@@ -1,0 +1,121 @@
+2
+PBWIN
+.bas
+CWindow: COMMCTRL: ListBox
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ListBox.fbtpl
+' Contents: Template - CWindow with a ListBox
+' Compiler: Free Basic
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx.CWindowClass
+
+#define IDC_LISTBOX 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Window procedure
+' ================================================================e========================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+
+         CASE IDC_LISTBOX
+            SELECT CASE HIWORD(wParam)
+               CASE LBN_DBLCLK
+                  ' // Get the handle of the Listbox
+                  DIM hListBox AS HWND = GetDlgItem(hwnd, IDC_LISTBOX)
+                  ' // Get the current selection
+                  DIM curSel AS LONG = SendMessageW(hListBox, LB_GETCURSEL, 0, 0)
+                  ' // Get the length of the ListBox item text
+                  DIM nLen AS LONG = SendMessageW(hListBox, LB_GETTEXTLEN, curSel, 0)
+                  ' // Allocate memory for the buffer
+                  DIM pwszText AS WSTRING PTR = CAllocate(nLen + 1)
+                  ' // Get the text and display it
+                  SendMessageW(hListBox, LB_GETTEXT, curSel, CAST(LPARAM, pwszText))
+                  MessageBoxW(hwnd, pwszText, "ListBox test", MB_OK)
+                  ' // Deallocate the memory used by the buffer
+                  DeAllocate pwszText
+                  pwszText = NULL
+                  EXIT FUNCTION
+            END SELECT
+
+         END SELECT
+
+    	CASE WM_DESTROY
+          ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Pass unprocessed messages to DefWindowProc
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a ListBox", @WndProc)
+   pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
+   pWindow.SetClientSize(320, 375)
+   pWindow.Center
+
+   ' // Adds a listbox
+   DIM hListBox AS HWND
+   hListBox = pWindow.AddControl("ListBox", , IDC_LISTBOX, "")
+   pWindow.SetWindowPos hListBox, NULL, 8, 8, 300, 320, SWP_NOZORDER
+
+   ' // Fill the list box
+   DIM i AS LONG = 1, wszText AS WSTRING * 260
+   FOR i = 1 TO 50
+      wszText = "Item " & RIGHT("00" & STR(i), 2)
+      SendMessageW(hListBox, LB_ADDSTRING, 0, CAST(LPARAM, @wszText))
+   NEXT
+   ' // Select the first item
+   SendMessageW(hListBox, LB_SETCURSEL, 0, 0)
+
+   ' // Add a cancel button
+   pWindow.AddControl("Button", , IDCANCEL, "&Cancel", 233, 338, 75, 23)
+
+   |
+
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================

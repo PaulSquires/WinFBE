@@ -1,0 +1,34 @@
+
+[ ] Process command line parameters.
+
+[ ] Find in files. 
+
+[ ] Re-enable menu option and write code for "Spaces to Tabs" option.
+
+[ ] DragDrop files open into application.
+
+[ ] Syntax keyword highlighting. 
+    [ ] Investigate mixed case keywords.
+    [ ] Maybe include a subpage in "Environment Options" to allow user to add/edit the list.
+    [ ] WinAPI keyword list.
+
+[ ] Codetips
+
+[ ] F1 Help for WinFBE and WinAPI help files.
+
+[ ] Implement code for Sub/Function Declaration menu option.
+
+[ ] Implement code for Last Position menu option.
+
+[ ] Implement Project code and logic. This is a very large topic and will be saved until all other issues resolved.
+
+[ ] Run Executable.
+
+[ ] Localization.
+
+[ ] Print option.
+
+[ ] Icons in menus. Not a priority but would be nice to have.
+
+
+

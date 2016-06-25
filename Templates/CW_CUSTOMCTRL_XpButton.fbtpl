@@ -1,0 +1,106 @@
+2
+FBGUI
+.bas
+CWindow: CUSTOMCTRL: XpButton
+' ########################################################################################
+' Microsoft Windows
+' File: CW_XpButton.fbtpl
+' Contents: CWindow XpButton example
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx.CWindowClass
+#INCLUDE ONCE "Afx/CXpButton.inc"
+USING Afx.CXpButtonClass
+
+CONST IDC_BUTTON1 = 1001
+CONST IDC_BUTTON2 = 1002
+CONST IDC_BUTTON3 = 1003
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "XpButton example", @WndProc)
+   pWindow.SetClientSize(215, 142)
+   pWindow.Center
+
+   DIM pXpButton1 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON1, "&Ok", 50, 20, 114, 26)
+'   pXpButton1.SetIconFromFile ExePath & "\16_OK.ICO", XPBI_NORMAL
+'   pXpButton1.SetIconFromFile ExePath & "\16_OKHOT.ICO", XPBI_HOT
+   pXpButton1.SetIcon LoadIcon(NULL, IDI_SHIELD), XPBI_NORMAL
+   pXpButton1.SetIcon LoadIcon(NULL, IDI_QUESTION), XPBI_HOT
+   pXpButton1.SetToggle CTRUE
+   pXpButton1.SetCursor LoadCursor(NULL, IDC_CROSS)
+   pXpButton1.SetImageMargin 10
+
+   DIM pXpButton2 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON2, "&Cancel", 50, 55, 114, 26)
+'   pXpButton2.SetIconFromFile ExePath & "\16_CANCEL.ICO", XPBI_NORMAL
+'   pXpButton2.SetIconFromFile ExePath & "\16_CANCELDISABLED.ICO", XPBI_DISABLED
+   pXpButton2.SetIcon LoadIcon(NULL, IDI_ERROR), XPBI_NORMAL
+   pXpButton2.SetImagePos XPBI_RIGHT OR XPBI_VCENTER
+   pXpButton2.SetTextFormat DT_RIGHT OR DT_VCENTER OR DT_SINGLELINE
+   EnableWindow pXpButton2.hWindow, FALSE   ' Disable the button
+
+   DIM pXpButton3 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON3, "&Classic Button", 50, 90, 114, 26)
+
+   SetFocus pXpButton1.hWindow
+
+   |
+
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================

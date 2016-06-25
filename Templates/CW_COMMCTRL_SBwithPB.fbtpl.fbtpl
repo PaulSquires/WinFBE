@@ -1,0 +1,121 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Status bar with progress bar
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_SBwithPB.fbtpl - Template
+' Contents: Demonstrates the use of the StatusBar and ProgressBar controls.
+' Comments: In this example, the progress bar has been made child of the status bar.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx.CWindowClass
+
+CONST IDC_START = 1001
+CONST IDC_STATUSBAR = 1002
+CONST IDC_PROGRESSBAR = 1003
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_START
+               ' // Retrieve the handle to the progress bar
+               DIM hProgressBar AS HWND = GetDlgItem(GetDlgItem(hwnd, IDC_STATUSBAR), IDC_PROGRESSBAR)
+               ' *** Test code ***
+               ' // Sets the step increment
+               SendMessageW(hProgressBar, PBM_SETSTEP, 1, 0)
+               ' // Draws the bar
+               DIM i AS LONG
+               FOR i = 1 TO 100
+                  ' // Advances the current position for a progress bar by the step
+                  ' // increment and redraws the bar to reflect the new position
+                  SendMessageW(hProgressBar, PBM_STEPIT, 0, 0)
+                  SLEEP 10
+               NEXT
+               ' // Clears the bar by reseting its position to 0
+               SendMessageW(hProgressBar, PBM_SETPOS, 0, 0)
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Resizes the status bar
+         DIM hStatusBar AS HWND = GetDlgItem(hwnd, IDC_STATUSBAR)
+         SendMessageW hStatusBar, WM_SIZE, wParam, lParam
+         ' // Redraws it
+         InvalidateRect hStatusBar, NULL, CTRUE
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Status bar with progress bar", @WndProc)
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDC_START, "&Start", 20, 20, 75, 23)
+
+   ' // Add a status bar
+   DIM hStatusbar AS HWND = pWindow.AddControl("Statusbar", , IDC_STATUSBAR)
+   ' // Set the parts
+   DIM rgParts(1 TO 2) AS LONG = {pWindow.ScaleX(160), -1}
+   IF SendMessageW(hStatusBar, SB_SETPARTS, 2, CAST(LPARAM, @rgParts(1))) <> 0 THEN
+      SendMessageW(hStatusBar, SB_SIMPLE, FALSE, 0)
+   END IF
+
+   ' // Add a progress bar to the status bar
+   DIM hProgressBar AS HWND = pWindow.AddControl("ProgressBar", hStatusbar, IDC_PROGRESSBAR, "", 0, 2, 160, 18)
+   ' // Set the range
+   SendMessageW(hProgressBar, PBM_SETRANGE32, 0, 100)
+   ' // Set the initial position
+   SendMessageW(hProgressBar, PBM_SETPOS, 0, 0)
+
+   |
+
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================

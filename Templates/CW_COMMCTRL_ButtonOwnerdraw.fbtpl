@@ -1,0 +1,128 @@
+2
+PBWIN
+.bas
+CWindow: COMMCTRL: Button (ownerdraw)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ButtonOwnerdraw.fbtpl - Template
+' Contents: Demonstrates the use of an ownerdraw button.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx.CWindowClass
+
+CONST IDC_BUTTON = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_DRAWITEM
+         SCOPE
+            DIM pWindow AS CWindow PTR
+            DIM rc AS RECT
+            DIM wszText AS WSTRING * 260
+            DIM pDis AS DRAWITEMSTRUCT PTR
+            DIM hPen AS HPEN
+            DIM hBrush AS HBRUSH
+            DIM AS HGDIOBJ hOldFont, hNewFont
+
+            pDis = CAST(DRAWITEMSTRUCT PTR, lParam)
+            IF pDis->CtlId <> IDC_BUTTON THEN EXIT FUNCTION
+            ' // Get the rectangle that defines the boundaries of the button to be drawn.
+            rc = pDis->rcItem
+            ' // Create a new font
+            pWindow = AfxCWindowPtr(hwnd)
+            hNewFont = pWindow->CreateFont(IIF(AfxWindowsVersion >= 600, "Segoe UI", "Tahoma"), _
+                       IIF(AfxWindowsVersion >= 600, 9, 8), FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
+            ' // Select the font in the button's device context
+            hOldFont = SelectObject(pDis->hDC, hNewFont)
+            ' // Draw the button
+            IF (pDis->itemState AND ODS_FOCUS) THEN
+               hPen = SelectObject(pDis->hDC, CreatePen(PS_SOLID, 3, BGR(255,0,0)))
+               hBrush = SelectObject(pDis->hDC, GetSysColorBrush(COLOR_BTNFACE))
+               Rectangle pDis->hDC, rc.Left, rc.Top, rc.Right, rc.Bottom
+               SelectObject pDis->hDC, hBrush
+               DeleteObject SelectObject(pDis->hDC, hPen)
+            ELSE
+               FillRect pDis->hDC, @rc, GetSysColorBrush(COLOR_BTNFACE)
+            END IF
+            ' // Draw the button's edge
+            rc.Left += 3: rc.Top += 3 : rc.Bottom -= 3: rc.Right -= 3
+            IF (pDis->itemState AND ODS_SELECTED) THEN
+               DrawEdge pDis->hDC, @rc, BDR_SUNKEN, BF_RECT OR BF_MIDDLE OR BF_SOFT
+               rc.Left += 2 : rc.Top += 2
+            ELSE
+               DrawEdge pDis->hDC, @rc, BDR_RAISED, BF_RECT OR BF_MIDDLE OR BF_SOFT
+            END IF
+            ' // Draw the button's caption
+            SetBkMode pDis->hDC, TRANSPARENT
+            SetTextColor pDis->hDC, IIF((pDis->itemState AND ODS_DISABLED), GetSysColor(COLOR_GRAYTEXT), GetSysColor(COLOR_BTNTEXT))
+            GetWindowTextW(pDis->hWndItem, wszText, SIZEOF(wszText))
+            DrawTextW pDis->hDC, wszText, -1, @rc, DT_CENTER OR DT_VCENTER ' or DT_SINGLELINE
+            SelectObject pDis->hDC, hOldFont
+            DeleteObject(hNewFont)
+         END SCOPE
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with ownerdraw button", @WndProc)
+   pWindow.Center
+
+   DIM hButton AS HWND = pWindow.AddControl("CUSTOMBUTTON", , IDC_BUTTON, "&Ownerdraw button", 100, 50, 150, 23)
+'  Alternate way:
+'   DIM hButton AS HWND = pWindow.AddControl("Button", , IDC_BUTTON, "&Ownerdraw button", 100, 50, 150, 23, BS_OWNERDRAW)
+   SetFocus hButton
+
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================

@@ -1,0 +1,149 @@
+
+' ========================================================================================
+' Process WM_CREATE message for window/dialog: frmGoto
+' ========================================================================================
+Function frmGoto_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+
+   ' This is a modal popup window so disable the parent window
+   EnableWindow GetParent(HWnd), False
+
+   '  Message cracker macro expects a True to be returned for a successful
+   '  OnCreate handler even though returning -1 from a standard WM_CREATE
+   '  call would stop creating the window. This is just one of those Windows
+   '  inconsistencies.
+   Return True
+End Function
+
+
+' ========================================================================================
+' Process WM_COMMAND message for window/dialog: frmGoto
+' ========================================================================================
+Function frmGoto_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+
+   Select Case id
+      Case IDOK
+         If codeNotify = BN_CLICKED Then
+            Dim nLine As Long
+            Dim swzText As WString * MAX_PATH
+            FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMGOTO_TXTLINE), @swzText, MAX_PATH )
+            nLine = Val(swzText) - 1
+            If nLine >= 0 Then
+               Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+               If pDoc Then SendMessageW( pDoc->hWindow, SCI_GOTOLINE, nLine, 0 )
+            End If
+            SendMessageW HWnd, WM_CLOSE, 0, 0
+            Exit Function
+         End If
+      Case IDCANCEL
+         If codeNotify = BN_CLICKED Then
+            SendMessageW HWnd, WM_CLOSE, 0, 0
+            Exit Function
+         End If
+   End Select
+
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Process WM_CLOSE message for window/dialog: frmGoto
+' ========================================================================================
+Function frmGoto_OnClose(HWnd As HWnd) As LRESULT
+   ' Enables parent window keeping parent's zorder
+   EnableWindow GetParent(HWnd), True 
+   DestroyWindow HWnd
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Process WM_DESTROY message for window/dialog: frmGoto
+' ========================================================================================
+Function frmGoto_OnDestroy(HWnd As HWnd) As LRESULT
+   PostQuitMessage(0)
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' frmGoto Window procedure
+' ========================================================================================
+Function frmGoto_WndProc( ByVal HWnd   As HWnd, _
+                          ByVal uMsg   As UINT, _
+                          ByVal wParam As WPARAM, _
+                          ByVal lParam As LPARAM _
+                          ) As LRESULT
+
+   Select Case uMsg
+      HANDLE_MSG (HWnd, WM_CREATE,   frmGoto_OnCreate)
+      HANDLE_MSG (HWnd, WM_CLOSE,    frmGoto_OnClose)
+      HANDLE_MSG (HWnd, WM_DESTROY,  frmGoto_OnDestroy)
+      HANDLE_MSG (HWnd, WM_COMMAND,  frmGoto_OnCommand)
+   End Select
+
+   ' for messages that we don't deal with
+   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+
+End Function
+
+
+' ========================================================================================
+' frmGoto_Show
+' ========================================================================================
+Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long 
+
+   '  Create the main window and child controls
+   Dim pWindow As CWindow Ptr = New CWindow
+   pWindow->Create(hWndParent, "Go to Line", @frmGoto_WndProc, 0, 0, 287, 126, _
+        WS_POPUP Or WS_DLGFRAME Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
+        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->SetClientSize(281, 97)
+   pWindow->Center
+   
+   pWindow->AddControl("TEXTBOX", pWindow->hWindow, IDC_FRMGOTO_TXTLINE, "", 105, 56, 67, 23, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, "&OK", 186, 14, 78, 30, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, "&Cancel", 186, 51, 78, 30, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTLINE, "Last line:", 15, 15, 81, 17, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTLINE, "Current line:", 15, 36, 81, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLGOTOLINE, "Go to line:", 15, 59, 81, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE, "", 107, 15, 65, 17, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE, "", 107, 36, 65, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   Dim As Long curPos, nLine, nLines
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      curPos  = SendMessageW(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
+      nLine   = SendMessageW(pDoc->hWindow, SCI_LINEFROMPOSITION, curPos, 0) + 1
+      nLines  = SendMessageW(pDoc->hWindow, SCI_GETLINECOUNT, 0, 0)
+      SetWindowTextW( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE), WStr(nLine) )
+      SetWindowTextW( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE), WStr(nLines) )
+   End If
+     
+   ShowWindow pWindow->hWindow, SW_SHOW
+   SetFocus GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_TXTLINE)
+
+   ' Process Windows messages
+   Function = pWindow->DoEvents(0)
+   
+   ' Delete the frmGotoCompiler CWindow class manually allocated memory 
+   Delete pWindow
+
+End Function

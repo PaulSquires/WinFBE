@@ -1,0 +1,125 @@
+2
+FBGUI
+.bas
+CWindow: COM: Explorer Browser
+' ########################################################################################
+' Microsoft Windows
+' File: CW_ExplorerBrowser.fbtpl
+' Contents: Resizable CWindow with an embedded Explorer Browser control
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "win/shlobj.bi"
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx.CWindowClass
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM pWindow AS CWindow PTR, rc AS RECT
+   STATIC peb AS IExplorerBrowser PTR
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the CWindow class
+         pWindow = AfxCWindowPtr(lParam)
+         ' // Add a button control
+         IF pWindow THEN pWindow->AddControl("Button", hwnd, IDCANCEL, "&Close")
+         ' // Create an instance of IExplorerBrowser
+         CoCreateInstance(@CLSID_ExplorerBrowser, NULL, CLSCTX_INPROC_SERVER, @IID_IExplorerBrowser, @peb)
+         IF peb = NULL THEN EXIT FUNCTION
+         peb->lpVtbl->SetOptions(peb, EBO_SHOWFRAMES)
+         DIM fs AS FOLDERSETTINGS
+         fs.ViewMode = FVM_DETAILS
+         DIM rc AS RECT
+         GetClientRect hwnd, @rc
+         peb->lpVtbl->Initialize(peb, hwnd, @rc, @fs)
+         ' // Navigate to the Profile folder
+         DIM pidlBrowse AS LPITEMIDLIST
+         IF SUCCEEDED(SHGetFolderLocation(NULL, CSIDL_PROFILE, NULL, 0, @pidlBrowse)) THEN
+            peb->lpVtbl->BrowseToIDList(peb, pidlBrowse, 0)
+            ILFree(pidlBrowse)
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE LOWORD(wParam)
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the controls
+            pWindow = CAST(CWindow PTR, GetWindowLongPtr(hwnd, 0))
+            pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 90, pWindow->ClientHeight - 35, 75, 23, CTRUE
+            ' // Resize the Explorer control
+            GetClientRect hwnd, @rc
+            rc.Right -= 210
+            IF peb THEN peb->lpVtbl->SetRect(peb, NULL, rc)
+         END IF
+
+    	CASE WM_DESTROY
+         IF peb THEN
+            ' // Destroy the browser and release the interface
+            peb->lpVtbl->Release(peb)
+            peb->lpVtbl->Release(peb)
+         END IF
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Initialize the COM library
+   CoInitialize NULL
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with an embedded Explorer Browser", @WndProc)
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   |
+
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Uninitialize the COM library
+   CoUninitialize
+
+END FUNCTION
+' ========================================================================================
