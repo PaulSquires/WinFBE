@@ -119,6 +119,12 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
       Case IDC_FRMOPTIONS_CMDOK
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
+            ' Apply the newly saved options to all open Scintilla windows
+            Dim As Long nCount = gpApp->GetDocumentCount 
+            Dim As Long i
+            For i = 0 To nCount - 1
+               gpApp->GetDocumentPtr(i)->ApplyProperties
+            Next
             SendMessageW HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If

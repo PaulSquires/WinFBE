@@ -127,8 +127,8 @@ Function CBProc( ByVal HWnd   As HWnd, _
                hBrush = CreateSolidBrush(nColorValue)
                ' Select brush into device context
                hBrush = SelectObject( Cast(HDC, lpdis->hDC), hBrush)
-               ' Draw
-               RoundRect lpdis->hDC, rc.Left, rc.Top, rc.Right, rc.Bottom, AfxScaleY(3), AfxScaleY(3)
+               ' Draw   
+               RoundRect lpdis->hDC, rc.Left, rc.Top, rc.Right, rc.Bottom, pWindow->ScaleX(3), pWindow->ScaleY(3)
                ' Select old brush and delete the new one
                DeleteObject SelectObject(lpdis->hDC, hBrush)
                
