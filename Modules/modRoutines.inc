@@ -153,6 +153,15 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, "Find FreeBASIC Compiler")
    
+      Case IDC_FRMOPTIONSEDITOR_CMDLOCALIZATION
+         rgFileTypes(1).pszName = @WSTR("Localization files")
+         rgFileTypes(1).pszSpec = @WSTR("*.lang")
+         rgFileTypes(2).pszName = @WSTR("All files")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         ' Set the title of the dialog
+         hr = pofd->lpVtbl->SetTitle(pofd, "Open Localization File")
+
       Case IDC_FRMOPTIONSCOMPILER_CMDFBHELPFILE, IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH
          rgFileTypes(1).pszName = @WSTR("Help file")
          rgFileTypes(1).pszSpec = @WSTR("*.chm")
@@ -675,5 +684,58 @@ Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, _
    lvi.cchTextMax = nTextMax
        
    Function = SendMessageW( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @lvi) )
+End Function
+
+' ========================================================================================
+' Load a .lang localization file from disk and populate the localization array
+' ========================================================================================
+Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
+
+   ' default that the file failed to load
+   Function = False
+   If pwszName = 0 Then Exit Function
+   If Dir(*pwszName) = "" Then Exit Function
+
+   Dim st    As WString * MAX_PATH
+   Dim wKey  As WString * MAX_PATH
+   Dim wData As WString * MAX_PATH
+   Dim nKey  As Long
+   Dim nData As Long  
+   Dim i     As Long
+    
+   Dim f As Long = Freefile
+   If Open( *pwszName For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
+
+   Do Until Eof(f)
+      Line Input #f, st
+      If Len(st) = 0 Then Continue Do
+      If Left(st, 1) = "'" Then Continue Do
+      
+      i = Instr(st, ":")
+      If i = 0 Then Continue Do
+      
+      wKey  = Left(st, i-1)
+      wData = Mid(st, i+1)
+      
+      nKey  = Val(wKey)
+      nData = Val(wData)
+
+      If Ucase(wKey) = "MAXIMUM" Then
+         ' resize the global dynamic array
+         ReDim LL(nData) As WString * MAX_PATH
+      Else
+         ' this should be a key/value pair line in the format:
+         ' 00001:value
+         ' Ensure that we add the value to the array within the valid
+         ' boundaries of the array.
+         If (nKey >= LBound(LL)) AndAlso (nKey <= Ubound(LL)) Then
+            LL(nKey) = wData
+         End If
+      End If   
+         
+   Loop
+   Close #f
+
+   Function = True
 End Function
 

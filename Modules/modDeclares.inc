@@ -138,6 +138,7 @@ Declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
 Declare Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
 Declare Function ProcessToCurdrive( ByVal pswzIn As WString Ptr ) As Long
 Declare Function ProcessFromCurdrive( ByVal pswzIn As WString Ptr ) As Long
+Declare Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
 
 
 ''

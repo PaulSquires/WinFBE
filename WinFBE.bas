@@ -44,6 +44,14 @@ Type TYPE_COLORS
 End Type
 Dim Shared gTempColors(15) As TYPE_COLORS
 
+' Create a dynamic array that will hold all localization words/phrases. This
+' array is resized and loaded using the LoadLocalizationFile function.
+ReDim Shared LL(Any) As WString * MAX_PATH
+
+' Define a macro that allows the user to specify the LL array subscript and
+' also a descriptive label (that is ignored), and return the LL array value.
+'#Define L(e,s)  LL(e)
+#Define L(e,s)  Iif( e >= LBound(LL) AndAlso e <= Ubound(LL), LL(e), WStr("")) 
 
 #Include Once "Modules\windowsxx.bi"
 #Include Once "Modules\modDeclares.inc"

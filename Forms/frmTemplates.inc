@@ -139,9 +139,9 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    SendMessageW hListBox, LB_SETHORIZONTALEXTENT, Cast(WPARAM, 600 * pWindow->rxRatio), 0
 
    ' Add the buttons
-   pWindow->AddControl("Button", , IDOK, "&OK", 245, 353, 74, 28, _
+   pWindow->AddControl("Button", , IDOK, L(0,"&OK"), 245, 353, 74, 28, _
                WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_FLAT Or BS_DEFPUSHBUTTON, WS_EX_NOPARENTNOTIFY)
-   pWindow->AddControl("Button", , IDCANCEL, "&Cancel", 333, 353, 74, 28, _
+   pWindow->AddControl("Button", , IDCANCEL, L(1,"&Cancel"), 333, 353, 74, 28, _
                WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_FLAT, WS_EX_NOPARENTNOTIFY)
 
    ' Search templates

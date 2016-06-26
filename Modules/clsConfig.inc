@@ -18,7 +18,7 @@ Type clsConfig
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
       TabSize              As WString * 20  = "3"
-      LocalizationFile     As WString * MAX_PATH = "default.lang"
+      LocalizationFile     As WString * MAX_PATH = "english.lang"
       KeywordCase          As WString * MAX_PATH = "Original Case"
       EditorFontname       As WString * MAX_PATH = "Courier New"
       EditorFontsize       As WString * 20  = "10"
@@ -212,8 +212,6 @@ Function clsConfig.LoadFromFile() as Long
    Dim nData As Long  
    Dim i     as Long
 
-   Dim wCurDrive As WString * 10 = Ucase(Left(Exepath, 1))
-
    If Dir(_ConfigFilename) = "" Then Exit Function
     
    Dim f as Long = Freefile
@@ -310,6 +308,9 @@ Function clsConfig.LoadFromFile() as Long
    
    Loop
    Close #f
+
+   ' Load the selected localization file
+    LoadLocalizationFile( Exepath & "\" & this.LocalizationFile )
 
    Function = 0
 End Function

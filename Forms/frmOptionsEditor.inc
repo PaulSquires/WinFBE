@@ -1,4 +1,32 @@
 
+' ========================================================================================
+' Process WM_COMMAND message for window/dialog: frmOptionsEditor
+' ========================================================================================
+Function frmOptionsEditor_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+
+   Select Case id
+
+      Case IDC_FRMOPTIONSEDITOR_CMDLOCALIZATION
+
+         If codeNotify = BN_CLICKED Then
+            ' Display the Open File Dialog
+            Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, id)
+            If pwszName Then
+               Dim wzFilename As WString * MAX_PATH = *pwszName
+               FF_PATHNAME( WStr("NAMEX"), pwszName, @wzFilename )
+               If LoadLocalizationFile(pwszName) Then
+                  SetWindowTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_LBLLOCALIZATION), wzFilename )
+               End If
+               CoTaskMemFree pwszName
+            End If
+            Exit Function
+         End If
+
+   End Select
+
+   Function = 0
+End Function
+
 
 ' ========================================================================================
 ' frmOptionsEditor Window procedure
@@ -8,6 +36,10 @@ Function frmOptionsEditor_WndProc( ByVal HWnd   As HWnd, _
                                    ByVal wParam As WPARAM, _
                                    ByVal lParam As LPARAM _
                                    ) As LRESULT
+
+   Select Case uMsg
+      HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsEditor_OnCommand)
+   End Select
 
    ' for messages that we don't deal with
    Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)

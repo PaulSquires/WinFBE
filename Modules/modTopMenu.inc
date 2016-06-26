@@ -8,24 +8,24 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
 
    hMenu = CreateMenu
    hPopUpMenu = CreatePopupMenu
-      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), "&File"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILENEW, "&New" & Chr(9) & "Ctrl+N"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILEOPEN, "&Open..." & Chr(9) & "Ctrl+O"
+      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(2,"&File")
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILENEW, L(3,"&New") & Chr(9) & "Ctrl+N"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILEOPEN, L(4,"&Open...") & Chr(9) & "Ctrl+O"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSE, "&Close" & Chr(9) & "Ctrl+Q"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, "Close All"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSE, L(5,"&Close") & Chr(9) & "Ctrl+Q"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"C&lose All")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVE, "&Save" & Chr(9) & "Ctrl+S"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, "Save &As" & Chr(9) & "F12"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEALL, "Sa&ve All" & Chr(9) & "Ctrl+Shift+S"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVE, L(7,"&Save") & Chr(9) & "Ctrl+S"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save &As") & Chr(9) & "F12"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEALL, L(9,"Sa&ve All") & Chr(9) & "Ctrl+Shift+S"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenuW hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), "&Recent Files"
-              AppendMenuW hPopUpSubMenu, MF_ENABLED, IDM_MRU, "Most Recently Used"
+            AppendMenuW hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(10,"&Recent Files")
+              AppendMenuW hPopUpSubMenu, MF_ENABLED, IDM_MRU, L(11,"(Empty)")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMAND, "Co&mmand Prompt..."
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMAND, L(12,"Co&mmand Prompt...")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_EXIT, "E&xit" & Chr(9) & "Alt+F4"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_EXIT, L(13,"E&xit") & Chr(9) & "Alt+F4"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), "&Edit"

@@ -104,10 +104,10 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->AddControl("TEXTBOX", pWindow->hWindow, IDC_FRMGOTO_TXTLINE, "", 105, 56, 67, 23, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, "&OK", 186, 14, 78, 30, _
+   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, L(0,"&OK"), 186, 14, 78, 30, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, "&Cancel", 186, 51, 78, 30, _
+   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, L(1,"&Cancel"), 186, 51, 78, 30, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTLINE, "Last line:", 15, 15, 81, 17, _
