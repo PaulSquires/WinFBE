@@ -117,6 +117,7 @@ Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    
    For i = lb To ub
       If m_arrDocuments(i) = pDoc Then
+         DestroyWindow(pDoc->hWindow)     ' destroy the Scintilla window
          idx = i
          Exit For
       End If   
