@@ -24,8 +24,6 @@
 
 [ ] Run Executable.
 
-[ ] Localization.
-
 [ ] Print option.
 
 [ ] Icons in menus. Not a priority but would be nice to have.
