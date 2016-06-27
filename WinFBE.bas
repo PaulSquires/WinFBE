@@ -54,11 +54,11 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 '#Define L(e,s)  Iif( e >= LBound(LL) AndAlso e <= Ubound(LL), LL(e), WStr("")) 
 
 #Include Once "Modules\windowsxx.bi"
+#Include Once "Modules\modScintilla.bi"
 #Include Once "Modules\modDeclares.inc"
 #Include Once "Modules\clsConfig.inc"
 #Include Once "Modules\modRoutines.inc"
 #Include Once "Modules\modCBColor.inc"
-#Include Once "Modules\modScintilla.bi"
 #Include Once "Modules\clsDocument.inc"
 #Include Once "Modules\clsApp.inc"
 #Include Once "Modules\clsTopTabCtl.inc"
@@ -108,9 +108,6 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
 
    ' Load the Scintilla code editing dll
    Dim As Any Ptr pLib = Dylibload("SciLexer32.dll")
-
-   ' Set process DPI aware
-   AfxSetProcessDPIAware
 
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )

@@ -815,6 +815,7 @@ Function clsDocument.ApplyProperties() As Long
 
    SciMsg( m_pSci, SCI_STYLESETFONT, STYLE_DEFAULT, Cast(LPARAM, Strptr(strFontName)) )
    SciMsg( m_pSci, SCI_STYLESETSIZE, STYLE_DEFAULT, nFontSize )
+   SciMsg( m_pSci, SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, GetFontCharSetID(gConfig.EditorFontCharset) )
 
    SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_DEFAULT, gConfig.clrTextFG )
    SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_DEFAULT, gConfig.clrWindowFG )

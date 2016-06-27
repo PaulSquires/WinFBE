@@ -841,6 +841,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' the logical ordering of a multiple display setup.
    AfxForceVisibleDisplay(pWindow->hWindow)
    
+   UpdateWindow pWindow->hWindow
    
    ' Process windows events
    Dim uMsg As MSG

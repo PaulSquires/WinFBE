@@ -76,6 +76,8 @@ Sub SaveEditorOptions()
    FF_ComboBox_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), idx, @gConfig.EditorFontname, Sizeof(gConfig.EditorFontname) )
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE) )
    FF_ComboBox_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE), idx, @gConfig.EditorFontSize, Sizeof(gConfig.EditorFontSize) )
+   idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET) )
+   FF_ComboBox_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET), idx, @gConfig.EditorFontCharSet, Sizeof(gConfig.EditorFontCharSet) )
    
    ' COMPILER OPTIONS
    HWnd = HWND_FRMOPTIONSCOMPILER

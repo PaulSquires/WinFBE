@@ -20,6 +20,7 @@ Type clsConfig
       TabSize              As WString * 20  = "3"
       LocalizationFile     As WString * MAX_PATH = "english.lang"
       EditorFontname       As WString * MAX_PATH = "Courier New"
+      EditorFontCharSet    As WString * MAX_PATH = "Default"
       EditorFontsize       As WString * 20  = "10"
       KeywordCase          As Long = 2  ' "Original Case"
       StartupLeft          As Long = 0
@@ -124,7 +125,8 @@ Function clsConfig.SaveToFile() as Long
    "TabSize="               & this.TabSize               & vbcrlf & _
    "KeywordCase="           & this.KeywordCase           & vbcrlf & _
    "EditorFontname="        & this.EditorFontname        & vbcrlf & _
-   "EditorFontsize="        & this.EditorFontsize        & vbcrlf & vbcrlf & _
+   "EditorFontsize="        & this.EditorFontsize        & vbcrlf & _
+   "EditorFontCharSet="     & this.EditorFontCharSet     & vbcrlf & vbcrlf & _
    "[Startup]" & vbcrlf & _
    "StartupLeft="           & this.StartupLeft           & vbcrlf & _
    "StartupTop="            & this.StartupTop            & vbcrlf & _
@@ -258,6 +260,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "TabSize":              this.TabSize              = wData
          Case "EditorFontname":       this.EditorFontname       = wData
          Case "EditorFontsize":       this.EditorFontsize       = wData
+         Case "EditorFontCharSet":    this.EditorFontCharSet    = wData
          Case "KeywordCase":          this.KeywordCase          = nData
          Case "StartupLeft":          this.StartupLeft          = nData
          Case "StartupTop":           this.StartupTop           = nData

@@ -91,7 +91,7 @@ End Function
 ' ========================================================================================
 ' Fill combobox with list of valid font sizes
 ' ========================================================================================
-Sub FillFontSizeCombo (ByVal hCb As HWnd, ByVal strFontName As WString Ptr)
+Sub FillFontSizeCombo( ByVal hCb As HWnd, ByVal strFontName As WString Ptr )
 
    Select Case Ucase(*strFontName)
       Case "FIXEDSYS"
@@ -122,6 +122,31 @@ Sub FillFontSizeCombo (ByVal hCb As HWnd, ByVal strFontName As WString Ptr)
          ComboBox_AddString( hCb, @WStr("36"))
    End Select
 
+End Sub
+
+' ========================================================================================
+' Fill combobox with list of valid character sets
+' ========================================================================================
+Sub FillFontCharSets( ByVal hCtl As HWnd )
+   ComboBox_AddString( hCtl, @WStr("Default") )
+   ComboBox_AddString( hCtl, @WStr("Ansi") )
+   ComboBox_AddString( hCtl, @WStr("Arabic") )
+   ComboBox_AddString( hCtl, @WStr("Baltic") )
+   ComboBox_AddString( hCtl, @WStr("Chinese Big 5") )
+   ComboBox_AddString( hCtl, @WStr("East Europe") )
+   ComboBox_AddString( hCtl, @WStr("GB 2312") )
+   ComboBox_AddString( hCtl, @WStr("Greek") )
+   ComboBox_AddString( hCtl, @WStr("Hangul") )
+   ComboBox_AddString( hCtl, @WStr("Hebrew") )
+   ComboBox_AddString( hCtl, @WStr("Johab") )
+   ComboBox_AddString( hCtl, @WStr("Mac") )
+   ComboBox_AddString( hCtl, @WStr("OEM") )
+   ComboBox_AddString( hCtl, @WStr("Russian") )
+   ComboBox_AddString( hCtl, @WStr("Shiftjis") )
+   ComboBox_AddString( hCtl, @WStr("Symbol") )
+   ComboBox_AddString( hCtl, @WStr("Thai") )
+   ComboBox_AddString( hCtl, @WStr("Turkish") )
+   ComboBox_AddString( hCtl, @WStr("Vietnamese") )
 End Sub
 
 
@@ -313,11 +338,15 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
                  pWindow->ScaleX(224), pWindow->ScaleY(100), pWindow->ScaleX(146), pWindow->ScaleY(20) )
                  
    Dim As HWnd hComboFontname = _
-      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME, "", 11, 261, 269, 23, _
+      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME, "", 11, 261, 150, 23, _
            WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST Or CBS_OWNERDRAWFIXED Or CBS_HASSTRINGS Or CBS_SORT, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   Dim As HWnd hComboFontCharSet = _
+      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET, "", 170, 261, 150, 23, _
+           WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
+           WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    Dim As HWnd hComboFontSize = _
-      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE, "", 303, 261, 67, 23, _
+      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE, "", 330, 261, 40, 23, _
            WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
@@ -378,13 +407,16 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    ShowComboColors( HWND_FRMOPTIONSCOLORS, 0 )   
 
    FillFontCombo( hComboFontName )
-   FillFontSizeCombo hComboFontSize, @gConfig.EditorFontname
+   FillFontSizeCombo( hComboFontSize, @gConfig.EditorFontname )
+   FillFontCharSets( hComboFontCharSet )
    
    Dim idx As Long
    idx = SendMessageW( hComboFontName, CB_FINDSTRING, 0, Cast(LPARAM, Strptr(gConfig.EditorFontname)))
    ComboBox_SetCurSel( hComboFontName, idx )
    idx = SendMessageW( hComboFontSize, CB_FINDSTRING, 0, Cast(LPARAM, Strptr(gConfig.EditorFontSize)))
    ComboBox_SetCurSel( hComboFontSize, idx )
+   idx = SendMessageW( hComboFontCharSet, CB_FINDSTRING, 0, Cast(LPARAM, Strptr(gConfig.EditorFontCharSet)))
+   ComboBox_SetCurSel( hComboFontCharSet, idx )
 
    Function = 0
 End Function

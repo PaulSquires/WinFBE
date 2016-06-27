@@ -1,4 +1,38 @@
 
+
+
+' ========================================================================================
+' Get the Scintilla value for a character sets
+' ========================================================================================
+Function GetFontCharSetID(ByVal pswzCharsetName As WString Ptr ) As Long
+
+   If pswzCharsetName = 0 Then Return SC_CHARSET_DEFAULT
+   
+   Select Case *pswzCharsetName
+      Case "Default"       : Function = SC_CHARSET_DEFAULT
+      Case "Ansi"          : Function = SC_CHARSET_ANSI
+      Case "Arabic"        : Function = SC_CHARSET_ARABIC
+      Case "Baltic"        : Function = SC_CHARSET_BALTIC
+      Case "Chinese Big 5" : Function = SC_CHARSET_CHINESEBIG5
+      Case "East Europe"   : Function = SC_CHARSET_EASTEUROPE
+      Case "GB 2312"       : Function = SC_CHARSET_GB2312
+      Case "Greek"         : Function = SC_CHARSET_GREEK
+      Case "Hangul"        : Function = SC_CHARSET_HANGUL
+      Case "Hebrew"        : Function = SC_CHARSET_HEBREW
+      Case "Johab"         : Function = SC_CHARSET_JOHAB
+      Case "Mac"           : Function = SC_CHARSET_MAC
+      Case "OEM"           : Function = SC_CHARSET_OEM
+      Case "Russian"       : Function = SC_CHARSET_RUSSIAN
+      Case "Shiftjis"      : Function = SC_CHARSET_SHIFTJIS
+      Case "Symbol"        : Function = SC_CHARSET_SYMBOL
+      Case "Thai"          : Function = SC_CHARSET_THAI
+      Case "Turkish"       : Function = SC_CHARSET_TURKISH
+      Case "Vietnamese"    : Function = SC_CHARSET_VIETNAMESE
+   End Select
+
+End Function
+
+
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
