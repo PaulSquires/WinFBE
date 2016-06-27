@@ -30,7 +30,7 @@ Sub SaveEditorOptions()
    HWnd = HWND_FRMOPTIONSLOCAL
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), @wText, Sizeof(wText) )
    If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
-      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
+      MessageBoxW( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
                   L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
    End If
    gConfig.LocalizationFile = wText

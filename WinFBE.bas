@@ -93,6 +93,14 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    ' Load configuration file 
    gConfig.LoadFromFile()
 
+   ' Load the selected localization file
+   If LoadLocalizationFile( Exepath & "\" & gConfig.LocalizationFile ) = False Then
+      MessageBoxW( 0, WStr("Localization file could not be loaded. Aborting application.") & vbcrlf & _
+                   Exepath & "\" & gConfig.LocalizationFile, _
+                   WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      Return 1
+   End If
+
    ' Check for previous instance 
    If gConfig.MultipleInstances = False Then
       If FindWindow("WinFBE_Class", 0) Then

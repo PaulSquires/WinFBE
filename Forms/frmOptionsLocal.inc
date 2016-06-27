@@ -12,11 +12,9 @@ Function frmOptionsLocal_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal h
             ' Display the Open File Dialog
             Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, id)
             If pwszName Then
-               Dim wzFilename As WString * MAX_PATH = *pwszName
+               Dim wzFilename As WString * MAX_PATH 
                FF_PATHNAME( WStr("NAMEX"), pwszName, @wzFilename )
-               If LoadLocalizationFile(pwszName) Then
-                  SetWindowTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), wzFilename )
-               End If
+               SetWindowTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), wzFilename )
                CoTaskMemFree pwszName
             End If
             Exit Function

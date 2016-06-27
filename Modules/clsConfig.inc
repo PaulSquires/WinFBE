@@ -312,9 +312,6 @@ Function clsConfig.LoadFromFile() as Long
    Loop
    Close #f
 
-   ' Load the selected localization file
-    LoadLocalizationFile( Exepath & "\" & this.LocalizationFile )
-
    Function = 0
 End Function
 
