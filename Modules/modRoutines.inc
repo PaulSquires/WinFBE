@@ -153,7 +153,7 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(101,"Find FreeBASIC Compiler"))
    
-      Case IDC_FRMOPTIONSEDITOR_CMDLOCALIZATION
+      Case IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION
          rgFileTypes(1).pszName = @L(102,"Localization files")
          rgFileTypes(1).pszSpec = @WSTR("*.lang")
          rgFileTypes(2).pszName = @L(79,"All files")

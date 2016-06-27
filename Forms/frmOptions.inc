@@ -23,11 +23,12 @@ Sub SaveEditorOptions()
    gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE) )
 
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize, Sizeof(gConfig.TabSize) )
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @gConfig.KeywordCase, Sizeof(gConfig.KeywordCase) ) 
+   gConfig.KeywordCase = ComboBox_GetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE))
    
    ' If the localization has changed then display a message indicating that the changes
    ' will not be seen until the application is restarted.
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_LBLLOCALIZATION), @wText, Sizeof(wText) )
+   HWnd = HWND_FRMOPTIONSLOCAL
+   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), @wText, Sizeof(wText) )
    If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
       MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
                   L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
@@ -170,6 +171,9 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
                  Case 2
                      SetWindowTextW( hLabel, WStr(" ") & L(112,"Compiler Setup") )
                      hForm = HWND_FRMOPTIONSCOMPILER
+                 Case 3
+                     SetWindowTextW( hLabel, WStr(" ") & L(129,"Localization") )
+                     hForm = HWND_FRMOPTIONSLOCAL
              End Select
              
          
@@ -179,7 +183,7 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
              MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
              SetWindowPos hForm, HWND_TOP, _
                             rc.Left + pWindow->ScaleX(5), pWindow->ScaleY(50), _
-                            pWindow->ScaleX(370), pWindow->ScaleY(300), _
+                            pWindow->ScaleX(420), pWindow->ScaleY(300), _
                             SWP_SHOWWINDOW
              
              InvalidateRect HWnd, ByVal Null, True
@@ -270,44 +274,46 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->Create( hWndParent, L(113,"Environment Options"), @frmOptions_WndProc, 0, 0, 556, 439, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(550, 410)
+   pWindow->SetClientSize(625, 410)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
-'   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 355, 532, 3, _
-'   WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
-'   WS_EX_LEFT Or WS_EX_LTRREADING)
-   
    Dim As HWnd hLabel = _
-      pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LBLCATEGORY, "Category", 191, 10, 349, 30, _
+      pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LBLCATEGORY, "Category", 216, 10, 400, 30, _
            WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_CENTERIMAGE Or SS_NOTIFY Or SS_SUNKEN, _
            WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HFONT hFont = pWindow->CreateFont("", 12, FW_BOLD)
    AfxSetWindowFont hLabel, hFont, True
 
    Dim As HWnd hWndTreeview = _
-        pWindow->AddControl("TREEVIEW", , IDC_FRMOPTIONS_TVWCATEGORIES, "", 10, 10, 176, 335, _
+        pWindow->AddControl("TREEVIEW", , IDC_FRMOPTIONS_TVWCATEGORIES, "", 10, 10, 200, 335, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or TVS_HASBUTTONS Or TVS_HASLINES Or TVS_LINESATROOT Or TVS_SHOWSELALWAYS, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
    
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDOK, L(0,"&OK"), 372, 367, 74, 28, _
+   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 355, 600, 3, _
+        WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDOK, L(0,"&OK"), 450, 367, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDCANCEL, L(1,"&Cancel"), 460, 367, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDCANCEL, L(1,"&Cancel"), 535, 367, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-    
+
    ' Configure the TreeView
    Dim hItem As HANDLE 
    hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),      0)
            FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"), 1)
            FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),   2)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),     3)
 
    ' Load all of the child dialogs
    frmOptionsEditor_Show( pWindow->hWindow )
    frmOptionsColors_Show( pWindow->hWindow )
    frmOptionsCompiler_Show( pWindow->hWindow )
+   frmOptionsLocal_Show( pWindow->hWindow )
 
    ' Select the first item "Code Editor"
    TreeView_SelectItem( hWndTreeview, hItem)
@@ -330,6 +336,10 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
 
    ' Delete the frmOptionsCompiler CWindow class manually allocated memory 
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOMPILER)
+   Delete pWindow
+
+   ' Delete the frmOptionsLocal CWindow class manually allocated memory 
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSLOCAL)
    Delete pWindow
 
 End Function

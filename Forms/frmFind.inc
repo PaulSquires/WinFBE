@@ -278,42 +278,42 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
    HWND_FRMFIND = _
-   pWindow->Create(hwndParent, L(158,"Find"), @frmFind_WndProc, 0, 0, 466, 164, _
+   pWindow->Create(hwndParent, L(158,"Find"), @frmFind_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(460, 135)
+   pWindow->SetClientSize(510, 135)
    pWindow->Center
    
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMFIND_LBLFINDWHAT, L(159,"Find What:"), 10, 20, 63, 16, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMFIND_LBLFINDWHAT, L(159,"Find What:"), 7, 20, 63, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMFIND_COMBOFIND, "", 75, 17, 277, 22, _
+   pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMFIND_COMBOFIND, "", 75, 17, 327, 22, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWN Or CBS_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, L(160,"Find Next"), 369, 16, 81, 24, _
+   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, L(160,"Find Next"), 414, 16, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, L(161,"Close"), 369, 47, 81, 24, _
+   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, L(161,"Close"), 414, 47, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMFIND_CHKWHOLEWORDS, L(162,"Match Whole Words"), 26, 68, 139, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMFIND_CHKMATCHCASE, L(163,"Match Case"), 26, 88, 139, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMFIND_FRAMESCOPE, L(164,"Scope"), 190, 53, 162, 70, _
+   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMFIND_FRAMEOPTIONS, L(167,"Options"), 16, 53, 187, 70, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMFIND_OPTSCOPE1, L(165,"Current Document"), 199, 71, 143, 16, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMFIND_CHKWHOLEWORDS, L(162,"Match Whole Words"), 26, 68, 167, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMFIND_OPTSCOPE2, L(166,"All Open Documents"), 199, 91, 145, 16, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMFIND_CHKMATCHCASE, L(163,"Match Case"), 26, 88, 167, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMFIND_FRAMEOPTIONS, L(167,"Options"), 16, 53, 162, 70, _
+   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMFIND_FRAMESCOPE, L(164,"Scope"), 215, 53, 187, 70, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMFIND_OPTSCOPE1, L(165,"Current Document"), 225, 71, 170, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMFIND_OPTSCOPE2, L(166,"All Open Documents"), 225, 91, 170, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long i, nCount, startPos, endPos, startLine, endLine
    Dim As String buffer      

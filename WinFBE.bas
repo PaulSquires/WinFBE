@@ -30,7 +30,7 @@ Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR
 Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
 
 '  Global window handles for some forms 
-Dim Shared As HWnd HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS, HWND_FRMOPTIONSCOMPILER
+Dim Shared As HWnd HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS, HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL
 Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
 
 
@@ -70,6 +70,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 #Include Once "Forms\frmOptionsEditor.inc"
 #Include Once "Forms\frmOptionsColors.inc"
 #Include Once "Forms\frmOptionsCompiler.inc"
+#Include Once "Forms\frmOptionsLocal.inc"
 #Include Once "Forms\frmOptions.inc"
 #Include Once "Forms\frmTemplates.inc"
 #Include Once "Forms\frmCompileResults.inc"

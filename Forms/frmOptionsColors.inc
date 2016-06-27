@@ -284,40 +284,40 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   HWND_FRMOPTIONSCOLORS = pWindow->Create( hWndParent, "", @frmOptionsColors_WndProc, 0, 0, 354, 319, _
+   HWND_FRMOPTIONSCOLORS = pWindow->Create( hWndParent, "", @frmOptionsColors_WndProc, 0, 0, 0, 0, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(354, 319)
+   ' Height and width of this child form is set in frmOptions_OnNotify when the treeview option is selected.
    
    Dim As HWnd hList = _
-      pWindow->AddControl("LISTBOX",, IDC_FRMOPTIONSCOLORS_LSTCOLORS, "", 11, 22, 149, 203, _
+      pWindow->AddControl("LISTBOX",, IDC_FRMOPTIONSCOLORS_LSTCOLORS, "", 11, 22, 200, 203, _
            WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMCOLORS, L(133,"Colors"), 0, 0, 333, 235, _
+   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMCOLORS, L(133,"Colors"), 0, 0, 385, 235, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLFOREGROUND, L(134,"Color:"), 174, 21, 90, 18, _
+   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLFOREGROUND, L(134,"Color:"), 224, 21, 140, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND, L(135,"Background:"), 174, 80, 104, 18, _
+   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND, L(135,"Background:"), 224, 80, 140, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMFONT, L(136,"Font (applies to all styles)"), 0, 241, 333, 55, _
+   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMFONT, L(136,"Font (applies to all styles)"), 0, 241, 385, 55, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
         
    CreateCBColorList(pWindow->hWindow, IDC_FRMOPTIONSCOLORS_CBCOLOR1, _
-                 pWindow->ScaleX(175), pWindow->ScaleY(41), pWindow->ScaleX(146), pWindow->ScaleY(20) )
+                 pWindow->ScaleX(224), pWindow->ScaleY(41), pWindow->ScaleX(146), pWindow->ScaleY(20) )
 
    CreateCBColorList(pWindow->hWindow, IDC_FRMOPTIONSCOLORS_CBCOLOR2, _
-                 pWindow->ScaleX(175), pWindow->ScaleY(100), pWindow->ScaleX(146), pWindow->ScaleY(20) )
+                 pWindow->ScaleX(224), pWindow->ScaleY(100), pWindow->ScaleX(146), pWindow->ScaleY(20) )
                  
    Dim As HWnd hComboFontname = _
-      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME, "", 11, 261, 219, 23, _
+      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME, "", 11, 261, 269, 23, _
            WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST Or CBS_OWNERDRAWFIXED Or CBS_HASSTRINGS Or CBS_SORT, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    Dim As HWnd hComboFontSize = _
-      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE, "", 253, 261, 67, 23, _
+      pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE, "", 303, 261, 67, 23, _
            WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 

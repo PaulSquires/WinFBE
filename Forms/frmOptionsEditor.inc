@@ -1,32 +1,4 @@
 
-' ========================================================================================
-' Process WM_COMMAND message for window/dialog: frmOptionsEditor
-' ========================================================================================
-Function frmOptionsEditor_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
-   Select Case id
-
-      Case IDC_FRMOPTIONSEDITOR_CMDLOCALIZATION
-
-         If codeNotify = BN_CLICKED Then
-            ' Display the Open File Dialog
-            Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, id)
-            If pwszName Then
-               Dim wzFilename As WString * MAX_PATH = *pwszName
-               FF_PATHNAME( WStr("NAMEX"), pwszName, @wzFilename )
-               If LoadLocalizationFile(pwszName) Then
-                  SetWindowTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_LBLLOCALIZATION), wzFilename )
-               End If
-               CoTaskMemFree pwszName
-            End If
-            Exit Function
-         End If
-
-   End Select
-
-   Function = 0
-End Function
-
 
 ' ========================================================================================
 ' frmOptionsEditor Window procedure
@@ -36,10 +8,6 @@ Function frmOptionsEditor_WndProc( ByVal HWnd   As HWnd, _
                                    ByVal wParam As WPARAM, _
                                    ByVal lParam As LPARAM _
                                    ) As LRESULT
-
-   Select Case uMsg
-      HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsEditor_OnCommand)
-   End Select
 
    ' for messages that we don't deal with
    Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
@@ -58,68 +26,59 @@ Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   HWND_FRMOPTIONSEDITOR = pWindow->Create( hWndParent, "", @frmOptionsEditor_WndProc, 0, 0, 354, 319, _
+   HWND_FRMOPTIONSEDITOR = pWindow->Create( hWndParent, "", @frmOptionsEditor_WndProc, 0, 0, 0, 0, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(354, 319)
+   ' Height and width of this child form is set in frmOptions_OnNotify when the treeview option is selected.
    
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING, L(114,"Syntax highlighting"), 0, 0, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING, L(114,"Syntax highlighting"), 0, 0, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCODETIPS, L(115,"Enable CodeTips"), 0, 21, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCODETIPS, L(115,"Enable CodeTips"), 0, 21, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCONFINECARET, L(116,"Confine caret to text"), 0, 42, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCONFINECARET, L(116,"Confine caret to text"), 0, 42, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE, L(117,"Highlight current line"), 0, 63, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE, L(117,"Highlight current line"), 0, 63, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES, L(118,"Treat Tab as spaces"), 0, 83, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES, L(118,"Treat Tab as spaces"), 0, 84, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES, L(119,"Allow multiple instances"), 0, 104, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES, L(119,"Allow multiple instances"), 0, 105, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION, L(120,"Auto indentation"), 0, 124, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION, L(120,"Auto indentation"), 0, 126, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE, L(121,"Autosave files before compiling"), 0, 144, 235, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE, L(121,"Autosave files before compiling"), 0, 147, 235, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN, L(122,"Show left margin"), 185, 0, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN, L(122,"Show left margin"), 0, 168, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN, L(123,"Show fold margin"), 185, 21, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN, L(123,"Show fold margin"), 0, 189, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKLINENUMBERING, L(124,"Show line numbers"), 185, 42, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKLINENUMBERING, L(124,"Show line numbers"), 0, 210, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES, L(125,"Show Indentation guides"), 185, 64, 179, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES, L(125,"Show Indentation guides"), 0, 231, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSEDITOR_CMDLOCALIZATION, L(126,"Select"), 255, 214, 69, 26, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSEDITOR_TXTTABSIZE, "", 2, 270, 30, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL Or ES_NUMBER, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMOPTIONSEDITOR_COMBOCASE, "", 208, 269, 125, 22, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMOPTIONSEDITOR_COMBOCASE, "", 230, 269, 157, 22, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMOPTIONSEDITOR_LBLTABSIZE, L(127,"Tab Size:"), 38, 273, 86, 17, _
+   pWindow->AddControl("LABEL", , IDC_FRMOPTIONSEDITOR_LBLTABSIZE, L(127,"Tab Size:"), 38, 273, 100, 17, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMOPTIONSEDITOR_LBLKEYWORDCASE, L(128,"Case:"), 167, 273, 34, 16, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+   pWindow->AddControl("LABEL", , IDC_FRMOPTIONSEDITOR_LBLKEYWORDCASE, L(128,"Case:"), 120, 273, 100, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMOPTIONSEDITOR_LBLLOCALIZATION, "English.lang", 14, 217, 206, 22, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_CENTER Or SS_CENTERIMAGE Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", , IDC_FRMOPTIONSEDITOR_FRAMELOCALIZATION, L(129,"Localization"), 0, 198, 333, 50, _
-        WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
-        WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
 
 
    Dim As Long idx = 0
@@ -137,16 +96,13 @@ Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES),  gConfig.MultipleInstances)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE),    gConfig.CompileAutoSave)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION),    gConfig.AutoIndentation)
-   SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_LBLLOCALIZATION), @gConfig.LocalizationFile
+
    SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize
    
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(130,"Lower Case") )
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(131,"Upper Case") )
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(132,"Original Case") )
-   
-   idx = SendMessageW( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), CB_FINDSTRING, 0, _
-                               Cast(LPARAM, Strptr(gConfig.KeywordCase)))
-   ComboBox_SetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), idx )
+   ComboBox_SetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), gConfig.KeywordCase )
    
 
    Function = 0

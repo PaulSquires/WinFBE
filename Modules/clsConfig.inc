@@ -19,9 +19,9 @@ Type clsConfig
       CompileAutosave      As Long = True
       TabSize              As WString * 20  = "3"
       LocalizationFile     As WString * MAX_PATH = "english.lang"
-      KeywordCase          As WString * MAX_PATH = "Original Case"
       EditorFontname       As WString * MAX_PATH = "Courier New"
       EditorFontsize       As WString * 20  = "10"
+      KeywordCase          As Long = 2  ' "Original Case"
       StartupLeft          As Long = 0
       StartupTop           As Long = 0
       StartupRight         As Long = 0
@@ -256,9 +256,9 @@ Function clsConfig.LoadFromFile() as Long
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "LocalizationFile":     this.LocalizationFile     = wData
          Case "TabSize":              this.TabSize              = wData
-         Case "KeywordCase":          this.KeywordCase          = wData
          Case "EditorFontname":       this.EditorFontname       = wData
          Case "EditorFontsize":       this.EditorFontsize       = wData
+         Case "KeywordCase":          this.KeywordCase          = nData
          Case "StartupLeft":          this.StartupLeft          = nData
          Case "StartupTop":           this.StartupTop           = nData
          Case "StartupRight":         this.StartupRight         = nData

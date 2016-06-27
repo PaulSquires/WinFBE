@@ -13,7 +13,7 @@ End Constructor
 ''
 ''
 Destructor clsDocument
-   DestroyWindow m_hWindow     ' destroy the scintilla window
+'   DestroyWindow m_hWindow     ' destroy the scintilla window
 End Destructor
 
 
@@ -805,10 +805,10 @@ Function clsDocument.ApplyProperties() As Long
    strFontName = Str(gConfig.EditorFontname)
    nFontSize   = Val(gConfig.EditorFontsize)
    
-   Select Case Ucase(gConfig.KeywordCase)
-      Case "UPPER CASE":     nFontCase = SC_CASE_UPPER
-      Case "LOWER CASE":     nFontCase = SC_CASE_LOWER
-      Case "ORIGINAL CASE":  nFontCase = SC_CASE_MIXED
+   Select Case gConfig.KeywordCase
+      Case 0:  nFontCase = SC_CASE_UPPER
+      Case 1:  nFontCase = SC_CASE_LOWER
+      Case 2:  nFontCase = SC_CASE_MIXED
    End Select            
    
    If m_pSci = 0 Then Exit Function

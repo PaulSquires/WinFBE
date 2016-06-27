@@ -11,11 +11,7 @@ End Constructor
 ''
 ''
 Destructor clsApp()
-   ' Deallocate manually allocated memory for all document objects
-   Dim i As Long
-   For i = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
-      Delete m_arrDocuments(i)
-   Next
+'
 End Destructor 
 
 
@@ -121,7 +117,6 @@ Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    
    For i = lb To ub
       If m_arrDocuments(i) = pDoc Then
-         Delete( pDoc )     ' deallocate the class memory
          idx = i
          Exit For
       End If   
