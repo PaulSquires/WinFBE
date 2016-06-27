@@ -205,6 +205,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_FILENEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_FILEOPEN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_COMMAND, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_EXIT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_RESTOREMAIN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_OPTIONS, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_ENABLED
