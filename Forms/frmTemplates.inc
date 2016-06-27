@@ -121,7 +121,7 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hParent)->DPI
 
-   pWindow->Create(hParent, "Templates", @frmTemplates_WndProc, _
+   pWindow->Create(hParent, L(176,"Templates"), @frmTemplates_WndProc, _
                pWindow->UnScaleX(x), pWindow->UnScaleY(y), 0, 0, _
                WS_VISIBLE Or WS_CAPTION Or WS_POPUPWINDOW, WS_EX_WINDOWEDGE)
    pWindow->SetClientSize(420,395)

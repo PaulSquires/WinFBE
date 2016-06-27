@@ -29,8 +29,8 @@ Sub SaveEditorOptions()
    ' will not be seen until the application is restarted.
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_LBLLOCALIZATION), @wText, Sizeof(wText) )
    If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
-      MessageBox( HWND_FRMMAIN, "Localization changes will be applied the next time the application is run.", _
-                  "Warning", MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
+                  L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
    End If
    gConfig.LocalizationFile = wText
    
@@ -162,13 +162,13 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
              ' Display the correct Category name and Child dialog. The child identifier is held in the lParam
              Select Case FF_TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
                  Case 0
-                     SetWindowTextW( hLabel, @WStr(" Code Editor") )
+                     SetWindowTextW( hLabel, WStr(" ") & L(110,"Code Editor")) 
                      hForm = HWND_FRMOPTIONSEDITOR
                  Case 1
-                     SetWindowTextW( hLabel, @WStr(" Colors and Fonts") )
+                     SetWindowTextW( hLabel, WStr(" ") & L(111,"Colors and Fonts") )
                      hForm = HWND_FRMOPTIONSCOLORS
                  Case 2
-                     SetWindowTextW( hLabel, @WStr(" Compiler Setup") )
+                     SetWindowTextW( hLabel, WStr(" ") & L(112,"Compiler Setup") )
                      hForm = HWND_FRMOPTIONSCOMPILER
              End Select
              
@@ -267,15 +267,15 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   pWindow->Create( hWndParent, "Environment Options", @frmOptions_WndProc, 0, 0, 556, 439, _
+   pWindow->Create( hWndParent, L(113,"Environment Options"), @frmOptions_WndProc, 0, 0, 556, 439, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->SetClientSize(550, 410)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
-   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 355, 532, 3, _
-   WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
-   WS_EX_LEFT Or WS_EX_LTRREADING)
+'   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 355, 532, 3, _
+'   WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
+'   WS_EX_LEFT Or WS_EX_LTRREADING)
    
    Dim As HWnd hLabel = _
       pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LBLCATEGORY, "Category", 191, 10, 349, 30, _
@@ -300,9 +300,9 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
     
    ' Configure the TreeView
    Dim hItem As HANDLE 
-   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, "Code Editor",      0)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, "Colors and Fonts", 1)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, "Compiler Setup",   2)
+   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),      0)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"), 1)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),   2)
 
    ' Load all of the child dialogs
    frmOptionsEditor_Show( pWindow->hWindow )

@@ -134,42 +134,42 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
 
    Select Case idButton
       Case IDM_INSERTFILE
-         rgFileTypes(1).pszName = @WSTR("FB code files")
-         rgFileTypes(2).pszName = @WSTR("Resource files")
-         rgFileTypes(3).pszName = @WSTR("All files")
+         rgFileTypes(1).pszName = @L(77,"FB code files")
+         rgFileTypes(2).pszName = @L(78,"Resource files")
+         rgFileTypes(3).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
          rgFileTypes(2).pszSpec = @WSTR("*.rc")
          rgFileTypes(3).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
          ' Set the title of the dialog
-         hr = pofd->lpVtbl->SetTitle(pofd, "Insert File")
+         hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
 
       Case IDC_FRMOPTIONSCOMPILER_CMDFBWIN32, IDC_FRMOPTIONSCOMPILER_CMDFBWIN64
-         rgFileTypes(1).pszName = @WSTR("FB Compiler")
+         rgFileTypes(1).pszName = @L(100,"FB Compiler")
          rgFileTypes(1).pszSpec = @WSTR("fbc.exe")
-         rgFileTypes(2).pszName = @WSTR("All files")
+         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
          ' Set the title of the dialog
-         hr = pofd->lpVtbl->SetTitle(pofd, "Find FreeBASIC Compiler")
+         hr = pofd->lpVtbl->SetTitle(pofd, L(101,"Find FreeBASIC Compiler"))
    
       Case IDC_FRMOPTIONSEDITOR_CMDLOCALIZATION
-         rgFileTypes(1).pszName = @WSTR("Localization files")
+         rgFileTypes(1).pszName = @L(102,"Localization files")
          rgFileTypes(1).pszSpec = @WSTR("*.lang")
-         rgFileTypes(2).pszName = @WSTR("All files")
+         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
          ' Set the title of the dialog
-         hr = pofd->lpVtbl->SetTitle(pofd, "Open Localization File")
+         hr = pofd->lpVtbl->SetTitle(pofd, L(103,"Open Localization File"))
 
       Case IDC_FRMOPTIONSCOMPILER_CMDFBHELPFILE, IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH
-         rgFileTypes(1).pszName = @WSTR("Help file")
+         rgFileTypes(1).pszName = @L(104,"Help file")
          rgFileTypes(1).pszSpec = @WSTR("*.chm")
-         rgFileTypes(2).pszName = @WSTR("All files")
+         rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
          ' Set the title of the dialog
-         hr = pofd->lpVtbl->SetTitle(pofd, "Find Help File")
+         hr = pofd->lpVtbl->SetTitle(pofd, L(105,"Find Help File"))
    End Select
    
    ' Display the dialog
@@ -208,16 +208,16 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
 
    ' Set the file types
    Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
-   rgFileTypes(1).pszName = @WSTR("FB code files")
-   rgFileTypes(2).pszName = @WSTR("Resource files")
-   rgFileTypes(3).pszName = @WSTR("All files")
+   rgFileTypes(1).pszName = @L(77,"FB code files")
+   rgFileTypes(2).pszName = @L(78,"Resource files")
+   rgFileTypes(3).pszName = @L(79,"All files")
    rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
    rgFileTypes(2).pszSpec = @WSTR("*.rc")
    rgFileTypes(3).pszSpec = @WSTR("*.*")
    pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
 
    ' Set the title of the dialog
-   hr = pofd->lpVtbl->SetTitle(pofd, "Open source file")
+   hr = pofd->lpVtbl->SetTitle(pofd, L(106,"Open source file"))
    ' Set the default folder
    Dim pFolder As IShellItem Ptr
    SHCreateItemFromParsingName (Exepath, Null, @IID_IShellItem, @pFolder)
@@ -257,16 +257,16 @@ ByVal pwszDefExt As WString Ptr, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) A
 
    ' // Set the file types
    Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
-   rgFileTypes(1).pszName = @WSTR("FB code files")
-   rgFileTypes(2).pszName = @WSTR("Resource files")
-   rgFileTypes(3).pszName = @WSTR("All files")
+   rgFileTypes(1).pszName = @L(77,"FB code files")
+   rgFileTypes(2).pszName = @L(78,"Resource files")
+   rgFileTypes(3).pszName = @L(79,"All files")
    rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
    rgFileTypes(2).pszSpec = @WSTR("*.rc")
    rgFileTypes(3).pszSpec = @WSTR("*.*")
    psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
 
    ' // Set the title of the dialog
-   hr = psfd->lpVtbl->SetTitle(psfd, "File Save Dialog")
+   hr = psfd->lpVtbl->SetTitle(psfd, L(107,"Save source file"))
    ' // Set the file name
    hr = psfd->lpVtbl->SetFileName(psfd, pwszFileName)
    ' // Set the extension

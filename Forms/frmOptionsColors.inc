@@ -293,16 +293,16 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
       pWindow->AddControl("LISTBOX",, IDC_FRMOPTIONSCOLORS_LSTCOLORS, "", 11, 22, 149, 203, _
            WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMCOLORS, "Colors", 0, 0, 333, 235, _
+   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMCOLORS, L(133,"Colors"), 0, 0, 333, 235, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLFOREGROUND, "Color:", 174, 21, 90, 18, _
+   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLFOREGROUND, L(134,"Color:"), 174, 21, 90, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND, "Background:", 174, 80, 104, 18, _
+   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND, L(135,"Background:"), 174, 80, 104, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMFONT, "Font (applies to all styles)", 0, 241, 333, 55, _
+   pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMFONT, L(136,"Font (applies to all styles)"), 0, 241, 333, 55, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
         
@@ -322,44 +322,44 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
            WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    ' Load the lstList of colors
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Bookmarks")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Caret")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Comments")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Highlighted Line")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Keywords")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Fold Margin")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Fold Symbols")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Indentation Guides")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("LineNumbers")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Operators")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Preprocessor")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Selection")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Strings")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Text")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("WinAPI Keywords")) )
-   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @WStr("Window")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(137,"Bookmarks")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(138,"Caret")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(139,"Comments")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(140,"Highlighted Line")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(141,"Keywords")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(142,"Fold Margin")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(143,"Fold Symbols")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(144,"Indentation Guides")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(145,"LineNumbers")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(146,"Operators")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(147,"Preprocessor")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(148,"Selection")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(149,"Strings")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(150,"Text")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(151,"WinAPI Keywords")) )
+   SendMessageW( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(152,"Window")) )
 
    ' Save the currently selected fg and bg colors to the temporary global array
-   gTempColors(0).nFg = gConfig.clrBookmarksFG         
-   gTempColors(0).nBg = gConfig.clrBookmarksBG        
-   gTempColors(1).nFg = gConfig.clrCaretFG            
-   gTempColors(1).nBg = gConfig.clrCaretBG            
-   gTempColors(2).nFg = gConfig.clrCommentsFG         
-   gTempColors(2).nBg = gConfig.clrCommentsBG         
-   gTempColors(3).nFg = gConfig.clrHighlightedFG      
-   gTempColors(3).nBg = gConfig.clrHighlightedBG      
-   gTempColors(4).nFg = gConfig.clrKeywordFG          
-   gTempColors(4).nBg = gConfig.clrKeywordBG          
-   gTempColors(5).nFg = gConfig.clrFoldMarginFG       
-   gTempColors(5).nBg = gConfig.clrFoldMarginBG       
-   gTempColors(6).nFg = gConfig.clrFoldSymbolFG       
-   gTempColors(6).nBg = gConfig.clrFoldSymbolBG       
-   gTempColors(7).nFg = gConfig.clrIndentGuidesFG     
-   gTempColors(7).nBg = gConfig.clrIndentGuidesBG     
-   gTempColors(8).nFg = gConfig.clrLineNumbersFG      
-   gTempColors(8).nBg = gConfig.clrLineNumbersBG      
-   gTempColors(9).nFg = gConfig.clrOperatorsFG        
-   gTempColors(9).nBg = gConfig.clrOperatorsBG        
+   gTempColors(0).nFg  = gConfig.clrBookmarksFG         
+   gTempColors(0).nBg  = gConfig.clrBookmarksBG        
+   gTempColors(1).nFg  = gConfig.clrCaretFG            
+   gTempColors(1).nBg  = gConfig.clrCaretBG            
+   gTempColors(2).nFg  = gConfig.clrCommentsFG         
+   gTempColors(2).nBg  = gConfig.clrCommentsBG         
+   gTempColors(3).nFg  = gConfig.clrHighlightedFG      
+   gTempColors(3).nBg  = gConfig.clrHighlightedBG      
+   gTempColors(4).nFg  = gConfig.clrKeywordFG          
+   gTempColors(4).nBg  = gConfig.clrKeywordBG          
+   gTempColors(5).nFg  = gConfig.clrFoldMarginFG       
+   gTempColors(5).nBg  = gConfig.clrFoldMarginBG       
+   gTempColors(6).nFg  = gConfig.clrFoldSymbolFG       
+   gTempColors(6).nBg  = gConfig.clrFoldSymbolBG       
+   gTempColors(7).nFg  = gConfig.clrIndentGuidesFG     
+   gTempColors(7).nBg  = gConfig.clrIndentGuidesBG     
+   gTempColors(8).nFg  = gConfig.clrLineNumbersFG      
+   gTempColors(8).nBg  = gConfig.clrLineNumbersBG      
+   gTempColors(9).nFg  = gConfig.clrOperatorsFG        
+   gTempColors(9).nBg  = gConfig.clrOperatorsBG        
    gTempColors(10).nFg = gConfig.clrPreprocessorFG     
    gTempColors(10).nBg = gConfig.clrPreprocessorBG     
    gTempColors(11).nFg = gConfig.clrSelectionFG        
