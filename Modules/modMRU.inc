@@ -78,10 +78,11 @@ Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
    ' Search the 10 MRU items to see if the filename already exists and
    ' also for an available entry to put the filename in.
    For i = 0 To 9
-       wzFile = gConfig.MRU(i)
-       If Ucase(wzFile) = Ucase(*wzFilename) Then
-          idxExistsAt = i:  Exit For
-       End If   
+      wzFile = gConfig.MRU(i)
+      ProcessFromCurdrive(@wzFile)
+      If Ucase(wzFile) = Ucase(*wzFilename) Then
+         idxExistsAt = i:  Exit For
+      End If   
    Next
    
    ' If does not already exist then we simply need to move all entries
