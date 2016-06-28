@@ -20,7 +20,10 @@ Function frmMain_UpdateLineCol(HWnd As HWnd) As Long
    If pDoc = 0 Then
       StatusBar_SetText(hStatusbar, 2, "")    ' line/col/sel
       StatusBar_SetText(hStatusbar, 3, "")    ' length/lines
-      SetWindowTextW( HWnd, @APPNAME )
+      Dim wzText As WString * MAX_PATH
+      wzText = APPNAME            
+      If gpApp->IsProjectActive Then wzText = APPNAMESHORT & " - [" & *gpApp->ProjectName & "]"
+      SetWindowTextW( HWnd, wzText )
       Exit Function
    Else
       pDoc->DisplayStats
@@ -133,6 +136,43 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
                   rc.Left, rc.Top + nHeightRebar + nHeightTabControl, _
                   rc.Right, rc.Bottom - nHeightRebar - nHeightStatusBar - nHeightTabControl, _
                   SWP_SHOWWINDOW Or SWP_NOZORDER
+
+   frmMain_SetFocusToCurrentCodeWindow
+
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Create a new project
+' ========================================================================================
+Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
+
+   ' TODO: If a project is already open then save/close it.
+   If gpApp->IsProjectActive Then
+   
+   End If
+   
+   
+   gpApp->IsProjectActive     = True
+   gpApp->IsNewProjectFlag    = True
+   gpApp->ProjectDiskFilename = 0
+   gpApp->ProjectName         = @WStr("Project1")
+   
+   
+   frmMain_SetFocusToCurrentCodeWindow
+   
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Save project file to disk
+' ========================================================================================
+Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
+
+   ' Do the actual saving to disk
+   gpApp->SaveProject(bSaveAs)
 
    frmMain_SetFocusToCurrentCodeWindow
 
@@ -404,13 +444,12 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       Case IDM_COMMAND:            Shell(Environ("COMSPEC"))
 
-      
-       ''  EDIT MENU
-      Case IDM_UNDO:               Function = SendMessageW(hEdit, SCI_UNDO, 0, 0)
-      Case IDM_REDO:               Function = SendMessageW(hEdit, SCI_REDO, 0, 0)
-      Case IDM_CUT:                Function = SendMessageW(hEdit, SCI_CUT, 0, 0)
-      Case IDM_COPY:               Function = SendMessageW(hEdit, SCI_COPY, 0, 0)
-      Case IDM_PASTE:              Function = SendMessageW(hEdit, SCI_PASTE, 0, 0)
+      ''  EDIT MENU
+      Case IDM_REDO:               Function = SendMessageW( hEdit, SCI_REDO, 0, 0)
+      Case WM_UNDO:                Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
+      Case WM_CUT:                 Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+      Case WM_COPY:                Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
+      Case WM_PASTE:               Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
       Case IDM_DELETELINE:         Function = SendMessageW(hEdit, SCI_LINECUT, 0, 0)
       Case IDM_INSERTFILE:         Function = pDoc->InsertFile()
       Case IDM_INDENTBLOCK:        Function = SendMessageW(hEdit, SCI_TAB, 0, 0)
@@ -458,12 +497,22 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          SystemParametersInfo SPI_GETWORKAREA, 0, @rc, 0
          MoveWindow HWnd, 0, 0, rc.Right - rc.Left, rc.Bottom - rc.Top, CTRUE
          
-      Case IDM_OPTIONS
-         frmOptions_Show( HWnd, SW_NORMAL )
+      Case IDM_OPTIONS:            Function = frmOptions_Show( HWnd, SW_NORMAL )
+      
+      
+      ''  PROJECT MENU
+      Case IDM_PROJECTNEW:         Function = OnCommand_ProjectNew( HWnd )
+      Case IDM_PROJECTSAVE:        Function = OnCommand_ProjectSave( HWnd, False )
+      Case IDM_PROJECTSAVEAS:      Function = OnCommand_ProjectSave( HWnd, True )
+      Case IDM_PROJECTOPTIONS:     Function = frmProjectOptions_Show( HWnd )
+         
       
       ''  COMPILE MENU          
       Case IDM_BUILDEXECUTE, IDM_COMPILE
          Function = code_Compile(id)
+
+      Case IDM_COMMANDLINE
+         Function = frmCommandLine_Show( HWnd )
 
       Case IDM_USE32BIT, IDM_USE64BIT
          Function = frmMain_MenuSetCompiler(id)
@@ -472,7 +521,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       
       Case IDM_HELP
-         gpApp->Debug
+         'gpApp->Debug
  
       Case IDM_ABOUT
          MessageBoxW( HWnd, APPNAME & vbcrlf & "Version " & APPVERSION & _
@@ -602,7 +651,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                   Case IDM_UNINDENTBLOCK   : wszTooltipText = L(92,"UnIndent (Shift+TAB)")
                   Case IDM_COMMENTBLOCK    : wszTooltipText = L(93,"Comment Block (Ctrl+B)")
                   Case IDM_UNCOMMENTBLOCK  : wszTooltipText = L(94,"UnComment Block (Ctrl+Shift+B)")
-                  Case IDM_PROJECTLIST     : wszTooltipText = L(95,"Project Manager")
+                  Case IDM_PROJECTMANAGER  : wszTooltipText = L(95,"Project Manager (F4)")
                   Case IDM_COMPILE         : wszTooltipText = L(96,"Compile (Ctrl+F5)")
                   Case IDM_BUILDEXECUTE    : wszTooltipText = L(97,"Compile and Execute (F5)")
                   Case IDM_RUNEXE          : wszTooltipText = L(98,"Run Executable (Shift+F5)")
@@ -779,7 +828,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow("WinFBE_Class")
-   'pWindow->DPI = 96   ' eg. 144 or any other value (96 is default)
+   pWindow->DPI = 96   ' eg. 144 or any other value (96 is default)
    
    ' Disable background erasing
    pWindow->ClassStyle = CS_DBLCLKS

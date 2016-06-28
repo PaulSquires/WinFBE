@@ -87,6 +87,19 @@ Sub SaveEditorOptions()
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE), @gConfig.CompilerHelpfile, Sizeof(gConfig.CompilerHelpfile) )
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH), @gConfig.Win32APIHelpfile, Sizeof(gConfig.Win32APIHelpfile) )
 
+   ' KEYWORDS
+   If gConfig.bKeywordsDirty Then
+      HWnd = HWND_FRMOPTIONSKEYWORDS
+      Dim As HWnd hTextBox = GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS)
+      Dim As Long nLen = GetWindowTextLengthW(hTextBox) + 2  ' add space for ending nuls
+      Dim pzswKeywords As WString Ptr = CAllocate(nLen*2)
+      GetWindowTextW( hTextBox, pzswKeywords, nLen )
+      Dim As String FBKeywords = Str(*pzswKeywords)
+      gpApp->FBKeywords = Trim(FBKeywords)
+      gpApp->SaveKeywords
+      Deallocate(pzswKeywords)
+   End If
+   
    ' Output the config settings to disk file
    gConfig.SaveToFile
 
@@ -124,9 +137,11 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             SaveEditorOptions()
             ' Apply the newly saved options to all open Scintilla windows
             Dim As Long nCount = gpApp->GetDocumentCount 
+            Dim pDoc As clsDocument Ptr
             Dim As Long i
             For i = 0 To nCount - 1
-               gpApp->GetDocumentPtr(i)->ApplyProperties
+               pDoc = gpApp->GetDocumentPtr(i)
+               If pDoc Then pDoc->ApplyProperties
             Next
             SendMessageW HWnd, WM_CLOSE, 0, 0
             Exit Function
@@ -176,6 +191,9 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
                  Case 3
                      SetWindowTextW( hLabel, WStr(" ") & L(129,"Localization") )
                      hForm = HWND_FRMOPTIONSLOCAL
+                 Case 4
+                     SetWindowTextW( hLabel, WStr(" ") & L(177,"FreeBASIC Keywords") )
+                     hForm = HWND_FRMOPTIONSKEYWORDS
              End Select
              
          
@@ -306,16 +324,18 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
 
    ' Configure the TreeView
    Dim hItem As HANDLE 
-   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),      0)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"), 1)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),   2)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),     3)
+   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        0)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   1)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     2)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       3)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 4)
 
    ' Load all of the child dialogs
    frmOptionsEditor_Show( pWindow->hWindow )
    frmOptionsColors_Show( pWindow->hWindow )
    frmOptionsCompiler_Show( pWindow->hWindow )
    frmOptionsLocal_Show( pWindow->hWindow )
+   frmOptionsKeywords_Show( pWindow->hWindow )
 
    ' Select the first item "Code Editor"
    TreeView_SelectItem( hWndTreeview, hItem)
@@ -328,20 +348,11 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    ' Delete the frmOptions CWindow class manually allocated memory 
    Delete pWindow
 
-   ' Delete the frmOptionsEditor CWindow class manually allocated memory 
-   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSEDITOR)
-   Delete pWindow
-
-   ' Delete the frmOptionsColors CWindow class manually allocated memory 
-   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOLORS)
-   Delete pWindow
-
-   ' Delete the frmOptionsCompiler CWindow class manually allocated memory 
-   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOMPILER)
-   Delete pWindow
-
-   ' Delete the frmOptionsLocal CWindow class manually allocated memory 
-   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSLOCAL)
-   Delete pWindow
+   ' Delete the child windows releasing their manually allocated memory 
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSEDITOR):    Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOLORS):    Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOMPILER):  Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSLOCAL):     Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDS):  Delete pWindow
 
 End Function

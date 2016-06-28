@@ -5,6 +5,8 @@ Type clsConfig
       _ConfigFilename As String 
       
    Public:
+      bKeywordsDirty       As BOOLEAN = True       ' not saved to file
+      CommandLine          As WString * MAX_PATH   ' not saved to file
       SyntaxHighlighting   As Long = True
       Codetips             As Long = True
       LeftMargin           As Long = True
@@ -35,7 +37,6 @@ Type clsConfig
       Win32APIHelpfile     As WString * MAX_PATH = ""
       DefaultCompiler      As WString * MAX_PATH = "FBC 32bit"
       DefaultCompileMode   As WString * MAX_PATH = "GUI"
-      CommandLine          As WString * MAX_PATH = ""
       MRU(9)               As WString * MAX_PATH
       clrCaretFG           As Long = BGR(0,0,0)          ' black
       clrCaretBG           As Long = -1
@@ -152,8 +153,7 @@ Function clsConfig.SaveToFile() as Long
    "CompilerHelpfile="      & this.CompilerHelpfile      & vbcrlf & _
    "Win32APIHelpfile="      & this.Win32APIHelpfile      & vbcrlf & _
    "DefaultCompiler="       & this.DefaultCompiler       & vbcrlf & _
-   "DefaultCompileMode="    & this.DefaultCompileMode    & vbcrlf & _
-   "CommandLine="           & this.CommandLine           & vbcrlf 
+   "DefaultCompileMode="    & this.DefaultCompileMode    & vbcrlf 
    
    Print #f, "[MRU]"  
    For i As Long = 0 To 9
@@ -274,7 +274,6 @@ Function clsConfig.LoadFromFile() as Long
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
          Case "DefaultCompiler":      this.DefaultCompiler      = wData
          Case "DefaultCompileMode":   this.DefaultCompileMode   = wData
-         Case "CommandLine":          this.CommandLine          = wData
          Case "clrCaretFG":           this.clrCaretFG           = nData
          Case "clrCaretBG":           this.clrCaretBG           = nData
          Case "clrCommentsFG":        this.clrCommentsFG        = nData
