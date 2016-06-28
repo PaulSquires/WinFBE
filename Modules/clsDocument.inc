@@ -772,7 +772,9 @@ Function clsDocument.DisplayStats() As Long
    TabCtrl_SetItem( hTabCtl, idx, @TB )
    
    ' Update the main window caption with the full filename and path
-   wText = APPNAME & " - " & *this.DiskFilename & wTag
+   wText = APPNAMESHORT 
+   If gpApp->IsProjectActive Then wText = wText & " - [" & *gpApp->ProjectName & "]"
+   wText = wText & " - [" & *this.DiskFilename & wTag & "]"
    SetWindowTextW( HWND_FRMMAIN, @wText )
 
    Function = 0

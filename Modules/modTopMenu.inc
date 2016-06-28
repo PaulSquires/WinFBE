@@ -103,6 +103,16 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"&New Project")
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTMANAGER, L(181,"Project &Manager...") & Chr(9) & "F4"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"&Close Project")
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"&Save Project")
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project &As...")
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project O&ptions...")
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"&Compile")
@@ -134,11 +144,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY, VK_F12,  IDM_FILESAVEAS )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_S,  IDM_FILESAVEALL )
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_F4, IDM_EXIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Z,  IDM_UNDO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_E,  IDM_REDO )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_X,  IDM_CUT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_C,  IDM_COPY )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_V,  IDM_PASTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,  IDM_DELETELINE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_I,  IDM_INSERTFILE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_B,  IDM_COMMENTBLOCK )
@@ -165,6 +171,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F8,  IDM_UNFOLDALL )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,  IDM_ZOOMIN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F4,  IDM_PROJECTMANAGER )
    pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
@@ -208,6 +215,8 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_EXIT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_RESTOREMAIN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_OPTIONS, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_ENABLED
@@ -382,6 +391,18 @@ Function CreateContextMenu() As HMENU
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"Bloc&k Uncomment")
    AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All")
+
+
+'   Dim hInst As HINSTANCE = GetModuleHandle(Null)
+'   AfxAddIconToMenuItem(hPopupMenu,  0, True, AfxGdipIconFromRes(hInst, "IMAGE_UNDO"))
+'   AfxAddIconToMenuItem(hPopupMenu,  1, True, AfxGdipIconFromRes(hInst, "IMAGE_REDO"))
+'   AfxAddIconToMenuItem(hPopupMenu,  3, True, AfxGdipIconFromRes(hInst, "IMAGE_CUT"))
+'   AfxAddIconToMenuItem(hPopupMenu,  4, True, AfxGdipIconFromRes(hInst, "IMAGE_COPY"))
+'   AfxAddIconToMenuItem(hPopupMenu,  5, True, AfxGdipIconFromRes(hInst, "IMAGE_PASTE"))
+'   AfxAddIconToMenuItem(hPopupMenu,  7, True, AfxGdipIconFromRes(hInst, "IMAGE_INDENT"))
+'   AfxAddIconToMenuItem(hPopupMenu,  8, True, AfxGdipIconFromRes(hInst, "IMAGE_INDENT_REMOVE"))
+'   AfxAddIconToMenuItem(hPopupMenu, 10, True, AfxGdipIconFromRes(hInst, "IMAGE_COMMENT"))
+'   AfxAddIconToMenuItem(hPopupMenu, 11, True, AfxGdipIconFromRes(hInst, "IMAGE_COMMENT_REMOVE"))
 
    Function = hPopupMenu
 

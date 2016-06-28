@@ -21,8 +21,9 @@ Using Afx.CWindowClass
 ' $FB_RESPATH = "WinFBE.rc"
 
 
-#Define APPNAME     WStr("WinFBE - FreeBASIC Editor")
-#Define APPVERSION  WStr("1.0.0")
+#Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
+#Define APPNAMESHORT  WStr("WinFBE")
+#Define APPVERSION    WStr("1.0.0")
 
 
 '  Global window handle for the main form
@@ -30,7 +31,8 @@ Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR
 Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
 
 '  Global window handles for some forms 
-Dim Shared As HWnd HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS, HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL
+Dim Shared As HWnd HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS, HWND_FRMOPTIONSCOMPILER
+Dim Shared As HWnd HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
 
 
@@ -51,7 +53,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ' Define a macro that allows the user to specify the LL array subscript and
 ' also a descriptive label (that is ignored), and return the LL array value.
 #Define L(e,s)  LL(e)
-'#Define L(e,s)  Iif( e >= LBound(LL) AndAlso e <= Ubound(LL), LL(e), WStr("")) 
+
 
 #Include Once "Modules\windowsxx.bi"
 #Include Once "Modules\modScintilla.bi"
@@ -71,12 +73,15 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 #Include Once "Forms\frmOptionsColors.inc"
 #Include Once "Forms\frmOptionsCompiler.inc"
 #Include Once "Forms\frmOptionsLocal.inc"
+#Include Once "Forms\frmOptionsKeywords.inc"
 #Include Once "Forms\frmOptions.inc"
 #Include Once "Forms\frmTemplates.inc"
 #Include Once "Forms\frmCompileResults.inc"
 #Include Once "Forms\frmGoto.inc"
+#Include Once "Forms\frmCommandLine.inc"
 #Include Once "Forms\frmFind.inc"
 #Include Once "Forms\frmReplace.inc"
+#Include Once "Forms\frmProjectOptions.inc"
 #Include Once "Forms\frmMain.inc"
 
 

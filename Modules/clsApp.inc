@@ -3,7 +3,7 @@
 ''
 ''
 Constructor clsApp()
-   m_ActiveProject = -1
+   m_IsProjectActive = False
    this.LoadKeywords
 End Constructor
 
@@ -22,18 +22,30 @@ Function clsApp.LoadKeywords() as Long
    Dim f  as Long = Freefile
    
    If Open( Exepath & "\freebasic_keywords.txt" For Input as #f) = 0 Then
-      this.FBKeywords  = " "
+      this.FBKeywords  = ""
       Do Until EOF(f)
          Line Input #f, st
-         If Left(st, 1) = "'" Then Continue Do
-         this.FBKeywords = this.FBKeywords & st & " "
-      Loop
+         If Len(st) Then this.FBKeywords = this.FBKeywords & st & " "
+      Loop    
+      this.FBKeywords = Trim(this.FBKeywords)
       Close #f
    End If
    
    Function = 0
 End Function
 
+''
+''
+Function clsApp.SaveKeywords() As Long
+   Dim f As Long = Freefile
+   
+   If Open( Exepath & "\freebasic_keywords.txt" For Output As #f) = 0 Then
+      Print #f, this.FBKeywords
+      Close #f
+   End If
+   
+   Function = 0
+End Function
 
 ''
 ''
@@ -46,44 +58,100 @@ Property clsApp.IncludeFilename() As String
 End Property
 
 
-'''
-'''
-'Function clsApp.AddProject() as Long
-'   Dim ub as Long = UBound(m_arrProjects) + 1
-' 
-'   ReDim Preserve m_arrProjects(ub) as clsProject             
-' 
-'   m_ActiveProject = ub 
-'
-'   Function = 0
-'End Function
-'
-'
-'''
-'''
-'Property clsApp.ActiveProject( ByVal nValue as Long )
-'   m_ActiveProject = nValue
-'End Property
-'
-'Property clsApp.ActiveProject() as Long
-'   Property = m_ActiveProject
-'End Property
-'
-'
-'''
-'''
-'Sub clsApp.SetActiveProject( ByVal nValue as Long)
-'End Sub
-'
-'Function clsApp.GetActiveProject() ByRef as clsProject
-'   Function = m_arrProjects(m_ActiveProject)
-'End Function
+''
+''
+Property clsApp.IsProjectActive( ByVal nValue As BOOLEAN)
+   m_IsProjectActive = nValue
+End Property
+
+Property clsApp.IsProjectActive() As BOOLEAN
+   Property = m_IsProjectActive
+End Property
+
+
+''
+''
+Property clsApp.IsNewProjectFlag( ByVal nValue As BOOLEAN)
+   m_IsNewProjectFlag = nValue
+End Property
+
+Property clsApp.IsNewProjectFlag() As BOOLEAN
+   Property = m_IsNewProjectFlag
+End Property
+
+
+''
+''
+Property clsApp.ProjectName( ByVal wValue As WString Ptr)
+   m_wzProjectName = *wValue
+End Property
+
+Property clsApp.ProjectName() As WString Ptr
+   Property = @m_wzProjectName
+End Property
+
+
+''
+''
+Property clsApp.ProjectDiskFilename( ByVal wValue As WString Ptr)
+   m_wzProjectFilename = *wValue
+End Property
+
+Property clsApp.ProjectDiskFilename() As WString Ptr
+   Property = @m_wzProjectFilename
+End Property
+
+
+''
+''
+Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+
+   Dim sText     As String
+   Dim wFilename As WString * MAX_PATH
+   Dim wText     As WString * MAX_PATH  
+   Dim f         As Long 
+   
+   ' If this a new unsaved project set flag to display SaveAs dialog.
+   If this.IsNewProjectFlag Then bSaveAs = True
+      
+   wFilename = *this.ProjectDiskfilename
+   
+   If bSaveAs Then
+      ' Display the Save File Dialog
+      FF_PATHNAME( @WStr("NAMEX"), @wFilename, @wText)
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "")
+      If pwszName Then
+         wFilename = *pwszName
+         CoTaskMemFree(pwszName)
+      Else
+         Return False
+      End If
+   End If
+
+   ' Delete any existing file
+   If Dir(wFilename) > "" Then Kill wFilename
+   
+   ' Do the actual saving to disk
+   f = Freefile
+   If Open( wFilename For Output As #f) = 0 Then
+      Print #f, "*** PROJECT FILE ***"
+      Close #f
+   Else
+      ' error saving file
+   End If   
+
+   this.ProjectDiskFilename = @wFilename
+   this.IsNewProjectFlag    = False
+   
+   Function = True
+End Function
+
 
 
 ''
 ''
 Function clsApp.GetDocumentCount() As Long
-   Function = Ubound(m_arrDocuments) 
+   Function = Ubound(m_arrDocuments) + 1 
 End Function
 
 ''
@@ -151,17 +219,17 @@ End Function
 
 ''
 ''
-Function clsApp.Debug() As Long
-   Dim As Long lb = LBound(m_arrDocuments) 
-   Dim As Long ub = Ubound(m_arrDocuments)
-   
-   Print "--- DEBUG ---"
-   Print "lb = "; lb, "ub = "; ub
-   For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
-      Print "Array[";i;"]", "hWindow="; m_arrDocuments(i)->hWindow
-   Next                          
-   Print:Print
-   
-   Function = 0
-End Function
-
+'Function clsApp.Debug() As Long
+'   Dim As Long lb = LBound(m_arrDocuments) 
+'   Dim As Long ub = Ubound(m_arrDocuments)
+'   
+'   Print "--- DEBUG ---"
+'   Print "lb = "; lb, "ub = "; ub
+'   For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+'      Print "Array[";i;"]", "hWindow="; m_arrDocuments(i)->hWindow
+'   Next                          
+'   Print:Print
+'   
+'   Function = 0
+'End Function
+'

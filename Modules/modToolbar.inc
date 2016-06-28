@@ -114,7 +114,7 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_FUNCTIONLIST")
    i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_FUNCTIONLIST")
    i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_FUNCTIONLIST", 10, True)
-   Toolbar_AddButton hToolBar, i, IDM_PROJECTLIST
+   Toolbar_AddButton hToolBar, i, IDM_PROJECTMANAGER
 
    Toolbar_AddSeparator hToolBar
 

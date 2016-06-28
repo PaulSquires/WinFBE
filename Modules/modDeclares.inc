@@ -54,6 +54,7 @@
 #Define IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION  1000
 #Define IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION  1001
 #Define IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION  1002
+#Define IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS 1000
 #Define IDC_FRMTEMPLATES_LISTBOX  1000
 #Define IDC_FRMCOMPILERESULTS_LISTVIEW 1000
 #Define IDC_FRMFIND_LBLFINDWHAT  1000
@@ -83,6 +84,8 @@
 #Define IDC_FRMGOTO_TXTLINE  1003
 #Define IDC_FRMGOTO_LBLLASTVALUE  1004
 #Define IDC_FRMGOTO_LBLCURRENTVALUE  1005
+#Define IDC_FRMCOMMANDLINE_LABEL1  1000
+#Define IDC_FRMCOMMANDLINE_TEXTBOX1  1001
 
 Const DELIM = Chr(1)    ' character used as delimiter for Find/Replace text strings  
 Const IDC_MRUBASE = 5000           ' Windows id of MRU items 1 to 10 (located under File menu)
@@ -107,7 +110,8 @@ Enum
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
    IDM_OPTIONS
-   IDM_PROJECTLIST
+   IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_PROJECTCLOSE 
+   IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTOPTIONS
    IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMMANDLINE, IDM_USE32BIT, IDM_USE64BIT
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
@@ -219,20 +223,29 @@ End Type
 
 
 Type clsApp
-   Private:
-      m_ActiveProject     As Long
-'      m_arrProjects(Any)  as clsProject  
+   Private:                        
+      m_IsProjectActive   As BOOLEAN
+      m_IsNewProjectFlag  As BOOLEAN
+      m_wzProjectName     As WString * MAX_PATH
+      m_wzProjectFilename As WString * MAX_PATH
       m_IncludeFilename   As String
+
       m_arrDocuments(Any) As clsDocument Ptr
    
    Public:
-      Declare Function LoadKeywords() As Long
+      Declare Property IsProjectActive( ByVal nValue As BOOLEAN)
+      Declare Property IsProjectActive() As BOOLEAN
+      Declare Property IsNewProjectFlag( ByVal nValue As BOOLEAN)
+      Declare Property IsNewProjectFlag() As BOOLEAN
+      Declare Property ProjectDiskFilename( ByVal wValue As WString Ptr)
+      Declare Property ProjectDiskFilename() As WString Ptr
+      Declare Property ProjectName( ByVal wValue As WString Ptr)
+      Declare Property ProjectName() As WString Ptr
 
-'      Declare Function AddProject() As Long
-'      Declare Sub      SetActiveProject( ByVal nValue as Long)
-'      Declare Function GetActiveProject() ByRef as clsProject
-'      Declare Property ActiveProject( ByVal nValue as Long )
-'      Declare Property ActiveProject() as Long
+      Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+
+      Declare Function LoadKeywords() As Long
+      Declare Function SaveKeywords() As Long
 
       Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
       Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
@@ -246,7 +259,7 @@ Type clsApp
       
       FBKeywords As String 
       
-      Declare Function Debug() As Long
+      'Declare Function Debug() As Long
       
 End Type
 
