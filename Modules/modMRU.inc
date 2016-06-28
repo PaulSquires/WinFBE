@@ -61,7 +61,7 @@ Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    Next
    
    If GetMenuItemCount(hSubMenu) = 0 Then
-      AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, WStr("(Empty)") )
+      AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    End If
    
    Function = 0
