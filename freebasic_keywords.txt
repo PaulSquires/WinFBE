@@ -7,7 +7,7 @@
 $begin $debug $dynamic $finish $ignore $inc $include $linesize $list $module 
 $name $ocode $option $page $pagei $pagesize $process $skip $start $static 
 $stringpool $subtitle $title abs abs abstract accelerators access access acos alias 
-alias allocate alt and any append append as asc 
+alias allocate alt and any append append as asc andalso
 asin asm assert atan2 atn autocheckbox autoradiobutton base 
 basic beep  begin bin bin$ bin$ binary binary 
 bit bitmap bitreset bitset bload block bsave byref 
@@ -43,7 +43,7 @@ mkdir mki mki$ mkl mkl$ mklongint mks mks$
 mks$ mkshort mod multikey mutexcreate mutexdestroy mutexlock mutexunlock 
 name namespace next new noinvert not null 
 object oct oct$ oct$ off offset on on once open open operator option 
-option or out out output output overload override 
+option or out out output output overload override orelse
 paint palette pascal 
 pascal pcopy peek peek peekbyte peekcurr peeki peeklong peeks peekword 
 pen play pmap point pointer poke pokebyte pokecurr pokei 
