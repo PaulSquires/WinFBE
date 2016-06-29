@@ -34,6 +34,7 @@ Dim Shared As HMENU HWND_FRMMAIN_TOPMENU
 Dim Shared As HWnd HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS, HWND_FRMOPTIONSCOMPILER
 Dim Shared As HWnd HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
+Dim Shared As HWnd HWND_FRMPROJECTMANAGER
 
 
 ' Create a temporary array to hold the selected color values
@@ -81,7 +82,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 #Include Once "Forms\frmCommandLine.inc"
 #Include Once "Forms\frmFind.inc"
 #Include Once "Forms\frmReplace.inc"
-#Include Once "Forms\frmProjectOptions.inc"
+#Include Once "Forms\frmProjectManager.inc"
 #Include Once "Forms\frmMain.inc"
 
 

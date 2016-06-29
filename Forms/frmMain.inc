@@ -158,6 +158,10 @@ Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
    gpApp->ProjectDiskFilename = 0
    gpApp->ProjectName         = @WStr("Project1")
    
+   ' Ensure that the Project Manager window has been created (show it now as well)
+   frmProjectManager_Show( HWnd, SW_SHOW )
+   
+   ' This will update the main window to show the project name in the window caption
    frmMain_SetFocusToCurrentCodeWindow
    
    Function = 0
@@ -256,7 +260,7 @@ Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
    Dim wszFile As WString * MAX_PATH = gpApp->IncludeFilename
    Dim As Long idx
    
-   
+   ' Determine if file is already open (if it is then simply switch to it)
    idx = gTTabCtl.GetTabIndexFromFilename(@wszFile)
    If idx >= 0 Then
       gTTabCtl.SetFocusTab(idx)
@@ -375,10 +379,9 @@ End Function
 ' ========================================================================================
 Function frmMain_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 
-   ' Retrieve a reference to the CWindow class from the CREATESTRUCT structure
-   'Dim pCreateStruct As CREATESTRUCT Ptr = lpCreateStructPtr
-   'Dim pWindow As CWindow Ptr = Cast(CWindow Ptr, pCreateStruct->lpCreateParams)
-
+   ' Enable drag and drop files
+   DragAcceptFiles HWnd, CTRUE
+   
    '  Message cracker macro expects a True to be returned for a successful
    '  OnCreate handler even though returning -1 from a standard WM_CREATE
    '  call would stop creating the window. This is just one of those Windows
@@ -502,7 +505,10 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_PROJECTNEW:         Function = OnCommand_ProjectNew( HWnd )
       Case IDM_PROJECTSAVE:        Function = OnCommand_ProjectSave( HWnd, False )
       Case IDM_PROJECTSAVEAS:      Function = OnCommand_ProjectSave( HWnd, True )
-      Case IDM_PROJECTOPTIONS:     Function = frmProjectOptions_Show( HWnd )
+      Case IDM_PROJECTMANAGER:     Function = frmProjectManager_Show( HWnd )    ' this will also toggle visibility 
+      
+      Case IDM_ADDFILETOPROJECT:      Function = gpApp->ProjectAddFile( pDoc )
+      Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
          
       
       ''  COMPILE MENU          
@@ -738,6 +744,38 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_DROPFILES message for window/dialog: frmMain
+' ========================================================================================
+Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRESULT
+
+   ' Get the number of dropped files
+   Dim As Long nCount = DragQueryFile(hDrop, &HFFFFFFFF, Null, 0)
+   If nCount = 0 Then Exit Function
+   
+   Dim As Long i, nLen
+   Dim wszPath As WString * MAX_PATH
+   
+   For i = 0 To nCount - 1
+      nLen = DragQueryFile(hDrop, i, @wszPath, MAX_PATH)
+      ' Make sure it's a file, not a folder
+      Dim fd As WIN32_FIND_DATAW
+      Dim hFind As HANDLE = FindFirstFileW(@wszPath, @fd)
+      If hFind <> INVALID_HANDLE_VALUE Then
+         FindClose hFind
+         If (fd.dwFileAttributes And FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY Then
+            gpApp->IncludeFilename = wszPath
+            OnCommand_OpenIncludeFile(HWnd)
+         End If
+      End If
+   Next
+   
+   DragFinish hDrop
+   
+   Function = 0
+End Function
+
+
+' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmMain
 ' ========================================================================================
 Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
@@ -765,6 +803,9 @@ Function frmMain_OnDestroy(HWnd As HWnd) As LRESULT
    ' Output the config settings to disk file
    gConfig.SaveToFile
 
+   ' Disable drag and drop files
+   DragAcceptFiles HWnd, False
+   
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -788,6 +829,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_NOTIFY,      frmMain_OnNotify)
       HANDLE_MSG (HWnd, WM_ACTIVATEAPP, frmMain_OnActivateApp)
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
+      HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
 
       Case WM_SYSCOMMAND
          If (wParam And &HFFF0) = SC_CLOSE Then
@@ -913,11 +955,12 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    
    
    ' Delete the frmCompileResults CWindow class manually allocated memory 
-   pWindow = AfxCWindowPtr(HWND_FRMCOMPILERESULTS)
-   Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMCOMPILERESULTS):   Delete pWindow
+
+   ' Delete the frmProjectManager CWindow class manually allocated memory 
+   pWindow = AfxCWindowPtr(HWND_FRMPROJECTMANAGER):   Delete pWindow
 
    ' Delete the Main form CWindow class manually allocated memory 
-   pWindow = AfxCWindowPtr(HWND_FRMMAIN)
-   Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function

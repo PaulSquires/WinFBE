@@ -224,15 +224,6 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
-   ' Check if a Project is open and active
-   If gpApp->IsProjectActive Then
-      EnableMenuItem hMenu, IDM_PROJECTMANAGER, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or MF_ENABLED
-   End If
-   
 
    ' Check the correct default compiler
    Select Case UCase(gConfig.DefaultCompiler)
@@ -289,6 +280,15 @@ Function frmMain_ChangeTopMenuStates() As Long
       End If
    End If
    
+   ' Check if a Project is open and active
+   Dim As Long fEnabled = Iif( gpApp->IsProjectActive, MF_ENABLED, MF_GRAYED )
+   EnableMenuItem hMenu, IDM_PROJECTMANAGER, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or fEnabled
+   
+
    Function = 0
 End Function
 
@@ -339,6 +339,7 @@ Function CreateContextMenu() As HMENU
    Dim hPopupMenu    As HMENU
    Dim wPath         As WString * MAX_PATH
    Dim wCompilerPath As WString * MAX_PATH
+   Dim wzText        As WString * MAX_PATH
    Dim sFilename     As String 
    Dim hWindow       As HWnd   = pDoc->hWindow
    Dim nLine         As Long   = pDoc->GetCurrentLineNumber()
@@ -401,8 +402,18 @@ Function CreateContextMenu() As HMENU
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"Bloc&k Uncomment")
    AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All")
-
-
+   
+   If gpApp->IsProjectActive Then
+     AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
+     If pDoc->IsProjectFile Then     
+        wzText = L(190,"&Remove this file from the Project") & ": " & *gpApp->ProjectName
+        AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
+     Else
+        wzText = L(189,"A&dd this file to the Project") & ": " & *gpApp->ProjectName
+        AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 
+     End If
+   End If
+   
 '   Dim hInst As HINSTANCE = GetModuleHandle(Null)
 '   AfxAddIconToMenuItem(hPopupMenu,  0, True, AfxGdipIconFromRes(hInst, "IMAGE_UNDO"))
 '   AfxAddIconToMenuItem(hPopupMenu,  1, True, AfxGdipIconFromRes(hInst, "IMAGE_REDO"))

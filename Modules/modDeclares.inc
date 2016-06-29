@@ -86,13 +86,17 @@
 #Define IDC_FRMGOTO_LBLCURRENTVALUE  1005
 #Define IDC_FRMCOMMANDLINE_LABEL1  1000
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1  1001
-#Define IDC_FRMPROJECTOPTIONS_PROJECTNAME  1000
-#Define IDC_FRMPROJECTOPTIONS_PROJECTFILENAME  1001
+#Define IDC_FRMPROJECTMANAGER_LISTVIEW  1000
+
 
 Const DELIM = Chr(1)    ' character used as delimiter for Find/Replace text strings  
 Const IDC_MRUBASE = 5000           ' Windows id of MRU items 1 to 10 (located under File menu)
 
-
+Const FILETYPE_MAIN   = 0
+Const FILETYPE_MODULE = 1
+Const FILETYPE_NORMAL = 2
+ 
+   
 ''  Menu message identifiers
 Enum
 ''  Custom messages
@@ -114,6 +118,7 @@ Enum
    IDM_OPTIONS
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_PROJECTCLOSE 
    IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTOPTIONS
+   IDM_ADDFILETOPROJECT, IDM_REMOVEFILEFROMPROJECT
    IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMMANDLINE, IDM_USE32BIT, IDM_USE64BIT
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
@@ -158,17 +163,23 @@ Dim Shared gFind As FINDREPLACE_TYPE
 
 Type clsDocument
    Private:
-      m_hWindow      As HWnd
-      m_IsNewFlag    As BOOLEAN
-      m_sFilename    As WString * MAX_PATH
-      m_DateFileTime As Double
-      m_pSci         As Any Ptr      
+      m_hWindow         As HWnd
+      m_IsNewFlag       As BOOLEAN
+      m_IsProjectFile   As BOOLEAN
+      m_ProjectFileType As Long           ' 0:main, 1:module, 2:normal
+      m_sFilename       As WString * MAX_PATH
+      m_DateFileTime    As Double
+      m_pSci            As Any Ptr      
       
    Public:
       Declare Property hWindow( ByVal _HWnd As HWnd)
       Declare Property hWindow() As HWnd
       Declare Property IsNewFlag( ByVal nValue As BOOLEAN)
       Declare Property IsNewFlag() As BOOLEAN
+      Declare Property IsProjectFile( ByVal nValue As BOOLEAN)
+      Declare Property IsProjectFile() As BOOLEAN
+      Declare Property ProjectFileType( ByVal nValue As Long)
+      Declare Property ProjectFileType() As Long
       Declare Property DateFileTime( ByVal nValue As Double)
       Declare Property DateFileTime() As Double
       Declare Property DiskFilename( ByVal wValue As WString Ptr)
@@ -230,7 +241,7 @@ Type clsApp
       m_IsNewProjectFlag  As BOOLEAN
       m_wzProjectName     As WString * MAX_PATH
       m_wzProjectFilename As WString * MAX_PATH
-      m_IncludeFilename   As String
+      m_IncludeFilename   As String 
 
       m_arrDocuments(Any) As clsDocument Ptr
    
@@ -245,6 +256,8 @@ Type clsApp
       Declare Property ProjectName() As WString Ptr
 
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+      Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
+      Declare Function ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
 
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long

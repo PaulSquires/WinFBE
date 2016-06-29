@@ -147,6 +147,43 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 End Function
 
 
+''
+''
+Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
+   If pDoc = 0 Then Exit Function
+   
+   Dim wzFileType As WString * MAX_PATH = "NORMAL"
+   Dim wzFilePath As WString * MAX_PATH 
+   Dim wzFile     As WString * MAX_PATH
+   
+   ' Add the incoming document to the project. We simply need to set the flag for
+   ' instance of the document and update the Project Manager listview.
+   pDoc->IsProjectFile = True
+   
+   FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
+   FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
+ 
+   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+   
+   FF_ListView_InsertItem( hLV, 0, 0, wzFile, pDoc )
+   FF_ListView_InsertItem( hLV, 0, 1, wzFileType )
+   FF_ListView_InsertItem( hLV, 0, 2, wzFilePath )
+   
+   
+   Function = 0
+End Function
+
+''
+''
+Function clsApp.ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
+
+   ' Remove the incoming document from the project. We simply need to unset the flag for
+   ' instance of the document and update the Project Manager listview.
+   pDoc->IsProjectFile = True
+
+   Function = 0
+End Function
+
 
 ''
 ''

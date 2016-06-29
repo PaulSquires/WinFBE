@@ -39,6 +39,26 @@ End Property
 
 ''
 ''
+Property clsDocument.IsProjectFile( ByVal nValue As BOOLEAN)
+   m_IsProjectFile = nValue
+End Property
+
+Property clsDocument.IsProjectFile() As BOOLEAN
+   Property = m_IsProjectFile
+End Property
+
+''
+''
+Property clsDocument.ProjectFileType( ByVal nValue As Long)
+   m_ProjectFileType = nValue
+End Property
+
+Property clsDocument.ProjectFileType() As Long
+   Property = m_ProjectFileType
+End Property
+
+''
+''
 Property clsDocument.DateFileTime( ByVal nValue As Double)
    m_DateFileTime = nValue
 End Property
