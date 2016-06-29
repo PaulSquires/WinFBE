@@ -9,7 +9,6 @@
 
 [ ] Syntax keyword highlighting. 
     [ ] Investigate mixed case keywords.
-    [ ] Maybe include a subpage in "Environment Options" to allow user to add/edit the list.
     [ ] WinAPI keyword list.
 
 [ ] Codetips

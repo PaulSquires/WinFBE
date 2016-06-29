@@ -224,6 +224,16 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
+   ' Check if a Project is open and active
+   If gpApp->IsProjectActive Then
+      EnableMenuItem hMenu, IDM_PROJECTMANAGER, MF_BYCOMMAND Or MF_ENABLED
+      EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or MF_ENABLED
+      EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or MF_ENABLED
+      EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or MF_ENABLED
+      EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or MF_ENABLED
+   End If
+   
+
    ' Check the correct default compiler
    Select Case UCase(gConfig.DefaultCompiler)
       Case "FBC 32BIT"

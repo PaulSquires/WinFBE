@@ -24,7 +24,6 @@ Function frmMain_UpdateLineCol(HWnd As HWnd) As Long
       wzText = APPNAME            
       If gpApp->IsProjectActive Then wzText = APPNAMESHORT & " - [" & *gpApp->ProjectName & "]"
       SetWindowTextW( HWnd, wzText )
-      Exit Function
    Else
       pDoc->DisplayStats
       SetFocus(pDoc->hWindow)     
@@ -158,7 +157,6 @@ Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
    gpApp->IsNewProjectFlag    = True
    gpApp->ProjectDiskFilename = 0
    gpApp->ProjectName         = @WStr("Project1")
-   
    
    frmMain_SetFocusToCurrentCodeWindow
    

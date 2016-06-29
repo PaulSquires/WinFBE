@@ -198,6 +198,12 @@ Function frmMain_DisableToolbarButtons() As Long
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
 
+   If gpApp->IsProjectActive Then
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
+   Else
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
+   End If
+
    Function = 0
 End Function
 
@@ -237,7 +243,7 @@ Function frmMain_ChangeToolbarButtonsState() As Long
    FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
    FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
 
-
+   
    If SendMessageW(hEdit, SCI_GETMODIFY, 0, 0) = 0 Then 
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
    Else 

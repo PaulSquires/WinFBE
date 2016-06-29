@@ -86,6 +86,8 @@
 #Define IDC_FRMGOTO_LBLCURRENTVALUE  1005
 #Define IDC_FRMCOMMANDLINE_LABEL1  1000
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1  1001
+#Define IDC_FRMPROJECTOPTIONS_PROJECTNAME  1000
+#Define IDC_FRMPROJECTOPTIONS_PROJECTFILENAME  1001
 
 Const DELIM = Chr(1)    ' character used as delimiter for Find/Replace text strings  
 Const IDC_MRUBASE = 5000           ' Windows id of MRU items 1 to 10 (located under File menu)

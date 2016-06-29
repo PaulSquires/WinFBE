@@ -101,9 +101,14 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->SetClientSize(420, 100)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
-'   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL1, L(179,"Enter command line arguments:"), 10, 10, 400, 20, _
-'        WS_CHILD Or WS_VISIBLE Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
-'
+   Dim As HWnd lblProjName = _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_PROJECTNAME, "", 10, 10, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   Dim As HWnd lblProjFilename = _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_PROJECTFILENAME, "", 10, 33, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+
 '   Dim As HWnd hTextBox = _
 '   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TEXTBOX1, "", 10, 33, 400, 20, _
 '        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
@@ -117,6 +122,9 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
+ 
+   SetWindowTextW( lblProjName, gpApp->ProjectName )
+   SetWindowTextW( lblProjFilename, gpApp->ProjectDiskFilename )
    
 '   SetFocus hTextBox
    
