@@ -350,7 +350,7 @@ Function CreateContextMenu() As HMENU
    ' Ensure that the window under the cursor is actually a Scintilla window
    ' and not another window like a tab in the top tabcontrol.
    GetCursorPos(@pt)
-   ScreenToClient(pDoc->hWindow, @pt)
+   'ScreenToClient(pDoc->hWindow, @pt)
 
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
    
@@ -406,10 +406,10 @@ Function CreateContextMenu() As HMENU
    If gpApp->IsProjectActive Then
      AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
      If pDoc->IsProjectFile Then     
-        wzText = L(190,"&Remove this file from the Project") & ": " & *gpApp->ProjectName
+        wzText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
         AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
      Else
-        wzText = L(189,"A&dd this file to the Project") & ": " & *gpApp->ProjectName
+        wzText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
         AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 
      End If
    End If

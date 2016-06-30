@@ -549,8 +549,8 @@ End Function
 ' ========================================================================================
 Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
 
-   Dim ptttdi As NMTTDISPINFOW Ptr          ' Tooltip notification message information
-   Dim wszTooltipText As WString * MAX_PATH ' Tooltip text
+   Dim ptttdi As NMTTDISPINFOW Ptr    ' Tooltip notification message information
+   Dim wszText As WString * MAX_PATH  
    Dim nCurSel As Long
    Dim pInfo As TCHITTESTINFO
    Dim hTrackPopUpMenu As HMENU
@@ -602,6 +602,18 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
             AppendMenu hTrackPopUpMenu, MF_SEPARATOR, 0, "" 
             AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
+
+            Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(nCurSel)
+            If (pDoc <> 0) AndAlso (gpApp->IsProjectActive) Then
+               AppendMenuW hTrackPopUpMenu, MF_SEPARATOR, 0, ""
+               If pDoc->IsProjectFile Then     
+                  wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
+                  AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
+               Else
+                  wszText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
+                  AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
+               End If
+            End If
             GetCursorPos @pt
             TrackPopupMenu(hTrackPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
             DestroyMenu hTrackPopUpMenu
@@ -637,31 +649,31 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
       Case TTN_GETDISPINFO
          ptttdi = Cast(NMTTDISPINFOW Ptr, pNMHDR)
          ptttdi->hinst = Null
-         wszTooltipText = ""
+         wszText = ""
          Select Case ptttdi->hdr.hwndFrom
             Case SendMessageW(GetDlgItem(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), IDC_FRMMAIN_TOOLBAR), TB_GETTOOLTIPS, 0, 0)
                Select Case ptttdi->hdr.idFrom
-                  Case IDM_FILENEW         : wszTooltipText = L(81,"New (Ctrl+N)")
-                  Case IDM_FILEOPEN        : wszTooltipText = L(82,"Open (Ctrl+O)")
-                  Case IDM_FILESAVE        : wszTooltipText = L(83,"Save (Ctrl+S)")
-                  Case IDM_CUT             : wszTooltipText = L(84,"Cut (Ctrl+X)")
-                  Case IDM_COPY            : wszTooltipText = L(85,"Copy (Ctrl+C)")
-                  Case IDM_PASTE           : wszTooltipText = L(86,"Paste (Ctrl+V)")
-                  Case IDM_FIND            : wszTooltipText = L(87,"Find (Ctrl+F)")
-                  Case IDM_REPLACE         : wszTooltipText = L(88,"Replace (Ctrl+R)")
-                  Case IDM_UNDO            : wszTooltipText = L(89,"Undo (Ctrl+Z)")
-                  Case IDM_REDO            : wszTooltipText = L(90,"Redo (Ctrl+E)")
-                  Case IDM_INDENTBLOCK     : wszTooltipText = L(91,"Indent (TAB)")
-                  Case IDM_UNINDENTBLOCK   : wszTooltipText = L(92,"UnIndent (Shift+TAB)")
-                  Case IDM_COMMENTBLOCK    : wszTooltipText = L(93,"Comment Block (Ctrl+B)")
-                  Case IDM_UNCOMMENTBLOCK  : wszTooltipText = L(94,"UnComment Block (Ctrl+Shift+B)")
-                  Case IDM_PROJECTMANAGER  : wszTooltipText = L(95,"Project Manager (F4)")
-                  Case IDM_COMPILE         : wszTooltipText = L(96,"Compile (Ctrl+F5)")
-                  Case IDM_BUILDEXECUTE    : wszTooltipText = L(97,"Compile and Execute (F5)")
-                  Case IDM_RUNEXE          : wszTooltipText = L(98,"Run Executable (Shift+F5)")
-                  Case IDM_HELP            : wszTooltipText = L(99,"Help (F1)")
+                  Case IDM_FILENEW         : wszText = L(81,"New (Ctrl+N)")
+                  Case IDM_FILEOPEN        : wszText = L(82,"Open (Ctrl+O)")
+                  Case IDM_FILESAVE        : wszText = L(83,"Save (Ctrl+S)")
+                  Case IDM_CUT             : wszText = L(84,"Cut (Ctrl+X)")
+                  Case IDM_COPY            : wszText = L(85,"Copy (Ctrl+C)")
+                  Case IDM_PASTE           : wszText = L(86,"Paste (Ctrl+V)")
+                  Case IDM_FIND            : wszText = L(87,"Find (Ctrl+F)")
+                  Case IDM_REPLACE         : wszText = L(88,"Replace (Ctrl+R)")
+                  Case IDM_UNDO            : wszText = L(89,"Undo (Ctrl+Z)")
+                  Case IDM_REDO            : wszText = L(90,"Redo (Ctrl+E)")
+                  Case IDM_INDENTBLOCK     : wszText = L(91,"Indent (TAB)")
+                  Case IDM_UNINDENTBLOCK   : wszText = L(92,"UnIndent (Shift+TAB)")
+                  Case IDM_COMMENTBLOCK    : wszText = L(93,"Comment Block (Ctrl+B)")
+                  Case IDM_UNCOMMENTBLOCK  : wszText = L(94,"UnComment Block (Ctrl+Shift+B)")
+                  Case IDM_PROJECTMANAGER  : wszText = L(95,"Project Manager (F4)")
+                  Case IDM_COMPILE         : wszText = L(96,"Compile (Ctrl+F5)")
+                  Case IDM_BUILDEXECUTE    : wszText = L(97,"Compile and Execute (F5)")
+                  Case IDM_RUNEXE          : wszText = L(98,"Run Executable (Shift+F5)")
+                  Case IDM_HELP            : wszText = L(99,"Help (F1)")
                End Select
-               If Len(wszTooltipText) Then ptttdi->lpszText = @wszTooltipText
+               If Len(wszText) Then ptttdi->lpszText = @wszText
          End Select
    End Select
 
