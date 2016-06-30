@@ -117,6 +117,7 @@ Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, _
 End Function
 
 
+
 ' ========================================================================================
 ' Return WSTRING text for a control
 ' ========================================================================================
@@ -720,6 +721,48 @@ Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, _
    Function = SendMessageW( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @lvi) )
 End Function
 
+
+' ========================================================================================
+' Set the text for the specified row and col item
+' ========================================================================================
+Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, _
+                                  ByVal iRow As Long, _
+                                  ByVal iColumn As Long, _
+                                  ByVal pwszText As WString Ptr, _
+                                  ByVal nTextMax As Long _
+                                  ) As Long
+
+  Dim li As LV_ITEM
+
+  li.mask       = LVIF_TEXT
+  li.iItem      = iRow
+  li.iSubItem   = iColumn 
+  li.pszText    = pwszText
+  li.cchTextMax = nTextMax
+       
+  Function = SendMessage( hWndControl, LVM_SETITEM, 0, Cast(LPARAM, @li) )
+End Function
+
+
+' ========================================================================================
+' Retrieve the lParam value from a Listview
+' ========================================================================================
+Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
+                                ByVal iRow As Long _
+                                ) As Long
+   Dim li As LV_ITEM
+
+   li.mask       = LVIF_PARAM
+   li.iItem      = iRow
+   li.iSubItem   = 0 
+   
+   If SendMessage( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @li) ) Then
+      Function = li.lParam
+   End If   
+
+End Function
+
+
 ' ========================================================================================
 ' Load a .lang localization file from disk and populate the localization array
 ' ========================================================================================
@@ -771,5 +814,58 @@ Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
    Close #f
 
    Function = True
+End Function
+
+
+' ========================================================================================
+' Get the full process image name
+' ========================================================================================
+Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, _
+                              ByVal pwszExeName As WString Ptr _
+                              ) As Long
+   Dim dwSize As Long
+   Dim hProcess As HANDLE 
+   hProcess = OpenProcess(PROCESS_QUERY_INFORMATION Or PROCESS_VM_READ, 1, pe32w->th32ProcessID)
+   If hProcess Then
+      dwSize = MAX_PATH
+      QueryFullProcessImageNameW( hProcess, 0, pwszExeName, @dwSize ) 
+      CloseHandle hProcess
+   End If
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Checks if the program that we are going to compile is already running
+' ========================================================================================
+Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
+
+   Dim hSnapShot As HANDLE
+   Dim pe32w As PROCESSENTRY32W
+
+   Dim wszExeFileName As WString * MAX_PATH = Ucase(*pwszExeFileName)
+   Dim wszExeProcessName As WString * MAX_PATH
+
+   pe32w.dwSize = Sizeof(pe32w)
+   hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+
+   If hSnapShot <> INVALID_HANDLE_VALUE Then
+      If Process32First(hSnapShot, @pe32w) Then
+         GetProcessImageName( @pe32w, @wszExeProcessName )
+         If Ucase(wszExeProcessName) = wszExeFileName Then
+            Function = True
+         Else
+            Do While Process32Next(hSnapShot, @pe32w) > 0
+               GetProcessImageName( @pe32w, @wszExeProcessName )
+               If Ucase(wszExeProcessName) = wszExeFileName Then
+                  Function = True
+                  Exit Do
+               End If
+            Loop
+         End If
+      End If
+   End If
+   CloseHandle hSnapShot
+
 End Function
 

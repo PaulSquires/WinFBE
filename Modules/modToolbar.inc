@@ -198,12 +198,6 @@ Function frmMain_DisableToolbarButtons() As Long
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
 
-   If gpApp->IsProjectActive Then
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
-   Else
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
-   End If
-
    Function = 0
 End Function
 
@@ -218,64 +212,73 @@ Function frmMain_ChangeToolbarButtonsState() As Long
    Dim startSelPos As Long
    Dim endSelPos   As Long
    
+   ' Disable all toolbar icons by default
+   frmMain_DisableToolbarButtons
+
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc Then 
-      hEdit = pDoc->hWindow
-   Else
-      frmMain_DisableToolbarButtons
-      Exit Function
-   End If
+   If pDoc Then hEdit = pDoc->hWindow
 
    ' Enables or disables toolbar buttons
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FIND)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REPLACE)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_INDENTBLOCK)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNINDENTBLOCK)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
-   FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
-
-   
-   If SendMessageW(hEdit, SCI_GETMODIFY, 0, 0) = 0 Then 
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
-   Else 
+   If IsWindow(hEdit) Then
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
-   End If
-
-   startSelPos = SendMessageW(hEdit, SCI_GETSELECTIONSTART, 0, 0)
-   endSelPos   = SendMessageW(hEdit, SCI_GETSELECTIONEND, 0, 0)
-   If startSelPos = endSelPos Then
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
-   Else
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
-   End If
-
-   If SendMessageW(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE) 
-   Else 
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FIND)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REPLACE)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_INDENTBLOCK)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNINDENTBLOCK)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
+   
+      If SendMessageW(hEdit, SCI_GETMODIFY, 0, 0) = 0 Then 
+         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
+      Else 
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
+      End If
+   
+      startSelPos = SendMessageW(hEdit, SCI_GETSELECTIONSTART, 0, 0)
+      endSelPos   = SendMessageW(hEdit, SCI_GETSELECTIONEND, 0, 0)
+      If startSelPos = endSelPos Then
+         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
+         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
+      Else
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
+      End If
+   
+      If SendMessageW(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE) 
+      Else 
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
+      End If
+      
+      If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
+         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO) 
+      Else 
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
+      End If
+   
+      If SendMessageW(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
+         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO) 
+      Else 
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
+      End If
+
    End If
    
-   If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO) 
-   Else 
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
-   End If
-
-   If SendMessageW(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO) 
-   Else 
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
+   If gpApp->IsProjectActive OrElse cBool(IsWindow(hEdit)) Then
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
+   Else
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    End If
 
    Function = 0

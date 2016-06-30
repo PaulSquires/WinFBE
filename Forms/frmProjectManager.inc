@@ -7,17 +7,21 @@
 ' ========================================================================================
 Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
+   Dim As HWnd hLV = GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_LISTVIEW )
+   Dim As Long nCurSel = ListView_GetSelectionMark(hLV)
+   Dim pDoc As clsDocument Ptr 
+
+   If nCurSel > -1 Then
+      pDoc = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, nCurSel) )
+      gpApp->IncludeFilename = *pDoc->DiskFilename
+   End If
+   
    Select Case id
-      Case IDOK
-         If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
-            Exit Function
-         End If
-      Case IDCANCEL
-         If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
-            Exit Function
-         End If
+      Case IDM_OPENINCLUDE:           Function = OnCommand_OpenIncludeFile(HWND_FRMMAIN)
+      Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
+      Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
+      Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
+      Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
    End Select
 
    Function = 0
@@ -29,59 +33,12 @@ End Function
 ' ========================================================================================
 Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-   
-   Dim As HWnd hTV = GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_LISTVIEW )
-'   Dim As Long nHeightBreak = (70 * pWindow->ryRatio)
-'   Dim wzText As WString * MAX_PATH
-   
    ' Get the entire client area
    Dim As Rect rc
    GetClientRect(HWnd, @rc)
    
-   
-             
-'             Dim As Long nLeft, nTop
-'             Dim As HWnd hForm, hLabel
-'
-'             Static hCurrent As HWnd   ' hwnd of currently display child Form
-'             
-'             If hCurrent Then ShowWindow hCurrent, SW_HIDE
-'             
-'             Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
-'             
-''             ' Display the correct Category name and Child dialog. The child identifier is held in the lParam
-''             Select Case FF_TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
-''                 Case 0
-''                 Case 1
-''                 Case 2
-''                 Case 3
-''                 Case 4
-''             End Select
-'
-'             hForm = HWND_FRMPROJECTFILEINFO
-'             
-         
-   ' Reposition controls under the Treeview.
-
-'   Dim As HWnd hFileShortname = GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_FILESHORTNAME)
-'   Dim As HWnd hFileDiskname =  GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_FILEDISKNAME)
-
-   SetWindowPos hTV, 0, rc.Left, rc.Top, rc.Right, rc.Bottom, SWP_SHOWWINDOW Or SWP_NOZORDER
-
-'   GetWindowRect( hTV, @rc ): MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
-'   SetWindowPos hFileShortname, 0, rc.Left, rc.Bottom + (5 * pWindow->ryRatio), _
-'                                rc.Right, (20 * pWindow->ryRatio), SWP_SHOWWINDOW Or SWP_NOZORDER
-'
-'   GetWindowRect( hFileShortname, @rc ): MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
-'   SetWindowPos hFileDiskname,  0, rc.Left, rc.Bottom + (5 * pWindow->ryRatio), _
-'                                rc.Right, (20 * pWindow->ryRatio), SWP_SHOWWINDOW Or SWP_NOZORDER
-'
-'   wzText = "File: " & "myfile.inc"
-'   SetWindowTextW( hFileShortname, wzText )
-'
-'   wzText = "Path: " & "x:\FB\WinFBE\myfile.inc"
-'   SetWindowTextW( hFileDiskname, wzText )
+   Dim As HWnd hLV = GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_LISTVIEW )
+   SetWindowPos hLV, 0, rc.Left, rc.Top, rc.Right, rc.Bottom, SWP_SHOWWINDOW Or SWP_NOZORDER
 
    Function = 0
 End Function
@@ -104,7 +61,8 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmProjectManager
 ' ========================================================================================
 Function frmProjectManager_OnClose(HWnd As HWnd) As LRESULT
-   DestroyWindow HWnd
+   ' Never close the window; simply hide it.
+   ShowWindow( HWnd, SW_HIDE )
    Function = 0
 End Function
 
@@ -114,15 +72,37 @@ End Function
 ' ========================================================================================
 Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
 
-'    Select Case id
-'       Case IDC_FRMPROJECTMANAGER_TVWFILES
-'          If pNMHDR->code = TVN_SELCHANGED Then
-'             frmProjectManager_PositionWindows(HWnd)
-'          End If
-'   End Select
+   Dim nmi As NMITEMACTIVATE Ptr = Cast( NMITEMACTIVATE Ptr, pNMHDR)
+   Dim hPopUpMenu As HMENU
+   Dim pt As Point
+   
+   Select Case pNMHDR->code 
+   
+      Case NM_DBLCLK
+         ' Load the selected file into the editor
+         If id = IDC_FRMPROJECTMANAGER_LISTVIEW Then   
+            ' Get the pDoc from the selected row                
+            Dim pDoc As clsDocument Ptr = Cast( clsDocument Ptr, FF_ListView_GetlParam(nmi->hdr.hwndFrom, nmi->iItem) )
+            frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
+         End If
+
+      Case NM_RCLICK
+         If id = IDC_FRMPROJECTMANAGER_LISTVIEW Then   
+            ' Create the popup menu
+            If nmi->iItem > -1 Then
+              hPopupMenu = CreateProjectManagerContextMenu(nmi->hdr.hwndFrom, nmi->iItem)
+              GetCursorPos @pt
+              TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+              DestroyMenu hPopUpMenu
+            End If
+            Return True   ' prevent further processing that leads to WM_CONTEXTMENU
+         End If
+
+   End Select
 
    Function = 0
 End Function
+
 
 
 ' ========================================================================================
@@ -143,6 +123,7 @@ Function frmProjectManager_WndProc( ByVal HWnd   As HWnd, _
                                     ) As LRESULT
 
    Select Case uMsg
+      HANDLE_MSG (HWnd, WM_NOTIFY,   frmProjectManager_OnNotify)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmProjectManager_OnCommand)
       HANDLE_MSG (HWnd, WM_SIZE,     frmProjectManager_OnSize)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmProjectManager_OnClose)

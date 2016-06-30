@@ -117,31 +117,15 @@ Enum
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
    IDM_OPTIONS
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_PROJECTCLOSE 
-   IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTOPTIONS
+   IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS
    IDM_ADDFILETOPROJECT, IDM_REMOVEFILEFROMPROJECT
-   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMMANDLINE, IDM_USE32BIT, IDM_USE64BIT
+   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMMANDLINE
+   IDM_USE32BIT, IDM_USE64BIT
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
+   IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN
 End Enum
 
-
-Declare Function frmMain_UpdateLineCol(HWnd As HWnd) As Long
-Declare Function frmMain_ChangeTopMenuStates() As Long
-Declare Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
-Declare Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmCompileResults_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
-Declare Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
-Declare Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
-Declare Function Find_UpOrDown( ByVal flagUpDown As Long, _
-                                 ByVal findFlags  As Long, _
-                                 ByVal flagSearchCurrentOnly As BOOLEAN, _
-                                 ByVal hWndDialog As HWnd _
-                                 ) As Long
-Declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
-Declare Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
-Declare Function ProcessToCurdrive( ByVal pswzIn As WString Ptr ) As Long
-Declare Function ProcessFromCurdrive( ByVal pswzIn As WString Ptr ) As Long
-Declare Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
 
 
 ''
@@ -166,7 +150,7 @@ Type clsDocument
       m_hWindow         As HWnd
       m_IsNewFlag       As BOOLEAN
       m_IsProjectFile   As BOOLEAN
-      m_ProjectFileType As Long           ' 0:main, 1:module, 2:normal
+      m_ProjectFileType As Long      = FILETYPE_NORMAL     ' 0:main, 1:module, 2:normal
       m_sFilename       As WString * MAX_PATH
       m_DateFileTime    As Double
       m_pSci            As Any Ptr      
@@ -258,6 +242,7 @@ Type clsApp
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
       Declare Function ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
+      Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
 
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long
@@ -266,6 +251,8 @@ Type clsApp
       Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
       Declare Function GetDocumentCount() As Long
       Declare Function GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
+      Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
+      Declare Function GetMainDocumentPtr() As clsDocument Ptr
       Declare Property IncludeFilename( ByVal sFilename As String)
       Declare Property IncludeFilename() As String
 
@@ -277,6 +264,32 @@ Type clsApp
       'Declare Function Debug() As Long
       
 End Type
+
+Declare Function frmMain_UpdateLineCol(HWnd As HWnd) As Long
+Declare Function frmMain_ChangeTopMenuStates() As Long
+Declare Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+Declare Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
+Declare Function frmCompileResults_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
+Declare Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
+Declare Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
+Declare Function Find_UpOrDown( ByVal flagUpDown As Long, _
+                                 ByVal findFlags  As Long, _
+                                 ByVal flagSearchCurrentOnly As BOOLEAN, _
+                                 ByVal hWndDialog As HWnd _
+                                 ) As Long
+Declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
+Declare Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
+Declare Function ProcessToCurdrive( ByVal pswzIn As WString Ptr ) As Long
+Declare Function ProcessFromCurdrive( ByVal pswzIn As WString Ptr ) As Long
+Declare Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
+Declare Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
+Declare Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
+                                          ByVal bIsNewFile  As BOOLEAN, _ 
+                                          ByVal bIsTemplate As BOOLEAN, _
+                                          ByVal bShowInTab  As BOOLEAN, _
+                                          ByVal pwszName    As WString Ptr, _
+                                          ByVal pDocIn      As clsDocument Ptr _
+                                          ) As clsDocument Ptr
 
 '  Global App class that controls everything related to projects and documents
 Dim Shared gpApp As clsApp Ptr

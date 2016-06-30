@@ -183,26 +183,52 @@ End Function
 
 
 ' ========================================================================================
-' Create a new editing window
+' Attempt to open specified file. If it exists then position to Tab if applicable
 ' ========================================================================================
-Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
+Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
+                                 ByVal bIsNewFile  As BOOLEAN, _ 
+                                 ByVal bIsTemplate As BOOLEAN, _
+                                 ByVal bShowInTab  As BOOLEAN, _
+                                 ByVal pwszName    As WString Ptr, _
+                                 ByVal pDocIn      As clsDocument Ptr _
+                                 ) As clsDocument Ptr
+   
+   Dim As Long idx = -1
+   Dim pDoc As clsDocument Ptr 
+   
+   If pDocIn = 0 Then   ' Create a new pDoc 
+      pDoc = New clsDocument
+      If bIsNewFile Then
+         pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+      Else
+         pDoc->CreateCodeWindow(HWnd, False, bIsTemplate, pwszName)
+      End If   
+      gpApp->AddDocument(pDoc)            ' Add the new document to the global app
+   Else
+      pDoc = pDocIn     ' deal with the existing incoming pDoc
+   End If   
 
-   Dim pDoc As clsDocument Ptr = New clsDocument
-   
-   ' Create the new Scintilla window
-   pDoc->CreateCodeWindow(HWnd, True)
+   If bShowInTab Then
+      ' If the document is already open and loaded then simply switch to
+      ' that document in the top tabcontrol.
+      idx = gTTabCtl.GetTabIndexFromFilename(pwszName)
+      If idx = -1 Then idx = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
+      gTTabCtl.SetFocusTab(idx)
+   End If
 
-   ' Add the new document to the global app
-   gpApp->AddDocument(pDoc)                
-   
-   ' Add the new document to the top tabcontrol
-   Dim As Long idx = gTTabCtl.AddTab( pDoc )
-   gTTabCtl.SetFocusTab(idx)
-   
    ' Position all of the controls into place
    frmMain_PositionWindows(HWnd)
    frmMain_SetFocusToCurrentCodeWindow
-   
+
+   Function = pDoc
+End Function
+
+
+' ========================================================================================
+' Create a new editing window
+' ========================================================================================
+Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
+   frmMain_OpenFileSafely(HWnd, True, False, True, 0, 0 )
    Function = 0
 End Function
 
@@ -223,19 +249,7 @@ Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
       If pItem Then
          pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
          If pwszName Then 
-            ' If the document is already open and loaded then simply switch to
-            ' that document in the top tabcontrol.
-            idx = gTTabCtl.GetTabIndexFromFilename(pwszName)
-            If idx >= 0 Then
-               gTTabCtl.SetFocusTab(idx)
-            Else
-               ' Create the new Scintilla window and load the file
-               Dim pDoc As clsDocument Ptr = New clsDocument
-               pDoc->CreateCodeWindow(HWnd, False, False, pwszName)
-               gpApp->AddDocument(pDoc)        ' Add the new document to the global app          
-               idx = gTTabCtl.AddTab( pDoc )   ' Add the new document to the top tabcontrol
-               gTTabCtl.SetFocusTab(idx)
-            End If
+            frmMain_OpenFileSafely(HWnd, False, False, True, pwszName, 0 )
             CoTaskMemFree(pwszName)
             pwszName = Null
          End If
@@ -253,29 +267,57 @@ End Function
 
       
 ' ========================================================================================
-' Open #Include file that was selected from the right click popup menu
+' Add one or more files to the active Project
 ' ========================================================================================
-Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
+Function OnCommand_ProjectAddFiles( ByVal HWnd As HWnd ) As LRESULT
 
-   Dim wszFile As WString * MAX_PATH = gpApp->IncludeFilename
-   Dim As Long idx
+   ' Display the Open File Dialog
+   Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd)
+   If pItems = Null Then Exit Function
+   Dim dwItemCount As Long, i As Long, idx As Long, pItem As IShellItem Ptr, pwszName As WString Ptr
+   pItems->lpVtbl->GetCount(pItems, @dwItemCount)
    
-   ' Determine if file is already open (if it is then simply switch to it)
-   idx = gTTabCtl.GetTabIndexFromFilename(@wszFile)
-   If idx >= 0 Then
-      gTTabCtl.SetFocusTab(idx)
-   Else
-      ' Create the new Scintilla window and load the file
-      Dim pDoc As clsDocument Ptr = New clsDocument
-      pDoc->CreateCodeWindow(HWnd, False, False, @wszFile)
-      gpApp->AddDocument(pDoc)        ' Add the new document to the global app          
-      idx = gTTabCtl.AddTab( pDoc )   ' Add the new document to the top tabcontrol
-      gTTabCtl.SetFocusTab(idx)
-   End If
-
+   For i = 0 To dwItemCount - 1
+      pItems->lpVtbl->GetItemAt(pItems, i, @pItem)
+      If pItem Then
+         pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
+         If pwszName Then 
+            ' Check to see if the document is already loaded. If it is then check to see if it needs
+            ' to have its flag set to make it part of the project. If not then simply add it.
+            Dim pDoc As clsDocument Ptr 
+            pDoc = gpApp->GetDocumentPtrByFilename(pwszName)
+            If pDoc Then
+               If pDoc->IsProjectFile = False Then
+                  ' Add it to the Project Manager Listview
+                  gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
+               End If   
+            Else
+               ' Create the new Scintilla window and load the file
+               pDoc = frmMain_OpenFileSafely(HWnd, False, False, False, pwszName, 0 )
+               gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
+            End If
+            CoTaskMemFree(pwszName)
+            pwszName = Null
+         End If
+         pItem->lpVtbl->Release(pItem)
+         pItem = Null
+      End If
+   Next
+   pItems->lpVtbl->Release(pItems)
+   
    frmMain_PositionWindows(HWnd)
    frmMain_SetFocusToCurrentCodeWindow
 
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Open #Include file that was selected from the right click popup menu
+' ========================================================================================
+Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
+   frmMain_OpenFileSafely(HWnd, False, False, True, gpApp->IncludeFilename, 0 )
+   gpApp->IncludeFilename = ""
    Function = 0
 End Function
 
@@ -502,13 +544,16 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       
       ''  PROJECT MENU
-      Case IDM_PROJECTNEW:         Function = OnCommand_ProjectNew( HWnd )
-      Case IDM_PROJECTSAVE:        Function = OnCommand_ProjectSave( HWnd, False )
-      Case IDM_PROJECTSAVEAS:      Function = OnCommand_ProjectSave( HWnd, True )
-      Case IDM_PROJECTMANAGER:     Function = frmProjectManager_Show( HWnd )    ' this will also toggle visibility 
-      
+      Case IDM_PROJECTNEW:            Function = OnCommand_ProjectNew( HWnd )
+      Case IDM_PROJECTSAVE:           Function = OnCommand_ProjectSave( HWnd, False )
+      Case IDM_PROJECTSAVEAS:         Function = OnCommand_ProjectSave( HWnd, True )
+      Case IDM_PROJECTFILESADD:       Function = OnCommand_ProjectAddFiles( HWnd )
+      Case IDM_PROJECTMANAGER:        Function = frmProjectManager_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_ADDFILETOPROJECT:      Function = gpApp->ProjectAddFile( pDoc )
       Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
+      Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
+      Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
+      Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
          
       
       ''  COMPILE MENU          
@@ -553,7 +598,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Dim wszText As WString * MAX_PATH  
    Dim nCurSel As Long
    Dim pInfo As TCHITTESTINFO
-   Dim hTrackPopUpMenu As HMENU
+   Dim hPopUpMenu As HMENU
    Dim pt As Point         
    
    If id = IDC_SCINTILLA Then
@@ -596,29 +641,10 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
             gTTabCtl.SetFocusTab(nCurSel)
             ' Create the popup menu
-            hTrackPopUpMenu = CreatePopupMenu
-            AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
-            AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
-            AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
-            AppendMenu hTrackPopUpMenu, MF_SEPARATOR, 0, "" 
-            AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
-
-            Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(nCurSel)
-            If pDoc <> 0 Then
-               If gpApp->IsProjectActive Then
-                 AppendMenuW hTrackPopUpMenu, MF_SEPARATOR, 0, ""
-                 If pDoc->IsProjectFile Then     
-                    wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
-                    AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
-                 Else
-                    wszText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
-                    AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
-                 End If
-               End If
-            End If
+            hPopupMenu = CreateTopTabCtlContextMenu(nCurSel)
             GetCursorPos @pt
-            TrackPopupMenu(hTrackPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
-            DestroyMenu hTrackPopUpMenu
+            TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+            DestroyMenu hPopUpMenu
             Return True   ' prevent further processing that leads to WM_CONTEXTMENU
          End If
 
@@ -748,7 +774,7 @@ Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
    pt.x = xPos
    pt.y = yPos
    ScreenToClient hWndContext, @pt
-   hPopupMenu = CreateContextMenu()
+   hPopupMenu = CreateScintillaContextMenu()
    GetCursorPos @pt
    TrackPopupMenu hPopupMenu, 0, pt.x, pt.y, 0, HWnd, 0
    DestroyMenu hPopupMenu

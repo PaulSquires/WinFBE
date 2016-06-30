@@ -112,6 +112,8 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"&Save Project")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project &As...")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, L(207,"&Add Files to Project...")
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project O&ptions...")
 
    hPopUpMenu = CreatePopupMenu
@@ -122,11 +124,11 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_USE32BIT, L(69,"Use &32-Bit Compiler") & Chr(9) & "Ctrl+1"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_USE64BIT, L(70,"Use &64-Bit Compiler") & Chr(9) & "Ctrl+2"
+         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_USE32BIT, L(69,"Use &32-Bit Compiler") & Chr(9) & "Ctrl+1"
+         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_USE64BIT, L(70,"Use &64-Bit Compiler") & Chr(9) & "Ctrl+2"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_GUI, L(71,"Compile &GUI application") & Chr(9) & "Ctrl+3"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_CONSOLE, L(72,"Compile C&onsole application") & Chr(9) & "Ctrl+4"
+         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_GUI, L(71,"Compile &GUI application") & Chr(9) & "Ctrl+3"
+         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_CONSOLE, L(72,"Compile C&onsole application") & Chr(9) & "Ctrl+4"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
@@ -200,6 +202,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    Dim idMenu      As Long
    Dim startSelPos As Long
    Dim endSelPos   As Long
+   Dim nSelected   As Long 
    Dim hEdit       As HWnd
    
    ' Start off by disabling everything in order to make things easier. (We only
@@ -227,23 +230,17 @@ Function frmMain_ChangeTopMenuStates() As Long
 
    ' Check the correct default compiler
    Select Case UCase(gConfig.DefaultCompiler)
-      Case "FBC 32BIT"
-         CheckMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_CHECKED
-         CheckMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_UNCHECKED
-      Case "FBC 64BIT"
-         CheckMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_UNCHECKED
-         CheckMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_CHECKED
+      Case "FBC 32BIT": nSelected = IDM_USE32BIT
+      Case "FBC 64BIT": nSelected = IDM_USE64BIT
    End Select
+   CheckMenuRadioItem( hMenu, IDM_USE32BIT, IDM_USE64BIT, nSelected, MF_BYCOMMAND )
    
    ' Check the correct default compile mode
    Select Case Ucase(gConfig.DefaultCompileMode)
-      Case "GUI"
-         CheckMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_CHECKED
-         CheckMenuItem hMenu, IDM_CONSOLE, MF_BYCOMMAND Or MF_UNCHECKED
-      Case "CONSOLE"
-         CheckMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_UNCHECKED
-         CheckMenuItem hMenu, IDM_CONSOLE, MF_BYCOMMAND Or MF_CHECKED
+      Case "GUI":       nSelected = IDM_GUI
+      Case "CONSOLE":   nSelected = IDM_CONSOLE
    End Select
+   CheckMenuRadioItem( hMenu, IDM_GUI, IDM_CONSOLE, nSelected, MF_BYCOMMAND )
    
    ' Enable everything if a document is open
    If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 0 Then
@@ -286,8 +283,12 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_PROJECTFILESADD, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or fEnabled
-   
+   EnableMenuItem hMenu, IDM_BUILDEXECUTE, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or fEnabled
+   EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
    Function = 0
 End Function
@@ -298,10 +299,8 @@ End Function
 Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
 
    Select Case wID
-      Case IDM_USE32BIT
-         gConfig.DefaultCompiler = "FBC 32bit"
-      Case IDM_USE64BIT
-         gConfig.DefaultCompiler = "FBC 64bit"
+      Case IDM_USE32BIT:  gConfig.DefaultCompiler = "FBC 32bit"
+      Case IDM_USE64BIT:  gConfig.DefaultCompiler = "FBC 64bit"
    End Select
    
    frmMain_ChangeTopMenuStates()
@@ -316,10 +315,8 @@ End Function
 Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
 
    Select Case wID
-      Case IDM_GUI
-         gConfig.DefaultCompileMode = "GUI"
-      Case IDM_CONSOLE
-         gConfig.DefaultCompileMode = "CONSOLE"
+      Case IDM_GUI:      gConfig.DefaultCompileMode = "GUI"
+      Case IDM_CONSOLE:  gConfig.DefaultCompileMode = "CONSOLE"
    End Select
    
    frmMain_ChangeTopMenuStates()
@@ -331,7 +328,80 @@ End Function
 
 ''
 ''
-Function CreateContextMenu() As HMENU
+Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, ByVal pDoc As clsDocument Ptr ) As Long
+   AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL, L(204,"Normal file") 
+   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE, L(205,"Module file") 
+   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMAIN,   L(206,"Main file") 
+
+   Dim nFileType As Long
+   Select Case pDoc->ProjectFileType
+      Case FILETYPE_NORMAL: nFileType = IDM_SETFILENORMAL
+      Case FILETYPE_MODULE: nFileType = IDM_SETFILEMODULE
+      Case FILETYPE_MAIN:   nFileType = IDM_SETFILEMAIN
+   End Select
+   CheckMenuRadioItem( hPopupMenu, IDM_SETFILENORMAL, IDM_SETFILEMAIN, nFileType, MF_BYCOMMAND )
+
+   Function = 0
+End Function
+
+
+''
+''
+Function CreateProjectManagerContextMenu( ByVal hLV As HWnd, ByVal idx As Long ) As HMENU
+   Dim hPopUpMenu As HMENU
+   Dim wszText As WString * MAX_PATH
+   
+   ' idx is the Listview row index of the Project Manager
+   ' We use the OnCommand_OpenIncludeFile function to open any files so set the
+   ' filename here that will be used for the actual open.
+   Dim pDoc As clsDocument Ptr = Cast( clsDocument Ptr, FF_Listview_GetlParam(hLV, idx) )
+   
+   hPopUpMenu = CreatePopupMenu
+   AppendMenuW hPopUpMenu, MF_ENABLED, IDM_OPENINCLUDE,  L(203,"Open file") 
+   AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT,  L(190,"Remove from project") 
+   AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+   
+   Function = hPopupMenu
+End Function
+
+
+''
+''
+Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
+   Dim hPopUpMenu As HMENU
+   Dim wszText As WString * MAX_PATH
+   
+   hPopUpMenu = CreatePopupMenu
+   AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
+   AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
+   AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
+   AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
+   AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
+
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
+   If pDoc <> 0 Then
+      If gpApp->IsProjectActive Then
+        AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+        If pDoc->IsProjectFile Then     
+           wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
+           AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
+           AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+        Else
+           wszText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
+           AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
+        End If
+      End If
+   End If
+
+   Function = hPopupMenu
+End Function
+
+
+''
+''
+Function CreateScintillaContextMenu() As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then Exit Function
@@ -408,6 +478,7 @@ Function CreateContextMenu() As HMENU
      If pDoc->IsProjectFile Then     
         wzText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
         AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
+        AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
      Else
         wzText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
         AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 

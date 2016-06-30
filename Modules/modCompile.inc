@@ -58,8 +58,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Check to see if the compiler exists
    If Dir(gCompile.CompilerPath) = "" Then 
-      MessageBoxW( HWND_FRMMAIN, WStr("Invalid defined compiler path."), WStr("Error"), _
-                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      MessageBoxW( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
+                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
       Function = False: Exit Function
    End If
    
@@ -70,28 +70,44 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Case IDM_COMPILE:       gCompile.RunAfterCompile = False
    End Select
    
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   Dim pDoc As clsDocument Ptr 
+   If gpApp->IsProjectActive Then
+      pDoc = gpApp->GetMainDocumentPtr()
+      If pDoc = 0 Then
+         MessageBoxW( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
+                           MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+         Function = False: Exit Function
+      End If
+   Else
+      pDoc = gTTabCtl.GetActiveDocumentPtr()
+   End If
    If pDoc = 0 Then Return 0
    
    gCompile.FileToCompile = *pDoc->DiskFilename
    gCompile.CurrentFolder = Curdir                        
    gCompile.CompileFlags  = gConfig.CompilerSwitches   
-   
+
    Select Case gConfig.DefaultCompileMode   
       Case "GUI":     gCompile.CompileMode = " -s gui "
       Case "CONSOLE": gCompile.CompileMode = " -s console "
    End Select   
   
    FF_Pathname(@WStr("PATH"), pDoc->DiskFilename, @gCompile.OutputFolder)
+   FF_Pathname(@WStr("NAME"), @gCompile.FileToCompile, @wszTemp)
 
-   ' Change to the code output directory
-   ChDir gCompile.OutputFolder
-   
+   ' Need to test if the resulting application to be compiled is actually running
+   ' in memory. This would cause the compile to fail.
+   ' Test for the running exe if this project is an EXE project.
+   gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe"
+   If IsProcessRunning(@gCompile.OutputFilename) Then
+      MessageBoxW( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
+                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+      Function = False: Exit Function
+   End If
    
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
-   FF_Pathname(@WStr("NAME"), @gCompile.FileToCompile, @wszTemp)
    sTemp = "_" & Str(wszTemp)
    sTemp = FF_Replace(sTemp, " ", "_" )
    gCompile.BatchFile = sTemp & "_compile.bat" 
@@ -103,6 +119,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             " -v " & gCompile.CompileFlags & gCompile.CompileMode & _
             " > " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected to log file as well
 
+   ' Change to the code output directory
+   ChDir gCompile.OutputFolder
+   
    f = Freefile
    Open gCompile.BatchFile For Output as #f
    Print #f, execmd
@@ -254,7 +273,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Kill gCompile.LogFile
    Else                        
       ' There were warnings and/or errors so display the compile results form
-      wszTemp = "Compile Results :: [Warnings: " & NumWarnings & "  Errors: " & NumErrors & "]"
+      wszTemp = L(192,"Compile Results :: [Warnings:") & " " & NumWarnings & "  " & L(193,"Errors:") & " " & NumErrors & "]"
       SetWindowTextW( HWND_FRMCOMPILERESULTS, @wszTemp )
       ShowWindow HWND_FRMCOMPILERESULTS, SW_SHOW
       MessageBeep(MB_ICONWARNING)
@@ -263,11 +282,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If (NumErrors = 0) Then           
       DestroyWindow(HWND_FRMCOMPILERESULTS)
       st = sOutputMsg & vbCrLf & _
-            "Primary Source: "     & gCompile.FileToCompile & vbCrLf & _
-            "Target Compilation: " & gCompile.OutputFilename & vbCrLf & _
-            "Compile Time: "       & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " seconds." & vbCrLf & _
-            "File Size: "          & FileLen(gCompile.OutputFilename) & " bytes."
-      MessageBoxW HWND_FRMMAIN, WStr(st), WStr("Compiler Results"), MB_ICONINFORMATION Or MB_OK Or MB_TASKMODAL
+            L(194,"Primary Source:")     & " " & gCompile.FileToCompile & vbCrLf & _
+            L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
+            L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
+            L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
+      MessageBoxW HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK Or MB_TOPMOST
    Else
       gCompile.RunAfterCompile = False 
       
@@ -285,6 +304,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Ensure that we switch back to the Project's directory
    ChDir gCompile.CurrentFolder
    
+   Function = True   ' successful
 End Function
 
 

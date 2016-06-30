@@ -12,6 +12,7 @@
 #Include Once "windows.bi"
 #Include Once "vbcompat.bi"
 #Include Once "win\shobjidl.bi"
+#Include Once "win\TlHelp32.bi"
 #Include Once "Afx\CWindow.inc"
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxCtl.inc" 

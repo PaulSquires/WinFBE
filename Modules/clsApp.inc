@@ -134,6 +134,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' Do the actual saving to disk
    f = Freefile
    If Open( wFilename For Output As #f) = 0 Then
+      ' TODO: save the actual contents of a project file here
       Print #f, "*** PROJECT FILE ***"
       Close #f
    Else
@@ -152,7 +153,7 @@ End Function
 Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    If pDoc = 0 Then Exit Function
    
-   Dim wzFileType As WString * MAX_PATH = "NORMAL"
+   Dim wzFileType As WString * MAX_PATH = "Normal"
    Dim wzFilePath As WString * MAX_PATH 
    Dim wzFile     As WString * MAX_PATH
    
@@ -164,10 +165,11 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
  
    Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+   Dim As Long nCount = ListView_GetItemCount(hLV)
    
-   FF_ListView_InsertItem( hLV, 0, 0, wzFile, Cast(Long, pDoc) )
-   FF_ListView_InsertItem( hLV, 0, 1, wzFileType )
-   FF_ListView_InsertItem( hLV, 0, 2, wzFilePath )
+   FF_ListView_InsertItem( hLV, nCount, 0, wzFile, Cast(Long, pDoc) )
+   FF_ListView_InsertItem( hLV, nCount, 1, wzFileType )
+   FF_ListView_InsertItem( hLV, nCount, 2, wzFilePath )
    
    
    Function = 0
@@ -179,8 +181,58 @@ Function clsApp.ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
 
    ' Remove the incoming document from the project. We simply need to unset the flag for
    ' instance of the document and update the Project Manager listview.
-   pDoc->IsProjectFile = True
+   pDoc->IsProjectFile = False
+   
+   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+   Dim As Long nCount = ListView_GetItemCount(hLV)
+   Dim As Long i, nFound = -1
 
+   For i = 0 To nCount - 1
+       If FF_ListView_GetlParam( hLV, i ) = pDoc Then
+          nFound = i: Exit For
+       End If   
+   Next
+   
+   If nFound <> -1 Then ListView_DeleteItem( hLV, nFound)
+   
+   Function = 0
+End Function
+
+
+''
+''
+Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
+
+   Dim wzFileType As WString * MAX_PATH 
+   
+   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+   Dim As Long nCount = ListView_GetItemCount(hLV)
+   Dim As Long i, nFound = -1
+   Dim pDocList As clsDocument Ptr
+   
+   ' Find the position in the Listview where this document is located. Also, if we are setting a "Main"
+   ' project file then we need to toggle any other Main file to "Normal". There can only be one Main file.
+   For i = 0 To nCount - 1
+       pDocList = Cast( clsDocument Ptr, FF_ListView_GetlParam( hLV, i ) )
+       If pDocList = pDoc Then nFound = i
+       If nFileType = FILETYPE_MAIN Then
+          If pDocList->ProjectFileType = FILETYPE_MAIN Then
+             pDocList->ProjectFileType = FILETYPE_NORMAL
+             wzFileType = "Normal": FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
+          End If
+       End If   
+   Next
+   
+   If nFound <> -1 Then
+      pDoc->ProjectFileType = nFileType
+      Select Case nFileType
+         Case FILETYPE_MAIN:   wzFileType = "Main"
+         Case FILETYPE_MODULE: wzFileType = "Module"
+         Case FILETYPE_NORMAL: wzFileType = "Normal"
+      End Select
+      Return FF_ListView_SetItemText( hLV, nFound, 1, wzFileType, MAX_PATH )
+   End If    
+   
    Function = 0
 End Function
 
@@ -242,17 +294,27 @@ Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
 End Function
 
 
-'''
-'''
-'Function clsApp.GetDocument( ByVal hWindow as HWnd ) as DOCUMENT_TYPE Ptr
-'   For i as Long = LBound(m_arrDocuments) To UBound(m_arrDocuments)
-'      If m_arrDocuments(i).hWindow = hWindow Then
-'         Function = VarPtr(m_arrDocuments(i))
-'         Exit Function
-'      End If   
-'   Next
-'End Function
+''
+''
+Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
+   If pswzName = 0 Then Return 0
+   For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+      If Ucase(*m_arrDocuments(i)->DiskFilename) = Ucase(*pswzName) Then
+         Return m_arrDocuments(i)
+      End If
+   Next
+End Function
 
+
+''
+''
+Function clsApp.GetMainDocumentPtr() As clsDocument Ptr
+   For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+      If m_arrDocuments(i)->ProjectFileType = FILETYPE_MAIN Then
+         Return m_arrDocuments(i)
+      End If
+   Next
+End Function
 
 ''
 ''
