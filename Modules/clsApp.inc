@@ -165,7 +165,7 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
  
    Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
    
-   FF_ListView_InsertItem( hLV, 0, 0, wzFile, pDoc )
+   FF_ListView_InsertItem( hLV, 0, 0, wzFile, Cast(Long, pDoc) )
    FF_ListView_InsertItem( hLV, 0, 1, wzFileType )
    FF_ListView_InsertItem( hLV, 0, 2, wzFilePath )
    

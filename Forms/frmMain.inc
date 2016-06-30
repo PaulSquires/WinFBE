@@ -604,14 +604,16 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             AppendMenu hTrackPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
 
             Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(nCurSel)
-            If (pDoc <> 0) AndAlso (gpApp->IsProjectActive) Then
-               AppendMenuW hTrackPopUpMenu, MF_SEPARATOR, 0, ""
-               If pDoc->IsProjectFile Then     
-                  wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
-                  AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
-               Else
-                  wszText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
-                  AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
+            If pDoc <> 0 Then
+               If gpApp->IsProjectActive Then
+                 AppendMenuW hTrackPopUpMenu, MF_SEPARATOR, 0, ""
+                 If pDoc->IsProjectFile Then     
+                    wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
+                    AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
+                 Else
+                    wszText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
+                    AppendMenuW hTrackPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
+                 End If
                End If
             End If
             GetCursorPos @pt
@@ -880,7 +882,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow("WinFBE_Class")
-   pWindow->DPI = 96   ' eg. 144 or any other value (96 is default)
+   'pWindow->DPI = 96   ' eg. 144 or any other value (96 is default)
    
    ' Disable background erasing
    pWindow->ClassStyle = CS_DBLCLKS

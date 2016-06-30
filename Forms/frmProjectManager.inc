@@ -214,4 +214,5 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    ShowWindow HWND_FRMPROJECTMANAGER, nCmdShow
    SetFocus hLV
    
+   Function = 0
 End Function

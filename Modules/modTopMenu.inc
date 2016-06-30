@@ -350,7 +350,7 @@ Function CreateContextMenu() As HMENU
    ' Ensure that the window under the cursor is actually a Scintilla window
    ' and not another window like a tab in the top tabcontrol.
    GetCursorPos(@pt)
-   'ScreenToClient(pDoc->hWindow, @pt)
+   ScreenToClient(HWND_FRMMAIN, @pt)
 
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
    
