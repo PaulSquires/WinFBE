@@ -229,7 +229,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    Dim wText     As WString * MAX_PATH  
    Dim f         As Long 
    
-   ' If this a new Untitled document ans it is dirty then
+   ' If this is a new Untitled document and it is dirty then
    ' set flag to display SaveAs dialog.
    If this.IsNewFlag Then 
       If SendMessageW( m_hWindow, SCI_GETMODIFY, 0, 0 ) Then bSaveAs = True

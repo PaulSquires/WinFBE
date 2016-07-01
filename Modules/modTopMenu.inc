@@ -107,6 +107,9 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTMANAGER, L(181,"Project &Manager...") & Chr(9) & "F4"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenuW hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(219,"&Recent Projects")
+              AppendMenuW hPopUpSubMenu, MF_ENABLED, IDM_MRUPROJECT, L(11,"(Empty)")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"&Close Project")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"&Save Project")
@@ -329,6 +332,7 @@ End Function
 ''
 ''
 Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, ByVal pDoc As clsDocument Ptr ) As Long
+
    AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
    AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
    AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
@@ -384,7 +388,7 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
    If pDoc <> 0 Then
-      If gpApp->IsProjectActive Then
+      If (gpApp->IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
         If pDoc->IsProjectFile Then     
            wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
@@ -475,16 +479,16 @@ Function CreateScintillaContextMenu() As HMENU
    AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All")
    
-   If gpApp->IsProjectActive Then
-     AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
-     If pDoc->IsProjectFile Then     
-        wzText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
-        AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
-        AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
-     Else
-        wzText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
-        AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 
-     End If
+   If (gpApp->IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+      AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
+      If pDoc->IsProjectFile Then     
+         wzText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
+         AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
+         AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+      Else
+         wzText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
+         AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 
+      End If
    End If
    
 '   Dim hInst As HINSTANCE = GetModuleHandle(Null)

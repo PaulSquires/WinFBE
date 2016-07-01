@@ -162,7 +162,7 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    pWindow->Create( hWndParent, L(188,"Project Manager"), @frmProjectManager_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_THICKFRAME Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(600, 350)
+   pWindow->SetClientSize(400, 500)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
    ' Set the small and large icon for the main window (must be set after main window is created)

@@ -211,6 +211,8 @@ Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
          gpApp->IsNewProjectFlag = False
          gpApp->IsProjectActive = True
          frmProjectManager_Show( HWnd, SW_SHOW )
+         ' Update the most recently used project list 
+         UpdateMRUProjectList(pwszName)
       End If
       CoTaskMemFree(pwszName)
    End If
@@ -371,7 +373,13 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
    If pDoc = 0 Then Return 0
 
    ' Do the actual saving to disk
-   pDoc->SaveFile(bSaveAs)
+   If pDoc->SaveFile(bSaveAs) Then
+      ' If a project is active then we may need to update the filename/path for
+      ' this document if it is part of the project.
+      If (gpApp->IsProjectActive = True) And (pDoc->IsProjectFile = True) Then
+        gpApp->ProjectSetFileType( pDoc, pDoc->ProjectFileType )    ' this updates all fields in listview
+      End If
+   EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
    gTTabCtl.SetTabText(-1)
@@ -589,6 +597,10 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_PROJECTSAVEAS:         Function = OnCommand_ProjectSave( HWnd, True )
       Case IDM_PROJECTFILESADD:       Function = OnCommand_ProjectAddFiles( HWnd )
       Case IDM_PROJECTOPEN:           Function = OnCommand_ProjectOpen( HWnd )
+
+      Case IDC_MRUPROJECTBASE To (IDC_MRUPROJECTBASE + 10)
+         Function = OpenMRUProjectFile( HWnd, id )
+
       Case IDM_PROJECTCLOSE:          Function = OnCommand_ProjectClose( HWnd )
       Case IDM_PROJECTMANAGER:        Function = frmProjectManager_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_PROJECTOPTIONS:        Function = frmProjectOptions_Show( HWnd ) 
@@ -604,6 +616,10 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_BUILDEXECUTE, IDM_COMPILE
          Function = code_Compile(id)
 
+      Case IDM_RUNEXE
+         Exec gConfig.LastRunFilename, gConfig.CommandLine
+      
+      
       Case IDM_COMMANDLINE
          Function = frmCommandLine_Show( HWnd )
 
@@ -931,6 +947,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          ' do all of the topmenu items here rather than deal with individual popup submenus.
          frmMain_ChangeTopMenuStates()
          UpdateMRUMenu( Cast(HMENU, wParam) )
+         UpdateMRUProjectMenu( Cast(HMENU, wParam) )
 
       ''  CUSTOM MESSAGE
       Case MSG_USER_SETFOCUS

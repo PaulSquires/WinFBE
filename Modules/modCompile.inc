@@ -206,7 +206,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file
-'   Kill gCompile.BatchFile
+   Kill gCompile.BatchFile
 
    
    ' Clear the Compiler Log listview
@@ -347,6 +347,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    If gCompile.RunAfterCompile Then 
       Exec gCompile.OutputFilename, gConfig.CommandLine
+      gConfig.LastRunFilename = gCompile.OutputFilename
    End If
 
    ' Ensure that we switch back to the Project's directory

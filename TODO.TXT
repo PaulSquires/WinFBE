@@ -5,7 +5,7 @@
 
 [ ] Re-enable menu option and write code for "Spaces to Tabs" option.
 
-[ ] Syntax keyword highlighting. 
+[ ] Improve syntax keyword highlighting. 
     [ ] Investigate mixed case keywords.
     [ ] WinAPI keyword list.
 
@@ -16,8 +16,6 @@
 [ ] Implement code for Sub/Function Declaration menu option.
 
 [ ] Implement code for Last Position menu option.
-
-[ ] Run Executable.
 
 [ ] Print option.
 

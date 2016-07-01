@@ -113,7 +113,8 @@
 
 
 Const DELIM = Chr(1)    ' character used as delimiter for Find/Replace text strings  
-Const IDC_MRUBASE = 5000           ' Windows id of MRU items 1 to 10 (located under File menu)
+Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
+Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
 
 Const FILETYPE_MAIN     = 0
 Const FILETYPE_MODULE   = 1
@@ -140,7 +141,7 @@ Enum
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
    IDM_OPTIONS
-   IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_PROJECTCLOSE 
+   IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT, IDM_PROJECTCLOSE 
    IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS
    IDM_ADDFILETOPROJECT, IDM_REMOVEFILEFROMPROJECT
    IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMMANDLINE
@@ -334,6 +335,10 @@ Declare Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
 Declare Function ProjectSaveToFile() As BOOLEAN    
 Declare Function ProjectLoadFromFile() As BOOLEAN    
 Declare Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
+Declare Function frmProjectManager_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0) As Long
+Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
+
 
 '  Global App class that controls everything related to projects and documents
 Dim Shared gpApp As clsApp Ptr

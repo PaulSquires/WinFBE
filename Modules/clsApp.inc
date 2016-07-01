@@ -218,9 +218,13 @@ End Function
 
 ''
 ''
-Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
+Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
+                                    ByVal nFileType As Long _       ' new filetype 
+                                    ) As LRESULT
 
    Dim wzFileType As WString * MAX_PATH 
+   Dim wzFilePath As WString * MAX_PATH 
+   Dim wzFile     As WString * MAX_PATH
    
    Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
    Dim As Long nCount = ListView_GetItemCount(hLV)
@@ -255,7 +259,11 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileTy
          Case FILETYPE_NORMAL:   wzFileType = L(210,"Normal")
          Case FILETYPE_RESOURCE: wzFileType = L(213,"Resource")
       End Select
-      Return FF_ListView_SetItemText( hLV, nFound, 1, wzFileType, MAX_PATH )
+      FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
+      FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
+      FF_ListView_SetItemText( hLV, nFound, 0, @wzFile, MAX_PATH )
+      FF_ListView_SetItemText( hLV, nFound, 1, wzFileType, MAX_PATH )
+      FF_ListView_SetItemText( hLV, nFound, 2, @wzFilePath, MAX_PATH )
    End If    
    
    Function = 0

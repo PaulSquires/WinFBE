@@ -7,6 +7,7 @@ Type clsConfig
    Public:
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
       CommandLine          As WString * MAX_PATH   ' not saved to file
+      LastRunFilename      As WString * MAX_PATH   ' not saved to file
       SyntaxHighlighting   As Long = True
       Codetips             As Long = True
       LeftMargin           As Long = True
@@ -39,6 +40,7 @@ Type clsConfig
       DefaultCompiler      As WString * MAX_PATH = "FBC 32bit"
       DefaultCompileMode   As WString * MAX_PATH = "GUI"
       MRU(9)               As WString * MAX_PATH
+      MRUProject(9)        As WString * MAX_PATH
       clrCaretFG           As Long = BGR(0,0,0)          ' black
       clrCaretBG           As Long = -1
       clrCommentsFG        As Long = BGR(0,128,0)        ' green
@@ -163,6 +165,14 @@ Function clsConfig.SaveToFile() as Long
       Print #f, "MRU_" & Right("00" & Str(i), 2) & "="   & this.MRU(i) 
    Next         
    
+   Print #f, ""
+   
+   Print #f, "[MRUPROJECTS]"  
+   For i As Long = 0 To 9
+      ProcessToCurdrive(@this.MRUProject(i))
+      Print #f, "MRUPROJECT_" & Right("00" & Str(i), 2) & "="   & this.MRUProject(i) 
+   Next         
+
    Print #f, vbcrlf & _
    "[Colors]" & vbcrlf & _
    "clrCaretFG="            & this.clrCaretFG           & vbcrlf & _
@@ -244,6 +254,13 @@ Function clsConfig.LoadFromFile() as Long
          End If
       End If
       
+      If Left(wKey, 11) = "MRUPROJECT_" Then  ' is this an MRU Project entry
+         i = Val(Right(wKey,2))
+         If (i >= 0) And (i <= 9) Then 
+            this.MRUProject(i) = wData
+            Continue Do
+         End If
+      End If
 
       Select Case wKey
          Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
