@@ -13,6 +13,7 @@ CWindow: COMMCTRL: TreeView
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/AfxCtl.inc"
 USING Afx.CWindowClass
@@ -26,52 +27,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-' ========================================================================================
-' Window procedure
-' ================================================================e========================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-   SELECT CASE uMsg
-
-      CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
-            CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  SendMessageW hwnd, WM_CLOSE, 0, 0
-                  EXIT FUNCTION
-               END IF
-         END SELECT
-
-      CASE WM_NOTIFY
-         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
-         SELECT CASE ptnmhdr->idFrom
-            CASE IDC_TREEVIEW
-               IF ptnmhdr->code = NM_DBLCLK THEN
-                  ' // Retrieve the handle of the TreeView
-                  DIM hTreeView AS HWND = GetDlgItem(hwnd, IDC_TREEVIEW)
-                  ' // Retrieve the selected item
-                  DIM hItem AS HTREEITEM = TreeView_GetSelection(hTreeView)
-                  ' // Retrieve the text of the selected item
-                  DIM wszText AS WSTRING * 260
-                  TreeView_GetItemText(hTreeView, hItem, @wszText, 260)
-                  MessageBox hwnd, wszText, "", MB_OK
-                  EXIT FUNCTION
-               END IF
-         END SELECT
-
-    	CASE WM_DESTROY
-          ' // End the application
-         PostQuitMessage(0)
-         EXIT FUNCTION
-
-   END SELECT
-
-   ' // Pass unprocessed messages to DefWindowProc
-   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Main
@@ -84,6 +40,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Set process DPI aware
    AfxSetProcessDPIAware
 
+   ' // Create the main window
    DIM pWindow AS CWindow
    pWindow.Create(NULL, "CWindow with a TreeView", @WndProc)
    pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
@@ -152,8 +109,55 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
-   ' // Process Windows messages
+   ' // Dispatch Windows messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Window procedure
+' ================================================================e========================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_TREEVIEW
+               IF ptnmhdr->code = NM_DBLCLK THEN
+                  ' // Retrieve the handle of the TreeView
+                  DIM hTreeView AS HWND = GetDlgItem(hwnd, IDC_TREEVIEW)
+                  ' // Retrieve the selected item
+                  DIM hItem AS HTREEITEM = TreeView_GetSelection(hTreeView)
+                  ' // Retrieve the text of the selected item
+                  DIM wszText AS WSTRING * 260
+                  TreeView_GetItemText(hTreeView, hItem, @wszText, 260)
+                  MessageBox hwnd, wszText, "", MB_OK
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
 ' ========================================================================================

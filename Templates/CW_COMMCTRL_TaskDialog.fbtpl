@@ -14,12 +14,11 @@ CWindow: COMMCTRL: Task Dialog
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #define _WIN32_WINNT &h0602
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 ' $FB_RESPATH = "FBRES.rc"
-
-DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -27,6 +26,8 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL nCmdShow AS LONG) AS LONG
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Main
@@ -39,6 +40,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Set process DPI aware
    AfxSetProcessDPIAware
 
+   ' // Create the main window
    DIM pWindow AS CWindow
    pWindow.Create(NULL, "Task Dialog", @WndProc)
    pWindow.SetClientSize(500, 320)
@@ -50,6 +52,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
+   ' // Dispatch Windows messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
@@ -58,7 +61,7 @@ END FUNCTION
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -88,13 +91,13 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
     	CASE WM_DESTROY
-          ' // End the application by sending a WM_QUIT message
+         ' // End the application by sending a WM_QUIT message
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
-   ' // Process Windows messages
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION

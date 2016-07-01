@@ -16,6 +16,7 @@ CWindow: COMMCTRL: IPAddress control
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -28,50 +29,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-' ========================================================================================
-' Window procedure
-' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-   SELECT CASE uMsg
-
-      CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
-            CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  SendMessageW hwnd, WM_CLOSE, 0, 0
-                  EXIT FUNCTION
-               END IF
-            CASE IDC_IPADDRESS
-               IF HIWORD(wParam) = EN_CHANGE THEN
-                  ' *** Put your code here ***
-'                  Sample code: Get the address in string form
-'                  DIM wszText AS WSTRING * 260
-'                  GetWindowTextW(GetDlgItem(hwnd, IDC_IPADDRESS), @wszText, 260)
-'                  OutputDebugStringW wszText
-               END IF
-         END SELECT
-
-      CASE WM_NOTIFY
-         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
-         SELECT CASE ptnmhdr->idFrom
-            CASE IDC_IPADDRESS
-               IF ptnmhdr->code = IPN_FIELDCHANGED THEN
-                  ' *** Put your code here ***
-               END IF
-         END SELECT
-
-    	CASE WM_DESTROY
-         PostQuitMessage(0)
-         EXIT FUNCTION
-
-   END SELECT
-
-   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Main
@@ -95,7 +53,56 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
+   ' // Dispatch Windows messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_IPADDRESS
+               IF HIWORD(wParam) = EN_CHANGE THEN
+                  ' *** Put your code here ***
+'                  Sample code: Get the address in string form
+'                  DIM wszText AS WSTRING * 260
+'                  GetWindowTextW(GetDlgItem(hwnd, IDC_IPADDRESS), @wszText, 260)
+'                  OutputDebugStringW wszText
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' // Notification messages
+         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_IPADDRESS
+               IF ptnmhdr->code = IPN_FIELDCHANGED THEN
+                  ' *** Put your code here ***
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
 ' ========================================================================================

@@ -16,6 +16,7 @@ CWindow: GDI: Draw shaded triangle
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -25,6 +26,8 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL nCmdShow AS LONG) AS LONG
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Draws a shaded rectangle using the GradientFill function.
@@ -73,9 +76,35 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Drawing a shaded triangle", @WndProc)
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.SetClientSize(500, 300)
+   pWindow.Center
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    STATIC rxRatio AS SINGLE     ' // Horizontal scaling ratio
    STATIC ryRatio AS SINGLE     ' // Vertical scaling ratio
@@ -108,36 +137,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          EXIT FUNCTION
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Drawing a shaded triangle", @WndProc)
-   pWindow.Brush = GetStockObject(WHITE_BRUSH)
-   pWindow.SetClientSize(500, 300)
-   pWindow.Center
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

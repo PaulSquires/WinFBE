@@ -65,7 +65,7 @@ Function frmOptionsKeywords_Show( ByVal hWndParent As HWnd, _
    ' Height and width of this child form is set in frmOptions_OnNotify when the treeview option is selected.
    
    Dim As HWnd hTextBox = _
-   pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS, "", 0, 0, 386, 295, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS, "", 0, 0, 386, 345, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or ES_LEFT Or ES_MULTILINE Or ES_AUTOVSCROLL Or ES_WANTRETURN, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    

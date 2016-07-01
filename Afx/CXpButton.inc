@@ -125,7 +125,7 @@ CONSTRUCTOR CXpButton (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF
    ' // Register the class
    DIM wAtom AS ATOM
    DIM wcexw AS WNDCLASSEXW
-   DIM wszClassName AS WSTRING * 260 = "XPBUTTON"
+   DIM wszClassName AS WSTRING * 260 = "AFX_XPBUTTON"
    IF .GetClassInfoExW(.GetModuleHandleW(NULL), @wszClassName, @wcexw) = 0 THEN
       ' // Fill the WNDCLASSEXW structure
       WITH wcexw
@@ -158,7 +158,7 @@ CONSTRUCTOR CXpButton (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF
    IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER
    IF pWindow THEN m_hCtl = pWindow->AddControl(wszClassName, pWindow->hWindow, cID, wszTitle, x, y, nWidth, nHeight, dwStyle, dwExStyle, lpParam)
    IF m_hCtl THEN
-      .SetWindowLongPtr m_hCtl, 0, CAST(LONG_PTR, @this)
+      .SetWindowLongPtrW m_hCtl, 0, CAST(LONG_PTR, @this)
       ' // Set the same font used by the parent
       DIM lfw AS LOGFONTW
       IF pWindow->Font THEN
@@ -226,14 +226,14 @@ FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
       CASE WM_PAINT
          ' // Draws the button
          hDc = .BeginPaint(hwnd, @pPaint)
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton THEN pButton->UxDrawPushButton(hDc)
          .EndPaint hwnd, @pPaint
          EXIT FUNCTION
 
       CASE WM_PRINTCLIENT
          ' // Draws the button
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton THEN pButton->UxDrawPushButton(CAST(.HDC, wParam))
          EXIT FUNCTION
 
@@ -248,7 +248,7 @@ FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_LBUTTONDOWN
          ' // Redraws the button in pushed state
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton = NULL THEN EXIT FUNCTION
          .GetWindowRect pButton->hWindow, @rc
          .GetCursorPos @pt
@@ -268,7 +268,7 @@ FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_LBUTTONUP
          ' // Redraws the button in normal state
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton = NULL THEN EXIT FUNCTION
          .ReleaseCapture
          .GetWindowRect pButton->hWindow, @rc
@@ -286,7 +286,7 @@ FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_KEYDOWN
          ' // Redraws the button in pushed state
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton = NULL THEN EXIT FUNCTION
          SELECT CASE wParam
             CASE VK_RETURN, VK_SPACE
@@ -304,7 +304,7 @@ FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_KEYUP
          ' // Redraws the button in normal state
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton = NULL THEN EXIT FUNCTION
          IF pButton->m_fState = BST_PUSHED THEN
             pButton->m_fState = 0
@@ -336,7 +336,7 @@ FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_SETCURSOR
          ' // Establishes the cursor shape
-         pButton = CAST(CXpButton PTR, .GetWindowLongPtr(hwnd, 0))
+         pButton = CAST(CXpButton PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pButton = NULL THEN EXIT FUNCTION
          IF pButton->GetCursor THEN
             .SetCursor pButton->GetCursor

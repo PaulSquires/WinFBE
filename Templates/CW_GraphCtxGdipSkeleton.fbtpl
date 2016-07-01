@@ -13,10 +13,11 @@ CWindow: GRAPHCTX: GDI+ Graphic control skeleton
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
 #INCLUDE ONCE "Afx/AfxGdiPlus.inc"
 #INCLUDE ONCE "Afx/CGraphCtx.inc"
+USING Afx.CWindowClass
 USING Afx.CGraphCtxClass
 
 CONST IDC_GRCTX = 1001
@@ -28,7 +29,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' The following sample code draws a line.
@@ -65,6 +66,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Set process DPI aware
    AfxSetProcessDPIAware
 
+   ' // Create the main window
    DIM pWindow AS CWindow
    pWindow.Create(NULL, "CWindow GDI+ Graphic Control Skeleton", @WndProc)
    pWindow.Brush = CAST(HBRUSH, COLOR_WINDOW + 1)
@@ -81,7 +83,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
-   ' // Process Windows events
+   ' // Dispatch Windows events
    FUNCTION = pWindow.DoEvents(nCmdShow)
 
    ' // Shutdown GDI+
@@ -91,9 +93,9 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Window procedure
+' Main window callback procedure
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -115,11 +117,13 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END IF
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION

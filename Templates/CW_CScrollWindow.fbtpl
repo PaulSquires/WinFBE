@@ -1,11 +1,11 @@
 2
-PBWIN
+FBGUI
 .bas
-CWindow: COMMCTRL: ListBox
+CWindow: Scrollable window
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_COMMCTRL_ListBox.fbtpl
-' Contents: Template - CWindow with a ListBox
+' File: CW_ScrollWindow.fbtpl
+' Contents: Scrollable window
 ' Compiler: Free Basic
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
@@ -16,6 +16,7 @@ CWindow: COMMCTRL: ListBox
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/AfxCtl.inc"
+#INCLUDE ONCE "Afx/CScrollWindow.inc"
 USING Afx.CWindowClass
 
 #define IDC_LISTBOX 1001
@@ -40,16 +41,16 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Set process DPI aware
    AfxSetProcessDPIAware
 
-   ' // Create the main window
    DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with a ListBox", @WndProc)
+   DIM hwndMain AS HWND = pWindow.Create(NULL, "Scrollable window", @WndProc)
    pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
-   pWindow.SetClientSize(320, 375)
-   pWindow.Center
+   ' // Set a client size big enough to display all the controls
+   pWindow.SetClientSize(320, 335)
 
-   ' // Adds a listbox
-   DIM hListBox AS HWND = pWindow.AddControl("ListBox", , IDC_LISTBOX)
-   pWindow.SetWindowPos hListBox, NULL, 8, 8, 300, 320, SWP_NOZORDER
+   ' // Add a listbox
+   DIM hListBox AS HWND
+   hListBox = pWindow.AddControl("ListBox", , IDC_LISTBOX)
+   pWindow.SetWindowPos hListBox, NULL, 8, 8, 300, 280, SWP_NOZORDER
 
    ' // Fill the list box
    DIM i AS LONG, wszText AS WSTRING * 260
@@ -61,11 +62,20 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ListBox_SetCursel(hListBox, 0)
 
    ' // Add a cancel button
-   pWindow.AddControl("Button", , IDCANCEL, "&Cancel", 233, 338, 75, 23)
+   pWindow.AddControl("Button", , IDCANCEL, "&Cancel", 233, 298, 75, 23)
+
+   ' // Create an instance of the CScrollWindow class and attach the main window to it
+   DIM pScrollWindow AS CScrollWindow PTR = NEW CScrollWindow(hwndMain)
+   ' // Store the pointer in the class of the parent window for later deletion
+   pWindow.ScrollWindowPtr = pScrollWindow
+   ' // Shrink the client size
+   pWindow.SetClientSize(250, 260)
+   ' // Center the window
+   pWindow.Center
 
    |
 
-   ' // Dispatch Windows messages
+   ' // Dispatch windows messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
@@ -109,8 +119,23 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
          END SELECT
 
-    	CASE WM_DESTROY
-          ' // End the application
+      CASE WM_SIZE
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnSize(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_VSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnVScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_HSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnHScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 

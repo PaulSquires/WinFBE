@@ -145,7 +145,7 @@ DECLARE SUB Rebar_DragMove (BYVAL hRebar AS HWND, BYVAL dwPos AS DWORD)
 DECLARE SUB Rebar_EndDrag (BYVAL hRebar AS HWND)
 DECLARE SUB Rebar_GetBandBorders (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprc AS RECT PTR)
 DECLARE FUNCTION Rebar_GetBandCount (BYVAL hRebar AS HWND) AS DWORD
-DECLARE FUNCTION Rebar_GetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFO PTR) AS BOOLEAN
+DECLARE FUNCTION Rebar_GetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
 DECLARE SUB Rebar_GetBandMargins (BYVAL hRebar AS HWND, BYVAL pMargins AS MARGINS PTR)
 DECLARE FUNCTION Rebar_GetBarHeight (BYVAL hRebar AS HWND) AS DWORD
 DECLARE FUNCTION Rebar_GetBarInfo (BYVAL hRebar AS HWND, BYVAL lprbi AS REBARINFO PTR) AS BOOLEAN
@@ -162,12 +162,12 @@ DECLARE FUNCTION Rebar_GetTooltips (BYVAL hRebar AS HWND) AS HWND
 DECLARE FUNCTION Rebar_GetUnicodeFormat (BYVAL hRebar AS HWND) AS LONG
 DECLARE FUNCTION Rebar_HitTest (BYVAL hRebar AS HWND, BYVAL lprhbt AS RBHITTESTINFO PTR) AS LONG
 DECLARE FUNCTION Rebar_IdToIndex (BYVAL hRebar AS HWND, BYVAL uBandID AS DWORD) AS LONG
-DECLARE FUNCTION Rebar_InsertBand (BYVAL hRebar AS HWND, BYVAL uIndex AS DWORD, BYVAL lprbbi AS REBARBANDINFO PTR) AS BOOLEAN
+DECLARE FUNCTION Rebar_InsertBand (BYVAL hRebar AS HWND, BYVAL nIndex AS LONG, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
 DECLARE SUB Rebar_MaximizeBand (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL fIdeal AS DWORD)
 DECLARE SUB Rebar_MinimizeBand (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD)
 DECLARE FUNCTION Rebar_MoveBand (BYVAL hRebar AS HWND, BYVAL nFrom AS DWORD, BYVAL nTo AS DWORD) AS BOOLEAN
 DECLARE SUB Rebar_PushChevron (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL iAppValue AS DWORD)
-DECLARE FUNCTION Rebar_SetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFO PTR) AS BOOLEAN
+DECLARE FUNCTION Rebar_SetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
 #if _WIN32_WINNT = &h0602
 DECLARE FUNCTION Rebar_SetBandWidth (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL nWidth AS DWORD) AS BOOLEAN
 #endif
@@ -1463,7 +1463,7 @@ PRIVATE FUNCTION ListBox_ReplaceString (BYVAL hListBox AS HWND, BYVAL index AS L
    IF index = LB_ERR OR index = LB_ERRSPACE THEN Return index
    lRes = SendMessageW(hListBox, LB_SETITEMDATA, index, CAST(LPARAM, pNewData))
    IF lRes = LB_ERR THEN Return lRes
-   FUNCTION = SendMessageW(hListBox, IIF&((GetWindowLongPtr(hListBox, GWL_STYLE) AND LBS_MULTIPLESEL), LB_SETSEL, LB_SETCURSEL), index, 0)
+   FUNCTION = SendMessageW(hListBox, IIF&((GetWindowLongPtrW(hListBox, GWL_STYLE) AND LBS_MULTIPLESEL), LB_SETSEL, LB_SETCURSEL), index, 0)
 END FUNCTION
 ' ========================================================================================
 
@@ -1599,7 +1599,7 @@ END SUB
 PRIVATE SUB ListView_MakeHeaderFlat (BYVAL hwndLV AS HWND)
    DIM hLvHeader AS HWND = cast(HWND, SendMessageW(hwndLV, LVM_GETHEADER, 0, 0))
    IF hLvHeader = NULL THEN EXIT SUB
-   SetWindowLongPtr hLvHeader, GWL_STYLE, GetWindowLongPtr(hLvHeader, GWL_STYLE) XOR HDS_BUTTONS
+   SetWindowLongPtrW hLvHeader, GWL_STYLE, GetWindowLongPtrW(hLvHeader, GWL_STYLE) XOR HDS_BUTTONS
    SetWindowPos GetParent(hwndLV), NULL, 0, 0, 0, 0, SWP_NOZORDER OR SWP_NOMOVE OR SWP_NOSIZE OR SWP_DRAWFRAME
 END SUB
 ' ========================================================================================
@@ -1871,7 +1871,7 @@ END FUNCTION
 ' Retrieves information about a specified band in a rebar control.
 ' Returns TRUE or FALSE.
 ' ========================================================================================
-PRIVATE FUNCTION Rebar_GetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFO PTR) AS BOOLEAN
+PRIVATE FUNCTION Rebar_GetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
    FUNCTION = SendMessageW(hRebar, RB_GETBANDINFO, cast(WPARAM, uBand), cast(LPARAM, lprbbi))
 END FUNCTION
 ' ========================================================================================
@@ -2024,9 +2024,9 @@ END FUNCTION
 ' ========================================================================================
 ' Inserts a new band in a rebar control.
 ' ========================================================================================
-PRIVATE FUNCTION Rebar_InsertBand (BYVAL hRebar AS HWND, BYVAL uIndex AS DWORD, BYVAL lprbbi AS REBARBANDINFO PTR) AS BOOLEAN
+PRIVATE FUNCTION Rebar_InsertBand (BYVAL hRebar AS HWND, BYVAL nIndex AS LONG, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
    IF lprbbi = NULL THEN EXIT FUNCTION
-   FUNCTION = SendMessageW(hRebar, RB_INSERTBAND, cast(WPARAM, uIndex), cast(LPARAM, lprbbi))
+   FUNCTION = SendMessageW(hRebar, RB_INSERTBAND, cast(WPARAM, nIndex), cast(LPARAM, lprbbi))
 END FUNCTION
 ' ========================================================================================
 
@@ -2065,7 +2065,7 @@ END SUB
 ' ========================================================================================
 ' Sets characteristics of an existing band in a rebar control. Returns TRUE or FALSE.
 ' ========================================================================================
-PRIVATE FUNCTION Rebar_SetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFO PTR) AS BOOLEAN
+PRIVATE FUNCTION Rebar_SetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
    IF lprbbi = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_SETBANDINFO, cast(WPARAM, uBand), cast(LPARAM, lprbbi))
 END FUNCTION
@@ -3171,7 +3171,7 @@ END SUB
 ' Makes the toolbar opaque by removing the TBSTYLE_TRANSPARENT style.
 ' ========================================================================================
 PRIVATE SUB Toolbar_MakeOpaque (BYVAL hToolBar AS HWND)
-   SetWindowLongPtr(hToolBar, GWL_STYLE, GetWindowLongPtr(hToolBar, GWL_STYLE) AND NOT TBSTYLE_TRANSPARENT)
+   SetWindowLongPtrW(hToolBar, GWL_STYLE, GetWindowLongPtrW(hToolBar, GWL_STYLE) AND NOT TBSTYLE_TRANSPARENT)
 END SUB
 ' ========================================================================================
 

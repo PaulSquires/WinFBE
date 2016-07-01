@@ -143,23 +143,50 @@ End Function
 
 
 ' ========================================================================================
+' Save project file to disk
+' ========================================================================================
+Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
+
+   ' Do the actual saving to disk
+   gpApp->SaveProject(bSaveAs)
+
+   frmMain_SetFocusToCurrentCodeWindow
+
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Close currently active project
+' ========================================================================================
+Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
+
+   OnCommand_ProjectSave( HWnd, False )
+   DestroyWindow( HWND_FRMPROJECTMANAGER )
+   gpApp->IsProjectActive = False
+
+   frmMain_SetFocusToCurrentCodeWindow
+
+   Function = 0
+End Function
+
+
+' ========================================================================================
 ' Create a new project
 ' ========================================================================================
 Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 
-   ' TODO: If a project is already open then save/close it.
-   If gpApp->IsProjectActive Then
-   
-   End If
-   
-   
-   gpApp->IsProjectActive     = True
-   gpApp->IsNewProjectFlag    = True
-   gpApp->ProjectDiskFilename = 0
-   gpApp->ProjectName         = @WStr("Project1")
+   ' If a project is already open then save/close it.
+   If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
    
    ' Ensure that the Project Manager window has been created (show it now as well)
-   frmProjectManager_Show( HWnd, SW_SHOW )
+   gpApp->IsNewProjectFlag = True
+   frmProjectOptions_Show( HWnd, SW_SHOW )
+   
+   ' Ensure that the Project Manager window has been created (show it now as well)
+   If gpApp->IsProjectActive Then    
+      frmProjectManager_Show( HWnd, SW_SHOW )
+   End If
    
    ' This will update the main window to show the project name in the window caption
    frmMain_SetFocusToCurrentCodeWindow
@@ -169,13 +196,26 @@ End Function
 
 
 ' ========================================================================================
-' Save project file to disk
+' Open a Project
 ' ========================================================================================
-Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
+Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
 
-   ' Do the actual saving to disk
-   gpApp->SaveProject(bSaveAs)
+   ' Display the Open File Dialog
+   Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, IDM_PROJECTOPEN)
+   If pwszName Then 
+      ' If a project is already open then save/close it.
+      If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
+      ' Open the project
+      gpApp->ProjectDiskFilename = pwszName
+      If ProjectLoadFromFile() Then
+         gpApp->IsNewProjectFlag = False
+         gpApp->IsProjectActive = True
+         frmProjectManager_Show( HWnd, SW_SHOW )
+      End If
+      CoTaskMemFree(pwszName)
+   End If
 
+   frmMain_PositionWindows(HWnd)
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = 0
@@ -548,12 +588,16 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_PROJECTSAVE:           Function = OnCommand_ProjectSave( HWnd, False )
       Case IDM_PROJECTSAVEAS:         Function = OnCommand_ProjectSave( HWnd, True )
       Case IDM_PROJECTFILESADD:       Function = OnCommand_ProjectAddFiles( HWnd )
+      Case IDM_PROJECTOPEN:           Function = OnCommand_ProjectOpen( HWnd )
+      Case IDM_PROJECTCLOSE:          Function = OnCommand_ProjectClose( HWnd )
       Case IDM_PROJECTMANAGER:        Function = frmProjectManager_Show( HWnd )    ' this will also toggle visibility 
+      Case IDM_PROJECTOPTIONS:        Function = frmProjectOptions_Show( HWnd ) 
       Case IDM_ADDFILETOPROJECT:      Function = gpApp->ProjectAddFile( pDoc )
       Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
       Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
       Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
       Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
+      Case IDM_SETFILERESOURCE:       Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
          
       
       ''  COMPILE MENU          
@@ -579,7 +623,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        "Special thanks to:" & vbcrlf & _
                        "José Roca (Scintilla and CWindow framework)", _
                        @WStr("About"), _
-                       MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+                       MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
  
          frmMain_SetFocusToCurrentCodeWindow()
         
@@ -819,6 +863,9 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmMain
 ' ========================================================================================
 Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
+
+   ' If a project is already open then save/close it.
+   If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
 
    ' Close any open files asking to save any that are dirty 
    OnCommand_FileClose(HWnd, True)

@@ -14,6 +14,7 @@ CWindow: GDI: Enhanced metafile #3 (memory-based)
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -24,10 +25,38 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Enhanced Metafile Demo #3", @WndProc)
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.SetClientSize(400, 250)
+   pWindow.Center
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    STATIC hemf   AS HENHMETAFILE   ' // Handle to the enhanced metafile
    DIM    hdc    AS HDC            ' // Handle to the device context of the window
@@ -85,37 +114,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
     	CASE WM_DESTROY
          ' // Delete the enhanced metafile
          DeleteEnhMetaFile hemf
-         ' // Quit the application
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Enhanced Metafile Demo #3", @WndProc)
-   pWindow.Brush = GetStockObject(WHITE_BRUSH)
-   pWindow.SetClientSize(400, 250)
-   pWindow.Center
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

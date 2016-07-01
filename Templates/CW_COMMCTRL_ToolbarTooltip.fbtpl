@@ -13,6 +13,7 @@ CWindow: COMMCTRL: Toolbar with tooltips
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/AfxCtl.inc"
 USING Afx.CWindowClass
@@ -30,6 +31,8 @@ enum
    IDM_COPY, IDM_PASTE, IDM_UNDO, IDM_REDOW, IDM_DELETE, IDM_FILENEW, IDM_FILEOPEN
    IDM_FILESAVE, IDM_PRINTPRE, IDM_PROPERTIES, IDM_HELP, IDM_FIND, IDM_REPLACE, IDM_PRINT
 end enum
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Create a tool bar
@@ -71,9 +74,48 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a toolbar", @WndProc)
+   ' // Disable background erasing
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Set the client size
+   pWindow.SetClientSize(300, 150)
+   ' // Center the window
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDCANCEL, "&Close")
+
+   ' // Add a tooolbar
+   DIM hToolBar AS HWND = pWindow.AddControl("Toolbar", , IDC_TOOLBAR)
+   ' // Add the toolbar buttons
+   AddToolbarButtons hToolBar
+   ' // Size the toolbar
+   SendMessageW hToolBar, TB_AUTOSIZE, 0, 0
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -132,57 +174,21 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
       CASE WM_SIZE
          IF wParam <> SIZE_MINIMIZED THEN
             ' // Update the size and position of the Toolbar control
-            SendMessageW GetDlgItem(hWnd, IDC_TOOLBAR), TB_AUTOSIZE, 0, 0
+            Toolbar_Autosize(GetDlgItem(hWnd, IDC_TOOLBAR))
             ' // Resize the buttons
             DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
             IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 95, pWindow->ClientHeight - 35, 75, 23, CTRUE
          END IF
 
     	CASE WM_DESTROY
+          ' // End the application by sending a WM_QUIT message
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with a toolbar", @WndProc)
-   ' // Disable background erasing
-   pWindow.ClassStyle = CS_DBLCLKS
-   ' // Set the client size
-   pWindow.SetClientSize(300, 150)
-   ' // Center the window
-   pWindow.Center
-
-   ' // Add a button
-   pWindow.AddControl("Button", , IDCANCEL, "&Close")
-
-   ' // Add a tooolbar
-   DIM hToolBar AS HWND = pWindow.AddControl("Toolbar", , IDC_TOOLBAR)
-   ' // Add the toolbar buttons
-   AddToolbarButtons hToolBar
-   ' // Size the toolbar
-   SendMessageW hToolBar, TB_AUTOSIZE, 0, 0
-
-   |
-
-   ' // Process event messages
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

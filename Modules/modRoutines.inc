@@ -168,6 +168,15 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
    Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
 
    Select Case idButton
+      Case IDM_PROJECTOPEN
+         rgFileTypes(1).pszName = @L(216,"Project files")
+         rgFileTypes(1).pszSpec = @WSTR("*.wfbe")
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         ' Set the title of the dialog
+         hr = pofd->lpVtbl->SetTitle(pofd, L(216,"Project files"))
+      
       Case IDM_INSERTFILE
          rgFileTypes(1).pszName = @L(77,"FB code files")
          rgFileTypes(2).pszName = @L(78,"Resource files")
@@ -281,8 +290,12 @@ End Function
 ' Displays the FileSaveDialog
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================
-Function AfxIFileSaveDialog (ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, _
-ByVal pwszDefExt As WString Ptr, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) As WString Ptr
+Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
+                             ByVal pwszFileName As WString Ptr, _
+                             ByVal pwszDefExt As WString Ptr, _
+                             ByVal id As Long = 0, _
+                             ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH _
+                             ) As WString Ptr
 
    ' // Create an instance of the IFileSaveDialog interface
    Dim hr As Long
@@ -291,15 +304,25 @@ ByVal pwszDefExt As WString Ptr, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) A
    If psfd = Null Then Return Null
 
    ' // Set the file types
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
-   rgFileTypes(1).pszName = @L(77,"FB code files")
-   rgFileTypes(2).pszName = @L(78,"Resource files")
-   rgFileTypes(3).pszName = @L(79,"All files")
-   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
-   rgFileTypes(2).pszSpec = @WSTR("*.rc")
-   rgFileTypes(3).pszSpec = @WSTR("*.*")
-   psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
-
+   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC 
+   
+   Select Case id
+      Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE
+         rgFileTypes(1).pszName = @L(216,"Project files")
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.wfbe")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+      Case Else
+         rgFileTypes(1).pszName = @L(77,"FB code files")
+         rgFileTypes(2).pszName = @L(78,"Resource files")
+         rgFileTypes(3).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
+         rgFileTypes(2).pszSpec = @WSTR("*.rc")
+         rgFileTypes(3).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
+   End Select
+   
    ' // Set the title of the dialog
    hr = psfd->lpVtbl->SetTitle(psfd, L(107,"Save source file"))
    ' // Set the file name

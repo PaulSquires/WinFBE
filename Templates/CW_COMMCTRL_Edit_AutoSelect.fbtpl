@@ -4,7 +4,7 @@ FBGUI
 CWindow: COMMCTRL: Edit control - Auto selection of text
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_COMMCTRL_Edit_AutoSelect.fbtpl - Template
+' File: CW_COMMCTRL_Edit_AutoSelect.fbtpl
 ' Contents: Demonstrates the use of the Edit control with auto selection of text.
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -13,7 +13,9 @@ CWindow: COMMCTRL: Edit control - Auto selection of text
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/AfxCtl.inc"
 USING Afx.CWindowClass
 
 CONST IDC_EDIT1 = 1001
@@ -26,10 +28,45 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Edit controls - Auto selection of text", @WndProc)
+   pWindow.Center
+
+   ' // Add an Edit control
+   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "First Textbox", 20, 35, 305, 23)
+   ' // Add another Edit control
+   pWindow.AddControl("Edit", , IDC_EDIT2, "Second Textbox", 20, 75, 305, 23)
+   ' // Set the focus in the first edit control
+   SetFocus hEdit
+   ' // Highlight the text
+   Edit_SetSel(hEdit, 0, -1)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -45,51 +82,22 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                SELECT CASE LOWORD(wParam)
                   ' Note: To deselect, use EM_SETSEL, -1, 0
                   CASE IDC_EDIT1
-                     SendMessageW GetDlgItem(hWnd, IDC_EDIT1), EM_SETSEL, 0, -1
+                     Edit_SetSel(GetDlgItem(hWnd, IDC_EDIT1), 0, -1)
                   CASE IDC_EDIT2
-                     SendMessageW GetDlgItem(hWnd, IDC_EDIT2), EM_SETSEL, 0, -1
+                     Edit_SetSel(GetDlgItem(hWnd, IDC_EDIT2), 0, -1)
                END SELECT
                EXIT FUNCTION
          END SELECT
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Edit controls - Auto selection of text", @WndProc)
-   pWindow.Center
-
-   ' // Add an Edit control
-   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "First Textbox", 20, 35, 305, 23)
-   ' // Add another Edit control
-   pWindow.AddControl("Edit", , IDC_EDIT2, "Second Textbox", 20, 75, 305, 23)
-   ' // Set the focus in the first edit control
-   SetFocus hEdit
-   ' // Highlight the text
-   SendMessageW hEdit, EM_SETSEL, 0, -1
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

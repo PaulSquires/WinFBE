@@ -13,27 +13,30 @@ CWindow: COMMCTRL: Menu
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
 ' // Menu identifiers
-#define IDM_NEW      1001   ' New file
-#define IDM_OPEN     1002   ' Open file...
-#define IDM_SAVE     1003   ' Save file
-#define IDM_SAVEAS   1004   ' Save file as...
-#define IDM_EXIT     1005   ' Exit
+ENUM
+   IDM_NEW = 1001     ' New file
+   IDM_OPEN           ' Open file...
+   IDM_SAVE           ' Save file
+   IDM_SAVEAS         ' Save file as...
+   IDM_EXIT           ' Exit
 
-#define IDM_UNDO     2001   ' Undo
-#define IDM_CUT      2002   ' Cut
-#define IDM_COPY     2003   ' Copy
-#define IDM_PASTE    2004   ' Paste
+   IDM_UNDO = 2001    ' Undo
+   IDM_CUT            ' Cut
+   IDM_COPY           ' Copy
+   IDM_PASTE          ' Paste
 
-#define IDM_TILEH    3001   ' Tile hosizontal
-#define IDM_TILEV    3002   ' Tile vertical
-#define IDM_CASCADE  3003   ' Cascade
-#define IDM_ARRANGE  3004   ' Arrange icons
-#define IDM_CLOSE    3005   ' Close
-#define IDM_CLOSEALL 3006   ' Close all
+   IDM_TILEH = 3001   ' Tile hosizontal
+   IDM_TILEV          ' Tile vertical
+   IDM_CASCADE        ' Cascade
+   IDM_ARRANGE        ' Arrange icons
+   IDM_CLOSE          ' Close
+   IDM_CLOSEALL       ' Close all
+END ENUM
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -41,6 +44,8 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL nCmdShow AS LONG) AS LONG
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Build the menu
@@ -82,14 +87,43 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a menu", @WndProc)
+   pWindow.SetClientSize(400, 250)
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDCANCEL, "&Close", 280, 180, 75, 23)
+
+   ' // Create the menu
+   DIM hMenu AS HMENU = BuildMenu
+   SetMenu pWindow.hWindow, hMenu
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
-
-      CASE WM_CREATE
-         EXIT FUNCTION
 
       CASE WM_COMMAND
          SELECT CASE LOWORD(wParam)
@@ -111,38 +145,8 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
    END SELECT
 
-   ' // Process Windows messages
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with a menu", @WndProc)
-   pWindow.SetClientSize(400, 250)
-   pWindow.Center
-
-   ' // Add a button
-   pWindow.AddControl("Button", , IDCANCEL, "&Close", 280, 180, 75, 23)
-
-   ' // Create the menu
-   DIM hMenu AS HMENU = BuildMenu
-   SetMenu pWindow.hWindow, hMenu
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

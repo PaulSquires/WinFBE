@@ -13,6 +13,7 @@ CWindow: Modal popup window
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -40,6 +41,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Set process DPI aware
    AfxSetProcessDPIAware
 
+   ' // Create the main window
    DIM pWindow AS CWindow
    pWindow.Create(NULL, "CWindow with a popup window", @WndProc)
    pWindow.SetClientSize(500, 320)
@@ -50,6 +52,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
+   ' // Dispatch Windows messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
@@ -58,7 +61,7 @@ END FUNCTION
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -85,11 +88,13 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END IF
 
     	CASE WM_DESTROY
+         ' // Quit the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
@@ -165,6 +170,7 @@ FUNCTION PopupWndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS W
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION

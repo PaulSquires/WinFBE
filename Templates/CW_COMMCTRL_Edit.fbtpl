@@ -4,7 +4,7 @@ FBGUI
 CWindow: COMMCTRL: Edit control
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_COMMCTRL_Edit.fbtpl - Template
+' File: CW_COMMCTRL_Edit.fbtpl
 ' Contents: Demonstrates the use of the Edit control.
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -13,6 +13,7 @@ CWindow: COMMCTRL: Edit control
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -26,10 +27,45 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Edit controls", @WndProc)
+   pWindow.Center
+
+   ' // Add an Edit control
+   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "", 20, 15, 305, 23)
+   ' // Add a multiline Edit control
+   pWindow.AddControl("EditMultiline", , IDC_EDIT2, "", 20, 45, 305, 80)
+   ' // Alternate way
+'   pWindow.AddControl("Edit", , IDC_EDIT2, "", 20, 50, 300, 80, _
+'      WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN)
+
+   ' // Set the focus in the first edit control
+   SetFocus hEdit
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -44,42 +80,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Edit controls", @WndProc)
-   pWindow.Center
-
-   ' // Add an Edit control
-   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "", 20, 15, 305, 23)
-   ' // Add a multiline Edit control
-   pWindow.AddControl("EditMultiline", , IDC_EDIT2, "", 20, 45, 305, 80)
-   ' // Alternate way
-'   pWindow.AddControl("Edit", , IDC_EDIT2, "", 20, 50, 300, 80, _
-'      WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN)
-   ' // Set the focus in the first edit control
-   SetFocus hEdit
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

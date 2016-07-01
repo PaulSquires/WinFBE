@@ -27,6 +27,8 @@
 #Define IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN  1016
 #Define IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE  1017
 #Define IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES  1018
+#Define IDC_FRMOPTIONSEDITOR_CHKHIDECOMPILE  1019
+
 #Define IDC_FRMOPTIONSCOLORS_LSTCOLORS  1000
 #Define IDC_FRMOPTIONSCOLORS_FRMCOLORS  1001
 #Define IDC_FRMOPTIONSCOLORS_LBLFOREGROUND  1002
@@ -37,6 +39,7 @@
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTNAME  1007
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET  1008
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE  1009
+
 #Define IDC_FRMOPTIONSCOMPILER_CMDFBWIN32  1000
 #Define IDC_FRMOPTIONSCOMPILER_LBLSWITCHES  1001
 #Define IDC_FRMOPTIONSCOMPILER_LBLFBC32  1002
@@ -51,10 +54,12 @@
 #Define IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH  1011
 #Define IDC_FRMOPTIONSCOMPILER_LBLAPIHELP  1012
 #Define IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH  1013
+
 #Define IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION  1000
 #Define IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION  1001
 #Define IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION  1002
 #Define IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS 1000
+
 #Define IDC_FRMTEMPLATES_LISTBOX  1000
 #Define IDC_FRMCOMPILERESULTS_LISTVIEW 1000
 #Define IDC_FRMFIND_LBLFINDWHAT  1000
@@ -88,13 +93,32 @@
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1  1001
 #Define IDC_FRMPROJECTMANAGER_LISTVIEW  1000
 
+#Define IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH  1000
+#Define IDC_FRMPROJECTOPTIONS_CMDSELECT  1001
+#Define IDC_FRMPROJECTOPTIONS_OPTEXE  1002
+#Define IDC_FRMPROJECTOPTIONS_OPTDLL  1003
+#Define IDC_FRMPROJECTOPTIONS_OPTLIB  1004
+#Define IDC_FRMPROJECTOPTIONS_OPTNOERROR  1005
+#Define IDC_FRMPROJECTOPTIONS_OPTERROR  1006
+#Define IDC_FRMPROJECTOPTIONS_OPTRESUME  1007
+#Define IDC_FRMPROJECTOPTIONS_OPTERRORPLUS  1008
+#Define IDC_FRMPROJECTOPTIONS_FRAME1  1009
+#Define IDC_FRMPROJECTOPTIONS_FRAME2  1010
+#Define IDC_FRMPROJECTOPTIONS_CHKDEBUG  1011
+#Define IDC_FRMPROJECTOPTIONS_CHKTHREAD  1012
+#Define IDC_FRMPROJECTOPTIONS_LABEL1  1013
+#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS  1014
+#Define IDC_FRMPROJECTOPTIONS_LABEL2  1015
+#Define IDC_FRMPROJECTOPTIONS_LABEL3  1016
+
 
 Const DELIM = Chr(1)    ' character used as delimiter for Find/Replace text strings  
 Const IDC_MRUBASE = 5000           ' Windows id of MRU items 1 to 10 (located under File menu)
 
-Const FILETYPE_MAIN   = 0
-Const FILETYPE_MODULE = 1
-Const FILETYPE_NORMAL = 2
+Const FILETYPE_MAIN     = 0
+Const FILETYPE_MODULE   = 1
+Const FILETYPE_NORMAL   = 2
+Const FILETYPE_RESOURCE = 3
  
    
 ''  Menu message identifiers
@@ -123,7 +147,7 @@ Enum
    IDM_USE32BIT, IDM_USE64BIT
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
-   IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN
+   IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
 End Enum
 
 
@@ -209,7 +233,8 @@ Type clsTopTabCtl
       Declare Property hWindow() As HWnd
       Declare Function AddTab( ByVal pDoc As clsDocument Ptr ) As Long
       Declare Function GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) As Long
-      declare Function SetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
+      declare Function GetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
+      Declare Function SetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
       Declare Function SetFocusTab( ByVal idx As Long ) As Long
       Declare Function GetActiveDocumentPtr() As clsDocument Ptr
       Declare Function GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
@@ -220,16 +245,29 @@ End Type
 
 
 Type clsApp
-   Private:                        
-      m_IsProjectActive   As BOOLEAN
-      m_IsNewProjectFlag  As BOOLEAN
-      m_wzProjectName     As WString * MAX_PATH
-      m_wzProjectFilename As WString * MAX_PATH
-      m_IncludeFilename   As String 
-
+   Private: 
+      m_ProjectType        As Long                       
+      m_IsProjectActive    As BOOLEAN
+      m_IsNewProjectFlag   As BOOLEAN
+      m_wzProjectName      As WString * MAX_PATH
+      m_wzProjectFilename  As WString * MAX_PATH
+      m_wzProjectOther     As WString * MAX_PATH
+      m_IncludeFilename    As String 
+      m_ProjectErrorOption As Long
+      m_ProjectDebug       As Long
+      m_ProjectThread      As Long
+      
       m_arrDocuments(Any) As clsDocument Ptr
    
    Public:
+      Declare Property ProjectType( ByVal nValue As Long)
+      Declare Property ProjectType() As Long
+      Declare Property ProjectErrorOption( ByVal nValue As Long)
+      Declare Property ProjectErrorOption() As Long
+      Declare Property ProjectDebug( ByVal nValue As Long)
+      Declare Property Projectdebug() As Long
+      Declare Property ProjectThread( ByVal nValue As Long)
+      Declare Property ProjectThread() As Long
       Declare Property IsProjectActive( ByVal nValue As BOOLEAN)
       Declare Property IsProjectActive() As BOOLEAN
       Declare Property IsNewProjectFlag( ByVal nValue As BOOLEAN)
@@ -238,6 +276,8 @@ Type clsApp
       Declare Property ProjectDiskFilename() As WString Ptr
       Declare Property ProjectName( ByVal wValue As WString Ptr)
       Declare Property ProjectName() As WString Ptr
+      Declare Property ProjectOther( ByVal wValue As WString Ptr)
+      Declare Property ProjectOther() As WString Ptr
 
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
@@ -253,6 +293,7 @@ Type clsApp
       Declare Function GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
       Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
       Declare Function GetMainDocumentPtr() As clsDocument Ptr
+      Declare Function GetResourceDocumentPtr() As clsDocument Ptr
       Declare Property IncludeFilename( ByVal sFilename As String)
       Declare Property IncludeFilename() As String
 
@@ -290,6 +331,9 @@ Declare Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                           ByVal pwszName    As WString Ptr, _
                                           ByVal pDocIn      As clsDocument Ptr _
                                           ) As clsDocument Ptr
+Declare Function ProjectSaveToFile() As BOOLEAN    
+Declare Function ProjectLoadFromFile() As BOOLEAN    
+Declare Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 
 '  Global App class that controls everything related to projects and documents
 Dim Shared gpApp As clsApp Ptr

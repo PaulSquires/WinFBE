@@ -4,7 +4,7 @@ PBWIN
 CWindow: GDI: Alternate and winding fill modes
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_GDI_AltWind.fbtpl - Template
+' File: CW_GDI_AltWind.fbtpl
 ' This program is a translation/adaptation of the ALTWIND.C-Alternate and Winding Fill
 ' Modes Program © Charles Petzold, 1998, described and analysed in Chapter 5 of the book
 ' Programming Windows, 5th Edition.
@@ -16,6 +16,7 @@ CWindow: GDI: Alternate and winding fill modes
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -26,10 +27,46 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   DIM hWndMain AS HWND = pWindow.Create(NULL, "Alternate and Winding Fill Modes", @WndProc)
+   pWindow.Center
+
+   |
+
+   ' // Display the window
+   ShowWindow(hWndMain, nCmdShow)
+   UpdateWindow(hWndMain)
+
+   ' // Dispatch Windows messages
+   DIM uMsg AS MSG
+   WHILE (GetMessageW(@uMsg, NULL, 0, 0) <> FALSE)
+      TranslateMessage(@uMsg)
+      DispatchMessageW(@uMsg)
+   WEND
+
+   FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    STATIC cxClient AS LONG
    STATIC cyClient AS LONG
@@ -38,11 +75,13 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_SIZE
+         ' // Store the size of the client area
          cxClient = LOWORD(lParam)
          cyClient = HIWORD(lParam)
          EXIT FUNCTION
 
       CASE WM_PAINT
+         ' // Do the painting
          DIM ps AS PAINTSTRUCT
          DIM hdc AS HDC = BeginPaint(hwnd, @ps)
          SelectObject hdc, GetStockObject(GRAY_BRUSH)
@@ -62,6 +101,7 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          EXIT FUNCTION
 
       CASE WM_KEYDOWN
+         ' // If ESC key pressed, close the application sending an WM_CLOSE message
          SELECT CASE LOWORD(wParam)
             CASE VK_ESCAPE
                SendMessageW hwnd, WM_CLOSE, 0, 0
@@ -69,43 +109,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   DIM hWndMain AS HWND = pWindow.Create(NULL, "Alternate and Winding Fill Modes", @WndProc)
-   pWindow.Center
-
-   |
-
-   ShowWindow(hWndMain, nCmdShow)
-   UpdateWindow(hWndMain)
-
-   DIM uMsg AS MSG
-   WHILE (GetMessageW(@uMsg, NULL, 0, 0) <> FALSE)
-      TranslateMessage(@uMsg)
-      DispatchMessageW(@uMsg)
-   WEND
-
-   FUNCTION = uMsg.wParam
 
 END FUNCTION
 ' ========================================================================================

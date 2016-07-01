@@ -24,7 +24,7 @@ Using Afx.CWindowClass
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.0.0")
+#Define APPVERSION    WStr("0.0.0")
 
 
 '  Global window handle for the main form
@@ -84,6 +84,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 #Include Once "Forms\frmFind.inc"
 #Include Once "Forms\frmReplace.inc"
 #Include Once "Forms\frmProjectManager.inc"
+#Include Once "Forms\frmProjectOptions.inc"
 #Include Once "Forms\frmMain.inc"
 
 

@@ -15,6 +15,7 @@ CWindow: COMMCTRL: Button (ownerdraw) with normal and hot images.
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -27,10 +28,41 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION Button_SubclassProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with ownerdraw button", @WndProc)
+   pWindow.Center
+
+   ' // Add a subclassed ownerdraw button
+   DIM hButton AS HWND = pWindow.AddControl("CustomButton", , IDC_BUTTON, "", 150, 50, 50, 50, , , , CAST(WNDPROC, @Button_SubclassProc))
+   SetFocus hButton
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -45,37 +77,37 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
       CASE WM_DRAWITEM
-         SCOPE
-            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
-            DIM pDis AS DRAWITEMSTRUCT PTR = CAST(DRAWITEMSTRUCT PTR, lParam)
-            IF pDis->CtlId <> IDC_BUTTON THEN EXIT FUNCTION
-            ' Icon identifiers in User32.dll. Hacked with ResourceHacker.
-            ' IDI_APPLICATION = 100, IDI_WARNING = 101, IDI_QUESTION = 102, IDI_ERROR = 103
-            ' IDI_INFORMATION = 104, IDI_WINLOGO = 105, IDI_SHIELD = 106
-            ' Used here to make the example simpler.
-            ' Normally, you will load an icon or bitmap from a file or resource.
-            DIM hIcon AS HICON
-            IF GetPropW(GetDlgItem(hwnd, IDC_BUTTON), "HOT") = 0 THEN
-               hIcon = LoadImageW(GetModuleHandle("User32"), MAKEINTRESOURCEW(102), IMAGE_ICON, _
-                  pWindow->ScaleX(50), pWindow->ScaleY(50), LR_DEFAULTCOLOR)
-            ELSE
-               hIcon = LoadImageW(GetModuleHandle("User32"), MAKEINTRESOURCEW(103), IMAGE_ICON, _
-                  pWindow->ScaleX(50), pWindow->ScaleY(50), LR_DEFAULTCOLOR)
-            END IF
-            IF hIcon THEN
-               DrawStateW pDis->hDC, NULL, NULL, CAST(LPARAM, hIcon), 0, 0, 0, 0, 0, DST_ICON
-               DestroyIcon hIcon
-            END IF
-         END SCOPE
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         DIM pDis AS DRAWITEMSTRUCT PTR = CAST(DRAWITEMSTRUCT PTR, lParam)
+         IF pDis->CtlId <> IDC_BUTTON THEN EXIT FUNCTION
+         ' Icon identifiers in User32.dll. Hacked with ResourceHacker.
+         ' IDI_APPLICATION = 100, IDI_WARNING = 101, IDI_QUESTION = 102, IDI_ERROR = 103
+         ' IDI_INFORMATION = 104, IDI_WINLOGO = 105, IDI_SHIELD = 106
+         ' Used here to make the example simpler.
+         ' Normally, you will load an icon or bitmap from a file or resource.
+         DIM hIcon AS HICON
+         IF GetPropW(GetDlgItem(hwnd, IDC_BUTTON), "HOT") = 0 THEN
+            hIcon = LoadImageW(GetModuleHandle("User32"), MAKEINTRESOURCEW(102), IMAGE_ICON, _
+               pWindow->ScaleX(50), pWindow->ScaleY(50), LR_DEFAULTCOLOR)
+         ELSE
+            hIcon = LoadImageW(GetModuleHandle("User32"), MAKEINTRESOURCEW(103), IMAGE_ICON, _
+               pWindow->ScaleX(50), pWindow->ScaleY(50), LR_DEFAULTCOLOR)
+         END IF
+         IF hIcon THEN
+            DrawStateW pDis->hDC, NULL, NULL, CAST(LPARAM, hIcon), 0, 0, 0, 0, 0, DST_ICON
+            DestroyIcon hIcon
+         END IF
          FUNCTION = CTRUE
          EXIT FUNCTION
 
     	CASE WM_DESTROY
+         ' // Quit the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
@@ -137,35 +169,8 @@ FUNCTION Button_SubclassProc ( _
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = CallWindowProcW(GetPropW(hwnd, "OLDWNDPROC"), hwnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   ' // Create the main window
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with ownerdraw button", @WndProc)
-   pWindow.Center
-
-   ' // Add a subclassed ownerdraw button
-   DIM hButton AS HWND = pWindow.AddControl("CustomButton", , IDC_BUTTON, "", 150, 50, 50, 50, , , , CAST(WNDPROC, @Button_SubclassProc))
-   SetFocus hButton
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

@@ -4,7 +4,7 @@ FBGUI
 CWindow: COMMCTRL: Header control
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_COMMCTRL_HeaderCtrl.fbtpl - Template
+' File: CW_COMMCTRL_HeaderCtrl.fbtpl
 ' Contents: Demonstrates the use of the Header control.
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -13,6 +13,7 @@ CWindow: COMMCTRL: Header control
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -25,10 +26,55 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Header control", @WndProc)
+   pWindow.Center
+
+   ' // Add the header control.
+   DIM hHeader AS HWND = pWindow.AddControl("Header", , IDC_HEADER, "", 0, 0, pWindow.ClientWidth, 23)
+
+   ' // Insert items
+   DIM thdi AS HDITEMW
+   DIM wszItem AS WSTRING * 260
+   wszItem       = "Item 1"
+   thdi.Mask     = HDI_WIDTH OR HDI_FORMAT OR HDI_TEXT
+   thdi.fmt      = HDF_LEFT OR HDF_STRING
+   thdi.cxy      = pWindow.ScaleX(80)
+   thdi.pszText  = @wszItem
+   Header_InsertItem(hHeader, 1, @thdi)
+   wszItem       = "Item 2"
+   Header_InsertItem(hHeader, 2, @thdi)
+   wszItem       = "Item 3"
+   Header_InsertItem(hHeader, 3, @thdi)
+   wszItem       = "Item 4"
+   Header_InsertItem(hHeader, 4, @thdi)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -43,17 +89,18 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
       CASE WM_NOTIFY
+         ' // Retrieve the header item clicked
          DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
          SELECT CASE ptnmhdr->idFrom
             CASE IDC_HEADER
                SELECT CASE ptnmhdr->code
                   CASE HDN_ITEMCLICKW
                      DIM ptnmh AS NMHEADERW PTR = CAST(NMHEADERW PTR, lParam)
-                     MessageBoxW hwnd, "You have clicked item " & WSTR$(ptnmh->iItem + 1), "", MB_OK
+                     MessageBoxW hwnd, "You have clicked item " & WSTR(ptnmh->iItem + 1), "", MB_OK
                      EXIT FUNCTION
 '                  CASE HDN_ITEMDBLCLICK
 '                     DIM ptnmh AS NMHEADERW PTR = CAST(NMHEADERW PTR, lParam)
-'                     MessageBoxW hwnd, "You have clicked item " & WSTR$(ptnmh->iItem + 1), "", MB_OK
+'                     MessageBoxW hwnd, "You have clicked item " & WSTR(ptnmh->iItem + 1), "", MB_OK
 '                     EXIT FUNCTION
                END SELECT
          END SELECT
@@ -65,57 +112,19 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          GetClientRect hwnd, @trc
          thdl.prc = @trc
          thdl.pwpos = @twp
-         SendMessageW hHeader, HDM_LAYOUT, 0, CAST(LPARAM, @thdl)
+         Header_Layout(hHeader, @thdl)
          SetWindowPos hHeader, NULL, twp.x, twp.y, twp.cx, twp.cy, SWP_NOZORDER OR SWP_NOACTIVATE
          EXIT FUNCTION
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Header control", @WndProc)
-   pWindow.Center
-
-   DIM hHeader AS HWND = pWindow.AddControl("Header", , IDC_HEADER, "", 0, 0, pWindow.ClientWidth, 23)
-
-   DIM thdi AS HDITEMW
-   DIM wszItem AS WSTRING * 260
-   ' Insert items
-   wszItem       = "Item 1"
-   thdi.Mask     = HDI_WIDTH OR HDI_FORMAT OR HDI_TEXT
-   thdi.fmt      = HDF_LEFT OR HDF_STRING
-   thdi.cxy      = pWindow.ScaleX(80)
-   thdi.pszText  = @wszItem
-   SendMessageW hHeader, HDM_INSERTITEMW, 1, CAST(LPARAM, @thdi)
-   wszItem       = "Item 2"
-   SendMessageW hHeader, HDM_INSERTITEMW, 2, CAST(LPARAM, @thdi)
-   wszItem       = "Item 3"
-   SendMessageW hHeader, HDM_INSERTITEMW, 3, CAST(LPARAM, @thdi)
-   wszItem       = "Item 4"
-   SendMessageW hHeader, HDM_INSERTITEMW, 4, CAST(LPARAM, @thdi)
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

@@ -4,7 +4,7 @@ FBGUI
 CWindow: COMMCTRL: Edit control - Limit text
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_COMMCTRL_Edit_LimitText.fbtpl - Template
+' File: CW_COMMCTRL_Edit_LimitText.fbtpl
 ' Contents: Demonstrates how to set limits to an edit control
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -13,7 +13,9 @@ CWindow: COMMCTRL: Edit control - Limit text
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/AfxCtl.inc"
 USING Afx.CWindowClass
 
 CONST IDC_EDIT1 = 1001
@@ -26,10 +28,45 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Edit controls - Limit text", @WndProc)
+   pWindow.Center
+
+   ' // Add Edit controls
+   DIM hEdit1 AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "Text limit 20", 20, 35, 305, 23)
+   DIM hEdit2 AS HWND = pWindow.AddControl("Edit", , IDC_EDIT2, "Text limit 30", 20, 75, 305, 23)
+   ' // Set the limits
+   Edit_LimitText(hEdit1, 20)
+   Edit_LimitText(hEdit2, 30)
+   ' // Set the focus in the first edit control
+   SetFocus hEdit1
+
+
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -44,44 +81,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Edit controls - Limit text", @WndProc)
-   pWindow.Center
-
-   ' // Add an Edit control
-   DIM hEdit1 AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "Text limit 20", 20, 35, 305, 23, WS_VISIBLE OR WS_TABSTOP)
-   ' // Add another Edit control
-   DIM hEdit2 AS HWND = pWindow.AddControl("Edit", , IDC_EDIT2, "Text limit 30", 20, 75, 305, 23, WS_VISIBLE OR WS_TABSTOP)
-   ' // Set the limits
-   SendMessageW hEdit1, EM_SETLIMITTEXT, 20, 0
-   SendMessageW hEdit2, EM_SETLIMITTEXT, 30 ,0
-   ' // Set the focus in the first edit control
-   SetFocus hEdit1
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

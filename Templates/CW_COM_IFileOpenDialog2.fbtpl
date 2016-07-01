@@ -13,6 +13,7 @@ CWindow: COM: IFileOpenDialog interface (multiple selection)
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #define _WIN32_WINNT &h0602
 #INCLUDE ONCE "win/shobjidl.bi"
 #INCLUDE ONCE "Afx/CWindow.inc"
@@ -26,6 +27,96 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL nCmdShow AS LONG) AS LONG
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION AfxIFileOpenDialog (BYVAL hwndOwner AS HWND, BYVAL sigdnName AS SIGDN = SIGDN_FILESYSPATH) AS IShellItemArray PTR
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Initialize the COM library
+   CoInitialize(NULL)
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "IFileOpenDialog example", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDC_OFD, "&Open File Dialog", 350, 250, 110, 23)
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Uninitialize the COM library
+   CoUninitialize
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            ' // Display the Open File Dialog
+            CASE IDC_OFD
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  DIM pItems AS IShellItemArray PTR = AfxIFileOpenDialog(hwnd)
+                  IF pItems = NULL THEN EXIT FUNCTION
+                  DIM dwItemCount AS LONG, idx AS LONG, pItem AS IShellItem PTR, pwszName AS WSTRING PTR
+                  pItems->lpVtbl->GetCount(pItems, @dwItemCount)
+                  FOR idx = 0 TO dwItemCount - 1
+                     pItems->lpVtbl->GetItemAt(pItems, idx, @pItem)
+                     IF pItem THEN
+                        pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
+                        IF pwszName THEN
+                           MessageBoxW(hwnd, *pwszName, "IFileOpenDialog", MB_OK)
+                           CoTaskMemFree(pwszName)
+                           pwszName = NULL
+                        END IF
+                        pItem->lpVtbl->Release(pItem)
+                        pItem = NULL
+                     END IF
+                  NEXT
+                  pItems->lpVtbl->Release(pItems)
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // Quit the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
 
 ' ========================================================================================
 ' Displays the File Open Dialog (multiple selection)
@@ -74,93 +165,6 @@ FUNCTION AfxIFileOpenDialog (BYVAL hwndOwner AS HWND, BYVAL sigdnName AS SIGDN =
 
    ' // Release the
    IF pofd THEN pofd->lpVtbl->Release(pofd)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Window procedure
-' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-   SELECT CASE uMsg
-
-      CASE WM_CREATE
-         EXIT FUNCTION
-
-      CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
-            CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  SendMessageW hwnd, WM_CLOSE, 0, 0
-                  EXIT FUNCTION
-               END IF
-            CASE IDC_OFD
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  ' // Display the Open File Dialog
-                  DIM pItems AS IShellItemArray PTR = AfxIFileOpenDialog(hwnd)
-                  IF pItems = NULL THEN EXIT FUNCTION
-                  DIM dwItemCount AS LONG, idx AS LONG, pItem AS IShellItem PTR, pwszName AS WSTRING PTR
-                  pItems->lpVtbl->GetCount(pItems, @dwItemCount)
-                  FOR idx = 0 TO dwItemCount - 1
-                     pItems->lpVtbl->GetItemAt(pItems, idx, @pItem)
-                     IF pItem THEN
-                        pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
-                        IF pwszName THEN
-                           MessageBoxW(hwnd, *pwszName, "IFileOpenDialog", MB_OK)
-                           CoTaskMemFree(pwszName)
-                           pwszName = NULL
-                        END IF
-                        pItem->lpVtbl->Release(pItem)
-                        pItem = NULL
-                     END IF
-                  NEXT
-                  pItems->lpVtbl->Release(pItems)
-                  EXIT FUNCTION
-               END IF
-         END SELECT
-
-    	CASE WM_DESTROY
-         PostQuitMessage(0)
-         EXIT FUNCTION
-
-   END SELECT
-
-   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Initialize the COM library
-   CoInitialize(NULL)
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "IFileOpenDialog example", @WndProc)
-   pWindow.SetClientSize(500, 320)
-   pWindow.Center
-
-   ' // Add a button
-   pWindow.AddControl("Button", , IDC_OFD, "&Open File Dialog", 350, 250, 110, 23)
-
-   |
-
-   ' // Process event messages
-   FUNCTION = pWindow.DoEvents(nCmdShow)
-
-   ' // Uninitialize the COM library
-   CoUninitialize
 
 END FUNCTION
 ' ========================================================================================

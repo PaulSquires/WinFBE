@@ -13,7 +13,9 @@ CWindow: COMMCTRL: Trackbar
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/AfxCtl.inc"
 USING Afx.CWindowClass
 
 CONST IDC_TRACKBAR = 1001
@@ -25,10 +27,44 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Trackbar control", @WndProc)
+   pWindow.Center
+
+   ' // Add an Trackbar control
+   DIM hTrackBar AS HWND = pWindow.AddControl("Trackbar", , IDC_TRACKBAR, "", 75, 60, 200, 32)
+   ' // Set the range values
+   Trackbar_SetRangeMin hTrackBar, 0, TRUE
+   Trackbar_SetRangeMax hTrackBar, 20, TRUE
+   ' // Set the page size
+   Trackbar_SetPageSize hTrackBar, 1
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -52,42 +88,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          EXIT FUNCTION
 
     	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Trackbar control", @WndProc)
-   pWindow.Center
-
-   ' // Add an Trackbar control
-   DIM hTrackBar AS HWND = pWindow.AddControl("Trackbar", , IDC_TRACKBAR, "", 75, 60, 200, 32)
-   ' // Set the range values
-   SendMessageW hTrackBar, TBM_SETRANGEMIN, CTRUE, 0
-   SendMessageW hTrackBar, TBM_SETRANGEMAX, CTRUE, 20
-   ' // Set the page size
-   SendMessageW hTrackBar, TBM_SETPAGESIZE, 0, 1
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

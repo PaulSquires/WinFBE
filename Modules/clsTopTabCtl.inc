@@ -43,6 +43,30 @@ End Function
 
 ''
 ''
+Function clsTopTabCtl.GetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
+   ' Returns the tav index that holds the incoming pDocIn ptr.
+   If TabCtrl_GetItemCount(m_hWindow) = 0 Then Return -1 
+   If pDocIn = 0 Then Return -1
+   
+   Dim As Long i
+   Dim pDoc As clsDocument Ptr 
+   Dim As Long nCount = TabCtrl_GetItemCount(m_hWindow) 
+
+   Dim TB As TC_ITEM 
+   TB.Mask = TCIF_PARAM
+   
+   For i = 0 To nCount - 1
+      TabCtrl_GetItem( m_hWindow, i, @TB )
+      pDoc = Cast(clsDocument Ptr, TB.lParam)
+      If pDoc = pDocIn Then Return i
+   Next
+
+   Function = -1  ' if not found
+End Function
+
+
+''
+''
 Function clsTopTabCtl.SetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
    ' Sets to tab that holds the incoming pDocIn ptr.
    If TabCtrl_GetItemCount(m_hWindow) = 0 Then Return -1 

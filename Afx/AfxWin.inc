@@ -37,7 +37,9 @@ DECLARE SUB AfxDoEvents (BYVAL hwnd AS HWND = NULL)
 DECLARE SUB AfxPumpMessages
 DECLARE FUNCTION AfxFileExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
 DECLARE FUNCTION AfxFolderExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
+DECLARE FUNCTION AfxGetSystemDllPath (BYVAL pwszDllName AS WSTRING PTR, BYVAL pwszDllPath AS WSTRING PTR, BYVAL cchCount AS DWORD) AS LONG
 DECLARE FUNCTION AfxControlRunDLL (BYVAL hwnd AS HWND, BYVAL hInst AS HINSTANCE, BYVAL cmd AS WSTRING PTR, BYVAL nCmdShow AS LONG) AS BOOLEAN
+DECLARE FUNCTION AfxSaveTempFile (BYVAL pwszBuffer AS WSTRING PTR, BYREF wszTmpFileName AS WSTRING, BYREF wszExtension AS WSTRING) AS BOOLEAN
 
 ' Window
 DECLARE FUNCTION AfxGetWindowText OVERLOAD (BYVAL hwnd AS HWND) AS AFX_BSTR
@@ -89,6 +91,7 @@ DECLARE FUNCTION AfxUnscaleX (BYVAL cx AS SINGLE) AS SINGLE
 DECLARE FUNCTION AfxUnscaleY (BYVAL cy AS SINGLE) AS SINGLE
 DECLARE FUNCTION AfxIsResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS LONG) AS BOOLEAN
 DECLARE FUNCTION AfxIsDPIResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS LONG) AS BOOLEAN
+DECLARE FUNCTION AfxLoadIconMetric (BYVAL hinst AS HINSTANCE, BYVAL pszName AS PCWSTR, BYVAL lims AS LONG, BYVAL phico AS HICON PTR) AS HRESULT
 
 ' Metric conversions
 DECLARE FUNCTION AfxHiMetricToPixelsX (BYVAL hm AS LONG) AS LONG
@@ -121,8 +124,8 @@ DECLARE FUNCTION AfxGetWindowsFontInfo (BYVAL nType AS LONG, BYVAL plfw AS LOGFO
 DECLARE FUNCTION AfxGetWindowsFontPointSize (BYVAL nType AS LONG) AS LONG
 DECLARE FUNCTION AfxGetFontPointSize (BYVAL nHeight AS LONG) AS LONG
 DECLARE FUNCTION AfxGetFontHeight (BYVAL nPointSize AS LONG) AS LONG
-DECLARE FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName AS WSTRING) AS BOOLEAN
-DECLARE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LONG, BYVAL nValue AS LONG) AS BOOLEAN
+DECLARE FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName AS WSTRING) AS HFONT
+DECLARE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LONG, BYVAL nValue AS LONG) AS HFONT
 DECLARE FUNCTION AfxCreateFont (BYREF wszFaceName AS WSTRING, BYVAL lPointSize AS LONG, BYVAL DPI AS LONG = 96, _
    BYVAL lWeight AS LONG = 0, BYVAL bItalic AS UBYTE = FALSE, BYVAL bUnderline AS UBYTE = FALSE, _
    BYVAL bStrikeOut AS UBYTE = FALSE, BYVAL bCharSet AS UBYTE = DEFAULT_CHARSET) AS HFONT
@@ -142,13 +145,25 @@ DECLARE FUNCTION AfxDrawBitmap (BYVAL hDC AS HDC, BYVAL xStart AS LONG, BYVAL yS
 ' Helper procedures to display feedback and errors
 ' ========================================================================================
 PRIVATE SUB AfxMsg (BYVAL pwszText AS WSTRING PTR)
-   IF pwszText <> NULL THEN MessageBoxW(NULL, pwszText, "", MB_APPLMODAL) ELSE MessageBoxW(NULL, "", "", MB_APPLMODAL)
+   IF pwszText <> NULL THEN MessageBoxW(GetActiveWindow, pwszText, "", MB_APPLMODAL) ELSE MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL)
 END SUB
 #define AfxMsgN(num) AfxMsg(WSTR(num))
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE SUB AfxMsgV (BYVAL pvar AS VARIANT PTR)
-   IF pvar <> NULL THEN MessageBoxW(NULL, pvar->bstrVal, "", MB_APPLMODAL) ELSE MessageBoxW(NULL, "", "", MB_APPLMODAL)
+   IF pvar <> NULL THEN MessageBoxW(GetActiveWindow, pvar->bstrVal, "", MB_APPLMODAL) ELSE MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL)
+END SUB
+' ========================================================================================
+' ========================================================================================
+PRIVATE SUB AfxMsgUtf8 (BYVAL strUtf8Text AS STRING)
+   DIM pbstrText AS AFX_BSTR
+   pbstrText = AfxUcode(strUtf8Text, CP_UTF8)
+   IF pbstrText THEN
+      MessageBoxW(NULL, pbstrText, "", MB_APPLMODAL)
+      SysFreeString pbstrText
+   ELSE
+      MessageBoxW(NULL, "", "", MB_APPLMODAL)
+   END IF
 END SUB
 ' ========================================================================================
 
@@ -356,6 +371,15 @@ PRIVATE FUNCTION AfxAcodeV (BYVAL pvar AS VARIANT PTR, BYVAL nCodePage AS LONG =
    FUNCTION = ansiStr
 END FUNCTION
 ' ========================================================================================
+
+' // Unicode UTF16 to Unicode UTF8
+#define AfxUcodeToUtf8(w) AfxAcode(w, CP_UTF8)
+#define AfxUtf16ToUtf8(w) AfxAcode(w, CP_UTF8)
+' // Unicode UTF8 to Unicode UTF16
+#define AfxUtf8ToUcode(s) AfxUcode(s, CP_UTF8)
+#define AfxUtf8ToUtf16(s) AfxUcode(s, CP_UTF8)
+' // Variant to Unicode UTF8
+#define AfxVarToUtf8(v) AfxAcodeV(v, CP_UTF8)
 
 ' ========================================================================================
 ' Returns the Windows version
@@ -586,6 +610,43 @@ PRIVATE FUNCTION AfxControlRunDLL (BYVAL hwnd AS HWND, BYVAL hInst AS HINSTANCE,
 END FUNCTION
 ' ========================================================================================
 
+' ========================================================================================
+' Retrieves the fully qualified path of the specified system DLL.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetSystemDllPath (BYVAL pwszDllName AS WSTRING PTR, BYVAL pwszDllPath AS WSTRING PTR, BYVAL cchCount AS DWORD) AS LONG
+   IF pwszDllName = NULL OR pwszDllPath = NULL OR cchCount = 0 THEN EXIT FUNCTION
+   DIM hLib AS HMODULE
+   hLib = LoadLibraryW(pwszDllName)
+   IF hLib THEN
+      FUNCTION = GetModuleFileNameW(hLib, pwszDllPath, cchCount)
+      FreeLibrary hLib
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Saves the contents of a string buffer in a temporary file.
+' ========================================================================================
+PRIVATE FUNCTION AfxSaveTempFile (BYVAL pwszBuffer AS WSTRING PTR, BYREF wszTmpFileName AS WSTRING, BYREF wszExtension AS WSTRING) AS BOOLEAN
+   IF VARPTR(wszTmpFileName) = NULL THEN EXIT FUNCTION
+   DIM wszTmpPath AS WSTRING * MAX_PATH - 14
+   DIM dwRes AS DWORD, fn AS LONG
+   dwRes = GetTempPathW(MAX_PATH - 14, @wszTmpPath)
+   IF dwRes > 0 AND dwRes <= MAX_PATH - 14 THEN
+      dwRes = GetTempFileNameW(@wszTmpPath, "TMP", 0, @wszTmpFileName)
+      IF dwRes THEN
+         IF VARPTR(wszExtension) THEN wszTmpFileName = LEFT(wszTmpFileName, LEN(wszTmpFileName) - 3) & wszExtension
+         fn = FREEFILE
+         OPEN wszTmpFileName FOR OUTPUT AS #fn
+         IF ERR = 0 THEN
+            PUT #fn, 1, *pwszBuffer
+            CLOSE #fn
+            FUNCTION = TRUE
+         END IF
+      END IF
+   END IF
+END FUNCTION
+' ========================================================================================
 
 ' ########################################################################################
 '                                      *** WINDOW ***
@@ -686,7 +747,7 @@ END FUNCTION
 ' Retrieves the window styles.
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetWindowStyle (BYVAL hwnd AS HWND) AS DWORD
-   FUNCTION = GetWindowLongPtr(hwnd, GWL_STYLE)
+   FUNCTION = GetWindowLongPtrW(hwnd, GWL_STYLE)
 END FUNCTION
 ' ========================================================================================
 
@@ -694,7 +755,27 @@ END FUNCTION
 ' Retrieves the extended window styles.
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetWindowExStyle (BYVAL hwnd AS HWND) AS DWORD
-   FUNCTION = GetWindowLong(hwnd, GWL_EXSTYLE)
+   FUNCTION = GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Sets the window styles
+' ========================================================================================
+PRIVATE FUNCTION AfxSetWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
+   DIM dwOldStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_STYLE)
+   SetWindowLongPtrW(hwnd, GWL_STYLE, dwStyle)
+   FUNCTION = dwOldStyle
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Sets the window extended styles
+' ========================================================================================
+PRIVATE FUNCTION AfxSetWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
+   DIM dwOldExStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+   SetWindowLongPtrW(hwnd, GWL_EXSTYLE, dwExStyle)
+   FUNCTION = dwOldExStyle
 END FUNCTION
 ' ========================================================================================
 
@@ -706,8 +787,8 @@ END FUNCTION
 '   The previous window styles
 ' ========================================================================================
 PRIVATE FUNCTION AfxAddWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
-   DIM dwOldStyle AS DWORD = GetWindowLongPtr(hwnd, GWL_STYLE)
-   SetWindowLongPtr(hwnd, GWL_STYLE, dwOldStyle OR dwStyle)
+   DIM dwOldStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_STYLE)
+   SetWindowLongPtrW(hwnd, GWL_STYLE, dwOldStyle OR dwStyle)
    FUNCTION = dwOldStyle
 END FUNCTION
 ' ========================================================================================
@@ -720,8 +801,8 @@ END FUNCTION
 '   The previous extended window styles
 ' ========================================================================================
 PRIVATE FUNCTION AfxAddWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
-   DIM dwOldExStyle AS DWORD = GetWindowLongPtr(hwnd, GWL_EXSTYLE)
-   SetWindowLongPtr(hwnd, GWL_EXSTYLE, dwOldExStyle OR dwExStyle)
+   DIM dwOldExStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+   SetWindowLongPtrW(hwnd, GWL_EXSTYLE, dwOldExStyle OR dwExStyle)
    FUNCTION = dwOldExStyle
 END FUNCTION
 ' ========================================================================================
@@ -734,8 +815,8 @@ END FUNCTION
 '   The previous window styles
 ' ========================================================================================
 PRIVATE FUNCTION AfxRemoveWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
-   DIM dwOldStyle AS DWORD = GetWindowLongPtr(hwnd, GWL_STYLE)
-   SetWindowLongPtr(hwnd, GWL_STYLE, dwOldStyle AND (NOT dwStyle))
+   DIM dwOldStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_STYLE)
+   SetWindowLongPtrW(hwnd, GWL_STYLE, dwOldStyle AND (NOT dwStyle))
    FUNCTION = dwOldStyle
 END FUNCTION
 ' ========================================================================================
@@ -748,9 +829,22 @@ END FUNCTION
 '   The previous window styles
 ' ========================================================================================
 PRIVATE FUNCTION AfxRemoveWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
-   DIM dwOldExStyle AS DWORD = GetWindowLongPtr(hwnd, GWL_EXSTYLE)
-   SetWindowLongPtr(hwnd, GWL_EXSTYLE, dwOldExStyle AND (NOT dwEXStyle))
+   DIM dwOldExStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+   SetWindowLongPtrW(hwnd, GWL_EXSTYLE, dwOldExStyle AND (NOT dwEXStyle))
    FUNCTION = dwOldEXStyle
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the dimensions of the bounding rectangle of the specified window. The dimensions
+' are given in screen coordinates that are relative to the upper-left corner of the screen.
+' Note: To retrieve the height of the desktop window pass the handle returned by the
+' API function GetDesktopWindow.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetWindowRect (BYVAL hwnd AS HWND) AS RECT
+   DIM rc AS RECT
+   GetWindowRect(hwnd, @rc)
+   FUNCTION = rc
 END FUNCTION
 ' ========================================================================================
 
@@ -779,6 +873,21 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
+' Retrieves the coordinates of a window's client area. The client coordinates specify the
+' upper-left and lower-right corners of the client area. Because client coordinates are
+' relative to the upper-left corner of a window's client area, the coordinates of the
+' upper-left corner are (0,0).
+' Note: To retrieve the height of the desktop window pass the handle returned by the
+' API function GetDesktopWindow.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetWindowClientRect (BYVAL hwnd AS HWND) AS RECT
+   DIM rc AS RECT
+   GetClientRect(hwnd, @rc)
+   FUNCTION = rc
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
 ' Gets the width in pixels of the client area of a window.
 ' Note: To retrieve the height of the desktop window pass the handle returned by the
 ' API function GetDesktopWindow.
@@ -799,6 +908,33 @@ PRIVATE FUNCTION AfxGetWindowClientHeight (BYVAL hwnd AS HWND) AS LONG
    DIM rc AS RECT
    GetClientRect(hwnd, @rc)
    FUNCTION = rc.Bottom - rc.Top
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the coordinates of the work area on the primary display monitor expressed in
+' virtual screen coordinates. The work area is the portion of the screen not obscured by
+' the system taskbar or by application desktop toolbars. To get the work area of a monitor
+' other than the primary display monitor, call the GetMonitorInfo function.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetWorkAreaRect () AS RECT
+   DIM rcWrk AS RECT
+   SystemParametersInfo(SPI_GETWORKAREA, 0, @rcWrk, 0)
+   FUNCTION = rcWrk
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxGetWorkAreaWidth () AS LONG
+   DIM rcWrk AS RECT
+   SystemParametersInfo(SPI_GETWORKAREA, 0, @rcWrk, 0)
+   FUNCTION = rcWrk.Right - rcWrk.Left
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxGetWorkAreaHeight () AS LONG
+   DIM rcWrk AS RECT
+   SystemParametersInfo(SPI_GETWORKAREA, 0, @rcWrk, 0)
+   FUNCTION = rcWrk.Bottom - rcWrk.Top
 END FUNCTION
 ' ========================================================================================
 
@@ -853,7 +989,7 @@ PRIVATE SUB AfxCenterWindow (BYVAL hwnd AS HWND = NULL, BYVAL hwndParent AS HWND
       pt.y = rcWorkArea.Bottom - nHeight
    END IF
    ' // Convert screen coordinates to client area coordinates
-   IF (GetWindowLongPtr(hwnd, GWL_STYLE) AND WS_CHILD) = WS_CHILD THEN ScreenToClient hwndParent, @pt
+   IF (GetWindowLongPtrW(hwnd, GWL_STYLE) AND WS_CHILD) = WS_CHILD THEN ScreenToClient hwndParent, @pt
    ' // Reposition the window retaining its size and Z order
    SetWindowPos(hwnd, NULL, pt.x, pt.y, 0, 0, SWP_NOSIZE OR SWP_NOZORDER)
 
@@ -875,8 +1011,8 @@ PRIVATE SUB AfxSetWindowClientSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BY
    ' // because it doesn't know which menu we are using.
    SetRect(@rc, 0, 0, nWidth * rxRatio, nHeight * ryRatio)
    DIM hMenu AS HANDLE = GetMenu(hwnd)
-   DIM dwStyle AS DWORD = GetWindowLongPtr(hwnd, GWL_STYLE)
-   AdjustWindowRectEx(@rc, dwStyle, (hMenu <> NULL), GetWindowLongPtr(hwnd, GWL_EXSTYLE))
+   DIM dwStyle AS DWORD = GetWindowLongPtrW(hwnd, GWL_STYLE)
+   AdjustWindowRectEx(@rc, dwStyle, (hMenu <> NULL), GetWindowLongPtrW(hwnd, GWL_EXSTYLE))
    ' // If there is a menu, we need to check how much wrapping occurs when we set
    ' // the window to the width specified by AdjustWindowRectEX and an infinite
    ' // amount of height. An infinite height allows us to see every single menu wrap.
@@ -1050,7 +1186,7 @@ END SUB
 ' Source: http://www.catch22.net/tuts/tips2
 ' ========================================================================================
 PRIVATE SUB AfxForceVisibleDisplay (BYVAL hwnd AS HWND)
-   ' // Check if the specified window-recrangle is visible on any display
+   ' // Check if the specified window-rectangle is visible on any display
    DIM rc AS RECT
    GetWindowRect(hwnd, @rc)
    IF MonitorFromRect(@rc, MONITOR_DEFAULTTONULL) <> NULL THEN EXIT SUB
@@ -1076,7 +1212,7 @@ PRIVATE FUNCTION AfxGetTopLevelWindow (BYVAL hwnd AS HWND) AS HWND
    hWndTmp = hwnd
    DO
       hWndParent = hWndTmp
-      hWndTmp = IIF&(GetWindowLongPtr(hwndParent, GWL_STYLE) AND WS_CHILD, GetParent(hwndParent), GetWindow(hWndParent, GW_OWNER))
+      hWndTmp = IIF&(GetWindowLongPtrW(hwndParent, GWL_STYLE) AND WS_CHILD, GetParent(hwndParent), GetWindow(hWndParent, GW_OWNER))
       IF hWndTmp = NULL THEN EXIT DO
    LOOP
    FUNCTION = hWndParent
@@ -1105,8 +1241,8 @@ END FUNCTION
 ' Code borrowed from a function written by Dominic Mitchell for Phoenix.
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetFormHandle (BYVAL hwnd AS HWND) AS HWND
-   WHILE (GetWindowLongPtr(hwnd, GWL_STYLE) AND WS_CHILD)
-      IF (GetWindowLongPtr(hwnd, GWL_EXSTYLE) AND WS_EX_MDICHILD) THEN EXIT WHILE
+   WHILE (GetWindowLongPtrW(hwnd, GWL_STYLE) AND WS_CHILD)
+      IF (GetWindowLongPtrW(hwnd, GWL_EXSTYLE) AND WS_EX_MDICHILD) THEN EXIT WHILE
       hwnd = GetParent(hwnd)
    WEND
    FUNCTION = hwnd
@@ -1242,7 +1378,7 @@ PRIVATE FUNCTION AfxSetDlgMsgResult(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVA
       uMsg = WM_CHARTOITEM          OR _
       uMsg = WM_QUERYDRAGICON       OR _
       uMsg = WM_INITDIALOG          THEN
-      FUNCTION = IIF&(SetWindowLongPtr(hwnd, DWLP_MSGRESULT, result), TRUE, FALSE)
+      FUNCTION = IIF&(SetWindowLongPtrW(hwnd, DWLP_MSGRESULT, result), TRUE, FALSE)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -1314,6 +1450,8 @@ PRIVATE FUNCTION AfxLogPixelsX () AS LONG
    FUNCTION = dpiX
 END FUNCTION
 ' ========================================================================================
+#define AfxGetDpi AfxLogPixelsX
+#define AfxGetDpiX AfxLogPixelsX
 
 ' ========================================================================================
 ' Retrieves the number of pixels per logical inch along the screen height of the desktop
@@ -1326,6 +1464,7 @@ PRIVATE FUNCTION AfxLogPixelsY () AS LONG
    FUNCTION = dpiY
 END FUNCTION
 ' ========================================================================================
+#define AfxGetDpiY AfxLogPixelsY
 
 ' ========================================================================================
 ' Retrieves the desktop horizontal scaling ratio.
@@ -1424,6 +1563,21 @@ PRIVATE FUNCTION AfxIsDPIResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS 
    DIM ScreenWidth AS LONG = GetSystemMetrics(SM_CXSCREEN)
    DIM ScreenHeight AS LONG = GetSystemMetrics(SM_CYSCREEN)
    IF (cxMin <= ScreenWidth) AND (cyMin <= ScreenHeight) THEN FUNCTION = TRUE
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Loads a specified icon resource with a client-specified system metric.
+' See: https://msdn.microsoft.com/en-us/library/windows/desktop/bb775701(v=vs.85).aspx
+' ========================================================================================
+PRIVATE FUNCTION AfxLoadIconMetric (BYVAL hinst AS HINSTANCE, BYVAL pszName AS PCWSTR, BYVAL lims AS LONG, BYVAL phico AS HICON PTR) AS HRESULT
+   DIM AS ANY PTR pLib = DyLibLoad("Comctl32.dll")
+   IF pLib = NULL THEN EXIT FUNCTION
+   DIM pLoadIconMetric AS FUNCTION (BYVAL hinst AS HINSTANCE, BYVAL pszName AS PCWSTR, BYVAL lims AS LONG, BYVAL phico AS HICON PTR) AS HRESULT
+   pLoadIconMetric = DyLibSymbol(pLib, "LoadIconMetric")
+   IF pLoadIconMetric = NULL THEN EXIT FUNCTION
+   FUNCTION = pLoadIconMetric(hinst, pszName, lims, phico)
+   DyLibFree(pLib)
 END FUNCTION
 ' ========================================================================================
 
@@ -1906,11 +2060,13 @@ END FUNCTION
 ' Modifies the face name of the font of a window or control.
 ' Parameters:
 ' - hwnd = Handle of the window or control.
-' - pwszNewFaceName = The new face name of the font
-' Return value: TRUE on succes or FALSE on failure.
+' - pwszNewFaceName = The new face name of the font.
+' Return value: The handle of the new font on success, or NULL on failure.
 ' To get extended error information, call GetLastError.
+' Remarks: The returned font must be destroyed with DeleteObject or the macro DeleteFont
+' when no longer needed to prevent memory leaks.
 ' ========================================================================================
-PRIVATE FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName AS WSTRING) AS BOOLEAN
+PRIVATE FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName AS WSTRING) AS HFONT
    DIM lfw AS LOGFONTW
    IF hwnd = NULL OR VARPTR(wszNewFaceName) = NULL THEN EXIT FUNCTION
    ' // Get the handle of the font used by the header
@@ -1928,7 +2084,7 @@ PRIVATE FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName
    DeleteObject(SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
    ReleaseDC(hwnd, hDC)
    SendMessageW(hwnd, WM_SETFONT, CAST(WPARAM, hNewFont), CTRUE)
-   FUNCTION = TRUE
+   FUNCTION = hNewFont
 END FUNCTION
 ' ========================================================================================
 
@@ -1966,10 +2122,12 @@ END FUNCTION
 '      This parameter is important in the font mapping process. To ensure consistent results,
 '      specify a specific character set. If you specify a typeface name in the lfFaceName member,
 '      make sure that the lfCharSet value matches the character set of the typeface specified in lfFaceName.
-' Return value: TRUE on succes or FALSE on failure.
+' Return value: The handle of the new font on success, or NULL on failure.
 ' To get extended error information, call GetLastError.
+' Remarks: The returned font must be destroyed with DeleteObject or the macro DeleteFont
+' when no longer needed to prevent memory leaks.
 ' ========================================================================================
-PRIVATE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LONG, BYVAL nValue AS LONG) AS BOOLEAN
+PRIVATE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LONG, BYVAL nValue AS LONG) AS HFONT
    DIM lfw AS LOGFONTW
    IF IsWindow(hwnd) = 0 THEN EXIT FUNCTION
    ' // Get the handle of the font used by the header
@@ -2000,7 +2158,7 @@ PRIVATE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LO
          ' // Change the charset
          lfw.lfCharset = CUBYTE(nValue)
       CASE ELSE
-         RETURN FALSE
+         EXIT FUNCTION
    END SELECT
    ' // Create a new font
    DIM hNewFont AS HFONT = CreateFontIndirectW(@lfw)
@@ -2010,7 +2168,22 @@ PRIVATE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LO
    DeleteObject(SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
    ReleaseDC(hwnd, hDC)
    SendMessageW(hwnd, WM_SETFONT, CAST(WPARAM, hNewFont), CTRUE)
-   FUNCTION = TRUE
+   FUNCTION = hNewFont
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Modifies the height of the font used by a window of control.
+' Parameters:
+' - hwnd = Handle of the window or control.
+' - nValue: The base is 100. To increase the font a 20% pass 120; to reduce it a 20% pass 80%.
+' Return value: The handle of the new font on success, or NULL on failure.
+' To get extended error information, call GetLastError.
+' Remarks: The returned font must be destroyed with DeleteObject or the macro DeleteFont
+' when no longer needed to prevent memory leaks.
+' ========================================================================================
+PRIVATE FUNCTION AfxModifyFontHeight (BYVAL hwnd AS HWND, BYVAL nValue AS LONG) AS HFONT
+   FUNCTION = AfxModifyFontSettings(hwnd, AFX_FONT_HEIGHT, nValue)
 END FUNCTION
 ' ========================================================================================
 
@@ -2254,4 +2427,3 @@ PRIVATE FUNCTION AfxDrawBitmap (BYVAL hDC AS HDC, BYVAL xStart AS LONG, BYVAL yS
    DeleteDC hMemDC
 END FUNCTION
 ' ========================================================================================
-

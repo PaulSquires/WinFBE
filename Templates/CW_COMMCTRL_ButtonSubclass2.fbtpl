@@ -14,6 +14,7 @@ CWindow: COMMCTRL: Button subclass (SetWindowSubclass)
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -26,17 +27,44 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-' ========================================================================================
-' Window procedure
-' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION Button_SubclassProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM, BYVAL uIdSubclass AS UINT_PTR, BYVAL dwRefData AS DWORD_PTR) AS LRESULT
 
-   DIM pWindow AS CWindow PTR
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a subclassed button", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add a subclassed button without position or size (it will be resized in the WM_SIZE message).
+   pWindow.AddControl("Button", , IDC_BUTTON, "Click me", , , , , , , , _
+      CAST(WNDPROC, @Button_SubclassProc), IDC_BUTTON, CAST(DWORD_PTR, @pWindow))
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
-
-      CASE WM_CREATE
-         EXIT FUNCTION
 
       CASE WM_COMMAND
          SELECT CASE LOWORD(wParam)
@@ -51,16 +79,18 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
       CASE WM_SIZE
          IF wParam <> SIZE_MINIMIZED THEN
             ' // Resize the buttons
-            pWindow = AfxCWindowPtr(hwnd)
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
             IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_BUTTON), pWindow->ClientWidth - 120, pWindow->ClientHeight - 50, 75, 23, CTRUE
          END IF
 
     	CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
@@ -102,34 +132,8 @@ FUNCTION Button_SubclassProc ( _
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefSubclassProc(hwnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with a subclassed button", @WndProc)
-   pWindow.SetClientSize(500, 320)
-   pWindow.Center
-
-   ' // Add a subclassed button without position or size (it will be resized in the WM_SIZE message).
-   pWindow.AddControl("Button", , IDC_BUTTON, "Click me", , , , , , , , _
-      CAST(WNDPROC, @Button_SubclassProc), IDC_BUTTON, CAST(DWORD_PTR, @pWindow))
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

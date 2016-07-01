@@ -113,7 +113,7 @@ CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF
    ' // Register the class
    DIM wAtom AS ATOM
    DIM wcexw AS WNDCLASSEXW
-   DIM wszClassName AS WSTRING * 260 = "GRAPHCTX"
+   DIM wszClassName AS WSTRING * 260 = "AFX_GRAPHCTX"
    IF .GetClassInfoExW(.GetModuleHandleW(NULL), @wszClassName, @wcexw) = 0 THEN
       ' // Fill the WNDCLASSEXW structure
       WITH wcexw
@@ -137,8 +137,7 @@ CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF
    IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CHILD OR WS_TABSTOP
    IF pWindow THEN m_hCtl = pWindow->AddControl(wszClassName, pWindow->hWindow, cID, wszTitle, x, y, nWidth, nHeight, dwStyle, dwExStyle, lpParam)
    IF m_hCtl THEN
-      .SetWindowLongPtr m_hCtl, 0, CAST(LONG_PTR, @this)
-      IF LEN(wszTitle) THEN .SetWindowTextW m_hCtl, wszTitle
+      .SetWindowLongPtrW m_hCtl, 0, CAST(LONG_PTR, @this)
       ' // Set the same font used by the parent
       DIM lfw AS LOGFONTW
       IF pWindow->Font THEN
@@ -324,7 +323,7 @@ FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_HSCROLL
          ' // Get a pointer to the class
-         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtr(hwnd, 0))
+         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
          ' // Horizontal scrolling
          SELECT CASE LOWORD(wParam)
@@ -366,7 +365,7 @@ FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_VSCROLL
          ' // Get a pointer to the class
-         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtr(hwnd, 0))
+         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
          ' // Vertical scrolling
          SELECT CASE LOWORD(wParam)
@@ -427,7 +426,7 @@ FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_ERASEBKGND
          ' // Get a pointer to the class
-         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtr(hwnd, 0))
+         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
          ' // If not stretchable...
          IF pGraphCtx->m_Stretchable = FALSE THEN
@@ -456,7 +455,7 @@ FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_SIZE
          ' // Get a pointer to the class
-         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtr(hwnd, 0))
+         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
          ' // Updates virtual window origins
          DIM Increment AS LONG = LOWORD(lParam) - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left
@@ -501,7 +500,7 @@ FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_PRINTCLIENT
          ' // Get a pointer to the class
-         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtr(hwnd, 0))
+         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
          ' // Copies the bitmap to the provided device context
          hDC = CAST(.HDC, wParam)
@@ -519,7 +518,7 @@ FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL 
 
       CASE WM_PAINT
          ' // Get a pointer to the class
-         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtr(hwnd, 0))
+         pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
          ' // Copies the bitmap to the control's window
          hDC = .BeginPaint(hwnd, @ps)
@@ -627,9 +626,9 @@ FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHeight AS 
       DIM rcParent AS RECT, dwStyle AS DWORD
       .GetClientRect .GetParent(m_hCtl), @rcParent
       IF nWidth > rcParent.Right OR nHeight > rcParent.Bottom THEN
-         dwStyle = .GetWindowLongPtr(m_hCtl, GWL_STYLE)
+         dwStyle = .GetWindowLongPtrW(m_hCtl, GWL_STYLE)
          dwStyle = dwStyle OR WS_HSCROLL OR WS_VSCROLL
-         .SetWindowLongPtr(m_hCtl, GWL_STYLE, dwStyle)
+         .SetWindowLongPtrW(m_hCtl, GWL_STYLE, dwStyle)
       END IF
       ' // Initializes scroll bar ranges
       m_MaxX = m_coord.Right - m_coord.Left

@@ -1,11 +1,11 @@
 2
 FBGUI
 .bas
-CWindow: Layout manager (with size grip)
+CWindow: Scrollable child window
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_Layout2.fbtpl
-' Contents: Demonstrates the use of the Layout manager
+' File: CW_ScrollableChildWindow.fbtpl
+' Contents: Demonstrates the use of an scrollable child CWindow as container of child controls.
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
@@ -28,7 +28,10 @@ ENUM
    IDC_EDIT2
    IDC_GROUPBOX
    IDC_COMBOBOX
-   IDC_SIZEGRIP
+   IDC_OPTION1
+   IDC_OPTION2
+   IDC_OPTION3
+   IDC_DTPICKER
 END ENUM
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
@@ -38,7 +41,8 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION ChildDlg_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Main
@@ -53,23 +57,13 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    ' // Create the main window
    DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Layout manager", @WndProc)
+   pWindow.Create(NULL, "Scrollable Child CWindow Example", @WndProc)
    pWindow.SetClientSize 455, 180
    pWindow.Center
 
-   ' // Add an Edit control
-   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "", 20, 15, 305, 23)
-   ' // Add a multiline Edit control
-   pWindow.AddControl("EditMultiline", , IDC_EDIT2, "", 20, 45, 305, 80)
-   ' // Alternate way
-'   pWindow.AddControl("Edit", , IDC_EDIT2, "", 20, 50, 300, 80, _
-'      WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN)
-   ' // Set the focus in the first edit control
-   SetFocus hEdit
-
-   ' // Add more controls
+   ' // Add controls
    pWindow.AddControl("GroupBox", , IDC_GROUPBOX, "GroupBox", 340, 8, 100, 155)
-   pWindow.AddControl("Button", , IDCANCEL, "&Close", 250, 140, 75, 23)
+   pWindow.AddControl("Button", , IDCANCEL, "&Close", 250, 140, 76, 23)
    ' // Add a combobox control
    DIM hCombobox AS HWND = pWindow.AddControl("ComboBox", , IDC_COMBOBOX, "", 350, 30, 80, 100)
    ' // Fill the control with some data
@@ -79,18 +73,48 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
       SendMessageW(hComboBox, CB_ADDSTRING, 0, CAST(LPARAM, @wszText))
    NEXT
 
+   ' ***************************************************************************************
+   ' // Child dialog
+   DIM pChildDlg AS CWindow
+   pChildDlg.Create(pWindow.hWindow, "", @ChildDlg_WndProc, 15, 15, , , _
+      WS_VISIBLE OR WS_CHILD OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_BORDER, WS_EX_CONTROLPARENT)
+   pChildDlg.ClassStyle = CS_DBLCLKS
+   ' // Set a client size big enough to display all the controls
+'   310, 115
+   pChildDlg.SetClientSize(310, 180)
+   ' // Add an Edit control
+   DIM hEdit AS HWND = pChildDlg.AddControl("Edit", , IDC_EDIT1, "", 10, 15, 275, 23)
+   ' // Add three radio buttons (the first one should have the WS_GROUP style)
+   pChildDlg.AddControl("RadioButton", , IDC_OPTION1, "Option 1", 10, 50, 75, 23, WS_GROUP)
+   pChildDlg.AddControl("RadioButton", , IDC_OPTION2, "Option 2", 10, 70, 75, 23)
+   pChildDlg.AddControl("RadioButton", , IDC_OPTION3, "Option 3", 10, 90, 75, 23)
+   ' // Add a date time picker control
+   pChilddlg.AddControl("SysDateTimePick32", , IDC_DTPICKER, "", 135, 55, 150, 23)
+   ' // Add a button
+   pChildDlg.AddControl("Button", , IDOK, "&Ok", 205, 140, 76, 23)
+   ' // Create an instance of the CScrollWindow class and attach the main window to it
+   DIM pScrollChildDlg AS CScrollWindow PTR = NEW CScrollWindow(pChildDlg.hWindow)
+   ' // Store the pointer in the class of the parent window for later deletion
+   pChildDlg.ScrollWindowPtr = pScrollChildDlg
+   ' // Shrink the client size
+   pChildDlg.SetClientSize(310, 110)
+   ' // Set the focus in the first edit control
+   SetFocus hEdit
+   ' ***************************************************************************************
+
    ' // Anchor the controls
    DIM pLayout AS CLayout = pWindow.hWindow
    pWindow.UserData(AFX_LAYOUTPTRIDX) = CAST(LONG_PTR, @pLayout)
-   pLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
-   pLayout.AnchorControl(IDC_EDIT2, AFX_ANCHOR_HEIGHT_WIDTH)
    pLayout.AnchorControl(IDCANCEL, AFX_ANCHOR_BOTTOM_RIGHT)
    pLayout.AnchorControl(IDC_GROUPBOX, AFX_ANCHOR_HEIGHT_RIGHT)
    pLayout.AnchorControl(IDC_COMBOBOX, AFX_ANCHOR_RIGHT)
 
-   ' // Ad a size grip
-   pWindow.AddControl("SizeGrip", pWindow.hWindow, IDC_SIZEGRIP)
-   pLayout.AnchorControl(IDC_SIZEGRIP, AFX_ANCHOR_BOTTOM_RIGHT)
+   ' // Anchor the child CWindow
+   pLayout.AnchorControl(pChildDlg.hWindow, AFX_ANCHOR_HEIGHT_WIDTH)
+   ' // We could also make the child controls of this window with
+   ' // DIM pChildLayout AS CLayout = pChildDlg.hWindow
+   ' // pChildLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
+   ' // etc.
 
    |
 
@@ -103,7 +127,7 @@ END FUNCTION
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -138,7 +162,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          EXIT FUNCTION
 
     	CASE WM_DESTROY
-         ' // End the application
+          ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
@@ -146,6 +170,40 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
    ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Child dialog window procedure
+' ========================================================================================
+FUNCTION ChildDlg_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_SIZE
+         ' // In the WM_SIZE message we need to check the validity of the pointers
+         ' // because this message is sent before we have had time to store them.
+         DIM pWindow AS CWindow PTR = cast(CWindow PTR, GetWindowLongPtr(hwnd, 0))
+         DIM pScrollWindow AS CScrollWindow PTR
+         IF pWindow THEN pScrollWindow = pWindow->ScrollWindowPtr
+         IF pScrollWindow THEN pScrollWindow->OnSize(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_VSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnVScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_HSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnHScroll(wParam, lParam)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
 
 END FUNCTION
 ' ========================================================================================

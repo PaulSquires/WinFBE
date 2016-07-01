@@ -17,6 +17,7 @@ Type clsConfig
       HighlightCurrentLine As Long = True
       IndentGuides         As Long = True
       TabIndentSpaces      As Long = True
+      HideCompile          As Long = False
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
       TabSize              As WString * 20  = "3"
@@ -120,6 +121,7 @@ Function clsConfig.SaveToFile() as Long
    "HighlightCurrentLine="  & this.HighlightCurrentLine  & vbcrlf & _
    "IndentGuides="          & this.IndentGuides          & vbcrlf & _
    "TabIndentSpaces="       & this.TabIndentSpaces       & vbcrlf & _
+   "HideCompile="           & this.HideCompile           & vbcrlf & _
    "MultipleInstances="     & this.MultipleInstances     & vbcrlf & _
    "CompileAutosave="       & this.CompileAutosave       & vbcrlf & _
    "LocalizationFile="      & this.LocalizationFile      & vbcrlf & _
@@ -254,6 +256,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "HighlightCurrentLine": this.HighlightCurrentLine = nData
          Case "IndentGuides":         this.IndentGuides         = nData
          Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
+         Case "HideCompile":          this.HideCompile          = nData
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "LocalizationFile":     this.LocalizationFile     = wData

@@ -3,6 +3,7 @@
 ''
 Type COMPILE_TYPE
    FileToCompile   As WString * MAX_PATH
+   ResourceFile    As WString * MAX_PATH
    OutputFilename  As WString * MAX_PATH   ' resulting exe name 
    CompilerPath    As WString * MAX_PATH 
    CurrentFolder   As WString * MAX_PATH
@@ -40,6 +41,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim As String st1, st2, st3        
    Dim As HWnd hLV
          
+   sDQ = Chr(34)   ' double quotes
+
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
    If gConfig.CompileAutosave Then
@@ -70,35 +73,78 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Case IDM_COMPILE:       gCompile.RunAfterCompile = False
    End Select
    
-   Dim pDoc As clsDocument Ptr 
+   Dim pDocMain As clsDocument Ptr 
    If gpApp->IsProjectActive Then
-      pDoc = gpApp->GetMainDocumentPtr()
-      If pDoc = 0 Then
+      pDocMain = gpApp->GetMainDocumentPtr()
+      If pDocMain = 0 Then
          MessageBoxW( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
                            MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
          Function = False: Exit Function
       End If
    Else
-      pDoc = gTTabCtl.GetActiveDocumentPtr()
+      pDocMain = gTTabCtl.GetActiveDocumentPtr()
    End If
-   If pDoc = 0 Then Return 0
+   If pDocMain = 0 Then Return 0
    
-   gCompile.FileToCompile = *pDoc->DiskFilename
+   gCompile.FileToCompile = *pDocMain->DiskFilename
    gCompile.CurrentFolder = Curdir                        
-   gCompile.CompileFlags  = gConfig.CompilerSwitches   
+
+   FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.OutputFolder)
+   FF_Pathname(@WStr("NAME"), @gCompile.FileToCompile, @wszTemp)
+   gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe"
+
+   If gpApp->IsProjectActive Then
+      Dim pDocResource As clsDocument Ptr = gpApp->GetResourceDocumentPtr()
+      If pDocResource Then
+         gCompile.ResourceFile = *pDocResource->DiskFilename
+      Else
+         gCompile.ResourceFile = ""
+      End If
+      gCompile.CompileFlags = gConfig.CompilerSwitches   
+
+      Select Case gpApp->ProjectType
+         Case 0:   ' EXE (no special compile switch)
+         Case 1
+            gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll"
+            gCompile.CompileFlags = gCompile.CompileFlags & " -dll -x " & sDQ & gCompile.OutputFilename & sDQ           
+         Case 2
+            gCompile.OutputFilename = gCompile.OutputFolder & "lib" & wszTemp & ".a"
+            gCompile.CompileFlags = gCompile.CompileFlags & " -lib -x " & sDQ & gCompile.OutputFilename & sDQ          
+      End Select
+
+      Select Case gpApp->ProjectErrorOption
+         Case 0:   ' No error checking (no special compile switch)
+         Case 1:  gCompile.CompileFlags = gCompile.CompileFlags & " -e"           
+         Case 2:  gCompile.CompileFlags = gCompile.CompileFlags & " -ex"           
+         Case 3:  gCompile.CompileFlags = gCompile.CompileFlags & " -exx"           
+      End Select
+
+      If gpApp->ProjectDebug = BST_CHECKED Then
+         gCompile.CompileFlags = gCompile.CompileFlags & " -g"           
+      End If
+      
+      If gpApp->ProjectThread = BST_CHECKED Then
+         gCompile.CompileFlags = gCompile.CompileFlags & " -mt"           
+      End If
+
+      If Len(*gpApp->ProjectOther) Then
+         gCompile.CompileFlags = gCompile.CompileFlags & " " & *gpApp->ProjectOther           
+      End If
+
+   Else
+      gCompile.CompileFlags  = gConfig.CompilerSwitches   
+   End If
+
 
    Select Case gConfig.DefaultCompileMode   
       Case "GUI":     gCompile.CompileMode = " -s gui "
       Case "CONSOLE": gCompile.CompileMode = " -s console "
    End Select   
   
-   FF_Pathname(@WStr("PATH"), pDoc->DiskFilename, @gCompile.OutputFolder)
-   FF_Pathname(@WStr("NAME"), @gCompile.FileToCompile, @wszTemp)
 
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
    ' Test for the running exe if this project is an EXE project.
-   gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe"
    If IsProcessRunning(@gCompile.OutputFilename) Then
       MessageBoxW( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
@@ -112,10 +158,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    sTemp = FF_Replace(sTemp, " ", "_" )
    gCompile.BatchFile = sTemp & "_compile.bat" 
    gCompile.LogFile   = sTemp & "_compile.log"
-   sDQ = Chr(34)   ' double quotes
    
    execmd = sDQ & gCompile.CompilerPath & sDQ & " " & _
-            sDQ & gCompile.FileToCompile & sDQ & _
+            sDQ & gCompile.FileToCompile & sDQ & " " & _ 
+            Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
             " -v " & gCompile.CompileFlags & gCompile.CompileMode & _
             " > " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected to log file as well
 
@@ -160,7 +206,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file
-   Kill gCompile.BatchFile
+'   Kill gCompile.BatchFile
 
    
    ' Clear the Compiler Log listview
@@ -281,12 +327,14 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    If (NumErrors = 0) Then           
       DestroyWindow(HWND_FRMCOMPILERESULTS)
-      st = sOutputMsg & vbCrLf & _
-            L(194,"Primary Source:")     & " " & gCompile.FileToCompile & vbCrLf & _
-            L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
-            L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
-            L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-      MessageBoxW HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK Or MB_TOPMOST
+      If gConfig.HideCompile = BST_UNCHECKED Then
+         st = sOutputMsg & vbCrLf & _
+               L(194,"Primary Source:")     & " " & gCompile.FileToCompile & vbCrLf & _
+               L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
+               L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
+               L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
+         MessageBoxW HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK Or MB_TOPMOST
+      End If
    Else
       gCompile.RunAfterCompile = False 
       

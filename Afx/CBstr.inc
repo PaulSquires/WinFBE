@@ -31,6 +31,7 @@ TYPE CBStr
       m_CodePage AS LONG
 
    Public:
+      DECLARE CONSTRUCTOR
       DECLARE CONSTRUCTOR (BYVAL nCopePage AS LONG)
       DECLARE CONSTRUCTOR (BYREF wszStr AS CONST WSTRING = "")
       DECLARE CONSTRUCTOR (BYREF ansiStr AS STRING = "", BYVAL nCodePage AS LONG = 0)
@@ -57,6 +58,10 @@ END TYPE
 
 ' ========================================================================================
 ' CBStr class constructors
+' ========================================================================================
+CONSTRUCTOR CBStr
+   m_bstr = SysAllocString("")
+END CONSTRUCTOR
 ' ========================================================================================
 CONSTRUCTOR CBStr (BYVAL nCodePage AS LONG)
    m_CodePage = nCodePage
@@ -92,7 +97,7 @@ CONSTRUCTOR CBStr (BYREF bstrHandle AS AFX_BSTR = NULL)
       DIM res AS INTEGER = PEEK(DWORD, CAST(ANY PTR, bstrHandle) - 4) \ 2
       ' If the retrieved length if the same that the returned by LEN, then it must be an OLE string
       IF res = .LEN(*bstrHandle) THEN
-         ' Free the current OLE string and attach the passed handle to the class
+         ' Attach the passed handle to the class
          m_bstr = bstrHandle
       ELSE
          ' Allocate an OLE string with the contents of the string pointer by bstrHandle

@@ -14,15 +14,12 @@ CWindow: COMMCTRL: Task Dialog Indirect (Hyperlink)
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #define _WIN32_WINNT &h0602
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "win/shellapi.bi"
 USING Afx.CWindowClass
 ' $FB_RESPATH = "FBRES.rc"
-
-DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-DECLARE FUNCTION TaskDialogIndirectCallbackProc(BYVAL hwnd AS HWND, BYVAL uNotification AS UINT, BYVAL wParam AS WPARAM, _
-        BYVAL lParam AS LPARAM, BYVAL dwRefData AS LONG_PTR) AS HRESULT
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -30,6 +27,10 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL nCmdShow AS LONG) AS LONG
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TaskDialogIndirectCallbackProc(BYVAL hwnd AS HWND, BYVAL uNotification AS UINT, BYVAL wParam AS WPARAM, _
+        BYVAL lParam AS LPARAM, BYVAL dwRefData AS LONG_PTR) AS HRESULT
 
 ' ========================================================================================
 ' Main
@@ -53,6 +54,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
+   ' // Dispatch messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION

@@ -13,6 +13,7 @@ CWindow: COM: YouTube (ATL container)
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -23,15 +24,59 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandle(NULL), NULL, COMMAND(), SW_NORMAL)
 
+CONST IDC_ATLWIN = 1001
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION BuildYouTubeScript (BYVAL strCode AS STRING, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS STRING
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow YouTube Test", @WndProc)
+   pWindow.SetClientSize(450, 320)
+   pWindow.Center
+
+   ' // Initialize atl.dll
+   DIM hLib AS ANY PTR
+   hLib = DylibLoad("atl.dll")
+   DIM AS SUB AtlAxWinInit
+   AtlAxWinInit = DylibSymbol(hLib, "AtlAxWinInit")
+   AtlAxWinInit()
+
+   ' // Build the html script
+   DIM strCode AS STRING = "_oAgkTwFRuM"   ' --> Change me: 11 character video code
+   DIM s AS STRING = BuildYouTubeScript(strCode, pWindow.ClientWidth, pWindow.ClientHeight)
+
+   ' // Add the AtlAxWin control
+   pWindow.AddControl("AtlAxWin", , IDC_ATLWIN, s, 0, 0, 0, 0, WS_VISIBLE)
+   ' // Note: The atl.dll that comes installed its a very old one and doesn't work very well.
+   ' // If you use a newer version, change the name of the class passed to pWindow.AddControl,
+   ' // e.g. "AtlAxWin80" for atl80.dll.
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
-
-      CASE WM_CREATE
-         EXIT FUNCTION
 
       CASE WM_COMMAND
          SELECT CASE LOWORD(wParam)
@@ -45,17 +90,19 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
       CASE WM_SIZE
          IF wParam <> SIZE_MINIMIZED THEN
-            ' // Resize the buttons
+            ' // Resize the atl control
             DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
-            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, 1001), 0, 0, pWindow->ClientWidth, pWindow->ClientHeight, CTRUE
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_ATLWIN), 0, 0, pWindow->ClientWidth, pWindow->ClientHeight, CTRUE
          END IF
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
@@ -90,41 +137,6 @@ FUNCTION BuildYouTubeScript (BYVAL strCode AS STRING, BYVAL nWidth AS LONG, BYVA
    s += "</html>" & CHR(13, 10)
 
    FUNCTION = s
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow YouTube Test", @WndProc)
-   pWindow.SetClientSize(450, 320)
-   pWindow.Center
-
-   DIM hLib AS ANY PTR
-   hLib = DylibLoad("atl.dll")
-   DIM AS SUB AtlAxWinInit
-   AtlAxWinInit = DylibSymbol(hLib, "AtlAxWinInit")
-   AtlAxWinInit()
-   DIM strCode AS STRING = "_oAgkTwFRuM"   ' --> Change me: 11 character video code
-   DIM s AS STRING = BuildYouTubeScript(strCode, pWindow.ClientWidth, pWindow.ClientHeight)
-   pWindow.AddControl("AtlAxWin", , 1001, s, 0, 0, 0, 0, WS_VISIBLE)
-   ' // Note: The atl.dll that comes installed its a very old one and doesn't work very well.
-   ' // If you use a newer version, change the name of the class passed to pWindow.AddControl,
-   ' // e.g. "AtlAxWin80" for atl80.dll.
-
-   |
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

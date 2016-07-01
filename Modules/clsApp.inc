@@ -60,8 +60,61 @@ End Property
 
 ''
 ''
+Property clsApp.ProjectType( ByVal nValue As Long)
+   m_ProjectType = nValue
+End Property
+
+Property clsApp.ProjectType() As Long
+   Property = m_ProjectType
+End Property
+
+''
+''
+Property clsApp.ProjectDebug( ByVal nValue As Long)
+   m_ProjectDebug = nValue
+End Property
+
+Property clsApp.ProjectDebug() As Long
+   Property = m_ProjectDebug
+End Property
+
+''
+''
+Property clsApp.ProjectThread( ByVal nValue As Long)
+   m_ProjectThread = nValue
+End Property
+
+Property clsApp.ProjectThread() As Long
+   Property = m_ProjectThread
+End Property
+
+''
+''
+Property clsApp.ProjectErrorOption( ByVal nValue As Long)
+   m_ProjectErrorOption = nValue
+End Property
+
+Property clsApp.ProjectErrorOption() As Long
+   Property = m_ProjectErrorOption
+End Property
+
+''
+''
+Property clsApp.ProjectOther( ByVal wValue As WString Ptr)
+   m_wzProjectOther = *wValue
+End Property
+
+Property clsApp.ProjectOther() As WString Ptr
+   Property = @m_wzProjectOther
+End Property
+
+''
+''
 Property clsApp.IsProjectActive( ByVal nValue As BOOLEAN)
    m_IsProjectActive = nValue
+   If m_IsProjectActive = False Then 
+      SetWindowTextW( HWND_FRMMAIN, APPNAME )
+   End If   
 End Property
 
 Property clsApp.IsProjectActive() As BOOLEAN
@@ -106,10 +159,8 @@ End Property
 ''
 Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
-   Dim sText     As String
    Dim wFilename As WString * MAX_PATH
    Dim wText     As WString * MAX_PATH  
-   Dim f         As Long 
    
    ' If this a new unsaved project set flag to display SaveAs dialog.
    If this.IsNewProjectFlag Then bSaveAs = True
@@ -119,7 +170,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    If bSaveAs Then
       ' Display the Save File Dialog
       FF_PATHNAME( @WStr("NAMEX"), @wFilename, @wText)
-      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "")
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, @WStr("wfbe"), IDM_PROJECTSAVE)
       If pwszName Then
          wFilename = *pwszName
          CoTaskMemFree(pwszName)
@@ -130,50 +181,16 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
    ' Delete any existing file
    If Dir(wFilename) > "" Then Kill wFilename
-   
-   ' Do the actual saving to disk
-   f = Freefile
-   If Open( wFilename For Output As #f) = 0 Then
-      ' TODO: save the actual contents of a project file here
-      Print #f, "*** PROJECT FILE ***"
-      Close #f
-   Else
-      ' error saving file
-   End If   
-
    this.ProjectDiskFilename = @wFilename
+   ProjectSaveToFile()
+   
    this.IsNewProjectFlag    = False
+   ' Ensure that the Project Manager title is correct
+   frmProjectManager_PositionWindows(HWND_FRMPROJECTMANAGER)
    
    Function = True
 End Function
 
-
-''
-''
-Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
-   If pDoc = 0 Then Exit Function
-   
-   Dim wzFileType As WString * MAX_PATH = "Normal"
-   Dim wzFilePath As WString * MAX_PATH 
-   Dim wzFile     As WString * MAX_PATH
-   
-   ' Add the incoming document to the project. We simply need to set the flag for
-   ' instance of the document and update the Project Manager listview.
-   pDoc->IsProjectFile = True
-   
-   FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
-   FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
- 
-   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
-   Dim As Long nCount = ListView_GetItemCount(hLV)
-   
-   FF_ListView_InsertItem( hLV, nCount, 0, wzFile, Cast(Long, pDoc) )
-   FF_ListView_InsertItem( hLV, nCount, 1, wzFileType )
-   FF_ListView_InsertItem( hLV, nCount, 2, wzFilePath )
-   
-   
-   Function = 0
-End Function
 
 ''
 ''
@@ -212,13 +229,20 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileTy
    
    ' Find the position in the Listview where this document is located. Also, if we are setting a "Main"
    ' project file then we need to toggle any other Main file to "Normal". There can only be one Main file.
+   ' Likewise, there can only be one "Resource" file.
    For i = 0 To nCount - 1
        pDocList = Cast( clsDocument Ptr, FF_ListView_GetlParam( hLV, i ) )
        If pDocList = pDoc Then nFound = i
        If nFileType = FILETYPE_MAIN Then
           If pDocList->ProjectFileType = FILETYPE_MAIN Then
              pDocList->ProjectFileType = FILETYPE_NORMAL
-             wzFileType = "Normal": FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
+             wzFileType = L(210,"Normal"): FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
+          End If
+       End If   
+       If nFileType = FILETYPE_RESOURCE Then
+          If pDocList->ProjectFileType = FILETYPE_RESOURCE Then
+             pDocList->ProjectFileType = FILETYPE_NORMAL
+             wzFileType = L(210,"Normal"): FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
           End If
        End If   
    Next
@@ -226,12 +250,42 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileTy
    If nFound <> -1 Then
       pDoc->ProjectFileType = nFileType
       Select Case nFileType
-         Case FILETYPE_MAIN:   wzFileType = "Main"
-         Case FILETYPE_MODULE: wzFileType = "Module"
-         Case FILETYPE_NORMAL: wzFileType = "Normal"
+         Case FILETYPE_MAIN:     wzFileType = L(212,"Main")
+         Case FILETYPE_MODULE:   wzFileType = L(211,"Module")
+         Case FILETYPE_NORMAL:   wzFileType = L(210,"Normal")
+         Case FILETYPE_RESOURCE: wzFileType = L(213,"Resource")
       End Select
       Return FF_ListView_SetItemText( hLV, nFound, 1, wzFileType, MAX_PATH )
    End If    
+   
+   Function = 0
+End Function
+
+
+''
+''
+Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
+   If pDoc = 0 Then Exit Function
+   
+   Dim wzFileType As WString * MAX_PATH 
+   Dim wzFilePath As WString * MAX_PATH 
+   Dim wzFile     As WString * MAX_PATH
+   
+   ' Add the incoming document to the project. We simply need to set the flag for
+   ' instance of the document and update the Project Manager listview.
+   pDoc->IsProjectFile = True
+   
+   FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
+   FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
+ 
+   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+   Dim As Long nCount = ListView_GetItemCount(hLV)
+   
+   FF_ListView_InsertItem( hLV, nCount, 0, wzFile, Cast(Long, pDoc) )
+   FF_ListView_InsertItem( hLV, nCount, 1, wzFileType )
+   FF_ListView_InsertItem( hLV, nCount, 2, wzFilePath )
+   
+   this.ProjectSetFileType(pDoc, pDoc->ProjectFileType)
    
    Function = 0
 End Function
@@ -311,6 +365,16 @@ End Function
 Function clsApp.GetMainDocumentPtr() As clsDocument Ptr
    For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
       If m_arrDocuments(i)->ProjectFileType = FILETYPE_MAIN Then
+         Return m_arrDocuments(i)
+      End If
+   Next
+End Function
+
+''
+''
+Function clsApp.GetResourceDocumentPtr() As clsDocument Ptr
+   For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+      If m_arrDocuments(i)->ProjectFileType = FILETYPE_RESOURCE Then
          Return m_arrDocuments(i)
       End If
    Next

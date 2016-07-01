@@ -1,7 +1,4 @@
 
-
-
-
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmProjectManager
 ' ========================================================================================
@@ -13,15 +10,16 @@ Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
 
    If nCurSel > -1 Then
       pDoc = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, nCurSel) )
-      gpApp->IncludeFilename = *pDoc->DiskFilename
    End If
    
    Select Case id
-      Case IDM_OPENINCLUDE:           Function = OnCommand_OpenIncludeFile(HWND_FRMMAIN)
+      Case IDM_OPENINCLUDE           
+           frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
       Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
       Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
       Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
       Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
+      Case IDM_SETFILERESOURCE:       Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
    End Select
 
    Function = 0
@@ -40,6 +38,10 @@ Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    Dim As HWnd hLV = GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_LISTVIEW )
    SetWindowPos hLV, 0, rc.Left, rc.Top, rc.Right, rc.Bottom, SWP_SHOWWINDOW Or SWP_NOZORDER
 
+   Dim wzText As WString * MAX_PATH
+   wzText = L(188,"Project Manager") & " - [" & *gpApp->ProjectName & "]"
+   SetWindowTextW( HWND_FRMPROJECTMANAGER, wzText )                     
+   
    Function = 0
 End Function
 
@@ -184,12 +186,6 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    ListView_AddColumn( hLV, 2, WStr("Location"), 500 * pWindow->rxRatio )
                                                                        
                                                                        
-   Dim wzText As WString * MAX_PATH
-   
-   wzText = L(188,"Project Manager") & " - [" & *gpApp->ProjectName & "]"
-   SetWindowTextW( HWND_FRMPROJECTMANAGER, wzText )                     
-   
-   
    frmProjectManager_PositionWindows(HWND_FRMPROJECTMANAGER)
 
    ShowWindow HWND_FRMPROJECTMANAGER, nCmdShow

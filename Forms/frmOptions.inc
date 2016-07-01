@@ -21,6 +21,7 @@ Sub SaveEditorOptions()
    gConfig.MultipleInstances    = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES) )
    gConfig.AutoIndentation      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION) )
    gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE) )
+   gConfig.HideCompile          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKHIDECOMPILE) )
 
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize, Sizeof(gConfig.TabSize) )
    gConfig.KeywordCase = ComboBox_GetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE))
@@ -132,7 +133,7 @@ End Function
 Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
    Select Case id
-      Case IDC_FRMOPTIONS_CMDOK
+      Case IDOK
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
             ' Apply the newly saved options to all open Scintilla windows
@@ -146,7 +147,7 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             SendMessageW HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
-      Case IDC_FRMOPTIONS_CMDCANCEL
+      Case IDCANCEL
          If codeNotify = BN_CLICKED Then
             SendMessageW HWnd, WM_CLOSE, 0, 0
             Exit Function
@@ -203,7 +204,7 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
              MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
              SetWindowPos hForm, HWND_TOP, _
                             rc.Left + pWindow->ScaleX(5), pWindow->ScaleY(50), _
-                            pWindow->ScaleX(420), pWindow->ScaleY(300), _
+                            pWindow->ScaleX(420), pWindow->ScaleY(350), _
                             SWP_SHOWWINDOW
              
              InvalidateRect HWnd, ByVal Null, True
@@ -291,10 +292,10 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   pWindow->Create( hWndParent, L(113,"Environment Options"), @frmOptions_WndProc, 0, 0, 556, 439, _
+   pWindow->Create( hWndParent, L(113,"Environment Options"), @frmOptions_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
-        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(625, 410)
+        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_TOPMOST)
+   pWindow->SetClientSize(625, 460)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
    Dim As HWnd hLabel = _
@@ -305,19 +306,19 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    AfxSetWindowFont hLabel, hFont, True
 
    Dim As HWnd hWndTreeview = _
-        pWindow->AddControl("TREEVIEW", , IDC_FRMOPTIONS_TVWCATEGORIES, "", 10, 10, 200, 335, _
+        pWindow->AddControl("TREEVIEW", , IDC_FRMOPTIONS_TVWCATEGORIES, "", 10, 10, 200, 385, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or TVS_HASBUTTONS Or TVS_HASLINES Or TVS_LINESATROOT Or TVS_SHOWSELALWAYS, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
    
-   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 355, 600, 3, _
+   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 405, 600, 3, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDOK, L(0,"&OK"), 450, 367, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 450, 417, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDCANCEL, L(1,"&Cancel"), 535, 367, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 535, 417, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

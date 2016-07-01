@@ -13,6 +13,7 @@ CWindow: COMMCTRL: Rich Edit
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -25,47 +26,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-' ========================================================================================
-' Window procedure
-' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-   SELECT CASE uMsg
-
-      CASE WM_CREATE
-         EXIT FUNCTION
-
-      CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
-            CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  SendMessageW hwnd, WM_CLOSE, 0, 0
-                  EXIT FUNCTION
-               END IF
-         END SELECT
-
-      CASE WM_SIZE
-         ' // If the window isn't minimized, resize it
-         IF wParam <> SIZE_MINIMIZED THEN
-            ' // Resize the controls
-            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
-            IF pWindow THEN
-               pWindow->MoveWindow GetDlgItem(hwnd, IDC_RICHEDIT), 100, 50, pWindow->ClientWidth - 200, pWindow->ClientHeight - 150, CTRUE
-               pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 95, pWindow->ClientHeight - 35, 75, 23, CTRUE
-            END IF
-         END IF
-
-    	CASE WM_DESTROY
-         PostQuitMessage(0)
-         EXIT FUNCTION
-
-   END SELECT
-
-   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Main
@@ -92,7 +53,49 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    |
 
+   ' // Dispatch Windows messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // If the window isn't minimized, resize it
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the controls
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN
+               pWindow->MoveWindow GetDlgItem(hwnd, IDC_RICHEDIT), 100, 50, pWindow->ClientWidth - 200, pWindow->ClientHeight - 150, CTRUE
+               pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 95, pWindow->ClientHeight - 35, 75, 23, CTRUE
+            END IF
+         END IF
+
+    	CASE WM_DESTROY
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
 ' ========================================================================================

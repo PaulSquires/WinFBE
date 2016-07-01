@@ -4,7 +4,7 @@ FBGUI
 CWindow: MDI Framework Demo
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_MDIDemo.pbtpl - template
+' File: CW_MDIDemo.pbtpl
 ' Contents: CWindow MDI Framework Demo
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -13,31 +13,34 @@ CWindow: MDI Framework Demo
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #define USEMDI
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
 ' // Edit control identifier
-#define IDC_EDIT 101
+CONST IDC_EDIT = 101
 
 ' // Menu identifiers
-#define IDM_NEW      1001   ' New file
-#define IDM_OPEN     1002   ' Open file...
-#define IDM_SAVE     1003   ' Save file
-#define IDM_SAVEAS   1004   ' Save file as...
-#define IDM_EXIT     1005   ' Exit
+ENUM
+   IDM_NEW = 1001     ' New file
+   IDM_OPEN           ' Open file...
+   IDM_SAVE           ' Save file
+   IDM_SAVEAS         ' Save file as...
+   IDM_EXIT           ' Exit
 
-#define IDM_UNDO     2001   ' Undo
-#define IDM_CUT      2002   ' Cut
-#define IDM_COPY     2003   ' Copy
-#define IDM_PASTE    2004   ' Paste
+   IDM_UNDO = 2001    ' Undo
+   IDM_CUT            ' Cut
+   IDM_COPY           ' Copy
+   IDM_PASTE          ' Paste
 
-#define IDM_TILEH    3001   ' Tile hosizontal
-#define IDM_TILEV    3002   ' Tile vertical
-#define IDM_CASCADE  3003   ' Cascade
-#define IDM_ARRANGE  3004   ' Arrange icons
-#define IDM_CLOSE    3005   ' Close
-#define IDM_CLOSEALL 3006   ' Close all
+   IDM_TILEH = 3001   ' Tile hosizontal
+   IDM_TILEV          ' Tile vertical
+   IDM_CASCADE        ' Cascade
+   IDM_ARRANGE        ' Arrange icons
+   IDM_CLOSE          ' Close
+   IDM_CLOSEALL       ' Close all
+END ENUM
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -45,6 +48,9 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL nCmdShow AS LONG) AS LONG
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Build the menu
@@ -86,67 +92,48 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Default CWindow MDI callback function.
+' Main
 ' ========================================================================================
-FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
 
-   DIM hEdit AS HWND
-   DIM rc AS RECT
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
 
-   SELECT CASE uMsg
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "MDI with CWindow", @WndProc)
+   ' // Change the window style to avoid flicker
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Set the client size
+   pWindow.SetClientSize 650, 400
+   ' // Center the window
+   pWindow.Center
 
-      CASE WM_CREATE
-         ' // Retrieve a pointer to the CWindow class
-         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
-         ' // Create and edit control
-         IF pWindow THEN
-            GetClientRect hwnd, @rc
-            pWindow->AddControl("Edit", hwnd, IDC_EDIT, "", 0, 0, rc.Right, rc.Bottom, _
-               WS_CHILD OR WS_VISIBLE OR ES_MULTILINE OR WS_VSCROLL OR WS_HSCROLL OR ES_AUTOHSCROLL OR ES_AUTOVSCROLL OR ES_WANTRETURN OR ES_NOHIDESEL)
-            EXIT FUNCTION
-         END IF
+   ' // Create a menu
+   DIM hMenu AS HMENU
+   hMenu = BuildMenu
+   SetMenu pWindow.hWindow, hMenu
 
-      CASE WM_MDIACTIVATE
-         IF lParam = hwnd THEN
-         END IF
-         EXIT FUNCTION
+   '// Create a MDI client child window
+   DIM hwindowMenu AS HMENU
+   hwindowMenu = GetSubMenu(hMenu, 2)
+   pWindow.CreateMDIWindow(101, 0, 0, 0, 0, 0, 0, hwindowMenu, @MDIWindowProc)
 
-      CASE WM_SETFOCUS
-         ' // Set the keyboard focus to the first control that is
-         ' // visible, not disabled, and has the WS_TABSTOP style
-         SetFocus GetNextDlgTabItem(hwnd, NULL, FALSE)
+   |
 
-      CASE WM_SIZE
-         IF wParam <> SIZE_MINIMIZED THEN
-            ' // Resize the window and/or its controls
-            hEdit = GetDlgItem(hwnd, IDC_EDIT)
-            MoveWindow hEdit, 0, 0, LOWORD(lParam), HIWORD(lParam), CTRUE
-         END IF
-
-         ' Don't exit. Let DefMDIChildProcW to process the message for
-         ' properly resizing of the MDI child window.
-
-      CASE WM_DESTROY
-         ' // Do cleanup if needed, such removing properties attached
-         ' // to the MDI child window.
-         EXIT FUNCTION
-
-   END SELECT
-
-   ' // The DefMDIChildProc function provides default processing for any window
-   ' // message that the window procedure of a multiple-document interface (MDI)
-   ' // child window does not process. A window message not processed by the window
-   ' // procedure must be passed to the DefMDIChildProc function, not to the
-   ' // DefWindowProc function.
-   FUNCTION = DefMDIChildProcW(hwnd, uMsg, wParam, lParam)
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Window procedure
+' Main window callback procedure
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    STATIC hwndClient AS HWND    ' // Handle of the MDI client window
    DIM hwndActive AS HWND       ' // Active window
@@ -302,38 +289,59 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Main
+' Default CWindow MDI callback function.
 ' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
+FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
+   DIM hEdit AS HWND
+   DIM rc AS RECT
 
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "MDI with CWindow", @WndProc)
-   ' // Change the window style to avoid flicker
-   pWindow.ClassStyle = CS_DBLCLKS
-   ' // Set the client size
-   pWindow.SetClientSize 650, 400
-   ' // Center the window
-   pWindow.Center
+   SELECT CASE uMsg
 
-   ' // Create a menu
-   DIM hMenu AS HMENU
-   hMenu = BuildMenu
-   SetMenu pWindow.hWindow, hMenu
+      CASE WM_CREATE
+         ' // Retrieve a pointer to the CWindow class
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(GetAncestor(hwnd, GA_ROOTOWNER))
+         ' // Create and edit control
+         IF pWindow THEN
+            GetClientRect hwnd, @rc
+            pWindow->AddControl("Edit", hwnd, IDC_EDIT, "", 0, 0, rc.Right, rc.Bottom, _
+               WS_CHILD OR WS_VISIBLE OR ES_MULTILINE OR WS_VSCROLL OR WS_HSCROLL OR ES_AUTOHSCROLL OR ES_AUTOVSCROLL OR ES_WANTRETURN OR ES_NOHIDESEL)
+            EXIT FUNCTION
+         END IF
 
-   '// Create a MDI client child window
-   DIM hwindowMenu AS HMENU
-   hwindowMenu = GetSubMenu(hMenu, 2)
-   pWindow.CreateMDIWindow(101, 0, 0, 0, 0, 0, 0, hwindowMenu, @MDIWindowProc)
+      CASE WM_MDIACTIVATE
+         IF lParam = hwnd THEN
+         END IF
+         EXIT FUNCTION
 
-   |
+      CASE WM_SETFOCUS
+         ' // Set the keyboard focus to the first control that is
+         ' // visible, not disabled, and has the WS_TABSTOP style
+         SetFocus GetNextDlgTabItem(hwnd, NULL, FALSE)
 
-   FUNCTION = pWindow.DoEvents(nCmdShow)
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the window and/or its controls
+            hEdit = GetDlgItem(hwnd, IDC_EDIT)
+            MoveWindow hEdit, 0, 0, LOWORD(lParam), HIWORD(lParam), CTRUE
+         END IF
+
+         ' Don't exit. Let DefMDIChildProcW to process the message for
+         ' properly resizing of the MDI child window.
+
+      CASE WM_DESTROY
+         ' // Do cleanup if needed, such removing properties attached
+         ' // to the MDI child window.
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // The DefMDIChildProc function provides default processing for any window
+   ' // message that the window procedure of a multiple-document interface (MDI)
+   ' // child window does not process. A window message not processed by the window
+   ' // procedure must be passed to the DefMDIChildProc function, not to the
+   ' // DefWindowProc function.
+   FUNCTION = DefMDIChildProcW(hwnd, uMsg, wParam, lParam)
 
 END FUNCTION
 ' ========================================================================================

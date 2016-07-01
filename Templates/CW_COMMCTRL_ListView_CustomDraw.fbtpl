@@ -13,7 +13,9 @@ CWindow: COMMCTRL: ListView Custom Draw
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/AfxCtl.inc"
 USING Afx.CWindowClass
 
 #define IDC_LISTVIEW 1001
@@ -25,10 +27,80 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Custom Draw ListView (High DPI)", @WndProc)
+   pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
+   pWindow.SetClientSize(565, 320)
+   pWindow.Center
+
+   ' // Adds a listview
+   DIM hListView AS HWND
+   hListView = pWindow.AddControl("ListView", , IDC_LISTVIEW, "")
+
+   ' // Add some extended styles
+   DIM dwExStyle AS DWORD
+   dwExStyle = ListView_GetExtendedListViewStyle(hListView)
+   dwExStyle = dwExStyle OR LVS_EX_FULLROWSELECT OR LVS_EX_GRIDLINES
+   ListView_SetExtendedListViewStyle(hListView, dwExStyle)
+
+   ' // Add the header's column names
+   DIM i AS LONG, lvc AS LVCOLUMNW, wszText AS WSTRING * 260
+   lvc.mask = LVCF_FMT OR LVCF_WIDTH OR LVCF_TEXT OR LVCF_SUBITEM
+   FOR i = 0 TO 4
+      wszText = "Column " & STR(i)
+      lvc.pszText = @wszText
+      lvc.cx = pWindow.ScaleX(110)
+      lvc.iSubItem = i
+      ListView_InsertColumn(hListView, i, @lvc)
+   NEXT
+
+   ' // Populate the ListView with some data
+   DIM x AS LONG
+   DIM lvi AS LVITEMW
+   lvi.mask = LVIF_TEXT
+   FOR i = 0 to 29
+      lvi.iItem = i
+      lvi.iSubItem = 0
+      wszText = "Column 0 Row" + WSTR(i)
+      lvi.pszText = @wszText
+      ListView_InsertItem(hListView, @lvi)
+      FOR x = 1 TO 4
+         wszText = "Column " & WSTR(x) & " Row" + WSTR(i)
+         ListView_SetItemText(hListView, i, x, @wszText)
+      NEXT
+   NEXT
+
+   ' // Select the fist item
+   ListView_SetItemState(hListView, 0, LVIS_FOCUSED OR LVIS_SELECTED, &H000F)
+   ' // Set the focus in the ListView
+   SetFocus hListView
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
 ' ================================================================e========================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    DIM pNmh  AS NMHDR PTR            ' // Pointer to a NMHDR structure
    DIM pLvNm AS NMLISTVIEW PTR       ' // Pointer to a NMLISTVIEW structure
@@ -65,7 +137,7 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
             CASE IDC_LISTVIEW
                pLvNm = CAST(NMLISTVIEW PTR, lParam)
                SELECT CASE pLvNm->hdr.code
-                  CASE CULNG(NM_CUSTOMDRAW)   ' CULNG needed with FB < 1.05 because NM_CUSTOMDRAW is negative
+                  CASE NM_CUSTOMDRAW
                      pLvCd = CAST(NMLVCUSTOMDRAW PTR, lParam)
                      SELECT CASE pLvCd->nmcd.dwDrawStage
                         CASE CDDS_PREPAINT, CDDS_ITEMPREPAINT
@@ -104,74 +176,6 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
    ' // Pass unprocessed messages to DefWindowProc
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Custom Draw ListView (High DPI)", @WndProc)
-   pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
-   pWindow.SetClientSize(565, 320)
-   pWindow.Center
-
-   ' // Adds a listview
-   DIM hListView AS HWND
-   hListView = pWindow.AddControl("ListView", , IDC_LISTVIEW, "")
-
-   ' // Add some extended styles
-   DIM dwExStyle AS DWORD
-   dwExStyle = ListView_GetExtendedListViewStyle(hListView)
-   dwExStyle = dwExStyle OR LVS_EX_FULLROWSELECT OR LVS_EX_GRIDLINES
-   ListView_SetExtendedListViewStyle(hListView, dwExStyle)
-
-   ' // Add the header's column names
-   DIM i AS LONG, lvc AS LVCOLUMNW, wszText AS WSTRING * 260
-   lvc.mask = LVCF_FMT OR LVCF_WIDTH OR LVCF_TEXT OR LVCF_SUBITEM
-   FOR i = 0 TO 4
-      wszText = "Column " & STR(i)
-      lvc.pszText = @wszText
-      lvc.cx = pWindow.ScaleX(110)
-      lvc.iSubItem = i
-      SendMessageW(hListView, LVM_INSERTCOLUMNW, i, CAST(LPARAM, @lvc))
-   NEXT
-
-   ' // Populate the ListView with some data
-   DIM x AS LONG
-   DIM lvi AS LVITEMW
-   lvi.mask = LVIF_TEXT
-   FOR i = 0 to 29
-      lvi.iItem = i
-      lvi.iSubItem = 0
-      wszText = "Column 0 Row" + WSTR(i)
-      lvi.pszText = @wszText
-      SendMessageW hListView, LVM_INSERTITEMW, 0, CAST(LPARAM, @lvi)
-'      ListView_InsertItem(hListView, @lvi)   ' if defined unicode
-      FOR x = 1 TO 4
-         lvi.iSubItem = x
-         wszText = "Column " & WSTR(x) & " Row" + WSTR(i)
-         lvi.pszText = @wszText
-         SendMessageW hListView, LVM_SETITEMTEXTW, i, CAST(LPARAM, @lvi)
-      NEXT
-   NEXT
-
-   ' // Select the fist item
-   ListView_SetItemState(hListView, 0, LVIS_FOCUSED OR LVIS_SELECTED, &H000F)
-
-   ' // Set the focus in the ListView
-   SetFocus hListView
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

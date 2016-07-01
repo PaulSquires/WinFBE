@@ -1,7 +1,7 @@
 ' ########################################################################################
 ' File: CWindow.inc
 ' Version: 1.0
-' Release candidate 10
+' Release candidate 12
 ' Contents: A wrapper class to create a SDK main window and add controls to it.
 ' Operating system: Microsoft Windows
 ' Compiler: FreeBasic 32 & 64-bit, Unicode.
@@ -17,6 +17,8 @@
 #include once "win/commctrl.bi"
 #include once "win/richedit.bi"
 #include once "Afx/AfxWin.inc"
+#include once "Afx/CScrollWindow.inc"
+USING Afx.CScrollWindowClass
 
 NAMESPACE Afx.CWindowClass
 
@@ -54,6 +56,7 @@ TYPE CWindow
       DIM m_wszMDIClassName AS WSTRING * 260          ' // MDI Class name
       #endif
       m_hRichEditLib AS HMODULE                       ' // Rich Edit moudle handle
+      m_pScrollWindow AS CScrollWindow PTR            ' // Pointer to the scroll window class
 
    Public:
       DECLARE CONSTRUCTOR (BYREF wszClassName AS CONST WSTRING = "")
@@ -75,6 +78,10 @@ TYPE CWindow
       DECLARE PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
       DECLARE PROPERTY ClassStyle () AS ULONG_PTR
       DECLARE PROPERTY ClassStyle (BYVAL dwStyle AS ULONG_PTR)
+      DECLARE PROPERTY WindowStyle () AS ULONG_PTR
+      DECLARE PROPERTY WindowStyle (BYVAL dwStyle AS ULONG_PTR)
+      DECLARE PROPERTY WindowExStyle () AS ULONG_PTR
+      DECLARE PROPERTY WindowExStyle (BYVAL dwExStyle AS ULONG_PTR)
       DECLARE PROPERTY DefaultFontName () AS STRING
       DECLARE PROPERTY DefaultFontName (BYREF wszFontName AS WSTRING)
       DECLARE PROPERTY DefaultFontSize () AS LONG
@@ -111,6 +118,9 @@ TYPE CWindow
       DECLARE FUNCTION GetControlClientRect OVERLOAD (BYVAL hwnd AS HWND) AS RECT
       DECLARE SUB GetWorkArea OVERLOAD (BYVAL lpRect AS LPRECT)
       DECLARE FUNCTION GetWorkArea OVERLOAD () AS RECT
+      DECLARE FUNCTION ControlHandle (BYVAL cID AS LONG) AS HWND
+      DECLARE PROPERTY ScrollWindowPtr () AS CScrollWindow PTR
+      DECLARE PROPERTY ScrollWindowPtr (BYVAL pScrollWindow AS CScrollWindow PTR)
       DECLARE SUB Resize ()
       DECLARE FUNCTION SetWindowPos (BYVAL hwnd AS HWND, BYVAL hwndInsertAfter AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL cx AS LONG, BYVAL cy AS LONG, BYVAL uFlags AS UINT) AS BOOLEAN
       DECLARE FUNCTION MoveWindow (BYVAL hwnd AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL bRepaint AS BOOLEAN) AS BOOLEAN
@@ -427,6 +437,7 @@ DESTRUCTOR CWindow
    IF m_hAccel THEN .DestroyAcceleratorTable(m_hAccel)
    IF m_wszClassName <> "" THEN .UnregisterClassW(m_wszClassName, m_hInstance)
    IF m_hRichEditLib THEN FreeLibrary m_hRichEditLib
+   IF m_pScrollWindow THEN Delete m_pScrollWindow
 
 END DESTRUCTOR
 ' ========================================================================================
@@ -540,7 +551,7 @@ FUNCTION CWindow.Create (BYVAL hParent AS HWND = NULL, BYREF wszTitle AS WSTRING
    ' // Set the font
    IF m_hFont THEN .SendMessageW m_hwnd, WM_SETFONT, CAST(WPARAM, m_hFont), FALSE
    ' // Store the class pointer
-   .SetWindowLongPtr(m_hwnd, 0, CAST(LONG_PTR, @this))
+   .SetWindowLongPtrW(m_hwnd, 0, CAST(LONG_PTR, @this))
 
 END FUNCTION
 ' ========================================================================================
@@ -599,7 +610,7 @@ END PROPERTY
 ' =====================================================================================
 
 ' =====================================================================================
-' Gets the window-class style bits.
+' Gets the window class style.
 ' =====================================================================================
 PROPERTY CWindow.ClassStyle () AS ULONG_PTR
    IF m_hwnd = NULL THEN EXIT PROPERTY
@@ -608,11 +619,47 @@ END PROPERTY
 ' =====================================================================================
 
 ' =====================================================================================
-' Gets the window-class style bits.
+' Gets the window class style.
 ' =====================================================================================
 PROPERTY CWindow.ClassStyle (BYVAL dwStyle AS ULONG_PTR)
    IF m_hwnd = NULL THEN EXIT PROPERTY
    .SetClassLongPtrW(m_hwnd, GCL_STYLE, dwStyle)
+END PROPERTY
+' =====================================================================================
+
+' =====================================================================================
+' Gets the window style.
+' =====================================================================================
+PROPERTY CWindow.WindowStyle () AS ULONG_PTR
+   IF m_hwnd = NULL THEN EXIT PROPERTY
+   PROPERTY = .GetWindowLongPtrW(m_hwnd, GWL_STYLE)
+END PROPERTY
+' =====================================================================================
+
+' =====================================================================================
+' Sets the window style.
+' =====================================================================================
+PROPERTY CWindow.WindowStyle (BYVAL dwStyle AS ULONG_PTR)
+   IF m_hwnd = NULL THEN EXIT PROPERTY
+   .SetWindowLongPtrW(m_hwnd, GWL_STYLE, dwStyle)
+END PROPERTY
+' =====================================================================================
+
+' =====================================================================================
+' Gets the window extended style.
+' =====================================================================================
+PROPERTY CWindow.WindowExStyle () AS ULONG_PTR
+   IF m_hwnd = NULL THEN EXIT PROPERTY
+   PROPERTY = .GetWindowLongPtrW(m_hwnd, GWL_EXSTYLE)
+END PROPERTY
+' =====================================================================================
+
+' =====================================================================================
+' Sets the window extended style.
+' =====================================================================================
+PROPERTY CWindow.WindowExStyle (BYVAL dwExStyle AS ULONG_PTR)
+   IF m_hwnd = NULL THEN EXIT PROPERTY
+   .SetWindowLongPtrW(m_hwnd, GWL_EXSTYLE, dwExStyle)
 END PROPERTY
 ' =====================================================================================
 
@@ -989,6 +1036,30 @@ END FUNCTION
 ' =====================================================================================
 
 ' =====================================================================================
+' Retrieves a handle to the child control specified by its identifier.
+' =====================================================================================
+FUNCTION CWindow.ControlHandle (BYVAL cID AS LONG) AS HWND
+   FUNCTION = .GetDlgItem(m_hwnd, cID)
+END FUNCTION
+' =====================================================================================
+
+' =====================================================================================
+' Returns a pointer to the scroll window class
+' =====================================================================================
+PROPERTY CWindow.ScrollWindowPtr () AS CScrollWindow PTR
+   PROPERTY = m_pScrollWindow
+END PROPERTY
+' =====================================================================================
+' =====================================================================================
+' Sets a pointer to the scroll window class
+' =====================================================================================
+PROPERTY CWindow.ScrollWindowPtr (BYVAL pScrollWindow AS CScrollWindow PTR)
+   IF m_pScrollWindow THEN Delete m_pScrollWindow
+   m_pScrollWindow = pScrollWindow
+END PROPERTY
+' =====================================================================================
+
+' =====================================================================================
 ' Resizes the window
 ' =====================================================================================
 SUB CWindow.Resize
@@ -1345,7 +1416,7 @@ FUNCTION CWindow.AddControl ( _
          bSetFont = FALSE
       CASE "TRACKBAR", "MSCTLS_TRACKBAR32"
          wsClassName = "msctls_trackbar32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR TBS_AUTOTICKS OR TBS_HORZ OR TBS_BOTTOM
+         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR TBS_AUTOTICKS OR TBS_HORZ OR TBS_BOTTOM OR TBS_TOOLTIPS
          bSetFont = FALSE
       CASE "UPDOWN", "MSCTLS_UPDOWN32"
          wsClassName = "msctls_updown32"
@@ -1723,7 +1794,7 @@ END FUNCTION
 TYPE CTabPage EXTENDS CWindow
 
    Private:
-      m_hTabPage AS HWND   ' // Tab page handle
+      m_hTabPage AS HWND                     ' // Tab page handle
 
    Public:
       DECLARE DESTRUCTOR
@@ -1910,14 +1981,11 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a pointer to the CWindow class given the handle of the window created with it
-' or the handle of any of the window's child controls.
+' Returns a pointer to the CWindow class given the handle of its associated window handle.
+' To retrieve it from the handle of any of its child windows or controls, use AfxCWindowOwnerPtr.
 ' ========================================================================================
 PRIVATE FUNCTION AfxCWindowPtr OVERLOAD (BYVAL hwnd AS HWND) AS CWindow PTR
-   IF hwnd = NULL THEN EXIT FUNCTION
-   DIM hRootOwner AS .HWND = .GetAncestor(hwnd, GA_ROOTOWNER)
-   IF hRootOwner = NULL THEN EXIT FUNCTION
-   FUNCTION = CAST(CWindow PTR, .GetWindowLongPtr(hRootOwner, 0))
+   FUNCTION = CAST(CWindow PTR, .GetWindowLongPtrW(hwnd, 0))
 END FUNCTION
 ' ========================================================================================
 
@@ -1939,11 +2007,23 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
+' Returns a pointer to the CWindow class given the handle of the window created with it
+' or the handle of any of it's children.
+' ========================================================================================
+PRIVATE FUNCTION AfxCWindowOwnerPtr OVERLOAD (BYVAL hwnd AS HWND) AS CWindow PTR
+   IF hwnd = NULL THEN EXIT FUNCTION
+   DIM hRootOwner AS .HWND = .GetAncestor(hwnd, GA_ROOTOWNER)
+   IF hRootOwner = NULL THEN EXIT FUNCTION
+   FUNCTION = CAST(CWindow PTR, .GetWindowLongPtrW(hRootOwner, 0))
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
 ' Returns a pointer to the CTabPage class given the handle of the tab control to which the
 ' tab page is associated and the zero-based tab index. If nTabIdx is ommited, the function
 ' will return the pointer of the selected tab, if any.
 ' ========================================================================================
-PRIVATE FUNCTION AfxCTabPagePtr (BYVAL hTab AS HWND, BYVAL idx AS LONG = -1) AS CTabPage PTR
+PRIVATE FUNCTION AfxCTabPagePtr OVERLOAD (BYVAL hTab AS HWND, BYVAL idx AS LONG) AS CTabPage PTR
    IF hTab = NULL THEN EXIT FUNCTION
    IF idx = -1 THEN idx = SendMessageW(hTab, TCM_GETCURSEL, 0, 0)
    IF idx = -1 THEN EXIT FUNCTION   ' No tab selected
@@ -1955,6 +2035,24 @@ PRIVATE FUNCTION AfxCTabPagePtr (BYVAL hTab AS HWND, BYVAL idx AS LONG = -1) AS 
          FUNCTION = CAST(CTabPage PTR, tci.lParam)
       END IF
    END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns a pointer to the CScrollWindow class given the handle of the tab control to which the
+' tab page is associated and the zero-based tab index. If nTabIdx is ommited, the function
+' will return the pointer associated to the selected tab, if any.
+' ========================================================================================
+PRIVATE FUNCTION AfxScrollTabPagePtr (BYVAL hTab AS HWND, BYVAL idx AS LONG) AS CScrollWindow PTR
+   FUNCTION = AfxCTabPagePtr(hTab, idx)->ScrollWindowPtr
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns a pointer to the CScrollWindow class given the handle of the window attached to it.
+' ========================================================================================
+PRIVATE FUNCTION AfxScrollWindowPtr (BYVAL hwnd AS HWND) AS CScrollWindow PTR
+   FUNCTION = cast(CWindow PTR, GetWindowLongPtr(hwnd, 0))->ScrollWindowPtr
 END FUNCTION
 ' ========================================================================================
 

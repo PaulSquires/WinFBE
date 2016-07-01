@@ -5,8 +5,6 @@
 
 [ ] Re-enable menu option and write code for "Spaces to Tabs" option.
 
-[ ] DragDrop files open into application.
-
 [ ] Syntax keyword highlighting. 
     [ ] Investigate mixed case keywords.
     [ ] WinAPI keyword list.
@@ -18,8 +16,6 @@
 [ ] Implement code for Sub/Function Declaration menu option.
 
 [ ] Implement code for Last Position menu option.
-
-[ ] Implement Project code and logic. This is a very large topic and will be saved until all other issues resolved.
 
 [ ] Run Executable.
 

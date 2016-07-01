@@ -4,7 +4,7 @@ FBGUI
 CWindow: COMMCTRL: Line control
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_COMMCTRL_Line.fbtpl - Template
+' File: CW_COMMCTRL_Line.fbtpl
 ' Contents: Demonstrates the use of the Line control.
 ' Remarks: A line control may also be a rectangle (empty or filled).
 ' Compiler: FreeBasic 32 & 64 bit
@@ -14,6 +14,7 @@ CWindow: COMMCTRL: Line control
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
+#define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 USING Afx.CWindowClass
 
@@ -28,10 +29,41 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
 ' ========================================================================================
-' Window procedure
+' Main
 ' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Line example", @WndProc)
+   pWindow.Center
+
+   ' // Add the controls
+   pWindow.AddControl("Line", , IDC_LINE1, "", 20, 20, 305, 1)
+   pWindow.AddControl("Line", , IDC_LINE2, "", 20, 40, 305, 15, WS_VISIBLE OR SS_ETCHEDFRAME OR SS_NOTIFY)
+   pWindow.AddControl("Line", , IDC_LINE3, "", 20, 80, 305, 30)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE uMsg
 
@@ -51,38 +83,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
     	CASE WM_DESTROY
+         ' // End the application
          PostQuitMessage(0)
          EXIT FUNCTION
 
    END SELECT
 
+   ' // Default processing of Windows messages
    FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Main
-' ========================================================================================
-FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                  BYVAL hPrevInstance AS HINSTANCE, _
-                  BYVAL szCmdLine AS ZSTRING PTR, _
-                  BYVAL nCmdShow AS LONG) AS LONG
-
-   ' // Set process DPI aware
-   AfxSetProcessDPIAware
-
-   DIM pWindow AS CWindow
-   pWindow.Create(NULL, "Line example", @WndProc)
-   pWindow.Center
-
-   pWindow.AddControl("Line", , IDC_LINE1, "", 20, 20, 305, 1)
-   pWindow.AddControl("Line", , IDC_LINE2, "", 20, 40, 305, 15, WS_VISIBLE OR SS_ETCHEDFRAME OR SS_NOTIFY)
-   pWindow.AddControl("Line", , IDC_LINE3, "", 20, 80, 305, 30)
-
-
-
-   FUNCTION = pWindow.DoEvents(nCmdShow)
 
 END FUNCTION
 ' ========================================================================================

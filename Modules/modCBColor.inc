@@ -85,7 +85,7 @@ Function CBProc( ByVal HWnd   As HWnd, _
 
          Select Case lpdis->itemAction
             Case ODA_DRAWENTIRE, ODA_SELECT
-               Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+               Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(HWnd)
                ' Clear background
                FillRect lpdis->hDC, @lpdis->rcItem, GetSysColorBrush(COLOR_WINDOW)
                ' Set the font

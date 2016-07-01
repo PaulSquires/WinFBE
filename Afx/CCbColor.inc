@@ -57,6 +57,8 @@ TYPE CCbColor
       DECLARE PROPERTY UserColor (BYVAL nColor AS COLORREF)
       DECLARE PROPERTY UserColor () AS COLORREF
       DECLARE PROPERTY SelColor () AS COLORREF
+      DECLARE PROPERTY ScalingRatio () AS SINGLE
+      DECLARE PROPERTY ScalingRatio (BYVAL rxRatio AS SINGLE)
       DECLARE STATIC FUNCTION CCbColorProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 END TYPE
@@ -336,6 +338,19 @@ PROPERTY CCbColor.SelColor () AS COLORREF
    DIM nSel AS LRESULT
    nSel = SendMessageW(m_hCtl, CB_GETCURSEL, 0, 0)
    IF nSel > CB_ERR THEN PROPERTY = this.GetQBColor(m_hCtl, nSel, 1)
+END PROPERTY
+' ========================================================================================
+
+' ========================================================================================
+' Gets/sets the width scaling ratio
+' ========================================================================================
+PROPERTY CCbColor.ScalingRatio (BYVAL rxRatio AS SINGLE)
+   m_ratio = rxRatio
+END PROPERTY
+' ========================================================================================
+' ========================================================================================
+PROPERTY CCbColor.ScalingRatio () AS SINGLE
+   PROPERTY = m_ratio
 END PROPERTY
 ' ========================================================================================
 

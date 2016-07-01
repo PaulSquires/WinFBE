@@ -179,7 +179,7 @@ CONSTRUCTOR CPgBar3D (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF 
    ' // Register the class
    DIM wAtom AS ATOM
    DIM wcexw AS WNDCLASSEXW
-   DIM wszClassName AS WSTRING * 260 = "PGBAR3D"
+   DIM wszClassName AS WSTRING * 260 = "AFX_PGBAR3D"
    IF .GetClassInfoExW(.GetModuleHandleW(NULL), @wszClassName, @wcexw) = 0 THEN
       ' // Fill the WNDCLASSEXW structure
       WITH wcexw
@@ -212,7 +212,7 @@ CONSTRUCTOR CPgBar3D (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF 
    IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CHILD OR WS_TABSTOP
    IF pWindow THEN m_hCtl = pWindow->AddControl(wszClassName, pWindow->hWindow, cID, wszTitle, x, y, nWidth, nHeight, dwStyle, dwExStyle, lpParam)
    IF m_hCtl THEN
-      .SetWindowLongPtr m_hCtl, 0, CAST(LONG_PTR, @this)
+      .SetWindowLongPtrW m_hCtl, 0, CAST(LONG_PTR, @this)
       IF LEN(wszTitle) THEN .SetWindowTextW m_hCtl, wszTitle
       ' // Set the same font used by the parent
       DIM lfw AS LOGFONTW
@@ -263,7 +263,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       CASE WM_PAINT
          ' // Get a pointer to the class
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          ' // Get the size of the control
          .GetClientRect hwnd, @rc
          ' // Clear the background
@@ -362,7 +362,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       CASE PGB_STEPUP
          ' // Increases step while < max; wParam and lParam shall be 0
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pPgBar->m_pStep < pPgBar->m_pMax THEN
             pPgBar->m_pStep = pPgBar->m_pStep + 1
             .SendMessageW hwnd, PGB_REFRESH, 0, 0
@@ -371,7 +371,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // Step down while > 0
       CASE PGB_STEPDN
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pPgBar->m_pStep > 0 THEN
             pPgBar->m_pStep = pPgBar->m_pStep - 1
             .SendMessageW hwnd, PGB_REFRESH, 0, 0
@@ -380,7 +380,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // Build gradient bars
       CASE PGB_BUILDBARS
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->CreateGradientBars
          IF lParam THEN .SendMessageW hwnd, PGB_REFRESH, 0, 0
          EXIT FUNCTION
@@ -393,32 +393,32 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // wParam sets progess bar value, lParam controls redraw
       CASE PGB_SETVALUE
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_pStep = MIN(pPgBar->m_pMax, wParam)
          IF lParam THEN .SendMessageW hwnd, PGB_REFRESH, 0, 0
          EXIT FUNCTION
 
       ' // Return the current step value
       CASE PGB_GETVALUE
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_pStep
          EXIT FUNCTION
 
      ' // Set max number of steps
       CASE PGB_SETMAX
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_pMax = wParam
          EXIT FUNCTION
 
       ' // Get max number of steps
       CASE PGB_GETMAX
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_pMax
          EXIT FUNCTION
 
       ' // Set bar color
       CASE PGB_SETBARCOL
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_barCol = wParam * 24 + 1
          ' // Rebuild the bars
          IF lParam THEN .SendMessageW hwnd, PGB_BUILDBARS, 0, 1
@@ -426,13 +426,13 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // Return bar color scheme
       CASE PGB_GETBARCOL
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_barCol / 24
          EXIT FUNCTION
       ' // Set background color via wParam
 
       CASE PGB_SETCOLBKG
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_bkgColor = wParam
          ' // Delete old brush
          IF pPgBar->m_hbBack THEN DeleteObject pPgBar->m_hbBack
@@ -443,87 +443,87 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // Return background color
       CASE PGB_GETCOLBKG
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_bkgColor
          EXIT FUNCTION
 
       ' // Bar direction; left to right = 0, default
       CASE PGB_SETBARDIR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_direction = wParam
          IF lParam THEN .SendMessageW hwnd, PGB_BUILDBARS, 0, 1
          EXIT FUNCTION
 
       ' // Return bar direction
       CASE PGB_GETBARDIR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_direction
          EXIT FUNCTION
 
       ' // Set gradient direction; horizontal = 0, default
       CASE PGB_SETGRADIENTDIR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_gradientDir = wParam
          IF lParam THEN .SendMessageW hwnd, PGB_BUILDBARS, 0, 1
          EXIT FUNCTION
 
       ' // Return gradient direction
       CASE PGB_GETGRADIENTDIR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_gradientDir
          EXIT FUNCTION
 
       ' // Set text on/off
       CASE PGB_SETTXTON
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_txtOnOff = lParam
          EXIT FUNCTION
 
       ' // Return text on/off setting
       CASE PGB_GETTXTON
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_txtOnOff
          EXIT FUNCTION
 
       ' // Set text position in the control
       CASE PGB_SETTXTPOS
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_txtPos = wParam
          EXIT FUNCTION
 
       ' // Return txtPos setting
       CASE PGB_GETTXTPOS
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_txtPos
          EXIT FUNCTION
 
       ' // Set text color
       CASE PGB_SETTXTCOLBAR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_txtColBar = wParam
          EXIT FUNCTION
 
       ' // Return bar text color
       CASE PGB_GETTXTCOLBAR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_txtColBar
          EXIT FUNCTION
 
       ' // Set text background color
       CASE PGB_SETTXTCOLBKG
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_txtColBkg = wParam
          EXIT FUNCTION
 
       ' // Return background text color
       CASE PGB_GETTXTCOLBKG
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = pPgBar->m_txtColBkg
          EXIT FUNCTION
 
       ' // Set the text of the bar
       CASE PGB_SETTXTBAR
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          tp = CAST(WSTRING PTR, wParam)
          pPgBar->m_txtBar = *tp
          IF lParam THEN .SendMessageW hwnd, PGB_REFRESH, 0, 0
@@ -531,7 +531,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // Set text of the background
       CASE PGB_SETTXTBKG
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          tp = CAST(WSTRING PTR, wParam)
          pPgBar->m_txtBkg = *tp
          IF lParam THEN .SendMessageW hwnd, PGB_REFRESH, 0, 0
@@ -539,7 +539,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
      ' // Set the font handle
      CASE PGB_SETFONT
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pPgBar->m_hFont THEN DeleteObject pPgBar->m_hFont
          pPgBar->m_hFont = CAST(HFONT, wParam)
          IF lParam THEN .SendMessageW hwnd, PGB_REFRESH, 0, 0
@@ -547,13 +547,13 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
      ' // Get the font handle
      CASE PGB_SETFONT
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = CAST(LRESULT, pPgBar->m_hFont)
          EXIT FUNCTION
 
      ' // Set angle of the font
      CASE PGB_SETTXTANGLE
-         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+         pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          pPgBar->m_txtAngle = wParam
          DIM lfw AS LOGFONTW
          .GetObjectW(pPgBar->m_hFont, SIZEOF(lfw), @lfw)
@@ -566,7 +566,7 @@ FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
 
       ' // Return eventual text angle
       CASE PGB_GETTXTANGLE
-        pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtr(hwnd, 0))
+        pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
         FUNCTION = pPgBar->m_txtAngle
         EXIT FUNCTION
 
