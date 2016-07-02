@@ -7,7 +7,8 @@ Type COMPILE_TYPE
    OutputFilename  As WString * MAX_PATH   ' resulting exe name 
    CompilerPath    As WString * MAX_PATH 
    CurrentFolder   As WString * MAX_PATH
-   OutputFolder    As WString * MAX_PATH
+   OutputFolder    As WString * MAX_PATH   ' release32, release64
+   OBjFolder       As WString * MAX_PATH   ' *.o for all modules
    CompileMode     As WString * MAX_PATH 
    CompileFlags    As WString * MAX_PATH
    BatchFile       As WString * MAX_PATH
@@ -41,6 +42,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim As String st1, st2, st3        
    Dim As HWnd hLV
          
+   Dim As BOOLEAN fCompile32, fCompile64
+   
    sDQ = Chr(34)   ' double quotes
 
    ' Can only continue to compile if the primary source code file
@@ -54,8 +57,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ProcessFromCurdrive(@gConfig.FBWINCompiler32)
    ProcessFromCurdrive(@gConfig.FBWINCompiler64)
    Select Case Ucase(gConfig.DefaultCompiler)
-      Case "FBC 32BIT":   gCompile.CompilerPath = gConfig.FBWINcompiler32
-      Case "FBC 64BIT":   gCompile.CompilerPath = gConfig.FBWINcompiler64
+      Case "FBC 32BIT"
+         fCompile32 = True: fCompile64 = False
+         gCompile.CompilerPath = gConfig.FBWINcompiler32
+      Case "FBC 64BIT"
+         gCompile.CompilerPath = gConfig.FBWINcompiler64
+         fCompile32 = False: fCompile64 = True
    End Select
    
    
@@ -89,9 +96,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.FileToCompile = *pDocMain->DiskFilename
    gCompile.CurrentFolder = Curdir                        
 
+   ' By default for non-project compiles, the resulting compiled exe/dll/lib will
+   ' be located in the same folder as the source file. For projects, the compiled
+   ' file will be located either in the release32 or release64 folders.
    FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.OutputFolder)
    FF_Pathname(@WStr("NAME"), @gCompile.FileToCompile, @wszTemp)
-   gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe"
 
    If gpApp->IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gpApp->GetResourceDocumentPtr()
@@ -102,14 +111,23 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       End If
       gCompile.CompileFlags = gConfig.CompilerSwitches   
 
+      If fCompile32 Then gCompile.OutputFolder = gCompile.OutputFolder & "\release32\"
+      If fCompile64 Then gCompile.OutputFolder = gCompile.OutputFolder & "\release64\"
+      gCompile.ObjFolder = gCompile.OutputFolder & "obj\"
+      
+      ' Make sure the folders exist
+      SHCreateDirectory( 0, gCompile.OutputFolder )
+      SHCreateDirectory( 0, gCompile.ObjFolder )
+      
       Select Case gpApp->ProjectType
          Case 0:   ' EXE (no special compile switch)
+            gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe" 
          Case 1
-            gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll"
-            gCompile.CompileFlags = gCompile.CompileFlags & " -dll -x " & sDQ & gCompile.OutputFilename & sDQ           
+            gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll" 
+            gCompile.CompileFlags = gCompile.CompileFlags & " -dll "
          Case 2
-            gCompile.OutputFilename = gCompile.OutputFolder & "lib" & wszTemp & ".a"
-            gCompile.CompileFlags = gCompile.CompileFlags & " -lib -x " & sDQ & gCompile.OutputFilename & sDQ          
+            gCompile.OutputFilename = gCompile.OutputFolder & "lib" & wszTemp & ".a" 
+            gCompile.CompileFlags = gCompile.CompileFlags & " -lib "
       End Select
 
       Select Case gpApp->ProjectErrorOption
@@ -132,11 +150,22 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       End If
 
    Else
-      gCompile.CompileFlags  = gConfig.CompilerSwitches   
+      ' No active project
+      gCompile.CompileFlags = gConfig.CompilerSwitches   
+      gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe"
+      If Instr(Ucase(gCompile.CompileFlags), " -DLL") Then
+         gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll"
+      End If
+      If Instr(Ucase(gCompile.CompileFlags), " -DYLIB") Then
+         gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll"
+      End If
+      If Instr(Ucase(gCompile.CompileFlags), " -LIB") Then
+         gCompile.OutputFilename = gCompile.OutputFolder & "lib" & wszTemp & ".a"
+      End If
    End If
 
 
-   Select Case gConfig.DefaultCompileMode   
+   Select Case gConfig.DefaultCompileMode   ' used on the Main source file
       Case "GUI":     gCompile.CompileMode = " -s gui "
       Case "CONSOLE": gCompile.CompileMode = " -s console "
    End Select   
@@ -159,18 +188,54 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.BatchFile = sTemp & "_compile.bat" 
    gCompile.LogFile   = sTemp & "_compile.log"
    
-   execmd = sDQ & gCompile.CompilerPath & sDQ & " " & _
-            sDQ & gCompile.FileToCompile & sDQ & " " & _ 
-            Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
-            " -v " & gCompile.CompileFlags & gCompile.CompileMode & _
-            " > " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected to log file as well
-
    ' Change to the code output directory
    ChDir gCompile.OutputFolder
    
    f = Freefile
    Open gCompile.BatchFile For Output as #f
-   Print #f, execmd
+   
+   Dim As Long nCount = gpApp->GetDocumentCount 
+   Dim pDoc As clsDocument Ptr
+
+   ' If this is a project then we need to compile all of the modules first
+   ' in order to create the necessary *.o object files
+   If gpApp->IsProjectActive Then
+      For i = 0 To nCount - 1
+         pDoc = gpApp->GetDocumentPtr(i)
+         If pDoc->IsProjectFile Then
+            If pDoc->ProjectFileType = FILETYPE_MODULE Then
+               ' Get the base name of the file for constructing the object filename
+               FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
+               Print #f, sDQ & gCompile.CompilerPath & sDQ & _
+                         " -c " & sDQ & *pDoc->DiskFilename & sDQ & _
+                         " -o " & sDQ & gCompile.ObjFolder & wszTemp & ".o" & sDQ 
+            End If
+         End If
+      Next
+   End If
+   
+   ' Compile the Main file. If this is a project then we also need to link
+   ' in all of the *.o object files.
+   Print #f, sDQ & gCompile.CompilerPath & sDQ & _
+            " " & sDQ & gCompile.FileToCompile & sDQ & _ 
+            " -x " & sDQ & gCompile.OutputFilename & sDQ & _
+            " " & Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
+            " -v " & gCompile.CompileFlags & gCompile.CompileMode;
+
+   If gpApp->IsProjectActive Then
+      For i = 0 To nCount - 1
+         pDoc = gpApp->GetDocumentPtr(i)
+         If pDoc->IsProjectFile Then
+            If pDoc->ProjectFileType = FILETYPE_MODULE Then
+               ' Get the base name of the file for constructing the object filename
+               FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
+               Print #f, " " & sDQ & gCompile.ObjFolder & wszTemp & ".o" & sDQ 
+            End If
+         End If
+      Next
+   End If
+
+   Print #f, " > " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected to log file as well
    Close #f
 
          
@@ -206,7 +271,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file
-   Kill gCompile.BatchFile
+'   Kill gCompile.BatchFile
 
    
    ' Clear the Compiler Log listview

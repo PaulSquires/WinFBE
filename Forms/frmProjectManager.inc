@@ -1,5 +1,57 @@
 
 ' ========================================================================================
+' Listview callback compare function for sorting columns
+' ========================================================================================
+Function ListView_CompareFunc( ByVal index1 As Long, _
+                               ByVal index2 As Long, _
+                               ByVal lvs As LVSORT_TYPE Ptr _
+                               ) As Long
+
+   Dim wzItem1 As WString * MAX_PATH
+   Dim wzItem2 As WString * MAX_PATH
+   Dim lReturn As Long
+        
+   ' Get the values from the ListView     
+   ListView_GetItemText( lvs->hLV, index1, lvs->nColumn, @wzItem1, MAX_PATH )
+   ListView_GetItemText( lvs->hLV, index2, lvs->nColumn, @wzItem2, MAX_PATH )
+    
+   lReturn = Lstrcmpi(wzItem1, wzItem2)
+    
+   Function = Iif( lvs->nSortOrder = SO_ASCENDING, lReturn, -lReturn )                         
+
+End Function
+
+
+' ========================================================================================
+' Draw the sort arrow for the listview column
+' ========================================================================================
+Function ListView_DrawSortArrow( ByVal hLV As HWnd, ByVal nColumn As Long, ByVal nSortOrder As Long) As Long
+
+   Dim As HWnd hHeader = Cast(HWnd, SendMessage(hLV, LVM_GETHEADER, 0, 0))
+
+   Dim HDI As HD_ITEM
+
+   HDI.mask = HDI_FORMAT
+   Header_GetItem( hHeader, nColumn, @HDI )
+    
+   Select Case nSortOrder
+     Case SO_NONE      
+        HDI.fmt = HDI.fmt And Not (HDF_SORTDOWN Or HDF_SORTUP) 
+     Case SO_ASCENDING
+        HDI.fmt = HDI.fmt And Not HDF_SORTDOWN
+        HDI.fmt = HDI.fmt Or      HDF_SORTUP                       
+     Case SO_DESCENDING
+        HDI.fmt = HDI.fmt And Not HDF_SORTUP 
+        HDI.fmt = HDI.fmt Or      HDF_SORTDOWN                             
+   End Select       
+
+   Header_SetItem( hHeader, nColumn, @HDI )
+    
+   Function = 0
+End Function
+
+
+' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmProjectManager
 ' ========================================================================================
 Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
@@ -108,8 +160,33 @@ Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
               DestroyMenu hPopUpMenu
             End If
             Return True   ' prevent further processing that leads to WM_CONTEXTMENU
-         End If
+         End If 
+         
+      Case LVN_COLUMNCLICK
+         If id = IDC_FRMPROJECTMANAGER_LISTVIEW Then
+            
+            ' Sort the listview based on the clicked column header 
+            Dim lpNMV As NM_LISTVIEW Ptr = Cast( NM_LISTVIEW Ptr, pNMHDR )
 
+            Static fSortColumn As Long = -1
+            Static fSortOrder As Long = SO_ASCENDING
+            fSortOrder = Iif(fSortOrder = SO_ASCENDING, SO_DESCENDING, SO_ASCENDING)
+            
+            Dim lvs As LVSORT_TYPE
+            lvs.hLV        = lpNMV->hdr.hwndFrom
+            lvs.nColumn    = lpNMV->iSubItem
+            lvs.nSortOrder = fSortOrder
+            
+            ' Remove any existing sort arrows and then set the current column arrrow
+            ListView_DrawSortArrow( lvs.hLV, fSortColumn, SO_NONE )
+            ListView_DrawSortArrow( lvs.hLV, lvs.nColumn, fSortOrder )
+            ListView_SortItemsEx( lvs.hLV, @ListView_CompareFunc, @lvs )
+                       
+            ' Save the column number that has been sorted
+            fSortColumn = lpNMV->iSubItem
+            
+         End If
+         
    End Select
 
    Function = 0

@@ -170,6 +170,19 @@ End Type
 Dim Shared gFind As FINDREPLACE_TYPE
 
 
+''  Listview column sorting
+Type LVSORT_TYPE
+   hLV        As HWnd
+   nColumn    As Long 
+   nSortOrder As Long
+End Type   
+
+' Equates
+Const SO_NONE       = 0
+Const SO_ASCENDING  = 1
+Const SO_DESCENDING = 2
+
+
 Type clsDocument
    Private:
       m_hWindow         As HWnd
