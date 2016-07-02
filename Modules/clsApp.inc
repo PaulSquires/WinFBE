@@ -234,8 +234,8 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
    ' Find the position in the Listview where this document is located. Also, if we are setting a "Main"
    ' project file then we need to toggle any other Main file to "Normal". There can only be one Main file.
    ' Likewise, there can only be one "Resource" file.
-   For i = 0 To nCount - 1
-       pDocList = Cast( clsDocument Ptr, FF_ListView_GetlParam( hLV, i ) )
+   For i = 0 To nCount - 1                     
+       pDocList = Cast( clsDocument Ptr, CInt(FF_ListView_GetlParam(hLV, i)) )
        If pDocList = pDoc Then nFound = i
        If nFileType = FILETYPE_MAIN Then
           If pDocList->ProjectFileType = FILETYPE_MAIN Then
@@ -289,7 +289,7 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
    Dim As Long nCount = ListView_GetItemCount(hLV)
    
-   FF_ListView_InsertItem( hLV, nCount, 0, wzFile, Cast(Long, pDoc) )
+   FF_ListView_InsertItem( hLV, nCount, 0, wzFile, Cast(LPARAM, pDoc) )
    FF_ListView_InsertItem( hLV, nCount, 1, wzFileType )
    FF_ListView_InsertItem( hLV, nCount, 2, wzFilePath )
    

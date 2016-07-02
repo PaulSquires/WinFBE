@@ -80,7 +80,7 @@ End Function
 Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, _
                                  ByVal hParent As HANDLE, _
                                  ByRef TheText As WString, _
-                                 ByVal lParam As Long = 0, _
+                                 ByVal lParam As LPARAM = 0, _
                                  ByVal iImage As Long = 0, _
                                  ByVal iSelectedImage As Long = 0 _
                                  ) As HANDLE
@@ -693,7 +693,7 @@ Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, _
                                  ByVal iRow        As Long, _         
                                  ByVal iColumn     As Long, _
                                  ByVal pwszText    As WString Ptr, _
-                                 ByVal lParam      As Long = 0 _
+                                 ByVal lParam      As LPARAM = 0 _
                                  ) As BOOLEAN
 
    Dim lvi As LVITEMW
@@ -771,7 +771,7 @@ End Function
 ' ========================================================================================
 Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
                                 ByVal iRow As Long _
-                                ) As Long
+                                ) As LPARAM
    Dim li As LV_ITEM
 
    li.mask       = LVIF_PARAM

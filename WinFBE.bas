@@ -123,8 +123,12 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    gpApp = New clsApp
 
    ' Load the Scintilla code editing dll
-   Dim As Any Ptr pLib = Dylibload("SciLexer32.dll")
-
+   #IfDef __FB_64BIT__
+      Dim As Any Ptr pLib = Dylibload("SciLexer64.dll")
+   #Else
+      Dim As Any Ptr pLib = Dylibload("SciLexer32.dll")
+   #EndIf
+   
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )
 

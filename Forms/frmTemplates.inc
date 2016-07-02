@@ -43,7 +43,7 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
             If curSel = LB_ERR Then Exit Function
             ' Get the stored index
             Dim pwszPath As WString Ptr = Cast(WString Ptr, SendMessageW(hListBox, LB_GETITEMDATA, Cast(WPARAM, curSel), 0))
-            If pwszPath = LB_ERR Then Exit Function
+            If pwszPath = 0 Then Exit Function
             ' Open the template
             If pwszPath Then
                ' Create the new Scintilla window and load the file
