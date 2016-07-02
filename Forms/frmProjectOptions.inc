@@ -66,7 +66,11 @@ Function ProjectLoadFromFile() As BOOLEAN
    If Open( *gpApp->ProjectDiskFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
 
    frmProjectManager_Show( HWND_FRMMAIN, SW_SHOW )
-
+   
+   ' Turn off redrawing of the listview in order to speed up loading
+   Dim As HWnd hLV = GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW )
+   SendMessage( hLV, WM_SETREDRAW, False, 0 )
+   
    Do Until Eof(f)
       Line Input #f, st
       If Len(st) = 0 Then Continue Do
@@ -110,7 +114,10 @@ Function ProjectLoadFromFile() As BOOLEAN
    gpApp->IsProjectActive = True
       
    Close #f
-   
+ 
+   SendMessage( hLV, WM_SETREDRAW, True, 0 )
+   RedrawWindow(hLV, Null, Null, RDW_ERASE Or RDW_FRAME Or RDW_INVALIDATE Or RDW_ALLCHILDREN)
+    
    Function = True   ' successul save
 End Function
 
@@ -127,7 +134,7 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
 
    If Len(*gpApp->ProjectDiskFilename) = 0 Then
       MessageBoxW( HWnd, L(217,"Invalid project path specified."), L(201,"Error"), _
-                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       SetFocus hCtrl
       Function = False: Exit Function
    End If
@@ -158,6 +165,15 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS)
    FF_Control_GetTextW( hCtrl, gpApp->ProjectOther, MAX_PATH )
    
+   ' Ensure that the subfolders exist for the project
+   Dim wzPath As WString * MAX_PATH
+   FF_Pathname(@WStr("PATH"), gpApp->ProjectDiskFilename, @wzPath)
+
+   SHCreateDirectory( 0, wzPath & "release32" )
+   SHCreateDirectory( 0, wzPath & "release32\obj" )
+   SHCreateDirectory( 0, wzPath & "release64" )
+   SHCreateDirectory( 0, wzPath & "release64\obj" )
+
    Return ProjectSaveToFile()   
 
 End Function
@@ -205,6 +221,8 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
             If SaveProjectOptions(HWnd) Then
                gpApp->IsNewProjectFlag = False
                gpApp->IsProjectActive = True
+               ' Update the most recently used project list 
+               UpdateMRUProjectList(gpApp->ProjectDiskFilename)
                SendMessageW HWnd, WM_CLOSE, 0, 0
             End If
             Exit Function
@@ -274,12 +292,12 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    Dim As HWnd hForm = _
    pWindow->Create( hWndParent, "", @frmProjectOptions_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
-        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_TOPMOST Or WS_EX_LEFT)
+        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT)
    pWindow->SetClientSize(720, 385)
    pWindow->Center(pWindow->hWindow, hWndParent)
       

@@ -62,7 +62,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Check to see if the compiler exists
    If Dir(gCompile.CompilerPath) = "" Then 
       MessageBoxW( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
-                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
    
@@ -78,7 +78,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       pDocMain = gpApp->GetMainDocumentPtr()
       If pDocMain = 0 Then
          MessageBoxW( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
-                           MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+                           MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
          Function = False: Exit Function
       End If
    Else
@@ -147,7 +147,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Test for the running exe if this project is an EXE project.
    If IsProcessRunning(@gCompile.OutputFilename) Then
       MessageBoxW( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
-                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
    
@@ -333,7 +333,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
                L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
                L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-         MessageBoxW HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK Or MB_TOPMOST
+         MessageBoxW( HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
       End If
    Else
       gCompile.RunAfterCompile = False 

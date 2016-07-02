@@ -119,7 +119,7 @@ End Function
 Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As Long) As Long
 
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hParent)->DPI
 
    pWindow->Create(hParent, L(176,"Templates"), @frmTemplates_WndProc, _
                pWindow->UnScaleX(x), pWindow->UnScaleY(y), 0, 0, _

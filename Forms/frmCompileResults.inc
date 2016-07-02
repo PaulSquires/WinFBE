@@ -17,6 +17,8 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
    FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
    FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
 
+   If Dir(wszErrorFile) = "" Then Exit Function
+   
    ' Position the editor to the Error line
    idx = gTTabCtl.GetTabIndexFromFilename( @wszErrorFile )
    If idx >= 0 Then
@@ -157,7 +159,7 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
 
    '  Create the window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    HWND_FRMCOMPILERESULTS = _
        pWindow->Create( hWndParent, "Compile Results", @frmCompileResults_WndProc, 0, 0, 0, 0, _

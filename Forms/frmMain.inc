@@ -162,6 +162,10 @@ End Function
 Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 
    OnCommand_ProjectSave( HWnd, False )
+   
+   ' Close all documents that may be open
+   OnCommand_FileClose( HWnd, True )
+   
    DestroyWindow( HWND_FRMPROJECTMANAGER )
    gpApp->IsProjectActive = False
 
@@ -450,7 +454,13 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal bCloseAll As BOOLEAN = F
       TabCtrl_DeleteItem(gTTabCtl.hWindow, idx)
       ' Set the active tab to the closest tab to the one just removed
       gTTabCtl.SetFocusTab(idx-1)
-      gpApp->RemoveDocument(pDoc)
+      
+      ShowWindow pDoc->hWindow, SW_HIDE
+
+      ' Only remove this document from the global collection if it is not
+      ' part of any active Project.
+      If pDoc->IsProjectFile = False Then gpApp->RemoveDocument(pDoc)
+      
       frmMain_PositionWindows(HWnd)
    
       If bCloseAll = False Then Exit Do
@@ -637,9 +647,9 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        vbcrlf & vbcrlf & _
                        "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "José Roca (Scintilla and CWindow framework)", _
+                       "José Roca (Scintilla and CWindow)", _
                        @WStr("About"), _
-                       MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TOPMOST )
+                       MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
          frmMain_SetFocusToCurrentCodeWindow()
         

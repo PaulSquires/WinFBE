@@ -818,7 +818,7 @@ Function clsDocument.ApplyProperties() As Long
    
    ' Determine the pWindow parent of the Scintilla window in order
    ' to ensure that DPI ratios are correctly used.
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(m_hWindow)
+   Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(m_hWindow)
    If pWindow Then
       rxRatio = pWindow->rxRatio
       ryRatio = pWindow->ryRatio

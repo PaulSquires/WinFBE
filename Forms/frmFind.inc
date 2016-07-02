@@ -275,7 +275,7 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
       
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    HWND_FRMFIND = _
    pWindow->Create(hwndParent, L(158,"Find"), @frmFind_WndProc, 0, 0, 0, 0, _

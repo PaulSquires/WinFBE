@@ -338,6 +338,7 @@ Declare Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRES
 Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 Declare Function frmProjectManager_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0) As Long
 Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
+Declare Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal bCloseAll As BOOLEAN = False) As LRESULT
 
 
 '  Global App class that controls everything related to projects and documents

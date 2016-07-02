@@ -5,23 +5,33 @@
 Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
    Dim As HWnd hLV = GetDlgItem(HWnd, IDC_FRMPROJECTMANAGER_LISTVIEW )
-   Dim As Long nCurSel = ListView_GetSelectionMark(hLV)
    Dim pDoc As clsDocument Ptr 
 
-   If nCurSel > -1 Then
-      pDoc = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, nCurSel) )
-   End If
-   
    Select Case id
-      Case IDM_OPENINCLUDE           
-           frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
-      Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
-      Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
-      Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
-      Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
-      Case IDM_SETFILERESOURCE:       Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
+      Case IDM_OPENINCLUDE,IDM_REMOVEFILEFROMPROJECT, IDM_SETFILENORMAL, IDM_SETFILEMODULE, _
+           IDM_SETFILEMAIN,IDM_SETFILERESOURCE
+                  
+         Dim As Long lIndex = -1 
+         If ListView_GetSelectedCount(hLV) > 0 Then                
+            Do
+               ' Get the next selected index
+               lIndex = ListView_GetNextItem(hLV, lIndex, LVNI_SELECTED)
+               If lIndex <> -1 Then    
+                  pDoc = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, lIndex) )
+                  Select Case id
+                     Case IDM_OPENINCLUDE           
+                          frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
+                     Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
+                     Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
+                     Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
+                     Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
+                     Case IDM_SETFILERESOURCE:       Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
+                  End Select
+               End If
+            Loop Until lIndex = -1
+         End If
    End Select
-
+   
    Function = 0
 End Function
 
@@ -83,7 +93,7 @@ Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
       Case NM_DBLCLK
          ' Load the selected file into the editor
          If id = IDC_FRMPROJECTMANAGER_LISTVIEW Then   
-            ' Get the pDoc from the selected row                
+            ' Get the pDoc from the selected row
             Dim pDoc As clsDocument Ptr = Cast( clsDocument Ptr, FF_ListView_GetlParam(nmi->hdr.hwndFrom, nmi->iItem) )
             frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
          End If
@@ -156,7 +166,7 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    HWND_FRMPROJECTMANAGER = _
    pWindow->Create( hWndParent, L(188,"Project Manager"), @frmProjectManager_WndProc, 0, 0, 0, 0, _

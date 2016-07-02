@@ -13,6 +13,7 @@
 #Include Once "vbcompat.bi"
 #Include Once "win\shobjidl.bi"
 #Include Once "win\TlHelp32.bi"
+#Include Once "win\Shlobj.bi"
 #Include Once "Afx\CWindow.inc"
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxCtl.inc" 
@@ -96,7 +97,6 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
                   ByVal szCmdLine     As ZString Ptr, _
                   ByVal nCmdShow      As Long _
                   ) As Long
-
 
    ' Load configuration file 
    gConfig.LoadFromFile()

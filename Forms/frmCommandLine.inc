@@ -94,11 +94,11 @@ Function frmCommandLine_Show( ByVal hWndParent As HWnd, _
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    pWindow->Create( hWndParent, L(178,"Command Line"), @frmCommandLine_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
-        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_TOPMOST)
+        WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT)
    pWindow->SetClientSize(420, 100)
    pWindow->Center(pWindow->hWindow, hWndParent)
       

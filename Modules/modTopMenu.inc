@@ -246,7 +246,8 @@ Function frmMain_ChangeTopMenuStates() As Long
    CheckMenuRadioItem( hMenu, IDM_GUI, IDM_CONSOLE, nSelected, MF_BYCOMMAND )
    
    ' Enable everything if a document is open
-   If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 0 Then
+   Dim As Long NumTabs = TabCtrl_GetItemCount(gTTabCtl.hWindow)
+   If NumTabs > 0 Then
       For idMenu = IDM_FILE To IDM_ABOUT
          EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_ENABLED
       Next
@@ -288,6 +289,12 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTFILESADD, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or fEnabled
+
+   If (gpApp->IsProjectActive = True) OrElse cbool(NumTabs > 0) Then
+      fEnabled = MF_ENABLED
+   Else
+      fEnabled = MF_GRAYED 
+   End If
    EnableMenuItem hMenu, IDM_BUILDEXECUTE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or fEnabled

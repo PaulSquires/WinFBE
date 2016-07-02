@@ -282,7 +282,7 @@ Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
       
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
+   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    HWND_FRMREPLACE = _
    pWindow->Create(hwndParent, L(173,"Replace"), @frmReplace_WndProc, 0, 0, 0, 0, _
