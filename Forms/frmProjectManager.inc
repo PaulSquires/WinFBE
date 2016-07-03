@@ -100,7 +100,8 @@ Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
                   Select Case id
                      Case IDM_OPENINCLUDE           
                           frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
-                     Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
+                     Case IDM_REMOVEFILEFROMPROJECT
+                          Function = gpApp->ProjectRemoveFile( pDoc )
                      Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
                      Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
                      Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
@@ -250,6 +251,7 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmProjectManager
 ' ========================================================================================
 Function frmProjectManager_OnDestroy(HWnd As HWnd) As LRESULT
+   HWND_FRMPROJECTMANAGER = 0
    Function = 0
 End Function
 

@@ -10,6 +10,7 @@ Type COMPILE_TYPE
    CompilerPath    As WString * MAX_PATH   ' full path and file.ext to fbc.exe
    ObjFolder       As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
    ObjFolderShort  As WString * MAX_PATH   ' ".\obj32\" or "\obj64\"
+   ObjID           As WString * MAX_PATH   ' "32" or "64" appended to object name
    CompileMode     As WString * MAX_PATH 
    CompileFlags    As WString * MAX_PATH
    BatchFile       As WString * MAX_PATH
@@ -103,14 +104,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.ResourceFile = Iif( pDocResource, *pDocResource->DiskFilename, WStr(""))
       gCompile.CompileFlags = gConfig.CompilerSwitches   
 
-      If fCompile32 Then 
-         gCompile.ObjFolder = gCompile.MainFolder & "obj32\"
-         gCompile.ObjFolderShort = ".\obj32\"
-      End If   
-      If fCompile64 Then 
-         gCompile.ObjFolder = gCompile.MainFolder & "obj64\"
-         gCompile.ObjFolderShort = ".\obj64\"
-      End If   
+      gCompile.ObjFolder = gCompile.MainFolder & "wfbe_obj\"
+      gCompile.ObjFolderShort = ".\wfbe_obj\"
+
+      If fCompile32 Then gCompile.ObjID = "32.o"
+      If fCompile64 Then gCompile.ObjID = "64.o"
       
       ' Make sure the folders exist
       SHCreateDirectory( 0, gCompile.ObjFolder )
@@ -208,7 +206,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               wszTemp = gCompile.ObjFolderShort & wszTemp & ".o"
+               wszTemp = gCompile.ObjFolderShort & wszTemp & gCompile.ObjID
                
                ' Compare the source code file datetime to the object. If the source code
                ' date time is greater then we need to recompile it, otherwise we will simply
@@ -241,7 +239,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               Print #f, " " & gCompile.ObjFolderShort & wszTemp & ".o";
+               Print #f, " " & gCompile.ObjFolderShort & wszTemp & gCompile.ObjID;
             End If
          End If
       Next
@@ -283,7 +281,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file
-'   Kill gCompile.BatchFile
+   Kill gCompile.BatchFile
 
    
    ' Clear the Compiler Log listview

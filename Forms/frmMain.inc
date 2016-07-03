@@ -226,6 +226,16 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    
    ' Close all documents that may be open
    OnCommand_FileClose( HWnd, True )
+
+   ' If any documents remain in the global collection then ensure that
+   ' they are reset to not be part of a project (because the project is now closed)
+   Dim As Long nCount = gpApp->GetDocumentCount 
+   Dim pDoc As clsDocument Ptr
+   Dim As Long i
+   For i = 0 To nCount - 1
+      pDoc = gpApp->GetDocumentPtr(i)
+      If pDoc Then pDoc->IsProjectFile = False
+   Next
    
    DestroyWindow( HWND_FRMPROJECTMANAGER )
    gpApp->IsProjectActive = False

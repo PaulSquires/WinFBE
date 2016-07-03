@@ -167,13 +167,6 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS)
    FF_Control_GetTextW( hCtrl, gpApp->ProjectOther, MAX_PATH )
    
-   ' Ensure that the subfolders exist for the project
-   Dim wzPath As WString * MAX_PATH
-   FF_Pathname(@WStr("PATH"), gpApp->ProjectDiskFilename, @wzPath)
-
-   SHCreateDirectory( 0, wzPath & "obj32" )
-   SHCreateDirectory( 0, wzPath & "obj64" )
-
    Return ProjectSaveToFile()   
 
 End Function
