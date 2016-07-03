@@ -463,11 +463,19 @@ Function CreateScintillaContextMenu() As HMENU
       i = Instr(sFilename, "'")
       If i Then sFilename = Left(sFilename, i-1)
       sFilename = Trim(sFilename, Any Chr(32,34))  ' remove spaces and double quotes
+      FF_Pathname(WStr("PATH"), pDoc->DiskFilename, @wPath)
 
-      If Dir(sFilename) > "" Then gpApp->IncludeFilename = sFilename
-      If Dir(Curdir & "\" & sFilename) > "" Then gpApp->IncludeFilename = Curdir & "\" & sFilename
-      If Dir(Exepath & "\" & sFilename) > "" Then gpApp->IncludeFilename = Exepath & "\" & sFilename
-      If Dir(Str(wCompilerPath) & "\" & sFilename) > "" Then gpApp->IncludeFilename = Str(wCompilerPath) & "\" & sFilename
+      If Dir(wPath & sFilename) > "" Then 
+         gpApp->IncludeFilename = wPath & sFilename
+      ElseIf Dir(sFilename) > "" Then 
+         gpApp->IncludeFilename = sFilename
+      ElseIf Dir(Curdir & "\" & sFilename) > "" Then 
+         gpApp->IncludeFilename = Curdir & "\" & sFilename
+      ElseIf Dir(Exepath & "\" & sFilename) > "" Then 
+         gpApp->IncludeFilename = Exepath & "\" & sFilename
+      ElseIf Dir(Str(wCompilerPath) & "\" & sFilename) > "" Then 
+         gpApp->IncludeFilename = Str(wCompilerPath) & "\" & sFilename
+      End If
       gpApp->IncludeFilename = FF_Replace(gpApp->IncludeFilename, "/", "\")
       
       If Dir(gpApp->IncludeFilename) > "" Then        
