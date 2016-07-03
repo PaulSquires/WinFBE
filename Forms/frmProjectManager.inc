@@ -174,7 +174,9 @@ Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
          If id = IDC_FRMPROJECTMANAGER_LISTVIEW Then   
             ' Get the pDoc from the selected row
             Dim pDoc As clsDocument Ptr = Cast( clsDocument Ptr, FF_ListView_GetlParam(nmi->hdr.hwndFrom, nmi->iItem) )
-            frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
+            If pDoc Then
+               frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
+            End If
          End If
 
       Case NM_RCLICK
@@ -295,13 +297,16 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
+   Dim rcWork As Rect = pWindow->GetWorkArea
+   Dim nHeight As Long = (rcWork.Bottom - rcWork.Top) * .80
+
    HWND_FRMPROJECTMANAGER = _
-   pWindow->Create( hWndParent, L(188,"Project Manager"), @frmProjectManager_WndProc, 0, 0, 0, 0, _
+   pWindow->Create( hWndParent, L(188,"Project Manager"), @frmProjectManager_WndProc, 0, 0, 500, nHeight, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_THICKFRAME Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(400, 500)
    pWindow->Center(pWindow->hWindow, hWndParent)
-      
+   
+   
    ' Set the small and large icon for the main window (must be set after main window is created)
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)

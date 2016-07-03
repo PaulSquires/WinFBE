@@ -171,10 +171,8 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    Dim wzPath As WString * MAX_PATH
    FF_Pathname(@WStr("PATH"), gpApp->ProjectDiskFilename, @wzPath)
 
-   SHCreateDirectory( 0, wzPath & "release32" )
-   SHCreateDirectory( 0, wzPath & "release32\obj" )
-   SHCreateDirectory( 0, wzPath & "release64" )
-   SHCreateDirectory( 0, wzPath & "release64\obj" )
+   SHCreateDirectory( 0, wzPath & "obj32" )
+   SHCreateDirectory( 0, wzPath & "obj64" )
 
    Return ProjectSaveToFile()   
 

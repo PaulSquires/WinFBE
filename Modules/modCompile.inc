@@ -2,14 +2,14 @@
 ''  Handle information related to Compile process 
 ''
 Type COMPILE_TYPE
-   FileToCompile   As WString * MAX_PATH
-   ResourceFile    As WString * MAX_PATH
-   OutputFilename  As WString * MAX_PATH   ' resulting exe name 
-   CompilerPath    As WString * MAX_PATH 
-   CurrentFolder   As WString * MAX_PATH
-   SourceFolder    As WString * MAX_PATH   
-   OutputFolder    As WString * MAX_PATH   ' release32, release64
-   OBjFolder       As WString * MAX_PATH   ' *.o for all modules
+   MainFilename    As WString * MAX_PATH   ' main source file (full path and file.ext)
+   MainName        As WString * MAX_PATH   ' main source file (Name only, no extension)
+   MainFolder      As WString * MAX_PATH   ' main source folder 
+   ResourceFile    As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
+   OutputFilename  As WString * MAX_PATH   ' resulting exe/dll/lib name 
+   CompilerPath    As WString * MAX_PATH   ' full path and file.ext to fbc.exe
+   ObjFolder       As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
+   ObjFolderShort  As WString * MAX_PATH   ' ".\obj32\" or "\obj64\"
    CompileMode     As WString * MAX_PATH 
    CompileFlags    As WString * MAX_PATH
    BatchFile       As WString * MAX_PATH
@@ -94,43 +94,35 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    If pDocMain = 0 Then Return 0
    
-   gCompile.FileToCompile = *pDocMain->DiskFilename
-   gCompile.CurrentFolder = Curdir                        
-
-   FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.SourceFolder)
-
-
-   ' By default for non-project compiles, the resulting compiled exe/dll/lib will
-   ' be located in the same folder as the source file. For projects, the compiled
-   ' file will be located either in the release32 or release64 folders.
-   FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.OutputFolder)
-   FF_Pathname(@WStr("NAME"), @gCompile.FileToCompile, @wszTemp)
+   FF_Pathname(@WStr("FULL"), pDocMain->DiskFilename, @gCompile.MainFilename)
+   FF_Pathname(@WStr("NAME"), pDocMain->DiskFilename, @gCompile.MainName)
+   FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.MainFolder)
 
    If gpApp->IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gpApp->GetResourceDocumentPtr()
-      If pDocResource Then
-         gCompile.ResourceFile = *pDocResource->DiskFilename
-      Else
-         gCompile.ResourceFile = ""
-      End If
+      gCompile.ResourceFile = Iif( pDocResource, *pDocResource->DiskFilename, WStr(""))
       gCompile.CompileFlags = gConfig.CompilerSwitches   
 
-      If fCompile32 Then gCompile.OutputFolder = gCompile.OutputFolder & "release32\"
-      If fCompile64 Then gCompile.OutputFolder = gCompile.OutputFolder & "release64\"
-      gCompile.ObjFolder = gCompile.OutputFolder & "obj\"
+      If fCompile32 Then 
+         gCompile.ObjFolder = gCompile.MainFolder & "obj32\"
+         gCompile.ObjFolderShort = ".\obj32\"
+      End If   
+      If fCompile64 Then 
+         gCompile.ObjFolder = gCompile.MainFolder & "obj64\"
+         gCompile.ObjFolderShort = ".\obj64\"
+      End If   
       
       ' Make sure the folders exist
-      SHCreateDirectory( 0, gCompile.OutputFolder )
       SHCreateDirectory( 0, gCompile.ObjFolder )
       
       Select Case gpApp->ProjectType
          Case 0:   ' EXE (no special compile switch)
-            gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe" 
+            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".exe" 
          Case 1
-            gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll" 
+            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll" 
             gCompile.CompileFlags = gCompile.CompileFlags & " -dll "
          Case 2
-            gCompile.OutputFilename = gCompile.OutputFolder & "lib" & wszTemp & ".a" 
+            gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & ".a" 
             gCompile.CompileFlags = gCompile.CompileFlags & " -lib "
       End Select
 
@@ -156,15 +148,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Else
       ' No active project
       gCompile.CompileFlags = gConfig.CompilerSwitches   
-      gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".exe"
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".exe"
       If Instr(Ucase(gCompile.CompileFlags), " -DLL") Then
-         gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll"
+         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll"
       End If
       If Instr(Ucase(gCompile.CompileFlags), " -DYLIB") Then
-         gCompile.OutputFilename = gCompile.OutputFolder & wszTemp & ".dll"
+         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll"
       End If
       If Instr(Ucase(gCompile.CompileFlags), " -LIB") Then
-         gCompile.OutputFilename = gCompile.OutputFolder & "lib" & wszTemp & ".a"
+         gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & ".a"
       End If
    End If
 
@@ -194,7 +186,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.LogFile   = sTemp & "_compile.log"
    
    ' Change to the output code directory
-   ChDir gCompile.OutputFolder
+   ChDir gCompile.MainFolder
    
    f = Freefile
    Open gCompile.BatchFile For Output as #f
@@ -212,7 +204,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               wszTemp = ".\obj\" & wszTemp & ".o"
+               wszTemp = gCompile.ObjFolderShort & wszTemp & ".o"
                
                ' Compare the source code file datetime to the object. If the source code
                ' date time is greater then we need to recompile it, otherwise we will simply
@@ -231,8 +223,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
    Print #f, sDQ & gCompile.CompilerPath & sDQ & _
-            " " & sDQ & gCompile.FileToCompile & sDQ & _ 
-            " -x " & sDQ & gCompile.OutputFilename & sDQ & _
+            " " & sDQ & gCompile.MainFilename & sDQ & _ 
+            " -x " & sDQ & gCompile.OutputFilename & sDQ & _ 
             " " & Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
             " -v " & gCompile.CompileFlags & gCompile.CompileMode;
         
@@ -243,7 +235,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               Print #f, " .\obj\" & wszTemp & ".o";
+               Print #f, gCompile.ObjFolderShort & wszTemp & ".o";
             End If
          End If
       Next
@@ -408,7 +400,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       DestroyWindow(HWND_FRMCOMPILERESULTS)
       If gConfig.HideCompile = BST_UNCHECKED Then
          st = sOutputMsg & vbCrLf & _
-               L(194,"Primary Source:")     & " " & gCompile.FileToCompile & vbCrLf & _
+               L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
                L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
                L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
                L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
@@ -429,9 +421,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
 
-   ' Ensure that we switch back to the Project's directory
-   ChDir gCompile.CurrentFolder
-   
    Function = True   ' successful
 End Function
 
