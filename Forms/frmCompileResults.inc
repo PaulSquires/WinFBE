@@ -163,7 +163,7 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
 
    HWND_FRMCOMPILERESULTS = _
        pWindow->Create( hWndParent, "Compile Results", @frmCompileResults_WndProc, 0, 0, 0, 0, _
-            WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_THICKFRAME Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
+            WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_MINIMIZEBOX or WS_THICKFRAME Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
             WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
        pWindow->SetClientSize(600, 375)
        pWindow->Center

@@ -188,6 +188,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Change to the output code directory
    ChDir gCompile.MainFolder
    
+   ' Must delete any previous instance of the compiler log file in case it was not deleted. Need
+   ' to do this because the compiler appends to the log file rather than overwriting.
+   Kill gCompile.LogFile
+   
    f = Freefile
    Open gCompile.BatchFile For Output as #f
    
@@ -212,13 +216,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                If FileDateTime(*pDoc->DiskFilename) > FileDateTime(wszTemp) Then
                   Print #f, sDQ & gCompile.CompilerPath & sDQ & _
                             " -c " & sDQ & *pDoc->DiskFilename & sDQ & _
-                            " -o " & sDQ & wszTemp & sDQ 
+                            " -o " & sDQ & wszTemp & sDQ;
+                  Print #f, " >> " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
                End If
                
             End If
          End If
       Next
    End If
+
    
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
@@ -241,7 +247,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Next
    End If
 
-   Print #f, " > " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected to log file as well
+   Print #f, " >> " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
    Close #f
 
          
@@ -277,7 +283,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file
-   Kill gCompile.BatchFile
+'   Kill gCompile.BatchFile
 
    
    ' Clear the Compiler Log listview
@@ -299,9 +305,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       st = Trim(FF_Parse(sLogSt, vbCrlf, NextLine))                 
       st_ucase = Ucase(st)
       
-      If NextLine <= 2 Then  ' Save the FB version and copyright information
-         sOutputMsg = sOutputMsg & st & vbCrLf 
-         Continue For
+      ' Save the FB version and copyright information. 
+      If Left(st_ucase, 19) = "FREEBASIC COMPILER " Then
+         sOutputMsg = sOutputMsg & st & vbCrLf: Continue For
+      End If        
+      If Left(st_ucase, 13) = "COPYRIGHT (C)" Then
+         sOutputMsg = sOutputMsg & st & vbCrLf: Continue For
       End If        
       
       ' Check to see if an error occurred in compiling a resource script.
