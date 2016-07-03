@@ -235,7 +235,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               Print #f, gCompile.ObjFolderShort & wszTemp & ".o";
+               Print #f, " " & gCompile.ObjFolderShort & wszTemp & ".o";
             End If
          End If
       Next

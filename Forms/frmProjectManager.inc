@@ -255,6 +255,47 @@ End Function
 
 
 ' ========================================================================================
+' Processes messages for the subclassed Listview window.
+' ========================================================================================
+Function Listview_SubclassProc ( _
+                  ByVal HWnd   As HWnd, _                 ' // Control window handle
+                  ByVal uMsg   As UINT, _                 ' // Type of message
+                  ByVal wParam As WPARAM, _               ' // First message parameter
+                  ByVal lParam As LPARAM, _               ' // Second message parameter
+                  ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
+                  ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
+                  ) As LRESULT
+
+   Select Case uMsg
+
+      Case WM_GETDLGCODE
+         ' All keyboard input
+         Function = DLGC_WANTALLKEYS
+         Exit Function
+
+      Case WM_KEYUP
+         Select Case Loword(wParam)
+            Case VK_RETURN
+               ' Simulate the sending of a WM_COMMAND message to the control with the IDM_OPENINCLUDE
+               ' value. This will invoke the code in WM_COMMAND that cycles through all selected rows
+               ' in the listview and opens the selected files.
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKELPARAM(IDM_OPENINCLUDE, 0), 0 )
+               Exit Function
+         End Select
+
+      Case WM_DESTROY
+         ' REQUIRED: Remove control subclassing
+         RemoveWindowSubclass HWnd, @Listview_SubclassProc, uIdSubclass
+
+   End Select
+
+   ' Default processing of Windows messages
+   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
+
+End Function
+
+
+' ========================================================================================
 ' frmProjectManager Window procedure
 ' ========================================================================================
 Function frmProjectManager_WndProc( ByVal HWnd   As HWnd, _
@@ -311,10 +352,11 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
-   Dim As HWnd hLV = _
+   Dim As HWnd hLV = _   ' subclassed to catch ENTER key
         pWindow->AddControl("LISTVIEW", , IDC_FRMPROJECTMANAGER_LISTVIEW, "", 10, 10, 176, 335, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS , _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(WNDPROC, @Listview_SubclassProc), IDC_FRMPROJECTMANAGER_LISTVIEW, Cast(DWORD_PTR, @pWindow))
 
    ' Add some extended styles
    Dim dwExStyle As DWORD
