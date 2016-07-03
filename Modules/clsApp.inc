@@ -240,13 +240,15 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
        If nFileType = FILETYPE_MAIN Then
           If pDocList->ProjectFileType = FILETYPE_MAIN Then
              pDocList->ProjectFileType = FILETYPE_NORMAL
-             wzFileType = L(210,"Normal"): FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
+             wzFileType = ""  'L(210,"Normal")
+             FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
           End If
        End If   
        If nFileType = FILETYPE_RESOURCE Then
           If pDocList->ProjectFileType = FILETYPE_RESOURCE Then
              pDocList->ProjectFileType = FILETYPE_NORMAL
-             wzFileType = L(210,"Normal"): FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
+             wzFileType = ""  'L(210,"Normal")
+             FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
           End If
        End If   
    Next
