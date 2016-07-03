@@ -116,10 +116,11 @@ Const DELIM = Chr(1)    ' character used as delimiter for Find/Replace text stri
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
 
-Const FILETYPE_MAIN     = 0
-Const FILETYPE_MODULE   = 1
-Const FILETYPE_NORMAL   = 2
-Const FILETYPE_RESOURCE = 3
+Const FILETYPE_UNDEFINED = 0
+Const FILETYPE_MAIN      = 1
+Const FILETYPE_MODULE    = 2
+Const FILETYPE_NORMAL    = 3
+Const FILETYPE_RESOURCE  = 4
  
    
 ''  Menu message identifiers
@@ -182,13 +183,16 @@ Const SO_NONE       = 0
 Const SO_ASCENDING  = 1
 Const SO_DESCENDING = 2
 
+Dim Shared gLVProjSortCol As Long = 0             ' sort column of project management listview
+Dim Shared gLVProjSortDir As Long = SO_ASCENDING  ' sort direction of project management listview
+
 
 Type clsDocument
    Private:
       m_hWindow         As HWnd
       m_IsNewFlag       As BOOLEAN
       m_IsProjectFile   As BOOLEAN
-      m_ProjectFileType As Long      = FILETYPE_NORMAL     ' 0:main, 1:module, 2:normal
+      m_ProjectFileType As Long = FILETYPE_UNDEFINED
       m_sFilename       As WString * MAX_PATH
       m_DateFileTime    As Double
       m_pSci            As Any Ptr      

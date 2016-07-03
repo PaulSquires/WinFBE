@@ -114,6 +114,8 @@ Function ProjectLoadFromFile() As BOOLEAN
    gpApp->IsProjectActive = True
       
    Close #f
+
+   Listview_SortColumn( hLV, gLVProjSortCol, gLVProjSortDir )
  
    SendMessage( hLV, WM_SETREDRAW, True, 0 )
    RedrawWindow(hLV, Null, Null, RDW_ERASE Or RDW_FRAME Or RDW_INVALIDATE Or RDW_ALLCHILDREN)

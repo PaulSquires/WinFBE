@@ -235,7 +235,7 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
    ' project file then we need to toggle any other Main file to "Normal". There can only be one Main file.
    ' Likewise, there can only be one "Resource" file.
    For i = 0 To nCount - 1                     
-       pDocList = Cast( clsDocument Ptr, CInt(FF_ListView_GetlParam(hLV, i)) )
+       pDocList = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, i) )
        If pDocList = pDoc Then nFound = i
        If nFileType = FILETYPE_MAIN Then
           If pDocList->ProjectFileType = FILETYPE_MAIN Then
@@ -256,7 +256,7 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
       Select Case nFileType
          Case FILETYPE_MAIN:     wzFileType = L(212,"Main")
          Case FILETYPE_MODULE:   wzFileType = L(211,"Module")
-         Case FILETYPE_NORMAL:   wzFileType = L(210,"Normal")
+         Case FILETYPE_NORMAL:   wzFileType = ""  'L(210,"Normal")
          Case FILETYPE_RESOURCE: wzFileType = L(213,"Resource")
       End Select
       FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
@@ -277,6 +277,7 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    
    Dim wzFileType As WString * MAX_PATH 
    Dim wzFilePath As WString * MAX_PATH 
+   Dim wzFileExt  As WString * MAX_PATH 
    Dim wzFile     As WString * MAX_PATH
    
    ' Add the incoming document to the project. We simply need to set the flag for
@@ -285,7 +286,29 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    
    FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
    FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
+   FF_PATHNAME( @WStr("EXTN"),  pDoc->DiskFilename, @wzFileExt )
  
+   ' Determine if the document already exists in the project. If it does not then
+   ' make a determination of a default file type for this new file being added to the project.
+   Dim bFound As BOOLEAN = False
+   For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+      If m_arrDocuments(i) = pDoc Then
+         If pDoc->IsProjectFile = False Then
+            bFound = True: Exit For
+         End If
+      End If
+   Next
+   If bFound = False Then
+      If pDoc->ProjectFileType = FILETYPE_UNDEFINED Then
+         Select Case Ucase(wzFileExt)
+            Case ".BAS": pDoc->ProjectFileType = FILETYPE_MODULE
+            Case ".RC":  pDoc->ProjectFileType = FILETYPE_RESOURCE
+            Case ".BI":  pDoc->ProjectFileType = FILETYPE_NORMAL
+            Case Else:   pDoc->ProjectFileType = FILETYPE_NORMAL
+         End Select   
+      End If
+   End If
+   
    Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
    Dim As Long nCount = ListView_GetItemCount(hLV)
    
@@ -294,7 +317,7 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    FF_ListView_InsertItem( hLV, nCount, 2, wzFilePath )
    
    this.ProjectSetFileType(pDoc, pDoc->ProjectFileType)
-   
+
    Function = 0
 End Function
 

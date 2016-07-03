@@ -809,7 +809,7 @@ Function clsDocument.ApplyProperties() As Long
    Dim i           As Long
    Dim nPixels     As Long  
    Dim bitsNeeded  As Long 
-   Dim wFileExt    As WString * 20 
+   Dim wFileExt    As WString * MAX_PATH
    Dim strFontName As String 
    Dim nFontSize   As Long  
    Dim nFontCase   As Long 
@@ -949,7 +949,8 @@ Function clsDocument.ApplyProperties() As Long
    FF_Pathname( @WStr("EXTN"), this.DiskFilename, @wFileExt )
    wFileExt = Ucase(wFileExt)
 
-   If (wFileExt = ".BAS") OrElse (wFileExt = ".INC") OrElse (wFileExt = ".BI") Then
+   If cbool(wFileExt = ".BAS") OrElse cbool(wFileExt = ".INC") _
+         OrElse cbool(wFileExt = ".BI") OrElse (this.IsNewFlag = True) Then
      
       SciMsg( m_pSci, SCI_SETLEXER, SCLEX_VB, 0 )
       bitsNeeded = SciMsg( m_pSci, SCI_GETSTYLEBITSNEEDED, 0, 0)

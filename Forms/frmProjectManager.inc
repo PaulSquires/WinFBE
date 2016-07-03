@@ -52,6 +52,33 @@ End Function
 
 
 ' ========================================================================================
+' Sort the listview based on the specified column and display the sort arrow
+' ========================================================================================
+Function Listview_SortColumn( ByVal hLV As HWnd, _
+                              ByVal nColumn As Long, _
+                              ByVal nSortOrder As Long _
+                              ) As Long
+
+   Dim lvs As LVSORT_TYPE
+   lvs.hLV        = hLV
+   lvs.nColumn    = nColumn
+   lvs.nSortOrder = nSortOrder
+   
+   ' Remove any existing sort arrows and then set the current column arrrow
+   ListView_DrawSortArrow( hLV, gLVProjSortCol, SO_NONE )
+   
+   ' set the sort arrow for the specified column
+   ListView_DrawSortArrow( hLV, nColumn, nSortOrder )
+   ListView_SortItemsEx( hLV, @ListView_CompareFunc, @lvs )
+                       
+   gLVProjSortCol = nColumn
+   gLVProjSortDir = nSortOrder
+
+   Function = 0
+End Function
+
+
+' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmProjectManager
 ' ========================================================================================
 Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
@@ -168,25 +195,48 @@ Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             ' Sort the listview based on the clicked column header 
             Dim lpNMV As NM_LISTVIEW Ptr = Cast( NM_LISTVIEW Ptr, pNMHDR )
 
-            Static fSortColumn As Long = -1
             Static fSortOrder As Long = SO_ASCENDING
             fSortOrder = Iif(fSortOrder = SO_ASCENDING, SO_DESCENDING, SO_ASCENDING)
             
-            Dim lvs As LVSORT_TYPE
-            lvs.hLV        = lpNMV->hdr.hwndFrom
-            lvs.nColumn    = lpNMV->iSubItem
-            lvs.nSortOrder = fSortOrder
-            
-            ' Remove any existing sort arrows and then set the current column arrrow
-            ListView_DrawSortArrow( lvs.hLV, fSortColumn, SO_NONE )
-            ListView_DrawSortArrow( lvs.hLV, lvs.nColumn, fSortOrder )
-            ListView_SortItemsEx( lvs.hLV, @ListView_CompareFunc, @lvs )
-                       
-            ' Save the column number that has been sorted
-            fSortColumn = lpNMV->iSubItem
+            Listview_SortColumn( lpNMV->hdr.hwndFrom, lpNMV->iSubItem, fSortOrder )
             
          End If
          
+      Case NM_CUSTOMDRAW
+         Dim lpLvCd As NMLVCUSTOMDRAW Ptr = Cast(NMLVCUSTOMDRAW Ptr, pNMHDR)
+         Dim pDoc As clsDocument Ptr
+         Dim As Long lRow, lCol  
+             
+         If id = IDC_FRMPROJECTMANAGER_LISTVIEW  Then
+
+            Select Case lpLvCd->nmcd.dwDrawStage
+               Case CDDS_PREPAINT, CDDS_ITEMPREPAINT
+                  Return CDRF_NOTIFYSUBITEMDRAW
+                     
+               Case CDDS_ITEMPREPAINT Or CDDS_SUBITEM
+                  ' to retrieve the line and column number of the cell
+                  lRow = lpLvCd->nmcd.dwItemSpec  ' Line number
+                  lCol = lpLvCd->iSubItem         ' Column number                                                                
+                  
+                  If lCol = 1 Then   ' filetype column
+                     pDoc = Cast( clsDocument Ptr, FF_ListView_GetlParam(pNMHDR->hwndFrom, lRow) )
+                     If pDoc Then
+                        Select Case pDoc->ProjectFileType
+                           Case FILETYPE_NORMAL:    lpLvCd->clrText = BGR(0,0,0)        ' black
+                           Case FILETYPE_MAIN:      lpLvCd->clrText = BGR(153,000,000)  ' dark red  
+                           Case FILETYPE_MODULE:    lpLvCd->clrText = BGR(051,102,000)  ' dark green  
+                           Case FILETYPE_RESOURCE:  lpLvCd->clrText = BGR(173,000,173)  ' dark purple
+                        End Select   
+                     End If       
+                  Else
+                     lpLvCd->clrText = BGR(0,0,0)  ' black  
+                     'lpLvCd->clrTextBk = &H00D8E9EC  ' grey backcolor
+                  End If
+                  Return CDRF_NEWFONT
+                                               
+            End Select
+         End If
+
    End Select
 
    Function = 0

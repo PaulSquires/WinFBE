@@ -1057,72 +1057,62 @@ Type Sci_NotifyHeader Field = 4
   ' // code should be DWORD, but it is defined as LONG in PBWin 9 built-in NMHDR structure.
   '  * hwndFrom is really an environment specific window handle or pointer
   '  * but most clients of Scintilla.h do not have this type visible. */
-  hwndFrom As uLong   ' void *hwndFrom
-  idfrom   As uLong   ' uptr_t idFrom
-  code     As Long    ' unsigned int code
+'  hwndFrom As uLong   ' void *hwndFrom
+'  idfrom   As uLong   ' uptr_t idFrom
+'  code     As Long    ' unsigned int code
+	hwndFrom as HWND
+	idFrom As UINT_PTR
+	code As UINT
 End Type
 
-'#define NotifyHeader Sci_NotifyHeader
-
-'struct SCNotification {
-'   struct Sci_NotifyHeader nmhdr;
-'   int position;
-'   /* SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK, */
-'   /* SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK, */
-'   /* SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK, */
-'   /* SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
-'   /* SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
-
-'   int ch;     /* SCN_CHARADDED, SCN_KEY */
-'   int modifiers;
-'   /* SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, */
-'   /* SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
-
-'   int modificationType;   /* SCN_MODIFIED */
-'   const char *text;
-'   /* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED */
-
-'   int length;    /* SCN_MODIFIED */
-'   int linesAdded;   /* SCN_MODIFIED */
-'   int message;   /* SCN_MACRORECORD */
-'   uptr_t wParam; /* SCN_MACRORECORD */
-'   sptr_t lParam; /* SCN_MACRORECORD */
-'   int line;      /* SCN_MODIFIED */
-'   int foldLevelNow; /* SCN_MODIFIED */
-'   int foldLevelPrev;   /* SCN_MODIFIED */
-'   int margin;    /* SCN_MARGINCLICK */
-'   int listType;  /* SCN_USERLISTSELECTION */
-'   int x;         /* SCN_DWELLSTART, SCN_DWELLEND */
-'   int y;      /* SCN_DWELLSTART, SCN_DWELLEND */
-'   int token;     /* SCN_MODIFIED with SC_MOD_CONTAINER */
-'   int annotationLinesAdded;  /* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
-'   int updated;   /* SCN_UPDATEUI */
-'};
-
-' // Size = 80 bytes
 Type SCNotification Field = 4
    hdr                  As Sci_NotifyHeader
-   position             As Long
-   ch                   As Long
-   modifiers            As Long
-   modificationType     As Long
+   position             As Integer
+   ch                   As Integer
+   modifiers            As Integer
+   modificationType     As Integer
    lpText               As ZString Ptr
-   length               As Long
-   linesAdded           As Long
-   message              As uLong   ' must be DWORD, not LONG
-   wParam               As uLong
-   lParam               As Long
-   nLine                As Long
-   foldLevelNow         As Long
-   foldLevelPrev        As Long
-   margin               As Long
-   listType             As Long
-   x                    As Long
-   y                    As Long
-   token                As Long
-   annotationLinesAdded As Long
-   updated              As Long
+   length               As Integer
+   linesAdded           As Integer
+   message              As uInteger   ' must be DWORD, not LONG
+   wParam               As uInteger
+   lParam               As Integer
+   nLine                As Integer
+   foldLevelNow         As Integer
+   foldLevelPrev        As Integer
+   margin               As Integer
+   listType             As Integer
+   x                    As Integer
+   y                    As Integer
+   token                As Integer
+   annotationLinesAdded As Integer
+   updated              As Integer
 End Type
+
+' // Size = 80 bytes
+'Type SCNotification Field = 4
+'   hdr                  As Sci_NotifyHeader
+'   position             As Long
+'   ch                   As Long
+'   modifiers            As Long
+'   modificationType     As Long
+'   lpText               As ZString Ptr
+'   length               As Long
+'   linesAdded           As Long
+'   message              As uLong   ' must be DWORD, not LONG
+'   wParam               As uLong
+'   lParam               As Long
+'   nLine                As Long
+'   foldLevelNow         As Long
+'   foldLevelPrev        As Long
+'   margin               As Long
+'   listType             As Long
+'   x                    As Long
+'   y                    As Long
+'   token                As Long
+'   annotationLinesAdded As Long
+'   updated              As Long
+'End Type
 
 #IfDef INCLUDE_DEPRECATED_FEATURES
    #Define SC_CP_DBCS         1

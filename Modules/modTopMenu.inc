@@ -297,8 +297,13 @@ Function frmMain_ChangeTopMenuStates() As Long
    End If
    EnableMenuItem hMenu, IDM_BUILDEXECUTE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
-   EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
+
+   If Dir$(gConfig.LastRunFilename) > "" Then
+      EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
+   Else
+      EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
+   End If
 
    Function = 0
 End Function

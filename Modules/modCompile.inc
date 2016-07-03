@@ -7,6 +7,7 @@ Type COMPILE_TYPE
    OutputFilename  As WString * MAX_PATH   ' resulting exe name 
    CompilerPath    As WString * MAX_PATH 
    CurrentFolder   As WString * MAX_PATH
+   SourceFolder    As WString * MAX_PATH   
    OutputFolder    As WString * MAX_PATH   ' release32, release64
    OBjFolder       As WString * MAX_PATH   ' *.o for all modules
    CompileMode     As WString * MAX_PATH 
@@ -96,6 +97,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.FileToCompile = *pDocMain->DiskFilename
    gCompile.CurrentFolder = Curdir                        
 
+   FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.SourceFolder)
+
+
    ' By default for non-project compiles, the resulting compiled exe/dll/lib will
    ' be located in the same folder as the source file. For projects, the compiled
    ' file will be located either in the release32 or release64 folders.
@@ -111,8 +115,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       End If
       gCompile.CompileFlags = gConfig.CompilerSwitches   
 
-      If fCompile32 Then gCompile.OutputFolder = gCompile.OutputFolder & "\release32\"
-      If fCompile64 Then gCompile.OutputFolder = gCompile.OutputFolder & "\release64\"
+      If fCompile32 Then gCompile.OutputFolder = gCompile.OutputFolder & "release32\"
+      If fCompile64 Then gCompile.OutputFolder = gCompile.OutputFolder & "release64\"
       gCompile.ObjFolder = gCompile.OutputFolder & "obj\"
       
       ' Make sure the folders exist
@@ -183,12 +187,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
+   FF_Pathname(@WStr("NAME"), gpApp->ProjectName, @wszTemp)
    sTemp = "_" & Str(wszTemp)
    sTemp = FF_Replace(sTemp, " ", "_" )
    gCompile.BatchFile = sTemp & "_compile.bat" 
    gCompile.LogFile   = sTemp & "_compile.log"
    
-   ' Change to the code output directory
+   ' Change to the output code directory
    ChDir gCompile.OutputFolder
    
    f = Freefile
@@ -200,15 +205,24 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gpApp->IsProjectActive Then
+
       For i = 0 To nCount - 1
          pDoc = gpApp->GetDocumentPtr(i)
          If pDoc->IsProjectFile Then
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               Print #f, sDQ & gCompile.CompilerPath & sDQ & _
-                         " -c " & sDQ & *pDoc->DiskFilename & sDQ & _
-                         " -o " & sDQ & gCompile.ObjFolder & wszTemp & ".o" & sDQ 
+               wszTemp = ".\obj\" & wszTemp & ".o"
+               
+               ' Compare the source code file datetime to the object. If the source code
+               ' date time is greater then we need to recompile it, otherwise we will simply
+               ' link to the existing object file.
+               If FileDateTime(*pDoc->DiskFilename) > FileDateTime(wszTemp) Then
+                  Print #f, sDQ & gCompile.CompilerPath & sDQ & _
+                            " -c " & sDQ & *pDoc->DiskFilename & sDQ & _
+                            " -o " & sDQ & wszTemp & sDQ 
+               End If
+               
             End If
          End If
       Next
@@ -221,7 +235,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             " -x " & sDQ & gCompile.OutputFilename & sDQ & _
             " " & Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
             " -v " & gCompile.CompileFlags & gCompile.CompileMode;
-
+        
    If gpApp->IsProjectActive Then
       For i = 0 To nCount - 1
          pDoc = gpApp->GetDocumentPtr(i)
@@ -229,7 +243,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
-               Print #f, " " & sDQ & gCompile.ObjFolder & wszTemp & ".o" & sDQ 
+               Print #f, " .\obj\" & wszTemp & ".o";
             End If
          End If
       Next
@@ -271,7 +285,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file
-'   Kill gCompile.BatchFile
+   Kill gCompile.BatchFile
 
    
    ' Clear the Compiler Log listview
@@ -412,8 +426,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    If gCompile.RunAfterCompile Then 
       Exec gCompile.OutputFilename, gConfig.CommandLine
-      gConfig.LastRunFilename = gCompile.OutputFilename
    End If
+   gConfig.LastRunFilename = gCompile.OutputFilename
 
    ' Ensure that we switch back to the Project's directory
    ChDir gCompile.CurrentFolder

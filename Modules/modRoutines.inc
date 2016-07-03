@@ -407,7 +407,7 @@ Function FF_Pathname( ByVal wOption   As WString Ptr, _
           End If
              
        Case "NAME"
-          ' Get the full filename
+          ' Get the filename (without extension)
           i = InStrRev(s, Any ":/\")
           st = Iif( i, Mid(s, i + 1), s )
           ' Get the name portion
@@ -416,7 +416,7 @@ Function FF_Pathname( ByVal wOption   As WString Ptr, _
           *OutFilespec = st: Exit Function
        
        Case "EXTN"
-          ' Get the full filename
+          ' Get the extension only (includes the period)
           i = InStrRev(s, Any ":/\")
           st = Iif( i, Mid(s, i + 1), s )
           ' Get the extension
@@ -425,6 +425,7 @@ Function FF_Pathname( ByVal wOption   As WString Ptr, _
           *OutFilespec = st: Exit Function
        
        Case "NAMEX"
+          ' Get the filename with extension
           i = InStrRev(s, Any WStr(":/\"))
           If i Then  
              *OutFilespec = Mid(s, i + 1): Exit Function

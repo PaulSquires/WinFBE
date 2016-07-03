@@ -78,6 +78,67 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             End Select
          End If
          
+      CASE SCN_CHARADDED
+         If pNSC->ch = 13 Then  ' ENTER KEY PRESSED
+            If gConfig.AutoIndentation Then
+               Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+               If pDoc Then
+                  hEdit = pDoc->hWindow
+                  ' Current position
+                  Dim curPos As Long = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+                  ' Current line
+                  nLine = SendMessage(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
+                  ' Line length of the previous line
+                  Dim LineLen As Long = SendMessage(hEdit, SCI_LINELENGTH, nLine - 1, 0)
+                  If LineLen < 1 Then Exit Function
+                  ' Get the text of the previous line
+                  Dim buffer As String = Space(LineLen)
+                  SendMessage(hEdit, SCI_GETLINE, nLine - 1, Cast(LPARAM, Strptr(buffer)))
+                  ' Get the tab width
+                  Dim TabSize As Long = SendMessage(hEdit, SCI_GETTABWIDTH, 0, 0)
+                  ' Calculate the number of spaces to fill on the left
+                  Dim nSpaces As Long, i As Long
+                  For i = 1 To Len(buffer)
+                     If Mid(buffer, i, 1) <> " " Then
+                        If Mid(buffer, i, 1) = Chr(9) Then
+                           nSpaces = nSpaces + TabSize
+                        Else
+                           Exit For
+                        End If
+                     Else
+                        nSpaces = nSpaces + 1
+                     End If
+                  Next
+                  Dim strFill As String = ""
+                  ' Remove CRLF
+                  buffer = FF_Remove(buffer, Chr(13))
+                  buffer = FF_Remove(buffer, Chr(10))
+                  ' Remove spaces and tabs and convert to uppercase
+                  buffer = Trim(Ucase(buffer), Any Chr(32, 9))
+                  If (Left(buffer, 3) = "IF " And Right(buffer, 5) = " THEN") Or _
+                     Left(buffer, 4) = "ELSE" Or _
+                     Left(buffer, 7) = "SELECT " Or _
+                     Left(buffer, 5) = "CASE " Or _
+                     Left(buffer, 4) = "FOR " Or _
+                     Left(buffer, 3) = "DO " Or _
+                     buffer = "DO" Or _
+                     Left$(buffer, 6) = "WHILE " Or _
+                     buffer = "WHILE" Then
+                     ' // Indentation size
+                     Dim IndentSize As Long = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
+                     ' // Add spaces to indent the line
+                     strFill = Space(nSpaces + IndentSize)
+                  Else
+                     ' Add the same spaces on the left that the line above
+                     strFill = Space(nSpaces)
+                  End If
+                  ' *** TODO: If using tabs, replace spaces with tabs
+                  ' Indents the line
+                  SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+               End If
+            End If
+         End If
+         
    End Select
 
    Function = 0
@@ -342,6 +403,9 @@ Function OnCommand_ProjectAddFiles( ByVal HWnd As HWnd ) As LRESULT
                pDoc = frmMain_OpenFileSafely(HWnd, False, False, False, pwszName, 0 )
                gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
             End If
+            ' Ensure that the item displays based on the correct sorting
+            Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+            Listview_SortColumn( hLV, gLVProjSortCol, gLVProjSortDir )
             CoTaskMemFree(pwszName)
             pwszName = Null
          End If
@@ -383,6 +447,9 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
       If (gpApp->IsProjectActive = True) And (pDoc->IsProjectFile = True) Then
         gpApp->ProjectSetFileType( pDoc, pDoc->ProjectFileType )    ' this updates all fields in listview
       End If
+      ' Apply document properties to this file because the file extension may have
+      ' changed. For example from Untitled to *.bas
+      pDoc->ApplyProperties
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
@@ -614,7 +681,12 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_PROJECTCLOSE:          Function = OnCommand_ProjectClose( HWnd )
       Case IDM_PROJECTMANAGER:        Function = frmProjectManager_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_PROJECTOPTIONS:        Function = frmProjectOptions_Show( HWnd ) 
-      Case IDM_ADDFILETOPROJECT:      Function = gpApp->ProjectAddFile( pDoc )
+    
+      Case IDM_ADDFILETOPROJECT:      
+           Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+           Function = gpApp->ProjectAddFile( pDoc )
+           Listview_SortColumn( hLV, gLVProjSortCol, gLVProjSortDir )
+
       Case IDM_REMOVEFILEFROMPROJECT: Function = gpApp->ProjectRemoveFile( pDoc )
       Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
       Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
