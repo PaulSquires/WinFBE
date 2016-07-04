@@ -711,6 +711,12 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_RUNEXE
          Exec gConfig.LastRunFilename, gConfig.CommandLine
       
+      Case IDM_COMPILERESULTS  ' show/hide compile results
+         If IsWindowVisible(HWND_FRMCOMPILERESULTS) Then
+            ShowWindow(HWND_FRMCOMPILERESULTS, SW_HIDE)
+         Else
+            ShowWindow(HWND_FRMCOMPILERESULTS, SW_SHOW)
+         End If
       
       Case IDM_COMMANDLINE
          Function = frmCommandLine_Show( HWnd )
