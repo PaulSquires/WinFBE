@@ -875,7 +875,20 @@ Function clsDocument.ApplyProperties() As Long
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 3, SC_MARGIN_FORE )
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 3, SC_MARGIN_BACK )
 
-
+   '' 
+   ''  FONT QUALITY
+   SciMsg( m_pSci, SCI_SETFONTQUALITY, SC_EFF_QUALITY_ANTIALIASED, 0 )
+   'SC_EFF_QUALITY_DEFAULT (backward compatible), SC_EFF_QUALITY_NON_ANTIALIASED, 
+   'SC_EFF_QUALITY_ANTIALIASED, SC_EFF_QUALITY_LCD_OPTIMIZED
+   
+   SciMsg( m_pSci, SCI_SETTECHNOLOGY, SC_TECHNOLOGY_DIRECTWRITE, 0 )
+   SciMsg( m_pSci, SCI_SETBUFFEREDDRAW, 0, 0 ) ' turn off b/c we are using Vista+ Direct Draw
+   'SC_TECHNOLOGY_DEFAULT (0). 
+   'On Windows Vista or later, 
+   'SC_TECHNOLOGY_DIRECTWRITE (1), 
+   'SC_TECHNOLOGY_DIRECTWRITERETAIN (2), or 
+   'SC_TECHNOLOGY_DIRECTWRITEDC (3) 
+   
    ''
    ''  CONFINE CARET TO TEXT
    If gConfig.ConfineCaret Then
@@ -891,7 +904,11 @@ Function clsDocument.ApplyProperties() As Long
    Else
       SciMsg( m_pSci, SCI_SETUSETABS, CTRUE, 0 )
    End If
-   
+
+   ''
+   ''  SELECTIONS FILL ENTIRE SCREEN SPACE
+   SciMsg( m_pSci, SCI_SETSELEOLFILLED, CTRUE, 0 )
+       
    ''
    ''  TAB WIDTH 
    SciMsg( m_pSci, SCI_SETTABWIDTH, Val(gConfig.TabSize), 0 )
@@ -908,8 +925,9 @@ Function clsDocument.ApplyProperties() As Long
    SciMsg( m_pSci, SCI_SETSELBACK, STYLE_INDENTGUIDE, gConfig.clrIndentGuidesBG )
    
    ''
-   '' CARET
+   ''  CARET
    SciMsg( m_pSci, SCI_SETCARETFORE, gConfig.clrCaretFG, 0 )
+   SciMsg( m_pSci, SCI_SETCARETWIDTH, 2, 0 )       ' 2 pixels
 
    ''
    ''  SHOW CARET LINE
