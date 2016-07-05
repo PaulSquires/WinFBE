@@ -44,7 +44,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim As String st1, st2, st3        
    Dim As HWnd hLV
          
-   Dim As BOOLEAN fCompile32, fCompile64
+   Dim As BOOLEAN fCompile32, fCompile64, fGoodCompile
    
    sDQ = Chr(34)   ' double quotes
 
@@ -305,9 +305,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       
       ' Save the FB version and copyright information. 
       If Left(st_ucase, 19) = "FREEBASIC COMPILER " Then
+         fGoodCompile = True
          sOutputMsg = sOutputMsg & st & vbCrLf: Continue For
       End If        
       If Left(st_ucase, 13) = "COPYRIGHT (C)" Then
+         fGoodCompile = True
          sOutputMsg = sOutputMsg & st & vbCrLf: Continue For
       End If        
       
@@ -393,8 +395,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' (2) Errors - unsuccessful compile. Show frmCompileRsults form and open the Compiler Log
    '     and position it to the error location.
    '
-   If (NumWarnings = 0) AndAlso (NumErrors = 0) Then
+   If (NumWarnings = 0) AndAlso (NumErrors = 0) Then 
+      ' If there were no errors but the fGoodCompile flag was not set to True then the log file
+      ' did not contain the required FB copyright notice. Something must have went wrong, like trying
+      ' to call the 64 bit compiler using a 32 bit operating system. Show the message to the user.
       Kill gCompile.LogFile
+      If fGoodCompile = False Then
+         MessageBoxW( HWND_FRMMAIN, WStr(sLogSt), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
+         Function = False: Exit Function
+      End If
    Else                        
       ' There were warnings and/or errors so display the compile results form
       wszTemp = L(192,"Compile Results :: [Warnings:") & " " & NumWarnings & "  " & L(193,"Errors:") & " " & NumErrors & "]"
