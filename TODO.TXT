@@ -13,10 +13,6 @@
 
 [ ] F1 Help for WinFBE and WinAPI help files.
 
-[ ] Implement code for Sub/Function Declaration menu option.
-
-[ ] Implement code for Last Position menu option.
-
 [ ] Print option.
 
 [ ] Icons in menus. Not a priority but would be nice to have.

@@ -106,7 +106,6 @@ Function ProjectLoadFromFile() As BOOLEAN
                gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
             End If
          
-         
       End Select
    
    Loop                        
