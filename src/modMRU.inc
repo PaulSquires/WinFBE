@@ -135,11 +135,10 @@ End Function
 ''
 ''
 Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
-   Dim hSubMenu As HMENU = GetMRUProjectMenuHandle()
    Dim wzFile As WString * MAX_PATH
    Dim idx As Long
    
-   GetMenuStringW(hSubMenu, wID, wzFile, MAX_PATH, MF_BYCOMMAND)
+   wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
 
    ' If a project is already open then save/close it.
    If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
@@ -148,7 +147,6 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
    If ProjectLoadFromFile() Then
       gpApp->IsNewProjectFlag = False
       gpApp->IsProjectActive = True
-      frmProjectManager_Show( HWnd, SW_SHOW )
       ' Update the most recently used project list 
       UpdateMRUProjectList(@wzFile)
    End If

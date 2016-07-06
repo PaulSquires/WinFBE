@@ -228,7 +228,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' in all of the *.o object files.
    Print #f, sDQ & gCompile.CompilerPath & sDQ & _
             " " & sDQ & gCompile.MainFilename & sDQ & _ 
-            " -x " & sDQ & gCompile.OutputFilename & sDQ & _ 
             " " & Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
             " -v " & gCompile.CompileFlags & gCompile.CompileMode;
         

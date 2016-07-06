@@ -361,7 +361,6 @@ Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
       If ProjectLoadFromFile() Then
          gpApp->IsNewProjectFlag = False
          gpApp->IsProjectActive = True
-         frmProjectManager_Show( HWnd, SW_SHOW )
          ' Update the most recently used project list 
          UpdateMRUProjectList(pwszName)
       End If

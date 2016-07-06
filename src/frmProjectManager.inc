@@ -87,9 +87,11 @@ Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
    Dim pDoc As clsDocument Ptr 
 
    Select Case id
+      Case IDM_PROJECTFILESADD: Function = OnCommand_ProjectAddFiles( HWND_FRMMAIN )
+      Case IDM_PROJECTOPTIONS:  Function = frmProjectOptions_Show( HWND_FRMMAIN ) 
+
       Case IDM_OPENINCLUDE,IDM_REMOVEFILEFROMPROJECT, IDM_SETFILENORMAL, IDM_SETFILEMODULE, _
            IDM_SETFILEMAIN,IDM_SETFILERESOURCE
-                  
          Dim As Long lIndex = -1 
          If ListView_GetSelectedCount(hLV) > 0 Then                
             Do
@@ -102,10 +104,10 @@ Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
                           frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
                      Case IDM_REMOVEFILEFROMPROJECT
                           Function = gpApp->ProjectRemoveFile( pDoc )
-                     Case IDM_SETFILENORMAL:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
-                     Case IDM_SETFILEMODULE:         Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
-                     Case IDM_SETFILEMAIN:           Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
-                     Case IDM_SETFILERESOURCE:       Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
+                     Case IDM_SETFILENORMAL:   Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_NORMAL )
+                     Case IDM_SETFILEMODULE:   Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MODULE )
+                     Case IDM_SETFILEMAIN:     Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_MAIN )
+                     Case IDM_SETFILERESOURCE: Function = gpApp->ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
                   End Select
                End If
             Loop Until lIndex = -1
@@ -183,12 +185,10 @@ Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
       Case NM_RCLICK
          If id = IDC_FRMPROJECTMANAGER_LISTVIEW Then   
             ' Create the popup menu
-            If nmi->iItem > -1 Then
-              hPopupMenu = CreateProjectManagerContextMenu(nmi->hdr.hwndFrom, nmi->iItem)
-              GetCursorPos @pt
-              TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
-              DestroyMenu hPopUpMenu
-            End If
+            hPopupMenu = CreateProjectManagerContextMenu(nmi->hdr.hwndFrom, nmi->iItem)
+            GetCursorPos @pt
+            TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+            DestroyMenu hPopUpMenu
             Return True   ' prevent further processing that leads to WM_CONTEXTMENU
          End If 
          
@@ -282,6 +282,9 @@ Function frmProjectManager_Listview_SubclassProc ( _
                ' value. This will invoke the code in WM_COMMAND that cycles through all selected rows
                ' in the listview and opens the selected files.
                SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDM_OPENINCLUDE, 0), 0 )
+               Exit Function
+            Case VK_DELETE
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDM_REMOVEFILEFROMPROJECT, 0), 0 )
                Exit Function
          End Select
 

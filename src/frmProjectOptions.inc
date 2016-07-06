@@ -65,7 +65,7 @@ Function ProjectLoadFromFile() As BOOLEAN
    Dim f As Long = Freefile
    If Open( *gpApp->ProjectDiskFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
 
-   frmProjectManager_Show( HWND_FRMMAIN, SW_SHOW )
+   frmProjectManager_Show( HWND_FRMMAIN, 0 )
    
    ' Turn off redrawing of the listview in order to speed up loading
    Dim As HWnd hLV = GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW )
