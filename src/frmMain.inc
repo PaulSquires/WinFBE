@@ -237,6 +237,8 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
       If pDoc Then pDoc->IsProjectFile = False
    Next
    
+   DestroyWindow( HWND_FRMFNLIST )
+   DestroyWindow( HWND_FRMCOMPILERESULTS )
    DestroyWindow( HWND_FRMPROJECTMANAGER )
    gpApp->IsProjectActive = False
 
@@ -460,11 +462,14 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
       ' Apply document properties to this file because the file extension may have
       ' changed. For example from Untitled to *.bas
       pDoc->ApplyProperties
+      ' Parse the code for sub/function listing and create list
+      pDoc->CreateFunctionList
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
    gTTabCtl.SetTabText(-1)
    frmMain_SetFocusToCurrentCodeWindow
+   frmFnList_UpdateListBox()
 
    Function = 0
 End Function
@@ -498,6 +503,7 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       End If   
    Next
    frmMain_SetFocusToCurrentCodeWindow
+   frmFnList_UpdateListBox()
 
    Function = 0
 End Function
@@ -624,10 +630,10 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
       ''  EDIT MENU
       Case IDM_REDO:               Function = SendMessageW( hEdit, SCI_REDO, 0, 0)
-      Case WM_UNDO:                Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
-      Case WM_CUT:                 Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
-      Case WM_COPY:                Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
-      Case WM_PASTE:               Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
+      Case IDM_UNDO, WM_UNDO:      Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
+      Case IDM_CUT, WM_CUT:        Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+      Case IDM_COPY, WM_COPY:      Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
+      Case IDM_PASTE, WM_PASTE:    Function = SendMessageW( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
       Case IDM_DELETELINE:         Function = SendMessageW(hEdit, SCI_LINECUT, 0, 0)
       Case IDM_INSERTFILE:         Function = pDoc->InsertFile()
       Case IDM_INDENTBLOCK:        Function = SendMessageW(hEdit, SCI_TAB, 0, 0)
@@ -657,6 +663,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Find_UpOrDown( id, 0, True, 0 )
 
       Case IDM_GOTO:               Function = frmGoto_Show(pDoc->hWindow)
+      Case IDM_FUNCTIONLIST:       Function = frmFnList_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_BOOKMARKTOGGLE:     Function = pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
       Case IDM_BOOKMARKNEXT:       Function = pDoc->NextBookmark()
       Case IDM_BOOKMARKPREV:       Function = pDoc->PrevBookmark()
@@ -711,15 +718,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_RUNEXE
          Exec gConfig.LastRunFilename, gConfig.CommandLine
       
-      Case IDM_COMPILERESULTS  ' show/hide compile results
-         If IsWindowVisible(HWND_FRMCOMPILERESULTS) Then
-            ShowWindow(HWND_FRMCOMPILERESULTS, SW_HIDE)
-         Else
-            ShowWindow(HWND_FRMCOMPILERESULTS, SW_SHOW)
-         End If
-      
-      Case IDM_COMMANDLINE
-         Function = frmCommandLine_Show( HWnd )
+      Case IDM_COMPILERESULTS :       Function = frmCompileResults_Show( HWnd )    ' this will also toggle visibility 
+      Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
 
       Case IDM_USE32BIT, IDM_USE64BIT
          Function = frmMain_MenuSetCompiler(id)
@@ -728,8 +728,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       
       Case IDM_HELP
-         'gpApp->Debug
- 
+      
+
       Case IDM_ABOUT
          MessageBoxW( HWnd, APPNAME & vbcrlf & "Version " & APPVERSION & _
                        vbcrlf & vbcrlf & _
@@ -757,7 +757,8 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Dim nCurSel As Long
    Dim pInfo As TCHITTESTINFO
    Dim hPopUpMenu As HMENU
-   Dim pt As Point         
+   Dim pt As Point   
+   Dim rc As Rect      
    
    If id = IDC_SCINTILLA Then
       ' Process Scintilla control notification messages
@@ -810,12 +811,18 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
          If id = IDC_FRMMAIN_TOOLBAR Then
             Dim ptbn As TBNOTIFY Ptr = Cast(TBNOTIFY Ptr, pNMHDR)
             Select Case ptbn->iItem
-               ' Dropdown new file menu
-               Case IDM_FILENEW
-                  Dim rc As Rect    
+               Case IDM_FILENEW    ' Dropdown new file menu
                   SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
                   MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
                   frmTemplates_Show(HWnd, rc.Left, rc.Bottom)
+               Case IDM_FILEOPEN    ' Dropdown most recently used files
+                  SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
+                  MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
+                  Dim As Long nBtnWidth = Toolbar_GetButtonWidth(HWND_FRMMAIN_TOOLBAR)
+                  hPopupMenu = CreateMRUpopup()
+                  TrackPopupMenu hPopupMenu, 0, rc.Left + nBtnWidth, rc.bottom, 0, HWnd, 0
+                  DestroyMenu hPopupMenu
+               
             End Select
          End If
 
@@ -853,7 +860,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                   Case IDM_UNINDENTBLOCK   : wszText = L(92,"UnIndent (Shift+TAB)")
                   Case IDM_COMMENTBLOCK    : wszText = L(93,"Comment Block (Ctrl+B)")
                   Case IDM_UNCOMMENTBLOCK  : wszText = L(94,"UnComment Block (Ctrl+Shift+B)")
-                  Case IDM_PROJECTMANAGER  : wszText = L(95,"Project Manager (F4)")
+                  Case IDM_FUNCTIONLIST    : wszText = L(222,"Function List (F4)")
                   Case IDM_COMPILE         : wszText = L(96,"Compile (Ctrl+F5)")
                   Case IDM_BUILDEXECUTE    : wszText = L(97,"Compile and Execute (F5)")
                   Case IDM_RUNEXE          : wszText = L(98,"Run Executable (Shift+F5)")
@@ -1072,7 +1079,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow("WinFBE_Class")
    'pWindow->DPI = 96   ' eg. 144 or any other value (96 is default)
    
-   ' Disable background erasing
+   ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
 
    HWND_FRMMAIN = pWindow->Create(Null, APPNAME, @frmMain_WndProc )

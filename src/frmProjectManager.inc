@@ -259,7 +259,7 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed Listview window.
 ' ========================================================================================
-Function Listview_SubclassProc ( _
+Function frmProjectManager_Listview_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -281,13 +281,13 @@ Function Listview_SubclassProc ( _
                ' Simulate the sending of a WM_COMMAND message to the control with the IDM_OPENINCLUDE
                ' value. This will invoke the code in WM_COMMAND that cycles through all selected rows
                ' in the listview and opens the selected files.
-               SendMessage( GetParent(HWnd), WM_COMMAND, MAKELPARAM(IDM_OPENINCLUDE, 0), 0 )
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDM_OPENINCLUDE, 0), 0 )
                Exit Function
          End Select
 
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
-         RemoveWindowSubclass HWnd, @Listview_SubclassProc, uIdSubclass
+         RemoveWindowSubclass HWnd, @frmProjectManager_Listview_SubclassProc, uIdSubclass
 
    End Select
 
@@ -358,7 +358,7 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
         pWindow->AddControl("LISTVIEW", , IDC_FRMPROJECTMANAGER_LISTVIEW, "", 10, 10, 176, 335, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS , _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @Listview_SubclassProc), IDC_FRMPROJECTMANAGER_LISTVIEW, Cast(DWORD_PTR, @pWindow))
+        Cast(WNDPROC, @frmProjectManager_Listview_SubclassProc), IDC_FRMPROJECTMANAGER_LISTVIEW, Cast(DWORD_PTR, @pWindow))
 
    ' Add some extended styles
    Dim dwExStyle As DWORD

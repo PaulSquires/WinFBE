@@ -12,8 +12,8 @@
 #pragma once
 
 #include once "windows.bi"
-#include once "Afx/CWindow.inc"
-#include once "Afx/AfxGdiPlus.inc"
+#Include Once "CWindow.inc"
+#include once "AfxGdiPlus.inc"
 
 USING Afx.CWindowClass
 

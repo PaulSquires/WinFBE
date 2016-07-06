@@ -16,7 +16,7 @@
 '#include once "win/windowsx.bi"
 #include once "win/commctrl.bi"
 #include once "win/uxtheme.bi"
-#include once "Afx/AfxWin.inc"
+#include once "AfxWin.inc"
 
 ' Button
 DECLARE SUB Button_Click (BYVAL hButton AS HWND)

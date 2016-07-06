@@ -16,8 +16,8 @@
 #include once "windows.bi"
 #include once "win/commctrl.bi"
 #include once "win/richedit.bi"
-#include once "Afx/AfxWin.inc"
-#include once "Afx/CScrollWindow.inc"
+#Include Once "AfxWin.inc"
+#include once "CScrollWindow.inc"
 USING Afx.CScrollWindowClass
 
 NAMESPACE Afx.CWindowClass

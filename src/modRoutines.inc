@@ -677,6 +677,90 @@ Function FF_StrDelete( ByRef sMainString As String, _
 End Function
 
 
+''
+''  FF_SHRINK
+''  Shrink a string to use a consistent single character delimiter.
+''
+''  The purpose of this function is to create a string with consecutive 
+''  data items (words) separated by a consistent single character. This 
+''  makes it very straightforward to parse the results as needed.
+''
+''  If sMask is not defined then all leading spaces and trailing spaces 
+''  are removed entirely. All occurrences of two or more spaces are changed 
+''  to a single space. Therefore, the new string returned consists of zero 
+''  or more words, each separated by a single space character.
+''
+''  If sMask is specified, it defines one or more delimiter characters to 
+''  shrink. All leading and trailing mask characters are removed entirely. 
+''  All occurrences of one or more mask characters are replaced with the 
+''  first character of sMask. The new string returned consists of zero or 
+''  more words, each separated by the character found in the first position 
+''  of sMask.    
+''
+''  WhiteSpace is generally defined as the four common non-printing 
+''  characters:  Space, Tab, Carriage-Return, and Line-Feed. sMask = Chr(32,9,13,10) 
+''
+Private Function FF_Shrink( ByRef sMainString As String, _
+                            ByRef sMask       As String = " " _
+                            ) As String
+
+    Dim nLen       As Integer = Len(sMask)
+    Dim i          As Integer
+    Dim z          As Integer
+    Dim nStart     As Integer
+    Dim sDuplicate As String
+    Dim sReplace   As String  = Left(sMask, 1)
+    Dim s          As String
+    
+    ' Eliminate all leading and trailing sMask characters
+    s = Trim(sMainString, Any sMask)
+    
+    ' Eliminate all duplicate sMask characters within the string
+    For z = 0 To nLen - 1 
+       sDuplicate = Chr(sMask[z]) & Chr(sMask[z])  ' usually double spaces
+       i = 1
+       Do
+           i = Instr(s, sDuplicate)
+           If i > 0 Then 
+              s = Left(s, i - 1) & sReplace & Mid(s, i + Len(sDuplicate))
+           End If   
+       Loop Until i = 0
+    Next
+    
+    ' Replace all single characters in the mask with the first character
+    ' of the mask.
+    i = 1
+    Do
+        i = Instr(i, s, Any sMask)
+        If i > 0 Then
+           ' only do the replace if the character at the position found is
+           ' different than the character we need to replace it with. This saves
+           ' us from having to do an unneeded string concatenation. Use pointer
+           ' arithmetic (zero based) to make comparison faster.
+           If s[i-1] <> sMask[0] Then
+              s = Left(s, i - 1) & sReplace & Mid(s, i + 1)
+           End If
+           i = i + 1
+        End If   
+    Loop Until i = 0
+
+    ' Finally, do a pass to ensure that there are no duplicates of the 
+    ' first mask character because of the replacements in the step above. 
+    sDuplicate = Chr(sMask[0]) & Chr(sMask[0])  
+    i = 1
+    Do
+        i = Instr(s, sDuplicate)
+        If i > 0 Then 
+           s = Left(s, i - 1) & sReplace & Mid(s, i + Len(sDuplicate))
+        End If   
+    Loop Until i = 0
+
+    Return s
+
+End Function
+
+
+
 '   Inserts an item at a specific location in the ListView.
 '
 '   hWndControl:    Handle of control (e.g. HWND_FORM1_LISTVIEW1)   

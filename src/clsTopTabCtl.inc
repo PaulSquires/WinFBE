@@ -195,5 +195,3 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
 End Function
 
 
-' Global class to manage the top TabControl
-Dim Shared gTTabCtl As clsTopTabCtl

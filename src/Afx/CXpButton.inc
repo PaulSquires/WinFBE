@@ -16,7 +16,7 @@
 #include once "windows.bi"
 #include once "win/tmschema.bi"
 #include once "win/uxtheme.bi"
-#include once "Afx/CWindow.inc"
+#include once "CWindow.inc"
 
 USING Afx.CWindowClass
 

@@ -11,7 +11,7 @@
 
 #pragma once
 #INCLUDE ONCE "win/uxtheme.bi"
-#INCLUDE ONCE "Afx/AfxWin.inc"
+#INCLUDE ONCE "AfxWin.inc"
 
 ' // The definition for BSTR in the FreeBASIC headers was incorrectly changed to WCHAR
 #ifndef AFX_BSTR

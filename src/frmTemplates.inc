@@ -151,54 +151,51 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    wszPath = Exepath & "\Templates\"
    wszCurPath = wszPath & "*.fbtpl"
 
-   ' Count the number of files and dimension the array
-   ' REDIM PRESERVE causes problems
-   Dim nCount As Long
-   hSearch = FindFirstFileW(wszCurPath, @WFD)
-   If hSearch <> INVALID_HANDLE_VALUE Then
-      Do
-         If (WFD.dwFileAttributes And FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY Then
-            nCount +=1
-         End If
-      Loop While FindNextFileW(hSearch, @WFD)
-      FindClose(hSearch)
-   End If
-   ' Dimension the array
-   If nCount = 0 Then Exit Function
-   Dim rgwszPaths(nCount - 1) As WString * MAX_PATH
-   idx = 0
+
+   ' Create a variable length array to hold the filenames with full paths.
+   Dim rgwszPaths(Any) As WString * MAX_PATH
+   
+   Dim As Long nCount, ub
+   Dim wszFilename As WString * MAX_PATH
+
 
    ' Find the files
-   hSearch = FindFirstFileW(wszCurPath, @WFD)
-   If hSearch <> INVALID_HANDLE_VALUE Then
-      Do
-         If (WFD.dwFileAttributes And FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY Then
-            wszFullPath = wszPath & WFD.cFileName
-            ' Get the description
-            FileNo = Freefile
-            If Open( wszFullPath For Input As #FileNo) = 0 Then 
-               nLin = 0
-               Do Until Eof(FileNo)
-                  Line Input #FileNo, wszText
-                  nLin += 1
-                  If nLin = 1 Then nType = Val(wszText)
-                  If nType < 1 Or nType > 2 Then Exit Do
-                  If nType = 1 And nLin = 3 Then Exit Do
-                  If nType = 2 And nLin = 4 Then Exit Do
-               Loop
-               Close FileNo
-               ' Display the description in the listbox
-               nItem = SendMessageW(hListBox, LB_ADDSTRING, 0, Cast(LPARAM, @wszText))
-               ' Store the full path in the array
-               rgwszPaths(idx) = wszFullPath
-               ' Store a pointer to the element of the array in the listbox item
-               SendMessageW hListBox, LB_SETITEMDATA, nItem, Cast(LPARAM, Varptr(rgwszPaths(idx)))
-               idx += 1
-            End If
-         End If
-      Loop While FindNextFileW(hSearch, @WFD)
-      FindClose(hSearch)
-   End If
+   wszFilename = Dir( wszCurPath, fbNormal )
+   Do Until Len(wszFilename) = 0
+
+      ' Resize our variable length array in chunks of 25
+      ub = Ubound(rgwszPaths)
+      If nCount > ub Then
+         ReDim Preserve rgwszPaths(ub + 25) As WString * MAX_PATH
+      End If
+      
+      wszFullPath = wszPath & wszFileName
+      ' Get the description
+      FileNo = Freefile
+      If Open( wszFullPath For Input As #FileNo) = 0 Then 
+         nLin = 0
+         Do Until Eof(FileNo)
+            Line Input #FileNo, wszText
+            nLin += 1
+            If nLin = 1 Then nType = Val(wszText)
+            If nType < 1 Or nType > 2 Then Exit Do
+            If nType = 1 And nLin = 3 Then Exit Do
+            If nType = 2 And nLin = 4 Then Exit Do
+         Loop
+         Close FileNo
+         ' Display the description in the listbox
+         nItem = SendMessageW(hListBox, LB_ADDSTRING, 0, Cast(LPARAM, @wszText))
+         ' Store the full path in the array
+         rgwszPaths(nCount) = wszFullPath
+         ' Store a pointer to the element of the array in the listbox item
+         SendMessageW hListBox, LB_SETITEMDATA, nItem, Cast(LPARAM, Varptr(rgwszPaths(nCount)))
+         nCount += 1
+         
+         wszFilename = Dir() 
+      End If
+   Loop 
+
+   If nCount = 0 Then Exit Function
 
    ' Process Windows messages
    Function = pWindow->DoEvents

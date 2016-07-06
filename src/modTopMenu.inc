@@ -79,6 +79,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function &Definition") & Chr(9) & "F6"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"&Last Position") & Chr(9) & "Shift+F6"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FUNCTIONLIST, L(221,"&Show/Hide Function List") & Chr(9) & "F4"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"&Goto Line...") & Chr(9) & "Ctrl+G"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
@@ -104,7 +105,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"&New Project")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTMANAGER, L(181,"Project &Manager...") & Chr(9) & "F4"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTMANAGER, L(181,"Project &Manager...") & Chr(9) & "F9"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
          hPopUpSubMenu = CreatePopupMenu
@@ -125,7 +126,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILERESULTS, L(220,"&Show/Hide Compile Results") & Chr(9) & "F9"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILERESULTS, L(220,"&Show/Hide Compile Results") & Chr(9) & "F7"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
@@ -167,6 +168,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,  IDM_REPLACE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F6,  IDM_DEFINITION )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F6,  IDM_LASTPOSITION )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F4,  IDM_FUNCTIONLIST )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,  IDM_GOTO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,  IDM_BOOKMARKTOGGLE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F2,  IDM_BOOKMARKNEXT )
@@ -178,11 +180,11 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F8,  IDM_UNFOLDALL )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,  IDM_ZOOMIN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F4,  IDM_PROJECTMANAGER )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F9,  IDM_PROJECTMANAGER )
    pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F9,  IDM_COMPILERESULTS )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_COMPILERESULTS )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_1,  IDM_USE32BIT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_2,  IDM_USE64BIT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_3,  IDM_GUI )
@@ -302,11 +304,14 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
-   If Dir$(gConfig.LastRunFilename) > "" Then
+   If Dir(gConfig.LastRunFilename) > "" Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
    End If
+
+   ' If at least one document exists then allow the Function List to be shown.
+   EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or Iif( gpApp->GetDocumentCount, MF_ENABLED, MF_GRAYED)
 
    Function = 0
 End Function

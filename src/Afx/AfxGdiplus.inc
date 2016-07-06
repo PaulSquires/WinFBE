@@ -20,7 +20,7 @@
     using gdiplus
 #endif
 #include once "win/winspool.bi"
-#include once "Afx/AfxWin.inc"
+#include once "AfxWin.inc"
 
 UNION GDIP_BGRA
    color AS DWORD

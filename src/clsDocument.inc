@@ -13,7 +13,8 @@ End Constructor
 ''
 ''
 Destructor clsDocument
-'   DestroyWindow m_hWindow     ' destroy the scintilla window
+   DestroyWindow m_hWindow       ' destroy the scintilla window
+   this.DeallocateFunctionList   ' free allocated memory for the function list
 End Destructor
 
 
@@ -249,18 +250,30 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       End If
    End If
 
-   ' Delete any existing file
-   If Dir(wFilename) > "" Then Kill wFilename
-   
-   ' Do the actual saving to disk
+
+   ' Save text buffer to disk by directly accessing buffer rather
+   ' saving it to an intermediary string variable first.
    f = Freefile
-   If Open( wFilename For Binary As #f) = 0 Then
-      sText = this.GetText
-      Put #f, 1, sText
+   If Open( wFilename For Output As #f ) = 0 Then
+      Dim As ZString Ptr psz = Cast( ZString Ptr, SendMessageW(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+      Print #f, *psz
       Close #f
    Else
       ' error saving file
-   End If   
+   End If         
+
+'   ' Delete any existing file
+'   If Dir(wFilename) > "" Then Kill wFilename
+'   
+'   ' Do the actual saving to disk
+'   f = Freefile
+'   If Open( wFilename For Binary As #f) = 0 Then
+'      sText = this.GetText
+'      Put #f, 1, sText
+'      Close #f
+'   Else
+'      ' error saving file
+'   End If   
 
    this.DiskFilename = @wFilename
    this.IsNewFlag    = False
@@ -1065,5 +1078,154 @@ Function clsDocument.ApplyProperties() As Long
    End If
    
    
+   Function = 0
+End Function
+
+
+
+''
+''
+Property clsDocument.FnListPtr( ByVal nValue As FUNCTION_TYPE Ptr)
+   m_FnListPtr = nValue
+End Property
+
+Property clsDocument.FnListPtr() As FUNCTION_TYPE Ptr
+   Property = m_FnListPtr
+End Property
+
+
+''
+''
+Function clsDocument.DeallocateFunctionList() As Long
+
+   Dim pList As FUNCTION_TYPE Ptr
+   Dim pListNext As FUNCTION_TYPE Ptr
+
+   ' If a list already exists then we need to deallocate any memory
+   If this.m_FnListPtr Then
+      pList = this.m_FnListPtr
+      Do Until pList = 0
+         pListNext = pList->pListNext
+         Delete pList
+         pList = pListNext
+      Loop
+   End If
+   this.m_FnListPtr = 0
+
+   Function = 0
+End Function
+               
+               
+''
+''
+Function clsDocument.CreateFunctionList() As Long
+   ' Generate a linked list of FUNCTION_TYPE structures that define all found
+   ' Functions/Subs in the source code. This list is used to be displayed in
+   ' the Function List.
+ 
+   Dim As ZString Ptr pzByte = Cast( ZString Ptr, SendMessageW(m_hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+   Dim As Long nLen = SendMessageW(m_hWindow, SCI_GETTEXTLENGTH, 0, 0) 
+   Dim As Long i = 0   ' current buffer position
+   Dim As Long nCurPos, nEOL, nLineNum
+   Dim As String st, st_ucase
+   Dim As Long n, iParen
+   Dim As BOOLEAN bFirstLine
+   
+   Dim pList As FUNCTION_TYPE Ptr
+   Dim pListTemp As FUNCTION_TYPE Ptr
+
+   ' If a list already exists then we need to deallocate any memory
+   this.DeallocateFunctionList()
+   
+   ' Create the first function list node that holds the file name
+   pList = New FUNCTION_TYPE
+   pList->bIsHeader = True
+   pList->nLineNumber = 0   'b/c Scintilla is zero based
+   pList->pDoc = @this
+   FF_PATHNAME( WStr("NAMEX"), this.DiskFilename, @pList->zFnName )
+   m_FnListPtr = pList
+
+   Do While i < nLen - 1
+      
+      ' Get the next line. Up to the first LF or NUL (eof)
+      nCurPos = i:  nEOL = -1
+      For n = nCurPos To nLen - 1
+         If pzByte[n] = 13 Then            ' end of line
+            nEOL = n: i = n + 1            ' skip over the CR
+            If pzByte[i] = 10 Then i += 1  ' skip over the LF
+            Exit For
+         End If   
+      Next
+      If nEOL = -1 Then 
+         i = nLen: nEOL = nLen
+      End If   
+      st = Space(nEOL - nCurPos): memcpy( Strptr(st), @pzByte[nCurPos], nEOL-nCurPos )
+      
+      nLineNum += 1
+      
+      If Len(st) = 0 Then Continue Do
+   
+      ' Remove any comments
+      n = Instr(st, "'")
+      If n Then st = Left(st, n-1)
+      
+      st = Trim(st)
+      If Len(st) = 0 Then Continue Do
+   
+      st_ucase = Ucase(st)
+      
+      If Left(st_ucase, 9)  = "FUNCTION " Then
+         st = Mid(st, 10): bFirstLine = True
+      ElseIf Left(st_ucase, 16) = "PUBLIC FUNCTION " Then
+         st = Mid(st, 17): bFirstLine = True
+      ElseIf Left(st_ucase, 17) = "PRIVATE FUNCTION " Then
+         st = Mid(st, 18): bFirstLine = True
+      End If   
+      
+      If Left(st_ucase, 4)  = "SUB " Then
+         st = Mid(st, 5): bFirstLine = True
+      ElseIf Left(st_ucase, 11) = "PUBLIC SUB " Then
+         st = Mid(st, 12): bFirstLine = True
+      ElseIf Left(st_ucase, 12) = "PRIVATE SUB " Then
+         st = Mid(st, 13): bFirstLine = True
+      End If   
+         
+   
+      ' bypass any line with = embedded in it but need to check only up to the first
+      ' open parenthesis because after that are the parameters and they could have equal
+      ' signs for default parameter values.
+      If bFirstLine Then
+         n = Instr( st, "=") 
+         If n Then 
+            iParen = Instr(st, "(") 
+            If (iParen = 0) OrElse (n < iParen) Then
+               bFirstLine = False: Continue Do
+            End If
+         End If
+         
+         pList = New FUNCTION_TYPE
+         ' Determine the name of this sub/function
+         iParen = Instr(st, "(") 
+         If iParen Then
+            pList->zFnName = Left(st, iParen - 1)
+         Else
+            pList->zFnName = st
+         End If
+         pList->bIsHeader = False
+         pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based
+         pList->pDoc = @this
+            
+         ' Need to add this function at the end of th linked list (maybe sorted order?)
+         pListTemp = m_FnListPtr 
+         Do While( pListTemp->pListNext <> 0 )
+            pListTemp = pListTemp->pListNext
+         Loop
+         pListTemp->pListNext = pList
+         
+         bFirstLine = False
+      EndIf
+         
+   Loop
+
    Function = 0
 End Function

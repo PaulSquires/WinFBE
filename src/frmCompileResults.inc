@@ -114,7 +114,8 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmCompileResults
 ' ========================================================================================
 Function frmCompileResults_OnClose(HWnd As HWnd) As LRESULT
-   DestroyWindow HWnd
+   ' Never close the window; simply hide it.
+   ShowWindow( HWnd, SW_HIDE )
    Function = 0
 End Function
 
@@ -123,6 +124,7 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmCompileResults
 ' ========================================================================================
 Function frmCompileResults_OnDestroy(HWnd As HWnd) As LRESULT
+   HWND_FRMCOMPILERESULTS = 0
    Function = 0
 End Function
 
@@ -157,6 +159,14 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
                                  ByVal nCmdShow   As Long = 0 _
                                  ) As Long
 
+   ' If Compile Results manager already exists then toggle its visibility
+   ' unless nCmdShow is explicitly set to show it.
+   If IsWindow(HWND_FRMCOMPILERESULTS) Then
+      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMCOMPILERESULTS), SW_HIDE, SW_SHOW)
+      ShowWindow HWND_FRMCOMPILERESULTS, nCmdShow
+      Exit Function
+   End If
+      
    '  Create the window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI

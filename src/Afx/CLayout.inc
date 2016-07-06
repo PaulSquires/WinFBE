@@ -15,7 +15,7 @@
 #pragma once
 
 #include once "windows.bi"
-#include once "Afx/CWindow.inc"
+#include once "CWindow.inc"
 
 NAMESPACE Afx.CLayoutClass
 

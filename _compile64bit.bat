@@ -1,7 +1,9 @@
 set FBLIBDIR=win64
 set FBCPATH=x:\FB\FreeBASIC-1.05.0-win64
 
-%FBCPATH%\fbc WinFBE.bas -x WinFBE64.exe WinFBE.rc -s gui
+cd src
+%FBCPATH%\fbc WinFBE.bas -x ..\WinFBE64.exe WinFBE.rc -s gui
+cd ..
 
 @if ErrorLevel 1 goto compileerror
 @echo SUCCESS!! WinFBE (64 bit) built.

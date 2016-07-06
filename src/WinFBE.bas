@@ -28,65 +28,36 @@ Using Afx.CWindowClass
 #Define APPVERSION    WStr("0.0.0")
 
 
-'  Global window handle for the main form
-Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR
-Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
+#Include Once "windowsxx.bi"      ' needed because version that ships with FB is broken and non-complete. 
+#Include Once "modScintilla.bi"
+#Include Once "modDeclares.bi"
+#Include Once "clsConfig.inc"
+#Include Once "modRoutines.inc"
+#Include Once "modCBColor.inc"
+#Include Once "clsDocument.inc"
+#Include Once "clsApp.inc"
+#Include Once "clsTopTabCtl.inc"
+#Include Once "modTopMenu.inc"
+#Include Once "modToolbar.inc"
+#Include Once "modCompile.inc"
+#Include Once "modMRU.inc"
 
-'  Global window handles for some forms 
-Dim Shared As HWnd HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS, HWND_FRMOPTIONSCOMPILER
-Dim Shared As HWnd HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
-Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
-Dim Shared As HWnd HWND_FRMPROJECTMANAGER
-
-
-' Create a temporary array to hold the selected color values
-' for the different editor elements. When the form is saved then 
-' the values from this temporary struture is saved to the 
-' configuration table.
-Type TYPE_COLORS
-   nFg As COLORREF
-   nBg As COLORREF
-End Type
-Dim Shared gTempColors(15) As TYPE_COLORS
-
-' Create a dynamic array that will hold all localization words/phrases. This
-' array is resized and loaded using the LoadLocalizationFile function.
-ReDim Shared LL(Any) As WString * MAX_PATH
-
-' Define a macro that allows the user to specify the LL array subscript and
-' also a descriptive label (that is ignored), and return the LL array value.
-#Define L(e,s)  LL(e)
-
-
-#Include Once "Modules\windowsxx.bi"
-#Include Once "Modules\modScintilla.bi"
-#Include Once "Modules\modDeclares.inc"
-#Include Once "Modules\clsConfig.inc"
-#Include Once "Modules\modRoutines.inc"
-#Include Once "Modules\modCBColor.inc"
-#Include Once "Modules\clsDocument.inc"
-#Include Once "Modules\clsApp.inc"
-#Include Once "Modules\clsTopTabCtl.inc"
-#Include Once "Modules\modTopMenu.inc"
-#Include Once "Modules\modToolbar.inc"
-#Include Once "Modules\modCompile.inc"
-#Include Once "Modules\modMRU.inc"
-
-#Include Once "Forms\frmOptionsEditor.inc"
-#Include Once "Forms\frmOptionsColors.inc"
-#Include Once "Forms\frmOptionsCompiler.inc"
-#Include Once "Forms\frmOptionsLocal.inc"
-#Include Once "Forms\frmOptionsKeywords.inc"
-#Include Once "Forms\frmOptions.inc"
-#Include Once "Forms\frmTemplates.inc"
-#Include Once "Forms\frmCompileResults.inc"
-#Include Once "Forms\frmGoto.inc"
-#Include Once "Forms\frmCommandLine.inc"
-#Include Once "Forms\frmFind.inc"
-#Include Once "Forms\frmReplace.inc"
-#Include Once "Forms\frmProjectManager.inc"
-#Include Once "Forms\frmProjectOptions.inc"
-#Include Once "Forms\frmMain.inc"
+#Include Once "frmOptionsEditor.inc"
+#Include Once "frmOptionsColors.inc"
+#Include Once "frmOptionsCompiler.inc"
+#Include Once "frmOptionsLocal.inc"
+#Include Once "frmOptionsKeywords.inc"
+#Include Once "frmOptions.inc"
+#Include Once "frmTemplates.inc"
+#Include Once "frmFnList.inc"
+#Include Once "frmCompileResults.inc"
+#Include Once "frmGoto.inc"
+#Include Once "frmCommandLine.inc"
+#Include Once "frmFind.inc"
+#Include Once "frmReplace.inc"
+#Include Once "frmProjectManager.inc"
+#Include Once "frmProjectOptions.inc"
+#Include Once "frmMain.inc"
 
 
 ' ========================================================================================

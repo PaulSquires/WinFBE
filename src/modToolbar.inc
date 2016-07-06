@@ -37,7 +37,7 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_OPEN_FILE")
    i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_OPEN_FILE")
    i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_OPEN_FILE", 10, True)
-   Toolbar_AddButton hToolBar, i, IDM_FILEOPEN
+   Toolbar_AddButton hToolBar, i, IDM_FILEOPEN, 0, TBSTYLE_DROPDOWN
 
    i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_SAVE_FILE")
    i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_SAVE_FILE")
@@ -114,7 +114,7 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_FUNCTIONLIST")
    i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_FUNCTIONLIST")
    i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_FUNCTIONLIST", 10, True)
-   Toolbar_AddButton hToolBar, i, IDM_PROJECTMANAGER
+   Toolbar_AddButton hToolBar, i, IDM_FUNCTIONLIST
 
    Toolbar_AddSeparator hToolBar
 
@@ -194,6 +194,7 @@ Function frmMain_DisableToolbarButtons() As Long
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNINDENTBLOCK)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
+   FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
@@ -283,6 +284,11 @@ Function frmMain_ChangeToolbarButtonsState() As Long
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    Else
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
+   End If
+   
+   ' If at least one document exists then allow the Function List to be shown.
+   If gpApp->GetDocumentCount() Then
+      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
    End If
    
    Function = 0

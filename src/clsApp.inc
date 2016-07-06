@@ -206,6 +206,11 @@ Function clsApp.ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
 
    For i = 0 To nCount - 1
        If FF_ListView_GetlParam( hLV, i ) = pDoc Then
+          ' If the document is not currently also loaded in a Tab then we
+          ' can now safely destroy the document and any allocated memory.
+          If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) >= 0 Then
+             pDoc->Destructor    ' need to manually call the destructor
+          End If
           nFound = i: Exit For
        End If   
    Next
@@ -347,6 +352,9 @@ Function clsApp.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
  
    ReDim Preserve m_arrDocuments(ub) As clsDocument Ptr             
    m_arrDocuments(ub) = pDoc
+
+   ' Parse the document to create sub/function list
+   pDoc->CreateFunctionList
    
    Function = 0
 End Function
@@ -361,7 +369,7 @@ Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    
    For i = lb To ub
       If m_arrDocuments(i) = pDoc Then
-         DestroyWindow(pDoc->hWindow)     ' destroy the Scintilla window
+         pDoc->Destructor    ' need to manually call the destructor
          idx = i
          Exit For
       End If   

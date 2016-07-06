@@ -13,7 +13,7 @@
 #pragma once
 
 #include once "windows.bi"
-#include once "Afx/CWindow.inc"
+#include once "CWindow.inc"
 #include once "win/commdlg.bi"
 
 USING Afx.CWindowClass
