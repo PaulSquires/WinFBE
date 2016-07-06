@@ -167,7 +167,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F3,  IDM_FINDPREV )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,  IDM_REPLACE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F6,  IDM_DEFINITION )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F6,  IDM_LASTPOSITION )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F6,  IDM_LASTPOSITION )
    pWindow->AddAccelerator( FVIRTKEY, VK_F4,  IDM_FUNCTIONLIST )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,  IDM_GOTO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,  IDM_BOOKMARKTOGGLE )

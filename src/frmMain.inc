@@ -1,8 +1,82 @@
 
 ' ========================================================================================
+' Position editor to document/function under the current caret position
+' ========================================================================================
+Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
+
+   If pDoc = 0 Then Exit Function
+   
+   Dim As Long i, nCount
+   Dim pList As FUNCTION_TYPE Ptr
+   
+   ' Determine the word at the current caret position.
+   Dim As String sWord = Ucase(pDoc->GetWord)
+   
+   Dim pDocFind As clsDocument Ptr
+   
+   nCount = gpApp->GetDocumentCount()
+   For i = 0 To nCount - 1
+      pDocFind = gpApp->GetDocumentPtr(i)
+      If pDocFind Then 
+         ' Search all of the names for a match on the current select word
+         pList = pDocFind->FnListPtr
+         Do Until pList = 0
+            If Ucase(pList->zFnName) = sWord Then
+               ' Save our current position in case user invokes "Last Position" option,   
+               gLastPosition.pDoc = pDoc
+               gLastPosition.nFirstLine = SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+               gLastPosition.nPosition = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+
+               frmMain_OpenFileSafely( HWND_FRMMAIN, False, False, True, pDocFind->DiskFilename, pDocFind )
+               ' Set the top line to display in the editor. I chose to start 3 lines before the
+               ' function just to make it visually more appealing.
+               SendMessageW( pDocFind->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
+               SendMessageW( pDocFind->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
+               Exit Function
+            End If
+            pList = pList->pListNext
+         Loop      
+      End If   
+   Next
+   
+   ' If we get this far then the word was not found.
+   MessageBoxW( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+   
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Return to most previous position (invoked when "Last Position" is selected
+' ========================================================================================
+Function frmMain_GotoLastPosition() As Long
+
+   Dim As Long i, nCount
+   Dim pDoc As clsDocument Ptr
+   
+   ' Is the pDoc pointer still valid
+   If gLastPosition.pDoc = 0 Then Exit Function
+   
+   nCount = gpApp->GetDocumentCount()
+   For i = 0 To nCount - 1
+      pDoc = gpApp->GetDocumentPtr(i)
+      If pDoc = gLastPosition.pDoc Then 
+         ' Position ourselves to the correct previous position.
+         frmMain_OpenFileSafely( HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
+         SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
+         SendMessageW( pDoc->hWindow, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
+         Exit Function
+      End If   
+   Next
+   
+   Function = 0
+End Function
+
+
+' ========================================================================================
 ' Update display info related to currently active document
 ' ========================================================================================
-Function frmMain_UpdateLineCol(HWnd As HWnd) As Long
+Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
 
    ' Update the statusbar with the current Line/Col position
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -662,6 +736,9 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          gFind.txtFind = pDoc->GetSelText()
          Find_UpOrDown( id, 0, True, 0 )
 
+      Case IDM_DEFINITION:         Function = frmMain_GotoDefinition( pDoc )
+      Case IDM_LASTPOSITION:       Function = frmMain_GotoLastPosition()
+      
       Case IDM_GOTO:               Function = frmGoto_Show(pDoc->hWindow)
       Case IDM_FUNCTIONLIST:       Function = frmFnList_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_BOOKMARKTOGGLE:     Function = pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )

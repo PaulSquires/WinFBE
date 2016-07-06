@@ -653,6 +653,36 @@ End Function
 
 
 ''
+''  FF_REMOVEANY
+''  Return a copy of a string with characters or strings removed
+''
+''  If MatchPattern is not present in MainString, all of MainString is returned intact.
+''  MatchPattern specifies a list of single characters to be searched for individually, 
+''  a match on any one of which will cause that character to be removed from the result.
+''  This function is case-sensitive. 
+''
+Function FF_RemoveAny( ByRef sMainString   As String, _
+                       ByRef sMatchPattern As String _
+                       ) As String
+
+    Dim i As Long 
+    Dim s As String 
+   
+    If Len(sMainString) = 0 Then Return sMainString
+
+    s = sMainString
+    Do
+        i = Instr(s, Any sMatchPattern)
+        If i > 0 Then 
+           s = Left(s, i - 1) & Mid(s, i + 1)
+        End If   
+    Loop Until i = 0
+   
+    Return s
+
+End Function
+
+''
 ''  FF_STRDELETE (ANSI ONLY)
 ''  Delete a specified number of characters from a string expression.
 ''

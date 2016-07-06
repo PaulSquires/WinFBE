@@ -218,8 +218,16 @@ Const SO_DESCENDING = 2
 Dim Shared gLVProjSortCol As Long = 0             ' sort column of project management listview
 Dim Shared gLVProjSortDir As Long = SO_ASCENDING  ' sort direction of project management listview
 
-
+' Forward reference
 Type clsDocument_ As clsDocument
+
+'' Last position in document. Used when "Last Position" menu option is selected.
+Type LASTPOSITION_TYPE
+   pDoc       As clsDocument_ Ptr
+   nFirstLine As Long     ' first visible line on screen
+   nPosition  As Long     ' Position in Scintilla document where caret is positioned
+End Type
+Dim Shared gLastPosition As LASTPOSITION_TYPE
 
 Type FUNCTION_TYPE
    pListNext   As FUNCTION_TYPE Ptr
@@ -284,7 +292,8 @@ Type clsDocument
       Declare Function DisplayStats() As Long
       Declare Function TabsToSpaces() As Long
       Declare Function CreateFunctionList() As Long
-      declare Function DeallocateFunctionList() As Long
+      Declare Function DeallocateFunctionList() As Long
+      Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Constructor
       Declare Destructor
 End Type
@@ -488,7 +497,7 @@ Declare Function frmGoto_OnClose(HWnd As HWnd) As LRESULT
 Declare Function frmGoto_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmGoto_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
-Declare Function frmMain_UpdateLineCol(HWnd As HWnd) As Long
+Declare Function frmMain_UpdateLineCol(ByVal HWnd As HWnd) As Long
 Declare Function Scintilla_OnNotify( ByVal HWnd As HWnd, ByVal pNSC As SCNOTIFICATION Ptr ) As Long
 Declare Function frmMain_SetFocusToCurrentCodeWindow() As Long
 Declare Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
@@ -610,6 +619,7 @@ Declare Function FF_Parse_Internal( ByRef sMainString As String, ByRef sDelimite
 Declare Function FF_Parse( ByRef sMainString As String, ByRef sDelimiter As String, ByVal nPosition As Long ) As String
 Declare Function FF_ParseCount( ByRef sMainString As String, ByRef sDelimiter As String ) As Long
 Declare Function FF_Remove( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
+Declare Function FF_RemoveAny( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
 Declare Function FF_StrDelete( ByRef sMainString As String, ByRef nStart As Long, ByRef nCount As Long ) As String
 Declare Function FF_Shrink( ByRef sMainString As String, ByRef sMask As String = " " ) As String
 Declare Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal lParam As LPARAM = 0 ) As BOOLEAN
@@ -633,3 +643,5 @@ Declare Function CreateScintillaContextMenu() As HMENU
 Declare Function frmFnList_UpdateListBox() As Long
 Declare Function frmFnList_SetListBoxPosition() As Long
 Declare Function CreateMRUpopup() As HMENU
+Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
+Declare Function frmMain_GotoLastPosition() As Long

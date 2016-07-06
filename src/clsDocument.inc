@@ -1143,6 +1143,7 @@ Function clsDocument.CreateFunctionList() As Long
    pList->nLineNumber = 0   'b/c Scintilla is zero based
    pList->pDoc = @this
    FF_PATHNAME( WStr("NAMEX"), this.DiskFilename, @pList->zFnName )
+   pList->zFnName = Ucase(pList->zFnName)
    m_FnListPtr = pList
 
    Do While i < nLen - 1
@@ -1228,4 +1229,30 @@ Function clsDocument.CreateFunctionList() As Long
    Loop
 
    Function = 0
+End Function
+
+
+''
+''
+Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
+
+   ' Get word at the specified location or under the cursor
+   Dim As Long x, y, p
+   Dim As String buffer 
+
+   ' Retrieve the current position
+   If curPos = -1 Then curPos = SciMsg( m_pSci, SCI_GETCURRENTPOS, 0, 0)
+   ' Retrieve the starting and ending position of the word
+   x = SciMsg( m_pSci, SCI_WORDSTARTPOSITION, curPos, True)
+   y = SciMsg( m_pSci, SCI_WORDENDPOSITION, curPos, False)
+   If y > x Then
+      ' Text range
+      buffer = this.GetTextRange(x, y)
+      ' Remove the $NUL
+      p = Instr(buffer, Chr(0))
+      If p Then buffer = Left(buffer, p - 1)
+   End If
+   buffer = FF_RemoveAny( buffer, Chr(13, 10, 34) & "()%," )
+   Function = buffer
+
 End Function
