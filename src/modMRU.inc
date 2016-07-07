@@ -36,6 +36,7 @@ Function CreateMRUpopup() As HMENU
    ' Popup menu that is displayed when downarrown on toolbar is pressed.
    Dim As HMENU hPopupMenu = CreatePopupMenu()
    
+   ' Display MRU files
    For i As Long = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
       ProcessFromCurdrive(@gConfig.MRU(i))
@@ -46,6 +47,18 @@ Function CreateMRUpopup() As HMENU
       End If
    Next
    
+   ' Display MRU projects
+   For i As Long = 0 To 9
+      ' If the file no longer exists then remove it from the MRU list
+      ProcessFromCurdrive(@gConfig.MRUPROJECT(i))
+      If Dir(gConfig.MRUPROJECT(i)) = "" Then
+         gConfig.MRUPROJECT(i) = ""
+      Else               
+         If i = 0 Then AppendMenuW( hPopUpMenu, MF_SEPARATOR, 0, "" )
+         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUPROJECTBASE + i, @gConfig.MRUPROJECT(i) )
+      End If
+   Next
+
    If GetMenuItemCount(hPopupMenu) = 0 Then
       AppendMenuW( hPopupMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    End If

@@ -1115,6 +1115,19 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
 
+      Case WM_ERASEBKGND
+         ' Code to prevent main application space flickering. Only brush the
+         ' background if no tabs are open.
+         If TabCtrl_GetItemCount(gTTabCtl.hWindow) = 0 Then 
+            Dim rc As Rect
+            Dim hDC As HDC
+            hDC = GetDC(HWnd)
+            GetClientRect HWnd, @rc
+            FillRect hDC, @rc, GetSysColorBrush(COLOR_BTNFACE)
+            ReleaseDC HWnd, hDC
+         End If
+         Return True
+         
       Case WM_SYSCOMMAND
          If (wParam And &HFFF0) = SC_CLOSE Then
             SendMessageW HWnd, WM_CLOSE, 0, 0
