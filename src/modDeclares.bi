@@ -128,6 +128,7 @@ Const FILETYPE_RESOURCE  = 4
 Enum
 ''  Custom messages
    MSG_USER_SETFOCUS = 10000
+   MSG_USER_PROCESS_COMMANDLINE 
    IDM_FILE, IDM_FILENEW 
    IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS, IDM_FILESAVEALL
    IDM_MRU, IDM_OPENINCLUDE, IDM_COMMAND, IDM_EXIT
@@ -407,7 +408,7 @@ Type clsApp
       m_IsNewProjectFlag   As BOOLEAN
       m_wzProjectName      As WString * MAX_PATH
       m_wzProjectFilename  As WString * MAX_PATH
-      m_wzProjectOther     As WString * MAX_PATH
+      m_wzProjectOther     As WString * MAX_PATH    ' compile flags
       m_IncludeFilename    As String 
       m_ProjectErrorOption As Long
       m_ProjectDebug       As Long
@@ -598,7 +599,7 @@ Declare Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
 Declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
 Declare Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
 Declare Function GetMRUProjectMenuHandle() As HMENU
-Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
+Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFilename As WString Ptr = 0 ) As Long
 Declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
 Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
 Declare Function GetFontCharSetID(ByVal pswzCharsetName As WString Ptr ) As Long
@@ -618,6 +619,7 @@ Declare Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButto
 Declare Function FF_Parse_Internal( ByRef sMainString As String, ByRef sDelimiter As String, ByRef nPosition As Long, ByRef nIsAny As BOOLEAN, ByRef nLenDelimiter As Long ) As String
 Declare Function FF_Parse( ByRef sMainString As String, ByRef sDelimiter As String, ByVal nPosition As Long ) As String
 Declare Function FF_ParseCount( ByRef sMainString As String, ByRef sDelimiter As String ) As Long
+Declare Function FF_RemoveW( ByVal pwszMainString As WString Ptr, ByVal pwszMatchPattern As WString Ptr, ByVal pwszOutFile As WString Ptr ) As Long
 Declare Function FF_Remove( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
 Declare Function FF_RemoveAny( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
 Declare Function FF_StrDelete( ByRef sMainString As String, ByRef nStart As Long, ByRef nCount As Long ) As String

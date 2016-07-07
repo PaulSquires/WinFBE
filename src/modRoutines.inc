@@ -623,6 +623,36 @@ End Function
 
 
 ''
+''  FF_REMOVEW (UNICODE ONLY)
+''  Return a copy of a string with characters or strings removed
+''
+''  If MatchPattern is not present in MainString, all of MainString is returned intact.
+''  The replacement can cause MainString to grow or condense in size. 
+''  This function is case-sensitive. 
+''
+Function FF_RemoveW( ByVal pwszMainString   As WString Ptr, _
+                     ByVal pwszMatchPattern As WString Ptr, _
+                     ByVal pwszOutFile      As WString Ptr _
+                     ) As Long
+
+    Dim i As Long 
+   
+    *pwszOutFile = *pwszMainString
+    If Len(*pwszMainString) = 0 Then Exit Function
+
+    Do
+        i = Instr( *pwszOutFile, *pwszMatchPattern )
+        If i > 0 Then 
+           *pwszOutFile = Left(*pwszOutFile, i - 1) & Mid(*pwszOutFile, i + Len(*pwszMatchPattern))
+        End If   
+    Loop Until i = 0
+   
+    Function = 0
+
+End Function
+
+
+''
 ''  FF_REMOVE (ANSI ONLY)
 ''  Return a copy of a string with characters or strings removed
 ''

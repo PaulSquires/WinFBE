@@ -6,7 +6,7 @@
 ''  CONSTRUCTOR
 ''
 Constructor clsConfig
-   _ConfigFilename = Exepath & "\WinFBE.ini" 
+   _ConfigFilename = Exepath & "\Settings\WinFBE.ini" 
 End Constructor
 
 

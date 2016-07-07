@@ -21,7 +21,7 @@ Function clsApp.LoadKeywords() as Long
    Dim st as String 
    Dim f  as Long = Freefile
    
-   If Open( Exepath & "\freebasic_keywords.txt" For Input as #f) = 0 Then
+   If Open( Exepath & "\Settings\freebasic_keywords.txt" For Input As #f) = 0 Then
       this.FBKeywords  = ""
       Do Until EOF(f)
          Line Input #f, st
@@ -39,7 +39,7 @@ End Function
 Function clsApp.SaveKeywords() As Long
    Dim f As Long = Freefile
    
-   If Open( Exepath & "\freebasic_keywords.txt" For Output As #f) = 0 Then
+   If Open( Exepath & "\Settings\freebasic_keywords.txt" For Output As #f) = 0 Then
       Print #f, this.FBKeywords
       Close #f
    End If

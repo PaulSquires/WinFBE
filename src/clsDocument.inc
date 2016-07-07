@@ -975,6 +975,7 @@ Function clsDocument.ApplyProperties() As Long
    ''  IDENTIFY CHARACTERS TO BE USED IN WORDS
    SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~._:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
+
    ''
    ''  APPLY ALL LANGUAGE SPECIFIC SYNTAX COLORING
    FF_Pathname( @WStr("EXTN"), this.DiskFilename, @wFileExt )
@@ -988,7 +989,9 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci, SCI_SETSTYLEBITS, bitsNeeded, 0 )
 
       ' Set FreeBASIC Keywords
-      SciMsg( m_pSci, SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gpApp->FBKeywords)) )
+      If Len(gpApp->FBKeywords) Then
+         SciMsg( m_pSci, SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gpApp->FBKeywords)) )
+      End If
       
       If gConfig.SyntaxHighlighting Then
     
@@ -1076,7 +1079,6 @@ Function clsDocument.ApplyProperties() As Long
       ' Disable folding of the procedures and functions
       SciMsg( m_pSci, SCI_SETPROPERTY, Cast(WPARAM, @"fold"), Cast(LPARAM, @"0") )
    End If
-   
    
    Function = 0
 End Function

@@ -102,7 +102,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If gpApp->IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gpApp->GetResourceDocumentPtr()
       gCompile.ResourceFile = Iif( pDocResource, *pDocResource->DiskFilename, WStr(""))
-      gCompile.CompileFlags = gConfig.CompilerSwitches   
+      gCompile.CompileFlags = *gpApp->ProjectOther           
 
       gCompile.ObjFolder = gCompile.MainFolder & "wfbe_obj\"
       gCompile.ObjFolderShort = ".\wfbe_obj\"
@@ -137,10 +137,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       
       If gpApp->ProjectThread = BST_CHECKED Then
          gCompile.CompileFlags = gCompile.CompileFlags & " -mt"           
-      End If
-
-      If Len(*gpApp->ProjectOther) Then
-         gCompile.CompileFlags = gCompile.CompileFlags & " " & *gpApp->ProjectOther           
       End If
 
    Else

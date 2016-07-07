@@ -109,6 +109,62 @@ End Function
 
 
 ' ========================================================================================
+' Process any command line that was passed to the editor
+' ========================================================================================
+Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
+
+   ' The incoming command line may contain a regular file to open or a project file.
+   
+   ' Command: A space-separated list of all command-line arguments is returned. When the 
+   '          command line is parsed for arguments, everything between double quotes in 
+   '          the parameter list will be considered as a single parameter, and is returned 
+   '          with the double quotes.
+   '          A value of zero (0) returns the name of the executable; and values of 
+   '          one (1) and greater return each command-line argument.
+
+   If Len(Command(1)) = 0 Then Exit Function
+   
+   Dim wszPath As WString * MAX_PATH
+   Dim wszExt  As WString * MAX_PATH
+   Dim wszArg  As WString * MAX_PATH
+   
+   Dim As Long i = 1
+   Do
+       wszArg = Command(i)
+       If Len(wszArg) = 0 Then Exit Do
+       
+       ' Remove any double quotes from the argument.
+       FF_RemoveW( @wszArg, @WChr(34), @wszPath )
+       
+       ' If no path exists for the file then add the current folder
+       FF_PATHNAME( @WStr("PATH"), @wszArg, @wszPath )
+       If Len(wszPath) = 0 Then wszArg = Curdir & "\" & wszArg 
+       
+       If Dir(wszArg) > "" Then
+          ' We have a valid filename so determine what type it is.
+          FF_PATHNAME( @WStr("EXTN"), @wszArg, @wszExt )
+          wszExt = Ucase(wszExt)
+          
+          Select Case wszExt
+             Case ".WFBE"    ' project file
+                ' Pass the info to our generic project open function to handle everything.
+                OpenMRUProjectFile( HWnd, 0, @wszArg )
+             
+             Case Else   ' .bas, .bi, .rc, etc...
+                frmMain_OpenFileSafely(HWnd, False, False, True, @wszArg, 0 )
+             
+          End Select   
+          
+       End If
+       
+       i += 1
+   Loop
+
+   Function = 0
+End Function   
+
+
+' ========================================================================================
 ' Process Scintilla Notifications
 ' ========================================================================================
 Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
@@ -354,20 +410,10 @@ Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
    ' Display the Open File Dialog
    Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, IDM_PROJECTOPEN)
    If pwszName Then 
-      ' If a project is already open then save/close it.
-      If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
-      ' Open the project
-      gpApp->ProjectDiskFilename = pwszName
-      If gConfig.ProjectLoadFromFile() Then
-         gpApp->IsNewProjectFlag = False
-         gpApp->IsProjectActive = True
-         ' Update the most recently used project list 
-         UpdateMRUProjectList(pwszName)
-      End If
+      ' Pass the info to our generic project open function to handle everything.
+      OpenMRUProjectFile( HWnd, 0, pwszName )
       CoTaskMemFree(pwszName)
    End If
-
-   frmMain_PositionWindows(HWnd)
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = 0
@@ -1118,15 +1164,9 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       Case WM_ERASEBKGND
          ' Code to prevent main application space flickering. Only brush the
          ' background if no tabs are open.
-         If TabCtrl_GetItemCount(gTTabCtl.hWindow) = 0 Then 
-            Dim rc As Rect
-            Dim hDC As HDC
-            hDC = GetDC(HWnd)
-            GetClientRect HWnd, @rc
-            FillRect hDC, @rc, GetSysColorBrush(COLOR_BTNFACE)
-            ReleaseDC HWnd, hDC
+         If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 0 Then 
+            Return True   ' prevents painting the background
          End If
-         Return True
          
       Case WM_SYSCOMMAND
          If (wParam And &HFFF0) = SC_CLOSE Then
@@ -1143,11 +1183,16 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          UpdateMRUMenu( Cast(HMENU, wParam) )
          UpdateMRUProjectMenu( Cast(HMENU, wParam) )
 
-      ''  CUSTOM MESSAGE
+      ''  CUSTOM MESSAGES
       Case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
          ' display such as Line#, Col#, Filename, etc.
          frmMain_UpdateLineCol(HWnd)
+
+      Case MSG_USER_PROCESS_COMMANDLINE 
+         ' process any command line arguments that may have been passed to the program.
+         frmMain_ProcessCommandLine(HWnd)
+
 
    End Select
 
@@ -1229,6 +1274,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    AfxForceVisibleDisplay(pWindow->hWindow)
    
    UpdateWindow pWindow->hWindow
+
+   ' Post a message to process the application's command line as applicable.
+   PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE , 0, 0 )
+
    
    ' Process windows events
    Dim uMsg As MSG

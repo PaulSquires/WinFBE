@@ -12,20 +12,10 @@ End Function
 ''
 Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
    Dim wzFile As WString * MAX_PATH
-   Dim idx As Long
    
    wzFile = gConfig.MRU(wID - IDC_MRUBASE)
-
-   idx = gTTabCtl.GetTabIndexFromFilename(@wzFile)
-   If idx >= 0 Then
-      gTTabCtl.SetFocusTab(idx)
-   Else
-      frmMain_OpenFileSafely(HWnd, False, False, True, @wzFile, 0 )
-   End If
+   frmMain_OpenFileSafely(HWnd, False, False, True, @wzFile, 0 )
    
-   ' Position all of the controls into place
-   frmMain_PositionWindows(HWnd)
-
    Function = 0
 End Function
 
@@ -147,12 +137,16 @@ End Function
 
 ''
 ''
-Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
+Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFilename As WString Ptr = 0 ) As Long
    Dim wzFile As WString * MAX_PATH
    Dim idx As Long
    
-   wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
-
+   If pwszFilename Then
+      wzFile = *pwszFilename
+   Else   
+      wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
+   End If
+   
    ' If a project is already open then save/close it.
    If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
    ' Open the project

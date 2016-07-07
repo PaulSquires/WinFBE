@@ -1,6 +1,4 @@
 
-[ ] Process command line parameters.
-
 [ ] Find in files. 
 
 [ ] Re-enable menu option and write code for "Spaces to Tabs" option.
