@@ -19,7 +19,7 @@
    #define AFX_BSTR WSTRING PTR
 #endif
 
-'NAMESPACE Afx.CBStrClass
+NAMESPACE Afx.CBStrClass
 
 ' ========================================================================================
 ' CBStr - OLE strings class
@@ -47,11 +47,12 @@ TYPE CBStr
       DECLARE OPERATOR &= (BYREF wszStr AS CONST WSTRING)
       DECLARE OPERATOR &= (BYREF pCBStr AS CBStr)
       DECLARE OPERATOR @ () AS AFX_BSTR PTR
+      DECLARE OPERATOR CAST () BYREF AS WSTRING
+      DECLARE OPERATOR CAST () AS ANY PTR
       DECLARE PROPERTY Handle () AS AFX_BSTR
       DECLARE PROPERTY CodePage () AS LONG
       DECLARE PROPERTY CodePage (BYVAL nCodePage AS LONG)
       DECLARE SUB Append (BYREF wszStr AS CONST WSTRING)
-      DECLARE OPERATOR CAST () BYREF AS WSTRING
 
 END TYPE
 ' ========================================================================================
@@ -119,8 +120,12 @@ END DESTRUCTOR
 ' Returns a pointer to the BSTR
 ' ========================================================================================
 OPERATOR CBStr.CAST () BYREF AS WSTRING
-'   OPERATOR =  PEEK(WSTRING, m_bstr)
    OPERATOR =  *CAST(WSTRING PTR, m_bstr)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+OPERATOR CBStr.CAST () AS ANY PTR
+   OPERATOR =  CAST(ANY PTR, m_bstr)
 END OPERATOR
 ' ========================================================================================
 
@@ -384,5 +389,5 @@ OPERATOR Len (BYREF pCBStr AS CBStr) AS INTEGER
 END OPERATOR
 ' ========================================================================================
 
-'END NAMESPACE
+END NAMESPACE
 

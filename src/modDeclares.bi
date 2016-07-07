@@ -152,6 +152,7 @@ Enum
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
+   IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
 End Enum
 
 
@@ -647,3 +648,4 @@ Declare Function frmFnList_SetListBoxPosition() As Long
 Declare Function CreateMRUpopup() As HMENU
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
+Declare Function ClearMRUlist( ByVal wID As Long ) As Long

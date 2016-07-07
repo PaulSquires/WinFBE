@@ -743,6 +743,9 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDC_MRUBASE To (IDC_MRUBASE + 10)
          Function = OpenMRUFile( HWnd, id )
 
+      Case IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
+         Function = ClearMRUlist( id )
+         
       Case IDM_OPENINCLUDE:        Function = OnCommand_OpenIncludeFile( HWnd )
       
       Case IDM_COMMAND:            Shell(Environ("COMSPEC"))

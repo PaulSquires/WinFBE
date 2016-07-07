@@ -22,6 +22,27 @@ End Function
 
 ''
 ''
+Function ClearMRUlist( ByVal wID As Long ) As Long
+
+   Dim As Long i 
+   
+   Select Case wID
+      Case IDM_MRUCLEAR
+         For i = 0 To 9
+            gConfig.MRU(i) = ""
+         Next
+      Case IDM_MRUPROJECTCLEAR
+         For i = 0 To 9
+            gConfig.MRUPROJECT(i) = ""
+         Next
+   End Select
+   
+   Function = 0
+End Function
+
+
+''
+''
 Function CreateMRUpopup() As HMENU
    ' Popup menu that is displayed when downarrown on toolbar is pressed.
    Dim As HMENU hPopupMenu = CreatePopupMenu()
@@ -83,6 +104,9 @@ Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    
    If GetMenuItemCount(hSubMenu) = 0 Then
       AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
+   Else
+      AppendMenuW( hSubMenu, MF_SEPARATOR, 0, "" )
+      AppendMenuW( hSubMenu, MF_STRING, IDM_MRUCLEAR, L(225, "Clear this list") )
    End If
    
    Function = 0
@@ -191,6 +215,9 @@ Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
    
    If GetMenuItemCount(hSubMenu) = 0 Then
       AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
+   Else
+      AppendMenuW( hSubMenu, MF_SEPARATOR, 0, "" )
+      AppendMenuW( hSubMenu, MF_STRING, IDM_MRUPROJECTCLEAR, L(225, "Clear this list") )
    End If
    
    Function = 0
