@@ -1165,7 +1165,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          ' Code to prevent main application space flickering. Only brush the
          ' background if no tabs are open.
          If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 0 Then 
-            Return True   ' prevents painting the background
+            Return True      ' prevents painting the background
          End If
          
       Case WM_SYSCOMMAND
