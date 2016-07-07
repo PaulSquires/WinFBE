@@ -144,7 +144,7 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
    If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
    ' Open the project
    gpApp->ProjectDiskFilename = @wzFile
-   If ProjectLoadFromFile() Then
+   If gConfig.ProjectLoadFromFile() Then
       gpApp->IsNewProjectFlag = False
       gpApp->IsProjectActive = True
       ' Update the most recently used project list 

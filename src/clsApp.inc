@@ -182,7 +182,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' Delete any existing file
    If Dir(wFilename) > "" Then Kill wFilename
    this.ProjectDiskFilename = @wFilename
-   ProjectSaveToFile()
+   gConfig.ProjectSaveToFile()
    
    this.IsNewProjectFlag    = False
    ' Ensure that the Project Manager title is correct

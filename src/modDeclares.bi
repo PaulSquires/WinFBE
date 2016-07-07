@@ -395,6 +395,8 @@ Type clsConfig
       Declare Constructor()
       Declare Function SaveToFile() As Long
       Declare Function LoadFromFile() As Long
+      Declare Function ProjectSaveToFile() As BOOLEAN    
+      Declare Function ProjectLoadFromFile() As BOOLEAN    
 End Type
 
 
@@ -567,8 +569,6 @@ Declare Function frmProjectManager_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function Listview_SubclassProc ( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM, ByVal uIdSubclass As UINT_PTR, ByVal dwRefData As DWORD_PTR ) As LRESULT
 Declare Function frmProjectManager_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmProjectManager_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
-Declare Function ProjectSaveToFile() As BOOLEAN
-Declare Function ProjectLoadFromFile() As BOOLEAN
 Declare Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
 Declare Function frmProjectOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT

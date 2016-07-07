@@ -255,6 +255,167 @@ Function clsConfig.LoadFromFile() as Long
 End Function
 
 
+' ========================================================================================
+' Save all options for the Project to a diskfile
+' ========================================================================================
+Function clsConfig.ProjectSaveToFile() As BOOLEAN    
+
+   Dim wszText As WString * MAX_PATH
+   Dim As Long nCount 
+   Dim pDoc As clsDocument Ptr
+   Dim As Long i, nActiveTab
+
+
+   Dim f As Long = Freefile
+   If Open( *gpApp->ProjectDiskFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
+
+   Print #f, "' WINFBE PROJECT FILE"
+   Print #f, "ProjectType=";         gpApp->ProjectType
+   Print #f, "ProjectErrorOption=";  gpApp->ProjectErrorOption
+   Print #f, "ProjectDebug=";        gpApp->ProjectDebug
+   Print #f, "ProjectThread=";       gpApp->ProjectThread
+   Print #f, "ProjectOther=";        *gpApp->ProjectOther
+   Print #f, "DefaultCompiler=";     gConfig.DefaultCompiler       
+   Print #f, "DefaultCompileMode=";  gConfig.DefaultCompileMode    
+   Print #f, "CommandLine=";         gConfig.CommandLine
+
+   ' Save all of the loaded tabs first
+   nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+   nActiveTab = TabCtrl_GetCurSel( gTTabCtl.hWindow )
+
+   Print #f, "ActiveTab="; nActiveTab
+
+   Dim TB As TC_ITEM 
+   TB.Mask = TCIF_PARAM
+
+   For i = 0 To nCount - 1
+      TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
+      pDoc = Cast(clsDocument Ptr, TB.lParam)
+      If pDoc->IsProjectFile Then 
+         wszText = *pDoc->DiskFilename
+         ProcessToCurdrive(@wszText)
+         Print #f, "File="; wszText
+         Print #f, "FileType="; pDoc->ProjectFileType
+         Print #f, "TabIndex="; -1
+         Print #f, "FirstLine="; SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+         Print #f, "Position="; SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)  
+         Print #f, "FileEnd=[-]" 
+      End If   
+   Next
+
+   ' Save all other non-displayed documents for the project
+   nCount = gpApp->GetDocumentCount 
+   For i = 0 To nCount - 1
+      pDoc = gpApp->GetDocumentPtr(i)
+      If pDoc Then 
+         If pDoc->IsProjectFile Then
+            If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
+               wszText = *pDoc->DiskFilename
+               ProcessToCurdrive(@wszText)
+               Print #f, "File="; wszText
+               Print #f, "FileType="; pDoc->ProjectFileType
+               Print #f, "TabIndex="; 0    
+               Print #f, "FileEnd=[-]"
+            End If
+         End If   
+      End If
+   Next
+
+   Close #f
+   
+   Function = True   ' successul save
+End Function
+
+
+' ========================================================================================
+' Load all options for the Project from a diskfile
+' ========================================================================================
+Function clsConfig.ProjectLoadFromFile() As BOOLEAN    
+
+   Dim st    As WString * MAX_PATH
+   Dim wKey  As WString * MAX_PATH
+   Dim wData As WString * MAX_PATH
+   Dim As Long nData, i, nFirstLine, nPosition, nActiveTab
+
+   ' Info saved for each File and used to create the file once FileEnd is found
+   Dim pDoc As clsDocument Ptr
+   Dim wszFilename As WString * MAX_PATH
+   Dim As Long nFileType, nTabIndex
+   
+   If Dir(*gpApp->ProjectDiskFilename) = "" Then Exit Function
+   FF_Pathname(@WStr("NAMEX"), gpApp->ProjectDiskFilename, gpApp->ProjectName)
+    
+   Dim f As Long = Freefile
+   If Open( *gpApp->ProjectDiskFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
+
+   frmProjectManager_Show( HWND_FRMMAIN, 0 )
+   
+   ' Turn off redrawing of the listview in order to speed up loading
+   Dim As HWnd hLV = GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW )
+   SendMessage( hLV, WM_SETREDRAW, False, 0 )
+   
+   Do Until Eof(f)
+      Line Input #f, st
+      If Len(st) = 0 Then Continue Do
+      If Left(st, 1) = "'" Then Continue Do
+      If Left(st, 1) = "[" Then Continue Do
+      
+      i = Instr(st, "=")
+      If i = 0 Then Continue Do
+      
+      wKey  = Left(st, i-1)
+      wData = Mid(st, i+1)
+      nData = Val(wData)
+      
+      ProcessFromCurdrive(@wData)
+
+      Select Case wKey
+         Case "ProjectType":         gpApp->ProjectType         = nData
+         Case "ProjectErrorOption":  gpApp->ProjectErrorOption  = nData
+         Case "ProjectDebug":        gpApp->ProjectDebug        = nData
+         Case "ProjectThread":       gpApp->ProjectThread       = nData
+         Case "ProjectOther":        gpApp->ProjectOther        = wData
+         Case "DefaultCompiler":     gConfig.DefaultCompiler    = wData
+         Case "DefaultCompileMode":  gConfig.DefaultCompileMode = wData
+         Case "CommandLine":         gConfig.CommandLine        = wData
+         Case "ActiveTab":           nActiveTab = nData
+         
+         Case "File":                wszFilename = wData
+         Case "FileType":            nFileType = nData
+         Case "TabIndex":            nTabIndex = nData 
+         Case "FirstLine":           nFirstLine = nData
+         Case "Position":            nPosition = nData
+         Case "FileEnd":
+            If Dir(wszFilename) > "" Then
+               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, nTabIndex, @wszFilename, 0 )
+               pDoc->ProjectFileType = nFileType
+               gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
+               ' Set the saved position
+               SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
+               SendMessageW( pDoc->hWindow, SCI_GOTOPOS, nPosition, 0) 
+               nFirstLine = 0: nPosition = 0
+            End If
+         
+      End Select
+   
+   Loop                        
+   
+   gTTabCtl.SetfocusTab( nActiveTab )
+   
+   gpApp->IsProjectActive = True
+      
+   Close #f
+
+   Listview_SortColumn( hLV, gLVProjSortCol, gLVProjSortDir )
+ 
+   SendMessage( hLV, WM_SETREDRAW, True, 0 )
+   RedrawWindow(hLV, Null, Null, RDW_ERASE Or RDW_FRAME Or RDW_INVALIDATE Or RDW_ALLCHILDREN)
+    
+   Function = True   ' successul save
+End Function
+
+
+
 
 
 

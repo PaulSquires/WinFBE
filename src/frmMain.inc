@@ -358,7 +358,7 @@ Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
       If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
       ' Open the project
       gpApp->ProjectDiskFilename = pwszName
-      If ProjectLoadFromFile() Then
+      If gConfig.ProjectLoadFromFile() Then
          gpApp->IsNewProjectFlag = False
          gpApp->IsProjectActive = True
          ' Update the most recently used project list 
