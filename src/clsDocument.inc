@@ -232,9 +232,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    
    ' If this is a new Untitled document and it is dirty then
    ' set flag to display SaveAs dialog.
-   If this.IsNewFlag Then 
-      If SendMessageW( m_hWindow, SCI_GETMODIFY, 0, 0 ) Then bSaveAs = True
-   End If
+   If this.IsNewFlag Then bSaveAs = true
       
    wFilename = *this.Diskfilename
    
@@ -1258,3 +1256,5 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
    Function = buffer
 
 End Function
+
+
