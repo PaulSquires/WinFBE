@@ -335,12 +335,13 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Dim st    As WString * MAX_PATH
    Dim wKey  As WString * MAX_PATH
    Dim wData As WString * MAX_PATH
-   Dim As Long nData, i, nFirstLine, nPosition, nActiveTab
+   Dim As Long nData, i, idx, nFirstLine, nPosition, nActiveTab
 
    ' Info saved for each File and used to create the file once FileEnd is found
    Dim pDoc As clsDocument Ptr
    Dim wszFilename As WString * MAX_PATH
    Dim As Long nFileType, nTabIndex
+   Dim As BOOLEAN bLoadInTab
    
    If Dir(*gpApp->ProjectDiskFilename) = "" Then Exit Function
    FF_Pathname(@WStr("NAMEX"), gpApp->ProjectDiskFilename, gpApp->ProjectName)
@@ -353,6 +354,12 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    ' Turn off redrawing of the listview in order to speed up loading
    Dim As HWnd hLV = GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW )
    SendMessage( hLV, WM_SETREDRAW, False, 0 )
+   
+   ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
+   ' here and open them only after all over documents have been loaded. This will look
+   ' visuall y more appealing.
+   Dim nTabs(any) As clsDocument Ptr
+   
    
    Do Until Eof(f)
       Line Input #f, st
@@ -382,14 +389,24 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
          
          Case "File":                wszFilename = wData
          Case "FileType":            nFileType = nData
-         Case "TabIndex":            nTabIndex = nData 
+         
+         Case "TabIndex":            bLoadInTab = nData
          Case "FirstLine":           nFirstLine = nData
          Case "Position":            nPosition = nData
          Case "FileEnd":
             If Dir(wszFilename) > "" Then
-               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, nTabIndex, @wszFilename, 0 )
+               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, False, @wszFilename, 0 )
                pDoc->ProjectFileType = nFileType
                gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
+
+               If bLoadInTab Then
+                  If nTabIndex > Ubound(nTabs) Then
+                     Redim Preserve nTabs(nTabIndex) As clsDocument Ptr
+                  End If
+                  nTabs(nTabIndex) = pDoc  
+                  nTabIndex += 1
+               End If
+                   
                ' Set the saved position
                SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
                SendMessageW( pDoc->hWindow, SCI_GOTOPOS, nPosition, 0) 
@@ -400,7 +417,12 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    
    Loop                        
    
-   gTTabCtl.SetfocusTab( nActiveTab )
+   ' Display all of the tabs
+   For i = LBound(nTabs) To UBound(nTabs)
+      idx = gTTabCtl.GetTabIndexFromFilename(nTabs(i)->DiskFilename)
+      If idx = -1 Then idx = gTTabCtl.AddTab( nTabs(i) )  ' Add the new document to the top tabcontrol
+   Next   
+   gTTabCtl.SetFocusTab( nActiveTab )
    
    gpApp->IsProjectActive = True
       
@@ -413,6 +435,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
     
    Function = True   ' successul save
 End Function
+
 
 
 

@@ -167,7 +167,7 @@ Dim Shared As HWnd HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
 Dim Shared As HWnd HWND_FRMPROJECTMANAGER, HWND_FRMFNLIST
 
-
+ 
 ' Create a temporary array to hold the selected color values
 ' for the different editor elements. When the form is saved then 
 ' the values from this temporary struture is saved to the 
@@ -649,3 +649,4 @@ Declare Function CreateMRUpopup() As HMENU
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
+

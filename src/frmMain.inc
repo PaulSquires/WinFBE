@@ -781,7 +781,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_REPLACE:            Function = frmReplace_Show(pDoc->hWindow)
 
       Case IDM_FINDNEXT, IDM_FINDPREV
-         gFind.txtFind = pDoc->GetSelText()
+         Dim As String sFindText = pDoc->GetSelText()
+         If Len(sFindText) Then gFind.txtFind = sFindText
          Find_UpOrDown( id, 0, True, 0 )
 
       Case IDM_DEFINITION:         Function = frmMain_GotoDefinition( pDoc )
@@ -1314,3 +1315,5 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
+
