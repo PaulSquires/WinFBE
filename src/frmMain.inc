@@ -82,13 +82,17 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
 
    Dim As HWnd hStatusbar = GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR)
-   Dim wText As WString * 100 
+   Static wText As WString * MAX_PATH
    
-   wText = " " & gConfig.DefaultCompiler
-   StatusBar_SetText(hStatusbar, 0, wText)
-
-   wText = " " & gConfig.DefaultCompileMode
-   StatusBar_SetText(hStatusbar, 1, wText)
+   ' Only update statusbar text if changed in order to prevent flicker
+   StatusBar_GetText(hStatusbar, 0, @wText)
+   If LTrim(wText) <> gConfig.DefaultCompiler Then
+      StatusBar_SetText(hStatusbar, 0, " " & gConfig.DefaultCompiler)
+   End If
+   StatusBar_GetText(hStatusbar, 1, @wText)
+   If LTrim(wText) <> gConfig.DefaultCompileMode Then
+      StatusBar_SetText(hStatusbar, 1, " " & gConfig.DefaultCompileMode)
+   End If
 
    ' If there is not any file being edited
    If pDoc = 0 Then
@@ -887,7 +891,10 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Dim rc As Rect      
    
    If id = IDC_SCINTILLA Then
-      ' Process Scintilla control notification messages
+      ' Process Scintilla control notification messages. First, check to see if the notifications
+      ' have been suppressed by a bulk modification activity that should only update the screen
+      ' at the end of its process (eg. moving large numbers of selected lines up or down).
+      If gpApp->SuppressNotify Then Exit Function
       Scintilla_OnNotify HWnd, Cast(SCNOTIFICATION Ptr, pNMHDR)
       Exit Function
    End If
@@ -1315,5 +1322,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
+
+
+
+
 
 

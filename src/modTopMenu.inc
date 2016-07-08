@@ -326,9 +326,8 @@ Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
       Case IDM_USE64BIT:  gConfig.DefaultCompiler = "FBC 64bit"
    End Select
    
-   frmMain_ChangeTopMenuStates()
-   frmMain_UpdateLineCol(HWND_FRMMAIN)   ' so that the statusbar updates
-   
+   frmMain_UpdateLineCol( HWND_FRMMAIN )
+
    Function = 0
 End Function
 
@@ -342,9 +341,8 @@ Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
       Case IDM_CONSOLE:  gConfig.DefaultCompileMode = "CONSOLE"
    End Select
    
-   frmMain_ChangeTopMenuStates()
-   frmMain_UpdateLineCol(HWND_FRMMAIN)   ' so that the statusbar updates
-   
+   frmMain_UpdateLineCol( HWND_FRMMAIN )
+
    Function = 0
 End Function
 
@@ -546,3 +544,4 @@ Function CreateScintillaContextMenu() As HMENU
 
 End Function
     
+

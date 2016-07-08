@@ -172,11 +172,15 @@ End Function
 Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    Dim TB    As TC_ITEM 
    Dim wText As WString * MAX_PATH  
+   Dim wTemp As WString * MAX_PATH  
 
    If idx = -1 Then idx = TabCtrl_GetCurSel(m_hWindow)
 
-   ' Get the pointer to the clsDocument stored in lParam
-   TB.Mask = TCIF_PARAM
+   ' Get the pointer to the clsDocument stored in lParam and also retrieve
+   ' the existing text. 
+   TB.Mask       = TCIF_PARAM Or TCIF_TEXT
+   TB.pszText    = @wTemp
+   TB.cchTextMax = MAX_PATH
    TabCtrl_GetItem( m_hWindow, idx, @TB )
    
    Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
@@ -187,11 +191,16 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
          wText = wText & "*"
       End If   
 
-      TB.Mask    = TCIF_TEXT 
-      TB.pszText = @wText  
-      Function = TabCtrl_SetItem( m_hWindow, idx, @TB )
+      ' We only update the text if it has changed in order to prevent flicker.
+      If wText <> wTemp Then
+         TB.Mask    = TCIF_TEXT 
+         TB.pszText = @wText  
+         Function = TabCtrl_SetItem( m_hWindow, idx, @TB )
+      End If
    End If
    
 End Function
+
+
 
 

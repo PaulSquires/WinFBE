@@ -414,12 +414,15 @@ Type clsApp
       m_ProjectErrorOption As Long
       m_ProjectDebug       As Long
       m_ProjectThread      As Long
+      m_SuppressNotify     As BOOLEAN     ' temporarily suppress Scintilla notifications
       
       m_arrDocuments(Any) As clsDocument Ptr
    
    Public:
       Declare Property ProjectType( ByVal nValue As Long)
       Declare Property ProjectType() As Long
+      Declare Property SuppressNotify( ByVal nValue As BOOLEAN)
+      Declare Property SuppressNotify() As BOOLEAN
       Declare Property ProjectErrorOption( ByVal nValue As Long)
       Declare Property ProjectErrorOption() As Long
       Declare Property ProjectDebug( ByVal nValue As Long)
@@ -649,4 +652,5 @@ Declare Function CreateMRUpopup() As HMENU
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
+
 

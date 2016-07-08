@@ -58,6 +58,21 @@ Property clsApp.IncludeFilename() As String
 End Property
 
 
+Property clsApp.ProjectThread( ByVal nValue As Long)
+   m_ProjectThread = nValue
+End Property
+
+''
+''
+Property clsApp.SuppressNotify( ByVal nValue As BOOLEAN)
+   m_SuppressNotify = nValue
+End Property
+
+Property clsApp.SuppressNotify() As BOOLEAN
+   Property = m_SuppressNotify
+End Property
+
+
 ''
 ''
 Property clsApp.ProjectType( ByVal nValue As Long)
@@ -80,9 +95,6 @@ End Property
 
 ''
 ''
-Property clsApp.ProjectThread( ByVal nValue As Long)
-   m_ProjectThread = nValue
-End Property
 
 Property clsApp.ProjectThread() As Long
    Property = m_ProjectThread
@@ -437,3 +449,5 @@ End Function
 '   Function = 0
 'End Function
 '
+
+

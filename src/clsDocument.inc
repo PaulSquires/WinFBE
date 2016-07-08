@@ -540,6 +540,7 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
    Next
    SciMsg( m_pSci, SCI_ENDUNDOACTION, 0, 0)
 
+   gpApp->SuppressNotify = True
    If flagMoveDown Then
       SciMsg( m_pSci, SCI_SETSELECTIONSTART, startPos + nbChar, 0)
       SciMsg( m_pSci, SCI_SETSELECTIONEND, Iif(noSel, startPos + nbChar, endPos + nbChar), 0)
@@ -547,6 +548,8 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
       SciMsg( m_pSci, SCI_SETSELECTIONSTART, startPos - nbChar, 0)
       SciMsg( m_pSci, SCI_SETSELECTIONEND, Iif(noSel, startPos - nbChar, endPos - nbChar), 0)
    End If
+   gpApp->SuppressNotify = False
+   SciMsg( m_pSci, SCI_COLOURISE, 0, -1 )
    
    Function = 0
 End Function
@@ -759,8 +762,9 @@ Function clsDocument.DisplayStats() As Long
    Dim pDoc As clsDocument Ptr
    Dim TB As TC_ITEM 
    
-   Static wText As WString * 1024   ' General purpose variable
-   Static wTag  As WString * 10     ' * display if modified
+   Static wTemp As WString * MAX_PATH  ' General purpose variable
+   Static wText As WString * MAX_PATH  ' General purpose variable
+   Static wTag  As WString * 10        ' * display if modified
    
    ' Retrieve the information and show it in the status bar
    nLines    = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0) 
@@ -783,30 +787,16 @@ Function clsDocument.DisplayStats() As Long
    wText = "  Lines: " & Str(nLines) & "   Chars: " & Str(nTextLen) 
    StatusBar_SetText(hStatusbar, 3, @wText)
 
-   ' Set the text that displays on the tab. Determine what tab this document belongs to. 
-   Dim As HWnd hTabCtl = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_TOPTABCONTROL)
-   nCount = TabCtrl_GetItemCount(hTabCtl) 
-   For i = 0 To nCount - 1
-      TB.Mask = TCIF_PARAM
-      TabCtrl_GetItem( hTabCtl, i, @TB )
-      pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If pDoc->hWindow = m_hWindow Then
-         idx = i: Exit For
-      EndIf
-   Next      
+   ' Set the filename text that displays on the tab. 
+   gTTabCtl.SetTabText(-1)
 
-   FF_PATHNAME( @WStr("NAMEX"), *this.DiskFilename, @wText)
-   wTag = Iif( SendMessageW( m_hWindow, SCI_GETMODIFY, 0, 0 ), "*", "")
-   wText = wText & wTag
-   TB.Mask    = TCIF_TEXT 
-   TB.pszText = @wText  
-   TabCtrl_SetItem( hTabCtl, idx, @TB )
-   
-   ' Update the main window caption with the full filename and path
+   ' Update the main window caption with the full filename and path. Only
+   ' do the update if the text has changed in order to prevent flicker.
+   FF_Control_GetTextW( HWND_FRMMAIN, @wTemp, MAX_PATH )
    wText = APPNAMESHORT 
    If gpApp->IsProjectActive Then wText = wText & " - [" & *gpApp->ProjectName & "]"
    wText = wText & " - [" & *this.DiskFilename & wTag & "]"
-   SetWindowTextW( HWND_FRMMAIN, @wText )
+   If wText <> wTemp Then SetWindowTextW( HWND_FRMMAIN, @wText )
 
    Function = 0
 End Function
@@ -971,7 +961,8 @@ Function clsDocument.ApplyProperties() As Long
 
    ''
    ''  IDENTIFY CHARACTERS TO BE USED IN WORDS
-   SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~._:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
+   'SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~._:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
+   SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~_:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
 
    ''
@@ -1256,5 +1247,9 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
    Function = buffer
 
 End Function
+
+
+
+
 
 

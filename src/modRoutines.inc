@@ -125,7 +125,7 @@ Function FF_Control_GetTextW( ByVal hWndControl   As HWnd, _
                               ByVal pOutStringLen As Long _
                               ) As Long
     
-   Dim As Long nLen = GetWindowTextLengthW(hWndControl) + 2  ' add space for ending nuls
+   Dim As Long nLen = GetWindowTextLengthW(hWndControl) + 1  ' add space for ending nul
    If nLen > pOutStringLen Then nLen = pOutStringLen
    Function = GetWindowTextW( hWndControl, pOutString, nLen )
          
@@ -141,7 +141,7 @@ Function FF_ComboBox_GetTextW( ByVal hWndControl   As HWnd, _
                                ByVal pOutStringLen As Long _
                                ) As Long
 
-   Dim As Long nLen = SendMessageW(hWndControl, CB_GETLBTEXTLEN, nIndex, 0) + 2  ' add space for ending nuls
+   Dim As Long nLen = SendMessageW(hWndControl, CB_GETLBTEXTLEN, nIndex, 0) + 1  ' add space for ending nul
    If nLen > pOutStringLen Then Return 0  ' buffer not large enough
    Function = SendMessageW( hWndControl, CB_GETLBTEXT, nIndex, Cast(LPARAM, pOutString) ) 
 
@@ -1035,4 +1035,5 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    CloseHandle hSnapShot
 
 End Function
+
 
