@@ -157,7 +157,7 @@ Enum
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
-   IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
+   IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
 End Enum
 
 
@@ -303,6 +303,8 @@ Type clsDocument
       Declare Function CreateFunctionList() As Long
       Declare Function DeallocateFunctionList() As Long
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
+      Declare Function GetBookmarks() As String
+      Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
       Declare Constructor
       Declare Destructor
 End Type
@@ -323,6 +325,9 @@ Type clsTopTabCtl
       Declare Function GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
       Declare Function DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEAN ) As Long
       Declare Function SetTabText( ByVal idx As Long ) As Long
+      Declare Function NextTab() As Long
+      Declare Function PrevTab() As Long
+      Declare Function CloseTab() As Long
       
 End Type
 
@@ -662,6 +667,9 @@ Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function frmProjectManager_SetListviewSelection() As Long
+
+
+
 
 
 

@@ -10,10 +10,7 @@
 ' ########################################################################################
 
 #pragma once
-
 #include once "windows.bi"
-#include once "win/ole2.bi"
-#include once "win/shlwapi.bi"
 
 #ifndef AFX_BSTR
    #define AFX_BSTR WSTRING PTR
@@ -26,7 +23,7 @@ NAMESPACE Afx.CBStrClass
 ' ========================================================================================
 TYPE CBStr
 
-   Private:
+   Public:
       m_bstr AS AFX_BSTR
       m_CodePage AS LONG
 
@@ -35,24 +32,17 @@ TYPE CBStr
       DECLARE CONSTRUCTOR (BYVAL nCopePage AS LONG)
       DECLARE CONSTRUCTOR (BYREF wszStr AS CONST WSTRING = "")
       DECLARE CONSTRUCTOR (BYREF ansiStr AS STRING = "", BYVAL nCodePage AS LONG = 0)
-      DECLARE CONSTRUCTOR (BYREF pCBStr AS CBStr)
+      DECLARE CONSTRUCTOR (BYREF cbs AS CBStr)
       DECLARE CONSTRUCTOR (BYREF bstrHandle AS AFX_BSTR = NULL)
       DECLARE DESTRUCTOR
       DECLARE OPERATOR Let (BYREF ansiStr AS STRING)
       DECLARE OPERATOR Let (BYREF wszStr AS CONST WSTRING)
-      DECLARE OPERATOR Let (BYREF pCBStr AS CBStr)
+      DECLARE OPERATOR Let (BYREF cbs AS CBStr)
       DECLARE OPERATOR Let (BYREF bstrHandle AS AFX_BSTR)
-      DECLARE OPERATOR += (BYREF wszStr AS CONST WSTRING)
-      DECLARE OPERATOR += (BYREF pCBStr AS CBStr)
-      DECLARE OPERATOR &= (BYREF wszStr AS CONST WSTRING)
-      DECLARE OPERATOR &= (BYREF pCBStr AS CBStr)
-      DECLARE OPERATOR @ () AS AFX_BSTR PTR
       DECLARE OPERATOR CAST () BYREF AS WSTRING
       DECLARE OPERATOR CAST () AS ANY PTR
-      DECLARE PROPERTY Handle () AS AFX_BSTR
       DECLARE PROPERTY CodePage () AS LONG
       DECLARE PROPERTY CodePage (BYVAL nCodePage AS LONG)
-      DECLARE SUB Append (BYREF wszStr AS CONST WSTRING)
 
 END TYPE
 ' ========================================================================================
@@ -83,8 +73,8 @@ CONSTRUCTOR CBStr (BYREF ansiStr AS STRING = "", BYVAL nCodePage AS LONG = 0)
 END CONSTRUCTOR
 ' ========================================================================================
 ' ========================================================================================
-CONSTRUCTOR CBStr (BYREF pCBStr AS CBStr)
-   m_bstr = SysAllocString(*pCBStr.Handle)
+CONSTRUCTOR CBStr (BYREF cbs AS CBStr)
+   m_bstr = SysAllocString(cbs)
 END CONSTRUCTOR
 ' ========================================================================================
 ' ========================================================================================
@@ -117,19 +107,6 @@ END DESTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a pointer to the BSTR
-' ========================================================================================
-OPERATOR CBStr.CAST () BYREF AS WSTRING
-   OPERATOR =  *CAST(WSTRING PTR, m_bstr)
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR CBStr.CAST () AS ANY PTR
-   OPERATOR =  CAST(ANY PTR, m_bstr)
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
 ' Assigns new text to the BSTR
 ' ========================================================================================
 OPERATOR CBStr.Let (BYREF wszStr AS CONST WSTRING)
@@ -145,9 +122,9 @@ OPERATOR CBStr.Let (BYREF ansiStr AS STRING)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
-OPERATOR CBStr.Let (BYREF pCBStr AS CBStr)
+OPERATOR CBStr.Let (BYREF cbs AS CBStr)
    IF m_bstr THEN SysFreeString(m_bstr)
-   m_bstr = SysAllocString(*pCBStr.Handle)
+   m_bstr = SysAllocString(cbs)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
@@ -155,27 +132,53 @@ OPERATOR CBStr.Let (BYREF bstrHandle AS AFX_BSTR)
    IF bstrHandle = NULL THEN EXIT OPERATOR
    ' Free the current OLE string
    IF m_bstr THEN SysFreeString(m_bstr)
-   ' Detect if the passed handle is an OLE string
-   ' If it is an OLE string it must have a descriptor; otherwise, don't
-   ' Get the length looking at the descriptor
-   DIM res AS INTEGER = PEEK(DWORD, CAST(ANY PTR, bstrHandle) - 4) \ 2
-   ' If the retrieved length if the same that the returned by LEN, then it must be an OLE string
+   ' Detect if the passed handle is an OLE string.
+   ' If it is an OLE string it must have a descriptor; otherwise, don't.
+   ' Get the length in bytes looking at the descriptor and divide by 2 to get the number of
+   ' unicode characters, that is the value returned by the FreeBASIC LEN operator.
+   DIM res AS DWORD = PEEK(DWORD, CAST(ANY PTR, bstrHandle) - 4) \ 2
+   ' If the retrieved length is the same that the returned by LEN, then it must be an OLE string
    IF res = .LEN(*bstrHandle) THEN
       ' Attach the passed handle to the class
       m_bstr = bstrHandle
    ELSE
-      ' Allocate an OLE string with the contents of the string pointer by bstrHandle
+      ' Allocate an OLE string with the contents of the string pointed by bstrHandle
       m_bstr = SysAllocString(*bstrHandle)
    END IF
 END OPERATOR
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the handle of the BSTR
+' One * returns the value of the BSTR pointer.
+' Two ** returns the adress of the start of the string data.
+' Needed because LEFT and RIGHT (cbs) fail with an ambiguous call error.
+' We have to use **cbs (notice the double indirection) with these functions.
 ' ========================================================================================
-PROPERTY CBStr.Handle () AS AFX_BSTR
-   PROPERTY = m_bstr
-END PROPERTY
+OPERATOR * (BYREF cbs AS CBStr) AS AFX_BSTR
+   OPERATOR = cbs.m_bstr
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Returns a pointer to the BSTR
+' ========================================================================================
+OPERATOR CBStr.CAST () BYREF AS WSTRING
+   OPERATOR =  *CAST(WSTRING PTR, m_bstr)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+OPERATOR CBStr.CAST () AS ANY PTR
+   OPERATOR =  CAST(ANY PTR, m_bstr)
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Returns the length of the BSTR in characters.
+' Needed because FB's LEN operator does not work with BSTRs.
+' ========================================================================================
+OPERATOR Len (BYREF cbs AS CBStr) AS INTEGER
+   OPERATOR = SysStringLen(cbs)
+END OPERATOR
 ' ========================================================================================
 
 ' ========================================================================================
@@ -185,209 +188,12 @@ PROPERTY CBStr.CodePage () AS LONG
    PROPERTY = m_CodePage
 END PROPERTY
 ' ========================================================================================
+' ========================================================================================
 PROPERTY CBStr.CodePage (BYVAL nCodePage AS LONG)
    m_CodePage = nCodePage
 END PROPERTY
 ' ========================================================================================
 
-' ========================================================================================
-' Appends a string to the BSTR. The string can be a literal or a FB STRING or WSTRING variable.
-' To append another BSTR:
-' DIM bs1 AS CBStr = "1st string"
-' DIM bs2 AS CBStr = "2nd string"
-' bs1.Append bs2
-' -or-
-' bs1.Append *bs2.Handle
-' -or-
-' bs1.Append **bs2
-' ========================================================================================
-SUB CBStr.Append (BYREF wszStr AS CONST WSTRING)
-   DIM n1 AS UINT = SysStringLen(m_bstr)
-   DIM nLen AS UINT = .LEN(wszStr)
-   IF nLen = 0 THEN EXIT SUB
-   DIM b AS AFX_BSTR = SysAllocStringLen(NULL, n1 + nLen)
-   IF b = NULL THEN EXIT SUB
-   memcpy(b, m_bstr, n1 * SIZEOF(WSTRING))
-   memcpy(b + n1, @wszStr, nLen * SIZEOF(WSTRING))
-   IF m_bstr THEN SysFreeString(m_bstr)
-   m_bstr = b
-END SUB
-' ========================================================================================
-
-' ========================================================================================
-' Returns the address of the BSTR
-' ========================================================================================
-OPERATOR CBStr.@ () AS AFX_BSTR PTR
-   OPERATOR = @m_bstr
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Appends a string to the BSTR. The string can be a literal or a FB STRING or WSTRING variable.
-' ========================================================================================
-OPERATOR CBStr.+= (BYREF wszStr AS CONST WSTRING)
-   this.Append(wszStr)
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Appends a BSTR to the BSTR.
-' ========================================================================================
-OPERATOR CBStr.+= (BYREF pCBStr AS CBStr)
-   this.Append(*pCBStr.Handle)
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Appends a string to the BSTR. The string can be a literal or a FB STRING or WSTRING variable.
-' ========================================================================================
-OPERATOR CBStr.&= (BYREF wszStr AS CONST WSTRING)
-   this.Append(wszStr)
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Appends a BSTR to the BSTR.
-' ========================================================================================
-OPERATOR CBStr.&= (BYREF pCBStr AS CBStr)
-   this.Append(*pCBStr.Handle)
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns vbTrue (-1) if the two BSTRings are equal; FALSE, otherwise.
-' ========================================================================================
-OPERATOR = (BYREF pCBStr1 AS CBStr, BYREF pCBStr2 AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr1.Handle, *pCBStr2.Handle) = 0
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR = (BYREF pCBStr AS CBStr, BYREF wszStr AS CONST WSTRING) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr.Handle, wszStr) = 0
-END OPERATOR
-' ========================================================================================
-OPERATOR = (BYREF wszStr AS CONST WSTRING, BYREF pCBStr AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(wszStr, *pCBStr.Handle) = 0
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns vbTrue (-1) if the two BSTRings are not equal; FALSE, otherwise.
-' ========================================================================================
-OPERATOR <> (BYREF pCBStr1 AS CBStr, BYREF pCBStr2 AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr1.Handle, *pCBStr2.Handle) <> 0
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR <> (BYREF pCBStr AS CBStr, BYREF wszStr AS CONST WSTRING) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr.Handle, wszStr) <> 0
-END OPERATOR
-' ========================================================================================
-OPERATOR <> (BYREF wszStr AS CONST WSTRING, BYREF pCBStr AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(wszStr, *pCBStr.Handle) <> 0
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns vbTrue (-1) if the the first BSTR is greater than the 2nd BSTR; FALSE, otherwise.
-' ========================================================================================
-OPERATOR > (BYREF pCBStr1 AS CBStr, BYREF pCBStr2 AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr1.Handle, *pCBStr2.Handle) > 0
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR > (BYREF pCBStr AS CBStr, BYREF wszStr AS CONST WSTRING) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr.Handle, wszStr) > 0
-END OPERATOR
-' ========================================================================================
-OPERATOR > (BYREF wszStr AS CONST WSTRING, BYREF pCBStr AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(wszStr, *pCBStr.Handle) > 0
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns vbTrue (-1) if the the first BSTR is less than the 2nd BSTR; FALSE, otherwise.
-' ========================================================================================
-OPERATOR < (BYREF pCBStr1 AS CBStr, BYREF pCBStr2 AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr1.Handle, *pCBStr2.Handle) < 0
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR < (BYREF pCBStr AS CBStr, BYREF wszStr AS CONST WSTRING) AS INTEGER
-   OPERATOR = StrCmpW(*pCBStr.Handle, wszStr) < 0
-END OPERATOR
-' ========================================================================================
-OPERATOR < (BYREF wszStr AS CONST WSTRING, BYREF pCBStr AS CBStr) AS INTEGER
-   OPERATOR = StrCmpW(wszStr, *pCBStr.Handle) < 0
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns vbTrue (-1) if the the first BSTR is greater or equal than the 2nd BSTR; FALSE, otherwise.
-' ========================================================================================
-OPERATOR >= (BYREF pCBStr1 AS CBStr, BYREF pCBStr2 AS CBStr) AS INTEGER
-   DIM nResult AS LONG
-   nResult = StrCmpW(*pCBStr1.Handle, *pCBStr2.Handle)
-   IF nResult > 0 OR nResult = 0 THEN OPERATOR = -1 ELSE OPERATOR = 0
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR >= (BYREF pCBStr AS CBStr, BYREF wszStr AS CONST WSTRING) AS INTEGER
-   DIM nResult AS LONG
-   nResult = StrCmpW(*pCBStr.Handle, wszStr)
-   IF nResult > 0 OR nResult = 0 THEN OPERATOR = -1 ELSE OPERATOR = 0
-END OPERATOR
-' ========================================================================================
-OPERATOR >= (BYREF wszStr AS CONST WSTRING, BYREF pCBStr AS CBStr) AS INTEGER
-   DIM nResult AS LONG
-   nResult = StrCmpW(wszStr, *pCBStr.Handle)
-   IF nResult > 0 OR nResult = 0 THEN OPERATOR = -1 ELSE OPERATOR = 0
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns vbTrue (-1) if the the first BSTR is less or equal than the 2nd BSTR; FALSE, otherwise.
-' ========================================================================================
-OPERATOR <= (BYREF pCBStr1 AS CBStr, BYREF pCBStr2 AS CBStr) AS INTEGER
-   DIM nResult AS LONG
-   nResult = StrCmpW(*pCBStr1.Handle, *pCBStr2.Handle)
-   IF nResult < 0 OR nResult = 0 THEN OPERATOR = -1 ELSE OPERATOR = 0
-END OPERATOR
-' ========================================================================================
-' ========================================================================================
-OPERATOR <= (BYREF pCBStr AS CBStr, BYREF wszStr AS CONST WSTRING) AS INTEGER
-   DIM nResult AS LONG
-   nResult = StrCmpW(*pCBStr.Handle, wszStr)
-   IF nResult < 0 OR nResult = 0 THEN OPERATOR = -1 ELSE OPERATOR = 0
-END OPERATOR
-' ========================================================================================
-OPERATOR <= (BYREF wszStr AS CONST WSTRING, BYREF pCBStr AS CBStr) AS INTEGER
-   DIM nResult AS LONG
-   nResult = StrCmpW(wszStr, *pCBStr.Handle)
-   IF nResult < 0 OR nResult = 0 THEN OPERATOR = -1 ELSE OPERATOR = 0
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns the address of the BSTR handle.
-' Usage:
-' DIM bs AS CBStr = "Test string"
-' PRINT bs
-' -or-
-' PRINT **bs (notice the double indirection)
-' ========================================================================================
-OPERATOR * (BYREF pCBStr AS CBStr) AS AFX_BSTR
-   OPERATOR = pCBStr.Handle
-END OPERATOR
-' ========================================================================================
-
-' ========================================================================================
-' Returns the length of the BSTR in characters
-' ========================================================================================
-OPERATOR Len (BYREF pCBStr AS CBStr) AS INTEGER
-   OPERATOR = SysStringLen(pCBStr.Handle)
-END OPERATOR
-' ========================================================================================
-
 END NAMESPACE
+
 

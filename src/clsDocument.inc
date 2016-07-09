@@ -1278,23 +1278,45 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
 
 End Function
 
+''
+''
+Function clsDocument.GetBookmarks() As String
 
+   ' Retrieve all bookmark positions in the document and return it
+   ' as a comma delimited string to be saved to project file.
+   Dim As String buffer
+   Dim As Long fMark  ' 32 bit value
+   Dim As Long nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0) 
 
+   For i As Long = 0 To nLines - 1
+      fMark = SciMsg( m_pSci, SCI_MARKERGET, i, 0)
+      If Bit(fMark, 0) Then
+         buffer = buffer & i & ","
+      End If
+   Next
 
+   Function = RTrim(buffer, ",")
 
+End Function
 
+''
+''
+Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
 
+   ' Set all bookmark positions in the document and based on the 
+   ' incoming comma delimited string retrieved from a project file.
+'   Dim As Long fMark  = BitSet(fMark, 0)   ' 32 bit value
+   Dim As Long nCount = FF_ParseCount(sBookmarks, ",")
+   Dim As Long nLine
+   
+   For i As Long = 1 To nCount
+      nLine = Val( FF_Parse(sBookmarks, ",", i) )
+      SciMsg( m_pSci, SCI_MARKERADD, nLine, 0)
+   Next
 
+   Function = 0
 
-
-
-
-
-
-
-
-
-
+End Function
 
 
 

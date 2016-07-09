@@ -104,6 +104,44 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
    End If
 End Function
 
+
+''
+''
+Function clsTopTabCtl.NextTab() As Long
+   ' Invoked by Ctl+TAB
+   ' Set the tab with focus (this sends the TCN_SELCHANGING and TCN_SELCHANGE 
+   ' notification codes to its parent window). 
+   Dim As Long nCount = TabCtrl_GetItemCount(m_hWindow) 
+   Dim As Long idx = TabCtrl_GetCurSel(m_hWindow)
+   If nCount = 0 Then Exit Function
+   idx += 1
+   If idx > nCount - 1 Then idx = 0
+   Function = TabCtrl_SetCurFocus(m_hWindow, idx)
+End Function
+
+''
+''
+Function clsTopTabCtl.PrevTab() As Long
+   ' Invoked by Ctl+Shift+TAB
+   ' Set the tab with focus (this sends the TCN_SELCHANGING and TCN_SELCHANGE 
+   ' notification codes to its parent window). 
+   Dim As Long nCount = TabCtrl_GetItemCount(m_hWindow) 
+   Dim As Long idx = TabCtrl_GetCurSel(m_hWindow)
+   If nCount = 0 Then Exit Function
+   idx -= 1
+   If idx < 0 Then idx = nCount - 1 
+   Function = TabCtrl_SetCurFocus(m_hWindow, idx)
+End Function
+
+''
+''
+Function clsTopTabCtl.CloseTab() As Long
+   ' Invoked by Ctl+W
+   OnCommand_FileClose( HWND_FRMMAIN, False )
+   Function = 0
+End Function
+
+
 ''
 ''
 Function clsTopTabCtl.GetActiveDocumentPtr() As clsDocument Ptr
@@ -200,6 +238,10 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    End If
    
 End Function
+
+
+
+
 
 
 

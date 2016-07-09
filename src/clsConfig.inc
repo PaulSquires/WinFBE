@@ -269,7 +269,6 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Dim pDoc As clsDocument Ptr
    Dim As Long i, nActiveTab
 
-
    Dim f As Long = Freefile
    If Open( *gpApp->ProjectDiskFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
 
@@ -300,7 +299,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
          ProcessToCurdrive(@wszText)
          Print #f, "File="; wszText
          Print #f, "FileType="; pDoc->ProjectFileType
-         Print #f, "TabIndex="; -1
+         Print #f, "TabIndex="; -1     ' use -1 rather than True
+         Print #f, "Bookmarks="; pDoc->GetBookmarks()
          Print #f, "FirstLine="; SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
          Print #f, "Position="; SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)  
          Print #f, "FileEnd=[-]" 
@@ -339,6 +339,8 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Dim st    As WString * MAX_PATH
    Dim wKey  As WString * MAX_PATH
    Dim wData As WString * MAX_PATH
+   
+   Dim sBookmarks As String
    Dim As Long nData, i, idx, nFirstLine, nPosition, nActiveTab
 
    ' Info saved for each File and used to create the file once FileEnd is found
@@ -395,6 +397,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
          Case "FileType":            nFileType = nData
          
          Case "TabIndex":            bLoadInTab = nData
+         Case "Bookmarks":           sBookmarks = Str(wData)
          Case "FirstLine":           nFirstLine = nData
          Case "Position":            nPosition = nData
          Case "FileEnd":
@@ -415,6 +418,10 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
                SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
                SendMessageW( pDoc->hWindow, SCI_GOTOPOS, nPosition, 0) 
                nFirstLine = 0: nPosition = 0
+               
+               ' Set any bookmarks
+               pDoc->SetBookmarks(sBookmarks)
+               sBookmarks = ""
             End If
          
       End Select
@@ -439,6 +446,9 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
     
    Function = True   ' successul save
 End Function
+
+
+
 
 
 

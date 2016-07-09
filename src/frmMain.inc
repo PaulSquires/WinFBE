@@ -731,11 +731,11 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
    Select Case id 
       
+      Case IDM_NEXTTAB:            Function = gTTabCtl.NextTab()
+      Case IDM_PREVTAB:            Function = gTTabCtl.PrevTab()
+      Case IDM_CLOSETAB:           Function = gTTabCtl.CloseTab()
+
       ''  FILE MENU
-      Case IDM_EXIT
-         SendMessageW( HWnd, WM_CLOSE, 0, 0 )
-
-
       Case IDM_FILENEW:            Function = OnCommand_FileNew( HWnd )
       Case IDM_FILEOPEN:           Function = OnCommand_FileOpen( HWnd )
       Case IDM_FILESAVE:           Function = OnCommand_FileSave( HWnd )
@@ -751,8 +751,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Function = ClearMRUlist( id )
          
       Case IDM_OPENINCLUDE:        Function = OnCommand_OpenIncludeFile( HWnd )
-      
       Case IDM_COMMAND:            Shell(Environ("COMSPEC"))
+      Case IDM_EXIT:               SendMessageW( HWnd, WM_CLOSE, 0, 0 )
 
       ''  EDIT MENU
       Case IDM_REDO:               Function = SendMessageW( hEdit, SCI_REDO, 0, 0)
@@ -1323,6 +1323,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
+
 
 
 

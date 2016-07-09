@@ -145,6 +145,9 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    Function = hMenu
 
    '  Create the accelerator table for the menu
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,  IDM_NEXTTAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,  IDM_PREVTAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,  IDM_CLOSETAB )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_N,  IDM_FILENEW )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_O,  IDM_FILEOPEN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,  IDM_FILECLOSE )
@@ -544,4 +547,7 @@ Function CreateScintillaContextMenu() As HMENU
 
 End Function
     
+
+
+
 
