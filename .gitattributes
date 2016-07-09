@@ -9,8 +9,6 @@
 *.bat       eol=crlf
 *.sln       eol=crlf
 *.txt       eol=crlf
-*.ini       eol=crlf
-*.lang      eol=crlf
 *.fbtpl     eol=crlf
 
 
