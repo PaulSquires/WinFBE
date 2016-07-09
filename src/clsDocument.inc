@@ -440,6 +440,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
    SciMsg( m_pSci, SCI_GOTOLINE, startLine, 0) 
 
+   gpApp->SuppressNotify = True
    For i = startLine To endLine
       strText = this.GetLine(i)   
       If flagBlock = False Then   ' unblock comment
@@ -459,6 +460,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
          nCount += 1
       End If
    Next
+   gpApp->SuppressNotify = False
 
    If startPos <> endPos Then
       SciMsg( m_pSci, SCI_SETSELECTIONSTART, startPos, 0)
@@ -531,6 +533,7 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
    SciMsg( m_pSci, SCI_BEGINUNDOACTION, 0, 0)
    SciMsg( m_pSci, SCI_GOTOLINE, line2swap, 0)
 
+   gpApp->SuppressNotify = True
    For i As Long = 0 To nbSelLines - 1
       If flagMoveDown Then
          this.CurrentLineUp()
@@ -538,9 +541,9 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
          this.CurrentLineDown()
       End If   
    Next
+   gpApp->SuppressNotify = False
    SciMsg( m_pSci, SCI_ENDUNDOACTION, 0, 0)
 
-   gpApp->SuppressNotify = True
    If flagMoveDown Then
       SciMsg( m_pSci, SCI_SETSELECTIONSTART, startPos + nbChar, 0)
       SciMsg( m_pSci, SCI_SETSELECTIONEND, Iif(noSel, startPos + nbChar, endPos + nbChar), 0)
@@ -548,8 +551,6 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
       SciMsg( m_pSci, SCI_SETSELECTIONSTART, startPos - nbChar, 0)
       SciMsg( m_pSci, SCI_SETSELECTIONEND, Iif(noSel, startPos - nbChar, endPos - nbChar), 0)
    End If
-   gpApp->SuppressNotify = False
-   SciMsg( m_pSci, SCI_COLOURISE, 0, -1 )
    
    Function = 0
 End Function
@@ -1272,6 +1273,8 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
    Function = buffer
 
 End Function
+
+
 
 
 
