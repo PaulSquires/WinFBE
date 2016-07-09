@@ -175,6 +175,9 @@ Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTION
 Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
 Dim Shared As HWnd HWND_FRMPROJECTMANAGER, HWND_FRMFNLIST
 
+'  Global handle to hhctrl.ocx for context sensitive help
+Dim Shared As Any Ptr gpHelpLib
+
  
 ' Create a temporary array to hold the selected color values
 ' for the different editor elements. When the form is saved then 
@@ -673,6 +676,8 @@ Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function frmProjectManager_SetListviewSelection() As Long
+
+
 
 
 

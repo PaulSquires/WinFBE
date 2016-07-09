@@ -285,11 +285,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    
    ' Clear the Compiler Log listview
-   If IsWindow(HWND_FRMCOMPILERESULTS) = 0 Then
-      ' Create the frmCompileResults form (initially not visible). This is a non-modal
-      ' popup form that displays compile results.
-      frmCompileResults_Show(HWND_FRMMAIN, 0)
-   End If
+   DestroyWindow(HWND_FRMCOMPILERESULTS)
+
+   ' Create the frmCompileResults form (initially not visible). This is a non-modal
+   ' popup form that displays compile results.
+   frmCompileResults_Show(HWND_FRMMAIN, SW_HIDE)
+
    hLV = GetDlgItem(HWND_FRMCOMPILERESULTS, IDC_FRMCOMPILERESULTS_LISTVIEW)
    ListView_DeleteAllItems( hLV )
    
@@ -388,7 +389,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Next
 
-
    '
    ' (1) No errors - successful compile. Show success messagebox. A successful compile
    '     will even occur if a number of warnings are present. If warnings then show Compiler Log.
@@ -412,7 +412,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       MessageBeep(MB_ICONWARNING)
    End If
    
-   If (NumErrors = 0) Then           
+   If (NumWarnings = 0) AndAlso (NumErrors = 0) Then 
       DestroyWindow(HWND_FRMCOMPILERESULTS)
       If gConfig.HideCompile = BST_UNCHECKED Then
          st = sOutputMsg & vbCrLf & _
@@ -439,6 +439,14 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Function = True   ' successful
 End Function
+
+
+
+
+
+
+
+
 
 
 

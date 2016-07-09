@@ -37,6 +37,7 @@ Using Afx.CWindowClass
 #Include Once "clsDocument.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
+#Include Once "modHelp.inc"
 #Include Once "modTopMenu.inc"
 #Include Once "modToolbar.inc"
 #Include Once "modCompile.inc"
@@ -101,6 +102,9 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
       Dim As Any Ptr pLib = Dylibload("SciLexer32.dll")
    #EndIf
    
+   ' Load the HTML help library for displaying FreeBASIC help *.chm file
+   gpHelpLib = DyLibLoad( "hhctrl.ocx" )
+   
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )
 
@@ -109,6 +113,9 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    
    ' Free the Scintilla library
    Dylibfree(pLib)
+   
+   ' Free the HTML help library
+   Dylibfree(gpHelpLib)
    
    ' Uninitialize the COM library
    CoUninitialize
@@ -120,6 +127,8 @@ End Function
 ' Main program entry point
 ' ========================================================================================
 End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+
+
 
 
 

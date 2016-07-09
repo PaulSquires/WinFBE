@@ -63,19 +63,6 @@ End Function
 
 
 ' ========================================================================================
-' Process WM_CREATE message for window/dialog: frmCompileResults
-' ========================================================================================
-Function frmCompileResults_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
-
-   '  Message cracker macro expects a True to be returned for a successful
-   '  OnCreate handler even though returning -1 from a standard WM_CREATE
-   '  call would stop creating the window. This is just one of those Windows
-   '  inconsistencies.
-   Return True
-End Function
-
-
-' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmCompileResults
 ' ========================================================================================
 Function frmCompileResults_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
@@ -139,7 +126,6 @@ Function frmCompileResults_WndProc( ByVal HWnd   As HWnd, _
                                     ) As LRESULT
     
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_CREATE,   frmCompileResults_OnCreate)
       HANDLE_MSG (HWnd, WM_SIZE,     frmCompileResults_OnSize)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmCompileResults_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmCompileResults_OnDestroy)
@@ -161,11 +147,11 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
 
    ' If Compile Results manager already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.
-   If IsWindow(HWND_FRMCOMPILERESULTS) Then
-      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMCOMPILERESULTS), SW_HIDE, SW_SHOW)
-      ShowWindow HWND_FRMCOMPILERESULTS, nCmdShow
-      Exit Function
-   End If
+'   If IsWindow(HWND_FRMCOMPILERESULTS) Then
+'      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMCOMPILERESULTS), SW_HIDE, SW_SHOW)
+'      ShowWindow HWND_FRMCOMPILERESULTS, nCmdShow
+'      Exit Function
+'   End If
            
    '  Create the window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -189,7 +175,7 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
         pWindow->AddControl("LISTVIEW", , IDC_FRMCOMPILERESULTS_LISTVIEW, "", 10, 10, 176, 335, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS , _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
-
+                                     
    ' Add some extended styles
    Dim dwExStyle As DWORD
    dwExStyle = ListView_GetExtendedListViewStyle(hLV)
@@ -204,10 +190,16 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
    ' Ensure that ListView is full size of the form
    frmCompileResults_PositionWindows( HWND_FRMCOMPILERESULTS )
    
+   ShowWindow( HWND_FRMCOMPILERESULTS, nCmdShow)
+   
    SetFocus hLV
    
    Function = 0
 End Function
+
+
+
+
 
 
 

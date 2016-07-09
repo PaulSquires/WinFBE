@@ -861,6 +861,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       
       Case IDM_HELP
+         ShowContextHelp() 
       
 
       Case IDM_ABOUT
@@ -1341,6 +1342,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
 
 
 
