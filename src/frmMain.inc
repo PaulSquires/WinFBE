@@ -635,13 +635,16 @@ End Function
 ' ========================================================================================
 ' Close current (or all) open file(s)
 ' ========================================================================================
-Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal bCloseAll As BOOLEAN = False) As LRESULT
+Function OnCommand_FileClose( ByVal HWnd As HWnd, _
+                              ByVal bCloseAll As BOOLEAN = False _
+                              ) As LRESULT
 
    Dim wText As WString * MAX_PATH  
-   Dim r     As Long 
+   Dim pDoc As clsDocument Ptr
+   Dim As Long r, idx 
    
    Do
-      Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+      pDoc = gTTabCtl.GetActiveDocumentPtr()
       If pDoc = 0 Then Return 0
    
       If SendMessageW( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
@@ -656,7 +659,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal bCloseAll As BOOLEAN = F
       End If
       
       ' Destroy the Scintilla window and remove from top tab control
-      Dim As Long idx = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+      idx = TabCtrl_GetCurSel(gTTabCtl.hWindow)
       TabCtrl_DeleteItem(gTTabCtl.hWindow, idx)
       ' Set the active tab to the closest tab to the one just removed
       gTTabCtl.SetFocusTab(idx-1)
@@ -908,10 +911,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             GetCursorPos( @pInfo.pt )
             ScreenToClient gTTabCtl.hWindow, @pInfo.pt
             nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-            gTTabCtl.SetFocusTab(nCurSel)
-            IF pInfo.flags = TCHT_ONITEMICON THEN  ' close the tab
-               gTTabCtl.CloseTab()
-            END IF
+            If pInfo.flags = TCHT_ONITEMICON Then gTTabCtl.CloseTab()
          End If
          
          ' Process clicking on the "compiler" or "compilemode" panels in the statusbar
@@ -1341,6 +1341,12 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
+
+
+
+
+
 
 
 
