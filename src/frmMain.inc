@@ -903,6 +903,17 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Select Case pNMHDR->code 
    
       Case NM_CLICK
+         If id = IDC_FRMMAIN_TOPTABCONTROL Then
+            ' Get the position of the hit and determine if the close icon was clicked.
+            GetCursorPos( @pInfo.pt )
+            ScreenToClient gTTabCtl.hWindow, @pInfo.pt
+            nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
+            gTTabCtl.SetFocusTab(nCurSel)
+            IF pInfo.flags = TCHT_ONITEMICON THEN  ' close the tab
+               gTTabCtl.CloseTab()
+            END IF
+         End If
+         
          ' Process clicking on the "compiler" or "compilemode" panels in the statusbar
          If id = IDC_FRMMAIN_STATUSBAR Then   
             Dim lpnm As NMMOUSE Ptr
@@ -1138,10 +1149,11 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmMain
 ' ========================================================================================
 Function frmMain_OnDestroy(HWnd As HWnd) As LRESULT
-   ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_SETIMAGELIST, 0, 0))
-   ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_SETHOTIMAGELIST, 0, 0))
-   ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_SETDISABLEDIMAGELIST, 0, 0))
-
+   ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETIMAGELIST, 0, 0))
+   ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETHOTIMAGELIST, 0, 0))
+   ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETDISABLEDIMAGELIST, 0, 0))
+   ImageList_Destroy TabCtrl_GetImageList(gTTabCtl.hWindow) 
+   
    ' Output the config settings to disk file
    gConfig.SaveToFile
 
@@ -1257,10 +1269,16 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' Add the top tabcontrol (initially not visible)
    gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _
        IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
-       WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or TCS_TABS Or TCS_FOCUSNEVER, _
-       WS_EX_LEFT Or WS_EX_LTRREADING)
+       WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
+       TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
      
-
+   ' Create the imagelist for the TopTabControl tabs
+   Dim As HICON hIcon = LoadIcon(pWindow->InstanceHandle, "IMAGE_TABCLOSE")
+   Dim As HANDLE hImageList = ImageList_Create(16, 16, ILC_MASK Or ILC_COLOR32, 1, 0)
+   ImageList_AddIcon(hImageList, hIcon)
+   DestroyIcon( hIcon )
+   TabCtrl_SetImageList(gTTabCtl.hWindow, hImageList)
+   
    ' SET STARTUP POSITION
    ' If no valid window size exists then set to the default working area of the screen
    If (gConfig.StartupRight = 0) OrElse (gConfig.StartupBottom = 0) Then
@@ -1323,6 +1341,15 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
+
+
+
+
+
+
+
+
 
 
 

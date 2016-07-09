@@ -1305,7 +1305,9 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
 
    ' Set all bookmark positions in the document and based on the 
    ' incoming comma delimited string retrieved from a project file.
-'   Dim As Long fMark  = BitSet(fMark, 0)   ' 32 bit value
+   sBookmarks = trim(sBookmarks)
+   If Len(sBookmarks) = 0 Then Exit Function
+   
    Dim As Long nCount = FF_ParseCount(sBookmarks, ",")
    Dim As Long nLine
    
@@ -1317,8 +1319,6 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    Function = 0
 
 End Function
-
-
 
 
 

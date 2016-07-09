@@ -136,7 +136,7 @@ End Function
 ''
 ''
 Function clsTopTabCtl.CloseTab() As Long
-   ' Invoked by Ctl+W
+   ' Invoked by Ctl+W or by clicking "X" on tab
    OnCommand_FileClose( HWND_FRMMAIN, False )
    Function = 0
 End Function
@@ -192,8 +192,9 @@ Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
    Dim idx As Long
    Dim TB  As TC_ITEM 
    
-   TB.Mask   = TCIF_PARAM
+   TB.Mask   = TCIF_PARAM Or TCIF_IMAGE
    TB.lParam = Cast(LPARAM, pDoc)
+   TB.iImage = 0
    
    Dim As Long NumItems = TabCtrl_GetItemCount(m_hWindow)             
    
@@ -238,6 +239,8 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    End If
    
 End Function
+
+
 
 
 
