@@ -231,7 +231,9 @@ Type LASTPOSITION_TYPE
 End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
+' Linked list of Function names
 Type FUNCTION_TYPE
+   pListPrev   As FUNCTION_TYPE Ptr
    pListNext   As FUNCTION_TYPE Ptr
    bIsHeader   As BOOLEAN
    zFnName     As WString * MAX_PATH
@@ -652,5 +654,9 @@ Declare Function CreateMRUpopup() As HMENU
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
+
+
+
+
 
 

@@ -244,8 +244,10 @@ Function frmFnList_ListBox_SubclassProc ( _
          Select Case Loword(wParam)
             Case VK_RETURN
                ' Simulate the sending of a LBN_DBLCLK to the control.
-               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
+               SendMessageW( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
                Exit Function
+            Case VK_ESCAPE
+               SendMessageW( GetParent(hWnd), WM_CLOSE, 0, 0 ) 
          End Select
 
       Case WM_DESTROY
@@ -348,3 +350,4 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+

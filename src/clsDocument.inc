@@ -1122,8 +1122,9 @@ Function clsDocument.CreateFunctionList() As Long
    Dim As Long n, iParen
    Dim As BOOLEAN bFirstLine
    
-   Dim pList As FUNCTION_TYPE Ptr
-   Dim pListTemp As FUNCTION_TYPE Ptr
+   Dim pList      As FUNCTION_TYPE Ptr
+   Dim pListTemp  As FUNCTION_TYPE Ptr
+   Dim pListFound As FUNCTION_TYPE Ptr
 
    ' If a list already exists then we need to deallocate any memory
    this.DeallocateFunctionList()
@@ -1136,6 +1137,8 @@ Function clsDocument.CreateFunctionList() As Long
    FF_PATHNAME( WStr("NAMEX"), this.DiskFilename, @pList->zFnName )
    pList->zFnName = Ucase(pList->zFnName)
    m_FnListPtr = pList
+   pList->pListPrev = 0
+   pList->pListNext = 0
 
    Do While i < nLen - 1
       
@@ -1206,20 +1209,42 @@ Function clsDocument.CreateFunctionList() As Long
          pList->bIsHeader = False
          pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based
          pList->pDoc = @this
-            
-         ' Need to add this function at the end of th linked list (maybe sorted order?)
-         pListTemp = m_FnListPtr 
-         Do While( pListTemp->pListNext <> 0 )
+         pList->pListPrev = 0
+         pList->pListNext = 0
+               
+         ' Need to add this function in sorted order
+         pListFound = 0
+         pListTemp  = m_FnListPtr
+         Do Until pListTemp = 0
+            If pListTemp->bIsHeader = False Then
+               If UCase(pList->zFnName) < UCase(pListTemp->zFnName) Then
+                  pListFound = pListTemp: Exit Do
+               End If
+            End If
+            If pListTemp->pListNext = 0 Then Exit Do
             pListTemp = pListTemp->pListNext
          Loop
-         pListTemp->pListNext = pList
-         
+         If pListFound = 0 Then
+            ' Insert the new node at end of list
+            pListTemp->pListNext = pList
+            pList->pListPrev = pListTemp
+            pList->pListNext = 0
+         Else
+            ' Insert the new node immediately before the found node
+            pList->pListNext = pListFound
+            pList->pListPrev = pListFound->pListPrev
+            pListFound->pListPrev->pListNext = pList
+            pListFound->pListPrev = pList
+         End If   
+
+
          bFirstLine = False
       EndIf
          
    Loop
 
    Function = 0
+
 End Function
 
 
@@ -1247,6 +1272,21 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
    Function = buffer
 
 End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
