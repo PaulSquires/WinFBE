@@ -970,6 +970,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
             gTTabCtl.DisplayScintilla(nCurSel, True)
             frmMain_PositionWindows(HWnd)
+            frmProjectManager_SetListviewSelection()
          End If
          
       Case TTN_GETDISPINFO
@@ -1322,6 +1323,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
 
 
 

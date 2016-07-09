@@ -42,6 +42,7 @@ Using Afx.CWindowClass
 #Include Once "modCompile.inc"
 #Include Once "modMRU.inc"
 
+#Include Once "frmOptionsGeneral.inc"
 #Include Once "frmOptionsEditor.inc"
 #Include Once "frmOptionsColors.inc"
 #Include Once "frmOptionsCompiler.inc"
@@ -119,5 +120,6 @@ End Function
 ' Main program entry point
 ' ========================================================================================
 End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+
 
 

@@ -46,28 +46,19 @@ Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES, L(118,"Treat Tab as spaces"), 0, 84, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES, L(119,"Allow multiple instances"), 0, 105, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION, L(120,"Auto indentation"), 0, 105, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION, L(120,"Auto indentation"), 0, 126, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN, L(122,"Show left margin"), 0, 126, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE, L(121,"Autosave files before compiling"), 0, 147, 235, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN, L(123,"Show fold margin"), 0, 147, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN, L(122,"Show left margin"), 0, 168, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKLINENUMBERING, L(124,"Show line numbers"), 0, 168, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN, L(123,"Show fold margin"), 0, 189, 400, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKLINENUMBERING, L(124,"Show line numbers"), 0, 210, 400, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES, L(125,"Show Indentation guides"), 0, 231, 400, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKHIDECOMPILE, L(218,"Hide successful compile results message"), 0, 252, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES, L(125,"Show Indentation guides"), 0, 189, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSEDITOR_TXTTABSIZE, "", 0, 320, 30, 20, _
@@ -96,10 +87,7 @@ Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES),       gConfig.IndentGuides)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE),        gConfig.HighlightCurrentLine)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES),        gConfig.TabIndentSpaces)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES),  gConfig.MultipleInstances)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE),    gConfig.CompileAutoSave)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION),    gConfig.AutoIndentation)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKHIDECOMPILE),        gConfig.HideCompile)
 
    SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize
    
@@ -112,3 +100,5 @@ Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
    Function = 0
    
 End Function
+
+

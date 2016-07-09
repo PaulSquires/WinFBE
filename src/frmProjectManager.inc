@@ -101,6 +101,7 @@ Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
                   pDoc = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, lIndex) )
                   Select Case id
                      Case IDM_OPENINCLUDE           
+                          If gConfig.CloseProjMgr Then ShowWindow(HWND_FRMPROJECTMANAGER, SW_HIDE)
                           frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
                      Case IDM_REMOVEFILEFROMPROJECT
                           Function = gpApp->ProjectRemoveFile( pDoc )
@@ -178,6 +179,7 @@ Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             ' Get the pDoc from the selected row
             Dim pDoc As clsDocument Ptr = Cast( clsDocument Ptr, FF_ListView_GetlParam(nmi->hdr.hwndFrom, nmi->iItem) )
             If pDoc Then
+               If gConfig.CloseProjMgr Then ShowWindow(HWND_FRMPROJECTMANAGER, SW_HIDE)
                frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
             End If
          End If
@@ -324,6 +326,33 @@ End Function
 
 
 ' ========================================================================================
+' Attempt to position the Listview line to the currently active document
+' ========================================================================================
+Function frmProjectManager_SetListviewSelection() As Long
+         
+   If IsWindowVisible(HWND_FRMPROJECTMANAGER) = 0 Then Exit Function
+   
+   ' Try to position to listview line of currently active document
+   Dim pDoc as clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   Dim hLV As Hwnd = GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+   ListView_SetItemState(hLV, -1, 0, LVIS_SELECTED)   'deselect all items
+   If pDoc Then
+      For i As Long = 0 To Listview_GetItemCount(hLV)
+         If pDoc = Cast(clsDocument Ptr, FF_Listview_GetlParam(hLV, i)) Then
+            SendMessageW(hLV, LVM_ENSUREVISIBLE, i, 0)   ' scroll to it
+            ListView_SetItemState(hLV, i, LVIS_SELECTED, LVIS_SELECTED)  ' select item
+            ListView_SetItemState(hLV, i, LVIS_FOCUSED, LVIS_FOCUSED)    ' optional
+            Exit For
+         End If
+      Next      
+   End If   
+
+   Function = 0
+   
+End Function
+
+
+' ========================================================================================
 ' frmProjectManager_Show
 ' ========================================================================================
 Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
@@ -335,6 +364,10 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    If IsWindow(HWND_FRMPROJECTMANAGER) Then
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMPROJECTMANAGER), SW_HIDE, SW_SHOW)
       ShowWindow HWND_FRMPROJECTMANAGER, nCmdShow
+      If nCmdShow = SW_SHOW Then
+         frmProjectManager_SetListviewSelection
+         SetFocus GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
+      End If   
       Exit Function
    End If
       
@@ -382,3 +415,9 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+
+
+
+
+
+

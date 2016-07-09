@@ -7,6 +7,14 @@ Sub SaveEditorOptions()
    Dim HWnd As HWnd 
    Dim wText As WString * MAX_PATH  
     
+   ' GENERAL OPTIONS   
+   HWnd = HWND_FRMOPTIONSGENERAL
+   gConfig.MultipleInstances    = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKMULTIPLEINSTANCES) )
+   gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE) )
+   gConfig.CloseFuncList        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST) )
+   gConfig.CloseProjMgr         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEPROJMGR) )
+   gConfig.HideCompile          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE) )
+
    ' EDITOR OPTIONS   
    HWnd = HWND_FRMOPTIONSEDITOR
    gConfig.SyntaxHighlighting   = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING) )
@@ -18,10 +26,7 @@ Sub SaveEditorOptions()
    gConfig.HighlightCurrentLine = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE) )
    gConfig.TabIndentSpaces      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES) )
    gConfig.IndentGuides         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES ) )
-   gConfig.MultipleInstances    = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKMULTIPLEINSTANCES) )
    gConfig.AutoIndentation      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION) )
-   gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCOMPILEAUTOSAVE) )
-   gConfig.HideCompile          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKHIDECOMPILE) )
 
    FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize, Sizeof(gConfig.TabSize) )
    gConfig.KeywordCase = ComboBox_GetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE))
@@ -112,10 +117,6 @@ End Sub
 ' ========================================================================================
 Function frmOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 
-   ' Retrieve a reference to the CWindow class from the CREATESTRUCT structure
-   'Dim pCreateStruct As CREATESTRUCT Ptr = lpCreateStructPtr
-   'Dim pWindow As CWindow Ptr = Cast(CWindow Ptr, pCreateStruct->lpCreateParams)
-
    ' This is a modal popup window so disable the parent window
    EnableWindow GetParent(HWnd), False
 
@@ -181,18 +182,21 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
              ' Display the correct Category name and Child dialog. The child identifier is held in the lParam
              Select Case FF_TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
                  Case 0
+                     SetWindowTextW( hLabel, WStr(" ") & L(226,"General Options")) 
+                     hForm = HWND_FRMOPTIONSGENERAL
+                 Case 1
                      SetWindowTextW( hLabel, WStr(" ") & L(110,"Code Editor")) 
                      hForm = HWND_FRMOPTIONSEDITOR
-                 Case 1
+                 Case 2
                      SetWindowTextW( hLabel, WStr(" ") & L(111,"Colors and Fonts") )
                      hForm = HWND_FRMOPTIONSCOLORS
-                 Case 2
+                 Case 3
                      SetWindowTextW( hLabel, WStr(" ") & L(112,"Compiler Setup") )
                      hForm = HWND_FRMOPTIONSCOMPILER
-                 Case 3
+                 Case 4
                      SetWindowTextW( hLabel, WStr(" ") & L(129,"Localization") )
                      hForm = HWND_FRMOPTIONSLOCAL
-                 Case 4
+                 Case 5
                      SetWindowTextW( hLabel, WStr(" ") & L(177,"FreeBASIC Keywords") )
                      hForm = HWND_FRMOPTIONSKEYWORDS
              End Select
@@ -325,13 +329,15 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
 
    ' Configure the TreeView
    Dim hItem As HANDLE 
-   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        0)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   1)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     2)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       3)
-           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 4)
+   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   2)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     3)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       4)
+           FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 5)
 
    ' Load all of the child dialogs
+   frmOptionsGeneral_Show( pWindow->hWindow )
    frmOptionsEditor_Show( pWindow->hWindow )
    frmOptionsColors_Show( pWindow->hWindow )
    frmOptionsCompiler_Show( pWindow->hWindow )
@@ -350,6 +356,7 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    Delete pWindow
 
    ' Delete the child windows releasing their manually allocated memory 
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSGENERAL):   Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSEDITOR):    Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOLORS):    Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOMPILER):  Delete pWindow
@@ -357,3 +364,5 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDS):  Delete pWindow
 
 End Function
+
+

@@ -166,18 +166,21 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
       ShowWindow HWND_FRMCOMPILERESULTS, nCmdShow
       Exit Function
    End If
-      
+           
    '  Create the window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
+   Dim rcWork  As Rect = pWindow->GetWorkArea
+   Dim nHeight As Long = (rcWork.Bottom - rcWork.Top) * .40
+   Dim nWidth  As Long = (rcWork.Right - rcWork.Left) * .60
+
    HWND_FRMCOMPILERESULTS = _
-       pWindow->Create( hWndParent, "Compile Results", @frmCompileResults_WndProc, 0, 0, 0, 0, _
+       pWindow->Create( hWndParent, "Compile Results", @frmCompileResults_WndProc, 0, 0, nWidth, nHeight, _
             WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_THICKFRAME Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
             WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-       pWindow->SetClientSize(600, 375)
        pWindow->Center
-       
+
    ' Set the small and large icon for the main window (must be set after main window is created)
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
@@ -205,3 +208,6 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+
+
+

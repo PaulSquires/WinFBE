@@ -33,6 +33,11 @@ Function clsConfig.SaveToFile() as Long
    Print #f, _
    "'  WINFBE CONFIGURATION" & vbcrlf & vbcrlf & _
    "[Editor]" & vbcrlf & _
+   "MultipleInstances="     & this.MultipleInstances     & vbcrlf & _
+   "CompileAutosave="       & this.CompileAutosave       & vbcrlf & _
+   "CloseFuncList="         & this.CloseFuncList         & vbcrlf & _
+   "CloseProjMgr="          & this.CloseProjMgr          & vbcrlf & _
+   "HideCompile="           & this.HideCompile           & vbcrlf & _
    "SyntaxHighlighting="    & this.SyntaxHighlighting    & vbcrlf & _
    "Codetips="              & this.Codetips              & vbcrlf & _
    "LeftMargin="            & this.LeftMargin            & vbcrlf & _
@@ -43,9 +48,6 @@ Function clsConfig.SaveToFile() as Long
    "HighlightCurrentLine="  & this.HighlightCurrentLine  & vbcrlf & _
    "IndentGuides="          & this.IndentGuides          & vbcrlf & _
    "TabIndentSpaces="       & this.TabIndentSpaces       & vbcrlf & _
-   "HideCompile="           & this.HideCompile           & vbcrlf & _
-   "MultipleInstances="     & this.MultipleInstances     & vbcrlf & _
-   "CompileAutosave="       & this.CompileAutosave       & vbcrlf & _
    "LocalizationFile="      & this.LocalizationFile      & vbcrlf & _
    "TabSize="               & this.TabSize               & vbcrlf & _
    "KeywordCase="           & this.KeywordCase           & vbcrlf & _
@@ -183,6 +185,11 @@ Function clsConfig.LoadFromFile() as Long
       End If
 
       Select Case wKey
+         Case "MultipleInstances":    this.MultipleInstances    = nData
+         Case "CompileAutosave":      this.CompileAutosave      = nData
+         Case "CloseFuncList":        this.CloseFuncList        = nData
+         Case "CloseProjMgr":         this.CloseProjMgr         = nData
+         Case "HideCompile":          this.HideCompile          = nData
          Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
          Case "Codetips":             this.Codetips             = nData
          Case "LeftMargin":           this.LeftMargin           = nData
@@ -193,9 +200,6 @@ Function clsConfig.LoadFromFile() as Long
          Case "HighlightCurrentLine": this.HighlightCurrentLine = nData
          Case "IndentGuides":         this.IndentGuides         = nData
          Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
-         Case "HideCompile":          this.HideCompile          = nData
-         Case "MultipleInstances":    this.MultipleInstances    = nData
-         Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "LocalizationFile":     this.LocalizationFile     = wData
          Case "TabSize":              this.TabSize              = wData
          Case "EditorFontname":       this.EditorFontname       = wData
@@ -435,6 +439,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
     
    Function = True   ' successul save
 End Function
+
 
 
 

@@ -92,7 +92,7 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
                SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
                SendMessageW( pDoc->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
             End If
-            ShowWindow HWND_FRMFNLIST, SW_HIDE
+            If gConfig.CloseFuncList Then ShowWindow( HWND_FRMFNLIST, SW_HIDE )
          End If
          
    End Select
@@ -350,4 +350,5 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+
 
