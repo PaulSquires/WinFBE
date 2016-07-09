@@ -112,12 +112,22 @@ End Property
 
 ''
 ''
-Property clsApp.ProjectOther( ByVal wValue As WString Ptr)
-   m_wzProjectOther = *wValue
+Property clsApp.ProjectOther32( ByVal wValue As WString Ptr)
+   m_wzProjectOther32 = *wValue
 End Property
 
-Property clsApp.ProjectOther() As WString Ptr
-   Property = @m_wzProjectOther
+Property clsApp.ProjectOther32() As WString Ptr
+   Property = @m_wzProjectOther32
+End Property
+
+''
+''
+Property clsApp.ProjectOther64( ByVal wValue As WString Ptr)
+   m_wzProjectOther64 = *wValue
+End Property
+
+Property clsApp.ProjectOther64() As WString Ptr
+   Property = @m_wzProjectOther64
 End Property
 
 ''
@@ -449,6 +459,7 @@ End Function
 '   Function = 0
 'End Function
 '
+
 
 
 

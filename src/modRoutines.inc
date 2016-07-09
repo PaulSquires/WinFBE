@@ -178,12 +178,10 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
       
       Case IDM_INSERTFILE
          rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(78,"Resource files")
-         rgFileTypes(3).pszName = @L(79,"All files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
-         rgFileTypes(2).pszSpec = @WSTR("*.rc")
-         rgFileTypes(3).pszSpec = @WSTR("*.*")
-         pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
 
@@ -252,12 +250,10 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
    ' Set the file types
    Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
    rgFileTypes(1).pszName = @L(77,"FB code files")
-   rgFileTypes(2).pszName = @L(78,"Resource files")
-   rgFileTypes(3).pszName = @L(79,"All files")
-   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
-   rgFileTypes(2).pszSpec = @WSTR("*.rc")
-   rgFileTypes(3).pszSpec = @WSTR("*.*")
-   pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
+   rgFileTypes(2).pszName = @L(79,"All files")
+   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
+   rgFileTypes(2).pszSpec = @WSTR("*.*")
+   pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
 
    ' Set the title of the dialog
    hr = pofd->lpVtbl->SetTitle(pofd, L(106,"Open source file"))
@@ -314,12 +310,10 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(78,"Resource files")
-         rgFileTypes(3).pszName = @L(79,"All files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
-         rgFileTypes(2).pszSpec = @WSTR("*.rc")
-         rgFileTypes(3).pszSpec = @WSTR("*.*")
-         psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
    End Select
    
    ' // Set the title of the dialog
@@ -1035,6 +1029,7 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    CloseHandle hSnapShot
 
 End Function
+
 
 
 

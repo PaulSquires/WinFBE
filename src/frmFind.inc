@@ -118,19 +118,6 @@ End Function
 
 
 ' ========================================================================================
-' Process WM_CREATE message for window/dialog: frmFind
-' ========================================================================================
-Function frmFind_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
-
-   '  Message cracker macro expects a True to be returned for a successful
-   '  OnCreate handler even though returning -1 from a standard WM_CREATE
-   '  call would stop creating the window. This is just one of those Windows
-   '  inconsistencies.
-   Return True
-End Function
-
-
-' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmFind
 ' ========================================================================================
 Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
@@ -245,7 +232,6 @@ Function frmFind_WndProc( ByVal HWnd   As HWnd, _
                           ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_CREATE,   frmFind_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmFind_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmFind_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmFind_OnCommand)
@@ -353,3 +339,6 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
 
    Function = 0
 End Function
+
+
+

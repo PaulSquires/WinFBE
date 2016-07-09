@@ -277,7 +277,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Print #f, "ProjectErrorOption=";  gpApp->ProjectErrorOption
    Print #f, "ProjectDebug=";        gpApp->ProjectDebug
    Print #f, "ProjectThread=";       gpApp->ProjectThread
-   Print #f, "ProjectOther=";        *gpApp->ProjectOther
+   Print #f, "ProjectOther32=";     *gpApp->ProjectOther32
+   Print #f, "ProjectOther64=";     *gpApp->ProjectOther64
    Print #f, "DefaultCompiler=";     gConfig.DefaultCompiler       
    Print #f, "DefaultCompileMode=";  gConfig.DefaultCompileMode    
    Print #f, "CommandLine=";         gConfig.CommandLine
@@ -338,7 +339,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
 
    Dim st    As WString * MAX_PATH
    Dim wKey  As WString * MAX_PATH
-   Dim wData As WString * MAX_PATH
+   Dim wData As WString * 1024
    
    Dim sBookmarks As String
    Dim As Long nData, i, idx, nFirstLine, nPosition, nActiveTab
@@ -387,7 +388,8 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
          Case "ProjectErrorOption":  gpApp->ProjectErrorOption  = nData
          Case "ProjectDebug":        gpApp->ProjectDebug        = nData
          Case "ProjectThread":       gpApp->ProjectThread       = nData
-         Case "ProjectOther":        gpApp->ProjectOther        = wData
+         Case "ProjectOther32":      gpApp->ProjectOther32      = wData
+         Case "ProjectOther64":      gpApp->ProjectOther64      = wData
          Case "DefaultCompiler":     gConfig.DefaultCompiler    = wData
          Case "DefaultCompileMode":  gConfig.DefaultCompileMode = wData
          Case "CommandLine":         gConfig.CommandLine        = wData
@@ -446,6 +448,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
     
    Function = True   ' successul save
 End Function
+
 
 
 

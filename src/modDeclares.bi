@@ -112,9 +112,12 @@
 #Define IDC_FRMPROJECTOPTIONS_CHKDEBUG  1011
 #Define IDC_FRMPROJECTOPTIONS_CHKTHREAD  1012
 #Define IDC_FRMPROJECTOPTIONS_LABEL1  1013
-#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS  1014
+#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS32  1014
 #Define IDC_FRMPROJECTOPTIONS_LABEL2  1015
 #Define IDC_FRMPROJECTOPTIONS_LABEL3  1016
+#Define IDC_FRMPROJECTOPTIONS_LABEL4  1017
+#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS64  1018
+
 #Define IDC_FRMFNLIST_LISTBOX  1000
 
 
@@ -423,7 +426,8 @@ Type clsApp
       m_IsNewProjectFlag   As BOOLEAN
       m_wzProjectName      As WString * MAX_PATH
       m_wzProjectFilename  As WString * MAX_PATH
-      m_wzProjectOther     As WString * MAX_PATH    ' compile flags
+      m_wzProjectOther32   As WString * 1024       ' compile flags 32 bit compiler
+      m_wzProjectOther64   As WString * 1024       ' compile flags 64 bit compiler
       m_IncludeFilename    As String 
       m_ProjectErrorOption As Long
       m_ProjectDebug       As Long
@@ -451,8 +455,10 @@ Type clsApp
       Declare Property ProjectDiskFilename() As WString Ptr
       Declare Property ProjectName( ByVal wValue As WString Ptr)
       Declare Property ProjectName() As WString Ptr
-      Declare Property ProjectOther( ByVal wValue As WString Ptr)
-      Declare Property ProjectOther() As WString Ptr
+      Declare Property ProjectOther32( ByVal wValue As WString Ptr)
+      Declare Property ProjectOther32() As WString Ptr
+      Declare Property ProjectOther64( ByVal wValue As WString Ptr)
+      Declare Property ProjectOther64() As WString Ptr
 
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
@@ -667,6 +673,7 @@ Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function frmProjectManager_SetListviewSelection() As Long
+
 
 
 

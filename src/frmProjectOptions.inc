@@ -38,8 +38,10 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKTHREAD)
    gpApp->ProjectThread = Button_GetCheck( hCtrl )
 
-   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS)
-   FF_Control_GetTextW( hCtrl, gpApp->ProjectOther, MAX_PATH )
+   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32)
+   FF_Control_GetTextW( hCtrl, gpApp->ProjectOther32, 1024)
+   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS64)
+   FF_Control_GetTextW( hCtrl, gpApp->ProjectOther64, 1024)
    
    Return gConfig.ProjectSaveToFile()   
 
@@ -165,46 +167,46 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->Create( hWndParent, "", @frmProjectOptions_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT)
-   pWindow->SetClientSize(720, 385)
+   pWindow->SetClientSize(720, 420)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
 
-   pWindow->AddControl("GROUPBOX", , IDC_FRMPROJECTOPTIONS_FRAME2, "Project Type", 15, 15, 279, 125, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMPROJECTOPTIONS_FRAME2, L(229,"Project Type"), 15, 15, 279, 125, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTEXE, "Executable (EXE)", 30, 34, 255, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTEXE, L(230,"Executable (EXE)"), 30, 34, 255, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or WS_GROUP Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTDLL, "Dynamic Link Library (-dll)", 30, 55, 255, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTDLL, L(231,"Dynamic Link Library (-dll)"), 30, 55, 255, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTLIB, "Static Library (-lib)", 30, 76, 255, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTLIB, L(232,"Static Library (-lib)"), 30, 76, 255, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", , IDC_FRMPROJECTOPTIONS_FRAME1, "Error Checking", 305, 15, 399, 125, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMPROJECTOPTIONS_FRAME1, L(233,"Error Checking"), 305, 15, 399, 125, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTNOERROR, "No error checking", 320, 37, 370, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTNOERROR, L(234,"No error checking"), 320, 37, 370, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or WS_GROUP Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTERROR, "Add error checking (-e)", 320, 58, 370, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTERROR, L(235,"Add error checking (-e)"), 320, 58, 370, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTRESUME, "Error checking with RESUME support (-ex)", 320, 79, 370, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTRESUME, L(236,"Error checking with RESUME support (-ex)"), 320, 79, 370, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTERRORPLUS, "Same as -ex plus array bounds and null pointer (-exx)", 320, 100, 370, 21, _
+   pWindow->AddControl("OPTION", , IDC_FRMPROJECTOPTIONS_OPTERRORPLUS, L(237,"Same as -ex plus array bounds and null pointer (-exx)"), 320, 100, 370, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HWnd hProjectDebug = _
-   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKDEBUG, "Add debug info (-g)", 30, 150, 278, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKDEBUG, L(238,"Add debug info (-g)"), 30, 150, 278, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HWnd hProjectThread = _
-   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKTHREAD, "Link with thread-safe runtime library (-mt)", 30, 172, 278, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKTHREAD, L(239,"Link with thread-safe runtime library (-mt)"), 30, 172, 278, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL1, "Project Path", 30, 211, 235, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL1, L(240,"Project Path"), 30, 211, 235, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HWnd hProjectPath = _
@@ -214,20 +216,30 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDC_FRMPROJECTOPTIONS_CMDSELECT, "...", 385, 229, 37, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL2, "Other Options", 31, 265, 235, 18, _
+
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL2, L(241,"Other Options (32-bit compiler)"), 31, 265, 235, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   Dim As HWnd hProjectOther = _
-   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS, "", 32, 285, 346, 20, _
+   Dim As HWnd hProjectOther32 = _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS32, "", 32, 285, 346, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 325, 700, 3, _
+   
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL4, L(242,"Other Options (64-bit compiler)"), 31, 314, 235, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   Dim As HWnd hProjectOther64 = _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS64, "", 32, 334, 346, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 370, 700, 3, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 550, 337, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 550, 380, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 635, 337, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 635, 380, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -242,7 +254,8 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
       gpApp->ProjectErrorOption  = 0
       gpApp->ProjectDebug        = BST_UNCHECKED
       gpApp->ProjectThread       = BST_UNCHECKED
-      gpApp->ProjectOther        = 0
+      gpApp->ProjectOther32      = 0
+      gpApp->ProjectOther64      = 0
    Else
       wszTitle = wszTitle & " - " & *gpApp->ProjectName
    End If
@@ -266,7 +279,8 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    Button_SetCheck( hProjectDebug, gpApp->ProjectDebug )
    Button_SetCheck( hProjectThread, gpApp->ProjectThread )
    
-   SetWindowTextW( hProjectOther, gpApp->ProjectOther )
+   SetWindowTextW( hProjectOther32, gpApp->ProjectOther32 )
+   SetWindowTextW( hProjectOther64, gpApp->ProjectOther64 )
 
    SetFocus GetDlgItem(hForm, IDOK)
    
@@ -277,3 +291,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    Delete pWindow
 
 End Function
+
+
+
+

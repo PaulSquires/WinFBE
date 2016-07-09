@@ -102,13 +102,18 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If gpApp->IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gpApp->GetResourceDocumentPtr()
       gCompile.ResourceFile = Iif( pDocResource, *pDocResource->DiskFilename, WStr(""))
-      gCompile.CompileFlags = *gpApp->ProjectOther           
 
       gCompile.ObjFolder = gCompile.MainFolder & "wfbe_obj\"
       gCompile.ObjFolderShort = ".\wfbe_obj\"
 
-      If fCompile32 Then gCompile.ObjID = "32.o"
-      If fCompile64 Then gCompile.ObjID = "64.o"
+      If fCompile32 Then 
+         gCompile.ObjID = "32.o"
+         gCompile.CompileFlags = *gpApp->ProjectOther32           
+      End If
+      If fCompile64 Then 
+         gCompile.ObjID = "64.o"
+         gCompile.CompileFlags = *gpApp->ProjectOther64           
+      End If   
       
       ' Make sure the folders exist
       SHCreateDirectory( 0, gCompile.ObjFolder )
@@ -434,6 +439,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Function = True   ' successful
 End Function
+
 
 
 
