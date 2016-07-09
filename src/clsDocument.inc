@@ -965,6 +965,10 @@ Function clsDocument.ApplyProperties() As Long
    'SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~._:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
    SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~_:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
+   ''
+   ''  OTHER
+   SciMsg( m_pSci, SCI_SETADDITIONALSELECTIONTYPING, True, 0 )
+   
 
    ''
    ''  APPLY ALL LANGUAGE SPECIFIC SYNTAX COLORING
@@ -1273,6 +1277,7 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
    Function = buffer
 
 End Function
+
 
 
 

@@ -926,7 +926,7 @@ Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
    If SendMessage( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @li) ) Then
       Function = li.lParam
    End If   
-
+   
 End Function
 
 
@@ -1035,5 +1035,6 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    CloseHandle hSnapShot
 
 End Function
+
 
 
