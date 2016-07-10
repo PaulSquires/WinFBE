@@ -849,7 +849,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Function = code_Compile(id)
 
       Case IDM_RUNEXE
-         Exec gConfig.LastRunFilename, gConfig.CommandLine
+         RunExe @gConfig.LastRunFilename, @gConfig.CommandLine
       
       Case IDM_COMPILERESULTS :       Function = frmCompileResults_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
@@ -1342,6 +1342,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
 
 
 

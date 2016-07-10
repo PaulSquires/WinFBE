@@ -676,6 +676,10 @@ Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function frmProjectManager_SetListviewSelection() As Long
+Declare Function RunEXE( ByVal pwszFileExe As WString Ptr, _
+                         ByVal pwszParam As WString Ptr _
+                         ) As Long
+
 
 
 

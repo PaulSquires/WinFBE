@@ -433,7 +433,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
   
    
    If gCompile.RunAfterCompile Then 
-      Exec gCompile.OutputFilename, gConfig.CommandLine
+      RunEXE @gCompile.OutputFilename, @gConfig.CommandLine
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
 
@@ -441,16 +441,28 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 End Function
 
 
+''
+''
+Function RunEXE( ByVal pwszFileExe As WString Ptr, _
+                 ByVal pwszParam As WString Ptr _
+                 ) As Long
+                         
+   Dim ShExecInfo As SHELLEXECUTEINFOW  
 
+   With ShExecInfo
+      .cbSize       = Len(SHELLEXECUTEINFOW)
+      .fMask        = SEE_MASK_NOCLOSEPROCESS
+      .HWnd         = 0
+      .lpVerb       = Null
+      .lpFile       = pwszFileExe
+      .lpParameters = pwszParam   
+      .lpDirectory  = 0
+      .nShow        = SW_SHOW
+      .hInstApp     = 0 
+   End With
+   ShellExecuteEx(@ShExecInfo)
 
-
-
-
-
-
-
-
-
-
+   Function = 0
+End Function
 
 
