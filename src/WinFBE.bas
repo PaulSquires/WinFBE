@@ -15,11 +15,13 @@
 #Include Once "win\TlHelp32.bi"
 #Include Once "win\Shlobj.bi"
 #Include Once "Afx\CWindow.inc"
+#Include Once "Afx\CBStr.inc"
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxCtl.inc" 
 #Include Once "Afx\AfxMenu.inc" 
 
 Using Afx.CWindowClass
+Using Afx.CBStrClass
 ' $FB_RESPATH = "WinFBE.rc"
 
 
@@ -127,6 +129,7 @@ End Function
 ' Main program entry point
 ' ========================================================================================
 End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+
 
 
 

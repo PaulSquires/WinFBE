@@ -147,11 +147,11 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
 
    ' If Compile Results manager already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.
-'   If IsWindow(HWND_FRMCOMPILERESULTS) Then
-'      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMCOMPILERESULTS), SW_HIDE, SW_SHOW)
-'      ShowWindow HWND_FRMCOMPILERESULTS, nCmdShow
-'      Exit Function
-'   End If
+   If IsWindow(HWND_FRMCOMPILERESULTS) Then
+      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMCOMPILERESULTS), SW_HIDE, SW_SHOW)
+      ShowWindow HWND_FRMCOMPILERESULTS, nCmdShow
+      Exit Function
+   End If
            
    '  Create the window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -196,6 +196,7 @@ Function frmCompileResults_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+
 
 
 
