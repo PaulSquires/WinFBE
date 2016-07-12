@@ -161,7 +161,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
 
    Select Case gConfig.DefaultCompileMode   ' used on the Main source file
-      Case "GUI":     gCompile.CompileMode = " -s gui "
+      Case "GUI"
+         If gpApp->ProjectSuppressConsole = BST_CHECKED Then
+            gCompile.CompileMode = " -s gui "
+         End If   
       Case "CONSOLE": gCompile.CompileMode = " -s console "
    End Select   
   
@@ -464,5 +467,6 @@ Function RunEXE( ByVal pwszFileExe As WString Ptr, _
 
    Function = 0
 End Function
+
 
 

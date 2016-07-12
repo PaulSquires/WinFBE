@@ -273,15 +273,16 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    If Open( *gpApp->ProjectDiskFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
 
    Print #f, "' WINFBE PROJECT FILE"
-   Print #f, "ProjectType=";         gpApp->ProjectType
-   Print #f, "ProjectErrorOption=";  gpApp->ProjectErrorOption
-   Print #f, "ProjectDebug=";        gpApp->ProjectDebug
-   Print #f, "ProjectThread=";       gpApp->ProjectThread
-   Print #f, "ProjectOther32=";     *gpApp->ProjectOther32
-   Print #f, "ProjectOther64=";     *gpApp->ProjectOther64
-   Print #f, "DefaultCompiler=";     gConfig.DefaultCompiler       
-   Print #f, "DefaultCompileMode=";  gConfig.DefaultCompileMode    
-   Print #f, "CommandLine=";         gConfig.CommandLine
+   Print #f, "ProjectType=";            gpApp->ProjectType
+   Print #f, "ProjectErrorOption=";     gpApp->ProjectErrorOption
+   Print #f, "ProjectDebug=";           gpApp->ProjectDebug
+   Print #f, "ProjectThread=";          gpApp->ProjectThread
+   Print #f, "ProjectSuppressConsole="; gpApp->ProjectSuppressConsole
+   Print #f, "ProjectOther32=";        *gpApp->ProjectOther32
+   Print #f, "ProjectOther64=";        *gpApp->ProjectOther64
+   Print #f, "DefaultCompiler=";        gConfig.DefaultCompiler       
+   Print #f, "DefaultCompileMode=";     gConfig.DefaultCompileMode    
+   Print #f, "CommandLine=";            gConfig.CommandLine
 
    ' Save all of the loaded tabs first
    nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
@@ -384,16 +385,17 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       ProcessFromCurdrive(@wData)
 
       Select Case wKey
-         Case "ProjectType":         gpApp->ProjectType         = nData
-         Case "ProjectErrorOption":  gpApp->ProjectErrorOption  = nData
-         Case "ProjectDebug":        gpApp->ProjectDebug        = nData
-         Case "ProjectThread":       gpApp->ProjectThread       = nData
-         Case "ProjectOther32":      gpApp->ProjectOther32      = wData
-         Case "ProjectOther64":      gpApp->ProjectOther64      = wData
-         Case "DefaultCompiler":     gConfig.DefaultCompiler    = wData
-         Case "DefaultCompileMode":  gConfig.DefaultCompileMode = wData
-         Case "CommandLine":         gConfig.CommandLine        = wData
-         Case "ActiveTab":           nActiveTab = nData
+         Case "ProjectType":            gpApp->ProjectType         = nData
+         Case "ProjectErrorOption":     gpApp->ProjectErrorOption  = nData
+         Case "ProjectDebug":           gpApp->ProjectDebug        = nData
+         Case "ProjectThread":          gpApp->ProjectThread       = nData
+         Case "ProjectSuppressConsole": gpApp->ProjectSuppressConsole = nData
+         Case "ProjectOther32":         gpApp->ProjectOther32      = wData
+         Case "ProjectOther64":         gpApp->ProjectOther64      = wData
+         Case "DefaultCompiler":        gConfig.DefaultCompiler    = wData
+         Case "DefaultCompileMode":     gConfig.DefaultCompileMode = wData
+         Case "CommandLine":            gConfig.CommandLine        = wData
+         Case "ActiveTab":              nActiveTab = nData
          
          Case "File":                wszFilename = wData
          Case "FileType":            nFileType = nData
@@ -448,6 +450,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
     
    Function = True   ' successul save
 End Function
+
 
 
 

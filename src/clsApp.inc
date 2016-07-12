@@ -61,6 +61,22 @@ End Property
 Property clsApp.ProjectThread( ByVal nValue As Long)
    m_ProjectThread = nValue
 End Property
+''
+''
+Property clsApp.ProjectThread() As Long
+   Property = m_ProjectThread
+End Property
+
+
+Property clsApp.ProjectSuppressConsole( ByVal nValue As Long)
+   m_ProjectSuppressConsole = nValue
+End Property
+''
+''
+Property clsApp.ProjectSuppressConsole() As Long
+   Property = m_ProjectSuppressConsole
+End Property
+
 
 ''
 ''
@@ -93,12 +109,6 @@ Property clsApp.ProjectDebug() As Long
    Property = m_ProjectDebug
 End Property
 
-''
-''
-
-Property clsApp.ProjectThread() As Long
-   Property = m_ProjectThread
-End Property
 
 ''
 ''
@@ -459,6 +469,7 @@ End Function
 '   Function = 0
 'End Function
 '
+
 
 
 

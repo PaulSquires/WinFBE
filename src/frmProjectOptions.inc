@@ -37,6 +37,8 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    gpApp->ProjectDebug = Button_GetCheck( hCtrl )
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKTHREAD)
    gpApp->ProjectThread = Button_GetCheck( hCtrl )
+   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKSUPPRESSCONSOLE)
+   gpApp->ProjectSuppressConsole = Button_GetCheck( hCtrl )
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32)
    FF_Control_GetTextW( hCtrl, gpApp->ProjectOther32, 1024)
@@ -206,6 +208,10 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKTHREAD, L(239,"Link with thread-safe runtime library (-mt)"), 30, 172, 278, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   Dim As HWnd hSuppressConsole = _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKSUPPRESSCONSOLE, L(245,"Suppress console for GUI applications (-s gui)"), 320, 150, 278, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL1, L(240,"Project Path"), 30, 211, 235, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
@@ -278,6 +284,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
 
    Button_SetCheck( hProjectDebug, gpApp->ProjectDebug )
    Button_SetCheck( hProjectThread, gpApp->ProjectThread )
+   Button_SetCheck( hSuppressConsole, gpApp->ProjectSuppressConsole )
    
    SetWindowTextW( hProjectOther32, gpApp->ProjectOther32 )
    SetWindowTextW( hProjectOther64, gpApp->ProjectOther64 )
@@ -291,6 +298,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    Delete pWindow
 
 End Function
+
 
 
 
