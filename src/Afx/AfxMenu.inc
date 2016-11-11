@@ -11,48 +11,9 @@
 
 #pragma once
 #INCLUDE ONCE "win/uxtheme.bi"
-#INCLUDE ONCE "AfxWin.inc"
-
-' // The definition for BSTR in the FreeBASIC headers was incorrectly changed to WCHAR
-#ifndef AFX_BSTR
-   #define AFX_BSTR WSTRING PTR
-#endif
-
-' // Forward declarations
-DECLARE FUNCTION AfxCheckMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS DWORD
-DECLARE FUNCTION AfxUnCheckMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS DWORD
-DECLARE FUNCTION AfxToggleMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS DWORD
-DECLARE FUNCTION AfxIsMenuItemChecked (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemEnabled (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemDisabled (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemGrayed (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemHighlighted (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemSeparator (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemPopup (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxIsMenuItemOwnerDraw (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxGetMenuItemState (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS DWORD
-DECLARE FUNCTION AfxSetMenuItemState (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fState AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxEnableMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxDisableMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxGrayMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxHiliteMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxRemoveCloseMenu (BYVAL hwnd AS HWND) AS BOOLEAN
-DECLARE FUNCTION AfxRightJustifyMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD) AS BOOLEAN
-DECLARE FUNCTION AfxSetMenuItemBold (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD) AS BOOLEAN
-DECLARE FUNCTION AfxSetMenuItemText (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYREF wszText AS WSTRING, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
-DECLARE FUNCTION AfxGetMenuItemText (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL cchTextMax AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxGetMenuFont (BYVAL plfw AS LOGFONTW PTR) AS BOOLEAN
-DECLARE FUNCTION AfxGetMenuFontPointSize () AS LONG
-DECLARE FUNCTION AfxGetMenuRect (BYVAL hwnd AS HWND, BYVAL hmenu AS HMENU, BYVAL prcmenu AS RECT PTR) AS LONG
-#if _WIN32_WINNT = &h0602
-DECLARE FUNCTION AfxInitBitmapInfo (BYVAL pbmi AS BITMAPINFO PTR, BYVAL cbInfo AS ULONG, BYVAL cx AS LONG, BYVAL cy AS LONG, BYVAL bpp AS WORD) AS BOOLEAN
-DECLARE FUNCTION AfxCreate32BitHBITMAP(BYVAL hDC AS HDC, BYVAL psize AS SIZE PTR, BYVAL ppvBits AS ANY PTR PTR, BYVAL phBmp AS HBITMAP PTR) AS BOOLEAN
-DECLARE FUNCTION AfxAddBitmapToMenuItem (BYVAL hMenu AS HMENU, BYVAL nMenuItem AS LONG, BYVAL fByPosition AS BOOLEAN, BYVAL hbmp AS HBITMAP) AS BOOLEAN
-DECLARE FUNCTION AfxConvertToPARGB32 (BYVAL hDC AS HDC, BYVAL pargb AS DWORD PTR, BYVAL hbmp AS HBITMAP, BYVAL sizeImage AS SIZE, BYVAL cxRow AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxHasAlpha (BYVAL pargb AS DWORD PTR, BYVAL sizeImage AS SIZE, BYVAL cxRow AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxConvertBufferToPARGB32 (BYVAL hPaintBuffer AS HPAINTBUFFER, BYVAL hDC AS HDC, BYVAL hIcon AS HICON, BYVAL sizeIcon AS SIZE) AS BOOLEAN
-DECLARE FUNCTION AfxAddIconToMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS BOOLEAN, BYVAL hIcon AS HICON, BYVAL fAutoDestroy AS BOOLEAN = TRUE, BYVAL phbmp AS HBITMAP PTR = NULL) AS BOOLEAN
-#endif
+#INCLUDE ONCE "Afx/AfxWin.inc"
+#INCLUDE ONCE "Afx/CWStr.inc"
+USING Afx
 
 ' ========================================================================================
 ' Checks a menu item.
@@ -68,7 +29,7 @@ PRIVATE FUNCTION AfxCheckMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, B
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    dwFlags = dwFlags OR MF_CHECKED
-   FUNCTION = CheckMenuItem(hMenu, uItem, dwFlags)
+   RETURN CheckMenuItem(hMenu, uItem, dwFlags)
 END FUNCTION
 ' ========================================================================================
 
@@ -86,7 +47,7 @@ PRIVATE FUNCTION AfxUnCheckMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD,
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    dwFlags = dwFlags OR MF_UNCHECKED
-   FUNCTION = CheckMenuItem(hMenu, uItem, dwFlags)
+   RETURN CheckMenuItem(hMenu, uItem, dwFlags)
 END FUNCTION
 ' ========================================================================================
 
@@ -101,7 +62,7 @@ PRIVATE FUNCTION AfxToggleMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, 
    ELSE
       dwFlags = dwFlags OR MF_CHECKED
    END IF
-   FUNCTION = CheckMenuItem(hMenu, uItem, dwFlags)
+   RETURN CheckMenuItem(hMenu, uItem, dwFlags)
 END FUNCTION
 ' ========================================================================================
 
@@ -111,7 +72,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxIsMenuItemChecked (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG = FALSE) AS BOOLEAN
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
-   IF GetMenuState(hMenu, uItem, dwFlags) AND MF_CHECKED = MF_CHECKED THEN FUNCTION = TRUE
+   IF GetMenuState(hMenu, uItem, dwFlags) AND MF_CHECKED = MF_CHECKED THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -122,7 +83,7 @@ PRIVATE FUNCTION AfxIsMenuItemEnabled (BYVAL hMenu AS HMENU, BYVAL uItem AS DWOR
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_DISABLED) <> MF_DISABLED) AND ((dwRes AND MF_GRAYED) <> MF_GRAYED) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_DISABLED) <> MF_DISABLED) AND ((dwRes AND MF_GRAYED) <> MF_GRAYED) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -133,7 +94,7 @@ PRIVATE FUNCTION AfxIsMenuItemDisabled (BYVAL hMenu AS HMENU, BYVAL uItem AS DWO
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_DISABLED) = MF_DISABLED) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_DISABLED) = MF_DISABLED) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -144,7 +105,7 @@ PRIVATE FUNCTION AfxIsMenuItemGrayed (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_GRAYED) = MF_GRAYED) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_GRAYED) = MF_GRAYED) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -155,7 +116,7 @@ PRIVATE FUNCTION AfxIsMenuItemHighlighted (BYVAL hMenu AS HMENU, BYVAL uItem AS 
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_HILITE) = MF_HILITE) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_HILITE) = MF_HILITE) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -166,7 +127,7 @@ PRIVATE FUNCTION AfxIsMenuItemSeparator (BYVAL hMenu AS HMENU, BYVAL uItem AS DW
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_SEPARATOR) = MF_SEPARATOR) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_SEPARATOR) = MF_SEPARATOR) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -177,7 +138,7 @@ PRIVATE FUNCTION AfxIsMenuItemPopup (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD,
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_POPUP) = MF_POPUP) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_POPUP) = MF_POPUP) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -188,7 +149,7 @@ PRIVATE FUNCTION AfxIsMenuItemOwnerDraw (BYVAL hMenu AS HMENU, BYVAL uItem AS DW
    DIM dwFlags AS DWORD
    IF fByPosition THEN dwFlags = MF_BYPOSITION ELSE dwFlags = MF_BYCOMMAND
    DIM dwRes AS DWORD = GetMenuState(hMenu, uItem, dwFlags)
-   IF ((dwRes AND MF_OWNERDRAW) = MF_OWNERDRAW) THEN FUNCTION = TRUE
+   IF ((dwRes AND MF_OWNERDRAW) = MF_OWNERDRAW) THEN RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -214,8 +175,8 @@ PRIVATE FUNCTION AfxGetMenuItemState (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD
    DIM mii AS MENUITEMINFOW
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STATE
-   IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) = 0 THEN EXIT FUNCTION
-   FUNCTION = mii.fState
+   IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) = 0 THEN RETURN 0
+   RETURN mii.fState
 END FUNCTION
 ' ========================================================================================
 
@@ -244,7 +205,7 @@ PRIVATE FUNCTION AfxSetMenuItemState (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STATE
    mii.fState = fState
-   FUNCTION = SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
 END FUNCTION
 ' ========================================================================================
 
@@ -264,7 +225,7 @@ PRIVATE FUNCTION AfxEnableMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, 
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STATE
    mii.fState = MFS_ENABLED
-   FUNCTION = SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
 END FUNCTION
 ' ========================================================================================
 
@@ -284,7 +245,7 @@ PRIVATE FUNCTION AfxDisableMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD,
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STATE
    mii.fState = MFS_DISABLED
-   FUNCTION = SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
 END FUNCTION
 ' ========================================================================================
 
@@ -304,7 +265,7 @@ PRIVATE FUNCTION AfxGrayMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BY
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STATE
    mii.fState = MFS_GRAYED
-   FUNCTION = SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
 END FUNCTION
 ' ========================================================================================
 
@@ -324,7 +285,7 @@ PRIVATE FUNCTION AfxHiliteMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, 
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STATE
    mii.fState = MFS_HILITE
-   FUNCTION = SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
 END FUNCTION
 ' ========================================================================================
 
@@ -336,17 +297,17 @@ END FUNCTION
 PRIVATE FUNCTION AfxRemoveCloseMenu (BYVAL hwnd AS HWND) AS BOOLEAN
    ' // Get the system menu handle
    DIM hMenu AS HMENU = GetSystemMenu(hwnd, 0)
-   IF hMenu = NULL THEN EXIT FUNCTION
+   IF hMenu = NULL THEN RETURN FALSE
    ' // Get the number of menu items
    DIM cbItems AS LONG = GetMenuItemCount(hMenu)
-   IF cbItems = 0 THEN EXIT FUNCTION
+   IF cbItems = 0 THEN RETURN FALSE
    ' // Remove the close menu item
-   IF RemoveMenu(hMenu, cbItems - 1, MF_REMOVE OR MF_BYPOSITION) = 0 THEN EXIT FUNCTION
+   IF RemoveMenu(hMenu, cbItems - 1, MF_REMOVE OR MF_BYPOSITION) = 0 THEN RETURN FALSE
    ' // Remove the separator line
-   IF RemoveMenu(hMenu, cbItems - 2, MF_REMOVE OR MF_BYPOSITION) = 0 THEN EXIT FUNCTION
+   IF RemoveMenu(hMenu, cbItems - 2, MF_REMOVE OR MF_BYPOSITION) = 0 THEN RETURN FALSE
    ' // Redraw the menu (this refreshes the caption bar, dimming the X button)
    DrawMenuBar(hwnd)
-   FUNCTION = TRUE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -367,7 +328,7 @@ PRIVATE FUNCTION AfxRightJustifyMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS D
    mii.fMask = MIIM_ID OR MIIM_DATA OR MIIM_TYPE OR MIIM_SUBMENU
    IF GetMenuItemInfoW(hMenu, uItem, CTRUE, @mii) THEN
       mii.fType = mii.fType OR MF_HELP
-      FUNCTION = SetMenuItemInfoW(hMenu, uItem, CTRUE, @mii)
+      RETURN SetMenuItemInfoW(hMenu, uItem, CTRUE, @mii)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -387,7 +348,7 @@ PRIVATE FUNCTION AfxSetMenuItemBold (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD)
    mii.fMask = MIIM_ID OR MIIM_DATA OR MIIM_TYPE OR MIIM_SUBMENU OR MIIM_STATE
    IF GetMenuItemInfoW(hMenu, uItem, TRUE, @mii) THEN
       mii.fState = mii.fState OR &H1000
-      FUNCTION = SetMenuItemInfoW(hMenu, uItem, CTRUE, @mii)
+      RETURN SetMenuItemInfoW(hMenu, uItem, CTRUE, @mii)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -407,7 +368,7 @@ PRIVATE FUNCTION AfxSetMenuItemText (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD,
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STRING
    mii.dwTypeData = @wszText
-   FUNCTION = SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN SetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
 END FUNCTION
 ' ========================================================================================
 
@@ -421,8 +382,8 @@ PRIVATE FUNCTION AfxGetMenuItemTextLen (BYVAL hMenu AS HMENU, BYVAL uItem AS DWO
    mii.fMask = MIIM_STRING
    mii.dwTypeData = NULL
    ' // Get the needed size of the buffer
-   IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) = 0 THEN EXIT FUNCTION
-   FUNCTION = mii.cch
+   IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) = 0 THEN RETURN 0
+   RETURN mii.cch
 END FUNCTION
 
 ' ========================================================================================
@@ -442,15 +403,34 @@ END FUNCTION
 ' AfxGetMenuItemText(hSubMenu, 1, TRUE, @wsz, 260)
 ' AfxMsg wsz
 ' ========================================================================================
-PRIVATE FUNCTION AfxGetMenuItemText (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL cchTextMax AS LONG) AS BOOLEAN
-   IF pwszText = NULL THEN EXIT FUNCTION
+PRIVATE FUNCTION AfxGetMenuItemText OVERLOAD (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL cchTextMax AS LONG) AS BOOLEAN
+   IF pwszText = NULL THEN RETURN FALSE
    ' // Fills the MENUITEMINFOW structure
    DIM mii AS MENUITEMINFOW
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_STRING
    mii.dwTypeData = pwszText
    mii.cch = cchTextMax
-   FUNCTION = GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+   RETURN GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxGetMenuItemText OVERLOAD (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS LONG) AS CWSTR
+   DIM mii AS MENUITEMINFOW
+   mii.cbSize = SIZEOF(mii)
+   mii.fMask = MIIM_STRING
+   mii.dwTypeData = NULL
+   ' // Get the needed size of the buffer
+   IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) = 0 THEN RETURN ""
+   ' // Make room for the trailing null
+   mii.cch += 1
+   ' // Allocate the buffer
+   DIM buffer AS CWSTR = SPACE(mii.cch)
+   ' // Get the menu string
+   mii.dwTypeData = cast(WSTRING PTR, @buffer)
+   IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) THEN
+      RETURN RTRIM(buffer, CHR(0))
+   END IF
 END FUNCTION
 ' ========================================================================================
 
@@ -462,11 +442,11 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetMenuFont (BYVAL plfw AS LOGFONTW PTR) AS BOOLEAN
    DIM ncm AS NONCLIENTMETRICSW
-   IF plfw = NULL THEN EXIT FUNCTION
+   IF plfw = NULL THEN RETURN FALSE
    IF AfxWindowsVersion >= 6 THEN ncm.cbSize = 504 ELSE ncm.cbSize = 500
-   IF SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, SIZEOF(ncm), @ncm, 0) = 0 THEN EXIT FUNCTION
+   IF SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, SIZEOF(ncm), @ncm, 0) = 0 THEN RETURN FALSE
    *plfw = ncm.lfMenuFont
-   FUNCTION = TRUE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -477,14 +457,14 @@ END FUNCTION
 PRIVATE FUNCTION AfxGetMenuFontPointSize () AS LONG
    DIM ncm AS NONCLIENTMETRICSW
    IF AfxWindowsVersion >= 6 THEN ncm.cbSize = 504 ELSE ncm.cbSize = 500
-   IF SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, SIZEOF(ncm), @ncm, 0) = 0 THEN EXIT FUNCTION
+   IF SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, SIZEOF(ncm), @ncm, 0) = 0 THEN RETURN 0
    DIM hDC AS HDC = CreateDCW("DISPLAY", NULL, NULL, NULL)
-   IF hDC = NULL THEN EXIT FUNCTION
+   IF hDC = NULL THEN RETURN 0
    DIM cyPixelsPerInch AS LONG = GetDeviceCaps(hDC, LOGPIXELSY)
    DeleteDC hDC
    DIM nPointSize AS LONG = MulDiv(ncm.lfMenuFont.lfHeight, 72, cyPixelsPerInch)
    IF nPointSize < 0 THEN nPointSize = -nPointSize
-   FUNCTION = nPointSize
+   RETURN nPointSize
 END FUNCTION
 ' ========================================================================================
 
@@ -504,7 +484,7 @@ PRIVATE FUNCTION AfxGetMenuRect (BYVAL hwnd AS HWND, BYVAL hmenu AS HMENU, BYVAL
       IF nRes = -1 THEN nRes = GetLastError : EXIT FOR
       UnionRect prcmenu, prcmenu, @rc
    NEXT
-   FUNCTION = nRes
+   RETURN nRes
 END FUNCTION
 ' ========================================================================================
 
@@ -549,7 +529,7 @@ END FUNCTION
 ' Return value: TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION AfxInitBitmapInfo (BYVAL pbmi AS BITMAPINFO PTR, BYVAL cbInfo AS ULONG, BYVAL cx AS LONG, BYVAL cy AS LONG, BYVAL bpp AS WORD) AS BOOLEAN
-   IF pbmi = NULL THEN EXIT FUNCTION
+   IF pbmi = NULL THEN RETURN FALSE
    memset(pbmi, 0, cbInfo)
    pbmi->bmiHeader.biSize = SIZEOF(BITMAPINFOHEADER)
    pbmi->bmiHeader.biPlanes = 1
@@ -557,7 +537,7 @@ PRIVATE FUNCTION AfxInitBitmapInfo (BYVAL pbmi AS BITMAPINFO PTR, BYVAL cbInfo A
    pbmi->bmiHeader.biWidth = cx
    pbmi->bmiHeader.biHeight = cy
    pbmi->bmiHeader.biBitCount = bpp
-   FUNCTION = TRUE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -572,15 +552,15 @@ END FUNCTION
 ' Return value: TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION AfxCreate32BitHBITMAP(BYVAL hDC AS HDC, BYVAL psize AS SIZE PTR, BYVAL ppvBits AS ANY PTR PTR, BYVAL phBmp AS HBITMAP PTR) AS BOOLEAN
-   IF psize = NULL OR phBmp = NULL THEN EXIT FUNCTION
+   IF psize = NULL OR phBmp = NULL THEN RETURN FALSE
    *phBmp = NULL
    DIM bmi AS BITMAPINFO
    AfxInitBitmapInfo(@bmi, SIZEOF(bmi), psize->cx, psize->cy, 32)
    DIM hdcUsed AS HDC = IIF(hDC <> NULL, hDC, GetDC(NULL))
-   IF hdcUsed = NULL THEN EXIT FUNCTION
+   IF hdcUsed = NULL THEN RETURN FALSE
    *phBmp = CreateDIBSection(hdcUsed, @bmi, DIB_RGB_COLORS, ppvBits, NULL, 0)
    ReleaseDC(NULL, hdcUsed)
-   FUNCTION = TRUE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -600,8 +580,8 @@ PRIVATE FUNCTION AfxAddBitmapToMenuItem (BYVAL hMenu AS HMENU, BYVAL nMenuItem A
    mii.cbSize = SIZEOF(mii)
    mii.fMask = MIIM_BITMAP
    mii.hbmpItem = hbmp
-   IF SetMenuItemInfoW(hMenu, nMenuItem, fByPosition, @mii) = 0 THEN EXIT FUNCTION
-   FUNCTION = TRUE
+   IF SetMenuItemInfoW(hMenu, nMenuItem, fByPosition, @mii) = 0 THEN RETURN FALSE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -618,7 +598,7 @@ END FUNCTION
 ' Remarks: MFT_BITMAP items do not support PARGB32 bitmaps.
 ' ========================================================================================
 PRIVATE FUNCTION AfxConvertToPARGB32 (BYVAL hDC AS HDC, BYVAL pargb AS DWORD PTR, BYVAL hbmp AS HBITMAP, BYVAL sizeImage AS SIZE, BYVAL cxRow AS LONG) AS BOOLEAN
-   IF hDC = NULL OR pargb = NULL OR hbmp = NULL THEN EXIT FUNCTION
+   IF hDC = NULL OR pargb = NULL OR hbmp = NULL THEN RETURN FALSE
    DIM bmi AS BITMAPINFO
    AfxInitBitmapInfo(@bmi, SIZEOF(bmi), sizeImage.cx, sizeImage.cy, 32)
    DIM hHeap AS HANDLE = GetProcessHeap
@@ -646,7 +626,7 @@ PRIVATE FUNCTION AfxConvertToPARGB32 (BYVAL hDC AS HDC, BYVAL pargb AS DWORD PTR
       END IF
    END IF
    HeapFree(hHeap, 0, pvBits)
-   FUNCTION = TRUE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================
 
@@ -660,7 +640,7 @@ END FUNCTION
 ' Return value: TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION AfxHasAlpha (BYVAL pargb AS DWORD PTR, BYVAL sizeImage AS SIZE, BYVAL cxRow AS LONG) AS BOOLEAN
-   IF pargb = NULL THEN EXIT FUNCTION
+   IF pargb = NULL THEN RETURN FALSE
    DIM cxDelta AS ULONG = cxRow - sizeImage.cx
    DIM x AS LONG, y AS LONG
    FOR y = sizeImage.cy TO 1 STEP -1
@@ -683,22 +663,24 @@ END FUNCTION
 ' Return value: TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION AfxConvertBufferToPARGB32 (BYVAL hPaintBuffer AS HPAINTBUFFER, BYVAL hDC AS HDC, BYVAL hIcon AS HICON, BYVAL sizeIcon AS SIZE) AS BOOLEAN
-   IF hPaintBuffer = NULL OR hDC = NULL OR hIcon = NULL THEN EXIT FUNCTION
+   IF hPaintBuffer = NULL OR hDC = NULL OR hIcon = NULL THEN RETURN FALSE
    DIM prgbQuad AS RGBQUAD PTR, cxRow AS LONG
-   IF GetBufferedPaintBits(hPaintBuffer, @prgbQuad, @cxRow) = 0 THEN
+   DIM hr AS HRESULT
+   hr = GetBufferedPaintBits(hPaintBuffer, @prgbQuad, @cxRow)
+   IF SUCCEEDED(hr) THEN
       DIM pargb AS DWORD PTR = CAST(DWORD PTR, prgbQuad)
       IF NOT AfxHasAlpha(pargb, sizeIcon, cxRow) THEN
          DIM info AS ICONINFO
          IF GetIconInfo(hicon, @info) THEN
             IF info.hbmMask THEN
-               FUNCTION = AfxConvertToPARGB32(hDC, pargb, info.hbmMask, sizeIcon, cxRow)
+               hr = AfxConvertToPARGB32(hDC, pargb, info.hbmMask, sizeIcon, cxRow)
                DeleteObject(info.hbmColor)
                DeleteObject(info.hbmMask)
             END IF
          END IF
       END IF
-      FUNCTION = TRUE
    END IF
+   IF SUCCEEDED(hr) THEN RETURN TRUE ELSE RETURN FALSE
 END FUNCTION
 ' ========================================================================================
 
@@ -719,13 +701,13 @@ END FUNCTION
 ' - phbmp        = Location where the bitmap representation of the icon is stored. Can be NULL.
 ' ========================================================================================
 PRIVATE FUNCTION AfxAddIconToMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWORD, BYVAL fByPosition AS BOOLEAN, BYVAL hIcon AS HICON, BYVAL fAutoDestroy AS BOOLEAN = TRUE, BYVAL phbmp AS HBITMAP PTR = NULL) AS BOOLEAN
-   IF hMenu = NULL OR hIcon = NULL THEN EXIT FUNCTION
+   IF hMenu = NULL OR hIcon = NULL THEN RETURN FALSE
    DIM hbmp AS HBITMAP, sizIcon AS SIZE, rcIcon AS RECT
    sizIcon.cx = GetSystemMetrics(SM_CXSMICON)
    sizIcon.cy = GetSystemMetrics(SM_CYSMICON)
    SetRect(@rcIcon, 0, 0, sizIcon.cx, sizIcon.cy)
    DIM hdcDest AS HDC = CreateCompatibleDC(NULL)
-   IF hdcDest = NULL THEN EXIT FUNCTION
+   IF hdcDest = NULL THEN RETURN FALSE
    DIM hr AS LONG = (AfxCreate32BitHBITMAP(hdcDest, @sizIcon, NULL, @hbmp))
    IF hr THEN
       DIM hbmpOld AS HBITMAP = CAST(HBITMAP, SelectObject(hdcDest, hbmp))
@@ -753,7 +735,7 @@ PRIVATE FUNCTION AfxAddIconToMenuItem (BYVAL hMenu AS HMENU, BYVAL uItem AS DWOR
    IF hr = FALSE THEN DeleteObject(hbmp): hbmp = NULL
    IF fAutoDestroy THEN DestroyIcon(hIcon)
    IF phbmp THEN *phbmp = hbmp
-   FUNCTION = hr
+   RETURN hr
 END FUNCTION
 #endif
 ' ========================================================================================

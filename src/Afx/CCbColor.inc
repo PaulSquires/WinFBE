@@ -11,14 +11,11 @@
 ' ########################################################################################
 
 #pragma once
-
 #include once "windows.bi"
-#include once "CWindow.inc"
+#include once "Afx/CWindow.inc"
 #include once "win/commdlg.bi"
 
-USING Afx.CWindowClass
-
-NAMESPACE Afx.CCbColorClass
+NAMESPACE Afx
 
 CONST CBCOL_SETAUTOCOLOR = WM_USER + 100
 CONST CBCOL_SETUSERCOLOR = WM_USER + 101
@@ -67,7 +64,7 @@ END TYPE
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION CCbColor.CCbColorProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CCbColor.CCbColorProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    DIM pCbColor AS CCbColor PTR
 
@@ -163,7 +160,7 @@ FUNCTION CCbColor.CCbColorProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wP
       CASE CBCOL_SETUSERCOLOR
          pCbColor = CAST(CCbColor PTR, .GetPropW(hwnd, "CBCOLORPTR"))
          IF pCbColor = NULL THEN EXIT FUNCTION
-         FUNCTION = pCbColor->m_UserColor
+         pCbColor->m_UserColor = wParam
          EXIT FUNCTION
 
       ' // Get user color
@@ -194,9 +191,9 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' CPgBar3D class constructor
+' CCbColor class constructor
 ' ========================================================================================
-CONSTRUCTOR CCbColor (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER,  _
+PRIVATE CONSTRUCTOR CCbColor (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER,  _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwAutoColor AS COLORREF = 0, BYVAL dwUserColor AS COLORREF = 0, _
    BYVAL prgNames AS WSTRING PTR = NULL, BYVAL numBytes AS DWORD = 0)
@@ -241,9 +238,9 @@ END CONSTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
-' CPgBar3D class destructor
+' CCbColor class destructor
 ' ========================================================================================
-DESTRUCTOR CCbColor
+PRIVATE DESTRUCTOR CCbColor
    ' // Free resources
    IF m_hFont THEN DeleteObject m_hFont
 END DESTRUCTOR
@@ -252,7 +249,7 @@ END DESTRUCTOR
 ' ========================================================================================
 ' Returns the handle of the button
 ' ========================================================================================
-FUNCTION CCbColor.hWindow () AS HWND
+PRIVATE FUNCTION CCbColor.hWindow () AS HWND
    FUNCTION = m_hCtl
 END FUNCTION
 ' ========================================================================================
@@ -260,7 +257,7 @@ END FUNCTION
 ' ========================================================================================
 ' Basic QB color function.
 ' ========================================================================================
-FUNCTION CCbColor.GetQBColor (BYVAL hwnd AS HWND, BYVAL c AS LONG, BYVAL dlg AS LONG) AS COLORREF
+PRIVATE FUNCTION CCbColor.GetQBColor (BYVAL hwnd AS HWND, BYVAL c AS LONG, BYVAL dlg AS LONG) AS COLORREF
 
    SELECT CASE c
       CASE  0 : FUNCTION = m_AutoColor          ' // Pre-set system color, like COLOR_WINDOW or COLOR_WINDOWTEXT
@@ -309,24 +306,24 @@ END FUNCTION
 ' ========================================================================================
 ' Gets/sets the RGB auto color
 ' ========================================================================================
-PROPERTY CCbColor.AutoColor (BYVAL nColor AS COLORREF)
+PRIVATE PROPERTY CCbColor.AutoColor (BYVAL nColor AS COLORREF)
    m_autoColor = nColor
 END PROPERTY
 ' ========================================================================================
 ' ========================================================================================
-PROPERTY CCbColor.AutoColor () AS COLORREF
+PRIVATE PROPERTY CCbColor.AutoColor () AS COLORREF
    PROPERTY = m_autoColor
 END PROPERTY
 
 ' ========================================================================================
 ' Gets/sets the RGB user color
 ' ========================================================================================
-PROPERTY CCbColor.UserColor (BYVAL nColor AS COLORREF)
+PRIVATE PROPERTY CCbColor.UserColor (BYVAL nColor AS COLORREF)
    m_autoColor = nColor
 END PROPERTY
 ' ========================================================================================
 ' ========================================================================================
-PROPERTY CCbColor.UserColor () AS COLORREF
+PRIVATE PROPERTY CCbColor.UserColor () AS COLORREF
    PROPERTY = m_autoColor
 END PROPERTY
 ' ========================================================================================
@@ -334,7 +331,7 @@ END PROPERTY
 ' ========================================================================================
 ' Get the selected color
 ' ========================================================================================
-PROPERTY CCbColor.SelColor () AS COLORREF
+PRIVATE PROPERTY CCbColor.SelColor () AS COLORREF
    DIM nSel AS LRESULT
    nSel = SendMessageW(m_hCtl, CB_GETCURSEL, 0, 0)
    IF nSel > CB_ERR THEN PROPERTY = this.GetQBColor(m_hCtl, nSel, 1)
@@ -344,12 +341,12 @@ END PROPERTY
 ' ========================================================================================
 ' Gets/sets the width scaling ratio
 ' ========================================================================================
-PROPERTY CCbColor.ScalingRatio (BYVAL rxRatio AS SINGLE)
+PRIVATE PROPERTY CCbColor.ScalingRatio (BYVAL rxRatio AS SINGLE)
    m_ratio = rxRatio
 END PROPERTY
 ' ========================================================================================
 ' ========================================================================================
-PROPERTY CCbColor.ScalingRatio () AS SINGLE
+PRIVATE PROPERTY CCbColor.ScalingRatio () AS SINGLE
    PROPERTY = m_ratio
 END PROPERTY
 ' ========================================================================================

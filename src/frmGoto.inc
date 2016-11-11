@@ -94,6 +94,8 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
+   pWindow->ClassStyle = CS_DROPSHADOW
+
    pWindow->Create(hWndParent, L(168,"Go to Line"), @frmGoto_WndProc, 0, 0, 287, 126, _
         WS_POPUP Or WS_DLGFRAME Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
@@ -147,3 +149,4 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
    Delete pWindow
 
 End Function
+

@@ -10,14 +10,11 @@
 ' ########################################################################################
 
 #pragma once
-
 #include once "windows.bi"
-#Include Once "CWindow.inc"
-#include once "AfxGdiPlus.inc"
+#include once "Afx/CWindow.inc"
+#include once "Afx/AfxGdiPlus.inc"
 
-USING Afx.CWindowClass
-
-NAMESPACE Afx.CImageCtxClass
+NAMESPACE Afx
 
 CONST GDIP_IMAGECTX_AUTOSIZE    = 0   ' // Autoadjusts the image to the width or height of the control
 CONST GDIP_IMAGECTX_ACTUALSIZE  = 1   ' // Shows the image with its actual size
@@ -57,12 +54,13 @@ CONST GDIP_IMAGECTX_STRETCH     = 4   ' // Adjusts the image to the height and w
 TYPE CImageCtx
 
    Private:
-      m_hCtl    AS HWND          ' // Handle to the control
-      m_hFont   AS HFONT         ' // Handle to the font used by the control
-      m_pImage  AS GpImage PTR   ' // Image object pointer
-      m_token   AS ULONG_PTR     ' // Token returned by GdiplusStartup
-      m_BkColor AS COLORREF      ' // RGB background color
-      m_Fit     AS LONG          ' // Fit to width/height
+      m_hCtl    AS HWND             ' // Handle to the control
+      m_hFont   AS HFONT            ' // Handle to the font used by the control
+      m_pImage  AS GpImage PTR      ' // Image object pointer
+      m_token   AS ULONG_PTR        ' // Token returned by GdiplusStartup
+      m_BkColor AS COLORREF         ' // RGB background color
+      m_Fit     AS LONG             ' // Fit to width/height
+      m_InterpolationMode AS LONG   ' // Interpolation mode
 
    Public:
 
@@ -82,6 +80,8 @@ TYPE CImageCtx
       DECLARE FUNCTION GetImageHeight () AS LONG
       DECLARE FUNCTION SetBkColor (BYVAL clr AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
       DECLARE FUNCTION GetBkColor () AS LONG
+      DECLARE SUB SetInterpolationMode (BYVAL InterpolationMode AS LONG)
+      DECLARE FUNCTION GetInterpolationMode () AS LONG
       DECLARE SUB Redraw
       DECLARE SUB Clear
       DECLARE STATIC FUNCTION CImageCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
@@ -92,7 +92,7 @@ END TYPE
 ' ========================================================================================
 ' CImageCtx class constructor
 ' ========================================================================================
-CONSTRUCTOR CImageCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+PRIVATE CONSTRUCTOR CImageCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
 
@@ -133,6 +133,8 @@ CONSTRUCTOR CImageCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF
 
    ' // Initialize GDI+
    m_token = AfxGdipInit
+   ' // Default interpolation mode
+   m_InterpolationMode = InterpolationModeHighQualityBicubic
 
 END CONSTRUCTOR
 ' ========================================================================================
@@ -140,7 +142,7 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' CImageCtx class destructor
 ' ========================================================================================
-DESTRUCTOR CImageCtx
+PRIVATE DESTRUCTOR CImageCtx
    ' // Delete the font used by the control
    IF m_hFont THEN DeleteObject m_hFont
    ' // Destroy the Image object
@@ -153,7 +155,7 @@ END DESTRUCTOR
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION CImageCtx.CImageCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CImageCtx.CImageCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    DIM hDC AS HDC, ps AS PAINTSTRUCT, hdr AS NMHDR, pImageCtx AS CImageCtx PTR
 
@@ -273,7 +275,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the handle of the control
 ' ========================================================================================
-FUNCTION CImageCtx.hWindow () AS HWND
+PRIVATE FUNCTION CImageCtx.hWindow () AS HWND
    FUNCTION = m_hCtl
 END FUNCTION
 ' ========================================================================================
@@ -282,7 +284,7 @@ END FUNCTION
 ' Draws the image
 ' Returns StatusOk or an error code.
 ' ========================================================================================
-FUNCTION CImageCtx.DrawImage (BYVAL hwnd AS HWND, BYVAL hDC AS HDC, BYVAL pImage AS GpImage PTR) AS LONG
+PRIVATE FUNCTION CImageCtx.DrawImage (BYVAL hwnd AS HWND, BYVAL hDC AS HDC, BYVAL pImage AS GpImage PTR) AS LONG
 
    DIM pImageCtx AS CImageCtx PTR    ' // Pointer to the CImageCtx class
    DIM hStatus AS GpStatus           ' // Result code
@@ -359,6 +361,7 @@ FUNCTION CImageCtx.DrawImage (BYVAL hwnd AS HWND, BYVAL hDC AS HDC, BYVAL pImage
         ' Stretch or shrunk to fill the controls client area
          w = rc.Right - rc.Left
          h = rc.Bottom - rc.Top
+         IF m_InterpolationMode THEN GdipSetInterpolationMode(pGraphics, m_InterpolationMode)
          hStatus = .GdipDrawImageRectI(pGraphics, pImageCtx->m_pImage, 0, 0, w, h)
       ELSEIF nFit = GDIP_IMAGECTX_FITTOWIDTH THEN
          ' // Calculate the percent of reduction or ampliation
@@ -371,6 +374,7 @@ FUNCTION CImageCtx.DrawImage (BYVAL hwnd AS HWND, BYVAL hDC AS HDC, BYVAL pImage
          IF h < (rc.Bottom - rc.Top) THEN
             cy = ((rc.Bottom - rc.Top) - h) / 2
          END IF
+         IF m_InterpolationMode THEN GdipSetInterpolationMode(pGraphics, m_InterpolationMode)
          hStatus = .GdipDrawImageRectI(pGraphics, pImageCtx->m_pImage, 0, cy, w, h)
          ' // Creates a brush and fills the client area of the window not covered by the image
          hBgBrush = .CreateSolidBrush(pImageCtx->m_BkColor)
@@ -399,6 +403,7 @@ FUNCTION CImageCtx.DrawImage (BYVAL hwnd AS HWND, BYVAL hDC AS HDC, BYVAL pImage
             cx = ((rc.Right - rc.Left) - w) / 2
          END IF
          ' // Draws the image
+         IF m_InterpolationMode THEN GdipSetInterpolationMode(pGraphics, m_InterpolationMode)
          hStatus = .GdipDrawImageRectI(pGraphics, pImageCtx->m_pImage, cx, 0, w, h)
          ' // Creates a brush and fills the client area of the window not covered by the image
          hBgBrush = .CreateSolidBrush(pImageCtx->m_BkColor)
@@ -433,7 +438,7 @@ END FUNCTION
 ' Return value:
 ' - Ok (0) or an error code.
 ' ========================================================================================
-FUNCTION CImageCtx.LoadImageFromFile (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CImageCtx.LoadImageFromFile (BYREF wszFileName AS WSTRING) AS LONG
    IF LEN(wszFileName) = 0 THEN RETURN E_INVALIDARG
    ' // Dispose a previous instance of the Image object, if any
    IF m_pImage THEN
@@ -470,14 +475,14 @@ END FUNCTION
 '   Ok or an error code.
 ' Note: In Windows 7, it fails to load .jpg and .tif files. Works with .bmp and .png files.
 ' ========================================================================================
-FUNCTION CImageCtx.LoadBitmapFromResource (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING) AS LONG
+PRIVATE FUNCTION CImageCtx.LoadBitmapFromResource (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING) AS LONG
    IF LEN(wszResourceName) = 0 THEN RETURN E_INVALIDARG
    ' // Dispose a previous instance of the Image object, if any
    IF m_pImage THEN
       .GdipDisposeImage(m_pImage)
       m_pImage = NULL
    END IF
-   DIM hStatus AS LONG = .GdipCreateBitmapFromResource(hInstance, wszResourceName, @m_pImage)
+   DIM hStatus AS LONG = .GdipCreateBitmapFromResource(hInstance, wszResourceName, cast(GpBitmap PTR PTR, @m_pImage))
    ' // Erases the window's client area
    DIM hBgBrush AS HBRUSH = .CreateSolidBrush(m_BkColor)
    IF hBgBrush THEN
@@ -506,7 +511,7 @@ END FUNCTION
 ' Return value:
 '   Ok or an error code.
 ' ========================================================================================
-FUNCTION CImageCtx.LoadImageFromResource (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING) AS LONG
+PRIVATE FUNCTION CImageCtx.LoadImageFromResource (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING) AS LONG
    IF LEN(wszResourceName) = 0 THEN RETURN E_INVALIDARG
    ' // Dispose a previous instance of the Image object, if any
    IF m_pImage THEN
@@ -533,7 +538,7 @@ FUNCTION CImageCtx.LoadImageFromResource (BYVAL hInstance AS HINSTANCE, BYREF ws
          DIM pImageStream AS LPSTREAM, pGraphics AS GpGraphics PTR
          IF .CreateStreamOnHGlobal(hGlobal, FALSE, @pImageStream) = S_OK THEN
             ' // Create a bitmap from the data contained in the stream
-            hStatus = .GdipCreateBitmapFromStream(pImageStream, @m_pImage)
+            hStatus = .GdipCreateBitmapFromStream(pImageStream, cast(GpBitmap PTR PTR, @m_pImage))
             IF hStatus = 0 THEN
                ' // Gets the device context handle
                hDC = .GetDc(m_hCtl)
@@ -577,7 +582,7 @@ END FUNCTION
 ' ========================================================================================
 ' Redraws the control.
 ' ========================================================================================
-SUB CImageCtx.Redraw
+PRIVATE SUB CImageCtx.Redraw
    .InvalidateRect m_hCtl, NULL, 0
    .UpdateWindow m_hCtl
 END SUB
@@ -599,7 +604,7 @@ END SUB
 ' Return value:
 ' * Returns the previous setting.
 ' ========================================================================================
-FUNCTION CImageCtx.SetImageAdjustment (BYVAL ImageAdjustment AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
+PRIVATE FUNCTION CImageCtx.SetImageAdjustment (BYVAL ImageAdjustment AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
    ' // Returns the old setting
    FUNCTION = m_Fit
    ' // Store the new setting
@@ -619,7 +624,7 @@ END FUNCTION
 ' Return value:
 ' * The current adjustment setting.
 ' ========================================================================================
-FUNCTION CImageCtx.GetImageAdjustment () AS LONG
+PRIVATE FUNCTION CImageCtx.GetImageAdjustment () AS LONG
    FUNCTION = m_Fit
 END FUNCTION
 ' ========================================================================================
@@ -627,7 +632,7 @@ END FUNCTION
 ' ========================================================================================
 ' Gets the width of the image.
 ' ========================================================================================
-FUNCTION CImageCtx.GetImageWidth () AS LONG
+PRIVATE FUNCTION CImageCtx.GetImageWidth () AS LONG
    DIM ImageWidth AS DWORD
    IF m_pImage THEN
       .GdipGetImageWidth(m_pImage, @ImageWidth)
@@ -643,7 +648,7 @@ END FUNCTION
 ' Return value:
 ' * The height of the image.
 ' ========================================================================================
-FUNCTION CImageCtx.GetImageHeight () AS LONG
+PRIVATE FUNCTION CImageCtx.GetImageHeight () AS LONG
    DIM ImageHeight AS DWORD
    IF m_pImage THEN
       .GdipGetImageHeight(m_pImage, @ImageHeight)
@@ -660,7 +665,7 @@ END FUNCTION
 ' Return value:
 ' * Returns the previous background color.
 ' ========================================================================================
-FUNCTION CImageCtx.SetBkColor (BYVAL clr AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
+PRIVATE FUNCTION CImageCtx.SetBkColor (BYVAL clr AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
    ' // Returns the old setting
    FUNCTION = m_BkColor
    ' // Stores the new color
@@ -676,8 +681,25 @@ END FUNCTION
 ' ========================================================================================
 ' Gets the background color of the control's window.
 ' ========================================================================================
-FUNCTION CImageCtx.GetBkColor () AS LONG
+PRIVATE FUNCTION CImageCtx.GetBkColor () AS LONG
    FUNCTION = m_BkColor
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Sets the interpolation mode used by GDI+. The interpolation mode determines the algorithm
+' that is used when images are scaled or rotated.
+' ========================================================================================
+PRIVATE SUB CImageCtx.SetInterpolationMode (BYVAL InterpolationMode AS LONG)
+   m_InterpolationMode = InterpolationMode
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Gets the interpolation mode used by GDI+.
+' ========================================================================================
+PRIVATE FUNCTION CImageCtx.GetInterpolationMode () AS LONG
+   FUNCTION = m_InterpolationMode
 END FUNCTION
 ' ========================================================================================
 
@@ -687,7 +709,7 @@ END FUNCTION
 ' NOTE: Don't dispose the returned pointer. The control keeps a copy of it and calls
 ' GdipDisposeImage when it is destroyed.
 ' ========================================================================================
-FUNCTION CImageCtx.GetImagePtr () AS GpImage PTR
+PRIVATE FUNCTION CImageCtx.GetImagePtr () AS GpImage PTR
    FUNCTION = m_pImage
 END FUNCTION
 ' ========================================================================================
@@ -698,7 +720,7 @@ END FUNCTION
 ' * If the function succeeds, the return value is TRUE.
 '   If the function fails, the return value is FALSE.
 ' ========================================================================================
-SUB CImageCtx.Clear
+PRIVATE SUB CImageCtx.Clear
    IF m_pImage THEN
       .GdipDisposeImage(m_pImage)
       m_pImage = 0

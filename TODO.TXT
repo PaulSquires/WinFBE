@@ -1,19 +1,15 @@
 
 [ ] Find in files. 
 
-[ ] Re-enable menu option and write code for "Spaces to Tabs" option.
-
 [ ] Improve syntax keyword highlighting. 
     [ ] Investigate mixed case keywords.
     [ ] WinAPI keyword list.
 
 [ ] Codetips
 
-[ ] F1 Help for WinFBE and WinAPI help files.
-
 [ ] Print option.
 
-[ ] Icons in menus. Not a priority but would be nice to have.
+
 
 
 

@@ -33,7 +33,7 @@ Function clsTopTabCtl.GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) A
       TabCtrl_GetItem( m_hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
       If pDoc Then 
-         If Ucase(*pDoc->DiskFilename) = Ucase(*pwszName) Then Return i
+         If Ucase(pDoc->DiskFilename) = Ucase(*pwszName) Then Return i
       End If   
    Next
 
@@ -225,7 +225,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
    If pDoc Then 
       ' Set the text that displays on the tab
-      FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wText)
+      wText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
       If SendMessageW( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
          wText = wText & "*"
       End If   
@@ -239,6 +239,8 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    End If
    
 End Function
+
+
 
 
 

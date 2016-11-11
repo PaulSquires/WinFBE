@@ -132,7 +132,7 @@ Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    SetWindowPos hLV, 0, rc.Left, rc.Top, rc.Right, rc.Bottom, SWP_SHOWWINDOW Or SWP_NOZORDER
 
    Dim wzText As WString * MAX_PATH
-   wzText = L(188,"Project Manager") & " - [" & *gpApp->ProjectName & "]"
+   wzText = L(188,"Project Manager") & " - [" & gpApp->ProjectName & "]"
    SetWindowTextW( HWND_FRMPROJECTMANAGER, wzText )                     
    
    Function = 0
@@ -415,6 +415,7 @@ Function frmProjectManager_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+
 
 
 

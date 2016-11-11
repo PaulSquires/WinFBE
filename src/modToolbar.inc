@@ -25,8 +25,6 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    hImageListHot      = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 20, 1)
 
    ' Add buttons to the toolbar
-   Dim As UINT nFlags = LR_LOADTRANSPARENT Or LR_LOADMAP3DCOLORS
-   Dim As COLORREF cClr = GetSysColor(COLOR_BTNFACE)
    Dim As Long i
 
    i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_NEW_FILE")

@@ -1,11 +1,11 @@
 ' ########################################################################################
 ' File: CWindow.inc
 ' Version: 1.0
-' Release candidate 12
+' Release candidate 24
 ' Contents: A wrapper class to create a SDK main window and add controls to it.
 ' Operating system: Microsoft Windows
 ' Compiler: FreeBasic 32 & 64-bit, Unicode.
-' Copyright (c) 2016 JosÃ© Roca. Freeware. Use at your own risk.
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -16,25 +16,45 @@
 #include once "windows.bi"
 #include once "win/commctrl.bi"
 #include once "win/richedit.bi"
-#Include Once "AfxWin.inc"
-#include once "CScrollWindow.inc"
-USING Afx.CScrollWindowClass
+#include once "Afx/AfxWin.inc"
 
-NAMESPACE Afx.CWindowClass
+NAMESPACE Afx
 
-' // Forward declarations
-DECLARE FUNCTION CWindow_RegisterClass (BYREF wszClassName AS CONST WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS ATOM
-DECLARE FUNCTION CWindow_WindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-DECLARE FUNCTION CWindow_CloseEnumProc (BYVAL hwnd AS HWND, BYVAL lParam AS LPARAM) AS LONG
-' // MDI (Multiple document interface)
-#ifdef USEMDI
-DECLARE FUNCTION CWindow_RegisterMDIClass (BYREF wsClassName AS WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS WORD
-DECLARE FUNCTION CWindowMDIProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-#endif
+' ========================================================================================
+' CScrollWindow class
+' ========================================================================================
+TYPE CScrollWindow
 
-' ########################################################################################
+   Private:
+      m_hwnd AS HWND             ' // Handle of the window
+      m_ClientRect AS RECT       ' // Coordinates of the window's client area
+      m_nHorzInc AS LONG         ' // Horizontal increment
+      m_nVertInc AS LONG         ' // Vertical increment
+      m_HScrollMax AS LONG       ' // Maximum horizontal scroll value
+      m_VScrollMax AS LONG       ' // Maximum vertical scroll value
+      m_HScrollPos AS LONG       ' // Horizontal scroll position
+      m_VScrollPos AS LONG       ' // Vertical scroll position
+      m_HorzUnits AS LONG        ' // Amount, in device units, of horizontal scrolling
+      m_VertUnits AS LONG        ' // Amount, in device units, of vertical scrolling
+
+   Public:
+      DECLARE CONSTRUCTOR (BYVAL hwnd AS HWND)
+      DECLARE DESTRUCTOR
+      DECLARE SUB SetupScrollbars
+      DECLARE SUB ResetScrollbars
+      DECLARE SUB SetClientRect (BYVAL pRect AS RECT PTR)
+      DECLARE SUB SetScrollingUnits (BYVAL nHorzUnits AS LONG, BYVAL nVertUnits AS LONG)
+      DECLARE SUB OnSize (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+      DECLARE SUB OnVScroll (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+      DECLARE SUB OnHScroll (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+      DECLARE SUB OnMouseWheel (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+
+END TYPE
+' ========================================================================================
+
+' ========================================================================================
 ' CWindow class
-' ########################################################################################
+' ========================================================================================
 TYPE CWindow
 
    Private:
@@ -130,7 +150,7 @@ TYPE CWindow
               BYVAL bItalic AS UBYTE = FALSE, BYVAL bUnderline AS UBYTE = FALSE, BYVAL bStrikeOut AS UBYTE = FALSE, BYVAL bCharSet AS UBYTE = DEFAULT_CHARSET) AS BOOLEAN
       DECLARE FUNCTION AddControl (BYREF wszClassName AS WSTRING, BYVAL hParent AS HWND = NULL, BYVAL cID AS INTEGER = 0, _
               BYREF wszTitle AS WSTRING = "", BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, _
-              BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0, _
+              BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS LONG = -1, BYVAL dwExStyle AS LONG = -1, BYVAL lpParam AS LONG_PTR = 0, _
               BYVAL pWndProc AS WNDPROC = NULL, BYVAL uIdSubclass AS UINT_PTR = &HFFFFFFFF, BYVAL dwRefData AS DWORD_PTR = NULL) AS HWND
       DECLARE PROPERTY AccelHandle () AS HACCEL
       DECLARE PROPERTY AccelHandle (BYVAL hAccel AS HACCEL)
@@ -145,6 +165,201 @@ TYPE CWindow
       #endif
 END TYPE
 ' ========================================================================================
+
+' =====================================================================================
+' CTabPage class
+' Creates a generic window used as a tab page of a tab control.
+' =====================================================================================
+TYPE CTabPage EXTENDS CWindow
+
+   Private:
+      m_hTabPage AS HWND                     ' // Tab page handle
+
+   Public:
+      DECLARE DESTRUCTOR
+      DECLARE PROPERTY hTabPage () AS HWND
+      DECLARE FUNCTION InsertPage (BYVAL hTab AS HWND, BYVAL nPage AS LONG, BYREF wszTitle AS WSTRING = "", _
+         BYVAL nImage AS LONG = -1, BYVAL lpfnWndProc AS WNDPROC = NULL, _
+         BYVAL dwStyle AS DWORD = WS_CLIPSIBLINGS OR WS_CLIPCHILDREN, BYVAL dwExStyle AS DWORD = 0) AS HWND
+
+END TYPE
+' ========================================================================================
+
+' ########################################################################################
+'                              *** CSCROLLWINDOW CLASS ***
+' ########################################################################################
+
+' ========================================================================================
+' CScrollWindow class constructor
+' ========================================================================================
+PRIVATE CONSTRUCTOR CScrollWindow (BYVAL hwnd AS HWND)
+   m_hwnd = hwnd
+   m_HorzUnits = 10
+   m_VertUnits = 10
+   GetClientRect(m_hwnd, @m_ClientRect)
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' CScrollWindow class destructor
+' ========================================================================================
+PRIVATE DESTRUCTOR CScrollWindow
+'   OutputDebugStringW "CScrollWindow.Destructor"
+END DESTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' Sets the amount, in device units, of horizontal and vertical scrolling
+' ========================================================================================
+PRIVATE SUB CScrollWindow.SetClientRect (BYVAL pRect AS RECT PTR)
+   IF pRect = NULL THEN EXIT SUB
+   m_CLientRect = *pRect
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Sets the amount, in device units, of horizontal and vertical scrolling
+' ========================================================================================
+PRIVATE SUB CScrollWindow.SetScrollingUnits (BYVAL nHorzUnits AS LONG, BYVAL nVertUnits AS LONG)
+   m_HorzUnits = nHorzUnits
+   m_VertUnits = nVertUnits
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Resets the window scrolling information
+' ========================================================================================
+PRIVATE SUB CScrollWindow.ResetScrollbars
+   ScrollWindow(m_hwnd, m_HScrollPos * m_HorzUnits, 0, NULL, NULL)
+   ScrollWindow(m_hwnd, 0, m_VScrollPos * m_HorzUnits, NULL, NULL)
+   m_HScrollPos = 0
+   m_VScrollPos = 0
+   SetScrollPos(m_hwnd, SB_HORZ, m_HScrollPos, CTRUE)
+   SetScrollPos(m_hwnd, SB_VERT, m_VScrollPos, CTRUE)
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Sets the scroll information
+' ========================================================================================
+PRIVATE SUB CScrollWindow.SetupScrollbars
+
+   DIM bMaximized AS LONG, tempRect AS RECT, wp AS WINDOWPLACEMENT
+
+   GetClientRect(m_hwnd, @tempRect)
+   GetWindowPlacement(m_hwnd, @wp)
+   bMaximized = (wp.showCmd = SW_MAXIMIZE)
+
+   ' // Calculate how many scrolling increments for the client area
+   m_nHorzInc = ((m_ClientRect.Right - m_ClientRect.Left) - (tempRect.Right  - tempRect.Left) ) \ m_HorzUnits
+   m_nVertInc = ((m_ClientRect.Bottom - m_ClientRect.Top) - (tempRect.bottom - tempRect.Top ) ) \ m_HorzUnits
+
+   '// Set the vertical and horizontal scrolling info
+   m_HScrollMax = MAX(0, m_nHorzInc)
+   m_HScrollPos = MIN(m_HScrollPos, m_HScrollMax)
+   SetScrollRange(m_hwnd, SB_HORZ, 0, m_HScrollMax, FALSE)
+   SetScrollPos(m_hwnd, SB_HORZ, m_HScrollPos, CTRUE)
+   m_VScrollMax = MAX(0, m_nVertInc)
+   m_VScrollPos = MIN(m_VScrollPos, m_VScrollMax)
+   SetScrollRange(m_hwnd, SB_VERT, 0, m_VScrollMax, FALSE)
+   SetScrollPos(m_hwnd, SB_VERT, m_VScrollPos, TRUE)
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Handle vertical scrollbar messages
+' WM_VSCROLL
+' nScrollCode = (int) LOWORD(wParam); // scroll bar value
+' nPos = (short int) HIWORD(wParam);  // scroll box position
+' hwndScrollBar = (HWND) lParam;      // handle of scroll bar
+' ========================================================================================
+PRIVATE SUB CScrollWindow.OnVScroll (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+
+   DIM nInc AS LONG, iMove AS LONG
+
+   SELECT CASE LOWORD(wParam)
+      CASE SB_TOP        : nInc = -m_VScrollPos
+      CASE SB_BOTTOM     : nInc = m_VScrollMax - m_VScrollPos
+      CASE SB_LINEUP     : nInc = -1
+      CASE SB_LINEDOWN   : nInc = 1
+      CASE SB_PAGEUP     : nInc = MIN(-1, -m_nVertInc)
+      CASE SB_PAGEDOWN   : nInc = MAX(1, m_nVertInc)
+      CASE SB_THUMBTRACK : nInc = HIWORD(wParam) - m_VScrollPos
+      CASE ELSE          : nInc = 0
+   END SELECT
+
+   nInc = MAX(-m_VScrollPos, MIN(nInc, m_VScrollMax - m_VScrollPos))
+   IF nInc THEN
+      m_VScrollPos += nInc
+      iMove = -m_HorzUnits * nInc
+      ScrollWindow(m_hwnd, 0, iMove, NULL, NULL)
+      SetScrollPos(m_hwnd, SB_VERT, m_VScrollPos, CTRUE)
+   END IF
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Handle horizontal scrollbar messages
+' WM_HSCROLL
+' nScrollCode = (int) LOWORD(wParam);  // scroll bar value
+' nPos = (short int) HIWORD(wParam);   // scroll box position
+' hwndScrollBar = (HWND) lParam;       // handle of scroll bar
+' ========================================================================================
+PRIVATE SUB CScrollWindow.OnHScroll (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+
+   DIM nInc AS LONG, iMove AS LONG
+
+   SELECT CASE LOWORD(wParam)
+      CASE SB_TOP        : nInc = -m_HScrollPos
+      CASE SB_BOTTOM     : nInc = m_HScrollMax - m_HScrollPos
+      CASE SB_LINEUP     : nInc = -1
+      CASE SB_LINEDOWN   : nInc = 1
+      CASE SB_PAGEUP     : nInc = -m_HorzUnits
+      CASE SB_PAGEDOWN   : nInc = m_HorzUnits
+      CASE SB_THUMBTRACK : nInc = HIWORD(wParam) - m_HScrollPos
+      CASE ELSE          : nInc = 0
+   END SELECT
+
+   nInc = MAX(-m_HScrollPos, MIN(nInc, m_HScrollMax - m_HScrollPos))
+   IF nInc THEN
+      m_HScrollPos += nInc
+      iMove = -m_HorzUnits * nInc
+      ScrollWindow(m_hwnd, iMove, 0, NULL, NULL)
+      SetScrollPos(m_hwnd, SB_HORZ, m_HScrollPos, CTRUE)
+  END IF
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Handle WM_SIZE messges
+' WM_SIZE
+' fwSizeType = wParam;      // resizing flag
+' nWidth = LOWORD(lParam);  // width of client area
+' nHeight = HIWORD(lParam); // height of client area
+' ========================================================================================
+PRIVATE SUB CScrollWindow.OnSize (BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+   this.ResetScrollbars
+   this.SetupScrollbars
+END SUB
+' ========================================================================================
+
+' ########################################################################################
+'                                 *** CWINDOW CLASS ***
+' ########################################################################################
+
+' // CWindow class forward declarations
+DECLARE FUNCTION CWindow_RegisterClass (BYREF wszClassName AS CONST WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS ATOM
+DECLARE FUNCTION CWindow_WindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION CWindow_CloseEnumProc (BYVAL hwnd AS HWND, BYVAL lParam AS LPARAM) AS LONG
+' // MDI (Multiple document interface)
+#ifdef USEMDI
+DECLARE FUNCTION CWindow_RegisterMDIClass (BYREF wsClassName AS WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS WORD
+DECLARE FUNCTION CWindowMDIProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+#endif
+
 
 ' ========================================================================================
 ' Registers the window class.
@@ -161,7 +376,7 @@ END TYPE
 ' the windows style using e.g. pWindow.ClassStyle = CS_DBLCLKS and take care yourself of
 ' repainting.
 ' ========================================================================================
-FUNCTION CWindow_RegisterClass (BYREF wszClassName AS CONST WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS ATOM
+PRIVATE FUNCTION CWindow_RegisterClass (BYREF wszClassName AS CONST WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS ATOM
 
    DIM    wAtom AS ATOM                     ' // Atom
    DIM    wcexw AS WNDCLASSEXW              ' // WNDCLASSEXW structure
@@ -218,7 +433,7 @@ END FUNCTION
 #define USEDLGMSG 1
 #endif
 ' ========================================================================================
-FUNCTION CWindow.DoEvents (BYVAL nCmdShow AS LONG = 0) AS LONG
+PRIVATE FUNCTION CWindow.DoEvents (BYVAL nCmdShow AS LONG = 0) AS LONG
 
    DIM uMsg AS MSG
    IF m_hwnd = NULL THEN EXIT FUNCTION
@@ -262,7 +477,7 @@ END FUNCTION
 ' ========================================================================================
 ' Default CWindow callback function.
 ' ========================================================================================
-FUNCTION CWindow_WindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CWindow_WindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    STATIC pWindow AS CWindow PTR
 #ifdef USEMDI
@@ -398,7 +613,7 @@ END FUNCTION
 ' Using the fist syntax, CWindow will use "FBWindowClass:" and a number as the window class.
 ' Using the second syntax, CWindows will use the passed string as the class name.
 ' ========================================================================================
-CONSTRUCTOR CWindow (BYREF wszClassName AS CONST WSTRING = "")
+PRIVATE CONSTRUCTOR CWindow (BYREF wszClassName AS CONST WSTRING = "")
 
    ' // Class name
    m_wszClassName = wszClassName
@@ -431,7 +646,7 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' CWindow class destructor
 ' ========================================================================================
-DESTRUCTOR CWindow
+PRIVATE DESTRUCTOR CWindow
 
    IF m_hFont THEN .DeleteObject m_hFont
    IF m_hAccel THEN .DestroyAcceleratorTable(m_hAccel)
@@ -445,7 +660,7 @@ END DESTRUCTOR
 ' ========================================================================================
 ' Returns the DPI (dots per pixel) used by the application.
 ' ========================================================================================
-PROPERTY CWindow.DPI () AS SINGLE
+PRIVATE PROPERTY CWindow.DPI () AS SINGLE
    PROPERTY = m_DPI
 END PROPERTY
 ' ========================================================================================
@@ -457,7 +672,7 @@ END PROPERTY
 ' The main window, controls and fonts will be scaled if the user changes the DPI setting.
 ' Don't change the DPI value once the main window has been created.
 ' ========================================================================================
-PROPERTY CWindow.DPI (BYVAL nDPI AS SINGLE)
+PRIVATE PROPERTY CWindow.DPI (BYVAL nDPI AS SINGLE)
 
    DIM hDC AS HDC
    m_DPI = nDPI
@@ -484,7 +699,7 @@ END PROPERTY
 ' Retrieves a value from the user data area of a CWindow.
 ' idx = The index number of the user data value to retrieve, in the range 0 to 99 inclusive.
 ' =====================================================================================
-PROPERTY CWindow.UserData (BYVAL idx AS LONG) AS LONG_PTR
+PRIVATE PROPERTY CWindow.UserData (BYVAL idx AS LONG) AS LONG_PTR
    IF idx < 0 OR idx > 99 THEN EXIT PROPERTY
    PROPERTY = m_rgUserData(idx)
 END PROPERTY
@@ -494,7 +709,7 @@ END PROPERTY
 ' Sets a value in the user data area of a CWindow.
 ' idx = The index number of the user data value to retrieve, in the range 0 to 99 inclusive.
 ' =====================================================================================
-PROPERTY CWindow.UserData (BYVAL idx AS LONG, BYVAL newValue AS LONG_PTR)
+PRIVATE PROPERTY CWindow.UserData (BYVAL idx AS LONG, BYVAL newValue AS LONG_PTR)
    IF idx < 0 OR idx > 99 THEN EXIT PROPERTY
    m_rgUserData(idx) = newValue
 END PROPERTY
@@ -527,7 +742,7 @@ END PROPERTY
 '       DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
 '       IF pWindow THEN pWindow->AddControl("Button", hwnd, IDCANCEL, "&Close", 350, 250, 75, 23)
 ' ========================================================================================
-FUNCTION CWindow.Create (BYVAL hParent AS HWND = NULL, BYREF wszTitle AS WSTRING = "", BYVAL lpfnWndProc AS WNDPROC = NULL, _
+PRIVATE FUNCTION CWindow.Create (BYVAL hParent AS HWND = NULL, BYREF wszTitle AS WSTRING = "", BYVAL lpfnWndProc AS WNDPROC = NULL, _
    BYVAL x AS LONG = CW_USEDEFAULT, BYVAL y AS LONG = CW_USEDEFAULT, BYVAL nWidth AS LONG = CW_USEDEFAULT, BYVAL nHeight AS LONG = CW_USEDEFAULT, _
    BYVAL dwStyle AS UINT = WS_OVERLAPPEDWINDOW OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS, _
    BYVAL dwExStyle AS UINT = WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE) AS HWND
@@ -559,7 +774,7 @@ END FUNCTION
 ' ========================================================================================
 ' Adjusts the bounding rectangle of the window based on the desired size of the client area.
 ' ========================================================================================
-SUB CWindow.SetClientSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
+PRIVATE SUB CWindow.SetClientSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
    AfxSetWindowClientSize(m_hwnd, nWidth, nHeight, m_rx, m_ry)
 END SUB
 ' ========================================================================================
@@ -571,7 +786,7 @@ END SUB
 ' - hwnd = Handle of the window.
 ' - hwndParent = [optional] Handle of the parent window.
 ' =====================================================================================
-SUB CWindow.Center (BYVAL hwnd AS HWND = NULL, BYVAL hwndParent AS HWND = NULL)
+PRIVATE SUB CWindow.Center (BYVAL hwnd AS HWND = NULL, BYVAL hwndParent AS HWND = NULL)
    IF hwnd = NULL THEN hwnd = m_hwnd
    AfxCenterWindow(hwnd, hwndParent)
 END SUB
@@ -580,7 +795,7 @@ END SUB
 ' =====================================================================================
 ' Returns the window handle
 ' =====================================================================================
-PROPERTY CWindow.hWindow () AS HWND
+PRIVATE PROPERTY CWindow.hWindow () AS HWND
    PROPERTY = m_hwnd
 END PROPERTY
 ' =====================================================================================
@@ -588,7 +803,7 @@ END PROPERTY
 ' =====================================================================================
 ' Sets the window handle
 ' =====================================================================================
-PROPERTY CWindow.hWindow (BYVAL hwnd AS HWND)
+PRIVATE PROPERTY CWindow.hWindow (BYVAL hwnd AS HWND)
    IF m_hwnd = NULL THEN m_hwnd = hwnd
 END PROPERTY
 ' =====================================================================================
@@ -596,7 +811,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the instance handle
 ' =====================================================================================
-PROPERTY CWindow.InstanceHandle () AS HINSTANCE
+PRIVATE PROPERTY CWindow.InstanceHandle () AS HINSTANCE
    PROPERTY = m_hInstance
 END PROPERTY
 ' =====================================================================================
@@ -604,7 +819,7 @@ END PROPERTY
 ' =====================================================================================
 ' Sets the instance handle
 ' =====================================================================================
-PROPERTY CWindow.InstanceHandle (BYVAL hInst AS HINSTANCE)
+PRIVATE PROPERTY CWindow.InstanceHandle (BYVAL hInst AS HINSTANCE)
    IF m_hInstance = NULL THEN m_hInstance = hInst
 END PROPERTY
 ' =====================================================================================
@@ -612,7 +827,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the window class style.
 ' =====================================================================================
-PROPERTY CWindow.ClassStyle () AS ULONG_PTR
+PRIVATE PROPERTY CWindow.ClassStyle () AS ULONG_PTR
    IF m_hwnd = NULL THEN EXIT PROPERTY
    PROPERTY = .GetClassLongPtrW(m_hwnd, GCL_STYLE)
 END PROPERTY
@@ -621,7 +836,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the window class style.
 ' =====================================================================================
-PROPERTY CWindow.ClassStyle (BYVAL dwStyle AS ULONG_PTR)
+PRIVATE PROPERTY CWindow.ClassStyle (BYVAL dwStyle AS ULONG_PTR)
    IF m_hwnd = NULL THEN EXIT PROPERTY
    .SetClassLongPtrW(m_hwnd, GCL_STYLE, dwStyle)
 END PROPERTY
@@ -630,7 +845,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the window style.
 ' =====================================================================================
-PROPERTY CWindow.WindowStyle () AS ULONG_PTR
+PRIVATE PROPERTY CWindow.WindowStyle () AS ULONG_PTR
    IF m_hwnd = NULL THEN EXIT PROPERTY
    PROPERTY = .GetWindowLongPtrW(m_hwnd, GWL_STYLE)
 END PROPERTY
@@ -638,8 +853,9 @@ END PROPERTY
 
 ' =====================================================================================
 ' Sets the window style.
+' Example to create a popup window: pWindow.WindowStyle = WS_POPUPWINDOW OR WS_CAPTION
 ' =====================================================================================
-PROPERTY CWindow.WindowStyle (BYVAL dwStyle AS ULONG_PTR)
+PRIVATE PROPERTY CWindow.WindowStyle (BYVAL dwStyle AS ULONG_PTR)
    IF m_hwnd = NULL THEN EXIT PROPERTY
    .SetWindowLongPtrW(m_hwnd, GWL_STYLE, dwStyle)
 END PROPERTY
@@ -648,7 +864,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the window extended style.
 ' =====================================================================================
-PROPERTY CWindow.WindowExStyle () AS ULONG_PTR
+PRIVATE PROPERTY CWindow.WindowExStyle () AS ULONG_PTR
    IF m_hwnd = NULL THEN EXIT PROPERTY
    PROPERTY = .GetWindowLongPtrW(m_hwnd, GWL_EXSTYLE)
 END PROPERTY
@@ -657,7 +873,7 @@ END PROPERTY
 ' =====================================================================================
 ' Sets the window extended style.
 ' =====================================================================================
-PROPERTY CWindow.WindowExStyle (BYVAL dwExStyle AS ULONG_PTR)
+PRIVATE PROPERTY CWindow.WindowExStyle (BYVAL dwExStyle AS ULONG_PTR)
    IF m_hwnd = NULL THEN EXIT PROPERTY
    .SetWindowLongPtrW(m_hwnd, GWL_EXSTYLE, dwExStyle)
 END PROPERTY
@@ -666,23 +882,23 @@ END PROPERTY
 ' =====================================================================================
 ' Gets/sets the default font name
 ' =====================================================================================
-PROPERTY CWindow.DefaultFontName () AS STRING
+PRIVATE PROPERTY CWindow.DefaultFontName () AS STRING
    PROPERTY = m_wszDefaultFontName
 END PROPERTY
 ' =====================================================================================
-PROPERTY CWindow.DefaultFontName (BYREF wszFontName AS WSTRING)
-   IF VARPTR(wszFontName) THEN m_wszDefaultFontName = wszFontName
+PRIVATE PROPERTY CWindow.DefaultFontName (BYREF wszFontName AS WSTRING)
+   IF VARPTR(wszFontName) <> NULL AND LEN(wszFontName) > 0 THEN m_wszDefaultFontName = wszFontName
 END PROPERTY
 ' =====================================================================================
 
 ' =====================================================================================
 ' Gets/sets the size in points of the default font.
 ' =====================================================================================
-PROPERTY CWindow.DefaultFontSize () AS LONG
+PRIVATE PROPERTY CWindow.DefaultFontSize () AS LONG
    PROPERTY = m_DefaultFontSize
 END PROPERTY
 ' =====================================================================================
-PROPERTY CWindow.DefaultFontSize (BYVAL nPointSize AS LONG)
+PRIVATE PROPERTY CWindow.DefaultFontSize (BYVAL nPointSize AS LONG)
    m_DefaultFontSize = nPointSize
 END PROPERTY
 ' =====================================================================================
@@ -690,7 +906,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the handle of the font used as default.
 ' =====================================================================================
-PROPERTY CWindow.Font () AS HFONT
+PRIVATE PROPERTY CWindow.Font () AS HFONT
    PROPERTY = m_hFont
 END PROPERTY
 ' =====================================================================================
@@ -698,7 +914,7 @@ END PROPERTY
 ' =====================================================================================
 ' Sets the handle of the font used as default.
 ' =====================================================================================
-PROPERTY CWindow.Font (BYVAL hFont AS HFONT)
+PRIVATE PROPERTY CWindow.Font (BYVAL hFont AS HFONT)
    IF m_hFont THEN .DeleteObject m_hFont
    m_hFont = hFont
 END PROPERTY
@@ -707,7 +923,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the background brush.
 ' =====================================================================================
-PROPERTY CWindow.Brush () AS HBRUSH
+PRIVATE PROPERTY CWindow.Brush () AS HBRUSH
    IF m_hwnd = NULL THEN EXIT PROPERTY
    PROPERTY = CAST(HBRUSH, .GetClassLongPtrW(m_hwnd, GCLP_HBRBACKGROUND))
 END PROPERTY
@@ -720,7 +936,7 @@ END PROPERTY
 ' value must be one of the standard system colors (the value 1 must be added
 ' to the chosen color), e.g. COLOR_WINDOW + 1
 ' =====================================================================================
-PROPERTY CWindow.Brush (BYVAL hbrBackground AS HBRUSH)
+PRIVATE PROPERTY CWindow.Brush (BYVAL hbrBackground AS HBRUSH)
    IF m_hwnd = NULL THEN EXIT PROPERTY
    .SetClassLongPtrW m_hwnd, GCLP_HBRBACKGROUND, CAST(LONG_PTR, hbrBackground)
    .InvalidateRect m_hwnd, NULL, CTRUE
@@ -735,7 +951,7 @@ END PROPERTY
 ' - hIcon = Handle to the new large icon.
 '   If this parameter is NULL, the icon is removed.
 ' =====================================================================================
-PROPERTY CWindow.BigIcon (BYVAL hIcon AS HICON)
+PRIVATE PROPERTY CWindow.BigIcon (BYVAL hIcon AS HICON)
    .SendMessageW(m_hwnd, WM_SETICON, CAST(WPARAM, ICON_BIG), CAST(LPARAM, hIcon))
 END PROPERTY
 ' =====================================================================================
@@ -747,7 +963,7 @@ END PROPERTY
 ' - hIcon = Handle to the new small icon.
 '   If this parameter is NULL, the icon is removed.
 ' =====================================================================================
-PROPERTY CWindow.SmallIcon (BYVAL hIcon AS HICON)
+PRIVATE PROPERTY CWindow.SmallIcon (BYVAL hIcon AS HICON)
    .SendMessageW(m_hwnd, WM_SETICON, CAST(WPARAM, ICON_SMALL), CAST(LPARAM, hIcon))
 END PROPERTY
 ' =====================================================================================
@@ -755,7 +971,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the horizontal scaling ratio
 ' =====================================================================================
-PROPERTY CWindow.rxRatio () AS SINGLE
+PRIVATE PROPERTY CWindow.rxRatio () AS SINGLE
    PROPERTY = m_rx
 END PROPERTY
 ' =====================================================================================
@@ -763,7 +979,7 @@ END PROPERTY
 ' =====================================================================================
 ' Sets the horizontal scaling ratio
 ' =====================================================================================
-PROPERTY CWindow.rxRatio (BYVAL rx AS SINGLE)
+PRIVATE PROPERTY CWindow.rxRatio (BYVAL rx AS SINGLE)
    m_rx = rx
 END PROPERTY
 ' =====================================================================================
@@ -771,7 +987,7 @@ END PROPERTY
 ' =====================================================================================
 ' Gets the vertical scaling ratio
 ' =====================================================================================
-PROPERTY CWindow.ryRatio () AS SINGLE
+PRIVATE PROPERTY CWindow.ryRatio () AS SINGLE
    PROPERTY = m_ry
 END PROPERTY
 ' =====================================================================================
@@ -779,7 +995,7 @@ END PROPERTY
 ' =====================================================================================
 ' Sets the vertical scaligng ratio
 ' =====================================================================================
-PROPERTY CWindow.ryRatio (BYVAL ry AS SINGLE)
+PRIVATE PROPERTY CWindow.ryRatio (BYVAL ry AS SINGLE)
    m_ry = ry
 END PROPERTY
 ' =====================================================================================
@@ -787,7 +1003,7 @@ END PROPERTY
 ' =====================================================================================
 ' Scales an horizontal coordinate according the DPI setting.
 ' =====================================================================================
-FUNCTION CWindow.ScaleX (BYVAL cx AS SINGLE) AS SINGLE
+PRIVATE FUNCTION CWindow.ScaleX (BYVAL cx AS SINGLE) AS SINGLE
    FUNCTION = cx * m_rx
 END FUNCTION
 ' =====================================================================================
@@ -795,7 +1011,7 @@ END FUNCTION
 ' =====================================================================================
 ' Scales a vertical coordinate according the DPI setting.
 ' =====================================================================================
-FUNCTION CWindow.ScaleY (BYVAL cy AS SINGLE) AS SINGLE
+PRIVATE FUNCTION CWindow.ScaleY (BYVAL cy AS SINGLE) AS SINGLE
    FUNCTION = cy * m_ry
 END FUNCTION
 ' =====================================================================================
@@ -803,7 +1019,7 @@ END FUNCTION
 ' =====================================================================================
 ' Unscales an horizontal coordinate according the DPI setting.
 ' =====================================================================================
-FUNCTION CWindow.UnScaleX (BYVAL cx AS SINGLE) AS SINGLE
+PRIVATE FUNCTION CWindow.UnScaleX (BYVAL cx AS SINGLE) AS SINGLE
    FUNCTION = cx / m_rx
 END FUNCTION
 ' =====================================================================================
@@ -811,7 +1027,7 @@ END FUNCTION
 ' =====================================================================================
 ' Unscales a vertical coordinate according the DPI setting.
 ' =====================================================================================
-FUNCTION CWindow.UnScaleY (BYVAL cy AS SINGLE) AS SINGLE
+PRIVATE FUNCTION CWindow.UnScaleY (BYVAL cy AS SINGLE) AS SINGLE
    FUNCTION = cy / m_ry
 END FUNCTION
 ' =====================================================================================
@@ -819,7 +1035,7 @@ END FUNCTION
 ' =====================================================================================
 ' Returns the width of the window
 ' =====================================================================================
-PROPERTY CWindow.Width () AS LONG
+PRIVATE PROPERTY CWindow.Width () AS LONG
    DIM rc AS RECT
    .GetWindowRect m_hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -830,7 +1046,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the height of the window
 ' =====================================================================================
-PROPERTY CWindow.Height () AS LONG
+PRIVATE PROPERTY CWindow.Height () AS LONG
    DIM rc AS RECT
    .GetWindowRect m_hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -841,7 +1057,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the client width of the window
 ' =====================================================================================
-PROPERTY CWindow.ClientWidth () AS LONG
+PRIVATE PROPERTY CWindow.ClientWidth () AS LONG
    DIM rc AS RECT
    .GetClientRect m_hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -852,7 +1068,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the client height of the window
 ' =====================================================================================
-PROPERTY CWindow.ClientHeight () AS LONG
+PRIVATE PROPERTY CWindow.ClientHeight () AS LONG
    DIM rc AS RECT
    .GetClientRect m_hwnd, @rc
    ' // Divide by m_ry to make the result High DPI aware
@@ -863,7 +1079,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the width of the specified window
 ' =====================================================================================
-PROPERTY CWindow.ControlWidth (BYVAL hwnd AS HWND) AS LONG
+PRIVATE PROPERTY CWindow.ControlWidth (BYVAL hwnd AS HWND) AS LONG
    DIM rc AS RECT
    .GetWindowRect hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -874,7 +1090,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the height of the specified window
 ' =====================================================================================
-PROPERTY CWindow.ControlHeight (BYVAL hwnd AS HWND) AS LONG
+PRIVATE PROPERTY CWindow.ControlHeight (BYVAL hwnd AS HWND) AS LONG
    DIM rc AS RECT
    .GetWindowRect hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -885,7 +1101,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the client width of the specified window
 ' =====================================================================================
-PROPERTY CWindow.ControlClientWidth (BYVAL hwnd AS HWND) AS LONG
+PRIVATE PROPERTY CWindow.ControlClientWidth (BYVAL hwnd AS HWND) AS LONG
    DIM rc AS RECT
    .GetClientRect hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -896,7 +1112,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the client height of the specified window
 ' =====================================================================================
-PROPERTY CWindow.ControlClientHeight (BYVAL hwnd AS HWND) AS LONG
+PRIVATE PROPERTY CWindow.ControlClientHeight (BYVAL hwnd AS HWND) AS LONG
    DIM rc AS RECT
    .GetClientRect hwnd, @rc
    ' // Divide by m_rx to make the result High DPI aware
@@ -907,7 +1123,7 @@ END PROPERTY
 ' =====================================================================================
 ' Retrieves the dimensions of the bounding rectangle of the main window.
 ' =====================================================================================
-SUB CWindow.GetWindowRect OVERLOAD (BYVAL lpRect AS LPRECT)
+PRIVATE SUB CWindow.GetWindowRect OVERLOAD (BYVAL lpRect AS LPRECT)
    IF lpRect = NULL THEN EXIT SUB
    .GetWindowRect(m_hwnd, lpRect)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -918,7 +1134,7 @@ SUB CWindow.GetWindowRect OVERLOAD (BYVAL lpRect AS LPRECT)
 END SUB
 ' =====================================================================================
 ' =====================================================================================
-FUNCTION CWindow.GetWindowRect OVERLOAD () AS RECT
+PRIVATE FUNCTION CWindow.GetWindowRect OVERLOAD () AS RECT
    DIM rc AS RECT
    .GetWindowRect(m_hwnd, @rc)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -933,7 +1149,7 @@ END FUNCTION
 ' =====================================================================================
 ' Retrieves the coordinates of the main window's client area.
 ' =====================================================================================
-SUB CWindow.GetClientRect OVERLOAD (BYVAL lpRect AS LPRECT)
+PRIVATE SUB CWindow.GetClientRect OVERLOAD (BYVAL lpRect AS LPRECT)
    IF lpRect = NULL THEN EXIT SUB
    .GetClientRect(m_hwnd, lpRect)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -944,7 +1160,7 @@ SUB CWindow.GetClientRect OVERLOAD (BYVAL lpRect AS LPRECT)
 END SUB
 ' =====================================================================================
 ' =====================================================================================
-FUNCTION CWindow.GetClientRect OVERLOAD () AS RECT
+PRIVATE FUNCTION CWindow.GetClientRect OVERLOAD () AS RECT
    DIM rc AS RECT
    .GetClientRect(m_hwnd, @rc)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -959,7 +1175,7 @@ END FUNCTION
 ' =====================================================================================
 ' Retrieves the dimensions of the bounding rectangle of the specified window.
 ' =====================================================================================
-SUB CWindow.GetControlWindowRect (BYVAL hwnd AS HWND, BYVAL lpRect AS LPRECT)
+PRIVATE SUB CWindow.GetControlWindowRect (BYVAL hwnd AS HWND, BYVAL lpRect AS LPRECT)
    IF lpRect = NULL THEN EXIT SUB
    .GetWindowRect(hwnd, lpRect)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -970,7 +1186,7 @@ SUB CWindow.GetControlWindowRect (BYVAL hwnd AS HWND, BYVAL lpRect AS LPRECT)
 END SUB
 ' =====================================================================================
 ' =====================================================================================
-FUNCTION CWindow.GetControlWindowRect (BYVAL hwnd AS HWND) AS RECT
+PRIVATE FUNCTION CWindow.GetControlWindowRect (BYVAL hwnd AS HWND) AS RECT
    DIM rc AS RECT
    .GetWindowRect(hwnd, @rc)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -985,7 +1201,7 @@ END FUNCTION
 ' =====================================================================================
 ' Retrieves the dimensions of a window's client area.
 ' =====================================================================================
-SUB CWindow.GetControlClientRect OVERLOAD (BYVAL hwnd AS HWND, BYVAL lpRect AS LPRECT)
+PRIVATE SUB CWindow.GetControlClientRect OVERLOAD (BYVAL hwnd AS HWND, BYVAL lpRect AS LPRECT)
    IF lpRect = NULL THEN EXIT SUB
    .GetClientRect(hwnd, lpRect)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -996,7 +1212,7 @@ SUB CWindow.GetControlClientRect OVERLOAD (BYVAL hwnd AS HWND, BYVAL lpRect AS L
 END SUB
 ' =====================================================================================
 ' =====================================================================================
-FUNCTION CWindow.GetControlClientRect OVERLOAD (BYVAL hwnd AS HWND) AS RECT
+PRIVATE FUNCTION CWindow.GetControlClientRect OVERLOAD (BYVAL hwnd AS HWND) AS RECT
    DIM rc AS RECT
    .GetClientRect(hwnd, @rc)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -1012,7 +1228,7 @@ END FUNCTION
 ' Retrieves the size of the work area on the primary display monitor. The work area is the
 ' portion of the screen not obscured by the system taskbar or by application desktop toolbars.
 ' =====================================================================================
-SUB CWindow.GetWorkArea OVERLOAD (BYVAL lpRect AS LPRECT)
+PRIVATE SUB CWindow.GetWorkArea OVERLOAD (BYVAL lpRect AS LPRECT)
    IF lpRect = NULL THEN EXIT SUB
    SystemParametersInfoW(SPI_GETWORKAREA, 0, lpRect, 0)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -1023,7 +1239,7 @@ SUB CWindow.GetWorkArea OVERLOAD (BYVAL lpRect AS LPRECT)
 END SUB
 ' =====================================================================================
 ' =====================================================================================
-FUNCTION CWindow.GetWorkArea OVERLOAD () AS RECT
+PRIVATE FUNCTION CWindow.GetWorkArea OVERLOAD () AS RECT
    DIM rc AS RECT
    SystemParametersInfoW(SPI_GETWORKAREA, 0, @rc, 0)
    ' // Divide by m_rx and m_ry to make the result High DPI aware
@@ -1038,7 +1254,7 @@ END FUNCTION
 ' =====================================================================================
 ' Retrieves a handle to the child control specified by its identifier.
 ' =====================================================================================
-FUNCTION CWindow.ControlHandle (BYVAL cID AS LONG) AS HWND
+PRIVATE FUNCTION CWindow.ControlHandle (BYVAL cID AS LONG) AS HWND
    FUNCTION = .GetDlgItem(m_hwnd, cID)
 END FUNCTION
 ' =====================================================================================
@@ -1046,14 +1262,14 @@ END FUNCTION
 ' =====================================================================================
 ' Returns a pointer to the scroll window class
 ' =====================================================================================
-PROPERTY CWindow.ScrollWindowPtr () AS CScrollWindow PTR
+PRIVATE PROPERTY CWindow.ScrollWindowPtr () AS CScrollWindow PTR
    PROPERTY = m_pScrollWindow
 END PROPERTY
 ' =====================================================================================
 ' =====================================================================================
 ' Sets a pointer to the scroll window class
 ' =====================================================================================
-PROPERTY CWindow.ScrollWindowPtr (BYVAL pScrollWindow AS CScrollWindow PTR)
+PRIVATE PROPERTY CWindow.ScrollWindowPtr (BYVAL pScrollWindow AS CScrollWindow PTR)
    IF m_pScrollWindow THEN Delete m_pScrollWindow
    m_pScrollWindow = pScrollWindow
 END PROPERTY
@@ -1062,7 +1278,7 @@ END PROPERTY
 ' =====================================================================================
 ' Resizes the window
 ' =====================================================================================
-SUB CWindow.Resize
+PRIVATE SUB CWindow.Resize
    .SendMessageW m_hwnd, WM_SIZE, CAST(WPARAM, SIZE_RESTORED), MAKELONG(this.ClientWidth, this.ClientHeight)
 END SUB
 ' =====================================================================================
@@ -1070,7 +1286,7 @@ END SUB
 ' =====================================================================================
 ' Changes the size, position, and Z order of a child, pop-up, or top-level window.
 ' =====================================================================================
-FUNCTION CWindow.SetWindowPos (BYVAL hwnd AS HWND, BYVAL hwndInsertAfter AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL cx AS LONG, BYVAL cy AS LONG, BYVAL uFlags AS UINT) AS BOOLEAN
+PRIVATE FUNCTION CWindow.SetWindowPos (BYVAL hwnd AS HWND, BYVAL hwndInsertAfter AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL cx AS LONG, BYVAL cy AS LONG, BYVAL uFlags AS UINT) AS BOOLEAN
    FUNCTION = .SetWindowPos(hwnd, hwndInsertAfter, x * m_rx, y * m_ry, cx * m_rx, cy * m_ry, uFlags)
 END FUNCTION
 ' =====================================================================================
@@ -1078,7 +1294,7 @@ END FUNCTION
 ' =====================================================================================
 ' Changes the position and dimensions of the specified window.
 ' =====================================================================================
-FUNCTION CWindow.MoveWindow (BYVAL hwnd AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL bRepaint AS BOOLEAN) AS BOOLEAN
+PRIVATE FUNCTION CWindow.MoveWindow (BYVAL hwnd AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL bRepaint AS BOOLEAN) AS BOOLEAN
    FUNCTION = .MoveWindow(hwnd, x * m_rx, y * m_ry, nWidth * m_rx, nHeight * m_ry, bRepaint)
 END FUNCTION
 ' =====================================================================================
@@ -1120,7 +1336,7 @@ END FUNCTION
 '   hFont = CWindow.CreateFont("Courier New", 10, FW_BOLD, , , , DEFAULT_CHARSET)
 '   hFont = CWindow.CreateFont("Marlett", 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 ' ========================================================================================
-FUNCTION CWindow.CreateFont ( _
+PRIVATE FUNCTION CWindow.CreateFont ( _
    BYREF wszFaceName AS WSTRING, _                  ' __in Typeface name of font
    BYVAL lPointSize  AS LONG, _                     ' __in Point size
    BYVAL lWeight     AS LONG = 0, _                 ' __in Font weight(bold etc.)
@@ -1132,7 +1348,7 @@ FUNCTION CWindow.CreateFont ( _
 
    DIM tlfw AS LOGFONTW
    DIM wstrFaceName AS WSTRING * LF_FACESIZE
-   IF VARPTR(wszFacename) THEN wstrFaceName = wszFaceName ELSE wstrFaceName = m_wszDefaultFontName
+   IF VARPTR(wszFacename) <> NULL AND LEN(wszFacename) > 0 THEN wstrFaceName = wszFaceName ELSE wstrFaceName = m_wszDefaultFontName
 
    ' // The result must be 1, unless the programmer has set a different DPI with the set DPI property
    DIM hDC AS HDC = GetDC(HWND_DESKTOP)
@@ -1167,7 +1383,7 @@ END FUNCTION
 '   CWindow.SetFont("Marlett", 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 ' Return Value = TRUE or FALSE.
 ' =====================================================================================
-FUNCTION CWindow.SetFont ( _
+PRIVATE FUNCTION CWindow.SetFont ( _
    BYREF wszFaceName AS WSTRING, _                  ' __in Typeface name of font
    BYVAL lPointSize  AS LONG, _                     ' __in Point size
    BYVAL lWeight     AS LONG = 0, _                 ' __in Font weight(bold etc.)
@@ -1179,7 +1395,7 @@ FUNCTION CWindow.SetFont ( _
 
    DIM hFont AS HFONT
    DIM wstrFaceName AS WSTRING * LF_FACESIZE
-   IF VARPTR(wszFacename) THEN wstrFaceName = wszFaceName ELSE wstrFaceName = m_wszDefaultFontName
+   IF VARPTR(wszFacename) <> NULL AND LEN (wszFacename) > 0 THEN wstrFaceName = wszFaceName ELSE wstrFaceName = m_wszDefaultFontName
    hFont = this.CreateFont(wstrFaceName, lPointSize, lWeight, bItalic, bUnderline, bStrikeOut, bCharSet)
    IF hFont THEN
       IF m_hFont THEN .DeleteObject m_hFont
@@ -1197,7 +1413,7 @@ END FUNCTION
 ' =====================================================================================
 ' Adds a control to the window
 ' =====================================================================================
-FUNCTION CWindow.AddControl ( _
+PRIVATE FUNCTION CWindow.AddControl ( _
    BYREF wszClassName AS WSTRING, _                       ' // Class name
    BYVAL hParent AS HWND = NULL, _                        ' // Parent window handle
    BYVAL cID AS INTEGER = 0, _                            ' // Control identifier
@@ -1206,8 +1422,8 @@ FUNCTION CWindow.AddControl ( _
    BYVAL y AS LONG = 0, _                                 ' // Vertical position
    BYVAL nWidth AS LONG = 0, _                            ' // Control width
    BYVAL nHeight AS LONG = 0, _                           ' // Control height
-   BYVAL dwStyle AS DWORD = 0, _                          ' // Control style
-   BYVAL dwExStyle AS DWORD = 0, _                        ' // Extended style
+   BYVAL dwStyle AS LONG = -1, _                          ' // Control style
+   BYVAL dwExStyle AS LONG = -1, _                        ' // Extended style
    BYVAL lpParam AS LONG_PTR = 0, _                       ' // Pointer to custom data
    BYVAL pWndProc AS WNDPROC = NULL, _                    ' // Address of the window callback procedure
    BYVAL uIdSubclass AS UINT_PTR = &HFFFFFFFF, _          ' // The subclass ID
@@ -1221,10 +1437,11 @@ FUNCTION CWindow.AddControl ( _
    ' // Window styles
    DIM wsClassName AS WSTRING * 260
    wsClassName = wszClassName
+
    SELECT CASE UCASE(wsClassName)
       CASE "BUTTON"
          ' Adds a button to the window
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER
          IF dwStyle = BS_FLAT THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER OR BS_FLAT
          IF dwStyle = BS_DEFPUSHBUTTON THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_CENTER OR BS_VCENTER OR BS_DEFPUSHBUTTON
          IF dwStyle = BS_OWNERDRAW THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_OWNERDRAW
@@ -1232,172 +1449,193 @@ FUNCTION CWindow.AddControl ( _
          IF dwStyle = BS_SPLITBUTTON THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_CENTER OR BS_VCENTER OR BS_SPLITBUTTON
          IF dwStyle = BS_DEFSPLITBUTTON THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_CENTER OR BS_VCENTER OR BS_DEFSPLITBUTTON
          #endif
+         dwExStyle = 0
       CASE "CUSTOMBUTTON", "OWNERDRAWBUTTON"
          ' Adds an ownerdraw button to the window.
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_OWNERDRAW
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_OWNERDRAW
+         dwExStyle = 0
       CASE "RADIOBUTTON", "OPTION"
          ' Adds a radio button to the window.
          ' Note: In PowerBASIC this control is called "Option".
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER
          IF dwStyle = WS_GROUP THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER OR WS_GROUP
+         dwExStyle = 0
       CASE "CHECKBOX"
          ' Adds a checkbox to the window.
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTOCHECKBOX OR BS_LEFT OR BS_VCENTER
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTOCHECKBOX OR BS_LEFT OR BS_VCENTER
+         dwExStyle = 0
       CASE "CHECK3STATE"
          ' Adds a 3 state checkbox to the window.
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTO3STATE OR BS_LEFT OR BS_VCENTER
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTO3STATE OR BS_LEFT OR BS_VCENTER
+         dwExStyle = 0
       CASE "LABEL"
          ' Adds a label to the window.
          wsClassName = "Static"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR SS_LEFT OR WS_GROUP OR SS_NOTIFY
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR SS_LEFT OR WS_GROUP OR SS_NOTIFY
+         dwExStyle = 0
       CASE "BITMAPLABEL"
          ' Adds an image label to the window.
          ' You must delete the bitmap before the application ends.
          wsClassName = "Static"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_BITMAP
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_TRANSPARENT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_BITMAP
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_TRANSPARENT
          bSetFont = FALSE
       CASE "ICONLABEL"
          ' Adds an image label to the window.
          ' You must delete the icon before the application ends.
          wsClassName = "Static"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_ICON
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_TRANSPARENT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_ICON
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_TRANSPARENT
          bSetFont = FALSE
       CASE "BITMAPBUTTON"
          ' Adds an image button to the window.
          ' You must delete the bitmap before the application ends.
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_BITMAP
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_BITMAP
+         dwExStyle = 0
       CASE "ICONBUTTON"
          ' Adds an image button to the window.
          ' You must delete the icon before the application ends.
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_ICON
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_ICON
+         dwExStyle = 0
       CASE "CUSTOMLABEL"
          ' Adds an ownerdraw label to the window.
          wsClassName = "Static"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_OWNERDRAW
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_OWNERDRAW
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "FRAME", "FRAMEWINDOW"
          ' Adds a frame to the window.
          ' Note: This is not the same that PowerBASIC DDT's Frame control, that in fact is a Group Box.
          wsClassName = "Static"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_GROUP OR SS_BLACKFRAME
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_TRANSPARENT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_GROUP OR SS_BLACKFRAME
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_TRANSPARENT
          bSetFont = FALSE
       CASE "GROUPBOX"
          ' Adds a group box to the window.
          ' Note: This is the same that DDT's frame control.
          wsClassName = "Button"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_GROUP OR BS_GROUPBOX
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_TRANSPARENT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPSIBLINGS OR WS_GROUP OR BS_GROUPBOX
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_TRANSPARENT
       CASE "LINE"
          ' Adds an horizontal line to the window
          wsClassName = "Static"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR SS_ETCHEDFRAME
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_TRANSPARENT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR SS_ETCHEDFRAME
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_TRANSPARENT
          bSetFont = FALSE
       CASE "EDIT", "TEXTBOX"
          ' Adds an edit control to the window.
          wsClassName = "Edit"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "EDITMULTILINE", "MULTILINETEXTBOX"
          ' Adds an edit control to the window.
          wsClassName = "Edit"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "COMBOBOX"
          ' Adds a combo box to the window.
-         IF dwStyle = 0 THEN dwStyle = WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWN OR CBS_HASSTRINGS OR CBS_SORT
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWN OR CBS_HASSTRINGS OR CBS_SORT
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "COMBOBOXEX", "COMBOBOXEX32"
          ' Adds a combo box ex to the window.
          wsClassName = "ComboBoxEx32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST
+         dwExStyle = 0
       CASE "LISTBOX"
          ' Adds a list box to the window.
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR LBS_STANDARD OR LBS_HASSTRINGS OR LBS_SORT OR LBS_NOTIFY
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR LBS_STANDARD OR LBS_HASSTRINGS OR LBS_SORT OR LBS_NOTIFY
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "PROGRESSBAR", "MSCTLS_PROGRESS32"
          ' Adds a progress bar to the window.
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE
          wsClassName = "msctls_progress32"
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "HEADER", "SYSHEADER32"
          ' Adds an header control to the window.
          wsClassName = "SysHeader32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR CCS_TOP OR HDS_HORZ OR HDS_BUTTONS
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR CCS_TOP OR HDS_HORZ OR HDS_BUTTONS
+         dwExStyle = 0
       CASE "TREEVIEW", "SYSTREEVIEW32"
          ' Adds a tree view control to the window.
          wsClassName = "SysTreeView32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_TABSTOP OR TVS_HASBUTTONS OR TVS_HASLINES OR TVS_LINESATROOT OR TVS_SHOWSELALWAYS
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_TABSTOP OR TVS_HASBUTTONS OR TVS_HASLINES OR TVS_LINESATROOT OR TVS_SHOWSELALWAYS
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "LISTVIEW", "SYSLISTVIEW32"
          ' Adds a list view control to the window.
          wsClassName = "SysListView32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_TABSTOP OR LVS_REPORT OR LVS_SHOWSELALWAYS OR LVS_SHAREIMAGELISTS OR LVS_AUTOARRANGE OR LVS_EDITLABELS OR LVS_ALIGNTOP
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_TABSTOP OR LVS_REPORT OR LVS_SHOWSELALWAYS OR LVS_SHAREIMAGELISTS OR LVS_AUTOARRANGE OR LVS_EDITLABELS OR LVS_ALIGNTOP
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "TOOLBAR", "TOOLBARWINDOW32"
          ' Adds a toolbar control to the window.
          wsClassName = "ToolbarWindow32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_TOP OR WS_BORDER OR TBSTYLE_FLAT OR TBSTYLE_TOOLTIPS
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_TOP OR WS_BORDER OR TBSTYLE_FLAT OR TBSTYLE_TOOLTIPS
+         dwExStyle = 0
       CASE "REBAR", "REBARWINDOW32"
          ' Adds a rebar control to the window.
          wsClassName = "ReBarWindow32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_NODIVIDER OR RBS_VARHEIGHT OR RBS_BANDBORDERS
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_NODIVIDER OR RBS_VARHEIGHT OR RBS_BANDBORDERS
+         dwExStyle = 0
       CASE "DATETIMEPICKER", "SYSDATETIMEPICK32"
          ' Adds a date time picker control to the window.
          wsClassName = "SysDateTimePick32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR DTS_SHORTDATEFORMAT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR DTS_SHORTDATEFORMAT
+         dwExStyle = 0
       CASE "MONTHCALENDAR", "MONTHCAL", "SYSMONTHCAL32"
          ' Adds a month calendar control to the window.
          wsClassName = "SysMonthCal32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "IPADDRESS", "SYSIPADDRESS32"
          ' Adds an IPAddress control to the window.
          wsClassName = "SysIPAddress32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "HOTKEY", "MSCTLS_HOTKEY32"
          ' Adds an hotkey control to the window.
          wsClassName = "msctls_hotkey32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "ANIMATE", "ANIMATION", "SYSANIMATE32"
          ' Adds an animation control to the window.
          wsClassName = "SysAnimate32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR ACS_TRANSPARENT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR ACS_TRANSPARENT
+         dwExStyle = 0
       CASE "SYSLINK"
          ' Adds a SysLink control to the window.
          ' Note: The SysLink control is defined in the ComCtl32.dll version 6 and requires a manifest
          ' or directive that specifies that version 6 of the DLL should be used if it is available.
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "PAGER", "SYSPAGER"
          ' Adds a Pager control to the window.
          wsClassName = "SysPager"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR PGS_HORZ
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR PGS_HORZ
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "TAB", "TABCONTROL", "SYSTABCONTROL32"
          ' Adds a Tab control to the window.
          wsClassName = "SysTabControl32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR WS_TABSTOP OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR TCS_TABS OR TCS_SINGLELINE OR TCS_RAGGEDRIGHT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR WS_TABSTOP OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR TCS_TABS OR TCS_SINGLELINE OR TCS_RAGGEDRIGHT
+         IF dwExStyle = -1 THEN dwExStyle = 0
          dwExStyle =  dwExStyle OR WS_EX_CONTROLPARENT
       CASE "STATUSBAR", "MSCTLS_STATUSBAR32"
          ' Adds a StatusBar control to the window.
          wsClassName = "msctls_statusbar32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_SIZEGRIP
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_SIZEGRIP
+         dwExStyle = 0
       CASE "SIZEBAR", "SIZEBOX", "SIZEGRIP"
          ' Adds a size box to the window.
          wsClassName = "Scrollbar"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR SBS_SIZEGRIP OR SBS_SIZEBOXBOTTOMRIGHTALIGN
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR SBS_SIZEGRIP OR SBS_SIZEBOXBOTTOMRIGHTALIGN
+         dwExStyle = 0
          bSetFont = FALSE
          nWidth = GetSystemMetrics(SM_CXVSCROLL)
          nHeight = GetSystemMetrics(SM_CYHSCROLL)
@@ -1407,27 +1645,34 @@ FUNCTION CWindow.AddControl ( _
       CASE "HSCROLLBAR"
          ' Adds an horizontal scroll bar to the window.
          wsClassName = "Scrollbar"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR SBS_HORZ
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR SBS_HORZ
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "VSCROLLBAR"
          ' Adds a vertical scroll bar to the window.
          wsClassName = "Scrollbar"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR SBS_VERT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR SBS_VERT
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "TRACKBAR", "MSCTLS_TRACKBAR32"
          wsClassName = "msctls_trackbar32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR TBS_AUTOTICKS OR TBS_HORZ OR TBS_BOTTOM OR TBS_TOOLTIPS
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR TBS_AUTOTICKS OR TBS_HORZ OR TBS_BOTTOM OR TBS_TOOLTIPS
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "UPDOWN", "MSCTLS_UPDOWN32"
          wsClassName = "msctls_updown32"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR UDS_WRAP OR UDS_ARROWKEYS OR UDS_ALIGNRIGHT OR UDS_SETBUDDYINT
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR UDS_WRAP OR UDS_ARROWKEYS OR UDS_ALIGNRIGHT OR UDS_SETBUDDYINT
+         dwExStyle = 0
          bSetFont = FALSE
       CASE "RICHEDIT", "RichEdit50W"
-         IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR WS_HSCROLL OR WS_VSCROLL OR ES_AUTOHSCROLL OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_WANTRETURN OR ES_NOHIDESEL OR ES_SAVESEL
-         IF dwExStyle = 0 THEN dwExStyle = WS_EX_CLIENTEDGE
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR WS_HSCROLL OR WS_VSCROLL OR ES_AUTOHSCROLL OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_WANTRETURN OR ES_NOHIDESEL OR ES_SAVESEL
+         IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
          wsClassName = "RichEdit50W"
          m_hRichEditLib = CAST(HMODULE, LoadLibraryW("MSFTEDIT.DLL"))
    END SELECT
+   ' // Don't allow negative values for the styles
+   IF dwStyle = -1 THEN dwStyle = 0
+   IF dwExStyle = -1 THEN dwExStyle = 0
    ' // Make sure that the control has the WS_CHILD style
    dwStyle = dwStyle OR WS_CHILD
    ' // Create the control
@@ -1544,12 +1789,12 @@ END FUNCTION
 ' =====================================================================================
 ' Gets/Sets the accelerator table handle
 ' =====================================================================================
-PROPERTY CWindow.AccelHandle () AS HACCEL
+PRIVATE PROPERTY CWindow.AccelHandle () AS HACCEL
    PROPERTY = m_hAccel
 END PROPERTY
 ' =====================================================================================
 ' =====================================================================================
-PROPERTY CWindow.AccelHandle (BYVAL hAccel AS HACCEL)
+PRIVATE PROPERTY CWindow.AccelHandle (BYVAL hAccel AS HACCEL)
    IF m_hAccel THEN .DestroyAcceleratorTable(m_hAccel)
    IF UBOUND(m_rgAccelEntries) - LBOUND(m_rgAccelEntries) > -1 THEN ERASE m_rgAccelEntries
    m_hAccel = hAccel
@@ -1558,7 +1803,7 @@ END PROPERTY
 ' =====================================================================================
 ' Adds an accelerator key to the table.
 ' =====================================================================================
-SUB CWindow.AddAccelerator OVERLOAD (BYVAL fvirt AS UBYTE, BYVAL wKey AS WORD, BYVAL cmd AS WORD)
+PRIVATE SUB CWindow.AddAccelerator OVERLOAD (BYVAL fvirt AS UBYTE, BYVAL wKey AS WORD, BYVAL cmd AS WORD)
    REDIM PRESERVE m_rgAccelEntries(UBOUND(m_rgAccelEntries) + 1) AS ACCEL
    m_rgAccelEntries(UBOUND(m_rgAccelEntries)).fvirt = fvirt
    m_rgAccelEntries(UBOUND(m_rgAccelEntries)).key = wKey
@@ -1566,7 +1811,7 @@ SUB CWindow.AddAccelerator OVERLOAD (BYVAL fvirt AS UBYTE, BYVAL wKey AS WORD, B
 END SUB
 ' =====================================================================================
 ' =====================================================================================
-SUB CWindow.AddAccelerator OVERLOAD (BYVAL fvirt AS UBYTE, BYREF wszKey AS WSTRING, BYVAL cmd AS WORD)
+PRIVATE SUB CWindow.AddAccelerator OVERLOAD (BYVAL fvirt AS UBYTE, BYREF wszKey AS WSTRING, BYVAL cmd AS WORD)
    REDIM PRESERVE m_rgAccelEntries(UBOUND(m_rgAccelEntries) + 1) AS ACCEL
    m_rgAccelEntries(UBOUND(m_rgAccelEntries)).fvirt = fvirt
    m_rgAccelEntries(UBOUND(m_rgAccelEntries)).key = ASC(wszKey)
@@ -1576,7 +1821,7 @@ END SUB
 ' =====================================================================================
 ' Creates the accelerator table.
 ' =====================================================================================
-FUNCTION CWindow.CreateAcceleratorTable () AS HACCEL
+PRIVATE FUNCTION CWindow.CreateAcceleratorTable () AS HACCEL
    IF UBOUND(m_rgAccelEntries) - LBOUND(m_rgAccelEntries) = -1 THEN EXIT FUNCTION
    IF m_hAccel THEN .DestroyAcceleratorTable(m_hAccel)
    m_hAccel = .CreateAcceleratorTableW(CAST(LPACCEL, @m_rgAccelEntries(0)), UBOUND(m_rgAccelEntries) - LBOUND(m_rgAccelEntries) + 1)
@@ -1586,7 +1831,7 @@ END FUNCTION
 ' =====================================================================================
 ' Destroys the accelerator table.
 ' =====================================================================================
-SUB CWindow.DestroyAcceleratorTable
+PRIVATE SUB CWindow.DestroyAcceleratorTable
    IF m_hAccel THEN .DestroyAcceleratorTable(m_hAccel)
    IF UBOUND(m_rgAccelEntries) - LBOUND(m_rgAccelEntries) > -1 THEN ERASE m_rgAccelEntries
    m_hAccel = NULL
@@ -1597,7 +1842,7 @@ END SUB
 ' =====================================================================================
 ' Optional. Sets de MDI class name
 ' =====================================================================================
-PROPERTY CWindow.MDIClassName (BYREF wszClassName AS WSTRING)
+PRIVATE PROPERTY CWindow.MDIClassName (BYREF wszClassName AS WSTRING)
    m_wszMDIClassName = wszClassName
 END PROPERTY
 ' =====================================================================================
@@ -1605,7 +1850,7 @@ END PROPERTY
 ' =====================================================================================
 ' Returns the MDI client window handle
 ' =====================================================================================
-PROPERTY CWindow.hwndClient () AS HWND
+PRIVATE PROPERTY CWindow.hwndClient () AS HWND
    PROPERTY = m_hwndClient
 END PROPERTY
 ' =====================================================================================
@@ -1620,7 +1865,7 @@ END PROPERTY
 '   The values of several of the members of this structure can be retrieved with
 '   GetClassLong and set with SetClassLong.
 ' ========================================================================================
-FUNCTION CWindow_RegisterMDIClass (BYREF wsClassName AS WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS WORD
+PRIVATE FUNCTION CWindow_RegisterMDIClass (BYREF wsClassName AS WSTRING, BYVAL hInstance AS HINSTANCE, BYVAL lpfnWndProc AS WNDPROC) AS WORD
 
    STATIC wAtom AS ATOM                     ' // Atom
    DIM    wcexw AS WNDCLASSEXW              ' // WNDCLASSEXW structure
@@ -1666,7 +1911,7 @@ END FUNCTION
 ' =====================================================================================
 ' Creates a MDI window
 ' =====================================================================================
-FUNCTION CWindow.CreateMDIWindow ( _
+PRIVATE FUNCTION CWindow.CreateMDIWindow ( _
    BYVAL cID AS LONG, _                  ' // Control identifier
    BYVAL x AS LONG, _                    ' // Horizontal position
    BYVAL y AS LONG, _                    ' // Vertical position
@@ -1697,7 +1942,7 @@ FUNCTION CWindow.CreateMDIWindow ( _
    DIM tccs AS CLIENTCREATESTRUCT
    ' // Note: If you use 1 as the identifier for the first child, the
    ' // identifiers of the windows will conflict with the dialog box
-   ' // identifiers, e.g. the first window with %ID_OK, the 2nd with
+   ' // identifiers, e.g. the first window with ID_OK, the 2nd with
    ' // IDCANCEL, etc.
    tccs.idFirstChild = 13
    tccs.hWindowMenu  = hSubMenu
@@ -1717,7 +1962,7 @@ END FUNCTION
 ' ========================================================================================
 ' Default CWindow MDI callback function.
 ' ========================================================================================
-FUNCTION CWindowMDIProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CWindowMDIProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    SELECT CASE AS CONST uMsg
 
@@ -1762,7 +2007,7 @@ END FUNCTION
 ' =====================================================================================
 ' Destroys all MDI child windows.
 ' =====================================================================================
-FUNCTION CWindow_CloseEnumProc ( _
+PRIVATE FUNCTION CWindow_CloseEnumProc ( _
    BYVAL hwnd   AS HWND, _                  ' // Handle of enumerated child window
    BYVAL lParam AS LPARAM _                 ' // Unused
    ) AS LONG
@@ -1788,28 +2033,13 @@ END FUNCTION
 ' =====================================================================================
 
 ' ########################################################################################
-' CTabPage class
-' Creates a generic window used as a tab page of a tab control.
+'                                 *** CTABPAGE CLASS ***
 ' ########################################################################################
-TYPE CTabPage EXTENDS CWindow
-
-   Private:
-      m_hTabPage AS HWND                     ' // Tab page handle
-
-   Public:
-      DECLARE DESTRUCTOR
-      DECLARE PROPERTY hTabPage () AS HWND
-      DECLARE FUNCTION InsertPage (BYVAL hTab AS HWND, BYVAL nPage AS LONG, BYREF wszTitle AS WSTRING = "", _
-         BYVAL nImage AS LONG = -1, BYVAL lpfnWndProc AS WNDPROC = NULL, _
-         BYVAL dwStyle AS DWORD = WS_CLIPSIBLINGS OR WS_CLIPCHILDREN, BYVAL dwExStyle AS DWORD = 0) AS HWND
-
-END TYPE
-' ========================================================================================
 
 ' ========================================================================================
 ' CTabPage class destructor
 ' ========================================================================================
-DESTRUCTOR CTabPage
+PRIVATE DESTRUCTOR CTabPage
 
    DIM i AS LONG, nCount AS LONG, hTab AS HWND, tci AS TCITEMW
    ' // Get the handle of the tab control
@@ -1852,7 +2082,7 @@ END DESTRUCTOR
 ' Return Value:
 ' - The handle of the new tab page.
 ' ========================================================================================
-FUNCTION CTabPage.InsertPage (BYVAL hTab AS HWND, BYVAL nPage AS LONG, BYREF wszTitle AS WSTRING = "", _
+PRIVATE FUNCTION CTabPage.InsertPage (BYVAL hTab AS HWND, BYVAL nPage AS LONG, BYREF wszTitle AS WSTRING = "", _
    BYVAL nImage AS LONG = -1, BYVAL lpfnWndProc AS WNDPROC = NULL, _
    BYVAL dwStyle AS DWORD = WS_CLIPSIBLINGS OR WS_CLIPCHILDREN, BYVAL dwExStyle AS DWORD = 0) AS HWND
 
@@ -1895,10 +2125,14 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the window handle of the tab page
 ' ========================================================================================
-PROPERTY CTabPage.hTabPage () AS HWND
+PRIVATE PROPERTY CTabPage.hTabPage () AS HWND
    PROPERTY = m_hTabPage
 END PROPERTY
 ' ========================================================================================
+
+' ########################################################################################
+'                                *** HELPER FUNCTIONS ***
+' ########################################################################################
 
 ' =====================================================================================
 ' Resizes all the tab pages associated with a tab control

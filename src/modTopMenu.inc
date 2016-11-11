@@ -467,13 +467,13 @@ Function CreateScintillaContextMenu() As HMENU
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
    
    ' Determine the compiler path in case it needs to be prepended to the filename
-   ProcessFromCurdrive(@gConfig.FBWINCompiler32)
-   ProcessFromCurdrive(@gConfig.FBWINCompiler64)
+   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+   gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    Select Case Ucase(gConfig.DefaultCompiler)
       Case "FBC 32BIT":   wCompilerPath = gConfig.FBWINcompiler32
       Case "FBC 64BIT":   wCompilerPath = gConfig.FBWINcompiler64
    End Select
-   FF_Pathname(WStr("PATH"), @wCompilerPath, @wCompilerPath)
+   wCompilerPath = AfxStrPathname( "PATH", wCompilerPath )
    wCompilerPath = wCompilerPath & "inc"
 
 
@@ -487,7 +487,7 @@ Function CreateScintillaContextMenu() As HMENU
       i = Instr(sFilename, "'")
       If i Then sFilename = Left(sFilename, i-1)
       sFilename = Trim(sFilename, Any Chr(32,34))  ' remove spaces and double quotes
-      FF_Pathname(WStr("PATH"), pDoc->DiskFilename, @wPath)
+      wPath = AfxStrPathname( "PATH", pDoc->DiskFilename )
 
       If Dir(wPath & sFilename) > "" Then 
          gpApp->IncludeFilename = wPath & sFilename
@@ -500,9 +500,9 @@ Function CreateScintillaContextMenu() As HMENU
       ElseIf Dir(Str(wCompilerPath) & "\" & sFilename) > "" Then 
          gpApp->IncludeFilename = Str(wCompilerPath) & "\" & sFilename
       End If
-      gpApp->IncludeFilename = FF_Replace(gpApp->IncludeFilename, "/", "\")
+      gpApp->IncludeFilename = AfxStrReplace(gpApp->IncludeFilename, "/", "\")
       
-      If Dir(gpApp->IncludeFilename) > "" Then        
+      If Dir(**gpApp->IncludeFilename) > "" Then        
          AppendMenuW hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") & Chr(32, 34) & gpApp->IncludeFilename & Chr(34)
          AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
       End If
@@ -550,6 +550,10 @@ Function CreateScintillaContextMenu() As HMENU
 
 End Function
     
+
+
+
+
 
 
 

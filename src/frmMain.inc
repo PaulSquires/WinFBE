@@ -97,10 +97,11 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
    ' If there is not any file being edited
    If pDoc = 0 Then
       StatusBar_SetText(hStatusbar, 2, "")    ' line/col/sel
-      StatusBar_SetText(hStatusbar, 3, "")    ' length/lines
+      StatusBar_SetText(hStatusbar, 3, "")    ' file type (normal, main, resource, module)
+      StatusBar_SetText(hStatusbar, 4, "")    ' file disktype (Unicode/Ansi)
       Dim wzText As WString * MAX_PATH
       wzText = APPNAME            
-      If gpApp->IsProjectActive Then wzText = APPNAMESHORT & " - [" & *gpApp->ProjectName & "]"
+      If gpApp->IsProjectActive Then wzText = APPNAMESHORT & " - [" & gpApp->ProjectName & "]"
       SetWindowTextW( HWnd, wzText )
    Else
       pDoc->DisplayStats
@@ -138,15 +139,15 @@ Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
        If Len(wszArg) = 0 Then Exit Do
        
        ' Remove any double quotes from the argument.
-       FF_RemoveW( @wszArg, @WChr(34), @wszPath )
+       wszPath = AfxStrRemove( wszArg, WChr(34) )
        
        ' If no path exists for the file then add the current folder
-       FF_PATHNAME( @WStr("PATH"), @wszArg, @wszPath )
-       If Len(wszPath) = 0 Then wszArg = Curdir & "\" & wszArg 
+       wszPath = AfxStrPathname( "PATH", wszArg )
+       If Len(wszPath) = 0 Then wszArg = ExePath & "\" & wszArg 
        
        If Dir(wszArg) > "" Then
           ' We have a valid filename so determine what type it is.
-          FF_PATHNAME( @WStr("EXTN"), @wszArg, @wszExt )
+          wszExt = AfxStrPathname( "EXTN", wszArg )
           wszExt = Ucase(wszExt)
           
           Select Case wszExt
@@ -245,8 +246,8 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                   Next
                   Dim strFill As String = ""
                   ' Remove CRLF
-                  buffer = FF_Remove(buffer, Chr(13))
-                  buffer = FF_Remove(buffer, Chr(10))
+                  buffer = AfxStrRemove(buffer, Chr(13))
+                  buffer = AfxStrRemove(buffer, Chr(10))
                   ' Remove spaces and tabs and convert to uppercase
                   buffer = Trim(Ucase(buffer), Any Chr(32, 9))
                   If (Left(buffer, 3) = "IF " And Right(buffer, 5) = " THEN") Or _
@@ -648,7 +649,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       If pDoc = 0 Then Return 0
    
       If SendMessageW( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
-         FF_PATHNAME( @WStr("NAMEX"), pDoc->Diskfilename, @wText)
+         wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBoxW( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
                            MB_YESNOCANCEL Or MB_ICONQUESTION)
          If r = IDCANCEL Then Exit Function
@@ -1031,6 +1032,7 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
    If fActivate Then
       ' Search all loaded documents
       Dim As Long nTabCount = TabCtrl_GetItemCount(gTTabCtl.hWindow)           
+      Dim As FILETIME ft
       Dim As Long i
       Dim As Double nSerial
       Dim As String sText
@@ -1044,20 +1046,26 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
             
             ' Compare the disk file date time to the value currently
             ' stored in document class.
-            nSerial = FileDateTime( *pDoc->DiskFilename )
-            If nSerial <> pDoc->DateFileTime Then
+            ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
+
+            If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
                gTTabCtl.SetTabIndexByDocumentPtr(pDoc)
                If MessageBoxW( HWND_FRMMAIN, _
-                               *pDoc->DiskFilename & vbCrLf & _ 
-                               WStr("File was changed by another application. Reload it?"), _
-                               WStr("File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                               pDoc->DiskFilename & vbCrLf & _ 
+                               L(245, "File was changed by another application. Reload it?"), _
+                               L(246, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
                   Dim As Long f = Freefile
-                  If Open(*pDoc->DiskFilename For Binary As #f) = 0 Then
+                  If Open(pDoc->DiskFilename For Binary As #f) = 0 Then
                      sText = Space(Lof(f))
                      Get #f, , sText
                      Close #f
+                     Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
+                     If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+                        sText = Mid(sText, 3)
+                        sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+                     End If   
                      pDoc->SetText( sText ) 
-                     pDoc->DateFileTime = FileDateTime( *pDoc->DiskFilename )
+                     pDoc->DateFileTime = AfxGetFileLastWriteTime(pDoc->DiskFilename)
                   End If
                End If                
             End If
@@ -1257,13 +1265,14 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
    ' Add a status bar
    Dim As HWnd hStatusbar = pWindow->AddControl("Statusbar", pWindow->hWindow, IDC_FRMMAIN_STATUSBAR)
-   Dim As Long rgParts(4)
-   rgParts(0) = pWindow->ScaleX(100)
-   rgParts(1) = pWindow->ScaleX(200)
-   rgParts(2) = pWindow->ScaleX(400)
-   rgParts(3) = pWindow->ScaleX(600)
-   rgParts(4) = -1
-   If SendMessageW( hStatusBar, SB_SETPARTS, 5, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
+   Dim As Long rgParts(5)
+   rgParts(0) = pWindow->ScaleX(100)   ' 32/64bit
+   rgParts(1) = pWindow->ScaleX(200)   ' GUI/Console
+   rgParts(2) = pWindow->ScaleX(400)   ' Line/Col
+   rgParts(3) = pWindow->ScaleX(500)   ' Normal/Module/Main/Resource
+   rgParts(4) = pWindow->ScaleX(600)   ' Unicode/ANSI
+   rgParts(5) = -1
+   If SendMessageW( hStatusBar, SB_SETPARTS, 6, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
       SendMessageW( hStatusBar, SB_SIMPLE, False, 0 )
    End If
 
@@ -1342,6 +1351,13 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):  Delete pWindow
 
 End Function
+
+
+
+
+
+
+
 
 
 

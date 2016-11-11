@@ -11,13 +11,10 @@
 ' ########################################################################################
 
 #pragma once
-
 #include once "windows.bi"
-#include once "CWindow.inc"
+#include once "Afx/CWindow.inc"
 
-USING Afx.CWindowClass
-
-NAMESPACE Afx.CPgBar3DClass
+NAMESPACE Afx
 
 ' ========================================================================================
 ' wParam colors for PGB_SETBARCOL message
@@ -172,7 +169,7 @@ END TYPE
 ' ========================================================================================
 ' CPgBar3D class constructor
 ' ========================================================================================
-CONSTRUCTOR CPgBar3D (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+PRIVATE CONSTRUCTOR CPgBar3D (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
 
@@ -227,7 +224,7 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' CPgBar3D class destructor
 ' ========================================================================================
-DESTRUCTOR CPgBar3D
+PRIVATE DESTRUCTOR CPgBar3D
    ' // Free resources
    IF m_hFont THEN DeleteObject m_hFont
    IF m_hRotateFont THEN DeleteObject m_hRotateFont
@@ -244,7 +241,7 @@ END DESTRUCTOR
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    DIM pPgBar AS CPgBar3D PTR
    DIM hDC AS HDC, ps AS PAINTSTRUCT
@@ -581,7 +578,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the handle of the control
 ' ========================================================================================
-FUNCTION CPgBar3D.hWindow () AS HWND
+PRIVATE FUNCTION CPgBar3D.hWindow () AS HWND
    FUNCTION = m_hCtl
 END FUNCTION
 ' ========================================================================================
@@ -589,7 +586,7 @@ END FUNCTION
 ' ========================================================================================
 ' Redraws the control
 ' ========================================================================================
-SUB CPgBar3D.Redraw
+PRIVATE SUB CPgBar3D.Redraw
    .SendMessageW(this.m_hCtl, PGB_REFRESH, 0, 0)
 END SUB
 ' ========================================================================================
@@ -597,7 +594,7 @@ END SUB
 ' ========================================================================================
 ' Clears the control
 ' ========================================================================================
-SUB CPgBar3D.Clear
+PRIVATE SUB CPgBar3D.Clear
    DIM txtOnOff AS LONG = .SendMessageW(this.m_hCtl, PGB_GETTXTON, 0, 0)
    .SendMessageW(this.m_hCtl, PGB_SETTXTON, 0, 0)
    .SendMessageW(this.m_hCtl, PGB_SETVALUE, 0, 1)
@@ -608,7 +605,7 @@ END SUB
 ' ========================================================================================
 ' Creates the gradient bars
 ' ========================================================================================
-SUB CPgBar3D.CreateGradientBars
+PRIVATE SUB CPgBar3D.CreateGradientBars
 
    DIM hDC AS HDC, ic AS LONG, jj AS LONG, hPen AS HPEN, kk AS SINGLE, L AS SINGLE, rc AS RECT
 
@@ -710,11 +707,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the maximum number of steps
 ' ========================================================================================
-FUNCTION CPgBar3D.GetMaxSteps () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetMaxSteps () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETMAX, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetMaxSteps (BYVAL nMaxSteps AS LONG)
+PRIVATE SUB CPgBar3D.SetMaxSteps (BYVAL nMaxSteps AS LONG)
    .SendMessageW(this.m_hCtl, PGB_SETMAX, nMaxSteps, 0)
 END SUB
 ' ========================================================================================
@@ -722,11 +719,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the step value
 ' ========================================================================================
-FUNCTION CPgBar3D.GetStep () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetStep () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETVALUE, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetStep (BYVAL nStepValue AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetStep (BYVAL nStepValue AS LONG, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETVALUE, nStepValue, fRedraw)
 END SUB
 ' ========================================================================================
@@ -735,11 +732,11 @@ END SUB
 ' Gets/sets the text mode
 ' 0 = no text, 1 = auto text (%), 2 = custom text
 ' ========================================================================================
-FUNCTION CPgBar3D.GetTextOn () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetTextOn () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETTXTON, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetTextOn (BYVAL nMode AS LONG)
+PRIVATE SUB CPgBar3D.SetTextOn (BYVAL nMode AS LONG)
    .SendMessageW(this.m_hCtl, PGB_SETTXTON, 0, nMode)
 END SUB
 ' ========================================================================================
@@ -747,11 +744,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the text position
 ' ========================================================================================
-FUNCTION CPgBar3D.GetTextPos () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetTextPos () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETTXTPOS, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetTextPos (BYVAL nPos AS LONG)
+PRIVATE SUB CPgBar3D.SetTextPos (BYVAL nPos AS LONG)
    .SendMessageW(this.m_hCtl, PGB_SETTXTPOS, nPos, 0)
 END SUB
 ' ========================================================================================
@@ -759,11 +756,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the bar color
 ' ========================================================================================
-FUNCTION CPgBar3D.GetBarColor () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetBarColor () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETBARCOL, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetBarColor (BYVAL nColor AS LONG)
+PRIVATE SUB CPgBar3D.SetBarColor (BYVAL nColor AS LONG)
    .SendMessageW(this.m_hCtl, PGB_SETBARCOL, nColor, 0)
 END SUB
 ' ========================================================================================
@@ -771,11 +768,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the bar text color
 ' ========================================================================================
-FUNCTION CPgBar3D.GetBarTextColor () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetBarTextColor () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETTXTCOLBAR, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetBarTextColor (BYVAL nColor AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetBarTextColor (BYVAL nColor AS LONG, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETTXTCOLBAR, nColor, fRedraw)
 END SUB
 ' ========================================================================================
@@ -784,11 +781,11 @@ END SUB
 ' Gets/sets the bar direction
 ' 0:left/right 1:upside down 2:bottom/top 3:top/bottom
 ' ========================================================================================
-FUNCTION CPgBar3D.GetBarDirection () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetBarDirection () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETBARDIR, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetBarDirection (BYVAL nDirection AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetBarDirection (BYVAL nDirection AS LONG, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETBARDIR, nDirection, fRedraw)
 END SUB
 ' ========================================================================================
@@ -796,11 +793,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the background color
 ' ========================================================================================
-FUNCTION CPgBar3D.GetBackColor () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetBackColor () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETCOLBKG, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetBackColor (BYVAL nColor AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetBackColor (BYVAL nColor AS LONG, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETCOLBKG, nColor, fRedraw)
 END SUB
 ' ========================================================================================
@@ -808,11 +805,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the text color
 ' ========================================================================================
-FUNCTION CPgBar3D.GetTextBackColor () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetTextBackColor () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETTXTCOLBKG, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetTextBackColor (BYVAL nColor AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetTextBackColor (BYVAL nColor AS LONG, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETTXTCOLBKG, nColor, fRedraw)
 END SUB
 ' ========================================================================================
@@ -821,11 +818,11 @@ END SUB
 ' Gets/sets the gradient direction
 ' 0:horizontal, 1:vertical
 ' ========================================================================================
-FUNCTION CPgBar3D.GetGradientDirection () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetGradientDirection () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_SETGRADIENTDIR, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetGradientDirection (BYVAL nDirection AS LONG)
+PRIVATE SUB CPgBar3D.SetGradientDirection (BYVAL nDirection AS LONG)
    .SendMessageW(this.m_hCtl, PGB_SETGRADIENTDIR, nDirection, 0)
 END SUB
 ' ========================================================================================
@@ -833,11 +830,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the angle of the font, in tenths of degree
 ' ========================================================================================
-FUNCTION CPgBar3D.GetTextAngle () AS LONG
+PRIVATE FUNCTION CPgBar3D.GetTextAngle () AS LONG
    FUNCTION = .SendMessageW(this.m_hCtl, PGB_GETTXTANGLE, 0, 0)
 END FUNCTION
 ' ========================================================================================
-SUB CPgBar3D.SetTextAngle (BYVAL nAngle AS LONG, BYVAL fRebuild AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetTextAngle (BYVAL nAngle AS LONG, BYVAL fRebuild AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETTXTANGLE, nAngle, fRebuild)
 END SUB
 ' ========================================================================================
@@ -845,7 +842,7 @@ END SUB
 ' ========================================================================================
 ' Increases step while < max
 ' ========================================================================================
-SUB CPgBar3D.StepUp
+PRIVATE SUB CPgBar3D.StepUp
    .SendMessageW(this.m_hCtl, PGB_STEPUP, 0, 0)
 END SUB
 ' ========================================================================================
@@ -853,7 +850,7 @@ END SUB
 ' ========================================================================================
 ' Decreases step while > 0
 ' ========================================================================================
-SUB CPgBar3D.StepDown
+PRIVATE SUB CPgBar3D.StepDown
    .SendMessageW(this.m_hCtl, PGB_STEPDN, 0, 0)
 END SUB
 ' ========================================================================================
@@ -861,7 +858,7 @@ END SUB
 ' ========================================================================================
 ' Builds the progress bars
 ' ========================================================================================
-SUB CPgBar3D.BuildBar (BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.BuildBar (BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_BUILDBARS, 0, fRedraw)
 END SUB
 ' ========================================================================================
@@ -869,7 +866,7 @@ END SUB
 ' ========================================================================================
 ' Set the bar text
 ' ========================================================================================
-SUB CPgBar3D.SetBarText (BYREF wszText AS WSTRING, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetBarText (BYREF wszText AS WSTRING, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETTXTBAR, CAST(WPARAM, @wszText), fRedraw)
 END SUB
 ' ========================================================================================
@@ -877,7 +874,7 @@ END SUB
 ' ========================================================================================
 ' Set the background text
 ' ========================================================================================
-SUB CPgBar3D.SetBackText (BYREF wszText AS WSTRING, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetBackText (BYREF wszText AS WSTRING, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETTXTBKG, CAST(WPARAM, @wszText), fRedraw)
 END SUB
 ' ========================================================================================
@@ -885,11 +882,11 @@ END SUB
 ' ========================================================================================
 ' Gets/sets the normal font used by the control
 ' ========================================================================================
-SUB CPgBar3D.SetFont (BYVAL hFont AS HFONT, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CPgBar3D.SetFont (BYVAL hFont AS HFONT, BYVAL fRedraw AS LONG = FALSE)
    .SendMessageW(this.m_hCtl, PGB_SETFONT, CAST(WPARAM, hFont), fRedraw)
 END SUB
 ' ========================================================================================
-FUNCTION CPgBar3D.GetFont () AS HFONT
+PRIVATE FUNCTION CPgBar3D.GetFont () AS HFONT
    FUNCTION = CAST(HFONT, .SendMessageW(this.m_hCtl, PGB_GETFONT, 0, 0))
 END FUNCTION
 ' ========================================================================================

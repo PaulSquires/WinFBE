@@ -33,6 +33,7 @@
 #Define IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION  1015
 #Define IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN  1016
 #Define IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES  1018
+#Define IDC_FRMOPTIONSEDITOR_CHKUNICODE  1019
 
 #Define IDC_FRMOPTIONSCOLORS_LSTCOLORS  1000
 #Define IDC_FRMOPTIONSCOLORS_FRMCOLORS  1001
@@ -259,12 +260,13 @@ Type clsDocument
       m_IsNewFlag       As BOOLEAN
       m_IsProjectFile   As BOOLEAN
       m_ProjectFileType As Long = FILETYPE_UNDEFINED
-      m_sFilename       As WString * MAX_PATH
-      m_DateFileTime    As Double
       m_pSci            As Any Ptr      
       m_FnListPtr       As FUNCTION_TYPE Ptr
       
    Public:
+      DiskFilename     As WString * MAX_PATH
+      DateFileTime     As FILETIME  
+
       Declare Property FnListPtr( ByVal nValue As FUNCTION_TYPE Ptr)
       Declare Property FnListPtr() As FUNCTION_TYPE Ptr
       Declare Property hWindow( ByVal _HWnd As HWnd)
@@ -275,10 +277,6 @@ Type clsDocument
       Declare Property IsProjectFile() As BOOLEAN
       Declare Property ProjectFileType( ByVal nValue As Long)
       Declare Property ProjectFileType() As Long
-      Declare Property DateFileTime( ByVal nValue As Double)
-      Declare Property DateFileTime() As Double
-      Declare Property DiskFilename( ByVal wValue As WString Ptr)
-      Declare Property DiskFilename() As WString Ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0 ) As HWnd
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
@@ -362,6 +360,7 @@ Type clsConfig
       HideCompile          As Long = False
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
+      UnicodeEncoding      As Long = False
       TabSize              As WString * 20  = "3"
       LocalizationFile     As WString * MAX_PATH = "english.lang"
       EditorFontname       As WString * MAX_PATH = "Courier New"
@@ -428,12 +427,7 @@ Type clsApp
       m_ProjectType        As Long                       
       m_IsProjectActive    As BOOLEAN
       m_IsNewProjectFlag   As BOOLEAN
-      m_wzProjectName      As WString * MAX_PATH
-      m_wzProjectFilename  As WString * MAX_PATH
-      m_wzProjectOther32   As WString * 1024       ' compile flags 32 bit compiler
-      m_wzProjectOther64   As WString * 1024       ' compile flags 64 bit compiler
       
-      m_IncludeFilename        As String 
       m_ProjectErrorOption     As Long
       m_ProjectDebug           As Long
       m_ProjectThread          As Long
@@ -443,6 +437,12 @@ Type clsApp
       m_arrDocuments(Any) As clsDocument Ptr
    
    Public:
+      ProjectName      As CWSTR
+      ProjectFilename  As CWSTR
+      ProjectOther32   As CWSTR       ' compile flags 32 bit compiler
+      ProjectOther64   As CWSTR       ' compile flags 64 bit compiler
+      IncludeFilename  As CWSTR
+      
       Declare Property ProjectType( ByVal nValue As Long)
       Declare Property ProjectType() As Long
       Declare Property SuppressNotify( ByVal nValue As BOOLEAN)
@@ -459,14 +459,6 @@ Type clsApp
       Declare Property IsProjectActive() As BOOLEAN
       Declare Property IsNewProjectFlag( ByVal nValue As BOOLEAN)
       Declare Property IsNewProjectFlag() As BOOLEAN
-      Declare Property ProjectDiskFilename( ByVal wValue As WString Ptr)
-      Declare Property ProjectDiskFilename() As WString Ptr
-      Declare Property ProjectName( ByVal wValue As WString Ptr)
-      Declare Property ProjectName() As WString Ptr
-      Declare Property ProjectOther32( ByVal wValue As WString Ptr)
-      Declare Property ProjectOther32() As WString Ptr
-      Declare Property ProjectOther64( ByVal wValue As WString Ptr)
-      Declare Property ProjectOther64() As WString Ptr
 
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
@@ -483,8 +475,6 @@ Type clsApp
       Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
       Declare Function GetMainDocumentPtr() As clsDocument Ptr
       Declare Function GetResourceDocumentPtr() As clsDocument Ptr
-      Declare Property IncludeFilename( ByVal sFilename As String)
-      Declare Property IncludeFilename() As String
 
       Declare Constructor()
       Declare Destructor()
@@ -635,8 +625,8 @@ Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVa
 Declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
 Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
 Declare Function GetFontCharSetID(ByVal pswzCharsetName As WString Ptr ) As Long
-Declare Function ProcessToCurdrive( ByVal pswzIn As WString Ptr ) As Long
-Declare Function ProcessFromCurdrive( ByVal pswzIn As WString Ptr ) As Long
+Declare Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
+Declare Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, ByVal hParent As HANDLE, ByRef TheText As WString, ByVal lParam As LPARAM = 0, ByVal iImage As Long = 0, ByVal iSelectedImage As Long = 0 ) As HANDLE
 Declare Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As Long
 Declare Function FF_Control_GetTextW( ByVal hWndControl As HWnd, ByVal pOutString As WString Ptr, ByVal pOutStringLen As Long ) As Long
@@ -644,18 +634,16 @@ Declare Function FF_ComboBox_GetTextW( ByVal hWndControl As HWnd, ByVal nIndex A
 Declare Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) As WString Ptr
 Declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) As IShellItemArray Ptr
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr
-Declare Function FF_Pathname( ByVal wOption As WString Ptr, ByVal InFilespec As WString Ptr, ByVal OutFilespec As WString Ptr ) As Long
-Declare Function FF_Replace( ByRef sMainString As String, ByRef sMatchPattern As String, ByRef sReplaceWith As String ) As String
 Declare Function FF_Toolbar_EnableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
 Declare Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
-Declare Function FF_Parse_Internal( ByRef sMainString As String, ByRef sDelimiter As String, ByRef nPosition As Long, ByRef nIsAny As BOOLEAN, ByRef nLenDelimiter As Long ) As String
-Declare Function FF_Parse( ByRef sMainString As String, ByRef sDelimiter As String, ByVal nPosition As Long ) As String
-Declare Function FF_ParseCount( ByRef sMainString As String, ByRef sDelimiter As String ) As Long
-Declare Function FF_RemoveW( ByVal pwszMainString As WString Ptr, ByVal pwszMatchPattern As WString Ptr, ByVal pwszOutFile As WString Ptr ) As Long
-Declare Function FF_Remove( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
-Declare Function FF_RemoveAny( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
-Declare Function FF_StrDelete( ByRef sMainString As String, ByRef nStart As Long, ByRef nCount As Long ) As String
-Declare Function FF_Shrink( ByRef sMainString As String, ByRef sMask As String = " " ) As String
+'Declare Function FF_Parse_Internal( ByRef sMainString As String, ByRef sDelimiter As String, ByRef nPosition As Long, ByRef nIsAny As BOOLEAN, ByRef nLenDelimiter As Long ) As String
+'Declare Function FF_Parse( ByRef sMainString As String, ByRef sDelimiter As String, ByVal nPosition As Long ) As String
+'Declare Function FF_ParseCount( ByRef sMainString As String, ByRef sDelimiter As String ) As Long
+'Declare Function FF_RemoveW( ByVal pwszMainString As WString Ptr, ByVal pwszMatchPattern As WString Ptr, ByVal pwszOutFile As WString Ptr ) As Long
+'Declare Function FF_Remove( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
+'Declare Function FF_RemoveAny( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
+'Declare Function FF_StrDelete( ByRef sMainString As String, ByRef nStart As Long, ByRef nCount As Long ) As String
+'Declare Function FF_Shrink( ByRef sMainString As String, ByRef sMask As String = " " ) As String
 Declare Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal lParam As LPARAM = 0 ) As BOOLEAN
 Declare Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As BOOLEAN
 Declare Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As Long
@@ -682,6 +670,14 @@ Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function frmProjectManager_SetListviewSelection() As Long
 Declare Function RunEXE( ByVal pwszFileExe As WString Ptr, ByVal pwszParam As WString Ptr ) As Long
+
+
+
+
+
+
+
+
 
 
 

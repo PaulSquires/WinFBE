@@ -49,15 +49,6 @@ End Function
 
 ''
 ''
-Property clsApp.IncludeFilename( ByVal sFilename As String)
-   m_IncludeFilename = sFilename
-End Property
-
-Property clsApp.IncludeFilename() As String
-   Property = m_IncludeFilename
-End Property
-
-
 Property clsApp.ProjectThread( ByVal nValue As Long)
    m_ProjectThread = nValue
 End Property
@@ -120,25 +111,6 @@ Property clsApp.ProjectErrorOption() As Long
    Property = m_ProjectErrorOption
 End Property
 
-''
-''
-Property clsApp.ProjectOther32( ByVal wValue As WString Ptr)
-   m_wzProjectOther32 = *wValue
-End Property
-
-Property clsApp.ProjectOther32() As WString Ptr
-   Property = @m_wzProjectOther32
-End Property
-
-''
-''
-Property clsApp.ProjectOther64( ByVal wValue As WString Ptr)
-   m_wzProjectOther64 = *wValue
-End Property
-
-Property clsApp.ProjectOther64() As WString Ptr
-   Property = @m_wzProjectOther64
-End Property
 
 ''
 ''
@@ -167,28 +139,6 @@ End Property
 
 ''
 ''
-Property clsApp.ProjectName( ByVal wValue As WString Ptr)
-   m_wzProjectName = *wValue
-End Property
-
-Property clsApp.ProjectName() As WString Ptr
-   Property = @m_wzProjectName
-End Property
-
-
-''
-''
-Property clsApp.ProjectDiskFilename( ByVal wValue As WString Ptr)
-   m_wzProjectFilename = *wValue
-End Property
-
-Property clsApp.ProjectDiskFilename() As WString Ptr
-   Property = @m_wzProjectFilename
-End Property
-
-
-''
-''
 Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
    Dim wFilename As WString * MAX_PATH
@@ -197,11 +147,11 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' If this a new unsaved project set flag to display SaveAs dialog.
    If this.IsNewProjectFlag Then bSaveAs = True
       
-   wFilename = *this.ProjectDiskfilename
+   wFilename = this.ProjectFilename
    
    If bSaveAs Then
       ' Display the Save File Dialog
-      FF_PATHNAME( @WStr("NAMEX"), @wFilename, @wText)
+      wText = AfxStrPathname( "NAMEX", wFilename )
       Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, @WStr("wfbe"), IDM_PROJECTSAVE)
       If pwszName Then
          wFilename = *pwszName
@@ -213,7 +163,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
    ' Delete any existing file
    If Dir(wFilename) > "" Then Kill wFilename
-   this.ProjectDiskFilename = @wFilename
+   this.ProjectFilename = wFilename
    gConfig.ProjectSaveToFile()
    
    this.IsNewProjectFlag    = False
@@ -298,11 +248,11 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
          Case FILETYPE_NORMAL:   wzFileType = ""  'L(210,"Normal")
          Case FILETYPE_RESOURCE: wzFileType = L(213,"Resource")
       End Select
-      FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
-      FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
-      FF_ListView_SetItemText( hLV, nFound, 0, @wzFile, MAX_PATH )
+      wzFile = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
+      wzFilePath = AfxStrPathname( "PATH",  pDoc->DiskFilename )
+      FF_ListView_SetItemText( hLV, nFound, 0, wzFile, MAX_PATH )
       FF_ListView_SetItemText( hLV, nFound, 1, wzFileType, MAX_PATH )
-      FF_ListView_SetItemText( hLV, nFound, 2, @wzFilePath, MAX_PATH )
+      FF_ListView_SetItemText( hLV, nFound, 2, wzFilePath, MAX_PATH )
    End If    
    
    Function = 0
@@ -323,9 +273,9 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
    ' instance of the document and update the Project Manager listview.
    pDoc->IsProjectFile = True
    
-   FF_PATHNAME( @WStr("NAMEX"), pDoc->DiskFilename, @wzFile )
-   FF_PATHNAME( @WStr("PATH"),  pDoc->DiskFilename, @wzFilePath )
-   FF_PATHNAME( @WStr("EXTN"),  pDoc->DiskFilename, @wzFileExt )
+   wzFile     = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
+   wzFilePath = AfxStrPathname( "PATH",  pDoc->DiskFilename )
+   wzFileExt  = AfxStrPathname( "EXTN",  pDoc->DiskFilename )
  
    ' Determine if the document already exists in the project. If it does not then
    ' make a determination of a default file type for this new file being added to the project.
@@ -426,7 +376,7 @@ End Function
 Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
    If pswzName = 0 Then Return 0
    For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
-      If Ucase(*m_arrDocuments(i)->DiskFilename) = Ucase(*pswzName) Then
+      If Ucase(m_arrDocuments(i)->DiskFilename) = Ucase(*pswzName) Then
          Return m_arrDocuments(i)
       End If
    Next
@@ -469,6 +419,10 @@ End Function
 '   Function = 0
 'End Function
 '
+
+
+
+
 
 
 

@@ -6,16 +6,16 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    Dim wText As WString * MAX_PATH  
     
    Dim As HWnd hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH)
-   FF_Control_GetTextW( hCtrl, gpApp->ProjectDiskFilename, MAX_PATH )
+   FF_Control_GetTextW( hCtrl, gpApp->ProjectFilename, MAX_PATH )
 
-   If Len(*gpApp->ProjectDiskFilename) = 0 Then
+   If Len(gpApp->ProjectFilename) = 0 Then
       MessageBoxW( HWnd, L(217,"Invalid project path specified."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       SetFocus hCtrl
       Function = False: Exit Function
    End If
 
-   FF_Pathname(@WStr("NAMEX"), gpApp->ProjectDiskFilename, gpApp->ProjectName)
+   gpApp->ProjectName = AfxStrPathname( "NAMEX", gpApp->ProjectFilename )
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTEXE)
    If Button_GetCheck(hCtrl) = BST_CHECKED Then gpApp->ProjectType = 0
@@ -93,7 +93,7 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
                gpApp->IsNewProjectFlag = False
                gpApp->IsProjectActive = True
                ' Update the most recently used project list 
-               UpdateMRUProjectList(gpApp->ProjectDiskFilename)
+               UpdateMRUProjectList(gpApp->ProjectFilename)
                SendMessageW HWnd, WM_CLOSE, 0, 0
             End If
             Exit Function
@@ -254,7 +254,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    If gpApp->IsNewProjectFlag Then
       ' Set the default values for a new project
       wszTitle = wszTitle & " - " & L(215, "New Project")
-      gpApp->ProjectDiskFilename = 0
+      gpApp->ProjectFilename = 0
       gpApp->ProjectName         = 0
       gpApp->ProjectType         = 0
       gpApp->ProjectErrorOption  = 0
@@ -263,11 +263,11 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
       gpApp->ProjectOther32      = 0
       gpApp->ProjectOther64      = 0
    Else
-      wszTitle = wszTitle & " - " & *gpApp->ProjectName
+      wszTitle = wszTitle & " - " & gpApp->ProjectName
    End If
    
    SetWindowTextW( hForm, wszTitle )
-   SetWindowTextW( hProjectPath, gpApp->ProjectDiskFilename )
+   SetWindowTextW( hProjectPath, gpApp->ProjectFilename )
    
    Dim nOptions(3) As Long
 
@@ -298,6 +298,9 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    Delete pWindow
 
 End Function
+
+
+
 
 
 

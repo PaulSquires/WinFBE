@@ -13,11 +13,10 @@
 ' ########################################################################################
 
 #pragma once
-
 #include once "windows.bi"
-#include once "CWindow.inc"
+#include once "Afx/CWindow.inc"
 
-NAMESPACE Afx.CLayoutClass
+NAMESPACE Afx
 
 ENUM AFX_ANCHORPOINT
    AFX_ANCHOR_NONE =  0
@@ -68,7 +67,7 @@ END TYPE
 ' ========================================================================================
 ' CLayout class constructor
 ' ========================================================================================
-CONSTRUCTOR CLayout (BYVAL hwndParent AS HWND)
+PRIVATE CONSTRUCTOR CLayout (BYVAL hwndParent AS HWND)
    m_hwndParent = hwndParent
 END CONSTRUCTOR
 ' ========================================================================================
@@ -80,7 +79,7 @@ END CONSTRUCTOR
 ' Return Value:
 '   The array index on success, or -1 on failure.
 ' ========================================================================================
-FUNCTION CLayout.GetAnchorItem (BYVAL hwndCtl AS HWND) AS LONG
+PRIVATE FUNCTION CLayout.GetAnchorItem (BYVAL hwndCtl AS HWND) AS LONG
    FUNCTION = -1
    DIM i AS LONG
    FOR i = 0 TO UBOUND(m_rgProps)
@@ -92,7 +91,7 @@ END FUNCTION
 ' ========================================================================================
 ' Anchor the control
 ' ========================================================================================
-FUNCTION CLayout.AnchorControl OVERLOAD (BYVAL hwndCtl AS HWND, BYVAL nAnchorMode AS LONG) AS BOOLEAN
+PRIVATE FUNCTION CLayout.AnchorControl OVERLOAD (BYVAL hwndCtl AS HWND, BYVAL nAnchorMode AS LONG) AS BOOLEAN
    IF .IsWindow(hwndCtl) = FALSE THEN EXIT FUNCTION
    ' // Chech if the item already exists
    DIM nItem AS LONG = this.GetAnchorItem(hwndCtl)
@@ -123,7 +122,7 @@ FUNCTION CLayout.AnchorControl OVERLOAD (BYVAL hwndCtl AS HWND, BYVAL nAnchorMod
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-FUNCTION CLayout.AnchorControl OVERLOAD (BYVAL cID AS LONG, BYVAL nAnchorMode AS LONG) AS BOOLEAN
+PRIVATE FUNCTION CLayout.AnchorControl OVERLOAD (BYVAL cID AS LONG, BYVAL nAnchorMode AS LONG) AS BOOLEAN
    DIM hwndCtl AS HWND = GetDlgItem(m_hwndParent, cID)
    IF hwndCtl THEN FUNCTION = this.AnchorControl(hwndCtl, nAnchorMode)
 END FUNCTION
@@ -132,7 +131,7 @@ END FUNCTION
 ' ========================================================================================
 ' Callback function to enumerate child windows
 ' ========================================================================================
-FUNCTION CLayout.AfxLayoutEnumChildProc (BYVAL hwndChild AS HWND, BYVAL lParam AS LPARAM) AS LONG
+PRIVATE FUNCTION CLayout.AfxLayoutEnumChildProc (BYVAL hwndChild AS HWND, BYVAL lParam AS LPARAM) AS LONG
 
    DIM rcParent AS RECT, rcChild AS RECT
    DIM nWidth AS LONG, nHeight AS LONG, x AS LONG, y AS LONG, xWidth AS LONG, yHeight AS LONG
@@ -231,7 +230,7 @@ END FUNCTION
 ' ========================================================================================
 ' Adjust the controls size and/or position
 ' ========================================================================================
-SUB CLayout.AdjustControls
+PRIVATE SUB CLayout.AdjustControls
    EnumChildWindows(m_hwndParent, CAST(WNDENUMPROC, @AfxLayoutEnumChildProc), CAST(LPARAM, @this))
 END SUB
 ' ========================================================================================

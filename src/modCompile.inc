@@ -9,7 +9,7 @@ Type COMPILE_TYPE
    OutputFilename  As WString * MAX_PATH   ' resulting exe/dll/lib name 
    CompilerPath    As WString * MAX_PATH   ' full path and file.ext to fbc.exe
    ObjFolder       As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
-   ObjFolderShort  As WString * MAX_PATH   ' ".\obj32\" or "\obj64\"
+   ObjFolderShort  As WString * MAX_PATH   ' ".\.wfbe\"
    ObjID           As WString * MAX_PATH   ' "32" or "64" appended to object name
    CompileMode     As WString * MAX_PATH 
    CompileFlags    As WString * MAX_PATH
@@ -56,8 +56,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
 
    ' Perform some pre-compile checks to see if we should continue.
-   ProcessFromCurdrive(@gConfig.FBWINCompiler32)
-   ProcessFromCurdrive(@gConfig.FBWINCompiler64)
+   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+   gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    Select Case Ucase(gConfig.DefaultCompiler)
       Case "FBC 32BIT"
          fCompile32 = True: fCompile64 = False
@@ -95,24 +95,24 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    If pDocMain = 0 Then Return 0
    
-   FF_Pathname(@WStr("FULL"), pDocMain->DiskFilename, @gCompile.MainFilename)
-   FF_Pathname(@WStr("NAME"), pDocMain->DiskFilename, @gCompile.MainName)
-   FF_Pathname(@WStr("PATH"), pDocMain->DiskFilename, @gCompile.MainFolder)
+   gCompile.MainFilename = pDocMain->DiskFilename 
+   gCompile.MainName     = AfxStrPathname( "NAME", pDocMain->DiskFilename )
+   gCompile.MainFolder   = AfxStrPathname( "PATH", pDocMain->DiskFilename )
 
    If gpApp->IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gpApp->GetResourceDocumentPtr()
-      gCompile.ResourceFile = Iif( pDocResource, *pDocResource->DiskFilename, WStr(""))
+      gCompile.ResourceFile = Iif( pDocResource, pDocResource->DiskFilename, WStr(""))
 
-      gCompile.ObjFolder = gCompile.MainFolder & "wfbe_obj\"
-      gCompile.ObjFolderShort = ".\wfbe_obj\"
+      gCompile.ObjFolder = gCompile.MainFolder & ".wfbe\"
+      gCompile.ObjFolderShort = ".\.wfbe\"
 
       If fCompile32 Then 
          gCompile.ObjID = "32.o"
-         gCompile.CompileFlags = *gpApp->ProjectOther32           
+         gCompile.CompileFlags = gpApp->ProjectOther32           
       End If
       If fCompile64 Then 
          gCompile.ObjID = "64.o"
-         gCompile.CompileFlags = *gpApp->ProjectOther64           
+         gCompile.CompileFlags = gpApp->ProjectOther64           
       End If   
       
       ' Make sure the folders exist
@@ -181,9 +181,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
-   FF_Pathname(@WStr("NAME"), gpApp->ProjectName, @wszTemp)
+   wszTemp = AfxStrPathname( "NAME", gpApp->ProjectName )
    sTemp = "_" & Str(wszTemp)
-   sTemp = FF_Replace(sTemp, " ", "_" )
+   sTemp = AfxStrReplace( sTemp, " ", "_" )
    gCompile.BatchFile = sTemp & "_compile.bat" 
    gCompile.LogFile   = sTemp & "_compile.log"
    
@@ -209,19 +209,22 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          If pDoc->IsProjectFile Then
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
-               FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
+               wszTemp = AfxStrPathname( "NAME", pDoc->DiskFilename )
                wszTemp = gCompile.ObjFolderShort & wszTemp & gCompile.ObjID
                
                ' Compare the source code file datetime to the object. If the source code
                ' date time is greater then we need to recompile it, otherwise we will simply
                ' link to the existing object file.
-               If FileDateTime(*pDoc->DiskFilename) > FileDateTime(wszTemp) Then
+               Dim As FILETIME ft1 = AfxGetFileLastWriteTime(pDoc->DiskFilename) ' source file
+               Dim As FILETIME ft2 = AfxGetFileLastWriteTime(wszTemp)  ' object file
+
+               If AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2) Then
                   Print #f, sDQ & gCompile.CompilerPath & sDQ & _
-                            " -c " & sDQ & *pDoc->DiskFilename & sDQ & _
+                            " -c " & sDQ & pDoc->DiskFilename & sDQ & _
                             " -o " & sDQ & wszTemp & sDQ;
                   Print #f, " >> " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
                End If
-               
+
             End If
          End If
       Next
@@ -241,7 +244,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          If pDoc->IsProjectFile Then
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
-               FF_Pathname(@WStr("NAME"), pDoc->DiskFilename, @wszTemp)
+               wszTemp = AfxStrPathname( "NAME", pDoc->DiskFilename )
                Print #f, " " & gCompile.ObjFolderShort & wszTemp & gCompile.ObjID;
             End If
          End If
@@ -300,13 +303,20 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Parse the log string.
    ' The compile was done using the "verbose" parameter. Save the first
    ' two lines because they contain the compiler version and copyright info.
-   NumLines = FF_ParseCount( sLogSt, vbCrLf)
+   NumLines = AfxStrParseCount( sLogSt, vbCrLf)
 
    For NextLine = 1 To NumLines                   
    
-      st = Trim(FF_Parse(sLogSt, vbCrlf, NextLine))                 
+      st = Trim(AfxStrParse(sLogSt, NextLine, vbCrlf))                 
       st_ucase = Ucase(st)
       
+      ' Deal with the situation where we might be trying to compile a 64-bit application
+      ' from a 32-bit operating system.
+      If Left(st_ucase, 16) = "THIS VERSION OF " Then
+         sOutputMsg = st
+         Exit For
+      End If   
+
       ' Save the FB version and copyright information. 
       If Left(st_ucase, 19) = "FREEBASIC COMPILER " Then
          fGoodCompile = True
@@ -350,7 +360,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          If i Then
             sTemp = Mid(st, i+4)
             i = Instr(sTemp, sDQ & " ")
-            If i Then gCompile.OutputFilename = FF_Remove(Left(sTemp, i), sDQ)
+            If i Then gCompile.OutputFilename = AfxStrRemove(Left(sTemp, i), sDQ)
          End If      
       End If
       
@@ -371,7 +381,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             (Parenthesis_End <= Error_Start)       And _
             (Error_Start > 0) Then
    
-            st1 = FF_Parse(st, "(", 1)   ' filename
+            st1 = AfxStrParse(st, 1, "(")   ' filename
             st2 = Mid( st, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
             st3 = Mid(st, Error_Start+1)  ' error message
 
@@ -467,6 +477,17 @@ Function RunEXE( ByVal pwszFileExe As WString Ptr, _
 
    Function = 0
 End Function
+
+
+
+
+
+
+
+
+
+
+
 
 
 

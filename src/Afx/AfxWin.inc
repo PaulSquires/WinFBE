@@ -10,376 +10,69 @@
 ' ########################################################################################
 
 #pragma once
+#INCLUDE ONCE "windows.bi"
 #INCLUDE ONCE "win/commctrl.bi"
 #INCLUDE ONCE "win/ole2.bi"
+#INCLUDE ONCE "win/psapi.bi"
+#INCLUDE ONCE "win/shlobj.bi"
+#INCLUDE ONCE "win/KnownFolders.bi"
+#INCLUDE ONCE "win/commdlg.bi"
+#INCLUDE ONCE "win/cderr.bi"
 
-' // The definition for BSTR in the FreeBASIC headers was incorrectly changed to WCHAR
-#ifndef AFX_BSTR
-   #define AFX_BSTR WSTRING PTR
-#endif
+#INCLUDE ONCE "Afx/AfxPath.inc"
+#INCLUDE ONCE "Afx/AfxStr.inc"
 
-' General purpose
-DECLARE SUB AfxMsg (BYVAL pwszText AS WSTRING PTR)
-DECLARE SUB AfxMsgV (BYVAL pvar AS VARIANT PTR)
-DECLARE FUNCTION AfxUcode OVERLOAD (BYREF ansiStr AS CONST STRING, BYVAL nCodePage AS LONG = 0) AS AFX_BSTR
-DECLARE FUNCTION AfxUcode OVERLOAD (BYREF ansiStr AS CONST STRING, BYVAL pwszStr AS WSTRING PTR, BYVAL cbSize AS LONG, BYVAL nCodePage AS LONG = 0) AS LONG
-DECLARE FUNCTION AfxUcodeV (BYREF ansiStr AS CONST STRING, BYVAL nCodePage AS LONG = 0) AS VARIANT
-DECLARE FUNCTION AfxAcode (BYVAL pwszStr AS WSTRING PTR, BYVAL nCodePage AS LONG = 0) AS STRING
-DECLARE FUNCTION AfxAcodeB (BYVAL pbstr AS AFX_BSTR, BYVAL nCodePage AS LONG = 0) AS STRING
-DECLARE FUNCTION AfxAcodeV (BYVAL pvar AS VARIANT PTR, BYVAL nCodePage AS LONG = 0) AS STRING
-DECLARE FUNCTION AfxWindowsVersion () AS LONG
-DECLARE FUNCTION AfxWindowsPlatform () AS LONG
-DECLARE FUNCTION AfxWindowsBuild () AS LONG
-DECLARE FUNCTION AfxIsPlatformNT () AS BOOLEAN
-DECLARE FUNCTION AfxGetFileVersion (BYVAL pwszFileName AS WSTRING PTR) AS LONG
-DECLARE FUNCTION AfxComCtlVersion () AS LONG
-DECLARE SUB AfxDoEvents (BYVAL hwnd AS HWND = NULL)
-DECLARE SUB AfxPumpMessages
-DECLARE FUNCTION AfxFileExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
-DECLARE FUNCTION AfxFolderExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
-DECLARE FUNCTION AfxGetSystemDllPath (BYVAL pwszDllName AS WSTRING PTR, BYVAL pwszDllPath AS WSTRING PTR, BYVAL cchCount AS DWORD) AS LONG
-DECLARE FUNCTION AfxControlRunDLL (BYVAL hwnd AS HWND, BYVAL hInst AS HINSTANCE, BYVAL cmd AS WSTRING PTR, BYVAL nCmdShow AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxSaveTempFile (BYVAL pwszBuffer AS WSTRING PTR, BYREF wszTmpFileName AS WSTRING, BYREF wszExtension AS WSTRING) AS BOOLEAN
-
-' Window
-DECLARE FUNCTION AfxGetWindowText OVERLOAD (BYVAL hwnd AS HWND) AS AFX_BSTR
-DECLARE FUNCTION AfxGetWindowText OVERLOAD (BYVAL hwnd AS HWND, BYVAL lpString AS LPWSTR, BYVAL nMaxCount AS LONG) AS LONG
-DECLARE FUNCTION AfxGetWindowTextLength (BYVAL hwnd AS HWND) AS LONG
-DECLARE FUNCTION AfxSetWindowText (BYVAL hwnd AS HWND, BYVAL pwszText AS WSTRING PTR) AS BOOLEAN
-DECLARE FUNCTION AfxSetWindowTextUtf8 (BYVAL hwnd AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
-DECLARE FUNCTION AfxGetWindowStyle (BYVAL hwnd AS HWND) AS DWORD
-DECLARE FUNCTION AfxGetWindowExStyle (BYVAL hwnd AS HWND) AS DWORD
-DECLARE FUNCTION AfxAddWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
-DECLARE FUNCTION AfxAddWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
-DECLARE FUNCTION AfxRemoveWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
-DECLARE FUNCTION AfxRemoveWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
-DECLARE FUNCTION AfxGetWindowWidth (BYVAL hwnd AS HWND) AS LONG
-DECLARE FUNCTION AfxGetWindowHeight (BYVAL hwnd AS HWND) AS LONG
-DECLARE FUNCTION AfxGetWindowClientWidth (BYVAL hwnd AS HWND) AS LONG
-DECLARE FUNCTION AfxGetWindowClientHeight (BYVAL hwnd AS HWND) AS LONG
-DECLARE SUB AfxCenterWindow (BYVAL hwnd AS HWND = NULL, BYVAL hwndParent AS HWND = NULL)
-DECLARE SUB AfxSetWindowClientSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL rxRatio AS SINGLE = 1, BYVAL ryRatio AS SINGLE = 1)
-DECLARE SUB AfxRedrawWindow (BYVAL hwnd AS HWND)
-DECLARE FUNCTION AfxRedrawNonClientArea (BYVAL hwnd AS HWND) AS BOOLEAN
-DECLARE FUNCTION AfxForwardSizeMessage (BYVAL hwnd AS HWND, BYVAL nResizeType AS DWORD, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS LRESULT
-DECLARE FUNCTION AfxSetWindowLocation (BYVAL hwnd AS HWND, BYVAL nLeft AS LONG, BYVAL nTop AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxSetWindowSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxShowWindowState (BYVAL hwnd AS HWND, BYVAL nShowState AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxSetWindowIcon (BYVAL hwnd AS HWND, BYVAL nIconType AS LONG, BYVAL hIcon AS HICON) AS HICON
-DECLARE SUB AfxForceSetForegroundWindow (BYVAL hwnd AS HWND)
-DECLARE SUB AfxForceVisibleDisplay (BYVAL hwnd AS HWND)
-DECLARE FUNCTION AfxGetTopLevelWindow (BYVAL hwnd AS HWND) AS HWND
-DECLARE FUNCTION AfxGetTopLevelParent (BYVAL hwnd AS HWND) AS HWND
-DECLARE FUNCTION AfxGetFormHandle (BYVAL hwnd AS HWND) AS HWND
-DECLARE FUNCTION AfxGetControlHandle (BYVAL hwnd AS HWND, BYVAL wCtrlID AS WORD) AS HWND
-DECLARE FUNCTION AfxGetTopEnabledWindow () AS HWND
-DECLARE FUNCTION AfxGethWndFromPID (BYVAL PID AS DWORD) AS HWND
-DECLARE SUB AfxGetWindowLocation (BYVAL hwnd AS HWND, BYVAL nLeft AS LONG PTR, BYVAL nTop AS LONG PTR)
-DECLARE FUNCTION AfxSetDlgMsgResult(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL result AS LONG) AS BOOLEAN
-
-' DPI related procedures
-DECLARE FUNCTION AfxSetProcessDPIAware () AS BOOLEAN
-DECLARE FUNCTION AfxIsProcessDPIAware () AS BOOLEAN
-DECLARE FUNCTION AfxUseDpiScaling () AS BOOLEAN
-DECLARE FUNCTION AfxLogPixelsX () AS LONG
-DECLARE FUNCTION AfxLogPixelsY () AS LONG
-DECLARE FUNCTION AfxScaleRatioX () AS SINGLE
-DECLARE FUNCTION AfxScaleRatioY () AS SINGLE
-DECLARE FUNCTION AfxScaleX (BYVAL cx AS SINGLE) AS SINGLE
-DECLARE FUNCTION AfxScaleY (BYVAL cy AS SINGLE) AS SINGLE
-DECLARE FUNCTION AfxUnscaleX (BYVAL cx AS SINGLE) AS SINGLE
-DECLARE FUNCTION AfxUnscaleY (BYVAL cy AS SINGLE) AS SINGLE
-DECLARE FUNCTION AfxIsResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxIsDPIResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS LONG) AS BOOLEAN
-DECLARE FUNCTION AfxLoadIconMetric (BYVAL hinst AS HINSTANCE, BYVAL pszName AS PCWSTR, BYVAL lims AS LONG, BYVAL phico AS HICON PTR) AS HRESULT
-
-' Metric conversions
-DECLARE FUNCTION AfxHiMetricToPixelsX (BYVAL hm AS LONG) AS LONG
-DECLARE FUNCTION AfxHiMetricToPixelsY (BYVAL hm AS LONG) AS LONG
-DECLARE FUNCTION AfxPixelsToHiMetricX (BYVAL cx AS LONG) AS LONG
-DECLARE FUNCTION AfxPixelsToHiMetricY (BYVAL cy AS LONG) AS LONG
-DECLARE FUNCTION AfxPixelsToPointsX (BYVAL pix AS LONG) AS LONG
-DECLARE FUNCTION AfxPixelsToPointsY (BYVAL pix AS LONG) AS LONG
-DECLARE FUNCTION AfxPointsToPixelsX (BYVAL pts AS LONG) AS LONG
-DECLARE FUNCTION AfxPointsToPixelsY (BYVAL pts AS LONG) AS LONG
-DECLARE FUNCTION AfxPixelsToTwipsX (BYVAL nPixels AS LONG) AS LONG
-DECLARE FUNCTION AfxPixelsToTwipsY (BYVAL nPixels AS LONG) AS LONG
-DECLARE FUNCTION AfxTwipsToPixelsX (BYVAL nTwips AS LONG) AS LONG
-DECLARE FUNCTION AfxTwipsToPixelsY (BYVAL nTwips AS LONG) AS LONG
-DECLARE FUNCTION AfxTwipsPerPixelX () AS LONG
-DECLARE FUNCTION AfxTwipsPerPixelY () AS LONG
-DECLARE FUNCTION AfxPointSizeToDip (BYVAL ptsize AS SINGLE) AS SINGLE
-
-' Clipboard
-DECLARE FUNCTION AfxClearClipboard () AS LONG
-DECLARE FUNCTION AfxGetClipboardData (BYVAL cfFormat AS DWORD) AS HGLOBAL
-DECLARE FUNCTION AfxSetClipboardData (BYVAL cfFormat AS DWORD, BYVAL hData AS HANDLE) AS HANDLE
-DECLARE FUNCTION AfxGetClipboardText () AS AFX_BSTR
-DECLARE FUNCTION AfxSetClipboardText (BYREF wszText AS WSTRING) AS HANDLE
-
-' Fonts
-DECLARE FUNCTION AfxGetWindowFont (BYVAL hwnd AS HWND) AS HFONT
-DECLARE SUB AfxSetWindowFont (BYVAL hwnd AS HWND, BYVAL hFont AS HFONT, BYVAL fRedraw AS LONG = CTRUE)
-DECLARE FUNCTION AfxGetWindowsFontInfo (BYVAL nType AS LONG, BYVAL plfw AS LOGFONTW PTR) AS BOOLEAN
-DECLARE FUNCTION AfxGetWindowsFontPointSize (BYVAL nType AS LONG) AS LONG
-DECLARE FUNCTION AfxGetFontPointSize (BYVAL nHeight AS LONG) AS LONG
-DECLARE FUNCTION AfxGetFontHeight (BYVAL nPointSize AS LONG) AS LONG
-DECLARE FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName AS WSTRING) AS HFONT
-DECLARE FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LONG, BYVAL nValue AS LONG) AS HFONT
-DECLARE FUNCTION AfxCreateFont (BYREF wszFaceName AS WSTRING, BYVAL lPointSize AS LONG, BYVAL DPI AS LONG = 96, _
-   BYVAL lWeight AS LONG = 0, BYVAL bItalic AS UBYTE = FALSE, BYVAL bUnderline AS UBYTE = FALSE, _
-   BYVAL bStrikeOut AS UBYTE = FALSE, BYVAL bCharSet AS UBYTE = DEFAULT_CHARSET) AS HFONT
-
-' DIBs
-DECLARE FUNCTION AfxCreateDIBSection (BYVAL hDC AS HDC, BYVAL nWidth AS DWORD, BYVAL nHeight AS DWORD, BYVAL bpp AS LONG = 0, BYVAL ppvBits AS ANY PTR PTR = NULL) AS HBITMAP
-DECLARE FUNCTION AfxDibLoadImage (BYVAL pwszFileName AS WSTRING PTR) AS BITMAPFILEHEADER PTR
-DECLARE FUNCTION AfxDibSaveImage (BYVAL pwszFileName AS WSTRING PTR, BYVAL pbmfh AS BITMAPFILEHEADER PTR) AS BOOLEAN
-
-' Bitmaps
-DECLARE FUNCTION AfxGetBitmapWidth (BYVAL hBitmap AS HBITMAP) AS LONG
-DECLARE FUNCTION AfxGetBitmapHeight (BYVAL hBitmap AS HBITMAP) AS LONG
-DECLARE FUNCTION AfxCaptureDisplay () AS HBITMAP
-DECLARE FUNCTION AfxDrawBitmap (BYVAL hDC AS HDC, BYVAL xStart AS LONG, BYVAL yStart AS LONG, BYVAL hBitmap AS HBITMAP) AS BOOLEAN
+USING Afx
 
 ' ========================================================================================
 ' Helper procedures to display feedback and errors
 ' ========================================================================================
-PRIVATE SUB AfxMsg (BYVAL pwszText AS WSTRING PTR)
-   IF pwszText <> NULL THEN MessageBoxW(GetActiveWindow, pwszText, "", MB_APPLMODAL) ELSE MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL)
-END SUB
-#define AfxMsgN(num) AfxMsg(WSTR(num))
-' ========================================================================================
-' ========================================================================================
-PRIVATE SUB AfxMsgV (BYVAL pvar AS VARIANT PTR)
-   IF pvar <> NULL THEN MessageBoxW(GetActiveWindow, pvar->bstrVal, "", MB_APPLMODAL) ELSE MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL)
-END SUB
-' ========================================================================================
-' ========================================================================================
-PRIVATE SUB AfxMsgUtf8 (BYVAL strUtf8Text AS STRING)
-   DIM pbstrText AS AFX_BSTR
-   pbstrText = AfxUcode(strUtf8Text, CP_UTF8)
-   IF pbstrText THEN
-      MessageBoxW(NULL, pbstrText, "", MB_APPLMODAL)
-      SysFreeString pbstrText
-   ELSE
-      MessageBoxW(NULL, "", "", MB_APPLMODAL)
-   END IF
-END SUB
-' ========================================================================================
-
-' ========================================================================================
-' Translates ansi bytes to unicode bytes.
-' Parameters:
-' - ansiStr = An ansi or UTF8 string.
-' - nCodePage = The code page used in the conversion, e.g. 1251 for Russian.
-'   If you specify CP_UTF8, the returned string will be UTF8 encoded.
-'   If you don't pass an unicode page, the function will use CP_ACP (0), which is the
-'   system default Windows ANSI code page.
-' Return value:
-'   An unicode BSTR. You must free this handle with SysFreeString when no longer needed.
-' Remarks:
-'   For conversions of ansi strings containing only characters of the Latin alphabet
-'   you can use SysAllocString instead.
-' Usage example (Russian ANSI string to BSTR):
-'   DIM bs AS AFX_BSTR
-'   bs = AfxUcode(CHR(209, 229, 236, 229, 237), 1251)
-'   MessageBoxW 0, bs, "", MB_OK
-'   IF bs THEN SysFreeString(bs)
-' Usage example (Russian UTF8 string to BSTR):
-'   DIM bs AS AFX_BSTR
-'   bs = AfxUcode("Дми́трий Дми́триевич", CP_UTF8)
-'   MessageBoxW 0, bs, "", MB_OK
-'   IF bs THEN SysFreeString(bs)
-' ========================================================================================
-PRIVATE FUNCTION AfxUcode OVERLOAD (BYREF ansiStr AS CONST STRING, BYVAL nCodePage AS LONG = 0) AS AFX_BSTR
-   DIM pbstr AS AFX_BSTR
-   IF nCodePage = CP_UTF8 THEN
-      DIM dwLen AS DWORD = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
-      IF dwLen THEN
-         pbstr = SysAllocString(WSTR(SPACE(dwLen)))
-         dwLen = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), pbstr, dwLen * 2)
-      END IF
-   ELSE
-      pbstr = SysAllocString(WSTR(SPACE(LEN(ansiStr))))
-      MultiByteToWideChar(nCodePage, MB_PRECOMPOSED, STRPTR(ansiStr), LEN(ansiStr), pbstr, LEN(ansiStr) * 2)
-   END IF
-   FUNCTION = pbstr
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYVAL pwszText AS WSTRING PTR, BYVAL uType AS DWORD = 0) AS LONG
+   IF pwszText <> NULL THEN FUNCTION = MessageBoxW(GetActiveWindow, pwszText, "Message", MB_APPLMODAL OR uType) ELSE FUNCTION = MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL OR uType)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-' Like the prior function, but returning a VT_BSTR variant.
-' Usage example (Russian ANSI string to BSTR):
-'   DIM v AS VARIANT
-'   v = AfxUcode(CHR(209, 229, 236, 229, 237), 1251)
-'   AfxMsgV(@v)
-'   VariantClear(@v)
-' Usage example (Russian UTF8 string to BSTR):
-'   DIM v AS VARIANT
-'   v = AfxUcode("Дми́трий Дми́триевич", CP_UTF8)
-'   AfxMsgV(@v)
-'   VariantClear(@v)
-' ========================================================================================
-PRIVATE FUNCTION AfxUcodeV (BYREF ansiStr AS CONST STRING, BYVAL nCodePage AS LONG = 0) AS VARIANT
-   DIM v AS VARIANT
-   V_VT(@v) = VT_BSTR
-   V_BSTR(@v) = AfxUcode(ansiStr, nCodePage)
-   FUNCTION = v
-END FUNCTION
-' ========================================================================================
-' ========================================================================================
-' Translates ansi bytes to unicode bytes.
-' Parameters:
-' - ansiStr = An ansi or UTF8 string.
-' - pwszStr = Pointer to a WSTRING that receives the converted string.
-' - cbSize = Size in bytes of the buffer pointed by pwszStr.
-'   If this parameter is 0 and/or wszStr is null, the function returns the required buffer
-'   size, in characters, including any terminating null character.
-' - nCodePage = The code page used in the conversion, e.g. 1251 for Russian.
-'   If you specify CP_UTF8, the returned string will be UTF8 encoded.
-'   If you don't pass an unicode page, the function will use CP_ACP (0), which is the
-'   system default Windows ANSI code page.
-' Return value:
-'   The number of unicode characters copied.
-' Remarks:
-'   For conversions of ansi strings containing only characters of the Latin alphabet
-'   it is easier to use the FreeBASIC function WSTR.
-' Usage example (Russian ANSI string to WSTRING)
-'   DIM wszText AS WSTRING * 260
-'   AfxUcode(CHR(209, 229, 236, 229, 237), @wszText, SIZEOF(wszText), 1251)
-'   MessageBoxW 0, wszText, "", MB_OK
-' Usage example (Russian UTF8 string to WSTRING)
-'   DIM wszText AS WSTRING * 260
-'   AfxUcode("Дми́трий Дми́триевич", @wszText, SIZEOF(wszText), CP_UTF8)
-'   MessageBoxW 0, wszText, "", MB_OK
-' ========================================================================================
-PRIVATE FUNCTION AfxUcode OVERLOAD (BYREF ansiStr AS CONST STRING, BYVAL pwszStr AS WSTRING PTR, BYVAL cbSize AS LONG, BYVAL nCodePage AS LONG = 0) AS LONG
-   DIM dwLen AS DWORD
-   IF pwszStr = NULL OR cbSize = 0 THEN
-      dwLen = MultiByteToWideChar(nCodePage, MB_PRECOMPOSED, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
-      RETURN dwLen
-   END IF
-   IF nCodePage = CP_UTF8 THEN
-      dwLen = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), pwszStr, cbSize)
-   ELSE
-      dwLen = MultiByteToWideChar(nCodePage, MB_PRECOMPOSED, STRPTR(ansiStr), LEN(ansiStr), pwszStr, cbSize)
-   END IF
-   FUNCTION = dwLen
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYREF cws AS CWSTR, BYVAL uType AS DWORD = 0) AS LONG
+   FUNCTION = MessageBoxW(GetActiveWindow, *cws, "Message", MB_APPLMODAL OR uType)
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Translates unicode bytes to ansi bytes.
-' Parameters:
-' - wszStr = The unicode string to convert
-' - nCodePage = The code page used in the conversion, e.g. 1251 for Russian.
-'   If you specify CP_UT8, it is assumed that ansiStr contains an UTF8 encoded string.
-'   If you don't pass an unicode page, the function will use CP_ACP (0), which is the
-'   system default Windows ANSI code page.
-' Return value:
-'   The converted string.
-' Usage example (Russian WSTRING to ANSI string)
-'   DIM wszText AS WSTRING * 260
-'   AfxUcode(CHR(209, 229, 236, 229, 237), @wszText, SIZEOF(wszText), 1251)
-'   MessageBoxW 0, wszText, "", MB_OK
-'   DIM s AS STRING
-'   s = AfxAcode(@wszText, 1251)
-'   MessageBoxW 0, s, "", MB_OK
-' Usage example (Russian WSTRING to UTF8 string)
-'   DIM wszText AS WSTRING * 260
-'   AfxUcode("Дми́трий Дми́триевич", @wszText, SIZEOF(wszText), CP_UTF8)
-'   MessageBoxW 0, wszText, "", MB_OK
-'   DIM s AS STRING
-'   s = AfxAcode(@wszText, CP_UTF8)
-'   MessageBoxW 0, s, "", MB_OK
-' Remarks:
-'   The function can also be used with AFX_BSTR unicode strings.
+' Processes pending Windows messages.
+' Call this procedure if you are performing a tight FOR/NEXT or DO/LOOP and need to allow
+' your application to be responsive to user input.
 ' ========================================================================================
-PRIVATE FUNCTION AfxAcode (BYVAL pwszStr AS WSTRING PTR, BYVAL nCodePage AS LONG = 0) AS STRING
-   DIM ansiStr AS STRING
-   IF pwszStr = NULL THEN EXIT FUNCTION
-   IF nCodePage = CP_UTF8 THEN
-      DIM dwLen AS DWORD = WideCharToMultiByte(CP_UTF8, 0, pwszStr, LEN(*pwszStr), NULL, 0, NULL, NULL)
-      IF dwLen THEN
-         ansiStr = SPACE(dwLen)
-         dwLen = WideCharToMultiByte(CP_UTF8, 0, pwszStr, LEN(*pwszStr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
+PRIVATE SUB AfxDoEvents (BYVAL hwnd AS HWND = NULL)
+   DIM uMsg AS MSG
+   IF hwnd = NULL THEN hwnd = GetActiveWindow
+   WHILE PeekMessage(@uMsg, NULL, 0, 0, PM_REMOVE)
+      ' // Determines whether a message is intended for the specified
+      ' // dialog box and, if it is, processes the message.
+      IF IsDialogMessageW(hwnd, @uMsg) = 0 THEN
+         ' // Translates virtual-key messages into character messages.
+         TranslateMessage @uMsg
+         ' // Dispatches a message to a window procedure.
+         DispatchMessageW @uMsg
       END IF
-   ELSE
-      ansiStr = SPACE(LEN(*pwszStr))
-      WideCharToMultiByte(nCodePage, 0, pwszStr, LEN(*pwszStr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
-   ENDIF
-   FUNCTION = ansiStr
-END FUNCTION
-' ========================================================================================
-' ========================================================================================
-' Translates unicode bytes to ansi bytes.
-' Parameters:
-' - pbstr = The unicode BSTR to convert
-' - nCodePage = The code page used in the conversion, e.g. 1251 for Russian.
-'   If you specify CP_UT8, it is assumed that ansiStr contains an UTF8 encoded string.
-'   If you don't pass an unicode page, the function will use CP_ACP (0), which is the
-'   system default Windows ANSI code page.
-' Return value:
-'   The converted string.
-' Usage example (Russian BSTR string to ANSI string):
-'   DIM bs AS AFX_BSTR
-'   bs = AfxUcode(CHR(209, 229, 236, 229, 237), 1251)
-'   MessageBoxW 0, bs, "", MB_OK
-'   DIM s AS STRING
-'   s = AfxAcodeB(bs, 1251)
-'   MessageBoxW 0, s, "", MB_OK
-'   IF bs THEN SysFreeString(bs)
-' Usage example (Russian BSTR string to Russian UTF8 string)
-'   DIM bs AS AFX_BSTR
-'   bs = AfxUcode("Дми́трий Дми́триевич", CP_UTF8)
-'   MessageBoxW 0, bs, "", MB_OK
-'   DIM s AS STRING
-'   s = AfxAcodeB(bs, CP_UTF8)
-'   MessageBoxW 0, s, "", MB_OK
-'   IF bs THEN SysFreeString(bs)
-' ========================================================================================
-PRIVATE FUNCTION AfxAcodeB (BYVAL pbstr AS AFX_BSTR, BYVAL nCodePage AS LONG = 0) AS STRING
-   DIM ansiStr AS STRING
-   IF nCodePage = CP_UTF8 THEN
-      DIM dwLen As DWORD = WideCharToMultiByte(CP_UTF8, 0, pbstr, SysStringLen(pbstr), NULL, 0, NULL, NULL)
-      IF dwLen THEN
-         ansiStr = SPACE(dwLen)
-         dwLen = WideCharToMultiByte(CP_UTF8, 0, pbstr, SysStringLen(pbstr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
-      END IF
-   ELSE
-      ansiStr = SPACE(SysStringLen(pbstr))
-      WideCharToMultiByte(nCodePage, 0, pbstr, SysStringLen(pbstr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
-   ENDIF
-   FUNCTION = ansiStr
-END FUNCTION
-' ========================================================================================
-' ========================================================================================
-' Like the previous functions, but accepting a VT_BSTR variant as input.
-' ========================================================================================
-PRIVATE FUNCTION AfxAcodeV (BYVAL pvar AS VARIANT PTR, BYVAL nCodePage AS LONG = 0) AS STRING
-   DIM ansiStr AS STRING
-   IF pvar = NULL OR pvar->vt <> VT_BSTR OR pvar->bstrVal = NULL THEN EXIT FUNCTION
-   IF nCodePage = CP_UTF8 THEN
-      DIM dwLen AS DWORD = WideCharToMultiByte(CP_UTF8, 0, pvar->bstrVal, SysStringLen(pvar->bstrVal), NULL, 0, NULL, NULL)
-      IF dwLen THEN
-         ansiStr = SPACE(dwLen)
-         dwLen = WideCharToMultiByte(CP_UTF8, 0, pvar->bstrVal, SysStringLen(pvar->bstrVal), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
-      END IF
-   ELSE
-      ansiStr = SPACE(SysStringLen(pvar->bstrVal))
-      WideCharToMultiByte(nCodePage, 0, pvar->bstrVal, SysStringLen(pvar->bstrVal), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
-   ENDIF
-   FUNCTION = ansiStr
-END FUNCTION
+   WEND
+END SUB
 ' ========================================================================================
 
-' // Unicode UTF16 to Unicode UTF8
-#define AfxUcodeToUtf8(w) AfxAcode(w, CP_UTF8)
-#define AfxUtf16ToUtf8(w) AfxAcode(w, CP_UTF8)
-' // Unicode UTF8 to Unicode UTF16
-#define AfxUtf8ToUcode(s) AfxUcode(s, CP_UTF8)
-#define AfxUtf8ToUtf16(s) AfxUcode(s, CP_UTF8)
-' // Variant to Unicode UTF8
-#define AfxVarToUtf8(v) AfxAcodeV(v, CP_UTF8)
+' ========================================================================================
+' Processes pending Windows messages.
+' Call this procedure if you are performing a tight FOR/NEXT or DO/LOOP and need to allow
+' your application to be responsive to user input.
+' ========================================================================================
+PRIVATE SUB AfxPumpMessages
+   DIM uMsg AS MSG
+   WHILE PeekMessage(@uMsg, NULL, 0, 0, PM_REMOVE)
+      ' // Translates virtual-key messages into character messages.
+      TranslateMessage @uMsg
+      ' // Dispatches a message to a window procedure.
+      DispatchMessageW @uMsg
+   WEND
+END SUB
+' ========================================================================================
 
 ' ========================================================================================
 ' Returns the Windows version
@@ -472,120 +165,281 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Processes pending Windows messages.
-' Call this procedure if you are performing a tight FOR/NEXT or DO/LOOP and need to allow
-' your application to be responsive to user input.
+' Retrieves the path of the Windows directory.
 ' ========================================================================================
-PRIVATE SUB AfxDoEvents (BYVAL hwnd AS HWND = NULL)
-   DIM uMsg AS MSG
-   IF hwnd = NULL THEN hwnd = GetActiveWindow
-   WHILE PeekMessage(@uMsg, NULL, 0, 0, PM_REMOVE)
-      ' // Determines whether a message is intended for the specified
-      ' // dialog box and, if it is, processes the message.
-      IF IsDialogMessageW(hwnd, @uMsg) = 0 THEN
-         ' // Translates virtual-key messages into character messages.
-         TranslateMessage @uMsg
-         ' // Dispatches a message to a window procedure.
-         DispatchMessageW @uMsg
-      END IF
-   WEND
-END SUB
-' ========================================================================================
-
-' ========================================================================================
-' Processes pending Windows messages.
-' Call this procedure if you are performing a tight FOR/NEXT or DO/LOOP and need to allow
-' your application to be responsive to user input.
-' ========================================================================================
-PRIVATE SUB AfxPumpMessages
-   DIM uMsg AS MSG
-   WHILE PeekMessage(@uMsg, NULL, 0, 0, PM_REMOVE)
-      ' // Translates virtual-key messages into character messages.
-      TranslateMessage @uMsg
-      ' // Dispatches a message to a window procedure.
-      DispatchMessageW @uMsg
-   WEND
-END SUB
-' ========================================================================================
-
-' ========================================================================================
-' Searches a directory for a file or subdirectory with a name that matches a specific name
-' (or partial name if wildcards are used).
-' Parameter:
-' - pwszFileSpec: The directory or path, and the file name, which can include wildcard
-'   characters, for example, an asterisk (*) or a question mark (?).
-'   This parameter should not be NULL, an invalid string (for example, an empty string or a
-'   string that is missing the terminating null character), or end in a trailing backslash (\).
-'   If the string ends with a wildcard, period (.), or directory name, the user must have
-'   access permissions to the root and all subdirectories on the path. To extend the limit
-'   of MAX_PATH wide characters to 32,767 wide characters, prepend "\\?\" to the path.
-' Return value:
-'   Returns TRUE if the specified file exists or FALSE otherwise.
-' Remarks:
-'   Prepending the string "\\?\" does not allow access to the root directory.
-'   On network shares, you can use a pwszFileSpec in the form of the following:
-'   "\\server\service\*". However, you cannot use a pwszFileSpec that points to the share
-'   itself; for example, "\\server\service" is not valid.
-'   To examine a directory that is not a root directory, use the path to that directory,
-'   without a trailing backslash. For example, an argument of "C:\Windows" returns information
-'   about the directory "C:\Windows", not about a directory or file in "C:\Windows".
-'   To examine the files and directories in "C:\Windows", use an pwszFileSpec of "C:\Windows\*".
-'   Be aware that some other thread or process could create or delete a file with this name
-'   between the time you query for the result and the time you act on the information.
-'   If this is a potential concern for your application, one possible solution is to use
-'   the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING
-'   (which fails if the file does not exist).
-' ========================================================================================
-PRIVATE FUNCTION AfxFileExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
-   DIM fd AS WIN32_FIND_DATAW
-   IF pwszFileSpec = NULL THEN EXIT FUNCTION
-   DIM hFind AS HANDLE = FindFirstFileW(pwszFileSpec, @fd)
-   IF hFind = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
-   FindClose hFind
-   ' // Make sure that it is not a directory or a temporary file
-   IF (fd.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY AND _
-      (fd.dwFileAttributes AND FILE_ATTRIBUTE_TEMPORARY) <> FILE_ATTRIBUTE_TEMPORARY THEN
-      FUNCTION = TRUE
-   END IF
+PRIVATE FUNCTION AfxGetWinDir () AS CWSTR
+   DIM wszWinDir AS WSTRING * MAX_PATH
+   GetWindowsDirectoryW wszWinDir, SIZEOF(wszWinDir)
+   RETURN wszWinDir
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Searches a directory for a file or subdirectory with a name that matches a specific name
-' (or partial name if wildcards are used).
-' Parameter:
-' - pwszFileSpec: The directory or path, and the file name, which can include wildcard
-'   characters, for example, an asterisk (*) or a question mark (?).
-'   This parameter should not be NULL, an invalid string (for example, an empty string or a
-'   string that is missing the terminating null character), or end in a trailing backslash (\).
-'   If the string ends with a wildcard, period (.), or directory name, the user must have
-'   access permissions to the root and all subdirectories on the path. To extend the limit
-'   of MAX_PATH wide characters to 32,767 wide characters, prepend "\\?\" to the path.
-' Return value:
-'   Returns TRUE if the specified folder exists or FALSE otherwise.
-' Remarks
-'   Prepending the string "\\?\" does not allow access to the root directory.
-'   On network shares, you can use an btrFileName in the form of the following: "\\server\service\*".
-'   However, you cannot use an btrFileName that points to the share itself; for example,
-'   "\\server\service" is not valid.
-'   To examine a directory that is not a root directory, use the path to that directory,
-'   without a trailing backslash. For example, an argument of "C:\Windows" returns information
-'   about the directory "C:\Windows", not about a directory or file in "C:\Windows".
-'   To examine the files and directories in "C:\Windows", use an btrFileName of "C:\Windows\*".
-'   Be aware that some other thread or process could create or delete a file with this name
-'   between the time you query for the result and the time you act on the information.
-'   If this is a potential concern for your application, one possible solution is to use
-'   the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING
-'   (which fails if the file does not exist).
+' Retrieves the name of the user associated with the current thread.
 ' ========================================================================================
-PRIVATE FUNCTION AfxFolderExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
-   DIM fd AS WIN32_FIND_DATAW
-   IF pwszFileSpec = NULL THEN EXIT FUNCTION
-   DIM hFind AS HANDLE = FindFirstFileW(pwszFileSpec, @fd)
-   IF hFind = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
-   FindClose hFind
-   ' // Make sure that it is a directory
-   IF (fd.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN FUNCTION = TRUE
+PRIVATE FUNCTION AfxGetUserName () AS CWSTR
+   DIM buffer AS WSTRING * 260
+   DIM dwBufLen AS DWORD = SIZEOF(buffer)
+   GetUserNameW(buffer, @dwBufLen)
+   RETURN buffer
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the computer name of the current system.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetComputerName () AS CWSTR
+   DIM buffer AS WSTRING * MAX_COMPUTERNAME_LENGTH
+   DIM dwBufLen AS DWORD = SIZEOF(buffer)
+   GetComputerNameW(buffer, @dwBufLen)
+   RETURN buffer
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the path of the program which is currently executing.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetExePathName () AS CWSTR
+   DIM buffer AS WSTRING * MAX_PATH, p AS LONG
+   GetModuleFileNameW NULL, buffer, SIZEOF(buffer)
+   p = INSTRREV(buffer, ANY ":/\")
+   RETURN LEFT(buffer, p)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the file name of the program which is currently executing.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetExeFileName () AS CWSTR
+   DIM buffer AS WSTRING * MAX_PATH, p AS LONG
+   GetModuleFileNameW NULL, buffer, SIZEOF(buffer)
+   p = INSTRREV(buffer, ANY ":/\")
+   IF p THEN buffer = MID(buffer, p + 1)
+   p = INSTRREV(buffer, ".")
+   IF p THEN buffer = LEFT(buffer, p - 1)
+   RETURN buffer
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the file name and extension of the program which is currently executing.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetExeFileNameX () AS CWSTR
+   DIM buffer AS WSTRING * MAX_PATH, p AS LONG
+   GetModuleFileNameW NULL, buffer, SIZEOF(buffer)
+   p = INSTRREV(buffer, ANY ":/\")
+   IF p THEN buffer = MID(buffer, p + 1)
+   RETURN buffer
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the extension (with a leading period) of the program which is currently executing.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetExeFileExt () AS CWSTR
+   DIM buffer AS WSTRING * MAX_PATH, p AS LONG
+   GetModuleFileNameW NULL, buffer, SIZEOF(buffer)
+   p = INSTRREV(buffer, ".")
+   IF p THEN RETURN MID(buffer, p) ELSE RETURN buffer
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the full path of the program which is currently executing.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetExeFullPath () AS CWSTR
+   DIM buffer AS WSTRING * MAX_PATH, cb AS LONG
+   cb = GetModuleFileNameW(NULL, buffer, SIZEOF(buffer))
+   RETURN LEFT(buffer, cb)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Parses a path/filename and returns the file name portion. That is the text to the right
+' of the last backslash (\) or colon (:), ending just before the last period (.). The file
+' extension is excluded.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileName (BYREF wszPath AS WSTRING) AS CWSTR
+   DIM cwsPath AS CWSTR = wszPath
+   DIM p AS LONG
+   p = INSTRREV(cwsPath, ANY ":/\")
+   IF p THEN cwsPath = MID(cwsPath, p + 1)
+   p = INSTRREV(cwsPath, ".")
+   IF p THEN
+      cwsPath = LEFT(**cwsPath, p - 1)
+   ELSE
+      cwsPath = ""
+   END IF
+   RETURN cwsPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Parses a path/filename and returns the file name portion. That is the text to the right
+' of the last backslash (\) or colon (:), ending just before the last period (.).
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileNameX (BYREF wszPath AS WSTRING) AS CWSTR
+   DIM cwsPath AS CWSTR = wszPath
+   DIM p AS LONG
+   p = INSTRREV(cwsPath, ANY ":/\")
+   IF p THEN RETURN MID(cwsPath, p + 1) ELSE RETURN cwsPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Parses a path/filename and returns the extension portion of the path/file name. That is
+' the last period (.) in the string plus the text to the right of it.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileExt (BYREF wszPath AS WSTRING) AS CWSTR
+   DIM cwsPath AS CWSTR = wszPath
+   DIM p AS LONG
+   p = INSTRREV(cwsPath, ".")
+   IF p THEN RETURN MID(cwsPath, p) ELSE RETURN cwsPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the current directory for the current process.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetCurDir () AS CWSTR
+   DIM wszCurDir AS WSTRING * MAX_PATH
+   GetCurrentDirectoryW(MAX_PATH, wszCurDir)
+   RETURN wszCurDir
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Converts the specified path to its long form.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetLongPathName (BYREF wszPath AS WSTRING) AS CWSTR
+   DIM wszLongPath AS WSTRING * MAX_PATH
+   GetLongPathNameW(wszPath, wszLongPath, SIZEOF(wszLongPath))
+   RETURN wszLongPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the short path form of the specified path.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetShortPathName (BYREF wszPath AS WSTRING) AS CWSTR
+   DIM wszShortPath AS WSTRING * MAX_PATH
+   GetShortPathNameW(wszPath, wszShortPath, SIZEOF(wszShortPath))
+   RETURN wszShortPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Parses a path/filename and returns the path portion. That is the text up to and including
+' the last backslash (\) or colon (:).
+' ========================================================================================
+PRIVATE FUNCTION AfxGetPathName (BYREF wszPath AS WSTRING) AS CWSTR
+   DIM cwsPath AS CWSTR = wszPath
+   DIM p AS LONG
+   p = INSTRREV(cwsPath, ANY ":\/")
+   IF p THEN RETURN LEFT(**cwsPath, p)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the path of the specified system DLL.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetSystemDllPath (BYREF wszDllName AS WSTRING) AS CWSTR
+   DIM wszPath AS WSTRING * MAX_PATH
+   DIM hLib AS HMODULE = LoadLibraryW(wszDllName)
+   IF hLib THEN
+      GetModuleFileNameW(hLib, wszPath, SIZEOF(wszPath))
+      FreeLibrary hLib
+   END IF
+   RETURN wszPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the path of the executable file given its process identifier.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetPathFromProcessId (BYVAL dwProcessId AS DWORD) AS CWSTR
+   DIM hProcess AS HANDLE, wszPath AS WSTRING * MAX_PATH
+   hProcess = OpenProcess(PROCESS_QUERY_INFORMATION OR PROCESS_VM_READ, FALSE, dwProcessId)
+   IF hProcess <> NULL THEN
+      GetModuleFileNameExW(hProcess, NULL, wszPath, SIZEOF(wszPath))
+      CloseHandle(hProcess)
+   END IF
+   RETURN wszPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the path of the executable file that created the specified window.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetPathFromWindowHandle (BYVAL hwnd AS HWND) AS CWSTR
+   DIM idProc AS DWORD, hProcess AS HANDLE, wszPath AS WSTRING * MAX_PATH
+   GetWindowThreadProcessId(hwnd, @idProc)
+   IF idProc THEN
+      hProcess = OpenProcess(PROCESS_QUERY_INFORMATION OR PROCESS_VM_READ, FALSE, idProc)
+      IF hProcess THEN
+         GetModuleFileNameExW(hProcess, NULL, wszPath, SIZEOF(wszPath))
+         CloseHandle(hProcess)
+         RETURN wszPath
+      END IF
+   END IF
+END FUNCTION
+' ========================================================================================
+
+#if _WIN32_WINNT = &h0602
+' ========================================================================================
+' Retrieves the path of an special folder. Requires Windows Vista/Windows 7 or superior.
+' - rfid: A reference to the KNOWNFOLDERID that identifies the folder. The folders associated
+'   with the known folder IDs might not exist on a particular system.
+' - dwFlags: Flags that specify special retrieval options. This value can be 0; otherwise,
+'   it is one or more of the KNOWN_FOLDER_FLAG values.
+' - hToken: An access token used to represent a particular user. This parameter is usually
+'   set to NULL, in which case the function tries to access the current user's instance of
+'   the folder. However, you may need to assign a value to hToken for those folders that can
+'   have multiple users but are treated as belonging to a single user. The most commonly used
+'   folder of this type is Documents.
+'   The calling application is responsible for correct impersonation when hToken is non-null.
+'   It must have appropriate security privileges for the particular user, including TOKEN_QUERY
+'   and TOKEN_IMPERSONATE, and the user's registry hive must be currently mounted. See Access
+'   Control for further discussion of access control issues.
+'   https://msdn.microsoft.com/en-us/library/windows/desktop/aa374860(v=vs.85).aspx
+'   Assigning the hToken parameter a value of -1 indicates the Default User. This allows
+'   clients of SHGetKnownFolderIDList to find folder locations (such as the Desktop folder)
+'   for the Default User. The Default User user profile is duplicated when any new user
+'   account is created, and includes special folders such as Documents and Desktop.
+'   Any items added to the Default User folder also appear in any new user account.
+'   Note that access to the Default User folders requires administrator privileges.
+' Return value:
+'   The path of the requested folder on success, or an empty string on failure.
+' Remarks: For a list of KNOWNFOLDERID constants see:
+'   https://msdn.microsoft.com/en-us/library/windows/desktop/dd378457(v=vs.85).aspx
+' Usage example: AfxGetKnowFolderPath(@FOLDERID_CommonPrograms)
+' ========================================================================================
+PRIVATE FUNCTION AfxGetKnowFolderPath (BYVAL rfid AS CONST KNOWNFOLDERID CONST PTR, BYVAL dwFlags AS DWORD = 0, BYVAL hToken AS HANDLE = NULL) AS CWSTR
+   DIM pidl AS ITEMIDLIST PTR          ' // Pointer to an item identifier list (PIDL)
+   DIM wszPath AS WSTRING * MAX_PATH   ' // Folder's path
+   IF SHGetKnownFolderIDList(rfid, dwFlags, hToken, @pidl) = S_OK THEN
+      SHGetPathFromIDListW pidl, @wszPath
+      CoTaskMemFree pidl
+      RETURN wszPath
+   END IF
+END FUNCTION
+' ========================================================================================
+#endif
+
+' ========================================================================================
+' Retrieves the path of an special folder.
+' - nFolder: A CSIDL value that identifies the folder of interest.
+' For a list of CSIDL values see:
+' https://msdn.microsoft.com/en-us/library/windows/desktop/bb762494(v=vs.85).aspx
+' ========================================================================================
+PRIVATE FUNCTION AfxGetSpecialFolderLocation (BYVAL nFolder AS LONG) AS CWSTR
+   DIM pidl AS ITEMIDLIST PTR          ' // Pointer to an item identifier list (PIDL)
+   DIM wszPath AS WSTRING * MAX_PATH   ' // Folder's path
+   IF SHGetSpecialFolderLocation(0, nFolder, @pidl) = S_OK THEN
+      SHGetPathFromIDListW pidl, @wszPath
+      CoTaskMemFree pidl
+      RETURN wszPath
+   END IF
 END FUNCTION
 ' ========================================================================================
 
@@ -611,40 +465,355 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Retrieves the fully qualified path of the specified system DLL.
+' Saves the contents of a string buffer in a temporary file and returns the name of the file.
 ' ========================================================================================
-PRIVATE FUNCTION AfxGetSystemDllPath (BYVAL pwszDllName AS WSTRING PTR, BYVAL pwszDllPath AS WSTRING PTR, BYVAL cchCount AS DWORD) AS LONG
-   IF pwszDllName = NULL OR pwszDllPath = NULL OR cchCount = 0 THEN EXIT FUNCTION
-   DIM hLib AS HMODULE
-   hLib = LoadLibraryW(pwszDllName)
-   IF hLib THEN
-      FUNCTION = GetModuleFileNameW(hLib, pwszDllPath, cchCount)
-      FreeLibrary hLib
-   END IF
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Saves the contents of a string buffer in a temporary file.
-' ========================================================================================
-PRIVATE FUNCTION AfxSaveTempFile (BYVAL pwszBuffer AS WSTRING PTR, BYREF wszTmpFileName AS WSTRING, BYREF wszExtension AS WSTRING) AS BOOLEAN
-   IF VARPTR(wszTmpFileName) = NULL THEN EXIT FUNCTION
+PRIVATE FUNCTION AfxSaveTempFile (BYVAL pwszBuffer AS WSTRING PTR, BYREF wszExtension AS WSTRING) AS CWSTR
+   DIM wszTmpFileName AS WSTRING * MAX_PATH
    DIM wszTmpPath AS WSTRING * MAX_PATH - 14
    DIM dwRes AS DWORD, fn AS LONG
    dwRes = GetTempPathW(MAX_PATH - 14, @wszTmpPath)
    IF dwRes > 0 AND dwRes <= MAX_PATH - 14 THEN
       dwRes = GetTempFileNameW(@wszTmpPath, "TMP", 0, @wszTmpFileName)
       IF dwRes THEN
-         IF VARPTR(wszExtension) THEN wszTmpFileName = LEFT(wszTmpFileName, LEN(wszTmpFileName) - 3) & wszExtension
+         IF LEN(wszExtension) THEN wszTmpFileName = LEFT(wszTmpFileName, LEN(wszTmpFileName) -  3) & wszExtension
          fn = FREEFILE
          OPEN wszTmpFileName FOR OUTPUT AS #fn
          IF ERR = 0 THEN
-            PUT #fn, 1, *pwszBuffer
+            PRINT #fn, *pwszBuffer
             CLOSE #fn
-            FUNCTION = TRUE
+            RETURN wszTmpFileName
          END IF
       END IF
    END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the Internet Explorer version (major.minor).
+' ========================================================================================
+PRIVATE FUNCTION AfxGetInternetExplorerVersion () AS SINGLE
+   DIM hKey AS HKEY, wszData AS WSTRING * 1024, cbData AS DWORD = SIZEOF(wszData)
+   IF RegOpenKeyExW(HKEY_LOCAL_MACHINE, "SOFTWARE\Microsoft\Internet Explorer", 0, _
+                    KEY_QUERY_VALUE, @hKey) <> ERROR_SUCCESS THEN EXIT FUNCTION
+   RegQueryValueExW hKey, "Version", NULL, NULL, cast(BYTE PTR, @wszData), @cbData
+   RegCloseKey hKey
+   FUNCTION = VAL(wszData)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the path of the default browser.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDefaultBrowserPath () AS CWSTR
+   DIM wszPath AS WSTRING * MAX_PATH, cchOut AS DWORD = SIZEOF(wszPath)
+   IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "http", "open", wszPath, @cchOut)) THEN RETURN wszPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the name of the default browser.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDefaultBrowserName () AS CWSTR
+   DIM wszPath AS WSTRING * MAX_PATH, cchOut AS DWORD = SIZEOF(wszPath)
+   IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "http", "open", wszPath, @cchOut)) THEN
+      RETURN AfxGetFileName(wszPath)
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the path of the default mail client application.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDefaultMailClientPath () AS CWSTR
+   DIM wszPath AS WSTRING * MAX_PATH, cchOut AS DWORD = SIZEOF(wszPath)
+   IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "mailto", "open", wszPath, @cchOut)) THEN RETURN wszPath
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the name of the default mail client application.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDefaultMailClientName () AS CWSTR
+   DIM wszPath AS WSTRING * MAX_PATH, cchOut AS DWORD = SIZEOF(wszPath)
+   IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "mailto", "open", wszPath, @cchOut)) THEN
+      RETURN AfxGetFileName(wszPath)
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Displays a dialog box that enables the user to select a folder.
+' - pwszTitle       = A string value that represents the title displayed inside the Browse dialog box.
+' - pwszStartFolder = The initial folder that the dialog will show.
+' - nFlags          = Optional. A LONG value that contains the options for the method. This can be a
+'                     combination of the values listed under the ulFlags member of the BROWSEINFO structure.
+'                     See: http://msdn.microsoft.com/en-us/library/windows/desktop/bb773205%28v=vs.85%29.aspx
+'                     Default value = BIF_RETURNONLYFSDIRS OR BIF_DONTGOBELOWDOMAIN OR BIF_USENEWUI OR BIF_RETURNFSANCESTORS
+' Note: To display the old style dialog, pass -1 in the dwFlags parameter.
+' ========================================================================================
+' // Browse for folder dialog procedure
+PRIVATE FUNCTION AfxBrowseForFolderProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM wszBuffer AS WSTRING * MAX_PATH
+
+   IF uMsg = BFFM_INITIALIZED THEN
+      SendMessageW hwnd, BFFM_SETSELECTIONW, CTRUE, cast(LPARAM, lParam)
+   ELSEIF uMsg = BFFM_SELCHANGED THEN
+      SHGetPathFromIDListW(cast(ITEMIDLIST PTR, wParam), @wszBuffer)
+      IF wParam = 0 OR _ ' // No id number
+         LEN(wszBuffer) = 0 OR _ ' // No name
+         (GetFileAttributesW(wszBuffer) AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY OR _ ' // Not a real directory
+         MID(wszBuffer, 2, 1) <> ":" THEN ' // Not a local or mapped drive
+            SendMessageW hwnd, BFFM_ENABLEOK, FALSE, FALSE
+      ELSEIF ((GetFileAttributesW(wszBuffer) AND FILE_ATTRIBUTE_SYSTEM) = FILE_ATTRIBUTE_SYSTEM) AND _
+            RIGHT(wszBuffer, 2) <> ":\" THEN   ' // Exclude system folders, allow root directories
+         SendMessageW hwnd, BFFM_ENABLEOK, FALSE, FALSE
+      END IF
+   END IF
+   RETURN 0
+
+END FUNCTION
+
+PRIVATE FUNCTION AfxBrowseForFolder (BYVAL hwnd AS HWND, BYVAL pwszTitle AS WSTRING PTR = NULL, _
+   BYVAL pwszStartFolder AS WSTRING PTR = NULL, BYVAL nFlags AS LONG = 0) AS CWSTR
+
+   DIM wszBuffer AS WSTRING * MAX_PATH, bi AS BROWSEINFOW, pidl AS ITEMIDLIST PTR
+   IF nFlags = 0 THEN nFlags = BIF_RETURNONLYFSDIRS OR BIF_DONTGOBELOWDOMAIN OR BIF_USENEWUI OR BIF_RETURNFSANCESTORS
+   IF nFlags = -1 THEN nFlags = BIF_RETURNONLYFSDIRS OR BIF_DONTGOBELOWDOMAIN OR BIF_RETURNFSANCESTORS
+
+   bi.hWndOwner = hwnd
+   bi.lpszTitle = pwszTitle
+   bi.ulFlags   = nFlags
+   bi.lpfn      = cast(BFFCALLBACK, @AfxBrowseForFolderProc)
+   bi.lParam    = cast(LPARAM, pwszStartFolder)
+   pidl         = SHBrowseForFolderW(@bi)
+
+   IF pidl THEN
+      SHGetPathFromIDListW(pidl, @wszBuffer)
+      CoTaskMemFree pidl
+   END IF
+   RETURN wszBuffer
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Creates an Open dialog box that lets the user specify the drive, directory, and the name
+' of a file or set of files to be opened.
+' - hwndOwner: A handle to the window that owns the dialog box. This parameter can be any
+'   valid window handle, or it can be NULL if the dialog box has no owner.
+' - wszTitle: A string to be placed in the title bar of the dialog box. If this member is NULL,
+'   the system uses the default title (that is, Save As or Open).
+' - wszFile: The file name used to initialize the File Name edit control. When the GetOpenFileName
+'   or GetSaveFileName function returns successfully, this buffer contains the drive designator,
+'   path, file name, and extension of the selected file.
+'   If the OFN_ALLOWMULTISELECT flag is set and the user selects multiple files, the buffer
+'   contains the current directory followed by the file names of the selected files. For
+'   Explorer-style dialog boxes, the directory and file name strings are NULL separated,
+'   with an extra NULL character after the last file name. For old-style dialog boxes, the
+'   strings are space separated and the function uses short file names for file names with
+'   spaces. You can use the FindFirstFile function to convert between long and short file
+'   names. If the user selects only one file, the lpstrFile string does not have a separator
+'   between the path and file name.
+' - wszInitialDir: The initial directory.
+' - wszFilter: A buffer containing pairs of "|" separated filter strings. The first string
+'   in each pair is a display string that describes the filter (for example, "Text Files"),
+'   and the second string specifies the filter pattern (for example, "*.TXT"). To specify
+'   multiple filter patterns for a single display string, use a semicolon to separate the
+'   patterns (for example, "*.TXT;*.DOC;*.BAK"). A pattern string can be a combination of
+'   valid file name characters and the asterisk (*) wildcard character. Do not include spaces
+'   in the pattern string.
+'   The system does not change the order of the filters. It displays them in the File Types
+'   combo box in the order specified in wszFilter. If wszFilter is NULL, the dialog box
+'   does not display any filters.
+' - wszDefExt: The default extension. GetOpenFileName and GetSaveFileName append this
+'   extension to the file name if the user fails to type an extension. This string can be
+'   any length, but only the first three characters are appended. The string should not
+'   contain a period (.). If this member is NULL and the user fails to type an extension,
+'   no extension is appended.
+' - pdwFlags: A set of bit flags you can use to initialize the dialog box. When the dialog
+'   box returns, it sets these flags to indicate the user's input. For example, to check
+'   if the user has checked the read only checkbox:
+'   IF (pdwFlags AND OFN_READONLY) = OFN_READONLY THEN ...
+'   This value can be a combination of the following flags:
+'   See complete list and explanations at:
+'   https://msdn.microsoft.com/en-us/library/windows/desktop/ms646839(v=vs.85).aspx
+' - pdwBufLen: The size of the buffer, in charactersm where the names of the selected
+'   files will be returned.
+' Return value:
+'   An string containing a comma separated list of the selected files.
+'   Parse the number of ",". If only one, then the user has selected only a file and the
+'   string contains the full path. If more, The first substring contains the path and the
+'   others the files.
+'   If the user has not selected any file, an empty string is returned.
+'   On failure, an empty string is returned and, if not null, the pdwBufLen parameter will
+'   be filled by the size of the required buffer in characters.
+' Usage example:
+'   DIM wszFile AS WSTRING * 260 = "*.*"
+'   DIM wszInitialDir AS STRING * 260 = CURDIR
+'   DIM wszFilter AS WSTRING * 260 = "BAS files (*.BAS)|*.BAS|" & "All Files (*.*)|*.*|"
+'   DIM dwFlags AS DWORD = OFN_EXPLORER OR OFN_FILEMUSTEXIST OR OFN_HIDEREADONLY OR OFN_ALLOWMULTISELECT
+'   DIM cws AS CWSTR = AfxOpenFileDialog(hwnd, "", wszFile, wszInitialDir, wszFilter, "BAS", @dwFlags, NULL)
+'   AfxMsg cws
+' ========================================================================================
+PRIVATE FUNCTION AfxOpenFileDialog ( _
+   BYVAL hwndOwner AS HWND _                    ' // Parent window
+ , BYREF wszTitle AS WSTRING _                  ' // Caption
+ , BYREF wszFile AS WSTRING _                   ' // Filename
+ , BYREF wszInitialDir AS WSTRING _             ' // Start directory
+ , BYREF wszFilter AS WSTRING _                 ' // Filename filter
+ , BYREF wszDefExt AS WSTRING _                 ' // Default extension
+ , BYVAL pdwFlags AS DWORD PTR = NULL _         ' // Flags
+ , BYVAL pdwBufLen AS DWORD PTR = NULL _        ' // Buffer length
+ ) AS CWSTR
+
+   DIM dwFlags AS DWORD, dwBufLen AS DWORD
+   IF pdwFlags THEN dwFlags = *pdwFlags
+   IF pdwBufLen THEN dwBufLen = *pdwBuflen
+
+   ' // Filter is a sequence of WSTRINGs with a final (extra) double null terminator
+   ' // The "|" characters are replaced with nulls
+   DIM wszMarkers AS WSTRING * 4 = "||"
+   IF RIGHT(wszFilter, 1) <> "|" THEN wszMarkers += "|"
+   DIM cwsFilter AS CWSTR = wszFilter & wszMarkers
+   DIM dwFilterStrSize AS DWORD = LEN(cwsFilter)
+   ' // Replace markers("|") with nulls
+   DIM pchar AS WCHAR PTR = *cwsFilter
+   FOR i AS LONG = 0 TO LEN(cwsFilter) - 1
+      IF pchar[i] = ASC("|") THEN pchar[i] = 0
+   NEXT
+
+   ' // If the initial directory has not been specified, assume the current directory
+   IF LEN(wszInitialDir) = 0 THEN wszInitialDir = CURDIR
+   ' // The size of the buffer must be at least MAX_PATH characters
+   IF dwBufLen = 0 THEN
+      IF (dwFlags AND OFN_ALLOWMULTISELECT = OFN_ALLOWMULTISELECT) THEN dwBufLen = 32768  ' // 64 Kb buffer
+   END IF
+   IF dwBufLen < 260 THEN dwBufLen = 260   ' // Make room for at least one path
+   ' // Allocate the file name and a marker ("|") to be replaced with a null
+   DIM cwsFile AS CWSTR = wszFile & "|"
+   ' // Store the position of the marker
+   DIM cbPos AS LONG = LEN(cwsFile) - 1
+   ' // Allocate room for the buffer
+   IF LEN(cwsFile) < dwBufLen THEN cwsFile += SPACE(dwBufLen - LEN(cwsFile))
+   DIM dwFileStrSize AS DWORD = LEN(cwsFile)
+   ' // The filename must be null terminated (replace the marker with a null)
+   pchar = *cwsFile
+   pchar[cbPos] = 0
+
+   ' // Fill the members of the structure
+   DIM ofn AS OPENFILENAMEW
+   ofn.lStructSize     = SIZEOF(ofn)
+   IF AfxWindowsVersion < 5 THEN ofn.lStructSize = 76
+   ofn.hwndOwner       = hwndOwner
+   ofn.lpstrFilter     = *cwsFilter
+   ofn.nFilterIndex    = 1
+   ofn.lpstrFile       = *cwsFile
+   ofn.nMaxFile        = dwFileStrSize
+   ofn.lpstrInitialDir = @wszInitialDir
+   IF LEN(wszTitle) THEN ofn.lpstrTitle = @wszTitle
+   ofn.Flags = dwFlags OR OFN_EXPLORER
+   IF LEN(wszDefExt) THEN ofn.lpstrDefExt = @wszDefExt
+
+   ' // Call the open file dialog
+   IF GetOpenFilenameW(@ofn) THEN
+      pchar = *cwsFile
+      FOR i AS LONG = 0 TO dwFileStrSize - 1
+         ' // If double null, exit
+         IF pchar[i] = 0 AND pchar[i + 1] = 0 THEN EXIT FOR
+         ' // Replace null with ","
+         IF pchar[i] = 0 THEN pchar[i] = ASC(",")
+      NEXT
+      ' // Trim trailing spaces
+      cwsFile = RTRIM(cwsFile, CHR(32))
+      IF RIGHT(**cwsFile, 1) = "," THEN cwsFile = LEFT(**cwsFile, LEN(cwsFile) - 1)
+   ELSE
+      ' // Buffer too small
+      IF CommDlgExtendedError = FNERR_BUFFERTOOSMALL THEN
+         dwBufLen = ASC(**cwsFile)
+      END IF
+      cwsFile = ""
+   END IF
+
+   ' // Return the retrieved values
+   IF pdwFlags THEN *pdwFlags = ofn.Flags
+   IF pdwBufLen THEN *pdwBufLen = dwBufLen
+   RETURN cwsFile
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' The parameters are the same that for AfxOpenFileDialog, except the optional pdwBufferLen.
+' In the pdwFlags parameter you may add OFN_OVERWRITEPROMPT to be asked if you want to
+' overwrite an existing file.
+' Usage example:
+'   DIM wszFile AS WSTRING * 260 = "*.*"
+'   DIM wszInitialDir AS STRING * 260 = CURDIR
+'   DIM wszFilter AS WSTRING * 260 = "BAS files (*.BAS)|*.BAS|" & "All Files (*.*)|*.*|"
+'   DIM dwFlags AS DWORD = OFN_EXPLORER OR OFN_FILEMUSTEXIST OR OFN_HIDEREADONLY OR OFN_OVERWRITEPROMPT
+'   DIM cws AS CWSTR = AfxSaveFileDialog(hwnd, "", wszFile, wszInitialDir, wszFilter, "BAS", @dwFlags)
+'   AfxMsg cws
+' ========================================================================================
+PRIVATE FUNCTION AfxSaveFileDialog ( _
+   BYVAL hwndOwner AS HWND _                    ' // Parent window
+ , BYREF wszTitle AS WSTRING _                  ' // Caption
+ , BYREF wszFileName AS WSTRING _               ' // Filename
+ , BYREF wszInitialDir AS WSTRING _             ' // Start directory
+ , BYREF wszFilter AS WSTRING _                 ' // Filename filter
+ , BYREF wszDefExt AS WSTRING _                 ' // Default extension
+ , BYVAL pdwFlags AS DWORD PTR = NULL _         ' // Flags
+ ) AS CWSTR
+
+   DIM dwFlags AS DWORD
+   IF pdwFlags THEN dwFlags = *pdwFlags
+
+   ' // Filter is a sequence of WSTRINGs with a final (extra) double null terminator
+   ' // The "|" characters are replaced with nulls
+   DIM wszMarkers AS WSTRING * 4 = "||"
+   IF RIGHT(wszFilter, 1) <> "|" THEN wszMarkers += "|"
+   DIM cwsFilter AS CWSTR = wszFilter & wszMarkers
+   DIM dwFilterStrSize AS DWORD = LEN(cwsFilter)
+   ' // Replace markers("|") with nulls
+   DIM pchar AS WCHAR PTR = *cwsFilter
+   DIM i AS LONG
+   FOR i = 0 TO LEN(cwsFilter) - 1
+      IF pchar[i] = ASC("|") THEN pchar[i] = 0
+   NEXT
+
+   ' // If the initial directory has not been specified, assume the current directory
+   IF LEN(wszInitialDir) = 0 THEN wszInitialDir = CURDIR
+   DIM wszFile AS WSTRING * MAX_PATH = wszFileName
+   DIM cwsFile AS CWSTR = wszFile & "|"
+   ' // Store the position of the marker
+   DIM cbPos AS LONG = LEN(cwsFile) - 1
+   ' // Allocate room for the buffer
+   IF LEN(cwsFile) < MAX_PATH THEN cwsFile += SPACE(MAX_PATH - LEN(cwsFile))
+   DIM dwFileStrSize AS DWORD = LEN(cwsFile)
+   ' // The filename must be null terminated (replace the marker with a null)
+   pchar = *cwsFile
+   pchar[cbPos] = 0
+
+   ' // Fill the members of the structure
+   DIM ofn AS OPENFILENAMEW
+   ofn.lStructSize     = SIZEOF(ofn)
+   IF AfxWindowsVersion < 5 THEN ofn.lStructSize = 76
+   ofn.lpstrFilter     = *cwsFilter
+   ofn.nFilterIndex    = 1
+   ofn.lpstrFile       = *cwsFile
+   ofn.nMaxFile        = dwFileStrSize
+   ofn.lpstrInitialDir = @wszInitialDir
+   IF LEN(wszTitle) THEN ofn.lpstrTitle = @wszTitle
+   ofn.Flags = dwFlags OR OFN_EXPLORER
+   IF LEN(wszDefExt) THEN ofn.lpstrDefExt = @wszDefExt
+
+   ' // Call the save filename dialog
+   IF GetSaveFilenameW(@ofn) = 0 THEN cwsFile = ""
+
+   ' // Return the retrieved values
+   IF pdwFlags THEN *pdwFlags = ofn.Flags
+   RETURN cwsFile
+
 END FUNCTION
 ' ========================================================================================
 
@@ -653,51 +822,27 @@ END FUNCTION
 ' ########################################################################################
 
 ' ========================================================================================
-' Gets the text of a window. This function can also be used to retrieve the text of buttons,
-' and edit and static controls.
-' Return value: The handle of a newly allocated BSTR. Must be freed with SysFreeString when
-' no longer needed.
-' Remarks: The function uses the WM_GETTEXT message because GetWindowText cannot retrieve
-' the text of a window in another application.
-' Usage examples:
-' DIM pbstr AS AFX_BSTR = AfxGetWindowText(hButton)
-' MessageBoxW 0, pbstr, "", MB_OK
-' SysFreeString pbstr
-' -or-
-' DIM cb AS CBSTR = AfxGetWindowText(hButton)
-' MessageBoxW 0, *cb, "", MB_OK
+' Gets the class name of the specified window
 ' ========================================================================================
-PRIVATE FUNCTION AfxGetWindowText OVERLOAD (BYVAL hwnd AS HWND) AS AFX_BSTR
-   DIM nLen AS LRESULT = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0)
-   IF nLen = 0 THEN EXIT FUNCTION
-   DIM pbuffer AS WSTRING PTR = CAllocate(nLen + 1, 1)
-   nLen = SendMessageW(hwnd, WM_GETTEXT, nLen + 1, CAST(LPARAM, pbuffer))
-   IF pbuffer THEN
-      DIM pbstr AS AFX_BSTR = SysAllocString(pbuffer)
-      FUNCTION = pbstr
-      Deallocate pbuffer
-   END IF
+PRIVATE FUNCTION AfxGetWindowClassName (BYVAL hwnd AS HWND) AS CWSTR
+   DIM wszClassName AS WSTRING * 260
+   GetClassNameW hwnd, wszClassName, SIZEOF(wszClassName)
+   RETURN wszClassName
 END FUNCTION
 ' ========================================================================================
+
 ' ========================================================================================
 ' Gets the text of a window. This function can also be used to retrieve the text of buttons,
-' and edit and static controls. The return value is the number of characters copied, not
-' including the terminating null character.
+' and edit and static controls.
 ' Remarks: The function uses the WM_GETTEXT message because GetWindowText cannot retrieve
 ' the text of a window in another application.
-' Parameters:
-' - hwnd = Handle to the window or control.
-' - lpString = A pointer to the buffer that is to receive the text.
-' - nMaxCount = The maximum number of characters to be copied, including the terminating
-'   null character.
-' Usage example:
-'   DIM wszText AS WSTRING * 260
-'   AfxGetWindowText(hwnd, @wszText, 260)
+' Example: DIM cws AS CWSTR = AfxGetWindowText(hwnd)
 ' ========================================================================================
-PRIVATE FUNCTION AfxGetWindowText OVERLOAD (BYVAL hwnd AS HWND, BYVAL lpString AS LPWSTR, BYVAL nMaxCount AS LONG) AS LONG
-   DIM nLen AS LRESULT = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0)
-   IF nLen = 0 THEN EXIT FUNCTION
-   FUNCTION = SendMessageW(hwnd, WM_GETTEXT, nMaxCount, CAST(LPARAM, lpString))
+PRIVATE FUNCTION AfxGetWindowText (BYVAL hwnd AS HWND) AS CWSTR
+   DIM nLen AS LONG = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0)
+   DIM wszText AS CWSTR = SPACE(nLen + 1)
+   SendMessageW(hwnd, WM_GETTEXT, nLen + 1, cast(LPARAM, *wszText))
+   RETURN wszText
 END FUNCTION
 ' ========================================================================================
 
@@ -723,23 +868,6 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION AfxSetWindowText (BYVAL hwnd AS HWND, BYVAL pwszText AS WSTRING PTR) AS BOOLEAN
    FUNCTION = SendMessageW(hwnd, WM_SETTEXT, 0, CAST(LPARAM, pwszText))
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the text of a window using UTF8 encoded strings. This function can also be used to
-' set the text of buttons, edit and static controls. The return value is TRUE if the text
-' is set or FALSE if it is not.
-' Note: The target window must be an unicode window.
-' Usage example: AfxSetWindowTextUtf8(hwnd, "Дми́трий Дми́триевич")
-' ========================================================================================
-PRIVATE FUNCTION AfxSetWindowUtf8Text (BYVAL hwnd AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
-   DIM pbstrText AS AFX_BSTR
-   pbstrText = AfxUcode(strUtf8Text, CP_UTF8)
-   IF pbstrText THEN
-      FUNCTION = SendMessageW(hwnd, WM_SETTEXT, 0, CAST(LPARAM, pbstrText))
-      SysFreeString pbstrText
-   END IF
 END FUNCTION
 ' ========================================================================================
 
@@ -1851,41 +1979,33 @@ END FUNCTION
 
 ' ========================================================================================
 ' Returns an unicode text string from the clipboard.
-' Usage examples:
-' DIM bs AS AFX_BSTR = AfxGetClipboardText
-' AfxMsg *bs
-' SysFreeString bs
-' -or-
-' DIM cb AS CBSTR = AfxGetClipboardText
-' IF cb THEN AfxMsg *cb
 ' ========================================================================================
-PRIVATE FUNCTION AfxGetClipboardText () AS AFX_BSTR
-   ' // If the text format is available...
-   IF IsClipboardFormatAvailable(CF_UNICODETEXT) <> 0 THEN
-      ' // Opens the clipboard
-      IF OpenClipboard(NULL) <> 0 THEN
-         ' // Gets memory object of clipboard text
-         DIM hMem AS HANDLE = GetClipboardData(CF_UNICODETEXT)
-         IF hMem <> NULL THEN
-            ' // Locks it and get a pointer
-            DIM pMem AS HGLOBAL = GlobalLock(hMem)
-            ' // Assigns the data to our function return value
-            IF pMem <> NULL THEN
-               ' // Gets the size of the global lock
-               DIM dwSize AS DWORD = GlobalSize(hMem)
-               IF dwSize > 0 THEN
-                  ' // Allocates a BSTR and copies the contents of the clipboard to it
-                  DIM pbstr AS AFX_BSTR = SysAllocStringLen(pMem, dwSize)
-                  FUNCTION = pbstr
-               END IF
-            END IF
-            ' // Releases the memory object
-            GlobalUnlock hMem
-         END IF
-         ' // Closes the clipboard
-         CloseClipboard
-      END IF
+PRIVATE FUNCTION AfxGetClipboardText () AS CWSTR
+   DIM cwsText AS CWSTR
+   ' // Check if the required format is available
+   IF IsClipboardFormatAvailable(CF_UNICODETEXT) = 0 THEN RETURN ""
+   ' // Open the clipboard
+   IF OpenClipboard(NULL) = 0 THEN RETURN ""
+   ' // Get memory object of clipboard text
+   DIM hMem AS HANDLE = GetClipboardData(CF_UNICODETEXT)
+   IF hMem = NULL THEN
+      CloseClipboard
+      RETURN ""
    END IF
+   ' // Lock it and get a pointer to the data
+   DIM pMem AS HGLOBAL = GlobalLock(hMem)
+   IF pMem = NULL THEN
+      CloseClipboard
+      RETURN ""
+   END IF
+   ' // Get the size of the global lock
+   DIM dwSize AS DWORD = GlobalSize(hMem)
+   IF dwSize > 0 THEN cwsText.AppendBuffer(pMem, dwSize)
+   ' // Releases the memory object
+   GlobalUnlock hMem
+   ' // Closes the clipboard
+   CloseClipboard
+   RETURN cwsText
 END FUNCTION
 ' ========================================================================================
 
@@ -2425,5 +2545,324 @@ PRIVATE FUNCTION AfxDrawBitmap (BYVAL hDC AS HDC, BYVAL xStart AS LONG, BYVAL yS
       FUNCTION = TRUE
    END IF
    DeleteDC hMemDC
+END FUNCTION
+' ========================================================================================
+
+' ########################################################################################
+'                                     *** FILES ***
+' ########################################################################################
+
+' ========================================================================================
+' Searches a directory for a file or subdirectory with a name that matches a specific name
+' (or partial name if wildcards are used).
+' Parameter:
+' - pwszFileSpec: The directory or path, and the file name, which can include wildcard
+'   characters, for example, an asterisk (*) or a question mark (?).
+'   This parameter should not be NULL, an invalid string (for example, an empty string or a
+'   string that is missing the terminating null character), or end in a trailing backslash (\).
+'   If the string ends with a wildcard, period (.), or directory name, the user must have
+'   access permissions to the root and all subdirectories on the path. To extend the limit
+'   of MAX_PATH wide characters to 32,767 wide characters, prepend "\\?\" to the path.
+' Return value:
+'   Returns TRUE if the specified file exists or FALSE otherwise.
+' Remarks:
+'   Prepending the string "\\?\" does not allow access to the root directory.
+'   On network shares, you can use a pwszFileSpec in the form of the following:
+'   "\\server\service\*". However, you cannot use a pwszFileSpec that points to the share
+'   itself; for example, "\\server\service" is not valid.
+'   To examine a directory that is not a root directory, use the path to that directory,
+'   without a trailing backslash. For example, an argument of "C:\Windows" returns information
+'   about the directory "C:\Windows", not about a directory or file in "C:\Windows".
+'   To examine the files and directories in "C:\Windows", use an pwszFileSpec of "C:\Windows\*".
+'   Be aware that some other thread or process could create or delete a file with this name
+'   between the time you query for the result and the time you act on the information.
+'   If this is a potential concern for your application, one possible solution is to use
+'   the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING
+'   (which fails if the file does not exist).
+' ========================================================================================
+PRIVATE FUNCTION AfxFileExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
+   DIM fd AS WIN32_FIND_DATAW
+   IF pwszFileSpec = NULL THEN EXIT FUNCTION
+   DIM hFind AS HANDLE = FindFirstFileW(pwszFileSpec, @fd)
+   IF hFind = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
+   FindClose hFind
+   ' // Make sure that it is not a directory or a temporary file
+   IF (fd.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY AND _
+      (fd.dwFileAttributes AND FILE_ATTRIBUTE_TEMPORARY) <> FILE_ATTRIBUTE_TEMPORARY THEN
+      FUNCTION = TRUE
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Searches a directory for a file or subdirectory with a name that matches a specific name
+' (or partial name if wildcards are used).
+' Parameter:
+' - pwszFileSpec: The directory or path, and the file name, which can include wildcard
+'   characters, for example, an asterisk (*) or a question mark (?).
+'   This parameter should not be NULL, an invalid string (for example, an empty string or a
+'   string that is missing the terminating null character), or end in a trailing backslash (\).
+'   If the string ends with a wildcard, period (.), or directory name, the user must have
+'   access permissions to the root and all subdirectories on the path. To extend the limit
+'   of MAX_PATH wide characters to 32,767 wide characters, prepend "\\?\" to the path.
+' Return value:
+'   Returns TRUE if the specified folder exists or FALSE otherwise.
+' Remarks
+'   Prepending the string "\\?\" does not allow access to the root directory.
+'   On network shares, you can use an btrFileName in the form of the following: "\\server\service\*".
+'   However, you cannot use an btrFileName that points to the share itself; for example,
+'   "\\server\service" is not valid.
+'   To examine a directory that is not a root directory, use the path to that directory,
+'   without a trailing backslash. For example, an argument of "C:\Windows" returns information
+'   about the directory "C:\Windows", not about a directory or file in "C:\Windows".
+'   To examine the files and directories in "C:\Windows", use an btrFileName of "C:\Windows\*".
+'   Be aware that some other thread or process could create or delete a file with this name
+'   between the time you query for the result and the time you act on the information.
+'   If this is a potential concern for your application, one possible solution is to use
+'   the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING
+'   (which fails if the file does not exist).
+' ========================================================================================
+PRIVATE FUNCTION AfxFolderExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
+   DIM fd AS WIN32_FIND_DATAW
+   IF pwszFileSpec = NULL THEN EXIT FUNCTION
+   DIM hFind AS HANDLE = FindFirstFileW(pwszFileSpec, @fd)
+   IF hFind = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
+   FindClose hFind
+   ' // Make sure that it is a directory
+   IF (fd.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY THEN FUNCTION = TRUE
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a directory; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsFolder (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_DIRECTORY) = FILE_ATTRIBUTE_DIRECTORY)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a system file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsSystemFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_SYSTEM) = FILE_ATTRIBUTE_SYSTEM)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a hidden file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsHiddenFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_HIDDEN) = FILE_ATTRIBUTE_HIDDEN)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a read only file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsReadOnlyFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_READONLY) = FILE_ATTRIBUTE_READONLY)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a temporary file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsTemporaryFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_TEMPORARY) = FILE_ATTRIBUTE_TEMPORARY)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a normal file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsNormalFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_NORMAL) = FILE_ATTRIBUTE_NORMAL)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a compressed file or diectory; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsCompressedFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_COMPRESSED) = FILE_ATTRIBUTE_COMPRESSED)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is an encrypted file or diectory; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsEncryptedFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_ENCRYPTED) = FILE_ATTRIBUTE_ENCRYPTED)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified file or directory is not to be indexed by the content
+' indexing service; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsNotContentIndexedFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_NOT_CONTENT_INDEXED) = FILE_ATTRIBUTE_NOT_CONTENT_INDEXED)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified file is not available immediately; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsOffLineFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_OFFLINE) = FILE_ATTRIBUTE_OFFLINE)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a file or directory that has an associated reparse
+' point, or a file that is a symbolic link; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsReparsePointFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_REPARSE_POINT) = FILE_ATTRIBUTE_REPARSE_POINT)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns TRUE if the specified path is a sparse file; FALSE, otherwise.
+' To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsSparseFile (BYREF wszFileSpec AS WSTRING) AS BOOLEAN
+   DIM dwAttributes AS DWORD = GetFileAttributesW(wszFileSpec)
+   IF dwAttributes = INVALID_FILE_ATTRIBUTES THEN RETURN FALSE
+   RETURN ((dwAttributes AND FILE_ATTRIBUTE_SPARSE_FILE) = FILE_ATTRIBUTE_SPARSE_FILE)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the size in bytes of the specified file. Don't use it with folders.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileSize (BYREF wszFileSpec AS WSTRING) AS ULONGLONG
+   DIM fd AS WIN32_FIND_DATAW
+   DIM hFind AS HANDLE = FindFirstFileW(wszFileSpec, @fd)
+   IF hFind = INVALID_HANDLE_VALUE THEN RETURN 0
+   FindClose hFind
+   IF (fd.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY AND _
+      (fd.dwFileAttributes AND FILE_ATTRIBUTE_TEMPORARY) <> FILE_ATTRIBUTE_TEMPORARY THEN
+      DIM ullSize AS ULONGLONG = (fd.nFileSizeHigh * (&hFFFFFFFF + 1)) + fd.nFileSizeLow
+      RETURN ullSize
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the time the file was created.
+' - wszFileSpec: The directory or path, and the file name, which can include wildcard characters,
+'   for example, an asterisk (*) or a question mark (?).
+'   This parameter should not be NULL, an invalid string (for example, an empty string or a
+'   string that is missing the terminating null character), or end in a trailing backslash (\).
+'   If the string ends with a wildcard, period (.), or directory name, the user must have access
+'   permissions to the root and all subdirectories on the path.
+'   To extend the limit from MAX_PATH to 32,767 wide characters, prepend "\\?\" to the path.
+' - bUTC: Pass FALSE if you want to get the time in local time (the NTFS file system stores time
+'   values in UTC format, so they are not affected by changes in time zone or daylight saving time).
+'   FileTimeToLocalFileTime uses the current settings for the time zone and daylight saving time.
+'   Therefore, if it is daylight saving time, it takes daylight saving time into account, even
+'   if the file time you are converting is in standard time.
+' Usage: AfxFileTimeToDateStr(AfxGetFileCreationTime("C:\Tests\test.bas", FALSE), "dd/MM/yyyy")
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileCreationTime (BYREF wszFileSpec AS WSTRING, BYVAL bUTC AS BOOLEAN = TRUE) AS FILETIME
+   DIM fd AS WIN32_FIND_DATAW
+   DIM hFind AS HANDLE = FindFirstFileW(wszFileSpec, @fd)
+   IF hFind <> INVALID_HANDLE_VALUE THEN
+      FindClose hFind
+      IF bUTC = TRUE THEN
+         RETURN fd.ftCreationTime
+      ELSE
+         DIM FT AS FILETIME
+         FileTimeToLocalFileTime(@fd.ftCreationTime, @FT)
+         RETURN FT
+      END IF
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the time the file was last accessed. The NTFS file system delays updates to the
+' last access time for a file by up to 1 hour after the last access.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileLastAccessTime (BYREF wszFileSpec AS WSTRING, BYVAL bUTC AS BOOLEAN = TRUE) AS FILETIME
+   DIM fd AS WIN32_FIND_DATAW
+   DIM hFind AS HANDLE = FindFirstFileW(wszFileSpec, @fd)
+   IF hFind <> INVALID_HANDLE_VALUE THEN
+      FindClose hFind
+      IF bUTC = TRUE THEN
+         RETURN fd.ftLastAccessTime
+      ELSE
+         DIM FT AS FILETIME
+         FileTimeToLocalFileTime(@fd.ftLastAccessTime, @FT)
+         RETURN FT
+      END IF
+   END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the time the file was last written to, truncated, or overwritten.
+' When writing to a file, the last write time is not fully updated until all handles that
+' are used for writing are closed.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetFileLastWriteTime (BYREF wszFileSpec AS WSTRING, BYVAL bUTC AS BOOLEAN = TRUE) AS FILETIME
+   DIM fd AS WIN32_FIND_DATAW
+   DIM hFind AS HANDLE = FindFirstFileW(wszFileSpec, @fd)
+   IF hFind <> INVALID_HANDLE_VALUE THEN
+      FindClose hFind
+      IF bUTC = TRUE THEN
+         RETURN fd.ftLastWriteTime
+      ELSE
+         DIM FT AS FILETIME
+         FileTimeToLocalFileTime(@fd.ftLastWriteTime, @FT)
+         RETURN FT
+      END IF
+   END IF
 END FUNCTION
 ' ========================================================================================

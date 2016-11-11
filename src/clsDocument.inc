@@ -58,25 +58,6 @@ Property clsDocument.ProjectFileType() As Long
    Property = m_ProjectFileType
 End Property
 
-''
-''
-Property clsDocument.DateFileTime( ByVal nValue As Double)
-   m_DateFileTime = nValue
-End Property
-
-Property clsDocument.DateFileTime() As Double
-   Property = m_DateFileTime
-End Property
-
-''
-''
-Property clsDocument.DiskFilename( ByVal wValue As WString Ptr)
-   m_sFilename = *wValue
-End Property
-
-Property clsDocument.DiskFilename() As WString Ptr
-   Property = @m_sFilename
-End Property
 
 ''
 ''
@@ -99,7 +80,6 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       If SciMsg = 0 Then
          SciMsg = Cast( Scintilla_DirectFunction, SendMessage( m_hWindow, SCI_GETDIRECTFUNCTION, 0, 0 ) )
       End If
-
       ' Call the direct function for speed purposes rather than relying on the traditional SendMessage method.
       m_pSci = Cast(Any Ptr, SendMessage( m_hWindow, SCI_GETDIRECTPOINTER, 0, 0 )) 
    End If
@@ -114,7 +94,9 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    End If
 
    If pwszFile Then   
-      If Dir(*pwszFile) > "" Then   
+      ' Do not use Dir() > "" here b/c if incoming file originated from a Do/Loop 
+      ' of files using Dir() then there will be problems.
+      If AfxFileExists(*pwszFile) Then     
          Dim As String st, sText
          Dim As Long f = Freefile
          Dim As Long idx
@@ -129,7 +111,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                   Select Case idx
                      Case 1
                      Case 2
-                     Case 3: this.DiskFilename = *this.DiskFilename & Trim(st)    
+                     Case 3: this.DiskFilename = this.DiskFilename & Trim(st)    
                      Case 4 
                      Case Else
                         sText = sText & st & vbCrLf
@@ -146,8 +128,13 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                sText = Space(Lof(f))
                Get #f, , sText
                Close #f
+               Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
+               If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+                  sText = Mid(sText, 3)
+                  sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+               End If   
                this.SetText( sText ) 
-               this.DateFileTime = FileDateTime( *pwszFile )
+               this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
             End If
             this.DiskFilename = *pwszFile
             SciMsg( m_pSci, SCI_SETSAVEPOINT, 0, 0)
@@ -213,6 +200,11 @@ Function clsDocument.InsertFile() As BOOLEAN
          sText = Space(Lof(f))
          Get #f, , sText
          Close #f
+         Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
+         If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+            sText = Mid(sText, 3)
+            sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+         End If   
       End If
       SciMsg( m_pSci, SCI_INSERTTEXT, -1, Cast(LPARAM, Strptr(sText)) )
       CoTaskMemFree pwszName
@@ -234,11 +226,11 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' set flag to display SaveAs dialog.
    If this.IsNewFlag Then bSaveAs = true
       
-   wFilename = *this.Diskfilename
+   wFilename = this.Diskfilename
    
    If bSaveAs Then
       ' Display the Save File Dialog
-      FF_PATHNAME( @WStr("NAMEX"), @wFilename, @wText)
+      wText = AfxStrPathname( "NAMEX", wFilename )
       Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "")
       If pwszName Then
          wFilename = *pwszName
@@ -260,22 +252,9 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       ' error saving file
    End If         
 
-'   ' Delete any existing file
-'   If Dir(wFilename) > "" Then Kill wFilename
-'   
-'   ' Do the actual saving to disk
-'   f = Freefile
-'   If Open( wFilename For Binary As #f) = 0 Then
-'      sText = this.GetText
-'      Put #f, 1, sText
-'      Close #f
-'   Else
-'      ' error saving file
-'   End If   
-
-   this.DiskFilename = @wFilename
+   this.DiskFilename = wFilename
    this.IsNewFlag    = False
-   this.DateFileTime = FileDateTime( wFilename )
+   this.DateFileTime = AfxGetFileLastWriteTime( wFilename )
    
    ' Set the current state of the document to unmodified
    SciMsg( m_pSci, SCI_SETSAVEPOINT, 0, 0)
@@ -758,7 +737,7 @@ Function clsDocument.DisplayStats() As Long
 
    Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
 
-   Dim As Long i, curPos, nLine, nCol, nLines, nTextLen, nCount, idx
+   Dim As Long i, curPos, nLine, nCol
    Dim As Long startPos, endPos, startLine, endLine, nSelLines
    Dim pDoc As clsDocument Ptr
    Dim TB As TC_ITEM 
@@ -768,25 +747,29 @@ Function clsDocument.DisplayStats() As Long
    Static wTag  As WString * 10        ' * display if modified
    
    ' Retrieve the information and show it in the status bar
-   nLines    = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0) 
-   nTextLen  = SciMsg( m_pSci, SCI_GETTEXTLENGTH, 0, 0) 
    curPos    = SciMsg( m_pSci, SCI_GETCURRENTPOS, 0, 0)
    nLine     = SciMsg( m_pSci, SCI_LINEFROMPOSITION, curPos, 0) 
    nCol      = SciMsg( m_pSci, SCI_GETCOLUMN, curPos, 0) 
    this.GetSelectedLineRange(startLine, endLine, startPos, endPos )
 
+   wText = " Ln " & Str(nLine+1) & ", Col " & Str(nCol+1) 
    If endPos - startPos Then  ' there is selected text
-      startLine = Iif( nLine < startLine, nLine, startLine)
-      endLine   = Iif( nLine > endLine, nLine, endLine)
-      nSelLines = Iif(endLine = startLine, 0, endLine - startLine + 1)  
+      wText = wText & " (" & Str(endPos - startPos) & " selected)"
    End If
-   
-   wText = " Ln: " & Str(nLine+1) & "   Col: " & Str(nCol+1) & _
-           "   Sel: " & Str(endPos - startPos) & " | " & Str(nSelLines)
    StatusBar_SetText(hStatusbar, 2, @wText)
    
-   wText = "  Lines: " & Str(nLines) & "   Chars: " & Str(nTextLen) 
+
+   wText = ""
+   Select Case this.ProjectFileType
+      Case FILETYPE_NORMAL:   wText = L(210,"Normal") 
+      Case FILETYPE_MODULE:   wText = L(211,"Module")
+      Case FILETYPE_MAIN:     wText = L(212,"Main")
+      Case FILETYPE_RESOURCE: wText = L(213,"Resource")
+   End Select
    StatusBar_SetText(hStatusbar, 3, @wText)
+
+   wText = IIF( gConfig.UnicodeEncoding, "UTF-8 (Unicode)", "ANSI" )
+   StatusBar_SetText(hStatusbar, 4, @wText)
 
    ' Set the filename text that displays on the tab. 
    gTTabCtl.SetTabText(-1)
@@ -795,8 +778,8 @@ Function clsDocument.DisplayStats() As Long
    ' do the update if the text has changed in order to prevent flicker.
    FF_Control_GetTextW( HWND_FRMMAIN, @wTemp, MAX_PATH )
    wText = APPNAMESHORT 
-   If gpApp->IsProjectActive Then wText = wText & " - [" & *gpApp->ProjectName & "]"
-   wText = wText & " - [" & *this.DiskFilename & wTag & "]"
+   If gpApp->IsProjectActive Then wText = wText & " - [" & gpApp->ProjectName & "]"
+   wText = wText & " - [" & this.DiskFilename & wTag & "]"
    If wText <> wTemp Then SetWindowTextW( HWND_FRMMAIN, @wText )
 
    Function = 0
@@ -830,8 +813,8 @@ Function clsDocument.ApplyProperties() As Long
    nFontSize   = Val(gConfig.EditorFontsize)
    
    Select Case gConfig.KeywordCase
-      Case 0:  nFontCase = SC_CASE_UPPER
-      Case 1:  nFontCase = SC_CASE_LOWER
+      Case 0:  nFontCase = SC_CASE_LOWER
+      Case 1:  nFontCase = SC_CASE_UPPER
       Case 2:  nFontCase = SC_CASE_MIXED
    End Select            
    
@@ -965,6 +948,13 @@ Function clsDocument.ApplyProperties() As Long
    'SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~._:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
    SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~_:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
+   ''  UNICODE (UTF-8 encoding)
+   IF gConfig.UnicodeEncoding THEN
+      SciMsg( m_pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+   ELSE
+      SciMsg( m_pSci, SCI_SETCODEPAGE, 0, 0 )
+   END IF
+   
    ''
    ''  OTHER
    SciMsg( m_pSci, SCI_SETADDITIONALSELECTIONTYPING, True, 0 )
@@ -972,7 +962,7 @@ Function clsDocument.ApplyProperties() As Long
 
    ''
    ''  APPLY ALL LANGUAGE SPECIFIC SYNTAX COLORING
-   FF_Pathname( @WStr("EXTN"), this.DiskFilename, @wFileExt )
+   wFileExt = AfxStrPathname( "EXTN", this.DiskFilename )
    wFileExt = Ucase(wFileExt)
 
    If cbool(wFileExt = ".BAS") OrElse cbool(wFileExt = ".INC") _
@@ -1139,7 +1129,7 @@ Function clsDocument.CreateFunctionList() As Long
    pList->bIsHeader = True
    pList->nLineNumber = 0   'b/c Scintilla is zero based
    pList->pDoc = @this
-   FF_PATHNAME( WStr("NAMEX"), this.DiskFilename, @pList->zFnName )
+   pList->zFnName = AfxStrPathname( "NAMEX", this.DiskFilename )
    pList->zFnName = Ucase(pList->zFnName)
    m_FnListPtr = pList
    pList->pListPrev = 0
@@ -1273,7 +1263,7 @@ Function clsDocument.GetWord( ByVal curPos As Long = -1 ) As String
       p = Instr(buffer, Chr(0))
       If p Then buffer = Left(buffer, p - 1)
    End If
-   buffer = FF_RemoveAny( buffer, Chr(13, 10, 34) & "()%," )
+   buffer = AfxStrRemoveAny( buffer, Chr(13, 10, 34) & "()%," )
    Function = buffer
 
 End Function
@@ -1308,17 +1298,35 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    sBookmarks = trim(sBookmarks)
    If Len(sBookmarks) = 0 Then Exit Function
    
-   Dim As Long nCount = FF_ParseCount(sBookmarks, ",")
+   Dim As Long nCount = AfxStrParseCount(sBookmarks, ",")
    Dim As Long nLine
    
    For i As Long = 1 To nCount
-      nLine = Val( FF_Parse(sBookmarks, ",", i) )
+      nLine = Val( AfxStrParse(sBookmarks, i, ",") )
       SciMsg( m_pSci, SCI_MARKERADD, nLine, 0)
    Next
 
    Function = 0
 
 End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

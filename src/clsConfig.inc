@@ -50,6 +50,7 @@ Function clsConfig.SaveToFile() as Long
    "TabIndentSpaces="       & this.TabIndentSpaces       & vbcrlf & _
    "LocalizationFile="      & this.LocalizationFile      & vbcrlf & _
    "TabSize="               & this.TabSize               & vbcrlf & _
+   "UnicodeEncoding="       & this.UnicodeEncoding       & vbcrlf & _
    "KeywordCase="           & this.KeywordCase           & vbcrlf & _
    "EditorFontname="        & this.EditorFontname        & vbcrlf & _
    "EditorFontsize="        & this.EditorFontsize        & vbcrlf & _
@@ -67,10 +68,10 @@ Function clsConfig.SaveToFile() as Long
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
-   ProcessToCurdrive(@this.FBWINCompiler32)
-   ProcessToCurdrive(@this.FBWINCompiler64)
-   ProcessToCurdrive(@this.CompilerHelpfile)
-   ProcessToCurdrive(@this.Win32APIHelpfile)
+   this.FBWINCompiler32  = ProcessToCurdrive(this.FBWINCompiler32)
+   this.FBWINCompiler64  = ProcessToCurdrive(this.FBWINCompiler64)
+   this.CompilerHelpfile = ProcessToCurdrive(this.CompilerHelpfile)
+   this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
 
    Print #f, _
    "FBWINCompiler32="       & this.FBWINCompiler32       & vbcrlf & _
@@ -83,7 +84,7 @@ Function clsConfig.SaveToFile() as Long
    
    Print #f, "[MRU]"  
    For i As Long = 0 To 9
-      ProcessToCurdrive(@this.MRU(i))
+      this.MRU(i) = ProcessToCurdrive(this.MRU(i))
       Print #f, "MRU_" & Right("00" & Str(i), 2) & "="   & this.MRU(i) 
    Next         
    
@@ -91,7 +92,7 @@ Function clsConfig.SaveToFile() as Long
    
    Print #f, "[MRUPROJECTS]"  
    For i As Long = 0 To 9
-      ProcessToCurdrive(@this.MRUProject(i))
+      this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
       Print #f, "MRUPROJECT_" & Right("00" & Str(i), 2) & "="   & this.MRUProject(i) 
    Next         
 
@@ -166,7 +167,7 @@ Function clsConfig.LoadFromFile() as Long
       wData = Mid(st, i+1)
       nData = Val(wData)
       
-      ProcessFromCurdrive(@wData)
+      wData = ProcessFromCurdrive(wData)
 
       If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
          i = Val(Right(wKey,2))
@@ -202,6 +203,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
          Case "LocalizationFile":     this.LocalizationFile     = wData
          Case "TabSize":              this.TabSize              = wData
+         Case "UnicodeEncoding":      this.UnicodeEncoding      = nData
          Case "EditorFontname":       this.EditorFontname       = wData
          Case "EditorFontsize":       this.EditorFontsize       = wData
          Case "EditorFontCharSet":    this.EditorFontCharSet    = wData
@@ -270,7 +272,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Dim As Long i, nActiveTab
 
    Dim f As Long = Freefile
-   If Open( *gpApp->ProjectDiskFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
+   If Open( gpApp->ProjectFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
 
    Print #f, "' WINFBE PROJECT FILE"
    Print #f, "ProjectType=";            gpApp->ProjectType
@@ -278,8 +280,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Print #f, "ProjectDebug=";           gpApp->ProjectDebug
    Print #f, "ProjectThread=";          gpApp->ProjectThread
    Print #f, "ProjectSuppressConsole="; gpApp->ProjectSuppressConsole
-   Print #f, "ProjectOther32=";        *gpApp->ProjectOther32
-   Print #f, "ProjectOther64=";        *gpApp->ProjectOther64
+   Print #f, "ProjectOther32=";         gpApp->ProjectOther32
+   Print #f, "ProjectOther64=";         gpApp->ProjectOther64
    Print #f, "DefaultCompiler=";        gConfig.DefaultCompiler       
    Print #f, "DefaultCompileMode=";     gConfig.DefaultCompileMode    
    Print #f, "CommandLine=";            gConfig.CommandLine
@@ -297,8 +299,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
       If pDoc->IsProjectFile Then 
-         wszText = *pDoc->DiskFilename
-         ProcessToCurdrive(@wszText)
+         wszText = pDoc->DiskFilename
+         wszText = ProcessToCurdrive(wszText)
          Print #f, "File="; wszText
          Print #f, "FileType="; pDoc->ProjectFileType
          Print #f, "TabIndex="; -1     ' use -1 rather than True
@@ -316,8 +318,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
       If pDoc Then 
          If pDoc->IsProjectFile Then
             If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
-               wszText = *pDoc->DiskFilename
-               ProcessToCurdrive(@wszText)
+               wszText = pDoc->DiskFilename
+               wszText = ProcessToCurdrive(wszText)
                Print #f, "File="; wszText
                Print #f, "FileType="; pDoc->ProjectFileType
                Print #f, "TabIndex="; 0    
@@ -351,11 +353,11 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
    
-   If Dir(*gpApp->ProjectDiskFilename) = "" Then Exit Function
-   FF_Pathname(@WStr("NAMEX"), gpApp->ProjectDiskFilename, gpApp->ProjectName)
+   If AfxFileExists(gpApp->ProjectFilename) = 0 Then Exit Function
+   gpApp->ProjectName = AfxStrPathname( "NAMEX", gpApp->ProjectFilename )
     
    Dim f As Long = Freefile
-   If Open( *gpApp->ProjectDiskFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
+   If Open( gpApp->ProjectFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
 
    frmProjectManager_Show( HWND_FRMMAIN, 0 )
    
@@ -382,7 +384,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       wData = Mid(st, i+1)
       nData = Val(wData)
       
-      ProcessFromCurdrive(@wData)
+      wData = ProcessFromCurdrive(wData)
 
       Select Case wKey
          Case "ProjectType":            gpApp->ProjectType         = nData
@@ -405,7 +407,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
          Case "FirstLine":           nFirstLine = nData
          Case "Position":            nPosition = nData
          Case "FileEnd":
-            If Dir(wszFilename) > "" Then
+            If AfxFileExists(wszFilename) Then
                pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, False, @wszFilename, 0 )
                pDoc->ProjectFileType = nFileType
                gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
@@ -450,6 +452,12 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
     
    Function = True   ' successul save
 End Function
+
+
+
+
+
+
 
 
 

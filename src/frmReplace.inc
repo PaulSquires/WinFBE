@@ -7,7 +7,7 @@ Function frmReplace_AddToReplaceCombo( ByRef sText As Const String ) As Long
    
    ' If the string already exists in the combobox then remove it
    i = Instr(gFind.txtReplaceCombo, sText & DELIM)
-   If i Then gFind.txtReplaceCombo = FF_StrDelete(gFind.txtReplaceCombo, i, Len(sText))
+   If i Then gFind.txtReplaceCombo = AfxStrDelete(gFind.txtReplaceCombo, i, Len(sText))
   
    ' Add it to the beginning of the list
    gFind.txtReplaceCombo = sText & DELIM & gFind.txtReplaceCombo 
@@ -72,9 +72,9 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             gFind.txtFind = Str(wszText)
             frmFind_AddToFindCombo(gFind.txtFind)
             ComboBox_ResetContent(hwndCtl)
-            nCount = FF_ParseCount(gFind.txtFindCombo, DELIM )
+            nCount = AfxStrParseCount(gFind.txtFindCombo, DELIM )
             For i = 1 To nCount
-               wszText = FF_Parse(gFind.txtFindCombo, DELIM, i)
+               wszText = AfxStrParse(gFind.txtFindCombo, i, DELIM)
                If Len(wszText) Then ComboBox_AddString( hwndCtl, @wszText )
             Next
             wszText = gFind.txtFind
@@ -92,9 +92,9 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             gFind.txtReplace = Str(wszText)
             frmReplace_AddToReplaceCombo(gFind.txtReplace)
             ComboBox_ResetContent(hwndCtl)
-            nCount = FF_ParseCount(gFind.txtReplaceCombo, DELIM )
+            nCount = AfxStrParseCount(gFind.txtReplaceCombo, DELIM )
             For i = 1 To nCount
-               wszText = FF_Parse(gFind.txtReplaceCombo, DELIM, i)
+               wszText = AfxStrParse(gFind.txtReplaceCombo, i, DELIM)
                If Len(wszText) Then ComboBox_AddString( hwndCtl, @wszText )
             Next
             wszText = gFind.txtReplace
@@ -283,6 +283,7 @@ Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
+   pWindow->ClassStyle = CS_DROPSHADOW
 
    HWND_FRMREPLACE = _
    pWindow->Create(hwndParent, L(173,"Replace"), @frmReplace_WndProc, 0, 0, 0, 0, _
@@ -377,3 +378,5 @@ Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
    
    Function = 0
 End Function
+
+

@@ -12,15 +12,12 @@
 ' ########################################################################################
 
 #pragma once
-
 #include once "windows.bi"
 #include once "win/tmschema.bi"
 #include once "win/uxtheme.bi"
-#include once "CWindow.inc"
+#include once "Afx/CWindow.inc"
 
-USING Afx.CWindowClass
-
-NAMESPACE Afx.CXpButtonClass
+NAMESPACE Afx
 
 ' ========================================================================================
 ' Image class
@@ -108,8 +105,8 @@ TYPE CXpButton
       DECLARE SUB SetImage (BYVAL hImage AS HANDLE, BYVAL ImageType AS LONG, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
       DECLARE SUB SetIcon (BYVAL hIcon AS HICON, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
       DECLARE SUB SetBitmap (BYVAL hBitmap AS HBITMAP, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
-      DECLARE SUB SetIconFromFile (BYVAL wszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
-      DECLARE SUB SetBitmapFromFile (BYVAL wszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+      DECLARE SUB SetIconFromFile (BYVAL pwszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+      DECLARE SUB SetBitmapFromFile (BYVAL pwszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
       DECLARE STATIC FUNCTION CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 END TYPE
@@ -118,7 +115,7 @@ END TYPE
 ' ========================================================================================
 ' CXpButton class constructor
 ' ========================================================================================
-CONSTRUCTOR CXpButton (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+PRIVATE CONSTRUCTOR CXpButton (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
 
@@ -172,7 +169,7 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' CXpButton class destructor
 ' ========================================================================================
-DESTRUCTOR CXpButton
+PRIVATE DESTRUCTOR CXpButton
    ' // Deletes the images
    IF m_hImage THEN .DeleteObject m_hImage
    IF m_hHotImage THEN .DeleteObject m_hHotImage
@@ -186,7 +183,7 @@ END DESTRUCTOR
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CXpButton.CXPButtonProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    DIM pButton AS CXpButton PTR
    DIM hDc AS HDC, pPaint AS PAINTSTRUCT
@@ -377,7 +374,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the handle of the button
 ' ========================================================================================
-FUNCTION CXpButton.hWindow () AS HWND
+PRIVATE FUNCTION CXpButton.hWindow () AS HWND
    FUNCTION = m_hCtl
 END FUNCTION
 ' ========================================================================================
@@ -385,7 +382,7 @@ END FUNCTION
 ' ========================================================================================
 ' Redraws the button
 ' ========================================================================================
-SUB CXpButton.Redraw
+PRIVATE SUB CXpButton.Redraw
    .InvalidateRect m_hCtl, NULL, 0
    .UpdateWindow m_hCtl
 END SUB
@@ -397,7 +394,7 @@ END SUB
 ' - hFont = Font handle
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetFont (BYVAL hFont AS HFONT, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetFont (BYVAL hFont AS HFONT, BYVAL fRedraw AS LONG = FALSE)
    IF hFont = NULL THEN EXIT SUB
    IF m_hFont THEN .DeleteObject m_hFont
    m_hFont = hFont
@@ -408,7 +405,7 @@ END SUB
 ' ========================================================================================
 ' Returns the font handle
 ' ========================================================================================
-FUNCTION CXpButton.GetFont () AS HFONT
+PRIVATE FUNCTION CXpButton.GetFont () AS HFONT
    FUNCTION = m_hFont
 END FUNCTION
 ' ========================================================================================
@@ -484,7 +481,7 @@ END FUNCTION
 '     and adds an ellipsis.
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetTextFormat (BYVAL dwTextFlags AS DWORD, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetTextFormat (BYVAL dwTextFlags AS DWORD, BYVAL fRedraw AS LONG = FALSE)
    m_dwTextFlags = dwTextFlags
    IF fRedraw THEN this.Redraw
 END SUB
@@ -493,7 +490,7 @@ END SUB
 ' ========================================================================================
 ' Returns the text format
 ' ========================================================================================
-FUNCTION CXpButton.GetTextFormat () AS DWORD
+PRIVATE FUNCTION CXpButton.GetTextFormat () AS DWORD
    FUNCTION = m_dwTextFlags
 END FUNCTION
 ' ========================================================================================
@@ -503,7 +500,7 @@ END FUNCTION
 ' Parameter:
 ' - hCursor = Cursor handle
 ' ========================================================================================
-SUB CXpButton.SetCursor (BYVAL hCursor AS HCURSOR)
+PRIVATE SUB CXpButton.SetCursor (BYVAL hCursor AS HCURSOR)
    IF m_hCursor THEN DestroyCursor m_hCursor
    m_hCursor = hCursor
 END SUB
@@ -512,7 +509,7 @@ END SUB
 ' ========================================================================================
 ' Gets the cursor for the button
 ' ========================================================================================
-FUNCTION CXpButton.GetCursor () AS HCURSOR
+PRIVATE FUNCTION CXpButton.GetCursor () AS HCURSOR
    FUNCTION = m_hCursor
 END FUNCTION
 ' ========================================================================================
@@ -523,7 +520,7 @@ END FUNCTION
 ' - fToggle = Toggle state (TRUE or FALSE)
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetToggle (BYVAL fToggle AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetToggle (BYVAL fToggle AS LONG, BYVAL fRedraw AS LONG = FALSE)
    IF fToggle <> 0 THEN fToggle = CTRUE
    m_bIsToggle = fToggle
    IF fRedraw THEN this.Redraw
@@ -534,7 +531,7 @@ END SUB
 ' Gets the button toggle state
 ' Returns CTRUE if the button is toggled or FALSE otherwise.
 ' ========================================================================================
-FUNCTION CXpButton.GetToggle () AS LONG
+PRIVATE FUNCTION CXpButton.GetToggle () AS LONG
    FUNCTION = m_bIsToggle
 END FUNCTION
 ' ========================================================================================
@@ -545,7 +542,7 @@ END FUNCTION
 ' - fState = Toggled state (TRUE or FALSE)
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetToggleState (BYVAL fState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetToggleState (BYVAL fState AS LONG, BYVAL fRedraw AS LONG = FALSE)
    IF fState <> 0 THEN fState = -1
    m_bToggled = fState
    IF fRedraw THEN this.Redraw
@@ -555,7 +552,7 @@ END SUB
 ' ========================================================================================
 ' Returns TRUE if button is toggled (down) or FALSE otherwise
 ' ========================================================================================
-FUNCTION CXpButton.GetToggleState () AS LONG
+PRIVATE FUNCTION CXpButton.GetToggleState () AS LONG
    FUNCTION = m_bToggled
 END FUNCTION
 ' ========================================================================================
@@ -567,7 +564,7 @@ END FUNCTION
 ' - nHeight = Height of the image, in pixels.
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetImageSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetImageSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL fRedraw AS LONG = FALSE)
    m_ImageWidth = nWidth
    m_ImageHeight = nHeight
    IF fRedraw THEN this.Redraw
@@ -580,7 +577,7 @@ END SUB
 ' - nWidth = Width of the image, in pixels.
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetImageWidth (BYVAL nWidth AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetImageWidth (BYVAL nWidth AS LONG, BYVAL fRedraw AS LONG = FALSE)
    m_ImageWidth = nWidth
    IF fRedraw THEN this.Redraw
 END SUB
@@ -589,7 +586,7 @@ END SUB
 ' ========================================================================================
 ' Gets the width of the image.
 ' ========================================================================================
-FUNCTION CXpButton.GetImageWidth () AS LONG
+PRIVATE FUNCTION CXpButton.GetImageWidth () AS LONG
    FUNCTION = m_ImageWidth
 END FUNCTION
 ' ========================================================================================
@@ -600,7 +597,7 @@ END FUNCTION
 ' - nHeight = Height of the image, in pixels.
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetImageHeight (BYVAL nHeight AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetImageHeight (BYVAL nHeight AS LONG, BYVAL fRedraw AS LONG = FALSE)
    m_ImageHeight = nHeight
    IF fRedraw THEN this.Redraw
 END SUB
@@ -609,7 +606,7 @@ END SUB
 ' ========================================================================================
 ' Gets the height of the image.
 ' ========================================================================================
-FUNCTION CXpButton.GetImageHeight () AS LONG
+PRIVATE FUNCTION CXpButton.GetImageHeight () AS LONG
    FUNCTION = m_ImageHeight
 END FUNCTION
 ' ========================================================================================
@@ -630,7 +627,7 @@ END FUNCTION
 '     %XPBI_CENTERCENTER = %XPBI_CENTER OR %XPBI_VCENTER  ' // Center-center (no text)
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetImagePos (BYVAL nPos AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetImagePos (BYVAL nPos AS LONG, BYVAL fRedraw AS LONG = FALSE)
    m_ImagePos = nPos
    IF fRedraw THEN this.Redraw
 END SUB
@@ -639,7 +636,7 @@ END SUB
 ' ========================================================================================
 ' Gets the position of the image.
 ' ========================================================================================
-FUNCTION CXpButton.GetImagePos () AS LONG
+PRIVATE FUNCTION CXpButton.GetImagePos () AS LONG
    FUNCTION = m_ImagePos
 END FUNCTION
 ' ========================================================================================
@@ -650,7 +647,7 @@ END FUNCTION
 ' - nMargin = Margin (in pixels)
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetImageMargin (BYVAL nMargin AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetImageMargin (BYVAL nMargin AS LONG, BYVAL fRedraw AS LONG = FALSE)
    m_ImageMargin = nMargin
    IF fRedraw THEN this.Redraw
 END SUB
@@ -659,7 +656,7 @@ END SUB
 ' ========================================================================================
 ' Gets the margin of the image.
 ' ========================================================================================
-FUNCTION CXpButton.GetImageMargin () AS LONG
+PRIVATE FUNCTION CXpButton.GetImageMargin () AS LONG
    FUNCTION = m_ImageMargin
 END FUNCTION
 ' ========================================================================================
@@ -670,7 +667,7 @@ END FUNCTION
 ' - nMargin = Margin (in pixels)
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetTextMargin (BYVAL nMargin AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetTextMargin (BYVAL nMargin AS LONG, BYVAL fRedraw AS LONG = FALSE)
    m_TextMargin = nMargin
    IF fRedraw THEN this.Redraw
 END SUB
@@ -679,7 +676,7 @@ END SUB
 ' ========================================================================================
 ' Gets the text margin.
 ' ========================================================================================
-FUNCTION CXpButton.GetTextMargin () AS LONG
+PRIVATE FUNCTION CXpButton.GetTextMargin () AS LONG
    FUNCTION = m_TextMargin
 END FUNCTION
 ' ========================================================================================
@@ -687,7 +684,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the button state
 ' ========================================================================================
-FUNCTION CXpButton.GetButtonState () AS LONG
+PRIVATE FUNCTION CXpButton.GetButtonState () AS LONG
    FUNCTION = m_fState
 END FUNCTION
 ' ========================================================================================
@@ -695,7 +692,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the image type
 ' ========================================================================================
-FUNCTION CXpButton.GetImageType () AS LONG
+PRIVATE FUNCTION CXpButton.GetImageType () AS LONG
    FUNCTION = m_ImageType
 END FUNCTION
 ' ========================================================================================
@@ -703,7 +700,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns CTRUE if themes are enabled or FALSE otherwise
 ' ========================================================================================
-FUNCTION CXpButton.IsThemed () AS LONG
+PRIVATE FUNCTION CXpButton.IsThemed () AS LONG
    FUNCTION = m_bIsThemed
 END FUNCTION
 ' ========================================================================================
@@ -711,7 +708,7 @@ END FUNCTION
 ' ========================================================================================
 ' Enables theming
 ' ========================================================================================
-SUB CXpButton.EnableTheming
+PRIVATE SUB CXpButton.EnableTheming
    m_bIsThemed = CTRUE
    this.Redraw
 END SUB
@@ -720,7 +717,7 @@ END SUB
 ' ========================================================================================
 ' Disables theming
 ' ========================================================================================
-SUB CXpButton.DisableTheming
+PRIVATE SUB CXpButton.DisableTheming
    m_bIsThemed = FALSE
    this.Redraw
 END SUB
@@ -734,7 +731,7 @@ END SUB
 '      XPBI_HOT = 2
 '      XPBI_DISABLED = 3
 ' ========================================================================================
-FUNCTION CXpButton.GetImage (BYVAL ImageState AS LONG) AS HANDLE
+PRIVATE FUNCTION CXpButton.GetImage (BYVAL ImageState AS LONG) AS HANDLE
    SELECT CASE ImageState
       CASE XPBI_NORMAL
          FUNCTION = m_hImage
@@ -749,7 +746,7 @@ END FUNCTION
 ' ========================================================================================
 ' Draws the button
 ' ========================================================================================
-SUB CXpButton.UxDrawPushButton (BYVAL hDC AS HDC)
+PRIVATE SUB CXpButton.UxDrawPushButton (BYVAL hDC AS HDC)
 
    DIM hTheme AS HTHEME                   ' // Theme handle
    DIM rcClient AS RECT                   ' // Original coordinates of the button client area
@@ -964,7 +961,7 @@ END SUB
 '      XPBI_DISABLED = 3
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetImage (BYVAL hImage AS HANDLE, BYVAL ImageType AS LONG, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetImage (BYVAL hImage AS HANDLE, BYVAL ImageType AS LONG, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
    IF hImage = NULL THEN EXIT SUB
    IF ImageType <> IMAGE_ICON AND ImageType <> IMAGE_BITMAP THEN EXIT SUB
    IF ImageState <> XPBI_NORMAL AND ImageState <> XPBI_HOT AND ImageState <> XPBI_DISABLED THEN EXIT SUB
@@ -1015,7 +1012,7 @@ END SUB
 '      XPBI_DISABLED = 3
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetIcon (BYVAL hIcon AS HICON, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetIcon (BYVAL hIcon AS HICON, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
    this.SetImage(hIcon, IMAGE_ICON, ImageState, fRedraw)
 END SUB
 ' ========================================================================================
@@ -1030,7 +1027,7 @@ END SUB
 '      XPBI_DISABLED = 3
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetBitmap (BYVAL hBitmap AS HBITMAP, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+PRIVATE SUB CXpButton.SetBitmap (BYVAL hBitmap AS HBITMAP, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
    this.SetImage(hBitmap, IMAGE_BITMAP, ImageState, fRedraw)
 END SUB
 ' ========================================================================================
@@ -1038,11 +1035,11 @@ END SUB
 ' ========================================================================================
 ' Loads an icon from file and sets it as the image of the button.
 ' Parameters:
-' - wszPath = Full path of the icon's file.
+' - pwszPath = Full path of the icon's file.
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetIconFromFile (BYVAL wszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
-   DIM hIcon AS HICON = .LoadImageW(NULL, wszPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE)
+PRIVATE SUB CXpButton.SetIconFromFile (BYVAL pwszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+   DIM hIcon AS HICON = .LoadImageW(NULL, pwszPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE)
    this.SetImage(hIcon, IMAGE_ICON, ImageState, fRedraw)
 END SUB
 ' ========================================================================================
@@ -1050,11 +1047,11 @@ END SUB
 ' ========================================================================================
 ' Loads a bitmap from file and sets it as the image of the button.
 ' Parameters:
-' - wszPath = Full path of the bitmap file.
+' - pwszPath = Full path of the bitmap file.
 ' - fRedraw = TRUE or FALSE (redraws the button to reflect the changes)
 ' ========================================================================================
-SUB CXpButton.SetBitmapFromFile (BYVAL wszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
-   DIM hBitmap AS HBITMAP = LoadImageW(NULL, wszPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE)
+PRIVATE SUB CXpButton.SetBitmapFromFile (BYVAL pwszPath AS WSTRING PTR, BYVAL ImageState AS LONG, BYVAL fRedraw AS LONG = FALSE)
+   DIM hBitmap AS HBITMAP = LoadImageW(NULL, pwszPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE)
    this.SetImage(hBitmap, IMAGE_BITMAP, ImageState, fRedraw)
 END SUB
 ' ========================================================================================

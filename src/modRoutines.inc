@@ -32,10 +32,11 @@ Function GetFontCharSetID(ByVal pswzCharsetName As WString Ptr ) As Long
 End Function
 
 
+
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
-Function ProcessToCurdrive( ByVal pswzIn As WString Ptr ) As Long
+Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the WinFBE application. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -43,20 +44,20 @@ Function ProcessToCurdrive( ByVal pswzIn As WString Ptr ) As Long
    ' drive letter.
 
    ' It is assumed that the incoming ptr is to a WString of MAX_PATH
-   Dim wCurDrive As WString * 10 = LCase(Left(Exepath, 3))  ' eg. D:\
+   Dim wzCurDrive As CWSTR = LCase(Left(Exepath, 3))  ' eg. D:\
 
-   If LCase(Left(*pswzIn, 3)) = wCurDrive Then 
-      *pswzIn = WStr("{CURDRIVE}") & Mid(*pswzIn, 2)
+   If LCase(Left(**wzFilename, 3)) = wzCurDrive Then 
+      wzFilename = "{CURDRIVE}" & Mid(**wzFilename, 2)
    End If
 
-   Function = 0
+   Return wzFilename
 End Function
 
 
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
-Function ProcessFromCurdrive( ByVal pswzIn As WString Ptr ) As Long
+Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the WinFBE application. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -64,13 +65,13 @@ Function ProcessFromCurdrive( ByVal pswzIn As WString Ptr ) As Long
    ' drive letter.
 
    ' It is assumed that the incoming ptr is to a WString of MAX_PATH
-   Dim wCurDrive As WString * 10 = LCase(Left(Exepath, 3))  ' eg. D:\
+   Dim wzCurDrive As CWSTR = LCase(Left(Exepath, 3))  ' eg. D:\
 
-   If Ucase(Left(*pswzIn, 10)) = "{CURDRIVE}" Then 
-      *pswzIn = Left(wCurDrive, 1) & Mid(*pswzIn, 11)
+   If Ucase(Left(**wzFilename, 10)) = "{CURDRIVE}" Then 
+      wzFilename = Left(**wzCurDrive, 1) & Mid(wzFilename, 11)
    End If
 
-   Function = 0
+   Return wzFilename
 End Function
 
 
@@ -352,119 +353,6 @@ End Function
 
 
 ' ========================================================================================
-' FF_PATHNAME
-' Parse a path/file name to extract component parts
-' ========================================================================================
-''  This function evaluates a text path/file text name, and returns a requested 
-''  part of the name. The functionality is strictly one of string parsing alone. 
-''  
-''  sOption one of the following words which is used to specify the requested part:
-''  FULL
-''        Returns the full path/file name, just as given in the sFilespec parameter. 
-''  PATH
-''        Returns the path portion of the path/file Name. That is the text up to and 
-''        including the last backslash (\) or colon (:).
-''  NAME
-''        Return the name portion of the path/file Name. That is the text To the right 
-''        of the last backslash (\) or colon (:), ending just before the last period (.).
-''  EXTN
-''        Returns the extension portion of the path/file name. That is the last 
-''        period (.) in the string plus the text to the right of it.
-''  NAMEX
-''        Returns the name and the EXTN parts combined.
-'' 
-Function FF_Pathname( ByVal wOption   As WString Ptr, _
-                      ByVal InFilespec As WString Ptr, _
-                      ByVal OutFilespec As WString Ptr _
-                      ) As Long
-
-    Dim nLen As Long = Len(*inFilespec)
-    Dim s    As WString * MAX_PATH  = *InFilespec
-    Dim st   As WString * MAX_PATH  = ""
-    Dim i    As Long = 0
-
-    If nLen = 0 Then 
-       *OutFilespec = "": Exit Function
-    End If   
-
-    Select Case Ucase(Trim(*wOption))
-       Case "FULL" 
-          *OutFilespec = *InFilespec
-          Exit Function
-       
-       Case "PATH"
-          i = InStrRev(s, Any ":\/")
-          If i Then 
-             *OutFilespec = Left(s,i): Exit Function
-          Else
-             *OutFilespec = "": Exit Function
-          End If
-             
-       Case "NAME"
-          ' Get the filename (without extension)
-          i = InStrRev(s, Any ":/\")
-          st = Iif( i, Mid(s, i + 1), s )
-          ' Get the name portion
-          i = InStrRev(st, ".")
-          st = Iif( i, Left(st, i - 1), st )
-          *OutFilespec = st: Exit Function
-       
-       Case "EXTN"
-          ' Get the extension only (includes the period)
-          i = InStrRev(s, Any ":/\")
-          st = Iif( i, Mid(s, i + 1), s )
-          ' Get the extension
-          i = InStrRev(st, ".")
-          st = Iif( i, Mid(st, i), WStr("") )
-          *OutFilespec = st: Exit Function
-       
-       Case "NAMEX"
-          ' Get the filename with extension
-          i = InStrRev(s, Any WStr(":/\"))
-          If i Then  
-             *OutFilespec = Mid(s, i + 1): Exit Function
-          Else
-             *OutFilespec = *InFilespec
-          End If   
-    End Select
-    
-    Function = 0
-    
-End Function
-
-''
-''  FF_REPLACE (ANSI ONLY)
-''  Within a specified string, replace all occurrences of one string with another string.
-''
-''  Replaces all occurrences of MatchPattern in MainString with ReplaceWith.  
-''  The replacement can cause MainString to grow or condense in size. 
-''  This function is case-sensitive. 
-''  When a match is found, the scan for the next match begins at the position 
-''  immediately following the prior match.
-''
-Function FF_Replace( ByRef sMainString   As String, _
-                     ByRef sMatchPattern As String, _
-                     ByRef sReplaceWith  As String _
-                     ) As String
-
-    Dim i As Integer 
-    Dim s As String 
-   
-    s = sMainString
-    i = 1
-    Do
-        i = Instr(i, s, sMatchPattern)
-        If i > 0 Then 
-           s = Left(s, i - 1) & sReplaceWith & Mid(s, i + Len(sMatchPattern))
-           i += Len(sReplaceWith)
-        End If   
-    Loop Until i = 0
-   
-    Return s
-
-End Function
-
-' ========================================================================================
 ' Enables the specified button in a toolbar.
 ' Returns TRUE if successful, or FALSE otherwise.
 ' ========================================================================================
@@ -486,333 +374,6 @@ Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Lon
       Function = SendMessageW(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(False, 0)))
    End If
 End Function
-
-
-''
-''  FF_PARSE_INTERNAL (ANSI ONLY)
-''  Used by both FF_Parse and FF_ParseAny (internal function)
-''
-Function FF_Parse_Internal( ByRef sMainString   As String, _
-                            ByRef sDelimiter    As String, _
-                            ByRef nPosition     As Long, _
-                            ByRef nIsAny        As BOOLEAN, _
-                            ByRef nLenDelimiter As Long _
-                            ) As String
-                   
-    ' Returns the nPosition-th substring in a string sMainString with separations sDelimiter (one or more charcters),
-    ' beginning with nPosition = 1
-
-    Dim As Long i, j, count
-    Dim s As String 
-    Dim fReverse As BOOLEAN = Iif(nPosition < 0, True, False)
-    
-    nPosition = Abs(nPosition)
-    count = 0
-    i = 1
-    s = sMainString 
-    
-    If fReverse Then 
-       ' Reverse search
-       ' Get the start of the token (j) by searching in reverse
-       If nIsAny Then
-          i = InStrRev(sMainString, Any sDelimiter)
-       Else
-          i = InStrRev(sMainString, sDelimiter)
-       End If
-       Do While i > 0        ' if not found loop will be skipped
-          j = i + nLenDelimiter
-          count += 1
-          i = i - nLenDelimiter
-          If count = nPosition Then Exit Do
-          If nIsAny Then
-             i = InStrRev(sMainString, Any sDelimiter, i )
-          Else
-             i = InStrRev(sMainString, sDelimiter, i )
-          End If   
-       Loop
-       If i = 0 Then j = 1
-
-       ' Now continue forward to get the end of the token
-       If nIsAny Then
-          i = Instr(j, sMainString, Any sDelimiter)
-       Else
-          i = Instr(j, sMainString, sDelimiter)
-       End If
-       If (i > 0) Or (count = nPosition) Then
-           If i = 0 Then
-               s = Mid(sMainString, j)
-           Else
-               s = Mid(sMainString, j, i - j)
-           End If
-       End If
-    
-    Else              
-    
-       ' Forward search
-       Do
-           j = i
-           If nIsAny Then
-              i = Instr(i, sMainString, Any sDelimiter)
-           Else
-              i = Instr(i, sMainString, sDelimiter)
-           End If   
-           If i > 0 Then count += 1: i += nLenDelimiter
-       Loop Until (i = 0) Or (count = nPosition)
-
-       If (i > 0) Or (count = nPosition - 1) Then
-           If i = 0 Then
-               s = Mid(sMainString, j)
-           Else
-               s = Mid(sMainString, j, i - nLenDelimiter - j)
-           End If
-       End If
-    End If
-      
-    Return s
-
-End Function
-
-
-''
-''  FF_PARSE (ANSI ONLY)
-''  Return a delimited field from a string expression.
-''
-''  Delimiter contains a string of one or more characters that must be fully matched to be successful.
-''  If nPosition evaluates to zero or is outside of the actual field count, an empty string is returned.
-''  If nPosition is negative then fields are searched from the right to left of the MainString.
-''  Delimiters are case-sensitive,
-''
-Function FF_Parse( ByRef sMainString As String, _
-                   ByRef sDelimiter  As String, _
-                   ByVal nPosition   As Long _
-                   ) As String
-   ' The parse must match the entire deliminter string
-   Function = FF_Parse_Internal( sMainString, sDelimiter, nPosition, False, Len(sDelimiter) )
-End Function
-
-
-''
-''  FF_PARSECOUNT (ANSI ONLY)
-''  Return the count of delimited fields from a string expression.
-''
-''  If MainString is empty (a null string) or contains no delimiter character(s), the string 
-''  is considered to contain exactly one sub-field. In this case, FF_PARSECOUNT returns the value 1.
-''  Delimiter contains a string (one or more characters) that must be fully matched.
-''  Delimiters are case-sensitive,
-''
-Function FF_ParseCount( ByRef sMainString As String, _
-                        ByRef sDelimiter  As String _
-                        ) As Long
-                   
-    Dim As Long count = 1
-    Dim As Long i = 1
-   
-    Do
-        i = Instr(i, sMainString, sDelimiter)
-        If i > 0 Then count += 1: i += Len(sDelimiter)
-    Loop Until i = 0
-   
-    Return count
-End Function
-
-
-''
-''  FF_REMOVEW (UNICODE ONLY)
-''  Return a copy of a string with characters or strings removed
-''
-''  If MatchPattern is not present in MainString, all of MainString is returned intact.
-''  The replacement can cause MainString to grow or condense in size. 
-''  This function is case-sensitive. 
-''
-Function FF_RemoveW( ByVal pwszMainString   As WString Ptr, _
-                     ByVal pwszMatchPattern As WString Ptr, _
-                     ByVal pwszOutFile      As WString Ptr _
-                     ) As Long
-
-    Dim i As Long 
-   
-    *pwszOutFile = *pwszMainString
-    If Len(*pwszMainString) = 0 Then Exit Function
-
-    Do
-        i = Instr( *pwszOutFile, *pwszMatchPattern )
-        If i > 0 Then 
-           *pwszOutFile = Left(*pwszOutFile, i - 1) & Mid(*pwszOutFile, i + Len(*pwszMatchPattern))
-        End If   
-    Loop Until i = 0
-   
-    Function = 0
-
-End Function
-
-
-''
-''  FF_REMOVE (ANSI ONLY)
-''  Return a copy of a string with characters or strings removed
-''
-''  If MatchPattern is not present in MainString, all of MainString is returned intact.
-''  The replacement can cause MainString to grow or condense in size. 
-''  This function is case-sensitive. 
-''
-Function FF_Remove( ByRef sMainString   As String, _
-                    ByRef sMatchPattern As String _
-                    ) As String
-
-    Dim i As Long 
-    Dim s As String 
-   
-    If Len(sMainString) = 0 Then Return sMainString
-
-    s = sMainString
-    Do
-        i = Instr(s, sMatchPattern)
-        If i > 0 Then 
-           s = Left(s, i - 1) & Mid(s, i + Len(sMatchPattern))
-        End If   
-    Loop Until i = 0
-   
-    Return s
-
-End Function
-
-
-''
-''  FF_REMOVEANY
-''  Return a copy of a string with characters or strings removed
-''
-''  If MatchPattern is not present in MainString, all of MainString is returned intact.
-''  MatchPattern specifies a list of single characters to be searched for individually, 
-''  a match on any one of which will cause that character to be removed from the result.
-''  This function is case-sensitive. 
-''
-Function FF_RemoveAny( ByRef sMainString   As String, _
-                       ByRef sMatchPattern As String _
-                       ) As String
-
-    Dim i As Long 
-    Dim s As String 
-   
-    If Len(sMainString) = 0 Then Return sMainString
-
-    s = sMainString
-    Do
-        i = Instr(s, Any sMatchPattern)
-        If i > 0 Then 
-           s = Left(s, i - 1) & Mid(s, i + 1)
-        End If   
-    Loop Until i = 0
-   
-    Return s
-
-End Function
-
-''
-''  FF_STRDELETE (ANSI ONLY)
-''  Delete a specified number of characters from a string expression.
-''
-''  Returns a string based on MainString but with nCount characters deleted 
-''  starting at position nStart. The first character in the string is position 1, etc.
-'' 
-Function FF_StrDelete( ByRef sMainString As String, _
-                       ByRef nStart      As Long, _
-                       ByRef nCount      As Long _
-                       ) As String
-
-   Dim nLenMain As Long = Len(sMainString)
-   
-   If nStart > nLenMain Then Return sMainString
-   If nStart < 0        Then Return sMainString
-   If nCount <= 0       Then Return sMainString
-   If nStart = 0        Then nStart = nLenMain - nCount
-      
-   Dim s As String
-   s = Left(sMainString, nStart-1) & Mid(sMainString, nStart+nCount+1)
-   Function = s
-End Function
-
-
-''
-''  FF_SHRINK
-''  Shrink a string to use a consistent single character delimiter.
-''
-''  The purpose of this function is to create a string with consecutive 
-''  data items (words) separated by a consistent single character. This 
-''  makes it very straightforward to parse the results as needed.
-''
-''  If sMask is not defined then all leading spaces and trailing spaces 
-''  are removed entirely. All occurrences of two or more spaces are changed 
-''  to a single space. Therefore, the new string returned consists of zero 
-''  or more words, each separated by a single space character.
-''
-''  If sMask is specified, it defines one or more delimiter characters to 
-''  shrink. All leading and trailing mask characters are removed entirely. 
-''  All occurrences of one or more mask characters are replaced with the 
-''  first character of sMask. The new string returned consists of zero or 
-''  more words, each separated by the character found in the first position 
-''  of sMask.    
-''
-''  WhiteSpace is generally defined as the four common non-printing 
-''  characters:  Space, Tab, Carriage-Return, and Line-Feed. sMask = Chr(32,9,13,10) 
-''
-Private Function FF_Shrink( ByRef sMainString As String, _
-                            ByRef sMask       As String = " " _
-                            ) As String
-
-    Dim nLen       As Integer = Len(sMask)
-    Dim i          As Integer
-    Dim z          As Integer
-    Dim nStart     As Integer
-    Dim sDuplicate As String
-    Dim sReplace   As String  = Left(sMask, 1)
-    Dim s          As String
-    
-    ' Eliminate all leading and trailing sMask characters
-    s = Trim(sMainString, Any sMask)
-    
-    ' Eliminate all duplicate sMask characters within the string
-    For z = 0 To nLen - 1 
-       sDuplicate = Chr(sMask[z]) & Chr(sMask[z])  ' usually double spaces
-       i = 1
-       Do
-           i = Instr(s, sDuplicate)
-           If i > 0 Then 
-              s = Left(s, i - 1) & sReplace & Mid(s, i + Len(sDuplicate))
-           End If   
-       Loop Until i = 0
-    Next
-    
-    ' Replace all single characters in the mask with the first character
-    ' of the mask.
-    i = 1
-    Do
-        i = Instr(i, s, Any sMask)
-        If i > 0 Then
-           ' only do the replace if the character at the position found is
-           ' different than the character we need to replace it with. This saves
-           ' us from having to do an unneeded string concatenation. Use pointer
-           ' arithmetic (zero based) to make comparison faster.
-           If s[i-1] <> sMask[0] Then
-              s = Left(s, i - 1) & sReplace & Mid(s, i + 1)
-           End If
-           i = i + 1
-        End If   
-    Loop Until i = 0
-
-    ' Finally, do a pass to ensure that there are no duplicates of the 
-    ' first mask character because of the replacements in the step above. 
-    sDuplicate = Chr(sMask[0]) & Chr(sMask[0])  
-    i = 1
-    Do
-        i = Instr(s, sDuplicate)
-        If i > 0 Then 
-           s = Left(s, i - 1) & sReplace & Mid(s, i + Len(sDuplicate))
-        End If   
-    Loop Until i = 0
-
-    Return s
-
-End Function
-
 
 
 '   Inserts an item at a specific location in the ListView.
@@ -1029,6 +590,10 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    CloseHandle hSnapShot
 
 End Function
+
+
+
+
 
 
 

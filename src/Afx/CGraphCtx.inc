@@ -11,12 +11,11 @@
 
 #pragma once
 #include once "windows.bi"
-#Include Once "CWindow.inc"
-#include once "AfxGdiplus.inc"
+#include once "Afx/CWindow.inc"
+#include once "win/ddraw.bi"   ' // needed to work together with CGdiPlus.inc
+#include once "Afx/AfxGdiplus.inc"
 
-USING Afx.CWindowClass
-
-NAMESPACE Afx.CGraphCtxClass
+NAMESPACE Afx
 
 ' // Notification messages
 'NM_CLICK     = NM_FIRST - 2
@@ -106,7 +105,7 @@ END TYPE
 ' ========================================================================================
 ' CGraphCtx class constructor
 ' ========================================================================================
-CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+PRIVATE CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
 
@@ -185,7 +184,7 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' CPgBar3D class destructor
 ' ========================================================================================
-DESTRUCTOR CGraphCtx
+PRIVATE DESTRUCTOR CGraphCtx
    ' // Restore the original bitmap
    .SelectObject(m_hMemDc, m_hOldBmp)
    ' // Destroys the bitmap and the memory device context
@@ -197,7 +196,7 @@ END DESTRUCTOR
 ' ========================================================================================
 ' Window procedure
 ' ========================================================================================
-FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+PRIVATE FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
    DIM pGraphCtx AS CGraphCtx PTR, rc AS RECT, rcFill AS RECT, hDC AS HDC, hBrush AS HBRUSH
    DIM si AS SCROLLINFO, ps AS PAINTSTRUCT, hdr AS NMHDR, nPage AS LONG
@@ -550,7 +549,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the handle of the control
 ' ========================================================================================
-FUNCTION CGraphCtx.hWindow () AS HWND
+PRIVATE FUNCTION CGraphCtx.hWindow () AS HWND
    FUNCTION = m_hCtl
 END FUNCTION
 ' ========================================================================================
@@ -563,7 +562,7 @@ END FUNCTION
 ' Return value:
 ' * If the function succeeds, the return value is S_OK.
 ' ========================================================================================
-FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS LONG
+PRIVATE FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS LONG
 
    ' // Clone the memory bitmap to restore it later
    DIM bi AS BITMAPINFO
@@ -667,7 +666,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the handle of the memory device context of the control.
 ' ========================================================================================
-FUNCTION CGraphCtx.GetMemDC () AS HDC
+PRIVATE FUNCTION CGraphCtx.GetMemDC () AS HDC
    FUNCTION = m_hMemDc
 END FUNCTION
 ' ========================================================================================
@@ -675,7 +674,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the handle of the compatible bitmap.
 ' ========================================================================================
-FUNCTION CGraphCtx.GethBmp () AS HBITMAP
+PRIVATE FUNCTION CGraphCtx.GethBmp () AS HBITMAP
    FUNCTION = m_hBmp
 END FUNCTION
 ' ========================================================================================
@@ -683,7 +682,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the location of the DIB bit values.
 ' ========================================================================================
-FUNCTION CGraphCtx.GetBits () AS ANY PTR
+PRIVATE FUNCTION CGraphCtx.GetBits () AS ANY PTR
    FUNCTION = m_ppvBits
 END FUNCTION
 ' ========================================================================================
@@ -696,7 +695,7 @@ END FUNCTION
 ' * If the function succeeds, the return value is TRUE.
 '   If the function fails, the return value is FALSE.
 ' ========================================================================================
-FUNCTION CGraphCtx.Clear (BYVAL RGBColor AS COLORREF) AS BOOLEAN
+PRIVATE FUNCTION CGraphCtx.Clear (BYVAL RGBColor AS COLORREF) AS BOOLEAN
    IF m_hMemDc = NULL THEN EXIT FUNCTION
    DIM hBrush AS .HBRUSH = .CreateSolidBrush(RGBColor)
    DIM rc AS RECT
@@ -712,7 +711,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the width of the virtual buffer.
 ' ========================================================================================
-FUNCTION CGraphCtx.GetVirtualBufferWidth () AS LONG
+PRIVATE FUNCTION CGraphCtx.GetVirtualBufferWidth () AS LONG
    FUNCTION = m_vWidth
 END FUNCTION
 ' ========================================================================================
@@ -720,7 +719,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns the height of the virtual buffer.
 ' ========================================================================================
-FUNCTION CGraphCtx.GetVirtualBufferHeight () AS LONG
+PRIVATE FUNCTION CGraphCtx.GetVirtualBufferHeight () AS LONG
    FUNCTION = m_vHeight
 END FUNCTION
 ' ========================================================================================
@@ -730,7 +729,7 @@ END FUNCTION
 ' Return value:
 ' * TRUE or FALSE
 ' ========================================================================================
-PROPERTY CGraphCtx.Stretchable () AS BOOLEAN
+PRIVATE PROPERTY CGraphCtx.Stretchable () AS BOOLEAN
    PROPERTY = m_Stretchable
 END PROPERTY
 ' ========================================================================================
@@ -742,7 +741,7 @@ END PROPERTY
 ' Return value:
 ' * The previous value of the property
 ' ========================================================================================
-PROPERTY CGraphCtx.Stretchable (BYVAL bStretchable AS BOOLEAN)
+PRIVATE PROPERTY CGraphCtx.Stretchable (BYVAL bStretchable AS BOOLEAN)
    m_Stretchable = bStretchable
 END PROPERTY
 ' ========================================================================================
@@ -750,7 +749,7 @@ END PROPERTY
 ' ========================================================================================
 ' Returns the value of the stretch mode property
 ' ========================================================================================
-PROPERTY CGraphCtx.StretchMode () AS LONG
+PRIVATE PROPERTY CGraphCtx.StretchMode () AS LONG
    PROPERTY = m_StretchMode
 END PROPERTY
 ' ========================================================================================
@@ -787,7 +786,7 @@ END PROPERTY
 ' Return value:
 ' * The previous value of the property
 ' ========================================================================================
-PROPERTY CGraphCtx.StretchMode (BYVAL nStretchMode AS LONG)
+PRIVATE PROPERTY CGraphCtx.StretchMode (BYVAL nStretchMode AS LONG)
    m_StretchMode = nStretchMode
 END PROPERTY
 ' ========================================================================================
@@ -797,7 +796,7 @@ END PROPERTY
 ' Return value:
 ' * TRUE or FALSE
 ' ========================================================================================
-PROPERTY CGraphCtx.Resizable () AS BOOLEAN
+PRIVATE PROPERTY CGraphCtx.Resizable () AS BOOLEAN
    PROPERTY = m_Resizable
 END PROPERTY
 ' ========================================================================================
@@ -809,7 +808,7 @@ END PROPERTY
 ' Return value:
 ' * The previous value of the property
 ' ========================================================================================
-PROPERTY CGraphCtx.Resizable (BYVAL bResizable AS BOOLEAN)
+PRIVATE PROPERTY CGraphCtx.Resizable (BYVAL bResizable AS BOOLEAN)
    m_Resizable = bResizable
 END PROPERTY
 ' ========================================================================================
@@ -823,7 +822,7 @@ END PROPERTY
 '   images are loaded with increased contrast. Therefore, it's better to use the
 '   CreateBitmapFromFile method.
 ' ========================================================================================
-SUB CGraphCtx.LoadImageFromFile (BYREF wszFileName AS WSTRING)
+PRIVATE SUB CGraphCtx.LoadImageFromFile (BYREF wszFileName AS WSTRING)
    ' // Initialize Gdiplus
    DIM token AS ULONG_PTR = AfxGdipInit
    IF token = NULL THEN EXIT SUB
@@ -857,7 +856,7 @@ END SUB
 ' - dimPercent  = Percent of dimming (1-99)
 ' - bGrayScale  = TRUE or FALSE. Convert to gray scale.
 ' ========================================================================================
-SUB CGraphCtx.CreateBitmapFromFile (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE)
+PRIVATE SUB CGraphCtx.CreateBitmapFromFile (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE)
    IF LEN(wszFileName) = 0 THEN EXIT SUB
 '   ' // Initialize Gdiplus
 '   DIM token AS ULONG_PTR = AfxGdipInit
@@ -895,32 +894,32 @@ END SUB
 ' If the method succeeds, it returns Ok, which is an element of the Status enumeration.
 ' If the method fails, it returns one of the other elements of the Status enumeration.
 ' ========================================================================================
-FUNCTION CGraphCtx.SaveImage (BYREF wszFileName AS WSTRING, BYREF wszMimeType AS WSTRING = "image/bmp") AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImage (BYREF wszFileName AS WSTRING, BYREF wszMimeType AS WSTRING = "image/bmp") AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, wszMimeType)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-FUNCTION CGraphCtx.SaveImageToBmp (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageToBmp (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/bmp")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-FUNCTION CGraphCtx.SaveImageToJpeg (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageToJpeg (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/jpeg")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-FUNCTION CGraphCtx.SaveImageToPng (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageToPng (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/png")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-FUNCTION CGraphCtx.SaveImageToGif (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageToGif (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/gif")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-FUNCTION CGraphCtx.SaveImageToTiff (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageToTiff (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/tiff")
 END FUNCTION
 ' ========================================================================================
@@ -939,7 +938,7 @@ END FUNCTION
 '   InterpolationModeHighQualityBicubic = 7
 ' Return value: Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.
 ' ========================================================================================
-FUNCTION CGraphCtx.PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS LONG
+PRIVATE FUNCTION CGraphCtx.PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS LONG
    FUNCTION = AfxGdipPrintHBITMAP(m_hBmp, bStretch, nStretchMode)
 END FUNCTION
 ' ========================================================================================

@@ -106,10 +106,10 @@ Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   ProcessFromCurdrive(@gConfig.FBWINCompiler32)
-   ProcessFromCurdrive(@gConfig.FBWINCompiler64)
-   ProcessFromCurdrive(@gConfig.CompilerHelpfile)
-   ProcessFromCurdrive(@gConfig.Win32APIHelpfile)
+   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+   gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+   gConfig.CompilerHelpfile = ProcessFromCurdrive(gConfig.CompilerHelpfile)
+   gConfig.Win32APIHelpfile = ProcessFromCurdrive(gConfig.Win32APIHelpfile)
 
    Dim As HWnd HWnd = HWND_FRMOPTIONSCOMPILER
    SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN32),       gConfig.FBWINCompiler32

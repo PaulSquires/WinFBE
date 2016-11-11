@@ -2,7 +2,7 @@
 ' ========================================================================================
 ' WinFBE
 ' Windows FreeBASIC Editor (Windows 32/64 bit)
-' Paul Squires and José Roca (2016)
+' Paul Squires (2016)
 ' ========================================================================================
 
 
@@ -15,13 +15,13 @@
 #Include Once "win\TlHelp32.bi"
 #Include Once "win\Shlobj.bi"
 #Include Once "Afx\CWindow.inc"
-#Include Once "Afx\CBStr.inc"
+#Include Once "Afx\AfxStr.inc"
+#Include Once "Afx\AfxTime.inc"
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxCtl.inc" 
 #Include Once "Afx\AfxMenu.inc" 
 
-Using Afx.CWindowClass
-Using Afx.CBStrClass
+Using Afx
 ' $FB_RESPATH = "WinFBE.rc"
 
 
@@ -30,7 +30,7 @@ Using Afx.CBStrClass
 #Define APPVERSION    WStr("0.0.0")
 
 
-#Include Once "windowsxx.bi"      ' needed because version that ships with FB is broken and non-complete. 
+#Include Once "windowsxx.bi"      ' needed because version that ships with FB is broken and incomplete. 
 #Include Once "modScintilla.bi"
 #Include Once "modDeclares.bi"
 #Include Once "clsConfig.inc"
@@ -129,6 +129,12 @@ End Function
 ' Main program entry point
 ' ========================================================================================
 End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+
+
+
+
+
+
 
 
 

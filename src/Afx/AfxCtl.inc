@@ -13,10 +13,10 @@
 
 #pragma once
 #include once "windows.bi"
-'#include once "win/windowsx.bi"
 #include once "win/commctrl.bi"
 #include once "win/uxtheme.bi"
-#include once "AfxWin.inc"
+'#include once "win/windowsx.bi"
+#include once "Afx/AfxWin.inc"
 
 ' Button
 DECLARE SUB Button_Click (BYVAL hButton AS HWND)
@@ -528,7 +528,7 @@ END FUNCTION
 ' - bState = A BOOL that specifies the state. CTRUE to set the flag, otherwise FALSE.
 ' ========================================================================================
 #if _WIN32_WINNT = &h0602
-PRIVATE SUB Button_SetDontClick (BYVAL hButton AS HWND, BYVAL bState AS LONG)
+PRIVATE SUB Button_SetDontClick (BYVAL hButton AS HWND, BYVAL bState AS BOOL)
    SendMessageW(hButton, BM_SETDONTCLICK, cast(WPARAM, bState), 0)
 END SUB
 #endif
@@ -614,17 +614,6 @@ PRIVATE FUNCTION Button_DeleteImage (BYVAL hButton AS HWND, BYVAL ImageType AS D
 END FUNCTION
 ' ========================================================================================
 
-' ========================================================================================
-' Sets the text of a button using a UTF8 encode string. The return value is TRUE if the
-' text is set. It is FALSE (for an edit control), LB_ERRSPACE (for a list box), or
-' CB_ERRSPACE (for a combo box) if insufficient space is available to set the text in the
-' edit control. It is CB_ERR if this message is sent to a combo box without an edit control.
-' ========================================================================================
-PRIVATE FUNCTION Button_SetUtf8Text (BYVAL hButton AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
-   FUNCTION = AfxSetWindowUtf8Text(hButton, strUtf8Text)
-END FUNCTION
-' ========================================================================================
-
 
 ' ########################################################################################
 '                                    *** COMBOBOX ***
@@ -636,7 +625,7 @@ END FUNCTION
 ' information, call GetLastError.
 ' ========================================================================================
 PRIVATE FUNCTION ComboBox_GetComboBoxInfo (BYVAL hComboBox AS HWND, BYVAL pcbi AS COMBOBOXINFO PTR) AS BOOLEAN
-   FUNCTION = SendMessageW(hComboBox, CB_GETCOMBOBOXINFO, 0, cast(LPARAM, cast(COMBOBOXINFO PTR, pcbi)))
+   FUNCTION = SendMessageW(hComboBox, CB_GETCOMBOBOXINFO, 0, cast(LPARAM, pcbi))
 END FUNCTION
 ' ========================================================================================
 
@@ -791,18 +780,6 @@ PRIVATE FUNCTION ComboBox_SetTopIndex (BYVAL hComboBox AS HWND, BYVAL index AS D
 END FUNCTION
 ' ========================================================================================
 
-' ========================================================================================
-' Sets the text of the edit control of a combobox using a UTF8 encode string. The return
-' value is TRUE if the text is set.  It is FALSE (for an edit control), LB_ERRSPACE (for a
-' list box), or CB_ERRSPACE (for a combo box) if insufficient space is available to set the
-' text in the edit control. It is CB_ERR if this message is sent to a combo box without an
-' edit control.
-' ========================================================================================
-PRIVATE FUNCTION Combobox_SetUtf8Text (BYVAL hComboBox AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
-   FUNCTION = AfxSetWindowUtf8Text(hComboBox, strUtf8Text)
-END FUNCTION
-' ========================================================================================
-
 ' ########################################################################################
 '                                   *** COMBOBOXEX ***
 ' ########################################################################################
@@ -879,7 +856,7 @@ END FUNCTION
 ' Returns the index at which the new item was inserted if successful, or -1 otherwise.
 ' ========================================================================================
 PRIVATE FUNCTION ComboBoxEx_InsertItem (BYVAL hComboboxEx AS HWND, BYVAL lpCBItem AS COMBOBOXEXITEM PTR) AS LONG
-   FUNCTION = SendMessageW(hComboBoxEx, CBEM_INSERTITEM, 0, cast(LPARAM, @lpCBItem))
+   FUNCTION = SendMessageW(hComboBoxEx, CBEM_INSERTITEM, 0, cast(LPARAM, lpCBItem))
 END FUNCTION
 ' ========================================================================================
 
@@ -1121,18 +1098,6 @@ PRIVATE SUB Edit_SetRightMargin (BYVAL hEdit AS HWND, BYVAL nWidth AS WORD)
 END SUB
 ' ========================================================================================
 
-' ========================================================================================
-' Sets the text of the edit control of a combobox using a UTF8 encode string. The return
-' value is TRUE if the text is set.  It is FALSE (for an edit control), LB_ERRSPACE (for a
-' list box), or CB_ERRSPACE (for a combo box) if insufficient space is available to set the
-' text in the edit control. It is CB_ERR if this message is sent to a combo box without an
-' edit control.
-' ========================================================================================
-PRIVATE FUNCTION Edit_SetUtf8Text (BYVAL hEdit AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
-   FUNCTION = AfxSetWindowUtf8Text(hEdit, strUtf8Text)
-END FUNCTION
-' ========================================================================================
-
 
 ' ########################################################################################
 '                                      *** HEADER ***
@@ -1142,7 +1107,7 @@ END FUNCTION
 ' Tests a point to determine which header item, if any, is at the specified point.
 ' ========================================================================================
 PRIVATE FUNCTION Header_HitTest (BYVAL hwndHD AS HWND, BYVAL phdhti AS HDHITTESTINFO PTR) AS LONG
-   FUNCTION = SendMessageW(hwndHD, HDM_HITTEST, 0, cast(LPARAM, cast(HDHITTESTINFO PTR, phdhti)))
+   FUNCTION = SendMessageW(hwndHD, HDM_HITTEST, 0, cast(LPARAM, phdhti))
 END FUNCTION
 ' ========================================================================================
 
@@ -1321,7 +1286,7 @@ END FUNCTION
 ' Returns TRUE if the message succeeds in getting the values and attributes specified.
 ' ========================================================================================
 PRIVATE FUNCTION Syslink_GetItem (BYVAL hLM AS HWND, BYVAL lpItem AS LITEM PTR) AS BOOLEAN
-   FUNCTION = SendMessageW(hLM, LM_GETITEM, 0, cast(LPARAM, cast(LITEM PTR, @lpItem)))
+   FUNCTION = SendMessageW(hLM, LM_GETITEM, 0, cast(LPARAM, lpItem))
 END FUNCTION
 ' ========================================================================================
 
@@ -1330,7 +1295,7 @@ END FUNCTION
 ' Returns TRUE if user clicked on a link, otherwise returns FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION SysLink_HitTest (BYVAL hLM AS HWND, BYVAL lphti AS LHITTESTINFO PTR) AS BOOLEAN
-   FUNCTION = SendMessageW(hLM, LM_HITTEST, 0, cast(LPARAM, cast(LHITTESTINFO PTR, @lphti)))
+   FUNCTION = SendMessageW(hLM, LM_HITTEST, 0, cast(LPARAM, lphti))
 END FUNCTION
 ' ========================================================================================
 
@@ -1339,7 +1304,7 @@ END FUNCTION
 ' Returns TRUE if the message succeeds in setting the values and attributes specified.
 ' ========================================================================================
 PRIVATE FUNCTION SysLink_SetItem (BYVAL hLM AS HWND, BYVAL lpItem AS LITEM PTR) AS BOOLEAN
-   FUNCTION = SendMessageW(hLM, LM_SETITEM, 0, cast(LPARAM, cast(LITEM PTR, @lpItem)))
+   FUNCTION = SendMessageW(hLM, LM_SETITEM, 0, cast(LPARAM, lpItem))
 END FUNCTION
 ' ========================================================================================
 
@@ -1854,7 +1819,6 @@ END SUB
 ' usable area in a band.
 ' ========================================================================================
 PRIVATE SUB Rebar_GetBandBorders (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprc AS RECT PTR)
-   IF lprc = NULL THEN EXIT SUB
    SendMessageW(hRebar, RB_GETBANDBORDERS, cast(WPARAM, uBand), cast(LPARAM, lprc))
 END SUB
 ' ========================================================================================
@@ -1880,7 +1844,6 @@ END FUNCTION
 ' Retrieves the margins of a band.
 ' ========================================================================================
 PRIVATE SUB Rebar_GetBandMargins (BYVAL hRebar AS HWND, BYVAL pMargins AS MARGINS PTR)
-   IF pMargins = NULL THEN EXIT SUB
    SendMessageW(hRebar, RB_GETBANDMARGINS, 0, cast(LPARAM, pMargins))
 END SUB
 ' ========================================================================================
@@ -1898,7 +1861,6 @@ END FUNCTION
 ' Return value: Returns TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_GetBarInfo (BYVAL hRebar AS HWND, BYVAL lprbi AS REBARINFO PTR) AS BOOLEAN
-   IF lprbi = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_GETBARINFO, 0, cast(LPARAM, lprbi))
 END FUNCTION
 ' ========================================================================================
@@ -1916,7 +1878,6 @@ END FUNCTION
 ' Return value: Returns TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_GetColorScheme (BYVAL hRebar AS HWND, BYVAL lpcs AS COLORSCHEME PTR) AS BOOLEAN
-   IF lpcs = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_GETCOLORSCHEME, 0, cast(LPARAM, lpcs))
 END FUNCTION
 ' ========================================================================================
@@ -1952,7 +1913,6 @@ END FUNCTION
 ' Return value: Returns TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_GetRect (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprc AS RECT PTR) AS BOOLEAN
-   IF lprc = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_GETRECT, cast(WPARAM, uBand), cast(LPARAM, lprc))
 END FUNCTION
 ' ========================================================================================
@@ -2006,7 +1966,6 @@ END FUNCTION
 ' Returns the zero-based index of the band at the given point, or -1 if no rebar band was at the point.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_HitTest (BYVAL hRebar AS HWND, BYVAL lprhbt AS RBHITTESTINFO PTR) AS LONG
-   IF lprhbt = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_HITTEST, 0, cast(LPARAM, lprhbt))
 END FUNCTION
 ' ========================================================================================
@@ -2025,7 +1984,6 @@ END FUNCTION
 ' Inserts a new band in a rebar control.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_InsertBand (BYVAL hRebar AS HWND, BYVAL nIndex AS LONG, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
-   IF lprbbi = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_INSERTBAND, cast(WPARAM, nIndex), cast(LPARAM, lprbbi))
 END FUNCTION
 ' ========================================================================================
@@ -2066,7 +2024,6 @@ END SUB
 ' Sets characteristics of an existing band in a rebar control. Returns TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_SetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
-   IF lprbbi = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_SETBANDINFO, cast(WPARAM, uBand), cast(LPARAM, lprbbi))
 END FUNCTION
 ' ========================================================================================
@@ -2085,7 +2042,6 @@ END FUNCTION
 ' Sets the characteristics of a rebar control. Returns TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_SetBarInfo (BYVAL hRebar AS HWND, BYVAL lprbi AS REBARINFO PTR) AS BOOLEAN
-   IF lprbi = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_SETBARINFO, 0, cast(LPARAM, lprbi))
 END FUNCTION
 ' ========================================================================================
@@ -2103,7 +2059,6 @@ END FUNCTION
 ' Sets the color scheme information for the rebar control.
 ' ========================================================================================
 PRIVATE SUB Rebar_SetColorScheme (BYVAL hRebar AS HWND, BYVAL lpcs AS COLORSCHEME PTR)
-   IF lpcs = NULL THEN EXIT SUB
    SendMessageW(hRebar, RB_SETCOLORSCHEME, 0, cast(LPARAM, lpcs))
 END SUB
 ' ========================================================================================
@@ -2173,7 +2128,6 @@ END FUNCTION
 ' Attempts to find the best layout of the bands for the given rectangle. Returns TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_SizeToRect (BYVAL hRebar AS HWND, BYVAL prc AS RECT PTR) AS BOOLEAN
-   IF prc = NULL THEN EXIT FUNCTION
    FUNCTION = SendMessageW(hRebar, RB_SIZETORECT, 0, cast(LPARAM, prc))
 END FUNCTION
 ' ========================================================================================
@@ -2275,17 +2229,6 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION Static_DeleteEnhancedMetafile (BYVAL hStatic AS HWND) AS BOOLEAN
    FUNCTION = DeleteObject(cast(HGDIOBJ, SendMessageW(hStatic, STM_SETIMAGE, cast(WPARAM, IMAGE_ENHMETAFILE), 0)))
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the text of a button using a UTF8 encode string. The return value is TRUE if the
-' text is set. It is FALSE (for an edit control), LB_ERRSPACE (for a list box), or
-' CB_ERRSPACE (for a combo box) if insufficient space is available to set the text in the
-' edit control. It is CB_ERR if this message is sent to a combo box without an edit control.
-' ========================================================================================
-PRIVATE FUNCTION Static_SetUtf8Text (BYVAL hStatic AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
-   FUNCTION = AfxSetWindowUtf8Text(hStatic, strUtf8Text)
 END FUNCTION
 ' ========================================================================================
 
@@ -3225,9 +3168,17 @@ END FUNCTION
 ' ========================================================================================
 ' Retrieves some or all of a tree-view item's attributes.
 ' Returns TRUE if successful, or FALSE otherwise.
+' Usage example:
+' DIM item AS TVITEMEXW
+' item.mask = TVIF_TEXT
+' item.hitem = hitem
+' DIM wszText AS WSTRING * MAX_PATH
+' item.pszText = @wszText
+' item.cchTextMax = MAX_PATH
+' TreeView_GetItemEx(hTreeView, @item)
 ' ========================================================================================
 PRIVATE FUNCTION TreeView_GetItemEx (BYVAL hwndTV AS HWND, BYVAL pitem AS TVITEMEXW PTR) AS BOOLEAN
-   FUNCTION = SendMessageW(hwndTV, TVM_GETITEMW, 0, cast(LPARAM, @pitem))
+   FUNCTION = SendMessageW(hwndTV, TVM_GETITEMW, 0, cast(LPARAM, pitem))
 END FUNCTION
 ' ========================================================================================
 
@@ -3402,9 +3353,9 @@ END SUB
 ' Expands all the list of items.
 ' Note: This is a very slow process if the control has many items because of the continuous
 ' redrawing; therefore, disable redrawing before calling it with
-'   SendMessage(hwndTV, WM_SETREDRAW, FALSE, 0)
+'   SendMessageW(hwndTV, WM_SETREDRAW, FALSE, 0)
 ' and reenable drawing once it has ended with
-'   SendMessage(hwndTV, WM_SETREDRAW, TRUE, 0)
+'   SendMessageW(hwndTV, WM_SETREDRAW, TRUE, 0)
 ' followed by a redrawing of the control
 '   InvalidateRect hwndTV, NULL, CTRUE
 '   UpdateWindow hwndTV
@@ -3514,12 +3465,12 @@ PRIVATE FUNCTION TreeView_ItemExists (BYVAL hTreeView AS HWND, BYVAL hNode AS HT
    IF pwszText = NULL THEN EXIT FUNCTION
    DIM cbLen AS LONG = LEN(*pwszText)
    IF cbLen = 0 THEN EXIT FUNCTION
-   DIM pwszItemText AS WSTRING PTR = CAllocate(cbLen + 1, 2)
+   DIM cwsItemText AS CWSTR = SPACE((cbLen + 1) * 2)
    DIM hItem AS HTREEITEM = TreeView_GetChild(hTreeView, hNode)
    DO
       IF hItem = NULL THEN EXIT FUNCTION
-      IF TreeView_GetItemText(hTreeView, hItem, pwszItemText, cbLen) = FALSE THEN RETURN FALSE
-      IF *pwszItemText = *pwszText THEN
+      IF TreeView_GetItemText(hTreeView, hItem, @cwsItemText, LEN(cwsItemText)) = FALSE THEN EXIT DO
+      IF cwsItemText = *pwszText THEN
          FUNCTION = TRUE
          EXIT DO
       END IF
@@ -3527,6 +3478,7 @@ PRIVATE FUNCTION TreeView_ItemExists (BYVAL hTreeView AS HWND, BYVAL hNode AS HT
    LOOP
 END FUNCTION
 ' ========================================================================================
+
 ' ========================================================================================
 ' Searches for an exact string in a tree view node. Search is case insensitive.
 ' Returns TRUE or FALSE.
@@ -3535,12 +3487,12 @@ PRIVATE FUNCTION TreeView_ItemExistsIgnoreCase (BYVAL hTreeView AS HWND, BYVAL h
    IF pwszText = NULL THEN EXIT FUNCTION
    DIM cbLen AS LONG = LEN(*pwszText)
    IF cbLen = 0 THEN EXIT FUNCTION
-   DIM pwszItemText AS WSTRING PTR = CAllocate(cbLen + 1, 2)
+   DIM cwsItemText AS CWSTR = SPACE((cbLen + 1) * 2)
    DIM hItem AS HTREEITEM = TreeView_GetChild(hTreeView, hNode)
    DO
       IF hItem = NULL THEN EXIT FUNCTION
-      IF TreeView_GetItemText(hTreeView, hItem, pwszItemText, cbLen) = FALSE THEN RETURN FALSE
-      IF UCASE(*pwszItemText) = UCASE(*pwszText) THEN
+      IF TreeView_GetItemText(hTreeView, hItem, @cwsItemText, LEN(cwsItemText)) = FALSE THEN EXIT DO
+      IF UCASE(cwsItemText) = UCASE(*pwszText) THEN
          FUNCTION = TRUE
          EXIT DO
       END IF

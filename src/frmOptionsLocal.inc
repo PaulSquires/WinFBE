@@ -13,7 +13,7 @@ Function frmOptionsLocal_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal h
             Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, id)
             If pwszName Then
                Dim wzFilename As WString * MAX_PATH 
-               FF_PATHNAME( WStr("NAMEX"), pwszName, @wzFilename )
+               wzFilename = AfxStrPathname( "NAMEX", *pwszName )
                SetWindowTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), wzFilename )
                CoTaskMemFree pwszName
             End If
@@ -76,3 +76,4 @@ Function frmOptionsLocal_Show( ByVal hWndParent As HWnd, _
    Function = 0
    
 End Function
+

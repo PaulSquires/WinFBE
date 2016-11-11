@@ -50,7 +50,7 @@ Function CreateMRUpopup() As HMENU
    ' Display MRU files
    For i As Long = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      ProcessFromCurdrive(@gConfig.MRU(i))
+      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
       If Dir(gConfig.MRU(i)) = "" Then
          gConfig.MRU(i) = ""
       Else
@@ -61,7 +61,7 @@ Function CreateMRUpopup() As HMENU
    ' Display MRU projects
    For i As Long = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      ProcessFromCurdrive(@gConfig.MRUPROJECT(i))
+      gConfig.MRUPROJECT(i) = ProcessFromCurdrive(gConfig.MRUPROJECT(i))
       If Dir(gConfig.MRUPROJECT(i)) = "" Then
          gConfig.MRUPROJECT(i) = ""
       Else               
@@ -94,7 +94,7 @@ Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    ' Add the new items
    For i = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      ProcessFromCurdrive(@gConfig.MRU(i))
+      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
       If Dir(gConfig.MRU(i)) = "" Then
          gConfig.MRU(i) = ""
       Else
@@ -124,7 +124,7 @@ Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
    ' also for an available entry to put the filename in.
    For i = 0 To 9
       wzFile = gConfig.MRU(i)
-      ProcessFromCurdrive(@wzFile)
+      wzFile = ProcessFromCurdrive(wzFile)
       If Ucase(wzFile) = Ucase(*wzFilename) Then
          idxExistsAt = i:  Exit For
       End If   
@@ -174,7 +174,7 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFi
    ' If a project is already open then save/close it.
    If gpApp->IsProjectActive Then OnCommand_ProjectClose(HWnd)
    ' Open the project
-   gpApp->ProjectDiskFilename = @wzFile
+   gpApp->ProjectFilename = wzFile
    If gConfig.ProjectLoadFromFile() Then
       gpApp->IsNewProjectFlag = False
       gpApp->IsProjectActive = True
@@ -205,7 +205,7 @@ Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
    ' Add the new items
    For i = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      ProcessFromCurdrive(@gConfig.MRUProject(i))
+      gConfig.MRUProject(i) = ProcessFromCurdrive(gConfig.MRUProject(i))
       If Dir(gConfig.MRUProject(i)) = "" Then
          gConfig.MRUProject(i) = ""
       Else
@@ -235,7 +235,7 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
    ' also for an available entry to put the filename in.
    For i = 0 To 9
       wzFile = gConfig.MRUProject(i)
-      ProcessFromCurdrive(@wzFile)
+      wzFile = ProcessFromCurdrive(wzFile)
       If Ucase(wzFile) = Ucase(*wzFilename) Then
          idxExistsAt = i:  Exit For
       End If   
@@ -256,4 +256,6 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
 
    Function = 0
 End Function  
+
+
 

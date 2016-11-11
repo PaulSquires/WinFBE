@@ -1,6 +1,6 @@
 ' ########################################################################################
 ' Microsoft Windows
-' File: AfxGdiplus.bas
+' File: AfxGdiplus.inc
 ' Content: Gdi Plus wrapper functions
 ' Compiler: Free Basic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -14,16 +14,32 @@
 #include once "windows.bi"
 #ifdef __FB_64BIT__
     #inclib "gdiplus"
-    #include "win/gdiplus-c.bi"
+    #include once "win/gdiplus-c.bi"
 #else
+    #include once "win/ddraw.bi"
     #include once "win/gdiplus.bi"
     using gdiplus
 #endif
 #include once "win/winspool.bi"
-#include once "AfxWin.inc"
+#include once "Afx/AfxWin.inc"
+
+NAMESPACE Afx
+
+UNION GDIP_COLORMAP
+   ' // For compatibility with GDI+
+   TYPE
+      oldColor AS COLORREF
+      newColor AS COLORREF
+   END TYPE
+   ' // For compatibility with GDI
+   TYPE
+      from AS COLORREF
+      to AS COLORREF
+   END TYPE
+END UNION
 
 UNION GDIP_BGRA
-   color AS DWORD
+   color AS COLORREF
    TYPE
       blue  AS UBYTE
       green AS UBYTE
@@ -32,11 +48,26 @@ UNION GDIP_BGRA
    END TYPE
 END UNION
 
+' // Another mess in the FB headers: declared as PathData, both as an structure and as a class.
+' // And GpPathData data declared AS ANY PTR.
+TYPE GDIP_PATHDATA
+   Count AS LONG
+   Points AS GpPointF PTR
+   Types AS UBYTE PTR
+END TYPE
+
 ' ========================================================================================
 ' Returns an ARGB color value initialized with the specified values for the alpha, red,
 ' green, and blue components.
 ' ========================================================================================
-PRIVATE FUNCTION GDIP_ARGB (BYVAL a AS UBYTE, BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS DWORD
+PRIVATE FUNCTION GDIP_ARGB (BYVAL a AS UBYTE, BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS COLORREF
+   DIM clr AS GDIP_BGRA
+   clr.alpha = a : clr.red   = r : clr.green = g : clr.blue  = b
+   FUNCTION  = clr.color
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION GDIP_COLOR (BYVAL a AS UBYTE, BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS COLORREF
    DIM clr AS GDIP_BGRA
    clr.alpha = a : clr.red   = r : clr.green = g : clr.blue  = b
    FUNCTION  = clr.color
@@ -47,7 +78,7 @@ END FUNCTION
 ' Returns an XRGB color value initialized with the specified values for the red, green,
 ' and blue components.
 ' ========================================================================================
-PRIVATE FUNCTION GDIP_XRGB (BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS DWORD
+PRIVATE FUNCTION GDIP_XRGB (BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS COLORREF
    FUNCTION = GDIP_ARGB(&HFF, r, g, b)
 END FUNCTION
 ' ========================================================================================
@@ -56,7 +87,7 @@ END FUNCTION
 ' Returns a BGRA color value initialized with the specified values for the  blue, green,
 ' red and alpha components.
 ' ========================================================================================
-PRIVATE FUNCTION GDIP_BGRA (BYVAL b AS UBYTE, BYVAL g AS UBYTE, BYVAL r AS UBYTE, BYVAL a AS UBYTE) AS DWORD
+PRIVATE FUNCTION GDIP_BGRA (BYVAL b AS UBYTE, BYVAL g AS UBYTE, BYVAL r AS UBYTE, BYVAL a AS UBYTE) AS COLORREF
    DIM clr AS GDIP_BGRA
    clr.blue  = b : clr.green = g : clr.red   = r : clr.alpha = a
    FUNCTION  = clr.color
@@ -67,10 +98,90 @@ END FUNCTION
 ' Returns an RGBA color value initialized with the specified values for the red, green,
 ' blue and alpha components.
 ' ========================================================================================
-PRIVATE FUNCTION GDIP_RGBA (BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE, BYVAL a AS UBYTE) AS DWORD
+PRIVATE FUNCTION GDIP_RGBA (BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE, BYVAL a AS UBYTE) AS COLORREF
    FUNCTION = GDIP_ARGB(a, r, g, b)
 END FUNCTION
 ' ========================================================================================
+
+' ========================================================================================
+' Returns the alpha component of an ARGB color.
+' ========================================================================================
+PRIVATE FUNCTION GDIP_GetAlpha (BYVAL argbcolor AS COLORREF) AS BYTE
+   DIM clr AS GDIP_BGRA
+   clr.color = argbcolor
+   RETURN clr.alpha
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the red component of an ARGB color.
+' ========================================================================================
+PRIVATE FUNCTION GDIP_GetRed (BYVAL argbcolor AS COLORREF) AS BYTE
+   DIM clr AS GDIP_BGRA
+   clr.color = argbcolor
+   RETURN clr.red
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the green component of an ARGB color.
+' ========================================================================================
+PRIVATE FUNCTION GDIP_GetGreen (BYVAL argbcolor AS COLORREF) AS BYTE
+   DIM clr AS GDIP_BGRA
+   clr.color = argbcolor
+   RETURN clr.green
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the blue component of an ARGB color.
+' ========================================================================================
+PRIVATE FUNCTION GDIP_GetBlue (BYVAL argbcolor AS COLORREF) AS BYTE
+   DIM clr AS GDIP_BGRA
+   clr.color = argbcolor
+   RETURN clr.blue
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Fills a RECTF structure
+' ========================================================================================
+PRIVATE FUNCTION GDIP_RECTF (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, BYVAL nHeight AS SINGLE) AS GpRectF
+   DIM rcf AS GpRectF
+   rcf.x = x : rcf.y = y : rcf.Width = nWidth : rcf.Height = nHeight
+   RETURN rcf
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Fills a RECT structure
+' ========================================================================================
+PRIVATE FUNCTION GDIP_RECT (BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS GpRect
+   DIM rc AS GpRect
+   rc.x = x : rc.y = y : rc.Width = nWidth : rc.Height = nHeight
+   RETURN rc
+END FUNCTION
+' ========================================================================================
+
+' =====================================================================================
+' Fills a POINTF structure
+' =====================================================================================
+PRIVATE FUNCTION GDIP_POINTF (BYVAL x AS SINGLE, BYVAL y AS SINGLE) AS GpPointF
+   DIM pt AS GpPointF
+   pt.x = x : pt.y = y
+   RETURN pt
+END FUNCTION
+' =====================================================================================
+
+' =====================================================================================
+' Fills a POINTF structure
+' =====================================================================================
+PRIVATE FUNCTION GDIP_POINT (BYVAL x AS LONG, BYVAL y AS LONG) AS GpPoint
+   DIM pt AS GpPoint
+   pt.x = x : pt.y = y
+   RETURN pt
+END FUNCTION
+' =====================================================================================
 
 ' ========================================================================================
 ' Returns the version of Gdiplus.dll, e.g. 601 for version 6.01.
@@ -80,10 +191,49 @@ PRIVATE FUNCTION AfxGdipDllVersion () AS LONG
 END FUNCTION
 ' ========================================================================================
 
+' =====================================================================================
+' Returns the description of a GdiPlus status code.
+' =====================================================================================
+PRIVATE FUNCTION AfxGdipStatusStr (BYVAL status AS GpStatus) AS CWSTR
+
+   DIM wszMsg AS WSTRING * 260 = "Unknown"
+
+   SELECT CASE status
+      CASE Ok                        : wszMsg = "Ok"
+      CASE GenericError              : wszMsg = "Generic error"
+      CASE InvalidParameter          : wszMsg = "Invalid parameter"
+      CASE OutOfMemory               : wszMsg = "Out of memory"
+      CASE ObjectBusy                : wszMsg = "Object busy"
+      CASE InsufficientBuffer        : wszMsg = "Insufficient buffer"
+      CASE NotImplemented            : wszMsg = "Not implemented"
+      CASE Win32Error                : wszMsg = "Win 32 error"
+      CASE WrongState                : wszMsg = "Wrong state"
+      CASE Aborted                   : wszMsg = "Aborted"
+      CASE FileNotFound              : wszMsg = "File not found"
+      CASE ValueOverflow             : wszMsg = "Value overflow"
+      CASE AccessDenied              : wszMsg = "Access denied"
+      CASE UnknownImageFormat        : wszMsg = "Unknown image format"
+      CASE FontFamilyNotFound        : wszMsg = "Font family not found"
+      CASE FontStyleNotFound         : wszMsg = "Font style not found"
+      CASE NotTrueTypeFont           : wszMsg = "Not TrueType font"
+      CASE UnsupportedGdiplusVersion : wszMsg = "Unsupported GdiPlus version"
+      CASE GdiplusNotInitialized     : wszMsg = "GdiPlus not initialized"
+      CASE PropertyNotFound          : wszMsg = "Property not found"
+      CASE PropertyNotSupported      : wszMsg = "Property not supported"
+'   #IF (GDIPVER >= &H0110)
+'      CASE ProfileNotFound           : cws = "Profile not found"
+'   #ENDIF   ' //(GDIPVER >= &H0110)
+   END SELECT
+
+   RETURN wszMsg
+
+END FUNCTION
+' =====================================================================================
+
 ' ========================================================================================
 ' Initilizes GDI+
 ' Returns a token or 0 if it fails.
-' Pass the token to GdiplusShutdown when you have finished using GDI+.
+' Pass the token to AfxGdipShutdown when you have finished using GDI+.
 ' ========================================================================================
 PRIVATE FUNCTION AfxGdipInit (BYVAL version AS UINT32 = 1) AS ULONG_PTR
    DIM token AS ULONG_PTR, StartupInput AS GdiplusStartupInput
@@ -91,6 +241,15 @@ PRIVATE FUNCTION AfxGdipInit (BYVAL version AS UINT32 = 1) AS ULONG_PTR
    GdiplusStartup(@token, @StartupInput, NULL)
    FUNCTION = token
 END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Cleans up resources used by Windows GDI+. Each call to AfxGdipInit should be paired with
+' a call to AfxGdipShutdown
+' ========================================================================================
+PRIVATE SUB AfxGdipShutdown (BYVAL token AS ULONG_PTR)
+   IF token THEN GdiplusShutdown(token)
+END SUB
 ' ========================================================================================
 
 ' ========================================================================================
@@ -775,3 +934,5 @@ PRIVATE FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS B
 
 END FUNCTION
 ' ========================================================================================
+
+END NAMESPACE

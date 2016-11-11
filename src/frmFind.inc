@@ -108,7 +108,7 @@ Function frmFind_AddToFindCombo( ByRef sText As Const String ) As Long
    
    ' If the string already exists in the combobox then remove it
    i = Instr(gFind.txtFindCombo, sText & DELIM)
-   If i Then gFind.txtFindCombo = FF_StrDelete(gFind.txtFindCombo, i, Len(sText))
+   If i Then gFind.txtFindCombo = AfxStrDelete(gFind.txtFindCombo, i, Len(sText))
   
    ' Add it to the beginning of the list
    gFind.txtFindCombo = sText & DELIM & gFind.txtFindCombo 
@@ -157,9 +157,9 @@ Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             gFind.txtFind = Str(wszText)
             frmFind_AddToFindCombo(gFind.txtFind)
             ComboBox_ResetContent(hwndCtl)
-            nCount = FF_ParseCount(gFind.txtFindCombo, DELIM )
+            nCount = AfxStrParseCount(gFind.txtFindCombo, DELIM )
             For i = 1 To nCount
-               wszText = FF_Parse(gFind.txtFindCombo, DELIM, i)
+               wszText = AfxStrParse(gFind.txtFindCombo, i, DELIM)
                If Len(wszText) Then ComboBox_AddString( hwndCtl, @wszText )
             Next
             wszText = gFind.txtFind
@@ -263,6 +263,8 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
+   pWindow->ClassStyle = CS_DROPSHADOW
+
    HWND_FRMFIND = _
    pWindow->Create(hwndParent, L(158,"Find"), @frmFind_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
@@ -339,6 +341,12 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
 
    Function = 0
 End Function
+
+
+
+
+
+
 
 
 
