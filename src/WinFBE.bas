@@ -35,16 +35,23 @@ Using Afx
 #Include Once "modDeclares.bi"
 #Include Once "clsConfig.inc"
 #Include Once "modRoutines.inc"
+#Include Once "modSplitter.inc" 
 #Include Once "modCBColor.inc"
 #Include Once "clsDocument.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
 #Include Once "modHelp.inc"
-#Include Once "modTopMenu.inc"
+#Include Once "modMenus.inc"
 #Include Once "modToolbar.inc"
 #Include Once "modCompile.inc"
 #Include Once "modMRU.inc"
 
+#Include Once "frmVScrollBar.inc"
+#Include Once "frmHotImgBtn.inc"
+#Include Once "frmHotTxtBtn.inc"
+#Include Once "frmRecent.inc" 
+#Include Once "frmExplorer.inc" 
+#Include Once "frmOutput.inc" 
 #Include Once "frmOptionsGeneral.inc"
 #Include Once "frmOptionsEditor.inc"
 #Include Once "frmOptionsColors.inc"
@@ -54,12 +61,10 @@ Using Afx
 #Include Once "frmOptions.inc"
 #Include Once "frmTemplates.inc"
 #Include Once "frmFnList.inc"
-#Include Once "frmCompileResults.inc"
 #Include Once "frmGoto.inc"
 #Include Once "frmCommandLine.inc"
 #Include Once "frmFind.inc"
 #Include Once "frmReplace.inc"
-#Include Once "frmProjectManager.inc"
 #Include Once "frmProjectOptions.inc"
 #Include Once "frmMain.inc"
 
@@ -94,9 +99,6 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    ' Initialize the COM library
    CoInitialize(Null)
 
-   ' Create a global App class to control all projects and documents
-   gpApp = New clsApp
-
    ' Load the Scintilla code editing dll
    #IfDef __FB_64BIT__
       Dim As Any Ptr pLib = Dylibload("SciLexer64.dll")
@@ -110,9 +112,6 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )
 
-   ' Destroy the global App class which in turn frees all allocated projects and documents
-   Delete gpApp
-   
    ' Free the Scintilla library
    Dylibfree(pLib)
    
@@ -129,6 +128,17 @@ End Function
 ' Main program entry point
 ' ========================================================================================
 End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+
+
+
+
+
+
+
+
+
+
+
 
 
 

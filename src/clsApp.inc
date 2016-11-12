@@ -162,43 +162,39 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    End If
 
    ' Delete any existing file
-   If Dir(wFilename) > "" Then Kill wFilename
+   If AfxFileExists(wFilename) Then Kill wFilename
    this.ProjectFilename = wFilename
+   this.ProjectName = AfxStrPathname( "NAMEX", wFilename )
    gConfig.ProjectSaveToFile()
    
-   this.IsNewProjectFlag    = False
-   ' Ensure that the Project Manager title is correct
-   frmProjectManager_PositionWindows(HWND_FRMPROJECTMANAGER)
+   this.IsNewProjectFlag = False
+
+   ' Also need to add this new project name to the MRU list.
+   UpdateMRUProjectList(@wFilename)
    
+   ' Ensure that the caption bar and Explorer root node is updated with the name
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   frmMain_UpdateLineCol(HWND_FRMMAIN)    ' this will update the caption
+   wFilename = ucase(gApp.ProjectName)
+   TreeView_SetItemText( hTree, gApp.hExplorerRootNode, @wFilename)
+   
+   frmMain_PositionWindows(HWND_FRMMAIN)
+
    Function = True
 End Function
-
+      
 
 ''
 ''
 Function clsApp.ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
 
    ' Remove the incoming document from the project. We simply need to unset the flag for
-   ' instance of the document and update the Project Manager listview.
+   ' instance of the document and update the Explorer Treeview.
    pDoc->IsProjectFile = False
-   
-   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
-   Dim As Long nCount = ListView_GetItemCount(hLV)
-   Dim As Long i, nFound = -1
+   ' Remove the document from the Explorer treeview (deletes the node)
+   Treeview_DeleteItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), pDoc->hNodeExplorer)
+   pDoc->hNodeExplorer = 0
 
-   For i = 0 To nCount - 1
-       If FF_ListView_GetlParam( hLV, i ) = pDoc Then
-          ' If the document is not currently also loaded in a Tab then we
-          ' can now safely destroy the document and any allocated memory.
-          If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) >= 0 Then
-             pDoc->Destructor    ' need to manually call the destructor
-          End If
-          nFound = i: Exit For
-       End If   
-   Next
-   
-   If nFound <> -1 Then ListView_DeleteItem( hLV, nFound)
-   
    Function = 0
 End Function
 
@@ -209,51 +205,24 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
                                     ByVal nFileType As Long _       ' new filetype 
                                     ) As LRESULT
 
-   Dim wzFileType As WString * MAX_PATH 
-   Dim wzFilePath As WString * MAX_PATH 
-   Dim wzFile     As WString * MAX_PATH
-   
-   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
-   Dim As Long nCount = ListView_GetItemCount(hLV)
-   Dim As Long i, nFound = -1
-   Dim pDocList As clsDocument Ptr
-   
-   ' Find the position in the Listview where this document is located. Also, if we are setting a "Main"
-   ' project file then we need to toggle any other Main file to "Normal". There can only be one Main file.
-   ' Likewise, there can only be one "Resource" file.
-   For i = 0 To nCount - 1                     
-       pDocList = Cast( clsDocument Ptr, FF_ListView_GetlParam(hLV, i) )
-       If pDocList = pDoc Then nFound = i
-       If nFileType = FILETYPE_MAIN Then
-          If pDocList->ProjectFileType = FILETYPE_MAIN Then
-             pDocList->ProjectFileType = FILETYPE_NORMAL
-             wzFileType = ""  'L(210,"Normal")
-             FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
-          End If
-       End If   
-       If nFileType = FILETYPE_RESOURCE Then
-          If pDocList->ProjectFileType = FILETYPE_RESOURCE Then
-             pDocList->ProjectFileType = FILETYPE_NORMAL
-             wzFileType = ""  'L(210,"Normal")
-             FF_ListView_SetItemText( hLV, i, 1, wzFileType, MAX_PATH )
-          End If
-       End If   
-   Next
-   
-   If nFound <> -1 Then
-      pDoc->ProjectFileType = nFileType
-      Select Case nFileType
-         Case FILETYPE_MAIN:     wzFileType = L(212,"Main")
-         Case FILETYPE_MODULE:   wzFileType = L(211,"Module")
-         Case FILETYPE_NORMAL:   wzFileType = ""  'L(210,"Normal")
-         Case FILETYPE_RESOURCE: wzFileType = L(213,"Resource")
-      End Select
-      wzFile = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-      wzFilePath = AfxStrPathname( "PATH",  pDoc->DiskFilename )
-      FF_ListView_SetItemText( hLV, nFound, 0, wzFile, MAX_PATH )
-      FF_ListView_SetItemText( hLV, nFound, 1, wzFileType, MAX_PATH )
-      FF_ListView_SetItemText( hLV, nFound, 2, wzFilePath, MAX_PATH )
-   End If    
+   ' If we are setting a "Main" project file then we need to toggle any other Main 
+   ' file to "Normal". There can only be one Main file. Likewise, there can only be 
+   ' one "Resource" file.
+   If nFileType = FILETYPE_MAIN Then
+      For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+         If m_arrDocuments(i)->ProjectFileType = FILETYPE_MAIN Then m_arrDocuments(i)->ProjectFileType = FILETYPE_NORMAL
+      Next   
+   End If      
+   If nFileType = FILETYPE_RESOURCE Then
+      For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
+         If m_arrDocuments(i)->ProjectFileType = FILETYPE_RESOURCE Then m_arrDocuments(i)->ProjectFileType = FILETYPE_NORMAL
+      Next   
+   End If      
+
+   pDoc->ProjectFileType = nFileType
+
+   ' Refresh the statusbar to ensure that the file's type is displayed properly
+   pDoc->DisplayStats
    
    Function = 0
 End Function
@@ -298,13 +267,6 @@ Function clsApp.ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
       End If
    End If
    
-   Dim As HWnd hLV = GetDlgItem( HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW)
-   Dim As Long nCount = ListView_GetItemCount(hLV)
-   
-   FF_ListView_InsertItem( hLV, nCount, 0, wzFile, Cast(LPARAM, pDoc) )
-   FF_ListView_InsertItem( hLV, nCount, 1, wzFileType )
-   FF_ListView_InsertItem( hLV, nCount, 2, wzFilePath )
-   
    this.ProjectSetFileType(pDoc, pDoc->ProjectFileType)
 
    Function = 0
@@ -343,33 +305,70 @@ End Function
 
 ''
 ''
-Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
-   Dim idx as Long 
+Function clsApp.RemoveDocumentFromArray( ByVal idx As Long) As Long
+   ' This is an internal function that is called by RemoveDocument. It
+   ' Simply resizes the class array that holds all of the pDoc documents.
    Dim i   as Long 
    Dim lb  As Long = LBound(m_arrDocuments)
    Dim ub  As Long = Ubound(m_arrDocuments) 
+   If idx < lb Then Exit Function
+   If idx > ub Then Exit Function
    
-   For i = lb To ub
-      If m_arrDocuments(i) = pDoc Then
-         pDoc->Destructor    ' need to manually call the destructor
-         idx = i
-         Exit For
-      End If   
-   Next
-
+   Dim pDoc As clsDocument Ptr = m_arrDocuments(idx)
+   
    ' remove the document from the array
    For i = idx To ub - 1
       m_arrDocuments(i) = m_arrDocuments(i+1)
    Next
 
    ' resize the array to the new smaller size
-   If (ub-1) >= 0 Then  ' to avoid gpf
+   If (ub-1) < 0 Then
+      Erase m_arrDocuments
+   Else
       ReDim Preserve m_arrDocuments(ub-1) As clsDocument Ptr             
    End If
+   
+   ' Finally, release memory associated with this pDoc
+   Delete pDoc
+ 
+   Function = 0
+End Function
+
+''
+''
+Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
+   Dim idx as Long = -1
+   Dim i   as Long 
+   Dim lb  As Long = LBound(m_arrDocuments)
+   Dim ub  As Long = Ubound(m_arrDocuments) 
+   
+   ' Find the pDoc in our application's document array
+   For i = lb To ub
+      If m_arrDocuments(i) = pDoc Then
+         idx = i: Exit For
+      End If   
+   Next
+   ' If not found then simply exit
+   If idx = -1 Then Exit function
+
+   this.RemoveDocumentFromArray(idx)
    
    Function = 0
 End Function
 
+''
+''
+Function clsApp.RemoveAllDocuments() As Long
+   Dim lb  As Long = LBound(m_arrDocuments)
+   Dim ub  As Long = Ubound(m_arrDocuments) 
+   
+   do until ub < lb
+      this.RemoveDocumentFromArray(ub)
+      ub = Ubound(m_arrDocuments) 
+   loop
+   
+   Function = 0
+End Function
 
 ''
 ''
@@ -380,6 +379,7 @@ Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As cls
          Return m_arrDocuments(i)
       End If
    Next
+   function = 0
 End Function
 
 
@@ -419,6 +419,18 @@ End Function
 '   Function = 0
 'End Function
 '
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

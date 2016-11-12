@@ -36,7 +36,6 @@ Function clsConfig.SaveToFile() as Long
    "MultipleInstances="     & this.MultipleInstances     & vbcrlf & _
    "CompileAutosave="       & this.CompileAutosave       & vbcrlf & _
    "CloseFuncList="         & this.CloseFuncList         & vbcrlf & _
-   "CloseProjMgr="          & this.CloseProjMgr          & vbcrlf & _
    "HideCompile="           & this.HideCompile           & vbcrlf & _
    "SyntaxHighlighting="    & this.SyntaxHighlighting    & vbcrlf & _
    "Codetips="              & this.Codetips              & vbcrlf & _
@@ -60,7 +59,8 @@ Function clsConfig.SaveToFile() as Long
    "StartupTop="            & this.StartupTop            & vbcrlf & _
    "StartupRight="          & this.StartupRight          & vbcrlf & _
    "StartupBottom="         & this.StartupBottom         & vbcrlf & _
-   "StartupMaximized="      & this.StartupMaximized      & vbcrlf 
+   "StartupMaximized="      & this.StartupMaximized      & vbcrlf & _
+   "ShowExplorer="          & this.ShowExplorer          & vbcrlf
    
    Print #f, "[Compiler]" 
    ' For each folder location determine if it resides on the same drive as
@@ -189,7 +189,6 @@ Function clsConfig.LoadFromFile() as Long
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "CloseFuncList":        this.CloseFuncList        = nData
-         Case "CloseProjMgr":         this.CloseProjMgr         = nData
          Case "HideCompile":          this.HideCompile          = nData
          Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
          Case "Codetips":             this.Codetips             = nData
@@ -213,6 +212,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "StartupRight":         this.StartupRight         = nData
          Case "StartupBottom":        this.StartupBottom        = nData
          Case "StartupMaximized":     this.StartupMaximized     = nData
+         Case "ShowExplorer":         this.ShowExplorer         = nData
          Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
          Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
          Case "CompilerSwitches":     this.CompilerSwitches     = wData
@@ -272,16 +272,16 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Dim As Long i, nActiveTab
 
    Dim f As Long = Freefile
-   If Open( gpApp->ProjectFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
+   If Open( gApp.ProjectFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
 
    Print #f, "' WINFBE PROJECT FILE"
-   Print #f, "ProjectType=";            gpApp->ProjectType
-   Print #f, "ProjectErrorOption=";     gpApp->ProjectErrorOption
-   Print #f, "ProjectDebug=";           gpApp->ProjectDebug
-   Print #f, "ProjectThread=";          gpApp->ProjectThread
-   Print #f, "ProjectSuppressConsole="; gpApp->ProjectSuppressConsole
-   Print #f, "ProjectOther32=";         gpApp->ProjectOther32
-   Print #f, "ProjectOther64=";         gpApp->ProjectOther64
+   Print #f, "ProjectType=";            gApp.ProjectType
+   Print #f, "ProjectErrorOption=";     gApp.ProjectErrorOption
+   Print #f, "ProjectDebug=";           gApp.ProjectDebug
+   Print #f, "ProjectThread=";          gApp.ProjectThread
+   Print #f, "ProjectSuppressConsole="; gApp.ProjectSuppressConsole
+   Print #f, "ProjectOther32=";         gApp.ProjectOther32
+   Print #f, "ProjectOther64=";         gApp.ProjectOther64
    Print #f, "DefaultCompiler=";        gConfig.DefaultCompiler       
    Print #f, "DefaultCompileMode=";     gConfig.DefaultCompileMode    
    Print #f, "CommandLine=";            gConfig.CommandLine
@@ -312,9 +312,9 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Next
 
    ' Save all other non-displayed documents for the project
-   nCount = gpApp->GetDocumentCount 
+   nCount = gApp.GetDocumentCount 
    For i = 0 To nCount - 1
-      pDoc = gpApp->GetDocumentPtr(i)
+      pDoc = gApp.GetDocumentPtr(i)
       If pDoc Then 
          If pDoc->IsProjectFile Then
             If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
@@ -353,21 +353,17 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
    
-   If AfxFileExists(gpApp->ProjectFilename) = 0 Then Exit Function
-   gpApp->ProjectName = AfxStrPathname( "NAMEX", gpApp->ProjectFilename )
+   If AfxFileExists(gApp.ProjectFilename) = 0 Then Exit Function
+   gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
     
    Dim f As Long = Freefile
-   If Open( gpApp->ProjectFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
+   If Open( gApp.ProjectFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
 
-   frmProjectManager_Show( HWND_FRMMAIN, 0 )
-   
-   ' Turn off redrawing of the listview in order to speed up loading
-   Dim As HWnd hLV = GetDlgItem(HWND_FRMPROJECTMANAGER, IDC_FRMPROJECTMANAGER_LISTVIEW )
-   SendMessage( hLV, WM_SETREDRAW, False, 0 )
-   
+   gApp.IsProjectActive = True
+
    ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
    ' here and open them only after all over documents have been loaded. This will look
-   ' visuall y more appealing.
+   ' visually more appealing.
    Dim nTabs(any) As clsDocument Ptr
    
    
@@ -382,18 +378,23 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       
       wKey  = Left(st, i-1)
       wData = Mid(st, i+1)
-      nData = Val(wData)
       
+      Select Case UCase(wData)
+         Case "TRUE":   nData = True
+         Case "FALSE":  nData = False
+         Case Else:     nData = Val(wData)
+      End Select
+
       wData = ProcessFromCurdrive(wData)
 
       Select Case wKey
-         Case "ProjectType":            gpApp->ProjectType         = nData
-         Case "ProjectErrorOption":     gpApp->ProjectErrorOption  = nData
-         Case "ProjectDebug":           gpApp->ProjectDebug        = nData
-         Case "ProjectThread":          gpApp->ProjectThread       = nData
-         Case "ProjectSuppressConsole": gpApp->ProjectSuppressConsole = nData
-         Case "ProjectOther32":         gpApp->ProjectOther32      = wData
-         Case "ProjectOther64":         gpApp->ProjectOther64      = wData
+         Case "ProjectType":            gApp.ProjectType         = nData
+         Case "ProjectErrorOption":     gApp.ProjectErrorOption  = nData
+         Case "ProjectDebug":           gApp.ProjectDebug        = nData
+         Case "ProjectThread":          gApp.ProjectThread       = nData
+         Case "ProjectSuppressConsole": gApp.ProjectSuppressConsole = nData
+         Case "ProjectOther32":         gApp.ProjectOther32      = wData
+         Case "ProjectOther64":         gApp.ProjectOther64      = wData
          Case "DefaultCompiler":        gConfig.DefaultCompiler    = wData
          Case "DefaultCompileMode":     gConfig.DefaultCompileMode = wData
          Case "CommandLine":            gConfig.CommandLine        = wData
@@ -408,15 +409,20 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
          Case "Position":            nPosition = nData
          Case "FileEnd":
             If AfxFileExists(wszFilename) Then
-               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, False, False, False, @wszFilename, 0 )
+               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                       False, _    ' bIsNewFile
+                                       False, _    ' bIsTemplate
+                                       FALSE, _    ' bShowInTab
+                                       false, _    ' bIsInclude
+                                       @wszFilename, _  ' pwszName
+                                       0 )  ' pDocIn
                pDoc->ProjectFileType = nFileType
-               gpApp->ProjectAddFile(pDoc)     ' Add the document to the active Project & Listview     
-
+ 
                If bLoadInTab Then
                   If nTabIndex > Ubound(nTabs) Then
                      Redim Preserve nTabs(nTabIndex) As clsDocument Ptr
                   End If
-                  nTabs(nTabIndex) = pDoc  
+                  nTabs(nTabIndex) = pDoc
                   nTabIndex += 1
                End If
                    
@@ -428,8 +434,9 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
                ' Set any bookmarks
                pDoc->SetBookmarks(sBookmarks)
                sBookmarks = ""
+            
             End If
-         
+
       End Select
    
    Loop                        
@@ -440,18 +447,25 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       If idx = -1 Then idx = gTTabCtl.AddTab( nTabs(i) )  ' Add the new document to the top tabcontrol
    Next   
    gTTabCtl.SetFocusTab( nActiveTab )
+   pDoc = gTTAbCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
+                           pDoc->hNodeExplorer )
+   end if
    
-   gpApp->IsProjectActive = True
-      
    Close #f
 
-   Listview_SortColumn( hLV, gLVProjSortCol, gLVProjSortDir )
- 
-   SendMessage( hLV, WM_SETREDRAW, True, 0 )
-   RedrawWindow(hLV, Null, Null, RDW_ERASE Or RDW_FRAME Or RDW_INVALIDATE Or RDW_ALLCHILDREN)
-    
-   Function = True   ' successul save
+   Function = True   ' successful open
 End Function
+
+
+
+
+
+
+
+
+
 
 
 

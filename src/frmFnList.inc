@@ -43,10 +43,10 @@ Function frmFnList_UpdateListBox() As Long
    Dim pList As FUNCTION_TYPE Ptr
    
    Dim As Long i, idx
-   Dim As Long nCount = gpApp->GetDocumentCount()
+   Dim As Long nCount = gApp.GetDocumentCount()
    
    For i = 0 To nCount - 1
-      pDoc = gpApp->GetDocumentPtr(i)
+      pDoc = gApp.GetDocumentPtr(i)
       If pDoc Then 
          ' Display all the sub/function names in this source file
          pList = pDoc->FnListPtr
@@ -86,7 +86,13 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
             Else
                ' Display the document containing the selected sub/function       
                pDoc = pList->pDoc
-               frmMain_OpenFileSafely( HWND_FRMMAIN, False, False, True, pDoc->DiskFilename, pDoc )
+               frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                       False, _    ' bIsNewFile
+                                       False, _    ' bIsTemplate
+                                       true, _     ' bShowInTab
+                                       false, _    ' bIsInclude
+                                       pDoc->DiskFilename, _  ' pwszName
+                                       pDoc )  ' pDocIn
                ' Set the top line to display in the editor. I chose to start 3 lines before the
                ' function just to make it visually more appealing.
                SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
@@ -325,8 +331,8 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
    
    
    ' Set the small and large icon for the main window (must be set after main window is created)
-   pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
-   pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
+   pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
+   pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
    Dim As HWnd hList = _ 
         pWindow->AddControl("LISTBOX", , IDC_FRMFNLIST_LISTBOX, "", 0, 0, 0, 0, _
@@ -350,5 +356,8 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
    
    Function = 0
 End Function
+
+
+
 
 

@@ -98,6 +98,9 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ZOOMIN, L(59,"Zoom &In") & Chr(9) & "Ctrl++"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ZOOMOUT, L(60,"Zoom &Out") & Chr(9) & "Ctrl+-"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_VIEWEXPLORER, L(250,"View &Explorer Window") & Chr(9) & "F9"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_VIEWOUTPUT, L(251,"View Ou&tput Window") & Chr(9) & "Ctrl+F9"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RESTOREMAIN, L(61,"&Restore Main Window Size")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
@@ -105,7 +108,6 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"&New Project")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTMANAGER, L(181,"Project &Manager...") & Chr(9) & "F9"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
          hPopUpSubMenu = CreatePopupMenu
@@ -125,8 +127,6 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And E&xecute") & Chr(9) & "F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILERESULTS, L(220,"&Show/Hide Compile Results") & Chr(9) & "F7"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
@@ -186,23 +186,17 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F8,  IDM_UNFOLDALL )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,  IDM_ZOOMIN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F9,  IDM_PROJECTMANAGER )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F9,  IDM_VIEWEXPLORER)
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,  IDM_VIEWOUTPUT )
    pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_COMPILERESULTS )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_1,  IDM_USE32BIT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_2,  IDM_USE64BIT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_3,  IDM_GUI )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_4,  IDM_CONSOLE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F1, IDM_HELP )
    pWindow->CreateAcceleratorTable()
-
-'   DIM hInst AS HINSTANCE = GetModuleHandle(NULL)
-'   DIM hSubMenu AS HMENU = GetSubMenu(hMenu, 0)
-'   AfxAddIconToMenuItem(hSubMenu, 0, TRUE, AfxGdipIconFromRes(hInst, "IMAGE_NEW_FILE"))
-'   AfxAddIconToMenuItem(hSubMenu, 1, TRUE, AfxGdipIconFromRes(hInst, "IMAGE_OPEN_FILE"))
-'   AfxAddIconToMenuItem(hSubMenu, 6, TRUE, AfxGdipIconFromRes(hInst, "IMAGE_SAVE_FILE"))
 
 End Function
 
@@ -230,6 +224,8 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_FILEOPEN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_COMMAND, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_EXIT, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_VIEWEXPLORER, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_VIEWOUTPUT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_RESTOREMAIN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_OPTIONS, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
@@ -293,7 +289,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    End If
    
    ' Check if a Project is open and active
-   Dim As Long fEnabled = Iif( gpApp->IsProjectActive, MF_ENABLED, MF_GRAYED )
+   Dim As Long fEnabled = Iif( gApp.IsProjectActive, MF_ENABLED, MF_GRAYED )
    EnableMenuItem hMenu, IDM_PROJECTMANAGER, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or fEnabled
@@ -301,7 +297,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_PROJECTFILESADD, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTOPTIONS, MF_BYCOMMAND Or fEnabled
 
-   If (gpApp->IsProjectActive = True) OrElse cbool(NumTabs > 0) Then
+   If (gApp.IsProjectActive = True) OrElse cbool(NumTabs > 0) Then
       fEnabled = MF_ENABLED
    Else
       fEnabled = MF_GRAYED 
@@ -310,14 +306,14 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
-   If Dir(gConfig.LastRunFilename) > "" Then
+   If AfxFileExists(gConfig.LastRunFilename) Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
    End If
 
    ' If at least one document exists then allow the Function List to be shown.
-   EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or Iif( gpApp->GetDocumentCount, MF_ENABLED, MF_GRAYED)
+   EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or Iif( gApp.GetDocumentCount, MF_ENABLED, MF_GRAYED)
 
    Function = 0
 End Function
@@ -424,14 +420,14 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
    If pDoc <> 0 Then
-      If (gpApp->IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+      If (gApp.IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
         If pDoc->IsProjectFile Then     
-           wszText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
+           wszText = L(190,"&Remove from project") & ": " & gApp.ProjectName
            AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
            AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
         Else
-           wszText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
+           wszText = L(189,"A&dd to project") & ": " & gApp.ProjectName
            AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
         End If
       End If
@@ -440,6 +436,31 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Function = hPopupMenu
 End Function
 
+
+''
+''
+Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
+   
+   If pDoc = 0 Then Exit Function
+   Dim wszText As WString * MAX_PATH
+   
+   Dim hPopUpMenu As HMENU = CreatePopupMenu()
+
+   If (gApp.IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+      If pDoc->IsProjectFile Then     
+         wszText = L(190,"&Remove from project") & ": " & gApp.ProjectName
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
+         AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+      End If
+   Else
+      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
+      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
+      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
+   End If
+
+   Function = hPopupMenu
+ 
+End Function
 
 ''
 ''
@@ -489,21 +510,21 @@ Function CreateScintillaContextMenu() As HMENU
       sFilename = Trim(sFilename, Any Chr(32,34))  ' remove spaces and double quotes
       wPath = AfxStrPathname( "PATH", pDoc->DiskFilename )
 
-      If Dir(wPath & sFilename) > "" Then 
-         gpApp->IncludeFilename = wPath & sFilename
-      ElseIf Dir(sFilename) > "" Then 
-         gpApp->IncludeFilename = sFilename
-      ElseIf Dir(Curdir & "\" & sFilename) > "" Then 
-         gpApp->IncludeFilename = Curdir & "\" & sFilename
-      ElseIf Dir(Exepath & "\" & sFilename) > "" Then 
-         gpApp->IncludeFilename = Exepath & "\" & sFilename
-      ElseIf Dir(Str(wCompilerPath) & "\" & sFilename) > "" Then 
-         gpApp->IncludeFilename = Str(wCompilerPath) & "\" & sFilename
+      If AfxFileExists(wPath & sFilename) Then 
+         gApp.IncludeFilename = wPath & sFilename
+      ElseIf AfxFileExists(sFilename) Then 
+         gApp.IncludeFilename = sFilename
+      ElseIf AfxFileExists(Curdir & "\" & sFilename) Then 
+         gApp.IncludeFilename = Curdir & "\" & sFilename
+      ElseIf AfxFileExists(Exepath & "\" & sFilename) Then 
+         gApp.IncludeFilename = Exepath & "\" & sFilename
+      ElseIf AfxFileExists(Str(wCompilerPath) & "\" & sFilename) Then 
+         gApp.IncludeFilename = Str(wCompilerPath) & "\" & sFilename
       End If
-      gpApp->IncludeFilename = AfxStrReplace(gpApp->IncludeFilename, "/", "\")
+      gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "/", "\")
       
-      If Dir(**gpApp->IncludeFilename) > "" Then        
-         AppendMenuW hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") & Chr(32, 34) & gpApp->IncludeFilename & Chr(34)
+      If AfxFileExists(gApp.IncludeFilename) Then        
+         AppendMenuW hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") & Chr(32, 34) & gApp.IncludeFilename & Chr(34)
          AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
       End If
    End If
@@ -523,33 +544,31 @@ Function CreateScintillaContextMenu() As HMENU
    AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All")
    
-   If (gpApp->IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+   If (gApp.IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
       AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
       If pDoc->IsProjectFile Then     
-         wzText = L(190,"&Remove from project") & ": " & *gpApp->ProjectName
+         wzText = L(190,"&Remove from project") & ": " & gApp.ProjectName
          AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
          AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
       Else
-         wzText = L(189,"A&dd to project") & ": " & *gpApp->ProjectName
+         wzText = L(189,"A&dd to project") & ": " & gApp.ProjectName
          AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 
       End If
    End If
    
-'   Dim hInst As HINSTANCE = GetModuleHandle(Null)
-'   AfxAddIconToMenuItem(hPopupMenu,  0, True, AfxGdipIconFromRes(hInst, "IMAGE_UNDO"))
-'   AfxAddIconToMenuItem(hPopupMenu,  1, True, AfxGdipIconFromRes(hInst, "IMAGE_REDO"))
-'   AfxAddIconToMenuItem(hPopupMenu,  3, True, AfxGdipIconFromRes(hInst, "IMAGE_CUT"))
-'   AfxAddIconToMenuItem(hPopupMenu,  4, True, AfxGdipIconFromRes(hInst, "IMAGE_COPY"))
-'   AfxAddIconToMenuItem(hPopupMenu,  5, True, AfxGdipIconFromRes(hInst, "IMAGE_PASTE"))
-'   AfxAddIconToMenuItem(hPopupMenu,  7, True, AfxGdipIconFromRes(hInst, "IMAGE_INDENT"))
-'   AfxAddIconToMenuItem(hPopupMenu,  8, True, AfxGdipIconFromRes(hInst, "IMAGE_INDENT_REMOVE"))
-'   AfxAddIconToMenuItem(hPopupMenu, 10, True, AfxGdipIconFromRes(hInst, "IMAGE_COMMENT"))
-'   AfxAddIconToMenuItem(hPopupMenu, 11, True, AfxGdipIconFromRes(hInst, "IMAGE_COMMENT_REMOVE"))
-
    Function = hPopupMenu
 
 End Function
     
+
+
+
+
+
+
+
+
+
 
 
 

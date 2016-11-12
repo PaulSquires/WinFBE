@@ -268,7 +268,7 @@ Function frmMain_ChangeToolbarButtonsState() As Long
 
    End If
    
-   If gpApp->IsProjectActive OrElse cBool(IsWindow(hEdit)) Then
+   If gApp.IsProjectActive OrElse cBool(IsWindow(hEdit)) Then
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
@@ -285,9 +285,10 @@ Function frmMain_ChangeToolbarButtonsState() As Long
    End If
    
    ' If at least one document exists then allow the Function List to be shown.
-   If gpApp->GetDocumentCount() Then
+   If gApp.GetDocumentCount() Then
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
    End If
    
    Function = 0
 End Function
+

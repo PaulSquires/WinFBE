@@ -419,7 +419,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
    SciMsg( m_pSci, SCI_GOTOLINE, startLine, 0) 
 
-   gpApp->SuppressNotify = True
+   gApp.SuppressNotify = True
    For i = startLine To endLine
       strText = this.GetLine(i)   
       If flagBlock = False Then   ' unblock comment
@@ -439,7 +439,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
          nCount += 1
       End If
    Next
-   gpApp->SuppressNotify = False
+   gApp.SuppressNotify = False
 
    If startPos <> endPos Then
       SciMsg( m_pSci, SCI_SETSELECTIONSTART, startPos, 0)
@@ -512,7 +512,7 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
    SciMsg( m_pSci, SCI_BEGINUNDOACTION, 0, 0)
    SciMsg( m_pSci, SCI_GOTOLINE, line2swap, 0)
 
-   gpApp->SuppressNotify = True
+   gApp.SuppressNotify = True
    For i As Long = 0 To nbSelLines - 1
       If flagMoveDown Then
          this.CurrentLineUp()
@@ -520,7 +520,7 @@ Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
          this.CurrentLineDown()
       End If   
    Next
-   gpApp->SuppressNotify = False
+   gApp.SuppressNotify = False
    SciMsg( m_pSci, SCI_ENDUNDOACTION, 0, 0)
 
    If flagMoveDown Then
@@ -761,10 +761,10 @@ Function clsDocument.DisplayStats() As Long
 
    wText = ""
    Select Case this.ProjectFileType
-      Case FILETYPE_NORMAL:   wText = L(210,"Normal") 
-      Case FILETYPE_MODULE:   wText = L(211,"Module")
-      Case FILETYPE_MAIN:     wText = L(212,"Main")
-      Case FILETYPE_RESOURCE: wText = L(213,"Resource")
+      Case FILETYPE_NORMAL:   wText = ucase(L(210,"Normal")) 
+      Case FILETYPE_MODULE:   wText = ucase(L(211,"Module"))
+      Case FILETYPE_MAIN:     wText = ucase(L(212,"Main"))
+      Case FILETYPE_RESOURCE: wText = ucase(L(213,"Resource"))
    End Select
    StatusBar_SetText(hStatusbar, 3, @wText)
 
@@ -778,7 +778,7 @@ Function clsDocument.DisplayStats() As Long
    ' do the update if the text has changed in order to prevent flicker.
    FF_Control_GetTextW( HWND_FRMMAIN, @wTemp, MAX_PATH )
    wText = APPNAMESHORT 
-   If gpApp->IsProjectActive Then wText = wText & " - [" & gpApp->ProjectName & "]"
+   If gApp.IsProjectActive Then wText = wText & " - [" & gApp.ProjectName & "]"
    wText = wText & " - [" & this.DiskFilename & wTag & "]"
    If wText <> wTemp Then SetWindowTextW( HWND_FRMMAIN, @wText )
 
@@ -973,8 +973,8 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci, SCI_SETSTYLEBITS, bitsNeeded, 0 )
 
       ' Set FreeBASIC Keywords
-      If Len(gpApp->FBKeywords) Then
-         SciMsg( m_pSci, SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gpApp->FBKeywords)) )
+      If Len(gApp.FBKeywords) Then
+         SciMsg( m_pSci, SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gApp.FBKeywords)) )
       End If
       
       If gConfig.SyntaxHighlighting Then
@@ -1309,6 +1309,8 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    Function = 0
 
 End Function
+
+
 
 
 

@@ -51,7 +51,7 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
                pDoc->CreateCodeWindow(HWND_FRMMAIN, True, True, pwszPath)
             
                ' Add the new document to the global app
-               gpApp->AddDocument(pDoc)                
+               gApp.AddDocument(pDoc)                
                
                ' Add the new document to the top tabcontrol
                Dim As Long idx = gTTabCtl.AddTab( pDoc )
@@ -127,8 +127,8 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    pWindow->SetClientSize(420,395)
    
    ' Set the small and large icon for the main window (must be set after main window is created)
-   pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
-   pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
+   pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
+   pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
    ' Add a listbox
    Dim hListBox As HWnd = pWindow->AddControl("ListBox", , IDC_FRMTEMPLATES_LISTBOX, "", _
@@ -144,59 +144,64 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    pWindow->AddControl("Button", , IDCANCEL, L(1,"&Cancel"), 333, 353, 74, 28, _
                WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_FLAT, WS_EX_NOPARENTNOTIFY)
 
-   ' Search templates
-   Dim hSearch As HANDLE, WFD As WIN32_FIND_DATAW, FileNo As Long, nType As Long, nItem As Long
-   Dim wszPath As WString * MAX_PATH, wszCurPath As WString * MAX_PATH, wszText As WString * 260
-   Dim wszFullPath As WString * MAX_PATH * 2, idx As Long, nLin As Long
-   wszPath = Exepath & "\Templates\"
+   ' // Search templates
+   DIM hSearch as HANDLE, WFD AS WIN32_FIND_DATAW, FileNo AS LONG, nType AS LONG, nItem AS LONG
+   DIM wszPath AS WSTRING * MAX_PATH, wszCurPath AS WSTRING * MAX_PATH, wszText AS WSTRING * 260
+   DIM wszFullPath AS WSTRING * MAX_PATH * 2, idx AS LONG, nLin AS LONG
+   wszPath = ExePath & "\Templates\"
    wszCurPath = wszPath & "*.fbtpl"
 
+   ' // Count the number of files and dimension the array
+   ' // REDIM PRESERVE causes problems
+   DIM nCount AS LONG
+   hSearch = FindFirstFileW(wszCurPath, @WFD)
+   IF hSearch <> INVALID_HANDLE_VALUE THEN
+      DO
+         IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
+            nCount +=1
+         END IF
+      LOOP WHILE FindNextFileW(hSearch, @WFD)
+      FindClose(hSearch)
+   END IF
+   ' // Dimension the array
+   IF nCount = 0 THEN EXIT FUNCTION
+   DIM rgwszPaths(nCount - 1) AS WSTRING * MAX_PATH
+   idx = 0
 
-   ' Create a variable length array to hold the filenames with full paths.
-   Dim rgwszPaths(Any) As WString * MAX_PATH
+   ' // Find the files
+   hSearch = FindFirstFileW(wszCurPath, @WFD)
+   IF hSearch <> INVALID_HANDLE_VALUE THEN
+      DO
+         IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
+            wszFullPath = wszPath & WFD.cFileName
+            ' // Get the description
+            FileNo = FREEFILE
+            OPEN wszFullPath FOR INPUT AS #FileNo
+            IF ERR = 0 THEN
+               nLin = 0
+               DO UNTIL EOF(FileNo)
+                  LINE INPUT #FileNo, wszText
+                  nLin += 1
+                  IF nLin = 1 THEN nType = VAL(wszText)
+                  IF nType < 1 OR nType > 2 THEN EXIT DO
+                  IF nType = 1 AND nLin = 3 THEN EXIT DO
+                  IF nType = 2 AND nLin = 4 THEN EXIT DO
+               LOOP
+               CLOSE FileNo
+               ' // Display the description in the listbox
+               nItem = SendMessageW(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
+               ' // Store the full path in the array
+               rgwszPaths(idx) = wszFullPath
+               ' // Store a pointer to the element of the array in the listbox item
+               SendMessageW hListBox, LB_SETITEMDATA, nItem, cast(LPARAM, VARPTR(rgwszPaths(idx)))
+               idx += 1
+               IF idx > UBOUND(rgwszPaths) THEN EXIT DO
+            END IF
+         END IF
+      LOOP WHILE FindNextFileW(hSearch, @WFD)
+      FindClose(hSearch)
+   END IF
    
-   Dim As Long nCount, ub
-   Dim wszFilename As WString * MAX_PATH
-
-
-   ' Find the files
-   wszFilename = Dir( wszCurPath, fbNormal )
-   Do Until Len(wszFilename) = 0
-
-      ' Resize our variable length array in chunks of 25
-      ub = Ubound(rgwszPaths)
-      If nCount > ub Then
-         ReDim Preserve rgwszPaths(ub + 25) As WString * MAX_PATH
-      End If
-      
-      wszFullPath = wszPath & wszFileName
-      ' Get the description
-      FileNo = Freefile
-      If Open( wszFullPath For Input As #FileNo) = 0 Then 
-         nLin = 0
-         Do Until Eof(FileNo)
-            Line Input #FileNo, wszText
-            nLin += 1
-            If nLin = 1 Then nType = Val(wszText)
-            If nType < 1 Or nType > 2 Then Exit Do
-            If nType = 1 And nLin = 3 Then Exit Do
-            If nType = 2 And nLin = 4 Then Exit Do
-         Loop
-         Close FileNo
-         ' Display the description in the listbox
-         nItem = SendMessageW(hListBox, LB_ADDSTRING, 0, Cast(LPARAM, @wszText))
-         ' Store the full path in the array
-         rgwszPaths(nCount) = wszFullPath
-         ' Store a pointer to the element of the array in the listbox item
-         SendMessageW hListBox, LB_SETITEMDATA, nItem, Cast(LPARAM, Varptr(rgwszPaths(nCount)))
-         nCount += 1
-         
-         wszFilename = Dir() 
-      End If
-   Loop 
-
-   If nCount = 0 Then Exit Function
-
    ' Process Windows messages
    Function = pWindow->DoEvents
 
@@ -204,3 +209,6 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    Delete pWindow
 
 End Function
+
+
+

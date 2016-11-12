@@ -12,7 +12,6 @@ Sub SaveEditorOptions()
    gConfig.MultipleInstances    = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKMULTIPLEINSTANCES) )
    gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE) )
    gConfig.CloseFuncList        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST) )
-   gConfig.CloseProjMgr         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEPROJMGR) )
    gConfig.HideCompile          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE) )
 
    ' EDITOR OPTIONS   
@@ -102,8 +101,8 @@ Sub SaveEditorOptions()
       Dim pzswKeywords As WString Ptr = CAllocate(nLen*2)
       GetWindowTextW( hTextBox, pzswKeywords, nLen )
       Dim As String FBKeywords = Str(*pzswKeywords)
-      gpApp->FBKeywords = Trim(FBKeywords)
-      gpApp->SaveKeywords
+      gApp.FBKeywords = Trim(FBKeywords)
+      gApp.SaveKeywords
       Deallocate(pzswKeywords)
    End If
    
@@ -139,11 +138,11 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
             ' Apply the newly saved options to all open Scintilla windows
-            Dim As Long nCount = gpApp->GetDocumentCount 
+            Dim As Long nCount = gApp.GetDocumentCount 
             Dim pDoc As clsDocument Ptr
             Dim As Long i
             For i = 0 To nCount - 1
-               pDoc = gpApp->GetDocumentPtr(i)
+               pDoc = gApp.GetDocumentPtr(i)
                If pDoc Then pDoc->ApplyProperties
             Next
             SendMessageW HWnd, WM_CLOSE, 0, 0
@@ -365,6 +364,8 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDS):  Delete pWindow
 
 End Function
+
+
 
 
 

@@ -7,6 +7,20 @@
 #Define IDC_FRMMAIN_REBAR  1002
 #Define IDC_FRMMAIN_STATUSBAR  1003
 
+#Define IDC_FRMOUTPUT_TABCONTROL  1000
+#Define IDC_FRMOUTPUT_LISTVIEW    1001
+#Define IDC_FRMOUTPUT_TXTLOGFILE  1002
+#Define IDC_FRMOUTPUT_BTNCLOSE    1003
+
+#Define IDC_FRMEXPLORER_LBLEXPLORER     1000
+#Define IDC_FRMEXPLORER_TREE            1001
+#Define IDC_FRMEXPLORER_BTNCLOSE        1002
+
+#Define IDC_FRMRECENT_BTNOPENFILE     1000
+#Define IDC_FRMRECENT_BTNOPENPROJECT  1001
+#Define IDC_FRMRECENT_TREEFILES       1002
+#Define IDC_FRMRECENT_TREEPROJECTS    1003
+
 #Define IDC_FRMOPTIONS_LABEL1  1000
 #Define IDC_FRMOPTIONS_CMDCANCEL  1001
 #Define IDC_FRMOPTIONS_LBLCATEGORY  1002
@@ -67,7 +81,7 @@
 #Define IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS 1000
 
 #Define IDC_FRMTEMPLATES_LISTBOX  1000
-#Define IDC_FRMCOMPILERESULTS_LISTVIEW 1000
+
 #Define IDC_FRMFIND_LBLFINDWHAT  1000
 #Define IDC_FRMFIND_COMBOFIND  1001
 #Define IDC_FRMFIND_CHKWHOLEWORDS  1004
@@ -97,7 +111,6 @@
 #Define IDC_FRMGOTO_LBLCURRENTVALUE  1005
 #Define IDC_FRMCOMMANDLINE_LABEL1  1000
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1  1001
-#Define IDC_FRMPROJECTMANAGER_LISTVIEW  1000
 
 #Define IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH  1000
 #Define IDC_FRMPROJECTOPTIONS_CMDSELECT  1001
@@ -153,11 +166,12 @@ Enum
    IDM_GOTO, IDM_BOOKMARKTOGGLE, IDM_BOOKMARKNEXT, IDM_BOOKMARKPREV, IDM_BOOKMARKCLEARALL
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
+   IDM_VIEWEXPLORER, IDM_VIEWOUTPUT
    IDM_OPTIONS
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT, IDM_PROJECTCLOSE 
    IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS
    IDM_ADDFILETOPROJECT, IDM_REMOVEFILEFROMPROJECT
-   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMPILERESULTS, IDM_COMMANDLINE
+   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_RUNEXE, IDM_COMMANDLINE
    IDM_USE32BIT, IDM_USE64BIT
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
@@ -168,14 +182,17 @@ End Enum
 
 
 '  Global window handle for the main form
-Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR
+Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR, HWND_FRMEXPLORER, HWND_FRMRECENT, HWND_FRMOUTPUT
 Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
+
+Dim Shared As HIMAGELIST ghImageListNormal
+Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
 
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
-Dim Shared As HWnd HWND_FRMCOMPILERESULTS, HWND_FRMFIND, HWND_FRMREPLACE
-Dim Shared As HWnd HWND_FRMPROJECTMANAGER, HWND_FRMFNLIST
+Dim Shared As HWnd HWND_FRMFIND, HWND_FRMREPLACE
+Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMVSCROLLBAR
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
@@ -200,6 +217,17 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ' also a descriptive label (that is ignored), and return the LL array value.
 #Define L(e,s)  LL(e)
 
+#Define SetFocusScintilla  PostMessageW HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
+#Define ResizeExplorerWindow  PostMessageW HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
+
+
+Type SCROLL_TYPE
+   rcThumb       As Rect
+   ptLastPos     As POINT
+   bScrollActive As BOOLEAN
+   nHorizPos     As Long
+End Type   
+Dim Shared gScroll As SCROLL_TYPE
 
 ''
 ''  Save information related to Find/Replace operations
@@ -266,6 +294,7 @@ Type clsDocument
    Public:
       DiskFilename     As WString * MAX_PATH
       DateFileTime     As FILETIME  
+      hNodeExplorer    As HTREEITEM
 
       Declare Property FnListPtr( ByVal nValue As FUNCTION_TYPE Ptr)
       Declare Property FnListPtr() As FUNCTION_TYPE Ptr
@@ -346,7 +375,7 @@ Type clsConfig
       CommandLine          As WString * MAX_PATH   ' not saved to file
       LastRunFilename      As WString * MAX_PATH   ' not saved to file
       CloseFuncList        As Long = True
-      CloseProjMgr         As Long = True
+      ShowExplorer         As Long = True
       SyntaxHighlighting   As Long = True
       Codetips             As Long = True
       LeftMargin           As Long = True
@@ -442,7 +471,11 @@ Type clsApp
       ProjectOther32   As CWSTR       ' compile flags 32 bit compiler
       ProjectOther64   As CWSTR       ' compile flags 64 bit compiler
       IncludeFilename  As CWSTR
+      hExplorerRootNode As HTREEITEM
       
+      bDragActive       As BOOLEAN     ' splitter drag is currently active
+      hWndPanel         As HWND        ' the panel being split left/right or up/down
+
       Declare Property ProjectType( ByVal nValue As Long)
       Declare Property ProjectType() As Long
       Declare Property SuppressNotify( ByVal nValue As BOOLEAN)
@@ -469,7 +502,9 @@ Type clsApp
       Declare Function SaveKeywords() As Long
 
       Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
+      declare Function RemoveDocumentFromArray( ByVal idx As Long) As Long
       Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
+      declare Function RemoveAllDocuments() As Long
       Declare Function GetDocumentCount() As Long
       Declare Function GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
       Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
@@ -487,7 +522,7 @@ End Type
 
 
 '  Global classes
-Dim Shared gpApp As clsApp Ptr
+Dim Shared gApp As clsApp
 Dim Shared gConfig As clsConfig
 Dim Shared gTTabCtl As clsTopTabCtl
 
@@ -500,14 +535,6 @@ Declare Function frmCommandLine_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmCommandLine_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmCommandLine_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
 Declare Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
-Declare Function frmCompileResults_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmCompileResults_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
-Declare Function frmCompileResults_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
-Declare Function frmCompileResults_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-Declare Function frmCompileResults_OnClose(HWnd As HWnd) As LRESULT
-Declare Function frmCompileResults_OnDestroy(HWnd As HWnd) As LRESULT
-Declare Function frmCompileResults_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
-Declare Function frmCompileResults_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
 Declare Function Find_UpOrDown( ByVal flagUpDown As Long, ByVal findFlags As Long, ByVal flagSearchCurrentOnly As BOOLEAN, ByVal hWndDialog As HWnd ) As Long
 Declare Function frmFind_AddToFindCombo( ByRef sText As Const String ) As Long
 Declare Function frmFind_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
@@ -530,7 +557,7 @@ Declare Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOO
 Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr ) As clsDocument Ptr
+Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr ) As clsDocument Ptr
 Declare Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectAddFiles( ByVal HWnd As HWnd ) As LRESULT
@@ -580,18 +607,7 @@ Declare Function frmOptionsKeywords_Show( ByVal hWndParent As HWnd, ByVal nCmdSh
 Declare Function frmOptionsLocal_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function frmOptionsLocal_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmOptionsLocal_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
-Declare Function ListView_CompareFunc( ByVal index1 As Long, ByVal index2 As Long, ByVal lvs As LVSORT_TYPE Ptr ) As Long
-Declare Function ListView_DrawSortArrow( ByVal hLV As HWnd, ByVal nColumn As Long, ByVal nSortOrder As Long) As Long
-Declare Function Listview_SortColumn( ByVal hLV As HWnd, ByVal nColumn As Long, ByVal nSortOrder As Long ) As Long
-Declare Function frmProjectManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-Declare Function frmProjectManager_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmProjectManager_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
-Declare Function frmProjectManager_OnClose(HWnd As HWnd) As LRESULT
-Declare Function frmProjectManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-Declare Function frmProjectManager_OnDestroy(HWnd As HWnd) As LRESULT
-Declare Function Listview_SubclassProc ( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM, ByVal uIdSubclass As UINT_PTR, ByVal dwRefData As DWORD_PTR ) As LRESULT
-Declare Function frmProjectManager_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
-Declare Function frmProjectManager_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
+declare Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
 Declare Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
 Declare Function frmProjectOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
@@ -636,14 +652,6 @@ Declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigd
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr
 Declare Function FF_Toolbar_EnableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
 Declare Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
-'Declare Function FF_Parse_Internal( ByRef sMainString As String, ByRef sDelimiter As String, ByRef nPosition As Long, ByRef nIsAny As BOOLEAN, ByRef nLenDelimiter As Long ) As String
-'Declare Function FF_Parse( ByRef sMainString As String, ByRef sDelimiter As String, ByVal nPosition As Long ) As String
-'Declare Function FF_ParseCount( ByRef sMainString As String, ByRef sDelimiter As String ) As Long
-'Declare Function FF_RemoveW( ByVal pwszMainString As WString Ptr, ByVal pwszMatchPattern As WString Ptr, ByVal pwszOutFile As WString Ptr ) As Long
-'Declare Function FF_Remove( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
-'Declare Function FF_RemoveAny( ByRef sMainString As String, ByRef sMatchPattern As String ) As String
-'Declare Function FF_StrDelete( ByRef sMainString As String, ByRef nStart As Long, ByRef nCount As Long ) As String
-'Declare Function FF_Shrink( ByRef sMainString As String, ByRef sMask As String = " " ) As String
 Declare Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal lParam As LPARAM = 0 ) As BOOLEAN
 Declare Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As BOOLEAN
 Declare Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As Long
@@ -668,8 +676,32 @@ Declare Function CreateMRUpopup() As HMENU
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
-Declare Function frmProjectManager_SetListviewSelection() As Long
 Declare Function RunEXE( ByVal pwszFileExe As WString Ptr, ByVal pwszParam As WString Ptr ) As Long
+declare Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
+declare Function CreateRootNodeExplorerTreeview() As Long
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

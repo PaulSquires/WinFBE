@@ -116,7 +116,65 @@ Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, _
     Function = ti.lParam
 End Function
 
+' ========================================================================================
+' Returns True/False state for whether node is Expanded
+' ========================================================================================
+Function FF_TreeView_SetCheckState( ByVal hWndControl As HWnd, _
+                                    ByVal hItem As HANDLE, _
+                                    ByVal fCheck As Boolean _
+                                    ) As BOOLEAN
 
+   Dim ti As TV_ITEM
+
+   ti.hItem = hItem                                                 
+   ti.mask  = TVIF_HANDLE Or TVIF_STATE
+   ti.stateMask = TVIS_STATEIMAGEMASK
+   
+   ' Image 0: Blank image
+   ' Image 1: Closed image
+   ' Image 2: Open image
+ 
+   ti.state = INDEXTOSTATEIMAGEMASK( Iif(fCheck, 2, 1)  )
+                    
+   ' Returns a nonzero value if successful, or zero otherwise.                  
+   Function = TreeView_SetItem(hWndControl, @ti)
+
+End Function
+
+' ========================================================================================
+' Returns True/False state for whether node is Expanded
+' ========================================================================================
+Function FF_TreeView_GetCheckState( ByVal hWndControl As HWnd, _
+                                    ByVal hItem As HANDLE _
+                                    ) As BOOLEAN
+
+   Dim ti As TV_ITEM
+
+   ti.hItem = hItem                                                 
+   ti.mask  = TVIF_HANDLE Or TVIF_STATE
+   ti.stateMask = TVIS_STATEIMAGEMASK
+   
+   TreeView_GetItem(hWndControl, @ti)
+
+   Return (ti.state Shr 12) - 1
+End Function
+
+
+' ========================================================================================
+' Set the lParam value for a Treeview Item
+' ========================================================================================
+Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, _
+                                ByVal hItem as HANDLE, _
+                                ByVal lParam as Long) as Long
+
+   Dim ti as TV_ITEM
+
+   ti.hItem  = hItem                                        
+   ti.mask   = TVIF_PARAM
+   ti.lParam = lParam
+   If TreeView_SetItem( hWndControl, @ti ) = 0 Then Function = True
+    
+End Function
 
 ' ========================================================================================
 ' Return WSTRING text for a control
@@ -590,6 +648,7 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    CloseHandle hSnapShot
 
 End Function
+
 
 
 

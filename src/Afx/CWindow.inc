@@ -1765,11 +1765,11 @@ PRIVATE FUNCTION CWindow.AddControl ( _
       CASE "ICONBUTTON"
          ' // Loads the image
          DIM hImage AS HANDLE, wID AS WORD, dwID AS DWORD
-         IF LEFT(wszTitle, 1) = "#" THEN
+         If Left(wszTitle, 1) = "#" Then
             wID = VAL(MID(wszTitle, 2))
             dwID = MAKELONG(wID, 0)
             hImage = .LoadImageW(m_hInstance, CAST(LPCWSTR, CAST(ULONG_PTR, dwID)), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR)
-         ELSE
+         Else
             hImage = .LoadImageW(m_hInstance, wszTitle, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR)
          END IF
          IF hImage THEN .SendMessageW(hCtl, BM_SETIMAGE, IMAGE_ICON, CAST(LPARAM, hImage))

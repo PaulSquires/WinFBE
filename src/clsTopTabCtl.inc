@@ -235,10 +235,19 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
          TB.Mask    = TCIF_TEXT 
          TB.pszText = @wText  
          Function = TabCtrl_SetItem( m_hWindow, idx, @TB )
+         ' Also update the Explorer node's filename
+         if pDoc->hNodeExplorer then
+            Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+            TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wText )
+         end if   
       End If
    End If
    
 End Function
+
+
+
+
 
 
 
