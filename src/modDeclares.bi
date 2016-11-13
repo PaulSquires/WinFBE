@@ -131,7 +131,7 @@
 #Define IDC_FRMPROJECTOPTIONS_LABEL3  1016
 #Define IDC_FRMPROJECTOPTIONS_LABEL4  1017
 #Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS64  1018
-#Define IDC_FRMPROJECTOPTIONS_CHKSUPPRESSCONSOLE  1019
+#Define IDC_FRMPROJECTOPTIONS_CHKSHOWCONSOLE  1019
 
 #Define IDC_FRMFNLIST_LISTBOX  1000
 
@@ -460,7 +460,7 @@ Type clsApp
       m_ProjectErrorOption     As Long
       m_ProjectDebug           As Long
       m_ProjectThread          As Long
-      m_ProjectSuppressConsole As Long
+      m_ProjectShowConsole     As Long
       m_SuppressNotify         As BOOLEAN     ' temporarily suppress Scintilla notifications
       
       m_arrDocuments(Any) As clsDocument Ptr
@@ -486,8 +486,8 @@ Type clsApp
       Declare Property ProjectDebug() As Long
       Declare Property ProjectThread( ByVal nValue As Long)
       Declare Property ProjectThread() As Long
-      Declare Property ProjectSuppressConsole( ByVal nValue As Long)
-      Declare Property ProjectSuppressConsole() As Long
+      Declare Property ProjectShowConsole( ByVal nValue As Long)
+      Declare Property ProjectShowConsole() As Long
       Declare Property IsProjectActive( ByVal nValue As BOOLEAN)
       Declare Property IsProjectActive() As BOOLEAN
       Declare Property IsNewProjectFlag( ByVal nValue As BOOLEAN)
@@ -667,7 +667,6 @@ Declare Function frmMain_ChangeTopMenuStates() As Long
 Declare Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
 Declare Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
 Declare Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, ByVal pDoc As clsDocument Ptr ) As Long
-Declare Function CreateProjectManagerContextMenu( ByVal hLV As HWnd, ByVal idx As Long ) As HMENU
 Declare Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 Declare Function CreateScintillaContextMenu() As HMENU
 Declare Function frmFnList_UpdateListBox() As Long
@@ -679,6 +678,8 @@ Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function RunEXE( ByVal pwszFileExe As WString Ptr, ByVal pwszParam As WString Ptr ) As Long
 declare Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
 declare Function CreateRootNodeExplorerTreeview() As Long
+
+
 
 
 

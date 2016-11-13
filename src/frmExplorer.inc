@@ -86,6 +86,8 @@ end function
 ' ========================================================================================
 Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fUpdateNodes As BOOLEAN ) As Long
 
+print "AddFunctionsToExplorerTreeview  pDoc="; pDoc
+
    If pDoc = 0 Then Exit Function
    
    Dim pList As FUNCTION_TYPE Ptr 
@@ -94,6 +96,9 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
    Dim As HTREEITEM hChild
    Dim As BOOLEAN fAddChildren = False
    
+print wzFile
+print pDoc->DiskFilename
+
    ' If hNodeExplorer does not exist then we must be adding a new document. If it does
    ' exist then we simply need to update the child nodes with the new pointers to the function list.
    If fUpdateNodes = False Then
@@ -111,6 +116,8 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
       Loop
       fAddChildren = True
    End If
+
+print pDoc->hNodeExplorer
    
    If fAddChildren Then
       ' Ensure the parent node (filename) has the correct pointer
@@ -488,6 +495,8 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    Function = 0
    
 End Function
+
+
 
 
 

@@ -279,7 +279,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Print #f, "ProjectErrorOption=";     gApp.ProjectErrorOption
    Print #f, "ProjectDebug=";           gApp.ProjectDebug
    Print #f, "ProjectThread=";          gApp.ProjectThread
-   Print #f, "ProjectSuppressConsole="; gApp.ProjectSuppressConsole
+   Print #f, "ProjectShowConsole=";     gApp.ProjectShowConsole
    Print #f, "ProjectOther32=";         gApp.ProjectOther32
    Print #f, "ProjectOther64=";         gApp.ProjectOther64
    Print #f, "DefaultCompiler=";        gConfig.DefaultCompiler       
@@ -310,7 +310,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
          Print #f, "FileEnd=[-]" 
       End If   
    Next
-
+         
    ' Save all other non-displayed documents for the project
    nCount = gApp.GetDocumentCount 
    For i = 0 To nCount - 1
@@ -388,13 +388,13 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       wData = ProcessFromCurdrive(wData)
 
       Select Case wKey
-         Case "ProjectType":            gApp.ProjectType         = nData
-         Case "ProjectErrorOption":     gApp.ProjectErrorOption  = nData
-         Case "ProjectDebug":           gApp.ProjectDebug        = nData
-         Case "ProjectThread":          gApp.ProjectThread       = nData
-         Case "ProjectSuppressConsole": gApp.ProjectSuppressConsole = nData
-         Case "ProjectOther32":         gApp.ProjectOther32      = wData
-         Case "ProjectOther64":         gApp.ProjectOther64      = wData
+         Case "ProjectType":            gApp.ProjectType           = nData
+         Case "ProjectErrorOption":     gApp.ProjectErrorOption    = nData
+         Case "ProjectDebug":           gApp.ProjectDebug          = nData
+         Case "ProjectThread":          gApp.ProjectThread         = nData
+         Case "ProjectShowConsole":     gApp.ProjectShowConsole    = nData
+         Case "ProjectOther32":         gApp.ProjectOther32        = wData
+         Case "ProjectOther64":         gApp.ProjectOther64        = wData
          Case "DefaultCompiler":        gConfig.DefaultCompiler    = wData
          Case "DefaultCompileMode":     gConfig.DefaultCompileMode = wData
          Case "CommandLine":            gConfig.CommandLine        = wData
@@ -457,6 +457,8 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
 
    Function = True   ' successful open
 End Function
+
+
 
 
 

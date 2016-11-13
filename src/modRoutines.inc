@@ -38,13 +38,17 @@ End Function
 ' ========================================================================================
 Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
-   ' the WinFBE application. If it does then substitute the replaceable parameter
+   ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
-
-   ' It is assumed that the incoming ptr is to a WString of MAX_PATH
-   Dim wzCurDrive As CWSTR = LCase(Left(Exepath, 3))  ' eg. D:\
+   dim zText as CWSTR 
+   if AfxFileExists(gApp.ProjectFilename) Then
+      zText = gApp.ProjectFilename
+   else
+      zText = exepath
+   end if      
+   Dim wzCurDrive As CWSTR = LCase(Left(zText, 3))  ' eg. D:\
 
    If LCase(Left(**wzFilename, 3)) = wzCurDrive Then 
       wzFilename = "{CURDRIVE}" & Mid(**wzFilename, 2)
@@ -59,16 +63,18 @@ End Function
 ' ========================================================================================
 Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
-   ' the WinFBE application. If it does then substitute the replaceable parameter
+   ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
-
-   ' It is assumed that the incoming ptr is to a WString of MAX_PATH
-   Dim wzCurDrive As CWSTR = LCase(Left(Exepath, 3))  ' eg. D:\
-
+   dim zText as CWSTR 
+   if AfxFileExists(gApp.ProjectFilename) Then
+      zText = gApp.ProjectFilename
+   else
+      zText = exepath
+   end if      
    If Ucase(Left(**wzFilename, 10)) = "{CURDRIVE}" Then 
-      wzFilename = Left(**wzCurDrive, 1) & Mid(wzFilename, 11)
+      wzFilename = Left(zText, 1) & Mid(wzFilename, 11)
    End If
 
    Return wzFilename
@@ -648,6 +654,9 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    CloseHandle hSnapShot
 
 End Function
+
+
+
 
 
 

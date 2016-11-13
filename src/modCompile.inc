@@ -162,8 +162,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Select Case UCase(gConfig.DefaultCompileMode)   ' used on the Main source file
       Case "GUI"
-         If gApp.ProjectSuppressConsole = BST_CHECKED Then
-            gCompile.CompileMode = " -s gui "
+         ' For non-projects simply suppress the console. For projects, the console
+         ' will not show unless option is selected in Project Options.
+         gCompile.CompileMode = " -s gui "   ' default do not show console
+         If gApp.ProjectShowConsole = BST_CHECKED Then
+            gCompile.CompileMode = " "   ' console is not suppressed
          End If   
       Case "CONSOLE": gCompile.CompileMode = " -s console "
    End Select   
@@ -508,6 +511,7 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
    SendMessageW pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0
 
 End Function
+
 
 
 

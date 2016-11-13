@@ -59,13 +59,13 @@ Property clsApp.ProjectThread() As Long
 End Property
 
 
-Property clsApp.ProjectSuppressConsole( ByVal nValue As Long)
-   m_ProjectSuppressConsole = nValue
+Property clsApp.ProjectShowConsole( ByVal nValue As Long)
+   m_ProjectShowConsole = nValue
 End Property
 ''
 ''
-Property clsApp.ProjectSuppressConsole() As Long
-   Property = m_ProjectSuppressConsole
+Property clsApp.ProjectShowConsole() As Long
+   Property = m_ProjectShowConsole
 End Property
 
 
@@ -419,6 +419,7 @@ End Function
 '   Function = 0
 'End Function
 '
+
 
 
 

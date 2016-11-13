@@ -84,6 +84,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       m_pSci = Cast(Any Ptr, SendMessage( m_hWindow, SCI_GETDIRECTPOINTER, 0, 0 )) 
    End If
    
+   Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
    Static nNextFileNum As Long 
       
    ' If a disk file was specified then open it and load it into the editor
@@ -111,15 +112,21 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                   Select Case idx
                      Case 1
                      Case 2
-                     Case 3: this.DiskFilename = this.DiskFilename & Trim(st)    
+                     Case 3: this.DiskFilename = "Untitled" & Trim(st)    
                      Case 4 
                      Case Else
                         sText = sText & st & vbCrLf
                   End Select   
                Loop
                Close #f
+               If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+                  sText = Mid(sText, 3)
+                  sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+               End If   
                this.SetText( sText ) 
             End If
+            ' Force the template file to be considered "new" so it will be saved.
+            this.IsNewFlag = true
             ' Search for "|", replace it with an empty space "" and position the caret in that place
             this.FindReplace( "|", "" )
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
@@ -128,7 +135,6 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                sText = Space(Lof(f))
                Get #f, , sText
                Close #f
-               Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
                If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
                   sText = Mid(sText, 3)
                   sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
@@ -966,7 +972,8 @@ Function clsDocument.ApplyProperties() As Long
    wFileExt = Ucase(wFileExt)
 
    If cbool(wFileExt = ".BAS") OrElse cbool(wFileExt = ".INC") _
-         OrElse cbool(wFileExt = ".BI") OrElse (this.IsNewFlag = True) Then
+         OrElse cbool(wFileExt = ".BI") OrElse (this.IsNewFlag = True) _
+         orelse cbool(wFileExt = ".FBTPL") Then
      
       SciMsg( m_pSci, SCI_SETLEXER, SCLEX_VB, 0 )
       bitsNeeded = SciMsg( m_pSci, SCI_GETSTYLEBITSNEEDED, 0, 0)
@@ -1309,6 +1316,10 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    Function = 0
 
 End Function
+
+
+
+
 
 
 

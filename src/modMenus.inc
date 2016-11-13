@@ -374,39 +374,6 @@ End Function
 
 ''
 ''
-Function CreateProjectManagerContextMenu( ByVal hLV As HWnd, ByVal idx As Long ) As HMENU
-   Dim hPopUpMenu As HMENU
-   Dim wszText As WString * MAX_PATH
-   Dim i As Long
-   
-   ' idx is the Listview row index of the Project Manager. If index is -1 then no
-   ' line is selected, therefore present menu to Add Files to Project.
-   ' We use the OnCommand_OpenIncludeFile function to open any files so set the
-   ' filename here that will be used for the actual open.
-   Dim pDoc As clsDocument Ptr = Cast( clsDocument Ptr, FF_Listview_GetlParam(hLV, idx) )
-   
-   hPopUpMenu = CreatePopupMenu
-   If idx = -1 Then
-      wszText = L(207,"&Add Files to Project...")
-      i = Instr(wszText, "&"):  If i Then wszText = Left(wszText, i-1) & Mid(wszText, i+1)
-      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, wszText
-      AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
-      wszText = L(186,"Project O&ptions...")
-      i = Instr(wszText, "&"):  If i Then wszText = Left(wszText, i-1) & Mid(wszText, i+1)
-      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, wszText
-   Else
-      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_OPENINCLUDE,  L(203,"Open file") 
-      AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
-      AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT,  L(190,"Remove from project") 
-      AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
-   End If
-   
-   Function = hPopupMenu
-End Function
-
-
-''
-''
 Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Dim hPopUpMenu As HMENU
    Dim wszText As WString * MAX_PATH
@@ -420,14 +387,14 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
    If pDoc <> 0 Then
-      If (gApp.IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+      If (gApp.IsProjectActive = True) Then
         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
         If pDoc->IsProjectFile Then     
-           wszText = L(190,"&Remove from project") & ": " & gApp.ProjectName
+           wszText = L(190,"&Remove from project")
            AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
            AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
         Else
-           wszText = L(189,"A&dd to project") & ": " & gApp.ProjectName
+           wszText = L(189,"A&dd to project")
            AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wszText 
         End If
       End If
@@ -446,9 +413,9 @@ Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
    
    Dim hPopUpMenu As HMENU = CreatePopupMenu()
 
-   If (gApp.IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+   If (gApp.IsProjectActive = True) Then
       If pDoc->IsProjectFile Then     
-         wszText = L(190,"&Remove from project") & ": " & gApp.ProjectName
+         wszText = L(190,"&Remove from project") 
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
          AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
       End If
@@ -544,14 +511,14 @@ Function CreateScintillaContextMenu() As HMENU
    AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
    AppendMenuW hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All")
    
-   If (gApp.IsProjectActive = True) AndAlso (pDoc->IsNewflag = False) Then
+   If (gApp.IsProjectActive = True) Then
       AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
       If pDoc->IsProjectFile Then     
-         wzText = L(190,"&Remove from project") & ": " & gApp.ProjectName
+         wzText = L(190,"&Remove from project")
          AppendMenuW hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
          AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
       Else
-         wzText = L(189,"A&dd to project") & ": " & gApp.ProjectName
+         wzText = L(189,"A&dd to project") 
          AppendMenuW hPopupMenu, MF_ENABLED, IDM_ADDFILETOPROJECT, wzText 
       End If
    End If
@@ -560,6 +527,8 @@ Function CreateScintillaContextMenu() As HMENU
 
 End Function
     
+
+
 
 
 

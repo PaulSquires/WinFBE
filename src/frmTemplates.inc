@@ -46,19 +46,14 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
             If pwszPath = 0 Then Exit Function
             ' Open the template
             If pwszPath Then
-               ' Create the new Scintilla window and load the file
-               Dim pDoc As clsDocument Ptr = New clsDocument
-               pDoc->CreateCodeWindow(HWND_FRMMAIN, True, True, pwszPath)
-            
-               ' Add the new document to the global app
-               gApp.AddDocument(pDoc)                
-               
-               ' Add the new document to the top tabcontrol
-               Dim As Long idx = gTTabCtl.AddTab( pDoc )
-               gTTabCtl.SetFocusTab(idx)
-               
-               ' Position all of the controls into place
-               frmMain_PositionWindows(HWND_FRMMAIN)
+               dim pDoc as clsDocument ptr
+               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                       False, _    ' bIsNewFile
+                                       true, _     ' bIsTemplate
+                                       True,  _    ' bShowInTab
+                                       false, _    ' bIsInclude
+                                       pwszPath, _ ' pwszName
+                                       0 )         ' pDocIn
    
                ' Ensure that the code window scrolls to the correct location
                Dim As Long curPos = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
@@ -209,6 +204,11 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    Delete pWindow
 
 End Function
+
+
+
+
+
 
 
 

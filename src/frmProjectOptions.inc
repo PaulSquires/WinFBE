@@ -37,8 +37,8 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    gApp.ProjectDebug = Button_GetCheck( hCtrl )
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKTHREAD)
    gApp.ProjectThread = Button_GetCheck( hCtrl )
-   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKSUPPRESSCONSOLE)
-   gApp.ProjectSuppressConsole = Button_GetCheck( hCtrl )
+   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKSHOWCONSOLE)
+   gApp.ProjectShowConsole = Button_GetCheck( hCtrl )
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32)
    FF_Control_GetTextW( hCtrl, gApp.ProjectOther32, 1024)
@@ -208,8 +208,8 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKTHREAD, L(239,"Link with thread-safe runtime library (-mt)"), 30, 172, 278, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   Dim As HWnd hSuppressConsole = _
-   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKSUPPRESSCONSOLE, L(245,"Suppress console for GUI applications (-s gui)"), 320, 150, 278, 20, _
+   Dim As HWnd hShowConsole = _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKSHOWCONSOLE, L(245,"Show console for GUI applications"), 320, 150, 278, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL1, L(240,"Project Path"), 30, 211, 235, 18, _
@@ -262,6 +262,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
       gApp.ProjectThread       = BST_UNCHECKED
       gApp.ProjectOther32      = 0
       gApp.ProjectOther64      = 0
+      gApp.ProjectShowConsole  = 0
    Else
       wszTitle = wszTitle & " - " & gApp.ProjectName
    End If
@@ -284,7 +285,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
 
    Button_SetCheck( hProjectDebug, gApp.ProjectDebug )
    Button_SetCheck( hProjectThread, gApp.ProjectThread )
-   Button_SetCheck( hSuppressConsole, gApp.ProjectSuppressConsole )
+   Button_SetCheck( hShowConsole, gApp.ProjectShowConsole )
    
    SetWindowTextW( hProjectOther32, gApp.ProjectOther32 )
    SetWindowTextW( hProjectOther64, gApp.ProjectOther64 )
@@ -298,6 +299,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    Delete pWindow
 
 End Function
+
 
 
 
