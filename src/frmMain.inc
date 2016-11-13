@@ -1036,6 +1036,19 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                      frmMain_MenuSetCompileMode( IDM_GUI )
                End Select
             End If
+            If lpnm->dwItemSpec = 3 Then   ' ProjectFiletype is panel 3
+'               Select Case Ucase(gConfig.DefaultCompileMode)
+'                  Case "GUI"      ' toggle from GUI to CONSOLE
+'                     frmMain_MenuSetCompileMode( IDM_CONSOLE )
+'                  Case "CONSOLE"  ' toggle from CONSOLE to GUI
+'                     frmMain_MenuSetCompileMode( IDM_GUI )
+'               End Select
+            end if
+            If lpnm->dwItemSpec = 4 Then   ' Ansi/Unicode is panel 4
+               ' Toggle the ANSI/Unicode state
+               gConfig.UnicodeEncoding = iif( gConfig.UnicodeEncoding, false, true )
+               frmMain_UpdateLineCol( HWND_FRMMAIN )
+            end if   
          End If
 
       Case NM_RCLICK
@@ -1483,6 +1496,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
+
 
 
 

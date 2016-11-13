@@ -190,6 +190,10 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFi
       end if   
    end if
          
+   ' Clear any previous info from the Output windows
+   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
+   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
+   
    ' Open the project
    gApp.ProjectFilename = wzFile
    If gConfig.ProjectLoadFromFile() Then
@@ -271,6 +275,9 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
 
    Function = 0
 End Function  
+
+
+
 
 
 

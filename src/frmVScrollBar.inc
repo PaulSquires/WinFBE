@@ -118,24 +118,31 @@ Function frmVScrollBar_OnPaint( ByVal HWnd As HWnd) As LRESULT
    nFirstLine = 1
    nPageLines = Treeview_GetVisibleCount(hTV)
    
-   ' Paint the scrollbar thumb
-   nThumbHeight = (nPageLines / (nLines - nPageLines))  * rc.bottom  
-   ' Ensure our thumb is not too small for practical purposes.
-   If nThumbHeight < pWindow->ScaleY(16) Then
-      nthumbHeight = pWindow->ScaleY(16)
-   End If   
-   gScroll.rcThumb.left  = rc.left + 1
-   gScroll.rcThumb.right = rc.right - 1
-   gScroll.rcThumb.top   = (rc.bottom - rc.top) * (nFirstLine / nLines)
-   gScroll.rcThumb.bottom = gScroll.rcThumb.top + nThumbHeight
-   ' Don't let the thumb extend past the bottom of the client area
-   If gScroll.rcThumb.bottom > rc.bottom Then 
-      gScroll.rcThumb.bottom = rc.bottom
-      gScroll.rcThumb.top = rc.bottom - nThumbHeight
-   End If   
-   hBrush = CreateSolidBrush( BGR(66,66,66) )
-   FillRect(memDC, @gScroll.rcThumb, hBrush) 
-   DeleteBrush(hBrush)
+print nPageLines, nLines   
+
+   ' Do not create a scrollbar if the current number of visible nodes
+   ' equals the total number of nodes in the treeview, therefore no
+   ' need to scroll the treeview.
+   If nPageLines < nLines then
+      ' Paint the scrollbar thumb
+      nThumbHeight = (nPageLines / (nLines - nPageLines))  * rc.bottom  
+      ' Ensure our thumb is not too small for practical purposes.
+      If nThumbHeight < pWindow->ScaleY(16) Then
+         nthumbHeight = pWindow->ScaleY(16)
+      End If   
+      gScroll.rcThumb.left  = rc.left + 1
+      gScroll.rcThumb.right = rc.right - 1
+      gScroll.rcThumb.top   = (rc.bottom - rc.top) * (nFirstLine / nLines)
+      gScroll.rcThumb.bottom = gScroll.rcThumb.top + nThumbHeight
+      ' Don't let the thumb extend past the bottom of the client area
+      If gScroll.rcThumb.bottom > rc.bottom Then 
+         gScroll.rcThumb.bottom = rc.bottom
+         gScroll.rcThumb.top = rc.bottom - nThumbHeight
+      End If   
+      hBrush = CreateSolidBrush( BGR(66,66,66) )
+      FillRect(memDC, @gScroll.rcThumb, hBrush) 
+      DeleteBrush(hBrush)
+   end if
    
    ' Copy the entire memory bitmap over to the visual display
    BitBlt ps.hDC, 0, 0, rc.Right, rc.Bottom, memDC, 0, 0, SRCCOPY 
@@ -206,6 +213,8 @@ Function frmVScrollBar_Show( ByVal hWndParent As HWnd ) As LRESULT
    Function = 0
    
 End Function
+
+
 
 
 
