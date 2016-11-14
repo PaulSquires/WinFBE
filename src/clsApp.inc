@@ -1,19 +1,15 @@
-
-
 ''
 ''
 Constructor clsApp()
-   m_IsProjectActive = False
+   this.IsProjectActive = False
    this.LoadKeywords
 End Constructor
-
 
 ''
 ''
 Destructor clsApp()
 '
 End Destructor 
-
 
 ''
 ''
@@ -46,96 +42,6 @@ Function clsApp.SaveKeywords() As Long
    
    Function = 0
 End Function
-
-''
-''
-Property clsApp.ProjectThread( ByVal nValue As Long)
-   m_ProjectThread = nValue
-End Property
-''
-''
-Property clsApp.ProjectThread() As Long
-   Property = m_ProjectThread
-End Property
-
-
-Property clsApp.ProjectShowConsole( ByVal nValue As Long)
-   m_ProjectShowConsole = nValue
-End Property
-''
-''
-Property clsApp.ProjectShowConsole() As Long
-   Property = m_ProjectShowConsole
-End Property
-
-
-''
-''
-Property clsApp.SuppressNotify( ByVal nValue As BOOLEAN)
-   m_SuppressNotify = nValue
-End Property
-
-Property clsApp.SuppressNotify() As BOOLEAN
-   Property = m_SuppressNotify
-End Property
-
-
-''
-''
-Property clsApp.ProjectType( ByVal nValue As Long)
-   m_ProjectType = nValue
-End Property
-
-Property clsApp.ProjectType() As Long
-   Property = m_ProjectType
-End Property
-
-''
-''
-Property clsApp.ProjectDebug( ByVal nValue As Long)
-   m_ProjectDebug = nValue
-End Property
-
-Property clsApp.ProjectDebug() As Long
-   Property = m_ProjectDebug
-End Property
-
-
-''
-''
-Property clsApp.ProjectErrorOption( ByVal nValue As Long)
-   m_ProjectErrorOption = nValue
-End Property
-
-Property clsApp.ProjectErrorOption() As Long
-   Property = m_ProjectErrorOption
-End Property
-
-
-''
-''
-Property clsApp.IsProjectActive( ByVal nValue As BOOLEAN)
-   m_IsProjectActive = nValue
-   If m_IsProjectActive = False Then 
-      SetWindowTextW( HWND_FRMMAIN, APPNAME )
-   End If   
-End Property
-
-Property clsApp.IsProjectActive() As BOOLEAN
-   Property = m_IsProjectActive
-End Property
-
-
-''
-''
-Property clsApp.IsNewProjectFlag( ByVal nValue As BOOLEAN)
-   m_IsNewProjectFlag = nValue
-End Property
-
-Property clsApp.IsNewProjectFlag() As BOOLEAN
-   Property = m_IsNewProjectFlag
-End Property
-
 
 ''
 ''
@@ -419,6 +325,7 @@ End Function
 '   Function = 0
 'End Function
 '
+
 
 
 

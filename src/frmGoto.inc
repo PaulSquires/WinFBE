@@ -112,19 +112,19 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, L(1,"&Cancel"), 186, 51, 78, 30, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTLINE, L(169,"Last line:"), 15, 15, 81, 17, _
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTLINE, L(170,"Current line:"), 15, 15, 81, 17, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTLINE, L(170,"Current line:"), 15, 36, 81, 18, _
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTLINE, L(169,"Last line:"), 15, 36, 81, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLGOTOLINE, L(171,"Go to line:"), 15, 59, 81, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE, "", 107, 15, 65, 17, _
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE, "", 107, 15, 65, 17, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE, "", 107, 36, 65, 18, _
+   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE, "", 107, 36, 65, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

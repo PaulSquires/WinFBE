@@ -13,51 +13,9 @@ End Constructor
 ''
 ''
 Destructor clsDocument
-   DestroyWindow m_hWindow       ' destroy the scintilla window
+   DestroyWindow this.hWindow       ' destroy the scintilla window
    this.DeallocateFunctionList   ' free allocated memory for the function list
 End Destructor
-
-
-''
-''
-Property clsDocument.hWindow( ByVal _HWnd as HWnd)
-   m_hWindow = _HWnd
-End Property
-
-Property clsDocument.hWindow() as HWnd
-   Property = m_hWindow
-End Property
-
-''
-''
-Property clsDocument.IsNewFlag( ByVal nValue As BOOLEAN)
-   m_IsNewFlag = nValue
-End Property
-
-Property clsDocument.IsNewFlag() As BOOLEAN
-   Property = m_IsNewFlag
-End Property
-
-''
-''
-Property clsDocument.IsProjectFile( ByVal nValue As BOOLEAN)
-   m_IsProjectFile = nValue
-End Property
-
-Property clsDocument.IsProjectFile() As BOOLEAN
-   Property = m_IsProjectFile
-End Property
-
-''
-''
-Property clsDocument.ProjectFileType( ByVal nValue As Long)
-   m_ProjectFileType = nValue
-End Property
-
-Property clsDocument.ProjectFileType() As Long
-   Property = m_ProjectFileType
-End Property
-
 
 ''
 ''
@@ -68,7 +26,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
 
    ' Creates a Scintilla editing window (initially not visible). Optionally, load a diskfile
    ' into the window and apply properties to it.
-   m_hWindow = CreateWindowEx( 0, "Scintilla", "", _
+   this.hWindow = CreateWindowEx( 0, "Scintilla", "", _
                    WS_CHILD Or WS_TABSTOP Or WS_CLIPCHILDREN, _
                    0,0,0,0,HWndParent, _
                    Cast(HMENU, IDC_SCINTILLA), GetModuleHandle(Null), Null)
@@ -76,12 +34,12 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    ' Initialize our direct access to the Scintilla code windows. This is much faster than
    ' using SendMessage to the window. Only need to initialize once no matter how many
    ' code windows that are eventually opened.
-   If IsWindow(m_hWindow) Then
+   If IsWindow(this.hWindow) Then
       If SciMsg = 0 Then
-         SciMsg = Cast( Scintilla_DirectFunction, SendMessage( m_hWindow, SCI_GETDIRECTFUNCTION, 0, 0 ) )
+         SciMsg = Cast( Scintilla_DirectFunction, SendMessage( this.hWindow, SCI_GETDIRECTFUNCTION, 0, 0 ) )
       End If
       ' Call the direct function for speed purposes rather than relying on the traditional SendMessage method.
-      m_pSci = Cast(Any Ptr, SendMessage( m_hWindow, SCI_GETDIRECTPOINTER, 0, 0 )) 
+      m_pSci = Cast(Any Ptr, SendMessage( this.hWindow, SCI_GETDIRECTPOINTER, 0, 0 )) 
    End If
    
    Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
@@ -153,7 +111,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
 
    this.ApplyProperties()
    
-   Function = m_hWindow
+   Function = this.hWindow
 End Function
 
 ''
@@ -252,7 +210,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    f = Freefile
    If Open( wFilename For Output As #f ) = 0 Then
       Dim As ZString Ptr psz = Cast( ZString Ptr, SendMessageW(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-      Print #f, *psz
+      Print #f, *psz;
       Close #f
    Else
       ' error saving file
@@ -279,7 +237,7 @@ Function clsDocument.GetTextRange( ByVal cpMin As Long, ByVal cpMax As Long) As 
    txtrg.chrg.cpMax = cpMax
    buffer = Space(cpMax - cpMin + 1)
    txtrg.lpstrText = Strptr(buffer)
-   SendMessage(m_hWindow, SCI_GETTEXTRANGE, 0, Cast(LPARAM, @txtrg))
+   SendMessage(this.hWindow, SCI_GETTEXTRANGE, 0, Cast(LPARAM, @txtrg))
    p = Instr(buffer, Chr(0))
    If p Then buffer = Left(buffer, p - 1)
    Function = buffer
@@ -353,7 +311,7 @@ Function clsDocument.GetLine( ByVal nLine As Long) As String
    nLen = SciMsg( m_pSci, SCI_LINELENGTH, nLine , 0)
    If nLen < 1 Then Exit Function
    buffer = Space(nLen)
-   SendMessage m_hWindow, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer))
+   SendMessage this.hWindow, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer))
    Function = Rtrim(buffer, Any Chr(13,10,0))
 End Function
 
@@ -616,7 +574,7 @@ Function clsDocument.FoldAll() As Long
    Dim nFoldLevel As Long
    
    ' Force the lexer to style the whole document
-   SendMessage m_hWindow, SCI_COLOURISE, -1, 0
+   SendMessage this.hWindow, SCI_COLOURISE, -1, 0
 
    nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 
@@ -642,7 +600,7 @@ Function clsDocument.UnFoldAll() As Long
    Dim nFoldLevel As Long
    
    ' Force the lexer to style the whole document
-   SendMessage m_hWindow, SCI_COLOURISE, -1, 0
+   SendMessage this.hWindow, SCI_COLOURISE, -1, 0
 
    nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 
@@ -670,7 +628,7 @@ Function clsDocument.FoldToggleOnwards( ByVal nLine As Long) As Long
    Dim FoldState  As Long
    
    ' Force the lexer to style the whole document
-   SendMessage m_hWindow, SCI_COLOURISE, -1, 0
+   SendMessage this.hWindow, SCI_COLOURISE, -1, 0
 
    nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 
@@ -809,7 +767,7 @@ Function clsDocument.ApplyProperties() As Long
    
    ' Determine the pWindow parent of the Scintilla window in order
    ' to ensure that DPI ratios are correctly used.
-   Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(m_hWindow)
+   Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(this.hWindow)
    If pWindow Then
       rxRatio = pWindow->rxRatio
       ryRatio = pWindow->ryRatio
@@ -1078,32 +1036,21 @@ End Function
 
 ''
 ''
-Property clsDocument.FnListPtr( ByVal nValue As FUNCTION_TYPE Ptr)
-   m_FnListPtr = nValue
-End Property
-
-Property clsDocument.FnListPtr() As FUNCTION_TYPE Ptr
-   Property = m_FnListPtr
-End Property
-
-
-''
-''
 Function clsDocument.DeallocateFunctionList() As Long
 
    Dim pList As FUNCTION_TYPE Ptr
    Dim pListNext As FUNCTION_TYPE Ptr
 
    ' If a list already exists then we need to deallocate any memory
-   If this.m_FnListPtr Then
-      pList = this.m_FnListPtr
+   If this.FnListPtr Then
+      pList = this.FnListPtr
       Do Until pList = 0
          pListNext = pList->pListNext
          Delete pList
          pList = pListNext
       Loop
    End If
-   this.m_FnListPtr = 0
+   this.FnListPtr = 0
 
    Function = 0
 End Function
@@ -1116,8 +1063,8 @@ Function clsDocument.CreateFunctionList() As Long
    ' Functions/Subs in the source code. This list is used to be displayed in
    ' the Function List.
  
-   Dim As ZString Ptr pzByte = Cast( ZString Ptr, SendMessageW(m_hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-   Dim As Long nLen = SendMessageW(m_hWindow, SCI_GETTEXTLENGTH, 0, 0) 
+   Dim As ZString Ptr pzByte = Cast( ZString Ptr, SendMessageW(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+   Dim As Long nLen = SendMessageW(this.hWindow, SCI_GETTEXTLENGTH, 0, 0) 
    Dim As Long i = 0   ' current buffer position
    Dim As Long nCurPos, nEOL, nLineNum
    Dim As String st, st_ucase
@@ -1138,7 +1085,7 @@ Function clsDocument.CreateFunctionList() As Long
    pList->pDoc = @this
    pList->zFnName = AfxStrPathname( "NAMEX", this.DiskFilename )
    pList->zFnName = Ucase(pList->zFnName)
-   m_FnListPtr = pList
+   this.FnListPtr = pList
    pList->pListPrev = 0
    pList->pListNext = 0
 
@@ -1216,7 +1163,7 @@ Function clsDocument.CreateFunctionList() As Long
                
          ' Need to add this function in sorted order
          pListFound = 0
-         pListTemp  = m_FnListPtr
+         pListTemp  = this.FnListPtr
          Do Until pListTemp = 0
             If pListTemp->bIsHeader = False Then
                If UCase(pList->zFnName) < UCase(pListTemp->zFnName) Then
@@ -1316,6 +1263,7 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    Function = 0
 
 End Function
+
 
 
 

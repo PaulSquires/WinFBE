@@ -1036,13 +1036,16 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                      frmMain_MenuSetCompileMode( IDM_GUI )
                End Select
             End If
+            If lpnm->dwItemSpec = 2 Then   ' line/column panel is panel 2
+               dim pDoc as clsDocument ptr
+               pDoc = gTTAbCtl.GetActiveDocumentPtr()
+               If pDoc Then Function = frmGoto_Show(pDoc->hWindow)
+            end if
             If lpnm->dwItemSpec = 3 Then   ' ProjectFiletype is panel 3
-'               Select Case Ucase(gConfig.DefaultCompileMode)
-'                  Case "GUI"      ' toggle from GUI to CONSOLE
-'                     frmMain_MenuSetCompileMode( IDM_CONSOLE )
-'                  Case "CONSOLE"  ' toggle from CONSOLE to GUI
-'                     frmMain_MenuSetCompileMode( IDM_GUI )
-'               End Select
+               hPopupMenu = CreateStatusBarFileTypeContextMenu
+               GetCursorPos @pt
+               TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+               DestroyMenu hPopUpMenu
             end if
             If lpnm->dwItemSpec = 4 Then   ' Ansi/Unicode is panel 4
                ' Toggle the ANSI/Unicode state
@@ -1496,55 +1499,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -113,26 +113,33 @@ Function frmVScrollBar_OnPaint( ByVal HWnd As HWnd) As LRESULT
    DeleteBrush(hBrush)
 
    Dim As HWnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE ) 
-   Dim As Long nLines, nFirstLine, nPageLines, nThumbHeight
-   nLines     = Treeview_GetCount(hTV)
+   Dim As Long nFirstLine, nPageLines, nThumbHeight
    nFirstLine = 1
-   nPageLines = Treeview_GetVisibleCount(hTV)
+   nPageLines = Treeview_GetVisibleCount(hTV)   ' number of nodes that can fit on the screen
+
+   dim hItem as HTREEITEM
+   dim nCountVisible as long
    
-print nPageLines, nLines   
+   ' Determine the total number of nodes that are expanded and visible
+   hItem = Treeview_GetFirstVisible(hTV)
+   do until hItem = null
+      nCountVisible = nCountVisible + 1
+      hItem = Treeview_GetNextVisible(hTV, hItem)
+   loop   
 
    ' Do not create a scrollbar if the current number of visible nodes
    ' equals the total number of nodes in the treeview, therefore no
    ' need to scroll the treeview.
-   If nPageLines < nLines then
+   If nPageLines < nCountVisible then
       ' Paint the scrollbar thumb
-      nThumbHeight = (nPageLines / (nLines - nPageLines))  * rc.bottom  
+      nThumbHeight = (nPageLines / (nCountVisible - nPageLines))  * rc.bottom  
       ' Ensure our thumb is not too small for practical purposes.
       If nThumbHeight < pWindow->ScaleY(16) Then
          nthumbHeight = pWindow->ScaleY(16)
       End If   
       gScroll.rcThumb.left  = rc.left + 1
       gScroll.rcThumb.right = rc.right - 1
-      gScroll.rcThumb.top   = (rc.bottom - rc.top) * (nFirstLine / nLines)
+      gScroll.rcThumb.top   = (rc.bottom - rc.top) * (nFirstLine / nCountVisible)
       gScroll.rcThumb.bottom = gScroll.rcThumb.top + nThumbHeight
       ' Don't let the thumb extend past the bottom of the client area
       If gScroll.rcThumb.bottom > rc.bottom Then 
@@ -213,6 +220,7 @@ Function frmVScrollBar_Show( ByVal hWndParent As HWnd ) As LRESULT
    Function = 0
    
 End Function
+
 
 
 
