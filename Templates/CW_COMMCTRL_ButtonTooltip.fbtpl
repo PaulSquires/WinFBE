@@ -15,8 +15,7 @@ CWindow: COMMCTRL: Button with tooltip
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
-USING Afx.CWindowClass
+USING Afx
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -26,6 +25,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -71,9 +71,9 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
       CASE WM_COMMAND
          ' // If ESC key pressed, close the application sending an WM_CLOSE message
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

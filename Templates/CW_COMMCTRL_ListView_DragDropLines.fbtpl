@@ -1,0 +1,194 @@
+2
+PBWIN
+.bas
+CWindow: COMMCTRL: LitView: Drag and drop lines
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ListView_DragDropLines.fbtpl
+' Contents: Demonstrates drag and drop lines
+' Compiler: Free Basic
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+#define IDC_LISTVIEW 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "ListView: Drag and drop lines", @WndProc)
+   pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
+   pWindow.SetClientSize(400, 250)
+   pWindow.Center
+
+   ' // Adds a listview
+   DIM hListView AS HWND
+   hListView = pWindow.AddControl("ListView", , IDC_LISTVIEW, "")
+
+   ' // Add grid lines
+   DIM dwExStyle AS DWORD
+   dwExStyle = ListView_GetExtendedListViewStyle(hListView)
+   dwExStyle = dwExStyle OR LVS_EX_GRIDLINES
+   ListView_SetExtendedListViewStyle(hListView, dwExStyle)
+
+   ' // Add the header's column names
+   DIM i AS LONG = 0, lvc AS LVCOLUMNW, wszText AS WSTRING * 260
+   lvc.mask = LVCF_FMT OR LVCF_WIDTH OR LVCF_TEXT OR LVCF_SUBITEM
+   wszText = "Items"
+   lvc.pszText = @wszText
+   lvc.cx = pWindow.ScaleX(pWindow.ClientWidth - 30)
+   lvc.iSubItem = i
+   ListView_InsertColumn(hListView, i, @lvc)
+
+   ' // Populate the ListView with some data
+   DIM lvi AS LVITEMW
+   lvi.mask = LVIF_TEXT
+   FOR i = 0 to 29
+      lvi.iItem = i
+      lvi.iSubItem = 0
+      wszText = "This is item number " + WSTR(i)
+      lvi.pszText = @wszText
+      ListView_InsertItem(hListView, @lvi)
+   NEXT
+
+   ' // Select the fist item
+   ListView_SetItemState(hListView, 0, LVIS_FOCUSED OR LVIS_SELECTED, &H000F)
+   ' // Set the focus in the ListView
+   SetFocus hListView
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ================================================================e========================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC bDragItem AS BOOLEAN, hListView AS HWND
+   DIM lvi AS LVITEMW, lvhit AS LVHITTESTINFO, wszText AS WSTRING * 260
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Resize the ListView control and its header
+         IF wParam <> SIZE_MINIMIZED THEN
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_LISTVIEW), 5, 5, pWindow->ClientWidth - 10, pWindow->ClientHeight - 10, CTRUE
+         END IF
+
+         CASE WM_NOTIFY
+            DIM pnmh AS NMHDR PTR = cast(NMHDR PTR, lParam)
+            SELECT CASE pnmh->idFrom
+               CASE IDC_LISTVIEW
+                  SELECT CASE pnmh->code
+                     CASE LVN_BEGINDRAG
+                        ' Track the handle, capture mouse input and set drag flag...
+                        hListView = pnmh->hwndFrom
+                        bDragItem = TRUE
+                        SetFocus hListView
+                        SetCapture hwnd
+                  END SELECT
+            END SELECT
+
+         CASE WM_MOUSEMOVE
+            ' Set focus rectangle on new position, or display no-move cursor...
+            IF bDragItem THEN
+               GetCursorPos @lvhit.pt
+               ScreenToClient hListView, @lvhit.pt
+               SendMessageW hListView, LVM_HITTEST, 0, cast(LPARAM, @lvhit)
+               IF lvhit.iItem > -1 THEN
+                  SetCursor LoadCursor(NULL, IDC_ARROW)
+                  lvi.state = LVIS_FOCUSED
+                  lvi.stateMask = LVIS_FOCUSED
+                  SendMessageW hListView, LVM_SETITEMSTATE, cast(WPARAM, lvhit.iItem), cast(LPARAM, @lvi)
+               ELSE
+                  SetCursor LoadCursor(NULL, IDC_NO)
+               END IF
+            END IF
+
+         CASE WM_LBUTTONUP
+            IF bDragItem THEN
+               ' Finish dragging item...
+               ReleaseCapture
+               bDragItem = FALSE
+               ' Locate the item drop position...
+               GetCursorPos @lvhit.pt
+               ScreenToClient hListView, @lvhit.pt
+               SendMessageW hListView, LVM_HITTEST, 0, cast(LPARAM, @lvhit)
+               DIM nPos AS LONG = SendMessageW(hListView, LVM_GETNEXTITEM, -1, LVNI_SELECTED)
+               ' Check to make sure we have a valid item...
+               IF (nPos = -1) OR (lvhit.iItem = -1) OR (lvhit.iItem = nPos) OR _
+                  ((lvhit.flags AND LVHT_ONITEMLABEL = 0) AND (lvhit.flags AND LVHT_ONITEMSTATEICON = 0)) THEN
+                  ' Reset the focus back to original...
+                  lvi.state = LVIS_FOCUSED OR LVIS_SELECTED
+                  lvi.stateMask = LVIS_FOCUSED OR LVIS_SELECTED
+                  SendMessageW hListView, LVM_SETITEMSTATE, nPos, cast(LPARAM, @lvi)
+                  EXIT FUNCTION
+               END IF
+               ' Delete and re-insert item to complete the operation...
+               lvi.iItem = nPos
+               lvi.pszText = @wszText
+               lvi.cchTextMax = SIZEOF(wszText)
+               lvi.mask = LVIF_STATE OR LVIF_IMAGE OR LVIF_INDENT OR LVIF_PARAM OR LVIF_TEXT
+               SendMessageW hListView, LVM_GETITEM, 0, cast(LPARAM, @lvi)
+               lvi.iItem = lvhit.iItem
+               lvi.state = LVIS_SELECTED OR LVIS_FOCUSED
+               lvi.stateMask = LVIS_SELECTED OR LVIS_FOCUSED
+               SendMessageW hListView, LVM_DELETEITEM, nPos, 0
+               SendMessageW hListView, LVM_INSERTITEM, 0, cast(LPARAM, @lvi)
+               SendMessageW hListView, LVM_SETITEMTEXT, lvi.iItem, cast(LPARAM, @lvi)
+            END IF
+
+    	CASE WM_DESTROY
+          ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Pass unprocessed messages to DefWindowProc
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

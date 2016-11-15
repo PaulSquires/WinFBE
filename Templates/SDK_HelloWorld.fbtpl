@@ -24,102 +24,8 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
-' ========================================================================================
-' Adjusts the bounding rectangle of a window based on the desired size of the client area.
-' ========================================================================================
-SUB AfxSetClientSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
-
-   DIM rc      AS RECT
-   DIM rcTemp  AS RECT
-   DIM hMenu   AS HANDLE
-   DIM dwStyle AS DWORD
-   DIM cx      AS LONG
-   DIM cy      AS LONG
-
-   ' // Convert the client rectangle to a window rectangle.
-   ' // The AdjustWindowRectEx function cannot take menu wrapping into account
-   ' // because it doesn't know which menu we are using.
-   SetRect(@rc, 0, 0, AfxScaleX(nWidth), AfxScaleY(nHeight))
-   hMenu   = GetMenu(hwnd)
-   dwStyle = GetWindowLongPtr(hwnd, GWL_STYLE)
-   AdjustWindowRectEx(@rc, dwStyle, (hMenu <> NULL), GetWindowLongPtr(hwnd, GWL_EXSTYLE))
-
-  ' // If there is a menu, we need to check how much wrapping occurs when we set
-  ' // the window to the width specified by AdjustWindowRectEX and an infinite
-  ' // amount of height. An infinite height allows us to see every single menu wrap.
-
-   IF hMenu <> NULL THEN
-      rcTemp = rc
-      rcTemp.Bottom = &H7FFF   ' // "Infinite" height
-      SendMessage(hwnd, WM_NCCALCSIZE, 0, cast(LPARAM, @rcTemp))
-      ' // Adjust our previous calculation to compensate for menu wrapping.
-      rc.Bottom = rc.Bottom + rcTemp.Top
-   END IF
-
-   ' // The AdjustWindowRectEx function does not take the WS_VSCROLL or WS_HSCROLL
-   ' // styles into account. To account for the scroll bars, we need to call the
-   ' // GetSystemMetrics function with SM_CXVSCROLL or SM_CYHSCROLL.
-   IF (dwStyle AND WS_HSCROLL) = WS_HSCROLL THEN
-      rc.Bottom = rc.Bottom + GetSystemMetrics(SM_CYHSCROLL)
-   END IF
-   IF (dwStyle AND WS_VSCROLL) = WS_VSCROLL THEN
-      rc.Right = rc.Right + GetSystemMetrics(SM_CXVSCROLL)
-   END IF
-   cx = rc.Right - rc.Left
-   cy = rc.Bottom - rc.Top
-   SetWindowPos(hwnd, NULL, 0, 0, cx, cy, SWP_NOZORDER OR SWP_NOMOVE OR SWP_NOACTIVATE)
-
-END SUB
-' ========================================================================================
-
-' ========================================================================================
-' Window procedure
-' ========================================================================================
-FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-   STATIC hNewFont AS HFONT
-
-    SELECT CASE uMsg
-
-       CASE WM_CREATE
-         ' // Create a new font scaled according the DPI ratio
-         IF AfxGetDpi <> 96 THEN hNewFont = AfxCreateFont("Tahoma", 9, AfxGetDpi)
-         EXIT FUNCTION
-
-      CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
-            CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  SendMessageW hwnd, WM_CLOSE, 0, 0
-                  EXIT FUNCTION
-               END IF
-         END SELECT
-
-       CASE WM_PAINT
-    		DIM rc AS RECT, ps AS PAINTSTRUCT, hDC AS HANDLE, hOldFont AS HFONT
-         hDC = BeginPaint(hWnd, @ps)
-         IF hNewFont THEN hOldFont = CAST(HFONT, SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
-         GetClientRect(hWnd, @rc)
-         DrawTextW(hDC, "Hello, World!", -1, @rc, DT_SINGLELINE or DT_CENTER or DT_VCENTER)
-         IF hNewFont THEN SelectObject(hDC, CAST(HGDIOBJ, CAST(HFONT, hOldFont)))
-         EndPaint(hWnd, @ps)
-         EXIT FUNCTION
-
-    	CASE WM_DESTROY
-         ' // Destroy the new font
-         IF hNewFont THEN DeleteObject(CAST(HGDIOBJ, hNewFont))
-         ' // End the application
-         PostQuitMessage(0)
-         EXIT FUNCTION
-
-   END SELECT
-
-   ' // Default processing of Windows messages
-   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
-
-END FUNCTION
-' ========================================================================================
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
 ' Main
@@ -179,7 +85,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    END IF
 
    ' // Set the client size of the window
-   AfxSetClientSize(hWndMain, 500, 320)
+   AfxSetWindowClientSize(hWndMain, AfxScaleX(500), AfxScaleY(320))
    ' // Center the window
    AfxCenterWindow(hWndMain)
 
@@ -199,6 +105,56 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    WEND
 
    FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hNewFont AS HFONT
+
+    SELECT CASE uMsg
+
+       CASE WM_CREATE
+         ' // Create a new font scaled according the DPI ratio
+         IF AfxGetDpi <> 96 THEN hNewFont = AfxCreateFont("Tahoma", 9, AfxGetDpi)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+       CASE WM_PAINT
+    		DIM rc AS RECT, ps AS PAINTSTRUCT, hDC AS HANDLE, hOldFont AS HFONT
+         hDC = BeginPaint(hWnd, @ps)
+         IF hNewFont THEN hOldFont = CAST(HFONT, SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
+         GetClientRect(hWnd, @rc)
+         DrawTextW(hDC, "Hello, World!", -1, @rc, DT_SINGLELINE or DT_CENTER or DT_VCENTER)
+         IF hNewFont THEN SelectObject(hDC, CAST(HGDIOBJ, CAST(HFONT, hOldFont)))
+         EndPaint(hWnd, @ps)
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Destroy the new font
+         IF hNewFont THEN DeleteObject(CAST(HGDIOBJ, hNewFont))
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
 
 END FUNCTION
 ' ========================================================================================

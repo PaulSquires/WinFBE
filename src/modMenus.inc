@@ -351,9 +351,14 @@ End Function
 
 ''
 ''
-Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, ByVal pDoc As clsDocument Ptr ) As Long
+Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
+                                    ByVal pDoc As clsDocument Ptr, _
+                                    byval fNoSeparator as BOOLEAN = false _
+                                    ) As Long
 
-   AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
+   if fNoSeparator = false then
+      AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
+   end if
    AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
    AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
    AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMAIN,     L(206,"Main file") 
@@ -374,6 +379,24 @@ End Function
 
 ''
 ''
+Function CreateStatusBarFileTypeContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   Dim wszText As WString * MAX_PATH
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      If gApp.IsProjectActive Then
+         hPopUpMenu = CreatePopupMenu
+         AddProjectFileTypesToMenu( hPopUpMenu, pDoc, true ) 
+      End If
+   End If
+
+   Function = hPopupMenu
+End Function
+
+
+''
+''
 Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Dim hPopUpMenu As HMENU
    Dim wszText As WString * MAX_PATH
@@ -386,7 +409,7 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
-   If pDoc <> 0 Then
+   If pDoc Then
       If (gApp.IsProjectActive = True) Then
         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
         If pDoc->IsProjectFile Then     
@@ -491,7 +514,7 @@ Function CreateScintillaContextMenu() As HMENU
       gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "/", "\")
       
       If AfxFileExists(gApp.IncludeFilename) Then        
-         AppendMenuW hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") & Chr(32, 34) & gApp.IncludeFilename & Chr(34)
+         AppendMenuW hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") + Chr(32, 34) + gApp.IncludeFilename + Chr(34)
          AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
       End If
    End If

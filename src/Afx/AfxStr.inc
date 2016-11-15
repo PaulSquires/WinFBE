@@ -26,33 +26,28 @@ USING Afx
 '   If you don't pass an unicode page, the function will use CP_ACP (0), which is the
 '   system default Windows ANSI code page.
 ' Return value:
-'   An unicode BSTR. You must free this handle with SysFreeString when no longer needed.
-' Remarks:
-'   For conversions of ansi strings containing only characters of the Latin alphabet
-'   you can use SysAllocString instead.
+'   The converted string as a CWSTR.
 ' ========================================================================================
 PRIVATE FUNCTION AfxUcode (BYREF ansiStr AS CONST STRING, BYVAL nCodePage AS LONG = 0) AS CWSTR
-   DIM pbstr AS BSTR
    IF nCodePage = CP_UTF8 THEN
       DIM dwLen AS DWORD = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
       IF dwLen THEN
-         pbstr = SysAllocString(WSTR(SPACE(dwLen)))
-         dwLen = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), pbstr, dwLen * 2)
+         DIM cws AS CWSTR = SPACE(dwLen)
+         dwLen = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), *cws, dwLen * 2)
+         IF dwLen THEN RETURN cws
       END IF
    ELSE
-      pbstr = SysAllocString(WSTR(SPACE(LEN(ansiStr))))
-      MultiByteToWideChar(nCodePage, MB_PRECOMPOSED, STRPTR(ansiStr), LEN(ansiStr), pbstr, LEN(ansiStr) * 2)
+      DIM cws AS CWSTR = SPACE(LEN(ansiStr))
+      DIM dwLen AS DWORD = MultiByteToWideChar(nCodePage, MB_PRECOMPOSED, STRPTR(ansiStr), LEN(ansiStr), *cws, LEN(ansiStr) * 2)
+      IF dwLen THEN RETURN cws
    END IF
-   DIM cws AS CWSTR = *cast(WSTRING PTR, pbstr)
-   SysFreeString pbstr
-   RETURN cws
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
 ' Translates unicode bytes to ansi bytes.
 ' Parameters:
-' - wszStr = The unicode string to convert
+' - pwszStr = The unicode string to convert
 ' - nCodePage = The code page used in the conversion, e.g. 1251 for Russian.
 '   If you specify CP_UT8, it is assumed that ansiStr contains an UTF8 encoded string.
 '   If you don't pass an unicode page, the function will use CP_ACP (0), which is the
@@ -61,19 +56,19 @@ END FUNCTION
 '   The converted string.
 ' ========================================================================================
 PRIVATE FUNCTION AfxAcode (BYVAL pwszStr AS WSTRING PTR, BYVAL nCodePage AS LONG = 0) AS STRING
-   DIM ansiStr AS STRING
    IF pwszStr = NULL THEN EXIT FUNCTION
    IF nCodePage = CP_UTF8 THEN
       DIM dwLen AS DWORD = WideCharToMultiByte(CP_UTF8, 0, pwszStr, LEN(*pwszStr), NULL, 0, NULL, NULL)
       IF dwLen THEN
-         ansiStr = SPACE(dwLen)
+         DIM ansiStr AS STRING = SPACE(dwLen)
          dwLen = WideCharToMultiByte(CP_UTF8, 0, pwszStr, LEN(*pwszStr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
+         IF dwLen THEN RETURN ansiStr
       END IF
    ELSE
-      ansiStr = SPACE(LEN(*pwszStr))
-      WideCharToMultiByte(nCodePage, 0, pwszStr, LEN(*pwszStr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
+      DIM ansiStr AS STRING = SPACE(LEN(*pwszStr))
+      DIM dwLen AS DWORD = WideCharToMultiByte(nCodePage, 0, pwszStr, LEN(*pwszStr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
+      IF dwLen THEN RETURN ansiStr
    ENDIF
-   FUNCTION = ansiStr
 END FUNCTION
 ' ========================================================================================
 

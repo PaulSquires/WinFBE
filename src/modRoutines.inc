@@ -48,7 +48,7 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    else
       zText = exepath
    end if      
-   Dim wzCurDrive As CWSTR = LCase(Left(zText, 3))  ' eg. D:\
+   Dim wzCurDrive As CWSTR = LCase(Left(**zText, 3))  ' eg. D:\
 
    If LCase(Left(**wzFilename, 3)) = wzCurDrive Then 
       wzFilename = "{CURDRIVE}" & Mid(**wzFilename, 2)
@@ -74,7 +74,7 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
       zText = exepath
    end if      
    If Ucase(Left(**wzFilename, 10)) = "{CURDRIVE}" Then 
-      wzFilename = Left(zText, 1) & Mid(wzFilename, 11)
+      wzFilename = Left(**zText, 1) & Mid(wzFilename, 11)
    End If
 
    Return wzFilename

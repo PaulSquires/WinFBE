@@ -1,7 +1,7 @@
 ' ########################################################################################
 ' File: CWindow.inc
 ' Version: 1.0
-' Release candidate 24
+' Release candidate 25
 ' Contents: A wrapper class to create a SDK main window and add controls to it.
 ' Operating system: Microsoft Windows
 ' Compiler: FreeBasic 32 & 64-bit, Unicode.
@@ -14,8 +14,7 @@
 #pragma once
 
 #include once "windows.bi"
-#include once "win/commctrl.bi"
-#include once "win/richedit.bi"
+#include once "Afx/AfxCtl.inc"
 #include once "Afx/AfxWin.inc"
 
 NAMESPACE Afx
@@ -934,7 +933,9 @@ END PROPERTY
 ' Handle to the class background brush. This member can be a handle to the physical
 ' brush to be used for painting the background, or it can be a color value. A color
 ' value must be one of the standard system colors (the value 1 must be added
-' to the chosen color), e.g. COLOR_WINDOW + 1
+' to the chosen color), e.g. COLOR_WINDOW + 1.
+' You can also use CreateSolidBrush to create a logical brush with a solid color, e.g.
+' CreateSolidBrush(BGR(0, 0, 255)
 ' =====================================================================================
 PRIVATE PROPERTY CWindow.Brush (BYVAL hbrBackground AS HBRUSH)
    IF m_hwnd = NULL THEN EXIT PROPERTY
@@ -1536,7 +1537,7 @@ PRIVATE FUNCTION CWindow.AddControl ( _
       CASE "EDITMULTILINE", "MULTILINETEXTBOX"
          ' Adds an edit control to the window.
          wsClassName = "Edit"
-         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN
+         IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR WS_VSCROLL OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN
          IF dwExStyle = -1 THEN dwExStyle = WS_EX_CLIENTEDGE
       CASE "COMBOBOX"
          ' Adds a combo box to the window.
@@ -1765,11 +1766,11 @@ PRIVATE FUNCTION CWindow.AddControl ( _
       CASE "ICONBUTTON"
          ' // Loads the image
          DIM hImage AS HANDLE, wID AS WORD, dwID AS DWORD
-         If Left(wszTitle, 1) = "#" Then
+         IF LEFT(wszTitle, 1) = "#" THEN
             wID = VAL(MID(wszTitle, 2))
             dwID = MAKELONG(wID, 0)
             hImage = .LoadImageW(m_hInstance, CAST(LPCWSTR, CAST(ULONG_PTR, dwID)), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR)
-         Else
+         ELSE
             hImage = .LoadImageW(m_hInstance, wszTitle, IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR)
          END IF
          IF hImage THEN .SendMessageW(hCtl, BM_SETIMAGE, IMAGE_ICON, CAST(LPARAM, hImage))
@@ -2291,3 +2292,4 @@ END FUNCTION
 ' ========================================================================================
 
 END NAMESPACE
+

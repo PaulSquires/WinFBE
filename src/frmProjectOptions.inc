@@ -264,7 +264,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
       gApp.ProjectOther64      = 0
       gApp.ProjectShowConsole  = 0
    Else
-      wszTitle = wszTitle & " - " & gApp.ProjectName
+      wszTitle = wszTitle + " - " + gApp.ProjectName
    End If
    
    SetWindowTextW( hForm, wszTitle )

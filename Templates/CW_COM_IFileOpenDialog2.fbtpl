@@ -15,9 +15,9 @@ CWindow: COM: IFileOpenDialog interface (multiple selection)
 
 #define UNICODE
 #define _WIN32_WINNT &h0602
-#INCLUDE ONCE "win/shobjidl.bi"
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
+#INCLUDE ONCE "win/shobjidl.bi"
+USING Afx
 
 CONST IDC_OFD = 1001
 
@@ -28,6 +28,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declarations
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION AfxIFileOpenDialog (BYVAL hwndOwner AS HWND, BYVAL sigdnName AS SIGDN = SIGDN_FILESYSPATH) AS IShellItemArray PTR
 
@@ -73,23 +74,25 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             ' // Display the Open File Dialog
             CASE IDC_OFD
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   DIM pItems AS IShellItemArray PTR = AfxIFileOpenDialog(hwnd)
                   IF pItems = NULL THEN EXIT FUNCTION
-                  DIM dwItemCount AS LONG, idx AS LONG, pItem AS IShellItem PTR, pwszName AS WSTRING PTR
+                  DIM dwItemCount AS LONG
                   pItems->lpVtbl->GetCount(pItems, @dwItemCount)
-                  FOR idx = 0 TO dwItemCount - 1
+                  FOR idx AS LONG = 0 TO dwItemCount - 1
+                     DIM pItem AS IShellItem PTR
                      pItems->lpVtbl->GetItemAt(pItems, idx, @pItem)
                      IF pItem THEN
+                        DIM pwszName AS WSTRING PTR
                         pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
                         IF pwszName THEN
                            MessageBoxW(hwnd, *pwszName, "IFileOpenDialog", MB_OK)

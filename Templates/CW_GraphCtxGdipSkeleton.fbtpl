@@ -17,8 +17,7 @@ CWindow: GRAPHCTX: GDI+ Graphic control skeleton
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/AfxGdiPlus.inc"
 #INCLUDE ONCE "Afx/CGraphCtx.inc"
-USING Afx.CWindowClass
-USING Afx.CGraphCtxClass
+USING Afx
 
 CONST IDC_GRCTX = 1001
 
@@ -29,6 +28,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -100,10 +100,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               ' // If ESC key pressed, close the application sending an WM_CLOSE message
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

@@ -16,9 +16,8 @@ CWindow: COM: Explorer Browser in a tab page
 #define UNICODE
 #define _WIN32_WINNT &h0602
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
 #INCLUDE ONCE "win/shlobj.bi"
-USING Afx.CWindowClass
+USING Afx
 
 ' // Main window user data zero-based indices
 ENUM AFX_USERDATA
@@ -81,8 +80,8 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    ' // Display the first tab page
    ShowWindow pTabPage1->hTabPage, SW_SHOW
-   ' // Set the focus to the first tab
-   SendMessageW hTab, TCM_SETCURFOCUS, 0, 0
+   ' // Set the focus to the first tab (tab numbers are zero-based)
+   TabCtrl_SetCurFocus(hTab, 0)
 
    |
 
@@ -103,15 +102,15 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             CASE IDC_SELECTION
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   ' // Get a reference to the 2nd tab page
                   DIM pTabPage AS CTabPage PTR = AfxCTabPagePtr(GetDlgItem(hwnd, IDC_TAB), 1)
                   ' // Get the handle of the listbox control
@@ -119,8 +118,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                   ' // Get the number of items in the listbox
                   DIM nItems AS LONG = ListBox_GetCount(hListBox)
                   ' // Delete all items
-                  DIM i AS LONG
-                  FOR i = 0 TO nItems - 1
+                  FOR i AS LONG = 0 TO nItems - 1
                      ListBox_DeleteString(hListBox, 0)
                   NEXT
                   ' // Get a reference to the CWindow class
@@ -149,7 +147,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                            DIM uNumFiles AS UINT = DragQueryFile(hDrop, &hFFFFFFFF, NULL, 0)
                            DIM hr AS HRESULT, i AS LONG
                            DIM wszPath AS WSTRING * MAX_PATH
-                           FOR i = 0 TO uNumFiles - 1
+                           FOR i AS LONG = 0 TO uNumFiles - 1
                               wszPath = ""
                               ' // Get the path of the file
                               DragQueryFile(hDrop, i, @wszPath, MAX_PATH)
@@ -177,9 +175,9 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          END SELECT
 
       CASE WM_GETMINMAXINFO
-         ' Set the pointer to the address of the MINMAXINFO structure
+         ' // Set the pointer to the address of the MINMAXINFO structure
          DIM ptmmi AS MINMAXINFO PTR = CAST(MINMAXINFO PTR, lParam)
-         ' Set the minimum and maximum sizes that can be produced by dragging the borders of the window
+         ' // Set the minimum and maximum sizes that can be produced by dragging the borders of the window
          DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
          IF pWindow THEN
             ptmmi->ptMinTrackSize.x = 460 * pWindow->rxRatio
@@ -190,7 +188,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
       CASE WM_SIZE
          DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
          DIM hTab AS HWND = GetDlgItem(hwnd, IDC_TAB)
-         ' / Move the buttons
+         ' // Move the buttons
          IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_SELECTION), pWindow->ClientWidth - 172, pWindow->ClientHeight - 28, 75, 23, CTRUE
          IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 86, pWindow->ClientHeight - 28, 75, 23, CTRUE
          ' // Resize the tab control
@@ -203,7 +201,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          DIM nPage AS DWORD              ' // Page number
          DIM pTabPage AS CTabPage PTR    ' // Tab page object reference
          DIM tci AS TCITEMW              ' // TCITEMW structure
-         DIM ptnmhdr AS NMHDR PTR   ' // Information about a notification message
+         DIM ptnmhdr AS NMHDR PTR        ' // Information about a notification message
          ptnmhdr = CAST(NMHDR PTR, lParam)
          SELECT CASE ptnmhdr->idFrom
             CASE IDC_TAB
@@ -289,7 +287,7 @@ FUNCTION TabPage1_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam 
          EXIT FUNCTION
 
       CASE WM_DESTROY
-            ' // Destroy the browser and release the interface
+         ' // Destroy the browser and release the interface
          IF peb THEN
             peb->lpVtbl->Destroy(peb)
             peb->lpVtbl->Release(peb)

@@ -16,8 +16,7 @@ CWindow: Layout manager (with size grip)
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/CLayout.inc"
-USING Afx.CWindowClass
-USING Afx.CLayoutClass
+USING Afx
 
 ENUM AFX_USERDATA
    AFX_LAYOUTPTRIDX = 0
@@ -38,6 +37,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -73,8 +73,8 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Add a combobox control
    DIM hCombobox AS HWND = pWindow.AddControl("ComboBox", , IDC_COMBOBOX, "", 350, 30, 80, 100)
    ' // Fill the control with some data
-   DIM i AS LONG = 1, wszText AS WSTRING * 260
-   FOR i = 1 TO 9
+   DIM wszText AS WSTRING * 260
+   FOR i AS LONG = 1 TO 9
       wszText = "Item " & RIGHT("00" & STR(i), 2)
       SendMessageW(hComboBox, CB_ADDSTRING, 0, CAST(LPARAM, @wszText))
    NEXT
@@ -108,10 +108,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

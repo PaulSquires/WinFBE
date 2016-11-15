@@ -16,8 +16,7 @@ CWindow: COMMCTRL: ComboBox
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
-USING Afx.CWindowClass
+USING Afx
 
 CONST IDC_COMBOBOX = 1001
 
@@ -28,6 +27,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -50,8 +50,8 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    DIM hCombobox AS HWND = pWindow.AddControl("ComboBox", , IDC_COMBOBOX, "", 80, 30, 190, 100)
 
    ' // Fill the control with some data
-   DIM i AS LONG = 1, wszText AS WSTRING * 260
-   FOR i = 1 TO 9
+   DIM wszText AS WSTRING * 260
+   FOR i AS LONG = 1 TO 9
       wszText = "Item " & RIGHT("00" & STR(i), 2)
       ComboBox_AddString(hComboBox, @wszText)
    NEXT
@@ -74,16 +74,16 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             CASE IDC_COMBOBOX
                ' // The selection has changed
-               IF HIWORD(wParam) = LBN_SELCHANGE THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = LBN_SELCHANGE THEN
                   ' // Handle of the combobox
                   DIm hCombobox AS HWND = GetDlgItem(hwnd, IDC_COMBOBOX)
                   ' // Retrieve the Item selected

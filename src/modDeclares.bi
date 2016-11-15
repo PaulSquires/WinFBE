@@ -284,28 +284,18 @@ End Type
 
 Type clsDocument
    Private:
-      m_hWindow         As HWnd
-      m_IsNewFlag       As BOOLEAN
-      m_IsProjectFile   As BOOLEAN
-      m_ProjectFileType As Long = FILETYPE_UNDEFINED
-      m_pSci            As Any Ptr      
-      m_FnListPtr       As FUNCTION_TYPE Ptr
+      m_pSci           As Any Ptr      
       
    Public:
+      hWindow          As HWnd
+      IsNewFlag        As BOOLEAN
+      IsProjectFile    As BOOLEAN
+      ProjectFileType  As Long = FILETYPE_UNDEFINED
+      FnListPtr        As FUNCTION_TYPE Ptr
       DiskFilename     As WString * MAX_PATH
       DateFileTime     As FILETIME  
       hNodeExplorer    As HTREEITEM
 
-      Declare Property FnListPtr( ByVal nValue As FUNCTION_TYPE Ptr)
-      Declare Property FnListPtr() As FUNCTION_TYPE Ptr
-      Declare Property hWindow( ByVal _HWnd As HWnd)
-      Declare Property hWindow() As HWnd
-      Declare Property IsNewFlag( ByVal nValue As BOOLEAN)
-      Declare Property IsNewFlag() As BOOLEAN
-      Declare Property IsProjectFile( ByVal nValue As BOOLEAN)
-      Declare Property IsProjectFile() As BOOLEAN
-      Declare Property ProjectFileType( ByVal nValue As Long)
-      Declare Property ProjectFileType() As Long
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0 ) As HWnd
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
@@ -345,11 +335,9 @@ End Type
 
 Type clsTopTabCtl
    Private:
-      m_hWindow   As HWnd
       
    Public:
-      Declare Property hWindow( ByVal _HWnd As HWnd)
-      Declare Property hWindow() As HWnd
+      hWindow   As HWnd
       Declare Function AddTab( ByVal pDoc As clsDocument Ptr ) As Long
       Declare Function GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) As Long
       declare Function GetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
@@ -453,45 +441,26 @@ End Type
 
 Type clsApp
    Private: 
-      m_ProjectType        As Long                       
-      m_IsProjectActive    As BOOLEAN
-      m_IsNewProjectFlag   As BOOLEAN
-      
-      m_ProjectErrorOption     As Long
-      m_ProjectDebug           As Long
-      m_ProjectThread          As Long
-      m_ProjectShowConsole     As Long
-      m_SuppressNotify         As BOOLEAN     ' temporarily suppress Scintilla notifications
       
       m_arrDocuments(Any) As clsDocument Ptr
    
    Public:
-      ProjectName      As CWSTR
-      ProjectFilename  As CWSTR
-      ProjectOther32   As CWSTR       ' compile flags 32 bit compiler
-      ProjectOther64   As CWSTR       ' compile flags 64 bit compiler
-      IncludeFilename  As CWSTR
-      hExplorerRootNode As HTREEITEM
-      
-      bDragActive       As BOOLEAN     ' splitter drag is currently active
-      hWndPanel         As HWND        ' the panel being split left/right or up/down
-
-      Declare Property ProjectType( ByVal nValue As Long)
-      Declare Property ProjectType() As Long
-      Declare Property SuppressNotify( ByVal nValue As BOOLEAN)
-      Declare Property SuppressNotify() As BOOLEAN
-      Declare Property ProjectErrorOption( ByVal nValue As Long)
-      Declare Property ProjectErrorOption() As Long
-      Declare Property ProjectDebug( ByVal nValue As Long)
-      Declare Property ProjectDebug() As Long
-      Declare Property ProjectThread( ByVal nValue As Long)
-      Declare Property ProjectThread() As Long
-      Declare Property ProjectShowConsole( ByVal nValue As Long)
-      Declare Property ProjectShowConsole() As Long
-      Declare Property IsProjectActive( ByVal nValue As BOOLEAN)
-      Declare Property IsProjectActive() As BOOLEAN
-      Declare Property IsNewProjectFlag( ByVal nValue As BOOLEAN)
-      Declare Property IsNewProjectFlag() As BOOLEAN
+      ProjectType          As Long                       
+      IsProjectActive      As BOOLEAN
+      IsNewProjectFlag     As BOOLEAN
+      ProjectErrorOption   As Long
+      ProjectDebug         As Long
+      ProjectThread        As Long
+      ProjectShowConsole   As Long
+      SuppressNotify       As BOOLEAN     ' temporarily suppress Scintilla notifications
+      ProjectName          As CWSTR
+      ProjectFilename      As CWSTR
+      ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
+      ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
+      IncludeFilename      As CWSTR
+      hExplorerRootNode    As HTREEITEM
+      bDragActive          As BOOLEAN     ' splitter drag is currently active
+      hWndPanel            As HWND        ' the panel being split left/right or up/down
 
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
@@ -666,7 +635,8 @@ Declare Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
 Declare Function frmMain_ChangeTopMenuStates() As Long
 Declare Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
 Declare Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
-Declare Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, ByVal pDoc As clsDocument Ptr ) As Long
+Declare Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, ByVal pDoc As clsDocument Ptr, byval fNoSeparator as BOOLEAN = false ) As Long
+declare Function CreateStatusBarFileTypeContextMenu() As HMENU
 Declare Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 Declare Function CreateScintillaContextMenu() As HMENU
 Declare Function frmFnList_UpdateListBox() As Long
@@ -678,55 +648,6 @@ Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function RunEXE( ByVal pwszFileExe As WString Ptr, ByVal pwszParam As WString Ptr ) As Long
 declare Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
 declare Function CreateRootNodeExplorerTreeview() As Long
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

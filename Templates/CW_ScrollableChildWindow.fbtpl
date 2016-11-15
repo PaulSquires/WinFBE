@@ -16,8 +16,7 @@ CWindow: Scrollable child window
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/CLayout.inc"
-USING Afx.CWindowClass
-USING Afx.CLayoutClass
+USING Afx
 
 ENUM AFX_USERDATA
    AFX_LAYOUTPTRIDX = 0
@@ -41,6 +40,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declarations
 DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION ChildDlg_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
@@ -80,7 +80,6 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
       WS_VISIBLE OR WS_CHILD OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_BORDER, WS_EX_CONTROLPARENT)
    pChildDlg.ClassStyle = CS_DBLCLKS
    ' // Set a client size big enough to display all the controls
-'   310, 115
    pChildDlg.SetClientSize(310, 180)
    ' // Add an Edit control
    DIM hEdit AS HWND = pChildDlg.AddControl("Edit", , IDC_EDIT1, "", 10, 15, 275, 23)
@@ -92,9 +91,9 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    pChilddlg.AddControl("SysDateTimePick32", , IDC_DTPICKER, "", 135, 55, 150, 23)
    ' // Add a button
    pChildDlg.AddControl("Button", , IDOK, "&Ok", 205, 140, 76, 23)
-   ' // Create an instance of the CScrollWindow class and attach the main window to it
+   ' // Create an instance of the CScrollWindow class and attach the child dialog to it
    DIM pScrollChildDlg AS CScrollWindow PTR = NEW CScrollWindow(pChildDlg.hWindow)
-   ' // Store the pointer in the class of the parent window for later deletion
+   ' // Store the pointer in the class of the child dialog for later deletion
    pChildDlg.ScrollWindowPtr = pScrollChildDlg
    ' // Shrink the client size
    pChildDlg.SetClientSize(310, 110)
@@ -111,7 +110,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    ' // Anchor the child CWindow
    pLayout.AnchorControl(pChildDlg.hWindow, AFX_ANCHOR_HEIGHT_WIDTH)
-   ' // We could also make the child controls of this window with
+   ' // We could also anchor the child controls of this window with
    ' // DIM pChildLayout AS CLayout = pChildDlg.hWindow
    ' // pChildLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
    ' // etc.
@@ -132,10 +131,10 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

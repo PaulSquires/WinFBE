@@ -329,7 +329,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
-   pWindow->SetFont( "Segoe UI Semibold", 10)
+   pWindow->SetFont( "Segoe UI Semibold", 9)
    pWindow->Brush = CreateSolidBrush(BGR(80,80,80))
 
    Dim as HWND hBtn = _
@@ -357,7 +357,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEFILES, Cast(DWORD_PTR, @pWindow))
   
-   hFont = pWindow->CreateFont("Segoe UI", 10) 
+   hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessageW( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
    'SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(37,37,37)) )
    SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(80,80,80)) )
@@ -373,7 +373,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEPROJECTS, Cast(DWORD_PTR, @pWindow))
    
-   hFont = pWindow->CreateFont("Segoe UI", 10) 
+   hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessageW( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
    'SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(37,37,37)) )
    SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(80,80,80)) )

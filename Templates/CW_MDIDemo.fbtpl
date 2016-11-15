@@ -16,7 +16,7 @@ CWindow: MDI Framework Demo
 #define UNICODE
 #define USEMDI
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
+USING Afx
 
 ' // Edit control identifier
 CONST IDC_EDIT = 101
@@ -49,6 +49,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declarations
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
@@ -155,9 +156,9 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          EXIT FUNCTION
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
@@ -311,6 +312,7 @@ FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS 
 
       CASE WM_MDIACTIVATE
          IF lParam = hwnd THEN
+            ' ...
          END IF
          EXIT FUNCTION
 

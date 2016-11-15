@@ -18,7 +18,7 @@ CWindow: COMMCTRL: Task Dialog Indirect (Hyperlink)
 #define _WIN32_WINNT &h0602
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "win/shellapi.bi"
-USING Afx.CWindowClass
+USING Afx
 ' $FB_RESPATH = "FBRES.rc"
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
@@ -28,6 +28,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declarations
 DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION TaskDialogIndirectCallbackProc(BYVAL hwnd AS HWND, BYVAL uNotification AS UINT, BYVAL wParam AS WPARAM, _
         BYVAL lParam AS LPARAM, BYVAL dwRefData AS LONG_PTR) AS HRESULT
@@ -70,14 +71,14 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
       CASE WM_COMMAND
          SELECT CASE LOWORD(wParam)
             CASE IDCANCEL
-               ' // If ESC key pressed, close the application sending an WM_CLOSE message
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             CASE IDOK
                ' // Display the message
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   DIM TaskConfig AS TASKDIALOGCONFIG
                   WITH TaskConfig
                      .cbSize = SIZEOF(TASKDIALOGCONFIG)

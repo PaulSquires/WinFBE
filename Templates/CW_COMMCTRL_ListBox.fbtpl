@@ -15,8 +15,7 @@ CWindow: COMMCTRL: ListBox
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
-USING Afx.CWindowClass
+USING Afx
 
 #define IDC_LISTBOX 1001
 
@@ -27,6 +26,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -52,9 +52,9 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    pWindow.SetWindowPos hListBox, NULL, 8, 8, 300, 320, SWP_NOZORDER
 
    ' // Fill the list box
-   DIM i AS LONG, wszText AS WSTRING * 260
-   FOR i = 1 TO 50
-      wszText = "Item " & RIGHT("00" & STR(i), 2)
+   DIM wszText AS WSTRING * 260
+   FOR i AS LONG = 1 TO 50
+      wszText = "Item " & RIGHT("00" & WSTR(i), 2)
       ListBox_AddString(hListBox, @wszText)
    NEXT
    ' // Select the first item
@@ -79,16 +79,16 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
 
          CASE IDC_LISTBOX
-            SELECT CASE HIWORD(wParam)
+            SELECT CASE GET_WM_COMMAND_CMD(wParam, lParam)
                CASE LBN_DBLCLK
                   ' // Get the handle of the Listbox
                   DIM hListBox AS HWND = GetDlgItem(hwnd, IDC_LISTBOX)
@@ -100,10 +100,16 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                   DIM pwszText AS WSTRING PTR = CAllocate(nLen + 1, 2)
                   ' // Get the text and display it
                   ListBox_GetText(hListBox, curSel, pwszText)
-                  MessageBoxW(hwnd, pwszText, "ListBox test", MB_OK)
+                  MessageBoxW(hwnd, *pwszText, "ListBox test", MB_OK)
                   ' // Deallocate the memory used by the buffer
                   DeAllocate pwszText
                   pwszText = NULL
+
+                  ' *** Alternate way using CWSTR ***
+'                  DIM cwsText AS CWSTR = ListBox_GetTextLen(hListBox, curSel) + 1
+'                  ListBox_GetText(hListBox, curSel, *cwsText)
+'                  MessageBoxW(hwnd, cwsText, "ListBox test", MB_OK)
+
                   EXIT FUNCTION
             END SELECT
 

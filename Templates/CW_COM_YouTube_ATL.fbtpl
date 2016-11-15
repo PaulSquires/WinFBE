@@ -15,7 +15,7 @@ CWindow: COM: YouTube (ATL container)
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
+USING Afx
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -26,6 +26,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
 CONST IDC_ATLWIN = 1001
 
+' // Forward declarations
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION BuildYouTubeScript (BYVAL strCode AS STRING, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS STRING
 
@@ -79,10 +80,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

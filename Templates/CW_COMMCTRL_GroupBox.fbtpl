@@ -18,7 +18,7 @@ CWindow: COMMCTRL: Group Box
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
+USING Afx
 
 ENUM
    IDC_GROUPBOX = 1001
@@ -35,6 +35,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -77,16 +78,16 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             ' // If Close button pressed, close the application sending an WM_CLOSE message
             CASE IDC_BUTTON
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
@@ -94,7 +95,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
       CASE WM_CTLCOLORSTATIC
          ' // Draw the GroupBox using the main window background color
-         IF GetDlgCtrlID(CAST(HWND, lParam)) = IDC_GROUPBOX THEN
+         IF GetWindowID(cast(HWND, lParam)) = IDC_GROUPBOX THEN
             ' Return handle of brush used to paint background
             FUNCTION = CAST(LRESULT, GetClassLongPtr(GetParent(hwnd), GCLP_HBRBACKGROUND))
             EXIT FUNCTION

@@ -16,8 +16,7 @@ CWindow: CUSTOMCTRL: PGBAR3D control (OOP version)
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "Afx/CPgBar3D.inc"
-USING Afx.CWindowClass
-USING Afx.CPgBar3DClass
+USING Afx
 
 enum
    IDC_START = 1001
@@ -39,6 +38,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -149,7 +149,7 @@ END FUNCTION
 ' ========================================================================================
 FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
-   STATIC slow AS LONG, allSteps AS LONG
+   STATIC slow AS BOOLEAN
 
    SELECT CASE uMsg
 
@@ -158,16 +158,16 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 '         IF (wParam AND &HFFF0) = SC_CLOSE THEN EXIT FUNCTION
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
                ' // If ESC key pressed, close the application sending an WM_CLOSE message
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
 
             CASE IDC_CHKTXT
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   DIM nCheck AS LRESULT = SendMessageW(GetDlgItem(hwnd, IDC_CHKTXT), BM_GETCHECK, 0, 0)
                   SendMessageW GetDlgItem(hwnd, IDC_BARLEFT), PGB_SETTXTON, 0, nCheck
                   SendMessageW GetDlgItem(hwnd, IDC_BARLEFT), PGB_REFRESH, 0, 0
@@ -181,14 +181,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                END IF
 
             CASE IDC_OPTFAST
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  slow = FALSE
-               END IF
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN slow = FALSE
 
             CASE IDC_OPTSLOW
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  slow = CTRUE
-               END IF
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN slow = CTRUE
 
             CASE IDC_START
                EnableWindow(GetDlgItem(hwnd, IDC_START), FALSE)   ' // Disable the start button

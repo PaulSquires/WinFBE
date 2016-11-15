@@ -1,0 +1,117 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Statusbar: Detect mouse click
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_SBMouseClick.fbtpl
+' Contents: Demonstrates how to determine which part of Statusbar was clicked.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_STATUSBAR = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Status bar: Detect mouse click", @WndProc)
+   pWindow.Center
+
+   ' // Add a label
+   pWindow.AddControl("LABEL", , -1, "Click one of the sections of the status bar with the mouse", _
+      20, 40, 350, 23)
+
+   ' // Add a status bar
+   DIM hStatusbar AS HWND = pWindow.AddControl("Statusbar", , IDC_STATUSBAR)
+   ' // Set the parts
+   DIM rgParts(1 TO 3) AS LONG = {pWindow.ScaleX(100), pWindow.ScaleX(220), -1}
+   IF StatusBar_SetParts(hStatusBar, 3, @rgParts(1)) THEN
+      StatusBar_Simple(hStatusBar, FALSE)
+   END IF
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' // Detect if the user has clicked the mouse in one of the status bar parts
+         DIM ptnmhdr AS NMHDR PTR
+         ptnmhdr = cast(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_STATUSBAR
+               DIM lpnm AS NMMOUSE PTR
+               IF ptnmhdr->code = NM_CLICK THEN
+                  lpnm = cast(NMMOUSE PTR, lParam)
+                  ' // Display the zero-based index of the section that was clicked.
+                  MessageBoxW hwnd, "You have clicked section " & STR(lpnm->dwItemSpec), "", MB_OK
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Resizes the status bar and redraws it
+         DIM hStatusBar AS HWND = GetDlgItem(hwnd, IDC_STATUSBAR)
+         SendMessageW hStatusBar, WM_SIZE, wParam, lParam
+         InvalidateRect hStatusBar, NULL, CTRUE
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

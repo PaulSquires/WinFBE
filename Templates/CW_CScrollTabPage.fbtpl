@@ -15,8 +15,14 @@ CWindow: Scrollable tab pages
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/CScrollWindow.inc"
-USING Afx.CWindowClass
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
 CONST IDC_TAB       = 1001
 CONST IDC_EDIT1     = 1002
@@ -25,17 +31,11 @@ CONST IDC_BTNSUBMIT = 1004
 CONST IDC_COMBO     = 1005
 CONST IDC_LISTBOX   = 1006
 
+' // Forward declarations
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION TabPage1_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION TabPage2_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION TabPage3_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                          BYVAL hPrevInstance AS HINSTANCE, _
-                          BYVAL szCmdLine AS ZSTRING PTR, _
-                          BYVAL nCmdShow AS LONG) AS LONG
-
-   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
 ' ========================================================================================
 ' Main
@@ -153,10 +153,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
@@ -232,9 +232,9 @@ FUNCTION TabPage1_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam 
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDC_BTNSUBMIT
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   MessageBoxW(hWnd, "Submit", "Tab 1", MB_OK)
                   EXIT FUNCTION
                END IF

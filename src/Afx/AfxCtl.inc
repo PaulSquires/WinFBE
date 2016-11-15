@@ -14,6 +14,7 @@
 #pragma once
 #include once "windows.bi"
 #include once "win/commctrl.bi"
+#include once "win/richedit.bi"
 #include once "win/uxtheme.bi"
 '#include once "win/windowsx.bi"
 #include once "Afx/AfxWin.inc"
@@ -3469,7 +3470,7 @@ PRIVATE FUNCTION TreeView_ItemExists (BYVAL hTreeView AS HWND, BYVAL hNode AS HT
    DIM hItem AS HTREEITEM = TreeView_GetChild(hTreeView, hNode)
    DO
       IF hItem = NULL THEN EXIT FUNCTION
-      IF TreeView_GetItemText(hTreeView, hItem, @cwsItemText, LEN(cwsItemText)) = FALSE THEN EXIT DO
+      IF TreeView_GetItemText(hTreeView, hItem, *cwsItemText, LEN(cwsItemText)) = FALSE THEN EXIT DO
       IF cwsItemText = *pwszText THEN
          FUNCTION = TRUE
          EXIT DO
@@ -3491,7 +3492,7 @@ PRIVATE FUNCTION TreeView_ItemExistsIgnoreCase (BYVAL hTreeView AS HWND, BYVAL h
    DIM hItem AS HTREEITEM = TreeView_GetChild(hTreeView, hNode)
    DO
       IF hItem = NULL THEN EXIT FUNCTION
-      IF TreeView_GetItemText(hTreeView, hItem, @cwsItemText, LEN(cwsItemText)) = FALSE THEN EXIT DO
+      IF TreeView_GetItemText(hTreeView, hItem, *cwsItemText, LEN(cwsItemText)) = FALSE THEN EXIT DO
       IF UCASE(cwsItemText) = UCASE(*pwszText) THEN
          FUNCTION = TRUE
          EXIT DO
@@ -5157,3 +5158,4 @@ PRIVATE SUB PropSheet_SetButtonText (BYVAL hDlg AS HWND, BYVAL dwButton AS DWORD
 END SUB
 
 #endif
+

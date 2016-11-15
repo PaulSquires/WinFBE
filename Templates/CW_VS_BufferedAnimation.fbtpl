@@ -18,9 +18,8 @@ CWindow: Visual Styles: Buffered animation
 #define UNICODE
 #define _WIN32_WINNT &h0602
 #INCLUDE ONCE "windows.bi"
-#INCLUDE ONCE "win/uxtheme.bi"
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
+USING Afx
 
 #define ANIMATION_DURATION 500
 #define IDC_LABEL 1001
@@ -32,6 +31,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -104,10 +104,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          fNewState = CTRUE
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

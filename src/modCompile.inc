@@ -311,8 +311,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' Deal with the situation where we might be trying to compile a 64-bit application
       ' from a 32-bit operating system.
       If Left(st_ucase, 16) = "THIS VERSION OF " Then
+         ' Simply set the log file text and show the compiler log file window rather
+         ' than the default compiler results window.
+         TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 1 )
          AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), st )
-         Exit For
+         ShowWindow HWND_FRMOUTPUT, SW_SHOW
+         frmMain_PositionWindows(HWND_FRMMAIN)
+         Exit function
       End If   
 
       ' Save the FB version and copyright information. 

@@ -15,7 +15,7 @@ CWindow: COMMCTRL: Header control
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-USING Afx.CWindowClass
+USING Afx
 
 CONST IDC_HEADER = 1001
 
@@ -26,6 +26,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -50,17 +51,17 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Insert items
    DIM thdi AS HDITEMW
    DIM wszItem AS WSTRING * 260
-   wszItem       = "Item 1"
-   thdi.Mask     = HDI_WIDTH OR HDI_FORMAT OR HDI_TEXT
-   thdi.fmt      = HDF_LEFT OR HDF_STRING
-   thdi.cxy      = pWindow.ScaleX(80)
+   wszItem   = "Item 1"
+   thdi.Mask = HDI_WIDTH OR HDI_FORMAT OR HDI_TEXT
+   thdi.fmt  = HDF_LEFT OR HDF_STRING
+   thdi.cxy  = pWindow.ScaleX(80)
    thdi.pszText  = @wszItem
    Header_InsertItem(hHeader, 1, @thdi)
-   wszItem       = "Item 2"
+   wszItem   = "Item 2"
    Header_InsertItem(hHeader, 2, @thdi)
-   wszItem       = "Item 3"
+   wszItem   = "Item 3"
    Header_InsertItem(hHeader, 3, @thdi)
-   wszItem       = "Item 4"
+   wszItem   = "Item 4"
    Header_InsertItem(hHeader, 4, @thdi)
 
    |
@@ -79,10 +80,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             ' // If ESC key pressed, close the application sending an WM_CLOSE message
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

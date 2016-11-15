@@ -15,8 +15,7 @@ CWindow: COMMCTRL: Edit control - Auto selection of text
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
-USING Afx.CWindowClass
+USING Afx
 
 CONST IDC_EDIT1 = 1001
 CONST IDC_EDIT2 = 1002
@@ -28,6 +27,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -71,15 +71,15 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
                ' // If ESC key pressed, close the application sending an WM_CLOSE message
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             CASE EN_SETFOCUS
-               SELECT CASE LOWORD(wParam)
+               SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
                   ' Note: To deselect, use EM_SETSEL, -1, 0
                   CASE IDC_EDIT1
                      Edit_SetSel(GetDlgItem(hWnd, IDC_EDIT1), 0, -1)

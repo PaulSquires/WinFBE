@@ -16,8 +16,7 @@ CWindow: COMMCTRL: Toolbar (vertical)
 #define UNICODE
 #INCLUDE ONCE "windows.bi"
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
-USING Afx.CWindowClass
+USING Afx
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
                           BYVAL hPrevInstance AS HINSTANCE, _
@@ -33,6 +32,7 @@ enum
    IDM_FILESAVE, IDM_PRINTPRE, IDM_PROPERTIES, IDM_HELP, IDM_FIND, IDM_REPLACE, IDM_PRINT
 end enum
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -122,10 +122,10 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
    SELECT CASE uMsg
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
                ' // If ESC key pressed, close the application sending an WM_CLOSE message
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF

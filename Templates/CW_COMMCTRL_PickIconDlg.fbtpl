@@ -16,7 +16,7 @@ CWindow: COMMCTRL: Pick Icon File Dialog
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
 #INCLUDE ONCE "win/shlobj.bi"
-USING Afx.CWindowClass
+USING Afx
 
 CONST IDC_PICKDLG = 1001   ' // Pick icon dialog identifier
 
@@ -27,6 +27,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
+' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
@@ -71,16 +72,16 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
 
       CASE WM_COMMAND
          ' // If ESC key pressed, close the application sending an WM_CLOSE message
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
             ' // Launch the Pick icon dialog
             CASE IDC_PICKDLG
-               IF HIWORD(wParam) = BN_CLICKED THEN
-                  IF LEN(wszIconPath) = 0 THEN AfxGetSystemDllPath("Shell32.dll", wszIconPath, MAX_PATH)
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  IF LEN(wszIconPath) = 0 THEN wszIconPath = AfxGetSystemDllPath("Shell32.dll")
                   IF LEN(wszIconPath) = 0 THEN EXIT FUNCTION
                   ' // Activate the Pick Icon Common Dialog Box
                   DIM hr AS LONG = PickIconDlg(0, wszIconPath, SIZEOF(wszIconPath), @nIconIndex)
@@ -92,8 +93,8 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                      hIcon = ExtractIconW(GetModuleHandle(NULL), wszIconPath, nIconIndex)
                      ' // Replace the application icons
                      IF hIcon THEN
-                        SendMessageW(hwnd, WM_SETICON, ICON_SMALL, cast(LPARAM, hIcon))
-                        SendMessageW(hwnd, WM_SETICON, ICON_BIG, cast(LPARAM, hIcon))
+                        AfxSetWindowIcon hwnd, ICON_SMALL, hIcon
+                        AfxSetWindowIcon hwnd, ICON_BIG, hIcon
                      END IF
                   END IF
                   EXIT FUNCTION

@@ -209,9 +209,6 @@ Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
   
       CASE WM_DESTROY
          DeleteFont( AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOUTPUT_TXTLOGFILE)) )
-         ' Must destroy the icon used in the ICONBUTTON
-         Dim As HICON hIcon = Cast(HICON, SendMessageW(GetDlgItem(HWND, IDC_FRMOUTPUT_BTNCLOSE), BM_GETIMAGE, IMAGE_ICON, 0))
-         DeleteObject(hIcon)
          
    End Select
 
@@ -250,10 +247,10 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
                   L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), 0, 0, nWidth, nHeight )
-
+                  
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _
-      WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN, _
+      WS_VISIBLE OR WS_TABSTOP OR WS_VSCROLL or ES_LEFT OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN, _
       WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
    Dim As HFONT hFont = AfxCreateFont( "Courier New", 9 )
    AfxSetWindowFont( hCtl, hFont, True )

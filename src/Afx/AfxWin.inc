@@ -1168,6 +1168,54 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
+' Centers a control horizontally.
+' hCtrl = Handle of the control.
+' ========================================================================================
+PRIVATE SUB AfxCenterControlH (BYVAL hCtrl AS HWND)
+   DIM rc AS RECT, rcParent AS RECT
+   ' // Get the coordinates of the control
+   GetWindowRect hCtrl, @rc
+   DIM nWidthControl AS LONG = rc.Right - rc.Left
+   DIM nHeightControl AS LONG = rc.Bottom - rc.Top
+   ' // Get the coordinates of the parent window
+   DIM hParent AS HWND = GetParent(hCtrl)
+   GetClientRect hParent, @rcParent
+   DIM nWidthParent AS LONG = rcParent.Right - rcParent.Left
+   ' // Calculate the x coordinate to center the control horizontally
+   DIM x AS LONG = (nWidthParent - nWidthControl) \ 2
+   ' // Convert the y coordinate of the control to client area coordinate
+   DIM pt AS POINT
+   pt.y = rc.Top
+   ScreenToClient hParent, @pt
+   MoveWindow hCtrl, x, pt.y, nWidthControl, nHeightControl, CTRUE
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Centers a control vertically
+' hCtrl = Handle of the control.
+' ========================================================================================
+PRIVATE SUB AfxCenterControlV (BYVAL hCtrl AS HWND)
+   DIM rc AS RECT, rcParent AS RECT
+   ' // Get the coordinates of the control
+   GetWindowRect hCtrl, @rc
+   DIM nWidthControl AS LONG = rc.Right - rc.Left
+   DIM nHeightControl AS LONG = rc.Bottom - rc.Top
+   ' // Get the coordinates of the parent window
+   DIM hParent AS HWND = GetParent(hCtrl)
+   GetClientRect hParent, @rcParent
+   DIM nHeightParent AS LONG = rcParent.Bottom - rcParent.Top
+   ' // Calculate the x coordinate to center the control vertically
+   DIM y AS LONG = (nHeightParent - nHeightControl) \ 2
+   ' // Convert the x coordinate of the control to client area coordinate
+   DIM pt AS POINT
+   pt.x = rc.Left
+   ScreenToClient hParent, @pt
+   MoveWindow hCtrl, pt.x + (nWidthControl \ 2), y, nWidthControl, nHeightControl, CTRUE
+END SUB
+' ========================================================================================
+
+' ========================================================================================
 ' Redraws the specified window.
 ' Do not use it from within a WM_PAINT message.
 ' ========================================================================================

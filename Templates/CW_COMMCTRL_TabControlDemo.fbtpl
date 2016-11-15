@@ -16,8 +16,14 @@ CWindow: COMMCTRL: Tab Control Demo
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/AfxCtl.inc"
-USING Afx.CWindowClass
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
 CONST IDC_TAB       = 1001
 CONST IDC_EDIT1     = 1002
@@ -31,13 +37,6 @@ DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam A
 DECLARE FUNCTION TabPage1_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION TabPage2_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 DECLARE FUNCTION TabPage3_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
-
-DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
-                          BYVAL hPrevInstance AS HINSTANCE, _
-                          BYVAL szCmdLine AS ZSTRING PTR, _
-                          BYVAL nCmdShow AS LONG) AS LONG
-
-   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
 
 ' ========================================================================================
 ' Main
@@ -95,10 +94,10 @@ FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          EXIT FUNCTION
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
-            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDCANCEL
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   SendMessageW hwnd, WM_CLOSE, 0, 0
                   EXIT FUNCTION
                END IF
@@ -183,9 +182,9 @@ FUNCTION TabPage1_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam 
          EXIT FUNCTION
 
       CASE WM_COMMAND
-         SELECT CASE LOWORD(wParam)
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
             CASE IDC_BTNSUBMIT
-               IF HIWORD(wParam) = BN_CLICKED THEN
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
                   MessageBoxW(hWnd, "Submit", "Tab 1", MB_OK)
                   EXIT FUNCTION
                END IF
@@ -214,8 +213,8 @@ FUNCTION TabPage2_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam 
          ' // Add a combobox to the second page
          DIM hComboBox AS HWND = pTabPage->AddControl("ComboBox", hwnd, IDC_COMBO, "", 20, 20, 191, 105)
          ' // Fill the combobox with some data
-         DIM i AS LONG = 1, wszText AS WSTRING * 260
-         FOR i = 1 TO 9
+         DIM wszText AS WSTRING * 260
+         FOR i AS LONG = 1 TO 9
             wszText = "Item " & RIGHT("00" & STR(i), 2)
             ComboBox_AddString(hComboBox, @wszText)
          NEXT
@@ -260,8 +259,8 @@ FUNCTION TabPage3_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam 
          DIM hListBox AS HWND = pTabPage->AddControl("ListBox", hwnd, IDC_LISTBOX)
          pTabPage->SetWindowPos hListBox, NULL, 15, 20, 161, 120, SWP_NOZORDER
          ' // Fill the combobox with some data
-         DIM i AS LONG = 1, wszText AS WSTRING * 260
-         FOR i = 1 TO 9
+         DIM wszText AS WSTRING * 260
+         FOR i AS LONG = 1 TO 9
             wszText = "Item " & RIGHT("00" & STR(i), 2)
             ListBox_AddString(hListBox, @wszText)
          NEXT
