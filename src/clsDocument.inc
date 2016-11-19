@@ -104,7 +104,10 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             SciMsg( m_pSci, SCI_SETSAVEPOINT, 0, 0)
             SciMsg( m_pSci, SCI_EMPTYUNDOBUFFER, 0, 0)
             ' Update the most recently used file list (only for non-IsNewFlag files)
-            UpdateMRUList(pwszFile)
+            ' Only add file to MRU list if it is not part of an active Project
+            If gApp.IsProjectActive = false Then 
+               UpdateMRUList(pwszFile)
+            end if
          End If
       End If   
    End If
@@ -1263,30 +1266,6 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    Function = 0
 
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

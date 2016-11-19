@@ -366,7 +366,10 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    ' visually more appealing.
    Dim nTabs(any) As clsDocument Ptr
    
-   
+   ' Prevent Treeview flickering during adding
+   dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   LockWindowUpdate(hTV)
+
    Do Until Eof(f)
       Line Input #f, st
       If Len(st) = 0 Then Continue Do
@@ -440,6 +443,8 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       End Select
    
    Loop                        
+   
+   LockWindowUpdate(0)
    
    ' Display all of the tabs
    For i = LBound(nTabs) To UBound(nTabs)

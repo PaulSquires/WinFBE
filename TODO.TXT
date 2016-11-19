@@ -4,7 +4,9 @@
 [ ] Improve syntax keyword highlighting. 
     [ ] WinAPI keyword list.
 
-[ ] Codetips
+[ ] Codetips.
+
+[ ] Split editing windows.
 
 [ ] Print option.
 
