@@ -16,7 +16,7 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
    Dim As HWnd hCtl
    Dim As Long nLeft, nTop, nWidth, nHeight
    
-   ' The Explorer label was painted in the top area so start our listbox immediately after that
+   ' The Explorer label was painted in the top area so start our treeviews immediately after that
    nWidth  = pWindow->ScaleX(24)
    nHeight = pWindow->ScaleY(24)
    nTop    = pWindow->ScaleY(8)
@@ -46,16 +46,10 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
       ' Ensure that the treeview root node is created.
       CreateRootNodeExplorerTreeview
             
-      ' Show the vertical scroll bar should it be needed.
-      Dim As Long nWidthVScroll = AfxGetWindowWidth( HWND_FRMVSCROLLBAR )
+      ' Allow a small space at the right edge to ensure area for splitter
       SetWindowPos( hCtl, 0, 0, nTop, _
-                    rc.Right - Iif(IsWindowVisible(HWND_FRMVSCROLLBAR), nWidthVScroll, 0), _
+                    rc.Right - pWindow->ScaleX(2), _
                     rc.bottom-nTop, SWP_SHOWWINDOW Or SWP_NOZORDER )
-      if IsWindowVisible(HWND_FRMVSCROLLBAR) Then
-         SetWindowPos( HWND_FRMVSCROLLBAR, HWND_TOP, rc.Right - nWidthVScroll, nTop, _
-                       nWidthVScroll, rc.bottom-nTop, SWP_SHOWWINDOW )
-      End if   
-      
    End If   
 
    Function = 0
@@ -468,7 +462,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _
+        TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _   'TVS_NOSCROLL Or 
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
    

@@ -46,7 +46,6 @@ Using Afx
 #Include Once "modCompile.inc"
 #Include Once "modMRU.inc"
 
-#Include Once "frmVScrollBar.inc"
 #Include Once "frmHotImgBtn.inc"
 #Include Once "frmHotTxtBtn.inc"
 #Include Once "frmRecent.inc" 

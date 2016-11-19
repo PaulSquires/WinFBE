@@ -1262,12 +1262,20 @@ Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
 
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
    
+   ' Prevent Treeview flickering during closing
+   dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   LockWindowUpdate(hTV)
+   
    ' If a project is already open then save/close it.
    If gApp.IsProjectActive Then 
-      if OnCommand_ProjectClose(HWnd) = 0 then return 0
+      if OnCommand_ProjectClose(HWnd) = 0 then 
+         LockWindowUpdate(0): return 0
+      end if   
    else      
       ' Close any open files asking to save any that are dirty 
-      if OnCommand_FileClose(HWnd, True) = 0 then return 0
+      if OnCommand_FileClose(HWnd, True) = 0 then 
+         LockWindowUpdate(0): return 0
+      end if   
    end if
    
    ' If no open documents remain then call DestroyWindow to close the application
@@ -1425,7 +1433,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' Create the various child windows
    frmExplorer_Show( HWND_FRMMAIN )
    frmRecent_Show( HWND_FRMEXPLORER )     ' child of frmExplorer
-   frmVScrollBar_Show( HWND_FRMEXPLORER ) ' child of frmExplorer
    frmOutput_Show( HWND_FRMMAIN )
 
    ' SET STARTUP POSITION
@@ -1494,7 +1501,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' Delete the allocated memory for the various child windows
    pWindow = AfxCWindowPtr(HWND_FRMEXPLORER):       Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMRECENT):         Delete pWindow
-   pWindow = AfxCWindowPtr(HWND_FRMVSCROLLBAR):     Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOUTPUT):         Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 

@@ -2,7 +2,6 @@
 [ ] Find in files. 
 
 [ ] Improve syntax keyword highlighting. 
-    [ ] Investigate mixed case keywords.
     [ ] WinAPI keyword list.
 
 [ ] Codetips
