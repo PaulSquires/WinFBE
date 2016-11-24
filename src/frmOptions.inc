@@ -28,13 +28,13 @@ Sub SaveEditorOptions()
    gConfig.AutoIndentation      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION) )
    gConfig.UnicodeEncoding      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKUNICODE) )
 
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize, Sizeof(gConfig.TabSize) )
+   gConfig.TabSize = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE) )
    gConfig.KeywordCase = ComboBox_GetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE))
    
    ' If the localization has changed then display a message indicating that the changes
    ' will not be seen until the application is restarted.
    HWnd = HWND_FRMOPTIONSLOCAL
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), @wText, Sizeof(wText) )
+   wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION) )
    If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
       MessageBoxW( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
                   L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
@@ -79,19 +79,19 @@ Sub SaveEditorOptions()
 
    Dim idx As Long 
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME) )
-   FF_ComboBox_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), idx, @gConfig.EditorFontname, Sizeof(gConfig.EditorFontname) )
+   gConfig.EditorFontname = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), idx )
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE) )
-   FF_ComboBox_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE), idx, @gConfig.EditorFontSize, Sizeof(gConfig.EditorFontSize) )
+   gConfig.EditorFontSize = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE), idx )  
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET) )
-   FF_ComboBox_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET), idx, @gConfig.EditorFontCharSet, Sizeof(gConfig.EditorFontCharSet) )
+   gConfig.EditorFontCharSet = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET), idx )
    
    ' COMPILER OPTIONS
    HWnd = HWND_FRMOPTIONSCOMPILER
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN32), @gConfig.FBWINCompiler32, Sizeof(gConfig.FBWINCompiler32) ) 
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN64), @gConfig.FBWINCompiler64, Sizeof(gConfig.FBWINCompiler64) )
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBSWITCHES), @gConfig.CompilerSwitches, Sizeof(gConfig.CompilerSwitches) )
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE), @gConfig.CompilerHelpfile, Sizeof(gConfig.CompilerHelpfile) )
-   FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH), @gConfig.Win32APIHelpfile, Sizeof(gConfig.Win32APIHelpfile) )
+   gConfig.FBWINCompiler32  = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN32) )
+   gConfig.FBWINCompiler64  = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN64) )
+   gConfig.CompilerSwitches = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBSWITCHES) )
+   gConfig.CompilerHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE) )
+   gConfig.Win32APIHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH) )
 
    ' KEYWORDS
    If gConfig.bKeywordsDirty Then

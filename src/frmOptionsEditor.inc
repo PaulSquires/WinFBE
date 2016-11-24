@@ -93,7 +93,7 @@ Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION),    gConfig.AutoIndentation)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKUNICODE),            gConfig.UnicodeEncoding)
 
-   SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), @gConfig.TabSize
+   SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), gConfig.TabSize
    
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(130,"Lower Case") )
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(131,"Upper Case") )

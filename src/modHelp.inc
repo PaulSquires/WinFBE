@@ -29,9 +29,9 @@ Function ShowContextHelp() As Long
                                ) AS HWND
 
    ' Ensure that the CurDrive parameter is converted if applicable
-   ProcessFromCurdrive( @gConfig.CompilerHelpFile ) 
+   gConfig.CompilerHelpFile = ProcessFromCurdrive( gConfig.CompilerHelpFile ) 
 
-   If Dir(gConfig.CompilerHelpFile) = "" Then
+   If AfxFileExists(gConfig.CompilerHelpFile) = 0 Then
       MessageBoxW( HWND_FRMMAIN, L(244,"FreeBASIC Help file not found."), L(201,"Error"), _
                     MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Exit Function
@@ -51,7 +51,7 @@ Function ShowContextHelp() As Long
    Dim pDoc as clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    
    If pDoc = 0 Then
-      HtmlHelpW( 0, @gConfig.CompilerHelpFile, HH_DISPLAY_TOC, NULL )
+      HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_DISPLAY_TOC, NULL )
       Exit Function
    ENd If
 
@@ -72,13 +72,13 @@ Function ShowContextHelp() As Long
    End With
    
    ' Open the help and show the topic
-   HtmlHelpW( 0, @gConfig.CompilerHelpFile, HH_DISPLAY_TOC, NULL )   '<-- needed?
+   HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_DISPLAY_TOC, Null )   '<-- needed?
    
-   If HtmlHelpW( 0, @gConfig.CompilerHelpFile, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) ) = 0 Then
+   If HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) ) = 0 Then
       ' Normal case search failed, try a ucase search
       wszKeyword     = UCase(wszKeyword)
       li.pszKeywords = @wszKeyword
-      HtmlHelpW( 0, @gConfig.CompilerHelpFile, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) )
+      HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) )
    End If
 
    Function = 0

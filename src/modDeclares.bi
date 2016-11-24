@@ -192,7 +192,7 @@ Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCo
 Dim Shared As HWnd HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFIND, HWND_FRMREPLACE
-Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMVSCROLLBAR
+Dim Shared As HWnd HWND_FRMFNLIST
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
@@ -360,8 +360,8 @@ Type clsConfig
       
    Public:
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
-      CommandLine          As WString * MAX_PATH   ' not saved to file
-      LastRunFilename      As WString * MAX_PATH   ' not saved to file
+      CommandLine          As CWSTR                ' not saved to file
+      LastRunFilename      As CWSTR                ' not saved to file
       CloseFuncList        As Long = True
       ShowExplorer         As Long = True
       SyntaxHighlighting   As Long = True
@@ -378,26 +378,26 @@ Type clsConfig
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
       UnicodeEncoding      As Long = False
-      TabSize              As WString * 20  = "3"
-      LocalizationFile     As WString * MAX_PATH = "english.lang"
-      EditorFontname       As WString * MAX_PATH = "Courier New"
-      EditorFontCharSet    As WString * MAX_PATH = "Default"
-      EditorFontsize       As WString * 20  = "10"
+      TabSize              As CWSTR = "3"
+      LocalizationFile     As CWSTR = "english.lang"
+      EditorFontname       As CWSTR = "Courier New"
+      EditorFontCharSet    As CWSTR = "Default"
+      EditorFontsize       As CWSTR = "10"
       KeywordCase          As Long = 2  ' "Original Case"
       StartupLeft          As Long = 0
       StartupTop           As Long = 0
       StartupRight         As Long = 0
       StartupBottom        As Long = 0
       StartupMaximized     As Long = False
-      FBWINCompiler32      As WString * MAX_PATH = ""
-      FBWINCompiler64      As WString * MAX_PATH = ""
-      CompilerSwitches     As WString * MAX_PATH = ""
-      CompilerHelpfile     As WString * MAX_PATH = ""
-      Win32APIHelpfile     As WString * MAX_PATH = ""
-      DefaultCompiler      As WString * MAX_PATH = "FBC 32bit"
-      DefaultCompileMode   As WString * MAX_PATH = "GUI"
-      MRU(9)               As WString * MAX_PATH
-      MRUProject(9)        As WString * MAX_PATH
+      FBWINCompiler32      As CWSTR
+      FBWINCompiler64      As CWSTR
+      CompilerSwitches     As CWSTR
+      CompilerHelpfile     As CWSTR
+      Win32APIHelpfile     As CWSTR
+      DefaultCompiler      As CWSTR = "FBC 32bit"
+      DefaultCompileMode   As CWSTR = "GUI"
+      MRU(9)               As CWSTR
+      MRUProject(9)        As CWSTR
       clrCaretFG           As Long = BGR(0,0,0)          ' black
       clrCaretBG           As Long = -1
       clrCommentsFG        As Long = BGR(0,128,0)        ' green
@@ -609,13 +609,12 @@ Declare Function GetMRUProjectMenuHandle() As HMENU
 Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFilename As WString Ptr = 0 ) As Long
 Declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
 Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
-Declare Function GetFontCharSetID(ByVal pswzCharsetName As WString Ptr ) As Long
+Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 Declare Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, ByVal hParent As HANDLE, ByRef TheText As WString, ByVal lParam As LPARAM = 0, ByVal iImage As Long = 0, ByVal iSelectedImage As Long = 0 ) As HANDLE
 Declare Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As Long
-Declare Function FF_Control_GetTextW( ByVal hWndControl As HWnd, ByVal pOutString As WString Ptr, ByVal pOutStringLen As Long ) As Long
-Declare Function FF_ComboBox_GetTextW( ByVal hWndControl As HWnd, ByVal nIndex As Long, ByVal pOutString As WString Ptr, ByVal pOutStringLen As Long ) As Long
+declare Function AfxGetComboBoxText( ByVal hWndControl As HWnd, ByVal nIndex As Long ) As CWSTR
 Declare Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) As WString Ptr
 Declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) As IShellItemArray Ptr
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr
@@ -645,7 +644,7 @@ Declare Function CreateMRUpopup() As HMENU
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
-Declare Function RunEXE( ByVal pwszFileExe As WString Ptr, ByVal pwszParam As WString Ptr ) As Long
+declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
 declare Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
 declare Function CreateRootNodeExplorerTreeview() As Long
 

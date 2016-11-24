@@ -60,7 +60,7 @@ Function CreateMRUpopup() As HMENU
       If AfxFileExists(gConfig.MRU(i)) = 0 Then
          gConfig.MRU(i) = ""
       Else
-         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUBASE + i, @gConfig.MRU(i) )
+         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
       End If
    Next
    
@@ -72,7 +72,7 @@ Function CreateMRUpopup() As HMENU
          gConfig.MRUPROJECT(i) = ""
       Else               
          If i = 0 Then AppendMenuW( hPopUpMenu, MF_SEPARATOR, 0, "" )
-         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUPROJECTBASE + i, @gConfig.MRUPROJECT(i) )
+         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUPROJECT(i) )
       End If
    Next
 
@@ -104,7 +104,7 @@ Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
       If AfxFileExists(gConfig.MRU(i)) = 0 Then
          gConfig.MRU(i) = ""
       Else
-         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUBASE + i, @gConfig.MRU(i) )
+         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
       End If
    Next
    
@@ -230,7 +230,7 @@ Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
       If AfxFileExists(gConfig.MRUProject(i)) = 0 Then
          gConfig.MRUProject(i) = ""
       Else
-         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, @gConfig.MRUProject(i) )
+         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUProject(i) )
       End If
    Next
    
@@ -264,12 +264,12 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
    ' down and add at the beginning of the list. The original 10th entry
    ' will now drop off the list.
    If idxExistsAt = -1 Then idxExistsAt = 9
-   
+
    For i = idxExistsAt To 1 Step -1
       gConfig.MRUProject(i) = gConfig.MRUProject(i-1)
    Next
    gConfig.MRUProject(0) = *wzFilename 
-   
+
    ' Save the configuration file
    gConfig.SaveToFile
 

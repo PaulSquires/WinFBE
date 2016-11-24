@@ -709,9 +709,9 @@ Function clsDocument.DisplayStats() As Long
    Dim pDoc As clsDocument Ptr
    Dim TB As TC_ITEM 
    
-   Static wTemp As WString * MAX_PATH  ' General purpose variable
-   Static wText As WString * MAX_PATH  ' General purpose variable
-   Static wTag  As WString * 10        ' * display if modified
+   Static wTemp As CWSTR         ' General purpose variable
+   Static wText As CWSTR         ' General purpose variable
+   Static wTag  As WString * 10  ' * display if modified
    
    ' Retrieve the information and show it in the status bar
    curPos    = SciMsg( m_pSci, SCI_GETCURRENTPOS, 0, 0)
@@ -721,9 +721,9 @@ Function clsDocument.DisplayStats() As Long
 
    wText = " Ln " & Str(nLine+1) & ", Col " & Str(nCol+1) 
    If endPos - startPos Then  ' there is selected text
-      wText = wText & " (" & Str(endPos - startPos) & " selected)"
+      wText = wText + " (" + Str(endPos - startPos) + " selected)"
    End If
-   StatusBar_SetText(hStatusbar, 2, @wText)
+   StatusBar_SetText(hStatusbar, 2, wText)
    
 
    wText = ""
@@ -733,21 +733,21 @@ Function clsDocument.DisplayStats() As Long
       Case FILETYPE_MAIN:     wText = ucase(L(212,"Main"))
       Case FILETYPE_RESOURCE: wText = ucase(L(213,"Resource"))
    End Select
-   StatusBar_SetText(hStatusbar, 3, @wText)
+   StatusBar_SetText(hStatusbar, 3, *wText)
 
    wText = IIF( gConfig.UnicodeEncoding, "UTF-8 (Unicode)", "ANSI" )
-   StatusBar_SetText(hStatusbar, 4, @wText)
+   StatusBar_SetText(hStatusbar, 4, *wText)
 
    ' Set the filename text that displays on the tab. 
    gTTabCtl.SetTabText(-1)
 
    ' Update the main window caption with the full filename and path. Only
    ' do the update if the text has changed in order to prevent flicker.
-   FF_Control_GetTextW( HWND_FRMMAIN, @wTemp, MAX_PATH )
+   wTemp = AfxGetWindowText( HWND_FRMMAIN )
    wText = APPNAMESHORT 
    If gApp.IsProjectActive Then wText = wText + " - [" + gApp.ProjectName + "]"
-   wText = wText & " - [" & this.DiskFilename & wTag & "]"
-   If wText <> wTemp Then SetWindowTextW( HWND_FRMMAIN, @wText )
+   wText = wText + " - [" + this.DiskFilename + wTag + "]"
+   If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
 
    Function = 0
 End Function
@@ -777,7 +777,7 @@ Function clsDocument.ApplyProperties() As Long
    End If   
    
    strFontName = Str(gConfig.EditorFontname)
-   nFontSize   = Val(gConfig.EditorFontsize)
+   nFontSize   = Val(**gConfig.EditorFontsize)
    
    Select Case gConfig.KeywordCase
       Case 0:  nFontCase = SC_CASE_LOWER
@@ -863,8 +863,8 @@ Function clsDocument.ApplyProperties() As Long
        
    ''
    ''  TAB WIDTH 
-   SciMsg( m_pSci, SCI_SETTABWIDTH, Val(gConfig.TabSize), 0 )
-   SciMsg( m_pSci, SCI_SETINDENT, Val(gConfig.TabSize), 0 )
+   SciMsg( m_pSci, SCI_SETTABWIDTH, Val(**gConfig.TabSize), 0 )
+   SciMsg( m_pSci, SCI_SETINDENT, Val(**gConfig.TabSize), 0 )
    
    ''
    ''  INDENTATION GUIDES

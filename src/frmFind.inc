@@ -132,7 +132,7 @@ Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             ' Ensure that the text in the find textbox has been added to the combobox. Need to do
             ' this to ensure that manually typed in text has been captured.
             Dim wszText As WString * MAX_PATH
-            FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMFIND_COMBOFIND), @wszText, MAX_PATH )
+            wszText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMFIND_COMBOFIND))
             gFind.txtFind = Str(wszText)
             frmFind_AddToFindCombo(gFind.txtFind)
             
@@ -153,7 +153,7 @@ Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             ' Add any previous search terms to the combobox
             Dim As Long i, nCount 
             Dim wszText As WString * MAX_PATH
-            FF_Control_GetTextW( hwndCtl, @wszText, MAX_PATH )
+            wszText = AfxGetWindowText(hwndCtl)
             gFind.txtFind = Str(wszText)
             frmFind_AddToFindCombo(gFind.txtFind)
             ComboBox_ResetContent(hwndCtl)

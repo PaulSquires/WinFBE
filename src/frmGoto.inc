@@ -25,7 +25,7 @@ Function frmGoto_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          If codeNotify = BN_CLICKED Then
             Dim nLine As Long
             Dim swzText As WString * MAX_PATH
-            FF_Control_GetTextW( GetDlgItem(HWnd, IDC_FRMGOTO_TXTLINE), @swzText, MAX_PATH )
+            swzText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMGOTO_TXTLINE) )
             nLine = Val(swzText) - 1
             If nLine >= 0 Then
                Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()

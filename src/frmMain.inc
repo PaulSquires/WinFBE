@@ -218,7 +218,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             hEdit      = pDoc->hWindow
             nLine      = SendMessage(hEdit, SCI_LINEFROMPOSITION, pNSC->position, 0)
             nFoldLevel = SendMessage(hEdit, SCI_GETFOLDLEVEL, nLine, 0)
-   
+
             Select Case pNSC->margin 
                Case 1   ' left margin (bookmarks)
                   pDoc->ToggleBookmark(nLine)
@@ -438,13 +438,8 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    DestroyWindow( HWND_FRMFNLIST )
 
    ' Reset the Explorer window
-   ' If the window style for a tree-view control contains TVS_NOSCROLL and 
-   ' all items are deleted, new items are not displayed until the window 
-   ' styles are reset. 
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   dim as long styles = GetWindowLongPtr(hTree, GWL_STYLE)
    TreeView_DeleteAllItems(hTree)
-   SetWindowLongPtr(hTree, GWL_STYLE, styles)
    gApp.hExplorerRootNode = 0
    
    gApp.IsProjectActive = False
@@ -760,12 +755,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    if gApp.IsProjectActive = false then 
       If TabCtrl_GetItemCount(gTTabCtl.hWindow) = 0 Then 
          ' Reset the Explorer window
-         ' If the window style for a tree-view control contains TVS_NOSCROLL and 
-         ' all items are deleted, new items are not displayed until the window 
-         ' styles are reset. 
-         dim as long styles = GetWindowLongPtr(hTree, GWL_STYLE)
          TreeView_DeleteAllItems(hTree)
-         SetWindowLongPtr(hTree, GWL_STYLE, styles)
          gApp.hExplorerRootNode = 0
       end if
       PositionExplorerWindows(HWND_FRMEXPLORER)
@@ -951,7 +941,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Function = code_Compile(id)
 
       Case IDM_RUNEXE
-         RunExe @gConfig.LastRunFilename, @gConfig.CommandLine
+         RunExe gConfig.LastRunFilename, gConfig.CommandLine
       
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
 

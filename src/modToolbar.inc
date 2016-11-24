@@ -278,7 +278,7 @@ Function frmMain_ChangeToolbarButtonsState() As Long
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
    End If
    
-   If Dir$(gConfig.LastRunFilename) > "" Then
+   If AfxFileExists(gConfig.LastRunFilename) Then
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    Else
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)

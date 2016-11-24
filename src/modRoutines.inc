@@ -3,11 +3,11 @@
 ' ========================================================================================
 ' Get the Scintilla value for a character sets
 ' ========================================================================================
-Function GetFontCharSetID(ByVal pswzCharsetName As WString Ptr ) As Long
+Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 
-   If pswzCharsetName = 0 Then Return SC_CHARSET_DEFAULT
+   If Len(wzCharsetName) = 0 Then Return SC_CHARSET_DEFAULT
    
-   Select Case *pswzCharsetName
+   Select Case **wzCharsetName
       Case "Default"       : Function = SC_CHARSET_DEFAULT
       Case "Ansi"          : Function = SC_CHARSET_ANSI
       Case "Arabic"        : Function = SC_CHARSET_ARABIC
@@ -182,34 +182,29 @@ Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, _
     
 End Function
 
-' ========================================================================================
-' Return WSTRING text for a control
-' ========================================================================================
-Function FF_Control_GetTextW( ByVal hWndControl   As HWnd, _
-                              ByVal pOutString    As WString Ptr, _
-                              ByVal pOutStringLen As Long _
-                              ) As Long
-    
-   Dim As Long nLen = GetWindowTextLengthW(hWndControl) + 1  ' add space for ending nul
-   If nLen > pOutStringLen Then nLen = pOutStringLen
-   Function = GetWindowTextW( hWndControl, pOutString, nLen )
-         
-End Function
+'' ========================================================================================
+'' Return WSTRING text for a control
+'' ========================================================================================
+'Function FF_Control_GetTextW( ByVal hWndControl   As HWnd, _
+'                              ByVal pOutString    As WString Ptr, _
+'                              ByVal pOutStringLen As Long _
+'                              ) As Long
+'    
+'   Dim As Long nLen = GetWindowTextLengthW(hWndControl) + 1  ' add space for ending nul
+'   If nLen > pOutStringLen Then nLen = pOutStringLen
+'   Function = GetWindowTextW( hWndControl, pOutString, nLen )
+'         
+'End Function
 
 
 ' ========================================================================================
-' Return WSTRING text for a ComboBox
+' Return CWSTR text for item in ComboBox
 ' ========================================================================================
-Function FF_ComboBox_GetTextW( ByVal hWndControl   As HWnd, _
-                               ByVal nIndex        As Long, _
-                               ByVal pOutString    As WString Ptr, _
-                               ByVal pOutStringLen As Long _
-                               ) As Long
-
-   Dim As Long nLen = SendMessageW(hWndControl, CB_GETLBTEXTLEN, nIndex, 0) + 1  ' add space for ending nul
-   If nLen > pOutStringLen Then Return 0  ' buffer not large enough
-   Function = SendMessageW( hWndControl, CB_GETLBTEXT, nIndex, Cast(LPARAM, pOutString) ) 
-
+Function AfxGetComboBoxText( ByVal hWndControl As HWnd, ByVal nIndex As Long ) As CWSTR
+   DIM nLen AS LONG = SendMessageW(hWndControl, CB_GETLBTEXTLEN, nIndex, 0)
+   DIM wszText AS CWSTR = SPACE(nLen + 1)
+   SendMessageW(hWndControl, CB_GETLBTEXT, nIndex, cast(LPARAM, *wszText))
+   RETURN wszText
 End Function           
 
 

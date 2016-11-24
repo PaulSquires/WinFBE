@@ -35,7 +35,6 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
          LoadRecentProjectsTreeview(HWND_FRMRECENT)
       End If
       ShowWindow hCtl, SW_HIDE
-      ShowWindow HWND_FRMVSCROLLBAR, SW_HIDE
       SetWindowPos( HWND_FRMRECENT, 0, 0, nTop, rc.right, rc.bottom-nTop, _
                     IIf( gApp.GetDocumentCount, SWP_HIDEWINDOW, SWP_SHOWWINDOW) Or SWP_NOZORDER )
    Else
@@ -369,30 +368,6 @@ Function frmExplorer_Tree_SubclassProc ( _
       Case WM_CHAR   ' prevent the annoying beep!
          If wParam = VK_RETURN Then Return 0
 
-      Case WM_MOUSELEAVE
-         RemovePropW HWND_FRMVSCROLLBAR, "HOT"
-         ShowWindow HWND_FRMVSCROLLBAR, SW_HIDE
-         PositionExplorerWindows(HWND_FRMEXPLORER)
-         
-      Case WM_MOUSEMOVE
-         ' Display the horizontal scroll bar if we hovering over the bottom of the window.
-         Dim rc As rect
-         GetClientRect Hwnd, @rc
-         
-         Dim xpos as long = LOWORD(lParam)
-         Dim ypos as long = HIWORD(lParam)
-        
-         'Dim As Long nHeight = AfxGetWindowHeight( HWND_FRMHSCROLLBAR )
-
-         ' Are we over the scrollbar area
-         'If (ypos > rc.bottom - nHeight) Then
-            If IsWindowVisible(HWND_FRMVSCROLLBAR) = 0 Then
-               ShowWindow(HWND_FRMVSCROLLBAR, SW_SHOW)
-               PositionExplorerWindows(HWND_FRMEXPLORER)
-               Exit Function
-            End If   
-         'End If   
-
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
          RemoveWindowSubclass HWnd, @frmExplorer_Tree_SubclassProc, uIdSubclass
@@ -462,7 +437,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _   'TVS_NOSCROLL Or 
+        TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
    

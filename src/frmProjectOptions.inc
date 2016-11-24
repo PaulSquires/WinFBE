@@ -6,7 +6,7 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    Dim wText As WString * MAX_PATH  
     
    Dim As HWnd hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH)
-   FF_Control_GetTextW( hCtrl, gApp.ProjectFilename, MAX_PATH )
+   gApp.ProjectFilename = AfxGetWindowText(hCtrl)
 
    If Len(gApp.ProjectFilename) = 0 Then
       MessageBoxW( HWnd, L(217,"Invalid project path specified."), L(201,"Error"), _
@@ -41,9 +41,9 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    gApp.ProjectShowConsole = Button_GetCheck( hCtrl )
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32)
-   FF_Control_GetTextW( hCtrl, gApp.ProjectOther32, 1024)
+   gApp.ProjectOther32 = AfxGetWindowText(hCtrl)
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS64)
-   FF_Control_GetTextW( hCtrl, gApp.ProjectOther64, 1024)
+   gApp.ProjectOther64 = AfxGetWindowText(hCtrl)
    
    Return gConfig.ProjectSaveToFile()   
 

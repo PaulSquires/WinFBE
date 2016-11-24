@@ -426,9 +426,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       
       MessageBeep(MB_ICONWARNING)
       
-      ' Position the Compiler Log to the first error
-      nFirstErrorLine = Iif(nFirstErrorLine > -1, nFirstErrorLine, 0) 
-      ListView_SelectItem( hLV, nFirstErrorLine )
+      ' Position the Compiler Log to the first error/warning
+      ListView_SelectItem( hLV, 0 )
       
       ' If fGoodCompile is False then something unusual occurred so better show the log file by default
       If fGoodCompile = False Then
@@ -441,7 +440,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    
    If gCompile.RunAfterCompile Then 
-      RunEXE @gCompile.OutputFilename, @gConfig.CommandLine
+      RunEXE gCompile.OutputFilename, gConfig.CommandLine
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
       
@@ -451,8 +450,8 @@ End Function
 
 ''
 ''
-Function RunEXE( ByVal pwszFileExe As WString Ptr, _
-                 ByVal pwszParam As WString Ptr _
+Function RunEXE( ByRef wszFileExe As CWSTR, _
+                 ByRef wszParam As CWSTR _
                  ) As Long
                          
    Dim ShExecInfo As SHELLEXECUTEINFOW  
@@ -462,8 +461,8 @@ Function RunEXE( ByVal pwszFileExe As WString Ptr, _
       .fMask        = SEE_MASK_NOCLOSEPROCESS
       .HWnd         = 0
       .lpVerb       = Null
-      .lpFile       = pwszFileExe
-      .lpParameters = pwszParam   
+      .lpFile       = wszFileExe
+      .lpParameters = wszParam   
       .lpDirectory  = 0
       .nShow        = SW_SHOW
       .hInstApp     = 0 

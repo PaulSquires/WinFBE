@@ -47,13 +47,13 @@ Function clsConfig.SaveToFile() as Long
    "HighlightCurrentLine="  & this.HighlightCurrentLine  & vbcrlf & _
    "IndentGuides="          & this.IndentGuides          & vbcrlf & _
    "TabIndentSpaces="       & this.TabIndentSpaces       & vbcrlf & _
-   "LocalizationFile="      & this.LocalizationFile      & vbcrlf & _
-   "TabSize="               & this.TabSize               & vbcrlf & _
    "UnicodeEncoding="       & this.UnicodeEncoding       & vbcrlf & _
    "KeywordCase="           & this.KeywordCase           & vbcrlf & _
-   "EditorFontname="        & this.EditorFontname        & vbcrlf & _
-   "EditorFontsize="        & this.EditorFontsize        & vbcrlf & _
-   "EditorFontCharSet="     & this.EditorFontCharSet     & vbcrlf & vbcrlf & _
+   "LocalizationFile="      + this.LocalizationFile      + vbcrlf + _
+   "TabSize="               + this.TabSize               + vbcrlf + _
+   "EditorFontname="        + this.EditorFontname        + vbcrlf + _
+   "EditorFontsize="        + this.EditorFontsize        + vbcrlf + _
+   "EditorFontCharSet="     + this.EditorFontCharSet     + vbcrlf + vbcrlf + _
    "[Startup]" & vbcrlf & _
    "StartupLeft="           & this.StartupLeft           & vbcrlf & _
    "StartupTop="            & this.StartupTop            & vbcrlf & _
@@ -74,18 +74,18 @@ Function clsConfig.SaveToFile() as Long
    this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
 
    Print #f, _
-   "FBWINCompiler32="       & this.FBWINCompiler32       & vbcrlf & _
-   "FBWINCompiler64="       & this.FBWINCompiler64       & vbcrlf & _
-   "CompilerSwitches="      & this.CompilerSwitches      & vbcrlf & _
-   "CompilerHelpfile="      & this.CompilerHelpfile      & vbcrlf & _
-   "Win32APIHelpfile="      & this.Win32APIHelpfile      & vbcrlf & _
-   "DefaultCompiler="       & this.DefaultCompiler       & vbcrlf & _
-   "DefaultCompileMode="    & this.DefaultCompileMode    & vbcrlf 
+   "FBWINCompiler32="       + this.FBWINCompiler32       + vbcrlf + _
+   "FBWINCompiler64="       + this.FBWINCompiler64       + vbcrlf + _
+   "CompilerSwitches="      + this.CompilerSwitches      + vbcrlf + _
+   "CompilerHelpfile="      + this.CompilerHelpfile      + vbcrlf + _
+   "Win32APIHelpfile="      + this.Win32APIHelpfile      + vbcrlf + _
+   "DefaultCompiler="       + this.DefaultCompiler       + vbcrlf + _
+   "DefaultCompileMode="    + this.DefaultCompileMode    + vbcrlf 
    
    Print #f, "[MRU]"  
    For i As Long = 0 To 9
       this.MRU(i) = ProcessToCurdrive(this.MRU(i))
-      Print #f, "MRU_" & Right("00" & Str(i), 2) & "="   & this.MRU(i) 
+      Print #f, "MRU_" + Right("00" & Str(i), 2) + "="   + this.MRU(i) 
    Next         
    
    Print #f, ""
@@ -93,7 +93,7 @@ Function clsConfig.SaveToFile() as Long
    Print #f, "[MRUPROJECTS]"  
    For i As Long = 0 To 9
       this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
-      Print #f, "MRUPROJECT_" & Right("00" & Str(i), 2) & "="   & this.MRUProject(i) 
+      Print #f, "MRUPROJECT_" + Right("00" & Str(i), 2) & "="   + this.MRUProject(i) 
    Next         
 
    Print #f, vbcrlf & _

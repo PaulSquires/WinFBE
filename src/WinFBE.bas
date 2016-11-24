@@ -82,8 +82,8 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
 
    ' Load the selected localization file
    If LoadLocalizationFile( Exepath & "\Languages\" & gConfig.LocalizationFile ) = False Then
-      MessageBoxW( 0, WStr("Localization file could not be loaded. Aborting application.") & vbcrlf & _
-                   Exepath & "\Languages\" & gConfig.LocalizationFile, _
+      MessageBoxW( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
+                   Exepath + "\Languages\" + gConfig.LocalizationFile, _
                    WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Return 1
    End If

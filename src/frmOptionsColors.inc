@@ -69,7 +69,7 @@ Function DrawFontCombo(ByVal HWnd As HWnd, ByVal wParam As WPARAM, ByVal lParam 
          End If
 
          ' Get item's text (fontname), create font and draw text
-         FF_ComboBox_GetTextW(HWnd, lpdis->itemID, wText, Sizeof(wText))
+         wText = AfxGetComboBoxText(HWnd, lpdis->itemID)
          If Len(wText) Then
             hFont = pWindow->CreateFont( wText, 10 ) 
             If hFont Then hFont = SelectObject(lpdis->hDC, hFont)
@@ -407,15 +407,15 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    ShowComboColors( HWND_FRMOPTIONSCOLORS, 0 )   
 
    FillFontCombo( hComboFontName )
-   FillFontSizeCombo( hComboFontSize, @gConfig.EditorFontname )
+   FillFontSizeCombo( hComboFontSize, gConfig.EditorFontname )
    FillFontCharSets( hComboFontCharSet )
    
    Dim idx As Long
-   idx = SendMessageW( hComboFontName, CB_FINDSTRING, 0, Cast(LPARAM, Strptr(gConfig.EditorFontname)))
+   idx = SendMessageW( hComboFontName, CB_FINDSTRING, 0, Cast(LPARAM, *gConfig.EditorFontname))
    ComboBox_SetCurSel( hComboFontName, idx )
-   idx = SendMessageW( hComboFontSize, CB_FINDSTRING, 0, Cast(LPARAM, Strptr(gConfig.EditorFontSize)))
+   idx = SendMessageW( hComboFontSize, CB_FINDSTRING, 0, Cast(LPARAM, *gConfig.EditorFontSize))
    ComboBox_SetCurSel( hComboFontSize, idx )
-   idx = SendMessageW( hComboFontCharSet, CB_FINDSTRING, 0, Cast(LPARAM, Strptr(gConfig.EditorFontCharSet)))
+   idx = SendMessageW( hComboFontCharSet, CB_FINDSTRING, 0, Cast(LPARAM, *gConfig.EditorFontCharSet))
    ComboBox_SetCurSel( hComboFontCharSet, idx )
 
    Function = 0
