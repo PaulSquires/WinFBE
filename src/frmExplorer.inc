@@ -1,3 +1,15 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
 
 
 
@@ -412,9 +424,11 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
    ' Only make the Explorer initially visable if it was already visible
-   ' when the most previous instance of the program closed.
+   ' when the most previous instance of the program closed. Also, set the width of
+   ' the window to the last used visible width.
+   dim as long nWidth = iif(gConfig.ShowExplorer, gConfig.ShowExplorerWidth, 250)
    
-   HWND_FRMEXPLORER = pWindow->Create( hWndParent, "", @frmExplorer_WndProc, 0, 0, 250, 0, _
+   HWND_FRMEXPLORER = pWindow->Create( hWndParent, "", @frmExplorer_WndProc, 0, 0, nWidth, 0, _
         WS_CHILD Or iif(gConfig.ShowExplorer, WS_VISIBLE, 0) Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 

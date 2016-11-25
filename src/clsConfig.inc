@@ -1,3 +1,17 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
+
 ''  CONFIGURATION MODULE
 
 
@@ -30,39 +44,41 @@ Function clsConfig.SaveToFile() as Long
    Dim f As Long = Freefile
    If Open( _ConfigFilename For Output Encoding "utf16" As #f ) <> 0 Then Exit Function
 
-   Print #f, _
-   "'  WINFBE CONFIGURATION" & vbcrlf & vbcrlf & _
-   "[Editor]" & vbcrlf & _
-   "MultipleInstances="     & this.MultipleInstances     & vbcrlf & _
-   "CompileAutosave="       & this.CompileAutosave       & vbcrlf & _
-   "CloseFuncList="         & this.CloseFuncList         & vbcrlf & _
-   "HideCompile="           & this.HideCompile           & vbcrlf & _
-   "SyntaxHighlighting="    & this.SyntaxHighlighting    & vbcrlf & _
-   "Codetips="              & this.Codetips              & vbcrlf & _
-   "LeftMargin="            & this.LeftMargin            & vbcrlf & _
-   "FoldMargin="            & this.FoldMargin            & vbcrlf & _
-   "AutoIndentation="       & this.AutoIndentation       & vbcrlf & _
-   "ConfineCaret="          & this.ConfineCaret          & vbcrlf & _
-   "LineNumbering="         & this.LineNumbering         & vbcrlf & _
-   "HighlightCurrentLine="  & this.HighlightCurrentLine  & vbcrlf & _
-   "IndentGuides="          & this.IndentGuides          & vbcrlf & _
-   "TabIndentSpaces="       & this.TabIndentSpaces       & vbcrlf & _
-   "UnicodeEncoding="       & this.UnicodeEncoding       & vbcrlf & _
-   "KeywordCase="           & this.KeywordCase           & vbcrlf & _
-   "LocalizationFile="      + this.LocalizationFile      + vbcrlf + _
-   "TabSize="               + this.TabSize               + vbcrlf + _
-   "EditorFontname="        + this.EditorFontname        + vbcrlf + _
-   "EditorFontsize="        + this.EditorFontsize        + vbcrlf + _
-   "EditorFontCharSet="     + this.EditorFontCharSet     + vbcrlf + vbcrlf + _
-   "[Startup]" & vbcrlf & _
-   "StartupLeft="           & this.StartupLeft           & vbcrlf & _
-   "StartupTop="            & this.StartupTop            & vbcrlf & _
-   "StartupRight="          & this.StartupRight          & vbcrlf & _
-   "StartupBottom="         & this.StartupBottom         & vbcrlf & _
-   "StartupMaximized="      & this.StartupMaximized      & vbcrlf & _
-   "ShowExplorer="          & this.ShowExplorer          & vbcrlf
-   
-   Print #f, "[Compiler]" 
+   Print #f, "'  WINFBE CONFIGURATION" 
+   print #f, ""
+   print #f, "[Editor]"
+   print #f, "MultipleInstances="     ; this.MultipleInstances    
+   print #f, "CompileAutosave="       ; this.CompileAutosave      
+   print #f, "CloseFuncList="         ; this.CloseFuncList        
+   print #f, "HideCompile="           ; this.HideCompile          
+   print #f, "SyntaxHighlighting="    ; this.SyntaxHighlighting   
+   print #f, "Codetips="              ; this.Codetips             
+   print #f, "LeftMargin="            ; this.LeftMargin           
+   print #f, "FoldMargin="            ; this.FoldMargin           
+   print #f, "AutoIndentation="       ; this.AutoIndentation      
+   print #f, "ConfineCaret="          ; this.ConfineCaret         
+   print #f, "LineNumbering="         ; this.LineNumbering        
+   print #f, "HighlightCurrentLine="  ; this.HighlightCurrentLine 
+   print #f, "IndentGuides="          ; this.IndentGuides         
+   print #f, "TabIndentSpaces="       ; this.TabIndentSpaces      
+   print #f, "UnicodeEncoding="       ; this.UnicodeEncoding      
+   print #f, "KeywordCase="           ; this.KeywordCase          
+   print #f, "LocalizationFile="      ; this.LocalizationFile     
+   print #f, "TabSize="               ; this.TabSize              
+   print #f, "EditorFontname="        ; this.EditorFontname       
+   print #f, "EditorFontsize="        ; this.EditorFontsize       
+   print #f, "EditorFontCharSet="     ; this.EditorFontCharSet    
+   print #f, ""
+   print #f, "[Startup]" 
+   print #f, "StartupLeft="           ; this.StartupLeft          
+   print #f, "StartupTop="            ; this.StartupTop           
+   print #f, "StartupRight="          ; this.StartupRight         
+   print #f, "StartupBottom="         ; this.StartupBottom        
+   print #f, "StartupMaximized="      ; this.StartupMaximized     
+   print #f, "ShowExplorer="          ; this.ShowExplorer         
+   print #f, "ShowExplorerWidth="     ; this.ShowExplorerWidth    
+   print #f, ""
+
    ' For each folder location determine if it resides on the same drive as
    ' the WinFBE application. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -73,63 +89,63 @@ Function clsConfig.SaveToFile() as Long
    this.CompilerHelpfile = ProcessToCurdrive(this.CompilerHelpfile)
    this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
 
-   Print #f, _
-   "FBWINCompiler32="       + this.FBWINCompiler32       + vbcrlf + _
-   "FBWINCompiler64="       + this.FBWINCompiler64       + vbcrlf + _
-   "CompilerSwitches="      + this.CompilerSwitches      + vbcrlf + _
-   "CompilerHelpfile="      + this.CompilerHelpfile      + vbcrlf + _
-   "Win32APIHelpfile="      + this.Win32APIHelpfile      + vbcrlf + _
-   "DefaultCompiler="       + this.DefaultCompiler       + vbcrlf + _
-   "DefaultCompileMode="    + this.DefaultCompileMode    + vbcrlf 
+   Print #f, "[Compiler]" 
+   print #f, "FBWINCompiler32="       ; this.FBWINCompiler32      
+   print #f, "FBWINCompiler64="       ; this.FBWINCompiler64      
+   print #f, "CompilerSwitches="      ; this.CompilerSwitches     
+   print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
+   print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
+   print #f, "DefaultCompiler="       ; this.DefaultCompiler      
+   print #f, "DefaultCompileMode="    ; this.DefaultCompileMode   
    
+   print #f, ""
    Print #f, "[MRU]"  
    For i As Long = 0 To 9
       this.MRU(i) = ProcessToCurdrive(this.MRU(i))
-      Print #f, "MRU_" + Right("00" & Str(i), 2) + "="   + this.MRU(i) 
+      Print #f, "MRU_"; Right("00" & Str(i), 2); "="; this.MRU(i) 
    Next         
    
    Print #f, ""
-   
    Print #f, "[MRUPROJECTS]"  
    For i As Long = 0 To 9
       this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
-      Print #f, "MRUPROJECT_" + Right("00" & Str(i), 2) & "="   + this.MRUProject(i) 
+      Print #f, "MRUPROJECT_"; Right("00" & Str(i), 2); "="; this.MRUProject(i) 
    Next         
 
-   Print #f, vbcrlf & _
-   "[Colors]" & vbcrlf & _
-   "clrCaretFG="            & this.clrCaretFG           & vbcrlf & _
-   "clrCaretBG="            & this.clrCaretBG           & vbcrlf & _
-   "clrCommentsFG="         & this.clrCommentsFG        & vbcrlf & _
-   "clrCommentsBG="         & this.clrCommentsBG        & vbcrlf & _
-   "clrHighlightedFG="      & this.clrHighlightedFG     & vbcrlf & _
-   "clrHighlightedBG="      & this.clrHighlightedBG     & vbcrlf & _
-   "clrKeywordFG="          & this.clrKeywordFG         & vbcrlf & _
-   "clrKeywordBG="          & this.clrKeywordBG         & vbcrlf & _
-   "clrFoldMarginFG="       & this.clrFoldMarginFG      & vbcrlf & _
-   "clrFoldMarginBG="       & this.clrFoldMarginBG      & vbcrlf & _
-   "clrFoldSymbolFG="       & this.clrFoldSymbolFG      & vbcrlf & _
-   "clrFoldSymbolBG="       & this.clrFoldSymbolBG      & vbcrlf & _
-   "clrLineNumbersFG="      & this.clrLineNumbersFG     & vbcrlf & _
-   "clrLineNumbersBG="      & this.clrLineNumbersBG     & vbcrlf & _
-   "clrBookmarksFG="        & this.clrBookmarksFG       & vbcrlf & _
-   "clrBookmarksBG="        & this.clrBookmarksBG       & vbcrlf & _
-   "clrOperatorsFG="        & this.clrOperatorsFG       & vbcrlf & _
-   "clrOperatorsBG="        & this.clrOperatorsBG       & vbcrlf & _
-   "clrIndentGuidesFG="     & this.clrIndentGuidesFG    & vbcrlf & _
-   "clrIndentGuidesBG="     & this.clrIndentGuidesBG    & vbcrlf & _
-   "clrPreprocessorFG="     & this.clrPreprocessorFG    & vbcrlf & _
-   "clrPreprocessorBG="     & this.clrPreprocessorBG    & vbcrlf & _
-   "clrSelectionFG="        & this.clrSelectionFG       & vbcrlf & _
-   "clrSelectionBG="        & this.clrSelectionBG       & vbcrlf & _
-   "clrStringsFG="          & this.clrStringsFG         & vbcrlf & _
-   "clrStringsBG="          & this.clrStringsBG         & vbcrlf & _
-   "clrTextFG="             & this.clrTextFG            & vbcrlf & _
-   "clrTextBG="             & this.clrTextBG            & vbcrlf & _
-   "clrWinAPIFG="           & this.clrWinAPIFG          & vbcrlf & _
-   "clrWinAPIBG="           & this.clrWinAPIBG          & vbcrlf & _
-   "clrWindowFG="           & this.clrWindowFG          & vbcrlf & _
-   "clrWindowBG="           & this.clrWindowBG          & vbcrlf 
+   Print #f, ""
+   print #f, "[Colors]" 
+   print #f, "clrCaretFG="            ; this.clrCaretFG           
+   print #f, "clrCaretBG="            ; this.clrCaretBG           
+   print #f, "clrCommentsFG="         ; this.clrCommentsFG        
+   print #f, "clrCommentsBG="         ; this.clrCommentsBG        
+   print #f, "clrHighlightedFG="      ; this.clrHighlightedFG     
+   print #f, "clrHighlightedBG="      ; this.clrHighlightedBG     
+   print #f, "clrKeywordFG="          ; this.clrKeywordFG         
+   print #f, "clrKeywordBG="          ; this.clrKeywordBG         
+   print #f, "clrFoldMarginFG="       ; this.clrFoldMarginFG      
+   print #f, "clrFoldMarginBG="       ; this.clrFoldMarginBG      
+   print #f, "clrFoldSymbolFG="       ; this.clrFoldSymbolFG      
+   print #f, "clrFoldSymbolBG="       ; this.clrFoldSymbolBG      
+   print #f, "clrLineNumbersFG="      ; this.clrLineNumbersFG     
+   print #f, "clrLineNumbersBG="      ; this.clrLineNumbersBG     
+   print #f, "clrBookmarksFG="        ; this.clrBookmarksFG       
+   print #f, "clrBookmarksBG="        ; this.clrBookmarksBG       
+   print #f, "clrOperatorsFG="        ; this.clrOperatorsFG       
+   print #f, "clrOperatorsBG="        ; this.clrOperatorsBG       
+   print #f, "clrIndentGuidesFG="     ; this.clrIndentGuidesFG    
+   print #f, "clrIndentGuidesBG="     ; this.clrIndentGuidesBG    
+   print #f, "clrPreprocessorFG="     ; this.clrPreprocessorFG    
+   print #f, "clrPreprocessorBG="     ; this.clrPreprocessorBG    
+   print #f, "clrSelectionFG="        ; this.clrSelectionFG       
+   print #f, "clrSelectionBG="        ; this.clrSelectionBG       
+   print #f, "clrStringsFG="          ; this.clrStringsFG         
+   print #f, "clrStringsBG="          ; this.clrStringsBG         
+   print #f, "clrTextFG="             ; this.clrTextFG            
+   print #f, "clrTextBG="             ; this.clrTextBG            
+   print #f, "clrWinAPIFG="           ; this.clrWinAPIFG          
+   print #f, "clrWinAPIBG="           ; this.clrWinAPIBG          
+   print #f, "clrWindowFG="           ; this.clrWindowFG          
+   print #f, "clrWindowBG="           ; this.clrWindowBG          
    
    Close #f
    
@@ -213,6 +229,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "StartupBottom":        this.StartupBottom        = nData
          Case "StartupMaximized":     this.StartupMaximized     = nData
          Case "ShowExplorer":         this.ShowExplorer         = nData
+         Case "ShowExplorerWidth":    this.ShowExplorerWidth    = nData
          Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
          Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
          Case "CompilerSwitches":     this.CompilerSwitches     = wData

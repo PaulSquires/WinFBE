@@ -1,3 +1,15 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
 
 
 ' ========================================================================================
@@ -51,7 +63,7 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    Dim wzCurDrive As CWSTR = LCase(Left(**zText, 3))  ' eg. D:\
 
    If LCase(Left(**wzFilename, 3)) = wzCurDrive Then 
-      wzFilename = "{CURDRIVE}" & Mid(**wzFilename, 2)
+      wzFilename = WSTR("{CURDRIVE}") & Mid(**wzFilename, 2)
    End If
 
    Return wzFilename
@@ -73,7 +85,7 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    else
       zText = exepath
    end if      
-   If Ucase(Left(**wzFilename, 10)) = "{CURDRIVE}" Then 
+   If Ucase(Left(**wzFilename, 10)) = WSTR("{CURDRIVE}") Then 
       wzFilename = Left(**zText, 1) & Mid(wzFilename, 11)
    End If
 
@@ -181,20 +193,6 @@ Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, _
    If TreeView_SetItem( hWndControl, @ti ) = 0 Then Function = True
     
 End Function
-
-'' ========================================================================================
-'' Return WSTRING text for a control
-'' ========================================================================================
-'Function FF_Control_GetTextW( ByVal hWndControl   As HWnd, _
-'                              ByVal pOutString    As WString Ptr, _
-'                              ByVal pOutStringLen As Long _
-'                              ) As Long
-'    
-'   Dim As Long nLen = GetWindowTextLengthW(hWndControl) + 1  ' add space for ending nul
-'   If nLen > pOutStringLen Then nLen = pOutStringLen
-'   Function = GetWindowTextW( hWndControl, pOutString, nLen )
-'         
-'End Function
 
 
 ' ========================================================================================

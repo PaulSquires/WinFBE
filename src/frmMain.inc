@@ -1,3 +1,16 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
 
 ' ========================================================================================
 ' Position editor to document/function under the current caret position
@@ -1250,7 +1263,10 @@ End Function
 ' ========================================================================================
 Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
 
+   ' Save whether the Explorer should be shown the next time the program is run.
+   ' Also save the Explorer panel width.
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
+   gConfig.ShowExplorerWidth = AfxGetWindowWidth( HWND_FRMEXPLORER )
    
    ' Prevent Treeview flickering during closing
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
