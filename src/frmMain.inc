@@ -1264,7 +1264,7 @@ End Function
 Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
 
    ' Save whether the Explorer should be shown the next time the program is run.
-   ' Also save the Explorer panel width.
+   ' Also save the Explorer panel width. 
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
    gConfig.ShowExplorerWidth = AfxGetWindowWidth( HWND_FRMEXPLORER )
    

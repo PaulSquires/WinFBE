@@ -426,7 +426,9 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    ' Only make the Explorer initially visable if it was already visible
    ' when the most previous instance of the program closed. Also, set the width of
    ' the window to the last used visible width.
-   dim as long nWidth = iif(gConfig.ShowExplorer, gConfig.ShowExplorerWidth, 250)
+   ' Because pWindow->Create scales the control according to the DPI, you must 
+   ' unscale the saved width:   
+   dim as long nWidth = iif(gConfig.ShowExplorer, pWindow->UnscaleX(gConfig.ShowExplorerWidth), 250)
    
    HWND_FRMEXPLORER = pWindow->Create( hWndParent, "", @frmExplorer_WndProc, 0, 0, nWidth, 0, _
         WS_CHILD Or iif(gConfig.ShowExplorer, WS_VISIBLE, 0) Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
