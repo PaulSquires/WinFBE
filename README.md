@@ -15,7 +15,7 @@ Features:
 
 Requirements:
 - Windows Vista or later operating system.
-- FreeBASIC Compiler
+- FreeBASIC Compiler http://www.freebasic.net/
 
 Resources:
 - Jose Roca: 
