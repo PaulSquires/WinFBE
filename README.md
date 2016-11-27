@@ -17,6 +17,13 @@ Requirements:
 - Windows Vista or later operating system.
 - FreeBASIC Compiler
 
+Resources:
+- Jose Roca: 
+-- CWINDOW class (Windows GUI API encapsulation)
+-- CWSTR class (Dynamic WSTRING Unicode class)
+-- AFX* classes (various useful string, date/time, GUI control, GDIPlus, routines)
+- Visit http://www.planetsquires.com/protect/forum/index.php for support forum.
+
 
 WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
 Copyright (C) 2016 Paul Squires, PlanetSquires Software
