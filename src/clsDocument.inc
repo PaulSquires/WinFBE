@@ -1148,7 +1148,8 @@ Function clsDocument.CreateFunctionList() As Long
          st = Mid(st, 12): bFirstLine = True
       ElseIf Left(st_ucase, 12) = "PRIVATE SUB " Then
          st = Mid(st, 13): bFirstLine = True
-      End If   
+      End If
+      st = ltrim(st)  ' remove any leading spaces   
          
    
       ' bypass any line with = embedded in it but need to check only up to the first
