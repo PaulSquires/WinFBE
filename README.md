@@ -6,6 +6,7 @@ Code is written using the FreeBASIC language and uses the Scintilla editing libr
 Features:
 - Unicode enabled.
 - 32 bit and 64 bit versions.
+- Language localization. Simple create language file based on English.lang file.
 - Projects and non-project based editing.
 - Easy integration of Console or GUI based code.
 - Incremental compiling of code defined as a "module".
