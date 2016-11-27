@@ -124,7 +124,8 @@
 #Define IDC_FRMFIND_FRAMESCOPE                      1006
 #Define IDC_FRMFIND_OPTSCOPE1                       1007
 #Define IDC_FRMFIND_OPTSCOPE2                       1008
-#Define IDC_FRMFIND_FRAMEOPTIONS                    1009
+#Define IDC_FRMFIND_OPTSCOPE3                       1009
+#Define IDC_FRMFIND_FRAMEOPTIONS                    1010
 
 #Define IDC_FRMREPLACE_LBLFINDWHAT                  1000
 #Define IDC_FRMREPLACE_COMBOFIND                    1001
@@ -133,12 +134,13 @@
 #Define IDC_FRMREPLACE_FRAMESCOPE                   1004
 #Define IDC_FRMREPLACE_OPTSCOPE1                    1005
 #Define IDC_FRMREPLACE_OPTSCOPE2                    1006
-#Define IDC_FRMREPLACE_FRAMEOPTIONS                 1007
-#Define IDC_FRMREPLACE_LBLREPLACEWITH               1008
-#Define IDC_FRMREPLACE_COMBOREPLACE                 1009
-#Define IDC_FRMREPLACE_CMDREPLACE                   1010
-#Define IDC_FRMREPLACE_CMDREPLACEALL                1011
-#Define IDC_FRMREPLACE_LBLSTATUS                    1012
+#Define IDC_FRMREPLACE_OPTSCOPE3                    1007
+#Define IDC_FRMREPLACE_FRAMEOPTIONS                 1008
+#Define IDC_FRMREPLACE_LBLREPLACEWITH               1009
+#Define IDC_FRMREPLACE_COMBOREPLACE                 1010
+#Define IDC_FRMREPLACE_CMDREPLACE                   1011
+#Define IDC_FRMREPLACE_CMDREPLACEALL                1012
+#Define IDC_FRMREPLACE_LBLSTATUS                    1013
 
 #Define IDC_FRMGOTO_LBLLASTLINE                     1000
 #Define IDC_FRMGOTO_LBLCURRENTLINE                  1001
@@ -206,7 +208,7 @@ Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
 
 '  Global window handles for some forms 
-Dim Shared As HWnd HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
+Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFIND, HWND_FRMREPLACE
 Dim Shared As HWnd HWND_FRMFNLIST

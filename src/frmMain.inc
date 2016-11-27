@@ -289,9 +289,9 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      buffer = "DO" Or _
                      Left$(buffer, 6) = "WHILE " Or _
                      buffer = "WHILE" Then
-                     ' // Indentation size
+                     ' Indentation size
                      Dim IndentSize As Long = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
-                     ' // Add spaces to indent the line
+                     ' Add spaces to indent the line
                      strFill = Space(nSpaces + IndentSize)
                   Else
                      ' Add the same spaces on the left that the line above

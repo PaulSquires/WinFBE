@@ -1061,26 +1061,26 @@ End Type
 
 Type SCNotification
    hdr                  As Sci_NotifyHeader
-   position             As INTEGER
-   ch                   As INTEGER
-   modifiers            As INTEGER
-   modificationType     As INTEGER
+   position             As LONG
+   ch                   As LONG
+   modifiers            As LONG
+   modificationType     As LONG
    lpText               As ZString Ptr
-   length               As INTEGER
-   linesAdded           As INTEGER
-   message              As INTEGER
-   wParam               As uINTEGER
-   lParam               As uINTEGER
-   nLine                As INTEGER
-   foldLevelNow         As INTEGER
-   foldLevelPrev        As INTEGER
-   margin               As INTEGER
-   listType             As INTEGER
-   x                    As INTEGER
-   y                    As INTEGER
-   token                As INTEGER
-   annotationLinesAdded As INTEGER
-   updated              As INTEGER
+   length               As LONG
+   linesAdded           As LONG
+   message              As LONG
+   wParam               As WPARAM
+   lParam               As LPARAM
+   nLine                As LONG
+   foldLevelNow         As LONG
+   foldLevelPrev        As LONG
+   margin               As LONG
+   listType             As LONG
+   x                    As LONG
+   y                    As LONG
+   token                As LONG
+   annotationLinesAdded As LONG
+   updated              As LONG
 End Type
 
 'struct SCNotification {

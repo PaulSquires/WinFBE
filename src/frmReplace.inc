@@ -127,18 +127,24 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             Exit Function
          End If
 
-      Case IDC_FRMREPLACE_OPTSCOPE1
+      Case IDC_FRMREPLACE_OPTSCOPE1     ' current document
          If codeNotify = BN_CLICKED Then
             If Button_GetCheck(hwndCtl) = BST_CHECKED Then gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE1      
             Exit Function
          End If
 
-      Case IDC_FRMREPLACE_OPTSCOPE2
+      Case IDC_FRMREPLACE_OPTSCOPE2    ' all open documents
          If codeNotify = BN_CLICKED Then
             If Button_GetCheck(hwndCtl) = BST_CHECKED Then gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE2
             Exit Function
          End If
  
+      Case IDC_FRMREPLACE_OPTSCOPE3   ' selection
+         If codeNotify = BN_CLICKED Then
+            If Button_GetCheck(hwndCtl) = BST_CHECKED Then gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE3
+            Exit Function
+         End If
+
       Case IDC_FRMREPLACE_CMDREPLACE
          If codeNotify = BN_CLICKED Then
             Dim startSelPos As Long     
@@ -302,52 +308,56 @@ Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->Create(hwndParent, L(173,"Replace"), @frmReplace_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(500, 161)
+   pWindow->SetClientSize(500, 181)
    pWindow->Center
    
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMREPLACE_LBLFINDWHAT, L(159,"Find what:"), 5, 11, 82, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLFINDWHAT, L(159,"Find what:"), 5, 11, 82, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMREPLACE_COMBOFIND, "", 95, 8, 295, 21, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMREPLACE_COMBOFIND, "", 95, 8, 295, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWN Or CBS_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMREPLACE_COMBOREPLACE, "", 95, 37, 295, 21, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMREPLACE_COMBOREPLACE, "", 95, 37, 295, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWN Or CBS_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, L(160,"Find Next"), 400, 7, 90, 24, _
+   pWindow->AddControl("BUTTON", , IDOK, L(160,"Find Next"), 400, 7, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDC_FRMREPLACE_CMDREPLACE, L(173,"Replace"), 400, 37, 90, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMREPLACE_CMDREPLACE, L(173,"Replace"), 400, 37, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or  BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDC_FRMREPLACE_CMDREPLACEALL, L(174,"Replace All"), 400, 67, 90, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMREPLACE_CMDREPLACEALL, L(174,"Replace All"), 400, 67, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or  BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, L(161,"Close"), 400, 110, 90, 24, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(161,"Close"), 400, 110, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMREPLACE_FRAMEOPTIONS, L(167,"Options"), 18, 67, 180, 70, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMREPLACE_FRAMEOPTIONS, L(167,"Options"), 18, 67, 180, 90, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMREPLACE_CHKWHOLEWORDS, L(162,"Match Whole Words"), 28, 82, 162, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMREPLACE_CHKWHOLEWORDS, L(162,"Match Whole Words"), 28, 82, 162, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMREPLACE_CHKMATCHCASE, L(163,"Match Case"), 28, 102, 162, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMREPLACE_CHKMATCHCASE, L(163,"Match Case"), 28, 102, 162, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMREPLACE_FRAMESCOPE, L(164,"Scope"), 209, 67, 180, 70, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMREPLACE_FRAMESCOPE, L(164,"Scope"), 209, 67, 180, 90, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMREPLACE_OPTSCOPE1, L(165,"Current Document"), 218, 85, 162, 16, _
+   pWindow->AddControl("OPTION", , IDC_FRMREPLACE_OPTSCOPE1, L(165,"Current Document"), 218, 85, 162, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMREPLACE_OPTSCOPE2, L(166,"All Open Documents"), 218, 105, 162, 16, _
+   pWindow->AddControl("OPTION", , IDC_FRMREPLACE_OPTSCOPE2, L(166,"All Open Documents"), 218, 105, 162, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMREPLACE_LBLREPLACEWITH, L(175,"Replace with:"), 5, 40, 82, 16, _
+' Find/Replace in Selected text is not working okay yet.
+'   pWindow->AddControl("OPTION", , IDC_FRMREPLACE_OPTSCOPE3, L(220,"Selected Text"), 218, 125, 162, 16, _
+'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+'        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(175,"Replace with:"), 5, 40, 82, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMREPLACE_LBLSTATUS, "Status", 19, 141, 368, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLSTATUS, "Status", 19, 141, 368, 16, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

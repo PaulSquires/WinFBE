@@ -25,7 +25,7 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
    ' want those options to search the current active document only.
 
    Dim As Long curPos, startPos, endPos, startLine, endLine, nCurTab, nTabCount
-   Dim As Long r, i, n, idx, idxFirst, IDC_SCOPE1, IDC_SCOPE2  
+   Dim As Long r, i, n, idx, idxFirst, IDC_SCOPE1, IDC_SCOPE2, IDC_SCOPE3  
    Dim As String buffer      
    Dim pDoc As clsDocument Ptr 
    
@@ -33,6 +33,7 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
    ' hWnd's and IDC's as needed for each type of dialog.
    IDC_SCOPE1 = Iif( hWndDialog = HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE1, IDC_FRMREPLACE_OPTSCOPE1)
    IDC_SCOPE2 = Iif( hWndDialog = HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE2, IDC_FRMREPLACE_OPTSCOPE2)
+   IDC_SCOPE3 = Iif( hWndDialog = HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE3, IDC_FRMREPLACE_OPTSCOPE3)
 
    If Len(gFind.txtFind) = 0 Then Return -1
 
@@ -49,7 +50,7 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
       pDocs(0) = gTTabCtl.GetActiveDocumentPtr
       pDocs(1) = gTTabCtl.GetActiveDocumentPtr
       nTabCount = 2
-   Else
+   Elseif gFind.nScopeFind = IDC_SCOPE2 then
       ' Search all loaded documents
       nTabCount = TabCtrl_GetItemCount(gTTabCtl.hWindow)           
       nCurTab   = TabCtrl_GetCurSel(gTTabCtl.hWindow)
@@ -62,6 +63,12 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
       Next
       pDocs(nTabCount) = gTTabCtl.GetDocumentPtr(nCurTab)
       nTabCount = nTabCount + 1
+   Elseif gFind.nScopeFind = IDC_SCOPE3 then
+      ' Search selected text
+      ReDim pDocs(1) As clsDocument Ptr
+      pDocs(0) = gTTabCtl.GetActiveDocumentPtr
+      nTabCount = 1   
+      flagUpDown = IDM_FINDNEXT
    End If
 
    
@@ -69,17 +76,24 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
    For idx = 0 To nTabCount - 1
       pDoc = pDocs(idx)
    
-      ' Begin to search from the current position
-      If flagUpDown = IDM_FINDNEXT Then
-         startPos = Iif(curPos = -1, 0, SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) + 1)
-         endPos = SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
-      Else
-         ' For backward searches the end position must be less than the start position
-         endPos = 0
-         startPos = Iif(curPos = -1, _
-                        SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), _
-                        SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) - 1)
-      End If
+      ' Determine the start and end position. If searching a Selection then
+      ' set that now, otherwise deal with the group of documents.
+      if gFind.nScopeFind = IDC_SCOPE3 then
+         pDoc->GetSelectedLineRange(startLine, endLine, startPos, endPos )
+      else
+         ' Begin to search from the current position
+         If flagUpDown = IDM_FINDNEXT Then
+            startPos = Iif(curPos = -1, 0, SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) + 1)
+            endPos = SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
+         Else
+            ' For backward searches the end position must be less than the start position
+            endPos = 0
+            startPos = Iif(curPos = -1, _
+                           SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), _
+                           SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) - 1)
+         End If
+      end if
+
       curPos = 0               
 
       SendMessageW( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
@@ -91,7 +105,7 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
       If r = -1 Then ' SEARCH NOT FOUND
          ' Search the next loaded window or display not found messagebox if no more pDocs to search.
          If idx + 1 > nTabCount - 1 Then                              
-            MessageBoxW( hWndDialog, WStr("No matches found."), WStr(" Find Next"), MB_OK Or MB_ICONINFORMATION Or MB_APPLMODAL Or MB_DEFBUTTON1)
+            MessageBoxW( hWndDialog, L(228, "No matches found."), L(158, "Find"), MB_OK Or MB_ICONINFORMATION Or MB_APPLMODAL Or MB_DEFBUTTON1)
             If hWndDialog = HWND_FRMFIND Then SetFocus GetDlgItem(hWndDialog, IDC_FRMFIND_COMBOFIND)
             If hWndDialog = HWND_FRMREPLACE Then SetFocus GetDlgItem(hWndDialog, IDC_FRMREPLACE_COMBOFIND)
             Exit Function
@@ -101,8 +115,13 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
          ' Position the caret and select the text
          SendMessageW( pDoc->hWindow, SCI_SETCURRENTPOS, r, 0)
          SendMessageW( pDoc->hWindow, SCI_GOTOPOS, r, 0)
-         SendMessageW( pDoc->hWindow, SCI_SETSELECTIONSTART, r, 0)
-         SendMessageW( pDoc->hWindow, SCI_SETSELECTIONEND, r+Len(gFind.txtFind), 0)
+         if gFind.nScopeFind = IDC_SCOPE3 then
+            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONSTART, startPos, 0)
+            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONEND, endPos, 0)
+         else
+            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONSTART, r, 0)
+            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONEND, r+Len(gFind.txtFind), 0)
+         end if
          gTTabCtl.SetTabIndexByDocumentPtr(pDoc)
          Exit Function
       End If
@@ -192,15 +211,21 @@ Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             Exit Function
          End If
 
-      Case IDC_FRMFIND_OPTSCOPE1
+      Case IDC_FRMFIND_OPTSCOPE1  ' current document
          If codeNotify = BN_CLICKED Then
             If Button_GetCheck(hwndCtl) = BST_CHECKED Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1      
             Exit Function
          End If
 
-      Case IDC_FRMFIND_OPTSCOPE2
+      Case IDC_FRMFIND_OPTSCOPE2   ' all open documents
          If codeNotify = BN_CLICKED Then
             If Button_GetCheck(hwndCtl) = BST_CHECKED Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE2
+            Exit Function
+         End If
+
+      Case IDC_FRMFIND_OPTSCOPE3    ' selection
+         If codeNotify = BN_CLICKED Then
+            If Button_GetCheck(hwndCtl) = BST_CHECKED Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE3
             Exit Function
          End If
 
@@ -282,39 +307,43 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->Create(hwndParent, L(158,"Find"), @frmFind_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(510, 135)
+   pWindow->SetClientSize(510, 155)
    pWindow->Center
    
-   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_FRMFIND_LBLFINDWHAT, L(159,"Find What:"), 7, 20, 63, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFIND_LBLFINDWHAT, L(159,"Find What:"), 7, 20, 63, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", pWindow->hWindow, IDC_FRMFIND_COMBOFIND, "", 75, 17, 327, 22, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMFIND_COMBOFIND, "", 75, 17, 327, 22, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWN Or CBS_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDOK, L(160,"Find Next"), 414, 16, 90, 24, _
+   pWindow->AddControl("BUTTON", , IDOK, L(160,"Find Next"), 414, 16, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", pWindow->hWindow, IDCANCEL, L(161,"Close"), 414, 47, 90, 24, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(161,"Close"), 414, 47, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMFIND_FRAMEOPTIONS, L(167,"Options"), 16, 53, 187, 70, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMFIND_FRAMEOPTIONS, L(167,"Options"), 16, 53, 187, 90, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMFIND_CHKWHOLEWORDS, L(162,"Match Whole Words"), 26, 68, 167, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMFIND_CHKWHOLEWORDS, L(162,"Match Whole Words"), 26, 68, 167, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", pWindow->hWindow, IDC_FRMFIND_CHKMATCHCASE, L(163,"Match Case"), 26, 88, 167, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMFIND_CHKMATCHCASE, L(163,"Match Case"), 26, 88, 167, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", pWindow->hWindow, IDC_FRMFIND_FRAMESCOPE, L(164,"Scope"), 215, 53, 187, 70, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMFIND_FRAMESCOPE, L(164,"Scope"), 215, 53, 187, 90, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMFIND_OPTSCOPE1, L(165,"Current Document"), 225, 71, 170, 16, _
+   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE1, L(165,"Current Document"), 225, 71, 170, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", pWindow->hWindow, IDC_FRMFIND_OPTSCOPE2, L(166,"All Open Documents"), 225, 91, 170, 16, _
+   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE2, L(166,"All Open Documents"), 225, 91, 170, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+' Find/Replace in Selected text is not working okay yet.
+'   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE3, L(220,"Selected Text"), 225, 111, 170, 16, _
+'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+'        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long i, nCount, startPos, endPos, startLine, endLine
    Dim As String buffer      
