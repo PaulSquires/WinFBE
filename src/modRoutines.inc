@@ -44,6 +44,15 @@ Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 End Function
 
 
+' ========================================================================================
+' Set the mouse pointer for a specific window
+' ========================================================================================
+function SetMousePtr( byval HWND as hWnd, byval hDesiredCursor as HCURSOR ) as HCURSOR
+ SetClassLongPtr(hWnd, GCLP_HCURSOR, cast(long_PTR, hDesiredCursor))
+ return SetCursor(hDesiredCursor)
+end function
+
+
 
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
@@ -643,8 +652,8 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
             Loop
          End If
       End If
+      CloseHandle hSnapShot
    End If
-   CloseHandle hSnapShot
 
 End Function
 

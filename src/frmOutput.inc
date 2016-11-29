@@ -265,12 +265,12 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _
       WS_VISIBLE OR WS_TABSTOP OR WS_VSCROLL or ES_LEFT OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN, _
       WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
-   Dim As HFONT hFont = AfxCreateFont( "Courier New", 9 )
+   Dim As HFONT hFont = pWindow->CreateFont( "Courier New", 9 )
    AfxSetWindowFont( hCtl, hFont, True )
 
    hLV = _
       pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LISTVIEW, "", 0, 0, 0, 0, _
-      WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS , _
+      WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS or LVS_SINGLESEL, _
       WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
       Cast(WNDPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LISTVIEW, Cast(DWORD_PTR, @pWindow))
                                      

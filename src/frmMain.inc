@@ -746,9 +746,9 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       ShowWindow pDoc->hWindow, SW_HIDE
 
       ' Only remove this document from the global collection if it is not
-      ' part of any active Project. Files that are part of a project are
+      ' part of any active Project or if it is new/unsaved file. Files that are part of a project are
       ' all closed (tabs/nodes) automatically in one shot rather than individually.
-      if gApp.IsProjectActive = false then 
+      if (gApp.IsProjectActive = false) or (pDoc->IsNewFlag = true) then 
          ' Also remove it from the Explorer
          Treeview_DeleteItem( hTree, pDoc->hNodeExplorer)
          gApp.RemoveDocument(pDoc)
@@ -1237,6 +1237,7 @@ Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRES
    
    Dim As Long i, nLen
    Dim wszPath As WString * MAX_PATH
+   Dim wFileExt As WString * MAX_PATH
    
    For i = 0 To nCount - 1
       nLen = DragQueryFile(hDrop, i, @wszPath, MAX_PATH)
@@ -1246,8 +1247,21 @@ Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRES
       If hFind <> INVALID_HANDLE_VALUE Then
          FindClose hFind
          If (fd.dwFileAttributes And FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY Then
-            gApp.IncludeFilename = wszPath
-            OnCommand_OpenIncludeFile(HWnd)
+            ' Determine what type of file is being dropped. If it is a project file .wfbe then
+            ' use the OpenProject routines, otherwise open it as a regular file.
+            wFileExt = AfxStrPathname( "EXTN", wszPath)
+            wFileExt = Ucase(wFileExt)
+            if wFileExt = ".WFBE" then
+               OpenMRUProjectFile( HWnd, 0, @wszPath )
+            Else   
+               frmMain_OpenFileSafely(HWnd, _
+                                       False, _    ' bIsNewFile
+                                       False, _    ' bIsTemplate
+                                       True,  _    ' bShowInTab
+                                       false, _    ' bIsInclude
+                                       @wszPath, _ ' pwszName
+                                       0 )         ' pDocIn
+            end if                           
          End If
       End If
    Next

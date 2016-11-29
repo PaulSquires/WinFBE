@@ -272,9 +272,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Close #f
 
          
-   ' Shell to the command interpreter and run the batch file
-   gCompile.StartTime = Timer
-
    wszFileExe = Environ("COMSPEC")
    wszParam   = " /C " & gCompile.BatchFile
    With ShExecInfo
@@ -288,8 +285,14 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       .nShow        = SW_HIDE
       .hInstApp     = 0 
    End With
+   
+   ' Shell to the command interpreter and run the batch file
+   gCompile.StartTime = Timer
+
+   dim as HCURSOR hCurSave = SetMousePtr( HWND_FRMMAIN, LoadCursor(0, IDC_WAIT) )
    ShellExecuteEx(@ShExecInfo)
    WaitForSingleObject(ShExecInfo.hProcess,INFINITE)
+   SetMousePtr( HWND_FRMMAIN, hCurSave )
 
    gCompile.EndTime = Timer
 
@@ -458,6 +461,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
       
+   gCompile.StartTime = 0  ' reset so wait cursor is not shown 
+   gCompile.EndTime = 0
+
    Function = True   ' successful
 End Function
 
