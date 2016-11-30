@@ -35,6 +35,15 @@ Type COMPILE_TYPE
 End Type
 Dim Shared gCompile As COMPILE_TYPE
 
+''
+''  Set the statusbar text and icon for a good/bad compile
+function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
+   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+   StatusBar_SetIcon(hStatusBar, 5, hIconCompile)
+   StatusBar_SetText(hStatusBar, 5, wszText)
+   function = 0
+end function
+
 
 ''
 ''  Main module that handles the entire compile process
@@ -68,7 +77,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       If OnCommand_FileSaveAll(HWND_FRMMAIN) Then Return True  ' user cancelled save
    End If
    
-
    ' Perform some pre-compile checks to see if we should continue.
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
@@ -286,6 +294,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       .hInstApp     = 0 
    End With
    
+   ' Indicate in the StatusBar that we have started to compile
+   SetCompileStatusBarMessage( L(203, "Compiling..."), 0 )
+   
    ' Shell to the command interpreter and run the batch file
    gCompile.StartTime = Timer
 
@@ -330,6 +341,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       If Left(st_ucase, 16) = "THIS VERSION OF " Then
          ' Simply set the log file text and show the compiler log file window rather
          ' than the default compiler results window.
+         SetCompileStatusBarMessage( "", 0 )
          TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 1 )
          AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), st )
          ShowWindow HWND_FRMOUTPUT, SW_SHOW
@@ -428,7 +440,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' the Output window (log file).
    If fGoodCompile = False Then NumErrors = NumErrors + 1
 
+   dim as CWSTR cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
+                                L(192, "Warnings:") & " " & NumWarnings & "  (" & _
+                                Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & ")"
+
    If (NumWarnings = 0) AndAlso (NumErrors = 0) Then 
+      SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
       If gConfig.HideCompile = False Then
          st = sOutputMsg & vbCrLf & _
                L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
@@ -441,6 +458,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' There were errors and/or warnings
       If NumErrors > 0 Then gCompile.RunAfterCompile = False 
       
+      SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
       
       ' Position the Compiler Log to the first error/warning
@@ -461,9 +479,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
       
-   gCompile.StartTime = 0  ' reset so wait cursor is not shown 
-   gCompile.EndTime = 0
-
    Function = True   ' successful
 End Function
 

@@ -390,7 +390,7 @@ DECLARE FUNCTION StatusBar_GetUnicodeFormat (BYVAL hStatusBar AS HWND) AS DWORD
 DECLARE FUNCTION StatusBar_IsSimple (BYVAL hStatusBar AS HWND) AS BOOLEAN
 DECLARE FUNCTION StatusBar_SetBkColor (BYVAL hStatusBar AS HWND, BYVAL clrBk AS COLORREF) AS COLORREF
 DECLARE SUB StatusBar_SetFont (BYVAL hStatusBar AS HWND, BYVAL hFont AS DWORD, BYVAL fRedraw AS LONG = FALSE)
-DECLARE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS DWORD) AS BOOLEAN
+DECLARE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS HICON) AS BOOLEAN
 DECLARE SUB StatusBar_SetMinHeight (BYVAL hStatusBar AS HWND, BYVAL minHeight AS DWORD)
 DECLARE FUNCTION StatusBar_SetParts (BYVAL hStatusBar AS HWND, BYVAL dwParts AS DWORD, BYVAL rgWidths AS LONG PTR) AS BOOLEAN
 DECLARE FUNCTION StatusBar_SetText (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL uType AS DWORD = 0) AS BOOLEAN
@@ -4089,8 +4089,9 @@ END SUB
 ' - hIcon: Handle to the icon to be set. If this value is NULL, the icon is removed from the part.
 ' Returns TRUE if successful, or FALSE otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS DWORD) AS BOOLEAN
-   FUNCTION = SendMessageW(hStatusBar, SB_SETICON, cast(WPARAM, nPart), cast(LPARAM, hIcon))
+'PRIVATE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS DWORD) AS BOOLEAN
+PRIVATE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS HICON) AS BOOLEAN
+   Function = SendMessageW(hStatusBar, SB_SETICON, Cast(WPARAM, nPart), Cast(LPARAM, hIcon))
 END FUNCTION
 ' ========================================================================================
 

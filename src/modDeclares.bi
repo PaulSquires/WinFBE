@@ -216,7 +216,8 @@ Dim Shared As HWnd HWND_FRMFNLIST
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
 
- 
+dim shared as HICON ghIconGood, ghIconBad
+
 ' Create a temporary array to hold the selected color values
 ' for the different editor elements. When the form is saved then 
 ' the values from this temporary struture is saved to the 

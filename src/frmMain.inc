@@ -1055,6 +1055,11 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                gConfig.UnicodeEncoding = iif( gConfig.UnicodeEncoding, false, true )
                frmMain_UpdateLineCol( HWND_FRMMAIN )
             end if   
+            If lpnm->dwItemSpec = 5 Then   ' Compile results is panel 5
+               ' Toggle show/hide compile results
+               ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
+               frmMain_PositionWindows(HWND_FRMMAIN)
+            End If   
          End If
 
       Case NM_RCLICK
@@ -1408,6 +1413,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
+   ' Load the good and bad compile icons
+   ghIconGood = LoadImage( pWindow->InstanceHandle, "IMAGE_GOODCOMPILE", IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR)
+   ghIconBad  = LoadImage( pWindow->InstanceHandle, "IMAGE_BADCOMPILE", IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR)
+
    ' Create the main application topmenu
    HWND_FRMMAIN_TOPMENU = frmMain_BuildMenu(pWindow)
    SetMenu pWindow->hWindow, HWND_FRMMAIN_TOPMENU
@@ -1415,6 +1424,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' Create the main application toolbar
    frmMain_CreateToolbar(pWindow)
    frmMain_ChangeToolbarButtonsState
+
+
 
    ' Add a status bar
    Dim As HWnd hStatusbar = pWindow->AddControl("Statusbar", pWindow->hWindow, IDC_FRMMAIN_STATUSBAR)
@@ -1517,6 +1528,9 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    
    ' Destroy the Explorer and Recent treeview imagelist
    ImageList_Destroy(ghImageListNormal)
+
+   If ghIconGood Then DestroyIcon(ghIconGood) 
+   If ghIconBad  Then DestroyIcon(ghIconBad)
 
    ' Delete the allocated memory for the various child windows
    pWindow = AfxCWindowPtr(HWND_FRMEXPLORER):       Delete pWindow
