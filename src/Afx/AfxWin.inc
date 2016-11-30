@@ -449,8 +449,8 @@ END FUNCTION
 ' // file (.cpl) and the tool represented by it will be launched. For launching some
 ' // control panel applications, you’ve to provide a valid windows handle (hwnd parameter)
 ' // and program instance (hinstance parameter).
-' // This opens the control panel: AfxControlRunDLL(0, 0, "", %SW_SHOWNORMAL)
-' // This opens the applications wizard: AfxControlRunDLL(0, 0, "appwiz.cpl", %SW_SHOWNORMAL)
+' // This opens the control panel: AfxControlRunDLL(0, 0, "", SW_SHOWNORMAL)
+' // This opens the applications wizard: AfxControlRunDLL(0, 0, "appwiz.cpl", SW_SHOWNORMAL)
 ' Return value: TRUE or FALSE.
 ' ========================================================================================
 PRIVATE FUNCTION AfxControlRunDLL (BYVAL hwnd AS HWND, BYVAL hInst AS HINSTANCE, BYVAL cmd AS WSTRING PTR, BYVAL nCmdShow AS LONG) AS BOOLEAN
@@ -840,9 +840,9 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetWindowText (BYVAL hwnd AS HWND) AS CWSTR
    DIM nLen AS LONG = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0)
-   DIM wszText AS CWSTR = SPACE(nLen + 1)
-   SendMessageW(hwnd, WM_GETTEXT, nLen + 1, cast(LPARAM, *wszText))
-   RETURN wszText
+   DIM cwsText AS CWSTR = SPACE(nLen + 1)
+   SendMessageW(hwnd, WM_GETTEXT, nLen + 1, cast(LPARAM, *cwsText))
+   RETURN cwsText
 END FUNCTION
 ' ========================================================================================
 
@@ -1328,18 +1328,20 @@ END FUNCTION
 ' for the user. The system assigns a slightly higher priority to the thread that created
 ' the foreground window than it does to other threads.
 ' Replacement for the SetForegroundWindow API function, that sometimes fails.
+' WARNING: Apparently, AttachThreadInput can lead to a deadlock.
+' See: https://blogs.msdn.microsoft.com/oldnewthing/20080801-00/?p=21393
 ' ========================================================================================
-PRIVATE SUB AfxForceSetForegroundWindow (BYVAL hwnd AS HWND)
-   DIM dwProcessId AS DWORD
-   DIM hwndForeground AS .HWND = GetForegroundWindow
-   DIM dwThreadId AS DWORD = GetWindowThreadProcessId(hwndForeground, @dwProcessId)
-   DIM dwCurThreadId AS DWORD = GetCurrentThreadId
-   AttachThreadInput(dwCurThreadId, dwThreadId, CTRUE)
-   SetForegroundWindow(hwnd)
-   BringWindowToTop(hwnd)
-   SetFocus(hwnd)
-   AttachThreadInput(dwCurThreadId, dwThreadId, FALSE)
-END SUB
+'PRIVATE SUB AfxForceSetForegroundWindow (BYVAL hwnd AS HWND)
+'   DIM dwProcessId AS DWORD
+'   DIM hwndForeground AS .HWND = GetForegroundWindow
+'   DIM dwThreadId AS DWORD = GetWindowThreadProcessId(hwndForeground, @dwProcessId)
+'   DIM dwCurThreadId AS DWORD = GetCurrentThreadId
+'   AttachThreadInput(dwCurThreadId, dwThreadId, CTRUE)
+'   SetForegroundWindow(hwnd)
+'   BringWindowToTop(hwnd)
+'   SetFocus(hwnd)
+'   AttachThreadInput(dwCurThreadId, dwThreadId, FALSE)
+'END SUB
 ' ========================================================================================
 
 ' ========================================================================================

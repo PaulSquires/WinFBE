@@ -265,7 +265,7 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' Creates a FontFamily object based on a specified font collection.
 ' ========================================================================================
-PRIVATE CONSTRUCTOR CGpFontFamily (BYVAL pwszName AS WSTRING PTR, pFontCollection AS CGpFontCollection PTR = NULL)
+PRIVATE CONSTRUCTOR CGpFontFamily (BYVAL pwszName AS WSTRING PTR, BYVAL pFontCollection AS CGpFontCollection PTR = NULL)
    m_Status = GdipCreateFontFamilyFromName(pwszName, IIF(pFontCollection, pFontCollection->m_pFontCollection, NULL), @m_pFontFamily)
 END CONSTRUCTOR
 ' ========================================================================================

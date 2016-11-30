@@ -365,7 +365,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEFILES, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _
+        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _ 
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEFILES, Cast(DWORD_PTR, @pWindow))
   
@@ -381,7 +381,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEPROJECTS, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _
+        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _  
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEPROJECTS, Cast(DWORD_PTR, @pWindow))
    

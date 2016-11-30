@@ -1163,16 +1163,16 @@ PRIVATE FUNCTION CGpGraphics.DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL dest
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS SINGLE, desty AS SINGLE, destWidth AS SINGLE, destHeight AS SINGLE, _
-   BYVAL srcx AS SINGLE, srcy AS SINGLE, srcWidth AS SINGLE, srcHeight AS SINGLE, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
+PRIVATE FUNCTION CGpGraphics.DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS SINGLE, BYVAL desty AS SINGLE, BYVAL destWidth AS SINGLE, BYVAL destHeight AS SINGLE, _
+   BYVAL srcx AS SINGLE, BYVAL srcy AS SINGLE, BYVAL srcWidth AS SINGLE, BYVAL srcHeight AS SINGLE, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
    RETURN SetStatus(GdipDrawImageRectRect(m_pGraphics, pImage->m_pImage, _
           destx, desty, destWidth, destHeight, srcx, srcy, srcWidth, srcHeight, _
           srcUnit, IIF(pImageAttributes, pImageAttributes->m_pImgAttr, NULL), NULL, NULL))
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS INT_, desty AS INT_, destWidth AS INT_, destHeight AS INT_, _
-   BYVAL srcx AS INT_, srcy AS INT_, srcWidth AS INT_, srcHeight AS INT_, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
+PRIVATE FUNCTION CGpGraphics.DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS INT_, BYVAL desty AS INT_, BYVAL destWidth AS INT_, BYVAL destHeight AS INT_, _
+   BYVAL srcx AS INT_, BYVAL srcy AS INT_, BYVAL srcWidth AS INT_, BYVAL srcHeight AS INT_, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
    RETURN SetStatus(GdipDrawImageRectRectI(m_pGraphics, pImage->m_pImage, _
           destx, desty, destWidth, destHeight, srcx, srcy, srcWidth, srcHeight, _
           srcUnit, IIF(pImageAttributes, pImageAttributes->m_pImgAttr, NULL), NULL, NULL))
@@ -1313,12 +1313,12 @@ PRIVATE FUNCTION CGpGraphics.IntersectClip (BYVAL rc AS GpRect PTR) AS GpStatus
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.IntersectClip (BYVAL x AS SINGLE, y AS SINGLE, nWidth AS SINGLE, nHeight AS SINGLE) AS GpStatus
+PRIVATE FUNCTION CGpGraphics.IntersectClip (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, BYVAL nHeight AS SINGLE) AS GpStatus
    RETURN SetStatus(GdipSetClipRect(m_pGraphics, x, y, nWidth, nHeight, CombineModeIntersect))
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.IntersectClip (BYVAL x AS INT_, y AS INT_, nWidth AS INT_, nHeight AS INT_) AS GpStatus
+PRIVATE FUNCTION CGpGraphics.IntersectClip (BYVAL x AS INT_, BYVAL y AS INT_, BYVAL nWidth AS INT_, BYVAL nHeight AS INT_) AS GpStatus
    RETURN SetStatus(GdipSetClipRectI(m_pGraphics, x, y, nWidth, nHeight, CombineModeIntersect))
 END FUNCTION
 ' ========================================================================================
@@ -1459,7 +1459,7 @@ PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL pt AS GpPoint PTR) AS BOOLEAN
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL x AS SINGLE, y AS SINGLE) AS BOOLEAN
+PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL x AS SINGLE, BYVAL y AS SINGLE) AS BOOLEAN
    DIM booln AS BOOL
    m_Status = GdipIsVisiblePoint(m_pGraphics, x, y, @booln)
    RETURN booln
@@ -1487,14 +1487,14 @@ PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL rc AS GpRect PTR) AS BOOLEAN
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL x AS SINGLE, y AS SINGLE, nWidth AS SINGLE, nHeight AS SINGLE) AS BOOLEAN
+PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, BYVAL nHeight AS SINGLE) AS BOOLEAN
    DIM booln AS BOOL
    m_Status = GdipIsVisibleRect(m_pGraphics, x, y, nWidth, nHeight, @booln)
    RETURN booln
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL x AS INT_, y AS INT_, nWidth AS INT_, nHeight AS INT_) AS BOOLEAN
+PRIVATE FUNCTION CGpGraphics.IsVisible (BYVAL x AS INT_, BYVAL y AS INT_, BYVAL nWidth AS INT_, BYVAL nHeight AS INT_) AS BOOLEAN
    DIM booln AS BOOL
    m_Status = GdipIsVisibleRectI(m_pGraphics, x, y, nWidth, nHeight, @booln)
    RETURN booln

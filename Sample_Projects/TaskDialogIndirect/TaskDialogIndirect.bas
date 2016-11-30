@@ -1,0 +1,121 @@
+' ########################################################################################
+' Microsoft Windows
+' File: TaskDialogIndirect.bas
+' Contents: Task dialog indirect example.
+' Remarks: Requires the use of a manifest.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "win/shellapi.bi"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TaskDialogIndirectCallbackProc(BYVAL hwnd AS HWND, BYVAL uNotification AS UINT, BYVAL wParam AS WPARAM, _
+        BYVAL lParam AS LPARAM, BYVAL dwRefData AS LONG_PTR) AS HRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recomended way is to use a manifest
+'   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Task Dialog", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add the buttons
+   pWindow.AddControl("Button", , IDOK, "&Click me", 280, 270, 75, 23)
+   pWindow.AddControl("Button", , IDCANCEL, "&Exit", 380, 270, 75, 23)
+
+   ' // Process Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDOK
+               ' // Display the message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  DIM TaskConfig AS TASKDIALOGCONFIG
+                  WITH TaskConfig
+                     .cbSize = SIZEOF(TASKDIALOGCONFIG)
+                     .hwndParent = hwnd
+                     .dwFlags = TDF_ENABLE_HYPERLINKS
+                     .pszWindowTitle = @WSTR("CWindow")
+                     .pszMainIcon = TD_INFORMATION_ICON
+                     .dwCommonButtons = TDCBF_OK_BUTTON OR TDCBF_CANCEL_BUTTON
+                     .pszMainInstruction = @WSTR("CWindow")
+                     .pszContent = @WSTR("An update for the CWindow framework has just been released. Click the hyperlink if you want to download it.")
+                     .pszFooter = @WSTR("Hyperlink: <A HREF=" & CHR(34) & "http://www.planetsquires.com/protect/forum/index.php?board=39.0" & CHR(34) & ">Download link</A>")
+                     .pszFooterIcon = TD_WARNING_ICON
+                     .nDefaultButton = IDOK
+                     .pfCallback = @TaskDialogIndirectCallbackProc
+                  END WITH
+                  DIM nClickedButton AS LONG
+                  DIM hr AS HRESULT = TaskDialogIndirect(@TaskConfig, @nClickedButton, NULL, NULL)
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+          ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Process Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Callback for TaskDialogIndirect.
+' ========================================================================================
+FUNCTION TaskDialogIndirectCallbackProc(BYVAL hwnd AS HWND, BYVAL uNotification AS UINT, BYVAL wParam AS WPARAM, _
+                                        BYVAL lParam AS LPARAM, BYVAL dwRefData AS LONG_PTR) AS HRESULT
+   SELECT CASE uNotification
+      CASE TDN_HYPERLINK_CLICKED
+         ' // The lParam parameter of this message contains the url
+         DIM hInstance AS HINSTANCE = ShellExecuteW(NULL, "open", cast(WSTRING PTR, lParam), NULL, NULL, SW_SHOW)
+         IF hInstance <= 32 THEN FUNCTION = cast(HRESULT, (cast(LONG_PTR, hInstance))) ELSE FUNCTION = S_OK
+   END SELECT
+END FUNCTION
+' ========================================================================================

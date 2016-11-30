@@ -328,7 +328,7 @@ PRIVATE FUNCTION AfxGdipImageFromFile2 (BYREF wszFileName AS WSTRING, _
                pixColor.blue  = (255 - pixColor.blue) * rFactor + pixColor.blue
             END IF
             IF bGrayScale THEN
-               ' Note: The sum of the percentages for the three colors should add tp up 1
+               ' Note: The sum of the percentages for the three colors should add to up 1
                iColor = 0.299 * pixColor.red + 0.587 * pixColor.green + 0.114 * pixColor.blue
                pixColor.Color = GDIP_BGRA (iColor, iColor, iColor, pixColor.alpha)
             ELSE
@@ -360,6 +360,8 @@ END FUNCTION
 ' Parameters:
 ' - pBuffer       = [in] Pointer to the buffer
 ' - bufferSize    = Size of the buffer
+' - dimPercent    = Percent of dimming (1-99)
+' - bGrayScale    = TRUE or FALSE. Convert to gray scale.
 ' - imageType     = IMAGE_ICON or IMAGE_BITMAP.
 ' - clrBackground = [in] The background color. This parameter is ignored if the image type
 '                   is IMAGE_ICON or the bitmap is totally opaque.
@@ -425,7 +427,7 @@ PRIVATE FUNCTION AfxGdipImageFromBuffer (BYVAL pBuffer AS ANY PTR, BYVAL bufferS
                            pixColor.blue  = (255 - pixColor.blue) * rFactor + pixColor.blue
                         END IF
                         IF bGrayScale THEN
-                           ' Note: The sum of the percentages for the three colors should add tp up 1
+                           ' Note: The sum of the percentages for the three colors should add to up 1
                            iColor = 0.299 * pixColor.red + 0.587 * pixColor.green + 0.114 * pixColor.blue
                            pixColor.Color = GDIP_BGRA (iColor, iColor, iColor, pixColor.alpha)
                         ELSE

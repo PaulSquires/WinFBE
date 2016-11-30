@@ -1,0 +1,15 @@
+//=============================================================================
+// Manifest
+//=============================================================================
+
+1 24 ".\Resources\Manifest.xml"
+
+//=============================================================================
+// Toolbar icons
+//=============================================================================
+
+// Toolbar, normal
+IDI_ARROW_LEFT_32       RCDATA ".\Resources\arrow_left_32.png"
+IDI_ARROW_RIGHT_32      RCDATA ".\Resources\arrow_right_32.png"
+IDI_HOME_32             RCDATA ".\Resources\home_32.png"
+IDI_SAVE_32             RCDATA ".\Resources\save_32.png"

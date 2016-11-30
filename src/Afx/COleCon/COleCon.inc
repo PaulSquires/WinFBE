@@ -665,7 +665,7 @@ END FUNCTION
 ' method returns FALSE.
 ' Remarks: If the control is the WebBrowser control, TranslateAccelerator calls the namesake
 ' method of the IDocHostUIHandler interface.
-' Note: Not
+' Note: Use the AfxForwardMessage function below that allows a more generic usage.
 ' ========================================================================================
 'PRIVATE FUNCTION COleCon.ForwardMessage (BYVAL pMsg AS tagMsg PTR) AS BOOLEAN
 '   IF m_pData->m_pOcx = NULL THEN RETURN FALSE

@@ -205,17 +205,6 @@ End Function
 
 
 ' ========================================================================================
-' Return CWSTR text for item in ComboBox
-' ========================================================================================
-Function AfxGetComboBoxText( ByVal hWndControl As HWnd, ByVal nIndex As Long ) As CWSTR
-   DIM nLen AS LONG = SendMessageW(hWndControl, CB_GETLBTEXTLEN, nIndex, 0)
-   DIM wszText AS CWSTR = SPACE(nLen + 1)
-   SendMessageW(hWndControl, CB_GETLBTEXT, nIndex, cast(LPARAM, *wszText))
-   RETURN wszText
-End Function           
-
-
-' ========================================================================================
 ' Displays the FileOpenDialog.
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================

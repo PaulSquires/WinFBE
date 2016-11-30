@@ -312,11 +312,15 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Dim TB As TC_ITEM 
    TB.Mask = TCIF_PARAM
 
+   dim cwzRelative as CWSTR
+   
    For i = 0 To nCount - 1
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
       If pDoc->IsProjectFile Then 
          wszText = pDoc->DiskFilename
+         cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
+         if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
          wszText = ProcessToCurdrive(wszText)
          Print #f, "File="; wszText
          Print #f, "FileType="; pDoc->ProjectFileType
@@ -336,6 +340,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
          If pDoc->IsProjectFile Then
             If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
                wszText = pDoc->DiskFilename
+               cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
+               if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
                wszText = ProcessToCurdrive(wszText)
                Print #f, "File="; wszText
                Print #f, "FileType="; pDoc->ProjectFileType
@@ -428,6 +434,10 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
          Case "FirstLine":           nFirstLine = nData
          Case "Position":            nPosition = nData
          Case "FileEnd":
+            ' If this is a relative filename then convert it back.
+            if AfxPathIsRelative(wszFilename) then 
+               wszFilename = AfxPathCombine( AfxStrPathName("PATH", gApp.ProjectFilename), wszFilename)
+            end if
             If AfxFileExists(wszFilename) Then
                pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
                                        False, _    ' bIsNewFile

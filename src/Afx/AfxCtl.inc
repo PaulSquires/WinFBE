@@ -32,8 +32,8 @@ DECLARE FUNCTION Button_SetImageListXY (BYVAL hButton AS HWND, BYVAL himl AS HIM
 DECLARE FUNCTION Button_DeleteBitmap (BYVAL hButton AS HWND) AS BOOLEAN
 DECLARE FUNCTION Button_DeleteIcon (BYVAL hButton AS HWND) AS BOOLEAN
 DECLARE FUNCTION Button_DeleteImage (BYVAL hButton AS HWND, BYVAL ImageType AS DWORD) AS BOOLEAN
-DECLARE FUNCTION Button_SetUtf8Text (BYVAL hButton AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
 ' Combobox
+DECLARE FUNCTION AfxGetComboBoxText (BYVAL hComboBox AS HWND, BYVAL nIndex AS LONG) AS CWSTR
 DECLARE FUNCTION ComboBox_GetComboBoxInfo (BYVAL hComboBox AS HWND, BYVAL pcbi AS COMBOBOXINFO PTR) AS BOOLEAN
 DECLARE FUNCTION Combobox_CalcHorizontalExtent (BYVAL hComboBox AS HWND) AS LONG
 DECLARE FUNCTION ComboBox_GetEditBoxHandle (BYVAL hComboBox AS HWND) AS HWND
@@ -46,7 +46,6 @@ DECLARE FUNCTION ComboBox_InitStorage (BYVAL hComboBox AS HWND, BYVAL items AS L
 DECLARE SUB ComboBox_SetHorizontalExtent (BYVAL hComboBox AS HWND, BYVAL nWidth AS LONG)
 DECLARE FUNCTION ComboBox_SetLocale (BYVAL hComboBox AS HWND, BYVAL lcid AS LONG) AS LONG
 DECLARE FUNCTION ComboBox_SetTopIndex (BYVAL hComboBox AS HWND, BYVAL index AS DWORD) AS LONG
-DECLARE FUNCTION Combobox_SetUtf8Text (BYVAL hButton AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
 ' ComboboxEx
 DECLARE FUNCTION ComboBoxEx_DeleteItem (BYVAL hComboboxEx AS HWND, BYVAL nIndex AS DWORD) AS INT_
 DECLARE FUNCTION ComboBoxEx_GetComboControl (BYVAL hComboboxEx AS HWND) AS HWND
@@ -83,7 +82,6 @@ DECLARE FUNCTION Edit_SetIMEStatus (BYVAL hEdit AS HWND, BYVAL nStatusType AS LO
 DECLARE SUB Edit_SetMargins (BYVAL hEdit AS HWND, BYVAL nMargins AS LONG, BYVAL nWidth AS LONG)
 DECLARE SUB Edit_SetLeftMargin (BYVAL hEdit AS HWND, BYVAL nWidth AS WORD)
 DECLARE SUB Edit_SetRightMargin (BYVAL hEdit AS HWND, BYVAL nWidth AS WORD)
-DECLARE FUNCTION Edit_SetUtf8Text (BYVAL hEdit AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
 ' Header
 DECLARE FUNCTION Header_HitTest (BYVAL hwndHD AS HWND, BYVAL phdhti AS HDHITTESTINFO PTR) AS LONG
 DECLARE FUNCTION Header_GetItemWidth (BYVAL hwndHD AS HWND, BYVAL nItem AS LONG) AS LONG
@@ -104,6 +102,7 @@ DECLARE FUNCTION Syslink_GetItem (BYVAL hLM AS HWND, BYVAL lpItem AS LITEM PTR) 
 DECLARE FUNCTION SysLink_HitTest (BYVAL hLM AS HWND, BYVAL lphti AS LHITTESTINFO PTR) AS BOOLEAN
 DECLARE FUNCTION SysLink_SetItem (BYVAL hLM AS HWND, BYVAL lpItem AS LITEM PTR) AS BOOLEAN
 ' Listbox
+DECLARE FUNCTION AfxGetListBoxText (BYVAL hListBox AS HWND, BYVAL nIndex AS LONG) AS CWSTR
 DECLARE FUNCTION ListBox_AddFile (BYVAL hListBox AS HWND, BYVAL pwszFileName AS WSTRING PTR) AS LONG
 DECLARE FUNCTION ListBox_GetAnchorIndex (BYVAL hListBox AS HWND) AS LONG
 DECLARE FUNCTION Listbox_GetListboxInfo (BYVAL hListBox AS HWND) AS LONG
@@ -133,7 +132,7 @@ DECLARE FUNCTION ListView_GetColumnCount (BYVAL hwndLV AS HWND) AS LONG
 DECLARE FUNCTION ListView_GetColumnOrder (BYVAL hwndLV AS HWND, BYVAL nCol AS LONG) AS LONG
 DECLARE FUNCTION ListView_GetOrderArray (BYVAL hwndLV AS HWND, BYVAL nSize AS DWORD, BYVAL lpiArray AS LONG PTR) AS LONG
 DECLARE FUNCTION LietView_GetTooltipsFont (BYVAL hwndLV AS HWND) AS HFONT
-DECLARE SUB ListView_SetTooltipsFont (BYVAL hwndLV AS HWND, hFont AS HFONT = NULL, fRedraw AS BOOLEAN = FALSE)
+DECLARE SUB ListView_SetTooltipsFont (BYVAL hwndLV AS HWND, BYVAL hFont AS HFONT = NULL, BYVAL fRedraw AS BOOLEAN = FALSE)
 DECLARE FUNCTION ListView_GetColumnText (BYVAL hwndLV AS HWND, BYVAL nCol AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL cchTextMax AS LONG) AS BOOLEAN
 DECLARE FUNCTION ListView_GetHeaderText (BYVAL hwndLV AS HWND, BYVAL nCol AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL cchTextMax AS LONG) AS LONG
 DECLARE FUNCTION ListView_AddColumn (BYVAL hwndLV AS HWND, BYVAL nCol AS LONG, BYVAL pwszText AS WSTRING PTR, BYVAL nWidth AS LONG, BYVAL nFormat AS LONG = 0) AS LONG
@@ -194,7 +193,6 @@ DECLARE FUNCTION Static_SetCursor (BYVAL hStatic AS HWND, BYVAL hCursor AS HCURS
 DECLARE FUNCTION Static_DeleteCursor (BYVAL hStatic AS HWND) AS BOOLEAN
 DECLARE FUNCTION Static_SetEnhancedMetafile (BYVAL hStatic AS HWND, BYVAL hEnhMetafile AS HENHMETAFILE) AS HENHMETAFILE
 DECLARE FUNCTION Static_DeleteEnhancedMetafile (BYVAL hStatic AS HWND) AS BOOLEAN
-DECLARE FUNCTION Static_SetUtf8Text (BYVAL hStatic AS HWND, BYVAL strUtf8Text AS STRING) AS LONG
 ' Toolbar
 DECLARE FUNCTION Toolbar_AddBitmap (BYVAL hToolBar AS HWND, BYVAL nButtons AS DWORD, BYVAL tabm AS TBADDBITMAP PTR) AS LONG
 DECLARE FUNCTION Toolbar_AddButtons (BYVAL hToolBar AS HWND, BYVAL nButtons AS DWORD, BYVAL lpButtons AS TBBUTTON PTR) AS BOOLEAN
@@ -619,6 +617,19 @@ END FUNCTION
 ' ########################################################################################
 '                                    *** COMBOBOX ***
 ' ########################################################################################
+
+' ========================================================================================
+' Gets a string from a list in a combo box.
+' - hComboBox: A handle to the combobox.
+' - nIndex: The zero-based index of the item.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetComboBoxText (BYVAL hComboBox AS HWND, BYVAL nIndex AS LONG) AS CWSTR
+   DIM nLen AS LONG = SendMessageW(hComboBox, CB_GETLBTEXTLEN, nIndex, 0)
+   DIM cwsText AS CWSTR = SPACE(nLen + 1)
+   SendMessageW(hComboBox, CB_GETLBTEXT, nIndex, cast(LPARAM, *cwsText))
+   RETURN cwsText
+END FUNCTION
+' ========================================================================================
 
 ' ========================================================================================
 ' Retrieves information about the specified combo box. If the function succeeds, the return
@@ -1315,6 +1326,19 @@ END FUNCTION
 ' ########################################################################################
 
 ' ========================================================================================
+' Gets a string from a list box.
+' - hComboBox: A handle to the list box.
+' - nIndex: The zero-based index of the item.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetListBoxText (BYVAL hListBox AS HWND, BYVAL nIndex AS LONG) AS CWSTR
+   DIM nLen AS LONG = SendMessageW(hListBox, LB_GETTEXTLEN, nIndex, 0)
+   DIM cwsText AS CWSTR = SPACE(nLen + 1)
+   SendMessageW(hListBox, LB_GETTEXT, nIndex, cast(LPARAM, *cwsText))
+   RETURN cwsText
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
 ' Adds the specified filename to a list box that contains a directory listing.
 ' The return value is the zero-based index of the file that was added, or LB_ERR if an error occurs.
 ' ========================================================================================
@@ -1667,7 +1691,7 @@ END FUNCTION
 ' - fRedraw = Specifies whether the control should be redrawn immediately upon setting the font.
 '             If this parameter is TRUE, the control redraws itself.
 ' ========================================================================================
-PRIVATE SUB ListView_SetTooltipsFont (BYVAL hwndLV AS HWND, hFont AS HFONT = NULL, fRedraw AS BOOLEAN = FALSE)
+PRIVATE SUB ListView_SetTooltipsFont (BYVAL hwndLV AS HWND, BYVAL hFont AS HFONT = NULL, BYVAL fRedraw AS BOOLEAN = FALSE)
    DIM hwndTooltips AS HWND = cast(HWND, SendMessageW(hwndLV, LVM_GETTOOLTIPS, 0, 0))
    IF hwndTooltips = NULL THEN EXIT SUB
    SendMessageW(hwndTooltips, WM_SETFONT, cast(WPARAM, hFont), cast(LPARAM, fRedraw))

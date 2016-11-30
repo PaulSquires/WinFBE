@@ -714,7 +714,7 @@ END FUNCTION
 ' ========================================================================================
 ' Scaling factor for the y-axis of the printer.
 ' ========================================================================================
-PRIVATE FUNCTION AfxGetPrinterScalingFactorY (wszPrinterName AS WSTRING) AS LONG
+PRIVATE FUNCTION AfxGetPrinterScalingFactorY (BYREF wszPrinterName AS WSTRING) AS LONG
    DIM hdc AS HDC = CreateICW(NULL, wszPrinterName, NULL, NULL)
    IF hdc = NULL THEN RETURN 0
    DIM nResult AS LONG = GetDeviceCaps(hdc, SCALINGFACTORY)

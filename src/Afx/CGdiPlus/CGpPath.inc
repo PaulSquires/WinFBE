@@ -522,7 +522,7 @@ END FUNCTION
 ' Transforms and flattens this path, and then converts this path's data points so that
 ' they represent only the outline of the path.
 ' =====================================================================================
-PRIVATE FUNCTION CGpGraphicsPath.Outline (pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = FlatnessDefault) AS GpStatus
+PRIVATE FUNCTION CGpGraphicsPath.Outline (BYVAL pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = FlatnessDefault) AS GpStatus
    RETURN SetStatus(GdipWindingModeOutline(m_pPath, IIF(pMatrix, pMatrix->m_pMatrix, NULL), flatness))
 END FUNCTION
 ' =====================================================================================

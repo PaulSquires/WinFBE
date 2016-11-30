@@ -638,7 +638,7 @@ Public:
 
 Public:
    DECLARE CONSTRUCTOR
-   DECLARE CONSTRUCTOR (BYVAL pwszName AS WSTRING PTR, pFontCollection AS CGpFontCollection_ PTR = NULL)
+   DECLARE CONSTRUCTOR (BYVAL pwszName AS WSTRING PTR, BYVAL pFontCollection AS CGpFontCollection_ PTR = NULL)
    DECLARE DESTRUCTOR
    DECLARE FUNCTION GetLastStatus () AS GpStatus
    DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
@@ -914,10 +914,10 @@ Public:
       BYVAL sourceRect AS GpRectF PTR, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
    DECLARE FUNCTION DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destRect AS GpRect PTR, _
       BYVAL sourceRect AS GpRect PTR, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
-   DECLARE FUNCTION DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS SINGLE, desty AS SINGLE, destWidth AS SINGLE, destHeight AS SINGLE, _
-      BYVAL srcx AS SINGLE, srcy AS SINGLE, srcWidth AS SINGLE, srcHeight AS SINGLE, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
-   DECLARE FUNCTION DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS INT_, desty AS INT_, destWidth AS INT_, destHeight AS INT_, _
-      BYVAL srcx AS INT_, srcy AS INT_, srcWidth AS INT_, srcHeight AS INT_, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
+   DECLARE FUNCTION DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS SINGLE, BYVAL desty AS SINGLE, BYVAL destWidth AS SINGLE, BYVAL destHeight AS SINGLE, _
+      BYVAL srcx AS SINGLE, BYVAL srcy AS SINGLE, BYVAL srcWidth AS SINGLE, BYVAL srcHeight AS SINGLE, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
+   DECLARE FUNCTION DrawImage (BYVAL pImage AS CGpImage PTR, BYVAL destx AS INT_, BYVAL desty AS INT_, BYVAL destWidth AS INT_, BYVAL destHeight AS INT_, _
+      BYVAL srcx AS INT_, BYVAL srcy AS INT_, BYVAL srcWidth AS INT_, BYVAL srcHeight AS INT_, BYVAL srcUnit AS GpUnit, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
    DECLARE FUNCTION SetClip (BYVAL pGraphics AS CGpGraphics PTR, BYVAL nCombineMode AS CombineMode = CombineModeReplace) AS GpStatus
    DECLARE FUNCTION SetClip (BYVAL rc AS GpRectF PTR, BYVAL nCombineMode AS CombineMode = CombineModeReplace) AS GpStatus
    DECLARE FUNCTION SetClip (BYVAL rc AS GpRect PTR, BYVAL nCombineMode AS CombineMode = CombineModeReplace) AS GpStatus
@@ -929,8 +929,8 @@ Public:
    DECLARE FUNCTION IntersectClip (BYVAL rcf AS GpRectF PTR) AS GpStatus
    DECLARE FUNCTION IntersectClip (BYVAL rc AS GpRect PTR) AS GpStatus
    DECLARE FUNCTION IntersectClip (BYVAL pRegion AS CGpRegion PTR) AS GpStatus
-   DECLARE FUNCTION IntersectClip (BYVAL x AS SINGLE, y AS SINGLE, nWidth AS SINGLE, nHeight AS SINGLE) AS GpStatus
-   DECLARE FUNCTION IntersectClip (BYVAL x AS INT_, y AS INT_, nWidth AS INT_, nHeight AS INT_) AS GpStatus
+   DECLARE FUNCTION IntersectClip (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, BYVAL nHeight AS SINGLE) AS GpStatus
+   DECLARE FUNCTION IntersectClip (BYVAL x AS INT_, BYVAL y AS INT_, BYVAL nWidth AS INT_, BYVAL nHeight AS INT_) AS GpStatus
    DECLARE FUNCTION ExcludeClip (BYVAL rcf AS GpRectF PTR) AS GpStatus
    DECLARE FUNCTION ExcludeClip (BYVAL rc AS GpRect PTR) AS GpStatus
    DECLARE FUNCTION ExcludeClip (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, BYVAL nHeight AS SINGLE) AS GpStatus
@@ -947,12 +947,12 @@ Public:
    DECLARE FUNCTION IsVisibleClipEmpty () AS BOOLEAN
    DECLARE FUNCTION IsVisible (BYVAL pt AS GpPointF PTR) AS BOOLEAN
    DECLARE FUNCTION IsVisible (BYVAL pt AS GpPoint PTR) AS BOOLEAN
-   DECLARE FUNCTION IsVisible (BYVAL x AS SINGLE, y AS SINGLE) AS BOOLEAN
-   DECLARE FUNCTION IsVisible (BYVAL x AS INT_, y AS INT_) AS BOOLEAN
+   DECLARE FUNCTION IsVisible (BYVAL x AS SINGLE, BYVAL y AS SINGLE) AS BOOLEAN
+   DECLARE FUNCTION IsVisible (BYVAL x AS INT_, BYVAL y AS INT_) AS BOOLEAN
    DECLARE FUNCTION IsVisible (BYVAL rcf AS GpRectF PTR) AS BOOLEAN
    DECLARE FUNCTION IsVisible (BYVAL rc AS GpRect PTR) AS BOOLEAN
-   DECLARE FUNCTION IsVisible (BYVAL x AS SINGLE, y AS SINGLE, nWidth AS SINGLE, nHeight AS SINGLE) AS BOOLEAN
-   DECLARE FUNCTION IsVisible (BYVAL x AS INT_, y AS INT_, nWidth AS INT_, nHeight AS INT_) AS BOOLEAN
+   DECLARE FUNCTION IsVisible (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, BYVAL nHeight AS SINGLE) AS BOOLEAN
+   DECLARE FUNCTION IsVisible (BYVAL x AS INT_, BYVAL y AS INT_, BYVAL nWidth AS INT_, BYVAL nHeight AS INT_) AS BOOLEAN
    DECLARE FUNCTION Save () AS GraphicsState
    DECLARE FUNCTION Restore (BYVAL gstate AS GraphicsState) AS GpStatus
    DECLARE FUNCTION BeginContainer () AS GraphicsContainer
@@ -1045,7 +1045,7 @@ Public:
    DECLARE FUNCTION GetBounds (BYVAL bounds AS GpRect PTR, BYVAL pMatrix AS CGpMatrix PTR, BYVAL pPen AS CGpPen PTR) AS GpStatus
    DECLARE FUNCTION Flatten (BYVAL pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = FlatnessDefault) AS GpStatus
    DECLARE FUNCTION Widen (BYVAL pPen AS CGpPen PTR, BYVAL pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = FlatnessDefault) AS GpStatus
-   DECLARE FUNCTION Outline (pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = FlatnessDefault) AS GpStatus
+   DECLARE FUNCTION Outline (BYVAL pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = FlatnessDefault) AS GpStatus
    DECLARE FUNCTION Warp (BYVAL destPoints AS GpPointF PTR, BYVAL nCount AS INT_, BYVAL srcRect AS GpRectF PTR, BYVAL pMatrix AS CGpMatrix PTR = NULL, BYVAL nWarpMode AS WarpMode = WarpModePerspective, BYVAL Flatness AS SINGLE = FlatnessDefault) AS GpStatus
    DECLARE FUNCTION GetPointCount () AS INT_
    DECLARE FUNCTION GetPathTypes (BYVAL types AS BYTE PTR, BYVAL nCount AS INT_) AS GpStatus
