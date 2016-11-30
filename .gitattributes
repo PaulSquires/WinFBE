@@ -10,7 +10,6 @@
 *.sln       eol=crlf
 *.txt       eol=crlf
 *.fbtpl     eol=crlf
-*.wfbe      eol=crlf
 *.rc        eol=crlf
 
 
