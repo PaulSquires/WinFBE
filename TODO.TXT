@@ -1,14 +1,20 @@
+[ ] Change the current Find and Replace dialogs to less intrusive styles like found in the Microsoft VSCode application.
 
 [ ] Find in files. 
 
 [ ] Improve syntax keyword highlighting. 
     [ ] WinAPI keyword list.
 
-[ ] Codetips.
+[ ] Codetips / Code Completion.
 
 [ ] Split editing windows.
 
 [ ] Print option.
+
+[ ] Integrated visual designer.
+
+[ ] Integrated debugger (most likely based on FBDebugger code (if that license permits))
+
 
 
 

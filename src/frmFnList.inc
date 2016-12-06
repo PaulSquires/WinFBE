@@ -318,7 +318,8 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMFNLIST), SW_HIDE, SW_SHOW)
       ShowWindow HWND_FRMFNLIST, nCmdShow
       If nCmdShow = SW_SHOW Then
-         frmFnList_SetListBoxPosition
+         frmFnList_UpdateListBox()
+         frmFnList_SetListBoxPosition()
          SetFocus GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
       End If
       Exit Function 

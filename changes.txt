@@ -1,0 +1,15 @@
+Version 1.1.0 (December 6, 2016)
+- Added: Subfolder called "Sample_Projects" containing many sample projects as written by Jose Roca.
+- Added: StatusBar panel 5 shows current compile results (Errors/Warnings). Clicking that panel shows/hide Output window.
+- Added: Change cursor to hourglass during compile process.
+- Changed: Project files are now saved to the project file as relative to the project disk filename (*.wfbe).
+- Changed: Updated the Scintilla 32-bit DLL to version 3.7.1.
+- Fixed: Situation where newly created untitled source filename could be saved to a project file (*.wfbe).
+- Fixed: Correct font for Compiler Log output to be HighDPI aware.
+- Fixed: Dropping of files onto editor (frmMain_OnDropFiles) now correctly opens regular files or projects.
+- Fixed: Problem with "Untitled.bas*" files persisting in Project Explorer list even when untitled source file is closed.
+- Fixed: Situation where removing/closing a file would continue to show its list of functions in the popup Function List.
+ 
+Version 1.0.0 (Initial Release) (November 27, 2016)
+
+

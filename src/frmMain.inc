@@ -749,8 +749,10 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       ' part of any active Project or if it is new/unsaved file. Files that are part of a project are
       ' all closed (tabs/nodes) automatically in one shot rather than individually.
       if (gApp.IsProjectActive = false) or (pDoc->IsNewFlag = true) then 
-         ' Also remove it from the Explorer
+         ' Remove it from the Explorer
          Treeview_DeleteItem( hTree, pDoc->hNodeExplorer)
+      end if   
+      if pDoc->IsProjectFile = false then
          gApp.RemoveDocument(pDoc)
       end if   
       

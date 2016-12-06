@@ -26,7 +26,7 @@ End Constructor
 ''
 ''
 Destructor clsDocument
-   DestroyWindow this.hWindow       ' destroy the scintilla window
+   DestroyWindow this.hWindow    ' destroy the scintilla window
    this.DeallocateFunctionList   ' free allocated memory for the function list
 End Destructor
 
@@ -818,7 +818,7 @@ Function clsDocument.ApplyProperties() As Long
    
    ''
    ''  MARGIN 1: Non-Folding symbols (defaults to width 16) (Bookmark symbol, etc) (will be same color as line numbering)
-   SciMsg( m_pSci, SCI_SETMARGINTYPEN, 1, SC_MARGIN_SYMBOL )
+   SciMsg( m_pSci, SCI_SETMARGINTYPEN, 1, SC_MARGIN_TEXT )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 1, 16 * rxRatio )
    SciMsg( m_pSci, SCI_SETMARGINSENSITIVEN, 1, 1 )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 1, Iif(gConfig.LeftMargin, 16 * rxRatio, 0) )

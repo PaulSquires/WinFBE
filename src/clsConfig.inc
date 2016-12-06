@@ -317,18 +317,21 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    For i = 0 To nCount - 1
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If pDoc->IsProjectFile Then 
-         wszText = pDoc->DiskFilename
-         cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
-         if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
-         wszText = ProcessToCurdrive(wszText)
-         Print #f, "File="; wszText
-         Print #f, "FileType="; pDoc->ProjectFileType
-         Print #f, "TabIndex="; -1     ' use -1 rather than True
-         Print #f, "Bookmarks="; pDoc->GetBookmarks()
-         Print #f, "FirstLine="; SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-         Print #f, "Position="; SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)  
-         Print #f, "FileEnd=[-]" 
+      If pDoc->IsProjectFile Then
+         ' Only deal with files that are no longer "new"
+         if pDoc->IsNewFlag = false then 
+            wszText = pDoc->DiskFilename
+            cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
+            if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
+            wszText = ProcessToCurdrive(wszText)
+            Print #f, "File="; wszText
+            Print #f, "FileType="; pDoc->ProjectFileType
+            Print #f, "TabIndex="; -1     ' use -1 rather than True
+            Print #f, "Bookmarks="; pDoc->GetBookmarks()
+            Print #f, "FirstLine="; SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+            Print #f, "Position="; SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)  
+            Print #f, "FileEnd=[-]" 
+         end if
       End If   
    Next
          
@@ -338,16 +341,19 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
       pDoc = gApp.GetDocumentPtr(i)
       If pDoc Then 
          If pDoc->IsProjectFile Then
-            If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
-               wszText = pDoc->DiskFilename
-               cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
-               if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
-               wszText = ProcessToCurdrive(wszText)
-               Print #f, "File="; wszText
-               Print #f, "FileType="; pDoc->ProjectFileType
-               Print #f, "TabIndex="; 0    
-               Print #f, "FileEnd=[-]"
-            End If
+            ' Only deal with files that are no longer "new"
+            if pDoc->IsNewFlag = false then 
+               If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
+                  wszText = pDoc->DiskFilename
+                  cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
+                  if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
+                  wszText = ProcessToCurdrive(wszText)
+                  Print #f, "File="; wszText
+                  Print #f, "FileType="; pDoc->ProjectFileType
+                  Print #f, "TabIndex="; 0    
+                  Print #f, "FileEnd=[-]"
+               End If
+            end if
          End If   
       End If
    Next
