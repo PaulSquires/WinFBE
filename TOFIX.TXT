@@ -2,6 +2,3 @@
 The fold margin doesn't always display the folding icons. 
 To replicate this issue load a large code file with many folding sections. Go to the view menu and environment options. Unselect to show left margin and close the options window. Scroll down your code and you will see that the code folding icons are missing. Select show left margin again and they will appear.
 
-(2)
-WinFBE crashed on closing. (CURRENTLY UNABLE TO REPLICATE THIS ERROR)
-Open a project. Add a new code file to it. Without changing anything else select exit. This results in a crash. It also erases the project file which is a pretty serious issue.

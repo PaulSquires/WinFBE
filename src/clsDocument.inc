@@ -202,8 +202,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    Dim wText     As WString * MAX_PATH  
    Dim f         As Long 
    
-   ' If this is a new Untitled document and it is dirty then
-   ' set flag to display SaveAs dialog.
+   ' If this is a new Untitled document then set flag to display SaveAs dialog.
    If this.IsNewFlag Then bSaveAs = true
       
    wFilename = this.Diskfilename
@@ -233,8 +232,15 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    End If         
 
    this.DiskFilename = wFilename
-   this.IsNewFlag    = False
    this.DateFileTime = AfxGetFileLastWriteTime( wFilename )
+   
+   ' If this was a new document then it needs to be saved to Recent File list.
+   If this.IsNewFlag Then 
+      If gApp.IsProjectActive = false Then 
+         UpdateMRUList(@wFilename)
+      end if
+   end if
+   this.IsNewFlag = False
    
    ' Set the current state of the document to unmodified
    SciMsg( m_pSci, SCI_SETSAVEPOINT, 0, 0)
