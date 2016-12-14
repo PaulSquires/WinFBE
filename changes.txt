@@ -1,5 +1,6 @@
 Version 1.1.1 (not formally released yet)
 - Added: Missing FB keywords: CULNG, CULNGINT
+- Added: New sample projects: RichOleDemo, Treeview, ToolbarRebar
 - Fixed: Newly created documents when saved now show in Recent Files list (if no project is active).
 
 Version 1.1.0 (December 6, 2016)
