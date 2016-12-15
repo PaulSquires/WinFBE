@@ -2,7 +2,8 @@ Version 1.1.1 (not formally released yet)
 - Added: Missing FB keywords: CULNG, CULNGINT
 - Added: New sample projects: RichOleDemo, Treeview, ToolbarRebar
 - Fixed: Newly created documents when saved now show in Recent Files list (if no project is active).
-
+- Fixed: Situation where closed project resource file used in subsequent opened *.bas file.
+ 
 Version 1.1.0 (December 6, 2016)
 - Added: Subfolder called "Sample_Projects" containing many sample projects as written by Jose Roca.
 - Added: StatusBar panel 5 shows current compile results (Errors/Warnings). Clicking that panel shows/hide Output window.

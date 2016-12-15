@@ -120,10 +120,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.MainFilename = pDocMain->DiskFilename
    gCompile.MainName = AfxStrPathname("NAME", pDocMain->DiskFilename)
    gCompile.MainFolder = AfxStrPathname("PATH", pDocMain->DiskFilename)
-
+   gCompile.ResourceFile = WStr("")    ' default that there is no resource
+   
    If gApp.IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gApp.GetResourceDocumentPtr()
-      gCompile.ResourceFile = Iif( pDocResource, pDocResource->DiskFilename, WStr(""))
+      if pDocResource then gCompile.ResourceFile = pDocResource->DiskFilename
 
       gCompile.ObjFolder = gCompile.MainFolder & ".wfbe\"
       gCompile.ObjFolderShort = ".\.wfbe\"
