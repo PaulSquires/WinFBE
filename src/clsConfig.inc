@@ -53,6 +53,7 @@ Function clsConfig.SaveToFile() as Long
    print #f, "HideCompile="           ; this.HideCompile          
    print #f, "SyntaxHighlighting="    ; this.SyntaxHighlighting   
    print #f, "Codetips="              ; this.Codetips             
+   print #f, "AutoComplete="          ; this.AutoComplete
    print #f, "LeftMargin="            ; this.LeftMargin           
    print #f, "FoldMargin="            ; this.FoldMargin           
    print #f, "AutoIndentation="       ; this.AutoIndentation      
@@ -208,6 +209,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "HideCompile":          this.HideCompile          = nData
          Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
          Case "Codetips":             this.Codetips             = nData
+         Case "AutoComplete":         this.AutoComplete         = nData
          Case "LeftMargin":           this.LeftMargin           = nData
          Case "FoldMargin":           this.FoldMargin           = nData
          Case "AutoIndentation":      this.AutoIndentation      = nData
@@ -495,33 +497,5 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
 
    Function = True   ' successful open
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

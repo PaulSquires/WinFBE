@@ -605,8 +605,24 @@ Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, _
    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION Or PROCESS_VM_READ, 1, pe32w->th32ProcessID)
    If hProcess Then
       dwSize = MAX_PATH
-      QueryFullProcessImageNameW( hProcess, 0, pwszExeName, @dwSize ) 
-      CloseHandle hProcess
+      
+'      Without using dynamic loading...      
+'      QueryFullProcessImageNameW( hProcess, 0, pwszExeName, @dwSize ) 
+'      CloseHandle hProcess
+
+      ' QueryFullProcessImageNameW is only available in Vista or higher. Try to dynamically load the 
+      ' function because statically linking to it will cause a runtime error if WinFBE is run using WinXP.
+      Dim As Any Ptr hLib = DyLibLoad("Kernel32")
+      If hLib then
+         dim MyQueryFullProcessImageName as function( byval hProcess as HANDLE, byval dwFlags as DWORD, byval lpExeName as LPWSTR, byval lpdwSize as PDWORD) as WINBOOL
+         MyQueryFullProcessImageName = DyLibSymbol( hLib, "QueryFullProcessImageNameW" )
+         If MyQueryFullProcessImageName Then
+            MyQueryFullProcessImageName( hProcess, 0, pwszExeName, @dwSize ) 
+            CloseHandle hProcess
+         end if
+         DyLibFree(hLib)
+      End If
+
    End If
    Function = 0
 End Function
@@ -645,12 +661,6 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    End If
 
 End Function
-
-
-
-
-
-
 
 
 

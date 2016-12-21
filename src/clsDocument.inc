@@ -371,6 +371,52 @@ End Function
 
 ''
 ''
+Function clsDocument.InFunction() As BOOLEAN
+   ' Determine if the current file position is in a Sub/Function.
+   ' 
+   ' Search up the file until we find 
+   dim as string sText, sFuncName 
+   dim as long nCurLine, i, n
+   
+   nCurLine = this.GetCurrentLineNumber
+   for i = nCurLine to 0 step -1
+      sText = ltrim(ucase(this.GetLine(i)))
+      sFuncName = ""
+         
+      ' If we reached the bottom of a previous Sub/Function then exit out
+      if left(sText, 12) = "END FUNCTION" orelse _
+         left(sText, 7) = "END SUB" then
+         exit function
+      END IF
+
+      If Left(sText, 9)  = "FUNCTION " then
+         sFuncName = ltrim(mid(sText, 9))
+      elseif Left(sText, 16) = "PUBLIC FUNCTION " then
+         sFuncName = ltrim(mid(sText, 16))
+      elseif Left(sText, 17) = "PRIVATE FUNCTION " then
+         sFuncName = ltrim(mid(sText, 17)) 
+      elseif Left(sText, 4)  = "SUB " then
+         sFuncName = ltrim(mid(sText, 4)) 
+      elseif Left(sText, 11) = "PUBLIC SUB " then
+         sFuncName = ltrim(mid(sText, 11))
+      elseif Left(sText, 12) = "PRIVATE SUB " Then
+         sFuncName = ltrim(mid(sText, 12))
+      End If
+      
+      ' bypass any line with = that is a "FUNCTION = " line.
+      if len(sFuncName) THEN
+         If left(sFuncName, 1) <> "=" Then
+            return true
+         end if   
+      End If
+         
+   NEXT
+
+   function = false
+End Function
+
+''
+''
 Function clsDocument.GetSelectedLineRange( ByRef startLine As Long, _
                                            ByRef endLine   As Long, _
                                            ByRef startPos  As Long, _

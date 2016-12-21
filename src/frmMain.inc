@@ -208,10 +208,10 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 
    If pNSC = 0 Then Exit Function
    
-   Dim hEdit      As HWnd 
-   Dim nLine      As Long 
-   Dim nFoldLevel As Long 
-   
+   Dim as HWND hEdit
+   Dim as long nLine, curPos, LineLen, nFoldLevel, TabSize, nSpaces, IndentSize, i
+   Dim as string buffer, strFill, strEnd 
+   Dim pDoc As clsDocument Ptr 
 
    Select Case pNSC->hdr.code
                      
@@ -226,7 +226,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 
       Case SCN_MARGINCLICK
          ' Folder margin
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
          If pDoc Then 
             hEdit      = pDoc->hWindow
             nLine      = SendMessage(hEdit, SCI_LINEFROMPOSITION, pNSC->position, 0)
@@ -246,64 +246,207 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
       CASE SCN_CHARADDED
          If pNSC->ch = 13 Then  ' ENTER KEY PRESSED
             If gConfig.AutoIndentation Then
-               Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-               If pDoc Then
-                  hEdit = pDoc->hWindow
-                  ' Current position
-                  Dim curPos As Long = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
-                  ' Current line
-                  nLine = SendMessage(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
-                  ' Line length of the previous line
-                  Dim LineLen As Long = SendMessage(hEdit, SCI_LINELENGTH, nLine - 1, 0)
-                  If LineLen < 1 Then Exit Function
-                  ' Get the text of the previous line
-                  Dim buffer As String = Space(LineLen)
-                  SendMessage(hEdit, SCI_GETLINE, nLine - 1, Cast(LPARAM, Strptr(buffer)))
-                  ' Get the tab width
-                  Dim TabSize As Long = SendMessage(hEdit, SCI_GETTABWIDTH, 0, 0)
-                  ' Calculate the number of spaces to fill on the left
-                  Dim nSpaces As Long, i As Long
-                  For i = 1 To Len(buffer)
-                     If Mid(buffer, i, 1) <> " " Then
-                        If Mid(buffer, i, 1) = Chr(9) Then
-                           nSpaces = nSpaces + TabSize
-                        Else
-                           Exit For
-                        End If
+               pDoc = gTTabCtl.GetActiveDocumentPtr()
+               If pDoc = 0 Then exit function
+               hEdit = pDoc->hWindow
+               ' Current position
+               curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+               ' Current line
+               nLine = SendMessage(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
+               ' Line length of the previous line
+               LineLen = SendMessage(hEdit, SCI_LINELENGTH, nLine - 1, 0)
+               If LineLen < 1 Then Exit Function
+               ' Get the text of the previous line
+               buffer = Space(LineLen)
+               SendMessage(hEdit, SCI_GETLINE, nLine - 1, Cast(LPARAM, Strptr(buffer)))
+               ' Get the tab width
+               TabSize = SendMessage(hEdit, SCI_GETTABWIDTH, 0, 0)
+               ' Calculate the number of spaces to fill on the left
+               For i = 1 To Len(buffer)
+                  If Mid(buffer, i, 1) <> " " Then
+                     If Mid(buffer, i, 1) = Chr(9) Then
+                        nSpaces = nSpaces + TabSize
                      Else
-                        nSpaces = nSpaces + 1
+                        Exit For
                      End If
-                  Next
-                  Dim strFill As String = ""
-                  ' Remove CRLF
-                  buffer = AfxStrRemove(buffer, Chr(13))
-                  buffer = AfxStrRemove(buffer, Chr(10))
-                  ' Remove spaces and tabs and convert to uppercase
-                  buffer = Trim(Ucase(buffer), Any Chr(32, 9))
-                  If (Left(buffer, 3) = "IF " And Right(buffer, 5) = " THEN") Or _
-                     Left(buffer, 4) = "ELSE" Or _
-                     Left(buffer, 7) = "SELECT " Or _
-                     Left(buffer, 5) = "CASE " Or _
-                     Left(buffer, 4) = "FOR " Or _
-                     Left(buffer, 3) = "DO " Or _
-                     buffer = "DO" Or _
-                     Left$(buffer, 6) = "WHILE " Or _
-                     buffer = "WHILE" Then
-                     ' Indentation size
-                     Dim IndentSize As Long = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
-                     ' Add spaces to indent the line
-                     strFill = Space(nSpaces + IndentSize)
                   Else
-                     ' Add the same spaces on the left that the line above
-                     strFill = Space(nSpaces)
+                     nSpaces = nSpaces + 1
                   End If
-                  ' *** TODO: If using tabs, replace spaces with tabs
-                  ' Indents the line
-                  SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+               Next
+               ' Remove CRLF
+               buffer = AfxStrRemove(buffer, Chr(13))
+               buffer = AfxStrRemove(buffer, Chr(10))
+               ' Remove spaces and tabs and convert to uppercase
+               buffer = Trim(Ucase(buffer), Any Chr(32, 9))
+               If (Left(buffer, 3) = "IF " And Right(buffer, 5) = " THEN") Or _
+                  Left(buffer, 4) = "ELSE" Or _
+                  Left(buffer, 7) = "SELECT " Or _
+                  Left(buffer, 5) = "CASE " Or _
+                  Left(buffer, 4) = "FOR " Or _
+                  Left(buffer, 3) = "DO " Or _
+                  buffer = "DO" Or _
+                  Left(buffer, 6) = "WHILE " Or _
+                  buffer = "WHILE" Then
+                  ' Indentation size
+                  IndentSize = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
+                  ' Add spaces to indent the line
+                  strFill = Space(nSpaces + IndentSize)
+               Else
+                  ' Add the same spaces on the left that the line above
+                  strFill = Space(nSpaces)
                End If
+               ' *** TODO: If using tabs, replace spaces with tabs
+               ' Indents the line
+               SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
             End If
          End If
          
+         IF pNSC->ch = 32 THEN   ' Space key pressed (Insert AutoComplete constructs if applicable)
+            IF gConfig.AutoComplete THEN
+               pDoc = gTTabCtl.GetActiveDocumentPtr()
+               If pDoc = 0 Then exit function
+               hEdit = pDoc->hWindow
+               curPos  = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+               nLine   = SendMessage(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
+               LineLen = SendMessage(hEdit, SCI_LINELENGTH, nLine, 0)
+               IndentSize = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
+               buffer  = Space(LineLen)
+               SendMessage(hEdit, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
+               TabSize = SendMessage(hEdit, SCI_GETTABWIDTH, 0, 0)
+               ' Calculate the number of spaces to fill on the left
+               nSpaces = 0
+               FOR i = 1 TO LEN(buffer)
+                  IF MID(buffer, i, 1) <> " " THEN
+                     IF MID(buffer, i, 1) = chr(9) THEN
+                        nSpaces = nSpaces + TabSize
+                     ELSE
+                        EXIT FOR
+                     END IF
+                  ELSE
+                     nSpaces = nSpaces + 1
+                  END IF
+               NEXT
+               ' Remove CRLF
+               buffer = AfxStrRemove(buffer, Chr(13))
+               buffer = AfxStrRemove(buffer, Chr(10))
+               ' Remove spaces and tabs and convert to uppercase
+               buffer = Trim(Ucase(buffer), Any Chr(32, 9))
+               SELECT CASE buffer
+                  CASE "IF"
+                     strFill = "x THEN" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END IF"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
+                  CASE "WHILE"
+                     strFill = "x" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "WEND"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
+                  CASE "FOR"
+                     strFill = "x" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "NEXT"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
+                  CASE "SELECT"
+                     strFill = "CASE x" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "CASE ELSE"
+                     strFill = SPACE(nSpaces + 3) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END SELECT"
+                     strFill = vbcrlf & SPACE$(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos + 5, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 6, 0)
+                  CASE "FUNCTION", "PRIVATE FUNCTION", "PUBLIC FUNCTION"
+                     if pDoc->InFunction then exit function
+                     strFill = "FuncName()" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END FUNCTION"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 8, 0)
+                  CASE "SUB", "PRIVATE SUB", "PUBLIC SUB"
+                     if pDoc->InFunction then exit function
+                     strFill = "SubName()" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END SUB"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 7, 0)
+                  CASE "PROPERTY"
+                     strFill = "PropertyName()" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END PROPERTY"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 12, 0)
+                  CASE "TYPE"
+                     strFill = "TypeName" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END TYPE"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 8, 0)
+                  CASE "UNION"
+                     strFill = "UnionName" & vbcrlf
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strFill = SPACE(nSpaces + IndentSize)
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     strEnd = "END UNION"
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
+                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
+                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 9, 0)
+               END SELECT
+            END IF
+         END IF
+
    End Select
 
    Function = 0

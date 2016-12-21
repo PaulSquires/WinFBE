@@ -51,16 +51,17 @@
 #Define IDC_FRMOPTIONSEDITOR_LBLKEYWORDCASE         1002
 #Define IDC_FRMOPTIONSEDITOR_COMBOCASE              1003
 #Define IDC_FRMOPTIONSEDITOR_CHKCODETIPS            1004
-#Define IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN      1005
-#Define IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING  1006
-#Define IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE         1007
-#Define IDC_FRMOPTIONSEDITOR_CHKLINENUMBERING       1008
-#Define IDC_FRMOPTIONSEDITOR_CHKCONFINECARET        1009
-#Define IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES         1010
-#Define IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION     1011
-#Define IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN      1012
-#Define IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES        1013
-#Define IDC_FRMOPTIONSEDITOR_CHKUNICODE             1014
+#Define IDC_FRMOPTIONSEDITOR_CHKAUTOCOMPLETE        1005
+#Define IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN      1006
+#Define IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING  1007
+#Define IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE         1008
+#Define IDC_FRMOPTIONSEDITOR_CHKLINENUMBERING       1009
+#Define IDC_FRMOPTIONSEDITOR_CHKCONFINECARET        1010
+#Define IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES         1011
+#Define IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION     1012
+#Define IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN      1013
+#Define IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES        1014
+#Define IDC_FRMOPTIONSEDITOR_CHKUNICODE             1015
 
 #Define IDC_FRMOPTIONSCOLORS_LSTCOLORS              1000
 #Define IDC_FRMOPTIONSCOLORS_FRMCOLORS              1001
@@ -327,6 +328,7 @@ Type clsDocument
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Function GetBookmarks() As String
       Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
+      declare Function InFunction() As BOOLEAN
       Declare Constructor
       Declare Destructor
 End Type
@@ -365,6 +367,7 @@ Type clsConfig
       ShowExplorerWidth    As Long = 250
       SyntaxHighlighting   As Long = True
       Codetips             As Long = True
+      AutoComplete         As Long = True
       LeftMargin           As Long = True
       FoldMargin           As Long = True
       AutoIndentation      As Long = True
@@ -394,7 +397,7 @@ Type clsConfig
       CompilerHelpfile     As CWSTR
       Win32APIHelpfile     As CWSTR
       DefaultCompiler      As CWSTR = "FBC 32bit"
-      DefaultCompileMode   As CWSTR = "GUI"
+      DefaultCompileMode   As CWSTR = "CONSOLE"
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
       clrCaretFG           As Long = BGR(0,0,0)          ' black

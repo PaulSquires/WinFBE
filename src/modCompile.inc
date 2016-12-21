@@ -197,13 +197,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
-   ' Test for the running exe if this project is an EXE project.
    If IsProcessRunning(@gCompile.OutputFilename) Then
       MessageBoxW( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
-   
+      
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
