@@ -54,6 +54,7 @@ Using Afx
 #Include Once "modToolbar.inc"
 #Include Once "modCompile.inc"
 #Include Once "modMRU.inc"
+#Include Once "modCodetips.inc"
 
 #Include Once "frmHotImgBtn.inc"
 #Include Once "frmHotTxtBtn.inc"

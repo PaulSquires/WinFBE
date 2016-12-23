@@ -244,6 +244,8 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          End If
          
       CASE SCN_CHARADDED
+         IF pNSC->ch = 40 THEN ShowCodetip()                ' "(" // Show code tip
+         
          If pNSC->ch = 13 Then  ' ENTER KEY PRESSED
             If gConfig.AutoIndentation Then
                pDoc = gTTabCtl.GetActiveDocumentPtr()
@@ -303,6 +305,10 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          
          IF pNSC->ch = 32 THEN   ' Space key pressed (Insert AutoComplete constructs if applicable)
             IF gConfig.AutoComplete THEN
+               ' First check to see if the previous word is "AS" because we will then
+               ' show the list of data types.
+               if ShowAutocompleteList() then exit function
+               ' If the list was not shown then check the other special cases.
                pDoc = gTTabCtl.GetActiveDocumentPtr()
                If pDoc = 0 Then exit function
                hEdit = pDoc->hWindow
