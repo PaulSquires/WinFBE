@@ -53,7 +53,7 @@ function ShowAutocompleteList() as BOOLEAN
    buffer = TRIM(pDoc->GetWord(curPos - 1))
    IF LEN(buffer) THEN
       ' Create the space separated data type list
-      sList = "Byte Double Integer Long LongInt Short Single " & _
+      sList = "Boolean Byte Double Integer Long LongInt Short Single " & _
               "String UByte UInteger UShort WString ZString"
       Select Case gConfig.KeywordCase
          Case 0:  sList = lcase(sList)
