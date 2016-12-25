@@ -18,15 +18,15 @@ function ShowCodetip() as BOOLEAN
    curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
    tipPos = curPos - 1   ' Skip the "("
 
-   ' Retrieve the word
-   buffer = TRIM(pDoc->GetWord(curPos - 1))
-'   IF LEN(buffer) THEN
-'      'CodetipStr = TRIM$(CSED_GetCodetip(buffer))
-'      IF LEN(CodetipStr) THEN
-'         SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
-'         FUNCTION = TRUE
-'      END IF
-'   END IF
+   ' Retrieve the word (keys must be searched using uppercase)
+   buffer = ucase(TRIM(pDoc->GetWord(curPos - 1)))
+   IF LEN(buffer) THEN
+      if gCodetips.FindItem(buffer) then
+         CodetipStr = gCodetips.FoundData
+         SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
+         FUNCTION = TRUE
+      END IF
+   END IF
 
    function = FALSE
 END FUNCTION

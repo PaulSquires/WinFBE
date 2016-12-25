@@ -49,6 +49,7 @@ Using Afx
 #Include Once "clsDocument.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
+#Include Once "clsFastHash.inc"
 #Include Once "modHelp.inc"
 #Include Once "modMenus.inc"
 #Include Once "modToolbar.inc"
@@ -117,6 +118,9 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    
    ' Load the HTML help library for displaying FreeBASIC help *.chm file
    gpHelpLib = DyLibLoad( "hhctrl.ocx" )
+   
+   ' Load the Codetips file
+   gCodetips.LoadFromFile( Exepath & "\Settings\codetips.ini" )
    
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )

@@ -244,8 +244,10 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          End If
          
       CASE SCN_CHARADDED
-         IF pNSC->ch = 40 THEN ShowCodetip()                ' "(" // Show code tip
-         
+         IF pNSC->ch = 40 THEN   ' "(" // Show code tip
+            if gConfig.CodeTips then ShowCodetip()                
+         end if
+            
          If pNSC->ch = 13 Then  ' ENTER KEY PRESSED
             If gConfig.AutoIndentation Then
                pDoc = gTTabCtl.GetActiveDocumentPtr()
