@@ -1221,6 +1221,7 @@ Function clsDocument.CreateFunctionList() As Long
          iParen = Instr(st, "(") 
          If iParen Then
             pList->zFnName = Left(st, iParen - 1)
+            pList->zFnDeclare = mid(st, iParen)
          Else
             pList->zFnName = st
          End If

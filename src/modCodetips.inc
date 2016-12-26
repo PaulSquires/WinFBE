@@ -5,9 +5,11 @@
 function ShowCodetip() as BOOLEAN
 
    dim as hwnd hEdit
-   dim as long curPos, tipPos     
+   dim as long curPos, tipPos, i
+   Dim As Long nCount = gApp.GetDocumentCount()
    dim as string buffer, CodetipStr
    dim pDoc as clsDocument ptr
+   Dim pList As FUNCTION_TYPE Ptr
    
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then exit function
@@ -21,13 +23,28 @@ function ShowCodetip() as BOOLEAN
    ' Retrieve the word (keys must be searched using uppercase)
    buffer = ucase(TRIM(pDoc->GetWord(curPos - 1)))
    IF LEN(buffer) THEN
+      ' Search the base builtin FB keywords first.
       if gCodetips.FindItem(buffer) then
          CodetipStr = gCodetips.FoundData
          SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
-         FUNCTION = TRUE
+         return TRUE
       END IF
+      ' Search all of the documents for user defined Sub/Functions   
+      For i = 0 To nCount - 1
+         pDoc = gApp.GetDocumentPtr(i)
+         If pDoc Then 
+            pList = pDoc->FnListPtr
+            Do Until pList = 0
+               if ucase(pList->zFnName) = buffer THEN
+                  CodetipStr = pList->zFnName & pList->zFnDeclare
+                  SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
+                  return TRUE
+               END IF
+               pList = pList->pListNext
+            Loop      
+         End If   
+      Next
    END IF
-
    function = FALSE
 END FUNCTION
 

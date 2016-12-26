@@ -277,6 +277,7 @@ Type FUNCTION_TYPE
    pListNext   As FUNCTION_TYPE Ptr
    bIsHeader   As BOOLEAN
    zFnName     As WString * MAX_PATH
+   zFnDeclare  As WString * (MAX_PATH * 2)
    nLineNumber As Long
    pDoc        As clsDocument_ Ptr
 End Type

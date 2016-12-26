@@ -1,7 +1,7 @@
 Version 1.1.1 (not formally released yet)
 - Added: Autocomplete feature for IF/WHILE/FOR/SELECT/FUNCTION/SUB/PROPERTY/TYPE/UNION 
 - Added: Autocomplete displays data type list after "AS" is typed.
-- Added: Codetip popups for builtin FreeBASIC keywords.
+- Added: Codetip popups for builtin FreeBASIC keywords and user defined subs/functions.
 - Added: Missing FB keywords: CULNG, CULNGINT, BOOLEAN
 - Added: New sample projects: RichOleDemo, Treeview, ToolbarRebar
 - Changed: Updated the Spanish language file.

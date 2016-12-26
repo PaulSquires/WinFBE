@@ -5,7 +5,7 @@
 [ ] Improve syntax keyword highlighting. 
     [ ] WinAPI keyword list.
 
-[ ] Codetips
+[ ] Codetips for WinAPI functions.
 
 [ ] Split editing windows.
 
