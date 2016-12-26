@@ -13,9 +13,10 @@ Features:
 - Incremental compiling of code defined as a "module".
 - Easy including of Windows Resource files simply by specifying which source code file is the resource.
 - Seemless integration of the FreeBasic Compiler (both 32 bit and 64 bit).
+- Codetip popups and auto completion.
 
 Requirements:
-- Windows Vista or later operating system.
+- Windows Vista or later operating system. Windows XP is not supported because many newer API's are used in the source code.
 - FreeBASIC Compiler http://www.freebasic.net/
 
 Resources:
@@ -27,7 +28,7 @@ Resources:
 
 
 WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-Copyright (C) 2016 Paul Squires, PlanetSquires Software
+Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 
 The WinFBE editor is licensed under the GNU GPLv3 or later.
 
