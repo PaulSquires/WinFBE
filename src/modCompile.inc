@@ -445,6 +445,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                                 Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & ")"
 
    If (NumWarnings = 0) AndAlso (NumErrors = 0) Then 
+      ' Hide the Output window is already open but there is no longer any warnings
+      ' or errors to show in the listview. Only close if the listview is active. Do not
+      ' close if the user is looking at the logfile textbox.
+      if IsWindowVisible(HWND_FRMOUTPUT) THEN
+         if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
+            ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
+            frmMain_PositionWindows(HWND_FRMMAIN)
+         END IF   
+      END IF 
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
       If gConfig.HideCompile = False Then
          st = sOutputMsg & vbCrLf & _
@@ -468,7 +477,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       If fGoodCompile = False Then
          PositionOutputWindows(HWND_FRMOUTPUT)
       End If   
-      ShowWindow HWND_FRMOUTPUT, SW_SHOW
+      ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized
       SetDocumentErrorPosition(hLV)
