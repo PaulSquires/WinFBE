@@ -321,7 +321,7 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
       pFolder->lpVtbl->Release(pFolder)
    End If
    ' Allow multiselection
-   hr = pofd->lpVtbl->SetOptions(pofd, FOS_ALLOWMULTISELECT Or FOS_NOCHANGEDIR)
+   hr = pofd->lpVtbl->SetOptions(pofd, FOS_ALLOWMULTISELECT Or FOS_NOCHANGEDIR or FOS_FILEMUSTEXIST)
    ' Display the dialog
    hr = pofd->lpVtbl->Show(pofd, hwndOwner)
 
