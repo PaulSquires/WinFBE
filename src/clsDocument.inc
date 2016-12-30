@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -333,7 +333,7 @@ Function clsDocument.GetLine( ByVal nLine As Long) As String
    nLen = SciMsg( m_pSci, SCI_LINELENGTH, nLine , 0)
    If nLen < 1 Then Exit Function
    buffer = Space(nLen)
-   SendMessage this.hWindow, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer))
+   SendMessage( this.hWindow, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
    Function = Rtrim(buffer, Any Chr(13,10,0))
 End Function
 
@@ -1131,10 +1131,8 @@ Function clsDocument.CreateFunctionList() As Long
    ' Functions/Subs in the source code. This list is used to be displayed in
    ' the Function List.
  
-   Dim As ZString Ptr pzByte = Cast( ZString Ptr, SendMessageW(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-   Dim As Long nLen = SendMessageW(this.hWindow, SCI_GETTEXTLENGTH, 0, 0) 
-   Dim As Long i = 0   ' current buffer position
-   Dim As Long nCurPos, nEOL, nLineNum
+   dim as long nLineCount = SendMessage(this.hWindow, SCI_GETLINECOUNT, 0, 0)
+   dim as long nLineNum 
    Dim As String st, st_ucase
    Dim As Long n, iParen
    Dim As BOOLEAN bFirstLine
@@ -1157,33 +1155,28 @@ Function clsDocument.CreateFunctionList() As Long
    pList->pListPrev = 0
    pList->pListNext = 0
 
-   Do While i < nLen - 1
+   for nLineNum = 0 to nLineCount - 1
+      bFirstLine = false   
+      st = ""
+      do
+         ' Get the full sub/function parameter list as it could be spread
+         ' across multiple lines via the line continuation underscore.
+         st = st & this.GetLine(nLineNum)
       
-      ' Get the next line. Up to the first LF or NUL (eof)
-      nCurPos = i:  nEOL = -1
-      For n = nCurPos To nLen - 1
-         If pzByte[n] = 13 Then            ' end of line
-            nEOL = n: i = n + 1            ' skip over the CR
-            If pzByte[i] = 10 Then i += 1  ' skip over the LF
-            Exit For
-         End If   
-      Next
-      If nEOL = -1 Then 
-         i = nLen: nEOL = nLen
-      End If   
-      st = Space(nEOL - nCurPos): memcpy( Strptr(st), @pzByte[nCurPos], nEOL-nCurPos )
-      
-      nLineNum += 1
-      
-      If Len(st) = 0 Then Continue Do
-   
-      ' Remove any comments
-      n = Instr(st, "'")
-      If n Then st = Left(st, n-1)
-      
-      st = Trim(st)
-      If Len(st) = 0 Then Continue Do
-   
+         ' Remove any comments
+         n = Instr(st, "'")
+         If n Then st = Left(st, n-1)
+         
+         st = Trim(st)
+         if right(st, 1) = "_" THEN
+            st = st & vbcrlf
+            nLineNum = nLineNum + 1
+         else
+            exit do   
+         END IF
+      loop 
+
+      If Len(st) = 0 Then Continue for
       st_ucase = Ucase(st)
       
       If Left(st_ucase, 9)  = "FUNCTION " Then
@@ -1202,65 +1195,62 @@ Function clsDocument.CreateFunctionList() As Long
          st = Mid(st, 13): bFirstLine = True
       End If
       st = ltrim(st)  ' remove any leading spaces   
-         
    
+      if bFirstLine = false THEN continue for
+
       ' bypass any line with = embedded in it but need to check only up to the first
       ' open parenthesis because after that are the parameters and they could have equal
       ' signs for default parameter values.
-      If bFirstLine Then
-         n = Instr( st, "=") 
-         If n Then 
-            iParen = Instr(st, "(") 
-            If (iParen = 0) OrElse (n < iParen) Then
-               bFirstLine = False: Continue Do
-            End If
-         End If
-         
-         pList = New FUNCTION_TYPE
-         ' Determine the name of this sub/function
+      n = Instr( st, "=") 
+      If n Then 
          iParen = Instr(st, "(") 
-         If iParen Then
-            pList->zFnName = Left(st, iParen - 1)
-            pList->zFnDeclare = mid(st, iParen)
-         Else
-            pList->zFnName = st
+         If (iParen = 0) OrElse (n < iParen) Then
+            Continue for
          End If
-         pList->bIsHeader = False
-         pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based
-         pList->pDoc = @this
-         pList->pListPrev = 0
-         pList->pListNext = 0
-               
-         ' Need to add this function in sorted order
-         pListFound = 0
-         pListTemp  = this.FnListPtr
-         Do Until pListTemp = 0
-            If pListTemp->bIsHeader = False Then
-               If UCase(pList->zFnName) < UCase(pListTemp->zFnName) Then
-                  pListFound = pListTemp: Exit Do
-               End If
+      End If
+
+      pList = New FUNCTION_TYPE
+      ' Determine the name of this sub/function
+      iParen = Instr(st, "(") 
+      If iParen Then
+         pList->zFnName = Left(st, iParen - 1)
+         pList->zFnDeclare = mid(st, iParen)
+      Else
+         pList->zFnName = st
+      End If
+
+      pList->bIsHeader = False
+      pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based
+      pList->pDoc = @this
+      pList->pListPrev = 0
+      pList->pListNext = 0
+            
+      ' Need to add this function in sorted order
+      pListFound = 0
+      pListTemp  = this.FnListPtr
+      Do Until pListTemp = 0
+         If pListTemp->bIsHeader = False Then
+            If UCase(pList->zFnName) < UCase(pListTemp->zFnName) Then
+               pListFound = pListTemp: Exit Do
             End If
-            If pListTemp->pListNext = 0 Then Exit Do
-            pListTemp = pListTemp->pListNext
-         Loop
-         If pListFound = 0 Then
-            ' Insert the new node at end of list
-            pListTemp->pListNext = pList
-            pList->pListPrev = pListTemp
-            pList->pListNext = 0
-         Else
-            ' Insert the new node immediately before the found node
-            pList->pListNext = pListFound
-            pList->pListPrev = pListFound->pListPrev
-            pListFound->pListPrev->pListNext = pList
-            pListFound->pListPrev = pList
-         End If   
-
-
-         bFirstLine = False
-      EndIf
+         End If
+         If pListTemp->pListNext = 0 Then Exit Do
+         pListTemp = pListTemp->pListNext
+      Loop
+      If pListFound = 0 Then
+         ' Insert the new node at end of list
+         pListTemp->pListNext = pList
+         pList->pListPrev = pListTemp
+         pList->pListNext = 0
+      Else
+         ' Insert the new node immediately before the found node
+         pList->pListNext = pListFound
+         pList->pListPrev = pListFound->pListPrev
+         pListFound->pListPrev->pListNext = pList
+         pListFound->pListPrev = pList
+      End If   
          
-   Loop
+   next
 
    Function = 0
 

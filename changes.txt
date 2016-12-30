@@ -6,6 +6,7 @@ Version 1.1.1 (not formally released yet)
 - Added: New sample projects: RichOleDemo, Treeview, ToolbarRebar
 - Changed: Updated the Spanish language file.
 - Changed: Compiler Output window will close on successul compile if no warnings/errors and listview was previously active.
+- Changed: Font quality now uses the SC_EFF_QUALITY_DEFAULT flag.
 - Fixed: Newly created documents when saved now show in Recent Files list (if no project is active).
 - Fixed: Situation where closed project resource file used in subsequent opened *.bas file.
 - Fixed: FOS_FILEMUSTEXIST flag was missing in AfxIFileOpenDialogMultiple.
