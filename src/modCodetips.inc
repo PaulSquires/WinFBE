@@ -48,7 +48,7 @@ function ShowCodetip() as BOOLEAN
             pList = pDoc->FnListPtr
             Do Until pList = 0
                if ucase(pList->zFnName) = buffer THEN
-                  CodetipStr = pList->zFnName & pList->zFnDeclare
+                  CodetipStr = pList->zFnDeclare
                   SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
                   return TRUE
                END IF

@@ -324,6 +324,7 @@ Type clsDocument
       Declare Function ConvertEOL( ByVal nMode As Long) As Long
       Declare Function DisplayStats() As Long
       Declare Function TabsToSpaces() As Long
+      declare function FormatCodetip( byval strCodeTip as string, byval bIsFunction as BOOLEAN) as STRING
       Declare Function CreateFunctionList() As Long
       Declare Function DeallocateFunctionList() As Long
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String

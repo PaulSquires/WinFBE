@@ -1123,7 +1123,40 @@ Function clsDocument.DeallocateFunctionList() As Long
    Function = 0
 End Function
                
-               
+            
+''               
+''
+function clsDocument.FormatCodetip( byval strCodeTip as string, byval bIsFunction as BOOLEAN) as STRING
+   IF len(strCodeTip) = 0 then exit function 
+   dim as long p
+   
+   ' remove multiple duplicate spaces
+   strCodeTip = AfxStrReplace(strCodeTip, "  ", " ")
+   IF INSTR(strCodeTip, "( ") THEN
+      strCodeTip = AfxStrReplace(strCodeTip, "( ", "(  ")
+   ELSEIF INSTR(strCodeTip, "(") THEN
+      strCodeTip = AfxStrReplace(strCodeTip, "(", "(  ")
+   END IF
+   p = INSTR(strCodeTip, "(")
+   IF p THEN
+      IF MID(strCodeTip, p + 1, 1) <> ")" AND MID(strCodeTip, p + 1, 2) <> " )" THEN
+         strCodeTip = AfxStrReplace(strCodeTip, "(", "( _" & vblf)
+         IF INSTR(strCodeTip, " )") THEN
+            strCodeTip = AfxStrReplace(strCodeTip, ")", "_" & vblf & ")")
+         ELSEIF INSTR(strCodeTip, ")") THEN
+            strCodeTip = AfxStrReplace(strCodeTip, ")", " _" & vblf & ")")
+         END IF
+      END IF
+   END IF
+   strCodeTip = AfxStrReplace(strCodeTip, ", ", ",")
+   strCodeTip = AfxStrReplace(strCodeTip, " ,", ",")
+   strCodeTip = AfxStrReplace(strCodeTip, ",", ", _" & vblf & "  ")
+   strCodeTip = iif(bIsFunction, "Function ", "Sub ") & strCodeTip
+   
+   FUNCTION = strCodeTip
+end function
+
+
 ''
 ''
 Function clsDocument.CreateFunctionList() As Long
@@ -1133,9 +1166,9 @@ Function clsDocument.CreateFunctionList() As Long
  
    dim as long nLineCount = SendMessage(this.hWindow, SCI_GETLINECOUNT, 0, 0)
    dim as long nLineNum 
-   Dim As String st, st_ucase
+   Dim As String st, st_ucase, sLine
    Dim As Long n, iParen
-   Dim As BOOLEAN bFirstLine
+   Dim As BOOLEAN bFirstLine, bIsFunction
    
    Dim pList      As FUNCTION_TYPE Ptr
    Dim pListTemp  As FUNCTION_TYPE Ptr
@@ -1157,21 +1190,23 @@ Function clsDocument.CreateFunctionList() As Long
 
    for nLineNum = 0 to nLineCount - 1
       bFirstLine = false   
+      bIsFunction = false
       st = ""
       do
          ' Get the full sub/function parameter list as it could be spread
          ' across multiple lines via the line continuation underscore.
-         st = st & this.GetLine(nLineNum)
+         sLine = this.GetLine(nLineNum)
       
          ' Remove any comments
-         n = Instr(st, "'")
-         If n Then st = Left(st, n-1)
+         n = Instr(sLine, "'")
+         If n Then sLine = Left(sLine, n-1)
          
-         st = Trim(st)
-         if right(st, 1) = "_" THEN
-            st = st & vbcrlf
+         sLine = Trim(sLine)
+         if right(sLine, 1) = "_" THEN
+            st = st & left(sLine, len(sLine)-1) & " "
             nLineNum = nLineNum + 1
          else
+            st = st & sLine
             exit do   
          END IF
       loop 
@@ -1180,11 +1215,11 @@ Function clsDocument.CreateFunctionList() As Long
       st_ucase = Ucase(st)
       
       If Left(st_ucase, 9)  = "FUNCTION " Then
-         st = Mid(st, 10): bFirstLine = True
+         st = Mid(st, 10): bFirstLine = True: bIsFunction = true
       ElseIf Left(st_ucase, 16) = "PUBLIC FUNCTION " Then
-         st = Mid(st, 17): bFirstLine = True
+         st = Mid(st, 17): bFirstLine = True: bIsFunction = true
       ElseIf Left(st_ucase, 17) = "PRIVATE FUNCTION " Then
-         st = Mid(st, 18): bFirstLine = True
+         st = Mid(st, 18): bFirstLine = True: bIsFunction = true
       End If   
       
       If Left(st_ucase, 4)  = "SUB " Then
@@ -1214,10 +1249,11 @@ Function clsDocument.CreateFunctionList() As Long
       iParen = Instr(st, "(") 
       If iParen Then
          pList->zFnName = Left(st, iParen - 1)
-         pList->zFnDeclare = mid(st, iParen)
       Else
          pList->zFnName = st
       End If
+      
+      pList->zFnDeclare = this.FormatCodetip(st, bIsFunction)
 
       pList->bIsHeader = False
       pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based
