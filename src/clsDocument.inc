@@ -1124,39 +1124,6 @@ Function clsDocument.DeallocateFunctionList() As Long
 End Function
                
             
-''               
-''
-function clsDocument.FormatCodetip( byval strCodeTip as string, byval bIsFunction as BOOLEAN) as STRING
-   IF len(strCodeTip) = 0 then exit function 
-   dim as long p
-   
-   ' remove multiple duplicate spaces
-   strCodeTip = AfxStrReplace(strCodeTip, "  ", " ")
-   IF INSTR(strCodeTip, "( ") THEN
-      strCodeTip = AfxStrReplace(strCodeTip, "( ", "(  ")
-   ELSEIF INSTR(strCodeTip, "(") THEN
-      strCodeTip = AfxStrReplace(strCodeTip, "(", "(  ")
-   END IF
-   p = INSTR(strCodeTip, "(")
-   IF p THEN
-      IF MID(strCodeTip, p + 1, 1) <> ")" AND MID(strCodeTip, p + 1, 2) <> " )" THEN
-         strCodeTip = AfxStrReplace(strCodeTip, "(", "( _" & vblf)
-         IF INSTR(strCodeTip, " )") THEN
-            strCodeTip = AfxStrReplace(strCodeTip, ")", "_" & vblf & ")")
-         ELSEIF INSTR(strCodeTip, ")") THEN
-            strCodeTip = AfxStrReplace(strCodeTip, ")", " _" & vblf & ")")
-         END IF
-      END IF
-   END IF
-   strCodeTip = AfxStrReplace(strCodeTip, ", ", ",")
-   strCodeTip = AfxStrReplace(strCodeTip, " ,", ",")
-   strCodeTip = AfxStrReplace(strCodeTip, ",", ", _" & vblf & "  ")
-   strCodeTip = iif(bIsFunction, "Function ", "Sub ") & strCodeTip
-   
-   FUNCTION = strCodeTip
-end function
-
-
 ''
 ''
 Function clsDocument.CreateFunctionList() As Long
@@ -1253,7 +1220,8 @@ Function clsDocument.CreateFunctionList() As Long
          pList->zFnName = st
       End If
       
-      pList->zFnDeclare = this.FormatCodetip(st, bIsFunction)
+      st = iif(bIsFunction, "Function ", "Sub ") & st
+      pList->zFnDeclare = st
 
       pList->bIsHeader = False
       pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based

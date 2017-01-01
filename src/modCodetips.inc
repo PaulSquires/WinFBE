@@ -12,6 +12,39 @@
 '    GNU General Public License for more details.
 
 ' ========================================================================================
+' Format the codetip prior to showing it
+' ========================================================================================
+function FormatCodetip( byval strCodeTip as string ) as STRING
+   IF len(strCodeTip) = 0 then exit function 
+   dim as long p
+   
+   ' remove multiple duplicate spaces
+   strCodeTip = AfxStrReplace(strCodeTip, "  ", " ")
+   IF INSTR(strCodeTip, "( ") THEN
+      strCodeTip = AfxStrReplace(strCodeTip, "( ", "(  ")
+   ELSEIF INSTR(strCodeTip, "(") THEN
+      strCodeTip = AfxStrReplace(strCodeTip, "(", "(  ")
+   END IF
+   p = INSTR(strCodeTip, "(")
+   IF p THEN
+      IF MID(strCodeTip, p + 1, 1) <> ")" AND MID(strCodeTip, p + 1, 2) <> " )" THEN
+         strCodeTip = AfxStrReplace(strCodeTip, "(", "( _" & vblf)
+         IF INSTR(strCodeTip, " )") THEN
+            strCodeTip = AfxStrReplace(strCodeTip, ")", "_" & vblf & ")")
+         ELSEIF INSTR(strCodeTip, ")") THEN
+            strCodeTip = AfxStrReplace(strCodeTip, ")", " _" & vblf & ")")
+         END IF
+      END IF
+   END IF
+   strCodeTip = AfxStrReplace(strCodeTip, ", ", ",")
+   strCodeTip = AfxStrReplace(strCodeTip, " ,", ",")
+   strCodeTip = AfxStrReplace(strCodeTip, ",", ", _" & vblf & "  ")
+   
+   FUNCTION = strCodeTip
+end function
+
+
+' ========================================================================================
 ' Show codetips
 ' ========================================================================================
 function ShowCodetip() as BOOLEAN
@@ -48,7 +81,7 @@ function ShowCodetip() as BOOLEAN
             pList = pDoc->FnListPtr
             Do Until pList = 0
                if ucase(pList->zFnName) = buffer THEN
-                  CodetipStr = pList->zFnDeclare
+                  CodetipStr = FormatCodetip(pList->zFnDeclare)
                   SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
                   return TRUE
                END IF
