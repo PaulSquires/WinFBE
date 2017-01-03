@@ -583,7 +583,9 @@ Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
          ' Ensure that we add the value to the array within the valid
          ' boundaries of the array.
          If (nKey >= LBound(LL)) AndAlso (nKey <= Ubound(LL)) Then
-            LL(nKey) = wData
+            ' Remove any comments from end of the line. Comments begin with
+            ' a semicolon character.
+            LL(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
          End If
       End If   
          

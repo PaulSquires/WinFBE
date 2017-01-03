@@ -36,7 +36,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.2.0") 
+#Define APPVERSION    WStr("1.2.1") 
 
 
 #Include Once "windowsxx.bi"      ' needed because version that ships with FB is broken and incomplete. 
