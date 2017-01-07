@@ -35,7 +35,8 @@ End Destructor
 Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                                        ByVal IsNewFile  As BOOLEAN, _     
                                        ByVal IsTemplate As BOOLEAN = False, _
-                                       ByVal pwszFile   As WString Ptr = 0 ) As HWnd   
+                                       ByVal pwszFile   As WString Ptr = 0 _
+                                       ) As HWnd   
 
    ' Creates a Scintilla editing window (initially not visible). Optionally, load a diskfile
    ' into the window and apply properties to it.
@@ -117,7 +118,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             SciMsg( m_pSci, SCI_SETSAVEPOINT, 0, 0)
             SciMsg( m_pSci, SCI_EMPTYUNDOBUFFER, 0, 0)
             ' Update the most recently used file list (only for non-IsNewFlag files)
-            ' Only add file to MRU list if it is not part of an active Project
+            ' Only add file to MRU list if it is not part of an active Project.
             If gApp.IsProjectActive = false Then 
                UpdateMRUList(pwszFile)
             end if
@@ -1129,7 +1130,7 @@ End Function
 Function clsDocument.CreateFunctionList() As Long
    ' Generate a linked list of FUNCTION_TYPE structures that define all found
    ' Functions/Subs in the source code. This list is used to be displayed in
-   ' the Function List.
+   ' the Function List and also used for displaying CodeTips.
  
    dim as long nLineCount = SendMessage(this.hWindow, SCI_GETLINECOUNT, 0, 0)
    dim as long nLineNum 

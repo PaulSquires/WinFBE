@@ -1170,7 +1170,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             ScreenToClient gTTabCtl.hWindow, @pInfo.pt
             nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
             If pInfo.flags = TCHT_ONITEMICON Then gTTabCtl.CloseTab()
-         End If
+         end if
          
          ' Process clicking on the "compiler" or "compilemode" panels in the statusbar
          If id = IDC_FRMMAIN_STATUSBAR Then   
@@ -1468,7 +1468,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnDestroy(HWnd As HWnd) As LRESULT
+Function frmMain_OnDestroy(byval HWnd As HWnd) As LRESULT
    ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETIMAGELIST, 0, 0))
    ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETHOTIMAGELIST, 0, 0))
    ImageList_Destroy Cast(HIMAGELIST, SendMessageW(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETDISABLEDIMAGELIST, 0, 0))
@@ -1481,6 +1481,80 @@ Function frmMain_OnDestroy(HWnd As HWnd) As LRESULT
    DragAcceptFiles HWnd, False
    
    PostQuitMessage(0)
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Process WM_SETCURSOR message for window/dialog: frmMain
+' ========================================================================================
+Function frmMain_OnSetCursor( byval HWnd As HWnd, _
+                              byval HWndCursor As hwnd, _
+                              byval codeHitTest as UINTEGER, _
+                              byval msg as UINTEGER _
+                              ) As LRESULT
+   dim as Point pt 
+   static as long oldX, oldY
+   
+   ' Determine if the top tab control tabs are being dragged and dropped.
+   GetCursorPos(@pt): ScreenToClient( Hwnd, @pt)
+   if ChildWindowFromPoint( HWND, pt) = gTTabCtl.hWindow then
+      Select Case msg
+         Case WM_LBUTTONDOWN
+            gApp.bDragTabActive = true: oldX = pt.x: oldY = pt.y
+         Case WM_MOUSEMOVE
+            if (gApp.bDragTabActive = true) And cbool(oldX <> pt.x Or oldY <> pt.y) Then 
+               ' Change mouse cursor
+               SetCursor( LoadCursor( null, IDC_HAND ))
+               return true
+            else   
+               SetCursor( LoadCursor( null, IDC_ARROW ))
+            end if   
+         Case WM_LBUTTONUP
+            If gApp.bDragTabActive Then 
+               gApp.bDragTabActive = false
+               dim as long idx, iCurTab, iDropTab, nCount
+               dim As TC_HITTESTINFO HT
+               Dim AS TCITEM TB_CURRENT, TB_TEMP 
+               
+               nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+               iCurTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+               GetCursorPos(@HT.pt): ScreenToClient( gTTabCtl.hWindow, @HT.pt)
+               ' Get the tab that is under the cursor drop location
+               iDropTab = SendMessage(gTTabCtl.hWindow, TCM_HITTEST, 0, cast(LPARAM, @HT)) 
+               If (iCurTab = iDropTab) Or (iDropTab = -1) Then Exit function
+
+               ' Save the current TCITEM so it can be set to the new position
+               TB_CURRENT.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
+               TabCtrl_GetItem( gTTabCtl.hWindow, iCurTab, @TB_CURRENT )
+
+               ' Move all of the TCITEM's up or down dependng on the drop point in
+               ' relation to the current point.
+               TB_TEMP.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
+               if iDropTab < iCurTab THEN
+                  for idx = iCurTab to iDropTab + 1 step -1
+                     TabCtrl_GetItem( gTTabCtl.hWindow, idx-1, @TB_TEMP )
+                     TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
+                     gTTabCtl.SetTabText(idx)
+                  NEXT
+               elseif iDropTab > iCurTab THEN
+                  for idx = iCurTab to iDropTab - 1 
+                     TabCtrl_GetItem( gTTabCtl.hWindow, idx+1, @TB_TEMP )
+                     TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
+                     gTTabCtl.SetTabText(idx)
+                  NEXT
+               END IF
+
+               ' Finally, set to the current tab (ie. the drop tab)
+               TabCtrl_SetItem( gTTabCtl.hWindow, iDropTab, @TB_CURRENT )
+               gTTabCtl.SetTabText(iDropTab)
+               gTTabCtl.SetFocusTab(iDropTab)
+               ' Reset the mouse pointer
+            end if
+            gApp.bDragTabActive = false
+      End Select
+   end if
+   
    Function = 0
 End Function
 
@@ -1504,6 +1578,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_ACTIVATEAPP, frmMain_OnActivateApp)
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
+      HANDLE_MSG (HWnd, WM_SETCURSOR,   frmMain_OnSetCursor)
 
       Case WM_ERASEBKGND
          ' Code to prevent main application space flickering. Only brush the
@@ -1517,6 +1592,9 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             SendMessageW HWnd, WM_CLOSE, 0, 0
          End If
 
+      case WM_CAPTURECHANGED
+         gApp.bDragTabActive = false
+         
       Case WM_SETFOCUS
          frmMain_SetFocusToCurrentCodeWindow
 

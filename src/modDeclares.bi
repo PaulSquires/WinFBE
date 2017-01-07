@@ -296,7 +296,7 @@ Type clsDocument
       DateFileTime     As FILETIME  
       hNodeExplorer    As HTREEITEM
 
-      Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0 ) As HWnd
+      Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
@@ -462,7 +462,8 @@ Type clsApp
       ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
       IncludeFilename      As CWSTR
       hExplorerRootNode    As HTREEITEM
-      bDragActive          As BOOLEAN     ' splitter drag is currently active
+      bDragTabActive       as BOOLEAN     ' A tab in the top tabcontrol is being dragged
+      bDragActive          As BOOLEAN     ' splitter drag is currently active 
       hWndPanel            As HWND        ' the panel being split left/right or up/down
 
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
