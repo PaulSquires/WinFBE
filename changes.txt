@@ -1,6 +1,7 @@
 Version 1.2.1 (Not released yet)
 - Added: German localization file (deutsch.lang) compliments of Tom Dehn. 
 - Added: Drag/Drop document tabs for the open code editor windows (top tabcontrol). Inspired by Pierre Bellisle.
+- Fixed: GPF would occur if trying to open a zero length disk file.
 
 Version 1.2.0 (January 1, 2017)
 - Added: Autocomplete feature for IF/WHILE/FOR/SELECT/FUNCTION/SUB/PROPERTY/TYPE/UNION 

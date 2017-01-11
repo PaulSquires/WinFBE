@@ -107,10 +107,12 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                sText = Space(Lof(f))
                Get #f, , sText
                Close #f
-               If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-                  sText = Mid(sText, 3)
-                  sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-               End If   
+               if len(sText) > 2 THEN  ' or will GPF
+                  If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+                     sText = Mid(sText, 3)
+                     sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+                  End If   
+               END IF
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
             End If

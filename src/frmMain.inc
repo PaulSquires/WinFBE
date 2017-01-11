@@ -170,7 +170,7 @@ Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
        wszPath = AfxStrPathname( "PATH", wszArg )
        If Len(wszPath) = 0 Then wszArg = ExePath & "\" & wszArg 
        
-       If Dir(wszArg) > "" Then
+       If AfxFileExists(wszArg) Then
           ' We have a valid filename so determine what type it is.
           wszExt = AfxStrPathname( "EXTN", wszArg )
           wszExt = Ucase(wszExt)
