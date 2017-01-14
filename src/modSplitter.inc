@@ -59,6 +59,7 @@ Function Splitter_OnLButtonDown() As BOOLEAN
    
    gApp.bDragActive = False 
    
+   SetCursor( LoadCursor( null, IDC_ARROW ))
    Function = 0
 End Function
 
@@ -113,17 +114,6 @@ Function Splitter_OnMouseMove() As BOOLEAN
          Dim As Long nDiff = pt.x - rc.Right
          GetClientRect HWND_FRMEXPLORER, @rc
          Dim As Long nWidth = (rc.Right - rc.Left + nDiff)
-'         Dim As Long nMinWidth = (30 * pWindow->rxRatio)
-'         ' We do not want the width to go under the minimum for this panel. If it does
-'         ' then we simply collapse the SidePanel.
-'         If nWidth < nMinWidth Then
-'            nWidth = nMinWidth
-'            frmHotImgBtn_SetSelected( GetDlgItem(HWND_FRMVIEWBAR, gViewBar.idxActive), False )
-'            gViewBar.idxActive = -1
-'            gViewBar.bIsPopOpen = False
-'            gApp.bDragActive = False
-'            ReleaseCapture()
-'         End If
          SetWindowPos HWND_FRMEXPLORER, 0, 0, 0, nWidth, rc.Bottom - rc.Top, SWP_NOMOVE Or SWP_NOZORDER
          frmMain_PositionWindows(HWND_FRMMAIN)
          Exit Function

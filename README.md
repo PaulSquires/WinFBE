@@ -8,6 +8,7 @@ Features:
 - 32 bit and 64 bit versions.
 - High DPI aware for any monitor resolution.
 - Language localization. Simple create language file based on English.lang file.
+- Localized for English, Spanish and German langauges.
 - Projects and non-project based editing.
 - Easy integration of Console or GUI based code.
 - Incremental compiling of code defined as a "module".

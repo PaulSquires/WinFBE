@@ -1,4 +1,4 @@
-Version 1.2.1 (Not released yet)
+Version 1.2.1 (January 14, 2017)
 - Added: German localization file (deutsch.lang) compliments of Tom Dehn. 
 - Added: Drag/Drop document tabs for the open code editor windows (top tabcontrol). Inspired by Pierre Bellisle.
 - Fixed: GPF would occur if trying to open a zero length disk file.
