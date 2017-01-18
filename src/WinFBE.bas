@@ -74,6 +74,7 @@ Using Afx
 #Include Once "frmGoto.inc"
 #Include Once "frmCommandLine.inc"
 #Include Once "frmFind.inc"
+#Include Once "frmFindInFiles.inc"
 #Include Once "frmReplace.inc"
 #Include Once "frmProjectOptions.inc"
 #Include Once "frmMain.inc"

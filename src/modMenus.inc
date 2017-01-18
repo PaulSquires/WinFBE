@@ -88,6 +88,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FIND, L(43,"&Find...") & Chr(9) & "Ctrl+F"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FINDNEXT, L(44,"Find &Next") & Chr(9) & "F3"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FINDPREV, L(45,"Find &Previous") & Chr(9) & "Shift+F3"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FINDINFILES, L(257,"Find &In Files...") & Chr(9) & "Ctrl+Shift+F"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REPLACE, L(46,"&Replace...") & Chr(9) & "Ctrl+R"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function &Definition") & Chr(9) & "F6"
@@ -184,6 +185,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F,  IDM_FIND )
    pWindow->AddAccelerator( FVIRTKEY, VK_F3,  IDM_FINDNEXT )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F3,  IDM_FINDPREV )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F, IDM_FINDINFILES)
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,  IDM_REPLACE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F6,  IDM_DEFINITION )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F6,  IDM_LASTPOSITION )

@@ -61,7 +61,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       
    ' If a disk file was specified then open it and load it into the editor
    this.IsNewFlag = IsNewFile
-   If IsNewFile Then
+   If (IsNewFile = true) orelse (IsTemplate = true) Then
       nNextFileNum = nNextFileNum + 1
       this.DiskFilename = "Untitled" & nNextFileNum
    End If
@@ -84,7 +84,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                   Select Case idx
                      Case 1
                      Case 2
-                     Case 3: this.DiskFilename = "Untitled" & Trim(st)    
+                     Case 3: this.DiskFilename = this.DiskFilename & Trim(st)    
                      Case 4 
                      Case Else
                         sText = sText & st & vbCrLf

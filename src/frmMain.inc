@@ -1033,6 +1033,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                                    
       ''  SEARCH MENU              
       Case IDM_FIND:               Function = frmFind_Show(pDoc->hWindow)
+      Case IDM_FINDINFILES:        Function = frmFindInFiles_Show(pDoc->hWindow)
       Case IDM_REPLACE:            Function = frmReplace_Show(pDoc->hWindow)
 
       Case IDM_FINDNEXT, IDM_FINDPREV
@@ -1553,6 +1554,9 @@ Function frmMain_OnSetCursor( byval HWnd As HWnd, _
             end if
             gApp.bDragTabActive = false
       End Select
+
+   else
+      SetCursor( LoadCursor( null, IDC_ARROW ))
    end if
    
    Function = 0

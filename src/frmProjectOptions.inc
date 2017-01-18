@@ -306,7 +306,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
 
    SetFocus GetDlgItem(hForm, IDOK)
    
-   ' Process Windows messages
+   ' Process Windows messages(modal)
    Function = pWindow->DoEvents(nCmdShow)
    
    ' Delete the frmProjectOptions CWindow class manually allocated memory 

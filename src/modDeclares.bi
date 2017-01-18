@@ -128,6 +128,19 @@
 #Define IDC_FRMFIND_OPTSCOPE3                       1009
 #Define IDC_FRMFIND_FRAMEOPTIONS                    1010
 
+#Define IDC_FRMFINDINFILES_LBLFINDWHAT              1000
+#Define IDC_FRMFINDINFILES_COMBOFIND                1001
+#Define IDC_FRMFINDINFILES_COMBOPATTERN             1002
+#Define IDC_FRMFINDINFILES_COMBOFOLDER              1003
+#Define IDC_FRMFINDINFILES_CHKWHOLEWORDS            1004
+#Define IDC_FRMFINDINFILES_CHKMATCHCASE             1005
+#Define IDC_FRMFINDINFILES_FRAMESCOPE               1006
+#Define IDC_FRMFINDINFILES_OPTSCOPE1                1007
+#Define IDC_FRMFINDINFILES_OPTSCOPE2                1008
+#Define IDC_FRMFINDINFILES_OPTSCOPE3                1009
+#Define IDC_FRMFINDINFILES_CHKSUBFOLDERS            1010
+#Define IDC_FRMFINDINFILES_FRAMEOPTIONS             1011
+
 #Define IDC_FRMREPLACE_LBLFINDWHAT                  1000
 #Define IDC_FRMREPLACE_COMBOFIND                    1001
 #Define IDC_FRMREPLACE_CHKWHOLEWORDS                1002
@@ -182,7 +195,8 @@ Enum
    IDM_TOMIXEDCASE, IDM_EOLTOCRLF, IDM_EOLTOCR, IDM_EOLTOLF, IDM_SELECTALL, IDM_SELECTLINE
    IDM_SPACESTOTABS, IDM_TABSTOSPACES
    IDM_SEARCH
-   IDM_FIND, IDM_FINDNEXT, IDM_FINDPREV, IDM_REPLACE, IDM_DEFINITION, IDM_LASTPOSITION, IDM_FUNCTIONLIST
+   IDM_FIND, IDM_FINDNEXT, IDM_FINDPREV, IDM_FINDINFILES, IDM_REPLACE, IDM_DEFINITION
+   IDM_LASTPOSITION, IDM_FUNCTIONLIST
    IDM_GOTO, IDM_BOOKMARKTOGGLE, IDM_BOOKMARKNEXT, IDM_BOOKMARKPREV, IDM_BOOKMARKCLEARALL
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
@@ -211,7 +225,7 @@ Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCo
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
-Dim Shared As HWnd HWND_FRMFIND, HWND_FRMREPLACE
+Dim Shared As HWnd HWND_FRMFIND, HWND_FRMREPLACE, HWND_FRMFINDINFILES
 Dim Shared As HWnd HWND_FRMFNLIST
 
 '  Global handle to hhctrl.ocx for context sensitive help
@@ -243,21 +257,24 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 
 
 ''
-''  Save information related to Find/Replace operations
+''  Save information related to Find/Replace and Find in Files operations
 ''
 Type FINDREPLACE_TYPE
-   txtFind         As String
-   txtReplace      As String
-   txtFindCombo    As String
-   txtReplaceCombo As String
-   txtLastFind     As String
-   nWholeWord      As Long          ' checkmark for find/replace whole word search
-   nMatchCase      As Long          ' match case when searching
-   nScopeFind      As Long          ' identifier of OptionButton that is checked
-   nScopeReplace   As Long          ' identifier of OptionButton that is checked
+   txtFind           As String
+   txtReplace        As String
+   txtFindCombo      As String
+   txtReplaceCombo   As String
+   txtLastFind       As String
+   txtFilePattern    As String        ' *.*, *.bas, etc (FindInFolder)
+   txtFolder         As String        ' start search from this folder (FindInFolder)
+   nWholeWord        As Long          ' checkmark for find/replace whole word search
+   nMatchCase        As Long          ' match case when searching
+   nSearchSubFolders As Long          ' search sub folders as well (FindInFolder)
+   nScopeFind        As Long          ' identifier of OptionButton that is checked
+   nScopeReplace     As Long          ' identifier of OptionButton that is checked
 End Type
 Dim Shared gFind As FINDREPLACE_TYPE
-
+Dim Shared gFindInFiles As FINDREPLACE_TYPE
 
 
 ' Forward reference
