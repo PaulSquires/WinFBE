@@ -1752,6 +1752,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
          ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
          If IsDialogMessageW( HWND_FRMFIND, @uMsg ) Then Continue Do
          If IsDialogMessageW( HWND_FRMREPLACE, @uMsg ) Then Continue Do
+         If IsDialogMessageW( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
+         
          If IsDialogMessageW(pWindow->hWindow, @uMsg) = 0 Then
             TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
             DispatchMessageW @uMsg    ' Dispatches a message to a window procedure.

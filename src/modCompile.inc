@@ -462,8 +462,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
                L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
          MessageBoxW( HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
+      else
+         ' Simply sound a success
+         MessageBeep(MB_OK)
       End If
-   Else
+   Else 
       ' There were errors and/or warnings
       If NumErrors > 0 Then gCompile.RunAfterCompile = False 
       
@@ -476,7 +479,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' If fGoodCompile is False then something unusual occurred so better show the log file by default
       If fGoodCompile = False Then
          PositionOutputWindows(HWND_FRMOUTPUT)
-      End If   
+      End If 
+      ' If the Search Results tab is active then reposition to the first tab for error listview
+      if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 2 THEN
+         TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
+         PositionOutputWindows(HWND_FRMOUTPUT)
+      end if
       ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized
@@ -536,7 +544,7 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
    FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
    FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
 
-   If Dir(wszErrorFile) = "" Then Exit Function
+   If AfxFileExists(wszErrorFile) = 0 Then Exit Function
    
    ' Position the editor to the Error line
    idx = gTTabCtl.GetTabIndexFromFilename( @wszErrorFile )

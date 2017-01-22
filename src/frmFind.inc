@@ -136,14 +136,23 @@ End Function
 ' Add a string to the Find combobox (ensure no duplicates)
 ' ========================================================================================
 Function frmFind_AddToFindCombo( ByRef sText As Const String ) As Long
-   Dim i As Long 
+   Dim as long i
+   dim as long nFound = -1
    
-   ' If the string already exists in the combobox then remove it
-   i = Instr(gFind.txtFindCombo, sText & DELIM)
-   If i Then gFind.txtFindCombo = AfxStrDelete(gFind.txtFindCombo, i, Len(sText))
-  
-   ' Add it to the beginning of the list
-   gFind.txtFindCombo = sText & DELIM & gFind.txtFindCombo 
+   if len(sText) = 0 THEN exit function
+   ' See if the string already exists in the combobox
+   for i = 0 to ubound(gFind.txtFindCombo)
+      if gFind.txtFindCombo(i) = sText THEN
+         nFound = i: exit for
+      END IF
+   NEXT
+   if nFound = -1 THEN  ' was not found
+      for i = ubound(gFind.txtFindCombo) to 1 step -1
+         gFind.txtFindCombo(i) = gFind.txtFindCombo(i-1)
+      next   
+      gFind.txtFindCombo(0) = sText
+   END IF
+   gFind.txtFind = sText
 
    Function = 0
 End Function
@@ -183,18 +192,18 @@ Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          ' Catch the dropdown of the Find combobox so we can populate it
          If codeNotify = CBN_DROPDOWN Then
             ' Add any previous search terms to the combobox
-            Dim As Long i, nCount 
+            Dim As Long i
             Dim wszText As WString * MAX_PATH
             wszText = AfxGetWindowText(hwndCtl)
-            gFind.txtFind = Str(wszText)
-            frmFind_AddToFindCombo(gFind.txtFind)
+            frmFind_AddToFindCombo(Str(wszText))
             ComboBox_ResetContent(hwndCtl)
-            nCount = AfxStrParseCount(gFind.txtFindCombo, DELIM )
-            For i = 1 To nCount
-               wszText = AfxStrParse(gFind.txtFindCombo, i, DELIM)
-               If Len(wszText) Then ComboBox_AddString( hwndCtl, @wszText )
+            For i = 0 To ubound(gFind.txtFindCombo)
+               If Len(gFind.txtFindCombo(i)) Then 
+                  wszText = wstr(gFind.txtFindCombo(i))
+                  ComboBox_AddString( hwndCtl, @wszText )
+               end if   
             Next
-            wszText = gFind.txtFind
+            wszText = wstr(gFind.txtFind)
             i = ComboBox_FindStringExact( hwndCtl, -1, @wszText )
             ComboBox_SetCurSel(hwndCtl, i)
          End If
@@ -254,6 +263,8 @@ Function frmFind_OnDestroy(HWnd As HWnd) As LRESULT
    gFind.nMatchCase = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_CHKMATCHCASE) )    
    If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_OPTSCOPE1) ) Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1      
    If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_OPTSCOPE2) ) Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE2
+   gFind.txtFind = str(AfxGetWindowText( GetDlgItem(HWnd_FRMFIND, IDC_FRMFIND_COMBOFIND)))
+   gFind.txtLastFind = gFind.txtFind 
 
    HWND_FRMFIND = 0
    Function = 0
@@ -286,12 +297,13 @@ End Function
 ' ========================================================================================
 Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
 
-   ' We don't want the Replace dialog to display at the same time as the Find form.
+   ' We don't want the FindInFiles or Replace dialogs to display at the same time.
    If IsWindowVisible(HWND_FRMREPLACE) Then DestroyWindow(HWND_FRMREPLACE)
+   If IsWindowVisible(HWND_FRMFINDINFILES) Then DestroyWindow(HWND_FRMFINDINFILES)
 
    ' If the Find window already exists then simply set focus to it and exit.
    If IsWindow(HWND_FRMFIND) Then
-      SetForegroundWindow(HWND_FRMMAIN)
+      SetForegroundWindow(HWND_FRMFIND)
       SetFocus GetDlgItem( HWND_FRMFIND, IDC_FRMFIND_COMBOFIND )
       Exit Function
    End If
@@ -346,7 +358,7 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
 '        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long i, nCount, startPos, endPos, startLine, endLine
-   Dim As String buffer      
+   Dim As String buffer, sFind      
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
@@ -358,15 +370,14 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
       buffer = pDoc->GetSelText()
       If Len(buffer) Then
          If Instr(buffer, Chr(13, 10)) = 0 Then
-            gFind.txtFind = buffer
+            sFind = buffer
             gFind.txtLastFind = buffer
          End If
       Else
-         gFind.txtFind = gFind.txtLastFind
+         sFind = gFind.txtLastFind
       End If
    End If
-
-   frmFind_AddToFindCombo(gFind.txtFind)
+   frmFind_AddToFindCombo(sFind)
 
    If gFind.nScopeFind = 0 Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1
    Button_SetCheck( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE1), Iif(gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1, BST_CHECKED, BST_UNCHECKED) )

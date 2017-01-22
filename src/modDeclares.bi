@@ -24,6 +24,7 @@
 #Define IDC_FRMOUTPUT_LISTVIEW                      1001
 #Define IDC_FRMOUTPUT_TXTLOGFILE                    1002
 #Define IDC_FRMOUTPUT_BTNCLOSE                      1003
+#Define IDC_FRMOUTPUT_LISTSEARCH                    1004
 
 #Define IDC_FRMEXPLORER_LBLEXPLORER                 1000
 #Define IDC_FRMEXPLORER_TREE                        1001
@@ -130,7 +131,7 @@
 
 #Define IDC_FRMFINDINFILES_LBLFINDWHAT              1000
 #Define IDC_FRMFINDINFILES_COMBOFIND                1001
-#Define IDC_FRMFINDINFILES_COMBOPATTERN             1002
+#Define IDC_FRMFINDINFILES_COMBOFILES               1002
 #Define IDC_FRMFINDINFILES_COMBOFOLDER              1003
 #Define IDC_FRMFINDINFILES_CHKWHOLEWORDS            1004
 #Define IDC_FRMFINDINFILES_CHKMATCHCASE             1005
@@ -140,7 +141,9 @@
 #Define IDC_FRMFINDINFILES_OPTSCOPE3                1009
 #Define IDC_FRMFINDINFILES_CHKSUBFOLDERS            1010
 #Define IDC_FRMFINDINFILES_FRAMEOPTIONS             1011
-
+#Define IDC_FRMFINDINFILES_CMDFILES                 1012
+#Define IDC_FRMFINDINFILES_CMDFOLDERS               1013
+ 
 #Define IDC_FRMREPLACE_LBLFINDWHAT                  1000
 #Define IDC_FRMREPLACE_COMBOFIND                    1001
 #Define IDC_FRMREPLACE_CHKWHOLEWORDS                1002
@@ -221,6 +224,7 @@ Dim Shared As HMENU HWND_FRMMAIN_TOPMENU
 
 Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
+dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
 
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
@@ -260,18 +264,20 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ''  Save information related to Find/Replace and Find in Files operations
 ''
 Type FINDREPLACE_TYPE
-   txtFind           As String
-   txtReplace        As String
-   txtFindCombo      As String
-   txtReplaceCombo   As String
-   txtLastFind       As String
-   txtFilePattern    As String        ' *.*, *.bas, etc (FindInFolder)
-   txtFolder         As String        ' start search from this folder (FindInFolder)
-   nWholeWord        As Long          ' checkmark for find/replace whole word search
-   nMatchCase        As Long          ' match case when searching
-   nSearchSubFolders As Long          ' search sub folders as well (FindInFolder)
-   nScopeFind        As Long          ' identifier of OptionButton that is checked
-   nScopeReplace     As Long          ' identifier of OptionButton that is checked
+   txtFind             As String
+   txtReplace          As String
+   txtFindCombo(10)    As String
+   txtFilesCombo(10)   As String
+   txtFolderCombo(10)  As String
+   txtReplaceCombo(10) As String
+   txtLastFind         As String
+   txtFiles            As String        ' *.*, *.bas, etc (FindInFolder)
+   txtFolder           As String        ' start search from this folder (FindInFolder)
+   nWholeWord          As Long          ' checkmark for find/replace whole word search
+   nMatchCase          As Long          ' match case when searching
+   nSearchSubFolders   As Long          ' search sub folders as well (FindInFolder)
+   nScopeFind          As Long          ' identifier of OptionButton that is checked
+   nScopeReplace       As Long          ' identifier of OptionButton that is checked
 End Type
 Dim Shared gFind As FINDREPLACE_TYPE
 Dim Shared gFindInFiles As FINDREPLACE_TYPE

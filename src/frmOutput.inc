@@ -13,6 +13,52 @@
 
 
 ' ========================================================================================
+' Process the search result that was double clicked
+' ========================================================================================
+function DoSearchFileSelected() as LONG
+
+   dim as long nCursel, f1, f2, nSize, nLineNum
+   dim wzText as wstring * MAX_PATH
+   dim wzFilename as wstring * MAX_PATH
+
+   dim as HWND hLB = GetDlgItem(hWnd_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH)
+   nCurSel = ListBox_GetCurSel(hLB)
+   SendMessage( hLB, LB_GETTEXT, nCurSel, cast(LPARAM, @wzText))
+   
+   'X:\FB\WinFBE - Editor\license.txt(1): WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+   
+   ' Search for the first open parenthesis 
+   f1 = instr(wzText, "(")
+   if f1 THEN
+      wzFilename = left(wzText, f1-1)
+      wzText = mid(wzText, f1+1) 
+      f2 = instr(wzText, ")")
+      if f2 THEN
+         wzText = left(wzText, f2-1) 
+         nLineNum = val(wzText)
+      end if
+   END IF
+
+   if AfxFileExists(wzFilename) = 0 THEN exit function
+      
+   Dim pDoc As clsDocument Ptr 
+   pDoc = frmMain_OpenFileSafely(HWnd_FRMMAIN, _
+                           False, _    ' bIsNewFile
+                           False, _    ' bIsTemplate
+                           True,  _    ' bShowInTab
+                           true, _     ' bIsInclude
+                           wzFilename, _ ' pwszName
+                           0 )         ' pDocIn
+
+   if pDoc THEN
+      SendMessageW pDoc->hWindow, SCI_GOTOLINE, nLineNum-1, 0
+   END IF
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Show/Hide correct child controls
 ' ========================================================================================
 Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
@@ -22,6 +68,7 @@ Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
    ' By default, hide all controls
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_HIDE
    
    hTabCtl = GetDlgItem(hWnd, IDC_FRMOUTPUT_TABCONTROL)
    
@@ -30,6 +77,8 @@ Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
          ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_SHOW )
       case 1    ' compiler log file
          ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_SHOW )
+      case 2    ' search results
+         ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_SHOW )
    end select
          
    Function = 0
@@ -63,6 +112,7 @@ Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
    nTop = nTop + nCtlHeight 
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
 
    ' Determine which child controls should be shown or hidden
    ShowHideOutputControls(hWnd)
@@ -94,6 +144,13 @@ Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
             ShowWindow HWND_FRMOUTPUT, SW_HIDE
             frmMain_PositionWindows(HWND_FRMMAIN)
          end if
+
+      case LBN_DBLCLK 
+         if id = IDC_FRMOUTPUT_LISTSEARCH then
+            DoSearchFileSelected()   
+            Exit Function
+         End If
+         
    end select
                        
    Function = 0
@@ -244,7 +301,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   Dim As HWnd hCtl, hLV
+   Dim As HWnd hCtl, hLV, hLB
    Dim As Long nWidth  = 24
    Dim As Long nHeight = 24
    
@@ -256,6 +313,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    TabCtrl_AddTab( hCtl, -1, L(191, "Compiler Results") )
    TabCtrl_AddTab( hCtl, -1, L(252, "Compiler Log File") )
+   TabCtrl_AddTab( hCtl, -1, L(262, "Search Results") )
    TabCtrl_SetCurSel( hCtl, 0 )
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
@@ -288,29 +346,18 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    ListView_AddColumn( hLV, 1, L(254, "File"), pWindow->ScaleX(250) )
    ListView_AddColumn( hLV, 2, L(255, "Description"), pWindow->ScaleX(500) )
        
+   ' Search results listbox
+   hLB = _
+      pWindow->AddControl("LISTBOX", , IDC_FRMOUTPUT_LISTSEARCH, "", 0, 0, 0, 0, _
+      WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
+      WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   AfxSetWindowFont( hLB, hFont, True )
+
    PositionOutputWindows(HWND_FRMOUTPUT)
    
    Function = 0
 
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

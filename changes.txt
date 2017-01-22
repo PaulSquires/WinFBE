@@ -1,4 +1,5 @@
 Version 1.2.2 (Not released yet)
+- Added: Find in Files
 - Added: Localization translations for Russian and Ukrainian compliments of ur_naz.
 - Fixed: Regression from v1.2.1 whereby cursor would not change to arrow during application start.
 - Fixed: Loading Template did not increment the Untitled 1,2,3 .bas filename numbering.

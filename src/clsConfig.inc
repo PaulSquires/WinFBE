@@ -397,10 +397,14 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    ' visually more appealing.
    Dim nTabs(any) As clsDocument Ptr
    
+   ' Prevent the constant updating of the app caption bar with filename, (pDoc->DisplayStats)
+   gProjectLoading = true   
+   
    ' Prevent Treeview flickering during adding
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    LockWindowUpdate(hTV)
 
+   
    Do Until Eof(f)
       Line Input #f, st
       If Len(st) = 0 Then Continue Do
@@ -494,6 +498,8 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    end if
    
    Close #f
+
+   gProjectLoading = false
 
    Function = True   ' successful open
 End Function

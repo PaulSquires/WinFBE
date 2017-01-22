@@ -16,29 +16,25 @@
 ' Add a string to the Find combobox (ensure no duplicates)
 ' ========================================================================================
 Function frmReplace_AddToReplaceCombo( ByRef sText As Const String ) As Long
-   Dim i As Long 
+   Dim as long i
+   dim as long nFound = -1
    
-   ' If the string already exists in the combobox then remove it
-   i = Instr(gFind.txtReplaceCombo, sText & DELIM)
-   If i Then gFind.txtReplaceCombo = AfxStrDelete(gFind.txtReplaceCombo, i, Len(sText))
-  
-   ' Add it to the beginning of the list
-   gFind.txtReplaceCombo = sText & DELIM & gFind.txtReplaceCombo 
+   if len(sText) = 0 THEN exit function
+   ' See if the string already exists in the combobox
+   for i = 0 to ubound(gFind.txtReplaceCombo)
+      if gFind.txtReplaceCombo(i) = sText THEN
+         nFound = i: exit for
+      END IF
+   NEXT
+   if nFound = -1 THEN  ' was not found
+      for i = ubound(gFind.txtReplaceCombo) to 1 step -1
+         gFind.txtReplaceCombo(i) = gFind.txtReplaceCombo(i-1)
+      next   
+      gFind.txtReplaceCombo(0) = sText
+   END IF
+   gFind.txtReplace = sText
 
    Function = 0
-End Function
-
-
-' ========================================================================================
-' Process WM_CREATE message for window/dialog: frmReplace
-' ========================================================================================
-Function frmReplace_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
-
-   '  Message cracker macro expects a True to be returned for a successful
-   '  OnCreate handler even though returning -1 from a standard WM_CREATE
-   '  call would stop creating the window. This is just one of those Windows
-   '  inconsistencies.
-   Return True
 End Function
 
 
@@ -58,11 +54,9 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             ' this to ensure that manually typed in text has been captured.
             Dim wszText As WString * MAX_PATH
             wszText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMREPLACE_COMBOFIND) )
-            gFind.txtFind = Str(wszText)
-            frmFind_AddToFindCombo(gFind.txtFind)
+            frmFind_AddToFindCombo(str(wszText))
             wszText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMREPLACE_COMBOREPLACE) )
-            gFind.txtReplace = Str(wszText)
-            frmReplace_AddToReplaceCombo(gFind.txtReplace)
+            frmReplace_AddToReplaceCombo(str(wszText))
             
             ' Do the actual search
             Find_UpOrDown(IDM_FINDNEXT, findFlags, False, HWND_FRMREPLACE)
@@ -79,18 +73,18 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
          ' Catch the dropdown of the Find combobox so we can populate it
          If codeNotify = CBN_DROPDOWN Then
             ' Add any previous search terms to the combobox
-            Dim As Long i, nCount 
+            Dim As Long i
             Dim wszText As WString * MAX_PATH
             wszText = AfxGetWindowText(hwndCtl)
-            gFind.txtFind = Str(wszText)
-            frmFind_AddToFindCombo(gFind.txtFind)
+            frmFind_AddToFindCombo(Str(wszText))
             ComboBox_ResetContent(hwndCtl)
-            nCount = AfxStrParseCount(gFind.txtFindCombo, DELIM )
-            For i = 1 To nCount
-               wszText = AfxStrParse(gFind.txtFindCombo, i, DELIM)
-               If Len(wszText) Then ComboBox_AddString( hwndCtl, @wszText )
+            For i = 0 To ubound(gFind.txtFindCombo)
+               If Len(gFind.txtFindCombo(i)) Then 
+                  wszText = wstr(gFind.txtFindCombo(i))
+                  ComboBox_AddString( hwndCtl, @wszText )
+               end if   
             Next
-            wszText = gFind.txtFind
+            wszText = wstr(gFind.txtFind)
             i = ComboBox_FindStringExact( hwndCtl, -1, @wszText )
             ComboBox_SetCurSel(hwndCtl, i)
          End If
@@ -99,18 +93,18 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
          ' Catch the dropdown of the Find combobox so we can populate it
          If codeNotify = CBN_DROPDOWN Then
             ' Add any previous search terms to the combobox
-            Dim As Long i, nCount 
+            Dim As Long i
             Dim wszText As WString * MAX_PATH
             wszText = AfxGetWindowText(hwndCtl)
-            gFind.txtReplace = Str(wszText)
-            frmReplace_AddToReplaceCombo(gFind.txtReplace)
+            frmReplace_AddToReplaceCombo(Str(wszText))
             ComboBox_ResetContent(hwndCtl)
-            nCount = AfxStrParseCount(gFind.txtReplaceCombo, DELIM )
-            For i = 1 To nCount
-               wszText = AfxStrParse(gFind.txtReplaceCombo, i, DELIM)
-               If Len(wszText) Then ComboBox_AddString( hwndCtl, @wszText )
+            For i = 0 To ubound(gFind.txtReplaceCombo)
+               If Len(gFind.txtReplaceCombo(i)) Then 
+                  wszText = wstr(gFind.txtReplaceCombo(i))
+                  ComboBox_AddString( hwndCtl, @wszText )
+               end if   
             Next
-            wszText = gFind.txtReplace
+            wszText = wstr(gFind.txtReplace)
             i = ComboBox_FindStringExact( hwndCtl, -1, @wszText )
             ComboBox_SetCurSel(hwndCtl, i)
          End If
@@ -255,6 +249,9 @@ Function frmReplace_OnDestroy(HWnd As HWnd) As LRESULT
    gFind.nMatchCase = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMREPLACE_CHKMATCHCASE) )    
    If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMREPLACE_OPTSCOPE1) ) Then gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE1      
    If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMREPLACE_OPTSCOPE2) ) Then gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE2
+   gFind.txtFind = str(AfxGetWindowText( GetDlgItem(HWnd_FRMREPLACE, IDC_FRMREPLACE_COMBOFIND)))
+   gFind.txtLastFind = gFind.txtFind 
+   gFind.txtReplace = str(AfxGetWindowText( GetDlgItem(HWnd_FRMREPLACE, IDC_FRMREPLACE_COMBOREPLACE)))
 
    HWND_FRMREPLACE = 0
    Function = 0
@@ -271,7 +268,6 @@ Function frmReplace_WndProc( ByVal HWnd   As HWnd, _
                              ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_CREATE,   frmReplace_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmReplace_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmReplace_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmReplace_OnCommand)
@@ -288,12 +284,13 @@ End Function
 ' ========================================================================================
 Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
 
-   ' We don't want the Find dialog to display at the same time as the Replace form.
+   ' We don't want the Find or FindInFiles dialogs to display at the same time as the Replace form.
    If IsWindowVisible(HWND_FRMFIND) Then DestroyWindow(HWND_FRMFIND)
+   If IsWindowVisible(HWND_FRMFINDINFILES) Then DestroyWindow(HWND_FRMFINDINFILES)
    
    ' If the Find window already exists then simply set focus to it and exit.
    If IsWindow(HWND_FRMREPLACE) Then
-      SetForegroundWindow(HWND_FRMMAIN)
+      SetForegroundWindow(HWND_FRMREPLACE)
       SetFocus GetDlgItem( HWND_FRMREPLACE, IDC_FRMREPLACE_COMBOFIND )
       Exit Function
    End If
@@ -362,7 +359,7 @@ Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long i, nCount, startPos, endPos, startLine, endLine
-   Dim As String buffer      
+   Dim As String buffer, sFind
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
@@ -374,16 +371,15 @@ Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
       buffer = pDoc->GetSelText()
       If Len(buffer) Then
          If Instr(buffer, Chr(13, 10)) = 0 Then
-            gFind.txtFind = buffer
+            sFind = buffer
             gFind.txtLastFind = buffer
          End If
       Else
-         gFind.txtFind = gFind.txtLastFind
+         sFind = gFind.txtLastFind
       End If
    End If
-
-   frmFind_AddToFindCombo(gFind.txtFind)
-
+   frmFind_AddToFindCombo(sFind)
+   frmReplace_AddToReplaceCombo(gFind.txtReplace)
 
    If gFind.nScopeReplace = 0 Then gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE1
    Button_SetCheck( GetDlgItem(HWND_FRMREPLACE, IDC_FRMREPLACE_OPTSCOPE1), Iif(gFind.nScopeReplace = IDC_FRMREPLACE_OPTSCOPE1, BST_CHECKED, BST_UNCHECKED) )

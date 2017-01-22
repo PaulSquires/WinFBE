@@ -206,7 +206,7 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFi
    AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
    ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
    
-   ' Open the project
+      ' Open the project
    gApp.ProjectFilename = wzFile
    If gConfig.ProjectLoadFromFile() Then
       gApp.IsNewProjectFlag = False

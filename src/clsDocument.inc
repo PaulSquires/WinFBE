@@ -809,14 +809,19 @@ Function clsDocument.DisplayStats() As Long
    ' Set the filename text that displays on the tab. 
    gTTabCtl.SetTabText(-1)
 
-   ' Update the main window caption with the full filename and path. Only
-   ' do the update if the text has changed in order to prevent flicker.
-   wTemp = AfxGetWindowText( HWND_FRMMAIN )
-   wText = APPNAMESHORT 
-   If gApp.IsProjectActive Then wText = wText + " - [" + gApp.ProjectName + "]"
-   wText = wText + " - [" + this.DiskFilename + wTag + "]"
-   If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
-
+   ' If a project is loading then we don't want to be constantly updating the 
+   ' application caption to the filename names, etc. Only do so once the project
+   ' has been finally loaded.
+   if gProjectLoading = false THEN
+      ' Update the main window caption with the full filename and path. Only
+      ' do the update if the text has changed in order to prevent flicker.
+      wTemp = AfxGetWindowText( HWND_FRMMAIN )
+      wText = APPNAMESHORT 
+      If gApp.IsProjectActive Then wText = wText + " - [" + gApp.ProjectName + "]"
+      wText = wText + " - [" + this.DiskFilename + wTag + "]"
+      If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
+   end if
+   
    Function = 0
 End Function
 
