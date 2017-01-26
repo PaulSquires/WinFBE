@@ -10,13 +10,32 @@
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
-  
-Type _HashItem
-   sKey   As String
-   sData  As String
-   pNext  As _HashItem Ptr
-End Type
 
+Type _HashItem
+   sKey    As String
+   sData1  As String
+   sData2  As String
+   sData3  As String
+   sData4  As String   ' Will this one be needed...
+   pNext   As _HashItem Ptr
+End Type
+' Structure for gCodeTips (FB's builtin keywords)
+' sKey   = FB keyword
+' sData1 = Syntax
+' sData2 = <N/A>
+' sData3 = <N/A>
+
+' Structure for gFunctionDeclares
+' sKey   = Function Name
+' sData1 = Function Declare
+' sData2 = Function Filename
+' sData3 = Str(LineNumber)
+
+' Structure for gFunctionLists
+' sKey   = Full Disk Filename
+' sData1 = DELIM separated list of function names
+' sData2 = <N/A>
+' sData3 = <N/A>
 
 Type clsFastHash
    Private:
@@ -28,11 +47,21 @@ Type clsFastHash
       Declare Function GetSlot( ByRef sKey As Const String) As LONG
 
    Public:
-      Declare Function AddItem( ByRef sKey As Const String, ByRef sData As Const String) As LONG   
+      declare Function AddItem( ByRef sKey As Const String, _
+                                 ByRef sData1   As Const String, _
+                                 ByRef sData2   As Const String = "", _
+                                 ByRef sData3   As Const String = "", _
+                                 ByRef sData4   As Const String = "" _
+                                 ) As LONG   
       Declare Function FindItem( ByRef sKey As Const String) As boolean   
       Declare function ClearHash() as BOOLEAN 
+      declare function DeleteItem(ByRef sKey As Const String) As boolean
+      declare function DeleteAllData2(ByRef sData2 As Const String) as BOOLEAN
       Declare Property FoundKey() As String
-      Declare Property FoundData() As String
+      Declare Property FoundData1() As String
+      Declare Property FoundData2() As String
+      Declare Property FoundData3() As String
+      Declare Property FoundData4() As String
       Declare Function SaveToFile( ByRef sFilename As Const String, _
                                    ByRef sHeaderText As Const String = "", _
                                    ByRef sDelimiter As Const String = "=" _
@@ -40,6 +69,7 @@ Type clsFastHash
       Declare Function LoadFromFile( ByRef sFilename As Const String, _
                                      ByRef sDelimiter As Const String = "=" _
                                      ) As LONG
+      declare Sub Debug( ByRef sFilename As Const String)
       Declare Constructor ( ByVal nCapacity As LONG = -1)
       Declare Destructor
 End Type
@@ -86,8 +116,26 @@ End Property
 
 ''
 ''
-Property clsFastHash.FoundData() As String
-   If m_FoundNode Then Property = m_FoundNode->sData
+Property clsFastHash.FoundData1() As String
+   If m_FoundNode Then Property = m_FoundNode->sData1
+End Property
+
+''
+''
+Property clsFastHash.FoundData2() As String
+   If m_FoundNode Then Property = m_FoundNode->sData2
+End Property
+
+''
+''
+Property clsFastHash.FoundData3() As String
+   If m_FoundNode Then Property = m_FoundNode->sData3
+End Property
+
+''
+''
+Property clsFastHash.FoundData4() As String
+   If m_FoundNode Then Property = m_FoundNode->sData4
 End Property
 
 ''
@@ -110,8 +158,11 @@ End Function
 
 ''
 ''
-Function clsFastHash.AddItem( ByRef sKey    As Const String, _
-                              ByRef sData   As Const String _
+Function clsFastHash.AddItem( ByRef sKey     As Const String, _
+                              ByRef sData1   As Const String, _
+                              ByRef sData2   As Const String = "", _
+                              ByRef sData3   As Const String = "", _
+                              ByRef sData4   As Const String = "" _
                               ) As LONG   
    
    If Ubound(m_arrHash) = -1 Then
@@ -127,7 +178,7 @@ Function clsFastHash.AddItem( ByRef sKey    As Const String, _
       m_arrHash(nPosition) = New _HashItem
       _Item = m_arrHash(nPosition)
    Else
-      ' Add the key/data to the linked list 
+      ' Determine if the key already exists. If yes, then simply update it's data.
       _Item = m_arrHash(nPosition)
       Do 
          If _Item->sKey = sKey Then
@@ -145,7 +196,10 @@ Function clsFastHash.AddItem( ByRef sKey    As Const String, _
    End If
 
    _Item->sKey   = sKey
-   _Item->sData  = sData
+   _Item->sData1 = sData1
+   _Item->sData2 = sData2
+   _Item->sData3 = sData3
+   _Item->sData4 = sData4
    Function = 0
 End Function
 
@@ -179,6 +233,80 @@ End Function
 
 ''
 ''
+function clsFastHash.DeleteItem(ByRef sKey As Const String) As boolean
+
+   Dim nPosition As LONG = this.GetSlot(sKey)
+   Dim _ItemPrev As _HashItem Ptr
+   Dim _Item As _HashItem Ptr
+   
+   m_FoundNode = 0
+
+   ' Determine if a linked list exists at this position.
+   If m_arrHash(nPosition) = 0 Then Return false
+   
+   ' Key exists in this slot. Find it in the linked list 
+   _Item = m_arrHash(nPosition)
+   _ItemPrev = 0
+   Do 
+      If _Item->sKey = sKey Then 
+         ' Key was located. Set the previous item to point to the
+         ' item after this one and then deallocate this current node.
+         if _ItemPrev = 0 THEN
+            m_arrHash(nPosition) = _Item->pNext
+         else
+            _ItemPrev->pNext = _Item->pNext   
+         END IF
+         delete _Item
+         return true
+      End If
+      If _Item->pNext = 0 Then Exit Do   
+      _ItemPrev = _Item
+      _Item = _Item->pNext
+   Loop
+   
+   function = false
+End function
+
+''
+''
+function clsFastHash.DeleteAllData2(ByRef sData2 As Const String) as BOOLEAN
+   Dim _Item     As _HashItem Ptr
+   Dim _ItemNext As _HashItem Ptr
+   Dim _ItemPrev As _HashItem Ptr
+   
+   ' Delete all nodes that match the Data2 field. This is currently used
+   ' to match Filenames held in Data2 to delete all functions for a specific
+   ' filename about to be parsed.
+   function = false
+   For i As LONG = LBound(m_arrHash) To Ubound(m_arrHash)
+      If m_arrHash(i) <> 0 Then
+         _Item = m_arrHash(i)
+         _ItemPrev = 0
+         Do Until _Item = 0
+            If _Item->sData2 = sData2 Then 
+               ' Matching Data2 was located. Set the previous item to point to the
+               ' item after this one and then deallocate this current node.
+               if _ItemPrev = 0 THEN
+                  m_arrHash(i) = _Item->pNext
+               else
+                  _ItemPrev->pNext = _Item->pNext   
+               END IF
+               _ItemNext = _Item->pNext
+               Delete _Item
+               _Item = _ItemNext
+               function = true
+            else
+               _ItemPrev = _Item
+               _Item = _Item->pNext
+            end if
+         Loop
+      End If
+   Next    
+   
+End function
+
+''
+''
 Function clsFastHash.SaveToFile( ByRef sFilename As Const String, _
                                  ByRef sHeaderText As Const String = "", _
                                  ByRef sDelimiter As Const String = "=" _
@@ -196,10 +324,10 @@ Function clsFastHash.SaveToFile( ByRef sFilename As Const String, _
       
    For i As LONG = LBound(m_arrHash) To Ubound(m_arrHash)
       If m_arrHash(i) = 0 Then Continue For
-      Print #f, m_arrHash(i)->sKey & sDelimiter & m_arrHash(i)->sData
+      Print #f, m_arrHash(i)->sKey & sDelimiter & m_arrHash(i)->sData1
       _Item = m_arrHash(i)->pNext
       Do Until _Item = 0
-         Print #f, m_arrHash(i)->sKey & sDelimiter & m_arrHash(i)->sData
+         Print #f, m_arrHash(i)->sKey & sDelimiter & m_arrHash(i)->sData1
          _Item = _Item->pNext
       Loop
    Next    
@@ -215,11 +343,11 @@ End Function
 Function clsFastHash.LoadFromFile( ByRef sFilename As Const String, _
                                    ByRef sDelimiter As Const String = "=" _
                                    ) As LONG
-   Dim st    As String
-   Dim sKey  As String
-   Dim sData As String
-   Dim f     As LONG         
-   Dim i     As LONG
+   Dim st     As String
+   Dim sKey   As String
+   Dim sData1 As String
+   Dim f      As LONG         
+   Dim i      As LONG
    
    f = Freefile
    If Open( sFilename For Input As #f ) = 0 Then
@@ -231,9 +359,9 @@ Function clsFastHash.LoadFromFile( ByRef sFilename As Const String, _
          
          i = Instr(st, sDelimiter)
          If i Then
-            sKey  = Left(st, i-1)
-            sData = Mid(st, i+1)
-            this.AddItem( sKey, sData ) 
+            sKey   = Left(st, i-1)
+            sData1 = Mid(st, i+1)
+            this.AddItem( sKey, sData1 ) 
          End If   
       Loop
       Close #f
@@ -242,5 +370,34 @@ Function clsFastHash.LoadFromFile( ByRef sFilename As Const String, _
    Function = 0
 End Function
 
+''
+''
+Sub clsFastHash.Debug( ByRef sFilename As Const String)
+   Dim _Item As _HashItem Ptr
+
+   Dim f As long = Freefile
+   Open sFilename For Output As #f
+   
+   For i As long = LBound(m_arrHash) To Ubound(m_arrHash)
+      If m_arrHash(i) = 0 Then
+         Print #f, "Slot: "; i, "<Null>"
+      Else   
+         Print #f, "Slot: "; i, m_arrHash(i)->sKey, m_arrHash(i)->sData1   ', _gHashLang(i)->pNextItem
+         _Item = m_arrHash(i)->pNext
+         Do Until _Item = 0
+            Print #f, "       ", _Item->sKey, _Item->sData1
+            _Item = _Item->pNext
+         Loop
+      End If
+   Next    
+   
+   Close #f
+End Sub
+
+' Create global hash variable to hold information for all FB language codetips
 dim shared gCodetips as clsFastHash
+' Create global hash variable to hold declares for all Subs/Functions
+dim shared gFunctionDeclares as clsFastHash = 1000
+' Create global hash variable to hold filenames and subs/functions within it
+dim shared gFunctionLists as clsFastHash
 

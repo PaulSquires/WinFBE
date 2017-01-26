@@ -172,7 +172,7 @@
 #Define IDC_FRMFNLIST_LISTBOX                       1000
 
 
-Const DELIM = Chr(1)                 ' character used as delimiter for Find/Replace text strings  
+Const DELIM = "|"                    ' character used as delimiter for function names in data1 of gFunctionLists hash
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
 
@@ -295,15 +295,15 @@ End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
 ' Linked list of Function names
-Type FUNCTION_TYPE
-   pListPrev   As FUNCTION_TYPE Ptr
-   pListNext   As FUNCTION_TYPE Ptr
-   bIsHeader   As BOOLEAN
-   zFnName     As WString * MAX_PATH
-   zFnDeclare  As WString * (MAX_PATH * 2)
-   nLineNumber As Long
-   pDoc        As clsDocument_ Ptr
-End Type
+'Type FUNCTION_TYPE
+'   pListPrev   As FUNCTION_TYPE Ptr
+'   pListNext   As FUNCTION_TYPE Ptr
+'   bIsHeader   As BOOLEAN
+'   zFnName     As WString * MAX_PATH
+'   zFnDeclare  As WString * (MAX_PATH * 2)
+'   nLineNumber As Long
+'   pDoc        As clsDocument_ Ptr
+'End Type
 
 Type clsDocument
    Private:
@@ -314,7 +314,6 @@ Type clsDocument
       IsNewFlag        As BOOLEAN
       IsProjectFile    As BOOLEAN
       ProjectFileType  As Long = FILETYPE_UNDEFINED
-      FnListPtr        As FUNCTION_TYPE Ptr
       DiskFilename     As WString * MAX_PATH
       DateFileTime     As FILETIME  
       hNodeExplorer    As HTREEITEM
@@ -347,8 +346,6 @@ Type clsDocument
       Declare Function ConvertEOL( ByVal nMode As Long) As Long
       Declare Function DisplayStats() As Long
       Declare Function TabsToSpaces() As Long
-      Declare Function CreateFunctionList() As Long
-      Declare Function DeallocateFunctionList() As Long
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Function GetBookmarks() As String
       Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
@@ -472,6 +469,7 @@ Type clsApp
    
    Public:
       ProjectType          As Long                       
+      IsUnicodeCodetips    As BOOLEAN    ' UNICODE define exists. Use Unicode version of codetips
       IsProjectActive      As BOOLEAN
       IsNewProjectFlag     As BOOLEAN
       ProjectErrorOption   As Long
@@ -673,6 +671,7 @@ Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
 declare Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
 declare Function CreateRootNodeExplorerTreeview() As Long
+declare Function ParseDocument( byval pDoc as clsDocument ptr, byval sFilename as string ) As Long
 
 
 

@@ -1,8 +1,11 @@
 Version 1.2.2 (Not released yet)
-- Added: Find in Files
+- Added: Find in Files functionality added.
+- Added: #Include files are now parsed for Sub/Function declaration Codetips.
 - Added: Localization translations for Russian and Ukrainian compliments of ur_naz.
+- Changed: Refined autocomplete insertions for SUB/FUNCTION/PROPERTY/TYPE/UNION.
 - Fixed: Regression from v1.2.1 whereby cursor would not change to arrow during application start.
 - Fixed: Loading Template did not increment the Untitled 1,2,3 .bas filename numbering.
+- Fixed: Autocomplete insertions (eg. IF/THEN, FOR/NEXT) now honours the keyword casing as defined by the user.
 
 Version 1.2.1 (January 14, 2017)
 - Added: German localization file (deutsch.lang) compliments of Tom Dehn. 

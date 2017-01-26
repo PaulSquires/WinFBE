@@ -19,47 +19,47 @@ Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
    If pDoc = 0 Then Exit Function
    
-   Dim As Long i, nCount
-   Dim pList As FUNCTION_TYPE Ptr
-   
-   ' Determine the word at the current caret position.
-   Dim As String sWord = Ucase(pDoc->GetWord)
-   
-   Dim pDocFind As clsDocument Ptr
-   
-   nCount = gApp.GetDocumentCount()
-   For i = 0 To nCount - 1
-      pDocFind = gApp.GetDocumentPtr(i)
-      If pDocFind Then 
-         ' Search all of the names for a match on the current select word
-         pList = pDocFind->FnListPtr
-         Do Until pList = 0
-            If Ucase(pList->zFnName) = sWord Then
-               ' Save our current position in case user invokes "Last Position" option,   
-               gLastPosition.pDoc = pDoc
-               gLastPosition.nFirstLine = SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-               gLastPosition.nPosition = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
-               frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                        False, _    ' bIsNewFile
-                        False, _    ' bIsTemplate
-                        True,  _    ' bShowInTab
-                        false, _    ' bIsInclude
-                        pDocFind->DiskFilename, _ ' pwszName
-                        pDocFind )  ' pDocIn
-
-               ' Set the top line to display in the editor. I chose to start 3 lines before the
-               ' function just to make it visually more appealing.
-               SendMessageW( pDocFind->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
-               SendMessageW( pDocFind->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
-               Exit Function
-            End If
-            pList = pList->pListNext
-         Loop      
-      End If   
-   Next
+'   Dim As Long i, nCount
+'   Dim pList As FUNCTION_TYPE Ptr
+'   
+'   ' Determine the word at the current caret position.
+'   Dim As String sWord = Ucase(pDoc->GetWord)
+'   
+'   Dim pDocFind As clsDocument Ptr
+'   
+'   nCount = gApp.GetDocumentCount()
+'   For i = 0 To nCount - 1
+'      pDocFind = gApp.GetDocumentPtr(i)
+'      If pDocFind Then 
+'         ' Search all of the names for a match on the current select word
+'         pList = pDocFind->FnListPtr
+'         Do Until pList = 0
+'            If Ucase(pList->zFnName) = sWord Then
+'               ' Save our current position in case user invokes "Last Position" option,   
+'               gLastPosition.pDoc = pDoc
+'               gLastPosition.nFirstLine = SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+'               gLastPosition.nPosition = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+'               frmMain_OpenFileSafely(HWND_FRMMAIN, _
+'                        False, _    ' bIsNewFile
+'                        False, _    ' bIsTemplate
+'                        True,  _    ' bShowInTab
+'                        false, _    ' bIsInclude
+'                        pDocFind->DiskFilename, _ ' pwszName
+'                        pDocFind )  ' pDocIn
+'
+'               ' Set the top line to display in the editor. I chose to start 3 lines before the
+'               ' function just to make it visually more appealing.
+'               SendMessageW( pDocFind->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
+'               SendMessageW( pDocFind->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
+'               Exit Function
+'            End If
+'            pList = pList->pListNext
+'         Loop      
+'      End If   
+'   Next
    
    ' If we get this far then the word was not found.
-   MessageBoxW( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+'   MessageBoxW( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
    
    Function = 0
 End Function
@@ -341,12 +341,12 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                buffer = Trim(Ucase(buffer), Any Chr(32, 9))
                SELECT CASE buffer
                   CASE "IF"
-                     strFill = "x THEN" & vbcrlf
+                     strFill = "x " & ConvertCase("THEN") & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END IF"
+                     strEnd = ConvertCase("END IF")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
@@ -358,7 +358,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "WEND"
+                     strEnd = ConvertCase("WEND")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
@@ -370,20 +370,20 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "NEXT"
+                     strEnd = ConvertCase("NEXT")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
                      SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
                   CASE "SELECT"
-                     strFill = "CASE x" & vbcrlf
+                     strFill = ConvertCase("CASE") & " x" & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "CASE ELSE"
+                     strEnd = ConvertCase("CASE ELSE")
                      strFill = SPACE(nSpaces + 3) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END SELECT"
+                     strEnd = ConvertCase("END SELECT")
                      strFill = vbcrlf & SPACE$(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
@@ -391,66 +391,61 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      SendMessage(hEdit, SCI_SETANCHOR, curPos + 6, 0)
                   CASE "FUNCTION", "PRIVATE FUNCTION", "PUBLIC FUNCTION"
                      if pDoc->InFunction then exit function
-                     strFill = "FuncName()" & vbcrlf
+                     strFill = "()" & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END FUNCTION"
+                     strEnd = ConvertCase("END FUNCTION")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 8, 0)
                   CASE "SUB", "PRIVATE SUB", "PUBLIC SUB"
                      if pDoc->InFunction then exit function
-                     strFill = "SubName()" & vbcrlf
+                     strFill = "()" & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END SUB"
+                     strEnd = ConvertCase("END SUB")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 7, 0)
                   CASE "PROPERTY"
-                     strFill = "PropertyName()" & vbcrlf
+                     strFill = "()" & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END PROPERTY"
+                     strEnd = ConvertCase("END PROPERTY")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 12, 0)
                   CASE "TYPE"
-                     strFill = "TypeName" & vbcrlf
+                     strFill = "" & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END TYPE"
+                     strEnd = ConvertCase("END TYPE")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 8, 0)
                   CASE "UNION"
-                     strFill = "UnionName" & vbcrlf
+                     strFill = "" & vbcrlf
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     strEnd = "END UNION"
+                     strEnd = ConvertCase("END UNION")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
                      SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 9, 0)
                END SELECT
             END IF
          END IF
@@ -813,7 +808,7 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
       pDoc->ApplyProperties
       pDoc->DisplayStats()   
       ' Parse the code for sub/function listing and create list
-      pDoc->CreateFunctionList
+      ParseDocument(pDoc, "")
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed

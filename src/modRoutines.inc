@@ -48,11 +48,78 @@ End Function
 ' Set the mouse pointer for a specific window
 ' ========================================================================================
 function SetMousePtr( byval HWND as hWnd, byval hDesiredCursor as HCURSOR ) as HCURSOR
- SetClassLongPtr(hWnd, GCLP_HCURSOR, cast(long_PTR, hDesiredCursor))
- return SetCursor(hDesiredCursor)
+   SetClassLongPtr(hWnd, GCLP_HCURSOR, cast(long_PTR, hDesiredCursor))
+   return SetCursor(hDesiredCursor)
+end function
+
+' ========================================================================================
+' Convert incoming text to proper case based on config setting. Used for autocomplete.
+' ========================================================================================
+function ConvertCase( byval sText as string) as string
+
+   Select Case gConfig.KeywordCase
+      Case 0:  return lcase(sText)
+      Case 1:  return ucase(sText)
+      Case 2   ' Mixed case
+         ' Loop through each character. If the previous character was an alphabet letter
+         ' then make the character lowercase otherwise make it uppercase.
+         Dim As String sChar, sPrevChar
+         For i As Long = 1 To Len(sText)
+            sChar = Mid(sText, i, 1)
+            sPrevChar = Mid(sText, i-1, 1)
+            If (sPrevChar = " ") OrElse (sPrevChar = "") Then
+               Mid(sText, i, 1) = Ucase(sChar)
+            Else   
+               Mid(sText, i, 1) = LCase(sChar)
+            End If   
+         Next
+         Return sText   
+   End Select            
 end function
 
 
+' ========================================================================================
+' Generic open document handler for when Function ListBox item selected or Explorer Treeview
+' ========================================================================================
+function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
+                               byref wszFunctionName as WSTRING _
+                               ) as long
+
+   ' Open the document based on the filename. If the Header line is clicked
+   ' then simply open the document and point to the first line. If a function 
+   ' is clicked then search the gFunctionDeclares hash to get the filename
+   ' and line number position within the file.
+   dim wszText as wstring * MAX_PATH
+   dim nLineNumber as LONG
+   if pDoc THEN  ' Header node
+      wszText = pDoc->DiskFilename
+      nLineNumber = 0
+   else 
+      if gFunctionDeclares.FindItem(str(ucase(wszFunctionName))) then
+         wszText = gFunctionDeclares.FoundData2  ' full filename
+         nLineNumber = val(gFunctionDeclares.FoundData3)
+      end if
+   end if   
+   
+   if AfxFileExists(wszText) = 0 THEN exit function
+      
+   ' Display the document containing the selected sub/function       
+   pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                           False, _    ' bIsNewFile
+                           False, _    ' bIsTemplate
+                           true, _     ' bShowInTab
+                           false, _    ' bIsInclude
+                           wszText, _  ' pwszName
+                           0 )  ' pDocIn
+   ' Set the top line to display in the editor. I chose to start 3 lines before the
+   ' function just to make it visually more appealing.
+   if pDoc THEN
+      SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
+      SendMessageW( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
+   END IF
+   
+   function = 0
+end function
 
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.

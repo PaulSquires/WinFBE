@@ -27,7 +27,6 @@ End Constructor
 ''
 Destructor clsDocument
    DestroyWindow this.hWindow    ' destroy the scintilla window
-   this.DeallocateFunctionList   ' free allocated memory for the function list
 End Destructor
 
 ''
@@ -115,6 +114,8 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                END IF
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
+            else
+               print "Error opening: "; *pwszFile
             End If
             this.DiskFilename = *pwszFile
             SciMsg( m_pSci, SCI_SETSAVEPOINT, 0, 0)
@@ -1108,165 +1109,6 @@ Function clsDocument.ApplyProperties() As Long
    Function = 0
 End Function
 
-
-
-''
-''
-Function clsDocument.DeallocateFunctionList() As Long
-
-   Dim pList As FUNCTION_TYPE Ptr
-   Dim pListNext As FUNCTION_TYPE Ptr
-
-   ' If a list already exists then we need to deallocate any memory
-   If this.FnListPtr Then
-      pList = this.FnListPtr
-      Do Until pList = 0
-         pListNext = pList->pListNext
-         Delete pList
-         pList = pListNext
-      Loop
-   End If
-   this.FnListPtr = 0
-
-   Function = 0
-End Function
-               
-            
-''
-''
-Function clsDocument.CreateFunctionList() As Long
-   ' Generate a linked list of FUNCTION_TYPE structures that define all found
-   ' Functions/Subs in the source code. This list is used to be displayed in
-   ' the Function List and also used for displaying CodeTips.
- 
-   dim as long nLineCount = SendMessage(this.hWindow, SCI_GETLINECOUNT, 0, 0)
-   dim as long nLineNum 
-   Dim As String st, st_ucase, sLine
-   Dim As Long n, iParen
-   Dim As BOOLEAN bFirstLine, bIsFunction
-   
-   Dim pList      As FUNCTION_TYPE Ptr
-   Dim pListTemp  As FUNCTION_TYPE Ptr
-   Dim pListFound As FUNCTION_TYPE Ptr
-
-   ' If a list already exists then we need to deallocate any memory
-   this.DeallocateFunctionList()
-   
-   ' Create the first function list node that holds the file name
-   pList = New FUNCTION_TYPE
-   pList->bIsHeader = True
-   pList->nLineNumber = 0   'b/c Scintilla is zero based
-   pList->pDoc = @this
-   pList->zFnName = AfxStrPathname( "NAMEX", this.DiskFilename )
-   pList->zFnName = Ucase(pList->zFnName)
-   this.FnListPtr = pList
-   pList->pListPrev = 0
-   pList->pListNext = 0
-
-   for nLineNum = 0 to nLineCount - 1
-      bFirstLine = false   
-      bIsFunction = false
-      st = ""
-      do
-         ' Get the full sub/function parameter list as it could be spread
-         ' across multiple lines via the line continuation underscore.
-         sLine = this.GetLine(nLineNum)
-      
-         ' Remove any comments
-         n = Instr(sLine, "'")
-         If n Then sLine = Left(sLine, n-1)
-         
-         sLine = Trim(sLine)
-         if right(sLine, 1) = "_" THEN
-            st = st & left(sLine, len(sLine)-1) & " "
-            nLineNum = nLineNum + 1
-         else
-            st = st & sLine
-            exit do   
-         END IF
-      loop 
-
-      If Len(st) = 0 Then Continue for
-      st_ucase = Ucase(st)
-      
-      If Left(st_ucase, 9)  = "FUNCTION " Then
-         st = Mid(st, 10): bFirstLine = True: bIsFunction = true
-      ElseIf Left(st_ucase, 16) = "PUBLIC FUNCTION " Then
-         st = Mid(st, 17): bFirstLine = True: bIsFunction = true
-      ElseIf Left(st_ucase, 17) = "PRIVATE FUNCTION " Then
-         st = Mid(st, 18): bFirstLine = True: bIsFunction = true
-      End If   
-      
-      If Left(st_ucase, 4)  = "SUB " Then
-         st = Mid(st, 5): bFirstLine = True
-      ElseIf Left(st_ucase, 11) = "PUBLIC SUB " Then
-         st = Mid(st, 12): bFirstLine = True
-      ElseIf Left(st_ucase, 12) = "PRIVATE SUB " Then
-         st = Mid(st, 13): bFirstLine = True
-      End If
-      st = ltrim(st)  ' remove any leading spaces   
-   
-      if bFirstLine = false THEN continue for
-
-      ' bypass any line with = embedded in it but need to check only up to the first
-      ' open parenthesis because after that are the parameters and they could have equal
-      ' signs for default parameter values.
-      n = Instr( st, "=") 
-      If n Then 
-         iParen = Instr(st, "(") 
-         If (iParen = 0) OrElse (n < iParen) Then
-            Continue for
-         End If
-      End If
-
-      pList = New FUNCTION_TYPE
-      ' Determine the name of this sub/function
-      iParen = Instr(st, "(") 
-      If iParen Then
-         pList->zFnName = Left(st, iParen - 1)
-      Else
-         pList->zFnName = st
-      End If
-      
-      st = iif(bIsFunction, "Function ", "Sub ") & st
-      pList->zFnDeclare = st
-
-      pList->bIsHeader = False
-      pList->nLineNumber = nLineNum - 1   'b/c Scintilla is zero based
-      pList->pDoc = @this
-      pList->pListPrev = 0
-      pList->pListNext = 0
-            
-      ' Need to add this function in sorted order
-      pListFound = 0
-      pListTemp  = this.FnListPtr
-      Do Until pListTemp = 0
-         If pListTemp->bIsHeader = False Then
-            If UCase(pList->zFnName) < UCase(pListTemp->zFnName) Then
-               pListFound = pListTemp: Exit Do
-            End If
-         End If
-         If pListTemp->pListNext = 0 Then Exit Do
-         pListTemp = pListTemp->pListNext
-      Loop
-      If pListFound = 0 Then
-         ' Insert the new node at end of list
-         pListTemp->pListNext = pList
-         pList->pListPrev = pListTemp
-         pList->pListNext = 0
-      Else
-         ' Insert the new node immediately before the found node
-         pList->pListNext = pListFound
-         pList->pListPrev = pListFound->pListPrev
-         pListFound->pListPrev->pListNext = pList
-         pListFound->pListPrev = pList
-      End If   
-         
-   next
-
-   Function = 0
-
-End Function
 
 
 ''

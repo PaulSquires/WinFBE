@@ -218,7 +218,7 @@ Function clsApp.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
    m_arrDocuments(ub) = pDoc
 
    ' Parse the document to create sub/function list
-   pDoc->CreateFunctionList
+   ParseDocument(pDoc, "")
    
    Function = 0
 End Function

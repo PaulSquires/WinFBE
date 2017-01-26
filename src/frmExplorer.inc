@@ -93,17 +93,16 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
 
    If pDoc = 0 Then Exit Function
    
-   Dim pList As FUNCTION_TYPE Ptr 
    Dim As CWSTR wzFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
    Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    Dim As HTREEITEM hChild
    Dim As BOOLEAN fAddChildren = False
    
    ' If hNodeExplorer does not exist then we must be adding a new document. If it does
-   ' exist then we simply need to update the child nodes with the new pointers to the function list.
+   ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
       If pDoc->hNodeExplorer = 0 Then
-         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, gApp.hExplorerRootNode, wzFile, 0, gidxImageClosed, gidxImageClosed)
+         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, gApp.hExplorerRootNode, wzFile, cast(LPARAM, pDoc), gidxImageClosed, gidxImageClosed)
          FF_TreeView_SetCheckState( hTree, pDoc->hNodeExplorer, False)
          fAddChildren = True
       End If
@@ -118,15 +117,20 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
    End If
 
    If fAddChildren Then
-      ' Ensure the parent node (filename) has the correct pointer
-      pList = pDoc->FnListPtr
-      FF_TreeView_SetlParam( hTree, pDoc->hNodeExplorer, Cast(LPARAM, pList) )
-      ' Add all the sub/function names in this source file
-      pList = pList->pListNext
-      Do Until pList = 0
-         FF_TreeView_InsertItem (hTree, pDoc->hNodeExplorer, pList->zFnName, Cast(LPARAM, pList), gidxImageCode, gidxImageCode)
-         pList = pList->pListNext
-      Loop      
+      dim wszText as wstring * MAX_PATH
+      dim as STRING sAllFunctions, sFunctionName
+      dim as string sFilename = ucase(pDoc->DiskFilename)
+      if gFunctionLists.FindItem(sFilename) then
+         ' Parse the function names and add them to the list box
+         sAllFunctions = gFunctionLists.FoundData1
+         if len(sAllFunctions) THEN
+            dim as long nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
+            for p as long = 1 to nParseCount
+               sFunctionName = AfxStrParse(sAllFunctions, p, DELIM)
+               FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, sFunctionName, 0, gidxImageCode, gidxImageCode)
+            NEXT
+         end if
+      end if
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
    
@@ -177,7 +181,6 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
    Dim As HWND hTree 
    Dim As LPARAM lParam
    Dim As Long idxImage 
-   Dim pList As FUNCTION_TYPE Ptr
    Dim pDoc As clsDocument Ptr
    Dim ht As TVHITTESTINFO
    Dim As POINT pt
@@ -206,18 +209,15 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
             
             ' This is a regular file.
             lParam = FF_TreeView_GetlParam(hTree, hItem)
-            pList = Cast(FUNCTION_TYPE Ptr, lParam)
-            If pList Then
-               If pList->bIsHeader Then
-                  If FF_TreeView_GetCheckState( hTree, hItem ) = True Then
-                     idxImage = gidxImageOpened
-                  Else
-                     idxImage = gidxImageClosed
-                  End If      
+            pDoc = Cast(clsDocument Ptr, lParam)
+            If pDoc Then
+               If FF_TreeView_GetCheckState( hTree, hItem ) = True Then
+                  idxImage = gidxImageOpened
                Else
-                  bIsButton = False
-                  idxImage = gidxImageCode
+                  idxImage = gidxImageClosed
                End If      
+            Else
+               idxImage = gidxImageCode
             End If
             
             If bIsButton = True Then
@@ -244,11 +244,11 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
                If hItem <> Treeview_GetRoot(hTree) Then 
                   ' Create the popup menu
                   lParam = FF_TreeView_GetlParam(hTree, hItem)
-                  pList = Cast(FUNCTION_TYPE Ptr, lParam)
-                  If pList Then
+                  pDoc = Cast(clsDocument ptr, lParam)
+                  If pDoc Then
                      ' Select the node and show the document
                      SendMessageW(hTree, WM_LBUTTONDBLCLK, 0, 0)
-                     Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pList->pDoc)
+                     Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
                      GetCursorPos @pt
                      TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWND_FRMMAIN, ByVal Null)
                      DestroyMenu hPopUpMenu
@@ -343,32 +343,13 @@ Function frmExplorer_Tree_SubclassProc ( _
       Case WM_LBUTTONDBLCLK
          hTree = hWnd
          hItem = Treeview_GetSelection(hTree)
-         ' This is a regular file. Preview it in the editor.
-         Dim pList As FUNCTION_TYPE Ptr
-         Dim pDoc As clsDocument Ptr
          lParam = FF_TreeView_GetlParam(hTree, hItem)
-         pList = Cast(FUNCTION_TYPE Ptr, lParam)
-         If pList Then
-            pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                    False, _    ' bIsNewFile
-                                    False, _    ' bIsTemplate
-                                    True,  _    ' bShowInTab
-                                    false, _    ' bIsInclude
-                                    pList->pDoc->DiskFilename, _  ' pwszName
-                                    pList->pDoc )  ' pDocIn
-            ' If this is a header node (File name) then set the parent node so that it can be
-            ' easily set later when top tab control tabs are clicked.
-            If pList->bIsHeader Then
-               pDoc->hNodeExplorer = hItem
-            Else
-               ' This is a function within the file. Attempt to position to the function line.
-               ' Set the top line to display in the editor. I chose to start 3 lines before the
-               ' function just to make it visually more appealing.
-               SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
-               SendMessageW( pDoc->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
-            End If      
-         End If
 
+         dim wszText as wstring * MAX_PATH
+         Dim pDoc As clsDocument Ptr
+         pDoc = Cast(clsDocument Ptr, lParam)
+         TreeView_GetItemText(hTree, hItem, @wszText, MAX_PATH)
+         OpenSelectedDocument(pDoc, wszText)
          Exit Function
          
       Case WM_KEYUP

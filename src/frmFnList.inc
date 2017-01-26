@@ -17,21 +17,28 @@
 ' ========================================================================================
 Function frmFnList_SetListBoxPosition() As Long
 
-   Dim pList   As FUNCTION_TYPE Ptr
    Dim nCurSel As Long = -1
 
    Dim As HWnd hList  = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
    Dim As Long nCount = Listbox_GetCount(hList)
+   dim wszText as wstring * MAX_PATH
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr() 
    If pDoc Then 
       For i As Long = 0 To nCount - 1
-         pList = Cast(FUNCTION_TYPE Ptr, Listbox_GetItemData(hList, i))
-         If pList Then
-            If pList->pDoc = pDoc Then
+         ListBox_GetText( hList, i, @wszText )
+         if ListBox_GetItemData(hList, i) <> 0 THEN   ' Header line (filename)
+            If wszText = ucase(pDoc->DiskFilename) Then
                nCurSel = i: Exit For
             End If
-         End If
+         else
+            ' Determine what file this function is located in.
+            if gFunctionDeclares.FindItem(ucase(str(wszText))) then
+               If ucase(gFunctionDeclares.FoundData2) = ucase(pDoc->DiskFilename) Then
+                  nCurSel = i: Exit For
+               End If
+            end if
+         END IF
       Next
    End If            
    
@@ -40,6 +47,35 @@ Function frmFnList_SetListBoxPosition() As Long
    Function = 0
 End Function
 
+'' ========================================================================================
+'' Simple Bubblesort to sort function names before displaying them
+'' ========================================================================================
+'Sub BubbleSort( MyArray() As String )
+'   dim as long i, j
+'   For i = 1 To UBound(MyArray)-1
+'      For j = i To UBound(MyArray)
+'         If MyArray(i) > MyArray(j) Then Swap MyArray(i), MyArray(j) 
+'      Next 
+'   Next 
+'End Sub
+
+' ========================================================================================
+' Simple Insertion sort to sort function names before displaying them (case insensitive)
+' ========================================================================================
+Sub InsertionSort( MyArray() As String )
+   dim as long lb = LBound(myArray)
+   dim as long ub = Ubound(myArray)
+   for startIndex as long = lb + 1 to ub 'establish starting index of each pass
+      for index as long = startIndex to lb + 1 step -1
+         if (ucase(myArray(index)) < ucase(myArray(index-1))) then   'REVERSE TO SORT DECENDING
+            swap myArray(index), myArray(index-1)
+         else
+            exit for
+         end if
+      next 
+   next 
+end sub
+
 
 ' ========================================================================================
 ' Update the Listbox with the list of functions from all loaded documents
@@ -47,28 +83,45 @@ End Function
 Function frmFnList_UpdateListBox() As Long
 
    Dim As HWnd hList = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
-   Dim szTemp As WString * MAX_PATH
    
    ' Clear the listbox and add the new items
    Listbox_ResetContent(hList)
    
    Dim pDoc As clsDocument Ptr
-   Dim pList As FUNCTION_TYPE Ptr
-   
-   Dim As Long i, idx
+   dim as string sAllFunctions, sFunctionName, sFilename
+   Dim As Long i, p, idx, nParseCount
    Dim As Long nCount = gApp.GetDocumentCount()
+   dim wszText as wstring * MAX_PATH
    
    For i = 0 To nCount - 1
       pDoc = gApp.GetDocumentPtr(i)
       If pDoc Then 
-         ' Display all the sub/function names in this source file
-         pList = pDoc->FnListPtr
-         Do Until pList = 0
-            ' Draw the function or header name and store pointer to pList
-            idx = Listbox_AddString( hList, @pList->zFnName )
-            ListBox_SetItemData( hList, idx, pList )    ' store pointer to type structure
-            pList = pList->pListNext
-         Loop      
+         sFilename = ucase(pDoc->DiskFilename)
+         if gFunctionLists.FindItem(sFilename) then
+            ' Draw the header name 
+            wszText = wstr(sFilename)
+            idx = Listbox_AddString( hList, strptr(wszText) )
+            ListBox_SetItemData( hList, idx, pDoc )    ' pDoc is stored for a header
+            ' Parse the function names and add them to the list box
+            sAllFunctions = gFunctionLists.FoundData1
+            if len(sAllFunctions) THEN
+               ' Get the names into array and then sort them alphabetically
+               nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
+               dim sFunctionNames(1 to nParseCount) as string 
+               for p = 1 to nParseCount 
+                  sFunctionNames(p) = AfxStrParse(sAllFunctions, p, DELIM)
+               NEXT
+               ' Simple bubble sort
+               'BubbleSort( sFunctionNames() )
+               InsertionSort( sFunctionNames() )
+               ' Display the names in the ListBox
+               for p = 1 to nParseCount 
+                  wszText = wstr(sFunctionNames(p))
+                  idx = Listbox_AddString( hList, strptr(wszText) )
+                  ListBox_SetItemData( hList, idx, 0 )
+               next
+            end if
+         end if
       End If   
    Next
    
@@ -87,33 +140,17 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
          If codeNotify = LBN_DBLCLK Then
             Dim As Long nCurSel = Listbox_GetCurSel(hwndCtl)
             If nCurSel = -1 Then Exit Function
-            
-            ' Retrieve the pointer to the pList and attempt to load the document at the correct 
-            ' location. If the pointer is Null then we have clicked on the header element which
-            ' is the name of the file. 
-            Dim pDoc As clsDocument Ptr 
-            Dim pList As FUNCTION_TYPE Ptr = Cast(FUNCTION_TYPE Ptr, Listbox_GetItemData(hWndCtl, nCurSel))
-            
-            If pList = 0 Then  ' header row
-               ' Get the filename and attempt to open the document
-            Else
-               ' Display the document containing the selected sub/function       
-               pDoc = pList->pDoc
-               frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       true, _     ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       pDoc->DiskFilename, _  ' pwszName
-                                       pDoc )  ' pDocIn
-               ' Set the top line to display in the editor. I chose to start 3 lines before the
-               ' function just to make it visually more appealing.
-               SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
-               SendMessageW( pDoc->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
-            End If
+            ' Open the document based on the filename. If the Header line is clicked
+            ' then simply open the document and point to the first line. If a function 
+            ' is clicked then search the gFunctionDeclares hash to get the filename
+            ' and line number position within the file.
+            dim wszText as wstring * MAX_PATH
+            dim pDoc as clsDocument ptr
+            ListBox_GetText( hwndCtl, nCurSel, @wszText )  ' already in UCASE format
+            pDoc = cast(clsDocument ptr, Listbox_GetItemData(hWndCtl, nCurSel))
+            OpenSelectedDocument(pDoc, wszText)
             If gConfig.CloseFuncList Then ShowWindow( HWND_FRMFNLIST, SW_HIDE )
-         End If
-         
+         end if      
    End Select
    
    Function = 0
@@ -180,13 +217,13 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
 
    Dim As HBRUSH hBrush 
    Dim As HFONT hFont, hFontOld
+   dim as BOOLEAN bIsHeader
    Dim As Rect rc 
    Dim wzText As WString * MAX_PATH
    
    If lpdis->itemID = -1 Then Exit Function
    
    Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(HWnd)
-   Dim pList As FUNCTION_TYPE Ptr
    
    Select Case lpdis->itemAction
       Case ODA_DRAWENTIRE, ODA_SELECT
@@ -201,14 +238,15 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
          SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
          SendMessageW(lpdis->hwndItem, LB_GETTEXT, lpdis->itemID, Cast(LPARAM, @wzText))
          
-         ' Determine what font to use. The pointer to the pList data is held in the ItemData
-         ' for each row in the ListBox. If that value is zero then we must be dealing with a
-         ' header row.
-         pList = Cast(FUNCTION_TYPE Ptr, lpdis->itemData)
-         hFont = pWindow->CreateFont("", 9, Iif(pList->bIsHeader, FW_BOLD, FW_NORMAL) )
+         ' Determine what font to use and if itès a header line then only show
+         ' the filename's name and extension (not full path)
+         bIsHeader = iif(lpdis->itemData, true, false)
+         if bIsHeader then wzText = AfxStrPathname( "NAMEX", wzText )
+         hFont = pWindow->CreateFont("", 9, iif(bIsHeader, FW_BOLD, FW_NORMAL) )
+
          hFontOld = SelectObject(lpdis->hDC, hFont)
          DrawTextW( lpdis->hDC, wzText, -1, Cast(lpRect, @lpdis->rcItem), _
-                        DT_LEFT Or DT_SINGLELINE Or Iif(pList->bIsHeader, DT_BOTTOM, DT_VCENTER) )
+                        DT_LEFT Or DT_SINGLELINE Or Iif(bIsHeader, DT_BOTTOM, DT_VCENTER) )
          DeleteObject(SelectObject(lpdis->hDC, hFontOld))
    
          ' SELECTED ITEM
@@ -312,7 +350,7 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
                          ByVal nCmdShow   As Long = 0 _
                          ) As Long
 
-   ' If project manager already exists then toggle its visibility
+   ' If function list already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.
    If IsWindow(HWND_FRMFNLIST) Then
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMFNLIST), SW_HIDE, SW_SHOW)

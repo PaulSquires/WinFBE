@@ -42,6 +42,7 @@ Using Afx
 #Include Once "windowsxx.bi"      ' needed because version that ships with FB is broken and incomplete. 
 #Include Once "modScintilla.bi"
 #Include Once "modDeclares.bi"
+#Include Once "clsFastHash.inc"
 #Include Once "clsConfig.inc"
 #Include Once "modRoutines.inc"
 #Include Once "modSplitter.inc" 
@@ -49,7 +50,7 @@ Using Afx
 #Include Once "clsDocument.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
-#Include Once "clsFastHash.inc"
+#Include Once "modParser.inc"
 #Include Once "modHelp.inc"
 #Include Once "modMenus.inc"
 #Include Once "modToolbar.inc"
@@ -122,7 +123,7 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    
    ' Load the Codetips file
    gCodetips.LoadFromFile( Exepath & "\Settings\codetips.ini" )
-   
+
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )
 
