@@ -197,11 +197,11 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
       
       sFuncDeclare = iif(bIsFunction, "Function ", "Sub ") & st
       nFuncLineNumber = nLineNum    'b/c Scintilla is zero based
-      gFunctionDeclares.AddItem(ucase(sFuncName), sFuncDeclare, ucase(sFilename), str(nFuncLineNumber))
+      gFunctionDeclares.AddItem(ucase(sFuncName), sFuncDeclare, sFilename, str(nFuncLineNumber))
             
       sAllFunctionNames = sAllFunctionNames & DELIM & sFuncName
    next
-   
+
    ' We are now finished parsing this file. Add the found list of function
    ' names to the global hash. Data1 holds a DELIM delimited string of function names.
    gFunctionLists.AddItem(ucase(sFilename), trim(sAllFunctionNames,DELIM))

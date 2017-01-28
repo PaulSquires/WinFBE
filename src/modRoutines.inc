@@ -97,6 +97,7 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    else 
       if gFunctionDeclares.FindItem(str(ucase(wszFunctionName))) then
          wszText = gFunctionDeclares.FoundData2  ' full filename
+print wszText 
          nLineNumber = val(gFunctionDeclares.FoundData3)
       end if
    end if   

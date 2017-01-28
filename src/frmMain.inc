@@ -19,47 +19,19 @@ Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
    If pDoc = 0 Then Exit Function
    
-'   Dim As Long i, nCount
-'   Dim pList As FUNCTION_TYPE Ptr
-'   
-'   ' Determine the word at the current caret position.
-'   Dim As String sWord = Ucase(pDoc->GetWord)
-'   
-'   Dim pDocFind As clsDocument Ptr
-'   
-'   nCount = gApp.GetDocumentCount()
-'   For i = 0 To nCount - 1
-'      pDocFind = gApp.GetDocumentPtr(i)
-'      If pDocFind Then 
-'         ' Search all of the names for a match on the current select word
-'         pList = pDocFind->FnListPtr
-'         Do Until pList = 0
-'            If Ucase(pList->zFnName) = sWord Then
-'               ' Save our current position in case user invokes "Last Position" option,   
-'               gLastPosition.pDoc = pDoc
-'               gLastPosition.nFirstLine = SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-'               gLastPosition.nPosition = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
-'               frmMain_OpenFileSafely(HWND_FRMMAIN, _
-'                        False, _    ' bIsNewFile
-'                        False, _    ' bIsTemplate
-'                        True,  _    ' bShowInTab
-'                        false, _    ' bIsInclude
-'                        pDocFind->DiskFilename, _ ' pwszName
-'                        pDocFind )  ' pDocIn
-'
-'               ' Set the top line to display in the editor. I chose to start 3 lines before the
-'               ' function just to make it visually more appealing.
-'               SendMessageW( pDocFind->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
-'               SendMessageW( pDocFind->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
-'               Exit Function
-'            End If
-'            pList = pList->pListNext
-'         Loop      
-'      End If   
-'   Next
+   ' Determine the word at the current caret position.
+   Dim As String sWord = pDoc->GetWord
    
-   ' If we get this far then the word was not found.
-'   MessageBoxW( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+   ' Search the list of Function names
+   if gFunctionDeclares.FindItem(ucase(sWord)) then
+      ' Save our current position in case user invokes "Last Position" option,   
+      gLastPosition.pDoc = pDoc
+      gLastPosition.nFirstLine = SendMessageW( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+      gLastPosition.nPosition = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+      OpenSelectedDocument(0, sWord)
+   else
+      MessageBoxW( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+   END IF
    
    Function = 0
 End Function
@@ -1142,7 +1114,6 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Dim ptttdi As NMTTDISPINFOW Ptr    ' Tooltip notification message information
    Dim wszText As WString * MAX_PATH  
    Dim nCurSel As Long
-   Dim pInfo As TCHITTESTINFO
    Dim hPopUpMenu As HMENU
    Dim pt As Point   
    Dim rc As Rect      
@@ -1160,13 +1131,6 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Select Case pNMHDR->code 
    
       Case NM_CLICK
-         If id = IDC_FRMMAIN_TOPTABCONTROL Then
-            ' Get the position of the hit and determine if the close icon was clicked.
-            GetCursorPos( @pInfo.pt )
-            ScreenToClient gTTabCtl.hWindow, @pInfo.pt
-            nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-            If pInfo.flags = TCHT_ONITEMICON Then gTTabCtl.CloseTab()
-         end if
          
          ' Process clicking on the "compiler" or "compilemode" panels in the statusbar
          If id = IDC_FRMMAIN_STATUSBAR Then   
@@ -1209,21 +1173,6 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
                frmMain_PositionWindows(HWND_FRMMAIN)
             End If   
-         End If
-
-      Case NM_RCLICK
-         If id = IDC_FRMMAIN_TOPTABCONTROL Then
-            ' Get the tab number
-            GetCursorPos( @pInfo.pt )
-            ScreenToClient gTTabCtl.hWindow, @pInfo.pt
-            nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-            gTTabCtl.SetFocusTab(nCurSel)
-            ' Create the popup menu
-            hPopupMenu = CreateTopTabCtlContextMenu(nCurSel)
-            GetCursorPos @pt
-            TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
-            DestroyMenu hPopUpMenu
-            Return True   ' prevent further processing that leads to WM_CONTEXTMENU
          End If
 
       Case TBN_DROPDOWN
@@ -1482,81 +1431,112 @@ End Function
 
 
 ' ========================================================================================
-' Process WM_SETCURSOR message for window/dialog: frmMain
+' Processes messages for the subclassed frmMain TabControl control.
 ' ========================================================================================
-Function frmMain_OnSetCursor( byval HWnd As HWnd, _
-                              byval HWndCursor As hwnd, _
-                              byval codeHitTest as UINTEGER, _
-                              byval msg as UINTEGER _
-                              ) As LRESULT
-   dim as Point pt 
+Function frmMain_TabCtl_SubclassProc ( _
+                  ByVal HWnd   As HWnd, _                 ' // Control window handle
+                  ByVal uMsg   As UINT, _                 ' // Type of message
+                  ByVal wParam As WPARAM, _               ' // First message parameter
+                  ByVal lParam As LPARAM, _               ' // Second message parameter
+                  ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
+                  ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
+                  ) As LRESULT
+
+   Dim pInfo As TCHITTESTINFO
+   Dim As HWND hLV 
+   Dim As POINT pt
+   dim as long nCurSel
+   dim as HMENU hPopupMenu 
    static as long oldX, oldY
-   
-   ' Determine if the top tab control tabs are being dragged and dropped.
-   GetCursorPos(@pt): ScreenToClient( Hwnd, @pt)
-   if ChildWindowFromPoint( HWND, pt) = gTTabCtl.hWindow then
-      Select Case msg
-         Case WM_LBUTTONDOWN
+
+
+   ' Convert our ENTER key presses into LBUTTONDBLCLK to process them similarly
+   If (uMsg = WM_KEYUP) And (Loword(wParam) = VK_RETURN) Then uMsg = WM_LBUTTONDBLCLK
+      
+   Select Case uMsg
+
+      Case WM_RBUTTONDOWN
+         ' Get the tab number
+         GetCursorPos( @pInfo.pt )
+         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
+         nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
+         gTTabCtl.SetFocusTab(nCurSel)
+         ' Create the popup menu
+         hPopupMenu = CreateTopTabCtlContextMenu(nCurSel)
+         GetCursorPos @pt
+         TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+         DestroyMenu hPopUpMenu
+         Return True   ' prevent further processing that leads to WM_CONTEXTMENU
+
+      Case WM_LBUTTONDOWN
+         ' Get the position of the hit and determine if the close icon was clicked.
+         GetCursorPos( @pInfo.pt )
+         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
+         nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
+         gTTabCtl.SetFocusTab(nCurSel)
+         ' Was the close icon pressed
+         If pInfo.flags = TCHT_ONITEMICON Then 
+            gTTabCtl.CloseTab()
+         else
             gApp.bDragTabActive = true: oldX = pt.x: oldY = pt.y
-         Case WM_MOUSEMOVE
-            if (gApp.bDragTabActive = true) And cbool(oldX <> pt.x Or oldY <> pt.y) Then 
-               ' Change mouse cursor
-               SetCursor( LoadCursor( null, IDC_HAND ))
-               return true
-            else   
-               SetCursor( LoadCursor( null, IDC_ARROW ))
-            end if   
-         Case WM_LBUTTONUP
-            If gApp.bDragTabActive Then 
-               gApp.bDragTabActive = false
-               dim as long idx, iCurTab, iDropTab, nCount
-               dim As TC_HITTESTINFO HT
-               Dim AS TCITEM TB_CURRENT, TB_TEMP 
-               
-               nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
-               iCurTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
-               GetCursorPos(@HT.pt): ScreenToClient( gTTabCtl.hWindow, @HT.pt)
-               ' Get the tab that is under the cursor drop location
-               iDropTab = SendMessage(gTTabCtl.hWindow, TCM_HITTEST, 0, cast(LPARAM, @HT)) 
-               If (iCurTab = iDropTab) Or (iDropTab = -1) Then Exit function
-
-               ' Save the current TCITEM so it can be set to the new position
-               TB_CURRENT.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
-               TabCtrl_GetItem( gTTabCtl.hWindow, iCurTab, @TB_CURRENT )
-
-               ' Move all of the TCITEM's up or down dependng on the drop point in
-               ' relation to the current point.
-               TB_TEMP.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
-               if iDropTab < iCurTab THEN
-                  for idx = iCurTab to iDropTab + 1 step -1
-                     TabCtrl_GetItem( gTTabCtl.hWindow, idx-1, @TB_TEMP )
-                     TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
-                     gTTabCtl.SetTabText(idx)
-                  NEXT
-               elseif iDropTab > iCurTab THEN
-                  for idx = iCurTab to iDropTab - 1 
-                     TabCtrl_GetItem( gTTabCtl.hWindow, idx+1, @TB_TEMP )
-                     TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
-                     gTTabCtl.SetTabText(idx)
-                  NEXT
-               END IF
-
-               ' Finally, set to the current tab (ie. the drop tab)
-               TabCtrl_SetItem( gTTabCtl.hWindow, iDropTab, @TB_CURRENT )
-               gTTabCtl.SetTabText(iDropTab)
-               gTTabCtl.SetFocusTab(iDropTab)
-               ' Reset the mouse pointer
-            end if
+            SetCursor( LoadCursor( null, IDC_HAND ))
+         end if
+            
+      Case WM_LBUTTONUP
+         If gApp.bDragTabActive Then 
             gApp.bDragTabActive = false
-      End Select
+            dim as long idx, iCurTab, iDropTab, nCount
+            dim As TC_HITTESTINFO HT
+            Dim AS TCITEM TB_CURRENT, TB_TEMP 
+            
+            nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+            iCurTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+            GetCursorPos(@HT.pt): ScreenToClient( gTTabCtl.hWindow, @HT.pt)
+            ' Get the tab that is under the cursor drop location
+            iDropTab = SendMessage(gTTabCtl.hWindow, TCM_HITTEST, 0, cast(LPARAM, @HT)) 
+            If (iCurTab = iDropTab) Or (iDropTab = -1) Then Exit function
 
-   else
-      SetCursor( LoadCursor( null, IDC_ARROW ))
-   end if
-   
-   Function = 0
+            ' Save the current TCITEM so it can be set to the new position
+            TB_CURRENT.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
+            TabCtrl_GetItem( gTTabCtl.hWindow, iCurTab, @TB_CURRENT )
+
+            ' Move all of the TCITEM's up or down dependng on the drop point in
+            ' relation to the current point.
+            TB_TEMP.Mask = TCIF_PARAM Or TCIF_TEXT or TCIF_IMAGE
+            if iDropTab < iCurTab THEN
+               for idx = iCurTab to iDropTab + 1 step -1
+                  TabCtrl_GetItem( gTTabCtl.hWindow, idx-1, @TB_TEMP )
+                  TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
+                  gTTabCtl.SetTabText(idx)
+               NEXT
+            elseif iDropTab > iCurTab THEN
+               for idx = iCurTab to iDropTab - 1 
+                  TabCtrl_GetItem( gTTabCtl.hWindow, idx+1, @TB_TEMP )
+                  TabCtrl_SetItem( gTTabCtl.hWindow, idx, @TB_TEMP )
+                  gTTabCtl.SetTabText(idx)
+               NEXT
+            END IF
+
+            ' Finally, set to the current tab (ie. the drop tab)
+            TabCtrl_SetItem( gTTabCtl.hWindow, iDropTab, @TB_CURRENT )
+            gTTabCtl.SetTabText(iDropTab)
+            gTTabCtl.SetFocusTab(iDropTab)
+
+         end if
+         gApp.bDragTabActive = false
+         ' Reset the mouse pointer
+         SetCursor( LoadCursor( null, IDC_ARROW ))
+
+      Case WM_DESTROY
+         ' REQUIRED: Remove control subclassing
+         RemoveWindowSubclass HWnd, @frmOutput_Listview_SubclassProc, uIdSubclass
+
+   End Select
+
+   ' Default processing of Windows messages
+   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
+
 End Function
-
 
 ' ========================================================================================
 ' frmMain Window procedure
@@ -1577,8 +1557,14 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_ACTIVATEAPP, frmMain_OnActivateApp)
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
-      HANDLE_MSG (HWnd, WM_SETCURSOR,   frmMain_OnSetCursor)
 
+      case WM_SETCURSOR
+         if (gApp.bDragTabActive = true) Then 
+            ' Change mouse cursor because Tab in TabCtl being moved
+            SetCursor( LoadCursor( null, IDC_HAND ))
+            return true
+         end if
+            
       Case WM_ERASEBKGND
          ' Code to prevent main application space flickering. Only brush the
          ' background if no tabs are open.
@@ -1674,8 +1660,9 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _
        IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
        WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
-       TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
-     
+       TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING, , _
+       Cast(WNDPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
+    
    ' Create the imagelist for the TopTabControl tabs
    Dim As HICON hIcon = LoadIcon(pWindow->InstanceHandle, "IMAGE_TABCLOSE")
    Dim As HANDLE hImageList = ImageList_Create(16, 16, ILC_MASK Or ILC_COLOR32, 1, 0)
