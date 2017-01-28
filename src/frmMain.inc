@@ -1563,6 +1563,8 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             ' Change mouse cursor because Tab in TabCtl being moved
             SetCursor( LoadCursor( null, IDC_HAND ))
             return true
+         elseif (gCompiling = true) then
+            SetCursor( LoadCursor(0, IDC_WAIT) )
          end if
             
       Case WM_ERASEBKGND
@@ -1655,6 +1657,15 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    If SendMessageW( hStatusBar, SB_SETPARTS, 6, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
       SendMessageW( hStatusBar, SB_SIMPLE, False, 0 )
    End If
+
+   ' Add a progress bar to the status bar (panel5) (to show compiling progress)
+   dim hProgressBar AS hwnd
+   hProgressBar = pWindow->AddControl( "ProgressBar", hStatusbar, IDC_FRMMAIN_PROGRESSBAR, "", _
+                             0, 0, 0, 0, WS_CHILD Or PBS_MARQUEE)
+   ' Move the Progressbar into the correct StatusBar panel
+   Dim rc As Rect
+   SendMessage( hStatusBar, SB_GETRECT, 5, Cast(LPARAM, @rc) )
+   MoveWindow( hProgressBar, rc.Left, rc.Top, pWindow->ScaleY(200), rc.Bottom - rc.Top, True )
 
    ' Add the top tabcontrol (initially not visible)
    gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _

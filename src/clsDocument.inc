@@ -939,7 +939,7 @@ Function clsDocument.ApplyProperties() As Long
    ''  TAB WIDTH 
    SciMsg( m_pSci, SCI_SETTABWIDTH, Val(**gConfig.TabSize), 0 )
    SciMsg( m_pSci, SCI_SETINDENT, Val(**gConfig.TabSize), 0 )
-   
+ 
    ''
    ''  INDENTATION GUIDES
    If gConfig.IndentGuides Then

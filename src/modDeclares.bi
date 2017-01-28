@@ -19,6 +19,8 @@
 #Define IDC_FRMMAIN_TOOLBAR                         1001
 #Define IDC_FRMMAIN_REBAR                           1002
 #Define IDC_FRMMAIN_STATUSBAR                       1003
+#Define IDC_FRMMAIN_PROGRESSBAR                     1004
+#Define IDC_FRMMAIN_COMPILETIMER                    1005
 
 #Define IDC_FRMOUTPUT_TABCONTROL                    1000
 #Define IDC_FRMOUTPUT_LISTVIEW                      1001
@@ -225,6 +227,7 @@ Dim Shared As HMENU HWND_FRMMAIN_TOPMENU
 Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
 dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
+dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
@@ -294,16 +297,6 @@ Type LASTPOSITION_TYPE
 End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
-' Linked list of Function names
-'Type FUNCTION_TYPE
-'   pListPrev   As FUNCTION_TYPE Ptr
-'   pListNext   As FUNCTION_TYPE Ptr
-'   bIsHeader   As BOOLEAN
-'   zFnName     As WString * MAX_PATH
-'   zFnDeclare  As WString * (MAX_PATH * 2)
-'   nLineNumber As Long
-'   pDoc        As clsDocument_ Ptr
-'End Type
 
 Type clsDocument
    Private:

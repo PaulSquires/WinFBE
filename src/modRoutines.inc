@@ -45,14 +45,6 @@ End Function
 
 
 ' ========================================================================================
-' Set the mouse pointer for a specific window
-' ========================================================================================
-function SetMousePtr( byval HWND as hWnd, byval hDesiredCursor as HCURSOR ) as HCURSOR
-   SetClassLongPtr(hWnd, GCLP_HCURSOR, cast(long_PTR, hDesiredCursor))
-   return SetCursor(hDesiredCursor)
-end function
-
-' ========================================================================================
 ' Convert incoming text to proper case based on config setting. Used for autocomplete.
 ' ========================================================================================
 function ConvertCase( byval sText as string) as string
@@ -97,7 +89,6 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    else 
       if gFunctionDeclares.FindItem(str(ucase(wszFunctionName))) then
          wszText = gFunctionDeclares.FoundData2  ' full filename
-print wszText 
          nLineNumber = val(gFunctionDeclares.FoundData3)
       end if
    end if   

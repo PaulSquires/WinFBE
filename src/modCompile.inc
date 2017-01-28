@@ -37,6 +37,7 @@ Dim Shared gCompile As COMPILE_TYPE
 
 ''
 ''  Set the statusbar text and icon for a good/bad compile
+'------------------------------------------------------------------------------------------------------------------------
 function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    StatusBar_SetIcon(hStatusBar, 5, hIconCompile)
@@ -294,19 +295,47 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       .hInstApp     = 0 
    End With
    
-   ' Indicate in the StatusBar that we have started to compile
-   SetCompileStatusBarMessage( L(203, "Compiling..."), 0 )
    
+   ' Indicate in the StatusBar that we have started to compile
+   SetCompileStatusBarMessage( "", 0 )
+
+   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
+   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
+   ShowWindow( hProgressBar, SW_SHOW)
+
+
    ' Shell to the command interpreter and run the batch file
    gCompile.StartTime = Timer
-
-   dim as HCURSOR hCurSave = SetMousePtr( HWND_FRMMAIN, LoadCursor(0, IDC_WAIT) )
+   gCompiling = true    
+   
+   dim as HCURSOR hCurSave = GetCursor()
+   SetCursor( LoadCursor(0, IDC_WAIT) )
+   
+   ' Shell to the compiler 
    ShellExecuteEx(@ShExecInfo)
-   WaitForSingleObject(ShExecInfo.hProcess,INFINITE)
-   SetMousePtr( HWND_FRMMAIN, hCurSave )
 
+   ' Give the process 33 ms (you can use a different value here depending on 
+   ' how responsive you wish your app to be)
+   Dim uMsg As MSG
+   while WaitForSingleObject(ShExecInfo.hProcess, 33) = WAIT_TIMEOUT
+   '  if after 33 ms the object's handle is not signaled..       
+   '  we examine the message queue and if there are any waiting..
+   '  Note:  see PeekMessage documentation for details on how to limit
+   '         the types of messages to look for
+      while(PeekMessage(@uMsg, HWND_FRMMAIN,  0, 0, PM_NOREMOVE))
+        ' we process them..
+        if(GetMessage(@uMsg, NULL, 0, 0) > 0) then
+            TranslateMessage(@uMsg)
+            DispatchMessage(@uMsg)
+         end if
+      wend
+   wend
+
+   SetCursor( hCurSave )
    gCompile.EndTime = Timer
-
+   gCompiling = false
+   ShowWindow( hProgressBar, SW_HIDE)
 
    ' Get the log file contents into a string in order to parse it for errors, etc
    If AfxFileExists(gCompile.LogFile) Then

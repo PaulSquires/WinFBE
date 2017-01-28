@@ -1,6 +1,7 @@
 Version 1.2.2 (Not released yet)
 - Added: Find in Files functionality added.
 - Added: #Include files are now parsed for Sub/Function declaration Codetips.
+- Added: ProgressBar in StatusBar during compiling progress.
 - Added: Localization translations for Russian and Ukrainian compliments of ur_naz.
 - Changed: Refined autocomplete insertions for SUB/FUNCTION/PROPERTY/TYPE/UNION.
 - Fixed: Regression from v1.2.1 whereby cursor would not change to arrow during application start.
