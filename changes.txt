@@ -1,4 +1,4 @@
-Version 1.2.2 (Fenruary 2, 2017)
+Version 1.2.2 (February 2, 2017)
 - Added: Find in Files functionality added.
 - Added: Add "TODO" messages directly in code via 'TODO: or ' TODO: List shows in Output window / TODO tab.
 - Added: New tab in Output window for "Notes". Notes are saved on a per project basis.
