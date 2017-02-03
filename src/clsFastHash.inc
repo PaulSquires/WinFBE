@@ -28,13 +28,19 @@ End Type
 ' Structure for gFunctionDeclares
 ' sKey   = Function Name
 ' sData1 = Function Declare
-' sData2 = Function Filename
+' sData2 = Filename
 ' sData3 = Str(LineNumber)
 
 ' Structure for gFunctionLists
 ' sKey   = Full Disk Filename
 ' sData1 = DELIM separated list of function names
 ' sData2 = <N/A>
+' sData3 = <N/A>
+
+' Structure for gTYPES
+' sKey   = TYPE name
+' sData1 = DELIM separated list of Type elements
+' sData2 = Filename
 ' sData3 = <N/A>
 
 Type clsFastHash
@@ -57,6 +63,7 @@ Type clsFastHash
       Declare function ClearHash() as BOOLEAN 
       declare function DeleteItem(ByRef sKey As Const String) As boolean
       declare function DeleteAllData2(ByRef sData2 As Const String) as BOOLEAN
+      declare function BuildKeyList() as string
       Declare Property FoundKey() As String
       Declare Property FoundData1() As String
       Declare Property FoundData2() As String
@@ -69,6 +76,7 @@ Type clsFastHash
       Declare Function LoadFromFile( ByRef sFilename As Const String, _
                                      ByRef sDelimiter As Const String = "=" _
                                      ) As LONG
+      declare function CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
       declare Sub Debug( ByRef sFilename As Const String)
       Declare Constructor ( ByVal nCapacity As LONG = -1)
       Declare Destructor
@@ -274,6 +282,8 @@ function clsFastHash.DeleteAllData2(ByRef sData2 As Const String) as BOOLEAN
    Dim _ItemNext As _HashItem Ptr
    Dim _ItemPrev As _HashItem Ptr
    
+   ' Incoming sData2 is already UCASE
+
    ' Delete all nodes that match the Data2 field. This is currently used
    ' to match Filenames held in Data2 to delete all functions for a specific
    ' filename about to be parsed.
@@ -283,7 +293,7 @@ function clsFastHash.DeleteAllData2(ByRef sData2 As Const String) as BOOLEAN
          _Item = m_arrHash(i)
          _ItemPrev = 0
          Do Until _Item = 0
-            If _Item->sData2 = sData2 Then 
+            If ucase(_Item->sData2) = sData2 Then 
                ' Matching Data2 was located. Set the previous item to point to the
                ' item after this one and then deallocate this current node.
                if _ItemPrev = 0 THEN
@@ -304,6 +314,29 @@ function clsFastHash.DeleteAllData2(ByRef sData2 As Const String) as BOOLEAN
    Next    
    
 End function
+
+
+''
+''
+function clsFastHash.BuildKeyList() as string
+   ' Build a space delimited list of all keys in this hash list. It is
+   ' used for creating a list of autocomplete popup selections (gTYPES).
+   Dim _Item    As _HashItem Ptr
+   dim sKeyList as string 
+   
+   For i As LONG = LBound(m_arrHash) To Ubound(m_arrHash)
+      If m_arrHash(i) <> 0 Then
+         _Item = m_arrHash(i)
+         Do Until _Item = 0
+            sKeyList = sKeyList & " " & _Item->sKey
+            _Item = _Item->pNext
+         Loop
+      End If
+   Next    
+   
+   function = sKeyList
+End function
+
 
 ''
 ''
@@ -327,7 +360,7 @@ Function clsFastHash.SaveToFile( ByRef sFilename As Const String, _
       Print #f, m_arrHash(i)->sKey & sDelimiter & m_arrHash(i)->sData1
       _Item = m_arrHash(i)->pNext
       Do Until _Item = 0
-         Print #f, m_arrHash(i)->sKey & sDelimiter & m_arrHash(i)->sData1
+         Print #f, _Item->sKey & sDelimiter & _Item->sData1
          _Item = _Item->pNext
       Loop
    Next    
@@ -337,6 +370,51 @@ Function clsFastHash.SaveToFile( ByRef sFilename As Const String, _
    Function = 0
 End Function
 
+
+''
+''
+Function clsFastHash.CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
+
+   Dim f As LONG         
+   Dim _Item As _HashItem Ptr
+   dim pDoc as clsDocument ptr
+      
+   f = Freefile
+   Open sFilename For Output As #f
+
+' Structure for gFunctionDeclares
+' sKey   = Function Name
+' sData1 = Function Declare
+' sData2 = Filename
+' sData3 = Str(LineNumber)
+
+   For i As LONG = LBound(m_arrHash) To Ubound(m_arrHash)
+      If m_arrHash(i) = 0 Then Continue For
+
+      ' Bypass any declares for Class subs/functions
+      if instr(m_arrHash(i)->sKey, ".") = 0 THEN
+         if gApp.GetDocumentPtrByFilename(wstr(m_arrHash(i)->sData2)) THEN 
+            Print #f, "Declare " & AfxStrShrink(m_arrHash(i)->sData1, Chr(32,9,13,10))
+         end if
+      END IF
+
+      _Item = m_arrHash(i)->pNext
+      Do Until _Item = 0
+         ' Bypass any declares for Class subs/functions
+         if instr(_Item->sKey, ".") = 0 THEN
+            if gApp.GetDocumentPtrByFilename(wstr(_Item->sData2)) THEN 
+               Print #f, "Declare " & AfxStrShrink(_Item->sData1, Chr(32,9,13,10))
+            end if
+         END IF
+         _Item = _Item->pNext
+      Loop
+
+   Next    
+   
+   Close #f
+
+   Function = 0
+End Function
 
 ''
 ''
@@ -400,4 +478,5 @@ dim shared gCodetips as clsFastHash
 dim shared gFunctionDeclares as clsFastHash = 1000
 ' Create global hash variable to hold filenames and subs/functions within it
 dim shared gFunctionLists as clsFastHash
-
+' Create global hash variable to hold TYPE names and their elements
+dim shared gTYPES as clsFastHash

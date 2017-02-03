@@ -52,6 +52,7 @@ Function GetIncludeFilename( byref sFilename as string, _    ' file where the #I
       return ""    ' don't parse this file
    end if   
    
+   
 End Function
 
 ''
@@ -77,8 +78,9 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
                         
    dim as long nLineCount, nLineNum, nFuncLineNumber
    Dim As String st, st_ucase, sLine, sFuncName, sFuncDeclare, sAllFunctionNames
-   Dim As Long n, iParen, f
-   Dim As BOOLEAN bFirstLine, bIsFunction
+   dim as string sTypeName, sTypeElements
+   Dim As Long n, iParen, f, i
+   Dim As BOOLEAN bIsSub, bIsFunction, bInType, bInTypePrivate
    redim as string sLineArray(1000)   ' dynamic array 
    
    ' The incoming document may already be loaded into a clsDocument so we can simply 
@@ -106,17 +108,25 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
    ' once the parse completes.
    ' gFunctionDeclares: declares for all Subs/Functions
    gFunctionDeclares.DeleteAllData2(ucase(sFilename))
-
+   gTYPES.DeleteAllData2(ucase(sFilename))
+   
+   ' Remove any TODO notes related to this document because they will be added 
+   ' again during this parse.
+   for i = lbound(gTODO) to ubound(gTODO)
+      if gTODO(i).sDiskFilename = sFilename THEN
+         gTODO(i).sDiskFilename = ""
+         gTODO(i).nLineNumber  = 0
+         gTODO(i).txtDescription = "" 
+      END IF
+   NEXT
+   
    ' gFunctionLists: filenames and subs/functions within it
    ' Key: Filename.
    ' This one is easy, simply delete the one hash entry for this filename
-    gFunctionLists.DeleteItem(ucase(sFilename))
-   
-   
+   gFunctionLists.DeleteItem(ucase(sFilename))
    
    for nLineNum = 0 to nLineCount - 1
-      bFirstLine = false   
-      bIsFunction = false
+      bIsSub = false:  bIsFunction = false
       st = ""
       do
          ' Get the full line as it could be across multiple lines via the line continuation underscore.
@@ -126,10 +136,30 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
             sLine = sLineArray(nLineNum)   
          END IF
       
-         ' Remove any comments
+         ' Check for a TODO entry
+         if (left(ucase(sLine), 6) = "'TODO:") or _
+            (left(ucase(sLine), 7) = "' TODO:") THEN
+
+            dim as long nEmpty = -1
+            for i = lbound(gTODO) to ubound(gTODO)
+               if gTODO(i).sDiskFilename = "" THEN
+                  nEmpty = i: exit for
+               end if
+            next
+            if nEmpty = -1 THEN
+               ' Make the array bigger
+               nEmpty = ubound(gTODO) + 1
+               redim preserve gTODO(n + 10)
+            END IF     
+            gTODO(nEmpty).sDiskFilename  = sFilename
+            gTODO(nEmpty).nLineNumber    = nLineNum + 1
+            gTODO(nEmpty).txtDescription = AfxStrParse(sLine, 2, ":") 
+         END IF
+
+         ' Remove any comments (must be after the check for the TODO
          n = Instr(sLine, "'")
          If n Then sLine = Left(sLine, n-1)
-         
+
          sLine = Trim(sLine)
          if right(sLine, 1) = "_" THEN
             st = st & left(sLine, len(sLine)-1) & " "
@@ -142,11 +172,73 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
 
       If Len(st) = 0 Then Continue for
       st_ucase = Ucase(st)
+      
+         
+      ' If we are currently processing a TYPE structure then continue
+      ' to do so here rather than testing for other declares.
+      if bInType THEN
+         ' Is this the last line of the TYPE
+         If Left(st_ucase, 8)  = "END TYPE" Then
+            gTYPES.AddItem(ucase(sTypeName), trim(sTypeElements,DELIM), sFilename)
+            bInTYPE = false: bInTypePrivate = false
+            sTypeElements = ""
+         else
+            if len(st) = 0 THEN continue for
+            if left(st_ucase, 8) = "PRIVATE:" THEN 
+               bInTypePrivate = true: continue for
+            elseif left(st_ucase, 7) = "PUBLIC:" THEN 
+               bInTypePrivate = false: continue for
+            elseif left(st_ucase, 1) = "#" THEN 
+               continue for   ' conditional equate 
+            end if
+            if bInTypePrivate then continue for
+
+            ' As Long var1, var2, var3
+            ' As Long Ptr var1, var2, var3
+            ' var1 as Long
+            ' Declare Sub
+            ' Declare Function
+            ' Property
+            ' Operator
+            st = RemoveDuplicateSpaces(st)
+            st_ucase = ucase(st)
+            ' AS Long var1, var2, var3
+            if left(st_ucase, 3) = "AS " THEN
+               ' the word following is the element type
+               n = instr(4, st_ucase, " ")
+               if n then
+                  ' Maybe the next word is "PTR" or "POINTER"
+                  if mid(st_ucase, n + 1, 4) = "PTR " then
+                     n = n + 5
+                  elseif mid(st_ucase, n + 1, 8) = "POINTER " then
+                     n = n + 9
+                  END IF 
+               END IF
+               ' Next is a list of elements DIM'd as the datatype
+               st = AfxStrReplace(mid(st, n), ", ", DELIM)
+            end if
+            ' var1 AS Long
+            n = instr(st_ucase, " AS ") 
+            if n THEN st = left(st, n-1)
+            
+            ' Process this line of the TYPE because it is Public
+            sTypeElements = sTypeElements & DELIM & st
+         end if
+         continue for   
+      END IF
+      
+      if left(st_ucase, 5) = "TYPE " THEN
+         ' If " AS " exists then this is not a TYPE structure
+         if instr(st_ucase, " AS ") THEN continue for
+         sTypeName = AfxStrParse( ltrim(mid(st, 6)), 1, " ")
+         sTypeElements = ""
+         bInType = true: continue for
+      end if   
 
       ' Search for UNICODE indicator
       if left(st_ucase, 7) = "#DEFINE" THEN
          if trim(mid(st_ucase, 8)) = "UNICODE" THEN
-            gApp.IsUnicodeCodetips = true
+            gApp.IsUnicodeCodetips = true: continue for
          END IF
       END IF
          
@@ -155,56 +247,65 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
       If Left(st_ucase, 9)  = "#INCLUDE " Then
          ' #INCLUDE "filename" or #INCLUDE ONCE "filename"
          dim as string sIncludeFilename = GetIncludeFilename(sFilename, st)
-         ParseDocument( 0, sIncludeFilename )
+         ' If the include file is already part of the loaded project
+         ' then no need to parse it again.
+         if gApp.GetDocumentPtrByFilename(wstr(sIncludeFilename)) = 0 THEN 
+            ParseDocument( 0, sIncludeFilename )
+         END IF
       end if
       
+      '' TEST FOR SUB/FUNCTION
       If Left(st_ucase, 9)  = "FUNCTION " Then
-         st = Mid(st, 10): bFirstLine = True: bIsFunction = true
+         st = Mid(st, 10): bIsFunction = true
       ElseIf Left(st_ucase, 16) = "PUBLIC FUNCTION " Then
-         st = Mid(st, 17): bFirstLine = True: bIsFunction = true
+         st = Mid(st, 17): bIsFunction = true
       ElseIf Left(st_ucase, 17) = "PRIVATE FUNCTION " Then
-         st = Mid(st, 18): bFirstLine = True: bIsFunction = true
-      End If   
-      
-      If Left(st_ucase, 4)  = "SUB " Then
-         st = Mid(st, 5): bFirstLine = True
+         st = Mid(st, 18): bIsFunction = true
+      elseIf Left(st_ucase, 4)  = "SUB " Then
+         st = Mid(st, 5): bIsSub = True
       ElseIf Left(st_ucase, 11) = "PUBLIC SUB " Then
-         st = Mid(st, 12): bFirstLine = True
+         st = Mid(st, 12): bIsSub = True
       ElseIf Left(st_ucase, 12) = "PRIVATE SUB " Then
-         st = Mid(st, 13): bFirstLine = True
+         st = Mid(st, 13): bIsSub = True
       End If
-      st = ltrim(st)  ' remove any leading spaces   
+      st = ltrim(st)  ' remove any leading spaces in the new substring  
    
-      if bFirstLine = false THEN continue for
-
-      ' bypass any line with = embedded in it but need to check only up to the first
-      ' open parenthesis because after that are the parameters and they could have equal
-      ' signs for default parameter values.
-      n = Instr( st, "=") 
-      If n Then 
-         iParen = Instr(st, "(") 
-         If (iParen = 0) OrElse (n < iParen) Then
-            Continue for
+      ''  PROCESS ANY SUB/FUNCTION found
+      if (bIsSub = true) orelse (bIsFunction = true) THEN 
+         ' bypass any line with = embedded in it but need to check only up to the first
+         ' open parenthesis because after that are the parameters and they could have equal
+         ' signs for default parameter values.
+         n = Instr( st, "=") 
+         If n Then 
+            iParen = Instr(st, "(") 
+            If (iParen = 0) OrElse (n < iParen) Then
+               Continue for
+            End If
          End If
-      End If
 
-      ' Determine the name of this sub/function
-      iParen = Instr(st, "(") 
-      sFuncName = iIf(iParen, trim(Left(st, iParen - 1)), st)
-      ' Remove any reference to "OVERLOAD" 
-      n = instr(ucase(sFuncName), "OVERLOAD") 
-      if n then sFuncName = rtrim(left(sFuncName, n-1))
+         ' Determine the name of this sub/function
+         iParen = Instr(st, "(") 
+         sFuncName = iIf(iParen, trim(Left(st, iParen - 1)), st)
+         ' Remove any reference to "OVERLOAD" 
+         n = instr(ucase(sFuncName), "OVERLOAD") 
+         if n then sFuncName = rtrim(left(sFuncName, n-1))
+         
+         sFuncDeclare = iif(bIsFunction, "Function ", "Sub ") & st
+         nFuncLineNumber = nLineNum    
+         gFunctionDeclares.AddItem(ucase(sFuncName), sFuncDeclare, sFilename, str(nFuncLineNumber))
+         sAllFunctionNames = sAllFunctionNames & DELIM & sFuncName
+      end if
       
-      sFuncDeclare = iif(bIsFunction, "Function ", "Sub ") & st
-      nFuncLineNumber = nLineNum    'b/c Scintilla is zero based
-      gFunctionDeclares.AddItem(ucase(sFuncName), sFuncDeclare, sFilename, str(nFuncLineNumber))
-            
-      sAllFunctionNames = sAllFunctionNames & DELIM & sFuncName
    next
 
    ' We are now finished parsing this file. Add the found list of function
    ' names to the global hash. Data1 holds a DELIM delimited string of function names.
    gFunctionLists.AddItem(ucase(sFilename), trim(sAllFunctionNames,DELIM))
+
+   
+   ' Update the TODO listview in the frmOutput form
+   UpdateToDoListview
+   
 
    Function = 0
 

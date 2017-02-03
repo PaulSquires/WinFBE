@@ -148,6 +148,14 @@ Function clsConfig.SaveToFile() as Long
    print #f, "clrWindowFG="           ; this.clrWindowFG          
    print #f, "clrWindowBG="           ; this.clrWindowBG          
    
+   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+   dim wszText as CWSTR = wstr("NOTES-START") + vbcrlf + _
+                          gApp.NonProjectNotes + vbcrlf + _
+                          wstr("NOTES-END") + vbcrlf
+   print #f, ""
+   print #f, "[Notes]"
+   print #f, wszText
+
    Close #f
    
    Function = 0
@@ -165,18 +173,34 @@ Function clsConfig.LoadFromFile() as Long
    Dim wData As WString * MAX_PATH
    Dim nData As Long  
    Dim i     as Long
+   dim bReadingNote as Boolean
 
    If Dir(_ConfigFilename) = "" Then Exit Function
     
    Dim f as Long = Freefile
    If Open( _ConfigFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
 
+   gApp.NonProjectNotes = ""
+   
    Do Until EOF(f)
       Line Input #f, st
       If Len(st) = 0 Then Continue Do
       If Left(st, 1) = "'" Then Continue Do
       If Left(st, 1) = "[" Then Continue Do
       
+      If Left(st, 11) = "NOTES-START" Then  
+         bReadingNote = true
+         continue do
+      end if   
+      If Left(st, 9) = "NOTES-END" Then  
+         bReadingNote = false
+         continue do
+      end if
+      if bReadingNote THEN
+         gApp.NonProjectNotes = gApp.NonProjectNotes + st + vbcrlf
+         continue do
+      END IF
+
       i = InStr(st, "=")
       If i = 0 Then Continue Do
       
@@ -185,6 +209,7 @@ Function clsConfig.LoadFromFile() as Long
       nData = Val(wData)
       
       wData = ProcessFromCurdrive(wData)
+
 
       If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
          i = Val(Right(wKey,2))
@@ -202,6 +227,7 @@ Function clsConfig.LoadFromFile() as Long
          End If
       End If
 
+      
       Select Case wKey
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
@@ -360,6 +386,17 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
       End If
    Next
 
+   ' If no project is active then save NOTES to config file.
+   if gApp.IsProjectActive THEN
+      dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+      dim wszText as CWSTR = wstr("NOTES-START") + vbcrlf + _
+                             AfxGetWindowText(hCtl) + vbcrlf + _
+                             wstr("NOTES-END") + vbcrlf
+      print #f, ""
+      print #f, "[Notes]"
+      print #f, wszText                       
+   END IF
+
    Close #f
    
    Function = True   ' successul save
@@ -374,7 +411,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Dim st    As WString * MAX_PATH
    Dim wKey  As WString * MAX_PATH
    Dim wData As WString * 1024
-   
+      
    Dim sBookmarks As String
    Dim As Long nData, i, idx, nFirstLine, nPosition, nActiveTab
 
@@ -383,6 +420,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Dim wszFilename As WString * MAX_PATH
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
+   dim as Boolean bReadingNote
    
    If AfxFileExists(gApp.ProjectFilename) = 0 Then Exit Function
    gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
@@ -391,6 +429,7 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    If Open( gApp.ProjectFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
 
    gApp.IsProjectActive = True
+   gApp.ProjectNotes = ""
 
    ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
    ' here and open them only after all over documents have been loaded. This will look
@@ -411,6 +450,19 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
       If Left(st, 1) = "'" Then Continue Do
       If Left(st, 1) = "[" Then Continue Do
       
+      If Left(st, 11) = "NOTES-START" Then  
+         bReadingNote = true
+         continue do
+      end if   
+      If Left(st, 9) = "NOTES-END" Then  
+         bReadingNote = false
+         continue do
+      end if
+      if bReadingNote THEN
+         gApp.ProjectNotes = gApp.ProjectNotes + st + vbcrlf
+         continue do
+      END IF
+
       i = Instr(st, "=")
       If i = 0 Then Continue Do
       
@@ -500,6 +552,9 @@ Function clsConfig.ProjectLoadFromFile() As BOOLEAN
    Close #f
 
    gProjectLoading = false
+
+   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+   AfxSetWindowText(hCtl, gApp.ProjectNotes)
 
    Function = True   ' successful open
 End Function

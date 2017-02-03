@@ -3,7 +3,7 @@
 [ ] Improve syntax keyword highlighting. 
     [ ] WinAPI keyword list.
 
-[ ] Improve Codetips support. Need to scan for #INCLUDE files and parse them for Codetips as well.
+[ ] Improve Codetips support. Loaded preparsed Windows includes (based on ANSI or UNICODE defined in files).
 
 [ ] Split editing windows.
 
@@ -13,7 +13,10 @@
 
 [ ] Integrated debugger (most likely based on FBDebugger code (if that license permits))
 
+[ ] Menu option. "Save as Template"
 
+[ ] Menu option. "New from Template"
+ 
 
 
 

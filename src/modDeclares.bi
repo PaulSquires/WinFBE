@@ -27,6 +27,8 @@
 #Define IDC_FRMOUTPUT_TXTLOGFILE                    1002
 #Define IDC_FRMOUTPUT_BTNCLOSE                      1003
 #Define IDC_FRMOUTPUT_LISTSEARCH                    1004
+#Define IDC_FRMOUTPUT_LVTODO                        1005
+#Define IDC_FRMOUTPUT_TXTNOTES                      1006
 
 #Define IDC_FRMEXPLORER_LBLEXPLORER                 1000
 #Define IDC_FRMEXPLORER_TREE                        1001
@@ -191,7 +193,8 @@ Enum
    MSG_USER_SETFOCUS = WM_USER + 1
    MSG_USER_PROCESS_COMMANDLINE 
    IDM_FILE, IDM_FILENEW 
-   IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS, IDM_FILESAVEALL
+   IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS
+   IDM_FILESAVEALL, IDM_FILESAVEDECLARES
    IDM_MRU, IDM_OPENINCLUDE, IDM_COMMAND, IDM_EXIT
    IDM_EDIT
    IDM_UNDO, IDM_REDO, IDM_CUT, IDM_COPY, IDM_PASTE, IDM_DELETELINE, IDM_INSERTFILE
@@ -285,6 +288,15 @@ End Type
 Dim Shared gFind As FINDREPLACE_TYPE
 Dim Shared gFindInFiles As FINDREPLACE_TYPE
 
+''
+''  TYPE to hold all TODO's found in the document or open project
+''
+type TODO_TYPE
+   sDiskFilename      As String 
+   nLineNumber        as Long
+   txtDescription     as string
+END TYPE
+dim shared gTODO(10) as TODO_TYPE
 
 ' Forward reference
 Type clsDocument_ As clsDocument
@@ -479,7 +491,9 @@ Type clsApp
       bDragTabActive       as BOOLEAN     ' A tab in the top tabcontrol is being dragged
       bDragActive          As BOOLEAN     ' splitter drag is currently active 
       hWndPanel            As HWND        ' the panel being split left/right or up/down
-
+      ProjectNotes         as CWSTR       ' Save/Load from project file
+      NonProjectNotes      as CWSTR       ' Save/oad from config file
+      
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
       Declare Function ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
@@ -514,7 +528,7 @@ Dim Shared gConfig As clsConfig
 Dim Shared gTTabCtl As clsTopTabCtl
 
 
-
+#if 0
 Declare Function frmCommandLine_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmCommandLine_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function frmCommandLine_OnClose(HWnd As HWnd) As LRESULT
@@ -665,7 +679,8 @@ declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As
 declare Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
 declare Function CreateRootNodeExplorerTreeview() As Long
 declare Function ParseDocument( byval pDoc as clsDocument ptr, byval sFilename as string ) As Long
-
+declare function UpdateToDoListview() as long 
+#endif
 
 
 

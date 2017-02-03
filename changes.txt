@@ -1,5 +1,8 @@
-Version 1.2.2 (Not released yet)
+Version 1.2.2 (Fenruary 2, 2017)
 - Added: Find in Files functionality added.
+- Added: Add "TODO" messages directly in code via 'TODO: or ' TODO: List shows in Output window / TODO tab.
+- Added: New tab in Output window for "Notes". Notes are saved on a per project basis.
+- Added: File Menu option to "Save Declares File". Auto generates a Declare file for all Sub/Functions that you can #Include into your project.
 - Added: #Include files are now parsed for Sub/Function declaration Codetips.
 - Added: ProgressBar in StatusBar during compiling progress.
 - Added: Localization translations for Russian and Ukrainian compliments of ur_naz.

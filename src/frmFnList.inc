@@ -47,35 +47,6 @@ Function frmFnList_SetListBoxPosition() As Long
    Function = 0
 End Function
 
-'' ========================================================================================
-'' Simple Bubblesort to sort function names before displaying them
-'' ========================================================================================
-'Sub BubbleSort( MyArray() As String )
-'   dim as long i, j
-'   For i = 1 To UBound(MyArray)-1
-'      For j = i To UBound(MyArray)
-'         If MyArray(i) > MyArray(j) Then Swap MyArray(i), MyArray(j) 
-'      Next 
-'   Next 
-'End Sub
-
-' ========================================================================================
-' Simple Insertion sort to sort function names before displaying them (case insensitive)
-' ========================================================================================
-Sub InsertionSort( MyArray() As String )
-   dim as long lb = LBound(myArray)
-   dim as long ub = Ubound(myArray)
-   for startIndex as long = lb + 1 to ub 'establish starting index of each pass
-      for index as long = startIndex to lb + 1 step -1
-         if (ucase(myArray(index)) < ucase(myArray(index-1))) then   'REVERSE TO SORT DECENDING
-            swap myArray(index), myArray(index-1)
-         else
-            exit for
-         end if
-      next 
-   next 
-end sub
-
 
 ' ========================================================================================
 ' Update the Listbox with the list of functions from all loaded documents

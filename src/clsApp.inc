@@ -270,7 +270,18 @@ Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    Next
    ' If not found then simply exit
    If idx = -1 Then Exit function
-
+   
+   ' Remove any TODO notes related to this document that is
+   ' no longer open or part of the project.
+   for i = lbound(gTODO) to ubound(gTODO)
+      if gTODO(i).sDiskFilename = str(pDoc->DiskFilename) THEN
+         gTODO(i).sDiskFilename = ""
+      END IF
+   NEXT
+   ' Update the TODO listview in the frmOutput form
+   UpdateToDoListview
+   
+   ' Now remove it from the array
    this.RemoveDocumentFromArray(idx)
    
    Function = 0

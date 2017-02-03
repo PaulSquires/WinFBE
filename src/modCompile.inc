@@ -509,11 +509,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       If fGoodCompile = False Then
          PositionOutputWindows(HWND_FRMOUTPUT)
       End If 
-      ' If the Search Results tab is active then reposition to the first tab for error listview
-      if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 2 THEN
+      ' If the Search Results, TODO, Notes tab is active then reposition to 
+      ' the first tab for error listview
+      select case TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) 
+         case 2, 3, 4
          TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
          PositionOutputWindows(HWND_FRMOUTPUT)
-      end if
+      end select
       ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized

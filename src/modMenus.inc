@@ -31,6 +31,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVE, L(7,"&Save") & Chr(9) & "Ctrl+S"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save &As") & Chr(9) & "F12"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEALL, L(9,"Sa&ve All") & Chr(9) & "Ctrl+Shift+S"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_FILESAVEDECLARES, L(265,"Save &Declares File") & Chr(9) & "Ctrl+Shift+D"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
             AppendMenuW hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(10,"&Recent Files")
@@ -168,6 +169,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_S,  IDM_FILESAVE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F12,  IDM_FILESAVEAS )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_S,  IDM_FILESAVEALL )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_D,  IDM_FILESAVEDECLARES )
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_F4, IDM_EXIT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_E,  IDM_REDO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,  IDM_DELETELINE )

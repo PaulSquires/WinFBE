@@ -216,7 +216,13 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          End If
          
       CASE SCN_CHARADDED
-         IF pNSC->ch = 40 THEN   ' "(" // Show code tip
+         IF pNSC->ch = 46 THEN   ' "."  Show autocomplete list for TYPE variables
+            IF gConfig.AutoComplete THEN
+               if ShowTYPEAutocompleteList() then exit function
+            end if
+         end if
+
+         IF pNSC->ch = 40 THEN   ' "("  Show code tip
             if gConfig.CodeTips then ShowCodetip()                
          end if
             
@@ -276,7 +282,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
             End If
          End If
-         
+   
          IF pNSC->ch = 32 THEN   ' Space key pressed (Insert AutoComplete constructs if applicable)
             IF gConfig.AutoComplete THEN
                ' First check to see if the previous word is "AS" because we will then
@@ -574,6 +580,10 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.hExplorerRootNode = 0
    
    gApp.IsProjectActive = False
+   gApp.ProjectNotes = ""
+
+   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+   AfxSetWindowText(hCtl, gApp.NonProjectNotes)
 
    PositionExplorerWindows(HWND_FRMEXPLORER)
    
@@ -593,6 +603,9 @@ Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
    
    ' Ensure that the Project Manager window has been created (show it now as well)
    gApp.IsNewProjectFlag = True
+   gApp.ProjectNotes = ""
+   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+   AfxSetWindowText(hCtl, gApp.ProjectNotes)
    frmProjectOptions_Show( HWnd, SW_SHOW )
    PositionExplorerWindows(HWND_FRMEXPLORER)
    
@@ -791,6 +804,48 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
    Function = 0
 End Function
 
+' ========================================================================================
+' Save Sub/Function Declares to disk
+' ========================================================================================
+Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
+
+   dim wFilename as wstring * MAX_PATH
+   static wText as wstring * MAX_PATH
+   
+   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "")
+   If pwszName Then
+      wFilename = *pwszName
+      wText = AfxStrPathname( "NAMEX", wFilename )
+      CoTaskMemFree(pwszName)
+   Else
+      Return False
+   End If
+
+   gFunctionDeclares.CreateDeclaresFile(wFilename)
+   ' If the declares file is loaded in the project then we need to reload
+   ' it in order to ensure most current document data.
+   dim pDoc as clsDocument ptr
+   pDoc = gApp.GetDocumentPtrByFilename(wFilename)
+   if pDoc THEN 
+      dim sText as string 
+      Dim As Long f = Freefile
+      If Open(pDoc->DiskFilename For Binary As #f) = 0 Then
+         sText = Space(Lof(f))
+         Get #f, , sText
+         Close #f
+         Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
+         If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+            sText = Mid(sText, 3)
+            sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+         End If   
+         pDoc->SetText( sText ) 
+         pDoc->DateFileTime = AfxGetFileLastWriteTime(pDoc->DiskFilename)
+         SendMessage(pDoc->hWindow, SCI_SETSAVEPOINT, 0, 0)
+      End If
+   end if
+  
+   Function = 0
+End Function
 
 ' ========================================================================================
 ' Save all open files to disk
@@ -958,6 +1013,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_FILEOPEN:           Function = OnCommand_FileOpen( HWnd )
       Case IDM_FILESAVE:           Function = OnCommand_FileSave( HWnd )
       Case IDM_FILESAVEAS:         Function = OnCommand_FileSave( HWnd, True )
+      Case IDM_FILESAVEDECLARES:   Function = OnCommand_FileSaveDeclares( HWnd )
       Case IDM_FILESAVEALL:        Function = OnCommand_FileSaveAll( HWnd ) 
       Case IDM_FILECLOSE:          Function = OnCommand_FileClose( HWnd, False )
       Case IDM_FILECLOSEALL:       Function = OnCommand_FileClose( HWnd, True )
@@ -1086,6 +1142,11 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       
       Case IDM_HELP
+         
+'gTYPES.Debug("_debug.txt")
+'gFunctionDeclares.CreateDeclaresFile("_debug.txt")
+'gFunctionDeclares.Debug("_debug2.txt")
+
          ShowContextHelp() 
       
 

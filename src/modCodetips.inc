@@ -75,7 +75,7 @@ function ShowCodetip() as BOOLEAN
       END IF
       ' Search the list of Function names
       if gFunctionDeclares.FindItem(buffer) then
-         CodetipStr = gFunctionDeclares.FoundData1
+         CodetipStr = FormatCodetip(gFunctionDeclares.FoundData1)
          SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
          return TRUE
       END IF
@@ -93,8 +93,9 @@ END FUNCTION
 function ShowAutocompleteList() as BOOLEAN
 
    dim as hwnd hEdit
-   dim as long curPos
-   dim as string buffer, sList
+   dim as long curPos, nCount, i
+   dim as string buffer
+   static as string sList
    dim pDoc as clsDocument ptr
    
    pDoc = gTTabCtl.GetActiveDocumentPtr()
@@ -108,23 +109,28 @@ function ShowAutocompleteList() as BOOLEAN
    ' Retrieve the word
    buffer = TRIM(pDoc->GetWord(curPos - 1))
    IF LEN(buffer) THEN
-      ' Create the space separated data type list
-      sList = "Boolean Byte Double Integer Long LongInt Short Single " & _
-              "String UByte UInteger UShort WString ZString"
-      Select Case gConfig.KeywordCase
-         Case 0:  sList = lcase(sList)
-         Case 1:  sList = ucase(sList)
-      End Select            
-      
-      ' If an autocomplete list is alrady active then continue to search the list
-      SendMessage(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
-      SendMessage(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
       if SendMessage(hEdit, SCI_AUTOCACTIVE, 0, 0) then
          SendMessage(hEdit, SCI_AUTOCSHOW, len(buffer), cast(LPARAM, strptr(sList)))
       else
          ' Determine if we need to display the autocomplete list.
          if ucase(buffer) = "AS" THEN
+            ' Create the space separated data type list
+            sList = "Boolean Byte Double Integer Long LongInt Short Single " & _
+                    "String UByte UInteger UShort WString ZString"
+            Select Case gConfig.KeywordCase
+               Case 0:  sList = lcase(sList)
+               Case 1:  sList = ucase(sList)
+               Case 2:  ' already mixed case
+            End Select            
+            ' Add all of the TYPE definitions that were found
+            sList = sList & gTYPES.BuildKeyList
+            ' If an autocomplete list is already active then continue to search the list
+            SendMessage(hEdit, SCI_AUTOCSETORDER, 1, 0)  ' List must be sorted alphabetically
+            SendMessage(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
+            SendMessage(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
             SendMessage(hEdit, SCI_AUTOCSHOW, 0, cast(LPARAM, strptr(sList)))
+         else
+            sList = ""
          end if
       end if
    END IF
@@ -132,3 +138,47 @@ function ShowAutocompleteList() as BOOLEAN
    function = FALSE
 END FUNCTION
 
+
+
+' ========================================================================================
+' Show TYPE Autocomplete list
+' ========================================================================================
+function ShowTYPEAutocompleteList() as BOOLEAN
+   dim as hwnd hEdit
+   dim as long curPos, nCount, i
+   dim as string buffer
+   static as string sList
+   dim pDoc as clsDocument ptr
+   
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then exit function
+
+   hEdit = pDoc->hWindow
+   
+   ' Retrieve the position
+   curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+
+'   ' Retrieve the TYPE variable name
+'   buffer = TRIM(pDoc->GetWord(curPos - 1))
+'   IF LEN(buffer) THEN
+'      if SendMessage(hEdit, SCI_AUTOCACTIVE, 0, 0) then
+'         SendMessage(hEdit, SCI_AUTOCSHOW, len(buffer), cast(LPARAM, strptr(sList)))
+'      else
+'         ' Need to determine what TYPE this variable was DIM'd as.
+'         
+'         if gTYPES.FindItem("SCI_RANGETOFORMAT") then
+'            ' Create the space separated data type list
+'            sList = AfxStrReplace( gTYPES.FoundData1, "|", " " )
+'            ' If an autocomplete list is already active then continue to search the list
+'            SendMessage(hEdit, SCI_AUTOCSETORDER, 1, 0)  ' List must be sorted alphabetically
+'            SendMessage(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
+'            SendMessage(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
+'            SendMessage(hEdit, SCI_AUTOCSHOW, 0, cast(LPARAM, strptr(sList)))
+'         else
+'            sList = ""
+'         end if
+'      end if
+'   END IF
+
+   function = FALSE
+END FUNCTION

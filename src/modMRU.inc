@@ -15,7 +15,7 @@
 ''
 Function GetMRUMenuHandle() as HMENU
    Dim hFileMenu as HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, 0 ) 
-   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, 10 )
+   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, 11 )
    Function = hSubMenu
 End Function
 
@@ -200,11 +200,14 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFi
          ' save was cancelled
          exit function
       end if   
+      gApp.NonProjectNotes = AfxGetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES))
    end if
          
    ' Clear any previous info from the Output windows
    AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
    ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
+   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO) )
+   AfxSetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), "")
    
       ' Open the project
    gApp.ProjectFilename = wzFile

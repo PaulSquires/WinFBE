@@ -13,6 +13,25 @@
 
 
 ' ========================================================================================
+' Update the TODO listview
+' ========================================================================================
+function UpdateToDoListview() as long 
+   dim as hwnd hLV = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO)
+   ListView_DeleteAllItems( hLV )
+   dim as long n = 0
+   for i as long = lbound(gTODO) to ubound(gTODO)
+      if AfxFileExists(gTODO(i).sDiskFilename) THEN
+         FF_ListView_InsertItem( hLV, n, 0, WStr(gTODO(i).nLineNumber) ) 
+         FF_ListView_InsertItem( hLV, n, 1, WStr(gTODO(i).sDiskFilename) )
+         FF_ListView_InsertItem( hLV, n, 2, WStr(gTODO(i).txtDescription) ) 
+         n = n + 1
+      end if
+   next
+   function = 0
+END FUNCTION
+
+
+' ========================================================================================
 ' Process the search result that was double clicked
 ' ========================================================================================
 function DoSearchFileSelected() as LONG
@@ -69,6 +88,8 @@ Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), SW_HIDE
    
    hTabCtl = GetDlgItem(hWnd, IDC_FRMOUTPUT_TABCONTROL)
    
@@ -79,6 +100,10 @@ Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
          ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_SHOW )
       case 2    ' search results
          ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_SHOW )
+      case 3    ' ToDo list
+         ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), SW_SHOW )
+      case 4    ' Notes
+         ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), SW_SHOW )
    end select
          
    Function = 0
@@ -113,6 +138,8 @@ Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
 
    ' Determine which child controls should be shown or hidden
    ShowHideOutputControls(hWnd)
@@ -146,7 +173,8 @@ Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
          end if
 
       case LBN_DBLCLK 
-         if id = IDC_FRMOUTPUT_LISTSEARCH then
+         if (id = IDC_FRMOUTPUT_LISTSEARCH) orelse _
+              (id = IDC_FRMOUTPUT_LVTODO) then
             DoSearchFileSelected()   
             Exit Function
          End If
@@ -314,6 +342,8 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    TabCtrl_AddTab( hCtl, -1, L(191, "Compiler Results") )
    TabCtrl_AddTab( hCtl, -1, L(252, "Compiler Log File") )
    TabCtrl_AddTab( hCtl, -1, L(262, "Search Results") )
+   TabCtrl_AddTab( hCtl, -1, L(263, "TODO") )
+   TabCtrl_AddTab( hCtl, -1, L(264, "Notes") )
    TabCtrl_SetCurSel( hCtl, 0 )
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
@@ -353,31 +383,38 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    AfxSetWindowFont( hLB, hFont, True )
 
+   ' TODO listview
+   hLV = _
+      pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LVTODO, "", 0, 0, 0, 0, _
+      WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS or LVS_SINGLESEL, _
+      WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+      Cast(WNDPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LVTODO, Cast(DWORD_PTR, @pWindow))
+                                     
+   ' Make the listview header flat
+   ListView_MakeHeaderFlat(hLV)
+          
+   ' Add some extended styles
+   dwExStyle = ListView_GetExtendedListViewStyle(hLV)
+   dwExStyle = dwExStyle Or LVS_EX_FULLROWSELECT Or LVS_EX_GRIDLINES Or LVS_EX_DOUBLEBUFFER Or LVS_EX_FLATSB
+   ListView_SetExtendedListViewStyle(hLV, dwExStyle)
+
+   ' Configure the ListView
+   ListView_AddColumn( hLV, 0, L(253, "Line"), pWindow->ScaleX(75) )
+   ListView_AddColumn( hLV, 1, L(254, "File"), pWindow->ScaleX(250) )
+   ListView_AddColumn( hLV, 2, L(255, "Description"), pWindow->ScaleX(500) )
+
+   hCtl = _
+      pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTNOTES, "", 0, 0, 0, 0, _
+      WS_VISIBLE OR WS_TABSTOP OR WS_VSCROLL or ES_LEFT OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN, _
+      WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
+   hFont = pWindow->CreateFont( "Courier New", 9 )
+   AfxSetWindowFont( hCtl, hFont, True )
+   AfxSetWindowText(hCtl, gApp.NonProjectNotes)
+   
    PositionOutputWindows(HWND_FRMOUTPUT)
    
    Function = 0
 
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
