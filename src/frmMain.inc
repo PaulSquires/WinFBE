@@ -1340,21 +1340,22 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
                gTTabCtl.SetTabIndexByDocumentPtr(pDoc)
                If MessageBoxW( HWND_FRMMAIN, _
                                pDoc->DiskFilename & vbCrLf & _ 
-                               L(245, "File was changed by another application. Reload it?"), _
-                               L(246, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                  Dim As Long f = Freefile
-                  If Open(pDoc->DiskFilename For Binary As #f) = 0 Then
-                     sText = Space(Lof(f))
-                     Get #f, , sText
-                     Close #f
-                     Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
-                     If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-                        sText = Mid(sText, 3)
-                        sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-                     End If   
+                               L(266, "File was changed by another application. Reload it?"), _
+                               L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                  dim cText as CTextStream
+                  if cText.Open(pDoc->DiskFilename, IOMODE_FORREADING) = 0 then
+                     sText = cText.ReadAll()
+                     cText.Close
+                     if len(sText) > 2 THEN  ' or will GPF
+                        Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
+                        If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
+                           sText = Mid(sText, 3)
+                           sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
+                        End If   
+                     END IF
                      pDoc->SetText( sText ) 
-                     pDoc->DateFileTime = AfxGetFileLastWriteTime(pDoc->DiskFilename)
-                  End If
+                     pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
+                  end if
                End If                
             End If
          End If

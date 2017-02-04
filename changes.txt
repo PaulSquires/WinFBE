@@ -1,3 +1,8 @@
+Version 1.2.3 (Not released yet)
+- Changed: TODO messages can now appear anywhere at start of a line (not only at the first character position).
+- Changed: Substantially increased the width of the compiler "Other Options" textboxes in Project Options.
+- Fixed: Cleared internal structures for function names, TYPES, etc when a document is closed.
+
 Version 1.2.2 (February 2, 2017)
 - Added: Find in Files functionality added.
 - Added: Add "TODO" messages directly in code via 'TODO: or ' TODO: List shows in Output window / TODO tab.

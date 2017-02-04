@@ -31,12 +31,13 @@
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxCtl.inc" 
 #Include Once "Afx\AfxMenu.inc" 
+#Include Once "Afx\CTextStream.inc"
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.2.2") 
+#Define APPVERSION    WStr("1.2.3") 
 
 
 #Include Once "windowsxx.bi"      ' needed because version that ships with FB is broken and incomplete. 

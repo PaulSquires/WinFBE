@@ -63,15 +63,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim wszFileExe   As WString * MAX_PATH
    Dim wszParam     As WString * MAX_PATH  
    
-   Dim As String execmd, sDQ, sLogSt, st, st_ucase, sTemp
-   Dim As String sOutputMsg, sFileExe, sParam
-   Dim As String st1, st2, st3        
+   Dim As CWSTR wexecmd, wDQ, wsLogSt, wst, wst_ucase, wszOutputMsg
+   Dim As CWSTR wst1, wst2, wst3        
    Dim As HWnd hLV
          
    Dim As BOOLEAN fCompile32, fCompile64, fGoodCompile
    
-   sDQ = Chr(34)  ' double quotes
-
+   'sDQ = Chr(34)  ' double quotes
+   wDQ = wchr(34) ' unicode double quotes
+   
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
    If gConfig.CompileAutosave Then
@@ -127,15 +127,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Dim pDocResource As clsDocument Ptr = gApp.GetResourceDocumentPtr()
       if pDocResource then gCompile.ResourceFile = pDocResource->DiskFilename
 
-      gCompile.ObjFolder = gCompile.MainFolder & ".wfbe\"
-      gCompile.ObjFolderShort = ".\.wfbe\"
+      gCompile.ObjFolder = gCompile.MainFolder & wstr(".wfbe\")
+      gCompile.ObjFolderShort = wstr(".\.wfbe\")
 
       If fCompile32 Then 
-         gCompile.ObjID = "32.o"
+         gCompile.ObjID = wstr("32.o")
          gCompile.CompileFlags = gApp.ProjectOther32           
       End If
       If fCompile64 Then 
-         gCompile.ObjID = "64.o"
+         gCompile.ObjID = wstr("64.o")
          gCompile.CompileFlags = gApp.ProjectOther64           
       End If   
       
@@ -144,42 +144,42 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       
       Select Case gApp.ProjectType
          Case 0:   ' EXE (no special compile switch)
-            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".exe" 
+            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe") 
          Case 1
-            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll" 
-            gCompile.CompileFlags = gCompile.CompileFlags & " -dll "
+            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll") 
+            gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -dll ")
          Case 2
-            gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & ".a" 
-            gCompile.CompileFlags = gCompile.CompileFlags & " -lib "
+            gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a") 
+            gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -lib ")
       End Select
 
       Select Case gApp.ProjectErrorOption
          Case 0:   ' No error checking (no special compile switch)
-         Case 1:  gCompile.CompileFlags = gCompile.CompileFlags & " -e"           
-         Case 2:  gCompile.CompileFlags = gCompile.CompileFlags & " -ex"           
-         Case 3:  gCompile.CompileFlags = gCompile.CompileFlags & " -exx"           
+         Case 1:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -e")           
+         Case 2:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -ex")           
+         Case 3:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -exx")           
       End Select
 
       If gApp.ProjectDebug = BST_CHECKED Then
-         gCompile.CompileFlags = gCompile.CompileFlags & " -g"           
+         gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -g")           
       End If
       
       If gApp.ProjectThread = BST_CHECKED Then
-         gCompile.CompileFlags = gCompile.CompileFlags & " -mt"           
+         gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -mt")           
       End If
 
    Else
       ' No active project
       gCompile.CompileFlags = gConfig.CompilerSwitches   
-      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".exe"
-      If Instr(Ucase(gCompile.CompileFlags), " -DLL") Then
-         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll"
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
+      If Instr(Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
+         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
       End If
-      If Instr(Ucase(gCompile.CompileFlags), " -DYLIB") Then
-         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll"
+      If Instr(Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
+         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
       End If
-      If Instr(Ucase(gCompile.CompileFlags), " -LIB") Then
-         gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & ".a"
+      If Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
+         gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
       End If
    End If
 
@@ -188,11 +188,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Case "GUI"
          ' For non-projects simply suppress the console. For projects, the console
          ' will not show unless option is selected in Project Options.
-         gCompile.CompileMode = " -s gui "   ' default do not show console
+         gCompile.CompileMode = wstr(" -s gui ")   ' default do not show console
          If gApp.ProjectShowConsole = BST_CHECKED Then
-            gCompile.CompileMode = " "   ' console is not suppressed
+            gCompile.CompileMode = wstr(" ")   ' console is not suppressed
          End If   
-      Case "CONSOLE": gCompile.CompileMode = " -s console "
+      Case "CONSOLE": gCompile.CompileMode = wstr(" -s console ")
    End Select   
   
 
@@ -207,11 +207,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
-   wszTemp = AfxStrPathname("NAME", gApp.ProjectName)
-   sTemp = "_" & Str(wszTemp)
-   sTemp = AfxStrReplace(sTemp, " ", "_" )
-   gCompile.BatchFile = sTemp & "_compile.bat" 
-   gCompile.LogFile   = sTemp & "_compile.log"
+   wszTemp = wstr("_") + AfxStrPathname("NAME", gApp.ProjectName)
+   wszTemp = AfxStrReplace(wszTemp, wstr(" "), wstr("_") )
+   gCompile.BatchFile = wszTemp & wstr("_compile.bat") 
+   gCompile.LogFile   = wszTemp & wstr("_compile.log")
    
    ' Change to the output code directory
    ChDir gCompile.MainFolder
@@ -222,6 +221,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    f = Freefile
    Open gCompile.BatchFile For Output as #f
+
+   ' Change the codepage used by Windows console to unicode
+   Print #f, "chcp 1250"
    
    Dim As Long nCount = gApp.GetDocumentCount 
    Dim pDoc As clsDocument Ptr
@@ -245,10 +247,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                Dim As FILETIME ft2 = AfxGetFileLastWriteTime(wszTemp)  ' object file
 
                If AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2) Then
-                  Print #f, sDQ & gCompile.CompilerPath & sDQ & _
-                            " -c " & sDQ & pDoc->DiskFilename & sDQ & _
-                            " -o " & sDQ & wszTemp & sDQ;
-                  Print #f, " >> " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
+                  Print #f, wDQ; gCompile.CompilerPath; wDQ; _
+                            " -c "; wDQ; pDoc->DiskFilename; wDQ; _
+                            " -o "; wDQ; wszTemp; wDQ;
+                  Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
                End If
                
             End If
@@ -259,10 +261,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
-   Print #f, sDQ & gCompile.CompilerPath & sDQ & _
-            " " & sDQ & gCompile.MainFilename & sDQ & _ 
-            " " & Iif(Len(gCompile.ResourceFile), sDQ & gCompile.ResourceFile & sDQ, WStr("")) & _
-            " -v " & gCompile.CompileFlags & gCompile.CompileMode;
+   Print #f, wDQ; gCompile.CompilerPath; wDQ; _
+            " "; wDQ; gCompile.MainFilename; wDQ; 
+   If Len(gCompile.ResourceFile) then
+      print #f, " "; wDQ; gCompile.ResourceFile; wDQ; 
+   end if   
+   print #f, " -v "; gCompile.CompileFlags; gCompile.CompileMode;
         
    If gApp.IsProjectActive Then
       For i = 0 To nCount - 1
@@ -271,18 +275,19 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If pDoc->ProjectFileType = FILETYPE_MODULE Then
                ' Get the base name of the file for constructing the object filename
                wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
-               Print #f, " " & gCompile.ObjFolderShort & wszTemp & gCompile.ObjID;
+               Print #f, " "; gCompile.ObjFolderShort; wszTemp; gCompile.ObjID;
             End If
          End If
       Next
    End If
 
-   Print #f, " >> " & gCompile.LogFile & " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
+   Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
    Close #f
-
          
    wszFileExe = Environ("COMSPEC")
+   'wszParam   = " /U /C " & gCompile.BatchFile
    wszParam   = " /C " & gCompile.BatchFile
+
    With ShExecInfo
       .cbSize       = Len(SHELLEXECUTEINFOW)
       .fMask        = SEE_MASK_NOCLOSEPROCESS
@@ -339,53 +344,56 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Get the log file contents into a string in order to parse it for errors, etc
    If AfxFileExists(gCompile.LogFile) Then
+      dim st as string 
+      wsLogSt = ""
       f = Freefile
-      Open gCompile.LogFile For Binary as #f 
-      sLogSt = Space(LOF(f))
-      Get #f, , sLogSt
+      Open gCompile.LogFile For INPUT as #f
+      while eof(f) = 0
+         line input #f, st
+         wsLogSt = wsLogSt + wstr(st) + vbcrlf
+      WEND
       Close #f
    End If   
    
    ' Delete the temporary batch file and the compiler log file
-   Kill gCompile.BatchFile
-   Kill gCompile.LogFile
+'   Kill gCompile.BatchFile
+'   Kill gCompile.LogFile
 
-   
    ' Copy the log file text to the logfile textbox
-   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), sLogSt )
+   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wsLogSt )
    
    hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW)
    ListView_DeleteAllItems( hLV )
    
    ' Parse the log string.
-   NumLines = AfxStrParseCount( sLogSt, vbCrLf)
+   NumLines = AfxStrParseCount( wsLogSt, vbCrLf)
  
    For NextLine = 1 To NumLines                   
    
-      st = Trim(AfxStrParse(sLogSt, NextLine, vbCrlf))                 
-      st_ucase = Ucase(st)
+      wst = Trim(AfxStrParse(wsLogSt, NextLine, vbCrlf))                 
+      wst_ucase = Ucase(wst)
       
       ' Deal with the situation where we might be trying to compile a 64-bit application
       ' from a 32-bit operating system.
-      If Left(st_ucase, 16) = "THIS VERSION OF " Then
+      If Left(**wst_ucase, 16) = WSTR("THIS VERSION OF ") Then
          ' Simply set the log file text and show the compiler log file window rather
          ' than the default compiler results window.
          SetCompileStatusBarMessage( "", 0 )
          TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 1 )
-         AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), st )
+         AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
          ShowWindow HWND_FRMOUTPUT, SW_SHOW
          frmMain_PositionWindows(HWND_FRMMAIN)
          Exit function
       End If   
 
       ' Save the FB version and copyright information. 
-      If Left(st_ucase, 19) = "FREEBASIC COMPILER " Then
+      If Left(**wst_ucase, 19) = WSTR("FREEBASIC COMPILER ") Then
          fGoodCompile = True
-         sOutputMsg = sOutputMsg & st & vbCrLf: Continue For
+         wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
       End If        
-      If Left(st_ucase, 13) = "COPYRIGHT (C)" Then
+      If Left(**wst_ucase, 13) = WSTR("COPYRIGHT (C)") Then
          fGoodCompile = True
-         sOutputMsg = sOutputMsg & st & vbCrLf: Continue For
+         wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
       End If        
       
       ' Check to see if an error occurred in compiling a resource script.
@@ -399,36 +407,36 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' compiling resource FAILED: Error Code 1
       
       ' Check to see if linking failed
-      If (Left(st_ucase, 6) = "ERROR!") Then
+      If (Left(**wst_ucase, 6) = WSTR("ERROR!")) Then
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
          FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1") ) 
          NumErrors = NumErrors + 1
       End If
       
-      If Instr(st_ucase, "LINKING FAILED:") Then 
+      If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") ) 
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr(st) ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, wst ) 
          NumErrors = NumErrors + 1
       End If
  
  
       ' Check for the "linking: " line because that line identifies the actual output filename being created
-      If Left(st_ucase, 9) = "LINKING: " Then 
+      If Left(**wst_ucase, 9) = WSTR("LINKING: ") Then 
          ' -o "WinFBE.exe" 
-         i = Instr(st, " -o ")
+         i = Instr(wst, WSTR(" -o "))
          If i Then
-            sTemp = Mid(st, i+4)
-            i = Instr(sTemp, sDQ & " ")
-            If i Then gCompile.OutputFilename = AfxStrRemove(Left(sTemp, i), sDQ)
+            wszTemp = Mid(wst, i+4)
+            i = Instr(wszTemp, wDQ & WSTR(" "))
+            If i Then gCompile.OutputFilename = AfxStrRemove(Left(wszTemp, i), wDQ)
          End If      
       End If
       
       ' Check for any compiler warnings
-      IsWarning = Instr(st_ucase, ") WARNING ")
+      IsWarning = Instr(wst_ucase, WSTR(") WARNING "))
       If IsWarning Then Error_Start = IsWarning
-      IsError   = Instr(st_ucase, ") ERROR ") 
+      IsError   = Instr(wst_ucase, WSTR(") ERROR ")) 
       If IsError Then Error_Start = IsError
       
       If (Error_Start > 0) Then 
@@ -436,19 +444,19 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          'c:\freebasic\test.bas(1394) warning 1(1): Passing scalar as pointer, at parameter 2 (hwndOldFocus) of ONSETFOCUS()
          'sample error message
          'c:\freebasic\test.bas(17) error 41: Variable not declared, kjljjada in 'kjljjada Error'
-         Parenthesis_Start = Instr(1, st, "(")
-         Parenthesis_End   = Instr(Parenthesis_Start, st, ")")
+         Parenthesis_Start = Instr(1, wst, WSTR("("))
+         Parenthesis_End   = Instr(Parenthesis_Start, wst, WSTR(")"))
          If (Parenthesis_Start < Parenthesis_End) And _
-            (Parenthesis_End <= Error_Start)       And _
+            (Parenthesis_End <= Error_Start)      And _
             (Error_Start > 0) Then
    
-            st1 = AfxStrParse(st, 1, "(")   ' filename
-            st2 = Mid( st, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
-            st3 = Mid(st, Error_Start+1)  ' error message
+            wst1 = AfxStrParse(wst, 1, WSTR("("))   ' filename
+            wst2 = Mid( wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
+            wst3 = Mid( wst, Error_Start + 1)  ' error message
  
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, WStr(st2) )  ' line#
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, WStr(st1) )  ' filename
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, WStr(st3) )  ' error message
+            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, wst2 )  ' line#
+            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, wst1 )  ' filename
+            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, wst3 )  ' error message
             
             If IsWarning Then 
                NumWarnings = NumWarnings + 1
@@ -485,12 +493,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       END IF 
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
       If gConfig.HideCompile = False Then
-         st = sOutputMsg & vbCrLf & _
+         wst = wszOutputMsg & vbCrLf & _
                L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
                L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
                L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
                L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-         MessageBoxW( HWND_FRMMAIN, WStr(st), L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
+         MessageBoxW( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
       else
          ' Simply sound a success
          MessageBeep(MB_OK)
@@ -595,7 +603,7 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
       ' Position all of the controls into place
       frmMain_PositionWindows(HWND_FRMMAIN)
    End If 
-   SendMessageW pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0
+   SendMessageW( pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
 
 End Function
 

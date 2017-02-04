@@ -68,6 +68,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    If pwszFile Then   
       ' Do not use Dir() > "" here b/c if incoming file originated from a Do/Loop 
       ' of files using Dir() then there will be problems.
+
       If AfxFileExists(*pwszFile) Then     
          Dim As String st, sText
          Dim As Long f = Freefile
@@ -102,10 +103,10 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             this.FindReplace( "|", "" )
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
          Else
-            If Open(*pwszFile For Binary As #f) = 0 Then
-               sText = Space(Lof(f))
-               Get #f, , sText
-               Close #f
+            dim cText as CTextStream
+            if cText.Open(*pwszFile, IOMODE_FORREADING) = 0 then
+               sText = cText.ReadAll()
+               cText.Close
                if len(sText) > 2 THEN  ' or will GPF
                   If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
                      sText = Mid(sText, 3)
@@ -223,17 +224,18 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       End If
    End If
 
-
+  
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
-   f = Freefile
-   If Open( wFilename For Output As #f ) = 0 Then
+   dim cText as CTextStream
+   if cText.Open(wFilename, IOMODE_FORWRITING, true) = 0 then
       Dim As ZString Ptr psz = Cast( ZString Ptr, SendMessageW(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-      Print #f, *psz;
-      Close #f
-   Else
+      cText.Write( *psz )
+      cText.Close
+   else
       ' error saving file
-   End If         
+      print "Error saving file: "; wFilename
+   end if   
 
    this.DiskFilename = wFilename
    this.DateFileTime = AfxGetFileLastWriteTime( wFilename )

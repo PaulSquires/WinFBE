@@ -112,7 +112,9 @@ Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    ' Add the new items
    For i = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
+print "before: "; gConfig.MRU(i)
       gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
+print "after: "; gConfig.MRU(i)
       If AfxFileExists(gConfig.MRU(i)) = 0 Then
          gConfig.MRU(i) = ""
       Else
@@ -138,6 +140,7 @@ Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
    Dim i           as Long
    Dim wzFile      As WString * MAX_PATH
    
+ 
    ' Search the 10 MRU items to see if the filename already exists and
    ' also for an available entry to put the filename in.
    For i = 0 To 9

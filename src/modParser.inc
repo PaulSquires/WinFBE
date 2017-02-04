@@ -137,8 +137,8 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
          END IF
       
          ' Check for a TODO entry
-         if (left(ucase(sLine), 6) = "'TODO:") or _
-            (left(ucase(sLine), 7) = "' TODO:") THEN
+         if (left(ucase(ltrim(sLine)), 6) = "'TODO:") or _
+            (left(ucase(ltrim(sLine)), 7) = "' TODO:") THEN
 
             dim as long nEmpty = -1
             for i = lbound(gTODO) to ubound(gTODO)
@@ -306,7 +306,6 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
    
-
    Function = 0
 
 End Function

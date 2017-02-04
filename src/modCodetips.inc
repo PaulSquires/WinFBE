@@ -15,11 +15,15 @@
 ' Format the codetip prior to showing it
 ' ========================================================================================
 function FormatCodetip( byval strCodeTip as string ) as STRING
-   IF len(strCodeTip) = 0 then exit function 
    dim as long p
-   
+
    ' remove multiple duplicate spaces
    strCodeTip = AfxStrReplace(strCodeTip, "  ", " ")
+
+   ' If this is only a small CodeTip then don't bother trying
+   ' to format it into multiple lines.
+   if len(strCodeTip) < 75 THEN return strCodeTip
+
    IF INSTR(strCodeTip, "( ") THEN
       strCodeTip = AfxStrReplace(strCodeTip, "( ", "(  ")
    ELSEIF INSTR(strCodeTip, "(") THEN

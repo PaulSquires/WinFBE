@@ -480,8 +480,8 @@ Function CreateScintillaContextMenu() As HMENU
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
    
    ' Determine the compiler path in case it needs to be prepended to the filename
-   ProcessFromCurdrive(@gConfig.FBWINCompiler32)
-   ProcessFromCurdrive(@gConfig.FBWINCompiler64)
+   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    Select Case Ucase(gConfig.DefaultCompiler)
       Case "FBC 32BIT":   wCompilerPath = gConfig.FBWINcompiler32
       Case "FBC 64BIT":   wCompilerPath = gConfig.FBWINcompiler64

@@ -248,6 +248,11 @@ Function clsApp.RemoveDocumentFromArray( ByVal idx As Long) As Long
       ReDim Preserve m_arrDocuments(ub-1) As clsDocument Ptr             
    End If
    
+   ' Remove from hash arrays
+   gFunctionDeclares.DeleteAllData2(ucase(pDoc->DiskFilename))
+   gFunctionLists.DeleteItem(ucase(pDoc->DiskFilename))
+   gTYPES.DeleteAllData2(ucase(pDoc->DiskFilename))
+
    ' Finally, release memory associated with this pDoc
    Delete pDoc
  
