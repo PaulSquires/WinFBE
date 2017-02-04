@@ -223,7 +223,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Open gCompile.BatchFile For Output as #f
 
    ' Change the codepage used by Windows console to unicode
-   Print #f, "chcp 1250"
+   'Print #f, "chcp 1250"
    
    Dim As Long nCount = gApp.GetDocumentCount 
    Dim pDoc As clsDocument Ptr
@@ -319,7 +319,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Shell to the compiler 
    ShellExecuteEx(@ShExecInfo)
-
+    
    ' Give the process 33 ms (you can use a different value here depending on 
    ' how responsive you wish your app to be)
    Dim uMsg As MSG
@@ -356,6 +356,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file and the compiler log file
+   
+' TODO: Uncomment Kills for compile batch file and logfile
 '   Kill gCompile.BatchFile
 '   Kill gCompile.LogFile
 
