@@ -243,7 +243,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                Dim As FILETIME ft1 = AfxGetFileLastWriteTime(pDoc->DiskFilename) ' source file
                Dim As FILETIME ft2 = AfxGetFileLastWriteTime(wszTemp)  ' object file
 
-               If AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2) Then
+               If (AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2)) or _
+                  (wID = IDM_REBUILDALL)  Then
                   Print #f, wDQ; gCompile.CompilerPath; wDQ; _
                             " -c "; wDQ; pDoc->DiskFilename; wDQ; _
                             " -o "; wDQ; wszTemp; wDQ;
@@ -353,7 +354,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If   
    
    ' Delete the temporary batch file and the compiler log file
-   
    Kill gCompile.BatchFile
    Kill gCompile.LogFile
 

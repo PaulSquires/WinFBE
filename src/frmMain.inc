@@ -1127,7 +1127,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          
            
       ''  COMPILE MENU          
-      Case IDM_BUILDEXECUTE, IDM_COMPILE
+      Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL
          Function = code_Compile(id)
 
       Case IDM_RUNEXE

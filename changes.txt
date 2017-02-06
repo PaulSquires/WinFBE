@@ -1,7 +1,10 @@
 Version 1.2.3 (Not released yet)
+- Added: "Rebuild All" menu option. Re-compiles all modules to object files rather than reusing existing version of the file.
 - Changed: TODO messages can now appear anywhere at start of a line (not only at the first character position).
 - Changed: Substantially increased the width of the compiler "Other Options" textboxes in Project Options.
 - Fixed: Cleared internal structures for function names, TYPES, etc when a document is closed.
+- Fixed: Clearing MRU list from top menu now immediately updates list shown in Explorer window.
+
 
 Version 1.2.2 (February 2, 2017)
 - Added: Find in Files functionality added.

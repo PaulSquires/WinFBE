@@ -395,7 +395,6 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    LoadRecentFilesTreeview(HWND_FRMRECENT)
    LoadRecentProjectsTreeview(HWND_FRMRECENT)
-   
    PositionRecentWindows(HWND_FRMRECENT)
 
    Function = 0

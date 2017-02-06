@@ -141,6 +141,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"&Compile")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And E&xecute") & Chr(9) & "F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"&Rebuild All") & Chr(9) & "Ctrl+Shift+F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
@@ -207,6 +208,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,  IDM_VIEWOUTPUT )
    pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_REBUILDALL)
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_1,  IDM_USE32BIT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_2,  IDM_USE64BIT )

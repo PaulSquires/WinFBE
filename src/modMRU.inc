@@ -49,12 +49,16 @@ Function ClearMRUlist( ByVal wID As Long ) As Long
          For i = 0 To 9
             gConfig.MRU(i) = ""
          Next
+         LoadRecentFilesTreeview(HWND_FRMRECENT)
       Case IDM_MRUPROJECTCLEAR
          For i = 0 To 9
             gConfig.MRUPROJECT(i) = ""
          Next
+         LoadRecentProjectsTreeview(HWND_FRMRECENT)
    End Select
    
+   PositionRecentWindows(HWND_FRMRECENT)
+
    Function = 0
 End Function
 
