@@ -222,9 +222,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    f = Freefile
    Open gCompile.BatchFile For Output as #f
 
-   ' Change the codepage used by Windows console to unicode
-   'Print #f, "chcp 1250"
-   
    Dim As Long nCount = gApp.GetDocumentCount 
    Dim pDoc As clsDocument Ptr
 
@@ -357,9 +354,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Delete the temporary batch file and the compiler log file
    
-' TODO: Uncomment Kills for compile batch file and logfile
-'   Kill gCompile.BatchFile
-'   Kill gCompile.LogFile
+   Kill gCompile.BatchFile
+   Kill gCompile.LogFile
 
    ' Copy the log file text to the logfile textbox
    AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wsLogSt )
