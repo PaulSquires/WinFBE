@@ -1,5 +1,6 @@
-Version 1.2.3 (Not released yet)
+Version 1.2.3 (February 7, 2017)
 - Added: "Rebuild All" menu option. Re-compiles all modules to object files rather than reusing existing version of the file.
+- Changed: Duplicate Line (Ctrl+D) will now duplicate entire block of selected text and not just the current caret line.
 - Changed: TODO messages can now appear anywhere at start of a line (not only at the first character position).
 - Changed: Substantially increased the width of the compiler "Other Options" textboxes in Project Options.
 - Fixed: Cleared internal structures for function names, TYPES, etc when a document is closed.

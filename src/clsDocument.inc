@@ -1180,7 +1180,30 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
 
 End Function
 
+''
+''
+Function clsDocument.LineDuplicate() As Long
+   ' Duplicate the current caret line, or an entire block of
+   ' code should a selection be active.
+   Dim startSelPos As Long     ' Starting position
+   Dim endSelPos   As Long     ' Ending position
+   Dim strText     As String   ' Selected text
 
+   ' If startSelPos and endSelPos are the same there is no selection,
+   startSelPos = SciMsg( m_pSci, SCI_GETSELECTIONSTART, 0, 0)
+   endSelPos   = SciMsg( m_pSci, SCI_GETSELECTIONEND, 0, 0)
+   
+   If startSelPos = endSelPos Then   ' no selection
+      ' Simply duplicate the line that the caret is on.
+      SciMsg( m_pSci, SCI_LINEDUPLICATE, 0, 0)
+   else
+      ' Retrieve the text
+      strText = this.GetTextRange(startSelPos, endSelPos)
+      SciMsg( m_pSci, SCI_INSERTTEXT, -1, Cast(LPARAM, Strptr(strText)) )
+      SciMsg( m_pSci, SCI_SETSELECTIONSTART, startSelPos, 0)
+      SciMsg( m_pSci, SCI_SETSELECTIONEND, endSelPos, 0)
+   end if
 
+   Function = 0
 
-
+End Function

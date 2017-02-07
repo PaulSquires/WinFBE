@@ -16,7 +16,7 @@
 #include once "win/commctrl.bi"
 #include once "win/richedit.bi"
 #include once "win/uxtheme.bi"
-'#include once "win/windowsx.bi"
+#include once "Afx/windowsxx.bi"
 #include once "Afx/AfxWin.inc"
 
 ' Button

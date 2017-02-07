@@ -355,6 +355,7 @@ Type clsDocument
       Declare Function GetBookmarks() As String
       Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
       declare Function InFunction() As BOOLEAN
+      declare Function LineDuplicate() As Long
       Declare Constructor
       Declare Destructor
 End Type

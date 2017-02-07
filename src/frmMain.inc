@@ -1040,7 +1040,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_UNINDENTBLOCK:      Function = SendMessageW(hEdit, SCI_BACKTAB, 0, 0)
       Case IDM_COMMENTBLOCK:       Function = pDoc->BlockComment(True) 
       Case IDM_UNCOMMENTBLOCK:     Function = pDoc->BlockComment(False) 
-      Case IDM_DUPLICATELINE:      Function = SendMessageW(hEdit, SCI_LINEDUPLICATE, 0, 0)
+      Case IDM_DUPLICATELINE:      Function = pDoc->LineDuplicate()
       Case IDM_MOVELINEUP:         Function = pDoc->MoveCurrentLines(False) 
       Case IDM_MOVELINEDOWN:       Function = pDoc->MoveCurrentLines(True)  
       Case IDM_TOUPPERCASE:        Function = pDoc->ChangeSelectionCase(1)
