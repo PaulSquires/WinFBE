@@ -44,13 +44,16 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
    ' document must be added to the array twice because the initial searching may start part
    ' way through the document. The second time the document is accessed will search the 
    ' first part of the document that would have been missed the first time.
-   If cBool(gFind.nScopeFind = IDC_SCOPE1) OrElse (flagSearchCurrentOnly = True) Then   
+   If cBool(gFind.nScopeFind = IDC_SCOPE1) orelse _
+      cBool(gFind.nScopeReplace = IDC_SCOPE1) OrElse _
+      (flagSearchCurrentOnly = True) Then   
+print "search current only"
       ' Search current document
       ReDim pDocs(1) As clsDocument Ptr
       pDocs(0) = gTTabCtl.GetActiveDocumentPtr
       pDocs(1) = gTTabCtl.GetActiveDocumentPtr
       nTabCount = 2
-   Elseif gFind.nScopeFind = IDC_SCOPE2 then
+   Elseif (gFind.nScopeFind = IDC_SCOPE2) or (gFind.nScopeReplace = IDC_SCOPE2) then
       ' Search all loaded documents
       nTabCount = TabCtrl_GetItemCount(gTTabCtl.hWindow)           
       nCurTab   = TabCtrl_GetCurSel(gTTabCtl.hWindow)
@@ -63,7 +66,7 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
       Next
       pDocs(nTabCount) = gTTabCtl.GetDocumentPtr(nCurTab)
       nTabCount = nTabCount + 1
-   Elseif gFind.nScopeFind = IDC_SCOPE3 then
+   Elseif (gFind.nScopeFind = IDC_SCOPE3) or (gFind.nScopeReplace = IDC_SCOPE3) then
       ' Search selected text
       ReDim pDocs(1) As clsDocument Ptr
       pDocs(0) = gTTabCtl.GetActiveDocumentPtr
@@ -83,6 +86,7 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
       else
          ' Begin to search from the current position
          If flagUpDown = IDM_FINDNEXT Then
+  print "find next"
             startPos = Iif(curPos = -1, 0, SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) + 1)
             endPos = SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
          Else

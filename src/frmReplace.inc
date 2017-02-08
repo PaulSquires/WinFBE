@@ -54,7 +54,8 @@ Function frmReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             ' this to ensure that manually typed in text has been captured.
             Dim wszText As WString * MAX_PATH
             wszText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMREPLACE_COMBOFIND) )
-            frmFind_AddToFindCombo(str(wszText))
+            gFind.txtFind = Str(wszText)
+            frmFind_AddToFindCombo(gFind.txtFind)
             wszText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMREPLACE_COMBOREPLACE) )
             frmReplace_AddToReplaceCombo(str(wszText))
             
