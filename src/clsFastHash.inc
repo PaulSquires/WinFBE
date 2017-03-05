@@ -388,12 +388,14 @@ Function clsFastHash.CreateDeclaresFile( ByRef sFilename As Const String ) As LO
 ' sData2 = Filename
 ' sData3 = Str(LineNumber)
 
+   dim as long idx = gApp.GetActiveProjectIndex()
+   
    For i As LONG = LBound(m_arrHash) To Ubound(m_arrHash)
       If m_arrHash(i) = 0 Then Continue For
 
       ' Bypass any declares for Class subs/functions
       if instr(m_arrHash(i)->sKey, ".") = 0 THEN
-         if gApp.GetDocumentPtrByFilename(wstr(m_arrHash(i)->sData2)) THEN 
+         if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(m_arrHash(i)->sData2)) THEN 
             Print #f, "Declare " & AfxStrShrink(m_arrHash(i)->sData1, Chr(32,9,13,10))
          end if
       END IF
@@ -402,7 +404,7 @@ Function clsFastHash.CreateDeclaresFile( ByRef sFilename As Const String ) As LO
       Do Until _Item = 0
          ' Bypass any declares for Class subs/functions
          if instr(_Item->sKey, ".") = 0 THEN
-            if gApp.GetDocumentPtrByFilename(wstr(_Item->sData2)) THEN 
+            if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(_Item->sData2)) THEN 
                Print #f, "Declare " & AfxStrShrink(_Item->sData1, Chr(32,9,13,10))
             end if
          END IF

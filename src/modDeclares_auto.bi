@@ -18,15 +18,13 @@ Declare Function frmProjectOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateSt
 Declare Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
 Declare Function frmOutput_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmReplace_OnDestroy(HWnd As HWnd) As LRESULT
-Declare Function LoadRecentProjectsTreeview( ByVal HWnd As HWnd ) As LRESULT
-Declare Function CreateRootNodeExplorerTreeview() As Long
 Declare Function frmOutput_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
 Declare Function frmRecent_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
-Declare Function frmRecent_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
 Declare Function CBProc( ByVal HWnd As HWnd, ByVal wMsg As UInt, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function Scintilla_OnNotify( ByVal HWnd As HWnd, ByVal pNSC As SCNOTIFICATION Ptr ) As Long
 Declare Function frmGoto_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function Splitter_OnLButtonUp() As BOOLEAN
+declare function frmOutput_ShowNotes() as long 
 Declare Function CreateScintillaContextMenu() As HMENU
 Declare Function frmExplorer_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmRecent_OnDestroy(HWnd As HWnd) As LRESULT
@@ -47,7 +45,7 @@ Declare Function DoSearchFileSelected() as LONG
 Declare Function frmFind_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
 Declare Function frmRecent_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-Declare Function frmProjectOptions_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
+Declare Function frmProjectOptions_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0, byval IsNewProject as boolean = false ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
 Declare Function frmFindInFiles_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmHotTxtBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
@@ -138,11 +136,11 @@ Declare Function frmHotImgBtn_SetSelected( ByVal HWnd As HWnd, ByVal fSelected A
 Declare Function frmProjectOptions_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmReplace_Show( ByVal hWndParent As HWnd ) As Long
 Declare Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
-Declare Function frmOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As Long
+Declare Function frmOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function LoadRecentFilesTreeview( ByVal HWnd As HWnd ) As LRESULT
+Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr ) As clsDocument Ptr
 Declare Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
 Declare Function frmFind_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
@@ -151,12 +149,12 @@ Declare Function frmOptions_OnClose(HWnd As HWnd) As LRESULT
 Declare Function frmTemplates_OnClose(HWnd As HWnd) As LRESULT
 Declare Function frmGoto_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmFnList_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
-Declare Function Find_UpOrDown( ByVal flagUpDown As Long, ByVal findFlags As Long, ByVal flagSearchCurrentOnly As BOOLEAN, ByVal hWndDialog As HWnd ) As Long
 Declare Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, ByVal hItem as HANDLE, ByVal lParam as Long) as Long
+Declare Function Find_UpOrDown( ByVal flagUpDown As Long, ByVal findFlags As Long, ByVal flagSearchCurrentOnly As BOOLEAN, ByVal hWndDialog As HWnd ) As Long
 Declare Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
 Declare Function UpdateToDoListview() as long
 Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmHotImgBtn( ByVal hWndParent As HWnd, ByVal cID As Long = 0, ByRef wszImgNormal As WString = "", ByRef wszImgHot As WString = "", ByRef wszTooltip As WString = "", ByVal nImgWidth As Long = 24, ByVal nImgHeight As Long = 24, ByVal clrBg As COLORREF = 0, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0 ) As HWND
+Declare Function frmHotImgBtn( ByVal hWndParent As HWnd, ByVal cID As Long = 0, ByRef wszImgNormal As WString = "", ByRef wszImgHot As WString = "", ByRef wszTooltip As WString = "", ByVal nImgWidth As Long = 24, ByVal nImgHeight As Long = 24, ByVal clrBg As COLORREF = 0, ByVal clrBgHot As COLORREF = 0, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, byval fSelectedFrame as BOOLEAN = true, byval fEnabled as BOOLEAN = true ) As HWND
 Declare Function GetMRUMenuHandle() as HMENU
 Declare Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function CreateStatusBarFileTypeContextMenu() As HMENU
@@ -194,8 +192,8 @@ Declare Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
 Declare Function frmFindInFiles_AddToFilesCombo( ByRef sText As Const String ) As Long
 Declare Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
 Declare Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
-Declare Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRESULT
 Declare Function RemoveDuplicateSpaces( byref sText as const string) as string
+Declare Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRESULT
 Declare Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 Declare Function frmFind_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmOutput_OnPaint( ByVal HWnd As HWnd) As LRESULT
@@ -213,3 +211,8 @@ Declare Function frmExplorer_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByV
 Declare Function frmFindInFiles_AddToFolderCombo( ByRef sText As Const String ) As Long
 Declare Function frmFindInFiles_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr
+declare function frmFindReplace_SetButtonStates() as LONG
+declare function frmFindReplace_HighlightSearches() as long
+declare function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as boolean ) as long
+declare Function frmHotImgBtn_Enabled( ByVal HWnd As HWnd, ByVal fEnabled as BOOLEAN ) As Long
+declare Function frmHotImgBtn_IsEnabled( ByVal HWnd As HWnd ) As boolean

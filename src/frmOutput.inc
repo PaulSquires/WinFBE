@@ -13,6 +13,25 @@
 
 
 ' ========================================================================================
+' Ensure that the correct notes are shown
+' ========================================================================================
+function frmOutput_ShowNotes() as long 
+
+   dim idx as long 
+   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+
+   if gApp.IsProjectActive THEN
+      idx = gApp.GetActiveProjectIndex()
+      AfxSetWindowText(hCtl, gApp.Projects(idx).ProjectNotes)
+   else   
+      AfxSetWindowText(hCtl, gApp.NonProjectNotes)
+   END IF
+
+   function = 0
+END FUNCTION
+
+
+' ========================================================================================
 ' Update the TODO listview
 ' ========================================================================================
 function UpdateToDoListview() as long 
@@ -178,6 +197,19 @@ Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
             DoSearchFileSelected()   
             Exit Function
          End If
+      
+      case EN_CHANGE
+         ' Notes have been modified. Save them to the correct global variable
+         ' to ensure that the changes are not lost when documents or projects
+         ' are switched.
+         if id = IDC_FRMOUTPUT_TXTNOTES THEN
+            if gApp.IsProjectActive THEN
+               dim as long idx = gApp.GetActiveProjectIndex()
+               gApp.Projects(idx).ProjectNotes = AfxGetWindowText(hwndCtl)
+            else
+               gApp.NonProjectNotes = AfxGetWindowText(hwndCtl)
+            end if   
+         END IF   
          
    end select
                        
@@ -311,7 +343,7 @@ Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -347,7 +379,8 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    TabCtrl_SetCurSel( hCtl, 0 )
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
-                  L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), 0, 0, nWidth, nHeight )
+                  L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT), _
+                  0, 0, nWidth, nHeight )
                   
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _

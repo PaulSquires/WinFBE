@@ -38,7 +38,7 @@ Function GetIncludeFilename( byref sFilename as string, _    ' file where the #I
    end if
    
    ' Search the compiler's include folder path
-   Select Case Ucase(gConfig.DefaultCompiler)
+   Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
       Case "FBC 32BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
       Case "FBC 64BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    End Select
@@ -249,7 +249,8 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
          dim as string sIncludeFilename = GetIncludeFilename(sFilename, st)
          ' If the include file is already part of the loaded project
          ' then no need to parse it again.
-         if gApp.GetDocumentPtrByFilename(wstr(sIncludeFilename)) = 0 THEN 
+         dim as long idx = gApp.GetActiveProjectIndex()
+         if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(sIncludeFilename)) = 0 THEN 
             ParseDocument( 0, sIncludeFilename )
          END IF
       end if

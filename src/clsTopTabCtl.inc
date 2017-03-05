@@ -101,6 +101,11 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
    If idx < 0 Then idx = nCount - 1
    If TabCtrl_GetCurSel(this.hWindow) <> idx Then
       Function = TabCtrl_SetCurFocus(this.hWindow, idx)
+      if IsWindowVisible(HWND_FRMFINDREPLACE) THEN
+         frmFindReplace_HighlightSearches
+         frmFindReplace_SetButtonStates
+      END IF
+      SetFocusScintilla
    End If
 End Function
 

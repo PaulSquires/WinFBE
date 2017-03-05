@@ -148,8 +148,8 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
-      SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
-      SendMessageW( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
+      SendMessage( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
+      SendMessage( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
    END IF
    
    function = 0
@@ -165,8 +165,9 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
    dim zText as CWSTR 
-   if AfxFileExists(gApp.ProjectFilename) Then
-      zText = gApp.ProjectFilename
+   dim idx as long = gApp.GetActiveProjectIndex
+   if AfxFileExists(gApp.Projects(idx).ProjectFilename) Then
+      zText = gApp.Projects(idx).ProjectFilename
    else
       zText = exepath
    end if      
@@ -190,8 +191,9 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
    dim zText as CWSTR 
-   if AfxFileExists(gApp.ProjectFilename) Then
-      zText = gApp.ProjectFilename
+   dim idx as long = gApp.GetActiveProjectIndex
+   if AfxFileExists(gApp.Projects(idx).ProjectFilename) Then
+      zText = gApp.Projects(idx).ProjectFilename
    else
       zText = exepath
    end if      
@@ -201,6 +203,22 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 
    Return wzFilename
 End Function
+
+
+
+' ========================================================================================
+' Removes checkbox from a node in a Treeview
+' ========================================================================================
+function Treeview_RemoveCheckBox( byval hTree as hwnd, byval hNode as HTREEITEM) as long 
+   
+   dim as TVITEM tvi
+   tvi.hItem = hNode
+   tvi.mask = TVIF_STATE
+   tvi.stateMask = TVIS_STATEIMAGEMASK
+   tvi.state = 0
+   function = TreeView_SetItem(hTree, @tvi)
+
+END FUNCTION
 
 
 ' ========================================================================================
@@ -217,7 +235,7 @@ Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, _
    Dim uInsert As TV_INSERTSTRUCT
 
    uInsert.hInsertAfter            = TVI_LAST
-   uInsert.item.mask               = TVIF_TEXT Or TVIF_IMAGE Or TVIF_SELECTEDIMAGE Or TVIF_PARAM
+   uInsert.item.mask               = TVIF_TEXT Or TVIF_PARAM Or TVIF_SELECTEDIMAGE Or TVIF_IMAGE 
    uInsert.hParent                 = hParent
    uInsert.item.pszText            = Cast(WString Ptr, Strptr(TheText))
    uInsert.item.iImage             = iImage 

@@ -40,7 +40,7 @@ Function frmCommandLine_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
    Select Case id
       Case IDOK
          If codeNotify = BN_CLICKED Then
-            GetWindowTextW( GetDlgItem(HWnd, IDC_FRMCOMMANDLINE_TEXTBOX1), gConfig.CommandLine, MAX_PATH )
+            gApp.Projects(gApp.GetActiveProjectIndex).ProjectCommandLine = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMCOMMANDLINE_TEXTBOX1) )
             SendMessageW HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
@@ -130,7 +130,7 @@ Function frmCommandLine_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   SetWindowTextW( hTextBox, gConfig.CommandLine )
+   SetWindowText( hTextBox, gApp.Projects(gApp.GetActiveProjectIndex).ProjectCommandLine )
    
    SetFocus hTextBox
    

@@ -36,8 +36,7 @@
 
 #Define IDC_FRMRECENT_BTNOPENFILE                   1000
 #Define IDC_FRMRECENT_BTNOPENPROJECT                1001
-#Define IDC_FRMRECENT_TREEFILES                     1002
-#Define IDC_FRMRECENT_TREEPROJECTS                  1003
+#Define IDC_FRMRECENT_TREEVIEW                      1002
 
 #Define IDC_FRMOPTIONS_LABEL1                       1000
 #Define IDC_FRMOPTIONS_CMDCANCEL                    1001
@@ -163,6 +162,19 @@
 #Define IDC_FRMREPLACE_CMDREPLACEALL                1012
 #Define IDC_FRMREPLACE_LBLSTATUS                    1013
 
+#Define IDC_FRMFINDREPLACE_BTNCLOSE                 IDCANCEL
+#Define IDC_FRMFINDREPLACE_BTNTOGGLE                1001
+#Define IDC_FRMFINDREPLACE_TXTFIND                  1002
+#Define IDC_FRMFINDREPLACE_TXTREPLACE               1003
+#Define IDC_FRMFINDREPLACE_BTNMATCHCASE             1004
+#Define IDC_FRMFINDREPLACE_BTNMATCHWHOLEWORD        1005
+#Define IDC_FRMFINDREPLACE_BTNREPLACE               1006
+#Define IDC_FRMFINDREPLACE_BTNREPLACEALL            1007
+#Define IDC_FRMFINDREPLACE_LBLRESULTS               1008
+#Define IDC_FRMFINDREPLACE_BTNLEFT                  1009
+#Define IDC_FRMFINDREPLACE_BTNRIGHT                 1010
+#Define IDC_FRMFINDREPLACE_BTNSELECTION             1011
+
 #Define IDC_FRMGOTO_LBLLASTLINE                     1000
 #Define IDC_FRMGOTO_LBLCURRENTLINE                  1001
 #Define IDC_FRMGOTO_LBLGOTOLINE                     1002
@@ -179,6 +191,7 @@
 Const DELIM = "|"                    ' character used as delimiter for function names in data1 of gFunctionLists hash
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
+CONST IDM_ADDFILETOPROJECT = 6100    ' 6100 to 6199 Popup menu will show list of open projects to choose from. 
 
 Const FILETYPE_UNDEFINED = 0
 Const FILETYPE_MAIN      = 1
@@ -192,6 +205,7 @@ Enum
 ''  Custom messages
    MSG_USER_SETFOCUS = WM_USER + 1
    MSG_USER_PROCESS_COMMANDLINE 
+   MSG_USER_TOGGLE_TVCHECKBOXES
    IDM_FILE, IDM_FILENEW 
    IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS
    IDM_FILESAVEALL, IDM_FILESAVEDECLARES
@@ -210,15 +224,16 @@ Enum
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
    IDM_VIEWEXPLORER, IDM_VIEWOUTPUT
    IDM_OPTIONS
-   IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT, IDM_PROJECTCLOSE 
-   IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS
-   IDM_ADDFILETOPROJECT, IDM_REMOVEFILEFROMPROJECT
+   IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT
+   IDM_PROJECTFILESADDTONODE, IDM_REMOVEFILEFROMPROJECT 
+   IDM_PROJECTCLOSE, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS  
    IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_COMMANDLINE
    IDM_USE32BIT, IDM_USE64BIT
    IDM_GUI, IDM_CONSOLE
    IDM_HELP, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
+
 End Enum
 
 
@@ -235,13 +250,14 @@ dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
-Dim Shared As HWnd HWND_FRMFIND, HWND_FRMREPLACE, HWND_FRMFINDINFILES
+Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES
 Dim Shared As HWnd HWND_FRMFNLIST
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
 
 dim shared as HICON ghIconGood, ghIconBad
+dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
 
 ' Create a temporary array to hold the selected color values
 ' for the different editor elements. When the form is saved then 
@@ -262,28 +278,26 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ' also a descriptive label (that is ignored), and return the LL array value.
 #Define L(e,s)  LL(e)
 
-#Define SetFocusScintilla  PostMessageW HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
-#Define ResizeExplorerWindow  PostMessageW HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
+#Define SetFocusScintilla  PostMessage HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
+#Define ResizeExplorerWindow  PostMessage HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
 
 
 ''
 ''  Save information related to Find/Replace and Find in Files operations
 ''
 Type FINDREPLACE_TYPE
+   foundCount          as long 
    txtFind             As String
    txtReplace          As String
    txtFindCombo(10)    As String
    txtFilesCombo(10)   As String
    txtFolderCombo(10)  As String
-   txtReplaceCombo(10) As String
    txtLastFind         As String
    txtFiles            As String        ' *.*, *.bas, etc (FindInFolder)
    txtFolder           As String        ' start search from this folder (FindInFolder)
    nWholeWord          As Long          ' checkmark for find/replace whole word search
    nMatchCase          As Long          ' match case when searching
    nSearchSubFolders   As Long          ' search sub folders as well (FindInFolder)
-   nScopeFind          As Long          ' identifier of OptionButton that is checked
-   nScopeReplace       As Long          ' identifier of OptionButton that is checked
 End Type
 Dim Shared gFind As FINDREPLACE_TYPE
 Dim Shared gFindInFiles As FINDREPLACE_TYPE
@@ -317,7 +331,7 @@ Type clsDocument
    Public:
       hWindow          As HWnd
       IsNewFlag        As BOOLEAN
-      IsProjectFile    As BOOLEAN
+      ProjectIndex     as long      ' array index into gApp.Projects
       ProjectFileType  As Long = FILETYPE_UNDEFINED
       DiskFilename     As WString * MAX_PATH
       DateFileTime     As FILETIME  
@@ -356,6 +370,12 @@ Type clsDocument
       Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
       declare Function InFunction() As BOOLEAN
       declare Function LineDuplicate() As Long
+      declare function SetMarkerHighlight() As Long
+      declare Function RemoveMarkerHighlight() As Long
+      declare Function IsMultiLineSelection() As boolean
+      declare Function HasMarkerHighlight() As BOOLEAN
+      declare Function FirstMarkerHighlight() As long
+      declare Function LastMarkerHighlight() As long
       Declare Constructor
       Declare Destructor
 End Type
@@ -386,8 +406,8 @@ Type clsConfig
       _ConfigFilename As String 
       
    Public:
+      FBKeywords           As String 
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
-      CommandLine          As CWSTR                ' not saved to file
       LastRunFilename      As CWSTR                ' not saved to file
       CloseFuncList        As Long = True
       ShowExplorer         As Long = True
@@ -396,9 +416,9 @@ Type clsConfig
       Codetips             As Long = True
       AutoComplete         As Long = True
       LeftMargin           As Long = True
-      FoldMargin           As Long = True
+      FoldMargin           As Long = false
       AutoIndentation      As Long = True
-      ConfineCaret         As Long = True
+      ConfineCaret         As Long = false
       LineNumbering        As Long = True
       HighlightCurrentLine As Long = True
       IndentGuides         As Long = True
@@ -423,8 +443,6 @@ Type clsConfig
       CompilerSwitches     As CWSTR
       CompilerHelpfile     As CWSTR
       Win32APIHelpfile     As CWSTR
-      DefaultCompiler      As CWSTR = "FBC 32bit"
-      DefaultCompileMode   As CWSTR = "CONSOLE"
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
       clrCaretFG           As Long = BGR(0,0,0)          ' black
@@ -461,48 +479,36 @@ Type clsConfig
       clrWindowBG          As Long = -1 
       
       Declare Constructor()
+      Declare Function LoadKeywords() As Long
+      Declare Function SaveKeywords() As Long
       Declare Function SaveToFile() As Long
       Declare Function LoadFromFile() As Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
-      Declare Function ProjectLoadFromFile() As BOOLEAN    
+      declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
 End Type
 
 
-Type clsApp
-   Private: 
-      
+type clsProject
+   private:
       m_arrDocuments(Any) As clsDocument Ptr
    
-   Public:
-      ProjectType          As Long                       
-      IsUnicodeCodetips    As BOOLEAN    ' UNICODE define exists. Use Unicode version of codetips
-      IsProjectActive      As BOOLEAN
-      IsNewProjectFlag     As BOOLEAN
-      ProjectErrorOption   As Long
-      ProjectDebug         As Long
-      ProjectThread        As Long
-      ProjectShowConsole   As Long
-      SuppressNotify       As BOOLEAN     ' temporarily suppress Scintilla notifications
+   public:
+      InUse                as boolean     ' this spot in the Projects array is in use
+      ProjectType          As Long        ' dll, exe, lib               
       ProjectName          As CWSTR
       ProjectFilename      As CWSTR
       ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
       ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
-      IncludeFilename      As CWSTR
       hExplorerRootNode    As HTREEITEM
-      bDragTabActive       as BOOLEAN     ' A tab in the top tabcontrol is being dragged
-      bDragActive          As BOOLEAN     ' splitter drag is currently active 
-      hWndPanel            As HWND        ' the panel being split left/right or up/down
+      ProjectErrorOption   As Long
+      ProjectDebug         As Long
+      ProjectThread        As Long
+      ProjectShowConsole   As Long
       ProjectNotes         as CWSTR       ' Save/Load from project file
-      NonProjectNotes      as CWSTR       ' Save/oad from config file
+      ProjectCompiler      as CWSTR = WSTR("FBC 32bit")
+      ProjectCompileMode   as CWSTR = WSTR("CONSOLE")
+      ProjectCommandLine   as CWSTR
       
-      Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
-      Declare Function ProjectAddFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
-      Declare Function ProjectRemoveFile( ByVal pDoc As clsDocument Ptr ) As LRESULT
-      Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
-
-      Declare Function LoadKeywords() As Long
-      Declare Function SaveKeywords() As Long
-
       Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
       declare Function RemoveDocumentFromArray( ByVal idx As Long) As Long
       Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
@@ -512,13 +518,43 @@ Type clsApp
       Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
       Declare Function GetMainDocumentPtr() As clsDocument Ptr
       Declare Function GetResourceDocumentPtr() As clsDocument Ptr
+      Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+      Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
+   
+      Declare Function Debug() As Long
+END TYPE
 
+Type clsApp
+   Private: 
+      
+   Public:
+      IsUnicodeCodetips       As BOOLEAN     ' UNICODE define exists. Use Unicode version of codetips
+      SuppressNotify          As BOOLEAN     ' temporarily suppress Scintilla notifications
+      hRecentFilesRootNode    As HTREEITEM
+      hRecentProjectsRootNode As HTREEITEM
+      bDragTabActive          as BOOLEAN     ' A tab in the top tabcontrol is being dragged
+      bDragActive             As BOOLEAN     ' splitter drag is currently active 
+      hWndPanel               As HWND        ' the panel being split left/right or up/down
+      IncludeFilename         As CWSTR
+      NonProjectNotes         as CWSTR       ' Save/load from config file
+      IsNewProjectFlag        As BOOLEAN
+      ProjectOverrideIndex    as long        ' Do action to specific project rather than the active project
+      
+      Projects(any) as clsProject 
+      
+      declare function GetProjectCount() as LONG
+      declare Function GetActiveProjectIndex() As long
+      declare Function SetActiveProject( byval hNode As HTREEITEM ) As long
+      declare Function EnsureDefaultActiveProject(byval hNode as HTREEITEM = 0) As long
+      declare Function RemoveAllSelectionAttributes() As long
+      declare Function GetProjectIndexByFilename( byref sFilename as wstring ) As long
+         
+      Declare Function IsProjectActive() As boolean
+      declare function GetNewProjectIndex() As Long
+      
       Declare Constructor()
       Declare Destructor()
       
-      FBKeywords As String 
-      
-      'Declare Function Debug() As Long
       
 End Type
 
@@ -527,8 +563,4 @@ End Type
 Dim Shared gApp As clsApp
 Dim Shared gConfig As clsConfig
 Dim Shared gTTabCtl As clsTopTabCtl
-
-
-
-
 

@@ -115,8 +115,8 @@ Sub SaveEditorOptions()
       Dim pzswKeywords As WString Ptr = CAllocate(nLen*2)
       GetWindowTextW( hTextBox, pzswKeywords, nLen )
       Dim As String FBKeywords = Str(*pzswKeywords)
-      gApp.FBKeywords = Trim(FBKeywords)
-      gApp.SaveKeywords
+      gConfig.FBKeywords = Trim(FBKeywords)
+      gConfig.SaveKeywords
       Deallocate(pzswKeywords)
    End If
    
@@ -152,19 +152,21 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
             ' Apply the newly saved options to all open Scintilla windows
-            Dim As Long nCount = gApp.GetDocumentCount 
             Dim pDoc As clsDocument Ptr
-            Dim As Long i
-            For i = 0 To nCount - 1
-               pDoc = gApp.GetDocumentPtr(i)
-               If pDoc Then pDoc->ApplyProperties
-            Next
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            for i as long = lbound(gApp.Projects) to ubound(gApp.Projects)
+               if gApp.Projects(i).InUse THEN
+                  For y as long = 0 To gApp.Projects(i).GetDocumentCount - 1
+                     pDoc = gApp.Projects(i).GetDocumentPtr(y)
+                     If pDoc Then pDoc->ApplyProperties
+                  Next
+               end if
+            next   
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
    End Select

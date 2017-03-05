@@ -26,8 +26,10 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
 
    Dim As Long curPos, startPos, endPos, startLine, endLine, nCurTab, nTabCount
    Dim As Long r, i, n, idx, idxFirst, IDC_SCOPE1, IDC_SCOPE2, IDC_SCOPE3  
+   dim as long SCImessage
    Dim As String buffer      
-   Dim pDoc As clsDocument Ptr 
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    
    ' This routine is used by both the Find dialog and the Replace dialog. Set the
    ' hWnd's and IDC's as needed for each type of dialog.
@@ -37,99 +39,47 @@ Function Find_UpOrDown( ByVal flagUpDown As Long, _
 
    If Len(gFind.txtFind) = 0 Then Return -1
 
-   Dim pDocs(Any) As clsDocument Ptr
-   
-   ' Create an array of Scintilla document pointers that we will need to search depending
-   ' on whether searching the current window or all windows has been chosen. The current
-   ' document must be added to the array twice because the initial searching may start part
-   ' way through the document. The second time the document is accessed will search the 
-   ' first part of the document that would have been missed the first time.
-   If cBool(gFind.nScopeFind = IDC_SCOPE1) orelse _
-      cBool(gFind.nScopeReplace = IDC_SCOPE1) OrElse _
-      (flagSearchCurrentOnly = True) Then   
-print "search current only"
-      ' Search current document
-      ReDim pDocs(1) As clsDocument Ptr
-      pDocs(0) = gTTabCtl.GetActiveDocumentPtr
-      pDocs(1) = gTTabCtl.GetActiveDocumentPtr
-      nTabCount = 2
-   Elseif (gFind.nScopeFind = IDC_SCOPE2) or (gFind.nScopeReplace = IDC_SCOPE2) then
-      ' Search all loaded documents
-      nTabCount = TabCtrl_GetItemCount(gTTabCtl.hWindow)           
-      nCurTab   = TabCtrl_GetCurSel(gTTabCtl.hWindow)
-      ReDim pDocs(nTabCount) As clsDocument Ptr
-      For idx = nCurTab To nTabCount - 1
-         pDocs(n) = gTTabCtl.GetDocumentPtr(idx): n = n + 1
-      Next
-      For idx = 0 To nCurTab - 1 
-         pDocs(n) = gTTabCtl.GetDocumentPtr(idx): n = n + 1
-      Next
-      pDocs(nTabCount) = gTTabCtl.GetDocumentPtr(nCurTab)
-      nTabCount = nTabCount + 1
-   Elseif (gFind.nScopeFind = IDC_SCOPE3) or (gFind.nScopeReplace = IDC_SCOPE3) then
-      ' Search selected text
-      ReDim pDocs(1) As clsDocument Ptr
-      pDocs(0) = gTTabCtl.GetActiveDocumentPtr
-      nTabCount = 1   
-      flagUpDown = IDM_FINDNEXT
-   End If
-
-   
-   ' cycle the search through all of the loaded pDocs
-   For idx = 0 To nTabCount - 1
-      pDoc = pDocs(idx)
-   
-      ' Determine the start and end position. If searching a Selection then
-      ' set that now, otherwise deal with the group of documents.
-      if gFind.nScopeFind = IDC_SCOPE3 then
-         pDoc->GetSelectedLineRange(startLine, endLine, startPos, endPos )
-      else
-         ' Begin to search from the current position
-         If flagUpDown = IDM_FINDNEXT Then
-  print "find next"
-            startPos = Iif(curPos = -1, 0, SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) + 1)
-            endPos = SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
-         Else
-            ' For backward searches the end position must be less than the start position
-            endPos = 0
-            startPos = Iif(curPos = -1, _
-                           SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), _
-                           SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) - 1)
-         End If
-      end if
-
-      curPos = 0               
-
-      SendMessageW( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-      SendMessageW( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
-      SendMessageW( pDoc->hWindow, SCI_SETSEARCHFLAGS, findFlags, 0)
-
-      ' Search for the text to find
-      r = SendMessageW( pDoc->hWindow, SCI_SEARCHINTARGET, Len(gFind.txtFind), Cast(LPARAM, Strptr(gFind.txtFind)))
-      If r = -1 Then ' SEARCH NOT FOUND
-         ' Search the next loaded window or display not found messagebox if no more pDocs to search.
-         If idx + 1 > nTabCount - 1 Then                              
-            MessageBoxW( hWndDialog, L(228, "No matches found."), L(158, "Find"), MB_OK Or MB_ICONINFORMATION Or MB_APPLMODAL Or MB_DEFBUTTON1)
-            If hWndDialog = HWND_FRMFIND Then SetFocus GetDlgItem(hWndDialog, IDC_FRMFIND_COMBOFIND)
-            If hWndDialog = HWND_FRMREPLACE Then SetFocus GetDlgItem(hWndDialog, IDC_FRMREPLACE_COMBOFIND)
-            Exit Function
-         End If   
-         curPos = -1
+   ' Determine the start and end position. If searching a Selection then
+   ' set that now, otherwise deal with the group of documents.
+   if CBool(gFind.nScopeFind = IDC_SCOPE1) orelse (flagSearchCurrentOnly = True) Then
+      ' Begin to search from the current position
+      If flagUpDown = IDM_FINDNEXT Then
+         startPos = Iif(curPos = -1, 0, SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) + 1)
+         endPos = SendMessageW( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
       Else
-         ' Position the caret and select the text
-         SendMessageW( pDoc->hWindow, SCI_SETCURRENTPOS, r, 0)
-         SendMessageW( pDoc->hWindow, SCI_GOTOPOS, r, 0)
-         if gFind.nScopeFind = IDC_SCOPE3 then
-            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONSTART, startPos, 0)
-            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONEND, endPos, 0)
-         else
-            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONSTART, r, 0)
-            SendMessageW( pDoc->hWindow, SCI_SETSELECTIONEND, r+Len(gFind.txtFind), 0)
-         end if
-         gTTabCtl.SetTabIndexByDocumentPtr(pDoc)
-         Exit Function
+         ' For backward searches the end position must be less than the start position
+         endPos = 0
+         startPos = Iif(curPos = -1, _
+                        SendMessage( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), _
+                        SendMessage( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) - 1)
       End If
-   Next
+   elseif gFind.nScopeFind = IDC_SCOPE3 then
+      pDoc->GetSelectedLineRange(startLine, endLine, startPos, endPos )
+   end if
+
+   SendMessage( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
+   SendMessage( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+   SendMessage( pDoc->hWindow, SCI_SETSEARCHFLAGS, findFlags, 0)
+
+   ' Search for the text to find
+   r = SendMessage( pDoc->hWindow, SCI_SEARCHINTARGET, Len(gFind.txtFind), Cast(LPARAM, Strptr(gFind.txtFind)))
+   If r = -1 Then ' SEARCH NOT FOUND
+      MessageBox( hWndDialog, L(228, "No matches found."), L(158, "Find"), MB_OK Or MB_ICONINFORMATION Or MB_APPLMODAL Or MB_DEFBUTTON1)
+      If hWndDialog = HWND_FRMFIND Then SetFocus GetDlgItem(hWndDialog, IDC_FRMFIND_COMBOFIND)
+      If hWndDialog = HWND_FRMREPLACE Then SetFocus GetDlgItem(hWndDialog, IDC_FRMREPLACE_COMBOFIND)
+      Exit Function
+   Else
+      ' Position the caret and select the text
+      SendMessage( pDoc->hWindow, SCI_SETCURRENTPOS, r, 0)
+      SendMessage( pDoc->hWindow, SCI_GOTOPOS, r, 0)
+      if gFind.nScopeFind = IDC_SCOPE3 then
+         SendMessage( pDoc->hWindow, SCI_SETSELECTIONSTART, startPos, 0)
+         SendMessage( pDoc->hWindow, SCI_SETSELECTIONEND, endPos, 0)
+      else
+         SendMessage( pDoc->hWindow, SCI_SETSELECTIONSTART, r, 0)
+         SendMessage( pDoc->hWindow, SCI_SETSELECTIONEND, r + Len(gFind.txtFind), 0)
+      end if
+   End If
       
    Function = 0
 End Function
@@ -267,6 +217,7 @@ Function frmFind_OnDestroy(HWnd As HWnd) As LRESULT
    gFind.nMatchCase = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_CHKMATCHCASE) )    
    If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_OPTSCOPE1) ) Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1      
    If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_OPTSCOPE2) ) Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE2
+   If Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFIND_OPTSCOPE3) ) Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE3
    gFind.txtFind = str(AfxGetWindowText( GetDlgItem(HWnd_FRMFIND, IDC_FRMFIND_COMBOFIND)))
    gFind.txtLastFind = gFind.txtFind 
 
@@ -291,7 +242,7 @@ Function frmFind_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -353,13 +304,13 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE1, L(165,"Current Document"), 225, 71, 170, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE2, L(166,"All Open Documents"), 225, 91, 170, 16, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-' Find/Replace in Selected text is not working okay yet.
-'   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE3, L(220,"Selected Text"), 225, 111, 170, 16, _
+'   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE2, L(166,"All Open Documents"), 225, 91, 170, 16, _
 '        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
 '        WS_EX_LEFT Or WS_EX_LTRREADING)
+' Find/Replace in Selected text is not working okay yet.
+   pWindow->AddControl("OPTION", , IDC_FRMFIND_OPTSCOPE3, L(220,"Selected Text"), 225, 91, 170, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTORADIOBUTTON Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long i, nCount, startPos, endPos, startLine, endLine
    Dim As String buffer, sFind      
@@ -386,8 +337,9 @@ Function frmFind_Show( ByVal hWndParent As HWnd ) As Long
    If gFind.nScopeFind = 0 Then gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1
    Button_SetCheck( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE1), Iif(gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE1, BST_CHECKED, BST_UNCHECKED) )
    Button_SetCheck( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE2), Iif(gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE2, BST_CHECKED, BST_UNCHECKED) )
+   Button_SetCheck( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_OPTSCOPE3), Iif(gFind.nScopeFind = IDC_FRMFIND_OPTSCOPE3, BST_CHECKED, BST_UNCHECKED) )
    
-   SetWindowTextW( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_COMBOFIND), WStr(gFind.txtFind) )    
+   SetWindowText( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_COMBOFIND), WStr(gFind.txtFind) )    
    EnableWindow( GetDlgItem(HWND_FRMFIND, IDOK), True )
  
    Button_SetCheck( GetDlgItem(HWND_FRMFIND, IDC_FRMFIND_CHKWHOLEWORDS), gFind.nWholeWord )

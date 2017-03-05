@@ -25,7 +25,7 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
    Dim As Rect rc
    GetClientRect(HWnd, @rc)
 
-   Dim As HWnd hCtl
+   Dim As HWnd hCtl, hTree
    Dim As Long nLeft, nTop, nWidth, nHeight
    
    ' The Explorer label was painted in the top area so start our treeviews immediately after that
@@ -38,73 +38,60 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
 
    nTop = nTop + nHeight + pWindow->ScaleY(12)
 
-   hCtl = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    
-   If CBool(gApp.GetDocumentCount = 0) And (gApp.IsProjectActive = False) Then
-      ' Ensure that the Recent lists are the most current
-      If IsWindowVisible(HWND_FRMRECENT) = 0 Then
-         LoadRecentFilesTreeview(HWND_FRMRECENT)
-         LoadRecentProjectsTreeview(HWND_FRMRECENT)
-      End If
-      ShowWindow hCtl, SW_HIDE
-      SetWindowPos( HWND_FRMRECENT, 0, 0, nTop, rc.right, rc.bottom-nTop, _
-                    IIf( gApp.GetDocumentCount, SWP_HIDEWINDOW, SWP_SHOWWINDOW) Or SWP_NOZORDER )
-   Else
+   If gApp.IsProjectActive Then
       ' Project is active to continue to show the Explorer tree regardless of whether 
       ' any files are actually open.
       ShowWindow HWND_FRMRECENT, SW_HIDE
-
-      ' Ensure that the treeview root node is created.
-      CreateRootNodeExplorerTreeview
-            
-      ' Allow a small space at the right edge to ensure area for splitter
-      SetWindowPos( hCtl, 0, 0, nTop, _
-                    rc.Right - pWindow->ScaleX(2), _
-                    rc.bottom-nTop, SWP_SHOWWINDOW Or SWP_NOZORDER )
+      ShowWindow hTree, SW_SHOW
+   else
+      ' If no project open then show Recent dialog
+      if gApp.Projects(0).GetDocumentCount = 0 then
+         ' Ensure that the Recent lists are the most current
+         If IsWindowVisible(HWND_FRMRECENT) = 0 Then LoadRecentFilesTreeview(HWND_FRMRECENT)
+         ShowWindow hTree, SW_HIDE
+         ShowWindow HWND_FRMRECENT, SW_SHOW
+      else
+         ShowWindow HWND_FRMRECENT, SW_HIDE
+         ShowWindow hTree, SW_SHOW
+      end if
    End If   
 
+   ' Allow a small space at the right edge to ensure area for splitter
+   SetWindowPos( IIF(IsWindowVisible(hTree), hTree, HWND_FRMRECENT), _
+                 0, 0, nTop, rc.Right - pWindow->ScaleX(2), rc.bottom-nTop, SWP_SHOWWINDOW Or SWP_NOZORDER )
+
+   AfxRedrawWindow(HWND_FRMEXPLORER)
+   
    Function = 0
 End Function
  
 
 ' ========================================================================================
-' Create the treeview root node should it not already exist
-' ========================================================================================
-Function CreateRootNodeExplorerTreeview() As Long
-
-   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   If gApp.hExplorerRootNode = 0 Then
-      gApp.hExplorerRootNode = FF_TreeView_InsertItem (hTree, TVI_ROOT, _
-                                          Iif(gApp.IsProjectActive, UCase(gApp.ProjectName), "FILES"), _
-                                          0, gidxImageOpened, gidxImageOpened )
-      FF_TreeView_SetCheckState( hTree, gApp.hExplorerRootNode, true)
-      ' Nodes are added to the treeview via the use of AddFunctionsToExplorerTreeview which
-      ' is found in the frmExplorer.inc file.
-   End If
-   
-   function = 0
-end function   
-
-
-' ========================================================================================
 ' Add the names of all subs/functions belonging to this document to the Explorer treeview
 ' ========================================================================================
 Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fUpdateNodes As BOOLEAN ) As Long
-
+ 
    If pDoc = 0 Then Exit Function
    
    Dim As CWSTR wzFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
    Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   Dim As HTREEITEM hChild
+   Dim As HTREEITEM hChild, hRootNode
    Dim As BOOLEAN fAddChildren = False
+   dim as long idx
+   
+   ' Determine what root node to add or update the files from
+   idx = gApp.GetActiveProjectIndex()
+   hRootNode = gApp.Projects(idx).hExplorerRootNode
    
    ' If hNodeExplorer does not exist then we must be adding a new document. If it does
    ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
       If pDoc->hNodeExplorer = 0 Then
-         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, gApp.hExplorerRootNode, wzFile, cast(LPARAM, pDoc), gidxImageClosed, gidxImageClosed)
-         FF_TreeView_SetCheckState( hTree, pDoc->hNodeExplorer, False)
+         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, hRootNode, wzFile, cast(LPARAM, pDoc) )
          fAddChildren = True
+         Treeview_RemoveCheckBox(hTree, pDoc->hNodeExplorer)
       End If
    Else
       ' Delete any existing children sub/function nodes and then update with new pointer values
@@ -115,11 +102,12 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
       Loop
       fAddChildren = True
    End If
-
+ 
    If fAddChildren Then
       dim wszText as wstring * MAX_PATH
       dim as STRING sAllFunctions, sFunctionName
       dim as string sFilename = ucase(pDoc->DiskFilename)
+      dim as HTREEITEM hNode
       if gFunctionLists.FindItem(sFilename) then
          ' Parse the function names and add them to the list box
          sAllFunctions = gFunctionLists.FoundData1
@@ -127,7 +115,8 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
             dim as long nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
             for p as long = 1 to nParseCount
                sFunctionName = AfxStrParse(sAllFunctions, p, DELIM)
-               FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, sFunctionName, 0, gidxImageCode, gidxImageCode)
+               hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, sFunctionName, 0 )
+               Treeview_RemoveCheckBox(hTree, hNode)
             NEXT
          end if
       end if
@@ -175,12 +164,9 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
    If (id <> IDC_FRMEXPLORER_TREE) Then Return 0
    
    Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
-   Dim lpTVKD As TV_KEYDOWN  Ptr = Cast(TV_KEYDOWN Ptr, pNMHDR)
    Dim As HTREEITEM hItem
-   Dim As BOOLEAN bIsButton
    Dim As HWND hTree 
    Dim As LPARAM lParam
-   Dim As Long idxImage 
    Dim pDoc As clsDocument Ptr
    Dim ht As TVHITTESTINFO
    Dim As POINT pt
@@ -188,6 +174,28 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
    ' Determine what node was clicked on
    Select Case pNMHDR->code 
       
+      case TVN_GETINFOTIP
+         ' Display a tooltip when a treeview node is hovered over. This will normally
+         ' be the full filename for the project or document.
+         dim pnmTip as NMTVGETINFOTIPW ptr = cast(NMTVGETINFOTIPW ptr, pNMHDR)
+         ' First, search if this tooltip belongs to a project root node
+         for i as long = 1 to ubound(gApp.Projects)
+            if gApp.Projects(i).InUse = true THEN
+               if gApp.Projects(i).hExplorerRootNode = pnmTip->hItem then
+                  pnmTip->pszText = cast(WSTRING Ptr, @**gApp.Projects(i).ProjectFilename)
+                  pnmTip->cchTextMax = len(gApp.Projects(i).ProjectFilename)
+                  exit function
+               end if   
+            END IF
+         NEXT
+         ' Second, search for a matching document
+         pDoc = Cast(clsDocument ptr, pnmTip->lParam)
+         if pDoc THEN
+            pnmTip->pszText = @pDoc->DiskFilename
+            pnmTip->cchTextMax = len(pDoc->DiskFilename)
+         END IF
+         exit function   
+
       Case NM_CLICK, NM_RCLICK
       ' If we have clicked on a folder item then issue an expand. Must use HitTest because the 
       ' the current node has not been selected yet.
@@ -199,96 +207,31 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
          Treeview_HitTest(hTree, @ht )
          hItem = ht.hItem
          If hItem Then Treeview_Select( hTree, hItem, TVGN_CARET)
-
-         If hItem Then
-            ' If we are clicking on the PROJECT name then expand/collapse the entire treeview list.
-            If hItem = Treeview_GetRoot(hTree) Then bIsButton = True
-            
-            ' Determine if we have clicked on the Expand/Collapse button or on the Filename or a Function name.
-            If ht.flags <> TVHT_ONITEMLABEL Then bIsButton = True
-            
-            ' This is a regular file.
-            lParam = FF_TreeView_GetlParam(hTree, hItem)
-            pDoc = Cast(clsDocument Ptr, lParam)
-            If pDoc Then
-               If FF_TreeView_GetCheckState( hTree, hItem ) = True Then
-                  idxImage = gidxImageOpened
-               Else
-                  idxImage = gidxImageClosed
-               End If      
-            Else
-               idxImage = gidxImageCode
-            End If
-            
-            If bIsButton = True Then
-               If FF_TreeView_GetCheckState( hTree, hItem ) = True Then
-                  FF_TreeView_SetCheckState( hTree, hItem, False)
-                  idxImage = gidxImageClosed
-                  Treeview_Expand(hTree, hItem, TVE_COLLAPSE) 
-               Else
-                  FF_TreeView_SetCheckState( hTree, hItem, True)
-                  idxImage = gidxImageOpened
-                  Treeview_Expand(hTree, hItem, TVE_EXPAND) 
-               End If
-            End If
-
-            ' Set the correct image for the node
-            Dim ti As TVITEM
-            ti.hItem = hItem                                                 
-            ti.mask = TVIF_HANDLE Or TVIF_IMAGE Or TVIF_SELECTEDIMAGE
-            ti.iImage = idxImage
-            ti.iSelectedImage = idxImage
-            TreeView_SetItem(hTree, @ti)
-            
-            If pNMHDR->code = NM_RCLICK Then
-               If hItem <> Treeview_GetRoot(hTree) Then 
-                  ' Create the popup menu
-                  lParam = FF_TreeView_GetlParam(hTree, hItem)
-                  pDoc = Cast(clsDocument ptr, lParam)
-                  If pDoc Then
-                     ' Select the node and show the document
-                     SendMessageW(hTree, WM_LBUTTONDBLCLK, 0, 0)
-                     Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
-                     GetCursorPos @pt
-                     TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWND_FRMMAIN, ByVal Null)
-                     DestroyMenu hPopUpMenu
-                     Function = True
-                  End If
-               End If   
-            End If
-            
-         End if
-            
          
-      Case NM_CUSTOMDRAW
-         Dim tvcd As NMTVCUSTOMDRAW Ptr = Cast(NMTVCUSTOMDRAW Ptr, pNMHDR)
+         ' Was the checkbox clicked on. If yes then post user messge to select/deselect
+         ' the other checkboxes for the other projects (only one can be active).
+         if (ht.flags and TVHT_ONITEMSTATEICON) THEN
+            PostMessage( HWND, MSG_USER_TOGGLE_TVCHECKBOXES, 0, Cast(LPARAM, ht.hItem))
+         END IF
 
-         Select Case tvcd->nmcd.dwDrawStage
-            Case CDDS_PREPAINT
-               Return CDRF_NOTIFYITEMDRAW 
+         If pNMHDR->code = NM_CLICK Then
+            ' Ensure that the correct Project name is showing
+            frmMain_PositionWindows(HWND_FRMMAIN)
+         end if
+         
+         If pNMHDR->code = NM_RCLICK Then
+            ' Create the popup menu
+            lParam = FF_TreeView_GetlParam(hTree, hItem)
+            pDoc = Cast(clsDocument ptr, lParam)
+            ' Select the node and show the document
+            if pDoc then SendMessage(hTree, WM_LBUTTONDBLCLK, 0, 0)
+            Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
+            GetCursorPos @pt
+            TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWND_FRMMAIN, ByVal Null)
+            DestroyMenu hPopUpMenu
+            Function = True
+         End If
 
-            Case CDDS_ITEMPREPAINT 
-               Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(hWnd, id))
-               SelectFont(tvcd->nmcd.hdc, hFont)
-               If (tvcd->nmcd.uItemState And ODS_SELECTED) And (GetFocus() = tvcd->nmcd.hdr.hwndFrom) Then
-                  tvcd->clrTextBk = BGR(9,71,113)
-                  tvcd->clrText   = BGR(255,255,250)
-               ElseIf (tvcd->nmcd.uItemState And ODS_SELECTED) Then
-                  tvcd->clrTextBk = BGR(63,63,70)
-                  tvcd->clrText   = BGR(204,204,204)
-               ElseIf (tvcd->nmcd.uItemState And CDIS_HOT) Then
-                  tvcd->clrTextBk = BGR(42,45,46)
-                  tvcd->clrText   = BGR(204,204,204)
-               Else
-                  'tvcd->clrTextBk = BGR(37,37,37)
-                  tvcd->clrTextBk = BGR(80,80,80)
-                  tvcd->clrText   = BGR(204,204,204)
-               End If
-                                   
-               Return CDRF_NEWFONT 
-
-         End Select
-      
    End Select
  
    Function = 0
@@ -374,6 +317,40 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_PAINT message for window/dialog: frmExplorer
+' ========================================================================================
+Function frmExplorer_OnPaint( ByVal HWnd As HWnd) As LRESULT
+            
+   Dim As PAINTSTRUCT ps
+   Dim As HPEN hPen
+   Dim As HDC hDc
+   Dim As Rect rc
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(HWND)
+   if pWindow = 0 THEN exit function
+
+   hDC = BeginPaint(hWnd, @ps)
+   GetClientRect HWnd, @rc
+
+   SaveDC hDC
+
+   FillRect( hDC, @rc, GetSysColorBrush( COLOR_BTNFACE) )
+   
+   ' Outline the right edge of dialog with a dull gray pen
+   hPen = CreatePen( PS_SOLID, 1, GetSysColor(COLOR_ACTIVEBORDER) )
+   SelectPen( hDC, hPen )
+   MoveToEx( hDC, rc.right - 1, rc.top, null)
+   LineTo( hDC, rc.right - 1, rc.bottom-1 )
+   RestoreDC hDC, -1 
+   DeletePen(hPen)
+   
+   EndPaint hWnd, @ps
+   
+   Function = 0
+End Function
+
+
+' ========================================================================================
 ' frmExplorer Window procedure
 ' ========================================================================================
 Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
@@ -387,10 +364,36 @@ Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND, frmExplorer_OnCommand)
       HANDLE_MSG (HWnd, WM_NOTIFY,  frmExplorer_OnNotify)
       HANDLE_MSG (HWnd, WM_DESTROY, frmExplorer_OnDestroy)
+      HANDLE_MSG (HWnd, WM_PAINT,   frmExplorer_OnPaint)
+   
+      case WM_ERASEBKGND
+         return true
+
+      case WM_CTLCOLORSTATIC
+         ' Background color for the Explorer label
+         SetBkColor Cast(HDC,wParam), GetSysColor(COLOR_BTNFACE)
+         return Cast( LRESULT, GetSysColorBrush(COLOR_BTNFACE))
+
+      case MSG_USER_TOGGLE_TVCHECKBOXES      
+         ' If this is a project root node then ensure that only one of the projects
+         ' root node has the checkmark box ticked. If there is only one project
+         ' then do not allow it to be unchecked.
+         dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+         dim as HTREEITEM hNode = Cast(HTREEITEM, lParam)
+         if gApp.GetProjectCount = 1 THEN
+            gApp.SetActiveProject(hNode)
+         else         
+            if TreeView_IsItemChecked(hTree, hNode) then
+               gApp.SetActiveProject(hNode)
+            else
+               gApp.EnsureDefaultActiveProject(hNode)
+            end if   
+         END IF
+
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -411,43 +414,38 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    ' unscale the saved width:   
    dim as long nWidth = iif(gConfig.ShowExplorer, pWindow->UnscaleX(gConfig.ShowExplorerWidth), 250)
    
-   HWND_FRMEXPLORER = pWindow->Create( hWndParent, "", @frmExplorer_WndProc, 0, 0, nWidth, 0, _
+   HWND_FRMEXPLORER = pWindow->Create( hWndParent, "Explorer Window", @frmExplorer_WndProc, 0, 0, nWidth, 0, _
         WS_CHILD Or iif(gConfig.ShowExplorer, WS_VISIBLE, 0) Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
    pWindow->SetFont( "Segoe UI Semibold", 9)
-   'pWindow->Brush = CreateSolidBrush(BGR(37,37,37))
-   pWindow->Brush = CreateSolidBrush(BGR(80,80,80))
+   pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    Dim As HWnd hBtn = _
-   frmHotTxtBtn( HWND_FRMEXPLORER, IDC_FRMEXPLORER_LBLEXPLORER, L(247, "EXPLORER"), "", _
-                    BGR(204,204,204), BGR(80,80,80), _
-                    BGR(204,204,204), BGR(80,80,80), _
-                    10, 0, 12, 75, 12 )            ' 0 Left, 1 Center, 2 Right
-   AfxSetWindowFont( hBtn, pWindow->Font, True )
+   pWindow->AddControl("LABEL", , IDC_FRMEXPLORER_LBLEXPLORER, L(247,"EXPLORER"), 10, 12, 75, 12, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   frmHotImgBtn( HWND_FRMEXPLORER, IDC_FRMEXPLORER_BTNCLOSE, "IMAGE_CLOSE2", "IMAGE_CLOSE2",  _
-                  L(161, "Close"), 24, 24, BGR(80,80,80), 0, 0, 24, 24 )
+   frmHotImgBtn( HWND_FRMEXPLORER, IDC_FRMEXPLORER_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
+                  L(161, "Close"), 24, 24, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_WINDOW), 0, 0, 24, 24 )
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _   
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
+        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
-   
-  'Treeview_SetIndent(hTree, 14)     '<-- do not scale this number
-   
-   Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
-   SendMessageW( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
-   'SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(37,37,37)) )
-   SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(80,80,80)) )
-   SendMessageW( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(24), 0 )
-   SendMessageW( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
-   TreeView_SetImageList( hTree, ghImageListNormal, TVSIL_NORMAL )
 
+      ' items that are initially checked will appear checked (must add TVS_CHECKBOXES after control is created)
+      SetWindowLongPtr( hTree, GWL_STYLE, GetWindowLongPtr(hTree, GWL_STYLE) OR TVS_CHECKBOXES )
+  
+   Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
+   SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
+   SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
+'   SendMessage( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(20), 0 )
+   SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
 
    PositionExplorerWindows(HWND_FRMEXPLORER)
 

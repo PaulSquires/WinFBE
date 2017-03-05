@@ -1,5 +1,3 @@
-[ ] Change the current Find and Replace dialogs to less intrusive styles like found in the Microsoft VSCode application.
-
 [ ] Improve syntax keyword highlighting. 
     [ ] WinAPI keyword list.
 

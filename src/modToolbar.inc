@@ -297,10 +297,12 @@ Function frmMain_ChangeToolbarButtonsState() As Long
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    End If
    
-   ' If at least one document exists then allow the Function List to be shown.
-   If gApp.GetDocumentCount() Then
+   ' If the Explorer treeview window is visible then at least one document or project is open
+   if IsWindowVisible( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE) ) THEN
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
-   End If
+   else   
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
+   END IF
    
    Function = 0
 End Function

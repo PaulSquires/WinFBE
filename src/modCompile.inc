@@ -55,9 +55,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim ShExecInfo As SHELLEXECUTEINFOW  
     
    Dim As Long Parenthesis_Start, Parenthesis_End, Error_Start       
-   Dim As Long f, i, NumLines, NextLine, idx, r
+   Dim As Long f, i, NumLines, NextLine, idx, r, nCount
    Dim As Long NumWarnings, NumErrors, IsError, IsWarning
    Dim As Long nFirstErrorLine = -1
+   Dim pDoc As clsDocument Ptr
    
    Dim wszTemp      As WString * MAX_PATH 
    Dim wszFileExe   As WString * MAX_PATH
@@ -68,6 +69,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim As HWnd hLV
          
    Dim As BOOLEAN fCompile32, fCompile64, fGoodCompile
+   
+   idx = gApp.GetActiveProjectIndex()
    
    'sDQ = Chr(34)  ' double quotes
    wDQ = wchr(34) ' unicode double quotes
@@ -81,7 +84,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Perform some pre-compile checks to see if we should continue.
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   Select Case Ucase(gConfig.DefaultCompiler)
+   Select Case Ucase(gApp.Projects(idx).ProjectCompiler)
       Case "FBC 32BIT"
          fCompile32 = True: fCompile64 = False
          gCompile.CompilerPath = gConfig.FBWINcompiler32
@@ -93,7 +96,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Check to see if the compiler exists
    If AfxFileExists(gCompile.CompilerPath) = 0 Then 
-      MessageBoxW( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
+      MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
@@ -105,11 +108,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Case IDM_COMPILE:       gCompile.RunAfterCompile = False
    End Select
    
+   
    Dim pDocMain As clsDocument Ptr 
    If gApp.IsProjectActive Then
-      pDocMain = gApp.GetMainDocumentPtr()
+      pDocMain = gApp.Projects(idx).GetMainDocumentPtr()
       If pDocMain = 0 Then
-         MessageBoxW( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
+         MessageBox( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
                            MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
          Function = False: Exit Function
       End If
@@ -119,12 +123,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If pDocMain = 0 Then Return 0
    
    gCompile.MainFilename = pDocMain->DiskFilename
-   gCompile.MainName = AfxStrPathname("NAME", pDocMain->DiskFilename)
-   gCompile.MainFolder = AfxStrPathname("PATH", pDocMain->DiskFilename)
+   gCompile.MainName     = AfxStrPathname("NAME", pDocMain->DiskFilename)
+   gCompile.MainFolder   = AfxStrPathname("PATH", pDocMain->DiskFilename)
    gCompile.ResourceFile = WStr("")    ' default that there is no resource
    
    If gApp.IsProjectActive Then
-      Dim pDocResource As clsDocument Ptr = gApp.GetResourceDocumentPtr()
+      Dim pDocResource As clsDocument Ptr = gApp.Projects(idx).GetResourceDocumentPtr()
       if pDocResource then gCompile.ResourceFile = pDocResource->DiskFilename
 
       gCompile.ObjFolder = gCompile.MainFolder & wstr(".wfbe\")
@@ -132,17 +136,17 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
       If fCompile32 Then 
          gCompile.ObjID = wstr("32.o")
-         gCompile.CompileFlags = gApp.ProjectOther32           
+         gCompile.CompileFlags = gApp.Projects(idx).ProjectOther32           
       End If
       If fCompile64 Then 
          gCompile.ObjID = wstr("64.o")
-         gCompile.CompileFlags = gApp.ProjectOther64           
+         gCompile.CompileFlags = gApp.Projects(idx).ProjectOther64           
       End If   
       
       ' Make sure the folders exist
       SHCreateDirectory( 0, gCompile.ObjFolder )
       
-      Select Case gApp.ProjectType
+      Select Case gApp.Projects(idx).ProjectType
          Case 0:   ' EXE (no special compile switch)
             gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe") 
          Case 1
@@ -153,18 +157,18 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -lib ")
       End Select
 
-      Select Case gApp.ProjectErrorOption
+      Select Case gApp.Projects(idx).ProjectErrorOption
          Case 0:   ' No error checking (no special compile switch)
          Case 1:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -e")           
          Case 2:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -ex")           
          Case 3:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -exx")           
       End Select
 
-      If gApp.ProjectDebug = BST_CHECKED Then
+      If gApp.Projects(idx).ProjectDebug = BST_CHECKED Then
          gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -g")           
       End If
       
-      If gApp.ProjectThread = BST_CHECKED Then
+      If gApp.Projects(idx).ProjectThread = BST_CHECKED Then
          gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -mt")           
       End If
 
@@ -184,12 +188,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
 
 
-   Select Case UCase(gConfig.DefaultCompileMode)   ' used on the Main source file
+   Select Case UCase(gApp.Projects(idx).ProjectCompileMode)   ' used on the Main source file
       Case "GUI"
          ' For non-projects simply suppress the console. For projects, the console
          ' will not show unless option is selected in Project Options.
          gCompile.CompileMode = wstr(" -s gui ")   ' default do not show console
-         If gApp.ProjectShowConsole = BST_CHECKED Then
+         If gApp.Projects(idx).ProjectShowConsole = BST_CHECKED Then
             gCompile.CompileMode = wstr(" ")   ' console is not suppressed
          End If   
       Case "CONSOLE": gCompile.CompileMode = wstr(" -s console ")
@@ -199,7 +203,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
    If IsProcessRunning(@gCompile.OutputFilename) Then
-      MessageBoxW( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
+      MessageBox( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
@@ -207,7 +211,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
-   wszTemp = wstr("_") + AfxStrPathname("NAME", gApp.ProjectName)
+   wszTemp = wstr("_") + AfxStrPathname("NAME", gApp.Projects(idx).ProjectName)
    wszTemp = AfxStrReplace(wszTemp, wstr(" "), wstr("_") )
    gCompile.BatchFile = wszTemp & wstr("_compile.bat") 
    gCompile.LogFile   = wszTemp & wstr("_compile.log")
@@ -222,36 +226,32 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    f = Freefile
    Open gCompile.BatchFile For Output as #f
 
-   Dim As Long nCount = gApp.GetDocumentCount 
-   Dim pDoc As clsDocument Ptr
 
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
-
+      nCount = gApp.Projects(idx).GetDocumentCount 
       For i = 0 To nCount - 1
-         pDoc = gApp.GetDocumentPtr(i)
-         If pDoc->IsProjectFile Then
-            If pDoc->ProjectFileType = FILETYPE_MODULE Then
-               ' Get the base name of the file for constructing the object filename
-               wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
-               wszTemp = gCompile.ObjFolderShort & wszTemp & gCompile.ObjID
-               
-               ' Compare the source code file datetime to the object. If the source code
-               ' date time is greater then we need to recompile it, otherwise we will simply
-               ' link to the existing object file.
-               Dim As FILETIME ft1 = AfxGetFileLastWriteTime(pDoc->DiskFilename) ' source file
-               Dim As FILETIME ft2 = AfxGetFileLastWriteTime(wszTemp)  ' object file
+         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+         If pDoc->ProjectFileType = FILETYPE_MODULE Then
+            ' Get the base name of the file for constructing the object filename
+            wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
+            wszTemp = gCompile.ObjFolderShort & wszTemp & gCompile.ObjID
+            
+            ' Compare the source code file datetime to the object. If the source code
+            ' date time is greater then we need to recompile it, otherwise we will simply
+            ' link to the existing object file.
+            Dim As FILETIME ft1 = AfxGetFileLastWriteTime(pDoc->DiskFilename) ' source file
+            Dim As FILETIME ft2 = AfxGetFileLastWriteTime(wszTemp)  ' object file
 
-               If (AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2)) or _
-                  (wID = IDM_REBUILDALL)  Then
-                  Print #f, wDQ; gCompile.CompilerPath; wDQ; _
-                            " -c "; wDQ; pDoc->DiskFilename; wDQ; _
-                            " -o "; wDQ; wszTemp; wDQ;
-                  Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
-               End If
-               
+            If (AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2)) or _
+               (wID = IDM_REBUILDALL)  Then
+               Print #f, wDQ; gCompile.CompilerPath; wDQ; _
+                         " -c "; wDQ; pDoc->DiskFilename; wDQ; _
+                         " -o "; wDQ; wszTemp; wDQ;
+               Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
             End If
+            
          End If
       Next
    End If
@@ -267,14 +267,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    print #f, " -v "; gCompile.CompileFlags; gCompile.CompileMode;
         
    If gApp.IsProjectActive Then
+      nCount = gApp.Projects(idx).GetDocumentCount 
       For i = 0 To nCount - 1
-         pDoc = gApp.GetDocumentPtr(i)
-         If pDoc->IsProjectFile Then
-            If pDoc->ProjectFileType = FILETYPE_MODULE Then
-               ' Get the base name of the file for constructing the object filename
-               wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
-               Print #f, " "; gCompile.ObjFolderShort; wszTemp; gCompile.ObjID;
-            End If
+         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+         If pDoc->ProjectFileType = FILETYPE_MODULE Then
+            ' Get the base name of the file for constructing the object filename
+            wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
+            Print #f, " "; gCompile.ObjFolderShort; wszTemp; gCompile.ObjID;
          End If
       Next
    End If
@@ -314,6 +313,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
+
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc = 0 THEN SendMessage( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+      
    
    ' Shell to the compiler 
    ShellExecuteEx(@ShExecInfo)
@@ -336,6 +339,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    wend
 
    SetCursor( hCurSave )
+   if pDoc = 0 THEN SendMessage( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
    gCompile.EndTime = Timer
    gCompiling = false
    ShowWindow( hProgressBar, SW_HIDE)
@@ -476,8 +480,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If fGoodCompile = False Then NumErrors = NumErrors + 1
 
    dim as CWSTR cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
-                                L(192, "Warnings:") & " " & NumWarnings & "  (" & _
-                                Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & ")"
+                                L(192, "Warnings:") & " " & NumWarnings 
+                                
 
    If (NumWarnings = 0) AndAlso (NumErrors = 0) Then 
       ' Hide the Output window is already open but there is no longer any warnings
@@ -489,6 +493,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             frmMain_PositionWindows(HWND_FRMMAIN)
          END IF   
       END IF 
+      cwsCompileMsg = cwsCompileMsg + "  [ " + gCompile.OutputFilename + " ]"
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
       If gConfig.HideCompile = False Then
          wst = wszOutputMsg & vbCrLf & _
@@ -505,6 +510,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' There were errors and/or warnings
       If NumErrors > 0 Then gCompile.RunAfterCompile = False 
       
+      cwsCompileMsg = cwsCompileMsg + "  [" + Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
       
@@ -529,7 +535,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    
    If gCompile.RunAfterCompile Then 
-      RunEXE gCompile.OutputFilename, gConfig.CommandLine
+      RunEXE gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
       

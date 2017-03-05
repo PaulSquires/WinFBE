@@ -144,6 +144,7 @@ function ParseSearchResults( byref wszResultFile as wstring ) as long
    ' Show the ListBox search results
    TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 2 )
    ShowWindow HWND_FRMOUTPUT, SW_SHOW
+   PositionOutputWindows(HWND_FRMOUTPUT)
    frmMain_PositionWindows(HWND_FRMMAIN)
       
    function = 0
@@ -261,8 +262,6 @@ function DoFindInFilesEx() as LONG
    print #f, wszFileExe & " " & wszParam
    close #f
  
-'print wszFileExe & " " & wszParam
-
    wszFileExe = Environ("COMSPEC")
    ' Batch filename must be enclosed in quotes b/c might have spaces in name
    wszParam   = wstr(" /C " & chr(34) & wszBatchFile & chr(34))
@@ -278,8 +277,32 @@ function DoFindInFilesEx() as LONG
       .hInstApp     = 0 
    End With
 
+   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
+   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
+   ShowWindow( hProgressBar, SW_SHOW)
+
    ShellExecuteEx(@ShExecInfo)
-   WaitForSingleObject(ShExecInfo.hProcess,INFINITE)
+'   WaitForSingleObject(ShExecInfo.hProcess,INFINITE)
+
+   ' Give the process 33 ms (you can use a different value here depending on 
+   ' how responsive you wish your app to be)
+   Dim uMsg As MSG
+   while WaitForSingleObject(ShExecInfo.hProcess, 33) = WAIT_TIMEOUT
+   '  if after 33 ms the object's handle is not signaled..       
+   '  we examine the message queue and if there are any waiting..
+   '  Note:  see PeekMessage documentation for details on how to limit
+   '         the types of messages to look for
+      while(PeekMessage(@uMsg, HWND_FRMMAIN,  0, 0, PM_NOREMOVE))
+        ' we process them..
+        if(GetMessage(@uMsg, NULL, 0, 0) > 0) then
+            TranslateMessage(@uMsg)
+            DispatchMessage(@uMsg)
+         end if
+      wend
+   wend
+
+   ShowWindow( hProgressBar, SW_HIDE)
 
    kill wszBatchFile
    
@@ -529,7 +552,7 @@ Function frmFindInFiles_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -539,14 +562,10 @@ End Function
 ' ========================================================================================
 Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
 
-   ' We don't want the Find or Replace dialogs to display at the same time.
-   If IsWindowVisible(HWND_FRMREPLACE) Then DestroyWindow(HWND_FRMREPLACE)
-   If IsWindowVisible(HWND_FRMFIND) Then DestroyWindow(HWND_FRMFIND)
-
    ' If the FindInFiles window already exists then simply set focus to it and exit.
    If IsWindow(HWND_FRMFINDINFILES) Then
       SetForegroundWindow(HWND_FRMFINDINFILES)
-      SetFocus GetDlgItem( HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND )
+      SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND) )
       Exit Function
    End If
 
@@ -608,19 +627,17 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    Dim As String buffer, sFind, sFiles, sFolder
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc Then 
-      pDoc->GetSelectedLineRange( startLine, endLine, startPos, endPos )
-
+   If pDoc Then
       ' Fills the search box with the selected word.
       ' If there are carriage returns or/and line feeds, this mean that
       ' there is a block selected, instead of a word, so avoid it.
       buffer = pDoc->GetSelText()
       If Len(buffer) Then
-         If Instr(buffer, Chr(13, 10)) = 0 Then
+         if pDoc->IsMultilineSelection = false then
             sFind = buffer
             gFindInFiles.txtLastFind = buffer
-         End If
-      Else
+         end if
+      else
          sFind = gFindInFiles.txtLastFind
       End If
    End If
@@ -628,12 +645,19 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
 
    if len(gFindInFiles.txtFilesCombo(0)) = 0 THEN sFiles = "*.bas *.bi *inc"
    frmFindInFiles_AddToFilesCombo(sFiles)
-   if len(gFindInFiles.txtFolderCombo(0)) = 0 THEN sFolder = exepath 
+   
+   if len(gFindInFiles.txtFolderCombo(0)) = 0 THEN 
+      if gApp.IsProjectActive THEN
+         sFolder = AfxStrPathName("PATH", gApp.Projects(gApp.GetActiveProjectIndex).ProjectFilename)
+      else
+         sFolder = exepath 
+      END IF
+   end if
    frmFindInFiles_AddToFolderCombo(sFolder)
 
-   SetWindowTextW( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND), WStr(gFindInFiles.txtFind) )    
-   SetWindowTextW( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFILES), WStr(gFindInFiles.txtFiles) )    
-   SetWindowTextW( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFOLDER), WStr(gFindInFiles.txtFolder) )    
+   SetWindowText( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND), WStr(gFindInFiles.txtFind) )    
+   SetWindowText( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFILES), WStr(gFindInFiles.txtFiles) )    
+   SetWindowText( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFOLDER), WStr(gFindInFiles.txtFolder) )    
    EnableWindow( GetDlgItem(HWND_FRMFINDINFILES, IDOK), True )
  
    Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKWHOLEWORDS), gFindInFiles.nWholeWord )
@@ -641,7 +665,7 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKSUBFOLDERS), gFindInFiles.nSearchSubFolders )
    
    ShowWindow HWND_FRMFINDINFILES, SW_SHOW
-   SetFocus GetDlgItem( HWND_FRMFINDINFILES, IDC_FRMFIND_COMBOFIND )
+   SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFIND_COMBOFIND) )
 
    Function = 0
 End Function

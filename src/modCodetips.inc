@@ -55,7 +55,6 @@ function ShowCodetip() as BOOLEAN
 
    dim as hwnd hEdit
    dim as long curPos, tipPos, i
-   Dim As Long nCount = gApp.GetDocumentCount()
    dim as string buffer, CodetipStr
    dim pDoc as clsDocument ptr
    

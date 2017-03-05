@@ -32,12 +32,15 @@
 #Include Once "Afx\AfxCtl.inc" 
 #Include Once "Afx\AfxMenu.inc" 
 #Include Once "Afx\CTextStream.inc"
+#include once "parserFB\token.bi"
+#include once "parserFB\scanner.bi"
+#include once "parserFB\parser.bi"
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.2.4") 
+#Define APPVERSION    WStr("1.2.5") 
 
 
 #Include Once "modScintilla.bi"
@@ -49,6 +52,7 @@ Using Afx
 #Include Once "modSplitter.inc" 
 #Include Once "modCBColor.inc"
 #Include Once "clsDocument.inc"
+#Include Once "clsProject.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
 #Include Once "modParser.inc"
@@ -75,9 +79,8 @@ Using Afx
 #Include Once "frmFnList.inc"
 #Include Once "frmGoto.inc"
 #Include Once "frmCommandLine.inc"
-#Include Once "frmFind.inc"
 #Include Once "frmFindInFiles.inc"
-#Include Once "frmReplace.inc"
+#Include Once "frmFindReplace.inc"
 #Include Once "frmProjectOptions.inc"
 #Include Once "frmMain.inc"
 

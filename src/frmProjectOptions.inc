@@ -20,44 +20,47 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    Dim wText As WString * MAX_PATH  
     
    Dim As HWnd hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH)
-   gApp.ProjectFilename = AfxGetWindowText(hCtrl)
+   
+   dim as long idx = gApp.GetActiveProjectIndex
+   
+   gApp.Projects(idx).ProjectFilename = AfxGetWindowText(hCtrl)
 
-   If Len(gApp.ProjectFilename) = 0 Then
+   If Len(gApp.Projects(idx).ProjectFilename) = 0 Then
       MessageBoxW( HWnd, L(217,"Invalid project path specified."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       SetFocus hCtrl
       Function = False: Exit Function
    End If
 
-   gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
+   gApp.Projects(idx).ProjectName = AfxStrPathname( "NAMEX", gApp.Projects(idx).ProjectFilename )
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTEXE)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectType = 0
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectType = 0
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTDLL)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectType = 1
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectType = 1
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTLIB)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectType = 2
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectType = 2
    
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTNOERROR)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectErrorOption = 0
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectErrorOption = 0
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTERROR)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectErrorOption = 1
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectErrorOption = 1
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTRESUME)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectErrorOption = 2
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectErrorOption = 2
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_OPTERRORPLUS)
-   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.ProjectErrorOption = 3
+   If Button_GetCheck(hCtrl) = BST_CHECKED Then gApp.Projects(idx).ProjectErrorOption = 3
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKDEBUG)
-   gApp.ProjectDebug = Button_GetCheck( hCtrl )
+   gApp.Projects(idx).ProjectDebug = Button_GetCheck( hCtrl )
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKTHREAD)
-   gApp.ProjectThread = Button_GetCheck( hCtrl )
+   gApp.Projects(idx).ProjectThread = Button_GetCheck( hCtrl )
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKSHOWCONSOLE)
-   gApp.ProjectShowConsole = Button_GetCheck( hCtrl )
+   gApp.Projects(idx).ProjectShowConsole = Button_GetCheck( hCtrl )
 
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32)
-   gApp.ProjectOther32 = AfxGetWindowText(hCtrl)
+   gApp.Projects(idx).ProjectOther32 = AfxGetWindowText(hCtrl)
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS64)
-   gApp.ProjectOther64 = AfxGetWindowText(hCtrl)
+   gApp.Projects(idx).ProjectOther64 = AfxGetWindowText(hCtrl)
    
    Return gConfig.ProjectSaveToFile()   
 
@@ -90,12 +93,14 @@ End Function
 ' ========================================================================================
 Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
+   dim as long idx = gApp.GetActiveProjectIndex
+   
    Select Case id
       Case IDC_FRMPROJECTOPTIONS_CMDSELECT
          If codeNotify = BN_CLICKED Then
-            Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWnd, gApp.ProjectName, WStr("wfbe"), IDC_FRMPROJECTOPTIONS_CMDSELECT)
+            Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWnd, gApp.Projects(idx).ProjectName, WStr("wfbe"), IDC_FRMPROJECTOPTIONS_CMDSELECT)
             If pwszName Then
-               SetWindowTextW( GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH), pwszName )
+               SetWindowText( GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH), pwszName )
                CoTaskMemFree pwszName
             End If
             Exit Function
@@ -103,19 +108,25 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
          
       Case IDOK
          If codeNotify = BN_CLICKED Then
+            if gApp.IsNewProjectFlag then gProjectLoading = TRUE
             If SaveProjectOptions(HWnd) Then
-               gApp.IsNewProjectFlag = False
-               gApp.IsProjectActive = True
-               ' Update the most recently used project list 
-               UpdateMRUProjectList(gApp.ProjectFilename)
-               SendMessageW HWnd, WM_CLOSE, 0, 0
+               if gApp.IsNewProjectFlag then 
+                  ' Update the most recently used project list 
+                  UpdateMRUProjectList(gApp.Projects(idx).ProjectFilename)
+                  gApp.IsNewProjectFlag = false
+                  gApp.Projects(idx).InUse = FALSE   ' because OpenMRUProjectFile will assign one.
+                  ' Open the new project so it displays in the Explorer treeview
+                  OpenMRUProjectFile( HWND_FRMMAIN, 0, gApp.Projects(idx).ProjectFilename )
+               end if
+               SendMessage( HWnd, WM_CLOSE, 0, 0 )
             End If
+            gProjectLoading = FALSE
             Exit Function
          End If
       
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
    End Select
@@ -129,8 +140,8 @@ End Function
 ' ========================================================================================
 Function frmProjectOptions_OnClose(HWnd As HWnd) As LRESULT
    ' Enables parent window keeping parent's zorder
-   EnableWindow GetParent(HWnd), True 
-   DestroyWindow HWnd
+   EnableWindow( GetParent(HWnd), True )
+   DestroyWindow( HWnd )
    Function = 0
 End Function
 
@@ -161,7 +172,7 @@ Function frmProjectOptions_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -170,7 +181,8 @@ End Function
 ' frmProjectOptions_Show
 ' ========================================================================================
 Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
-                                 ByVal nCmdShow   As Long = 0 _
+                                 ByVal nCmdShow   As Long = 0, _
+                                 byval IsNewProject as boolean = false _
                                  ) As Long
 
    Dim wszTitle As WString * MAX_PATH
@@ -265,44 +277,57 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
 
    wszTitle = L(214,"Project Options")
 
+   
+   dim as long idx = iif(IsNewProject, gApp.GetNewProjectIndex(), gApp.GetActiveProjectIndex() )
+   gApp.ProjectOverrideIndex = idx
+   
+   ' For new projects or projects being opened from disk, the call to GetProjectIndex
+   ' sets the InUse flag to TRUE. For a New project we simply want to get the details
+   ' of the new project and then save the file to disk. A later call opens the project
+   ' from disk and sets it up in the editor. Therefore, before exiting this dialog we
+   ' will reset the InUse flag to FALSE because the open project code will assign a new one.
+   gApp.IsNewProjectFlag = iif( IsNewProject, true, false )
+   
    If gApp.IsNewProjectFlag Then
       ' Set the default values for a new project
+      gApp.Projects(idx).InUse = true
       wszTitle = wszTitle & " - " & L(215, "New Project")
-      gApp.ProjectFilename = 0
-      gApp.ProjectName         = 0
-      gApp.ProjectType         = 0
-      gApp.ProjectErrorOption  = 0
-      gApp.ProjectDebug        = BST_UNCHECKED
-      gApp.ProjectThread       = BST_UNCHECKED
-      gApp.ProjectOther32      = 0
-      gApp.ProjectOther64      = 0
-      gApp.ProjectShowConsole  = 0
+      gApp.Projects(idx).ProjectFilename = 0
+      gApp.Projects(idx).ProjectName         = 0
+      gApp.Projects(idx).ProjectType         = 0
+      gApp.Projects(idx).ProjectErrorOption  = 0
+      gApp.Projects(idx).ProjectDebug        = BST_UNCHECKED
+      gApp.Projects(idx).ProjectThread       = BST_UNCHECKED
+      gApp.Projects(idx).ProjectOther32      = 0
+      gApp.Projects(idx).ProjectOther64      = 0
+      gApp.Projects(idx).ProjectShowConsole  = 0
+      gApp.Projects(idx).ProjectNotes = ""
    Else
-      wszTitle = wszTitle + " - " + gApp.ProjectName
+      wszTitle = wszTitle + " - " + gApp.Projects(idx).ProjectName
    End If
    
-   SetWindowTextW( hForm, wszTitle )
-   SetWindowTextW( hProjectPath, gApp.ProjectFilename )
+   SetWindowText( hForm, wszTitle )
+   SetWindowText( hProjectPath, gApp.Projects(idx).ProjectFilename )
    
    Dim nOptions(3) As Long
 
    nOptions(0) = IDC_FRMPROJECTOPTIONS_OPTEXE
    nOptions(1) = IDC_FRMPROJECTOPTIONS_OPTDLL  
    nOptions(2) = IDC_FRMPROJECTOPTIONS_OPTLIB 
-   CheckRadioButton( hForm, nOptions(0), nOptions(2), nOptions(gApp.ProjectType) )
+   CheckRadioButton( hForm, nOptions(0), nOptions(2), nOptions(gApp.Projects(idx).ProjectType) )
  
    nOptions(0) = IDC_FRMPROJECTOPTIONS_OPTNOERROR  
    nOptions(1) = IDC_FRMPROJECTOPTIONS_OPTERROR
    nOptions(2) = IDC_FRMPROJECTOPTIONS_OPTRESUME
    nOptions(3) = IDC_FRMPROJECTOPTIONS_OPTERRORPLUS
-   CheckRadioButton( hForm, nOptions(0), nOptions(3), nOptions(gApp.ProjectErrorOption) )
+   CheckRadioButton( hForm, nOptions(0), nOptions(3), nOptions(gApp.Projects(idx).ProjectErrorOption) )
 
-   Button_SetCheck( hProjectDebug, gApp.ProjectDebug )
-   Button_SetCheck( hProjectThread, gApp.ProjectThread )
-   Button_SetCheck( hShowConsole, gApp.ProjectShowConsole )
+   Button_SetCheck( hProjectDebug, gApp.Projects(idx).ProjectDebug )
+   Button_SetCheck( hProjectThread, gApp.Projects(idx).ProjectThread )
+   Button_SetCheck( hShowConsole, gApp.Projects(idx).ProjectShowConsole )
    
-   SetWindowTextW( hProjectOther32, gApp.ProjectOther32 )
-   SetWindowTextW( hProjectOther64, gApp.ProjectOther64 )
+   SetWindowTextW( hProjectOther32, gApp.Projects(idx).ProjectOther32 )
+   SetWindowTextW( hProjectOther64, gApp.Projects(idx).ProjectOther64 )
 
    SetFocus GetDlgItem(hForm, IDOK)
    

@@ -60,40 +60,47 @@ Function frmFnList_UpdateListBox() As Long
    
    Dim pDoc As clsDocument Ptr
    dim as string sAllFunctions, sFunctionName, sFilename
-   Dim As Long i, p, idx, nParseCount
-   Dim As Long nCount = gApp.GetDocumentCount()
+   Dim As Long i, x, p, idx, nParseCount, nDocumentCount
    dim wszText as wstring * MAX_PATH
    
-   For i = 0 To nCount - 1
-      pDoc = gApp.GetDocumentPtr(i)
-      If pDoc Then 
-         sFilename = ucase(pDoc->DiskFilename)
-         if gFunctionLists.FindItem(sFilename) then
-            ' Draw the header name 
-            wszText = wstr(sFilename)
-            idx = Listbox_AddString( hList, strptr(wszText) )
-            ListBox_SetItemData( hList, idx, pDoc )    ' pDoc is stored for a header
-            ' Parse the function names and add them to the list box
-            sAllFunctions = gFunctionLists.FoundData1
-            if len(sAllFunctions) THEN
-               ' Get the names into array and then sort them alphabetically
-               nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
-               dim sFunctionNames(1 to nParseCount) as string 
-               for p = 1 to nParseCount 
-                  sFunctionNames(p) = AfxStrParse(sAllFunctions, p, DELIM)
-               NEXT
-               ' Simple bubble sort
-               'BubbleSort( sFunctionNames() )
-               InsertionSort( sFunctionNames() )
-               ' Display the names in the ListBox
-               for p = 1 to nParseCount 
-                  wszText = wstr(sFunctionNames(p))
-                  idx = Listbox_AddString( hList, strptr(wszText) )
-                  ListBox_SetItemData( hList, idx, 0 )
-               next
+   Dim As Long nProjectCount = gApp.GetProjectCount()
+   
+   For idx = 0 To nProjectCount 
+      if gApp.Projects(idx).InUse = false THEN continue for
+         
+      nDocumentCount = gApp.Projects(idx).GetDocumentCount
+      for i = 0 to nDocumentCount - 1
+         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+         If pDoc Then 
+            sFilename = ucase(pDoc->DiskFilename)
+            if gFunctionLists.FindItem(sFilename) then
+               ' Draw the header name 
+               wszText = wstr(sFilename)
+               p = Listbox_AddString( hList, strptr(wszText) )
+               ListBox_SetItemData( hList, p, pDoc )    ' pDoc is stored for a header
+               ' Parse the function names and add them to the list box
+               sAllFunctions = gFunctionLists.FoundData1
+               if len(sAllFunctions) THEN
+                  ' Get the names into array and then sort them alphabetically
+                  nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
+                  dim sFunctionNames(1 to nParseCount) as string 
+                  for x = 1 to nParseCount 
+                     sFunctionNames(x) = AfxStrParse(sAllFunctions, x, DELIM)
+                  NEXT
+                  ' Simple bubble sort
+                  'BubbleSort( sFunctionNames() )
+                  InsertionSort( sFunctionNames() )
+                  ' Display the names in the ListBox
+                  for x = 1 to nParseCount 
+                     wszText = wstr(sFunctionNames(x))
+                     p = Listbox_AddString( hList, strptr(wszText) )
+                     ListBox_SetItemData( hList, p, 0 )
+                  next
+               end if
             end if
-         end if
-      End If   
+         End If   
+      next
+      
    Next
    
    Function = 0

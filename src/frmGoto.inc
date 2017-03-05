@@ -95,7 +95,7 @@ Function frmGoto_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 

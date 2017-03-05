@@ -54,7 +54,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       ' Call the direct function for speed purposes rather than relying on the traditional SendMessage method.
       m_pSci = Cast(Any Ptr, SendMessage( this.hWindow, SCI_GETDIRECTPOINTER, 0, 0 )) 
    End If
-   
+
    Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
    Static nNextFileNum As Long 
       
@@ -64,7 +64,8 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       nNextFileNum = nNextFileNum + 1
       this.DiskFilename = "Untitled" & nNextFileNum
    End If
-
+   this.ProjectFileType = FILETYPE_UNDEFINED
+   
    If pwszFile Then   
       ' Do not use Dir() > "" here b/c if incoming file originated from a Do/Loop 
       ' of files using Dir() then there will be problems.
@@ -310,6 +311,61 @@ Function clsDocument.ChangeSelectionCase( ByVal fCase As Long) As Long
    SciMsg( m_pSci, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(strText)))
 
    Function = 0
+End Function
+
+''
+''
+Function clsDocument.SetMarkerHighlight() As Long
+   ' Set a marker that will highlight the background of the current selection. This
+   ' is used when we are attempting to search a selection. We want the current search
+   ' area to be a different color than the regular highlighted text because any
+   ' search results are colored using the normal highlight colors so we need them
+   ' to stand out from the selected range.
+   Dim As Long startPos, endPos, startLine, endLine
+   this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
+   if endLine <> startLine THEN
+      SciMsg( m_pSci, SCI_MARKERDEFINE, 10, SC_MARK_BACKGROUND )  ' define as marker #10
+      SciMsg( m_pSci, SCI_SETMARGINMASKN, 4, &H400 )   ' set margin mask to allow SC_MARK_BACKGROUND 
+      for i as long = startLine to endLine
+         function = SciMsg( m_pSci, SCI_MARKERADD, i, 10)    ' add defined marker #10 to each line
+      NEXT
+      SciMsg( m_pSci, SCI_MARKERSETBACK, 10, BGR(220,220,220)) ' set backcolor of marker #10 
+   END IF
+End Function
+
+''
+''
+Function clsDocument.RemoveMarkerHighlight() As Long
+   ' Remove any markers that were set in the document that signify a highlighted range.
+   ' This is used when we are attempting to search a selection. 
+   function = SciMsg( m_pSci, SCI_MARKERDELETEALL, 10, 0)  ' delete all marker #10
+End Function
+
+''
+''
+Function clsDocument.FirstMarkerHighlight() As long
+   ' Get the first line with marker #10 highlight
+   dim as long markerMask 
+   markerMask = Bitset(markerMask, 10)
+   function = SciMsg( m_pSci, SCI_MARKERNEXT, 0, markerMask)
+End Function
+
+''
+''
+Function clsDocument.LastMarkerHighlight() As long
+   ' Get the first line with marker #10 highlight
+   dim as long nLastPos = SciMsg( m_pSci, SCI_GETTEXTLENGTH, 0, 0)
+   dim as long nLastLine = SciMsg( m_pSci, SCI_LINEFROMPOSITION, nLastPos, 0)
+   dim as long markerMask 
+   markerMask = Bitset(markerMask, 10)
+   function = SciMsg( m_pSci, SCI_MARKERPREVIOUS, nLastLine, markerMask)
+End Function
+
+''
+''
+Function clsDocument.HasMarkerHighlight() As BOOLEAN
+   ' True/False if selection markers exist in the document search for marker #10
+   function = iif(this.FirstMarkerHighlight = -1, false, true)
 End Function
 
 ''
@@ -773,6 +829,11 @@ End Function
 ''
 Function clsDocument.DisplayStats() As Long
 
+   ' If a project is loading then we don't want to be constantly updating the 
+   ' application caption to the filename names, etc. Only do so once the project
+   ' has been finally loaded.
+   if gProjectLoading THEN exit function
+
    Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
 
    Dim As Long i, curPos, nLine, nCol
@@ -793,6 +854,9 @@ Function clsDocument.DisplayStats() As Long
    wText = " Ln " & Str(nLine+1) & ", Col " & Str(nCol+1) 
    If endPos - startPos Then  ' there is selected text
       wText = wText + " (" + Str(endPos - startPos) + " selected)"
+      ' If this is a multiline selection then update the selected button
+      ' on the FindReplace window.
+      frmFindReplace_SetButtonStates
    End If
    StatusBar_SetText(hStatusbar, 2, wText)
    
@@ -812,21 +876,32 @@ Function clsDocument.DisplayStats() As Long
    ' Set the filename text that displays on the tab. 
    gTTabCtl.SetTabText(-1)
 
-   ' If a project is loading then we don't want to be constantly updating the 
-   ' application caption to the filename names, etc. Only do so once the project
-   ' has been finally loaded.
-   if gProjectLoading = false THEN
-      ' Update the main window caption with the full filename and path. Only
-      ' do the update if the text has changed in order to prevent flicker.
-      wTemp = AfxGetWindowText( HWND_FRMMAIN )
-      wText = APPNAMESHORT 
-      If gApp.IsProjectActive Then wText = wText + " - [" + gApp.ProjectName + "]"
-      wText = wText + " - [" + this.DiskFilename + wTag + "]"
-      If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
-   end if
+   ' Update the main window caption with the full filename and path. Only
+   ' do the update if the text has changed in order to prevent flicker.
+   wTemp = AfxGetWindowText( HWND_FRMMAIN )
+   wText = APPNAMESHORT 
+   If this.ProjectIndex > 0 Then  ' belongs to a regular project
+      wText = wText + " - [" + gApp.Projects(this.ProjectIndex).ProjectName + "]"
+   end if   
+   wText = wText + " - [" + this.DiskFilename + wTag + "]"
+   If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
+
+   if IsWindowVisible(HWND_FRMFINDREPLACE) THEN frmFindReplace_SetButtonStates
    
    Function = 0
 End Function
+
+
+''
+''
+Function clsDocument.IsMultiLineSelection() As boolean
+   dim as long startPos, endPos, startLine, endLine
+   startPos  = SciMsg( m_pSci, SCI_GETSELECTIONSTART, 0, 0) 
+   endPos    = SciMsg( m_pSci, SCI_GETSELECTIONEND, 0, 0) 
+   startLine = SciMsg( m_pSci, SCI_LINEFROMPOSITION, startPos, 0) 
+   endLine   = SciMsg( m_pSci, SCI_LINEFROMPOSITION, endPos, 0) 
+   if endLine <> startLine THEN return true
+end function
 
 
 ''
@@ -976,7 +1051,7 @@ Function clsDocument.ApplyProperties() As Long
    
    ''
    ''  MULTIPLE SELECTIONS
-   SciMsg( m_pSci, SCI_SETMULTIPLESELECTION, CTRUE, 0 ) 
+   SciMsg( m_pSci, SCI_SETMULTIPLESELECTION, FALSE, 0 ) 
             
    ''
    ''  ALWAYS KEEP THE CARET LINE VISIBLE
@@ -1017,8 +1092,8 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci, SCI_SETSTYLEBITS, bitsNeeded, 0 )
 
       ' Set FreeBASIC Keywords
-      If Len(gApp.FBKeywords) Then
-         SciMsg( m_pSci, SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gApp.FBKeywords)) )
+      If Len(gConfig.FBKeywords) Then
+         SciMsg( m_pSci, SCI_SETKEYWORDS, 0, Cast(LPARAM, Strptr(gConfig.FBKeywords)) )
       End If
       
       If gConfig.SyntaxHighlighting Then
@@ -1207,3 +1282,5 @@ Function clsDocument.LineDuplicate() As Long
    Function = 0
 
 End Function
+
+
