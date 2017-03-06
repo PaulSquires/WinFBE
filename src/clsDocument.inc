@@ -957,7 +957,6 @@ Function clsDocument.ApplyProperties() As Long
    ''
    ''  MARGIN 1: Non-Folding symbols (defaults to width 16) (Bookmark symbol, etc) (will be same color as line numbering)
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 1, SC_MARGIN_TEXT )
-   SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 1, 16 * rxRatio )
    SciMsg( m_pSci, SCI_SETMARGINSENSITIVEN, 1, 1 )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 1, Iif(gConfig.LeftMargin, 16 * rxRatio, 0) )
               
@@ -965,12 +964,11 @@ Function clsDocument.ApplyProperties() As Long
    ''  MARGIN 2: Folding symbols (defaults to width 0)
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 2, SC_MARGIN_SYMBOL )
    SciMsg( m_pSci, SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS )
-   SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 2, 16 * rxRatio )
    SciMsg( m_pSci, SCI_SETFOLDMARGINCOLOUR, CTRUE, gConfig.clrFoldMarginFG )
    SciMsg( m_pSci, SCI_SETFOLDMARGINHICOLOUR, CTRUE, gConfig.clrFoldMarginFG )
    SciMsg( m_pSci, SCI_SETMARGINSENSITIVEN, 2, 1 )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 2, Iif(gConfig.FoldMargin, 16 * rxRatio, 0) )
-   
+
    ''
    ''  MARGIN 3: Small margin to offset left margins from actual text (4 pixels)
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 3, SC_MARGIN_TEXT )

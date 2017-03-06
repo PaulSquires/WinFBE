@@ -590,7 +590,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         WS_EX_CONTROLPARENT or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->SetClientSize(frmWidth, frmHeight)
    
-   Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 10) 
+  ' Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 10) 
 
    frmHeight = AfxGetWindowHeight(HWND_FRMFINDREPLACE)
    
@@ -605,7 +605,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    hCtlFind = pWindow->AddControl("TEXTBOX", , IDC_FRMFINDREPLACE_TXTFIND, WSTR(sFindText), nLeft, nTop, 176, ctlHeight, _
               WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
               WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   AfxSetWindowFont( hCtlFind, hFont, True )
+   'AfxSetWindowFont( hCtlFind, hFont, True )
    SendMessage hCtlFind, EM_SETCUEBANNER, 1, CAST(LPARAM, @L(158,"Find"))
    
    ' Display the Match Case button 
@@ -631,7 +631,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         nLeft, nTop, 80, ctlHeight, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_CENTER Or SS_CENTERIMAGE, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   AfxSetWindowFont( hCtl, hFont, True )
+   'AfxSetWindowFont( hCtl, hFont, True )
    
    ' Display the Left button 
    nTop  = margin
@@ -660,7 +660,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    hCtlReplace = pWindow->AddControl("TEXTBOX", , IDC_FRMFINDREPLACE_TXTREPLACE, wstr(gFind.txtReplace), nLeft, nTop, 220, ctlHeight, _
               WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
               WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   AfxSetWindowFont( hCtlReplace, hFont, True )
+   'AfxSetWindowFont( hCtlReplace, hFont, True )
    SendMessage hCtlReplace, EM_SETCUEBANNER, 1, CAST(LPARAM, @L(173,"Replace"))
    
    ' Display the Replace button 
