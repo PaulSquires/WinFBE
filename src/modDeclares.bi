@@ -520,7 +520,6 @@ type clsProject
       Declare Function GetResourceDocumentPtr() As clsDocument Ptr
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
-   
       Declare Function Debug() As Long
 END TYPE
 

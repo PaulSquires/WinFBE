@@ -424,7 +424,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    Dim As HWnd hBtn = _
-   pWindow->AddControl("LABEL", , IDC_FRMEXPLORER_LBLEXPLORER, L(247,"EXPLORER"), 10, 12, 75, 12, _
+   pWindow->AddControl("LABEL", , IDC_FRMEXPLORER_LBLEXPLORER, L(247,"EXPLORER"), 10, 12, 75, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

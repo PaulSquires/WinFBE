@@ -72,20 +72,25 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
    Static wText As WString * MAX_PATH
    static wText2 as wstring * MAX_PATH
    
-   ' Only update statusbar text if changed in order to prevent flicker
-   wText2 = ""
-   StatusBar_GetText(hStatusbar, 0, @wText)
-   if gApp.IsProjectActive then wText2 = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
-   If LTrim(wText) <> wText2 Then
-      StatusBar_SetText(hStatusbar, 0, " " & wText2)
-   End If
+   if IsWindowVisible(HWND_FRMRECENT) THEN
+      StatusBar_SetText(hStatusbar, 0, "")    ' 32/64 compiler
+      StatusBar_SetText(hStatusbar, 1, "")    ' gui/console
+   else
+      ' Only update statusbar text if changed in order to prevent flicker
+      wText2 = ""
+      StatusBar_GetText(hStatusbar, 0, @wText)
+      wText2 = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
+      If LTrim(wText) <> wText2 Then
+         StatusBar_SetText(hStatusbar, 0, " " & wText2)
+      End If
 
-   wText2 = ""
-   StatusBar_GetText(hStatusbar, 1, @wText)
-   if gApp.IsProjectActive then wText2 = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
-   If LTrim(wText) <> wText2 Then
-      StatusBar_SetText(hStatusbar, 1, " " & wText2)
-   End If
+      wText2 = ""
+      StatusBar_GetText(hStatusbar, 1, @wText)
+      wText2 = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
+      If LTrim(wText) <> wText2 Then
+         StatusBar_SetText(hStatusbar, 1, " " & wText2)
+      End If
+   END IF
 
    ' If there is not any file being edited
    If pDoc = 0 Then
@@ -515,7 +520,7 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
-   
+   frmMain_UpdateLineCol(HWND)
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = 0
@@ -1272,21 +1277,17 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
       Scintilla_OnNotify HWnd, Cast(SCNOTIFICATION Ptr, pNMHDR)
       Exit Function
    End If
-   
-   
         
+
    Select Case pNMHDR->code 
    
       Case NM_CLICK
-         dim pDoc as clsDocument ptr
-         pDoc = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc = 0 THEN exit function
          ' Process clicking on the "compiler" or "compilemode" panels in the statusbar
          If id = IDC_FRMMAIN_STATUSBAR Then   
             Dim lpnm As NMMOUSE Ptr
             lpnm = Cast(NMMOUSE Ptr, pNMHDR)
             If lpnm->dwItemSpec = 0 Then   ' compiler panel is panel 0
-               Select Case Ucase(gApp.Projects(pDoc->ProjectIndex).ProjectCompiler)
+               Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
                   Case "FBC 32BIT"  ' toggle from 32 bit to 64 bit
                      frmMain_MenuSetCompiler( IDM_USE64BIT )
                   Case "FBC 64BIT"  ' toggle from 64 bit to 32 bit
@@ -1294,7 +1295,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                End Select
             End If
             If lpnm->dwItemSpec = 1 Then   ' compilemode panel is panel 1
-               Select Case Ucase(gApp.Projects(pDoc->ProjectIndex).ProjectCompileMode)
+               Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode)
                   Case "GUI"      ' toggle from GUI to CONSOLE
                      frmMain_MenuSetCompileMode( IDM_CONSOLE )
                   Case "CONSOLE"  ' toggle from CONSOLE to GUI
@@ -1302,7 +1303,8 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                End Select
             End If
             If lpnm->dwItemSpec = 2 Then   ' line/column panel is panel 2
-               Function = frmGoto_Show(pDoc->hWindow)
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+               if pDoc THEN Function = frmGoto_Show(pDoc->hWindow)
             end if
             If lpnm->dwItemSpec = 3 Then   ' ProjectFiletype is panel 3
                hPopupMenu = CreateStatusBarFileTypeContextMenu

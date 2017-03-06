@@ -238,6 +238,9 @@ Function frmMain_ChangeTopMenuStates() As Long
    For idMenu = IDM_ADDFILETOPROJECT To IDM_PROJECTOPTIONS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
+   For idMenu = IDM_BUILDEXECUTE To IDM_CONSOLE
+      EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
+   Next
    
    ' Items that will always be enabled.
    EnableMenuItem hMenu, IDM_FILENEW, MF_BYCOMMAND Or MF_ENABLED
@@ -251,33 +254,33 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_CONSOLE, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
 
    ' Check the correct default compiler
-   wzText = ""
-   if gApp.IsProjectActive then wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
-   Select Case UCase(wzText)
-      Case "FBC 64BIT": nSelected = IDM_USE64BIT
-      Case else   ' not defined or 32bit
-         nSelected = IDM_USE32BIT
-   End Select
-   CheckMenuRadioItem( hMenu, IDM_USE32BIT, IDM_USE64BIT, nSelected, MF_BYCOMMAND )
-   
-   ' Check the correct default compile mode
-   wzText = ""
-   if gApp.IsProjectActive then wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
-   Select Case Ucase(wzText)
-      Case "GUI":       nSelected = IDM_GUI
-      Case else   ' not defined or console
-         nSelected = IDM_CONSOLE
-   End Select
-   CheckMenuRadioItem( hMenu, IDM_GUI, IDM_CONSOLE, nSelected, MF_BYCOMMAND )
+   if IsWindowVisible(HWND_FRMRECENT) = 0 THEN
+      wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
+      Select Case UCase(wzText)
+         Case "FBC 64BIT": nSelected = IDM_USE64BIT
+         Case else   ' not defined or 32bit
+            nSelected = IDM_USE32BIT
+      End Select
+      CheckMenuRadioItem( hMenu, IDM_USE32BIT, IDM_USE64BIT, nSelected, MF_BYCOMMAND )
+      EnableMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_ENABLED
+      EnableMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_ENABLED
+      
+      ' Check the correct default compile mode
+      wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
+      Select Case Ucase(wzText)
+         Case "GUI":       nSelected = IDM_GUI
+         Case else   ' not defined or console
+            nSelected = IDM_CONSOLE
+      End Select
+      CheckMenuRadioItem( hMenu, IDM_GUI, IDM_CONSOLE, nSelected, MF_BYCOMMAND )
+      EnableMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_ENABLED
+      EnableMenuItem hMenu, IDM_CONSOLE, MF_BYCOMMAND Or MF_ENABLED
+   end if
    
    ' Enable everything if a document is open
    Dim As Long NumTabs = TabCtrl_GetItemCount(gTTabCtl.hWindow)
@@ -348,16 +351,14 @@ End Function
 ''
 Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
    dim as long idx
-   If gApp.IsProjectActive Then
-      idx = gApp.GetActiveProjectIndex
-      Select Case wID
-         Case IDM_USE32BIT
-            gApp.Projects(idx).ProjectCompiler = WSTR("FBC 32bit")
-         Case IDM_USE64BIT
-            gApp.Projects(idx).ProjectCompiler = WSTR("FBC 64bit")
-      End Select
-      frmMain_UpdateLineCol( HWND_FRMMAIN )
-   end if
+   idx = gApp.GetActiveProjectIndex
+   Select Case wID
+      Case IDM_USE32BIT
+         gApp.Projects(idx).ProjectCompiler = WSTR("FBC 32bit")
+      Case IDM_USE64BIT
+         gApp.Projects(idx).ProjectCompiler = WSTR("FBC 64bit")
+   End Select
+   frmMain_UpdateLineCol( HWND_FRMMAIN )
    Function = 0
 End Function
 
@@ -366,16 +367,14 @@ End Function
 ''
 Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
    dim as long idx
-   If gApp.IsProjectActive Then
-      idx = gApp.GetActiveProjectIndex
-      Select Case wID
-         Case IDM_GUI
-            gApp.Projects(idx).ProjectCompileMode = WSTR("GUI")
-         Case IDM_CONSOLE
-            gApp.Projects(idx).ProjectCompileMode = WSTR("CONSOLE")
-      End Select
-      frmMain_UpdateLineCol( HWND_FRMMAIN )
-   end if
+   idx = gApp.GetActiveProjectIndex
+   Select Case wID
+      Case IDM_GUI
+         gApp.Projects(idx).ProjectCompileMode = WSTR("GUI")
+      Case IDM_CONSOLE
+         gApp.Projects(idx).ProjectCompileMode = WSTR("CONSOLE")
+   End Select
+   frmMain_UpdateLineCol( HWND_FRMMAIN )
    Function = 0
 End Function
 

@@ -129,6 +129,8 @@ Function clsConfig.SaveToFile() as Long
    print #f, "CompilerSwitches="      ; this.CompilerSwitches     
    print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
+   print #f, "DefaultCompiler="       ; gApp.Projects(0).ProjectCompiler
+   print #f, "DefaultCompileMode="    ; gApp.Projects(0).ProjectCompileMode
    
    print #f, ""
    Print #f, "[MRU]"  
@@ -260,6 +262,12 @@ Function clsConfig.LoadFromFile() as Long
 
       
       Select Case wKey
+         Case "DefaultCompiler"
+            if len(wData) = 0 then wData = "FBC 32bit"
+            gApp.Projects(0).ProjectCompiler = wData
+         Case "DefaultCompileMode"
+            if len(wData) = 0 then wData = "CONSOLE"
+            gApp.Projects(0).ProjectCompileMode = wData
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "CloseFuncList":        this.CloseFuncList        = nData
