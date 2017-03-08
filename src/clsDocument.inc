@@ -1136,7 +1136,7 @@ Function clsDocument.ApplyProperties() As Long
 
    ''
    ''  CODE FOLDING
-   If gConfig.LeftMargin Then
+   If gConfig.FoldMargin Then
       ' Enable folding of the procedures and functions
       SciMsg( m_pSci, SCI_SETPROPERTY, Cast(WPARAM, @"fold"), Cast(LPARAM, @"1") )
 
