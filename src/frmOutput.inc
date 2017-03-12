@@ -38,14 +38,22 @@ function UpdateToDoListview() as long
    dim as hwnd hLV = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO)
    ListView_DeleteAllItems( hLV )
    dim as long n = 0
-   for i as long = lbound(gTODO) to ubound(gTODO)
-      if AfxFileExists(gTODO(i).sDiskFilename) THEN
-         FF_ListView_InsertItem( hLV, n, 0, WStr(gTODO(i).nLineNumber) ) 
-         FF_ListView_InsertItem( hLV, n, 1, WStr(gTODO(i).sDiskFilename) )
-         FF_ListView_InsertItem( hLV, n, 2, WStr(gTODO(i).txtDescription) ) 
+
+   dim pData as DBENGINE_DATA ptr
+   
+   gdb.dbRewind()
+   do 
+      pData = gdb.dbGetNext
+      if pData = 0 THEN exit do
+      if pData->dataType <> DB_TODO_ITEM THEN continue do
+      if AfxFileExists(pData->diskFilename) THEN
+         FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
+         FF_ListView_InsertItem( hLV, n, 1, WStr(pData->diskFilename) )
+         FF_ListView_InsertItem( hLV, n, 2, WStr(pData->data1) ) 
          n = n + 1
       end if
-   next
+   loop
+
    function = 0
 END FUNCTION
 
@@ -89,7 +97,7 @@ function DoSearchFileSelected() as LONG
                            0 )         ' pDocIn
 
    if pDoc THEN
-      SendMessageW pDoc->hWindow, SCI_GOTOLINE, nLineNum-1, 0
+      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNum-1, 0)
    END IF
 
    function = 0

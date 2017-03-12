@@ -315,7 +315,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    SetCursor( LoadCursor(0, IDC_WAIT) )
 
    pDoc = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN SendMessage( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+   if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
       
    
    ' Shell to the compiler 
@@ -339,7 +339,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    wend
 
    SetCursor( hCurSave )
-   if pDoc THEN SendMessage( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+   if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
    gCompile.EndTime = Timer
    gCompiling = false
    ShowWindow( hProgressBar, SW_HIDE)
@@ -607,7 +607,7 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
       ' Position all of the controls into place
       frmMain_PositionWindows(HWND_FRMMAIN)
    End If 
-   SendMessageW( pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
+   SciExec( pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
 
 End Function
 

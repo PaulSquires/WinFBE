@@ -19,28 +19,19 @@ Function frmFnList_SetListBoxPosition() As Long
 
    Dim nCurSel As Long = -1
 
+   Dim pDocActive As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr() 
+   Dim pDoc As clsDocument Ptr
+
    Dim As HWnd hList  = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
    Dim As Long nCount = Listbox_GetCount(hList)
-   dim wszText as wstring * MAX_PATH
    
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr() 
-   If pDoc Then 
-      For i As Long = 0 To nCount - 1
-         ListBox_GetText( hList, i, @wszText )
-         if ListBox_GetItemData(hList, i) <> 0 THEN   ' Header line (filename)
-            If wszText = ucase(pDoc->DiskFilename) Then
-               nCurSel = i: Exit For
-            End If
-         else
-            ' Determine what file this function is located in.
-            if gFunctionDeclares.FindItem(ucase(str(wszText))) then
-               If ucase(gFunctionDeclares.FoundData2) = ucase(pDoc->DiskFilename) Then
-                  nCurSel = i: Exit For
-               End If
-            end if
-         END IF
-      Next
-   End If            
+   ' Search for a match
+   For i As Long = 0 To nCount - 1
+      pDoc = Cast(clsDocument ptr, ListBox_GetItemData(hList, i))
+      if pDoc = pDocActive THEN
+         nCurSel = i: Exit For
+      END IF
+   Next
    
    Listbox_SetCurSel(hList, nCurSel)
    
@@ -58,49 +49,38 @@ Function frmFnList_UpdateListBox() As Long
    ' Clear the listbox and add the new items
    Listbox_ResetContent(hList)
    
-   Dim pDoc As clsDocument Ptr
-   dim as string sAllFunctions, sFunctionName, sFilename
-   Dim As Long i, x, p, idx, nParseCount, nDocumentCount
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   Dim As HTREEITEM hChild, hParent
+   dim as long p, pDoc, idx
    dim wszText as wstring * MAX_PATH
-   
+
    Dim As Long nProjectCount = gApp.GetProjectCount()
    
    For idx = 0 To nProjectCount 
       if gApp.Projects(idx).InUse = false THEN continue for
+
+      hParent = Treeview_GetChild( hTree, gApp.Projects(gApp.GetActiveProjectIndex).hExplorerRootNode)
+      do until hParent = 0 
+         ' Filename
+         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
+         pDoc = FF_TreeView_GetlParam(hTree, hParent)
+         wszText = ucase(wszText)
+         p = Listbox_AddString( hList, strptr(wszText) )
+         ListBox_SetItemData( hList, p, pDoc )    ' pDoc is stored for a header
          
-      nDocumentCount = gApp.Projects(idx).GetDocumentCount
-      for i = 0 to nDocumentCount - 1
-         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-         If pDoc Then 
-            sFilename = ucase(pDoc->DiskFilename)
-            if gFunctionLists.FindItem(sFilename) then
-               ' Draw the header name 
-               wszText = wstr(sFilename)
-               p = Listbox_AddString( hList, strptr(wszText) )
-               ListBox_SetItemData( hList, p, pDoc )    ' pDoc is stored for a header
-               ' Parse the function names and add them to the list box
-               sAllFunctions = gFunctionLists.FoundData1
-               if len(sAllFunctions) THEN
-                  ' Get the names into array and then sort them alphabetically
-                  nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
-                  dim sFunctionNames(1 to nParseCount) as string 
-                  for x = 1 to nParseCount 
-                     sFunctionNames(x) = AfxStrParse(sAllFunctions, x, DELIM)
-                  NEXT
-                  ' Simple bubble sort
-                  'BubbleSort( sFunctionNames() )
-                  InsertionSort( sFunctionNames() )
-                  ' Display the names in the ListBox
-                  for x = 1 to nParseCount 
-                     wszText = wstr(sFunctionNames(x))
-                     p = Listbox_AddString( hList, strptr(wszText) )
-                     ListBox_SetItemData( hList, p, 0 )
-                  next
-               end if
-            end if
-         End If   
-      next
-      
+         ' Get all functions in the file
+         hChild = Treeview_GetChild( hTree, hParent)
+         do until hChild = 0 
+            Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+            p = Listbox_AddString( hList, strptr(wszText) )
+            ListBox_SetItemData( hList, p, 0 )
+            hChild = Treeview_GetNextSibling(hTree, hChild)
+         loop
+         
+         ' Get the next filename
+         hParent = Treeview_GetNextSibling(hTree, hParent)
+      loop 
+
    Next
    
    Function = 0
@@ -118,13 +98,11 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
          If codeNotify = LBN_DBLCLK Then
             Dim As Long nCurSel = Listbox_GetCurSel(hwndCtl)
             If nCurSel = -1 Then Exit Function
-            ' Open the document based on the filename. If the Header line is clicked
-            ' then simply open the document and point to the first line. If a function 
-            ' is clicked then search the gFunctionDeclares hash to get the filename
-            ' and line number position within the file.
-            dim wszText as wstring * MAX_PATH
+            ' Open the document based on the filename or if it is a header line
+            ' then simply use the pDoc.
             dim pDoc as clsDocument ptr
-            ListBox_GetText( hwndCtl, nCurSel, @wszText )  ' already in UCASE format
+            dim wszText as wstring * MAX_PATH
+            ListBox_GetText( hwndCtl, nCurSel, @wszText )
             pDoc = cast(clsDocument ptr, Listbox_GetItemData(hWndCtl, nCurSel))
             OpenSelectedDocument(pDoc, wszText)
             If gConfig.CloseFuncList Then ShowWindow( HWND_FRMFNLIST, SW_HIDE )
@@ -214,7 +192,7 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
          ' DRAW TEXT
          SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
          SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
-         SendMessageW(lpdis->hwndItem, LB_GETTEXT, lpdis->itemID, Cast(LPARAM, @wzText))
+         SendMessage(lpdis->hwndItem, LB_GETTEXT, lpdis->itemID, Cast(LPARAM, @wzText))
          
          ' Determine what font to use and if itès a header line then only show
          ' the filename's name and extension (not full path)
@@ -279,10 +257,10 @@ Function frmFnList_ListBox_SubclassProc ( _
          Select Case Loword(wParam)
             Case VK_RETURN
                ' Simulate the sending of a LBN_DBLCLK to the control.
-               SendMessageW( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
                Exit Function
             Case VK_ESCAPE
-               SendMessageW( GetParent(hWnd), WM_CLOSE, 0, 0 ) 
+               SendMessage( GetParent(hWnd), WM_CLOSE, 0, 0 ) 
          End Select
 
       Case WM_DESTROY
@@ -316,7 +294,7 @@ Function frmFnList_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 

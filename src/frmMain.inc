@@ -19,15 +19,18 @@ Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
    If pDoc = 0 Then Exit Function
    
+   dim pData as DBENGINE_DATA ptr
+
    ' Determine the word at the current caret position.
    Dim As String sWord = pDoc->GetWord
    
    ' Search the list of Function names
-   if gFunctionDeclares.FindItem(ucase(sWord)) then
+   pData = gdb.dbFindFunctionName(sWord)
+   if pData THEN
       ' Save our current position in case user invokes "Last Position" option,   
       gLastPosition.pDoc = pDoc
-      gLastPosition.nFirstLine = SendMessage( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-      gLastPosition.nPosition = SendMessage( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+      gLastPosition.nFirstLine = SciExec( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+      gLastPosition.nPosition = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
       OpenSelectedDocument(0, sWord)
    else
       MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
@@ -53,8 +56,8 @@ Function frmMain_GotoLastPosition() As Long
             false, _    ' bIsInclude
             gLastPosition.pDoc->DiskFilename, _ ' pwszName
             gLastPosition.pDoc )  ' pDocIn
-   SendMessage( gLastPosition.pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
-   SendMessage( gLastPosition.pDoc->hWindow, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
+   SciExec( gLastPosition.pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
+   SciExec( gLastPosition.pDoc->hWindow, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
    
    Function = 0
 End Function
@@ -204,8 +207,8 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          If pDoc Then 
             hEdit      = pDoc->hWindow
-            nLine      = SendMessage(hEdit, SCI_LINEFROMPOSITION, pNSC->position, 0)
-            nFoldLevel = SendMessage(hEdit, SCI_GETFOLDLEVEL, nLine, 0)
+            nLine      = SciExec(hEdit, SCI_LINEFROMPOSITION, pNSC->position, 0)
+            nFoldLevel = SciExec(hEdit, SCI_GETFOLDLEVEL, nLine, 0)
 
             Select Case pNSC->margin 
                Case 1   ' left margin (bookmarks)
@@ -213,7 +216,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                Case 2   ' fold margin
                   ' If is the head line...
                   If (nFoldLevel And SC_FOLDLEVELHEADERFLAG) <> 0 Then
-                     SendMessageW(hEdit, SCI_TOGGLEFOLD, nLine, 0) 
+                     SciExec(hEdit, SCI_TOGGLEFOLD, nLine, 0) 
                   End If   
             End Select
          End If
@@ -235,17 +238,17 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                If pDoc = 0 Then exit function
                hEdit = pDoc->hWindow
                ' Current position
-               curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+               curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
                ' Current line
-               nLine = SendMessage(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
+               nLine = SciExec(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
                ' Line length of the previous line
-               LineLen = SendMessage(hEdit, SCI_LINELENGTH, nLine - 1, 0)
+               LineLen = SciExec(hEdit, SCI_LINELENGTH, nLine - 1, 0)
                If LineLen < 1 Then Exit Function
                ' Get the text of the previous line
                buffer = Space(LineLen)
-               SendMessage(hEdit, SCI_GETLINE, nLine - 1, Cast(LPARAM, Strptr(buffer)))
+               SciExec(hEdit, SCI_GETLINE, nLine - 1, Strptr(buffer))
                ' Get the tab width
-               TabSize = SendMessage(hEdit, SCI_GETTABWIDTH, 0, 0)
+               TabSize = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0)
                ' Calculate the number of spaces to fill on the left
                For i = 1 To Len(buffer)
                   If Mid(buffer, i, 1) <> " " Then
@@ -273,16 +276,16 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                   Left(buffer, 6) = "WHILE " Or _
                   buffer = "WHILE" Then
                   ' Indentation size
-                  IndentSize = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
+                  IndentSize = SciExec(hEdit, SCI_GETINDENT, 0, 0)
                   ' Add spaces to indent the line
                   strFill = Space(nSpaces + IndentSize)
                Else
                   ' Add the same spaces on the left that the line above
                   strFill = Space(nSpaces)
                End If
-               ' *** TODO: If using tabs, replace spaces with tabs
+               ' TODO: If using tabs, replace spaces with tabs
                ' Indents the line
-               SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+               SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
             End If
          End If
    
@@ -295,13 +298,13 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                pDoc = gTTabCtl.GetActiveDocumentPtr()
                If pDoc = 0 Then exit function
                hEdit = pDoc->hWindow
-               curPos  = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
-               nLine   = SendMessage(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
-               LineLen = SendMessage(hEdit, SCI_LINELENGTH, nLine, 0)
-               IndentSize = SendMessage(hEdit, SCI_GETINDENT, 0, 0)
+               curPos  = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
+               nLine   = SciExec(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
+               LineLen = SciExec(hEdit, SCI_LINELENGTH, nLine, 0)
+               IndentSize = SciExec(hEdit, SCI_GETINDENT, 0, 0)
                buffer  = Space(LineLen)
-               SendMessage(hEdit, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
-               TabSize = SendMessage(hEdit, SCI_GETTABWIDTH, 0, 0)
+               SciExec(hEdit, SCI_GETLINE, nLine, Strptr(buffer))
+               TabSize = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0)
                ' Calculate the number of spaces to fill on the left
                nSpaces = 0
                FOR i = 1 TO LEN(buffer)
@@ -323,110 +326,110 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                SELECT CASE buffer
                   CASE "IF"
                      strFill = "x " & ConvertCase("THEN") & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END IF")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_SETANCHOR, curPos + 1, 0)
                   CASE "WHILE"
                      strFill = "x" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("WEND")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_SETANCHOR, curPos + 1, 0)
                   CASE "FOR"
                      strFill = "x" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("NEXT")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 1, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_SETANCHOR, curPos + 1, 0)
                   CASE "SELECT"
                      strFill = ConvertCase("CASE") & " x" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("CASE ELSE")
                      strFill = SPACE(nSpaces + 3) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END SELECT")
                      strFill = vbcrlf & SPACE$(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos + 5, 0)
-                     SendMessage(hEdit, SCI_SETANCHOR, curPos + 6, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos + 5, 0)
+                     SciExec(hEdit, SCI_SETANCHOR, curPos + 6, 0)
                   CASE "FUNCTION", "PRIVATE FUNCTION", "PUBLIC FUNCTION"
                      if pDoc->InFunction then exit function
                      strFill = "()" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END FUNCTION")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
                   CASE "SUB", "PRIVATE SUB", "PUBLIC SUB"
                      if pDoc->InFunction then exit function
                      strFill = "()" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END SUB")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
                   CASE "PROPERTY"
                      strFill = "()" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END PROPERTY")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
                   CASE "TYPE"
                      strFill = "" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END TYPE")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
                   CASE "UNION"
                      strFill = "" & vbcrlf
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strFill = SPACE(nSpaces + IndentSize)
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END UNION")
                      strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SendMessage(hEdit, SCI_ADDTEXT, Len(strFill), Cast(LPARAM, Strptr(strFill)))
-                     SendMessage(hEdit, SCI_GOTOPOS, curPos, 0)
+                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
                END SELECT
             END IF
          END IF
@@ -445,7 +448,7 @@ Function frmMain_SetFocusToCurrentCodeWindow() As Long
    ' set focus to the currently active Scintilla code window. We
    ' use PostMessage to ensure that all all other windows 
    ' messages are finished processing.
-   PostMessageW HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
+   PostMessage( HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0 )
    Function = 0
 End Function
 
@@ -562,10 +565,10 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
       if pDoc = 0 THEN continue for
       if pDoc->ProjectIndex <> idx THEN continue for
          
-      If SendMessage( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
          OpenSelectedDocument(pDoc, "")
          wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
-         r = MessageBoxW( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
+         r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
                            MB_YESNOCANCEL Or MB_ICONQUESTION)
          If r = IDCANCEL Then Exit Function
          If r = IDYES Then 
@@ -588,6 +591,9 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    ' this project from the global array
    gApp.Projects(idx).RemoveAllDocuments
 
+   ' Reset the gdb database but reload the FB keywords
+   gdb.dbDeleteByProject(idx)
+   
    DestroyWindow( HWND_FRMFNLIST )
 
    ' Remove the Explorer node for this project
@@ -821,7 +827,7 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
       pDoc->ApplyProperties
       pDoc->DisplayStats()   
       ' Parse the code for sub/function listing and create list
-      ParseDocument(pDoc, "")
+      ParseDocument(idx, pDoc, "")
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
@@ -849,7 +855,8 @@ Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
       Return False
    End If
  
-   gFunctionDeclares.CreateDeclaresFile(wFilename)
+   CreateDeclaresFile(wFilename)
+   
    ' If the declares file is loaded in the project then we need to reload
    ' it in order to ensure most current document data.
    dim pDoc as clsDocument ptr
@@ -869,7 +876,7 @@ Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
          End If   
          pDoc->SetText( sText ) 
          pDoc->DateFileTime = AfxGetFileLastWriteTime(pDoc->DiskFilename)
-         SendMessage(pDoc->hWindow, SCI_SETSAVEPOINT, 0, 0)
+         SciExec(pDoc->hWindow, SCI_SETSAVEPOINT, 0, 0)
       End If
    end if
   
@@ -893,7 +900,7 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       TB.Mask = TCIF_PARAM
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If SendMessageW( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then 
+      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then 
          ' If this is a new Untitled document that is also dirty then we
          ' need to set the focus to that tab because the SaveAs dialog will be shown.
          If pDoc->IsNewFlag Then
@@ -928,7 +935,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       pDoc = gTTabCtl.GetActiveDocumentPtr()
       If pDoc = 0 Then Return true
    
-      If SendMessage( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
          wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
                            MB_YESNOCANCEL Or MB_ICONQUESTION)
@@ -1050,15 +1057,15 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_EXIT:               SendMessage( HWnd, WM_CLOSE, 0, 0 )
 
       ''  EDIT MENU
-      Case IDM_REDO:               Function = SendMessage( hEdit, SCI_REDO, 0, 0)
-      Case IDM_UNDO, WM_UNDO:      Function = SendMessage( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
-      Case IDM_CUT, WM_CUT:        Function = SendMessage( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
-      Case IDM_COPY, WM_COPY:      Function = SendMessage( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
-      Case IDM_PASTE, WM_PASTE:    Function = SendMessage( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
-      Case IDM_DELETELINE:         Function = SendMessage(hEdit, SCI_LINECUT, 0, 0)
+      Case IDM_REDO:               Function = SciExec( hEdit, SCI_REDO, 0, 0)
+      Case IDM_UNDO, WM_UNDO:      Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
+      Case IDM_CUT, WM_CUT:        Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+      Case IDM_COPY, WM_COPY:      Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
+      Case IDM_PASTE, WM_PASTE:    Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
+      Case IDM_DELETELINE:         Function = SciExec(hEdit, SCI_LINECUT, 0, 0)
       Case IDM_INSERTFILE:         Function = pDoc->InsertFile()
-      Case IDM_INDENTBLOCK:        Function = SendMessage(hEdit, SCI_TAB, 0, 0)
-      Case IDM_UNINDENTBLOCK:      Function = SendMessage(hEdit, SCI_BACKTAB, 0, 0)
+      Case IDM_INDENTBLOCK:        Function = SciExec(hEdit, SCI_TAB, 0, 0)
+      Case IDM_UNINDENTBLOCK:      Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
       Case IDM_COMMENTBLOCK:       Function = pDoc->BlockComment(True) 
       Case IDM_UNCOMMENTBLOCK:     Function = pDoc->BlockComment(False) 
       Case IDM_DUPLICATELINE:      Function = pDoc->LineDuplicate()
@@ -1072,7 +1079,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_EOLTOLF:            Function = pDoc->ConvertEOL(SC_EOL_LF)
       'Case IDM_SPACESTOTABS:
       Case IDM_TABSTOSPACES:       Function = pDoc->TabsToSpaces()
-      Case IDM_SELECTALL:          Function = SendMessageW(hEdit, SCI_SELECTALL, 0, 0)
+      Case IDM_SELECTALL:          Function = SciExec(hEdit, SCI_SELECTALL, 0, 0)
       Case IDM_SELECTLINE:         Function = pDoc->SelectLine(-1)
                                    
       ''  SEARCH MENU              
@@ -1085,9 +1092,9 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
          dim as long startPos, endPos, curPos, mainSel
          Dim As String sFindText 
-         mainSel  = SendMessage(pDoc->hWindow, SCI_GETMAINSELECTION, 0, 0)
-         startPos = SendMessage(pDoc->hWindow, SCI_GETSELECTIONSTART, mainSel, 0)
-         endPos   = SendMessage(pDoc->hWindow, SCI_GETSELECTIONEND, mainSel, 0)
+         mainSel  = SciExec(pDoc->hWindow, SCI_GETMAINSELECTION, 0, 0)
+         startPos = SciExec(pDoc->hWindow, SCI_GETSELECTIONSTART, mainSel, 0)
+         endPos   = SciExec(pDoc->hWindow, SCI_GETSELECTIONEND, mainSel, 0)
          sFindText = pDoc->GetTextRange(startPos, endPos)
 
          if (GetForeGroundWindow = HWND_FRMFINDREPLACE) or (Len(sFindText) = 0) then
@@ -1096,14 +1103,14 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             exit function
          end if
 
-         curPos = SendMessage( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+         curPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
          startPos = iif( id = IDM_FINDNEXT, curPos + 1, curPos - 1 )
-         endPos = iif( id = IDM_FINDNEXT, SendMessage( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), 0)
-         SendMessage( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SendMessage( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         endPos = iif( id = IDM_FINDNEXT, SciExec( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), 0)
+         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
          ' Search for the text to find
-         dim as long r = SendMessage( pDoc->hWindow, SCI_SEARCHINTARGET, Len(sFindText), Cast(LPARAM, Strptr(sFindText)))
-         If r <> -1 Then SendMessage( pDoc->hWindow, SCI_SETSEL, r, cast(LPARAM, r + len(sFindText)) )
+         dim as long r = SciExec( pDoc->hWindow, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+         If r <> -1 Then SciExec( pDoc->hWindow, SCI_SETSEL, r, r + len(sFindText)) 
 
 
       Case IDM_DEFINITION:         Function = frmMain_GotoDefinition( pDoc )
@@ -1114,15 +1121,15 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_BOOKMARKTOGGLE:     Function = pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
       Case IDM_BOOKMARKNEXT:       Function = pDoc->NextBookmark()
       Case IDM_BOOKMARKPREV:       Function = pDoc->PrevBookmark()
-      Case IDM_BOOKMARKCLEARALL:   Function = SendMessage(hEdit, SCI_MARKERDELETEALL, -1, 0)
+      Case IDM_BOOKMARKCLEARALL:   Function = SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
       
       ''  VIEW MENU
       Case IDM_FOLDTOGGLE:         Function = pDoc->FoldToggle( pDoc->GetCurrentLineNumber() )
       Case IDM_FOLDBELOW:          Function = pDoc->FoldToggleOnwards( pDoc->GetCurrentLineNumber() )
       Case IDM_FOLDALL:            Function = pDoc->FoldAll()
       Case IDM_UNFOLDALL:          Function = pDoc->UnFoldAll()
-      Case IDM_ZOOMIN:             Function = SendMessage(hEdit, SCI_ZOOMIN, 0, 0)
-      Case IDM_ZOOMOUT:            Function = SendMessage(hEdit, SCI_ZOOMOUT, 0, 0)
+      Case IDM_ZOOMIN:             Function = SciExec(hEdit, SCI_ZOOMIN, 0, 0)
+      Case IDM_ZOOMOUT:            Function = SciExec(hEdit, SCI_ZOOMOUT, 0, 0)
 
       Case IDM_VIEWEXPLORER
          ShowWindow HWND_FRMEXPLORER, Iif(IsWindowVisible(HWND_FRMEXPLORER), SW_HIDE, SW_SHOW)
@@ -1216,27 +1223,6 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       
       Case IDM_HELP
-
-'      for i as long = 1 to ubound(gApp.Projects)
-'         print i, "gApp.Projects(i).InUse = "; gApp.Projects(i).InUse
-'         print i, "gApp.Projects(i).ProjectFilename = "; gApp.Projects(i).ProjectFilename
-'         print i, "gApp.Projects(i).hExplorerRootNode = "; gApp.Projects(i).hExplorerRootNode
-'      NEXT
-
-'dim as Scanner tokenScanner
-'dim as DynamicArray ptr	list = tokenScanner.scanFile( pDoc->DiskFilename )
-'dim as CParser parser = CParser( list )
-'' Double escape the \ slashes in the filename otherwise JSON
-'' will report errors as invalid escape sequences.
-'dim sFilename as string = AfxStrReplace(pDoc->DiskFilename, "\", "\\")
-'parser.parse( sFilename )
-''parser.printAST()
-'parser.save( "_debug.txt" )
-
-'gTYPES.Debug("_debug.txt")
-'gFunctionDeclares.CreateDeclaresFile("_debug.txt")
-'gFunctionDeclares.Debug("_debug2.txt")
-
          ShowContextHelp() 
       
 
@@ -1367,7 +1353,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
          ptttdi->hinst = Null
          wszText = ""
          Select Case ptttdi->hdr.hwndFrom
-            Case SendMessageW(GetDlgItem(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), IDC_FRMMAIN_TOOLBAR), TB_GETTOOLTIPS, 0, 0)
+            Case SendMessage(GetDlgItem(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), IDC_FRMMAIN_TOOLBAR), TB_GETTOOLTIPS, 0, 0)
                Select Case ptttdi->hdr.idFrom
                   Case IDM_FILENEW         : wszText = L(81,"New (Ctrl+N)")
                   Case IDM_FILEOPEN        : wszText = L(82,"Open (Ctrl+O)")
@@ -1738,7 +1724,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          
       Case WM_SYSCOMMAND
          If (wParam And &HFFF0) = SC_CLOSE Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage HWnd, WM_CLOSE, 0, 0
          End If
 
       case WM_CAPTURECHANGED
@@ -1819,8 +1805,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    rgParts(3) = pWindow->ScaleX(500)   ' Normal/Module/Main/Resource
    rgParts(4) = pWindow->ScaleX(600)   ' Unicode/ANSI
    rgParts(5) = -1
-   If SendMessageW( hStatusBar, SB_SETPARTS, 6, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
-      SendMessageW( hStatusBar, SB_SIMPLE, False, 0 )
+   If SendMessage( hStatusBar, SB_SETPARTS, 6, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
+      SendMessage( hStatusBar, SB_SIMPLE, False, 0 )
    End If
 
    ' Add a progress bar to the status bar (panel5) (to show compiling progress)

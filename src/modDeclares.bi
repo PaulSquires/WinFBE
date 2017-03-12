@@ -280,7 +280,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 
 #Define SetFocusScintilla  PostMessage HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
 #Define ResizeExplorerWindow  PostMessage HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
-
+#Define SciExec(h, m, w, l) SendMessage(h, m, w, CAST(LPARAM, l))
 
 ''
 ''  Save information related to Find/Replace and Find in Files operations
@@ -302,15 +302,6 @@ End Type
 Dim Shared gFind As FINDREPLACE_TYPE
 Dim Shared gFindInFiles As FINDREPLACE_TYPE
 
-''
-''  TYPE to hold all TODO's found in the document or open project
-''
-type TODO_TYPE
-   sDiskFilename      As String 
-   nLineNumber        as Long
-   txtDescription     as string
-END TYPE
-dim shared gTODO(10) as TODO_TYPE
 
 ' Forward reference
 Type clsDocument_ As clsDocument
@@ -485,6 +476,7 @@ Type clsConfig
       Declare Function LoadFromFile() As Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
+      declare Function LoadCodetips( ByRef sFilename As Const String ) as boolean
 End Type
 
 

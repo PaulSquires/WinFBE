@@ -14,6 +14,34 @@
 
 ''
 ''
+Function IsPreparsedFile( byref sFilename as string ) as boolean
+   ' Create the list of preparsed WinAPI files that we will bypass during
+   ' parsing. This depends on the compiler chosen and filepath.
+
+   dim as string sPath, sTemp
+   sFilename = AfxStrReplace( sFilename, "/", "\")
+   
+   Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
+      Case "FBC 32BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+      Case "FBC 64BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+   End Select
+   sPath = AfxStrPathname("PATH", sPath) & "inc\"
+   
+   ' We do not want to parse the windows.bi file or any files in the \win
+   ' include folder.
+   sTemp = sPath & "windows.bi"
+   if _stricmp(sTemp, sFilename) = 0 THEN return true
+   
+   sPath = sPath & "win\"
+   sTemp = AfxStrPathName("PATH", sFilename)
+   if _stricmp(sPath, sTemp) = 0 THEN return true
+      
+   function = false
+end function
+
+
+''
+''
 Function GetIncludeFilename( byref sFilename as string, _    ' file where the #Include was found in (needed for pathing)
                              byref sLine as const string _
                              ) as STRING
@@ -47,12 +75,14 @@ Function GetIncludeFilename( byref sFilename as string, _    ' file where the #I
       ' We have found an Include file that may be part of the already preparsed
       ' and loaded Include files. Do a check and bypass parsing the file if it
       ' is a preparsed file.
-      '// TODO: Search list of preparsed files
-      
-      return ""    ' don't parse this file
+      if IsPreparsedFile(sTemp) THEN 
+         return ""
+      else
+         return sTemp   
+      END IF
    end if   
    
-   
+   return ""
 End Function
 
 ''
@@ -62,22 +92,23 @@ Function ScintillaGetLine( byval pDoc as clsDocument ptr, _
                            ) As String
    Dim nLen   As Long
    Dim buffer As String
-   nLen = SendMessage( pDoc->hWindow, SCI_LINELENGTH, nLine , 0)
+   nLen = SciExec( pDoc->hWindow, SCI_LINELENGTH, nLine , 0)
    If nLen < 1 Then Exit Function
    buffer = Space(nLen)
-   SendMessage( pDoc->hWindow, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
+   SciExec( pDoc->hWindow, SCI_GETLINE, nLine, Strptr(buffer))
    Function = Rtrim(buffer, Any Chr(13,10,0))
 End Function
 
 
 ''
 ''
-Function ParseDocument( byval pDoc as clsDocument ptr, _
+Function ParseDocument( byval idx as long, _     ' project index
+                        byval pDoc as clsDocument ptr, _
                         byval sFilename as string _
                         ) As Long
-                        
+   
    dim as long nLineCount, nLineNum, nFuncLineNumber
-   Dim As String st, st_ucase, sLine, sFuncName, sFuncDeclare, sAllFunctionNames
+   Dim As String st, st_ucase, sLine, txtDescription, sFuncName, sFuncDeclare
    dim as string sTypeName, sTypeElements
    Dim As Long n, iParen, f, i
    Dim As BOOLEAN bIsSub, bIsFunction, bInType, bInTypePrivate
@@ -87,7 +118,7 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
    ' use that pDoc to retrieve the lines. If the pDoc = Null then we need to load
    ' the file from disk into a standard string array.
    if pDoc THEN
-      nLineCount = SendMessage(pDoc->hWindow, SCI_GETLINECOUNT, 0, 0)
+      nLineCount = SciExec(pDoc->hWindow, SCI_GETLINECOUNT, 0, 0)
       sFilename = pDoc->DiskFilename
    else
       if AfxFileExists(sFilename) = 0 THEN exit function
@@ -104,27 +135,13 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
    END IF                     
    
    ' Before starting to parse this document we must remove any previously saved
-   ' data that exists in the hash arrays. The most current data will replace it 
-   ' once the parse completes.
-   ' gFunctionDeclares: declares for all Subs/Functions
-   gFunctionDeclares.DeleteAllData2(ucase(sFilename))
-   gTYPES.DeleteAllData2(ucase(sFilename))
+   ' data that exists in gdb database for this file.
+   gdb.dbDelete(sFilename)
    
-   ' Remove any TODO notes related to this document because they will be added 
-   ' again during this parse.
-   for i = lbound(gTODO) to ubound(gTODO)
-      if gTODO(i).sDiskFilename = sFilename THEN
-         gTODO(i).sDiskFilename = ""
-         gTODO(i).nLineNumber  = 0
-         gTODO(i).txtDescription = "" 
-      END IF
-   NEXT
+   gdb.dbAdd(sFilename, idx, DB_FILENAME_PARSE, 0, "", "")
+
    
-   ' gFunctionLists: filenames and subs/functions within it
-   ' Key: Filename.
-   ' This one is easy, simply delete the one hash entry for this filename
-   gFunctionLists.DeleteItem(ucase(sFilename))
-   
+   ' Analyze all lines in the file
    for nLineNum = 0 to nLineCount - 1
       bIsSub = false:  bIsFunction = false
       st = ""
@@ -139,21 +156,8 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
          ' Check for a TODO entry
          if (left(ucase(ltrim(sLine)), 6) = "'TODO:") or _
             (left(ucase(ltrim(sLine)), 7) = "' TODO:") THEN
-
-            dim as long nEmpty = -1
-            for i = lbound(gTODO) to ubound(gTODO)
-               if gTODO(i).sDiskFilename = "" THEN
-                  nEmpty = i: exit for
-               end if
-            next
-            if nEmpty = -1 THEN
-               ' Make the array bigger
-               nEmpty = ubound(gTODO) + 1
-               redim preserve gTODO(n + 10)
-            END IF     
-            gTODO(nEmpty).sDiskFilename  = sFilename
-            gTODO(nEmpty).nLineNumber    = nLineNum + 1
-            gTODO(nEmpty).txtDescription = AfxStrParse(sLine, 2, ":") 
+            txtDescription = AfxStrParse(sLine, 2, ":") 
+            gdb.dbAdd(sFilename, idx, DB_TODO_ITEM, nLineNum + 1, txtDescription, "")
          END IF
 
          ' Remove any comments (must be after the check for the TODO
@@ -179,7 +183,7 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
       if bInType THEN
          ' Is this the last line of the TYPE
          If Left(st_ucase, 8)  = "END TYPE" Then
-            gTYPES.AddItem(ucase(sTypeName), trim(sTypeElements,DELIM), sFilename)
+            gdb.dbAdd(sFilename, idx, DB_TYPE_NAME, nLineNum, sTypeName, trim(sTypeElements,DELIM))
             bInTYPE = false: bInTypePrivate = false
             sTypeElements = ""
          else
@@ -242,16 +246,18 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
          END IF
       END IF
          
+
       ' Is this an Include file that will need to be parsed? If yes, then
       ' get the filename and do a recursive call to ParseDocument.
       If Left(st_ucase, 9)  = "#INCLUDE " Then
          ' #INCLUDE "filename" or #INCLUDE ONCE "filename"
          dim as string sIncludeFilename = GetIncludeFilename(sFilename, st)
-         ' If the include file is already part of the loaded project
-         ' then no need to parse it again.
-         dim as long idx = gApp.GetActiveProjectIndex()
-         if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(sIncludeFilename)) = 0 THEN 
-            ParseDocument( 0, sIncludeFilename )
+         
+         ' If the include file was already parsed then skip it
+         if AfxFileExists(sIncludeFilename) then
+            if gdb.dbFilenameExists(sIncludeFilename) = false THEN
+               ParseDocument( idx, 0, sIncludeFilename )
+            end if
          END IF
       end if
       
@@ -293,17 +299,12 @@ Function ParseDocument( byval pDoc as clsDocument ptr, _
          
          sFuncDeclare = iif(bIsFunction, "Function ", "Sub ") & st
          nFuncLineNumber = nLineNum    
-         gFunctionDeclares.AddItem(ucase(sFuncName), sFuncDeclare, sFilename, str(nFuncLineNumber))
-         sAllFunctionNames = sAllFunctionNames & DELIM & sFuncName
+         gdb.dbAdd(sFilename, idx, DB_FUNCTION_NAME, nLineNum, sFuncName, sFuncDeclare)
+   
       end if
       
    next
 
-   ' We are now finished parsing this file. Add the found list of function
-   ' names to the global hash. Data1 holds a DELIM delimited string of function names.
-   gFunctionLists.AddItem(ucase(sFilename), trim(sAllFunctionNames,DELIM))
-
-   
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
    

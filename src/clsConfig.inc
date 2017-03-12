@@ -57,6 +57,36 @@ Function clsConfig.SaveKeywords() As Long
    Function = 0
 End Function
 
+  
+''
+''
+Function clsConfig.LoadCodetips( ByRef sFilename As Const String ) as boolean
+   Dim as string st, sFuncName, sFuncDeclare
+   Dim as long f, i
+   
+   f = Freefile
+   If Open( sFilename For Input As #f ) = 0 Then
+      Do Until Eof(f)
+         Line Input #f, st
+         
+         st = Trim(st)
+         If Len(st) = 0 Then Continue Do
+         
+         i = Instr(st, "=")
+         If i Then
+            sFuncName    = Left(st, i-1)
+            sFuncDeclare = Mid(st, i+1)
+            gdb.dbAdd("", -1, DB_FUNCTION_NAME, 0, sFuncName, sFuncDeclare)
+         End If   
+      Loop
+      Close #f
+      return false
+   End If
+
+   Function = true   ' error
+End Function
+
+
 ''
 ''  SAVE CONFIGURATION TO DISK FILE
 ''
@@ -193,7 +223,6 @@ Function clsConfig.SaveToFile() as Long
    
    Function = 0
 End Function
-
 
 
 ''
@@ -434,8 +463,8 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    END IF
 
    Close #f
-   
-   Function = True   ' successul save
+
+   Function = True   ' successful save
 End Function
 
 
@@ -577,8 +606,8 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
                End If
                    
                ' Set the saved position
-               SendMessage( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
-               SendMessage( pDoc->hWindow, SCI_GOTOPOS, nPosition, 0) 
+               SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
+               SciExec( pDoc->hWindow, SCI_GOTOPOS, nPosition, 0) 
                nFirstLine = 0: nPosition = 0
                
                ' Set any bookmarks

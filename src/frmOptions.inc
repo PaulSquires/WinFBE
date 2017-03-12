@@ -50,7 +50,7 @@ Sub SaveEditorOptions()
    HWnd = HWND_FRMOPTIONSLOCAL
    wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION) )
    If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
-      MessageBoxW( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
+      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
                   L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
    End If
    gConfig.LocalizationFile = wText
@@ -111,9 +111,9 @@ Sub SaveEditorOptions()
    If gConfig.bKeywordsDirty Then
       HWnd = HWND_FRMOPTIONSKEYWORDS
       Dim As HWnd hTextBox = GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS)
-      Dim As Long nLen = GetWindowTextLengthW(hTextBox) + 2  ' add space for ending nuls
+      Dim As Long nLen = GetWindowTextLength(hTextBox) + 2  ' add space for ending nuls
       Dim pzswKeywords As WString Ptr = CAllocate(nLen*2)
-      GetWindowTextW( hTextBox, pzswKeywords, nLen )
+      GetWindowText( hTextBox, pzswKeywords, nLen )
       Dim As String FBKeywords = Str(*pzswKeywords)
       gConfig.FBKeywords = Trim(FBKeywords)
       gConfig.SaveKeywords
@@ -296,7 +296,7 @@ Function frmOptions_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 

@@ -204,7 +204,7 @@ Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
    Dim As Long NumItems = TabCtrl_GetItemCount(this.hWindow)             
    
    ' Return the index of the added tab
-   idx = SendMessageW( this.hWindow, TCM_INSERTITEM, NumItems, Cast(LPARAM, @TB) )     
+   idx = SendMessage( this.hWindow, TCM_INSERTITEM, NumItems, Cast(LPARAM, @TB) )     
    
    this.SetTabText(idx)
    
@@ -231,7 +231,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    If pDoc Then 
       ' Set the text that displays on the tab
       wText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-      If SendMessageW( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
          wText = wText & "*"
       End If   
 

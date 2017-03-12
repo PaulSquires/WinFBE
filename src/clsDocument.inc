@@ -230,7 +230,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' saving it to an intermediary string variable first.
    dim cText as CTextStream
    if cText.Open(wFilename, IOMODE_FORWRITING, true) = 0 then
-      Dim As ZString Ptr psz = Cast( ZString Ptr, SendMessageW(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+      Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
       cText.Write( *psz )
       cText.Close
    else
@@ -266,7 +266,7 @@ Function clsDocument.GetTextRange( ByVal cpMin As Long, ByVal cpMax As Long) As 
    txtrg.chrg.cpMax = cpMax
    buffer = Space(cpMax - cpMin + 1)
    txtrg.lpstrText = Strptr(buffer)
-   SendMessage(this.hWindow, SCI_GETTEXTRANGE, 0, Cast(LPARAM, @txtrg))
+   SciMsg(m_pSci, SCI_GETTEXTRANGE, 0, cast(LPARAM, @txtrg))
    p = Instr(buffer, Chr(0))
    If p Then buffer = Left(buffer, p - 1)
    Function = buffer
@@ -395,7 +395,7 @@ Function clsDocument.GetLine( ByVal nLine As Long) As String
    nLen = SciMsg( m_pSci, SCI_LINELENGTH, nLine , 0)
    If nLen < 1 Then Exit Function
    buffer = Space(nLen)
-   SendMessage( this.hWindow, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
+   SciMsg( m_pSci, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
    Function = Rtrim(buffer, Any Chr(13,10,0))
 End Function
 
@@ -704,7 +704,7 @@ Function clsDocument.FoldAll() As Long
    Dim nFoldLevel As Long
    
    ' Force the lexer to style the whole document
-   SendMessage this.hWindow, SCI_COLOURISE, -1, 0
+   SciMsg( m_pSci, SCI_COLOURISE, -1, 0)
 
    nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 
@@ -730,7 +730,7 @@ Function clsDocument.UnFoldAll() As Long
    Dim nFoldLevel As Long
    
    ' Force the lexer to style the whole document
-   SendMessage this.hWindow, SCI_COLOURISE, -1, 0
+   SciMsg( m_pSci, SCI_COLOURISE, -1, 0 )
 
    nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 
@@ -758,7 +758,7 @@ Function clsDocument.FoldToggleOnwards( ByVal nLine As Long) As Long
    Dim FoldState  As Long
    
    ' Force the lexer to style the whole document
-   SendMessage this.hWindow, SCI_COLOURISE, -1, 0
+   SciMsg( m_pSci, SCI_COLOURISE, -1, 0 )
 
    nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 

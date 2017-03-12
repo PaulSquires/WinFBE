@@ -151,12 +151,12 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_HELP", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_HELP
 
-   SendMessageW hToolBar, TB_SETIMAGELIST, 0, Cast(LPARAM, hImageListNormal)
-   SendMessageW hToolBar, TB_SETDISABLEDIMAGELIST, 0, Cast(LPARAM, hImageListDisabled)
-   SendMessageW hToolBar, TB_SETHOTIMAGELIST, 0, Cast(LPARAM, hImageListHot)
+   SendMessage hToolBar, TB_SETIMAGELIST, 0, Cast(LPARAM, hImageListNormal)
+   SendMessage hToolBar, TB_SETDISABLEDIMAGELIST, 0, Cast(LPARAM, hImageListDisabled)
+   SendMessage hToolBar, TB_SETHOTIMAGELIST, 0, Cast(LPARAM, hImageListHot)
 
    ' Size the toolbar
-   SendMessageW hToolBar, TB_AUTOSIZE, 0, 0
+   SendMessage hToolBar, TB_AUTOSIZE, 0, 0
 
    ' Add the band containing the toolbar control to the rebar
    ' The size of the REBARBANDINFOW is different in Vista/Windows 7
@@ -181,7 +181,7 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    rbbi.clrBack    = GetSysColor(COLOR_BTNFACE)
 
    ' Insert band into rebar
-   SendMessageW hRebar, RB_INSERTBANDW, -1, Cast(LPARAM, @rbbi)
+   SendMessage hRebar, RB_INSERTBANDW, -1, Cast(LPARAM, @rbbi)
 
    Function = True
 
@@ -245,14 +245,14 @@ Function frmMain_ChangeToolbarButtonsState() As Long
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
    
-      If SendMessageW(hEdit, SCI_GETMODIFY, 0, 0) = 0 Then 
+      If SciExec(hEdit, SCI_GETMODIFY, 0, 0) = 0 Then 
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
       Else 
          FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
       End If
    
-      startSelPos = SendMessageW(hEdit, SCI_GETSELECTIONSTART, 0, 0)
-      endSelPos   = SendMessageW(hEdit, SCI_GETSELECTIONEND, 0, 0)
+      startSelPos = SciExec(hEdit, SCI_GETSELECTIONSTART, 0, 0)
+      endSelPos   = SciExec(hEdit, SCI_GETSELECTIONEND, 0, 0)
       If startSelPos = endSelPos Then
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
@@ -261,19 +261,19 @@ Function frmMain_ChangeToolbarButtonsState() As Long
          FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
       End If
    
-      If SendMessageW(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+      If SciExec(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE) 
       Else 
          FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
       End If
       
-      If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
+      If SciExec(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO) 
       Else 
          FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
       End If
    
-      If SendMessageW(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
+      If SciExec(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO) 
       Else 
          FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)

@@ -53,38 +53,32 @@ end function
 ' ========================================================================================
 function ShowCodetip() as BOOLEAN
 
-   dim as hwnd hEdit
-   dim as long curPos, tipPos, i
-   dim as string buffer, CodetipStr
    dim pDoc as clsDocument ptr
-   
+   dim pData as DBENGINE_DATA ptr
+
+   dim as string buffer
+   dim as long curPos, tipPos, i
+
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then exit function
 
-   hEdit = pDoc->hWindow
-   
    ' Retrieve the position
-   curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+   curPos = SciExec(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
    tipPos = curPos - 1   ' Skip the "("
 
    ' Retrieve the word (keys must be searched using uppercase)
-   buffer = ucase(TRIM(pDoc->GetWord(curPos - 1)))
+   buffer = TRIM(pDoc->GetWord(curPos - 1))
    IF LEN(buffer) THEN
-      ' Search the base builtin FB keywords first.
-      if gCodetips.FindItem(buffer) then
-         CodetipStr = gCodetips.FoundData1
-         SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
-         return TRUE
-      END IF
-      ' Search the list of Function names
-      if gFunctionDeclares.FindItem(buffer) then
-         CodetipStr = FormatCodetip(gFunctionDeclares.FoundData1)
-         SendMessage( hEdit, SCI_CALLTIPSHOW, tipPos - LEN(buffer), cast(lPARAM, strptr(CodetipStr)))
+      ' Search for a matching function name (user and builtin FB keywords)
+      pData = gdb.dbFindFunctionName(buffer)
+      if pData THEN
+         ' Codetip is stored in data2
+         SciExec( pDoc->hWindow, SCI_CALLTIPSHOW, tipPos - LEN(buffer), strptr(pData->data2))
          return TRUE
       END IF
       
-      '// TODO: Search the WinAPI declares if this is a Windows api program (ie. "windows.bi" exists)
-      '// TODO: Search depending on whether gApp.IsUnicodeCodetips is TRUE/FALSE
+      'TODO: Search the WinAPI declares if this is a Windows api program (ie. "windows.bi" exists)
+      'TODO: Search depending on whether gApp.IsUnicodeCodetips is TRUE/FALSE
       
    END IF
    function = FALSE
@@ -99,7 +93,9 @@ function ShowAutocompleteList() as BOOLEAN
    dim as long curPos, nCount, i
    dim as string buffer
    static as string sList
+
    dim pDoc as clsDocument ptr
+   dim pData as DBENGINE_DATA ptr
    
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then exit function
@@ -112,26 +108,33 @@ function ShowAutocompleteList() as BOOLEAN
    ' Retrieve the word
    buffer = TRIM(pDoc->GetWord(curPos - 1))
    IF LEN(buffer) THEN
-      if SendMessage(hEdit, SCI_AUTOCACTIVE, 0, 0) then
-         SendMessage(hEdit, SCI_AUTOCSHOW, len(buffer), cast(LPARAM, strptr(sList)))
+      if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
+         SciExec(hEdit, SCI_AUTOCSHOW, len(buffer), strptr(sList))
       else
          ' Determine if we need to display the autocomplete list.
          if ucase(buffer) = "AS" THEN
             ' Create the space separated data type list
             sList = "Boolean Byte Double Integer Long LongInt Short Single " & _
                     "String UByte UInteger UShort WString ZString"
-            Select Case gConfig.KeywordCase
-               Case 0:  sList = lcase(sList)
-               Case 1:  sList = ucase(sList)
-               Case 2:  ' already mixed case
-            End Select            
+            'Select Case gConfig.KeywordCase
+            '   Case 0:  sList = lcase(sList)
+            '   Case 1:  sList = ucase(sList)
+            '   Case 2:  ' already mixed case
+            'End Select            
             ' Add all of the TYPE definitions that were found
-            sList = sList & gTYPES.BuildKeyList
+            gdb.dbRewind()
+            do 
+               pData = gdb.dbGetNext()
+               if pData = 0 THEN exit do
+               if pData->dataType = DB_TYPE_NAME THEN
+                  sList = sList & " " & pData->data1
+               END IF
+            loop
             ' If an autocomplete list is already active then continue to search the list
-            SendMessage(hEdit, SCI_AUTOCSETORDER, 1, 0)  ' List must be sorted alphabetically
-            SendMessage(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
-            SendMessage(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
-            SendMessage(hEdit, SCI_AUTOCSHOW, 0, cast(LPARAM, strptr(sList)))
+            SciExec(hEdit, SCI_AUTOCSETORDER, 1, 0)  ' List must be sorted alphabetically
+            SciExec(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
+            SciExec(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
+            SciExec(hEdit, SCI_AUTOCSHOW, 0, strptr(sList))
          else
             sList = ""
          end if
@@ -159,7 +162,7 @@ function ShowTYPEAutocompleteList() as BOOLEAN
    hEdit = pDoc->hWindow
    
    ' Retrieve the position
-   curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+   curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
 
 '   ' Retrieve the TYPE variable name
 '   buffer = TRIM(pDoc->GetWord(curPos - 1))

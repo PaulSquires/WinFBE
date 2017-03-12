@@ -105,21 +105,20 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
  
    If fAddChildren Then
       dim wszText as wstring * MAX_PATH
-      dim as STRING sAllFunctions, sFunctionName
-      dim as string sFilename = ucase(pDoc->DiskFilename)
       dim as HTREEITEM hNode
-      if gFunctionLists.FindItem(sFilename) then
-         ' Parse the function names and add them to the list box
-         sAllFunctions = gFunctionLists.FoundData1
-         if len(sAllFunctions) THEN
-            dim as long nParseCount = AfxStrParseCount(sAllFunctions, DELIM)
-            for p as long = 1 to nParseCount
-               sFunctionName = AfxStrParse(sAllFunctions, p, DELIM)
-               hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, sFunctionName, 0 )
-               Treeview_RemoveCheckBox(hTree, hNode)
-            NEXT
-         end if
-      end if
+      dim pData as DBENGINE_DATA ptr
+      dim as string sFilename = ucase(pDoc->DiskFilename)
+      
+      gdb.dbRewind()
+      do 
+         pData = gdb.dbGetNext
+         if pData = 0 THEN exit do
+         if pData->dataType <> DB_FUNCTION_NAME THEN continue do
+         if sFilename = ucase(pData->DiskFilename) THEN
+            hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->data1, 0 )
+            Treeview_RemoveCheckBox(hTree, hNode)
+         END IF
+      loop
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
    

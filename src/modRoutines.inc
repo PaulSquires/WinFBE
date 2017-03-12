@@ -56,22 +56,22 @@ End Function
 '   Next 
 'End Sub
 
-' ========================================================================================
-' Simple Insertion sort to sort function names before displaying them (case insensitive)
-' ========================================================================================
-Sub InsertionSort( MyArray() As String )
-   dim as long lb = LBound(myArray)
-   dim as long ub = Ubound(myArray)
-   for startIndex as long = lb + 1 to ub 'establish starting index of each pass
-      for index as long = startIndex to lb + 1 step -1
-         if (ucase(myArray(index)) < ucase(myArray(index-1))) then   'REVERSE TO SORT DECENDING
-            swap myArray(index), myArray(index-1)
-         else
-            exit for
-         end if
-      next 
-   next 
-end sub
+'' ========================================================================================
+'' Simple Insertion sort to sort function names before displaying them (case insensitive)
+'' ========================================================================================
+'Sub InsertionSort( MyArray() As String )
+'   dim as long lb = LBound(myArray)
+'   dim as long ub = Ubound(myArray)
+'   for startIndex as long = lb + 1 to ub 'establish starting index of each pass
+'      for index as long = startIndex to lb + 1 step -1
+'         if (ucase(myArray(index)) < ucase(myArray(index-1))) then   'REVERSE TO SORT DECENDING
+'            swap myArray(index), myArray(index-1)
+'         else
+'            exit for
+'         end if
+'      next 
+'   next 
+'end sub
 
 
 ' ========================================================================================
@@ -129,9 +129,11 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
       wszText = pDoc->DiskFilename
       nLineNumber = 0
    else 
-      if gFunctionDeclares.FindItem(str(ucase(wszFunctionName))) then
-         wszText = gFunctionDeclares.FoundData2  ' full filename
-         nLineNumber = val(gFunctionDeclares.FoundData3)
+      dim pData as DBENGINE_DATA ptr
+      pData = gdb.dbFindFunctionName( str(wszFunctionName) ) 
+      if pData then
+         wszText = pData->DiskFilename
+         nLineNumber = pData->nLineNum
       end if
    end if   
    
@@ -148,8 +150,8 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
-      SendMessage( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
-      SendMessage( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
+      SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
+      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
    END IF
    
    function = 0
@@ -455,10 +457,6 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
 
 End Function
 
-'function paul() as LONG
-'function = 0
-'   
-'END function
 
 ' ========================================================================================
 ' Displays the FileSaveDialog
@@ -536,8 +534,8 @@ End Function
 ' ========================================================================================
 Function FF_Toolbar_EnableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
    ' Only enable the button if it is not already enabled. This should help reduce flicker.
-   If SendMessageW(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) = 0 Then
-      Function = SendMessageW(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(CTRUE, 0)))
+   If SendMessage(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) = 0 Then
+      Function = SendMessage(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(CTRUE, 0)))
    End If   
 End Function
 ' ========================================================================================
@@ -548,8 +546,8 @@ End Function
 ' ========================================================================================
 Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
    ' Only disable the button if it is not already disabled. This should help reduce flicker.
-   If SendMessageW(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) Then
-      Function = SendMessageW(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(False, 0)))
+   If SendMessage(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) Then
+      Function = SendMessage(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(False, 0)))
    End If
 End Function
 
@@ -583,10 +581,10 @@ Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, _
   
    If iColumn = 0 Then
       lvi.mask = LVIF_TEXT Or LVIF_PARAM Or LVIF_IMAGE 
-      Function = SendMessageW( hWndControl, LVM_INSERTITEM, 0, Cast(LPARAM, @lvi) )
+      Function = SendMessage( hWndControl, LVM_INSERTITEM, 0, Cast(LPARAM, @lvi) )
    Else 
       lvi.mask = LVIF_TEXT Or LVIF_IMAGE
-      Function = SendMessageW( hWndControl, LVM_SETITEM, 0, Cast(LPARAM, @lvi) )
+      Function = SendMessage( hWndControl, LVM_SETITEM, 0, Cast(LPARAM, @lvi) )
    End If
 End Function
 
@@ -618,7 +616,7 @@ Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, _
    lvi.pszText    = pwszText
    lvi.cchTextMax = nTextMax
        
-   Function = SendMessageW( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @lvi) )
+   Function = SendMessage( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @lvi) )
 End Function
 
 
@@ -716,6 +714,42 @@ Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
    Close #f
 
    Function = True
+End Function
+
+
+''
+''
+Function CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
+
+   dim pDoc as clsDocument ptr
+   dim pData as DBENGINE_DATA ptr
+   
+   dim as long idx = gApp.GetActiveProjectIndex()
+
+   dim as long f = Freefile
+   Open sFilename For Output As #f
+
+   gdb.dbRewind()
+   do 
+      pData = gdb.dbGetNext()
+      if pData = 0 THEN exit do
+      if pData->dataType <> DB_FUNCTION_NAME THEN continue do
+
+      ' data1 = Function name.
+      ' data2 = Function declare parameter list.
+
+      ' Bypass any declares for Class subs/functions
+      if instr(pData->data1, ".") = 0 THEN
+         if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(pData->DiskFilename)) THEN 
+            Print #f, "Declare " & AfxStrShrink(pData->data2, Chr(32,9,13,10))
+         end if
+      END IF
+
+   loop
+
+   Close #f
+
+   Function = 0
 End Function
 
 

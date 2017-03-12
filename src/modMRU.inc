@@ -260,15 +260,15 @@ Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
       If AfxFileExists(gConfig.MRUProject(i)) = 0 Then
          gConfig.MRUProject(i) = ""
       Else
-         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUProject(i) )
+         AppendMenu( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUProject(i) )
       End If
    Next
    
    If GetMenuItemCount(hSubMenu) = 0 Then
-      AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
+      AppendMenu( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    Else
-      AppendMenuW( hSubMenu, MF_SEPARATOR, 0, "" )
-      AppendMenuW( hSubMenu, MF_STRING, IDM_MRUPROJECTCLEAR, L(225, "Clear this list") )
+      AppendMenu( hSubMenu, MF_SEPARATOR, 0, "" )
+      AppendMenu( hSubMenu, MF_STRING, IDM_MRUPROJECTCLEAR, L(225, "Clear this list") )
    End If
    
    Function = 0

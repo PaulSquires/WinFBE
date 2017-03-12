@@ -131,7 +131,7 @@ Function clsProject.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
    m_arrDocuments(ub) = pDoc
 
    ' Parse the document to create sub/function list
-   ParseDocument(pDoc, "")
+   ParseDocument(gApp.GetActiveProjectIndex, pDoc, "")
    
    Function = 0
 End Function
@@ -149,11 +149,6 @@ Function clsProject.RemoveDocumentFromArray( ByVal idx As Long) As Long
    
    Dim pDoc As clsDocument Ptr = m_arrDocuments(idx)
    
-   ' Remove from hash arrays
-   gFunctionDeclares.DeleteAllData2(ucase(pDoc->DiskFilename))
-   gFunctionLists.DeleteItem(ucase(pDoc->DiskFilename))
-   gTYPES.DeleteAllData2(ucase(pDoc->DiskFilename))
-
    ' remove the document from the array
    For i = idx To ub - 1
       m_arrDocuments(i) = m_arrDocuments(i+1)
@@ -189,13 +184,9 @@ Function clsProject.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    ' If not found then simply exit
    If idx = -1 Then Exit function
    
-   ' Remove any TODO notes related to this document that is
-   ' no longer open or part of the project.
-   for i = lbound(gTODO) to ubound(gTODO)
-      if gTODO(i).sDiskFilename = str(pDoc->DiskFilename) THEN
-         gTODO(i).sDiskFilename = ""
-      END IF
-   NEXT
+   ' Remove all references from the gdb database
+   gdb.dbDelete(pDoc->DiskFilename)
+
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
    
