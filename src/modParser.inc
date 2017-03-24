@@ -109,9 +109,9 @@ Function ParseDocument( byval idx as long, _     ' project index
    
    dim as long nLineCount, nLineNum, nFuncLineNumber
    Dim As String st, st_ucase, sLine, txtDescription, sFuncName, sFuncDeclare
-   dim as string sTypeName, sTypeElements
+   dim as string sTypeName, sTypeElements, sVarName, sVarType
    Dim As Long n, iParen, f, i
-   Dim As BOOLEAN bIsSub, bIsFunction, bInType, bInTypePrivate
+   Dim As BOOLEAN bIsSub, bIsFunction, bInType, bInTypePrivate, bInMultilineComment
    redim as string sLineArray(1000)   ' dynamic array 
    
    ' The incoming document may already be loaded into a clsDocument so we can simply 
@@ -159,10 +159,17 @@ Function ParseDocument( byval idx as long, _     ' project index
             txtDescription = AfxStrParse(sLine, 2, ":") 
             gdb.dbAdd(sFilename, idx, DB_TODO_ITEM, nLineNum + 1, txtDescription, "")
          END IF
-
-         ' Remove any comments (must be after the check for the TODO
-         n = Instr(sLine, "'")
-         If n Then sLine = Left(sLine, n-1)
+         
+         ' Deal with multiline comments
+         if left(ltrim(sLine), 2) = "/'" THEN
+            bInMultilineComment = true
+         else
+            ' Remove any comments (must be after the check for the TODO)
+            if bInMultilineComment = false then
+               n = Instr(sLine, "'")
+               If n Then sLine = Left(sLine, n-1)
+            end if
+         END IF
 
          sLine = Trim(sLine)
          if right(sLine, 1) = "_" THEN
@@ -177,6 +184,12 @@ Function ParseDocument( byval idx as long, _     ' project index
       If Len(st) = 0 Then Continue for
       st_ucase = Ucase(st)
       
+      if bInMultilineComment then
+         if right(rtrim(st), 2) = "'/" THEN
+            bInMultilineComment = false
+         END IF
+         continue for
+      end if   
          
       ' If we are currently processing a TYPE structure then continue
       ' to do so here rather than testing for other declares.
@@ -246,7 +259,36 @@ Function ParseDocument( byval idx as long, _     ' project index
          END IF
       END IF
          
-
+      ' Is this a global shared variable
+      if left(st_ucase, 11) = "DIM SHARED " THEN
+         st = RemoveDuplicateSpaces(st)
+         st = mid(st, 11): st_ucase = ucase(st)
+         ' AS Long var1, var2, var3
+         if left(st_ucase, 3) = "AS " THEN
+            ' the word following is the element type
+            n = instr(4, st_ucase, " ")
+            if n then
+               sVarType = mid(st, n-4+1)
+               ' Maybe the next word is "PTR" or "POINTER"
+               if mid(st_ucase, n + 1, 4) = "PTR " then
+                  n = n + 5
+               elseif mid(st_ucase, n + 1, 8) = "POINTER " then
+                  n = n + 9
+               END IF 
+            END IF
+            ' Next is a list of elements DIM'd as the datatype
+            sVarName = AfxStrReplace(mid(st, n), ", ", DELIM)
+         else
+            ' var1 AS Long
+            n = instr(st_ucase, " AS ") 
+            if n = 0 THEN continue for
+            sVarName = trim(left(st, n-1))
+            sVarType = mid(st, n + 4)
+            gdb.dbAdd(sFilename, idx, DB_DIM_SHARED, 0, sVarName, sVarType)
+         end if
+         continue for
+      end if
+      
       ' Is this an Include file that will need to be parsed? If yes, then
       ' get the filename and do a recursive call to ParseDocument.
       If Left(st_ucase, 9)  = "#INCLUDE " Then

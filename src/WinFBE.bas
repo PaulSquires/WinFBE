@@ -37,7 +37,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.2.5") 
+#Define APPVERSION    WStr("1.3.0") 
 
 
 #Include Once "modScintilla.bi"
@@ -124,6 +124,9 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    
    ' Load the Codetips file
    gConfig.LoadCodetips( Exepath & "\Settings\codetips.ini" )
+
+   ' Load the WinAPI Codetips file
+   gConfig.LoadCodetipsWinAPI( Exepath & "\Settings\codetips_winapi.ini" )
 
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )

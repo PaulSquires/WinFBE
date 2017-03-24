@@ -222,11 +222,12 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          End If
          
       CASE SCN_CHARADDED
-         IF pNSC->ch = 46 THEN   ' "."  Show autocomplete list for TYPE variables
-            IF gConfig.AutoComplete THEN
-               if ShowTYPEAutocompleteList() then exit function
-            end if
-         end if
+         'TODO: Need to complete the TYPE autocomplete logic
+         'IF pNSC->ch = 46 THEN   ' "."  Show autocomplete list for TYPE variables
+         '   IF gConfig.AutoComplete THEN
+         '      if ShowTYPEAutocompleteList() then exit function
+         '   end if
+         'end if
 
          IF pNSC->ch = 40 THEN   ' "("  Show code tip
             if gConfig.CodeTips then ShowCodetip()                
@@ -1221,10 +1222,9 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_GUI, IDM_CONSOLE
          Function = frmMain_MenuSetCompileMode(id)
       
-      
       Case IDM_HELP
          ShowContextHelp() 
-      
+     
 
       Case IDM_ABOUT
          MessageBox( HWnd, APPNAME & vbcrlf & "Version " & APPVERSION & _

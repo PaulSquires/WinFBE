@@ -88,6 +88,59 @@ End Function
 
 
 ''
+''
+Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As Const String ) as boolean
+   Dim as string st, sID, sIdUnicode, sFuncName, sFuncDeclare
+   dim as string sTypeName, sTypeElements
+   Dim as long f, i
+   
+   ''
+   ''  Codetips definition file for WinAPI
+   ''
+   ''  Format:
+   ''  1st character:  U=UNICODE, A=ANSI, B=BOTH
+   ''  2nd character:  F=FUNCTION, T=TYPE
+   ''  3rd character:  colon.
+   ''  TYPE elements are separated by | pipe symbol
+   ''
+   f = Freefile
+   If Open( sFilename For Input As #f ) = 0 Then
+      Do Until Eof(f)
+         Line Input #f, st
+         
+         st = Trim(st)
+         If Len(st) = 0 Then Continue Do
+         
+         i = Instr(st, ":")
+         If i = 0 Then continue do
+         
+         sID = left(st, i - 1)
+         st = mid(st, i + 1)
+         
+         sIdUnicode = mid(sID, 1, 1)
+         select CASE mid(sID, 2, 1)
+            CASE "F"    ' function
+               i = instr(st, "(")
+               sFuncName    = Left(st, i-1)
+               sFuncDeclare = st
+               gdb.dbAdd("", -1, DB_FUNCTION_NAME, 0, sFuncName, sFuncDeclare, sIdUnicode)
+            case "T"     ' type
+               i = instr(st, "|")
+               sTypeName     = Left(st, i-1)
+               stypeElements = mid(st, i + 1)
+               gdb.dbAdd("", -1, DB_TYPE_NAME, 0, sTypeName, sTypeElements, sIdUnicode)
+         END SELECT
+  
+      Loop
+      Close #f
+      return false
+   End If
+
+   Function = true   ' error
+End Function
+      
+
+''
 ''  SAVE CONFIGURATION TO DISK FILE
 ''
 Function clsConfig.SaveToFile() as Long

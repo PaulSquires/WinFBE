@@ -477,6 +477,7 @@ Type clsConfig
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
       declare Function LoadCodetips( ByRef sFilename As Const String ) as boolean
+      declare Function LoadCodetipsWinAPI( ByRef sFilename As Const String ) as boolean
 End Type
 
 

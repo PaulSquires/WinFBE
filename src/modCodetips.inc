@@ -56,7 +56,7 @@ function ShowCodetip() as BOOLEAN
    dim pDoc as clsDocument ptr
    dim pData as DBENGINE_DATA ptr
 
-   dim as string buffer
+   dim as string buffer, codeTip
    dim as long curPos, tipPos, i
 
    pDoc = gTTabCtl.GetActiveDocumentPtr()
@@ -73,10 +73,11 @@ function ShowCodetip() as BOOLEAN
       pData = gdb.dbFindFunctionName(buffer)
       if pData THEN
          ' Codetip is stored in data2
-         SciExec( pDoc->hWindow, SCI_CALLTIPSHOW, tipPos - LEN(buffer), strptr(pData->data2))
+         codeTip = FormatCodetip(pData->data2)
+         SciExec( pDoc->hWindow, SCI_CALLTIPSHOW, tipPos - LEN(buffer), strptr(codeTip))
          return TRUE
       END IF
-      
+       
       'TODO: Search the WinAPI declares if this is a Windows api program (ie. "windows.bi" exists)
       'TODO: Search depending on whether gApp.IsUnicodeCodetips is TRUE/FALSE
       
@@ -103,7 +104,7 @@ function ShowAutocompleteList() as BOOLEAN
    hEdit = pDoc->hWindow
    
    ' Retrieve the position
-   curPos = SendMessage(hEdit, SCI_GETCURRENTPOS, 0, 0)
+   curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
 
    ' Retrieve the word
    buffer = TRIM(pDoc->GetWord(curPos - 1))
@@ -154,37 +155,45 @@ function ShowTYPEAutocompleteList() as BOOLEAN
    dim as long curPos, nCount, i
    dim as string buffer
    static as string sList
+
+   dim pData as DBENGINE_DATA ptr
    dim pDoc as clsDocument ptr
    
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then exit function
 
    hEdit = pDoc->hWindow
-   
+     
    ' Retrieve the position
    curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-
-'   ' Retrieve the TYPE variable name
-'   buffer = TRIM(pDoc->GetWord(curPos - 1))
-'   IF LEN(buffer) THEN
-'      if SendMessage(hEdit, SCI_AUTOCACTIVE, 0, 0) then
-'         SendMessage(hEdit, SCI_AUTOCSHOW, len(buffer), cast(LPARAM, strptr(sList)))
-'      else
-'         ' Need to determine what TYPE this variable was DIM'd as.
-'         
-'         if gTYPES.FindItem("SCI_RANGETOFORMAT") then
-'            ' Create the space separated data type list
-'            sList = AfxStrReplace( gTYPES.FoundData1, "|", " " )
-'            ' If an autocomplete list is already active then continue to search the list
-'            SendMessage(hEdit, SCI_AUTOCSETORDER, 1, 0)  ' List must be sorted alphabetically
-'            SendMessage(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
-'            SendMessage(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
-'            SendMessage(hEdit, SCI_AUTOCSHOW, 0, cast(LPARAM, strptr(sList)))
-'         else
-'            sList = ""
-'         end if
-'      end if
-'   END IF
+    
+   ' Retrieve the TYPE variable name
+   buffer = TRIM(pDoc->GetWord(curPos - 1), any " .")
+   IF LEN(buffer) THEN
+      if SendMessage(hEdit, SCI_AUTOCACTIVE, 0, 0) then
+         SendMessage(hEdit, SCI_AUTOCSHOW, len(buffer), cast(LPARAM, strptr(sList)))
+      else
+         ' Need to determine what TYPE this variable was DIM'd as.
+         ' Look up the variable
+         pData = gdb.dbFindVariableName(buffer)
+         if pData THEN
+            pData = gdb.dbFindTypeName(pData->data2)
+            if pData THEN
+               ' Create the space separated data type list
+               'sList = AfxStrReplace(pData->data2, DB_DELIM, " ")
+               sList = pData->data2
+               ' If an autocomplete list is already active then continue to search the list
+               SciExec(hEdit, SCI_AUTOCSETSEPARATOR, 124, 0)  ' Pipe symbol as separator
+               SciExec(hEdit, SCI_AUTOCSETORDER, 1, 0)  ' List must be sorted alphabetically
+               SciExec(hEdit, SCI_AUTOCSETIGNORECASE, 1, 0)
+               SciExec(hEdit, SCI_AUTOCSETMAXHEIGHT, 15, 0)
+               SciExec(hEdit, SCI_AUTOCSHOW, 0, strptr(sList))
+            else
+               sList = ""
+            end if
+         END IF
+      end if
+   END IF
 
    function = FALSE
 END FUNCTION

@@ -8,7 +8,7 @@ const DB_FUNCTION_NAME    = 1
 const DB_TYPE_NAME        = 2
 const DB_TODO_ITEM        = 3
 const DB_FILENAME_PARSE   = 4
-
+const DB_DIM_SHARED       = 5
 
 type DBENGINE_DATA
    deleted      as BOOLEAN = true  ' True/False
@@ -18,6 +18,7 @@ type DBENGINE_DATA
    diskFilename as string          ' Full disk filename
    data1        as string          ' Value dependant on DataType
    data2        as string          ' Value dependant on DataType
+   idUnicode    as string          ' U, A, B  (unicode, ansi, both)
 END TYPE
 
 TYPE clsDBEngine
@@ -31,15 +32,20 @@ TYPE clsDBEngine
                               byref DataType as long, _
                               byref nLineNum as long, _
                               byref Data1    as string, _
-                              byref Data2    as string ) as LONG
+                              byref Data2    as string, _
+                              byref idUnicode    as string = "" _
+                              ) as LONG
       declare function dbDelete( byref Diskfilename as string ) as boolean
       declare function dbDeleteByProject( byval idx as long ) as boolean
       declare function dbRewind() as LONG
       declare function dbGetNext() as DBENGINE_DATA ptr
       declare function dbFindFunctionName( byref sFunctionName as string ) as DBENGINE_DATA ptr
+      declare function dbFindVariableName( byref sVariableName as string ) as DBENGINE_DATA ptr
+      declare function dbFindTypeName( byref sTypeName as string ) as DBENGINE_DATA ptr
       declare function dbFilenameExists( byref sFilename as string ) as boolean
 
       declare function dbDebug() as long
+      declare function dbStats() as long
       declare constructor
 END TYPE
 
@@ -61,11 +67,15 @@ END TYPE
 '    Data1    = Description.
 '    Data2    = Not used.
 
+' Shared global variable
+'    DataType = DB_DIM_SHARED
+'    Data1    = Variable name.
+'    Data2    = TYPE name related to variable. 
 
 ''
 ''
 constructor clsDBEngine
-   redim m_arrData(100) as DBENGINE_DATA
+   redim m_arrData(500) as DBENGINE_DATA
    this.dbRewind
 end constructor
 
@@ -76,7 +86,8 @@ function clsDBEngine.dbAdd( byref DiskFilename as string, _
                             byref DataType     as long, _
                             byref nLineNum     as long, _
                             byref Data1        as string, _
-                            byref Data2        as string _
+                            byref Data2        as string, _
+                            byref idUnicode    as string = "" _
                             ) as LONG
    
    dim as long nSlot = -1
@@ -91,7 +102,7 @@ function clsDBEngine.dbAdd( byref DiskFilename as string, _
    ' If no slot found then resize the array to make room
    if nSlot = -1 THEN
       nSlot = ubound(m_arrData) + 1
-      redim preserve m_arrData(nSlot) as DBENGINE_DATA
+      redim preserve m_arrData(nSlot+100) as DBENGINE_DATA
    END IF
    
    with m_arrData(nSlot)
@@ -102,6 +113,7 @@ function clsDBEngine.dbAdd( byref DiskFilename as string, _
       .nLineNum     = nLineNum
       .data1        = Data1
       .data2        = Data2
+      .idUnicode    = idUnicode
    end with
    
    function = nSlot               
@@ -175,6 +187,42 @@ end function
 
 ''
 ''
+function clsDBEngine.dbFindVariableName( byref sVariableName as string ) as DBENGINE_DATA ptr
+   ' Find the array element that contains the variable name beng searched for
+   dim pData as DBENGINE_DATA ptr
+   this.dbRewind()
+   do 
+      pData = this.dbGetNext()
+      if pData = 0 THEN exit do
+      if pData->dataType = DB_DIM_SHARED THEN
+         if _stricmp(sVariableName, pData->data1) = 0 THEN
+            return @m_arrData(m_index)
+         END IF
+      END IF
+   loop
+   function = 0
+end function
+
+''
+''
+function clsDBEngine.dbFindTypeName( byref sTypeName as string ) as DBENGINE_DATA ptr
+   ' Find the array element that contains the variable name beng searched for
+   dim pData as DBENGINE_DATA ptr
+   this.dbRewind()
+   do 
+      pData = this.dbGetNext()
+      if pData = 0 THEN exit do
+      if pData->dataType = DB_TYPE_NAME THEN
+         if _stricmp(sTypeName, pData->data1) = 0 THEN
+            return @m_arrData(m_index)
+         END IF
+      END IF
+   loop
+   function = 0
+end function
+
+''
+''
 function clsDBEngine.dbFilenameExists( byref sFilename as string ) as boolean
    ' Search to see if the incoming filename has already been parsed.
    dim pData as DBENGINE_DATA ptr
@@ -214,6 +262,47 @@ function clsDBEngine.dbDebug() as long
    close #f
    function = 0
 end function
+
+''
+''
+function clsDBEngine.dbStats() as long
+   dim as long numTotal, numDeleted, numActive 
+   dim as long numKeywords, numFunctions, numTYPEs
+   dim as long numToDo, numFilenames
+   
+   for i as long = lbound(m_arrData) to ubound(m_arrData)
+      numTotal += 1
+      if m_arrData(i).deleted THEN 
+         numDeleted += 1
+      else
+         numActive += 1
+         select CASE m_arrData(i).dataType
+            case DB_FUNCTION_NAME 
+               if m_arrData(i).projectIndex = -1 then
+                  numKeywords += 1
+               else   
+                  numFunctions += 1
+               end if   
+            case DB_TYPE_NAME     :  numTYPEs += 1  
+            case DB_TODO_ITEM     :  numToDo += 1 
+            case DB_FILENAME_PARSE:  numFilenames += 1 
+            CASE ELSE
+         END SELECT
+      END IF
+   next
+
+   print "gdb stats"
+   print "numTotal = "; numTotal
+   print "numDeleted = "; numDeleted
+   print "numActive = "; numActive
+   print "numKeywords = "; numKeywords
+   print "numFunctions = "; numFunctions
+   print "numTYPEs = "; numTYPEs
+   print "numToDo = "; numToDo
+   print "numFilenames = "; numFilenames
+
+   function = 0
+END FUNCTION
 
 
 dim shared gdb as clsDBEngine
