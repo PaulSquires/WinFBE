@@ -53,10 +53,11 @@ Function frmFnList_UpdateListBox() As Long
    Dim As HTREEITEM hChild, hParent
    dim as long p, pDoc, idx
    dim wszText as wstring * MAX_PATH
-
+   
+   dim as long nFirstProject = iif(gApp.IsProjectActive, 1, 0)
    Dim As Long nProjectCount = gApp.GetProjectCount()
    
-   For idx = 0 To nProjectCount 
+   For idx = nFirstProject To nProjectCount 
       if gApp.Projects(idx).InUse = false THEN continue for
 
       hParent = Treeview_GetChild( hTree, gApp.Projects(gApp.GetActiveProjectIndex).hExplorerRootNode)
