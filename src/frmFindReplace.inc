@@ -360,7 +360,6 @@ Function frmFindReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
             frmFindReplace_SetButtonStates
             AfxRedrawWindow( hWnd )
          elseif (codeNotify = EN_SETFOCUS) then
-            'frmFindReplace_HighlightSearches
             frmFindReplace_SetButtonStates
             AfxRedrawWindow( hWnd )
          end if
@@ -438,7 +437,7 @@ Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
    SaveDC hDC
 
    SelectObject( hDC, GetStockObject( NULL_BRUSH ) )
-
+ 
    ' Outline the dialog with a dull gray pen
    hPen = CreatePen( PS_SOLID, 1, GetSysColor(COLOR_ACTIVEBORDER) )
    SelectPen( hDC, hPen )
@@ -455,13 +454,16 @@ Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
  
    ' Paint a null brushed rectangle around the control that has focus.
    hCtl = GetFocus()
-   GetWindowRect(hCtl, @rc)
-   ' If this is the Find textbox then extend it to cover the two embedded icons.
-   if hCtl = GetDlgItem(HWND, IDC_FRMFINDREPLACE_TXTFIND) THEN
-      rc.right = rc.right + pWindow->ScaleX(44)
+   if hCtl THEN
+      GetWindowRect(hCtl, @rc)
+      ' If this is the Find textbox then extend it to cover the two embedded icons.
+      if hCtl = GetDlgItem(HWND, IDC_FRMFINDREPLACE_TXTFIND) THEN
+         rc.right = rc.right + pWindow->ScaleX(44)
+      END IF
+      SelectObject( hDC, GetSysColorBrush(COLOR_3DFACE) )
+      MapWindowPoints( HWND_DESKTOP, HWND, CAST(LPPOINT, @rc), 2)
+      Rectangle(hDC, rc.left - 1, rc.top - 1, rc.right + 1, rc.bottom + 1)
    END IF
-   MapWindowPoints( HWND_DESKTOP, HWND, CAST(LPPOINT, @rc), 2)
-   Rectangle(hDC, rc.left - 1, rc.top - 1, rc.right + 1, rc.bottom + 1)
    
    RestoreDC hDC, -1 
    DeletePen(hPen)
@@ -692,6 +694,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    
    hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND )
    if len(AfxGetWindowText(hCtl)) then Edit_SetSel(hCtl, 0, -1)
+   frmFindReplace_HighlightSearches
    SetFocus hCtl 
 
    Function = 0

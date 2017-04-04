@@ -35,7 +35,7 @@ TYPE clsDBEngine
                               byref Data2    as string, _
                               byref idUnicode    as string = "" _
                               ) as LONG
-      declare function dbDelete( byref Diskfilename as string ) as boolean
+      declare function dbDelete( byref Diskfilename as string ) as long
       declare function dbDeleteByProject( byval idx as long ) as boolean
       declare function dbRewind() as LONG
       declare function dbGetNext() as DBENGINE_DATA ptr
@@ -121,14 +121,16 @@ end function
 
 ''
 ''
-function clsDBEngine.dbDelete( byref Diskfilename as string ) as boolean
+function clsDBEngine.dbDelete( byref Diskfilename as string ) as long
+   dim nCount as long 
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted = true then continue for
       if _stricmp(m_arrData(i).diskFilename, DiskFilename) = 0 THEN
          m_arrData(i).deleted = true
-         function = true
+         nCount = nCount + 1
       END IF   
    NEXT
+   function = nCount
 end function
 
 ''

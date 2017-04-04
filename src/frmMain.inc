@@ -834,6 +834,7 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
    ' Ensure that the Tab displays the correct filename in case it was changed
    gTTabCtl.SetTabText(-1)
    frmMain_SetFocusToCurrentCodeWindow
+   AddFunctionsToExplorerTreeview(pDoc, true)
    frmFnList_UpdateListBox()
 
    Function = 0
