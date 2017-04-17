@@ -669,7 +669,7 @@ Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
    ' default that the file failed to load
    Function = False
    If pwszName = 0 Then Exit Function
-   If Dir(*pwszName) = "" Then Exit Function
+   If AfxFileExists(*pwszName) = 0 Then Exit Function
 
    Dim st    As WString * MAX_PATH
    Dim wKey  As WString * MAX_PATH
