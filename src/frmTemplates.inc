@@ -156,7 +156,7 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    DIM hSearch as HANDLE, WFD AS WIN32_FIND_DATAW, FileNo AS LONG, nType AS LONG, nItem AS LONG
    DIM wszPath AS WSTRING * MAX_PATH, wszCurPath AS WSTRING * MAX_PATH, wszText AS WSTRING * 260
    DIM wszFullPath AS WSTRING * MAX_PATH * 2, idx AS LONG, nLin AS LONG
-   wszPath = ExePath & "\Templates\"
+   wszPath = AfxGetExePathName & "\Templates\"
    wszCurPath = wszPath & "*.fbtpl"
 
    ' // Count the number of files and dimension the array

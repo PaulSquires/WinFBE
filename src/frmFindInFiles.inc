@@ -191,7 +191,7 @@ function DoFindInFilesEx() as LONG
    ' What folder to start searching in
    gFindInFiles.txtFolder = str(trim(AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER) )))
    if len(gFindInFiles.txtFolder) = 0 THEN 
-      gFindInFiles.txtFolder = exepath
+      gFindInFiles.txtFolder = AfxGetExePathName
       AfxSetWindowText(GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER), gFindInFiles.txtFolder)
    end if
    frmFindInFiles_AddToFolderCombo(gFindInFiles.txtFolder)
@@ -248,7 +248,7 @@ function DoFindInFilesEx() as LONG
    'FINDSTR [/B] [/E] [/L] [/R] [/S] [/I] [/X] [/V] [/N] [/M] [/O] [/P] [/F:file]
    '        [/C:string] [/G:file] [/D:dir list] [/A:color attributes] [/OFF[LINE]]
    '        strings [[drive:][path]filename[ ...]]
-   wszResults = wstr(exepath & "\_search.txt")
+   wszResults = wstr(AfxGetExePathName & "\_search.txt")
    if AfxFileExists(wszResults) then kill wszResults
    if instr(wszResults, " ") THEN wszResults = chr(34) & wszResults & chr(34)
    wszFileExe = WSTR("FindStr.exe")  
@@ -256,7 +256,7 @@ function DoFindInFilesEx() as LONG
                  " " & **sSearchFiles & " >> " & wszResults
 
    dim f as long = freefile
-   wszBatchFile = wstr(exepath & "\_search.bat")
+   wszBatchFile = wstr(AfxGetExePathName & "\_search.bat")
    ' Open filename does not use enclosing quotes
    Open wszBatchFile For Output as #f
    print #f, wszFileExe & " " & wszParam
@@ -475,7 +475,7 @@ Function frmFindInFiles_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
          If codeNotify = BN_CLICKED Then
             static wszStartFolder as CWSTR
             dim wszFolder as CWSTR
-            if len(wszStartFolder) = 0 then wszStartFolder = exepath & "\"
+            if len(wszStartFolder) = 0 then wszStartFolder = AfxGetExePathName
             wszFolder = AfxBrowseForFolder( HWND_FRMFINDINFILES, L(261,"Choose the folder to search in:"), wszStartFolder )
             if len(wszFolder) then
                AfxSetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER), wszFolder)
@@ -650,7 +650,7 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
       if gApp.IsProjectActive THEN
          sFolder = AfxStrPathName("PATH", gApp.Projects(gApp.GetActiveProjectIndex).ProjectFilename)
       else
-         sFolder = exepath 
+         sFolder = AfxGetExePathName 
       END IF
    end if
    frmFindInFiles_AddToFolderCombo(sFolder)

@@ -2,6 +2,7 @@ Version 1.3.2 (Not released yet)
 - Fixed: Find dialog was not showing number of matches when word highlighted in code editor and then Find dialog displayed.
 - Fixed: Repaint issue with Find/Replace dialog.
 - Fixed: Newly added subs/functions not being added to Function List when file was saved.
+- Changed: Replaced all occurrences of DIR(), CURDIR(), EXEPATH() with Afx versions in order to better handle unicode languages.
 
 Version 1.3.1 (March 29, 2017)
 - Fixed: Regression with Function List showing two copies of all subs/functions contained in loaded files.

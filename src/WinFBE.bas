@@ -96,7 +96,7 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
 
    ' Load the selected localization file
    dim wszLocalizationFile as WString * MAX_PATH
-   wszLocalizationFile = Exepath + wstr("\Languages\") + gConfig.LocalizationFile
+   wszLocalizationFile = AfxGetExePathName + wstr("\Languages\") + gConfig.LocalizationFile
    If LoadLocalizationFile(@wszLocalizationFile) = False Then
       MessageBoxW( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
                    wszLocalizationFile, _
@@ -125,10 +125,10 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    gpHelpLib = DyLibLoad( "hhctrl.ocx" )
    
    ' Load the Codetips file
-   gConfig.LoadCodetips( Exepath & "\Settings\codetips.ini" )
+   gConfig.LoadCodetips( AfxGetExePathName & "\Settings\codetips.ini" )
 
    ' Load the WinAPI Codetips file
-   gConfig.LoadCodetipsWinAPI( Exepath & "\Settings\codetips_winapi.ini" )
+   gConfig.LoadCodetipsWinAPI( AfxGetExePathName & "\Settings\codetips_winapi.ini" )
 
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )

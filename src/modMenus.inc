@@ -545,10 +545,10 @@ Function CreateScintillaContextMenu() As HMENU
          gApp.IncludeFilename = wPath & sFilename
       ElseIf AfxFileExists(sFilename) Then 
          gApp.IncludeFilename = sFilename
-      ElseIf AfxFileExists(Curdir & "\" & sFilename) Then 
-         gApp.IncludeFilename = Curdir & "\" & sFilename
-      ElseIf AfxFileExists(Exepath & "\" & sFilename) Then 
-         gApp.IncludeFilename = Exepath & "\" & sFilename
+      ElseIf AfxFileExists(AfxGetCurDir & "\" & sFilename) Then 
+         gApp.IncludeFilename = AfxGetCurDir & "\" & sFilename
+      ElseIf AfxFileExists(AfxGetExePathName & "\" & sFilename) Then 
+         gApp.IncludeFilename = AfxGetExePathName & "\" & sFilename
       ElseIf AfxFileExists(Str(wCompilerPath) & "\" & sFilename) Then 
          gApp.IncludeFilename = Str(wCompilerPath) & "\" & sFilename
       End If

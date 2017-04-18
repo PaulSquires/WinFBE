@@ -323,7 +323,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
-   If Dir(gConfig.LastRunFilename) > "" Then
+   If AfxFileExists(gConfig.LastRunFilename) Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
@@ -502,20 +502,20 @@ Function CreateScintillaContextMenu() As HMENU
       sFilename = Trim(sFilename, Any Chr(32,34))  ' remove spaces and double quotes
       wPath = AfxStrPathname( "PATH", *pDoc->DiskFilename )
 
-      If Dir(wPath & sFilename) > "" Then 
+      If AfxFileExists(wPath & sFilename) Then 
          gpApp->IncludeFilename = wPath & sFilename
-      ElseIf Dir(sFilename) > "" Then 
+      ElseIf AfxFileExists(sFilename) Then 
          gpApp->IncludeFilename = sFilename
-      ElseIf Dir(Curdir & "\" & sFilename) > "" Then 
-         gpApp->IncludeFilename = Curdir & "\" & sFilename
-      ElseIf Dir(Exepath & "\" & sFilename) > "" Then 
-         gpApp->IncludeFilename = Exepath & "\" & sFilename
-      ElseIf Dir(Str(wCompilerPath) & "\" & sFilename) > "" Then 
+      ElseIf AfxFileExists(AfxGetCurDir & "\" & sFilename) Then 
+         gpApp->IncludeFilename = AfxGetCurDir & "\" & sFilename
+      ElseIf AfxFileExists(AfxGetExePathName & "\" & sFilename) Then 
+         gpApp->IncludeFilename = AfxGetExePathName & sFilename
+      ElseIf AfxFileExists(Str(wCompilerPath) & "\" & sFilename) Then 
          gpApp->IncludeFilename = Str(wCompilerPath) & "\" & sFilename
       End If
       gpApp->IncludeFilename = AfxStrReplace(gpApp->IncludeFilename, "/", "\")
       
-      If Dir(**gpApp->IncludeFilename) > "" Then        
+      If AfxfFileExists(gpApp->IncludeFilename) Then        
          AppendMenuW hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") & Chr(32, 34) & gpApp->IncludeFilename & Chr(34)
          AppendMenuW hPopupMenu, MF_SEPARATOR, 0, ""
       End If

@@ -20,7 +20,7 @@
 ''  CONSTRUCTOR
 ''
 Constructor clsConfig
-   _ConfigFilename = Exepath & "\Settings\WinFBE.ini" 
+   _ConfigFilename = AfxGetExePathName & "\Settings\WinFBE.ini" 
    this.LoadKeywords
 End Constructor
 
@@ -31,7 +31,7 @@ Function clsConfig.LoadKeywords() as Long
    Dim st as String 
    Dim f  as Long = Freefile
    
-   If Open( Exepath & "\Settings\freebasic_keywords.txt" For Input As #f) = 0 Then
+   If Open( AfxGetExePathName & "\Settings\freebasic_keywords.txt" For Input As #f) = 0 Then
       this.FBKeywords  = ""
       Do Until EOF(f)
          Line Input #f, st
@@ -49,7 +49,7 @@ End Function
 Function clsConfig.SaveKeywords() As Long
    Dim f As Long = Freefile
    
-   If Open( Exepath & "\Settings\freebasic_keywords.txt" For Output As #f) = 0 Then
+   If Open( AfxGetExePathName & "\Settings\freebasic_keywords.txt" For Output As #f) = 0 Then
       Print #f, this.FBKeywords
       Close #f
    End If
@@ -290,7 +290,7 @@ Function clsConfig.LoadFromFile() as Long
    Dim i     as Long
    dim bReadingNote as Boolean
 
-   If Dir(_ConfigFilename) = "" Then Exit Function
+   If AfxFileExists(_ConfigFilename) = 0 Then Exit Function
     
    Dim f as Long = Freefile
    If Open( _ConfigFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function

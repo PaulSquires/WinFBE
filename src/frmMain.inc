@@ -146,7 +146,7 @@ Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
        
        ' If no path exists for the file then add the current folder
        wszPath = AfxStrPathname( "PATH", wszArg )
-       If Len(wszPath) = 0 Then wszArg = ExePath & "\" & wszArg 
+       If Len(wszPath) = 0 Then wszArg = AfxGetExePathName & wszArg 
        
        If AfxFileExists(wszArg) Then
           ' We have a valid filename so determine what type it is.

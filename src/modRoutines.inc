@@ -171,7 +171,7 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    if AfxFileExists(gApp.Projects(idx).ProjectFilename) Then
       zText = gApp.Projects(idx).ProjectFilename
    else
-      zText = exepath
+      zText = AfxGetExePathName
    end if      
    Dim wzCurDrive As CWSTR = LCase(Left(**zText, 3))  ' eg. D:\
 
@@ -197,7 +197,7 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    if AfxFileExists(gApp.Projects(idx).ProjectFilename) Then
       zText = gApp.Projects(idx).ProjectFilename
    else
-      zText = exepath
+      zText = AfxGetExePathName
    end if      
    If Ucase(Left(**wzFilename, 10)) = WSTR("{CURDRIVE}") Then 
       wzFilename = Left(**zText, 1) & Mid(wzFilename, 11)
@@ -436,7 +436,7 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
    hr = pofd->lpVtbl->SetTitle(pofd, L(106,"Open source file"))
    ' Set the default folder
    Dim pFolder As IShellItem Ptr
-   SHCreateItemFromParsingName (Exepath, Null, @IID_IShellItem, @pFolder)
+   SHCreateItemFromParsingName (AfxGetExePathName, Null, @IID_IShellItem, @pFolder)
    If pFolder Then
       pofd->lpVtbl->SetDefaultFolder(pofd, pFolder)
       pFolder->lpVtbl->Release(pFolder)
@@ -504,7 +504,7 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
 
    ' // Set the default folder
    Dim pFolder As IShellItem Ptr
-   SHCreateItemFromParsingName (Exepath, Null, @IID_IShellItem, @pFolder)
+   SHCreateItemFromParsingName (AfxGetExePathName, Null, @IID_IShellItem, @pFolder)
    If pFolder Then
       psfd->lpVtbl->SetDefaultFolder(psfd, pFolder)
       pFolder->lpVtbl->Release(pFolder)
