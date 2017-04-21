@@ -113,6 +113,36 @@ end function
 
 
 ' ========================================================================================
+' Open a disk file and read it into a string (ANSI or UTF8)
+' ========================================================================================
+function GetFileToString( byref sFilename as string, byref txtBuffer as string, byval bUTFencoding as Boolean ) as boolean
+   Dim as string st
+   dim as long f = freefile
+   
+   if bUTFencoding THEN
+      Open sFilename for input Encoding "utf8" As #f 
+      if Err > 0 then return true  ' error opening file
+      do until eof(f)
+         line input #f, st 
+         txtBuffer = txtBuffer & st & vbcrlf
+      loop
+   else   
+      If Open( sFilename for Binary Access Read As #f ) = 00 Then 
+         If LOF(f) > 0 Then
+            txtBuffer = String(LOF(f), 0)
+            Get #f, ,txtBuffer
+         End If
+      else
+         return true  ' error opening file
+      end if   
+   END IF
+      
+   Close #f
+
+   function = false
+END FUNCTION
+
+' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
 ' ========================================================================================
 function OpenSelectedDocument( byval pDoc as clsDocument ptr, _

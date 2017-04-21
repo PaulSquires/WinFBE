@@ -104,16 +104,8 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             this.FindReplace( "|", "" )
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
          Else
-            dim cText as CTextStream
-            if cText.Open(*pwszFile, IOMODE_FORREADING) = 0 then
-               sText = cText.ReadAll()
-               cText.Close
-               if len(sText) > 2 THEN  ' or will GPF
-                  If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-                     sText = Mid(sText, 3)
-                     sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-                  End If   
-               END IF
+            dim sText as string
+            if GetFileToString(*pwszFile, sText, gConfig.UnicodeEncoding) = false then
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
             else
@@ -228,15 +220,20 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
   
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
-   dim cText as CTextStream
-   if cText.Open(wFilename, IOMODE_FORWRITING, true) = 0 then
-      Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-      cText.Write( *psz )
-      cText.Close
-   else
+   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+   f = freefile
+   if gConfig.UnicodeEncoding THEN
+      Open wFilename for output Encoding "utf8" As #f 
+   else   
+      Open wFilename for output As #f 
+   END IF
+   if Err > 0 then 
       ' error saving file
       print "Error saving file: "; wFilename
+   else
+      print #f, *psz 
    end if   
+   close #f
 
    this.DiskFilename = wFilename
    this.DateFileTime = AfxGetFileLastWriteTime( wFilename )

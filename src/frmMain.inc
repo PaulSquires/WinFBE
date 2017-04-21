@@ -1414,27 +1414,19 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
                ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
 
                If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
-                  'gTTabCtl.SetTabIndexByDocumentPtr(pDoc)
                   OpenSelectedDocument( pDoc, "" )
 
                   If MessageBox( HWND_FRMMAIN, _
                                   pDoc->DiskFilename & vbCrLf & _ 
                                   L(266, "File was changed by another application. Reload it?"), _
                                   L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                     dim cText as CTextStream
-                     if cText.Open(pDoc->DiskFilename, IOMODE_FORREADING) = 0 then
-                        sText = cText.ReadAll()
-                        cText.Close
-                        if len(sText) > 2 THEN  ' or will GPF
-                           Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
-                           If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-                              sText = Mid(sText, 3)
-                              sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-                           End If   
-                        END IF
+                     dim sText as string
+                     if GetFileToString(pDoc->DiskFilename, sText, gConfig.UnicodeEncoding) = false then
                         pDoc->SetText( sText ) 
                         pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
-                     end if
+                     else
+                        print "Error opening: "; pDoc->DiskFilename
+                     End If
                   End If                
                End If
             End If

@@ -31,7 +31,6 @@
 #Include Once "Afx\AfxTime.inc"
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxMenu.inc" 
-#Include Once "Afx\CTextStream.inc"
 
 Using Afx
 
@@ -149,6 +148,7 @@ End Function
 ' Main program entry point
 ' ========================================================================================
 End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+
 
 
 
