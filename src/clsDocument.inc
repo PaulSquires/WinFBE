@@ -105,7 +105,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
          Else
             dim sText as string
-            if GetFileToString(*pwszFile, sText, gConfig.UnicodeEncoding) = false then
+            if GetFileToString(*pwszFile, sText, @this) = false then
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
             else
@@ -221,18 +221,64 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
    Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+   
+   dim as long sciCodePage = SciMsg(m_pSci, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
+   
+   ' Get all the text from the control and convert to various formats as required.
+   dim as string txtBuffer 
+   
+   if AfxFileExists(wFilename) THEN Kill(wFilename)
+      
    f = freefile
-   if gConfig.UnicodeEncoding THEN
-      Open wFilename for output Encoding "utf8" As #f 
-   else   
-      Open wFilename for output As #f 
-   END IF
+   open wFilename for binary as #f
    if Err > 0 then 
       ' error saving file
       print "Error saving file: "; wFilename
    else
-      print #f, *psz 
-   end if   
+      select CASE this.FileEncoding
+         case FILE_ENCODING_ANSI
+            if sciCodePage = 0 THEN    
+               ' no conversion necessary
+               put #f, , *psz
+            else
+               ' need to convert
+               put #f, , Utf8ToAscii(*psz)
+            end if    
+
+         case FILE_ENCODING_UTF8
+            if sciCodePage = SC_CP_UTF8 THEN    
+               ' no conversion necessary
+               put #f, , *psz
+            else
+               ' need to convert
+               put #f, , AnsiToUtf8(*psz)
+            end if    
+
+         case FILE_ENCODING_UTF8_BOM
+            ' Output the BOM first
+            put #f, , chr(&HEF, &HBB, &HBF)
+            if sciCodePage = SC_CP_UTF8 THEN    
+               ' no conversion necessary
+               put #f, , *psz
+            else
+               ' need to convert
+               put #f, , AnsiToUtf8(*psz)
+            end if    
+
+         case FILE_ENCODING_UTF16_BOM
+            ' Output the BOM first
+            put #f, , chr(&HFF, &HFE)
+            if sciCodePage = SC_CP_UTF8 THEN    
+               ' convert utf8 to utf16
+               put #f, , Utf8ToUnicode(*psz)
+            else
+               ' need to convert ansi to unicode
+               put #f, , WStr(*psz)
+            end if    
+            
+         CASE ELSE
+      END SELECT
+   end if
    close #f
 
    this.DiskFilename = wFilename
@@ -867,8 +913,16 @@ Function clsDocument.DisplayStats() As Long
    End Select
    StatusBar_SetText(hStatusbar, 3, *wText)
 
-   wText = IIF( gConfig.UnicodeEncoding, "UTF-8 (Unicode)", "ANSI" )
+   
+   wText = FileEncodingTextDescription(this.FileEncoding)
    StatusBar_SetText(hStatusbar, 4, *wText)
+
+   if this.FileEncoding = FILE_ENCODING_ANSI THEN
+      SciMsg( m_pSci, SCI_SETCODEPAGE, 0, 0 )
+   ELSE
+      ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
+      SciMsg( m_pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+   end if
 
    ' Set the filename text that displays on the tab. 
    gTTabCtl.SetTabText(-1)
@@ -1062,10 +1116,11 @@ Function clsDocument.ApplyProperties() As Long
    SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~_:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
    ''  UNICODE (UTF-8 encoding)
-   IF gConfig.UnicodeEncoding THEN
-      SciMsg( m_pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
-   ELSE
+   IF this.FileEncoding = FILE_ENCODING_ANSI THEN
       SciMsg( m_pSci, SCI_SETCODEPAGE, 0, 0 )
+   ELSE
+      ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
+      SciMsg( m_pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
    END IF
    
    ''
@@ -1277,5 +1332,21 @@ Function clsDocument.LineDuplicate() As Long
    Function = 0
 
 End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

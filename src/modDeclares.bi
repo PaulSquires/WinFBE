@@ -199,6 +199,12 @@ Const FILETYPE_MODULE    = 2
 Const FILETYPE_NORMAL    = 3
 Const FILETYPE_RESOURCE  = 4
  
+' File encodings
+const FILE_ENCODING_ANSI      = 0
+const FILE_ENCODING_UTF8      = 1
+const FILE_ENCODING_UTF8_BOM  = 2
+const FILE_ENCODING_UTF16_BOM = 3
+
    
 ''  Menu message identifiers
 Enum
@@ -212,6 +218,7 @@ Enum
    IDM_MRU, IDM_OPENINCLUDE, IDM_COMMAND, IDM_EXIT
    IDM_EDIT
    IDM_UNDO, IDM_REDO, IDM_CUT, IDM_COPY, IDM_PASTE, IDM_DELETELINE, IDM_INSERTFILE
+   IDM_ANSI, IDM_UTF8, IDM_UTF8BOM, IDM_UTF16BOM
    IDM_INDENTBLOCK, IDM_UNINDENTBLOCK, IDM_COMMENTBLOCK, IDM_UNCOMMENTBLOCK
    IDM_DUPLICATELINE, IDM_MOVELINEUP, IDM_MOVELINEDOWN, IDM_TOUPPERCASE, IDM_TOLOWERCASE
    IDM_TOMIXEDCASE, IDM_EOLTOCRLF, IDM_EOLTOCR, IDM_EOLTOLF, IDM_SELECTALL, IDM_SELECTLINE
@@ -327,6 +334,8 @@ Type clsDocument
       DiskFilename     As WString * MAX_PATH
       DateFileTime     As FILETIME  
       hNodeExplorer    As HTREEITEM
+      FileEncoding     as long       
+      
 
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
@@ -555,4 +564,6 @@ End Type
 Dim Shared gApp As clsApp
 Dim Shared gConfig As clsConfig
 Dim Shared gTTabCtl As clsTopTabCtl
+
+
 

@@ -55,6 +55,12 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_INSERTFILE, L(21,"Insert &File...") & Chr(9) & "Ctrl+I"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(271,"File Encoding")
+              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_ANSI, "ANSI"
+              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8, "UTF-8"
+              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
+              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF16BOM, "UTF-16 (BOM)"
+         hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(22,"&Block Operations")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_INDENTBLOCK, L(23,"&Indent Block") & Chr(9) & "TAB"
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNINDENTBLOCK, L(24,"U&nIndent Block") & Chr(9) & "Shift+TAB"
@@ -293,12 +299,12 @@ Function frmMain_ChangeTopMenuStates() As Long
       Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
       If pDoc Then 
          hEdit = pDoc->hWindow
-         If SendMessageW(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+         If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
             EnableMenuItem( hMenu, IDM_PASTE, MF_GRAYED)
          End If
          
-         startSelPos = SendMessageW(hEdit, SCI_GETSELECTIONSTART, 0, 0)
-         endSelPos   = SendMessageW(hEdit, SCI_GETSELECTIONEND, 0, 0)
+         startSelPos = SendMessage(hEdit, SCI_GETSELECTIONSTART, 0, 0)
+         endSelPos   = SendMessage(hEdit, SCI_GETSELECTIONEND, 0, 0)
          If startSelPos = endSelPos Then
             EnableMenuItem hMenu, IDM_CUT, MF_GRAYED
             EnableMenuItem hMenu, IDM_COPY, MF_GRAYED
@@ -308,13 +314,28 @@ Function frmMain_ChangeTopMenuStates() As Long
             EnableMenuItem hMenu, IDM_UNDO, MF_GRAYED
          End If
       
-         If SendMessageW(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
+         If SendMessage(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
             EnableMenuItem hMenu, IDM_REDO, MF_GRAYED
          End If
 
-         If SendMessageW(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+         If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
             EnableMenuItem hMenu, IDM_PASTE, MF_GRAYED
          End If
+      
+         ' Check the File Encoding
+         select CASE pDoc->FileEncoding
+            case FILE_ENCODING_ANSI: nSelected = IDM_ANSI
+            case FILE_ENCODING_UTF8: nSelected = IDM_UTF8
+            case FILE_ENCODING_UTF8_BOM: nSelected = IDM_UTF8BOM
+            case FILE_ENCODING_UTF16_BOM: nSelected = IDM_UTF16BOM
+            CASE ELSE
+         END SELECT
+         CheckMenuRadioItem( hMenu, IDM_ANSI, IDM_UTF16BOM, nSelected, MF_BYCOMMAND )
+         EnableMenuItem hMenu, IDM_ANSI, MF_BYCOMMAND Or MF_ENABLED
+         EnableMenuItem hMenu, IDM_UTF8, MF_BYCOMMAND Or MF_ENABLED
+         EnableMenuItem hMenu, IDM_UTF8BOM, MF_BYCOMMAND Or MF_ENABLED
+         EnableMenuItem hMenu, IDM_UTF16BOM, MF_BYCOMMAND Or MF_ENABLED
+         
       End If
    End If
    
@@ -586,6 +607,8 @@ Function CreateScintillaContextMenu() As HMENU
 
 End Function
     
+
+
 
 
 

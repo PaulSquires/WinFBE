@@ -113,34 +113,201 @@ end function
 
 
 ' ========================================================================================
+' Maps Ansi character string to a UTF-8 string.
+' ========================================================================================
+FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
+
+   dim i AS LONG                ' // Loop counter
+   dim strAscii AS STRING       ' // Ascii string
+   dim idx AS LONG              ' // Position in the string
+   dim c AS LONG                ' // ASCII code
+   dim b2 AS LONG               ' // Second byte
+   dim fSkipChar AS boolean     ' // Flag
+
+   IF LEN(strUtf8) = 0 THEN EXIT FUNCTION
+   
+   ' // The maximum length of the translated string will be
+   ' // the same as the length of the original string.
+   ' // We are pre-allocating the buffer for faster operation
+   ' // than concatenating each character one by one.
+   strAscii = SPACE(LEN(strUtf8))
+
+   ' // Intialize index position in the string buffer
+   ' // used to store the converted Ascii string
+   idx = 1
+   
+   ' // Examine the contents of each character in the UTF-8 encoded string
+   FOR i = 1 TO LEN(strUtf8)
+      ' // If fSkipChar is set we have to skip this character
+      IF fSkipChar THEN
+         fSkipChar = 0
+         continue FOR
+      END IF
+      ' // Get the Ascii code of the character
+      c = ASC(MID(strUtf8, i, 1))
+      ' // If it is betwen 0 and 127...
+      IF c < 128 THEN 
+         ' // ...we simply copy it to the string buffer...
+         MID(strAscii, idx, 1) = MID(strUtf8, idx, 1)
+         ' // ...and increase the position by 1.
+         idx = idx + 1
+      ELSEIF c < 224 THEN
+         ' // We need to join this byte and the next byte.
+         b2 = ASC(MID(strUtf8, i + 1, 1))
+         IF b2 > 127 THEN
+            c = (c - 192) * 64 + (b2 - 128)
+            MID(strAscii, idx, 1) = CHR(c)
+            ' // Set the flag to skip the next character
+            fSkipChar = TRUE
+            ' // Increase the position by 1.
+            idx = idx + 1
+         END IF
+      END IF
+   NEXT
+
+   ' // Return the encoded string
+   FUNCTION = LEFT(strAscii, idx - 1)
+
+END FUNCTION
+
+' ========================================================================================
+' Maps Ansi character string to a UTF-8 string.
+' ========================================================================================
+FUNCTION AnsiToUtf8(BYREF sAnsi AS STRING) AS STRING
+ dim sUnicode AS STRING
+ dim sUtf8    AS STRING
+
+ 'Maps Ansi character string to a UTF-8 string.
+
+ 'Step one, convert to UNICODE
+ sUnicode = string(LEN(sAnsi) * 2, 0)
+ MultiByteToWideChar(CP_ACP, _                  'System default Windows ANSI code page
+                     MB_PRECOMPOSED, _          'Conversion type
+                     cast(LPCSTR, STRPTR(sAnsi)), _     'ANSI string to convert
+                     LEN(sAnsi), _              'Lenght of ANSI string
+                     cast(LPWSTR, STRPTR(sUnicode)), _  'Unicode string
+                     LEN(sUnicode))             'Lenght of Unicode buffer
+
+ 'Step two, convert to UTF-8
+ sUtf8 = string(LEN(sAnsi), 0)
+ WideCharToMultiByte(CP_UTF8, _                 'Set to UTF-8
+                     0, _                       'Conversion type
+                     cast(LPCWSTR, STRPTR(sUnicode)), _  'Unicode string to convert
+                     LEN(sUnicode) / 2, _       'Lenght of Unicode string
+                     cast(LPSTR, STRPTR(sUtf8)), _     'UTF-8 string
+                     LEN(sUtf8), _              'Length of UTF-8 buffer
+                     BYVAL 0, _                 'Invalid character replacement
+                     BYVAL 0)                   'Replacement was used flag
+ FUNCTION = sUtf8
+
+END FUNCTION
+
+
+' ========================================================================================
+' Maps UTF-8 string to Unicode character string 
+' ========================================================================================
+FUNCTION Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
+   DIM dwLen AS DWORD = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
+   IF dwLen THEN
+      DIM s AS STRING = SPACE(dwLen * 2)
+      dwLen = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), CAST(WSTRING PTR, STRPTR(s)), dwLen * 2)
+      IF dwLen THEN RETURN s
+   END IF
+end function
+
+   
+' ========================================================================================
+' Maps Unicode character string to a UTF-8 string.
+' ========================================================================================
+FUNCTION UnicodeToUtf8(byref sUnicode AS STRING) AS STRING
+ dim sUtf8 AS STRING
+
+ 'Maps Unicode character string to a UTF-8 string.
+ sUtf8 = string(LEN(sUnicode) / 2, 0)
+ WideCharToMultiByte(CP_UTF8, _                 'Set to UTF-8
+                     0, _                       'Conversion type
+                     cast(LPCWSTR, STRPTR(sUnicode)), _  'Unicode string to convert
+                     LEN(sUnicode) / 2, _       'Lenght of Unicode string
+                     cast(LPSTR, STRPTR(sUtf8)), _     'UTF-8 string
+                     LEN(sUtf8), _              'Length of UTF-8 buffer
+                     BYVAL 0, _                 'Invalid character replacement
+                     BYVAL 0)                   'Replacement was used flag
+ FUNCTION = sUtf8
+
+END FUNCTION
+
+
+' ========================================================================================
+' Return text description of the specified file encoding
+' ========================================================================================
+function FileEncodingTextDescription(byval FileEncoding as long) as CWSTR
+
+   select case FileEncoding
+      case FILE_ENCODING_UTF8:      RETURN "UTF-8"
+      case FILE_ENCODING_UTF8_BOM:  RETURN "UTF-8 (BOM)"   
+      case FILE_ENCODING_UTF16_BOM: RETURN "UTF-16 (BOM)"   
+      case else
+         return "ANSI"    ' includes FILE_ENCODING_ANSI
+   END select
+
+end function
+
+
+' ========================================================================================
 ' Open a disk file and read it into a string (ANSI or UTF8)
 ' ========================================================================================
-function GetFileToString( byref sFilename as string, byref txtBuffer as string, byval bUTFencoding as Boolean ) as boolean
-   Dim as string st
-   dim as long f = freefile
+function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
    
-   if bUTFencoding THEN
-      Open sFilename for input Encoding "utf8" As #f 
-      if Err > 0 then return true  ' error opening file
-      do until eof(f)
-         line input #f, st 
-         txtBuffer = txtBuffer & st & vbcrlf
-      loop
-   else   
-      If Open( sFilename for Binary Access Read As #f ) = 00 Then 
-         If LOF(f) > 0 Then
-            txtBuffer = String(LOF(f), 0)
-            Get #f, ,txtBuffer
-         End If
-      else
-         return true  ' error opening file
-      end if   
-   END IF
-      
-   Close #f
+   ' Load the entire file into a string
+   dim as string ansiStr
+   dim as long f = freefile
+   If Open( wszFilename for Binary Access Read As #f ) = 0 Then 
+      If LOF(f) > 0 Then
+         ansiStr = String(LOF(f), 0)
+         Get #f, , ansiStr
+      End If
+   else
+      return true  ' error opening file
+   end if
+   close #f   
 
+   ' Check for BOM signatures
+   if left(ansiStr, 3) = chr(&HEF, &HBB, &HBF) THEN
+      ' UTF8 BOM encoded 
+      pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
+      ansiStr = mid(ansiStr, 4)   ' bypass the BOM
+   elseif left(ansiStr, 2) = chr(&HFF, &HFE) THEN
+      ' UTF16 BOM (little endian) encoded
+      pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
+      ansiStr = mid(ansiStr, 3)   ' bypass the BOM
+   else
+      ' Could be ANSI or UTF8(no BOM)
+      ' Test the string to be ANSI by checking that BIT7 of each character is unset
+      dim as Boolean IsAnsi = true   ' default that this is an ansi file
+      for i as long = 0 to len(ansiStr) - 1
+         if bit(ansiStr[i], 7) THEN
+            IsAnsi = false: exit for 
+         END IF
+      NEXT
+      pDoc->FileEncoding = iif(IsAnsi, FILE_ENCODING_ANSI, FILE_ENCODING_UTF8)
+   END IF
+
+   select case pDoc->FileEncoding
+      case FILE_ENCODING_ANSI 
+         ' No conversion needed. clsDocument ApplyProperties will not
+         ' set the editor to UTF8 code.
+         txtBuffer = ansiStr
+      case FILE_ENCODING_UTF8, FILE_ENCODING_UTF8_BOM   
+         ' Convert to UTF8 so it can display in the editor
+         txtBuffer = AnsiToUtf8(ansiStr)
+      case FILE_ENCODING_UTF16_BOM
+         ' Convert to UTF8 so it can display in the editor
+         txtBuffer = UnicodeToUtf8(ansiStr)
+   END select
+      
    function = false
 END FUNCTION
+
 
 ' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
@@ -850,6 +1017,27 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
    End If
 
 End Function
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1084,6 +1084,19 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_SELECTALL:          Function = SciExec(hEdit, SCI_SELECTALL, 0, 0)
       Case IDM_SELECTLINE:         Function = pDoc->SelectLine(-1)
                                    
+      case IDM_ANSI
+         pDoc->FileEncoding = FILE_ENCODING_ANSI 
+         frmMain_UpdateLineCol( HWND_FRMMAIN )
+      case IDM_UTF8
+         pDoc->FileEncoding = FILE_ENCODING_UTF8
+         frmMain_UpdateLineCol( HWND_FRMMAIN )
+      case IDM_UTF8BOM
+         pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM 
+         frmMain_UpdateLineCol( HWND_FRMMAIN )
+      case IDM_UTF16BOM
+         pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
+         frmMain_UpdateLineCol( HWND_FRMMAIN )
+         
       ''  SEARCH MENU              
       Case IDM_FIND:               Function = frmFindReplace_Show(pDoc->hWindow, false)
       Case IDM_REPLACE:            Function = frmFindReplace_Show(pDoc->hWindow, true)
@@ -1300,8 +1313,19 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                DestroyMenu hPopUpMenu
             end if
             If lpnm->dwItemSpec = 4 Then   ' Ansi/Unicode is panel 4
-               ' Toggle the ANSI/Unicode state
-               gConfig.UnicodeEncoding = iif( gConfig.UnicodeEncoding, false, true )
+               ' Toggle through the encoding states
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+               if pDoc = 0 THEN exit function
+               if pDoc->FileEncoding = FILE_ENCODING_ANSI then
+                  pDoc->FileEncoding = FILE_ENCODING_UTF8
+               elseif pDoc->FileEncoding = FILE_ENCODING_UTF8 then
+                  pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
+               elseif pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM then
+                  pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM
+               elseif pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM then
+                  pDoc->FileEncoding = FILE_ENCODING_ANSI
+               END IF
+               ' Encoding has changed so set the file buffer to dirty
                frmMain_UpdateLineCol( HWND_FRMMAIN )
             end if   
             If lpnm->dwItemSpec = 5 Then   ' Compile results is panel 5
@@ -1421,7 +1445,7 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
                                   L(266, "File was changed by another application. Reload it?"), _
                                   L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
                      dim sText as string
-                     if GetFileToString(pDoc->DiskFilename, sText, gConfig.UnicodeEncoding) = false then
+                     if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
                         pDoc->SetText( sText ) 
                         pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
                      else
@@ -1916,6 +1940,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
+
+
+
+
 
 
 
