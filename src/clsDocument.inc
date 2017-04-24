@@ -283,6 +283,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
    this.DiskFilename = wFilename
    this.DateFileTime = AfxGetFileLastWriteTime( wFilename )
+   this.UserModified = false
    
    ' If this was a new document then it needs to be saved to Recent File list.
    If this.IsNewFlag Then 

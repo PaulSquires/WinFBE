@@ -219,15 +219,15 @@ end function
 ' ========================================================================================
 ' Maps Unicode character string to a UTF-8 string.
 ' ========================================================================================
-FUNCTION UnicodeToUtf8(byref sUnicode AS STRING) AS STRING
+FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
  dim sUtf8 AS STRING
 
  'Maps Unicode character string to a UTF-8 string.
- sUtf8 = string(LEN(sUnicode) / 2, 0)
+ sUtf8 = string(LEN(*pswzUnicode), 0)
  WideCharToMultiByte(CP_UTF8, _                 'Set to UTF-8
                      0, _                       'Conversion type
-                     cast(LPCWSTR, STRPTR(sUnicode)), _  'Unicode string to convert
-                     LEN(sUnicode) / 2, _       'Lenght of Unicode string
+                     cast(LPCWSTR, pswzUnicode), _  'Unicode string to convert
+                     LEN(*pswzUnicode), _       'Length of Unicode string
                      cast(LPSTR, STRPTR(sUtf8)), _     'UTF-8 string
                      LEN(sUtf8), _              'Length of UTF-8 buffer
                      BYVAL 0, _                 'Invalid character replacement
@@ -302,7 +302,8 @@ function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as
          txtBuffer = AnsiToUtf8(ansiStr)
       case FILE_ENCODING_UTF16_BOM
          ' Convert to UTF8 so it can display in the editor
-         txtBuffer = UnicodeToUtf8(ansiStr)
+         ' Need to pass a WSTRING pointer to the conversion function.
+         txtBuffer = UnicodeToUtf8( cast(WSTRING ptr, strptr(ansiStr)) )
    END select
       
    function = false

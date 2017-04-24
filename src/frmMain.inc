@@ -566,7 +566,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
       if pDoc = 0 THEN continue for
       if pDoc->ProjectIndex <> idx THEN continue for
          
-      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          OpenSelectedDocument(pDoc, "")
          wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
@@ -902,7 +902,7 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       TB.Mask = TCIF_PARAM
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then 
+      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          ' If this is a new Untitled document that is also dirty then we
          ' need to set the focus to that tab because the SaveAs dialog will be shown.
          If pDoc->IsNewFlag Then
@@ -937,7 +937,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       pDoc = gTTabCtl.GetActiveDocumentPtr()
       If pDoc = 0 Then Return true
    
-      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
                            MB_YESNOCANCEL Or MB_ICONQUESTION)
@@ -1085,15 +1085,19 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_SELECTLINE:         Function = pDoc->SelectLine(-1)
                                    
       case IDM_ANSI
+         if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN pDoc->UserModified = true
          pDoc->FileEncoding = FILE_ENCODING_ANSI 
          frmMain_UpdateLineCol( HWND_FRMMAIN )
       case IDM_UTF8
+         if pDoc->FileEncoding <> FILE_ENCODING_UTF8 THEN pDoc->UserModified = true
          pDoc->FileEncoding = FILE_ENCODING_UTF8
          frmMain_UpdateLineCol( HWND_FRMMAIN )
       case IDM_UTF8BOM
+         if pDoc->FileEncoding <> FILE_ENCODING_UTF8_BOM THEN pDoc->UserModified = true
          pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM 
          frmMain_UpdateLineCol( HWND_FRMMAIN )
       case IDM_UTF16BOM
+         if pDoc->FileEncoding <> FILE_ENCODING_UTF16_BOM THEN pDoc->UserModified = true
          pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
          frmMain_UpdateLineCol( HWND_FRMMAIN )
          
@@ -1245,7 +1249,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        vbcrlf & vbcrlf & _
                        "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "Jos� Roca (Scintilla and CWindow)", _
+                       "JosÃ© Roca (Scintilla and CWindow)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
@@ -1326,6 +1330,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                   pDoc->FileEncoding = FILE_ENCODING_ANSI
                END IF
                ' Encoding has changed so set the file buffer to dirty
+               pDoc->UserModified = true
                frmMain_UpdateLineCol( HWND_FRMMAIN )
             end if   
             If lpnm->dwItemSpec = 5 Then   ' Compile results is panel 5
@@ -1948,5 +1953,4 @@ End Function
 
 
 
-
-
+

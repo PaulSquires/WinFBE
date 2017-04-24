@@ -231,7 +231,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    If pDoc Then 
       ' Set the text that displays on the tab
       wText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-      If SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          wText = wText & "*"
       End If   
 

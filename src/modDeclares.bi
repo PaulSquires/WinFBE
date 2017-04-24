@@ -335,7 +335,7 @@ Type clsDocument
       DateFileTime     As FILETIME  
       hNodeExplorer    As HTREEITEM
       FileEncoding     as long       
-      
+      UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
 
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long

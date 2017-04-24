@@ -245,7 +245,7 @@ Function frmMain_ChangeToolbarButtonsState() As Long
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
    
-      If SciExec(hEdit, SCI_GETMODIFY, 0, 0) = 0 Then 
+      If cbool(SciExec(hEdit, SCI_GETMODIFY, 0, 0)) = false and (pDoc->UserModified = false) Then 
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
       Else 
          FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
