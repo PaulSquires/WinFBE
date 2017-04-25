@@ -1249,7 +1249,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        vbcrlf & vbcrlf & _
                        "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "JosÃ© Roca (Scintilla and CWindow)", _
+                       "José Roca (Scintilla and CWindow)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
@@ -1945,9 +1945,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
-
-
-
 
 
 

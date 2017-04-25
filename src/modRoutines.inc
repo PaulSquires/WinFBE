@@ -298,8 +298,8 @@ function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as
          ' set the editor to UTF8 code.
          txtBuffer = ansiStr
       case FILE_ENCODING_UTF8, FILE_ENCODING_UTF8_BOM   
-         ' Convert to UTF8 so it can display in the editor
-         txtBuffer = AnsiToUtf8(ansiStr)
+         ' No conversion needed.
+         txtBuffer = ansiStr  
       case FILE_ENCODING_UTF16_BOM
          ' Convert to UTF8 so it can display in the editor
          ' Need to pass a WSTRING pointer to the conversion function.
