@@ -243,7 +243,6 @@ END FUNCTION
 function FileEncodingTextDescription(byval FileEncoding as long) as CWSTR
 
    select case FileEncoding
-      case FILE_ENCODING_UTF8:      RETURN "UTF-8"
       case FILE_ENCODING_UTF8_BOM:  RETURN "UTF-8 (BOM)"   
       case FILE_ENCODING_UTF16_BOM: RETURN "UTF-16 (BOM)"   
       case else
@@ -259,12 +258,11 @@ end function
 function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
    
    ' Load the entire file into a string
-   dim as string ansiStr
    dim as long f = freefile
    If Open( wszFilename for Binary Access Read As #f ) = 0 Then 
       If LOF(f) > 0 Then
-         ansiStr = String(LOF(f), 0)
-         Get #f, , ansiStr
+         txtBuffer = String(LOF(f), 0)
+         Get #f, , txtBuffer
       End If
    else
       return true  ' error opening file
@@ -272,38 +270,29 @@ function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as
    close #f   
 
    ' Check for BOM signatures
-   if left(ansiStr, 3) = chr(&HEF, &HBB, &HBF) THEN
+   if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
       ' UTF8 BOM encoded 
       pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
-      ansiStr = mid(ansiStr, 4)   ' bypass the BOM
-   elseif left(ansiStr, 2) = chr(&HFF, &HFE) THEN
+      txtBuffer = mid(txtBuffer, 4)   ' bypass the BOM
+   elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
       ' UTF16 BOM (little endian) encoded
       pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
-      ansiStr = mid(ansiStr, 3)   ' bypass the BOM
+      txtBuffer = mid(txtBuffer, 3)   ' bypass the BOM
    else
-      ' Could be ANSI or UTF8(no BOM)
-      ' Test the string to be ANSI by checking that BIT7 of each character is unset
-      dim as Boolean IsAnsi = true   ' default that this is an ansi file
-      for i as long = 0 to len(ansiStr) - 1
-         if bit(ansiStr[i], 7) THEN
-            IsAnsi = false: exit for 
-         END IF
-      NEXT
-      pDoc->FileEncoding = iif(IsAnsi, FILE_ENCODING_ANSI, FILE_ENCODING_UTF8)
+      pDoc->FileEncoding = FILE_ENCODING_ANSI
    END IF
 
    select case pDoc->FileEncoding
       case FILE_ENCODING_ANSI 
-         ' No conversion needed. clsDocument ApplyProperties will not
+         ' No conversion needed. clsDocument ApplyProperties will *not*
          ' set the editor to UTF8 code.
-         txtBuffer = ansiStr
-      case FILE_ENCODING_UTF8, FILE_ENCODING_UTF8_BOM   
-         ' No conversion needed.
-         txtBuffer = ansiStr  
+      case FILE_ENCODING_UTF8_BOM   
+         ' No conversion needed. clsDocument ApplyProperties will set
+         ' the editor to UTF8 code.
       case FILE_ENCODING_UTF16_BOM
          ' Convert to UTF8 so it can display in the editor
          ' Need to pass a WSTRING pointer to the conversion function.
-         txtBuffer = UnicodeToUtf8( cast(WSTRING ptr, strptr(ansiStr)) )
+         txtBuffer = UnicodeToUtf8( cast(WSTRING ptr, strptr(txtBuffer)) )
    END select
       
    function = false

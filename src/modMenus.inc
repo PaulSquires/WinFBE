@@ -57,7 +57,6 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(271,"File Encoding")
               AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_ANSI, "ANSI"
-              AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8, "UTF-8"
               AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
               AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF16BOM, "UTF-16 (BOM)"
          hPopUpSubMenu = CreatePopupMenu
@@ -313,7 +312,7 @@ Function frmMain_ChangeTopMenuStates() As Long
          If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
             EnableMenuItem hMenu, IDM_UNDO, MF_GRAYED
          End If
-      
+               
          If SendMessage(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
             EnableMenuItem hMenu, IDM_REDO, MF_GRAYED
          End If
@@ -325,14 +324,12 @@ Function frmMain_ChangeTopMenuStates() As Long
          ' Check the File Encoding
          select CASE pDoc->FileEncoding
             case FILE_ENCODING_ANSI: nSelected = IDM_ANSI
-            case FILE_ENCODING_UTF8: nSelected = IDM_UTF8
             case FILE_ENCODING_UTF8_BOM: nSelected = IDM_UTF8BOM
             case FILE_ENCODING_UTF16_BOM: nSelected = IDM_UTF16BOM
             CASE ELSE
          END SELECT
          CheckMenuRadioItem( hMenu, IDM_ANSI, IDM_UTF16BOM, nSelected, MF_BYCOMMAND )
          EnableMenuItem hMenu, IDM_ANSI, MF_BYCOMMAND Or MF_ENABLED
-         EnableMenuItem hMenu, IDM_UTF8, MF_BYCOMMAND Or MF_ENABLED
          EnableMenuItem hMenu, IDM_UTF8BOM, MF_BYCOMMAND Or MF_ENABLED
          EnableMenuItem hMenu, IDM_UTF16BOM, MF_BYCOMMAND Or MF_ENABLED
          

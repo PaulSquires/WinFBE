@@ -245,15 +245,6 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
                put #f, , Utf8ToAscii(*psz)
             end if    
 
-         case FILE_ENCODING_UTF8
-            if sciCodePage = SC_CP_UTF8 THEN    
-               ' no conversion necessary
-               put #f, , *psz
-            else
-               ' need to convert
-               put #f, , AnsiToUtf8(*psz)
-            end if    
-
          case FILE_ENCODING_UTF8_BOM
             ' Output the BOM first
             put #f, , chr(&HEF, &HBB, &HBF)

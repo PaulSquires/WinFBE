@@ -1088,10 +1088,6 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN pDoc->UserModified = true
          pDoc->FileEncoding = FILE_ENCODING_ANSI 
          frmMain_UpdateLineCol( HWND_FRMMAIN )
-      case IDM_UTF8
-         if pDoc->FileEncoding <> FILE_ENCODING_UTF8 THEN pDoc->UserModified = true
-         pDoc->FileEncoding = FILE_ENCODING_UTF8
-         frmMain_UpdateLineCol( HWND_FRMMAIN )
       case IDM_UTF8BOM
          if pDoc->FileEncoding <> FILE_ENCODING_UTF8_BOM THEN pDoc->UserModified = true
          pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM 
@@ -1249,7 +1245,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        vbcrlf & vbcrlf & _
                        "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "JosÃ© Roca (Scintilla and CWindow)", _
+                       "José Roca (Scintilla and CWindow)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
@@ -1321,8 +1317,6 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
                if pDoc = 0 THEN exit function
                if pDoc->FileEncoding = FILE_ENCODING_ANSI then
-                  pDoc->FileEncoding = FILE_ENCODING_UTF8
-               elseif pDoc->FileEncoding = FILE_ENCODING_UTF8 then
                   pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
                elseif pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM then
                   pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM
