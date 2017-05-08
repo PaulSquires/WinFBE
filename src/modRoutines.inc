@@ -223,7 +223,7 @@ FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
  dim sUtf8 AS STRING
 
  'Maps Unicode character string to a UTF-8 string.
- sUtf8 = string(LEN(*pswzUnicode), 0)
+ sUtf8 = string(LEN(*pswzUnicode) * 2, 0)
  WideCharToMultiByte(CP_UTF8, _                 'Set to UTF-8
                      0, _                       'Conversion type
                      cast(LPCWSTR, pswzUnicode), _  'Unicode string to convert
