@@ -1085,16 +1085,27 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_SELECTLINE:         Function = pDoc->SelectLine(-1)
                                    
       case IDM_ANSI
-         if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN pDoc->UserModified = true
+         if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN 
+            pDoc->UserModified = true
+            ' Convert buffer to ANSI and redisplay the text in the editor
+            ConvertTextBuffer(pDoc, FILE_ENCODING_ANSI)
+         end if   
          pDoc->FileEncoding = FILE_ENCODING_ANSI 
          frmMain_UpdateLineCol( HWND_FRMMAIN )
+      
       case IDM_UTF8BOM
-         if pDoc->FileEncoding <> FILE_ENCODING_UTF8_BOM THEN pDoc->UserModified = true
+         if pDoc->FileEncoding <> FILE_ENCODING_UTF8_BOM THEN 
+            pDoc->UserModified = true
+            ConvertTextBuffer(pDoc, FILE_ENCODING_UTF8_BOM)
+         end if   
          pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM 
          frmMain_UpdateLineCol( HWND_FRMMAIN )
+      
       case IDM_UTF16BOM
-         if pDoc->FileEncoding <> FILE_ENCODING_UTF16_BOM THEN pDoc->UserModified = true
-         pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
+         if pDoc->FileEncoding <> FILE_ENCODING_UTF16_BOM THEN 
+            pDoc->UserModified = true
+            ConvertTextBuffer(pDoc, FILE_ENCODING_UTF16_BOM)
+         end if   
          frmMain_UpdateLineCol( HWND_FRMMAIN )
          
       ''  SEARCH MENU              
@@ -1317,11 +1328,11 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
                if pDoc = 0 THEN exit function
                if pDoc->FileEncoding = FILE_ENCODING_ANSI then
-                  pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
+                  ConvertTextBuffer(pDoc, FILE_ENCODING_UTF8_BOM)
                elseif pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM then
-                  pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM
+                  ConvertTextBuffer(pDoc, FILE_ENCODING_UTF16_BOM)
                elseif pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM then
-                  pDoc->FileEncoding = FILE_ENCODING_ANSI
+                  ConvertTextBuffer(pDoc, FILE_ENCODING_ANSI)
                END IF
                ' Encoding has changed so set the file buffer to dirty
                pDoc->UserModified = true

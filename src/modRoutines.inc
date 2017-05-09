@@ -300,6 +300,56 @@ END FUNCTION
 
 
 ' ========================================================================================
+' Convert the current text buffer to the specified encoding and redisplay the text.
+' ========================================================================================
+function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
+                            byval FileEncoding as long _
+                            ) as Long
+                            
+   if pDoc = 0 then exit function
+
+   ' Save the current file position and first visible line
+   dim nFirstLine as long = SciExec( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+   Dim nPos As Long = SciExec(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
+
+   pDoc->FileEncoding = FileEncoding
+   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(pDoc->hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
+   dim as long sciCodePage = SciExec(pDoc->hWindow, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
+   dim as string txtBuffer 
+   
+   ' Convert buffer to specified file encoding
+   select CASE FileEncoding
+      case FILE_ENCODING_ANSI
+         if sciCodePage = 0 THEN  ' already in ANSI format  
+            exit function
+         else   
+            ' need to convert from UTF8 to ANSI
+            txtBuffer = Utf8ToAscii(*psz)
+            SciExec(pDoc->hWindow, SCI_SETCODEPAGE, 0, 0 )
+         end if    
+
+      case FILE_ENCODING_UTF8_BOM, FILE_ENCODING_UTF16_BOM
+         if sciCodePage = SC_CP_UTF8 THEN  ' already in unicode format
+            exit function
+         else
+            ' need to convert from ANSI to UTF8
+            txtBuffer = AnsiToUtf8(*psz)
+            SciExec(pDoc->hWindow, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+         end if    
+
+   END SELECT
+   
+   ' Set the new buffer
+   pDoc->SetText(txtBuffer)
+    
+   SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
+   SciExec(pDoc->hWindow, SCI_GOTOPOS, nPos, 0)
+   
+   function = 0
+end function   
+
+
+' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
 ' ========================================================================================
 function OpenSelectedDocument( byval pDoc as clsDocument ptr, _

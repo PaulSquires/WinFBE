@@ -172,20 +172,12 @@ Function clsDocument.InsertFile() As BOOLEAN
    ' Display the Open File Dialog
    Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWND_FRMMAIN, IDM_INSERTFILE)
    If pwszName Then
-      Dim As Long f = Freefile
+      ' save the main file encoding because GetFileToString may change it
       Dim As String sText
-      If Open(*pwszName For Binary As #f) = 0 Then
-         sText = Space(Lof(f))
-         Get #f, , sText
-         Close #f
-         Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
-         If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-            sText = Mid(sText, 3)
-            sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-         End If   
-      End If
+      GetFileToString(*pwszName, sText, @this)
       SciMsg( m_pSci, SCI_INSERTTEXT, -1, Cast(LPARAM, Strptr(sText)) )
       CoTaskMemFree pwszName
+      this.ApplyProperties()
    End If
    
    Function = 0
@@ -223,9 +215,6 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
    
    dim as long sciCodePage = SciMsg(m_pSci, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
-   
-   ' Get all the text from the control and convert to various formats as required.
-   dim as string txtBuffer 
    
    if AfxFileExists(wFilename) THEN Kill(wFilename)
       
