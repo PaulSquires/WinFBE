@@ -113,7 +113,7 @@ end function
 
 
 ' ========================================================================================
-' Maps Ansi character string to a UTF-8 string.
+' Maps UTF-8 string to Ansi string.
 ' ========================================================================================
 FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
 
@@ -165,7 +165,7 @@ FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
       END IF
    NEXT
 
-   ' // Return the encoded string
+   ' // Return the string
    FUNCTION = LEFT(strAscii, idx - 1)
 
 END FUNCTION
