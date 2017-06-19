@@ -86,7 +86,7 @@ Function frmOptionsKeywords_Show( ByVal hWndParent As HWnd, _
    AfxSetWindowFont hTextBox, hFont, True
 
    gConfig.bKeywordsDirty = False
-   SetWindowTextW hTextBox, WStr(gApp.FBKeywords)
+   SetWindowTextW hTextBox, WStr(gConfig.FBKeywords)
    
    Function = 0
    

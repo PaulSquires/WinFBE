@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,72 +13,61 @@
  
 
 ' ========================================================================================
-' Load the Recent Files treeview
+' Load the Recent Files/Projects Treeview
 ' ========================================================================================
 Function LoadRecentFilesTreeview( ByVal HWnd As HWnd ) As LRESULT
 
-   Dim As CWSTR wzStr
-   Dim As HTREEITEM hNode
-   Dim As BOOLEAN fEmpty = True
+   Dim As CWSTR wzStr 
+   dim As HTREEITEM hNode, hFirstNode
+   Dim As BOOLEAN fEmpty = True 
 
-   Dim As HWnd hTree = GetDlgItem(HWnd, IDC_FRMRECENT_TREEFILES)
-   
-   Treeview_DeleteAllItems(hTree)
+   Dim As HWnd hTree = GetDlgItem(HWnd, IDC_FRMRECENT_TREEVIEW) 
 
-   ' Display MRU files
-   wzStr = UCase(AfxStrRemove( L(10, "&Recent Files"), "&"))
-   hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr, 0, gidxImageOpened, gidxImageOpened )
-   FF_TreeView_SetCheckState( hTree, hNode, True)
-   For i As Long = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
-      If AfxFileExists(gConfig.MRU(i)) Then
-         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRU(i), 0, gidxImageBlank, gidxImageBlank)
-         FF_TreeView_SetCheckState( hTree, hNode, False)
-         fEmpty = False
-      End If
-   Next
-   If fEmpty Then
-      wzStr = @L(11,"(Empty)")
-      FF_TreeView_InsertItem( hTree, hNode, wzStr, 0, gidxImageBlank, gidxImageBlank)
-   End If
-   Treeview_Expand(hTree, hNode, TVE_EXPAND) 
+   Treeview_DeleteAllItems(hTree) 
 
-   Function = 0
-      
-End Function
+   ''  RECENT FILES
+   wzStr = UCase(AfxStrRemove( L(10, "&Recent Files"), "&")) 
+   hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr )
+   hFirstNode = hNode
+   gApp.hRecentFilesRootNode = hNode
+   Treeview_SetBold( hTree, hNode, TRUE) 
+   For i As Long = 0 To 9 
+      ' If the file no longer exists then remove it from the MRU list 
+      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i)) 
+      If AfxFileExists(gConfig.MRU(i)) Then 
+         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRU(i), 0, gidxImageBlank, gidxImageBlank) 
+         FF_TreeView_SetCheckState( hTree, hNode, False) 
+         fEmpty = False 
+      End If 
+   Next 
+   If fEmpty Then 
+      wzStr = @L(11,"(Empty)") 
+      FF_TreeView_InsertItem( hTree, hNode, wzStr, 0, gidxImageBlank, gidxImageBlank) 
+   End If 
+   Treeview_Expand(hTree, hNode, TVE_EXPAND)  
 
-' ========================================================================================
-' Load the Recent Projects treeview
-' ========================================================================================
-Function LoadRecentProjectsTreeview( ByVal HWnd As HWnd ) As LRESULT
 
-   Dim As CWSTR wzStr
-   Dim As HTREEITEM hNode
-   Dim As BOOLEAN fEmpty = True
-
-   Dim As HWnd hTree = GetDlgItem(HWnd, IDC_FRMRECENT_TREEPROJECTS)
-   
-   Treeview_DeleteAllItems(hTree)
-
-   ' Display MRU files
-   wzStr = UCase(AfxStrRemove( L(219, "&Recent Projects"), "&"))
-   hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr, 0, gidxImageOpened, gidxImageOpened )
-   FF_TreeView_SetCheckState( hTree, hNode, True)
-   For i As Long = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRUPROJECT(i) = ProcessFromCurdrive(gConfig.MRUPROJECT(i))
-      If AfxFileExists(gConfig.MRUPROJECT(i)) Then
-         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRUPROJECT(i), 0, gidxImageBlank, gidxImageBlank)
-         FF_TreeView_SetCheckState( hTree, hNode, False)
-         fEmpty = False
-      End If
-   Next
-   If fEmpty Then
-      wzStr = @L(11,"(Empty)")
-      FF_TreeView_InsertItem( hTree, hNode, wzStr, 0, gidxImageBlank, gidxImageBlank)
-   End If
-   Treeview_Expand(hTree, hNode, TVE_EXPAND) 
+   ''  RECENT PROJECTS
+   wzStr = UCase(AfxStrRemove( L(219, "&Recent Projects"), "&")) 
+   hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr ) 
+   gApp.hRecentProjectsRootNode = hNode
+   Treeview_SetBold( hTree, hNode, TRUE) 
+   For i As Long = 0 To 9 
+      ' If the file no longer exists then remove it from the MRU list 
+      gConfig.MRUPROJECT(i) = ProcessFromCurdrive(gConfig.MRUPROJECT(i)) 
+      If AfxFileExists(gConfig.MRUPROJECT(i)) Then 
+         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRUPROJECT(i) )
+         fEmpty = False 
+      End If 
+   Next 
+   If fEmpty Then 
+      wzStr = @L(11,"(Empty)") 
+      FF_TreeView_InsertItem( hTree, hNode, wzStr )
+   End If 
+   Treeview_Expand(hTree, hNode, TVE_EXPAND)  
+ 
+   ' Set the view to the first line
+   TreeView_EnsureVisible(hTree, hFirstNode)
    
    Function = 0
       
@@ -114,25 +103,10 @@ Function PositionRecentWindows( ByVal HWnd As HWnd ) As LRESULT
                      SWP_SHOWWINDOW Or SWP_NOZORDER )
    AfxRedrawWindow(hBtn)
 
-   Dim As Long NumItems = 1  ' start with the header 
-   For i As Long = 0 To 9
-      ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
-      If AfxFileExists(gConfig.MRU(i)) Then NumItems = NumItems + 1
-   Next
-   ' The MRU list will consist of at least the Header and the (Empty) designation.
-   If NumItems < 2 Then NumItems = 2
-   
    nTop = nTop + pWindow->ScaleY(48)
-   hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_TREEFILES)
+   hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_TREEVIEW)
    SetWindowPos( hBtn, 0, pWindow->ScaleX(4), nTop, _
-                  rc.Right-rc.Left-pWindow->ScaleX(8), (NumItems * pWindow->ScaleY(24)), _
-                  SWP_SHOWWINDOW Or SWP_NOZORDER )
-   
-   nTop = nTop + AfxGetWindowHeight(hBtn) + pWindow->ScaleY(18)
-   hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_TREEPROJECTS)
-   SetWindowPos( hBtn, 0, pWindow->ScaleX(4), nTop, _
-                  rc.Right-rc.Left-pWindow->ScaleX(8), pWindow->ScaleY(264), _
+                  rc.Right-rc.Left-pWindow->ScaleX(8), rc.bottom - nTop, _
                   SWP_SHOWWINDOW Or SWP_NOZORDER )
 
    Function = 0
@@ -172,49 +146,6 @@ End Function
 
 
 ' ========================================================================================
-' Process WM_NOTIFY message for window/dialog: frmRecent
-' ========================================================================================
-Function frmRecent_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
- 
-   Select Case pNMHDR->code 
-      
-      Case NM_CUSTOMDRAW
-         Dim tvcd As NMTVCUSTOMDRAW Ptr = Cast(NMTVCUSTOMDRAW Ptr, pNMHDR)
-
-         Select Case tvcd->nmcd.dwDrawStage
-            Case CDDS_PREPAINT
-               Return CDRF_NOTIFYITEMDRAW 
-
-            Case CDDS_ITEMPREPAINT 
-               Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(hWnd, id))
-               SelectFont(tvcd->nmcd.hdc, hFont)
-               If (tvcd->nmcd.uItemState And ODS_SELECTED) And (GetFocus() = tvcd->nmcd.hdr.hwndFrom) Then
-                  tvcd->clrTextBk = BGR(9,71,113)
-                  tvcd->clrText   = BGR(255,255,250)
-               ElseIf (tvcd->nmcd.uItemState And ODS_SELECTED) Then
-                  tvcd->clrTextBk = BGR(63,63,70)
-                  tvcd->clrText   = BGR(204,204,204)
-               ElseIf (tvcd->nmcd.uItemState And CDIS_HOT) Then
-                  tvcd->clrTextBk = BGR(42,45,46)
-                  tvcd->clrText   = BGR(204,204,204)
-               Else
-                  tvcd->clrTextBk = BGR(80,80,80)
-                  tvcd->clrText   = BGR(204,204,204)
-               End If                                   
-               Return CDRF_NEWFONT 
-
-            Case CDDS_PREPAINT
-               Return CDRF_SKIPDEFAULT
-                                            
-         End Select
-      
-   End Select
- 
-   Function = 0
-End Function
-
-
-' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmRecent
 ' ========================================================================================
 Function frmRecent_OnDestroy(HWnd As HWnd) As LRESULT
@@ -222,17 +153,14 @@ Function frmRecent_OnDestroy(HWnd As HWnd) As LRESULT
 
    Dim As HFONT hFont
    Dim As HWnd hTree
-   hTree = GetDlgItem( hWnd, IDC_FRMRECENT_TREEFILES)
-   hFont = AfxGetWindowFont(hTree):  DeleteFont(hFont)
-   hTree = GetDlgItem( hWnd, IDC_FRMRECENT_TREEPROJECTS)
-   hFont = AfxGetWindowFont(hTree):  DeleteFont(hFont)
+   hTree = GetDlgItem( hWnd, IDC_FRMRECENT_TREEVIEW)
    
    Function = 0
 End Function
 
 
 ' ========================================================================================
-' Processes messages for the subclassed frmRecent treeview controls.
+' Processes messages for the subclassed frmRecent Treeview controls.
 ' ========================================================================================
 Function frmRecent_Tree_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
@@ -243,13 +171,8 @@ Function frmRecent_Tree_SubclassProc ( _
                   ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
                   ) As LRESULT
 
-   Dim As HWND hTree 
-   Dim As POINT pt
-   Dim As HTREEITEM hItem
-
    ' Convert our ENTER key presses into LBUTTONDBLCLK to process them similarly
    If (uMsg = WM_KEYUP) And (Loword(wParam) = VK_RETURN) Then uMsg = WM_LBUTTONDBLCLK
-
       
    Select Case uMsg
 
@@ -259,16 +182,16 @@ Function frmRecent_Tree_SubclassProc ( _
          Exit Function
 
       Case WM_LBUTTONDBLCLK
-         hTree = hWnd
-         hItem = Treeview_GetSelection(hTree)
+         dim as hwnd hTree = hWnd
+         dim As HTREEITEM hItem = Treeview_GetSelection(hTree)
          If hItem Then   
             ' Get the text for the line that was double clicked on.
             Dim As CWSTR wzStr = String(MAX_PATH, 0)
             TreeView_GetItemText( hTree, hItem, wzStr, MAX_PATH )
             If AfxFileExists(wzStr) Then
-               If uIdSubclass = IDC_FRMRECENT_TREEPROJECTS Then
+               If Treeview_GetParent(hTree, hItem) = gApp.hRecentProjectsRootNode then 
                   OpenMRUProjectFile( HWND_FRMMAIN, 0, wzStr)
-               Else   
+               Elseif Treeview_GetParent(hTree, hItem) = gApp.hRecentFilesRootNode then 
                   frmMain_OpenFileSafely(HWND_FRMMAIN, _
                                           False, _    ' bIsNewFile
                                           False, _    ' bIsTemplate
@@ -316,12 +239,11 @@ Function frmRecent_WndProc( ByVal HWnd   As HWnd, _
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_SIZE,    frmRecent_OnSize)
       HANDLE_MSG (HWnd, WM_COMMAND, frmRecent_OnCommand)
-      HANDLE_MSG (HWnd, WM_NOTIFY,  frmRecent_OnNotify)
       HANDLE_MSG (HWnd, WM_DESTROY, frmRecent_OnDestroy)
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -335,14 +257,14 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   HWND_FRMRECENT = pWindow->Create( hWndParent, "", @frmRecent_WndProc, 0, 0, 250, 0, _
+   HWND_FRMRECENT = pWindow->Create( hWndParent, "Recent Window", @frmRecent_WndProc, 0, 0, 250, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
    pWindow->SetFont( "Segoe UI Semibold", 9)
-   pWindow->Brush = CreateSolidBrush(BGR(80,80,80))
+   pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    Dim as HWND hBtn = _
       frmHotTxtBtn( HWND_FRMRECENT, IDC_FRMRECENT_BTNOPENFILE, L(248, "Open File"), "", _
@@ -358,56 +280,25 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
                        1 )            ' 0 Left, 1 Center, 2 Right
       AfxSetWindowFont( hBtn, pWindow->Font, True )
 
-   
-   Dim As HFONT hFont
-   Dim As HWnd hTree 
-   
-   hTree = _
-        pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEFILES, "", 0, 0, 0, 0, _
+   Dim As HWnd hTree = _
+        pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEVIEW, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _ 
+        TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEFILES, Cast(DWORD_PTR, @pWindow))
-  
-   hFont = pWindow->CreateFont("Segoe UI", 9) 
-   SendMessageW( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
-   'SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(37,37,37)) )
-   SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(80,80,80)) )
-   SendMessageW( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(24), 0 )
-   SendMessageW( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
-   'TreeView_SetImageList( hTree, ghImageListNormal, TVSIL_NORMAL )
+        Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEVIEW, Cast(DWORD_PTR, @pWindow))
 
+   Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
+   SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
+   SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
+   SendMessage( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(24), 0 )
+   SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
    
-   hTree = _
-        pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEPROJECTS, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
-        TVS_NOSCROLL Or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _  
-        WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEPROJECTS, Cast(DWORD_PTR, @pWindow))
-   
-   hFont = pWindow->CreateFont("Segoe UI", 9) 
-   SendMessageW( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
-   'SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(37,37,37)) )
-   SendMessageW( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, BGR(80,80,80)) )
-   SendMessageW( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(24), 0 )
-   SendMessageW( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
-   'TreeView_SetImageList( hTree, ghImageListNormal, TVSIL_NORMAL )
-
    LoadRecentFilesTreeview(HWND_FRMRECENT)
-   LoadRecentProjectsTreeview(HWND_FRMRECENT)
-   
    PositionRecentWindows(HWND_FRMRECENT)
 
    Function = 0
    
 End Function
-
-
-
-
-
-
-
 
 
 

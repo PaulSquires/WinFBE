@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -42,14 +42,14 @@ Function frmGoto_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             nLine = Val(swzText) - 1
             If nLine >= 0 Then
                Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-               If pDoc Then SendMessageW( pDoc->hWindow, SCI_GOTOLINE, nLine, 0 )
+               If pDoc Then SciExec( pDoc->hWindow, SCI_GOTOLINE, nLine, 0 )
             End If
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
    End Select
@@ -95,7 +95,7 @@ Function frmGoto_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -145,11 +145,11 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
-      curPos  = SendMessageW(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
-      nLine   = SendMessageW(pDoc->hWindow, SCI_LINEFROMPOSITION, curPos, 0) + 1
-      nLines  = SendMessageW(pDoc->hWindow, SCI_GETLINECOUNT, 0, 0)
-      SetWindowTextW( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE), WStr(nLine) )
-      SetWindowTextW( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE), WStr(nLines) )
+      curPos  = SciExec(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
+      nLine   = SciExec(pDoc->hWindow, SCI_LINEFROMPOSITION, curPos, 0) + 1
+      nLines  = SciExec(pDoc->hWindow, SCI_GETLINECOUNT, 0, 0)
+      SetWindowText( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE), WStr(nLine) )
+      SetWindowText( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE), WStr(nLines) )
    End If
      
    ShowWindow pWindow->hWindow, SW_SHOW

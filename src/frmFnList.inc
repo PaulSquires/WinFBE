@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -17,23 +17,21 @@
 ' ========================================================================================
 Function frmFnList_SetListBoxPosition() As Long
 
-   Dim pList   As FUNCTION_TYPE Ptr
    Dim nCurSel As Long = -1
+
+   Dim pDocActive As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr() 
+   Dim pDoc As clsDocument Ptr
 
    Dim As HWnd hList  = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
    Dim As Long nCount = Listbox_GetCount(hList)
    
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr() 
-   If pDoc Then 
-      For i As Long = 0 To nCount - 1
-         pList = Cast(FUNCTION_TYPE Ptr, Listbox_GetItemData(hList, i))
-         If pList Then
-            If pList->pDoc = pDoc Then
-               nCurSel = i: Exit For
-            End If
-         End If
-      Next
-   End If            
+   ' Search for a match
+   For i As Long = 0 To nCount - 1
+      pDoc = Cast(clsDocument ptr, ListBox_GetItemData(hList, i))
+      if pDoc = pDocActive THEN
+         nCurSel = i: Exit For
+      END IF
+   Next
    
    Listbox_SetCurSel(hList, nCurSel)
    
@@ -47,29 +45,43 @@ End Function
 Function frmFnList_UpdateListBox() As Long
 
    Dim As HWnd hList = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
-   Dim szTemp As WString * MAX_PATH
    
    ' Clear the listbox and add the new items
    Listbox_ResetContent(hList)
    
-   Dim pDoc As clsDocument Ptr
-   Dim pList As FUNCTION_TYPE Ptr
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   Dim As HTREEITEM hChild, hParent
+   dim as long p, pDoc, idx
+   dim wszText as wstring * MAX_PATH
    
-   Dim As Long i, idx
-   Dim As Long nCount = gApp.GetDocumentCount()
+   dim as long nFirstProject = iif(gApp.IsProjectActive, 1, 0)
+   Dim As Long nProjectCount = gApp.GetProjectCount()
    
-   For i = 0 To nCount - 1
-      pDoc = gApp.GetDocumentPtr(i)
-      If pDoc Then 
-         ' Display all the sub/function names in this source file
-         pList = pDoc->FnListPtr
-         Do Until pList = 0
-            ' Draw the function or header name and store pointer to pList
-            idx = Listbox_AddString( hList, @pList->zFnName )
-            ListBox_SetItemData( hList, idx, pList )    ' store pointer to type structure
-            pList = pList->pListNext
-         Loop      
-      End If   
+   For idx = nFirstProject To nProjectCount 
+      if gApp.Projects(idx).InUse = false THEN continue for
+
+      hParent = Treeview_GetChild( hTree, gApp.Projects(gApp.GetActiveProjectIndex).hExplorerRootNode)
+      do until hParent = 0 
+         ' Filename
+         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
+         pDoc = FF_TreeView_GetlParam(hTree, hParent)
+         wszText = ucase(wszText)
+         p = Listbox_AddString( hList, strptr(wszText) )
+         ListBox_SetItemData( hList, p, pDoc )    ' pDoc is stored for a header
+         
+         ' Get all functions in the file
+         hChild = Treeview_GetChild( hTree, hParent)
+         do until hChild = 0 
+            Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+            p = Listbox_AddString( hList, strptr(wszText) )
+            ListBox_SetItemData( hList, p, 0 )
+            hChild = Treeview_GetNextSibling(hTree, hChild)
+         loop
+         
+         ' Get the next filename
+         hParent = Treeview_GetNextSibling(hTree, hParent)
+      loop 
+
    Next
    
    Function = 0
@@ -87,33 +99,15 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
          If codeNotify = LBN_DBLCLK Then
             Dim As Long nCurSel = Listbox_GetCurSel(hwndCtl)
             If nCurSel = -1 Then Exit Function
-            
-            ' Retrieve the pointer to the pList and attempt to load the document at the correct 
-            ' location. If the pointer is Null then we have clicked on the header element which
-            ' is the name of the file. 
-            Dim pDoc As clsDocument Ptr 
-            Dim pList As FUNCTION_TYPE Ptr = Cast(FUNCTION_TYPE Ptr, Listbox_GetItemData(hWndCtl, nCurSel))
-            
-            If pList = 0 Then  ' header row
-               ' Get the filename and attempt to open the document
-            Else
-               ' Display the document containing the selected sub/function       
-               pDoc = pList->pDoc
-               frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       true, _     ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       pDoc->DiskFilename, _  ' pwszName
-                                       pDoc )  ' pDocIn
-               ' Set the top line to display in the editor. I chose to start 3 lines before the
-               ' function just to make it visually more appealing.
-               SendMessageW( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, pList->nLineNumber - 3, 0) 
-               SendMessageW( pDoc->hWindow, SCI_GOTOLINE, pList->nLineNumber, 0) 
-            End If
+            ' Open the document based on the filename or if it is a header line
+            ' then simply use the pDoc.
+            dim pDoc as clsDocument ptr
+            dim wszText as wstring * MAX_PATH
+            ListBox_GetText( hwndCtl, nCurSel, @wszText )
+            pDoc = cast(clsDocument ptr, Listbox_GetItemData(hWndCtl, nCurSel))
+            OpenSelectedDocument(pDoc, wszText)
             If gConfig.CloseFuncList Then ShowWindow( HWND_FRMFNLIST, SW_HIDE )
-         End If
-         
+         end if      
    End Select
    
    Function = 0
@@ -180,13 +174,13 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
 
    Dim As HBRUSH hBrush 
    Dim As HFONT hFont, hFontOld
+   dim as BOOLEAN bIsHeader
    Dim As Rect rc 
    Dim wzText As WString * MAX_PATH
    
    If lpdis->itemID = -1 Then Exit Function
    
    Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(HWnd)
-   Dim pList As FUNCTION_TYPE Ptr
    
    Select Case lpdis->itemAction
       Case ODA_DRAWENTIRE, ODA_SELECT
@@ -199,16 +193,17 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
          ' DRAW TEXT
          SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
          SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
-         SendMessageW(lpdis->hwndItem, LB_GETTEXT, lpdis->itemID, Cast(LPARAM, @wzText))
+         SendMessage(lpdis->hwndItem, LB_GETTEXT, lpdis->itemID, Cast(LPARAM, @wzText))
          
-         ' Determine what font to use. The pointer to the pList data is held in the ItemData
-         ' for each row in the ListBox. If that value is zero then we must be dealing with a
-         ' header row.
-         pList = Cast(FUNCTION_TYPE Ptr, lpdis->itemData)
-         hFont = pWindow->CreateFont("", 9, Iif(pList->bIsHeader, FW_BOLD, FW_NORMAL) )
+         ' Determine what font to use and if itès a header line then only show
+         ' the filename's name and extension (not full path)
+         bIsHeader = iif(lpdis->itemData, true, false)
+         if bIsHeader then wzText = AfxStrPathname( "NAMEX", wzText )
+         hFont = pWindow->CreateFont("", 9, iif(bIsHeader, FW_BOLD, FW_NORMAL) )
+
          hFontOld = SelectObject(lpdis->hDC, hFont)
          DrawTextW( lpdis->hDC, wzText, -1, Cast(lpRect, @lpdis->rcItem), _
-                        DT_LEFT Or DT_SINGLELINE Or Iif(pList->bIsHeader, DT_BOTTOM, DT_VCENTER) )
+                        DT_LEFT Or DT_SINGLELINE Or Iif(bIsHeader, DT_BOTTOM, DT_VCENTER) )
          DeleteObject(SelectObject(lpdis->hDC, hFontOld))
    
          ' SELECTED ITEM
@@ -263,10 +258,10 @@ Function frmFnList_ListBox_SubclassProc ( _
          Select Case Loword(wParam)
             Case VK_RETURN
                ' Simulate the sending of a LBN_DBLCLK to the control.
-               SendMessageW( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
                Exit Function
             Case VK_ESCAPE
-               SendMessageW( GetParent(hWnd), WM_CLOSE, 0, 0 ) 
+               SendMessage( GetParent(hWnd), WM_CLOSE, 0, 0 ) 
          End Select
 
       Case WM_DESTROY
@@ -300,7 +295,7 @@ Function frmFnList_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -312,13 +307,14 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
                          ByVal nCmdShow   As Long = 0 _
                          ) As Long
 
-   ' If project manager already exists then toggle its visibility
+   ' If function list already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.
    If IsWindow(HWND_FRMFNLIST) Then
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMFNLIST), SW_HIDE, SW_SHOW)
       ShowWindow HWND_FRMFNLIST, nCmdShow
       If nCmdShow = SW_SHOW Then
-         frmFnList_SetListBoxPosition
+         frmFnList_UpdateListBox()
+         frmFnList_SetListBoxPosition()
          SetFocus GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
       End If
       Exit Function 

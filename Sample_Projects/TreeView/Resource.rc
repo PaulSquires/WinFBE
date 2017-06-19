@@ -1,0 +1,13 @@
+//=============================================================================
+// Manifest
+//=============================================================================
+
+1 24 ".\Resources\Manifest.xml"
+
+//=============================================================================
+// TreeView icons
+//=============================================================================
+
+IDI_FOLDER_OPEN       RCDATA ".\Resources\folder_open_32.png"
+IDI_FOLDER_CLOSED     RCDATA ".\Resources\folder_closed_32.png"
+IDI_ARROW_RIGHT       RCDATA ".\Resources\arrowright_green_32.png"

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 ''
 Function GetMRUMenuHandle() as HMENU
    Dim hFileMenu as HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, 0 ) 
-   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, 10 )
+   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, 11 )
    Function = hSubMenu
 End Function
 
@@ -49,12 +49,16 @@ Function ClearMRUlist( ByVal wID As Long ) As Long
          For i = 0 To 9
             gConfig.MRU(i) = ""
          Next
+         LoadRecentFilesTreeview(HWND_FRMRECENT)
       Case IDM_MRUPROJECTCLEAR
          For i = 0 To 9
             gConfig.MRUPROJECT(i) = ""
          Next
+         LoadRecentFilesTreeview(HWND_FRMRECENT)
    End Select
    
+   PositionRecentWindows(HWND_FRMRECENT)
+
    Function = 0
 End Function
 
@@ -116,15 +120,15 @@ Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
       If AfxFileExists(gConfig.MRU(i)) = 0 Then
          gConfig.MRU(i) = ""
       Else
-         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
+         AppendMenu( hSubMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
       End If
    Next
    
    If GetMenuItemCount(hSubMenu) = 0 Then
-      AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
+      AppendMenu( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    Else
-      AppendMenuW( hSubMenu, MF_SEPARATOR, 0, "" )
-      AppendMenuW( hSubMenu, MF_STRING, IDM_MRUCLEAR, L(225, "Clear this list") )
+      AppendMenu( hSubMenu, MF_SEPARATOR, 0, "" )
+      AppendMenu( hSubMenu, MF_STRING, IDM_MRUCLEAR, L(225, "Clear this list") )
    End If
    
    Function = 0
@@ -138,6 +142,8 @@ Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
    Dim i           as Long
    Dim wzFile      As WString * MAX_PATH
    
+   if gProjectLoading then exit function
+
    ' Search the 10 MRU items to see if the filename already exists and
    ' also for an available entry to put the filename in.
    For i = 0 To 9
@@ -189,33 +195,45 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFi
       wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
    End If
    
-   ' If a project is already open then save/close it, otherwise simply close
-   ' all currently open files and then open the project.
-   If gApp.IsProjectActive Then 
-      if OnCommand_ProjectClose(HWnd) = 0 then
-         exit function
-      end if   
-   else
+   ' If the project is already open then simply set the project as active
+   ' rather than opening an additional copy of the project.
+   idx = gApp.GetProjectIndexByFilename(wzFile)
+   if idx > 0 THEN 
+      gApp.SetActiveProject( gApp.Projects(idx).hExplorerRootNode )
+      exit function
+   END IF
+   
+   ' If a project is not yet open then close any files that may be open in the editor.
+   If gApp.IsProjectActive = false Then 
+      ' If the Find/Replace window is open then close it.
+      DestroyWindow(HWND_FRMFINDREPLACE)
       if OnCommand_FileClose(HWnd, true) = 0 then
          ' save was cancelled
          exit function
       end if   
+      gApp.NonProjectNotes = AfxGetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES))
+      ' Clear the FILES explorer node
+      if gApp.Projects(0).hExplorerRootNode THEN
+         dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+         Treeview_DeleteItem( hTree, gApp.Projects(0).hExplorerRootNode )
+         gApp.Projects(0).hExplorerRootNode = 0
+      END IF
    end if
          
    ' Clear any previous info from the Output windows
    AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
    ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
+   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO) )
+   AfxSetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), "")
    
    ' Open the project
-   gApp.ProjectFilename = wzFile
-   If gConfig.ProjectLoadFromFile() Then
-      gApp.IsNewProjectFlag = False
-      gApp.IsProjectActive = True
+   If gConfig.ProjectLoadFromFile(wzFile) Then
       ' Update the most recently used project list 
       UpdateMRUProjectList(@wzFile)
    End If
 
    ' Position all of the controls into place
+   PositionExplorerWindows(HWND_FRMEXPLORER)
    frmMain_PositionWindows(HWnd)
 
    Function = 0
@@ -242,15 +260,15 @@ Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
       If AfxFileExists(gConfig.MRUProject(i)) = 0 Then
          gConfig.MRUProject(i) = ""
       Else
-         AppendMenuW( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUProject(i) )
+         AppendMenu( hSubMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUProject(i) )
       End If
    Next
    
    If GetMenuItemCount(hSubMenu) = 0 Then
-      AppendMenuW( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
+      AppendMenu( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    Else
-      AppendMenuW( hSubMenu, MF_SEPARATOR, 0, "" )
-      AppendMenuW( hSubMenu, MF_STRING, IDM_MRUPROJECTCLEAR, L(225, "Clear this list") )
+      AppendMenu( hSubMenu, MF_SEPARATOR, 0, "" )
+      AppendMenu( hSubMenu, MF_STRING, IDM_MRUPROJECTCLEAR, L(225, "Clear this list") )
    End If
    
    Function = 0

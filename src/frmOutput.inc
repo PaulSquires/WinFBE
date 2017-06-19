@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -13,6 +13,98 @@
 
 
 ' ========================================================================================
+' Ensure that the correct notes are shown
+' ========================================================================================
+function frmOutput_ShowNotes() as long 
+
+   dim idx as long 
+   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
+
+   if gApp.IsProjectActive THEN
+      idx = gApp.GetActiveProjectIndex()
+      AfxSetWindowText(hCtl, gApp.Projects(idx).ProjectNotes)
+   else   
+      AfxSetWindowText(hCtl, gApp.NonProjectNotes)
+   END IF
+
+   function = 0
+END FUNCTION
+
+
+' ========================================================================================
+' Update the TODO listview
+' ========================================================================================
+function UpdateToDoListview() as long 
+   dim as hwnd hLV = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO)
+   ListView_DeleteAllItems( hLV )
+   dim as long n = 0
+
+   dim pData as DBENGINE_DATA ptr
+   
+   gdb.dbRewind()
+   do 
+      pData = gdb.dbGetNext
+      if pData = 0 THEN exit do
+      if pData->dataType <> DB_TODO_ITEM THEN continue do
+      if AfxFileExists(pData->diskFilename) THEN
+         FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
+         FF_ListView_InsertItem( hLV, n, 1, WStr(pData->diskFilename) )
+         FF_ListView_InsertItem( hLV, n, 2, WStr(pData->data1) ) 
+         n = n + 1
+      end if
+   loop
+
+   function = 0
+END FUNCTION
+
+
+' ========================================================================================
+' Process the search result that was double clicked
+' ========================================================================================
+function DoSearchFileSelected() as LONG
+
+   dim as long nCursel, f1, f2, nSize, nLineNum
+   dim wzText as wstring * MAX_PATH
+   dim wzFilename as wstring * MAX_PATH
+
+   dim as HWND hLB = GetDlgItem(hWnd_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH)
+   nCurSel = ListBox_GetCurSel(hLB)
+   SendMessage( hLB, LB_GETTEXT, nCurSel, cast(LPARAM, @wzText))
+   
+   'X:\FB\WinFBE - Editor\license.txt(1): WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+   
+   ' Search for the first open parenthesis 
+   f1 = instr(wzText, "(")
+   if f1 THEN
+      wzFilename = left(wzText, f1-1)
+      wzText = mid(wzText, f1+1) 
+      f2 = instr(wzText, ")")
+      if f2 THEN
+         wzText = left(wzText, f2-1) 
+         nLineNum = val(wzText)
+      end if
+   END IF
+
+   if AfxFileExists(wzFilename) = 0 THEN exit function
+      
+   Dim pDoc As clsDocument Ptr 
+   pDoc = frmMain_OpenFileSafely(HWnd_FRMMAIN, _
+                           False, _    ' bIsNewFile
+                           False, _    ' bIsTemplate
+                           True,  _    ' bShowInTab
+                           true, _     ' bIsInclude
+                           wzFilename, _ ' pwszName
+                           0 )         ' pDocIn
+
+   if pDoc THEN
+      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNum-1, 0)
+   END IF
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Show/Hide correct child controls
 ' ========================================================================================
 Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
@@ -22,6 +114,9 @@ Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
    ' By default, hide all controls
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_HIDE
    ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), SW_HIDE
+   ShowWindow GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), SW_HIDE
    
    hTabCtl = GetDlgItem(hWnd, IDC_FRMOUTPUT_TABCONTROL)
    
@@ -30,6 +125,12 @@ Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
          ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), SW_SHOW )
       case 1    ' compiler log file
          ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), SW_SHOW )
+      case 2    ' search results
+         ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), SW_SHOW )
+      case 3    ' ToDo list
+         ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), SW_SHOW )
+      case 4    ' Notes
+         ShowWindow( GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), SW_SHOW )
    end select
          
    Function = 0
@@ -63,6 +164,9 @@ Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
    nTop = nTop + nCtlHeight 
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
 
    ' Determine which child controls should be shown or hidden
    ShowHideOutputControls(hWnd)
@@ -94,6 +198,27 @@ Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
             ShowWindow HWND_FRMOUTPUT, SW_HIDE
             frmMain_PositionWindows(HWND_FRMMAIN)
          end if
+
+      case LBN_DBLCLK 
+         if (id = IDC_FRMOUTPUT_LISTSEARCH) orelse _
+              (id = IDC_FRMOUTPUT_LVTODO) then
+            DoSearchFileSelected()   
+            Exit Function
+         End If
+      
+      case EN_CHANGE
+         ' Notes have been modified. Save them to the correct global variable
+         ' to ensure that the changes are not lost when documents or projects
+         ' are switched.
+         if id = IDC_FRMOUTPUT_TXTNOTES THEN
+            if gApp.IsProjectActive THEN
+               dim as long idx = gApp.GetActiveProjectIndex()
+               gApp.Projects(idx).ProjectNotes = AfxGetWindowText(hwndCtl)
+            else
+               gApp.NonProjectNotes = AfxGetWindowText(hwndCtl)
+            end if   
+         END IF   
+         
    end select
                        
    Function = 0
@@ -226,7 +351,7 @@ Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -244,7 +369,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   Dim As HWnd hCtl, hLV
+   Dim As HWnd hCtl, hLV, hLB
    Dim As Long nWidth  = 24
    Dim As Long nHeight = 24
    
@@ -256,10 +381,14 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    TabCtrl_AddTab( hCtl, -1, L(191, "Compiler Results") )
    TabCtrl_AddTab( hCtl, -1, L(252, "Compiler Log File") )
+   TabCtrl_AddTab( hCtl, -1, L(262, "Search Results") )
+   TabCtrl_AddTab( hCtl, -1, L(263, "TODO") )
+   TabCtrl_AddTab( hCtl, -1, L(264, "Notes") )
    TabCtrl_SetCurSel( hCtl, 0 )
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
-                  L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), 0, 0, nWidth, nHeight )
+                  L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT), _
+                  0, 0, nWidth, nHeight )
                   
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _
@@ -288,49 +417,45 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    ListView_AddColumn( hLV, 1, L(254, "File"), pWindow->ScaleX(250) )
    ListView_AddColumn( hLV, 2, L(255, "Description"), pWindow->ScaleX(500) )
        
+   ' Search results listbox
+   hLB = _
+      pWindow->AddControl("LISTBOX", , IDC_FRMOUTPUT_LISTSEARCH, "", 0, 0, 0, 0, _
+      WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
+      WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   AfxSetWindowFont( hLB, hFont, True )
+
+   ' TODO listview
+   hLV = _
+      pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LVTODO, "", 0, 0, 0, 0, _
+      WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS or LVS_SINGLESEL, _
+      WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+      Cast(WNDPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LVTODO, Cast(DWORD_PTR, @pWindow))
+                                     
+   ' Make the listview header flat
+   ListView_MakeHeaderFlat(hLV)
+          
+   ' Add some extended styles
+   dwExStyle = ListView_GetExtendedListViewStyle(hLV)
+   dwExStyle = dwExStyle Or LVS_EX_FULLROWSELECT Or LVS_EX_GRIDLINES Or LVS_EX_DOUBLEBUFFER Or LVS_EX_FLATSB
+   ListView_SetExtendedListViewStyle(hLV, dwExStyle)
+
+   ' Configure the ListView
+   ListView_AddColumn( hLV, 0, L(253, "Line"), pWindow->ScaleX(75) )
+   ListView_AddColumn( hLV, 1, L(254, "File"), pWindow->ScaleX(250) )
+   ListView_AddColumn( hLV, 2, L(255, "Description"), pWindow->ScaleX(500) )
+
+   hCtl = _
+      pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTNOTES, "", 0, 0, 0, 0, _
+      WS_VISIBLE OR WS_TABSTOP OR WS_VSCROLL or ES_LEFT OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN, _
+      WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
+   hFont = pWindow->CreateFont( "Courier New", 9 )
+   AfxSetWindowFont( hCtl, hFont, True )
+   AfxSetWindowText(hCtl, gApp.NonProjectNotes)
+   
    PositionOutputWindows(HWND_FRMOUTPUT)
    
    Function = 0
 
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

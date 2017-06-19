@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -101,6 +101,11 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
    If idx < 0 Then idx = nCount - 1
    If TabCtrl_GetCurSel(this.hWindow) <> idx Then
       Function = TabCtrl_SetCurFocus(this.hWindow, idx)
+      if IsWindowVisible(HWND_FRMFINDREPLACE) THEN
+         frmFindReplace_HighlightSearches
+         frmFindReplace_SetButtonStates
+      END IF
+      SetFocusScintilla
    End If
 End Function
 
@@ -199,7 +204,7 @@ Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
    Dim As Long NumItems = TabCtrl_GetItemCount(this.hWindow)             
    
    ' Return the index of the added tab
-   idx = SendMessageW( this.hWindow, TCM_INSERTITEM, NumItems, Cast(LPARAM, @TB) )     
+   idx = SendMessage( this.hWindow, TCM_INSERTITEM, NumItems, Cast(LPARAM, @TB) )     
    
    this.SetTabText(idx)
    
@@ -226,7 +231,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    If pDoc Then 
       ' Set the text that displays on the tab
       wText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-      If SendMessageW( pDoc->hWindow, SCI_GETMODIFY, 0, 0 ) Then
+      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          wText = wText & "*"
       End If   
 

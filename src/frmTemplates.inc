@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -52,10 +52,10 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
             ' Get the handle of the Listbox
             Dim hListBox As HWnd = GetDlgItem(HWnd, IDC_FRMTEMPLATES_LISTBOX)
             ' Get the current selection
-            Dim curSel As Long = SendMessageW(hListBox, LB_GETCURSEL, 0, 0)
+            Dim curSel As Long = SendMessage(hListBox, LB_GETCURSEL, 0, 0)
             If curSel = LB_ERR Then Exit Function
             ' Get the stored index
-            Dim pwszPath As WString Ptr = Cast(WString Ptr, SendMessageW(hListBox, LB_GETITEMDATA, Cast(WPARAM, curSel), 0))
+            Dim pwszPath As WString Ptr = Cast(WString Ptr, SendMessage(hListBox, LB_GETITEMDATA, Cast(WPARAM, curSel), 0))
             If pwszPath = 0 Then Exit Function
             ' Open the template
             If pwszPath Then
@@ -69,12 +69,12 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
                                        0 )         ' pDocIn
    
                ' Ensure that the code window scrolls to the correct location
-               Dim As Long curPos = SendMessageW( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
-               SendMessageW( pDoc->hWindow, SCI_GOTOPOS, curPos, 0 )
+               Dim As Long curPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
+               SciExec( pDoc->hWindow, SCI_GOTOPOS, curPos, 0 )
 
             End If
             ' Close the dialog
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
    End Select
@@ -116,7 +116,7 @@ Function frmTemplates_WndProc (ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wPa
    End Select
 
    ' Default processing of Windows messages
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -156,19 +156,19 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    DIM hSearch as HANDLE, WFD AS WIN32_FIND_DATAW, FileNo AS LONG, nType AS LONG, nItem AS LONG
    DIM wszPath AS WSTRING * MAX_PATH, wszCurPath AS WSTRING * MAX_PATH, wszText AS WSTRING * 260
    DIM wszFullPath AS WSTRING * MAX_PATH * 2, idx AS LONG, nLin AS LONG
-   wszPath = ExePath & "\Templates\"
+   wszPath = AfxGetExePathName & "\Templates\"
    wszCurPath = wszPath & "*.fbtpl"
 
    ' // Count the number of files and dimension the array
    ' // REDIM PRESERVE causes problems
    DIM nCount AS LONG
-   hSearch = FindFirstFileW(wszCurPath, @WFD)
+   hSearch = FindFirstFile(wszCurPath, @WFD)
    IF hSearch <> INVALID_HANDLE_VALUE THEN
       DO
          IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
             nCount +=1
          END IF
-      LOOP WHILE FindNextFileW(hSearch, @WFD)
+      LOOP WHILE FindNextFile(hSearch, @WFD)
       FindClose(hSearch)
    END IF
    ' // Dimension the array
@@ -177,7 +177,7 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    idx = 0
 
    ' // Find the files
-   hSearch = FindFirstFileW(wszCurPath, @WFD)
+   hSearch = FindFirstFile(wszCurPath, @WFD)
    IF hSearch <> INVALID_HANDLE_VALUE THEN
       DO
          IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
@@ -197,7 +197,7 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
                LOOP
                CLOSE FileNo
                ' // Display the description in the listbox
-               nItem = SendMessageW(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
+               nItem = SendMessage(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
                ' // Store the full path in the array
                rgwszPaths(idx) = wszFullPath
                ' // Store a pointer to the element of the array in the listbox item

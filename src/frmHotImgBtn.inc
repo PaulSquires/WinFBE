@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -25,15 +25,94 @@ Type HOTIMGBTN_TYPE
    hImgNormal As HICON
    hImgHot    As HICON
    clrBg      As COLORREF
+   clrBgHot   As COLORREF
    nImgWidth  As Long
    nImgHeight As Long
-   fSelected  As BOOLEAN  ' flag that button should remain displaying as selected
+   fSelected  As BOOLEAN      ' flag that button should remain displaying as selected
+   fSelectedFrame as boolean  ' draw frame around selected button
+   fEnabled   as boolean      ' should the button allow clicks
 End Type
 
 
+' ========================================================================================
+' Return the Enabled/Disabled flag
+' ========================================================================================
+Function frmHotImgBtn_IsEnabled( ByVal HWnd As HWnd ) As boolean
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
+   If pWindow = 0 Then Exit Function
+   
+   Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
+   Function = pData->fEnabled
+End Function
 
 ' ========================================================================================
-' Set the Selected falg for the button. If Selected then the button will always 
+' Set the Enabled/Disabled flag
+' ========================================================================================
+Function frmHotImgBtn_Enabled( ByVal HWnd As HWnd, ByVal fEnabled as BOOLEAN ) As Long
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
+   If pWindow = 0 Then Exit Function
+   
+   Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
+   If pData Then pData->fEnabled = fEnabled
+   AfxRedrawWindow( hWnd )
+   
+   Function = 0
+End Function
+
+' ========================================================================================
+' Set the background normal and hot colors. 
+' ========================================================================================
+Function frmHotImgBtn_SetBackColors( ByVal HWnd As HWnd, _
+                                     ByVal clrNormal As COLORREF, _
+                                     byval clrHot as COLORREF _
+                                     ) As Long
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
+   If pWindow = 0 Then Exit Function
+   
+   Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
+   If pData Then 
+      pData->clrBg = clrNormal
+      pData->clrBgHot = clrHot
+   end if   
+   AfxRedrawWindow( hWnd )
+   
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Set the normal and hot images. 
+' ========================================================================================
+Function frmHotImgBtn_SetImages( ByVal HWnd As HWnd, _
+                                 ByRef wszImgNormal As WString = "", _
+                                 ByRef wszImgHot    As WString = ""  _
+                                 ) As Long
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
+   If pWindow = 0 Then Exit Function
+   
+   Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
+   If pData = 0 Then exit function 
+
+   with *pData
+      .hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+      .hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+   
+      ' If the images failed to load then try loading them using GDI in cases of png format.
+      If .hImgNormal = 0 Then 
+         .hImgNormal = AfxGdipIconFromRes( pWindow->InstanceHandle, wszImgNormal )
+      End If
+      If .hImgHot = 0 Then 
+         .hImgHot = AfxGdipIconFromRes( pWindow->InstanceHandle, wszImgHot )
+      End If
+   end with
+
+   AfxRedrawWindow( hWnd )
+   
+   Function = 0
+End Function
+
+' ========================================================================================
+' Set the Selected flag for the button. If Selected then the button will always 
 ' display using the Hot image regardless of whether the button is hot or not.
 ' ========================================================================================
 Function frmHotImgBtn_SetSelected( ByVal HWnd As HWnd, ByVal fSelected As BOOLEAN) As Long
@@ -48,7 +127,7 @@ Function frmHotImgBtn_SetSelected( ByVal HWnd As HWnd, ByVal fSelected As BOOLEA
 End Function
 
 ' ========================================================================================
-' Gets the Selected falg from the button. If Selected then the button will always 
+' Gets the Selected flag from the button. If Selected then the button will always 
 ' display using the Hot image regardless of whether the button is hot or not.
 ' ========================================================================================
 Function frmHotImgBtn_GetSelected( ByVal HWnd As HWnd ) As BOOLEAN
@@ -127,15 +206,13 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
    hbit  = CreateCompatibleBitmap( ps.hDC, rc.Right, rc.Bottom )
    If hbit Then hbit = SelectObject( memDC, hbit )
 
+   dim as HPEN hPen = CreatePen(PS_SOLID, 1, BGR(0,0,255))  ' blue
+   SelectObject( memDC, hPen )
+
    Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
    
    If pData Then
-      bIsHot = IIf( GetPropW(hWnd, "HOT") = 0, False, True ) 
-
-      ' Paint the entire client background
-      hBrush = CreateSolidBrush( pData->clrBg )
-      FillRect(memDC, @rc, hBrush) 
-      DeleteBrush(hBrush)
+      bIsHot = IIf( GetProp(hWnd, "HOT") = 0, False, True ) 
 
       ' Center the image
       nHMargin = (rc.right - pData->nImgWidth) / 2
@@ -143,12 +220,27 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
       
       If ( bIsHot = True ) Or (pData->fSelected = True) Then
          hIcon = pData->hImgHot
+         hBrush = CreateSolidBrush( pData->clrBgHot )
       Else
          hIcon = pData->hImgNormal
+         hBrush = CreateSolidBrush( pData->clrBg )
       End If
-      DrawStateW memDC, NULL, NULL, CAST(LPARAM, hIcon), 0, _
+      ' Paint the entire client background
+      FillRect(memDC, @rc, hBrush) 
+      DeleteBrush(hBrush)
+
+      ' Draw the close "X" icon
+      DrawState memDC, NULL, NULL, CAST(LPARAM, hIcon), 0, _
                   rc.Left + nHMargin, rc.Top + nVMargin, 0, 0, DST_ICON Or DSS_NORMAL
        
+      if pData->fSelected THEN
+         ' If the button is in a selected state then draw a thin
+         ' border around the icon.
+         if pData->fSelectedFrame THEN
+            SelectObject( memDC, GetStockObject( NULL_BRUSH ) )
+            Rectangle(memDC, rc.left + 1, rc.top + 1, rc.right - 1, rc.bottom - 1)
+         end if
+      END IF
    End If
    
    ' Copy the entire memory bitmap over to the visual display
@@ -159,6 +251,7 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
    If memDC Then DeleteDC memDC
 
    RestoreDC hDC, -1 
+   DeleteObject(hPen)
    
    EndPaint hWnd, @ps
    
@@ -208,7 +301,7 @@ Function frmHotImgBtn_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -225,10 +318,13 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
                        ByVal nImgWidth    As Long = 24, _
                        ByVal nImgHeight   As Long = 24, _
                        ByVal clrBg        As COLORREF = 0, _
+                       ByVal clrBgHot     As COLORREF = 0, _
                        BYVAL x            AS LONG = 0, _
                        BYVAL y            AS LONG = 0, _
                        BYVAL nWidth       AS LONG = 0, _
-                       BYVAL nHeight      AS LONG = 0 _
+                       BYVAL nHeight      AS LONG = 0, _
+                       byval fSelectedFrame as BOOLEAN = true, _
+                       byval fEnabled       as BOOLEAN = true _
                        ) As HWND
 
    '  Create the main window and child controls
@@ -250,9 +346,12 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
       .cID        = cID
       .nImgWidth  = pWindow->ScaleX( nImgWidth )
       .nImgHeight = pWindow->ScaleY( nImgHeight )
-      .hImgNormal = LoadImageW( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
-      .hImgHot    = LoadImageW( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+      .hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+      .hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
       .clrBg      = clrBg
+      .clrBgHot   = clrBgHot
+      .fSelectedFrame = fSelectedFrame
+      .fEnabled   = fEnabled
    End With
    
    ' If the images failed to load then try loading them using GDI in cases of png format.

@@ -1,0 +1,74 @@
+Version 1.3.3 (May 14, 2017)
+- Updated unicode file buffer handling.
+
+Version 1.3.2 (May 4, 2017)
+- Fixed: Find dialog was not showing number of matches when word highlighted in code editor and then Find dialog displayed.
+- Fixed: Repaint issue with Find/Replace dialog.
+- Fixed: Newly added subs/functions not being added to Function List when file was saved.
+- Changed: Replaced all occurrences of DIR(), CURDIR(), EXEPATH() with Afx versions in order to better handle unicode languages.
+- Changed: Totally reworked the way WinFBE handles file encoding for ansi/utf/utf8bom/utf16bom files.
+
+Version 1.3.1 (March 29, 2017)
+- Fixed: Regression with Function List showing two copies of all subs/functions contained in loaded files.
+
+Version 1.3.0 (March 24, 2017)
+- Changed: Major internal changes. Project management; multiple projects. Too many changes to list.
+- Changed: New Find/Replace functionality. Much more like that found in code editors like VSCode.
+
+Version 1.2.4 (February 7, 2017)
+- Fixed: Regression with the "Replace" dialog not correctly searching for phrase to replace.
+ 
+Version 1.2.3 (February 7, 2017)
+- Added: "Rebuild All" menu option. Re-compiles all modules to object files rather than reusing existing version of the file.
+- Changed: Duplicate Line (Ctrl+D) will now duplicate entire block of selected text and not just the current caret line.
+- Changed: TODO messages can now appear anywhere at start of a line (not only at the first character position).
+- Changed: Substantially increased the width of the compiler "Other Options" textboxes in Project Options.
+- Fixed: Cleared internal structures for function names, TYPES, etc when a document is closed.
+- Fixed: Clearing MRU list from top menu now immediately updates list shown in Explorer window.
+
+Version 1.2.2 (February 2, 2017)
+- Added: Find in Files functionality added.
+- Added: Add "TODO" messages directly in code via 'TODO: or ' TODO: List shows in Output window / TODO tab.
+- Added: New tab in Output window for "Notes". Notes are saved on a per project basis.
+- Added: File Menu option to "Save Declares File". Auto generates a Declare file for all Sub/Functions that you can #Include into your project.
+- Added: #Include files are now parsed for Sub/Function declaration Codetips.
+- Added: ProgressBar in StatusBar during compiling progress.
+- Added: Localization translations for Russian and Ukrainian compliments of ur_naz.
+- Changed: Refined autocomplete insertions for SUB/FUNCTION/PROPERTY/TYPE/UNION.
+- Fixed: Regression from v1.2.1 whereby cursor would not change to arrow during application start.
+- Fixed: Loading Template did not increment the Untitled 1,2,3 .bas filename numbering.
+- Fixed: Autocomplete insertions (eg. IF/THEN, FOR/NEXT) now honours the keyword casing as defined by the user.
+
+Version 1.2.1 (January 14, 2017)
+- Added: German localization file (deutsch.lang) compliments of Tom Dehn. 
+- Added: Drag/Drop document tabs for the open code editor windows (top tabcontrol). Inspired by Pierre Bellisle.
+- Fixed: GPF would occur if trying to open a zero length disk file.
+
+Version 1.2.0 (January 1, 2017)
+- Added: Autocomplete feature for IF/WHILE/FOR/SELECT/FUNCTION/SUB/PROPERTY/TYPE/UNION 
+- Added: Autocomplete displays data type list after "AS" is typed.
+- Added: Codetip popups for builtin FreeBASIC keywords and user defined subs/functions.
+- Added: Missing FB keywords: CULNG, CULNGINT, BOOLEAN
+- Added: New sample projects: RichOleDemo, Treeview, ToolbarRebar
+- Changed: Updated the Spanish language file.
+- Changed: Compiler Output window will close on successul compile if no warnings/errors and listview was previously active.
+- Changed: Font quality now uses the SC_EFF_QUALITY_DEFAULT flag.
+- Fixed: Newly created documents when saved now show in Recent Files list (if no project is active).
+- Fixed: Situation where closed project resource file used in subsequent opened *.bas file.
+- Fixed: FOS_FILEMUSTEXIST flag was missing in AfxIFileOpenDialogMultiple.
+ 
+Version 1.1.0 (December 6, 2016)
+- Added: Subfolder called "Sample_Projects" containing many sample projects as written by Jose Roca.
+- Added: StatusBar panel 5 shows current compile results (Errors/Warnings). Clicking that panel shows/hide Output window.
+- Added: Change cursor to hourglass during compile process.
+- Changed: Project files are now saved to the project file as relative to the project disk filename (*.wfbe).
+- Changed: Updated the Scintilla 32-bit DLL to version 3.7.1.
+- Fixed: Situation where newly created untitled source filename could be saved to a project file (*.wfbe).
+- Fixed: Correct font for Compiler Log output to be HighDPI aware.
+- Fixed: Dropping of files onto editor (frmMain_OnDropFiles) now correctly opens regular files or projects.
+- Fixed: Problem with "Untitled.bas*" files persisting in Project Explorer list even when untitled source file is closed.
+- Fixed: Situation where removing/closing a file would continue to show its list of functions in the popup Function List.
+ 
+Version 1.0.0 (Initial Release) (November 27, 2016)
+
+

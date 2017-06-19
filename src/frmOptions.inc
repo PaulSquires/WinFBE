@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ Sub SaveEditorOptions()
    HWnd = HWND_FRMOPTIONSEDITOR
    gConfig.SyntaxHighlighting   = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING) )
    gConfig.Codetips             = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCODETIPS) )
+   gConfig.AutoComplete         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOCOMPLETE) )
    gConfig.LeftMargin           = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN) )
    gConfig.FoldMargin           = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN) )
    gConfig.ConfineCaret         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCONFINECARET) )
@@ -49,7 +50,7 @@ Sub SaveEditorOptions()
    HWnd = HWND_FRMOPTIONSLOCAL
    wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION) )
    If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
-      MessageBoxW( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
+      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
                   L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
    End If
    gConfig.LocalizationFile = wText
@@ -110,12 +111,12 @@ Sub SaveEditorOptions()
    If gConfig.bKeywordsDirty Then
       HWnd = HWND_FRMOPTIONSKEYWORDS
       Dim As HWnd hTextBox = GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS)
-      Dim As Long nLen = GetWindowTextLengthW(hTextBox) + 2  ' add space for ending nuls
+      Dim As Long nLen = GetWindowTextLength(hTextBox) + 2  ' add space for ending nuls
       Dim pzswKeywords As WString Ptr = CAllocate(nLen*2)
-      GetWindowTextW( hTextBox, pzswKeywords, nLen )
+      GetWindowText( hTextBox, pzswKeywords, nLen )
       Dim As String FBKeywords = Str(*pzswKeywords)
-      gApp.FBKeywords = Trim(FBKeywords)
-      gApp.SaveKeywords
+      gConfig.FBKeywords = Trim(FBKeywords)
+      gConfig.SaveKeywords
       Deallocate(pzswKeywords)
    End If
    
@@ -151,19 +152,21 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
             ' Apply the newly saved options to all open Scintilla windows
-            Dim As Long nCount = gApp.GetDocumentCount 
             Dim pDoc As clsDocument Ptr
-            Dim As Long i
-            For i = 0 To nCount - 1
-               pDoc = gApp.GetDocumentPtr(i)
-               If pDoc Then pDoc->ApplyProperties
-            Next
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            for i as long = lbound(gApp.Projects) to ubound(gApp.Projects)
+               if gApp.Projects(i).InUse THEN
+                  For y as long = 0 To gApp.Projects(i).GetDocumentCount - 1
+                     pDoc = gApp.Projects(i).GetDocumentPtr(y)
+                     If pDoc Then pDoc->ApplyProperties
+                  Next
+               end if
+            next   
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
    End Select
@@ -293,7 +296,7 @@ Function frmOptions_WndProc( ByVal HWnd   As HWnd, _
    End Select
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
