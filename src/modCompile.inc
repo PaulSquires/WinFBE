@@ -35,6 +35,7 @@ Type COMPILE_TYPE
 End Type
 Dim Shared gCompile As COMPILE_TYPE
 
+
 ''
 ''  Set the statusbar text and icon for a good/bad compile
 '------------------------------------------------------------------------------------------------------------------------
@@ -199,6 +200,16 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Case "CONSOLE": gCompile.CompileMode = wstr(" -s console ")
    End Select   
   
+   ' Search main source code for any user embedded compile directives. These will override
+   ' anything that was set at the default or project level.
+   dim directives as COMPILE_DIRECTIVES
+   pDocMain->CompileDirectives(@directives)
+   if directives.ConsoleFlag THEN 
+      gCompile.CompileMode = wstr(" -s console ")
+   else   
+      gCompile.CompileMode = wstr(" -s gui ")
+   END IF
+
 
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
@@ -407,14 +418,24 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' Could Not Open source file (p.RC)
       ' OBJ file Not made
       ' compiling resource FAILED: Error Code 1
-      
+                                          
       ' Check to see if linking failed
       If (Left(**wst_ucase, 6) = WSTR("ERROR!")) Then
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
          FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1") ) 
          NumErrors = NumErrors + 1
-      End If
+      elseIf (Left(**wst_ucase, 5) = WSTR("ERROR")) Then
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Error Code 1") ) 
+         NumErrors = NumErrors + 1
+      elseIf (Left(**wst_ucase, 19) = WSTR("COMPILING C FAILED:")) Then
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling C FAILED: Error Code 1") ) 
+         NumErrors = NumErrors + 1
+      end if
       
       If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") ) 

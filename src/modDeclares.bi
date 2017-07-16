@@ -309,6 +309,14 @@ Dim Shared gFind As FINDREPLACE_TYPE
 Dim Shared gFindInFiles As FINDREPLACE_TYPE
 
 
+' Structure that holds all of the user embedded compiler directives
+' in the source code. Currently, only the main source file is searched
+' for the '#CONSOLE ON|OFF directive but others can be added as needed.
+type COMPILE_DIRECTIVES
+   ConsoleFlag as Boolean              ' True:CONSOLE ON, False:CONSOLE OFF
+END TYPE
+
+
 ' Forward reference
 Type clsDocument_ As clsDocument
 
@@ -375,6 +383,7 @@ Type clsDocument
       declare Function HasMarkerHighlight() As BOOLEAN
       declare Function FirstMarkerHighlight() As long
       declare Function LastMarkerHighlight() As long
+      declare function CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES ptr) as Long
       Declare Constructor
       Declare Destructor
 End Type

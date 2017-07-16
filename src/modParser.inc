@@ -137,7 +137,6 @@ Function ParseDocument( byval idx as long, _     ' project index
    ' Before starting to parse this document we must remove any previously saved
    ' data that exists in gdb database for this file.
    gdb.dbDelete(sFilename)
-   
    gdb.dbAdd(sFilename, idx, DB_FILENAME_PARSE, 0, "", "")
 
    

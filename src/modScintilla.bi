@@ -203,6 +203,7 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SC_CASE_MIXED                                   0
 #Define SC_CASE_UPPER                                   1
 #Define SC_CASE_LOWER                                   2
+#Define SC_CASE_CAMEL                                   3
 #Define SCI_STYLEGETFORE                                2481
 #Define SCI_STYLEGETBACK                                2482
 #Define SCI_STYLEGETBOLD                                2483

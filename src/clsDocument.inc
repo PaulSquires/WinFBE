@@ -547,7 +547,9 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
             strText = Iif(Len(strText) > 1, Mid(strText, 2), " ")
          End If   
       Else
-         strText = "'" & strText
+         If Len(strText) Then
+            strText = "'" & strText
+         end if   
       End If
       If Len(strText) Then
          nPos = SciMsg( m_pSci, SCI_POSITIONFROMLINE, i, 0)   ' starting position of the line
@@ -965,7 +967,8 @@ Function clsDocument.ApplyProperties() As Long
    Select Case gConfig.KeywordCase
       Case 0:  nFontCase = SC_CASE_LOWER
       Case 1:  nFontCase = SC_CASE_UPPER
-      Case 2:  nFontCase = SC_CASE_MIXED
+      Case 2:  nFontCase = SC_CASE_CAMEL   
+      Case 3:  nFontCase = SC_CASE_MIXED    ' original case
    End Select            
    
    If m_pSci = 0 Then Exit Function
@@ -1315,16 +1318,34 @@ Function clsDocument.LineDuplicate() As Long
 End Function
 
 
+''
+''
+function clsDocument.CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES ptr) as Long
+   ' Search the source code for any user embedded compiler directives.
+   Dim i      As Long    
+   Dim nLines As Long    
+   dim st     as String
+   
+   nLines = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0)
 
+   For i = 0 To nLines
+      st = ltrim(this.GetLine(i))
+      if left(st, 1) <> "'" THEN continue for
+      st = ltrim(mid(st, 2))
 
+      if len(st) < 11 THEN continue for
+      st = ucase(st)
+         
+      ' '#CONSOLE ON|OFF
+      if left(st, 11) = "#CONSOLE ON" THEN
+         pDirectives->ConsoleFlag = true
+      elseif left(st, 12) = "#CONSOLE OFF" THEN   
+         pDirectives->ConsoleFlag = false
+      END IF
+   Next
 
-
-
-
-
-
-
-
+   function = 0
+END FUNCTION
 
 
 

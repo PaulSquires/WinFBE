@@ -125,7 +125,7 @@ function clsDBEngine.dbDelete( byref Diskfilename as string ) as long
    dim nCount as long 
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted = true then continue for
-      if _stricmp(m_arrData(i).diskFilename, DiskFilename) = 0 THEN
+      if ucase(m_arrData(i).diskFilename) = ucase(DiskFilename) THEN
          m_arrData(i).deleted = true
          nCount = nCount + 1
       END IF   

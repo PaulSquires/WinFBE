@@ -678,6 +678,7 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    idx = gApp.GetActiveProjectIndex()
 
    pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(pwszName)
+
    if pDoc then pDocIn = pDoc
    
    If pDocIn = 0 Then   ' Create a new pDoc 
