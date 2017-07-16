@@ -87,6 +87,7 @@ function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as
    dim txtFind as string = Str(AfxGetWindowText(hWndFind))
    lenFind = len(txtFind)
    endPos = SciExec( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
+   if endPos = 0 THEN exit function
     
    ' Build an array holding all of the selection positions
    redim iPositions(100) as long
