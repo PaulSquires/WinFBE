@@ -1,7 +1,13 @@
 Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
-Declare Sub InsertionSort( MyArray() As String )
 Declare Function RemoveDuplicateSpaces( byref sText as const string) as string
 Declare Function ConvertCase( byval sText as string) as string
+Declare Function Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
+Declare Function AnsiToUtf8(BYREF sAnsi AS STRING) AS STRING
+Declare Function Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
+Declare Function UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
+Declare Function FileEncodingTextDescription(byval FileEncoding as long) as CWSTR
+Declare Function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
+Declare Function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long
 Declare Function OpenSelectedDocument( byval pDoc as clsDocument ptr, byref wszFunctionName as WSTRING ) as long
 Declare Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
@@ -30,6 +36,7 @@ Declare Function Splitter_OnMouseMove() As BOOLEAN
 Declare Sub GetColorInfo( ByVal nIndex As Long, ByVal wColorName As WString Ptr, ByRef nColorValue As COLORREF )
 Declare Function CBProc( ByVal HWnd As HWnd, ByVal wMsg As UInt, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function CreateCBColorList( ByVal HWnd As HWnd, ByVal CtrlId As Long, ByVal nLeft As Long, ByVal nTop As Long, ByVal nWidth As Long, ByVal nHeight As Long ) As HWnd
+Declare Function IsPreparsedFile( byref sFilename as string ) as boolean
 Declare Function GetIncludeFilename( byref sFilename as string, byref sLine as const string ) as STRING
 Declare Function ScintillaGetLine( byval pDoc as clsDocument ptr, ByVal nLine As Long ) As String
 Declare Function ParseDocument( byval idx as long, byval pDoc as clsDocument ptr, byval sFilename as string ) As Long

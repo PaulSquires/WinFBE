@@ -1338,9 +1338,9 @@ function clsDocument.CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES 
          
       ' '#CONSOLE ON|OFF
       if left(st, 11) = "#CONSOLE ON" THEN
-         pDirectives->ConsoleFlag = true
+         pDirectives->ConsoleFlag = IDM_CONSOLE
       elseif left(st, 12) = "#CONSOLE OFF" THEN   
-         pDirectives->ConsoleFlag = false
+         pDirectives->ConsoleFlag = IDM_GUI
       END IF
    Next
 

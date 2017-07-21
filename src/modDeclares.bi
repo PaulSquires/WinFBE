@@ -313,7 +313,7 @@ Dim Shared gFindInFiles As FINDREPLACE_TYPE
 ' in the source code. Currently, only the main source file is searched
 ' for the '#CONSOLE ON|OFF directive but others can be added as needed.
 type COMPILE_DIRECTIVES
-   ConsoleFlag as Boolean              ' True:CONSOLE ON, False:CONSOLE OFF
+   ConsoleFlag as long              ' IDM_GUI, IDM_CONSOLE
 END TYPE
 
 

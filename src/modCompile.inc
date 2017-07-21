@@ -204,11 +204,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' anything that was set at the default or project level.
    dim directives as COMPILE_DIRECTIVES
    pDocMain->CompileDirectives(@directives)
-   if directives.ConsoleFlag THEN 
-      gCompile.CompileMode = wstr(" -s console ")
-   else   
-      gCompile.CompileMode = wstr(" -s gui ")
-   END IF
+   select case directives.ConsoleFlag 
+      case IDM_CONSOLE
+         gCompile.CompileMode = wstr(" -s console ")
+      case IDM_GUI
+         gCompile.CompileMode = wstr(" -s gui ")
+   END select
 
 
    ' Need to test if the resulting application to be compiled is actually running
