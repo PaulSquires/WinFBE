@@ -577,24 +577,56 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 'Aborting due to runtime error 6 (out of bounds array access) at line 2 of D:\Use
 'rs\T0003830\Documents\Mes Outils Personnels\FBIde0.4.6r4_fbc1.06.0\FBIDETEMP.bas
 '::()
-         dim as long f1, f2
-         f1 = instr(sBuffer, " at line ")
-         if f1 THEN
-            wst3 = wstr(left(sBuffer, f1-1))
-            f2 = instr(f1, sBuffer, " of ")
-            wst2 = AfxStrParse(mid(sBuffer, f1+9), 1, " ")   ' line#
-            wst1 = mid(sBuffer, f2+4)
-            wst1 = AfxStrParse(wst1, 1, WSTR("::"))   ' filename
+
+'Aborting due to runtime error 12 ("segmentation violation" signal) in D:\Users\T
+'0003830\Documents\Mes Outils Personnels\FBIde0.4.6r4_fbc1.06.0\FBIDETEMP.bas::S()
+
+
+         ' Is this a runtime error?
+         if instr(sBuffer, "Aborting due to runtime error ") THEN
+            dim as long f1, f2
+            ' Can we retrieve a line number?
+            f1 = instr(sBuffer, " at line ")
+            if f1 THEN
+               wst3 = wstr(left(sBuffer, f1-1))
+               f2 = instr(f1, sBuffer, " of ")
+               wst2 = AfxStrParse(mid(sBuffer, f1+9), 1, " ")   ' line#
+               wst1 = mid(sBuffer, f2+4)
+               wst1 = AfxStrParse(wst1, 1, "::")   ' filename
+               FF_ListView_InsertItem( hLV, 0, 0, wst2 )  ' line#
+               FF_ListView_InsertItem( hLV, 0, 1, wst1 )  ' filename
+               FF_ListView_InsertItem( hLV, 0, 2, wst3 )  ' error message
+               ListView_SelectItem( hLV, 0 )
+               SetDocumentErrorPosition(hLV)
+            else
+               ' Could not identify a line number so position to the line
+               ' number of the specified sub/function   
+               wst2 = rtrim(AfxStrParse(sBuffer, 2, "::"), any chr(0,32,13,10))   ' sub/function name
+               wst2 = rtrim(wst2, "()")
+               wst3 = wstr(sBuffer)
+               f1 = instr(sBuffer, ":\")
+               if f1 THEN
+                  wst1 = AfxStrParse(mid(sBuffer, f1-1), 1, "::")
+               END IF
+               if len(wst2) = 0 THEN
+                  FF_ListView_InsertItem( hLV, 0, 0, "main()" )  ' line#
+               else   
+                  FF_ListView_InsertItem( hLV, 0, 0, wst2+"()" )  ' line#
+               END IF
+               FF_ListView_InsertItem( hLV, 0, 1, wst1 )  ' filename
+               FF_ListView_InsertItem( hLV, 0, 2, wst3 )  ' error message
+               ListView_SelectItem( hLV, 0 )
+               OpenSelectedDocument(0, wst2)
+            END IF
+         else
+            wst3 = wstr(sBuffer)
+            FF_ListView_InsertItem( hLV, 0, 0, "0" )    ' line#
+            FF_ListView_InsertItem( hLV, 0, 1, "???" )  ' filename
+            FF_ListView_InsertItem( hLV, 0, 2, wst3 )   ' error message
+            ListView_SelectItem( hLV, 0 )
          END IF
-
-         FF_ListView_InsertItem( hLV, 0, 0, wst2 )  ' line#
-         FF_ListView_InsertItem( hLV, 0, 1, wst1 )  ' filename
-         FF_ListView_InsertItem( hLV, 0, 2, wst3 )  ' error message
-
-         ListView_SelectItem( hLV, 0 )
-         SetDocumentErrorPosition(hLV)
-      END IF
-
+         
+      end if
       'RunEXE gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
