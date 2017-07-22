@@ -536,7 +536,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
    ' flagBlock = True for Blocking comment, False for UnBlocking comment
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
    SciMsg( m_pSci, SCI_GOTOLINE, startLine, 0) 
-
+   
    gApp.SuppressNotify = True
    For i = startLine To endLine
       strText = this.GetLine(i)   
@@ -547,7 +547,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
             strText = Iif(Len(strText) > 1, Mid(strText, 2), " ")
          End If   
       Else
-         If Len(strText) Then
+         If Len(rtrim(strText)) Then
             strText = "'" & strText
          end if   
       End If

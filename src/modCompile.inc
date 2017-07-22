@@ -557,13 +557,127 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    
    If gCompile.RunAfterCompile Then 
-      RunEXE gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine
+      ' Capture any error messages from STDERR.
+      dim sBuffer as String
+      RedirConsoleToFile( gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine, sBuffer )
+      
+      if len(sBuffer) THEN
+         cwsCompileMsg = L(193, "Errors:") & " 1" & "  " & _
+                         L(192, "Warnings:") & " 0" & _
+                         "  [" + Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
+         SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
+         MessageBeep(MB_ICONWARNING)
+         TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
+         PositionOutputWindows(HWND_FRMOUTPUT)
+
+         ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
+         frmMain_PositionWindows(HWND_FRMMAIN)
+
+      ' Set to error line position only after all windows have been shown and resized
+'Aborting due to runtime error 6 (out of bounds array access) at line 2 of D:\Use
+'rs\T0003830\Documents\Mes Outils Personnels\FBIde0.4.6r4_fbc1.06.0\FBIDETEMP.bas
+'::()
+         dim as long f1, f2
+         f1 = instr(sBuffer, " at line ")
+         if f1 THEN
+            wst3 = wstr(left(sBuffer, f1-1))
+            f2 = instr(f1, sBuffer, " of ")
+            wst2 = AfxStrParse(mid(sBuffer, f1+9), 1, " ")   ' line#
+            wst1 = mid(sBuffer, f2+4)
+            wst1 = AfxStrParse(wst1, 1, WSTR("::"))   ' filename
+         END IF
+
+         FF_ListView_InsertItem( hLV, 0, 0, wst2 )  ' line#
+         FF_ListView_InsertItem( hLV, 0, 1, wst1 )  ' filename
+         FF_ListView_InsertItem( hLV, 0, 2, wst3 )  ' error message
+
+         ListView_SelectItem( hLV, 0 )
+         SetDocumentErrorPosition(hLV)
+      END IF
+
+      'RunEXE gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine
    End If
    gConfig.LastRunFilename = gCompile.OutputFilename
       
    Function = True   ' successful
 End Function
 
+
+''
+''
+FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
+                             byref zParams  AS zstring, _
+                             byval hChildStdOutWrite AS HANDLE _
+                             ) AS BOOLEAN
+   
+   dim ProcessInfo AS PROCESS_INFORMATION
+   dim StartupInf  AS STARTUPINFO
+
+   StartupInf.cb         = SIZEOF(STARTUPINFO)
+   StartupInf.hStdError  = hChildStdOutWrite    ' only capture the error messages
+   'StartupInf.hStdOutput = hChildStdOutWrite
+   StartupInf.dwFlags    = STARTF_USESTDHANDLES
+
+   IF CreateProcess( zCmdLine,  _                ' Create the child process.
+                     zCmdLine & " " & zParams, _ ' Command line
+                     BYVAL 0,     _  ' Process security attributes
+                     BYVAL 0,     _  ' Primary thread security attributes
+                     TRUE,        _  ' Handles are inherited
+                     0,           _  ' Creation flags
+                     BYVAL 0,     _  ' Use parent's environment
+                     BYVAL 0,     _  ' Use parent's current directory
+                     @StartupInf,  _  ' STARTUPINFO pointer
+                     @ProcessInfo) = FALSE THEN
+      ? "error createprocess"
+   ELSE
+      ' Close handles to the child process and its primary thread.
+      ' Some applications might keep these handles to monitor the status 
+      ' of the child process, for example.
+      CloseHandle( ProcessInfo.hProcess )
+      CloseHandle( ProcessInfo.hThread )
+      FUNCTION = TRUE
+ END IF
+END FUNCTION
+
+''
+''
+SUB RedirConsoleToFile( byref szExe AS zstring, _
+                        byref szCmdLine AS zstring, _
+                        byref sSaveToFile AS STRING _
+                        )
+   dim SecurityAttribute AS SECURITY_ATTRIBUTES
+   dim hChildStdOutRead  AS PHANDLE
+   dim hChildStdOutWrite AS PHANDLE
+   dim dwReadBytes       AS long
+   dim sBuffer AS STRING * 4096
+ 
+   ' Set the bInheritHandle flag so pipe handles are inherited.
+   SecurityAttribute.nLength              = SIZEOF(SECURITY_ATTRIBUTES)
+   SecurityAttribute.bInheritHandle       = TRUE
+   SecurityAttribute.lpSecurityDescriptor = NULL
+
+   ' Create a pipe for the child process's STDOUT.
+   IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
+      ? "error creating pipe"
+   ELSE
+      ' Ensure the read handle to the pipe for STDOUT is not inherited.
+      IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
+         ? "error SetHandleInformation"
+      ELSE
+         ' Create the child process and read from its standard output
+         IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
+            CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
+            DO
+              IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN EXIT DO
+              ? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
+              sSaveToFile = sSaveToFile & LEFT(sBuffer, dwReadBytes)
+              '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
+              ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
+            LOOP
+         END IF
+      END IF
+   END IF
+END SUB
 
 ''
 ''
