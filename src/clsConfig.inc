@@ -214,6 +214,7 @@ Function clsConfig.SaveToFile() as Long
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
    print #f, "DefaultCompiler="       ; gApp.Projects(0).ProjectCompiler
    print #f, "DefaultCompileMode="    ; gApp.Projects(0).ProjectCompileMode
+   print #f, "RunViaCommandWindow="   ; this.RunViaCommandWindow
    
    print #f, ""
    Print #f, "[MRU]"  
@@ -384,6 +385,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "CompilerSwitches":     this.CompilerSwitches     = wData
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
+         case "RunViaCommandWindow":  this.RunViaCommandWindow  = nData
          Case "clrCaretFG":           this.clrCaretFG           = nData
          Case "clrCaretBG":           this.clrCaretBG           = nData
          Case "clrCommentsFG":        this.clrCommentsFG        = nData

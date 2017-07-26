@@ -117,7 +117,11 @@ Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSCOMPILER_LBLAPIHELP, L(157,"WinAPI Help file (Win32_fb.chm):"), 0, 219, 375, 16, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW, _
+        L(273,"Run compiled programs using command window"), 0, 274, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    gConfig.CompilerHelpfile = ProcessFromCurdrive(gConfig.CompilerHelpfile)
@@ -129,6 +133,7 @@ Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd, _
    SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBSWITCHES),    gConfig.CompilerSwitches
    SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE),    gConfig.CompilerHelpfile
    SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH), gConfig.Win32APIHelpfile
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW),  gConfig.RunViaCommandWindow)
 
    Function = 0 
 End Function

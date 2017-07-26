@@ -106,7 +106,9 @@ Sub SaveEditorOptions()
    gConfig.CompilerSwitches = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBSWITCHES) )
    gConfig.CompilerHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE) )
    gConfig.Win32APIHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH) )
-
+   gConfig.RunViaCommandWindow = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW) )
+   
+   
    ' KEYWORDS
    If gConfig.bKeywordsDirty Then
       HWnd = HWND_FRMOPTIONSKEYWORDS

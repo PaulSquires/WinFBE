@@ -92,6 +92,7 @@
 #Define IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH       1011
 #Define IDC_FRMOPTIONSCOMPILER_LBLAPIHELP           1012
 #Define IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH     1013
+#Define IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW 1014
 
 #Define IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION         1000
 #Define IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION         1001
@@ -451,6 +452,7 @@ Type clsConfig
       CompilerSwitches     As CWSTR
       CompilerHelpfile     As CWSTR
       Win32APIHelpfile     As CWSTR
+      RunViaCommandWindow  As Long = False
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
       clrCaretFG           As Long = BGR(0,0,0)          ' black
