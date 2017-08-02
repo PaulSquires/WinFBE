@@ -289,22 +289,25 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
       case IDC_FRMCOMPILECONFIG_CMDDELETE
          if codeNotify = BN_CLICKED THEN
             if nCurSel > -1  THEN
-               if ubound(gConfig.BuildsTemp) = 0 THEN
-                  erase gConfig.BuildsTemp
-                  nCurSel = -1
-               else
-                  ' remove the item from the internal array
-                  for i as long = nCurSel to ubound(gConfig.BuildsTemp) - 1
-                     gConfig.BuildsTemp(i) = gConfig.BuildsTemp(i+1)
-                  NEXT
-                  redim preserve gConfig.BuildsTemp(ubound(gConfig.BuildsTemp)-1)
-               END IF
-               ' reload the listbox
-               LoadBuildListBox(HWND)
-               nCurSel = Min(nCurSel, ubound(gConfig.BuildsTemp))
-               ListBox_SetCurSel(hList1, nCurSel)
-               SetCompilerConfigTextboxes()
-               SetFocus hList1
+               if MessageBox( HWND, L(287, "Are you sure you want to delete this build configuration?"), L(276,"Confirm"), _
+                                 MB_YESNOCANCEL Or MB_ICONINFORMATION Or MB_DEFBUTTON1 ) = IDYES then
+                  if ubound(gConfig.BuildsTemp) = 0 THEN
+                     erase gConfig.BuildsTemp
+                     nCurSel = -1
+                  else
+                     ' remove the item from the internal array
+                     for i as long = nCurSel to ubound(gConfig.BuildsTemp) - 1
+                        gConfig.BuildsTemp(i) = gConfig.BuildsTemp(i+1)
+                     NEXT
+                     redim preserve gConfig.BuildsTemp(ubound(gConfig.BuildsTemp)-1)
+                  END IF
+                  ' reload the listbox
+                  LoadBuildListBox(HWND)
+                  nCurSel = Min(nCurSel, ubound(gConfig.BuildsTemp))
+                  ListBox_SetCurSel(hList1, nCurSel)
+                  SetCompilerConfigTextboxes()
+                  SetFocus hList1
+               end if
             END IF
          end if
 
@@ -328,6 +331,7 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
                If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
             end if
             LoadBuildListBox(HWND)
+            frmMain_UpdateLineCol(HWND_FRMMAIN)
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if
