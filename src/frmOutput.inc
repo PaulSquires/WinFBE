@@ -305,7 +305,7 @@ Function frmOutput_Listview_SubclassProc ( _
          Exit Function
 
       Case WM_LBUTTONDBLCLK
-         SetDocumentErrorPosition( HWND )    
+         SetDocumentErrorPosition( HWND, gCompile.CompileID )    
          Exit Function
          
       Case WM_KEYUP

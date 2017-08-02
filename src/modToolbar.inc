@@ -139,6 +139,11 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_COMPILE_AND_EXECUTE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_BUILDEXECUTE
 
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_QUICKRUN")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_QUICKRUN")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_QUICKRUN", 10, True)
+   Toolbar_AddButton hToolBar, i, IDM_QUICKRUN
+
    i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_EXECUTE")
    i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_EXECUTE")
    i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_EXECUTE", 10, True)
@@ -146,10 +151,17 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_HELP")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_HELP")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_HELP", 10, True)
-   Toolbar_AddButton hToolBar, i, IDM_HELP
+'   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_HELP")
+'   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_HELP")
+'   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_HELP", 10, True)
+'   Toolbar_AddButton hToolBar, i, IDM_HELP
+
+   ' Combobox to switch amongst the different build options
+   ' Get the last button's rect and position the combobox immediately the right
+   HWND_FRMMAIN_COMBOBUILDS = _
+   pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", 800, 8, 200, 20, _
+        WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST OR CBS_HASSTRINGS, _
+        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    SendMessage hToolBar, TB_SETIMAGELIST, 0, Cast(LPARAM, hImageListNormal)
    SendMessage hToolBar, TB_SETDISABLEDIMAGELIST, 0, Cast(LPARAM, hImageListDisabled)
@@ -160,7 +172,6 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 
    ' Add the band containing the toolbar control to the rebar
    ' The size of the REBARBANDINFOW is different in Vista/Windows 7
-   Dim rc As Rect
    Dim rbbi As REBARBANDINFOW
    If (AfxWindowsVersion >= 600) AndAlso (AfxComCtlVersion >= 600) Then
       rbbi.cbSize  = REBARBANDINFO_V6_SIZE
@@ -208,6 +219,7 @@ Function frmMain_DisableToolbarButtons() As Long
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
+   FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_QUICKRUN)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
 
    Function = 0
@@ -285,13 +297,21 @@ Function frmMain_ChangeToolbarButtonsState() As Long
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
+      ' QuickRun is not available for projects.
+      If gApp.IsProjectActive = false then 
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_QUICKRUN)
+      end if
    Else
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PROJECTMANAGER)
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_BUILDEXECUTE)
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMPILE)
+      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_QUICKRUN)
    End If
    
-   If AfxFileExists(gConfig.LastRunFilename) Then
+   ' Generate the gCompile.OutputFilename
+   gCompile.OutputFilename = ""
+   code_Compile(IDM_COMPILEOUTPUTFILE)
+   If AfxFileExists(gCompile.OutputFilename) Then
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    Else
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)

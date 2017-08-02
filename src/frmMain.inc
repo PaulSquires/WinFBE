@@ -73,33 +73,28 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
 
    Dim As HWnd hStatusbar = GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR)
    Static wText As WString * MAX_PATH
-   static wText2 as wstring * MAX_PATH
    
+   ' Only update statusbar text if changed in order to prevent flicker
    if IsWindowVisible(HWND_FRMRECENT) THEN
-      StatusBar_SetText(hStatusbar, 0, "")    ' 32/64 compiler
-      StatusBar_SetText(hStatusbar, 1, "")    ' gui/console
+      StatusBar_SetText(hStatusbar, 0, "")    ' Build configuration
    else
-      ' Only update statusbar text if changed in order to prevent flicker
-      wText2 = ""
-      StatusBar_GetText(hStatusbar, 0, @wText)
-      wText2 = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
-      If LTrim(wText) <> wText2 Then
-         StatusBar_SetText(hStatusbar, 0, " " & wText2)
-      End If
-
-      wText2 = ""
-      StatusBar_GetText(hStatusbar, 1, @wText)
-      wText2 = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
-      If LTrim(wText) <> wText2 Then
-         StatusBar_SetText(hStatusbar, 1, " " & wText2)
-      End If
+      dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+      if nCurSel > -1 THEN
+         StatusBar_GetText(hStatusbar, 0, @wText)
+         If LTrim(wText) <> gConfig.Builds(nCurSel).wszDescription Then
+            StatusBar_SetText(hStatusbar, 0, " " & gConfig.Builds(nCurSel).wszDescription)
+         End If
+      else
+         StatusBar_SetText(hStatusbar, 0, "")    ' Build configuration
+      END IF
    END IF
 
    ' If there is not any file being edited
    If pDoc = 0 Then
-      StatusBar_SetText(hStatusbar, 2, "")    ' line/col/sel
-      StatusBar_SetText(hStatusbar, 3, "")    ' file type (normal, main, resource, module)
-      StatusBar_SetText(hStatusbar, 4, "")    ' file disktype (Unicode/Ansi)
+      StatusBar_SetText(hStatusbar, 1, "")    ' line/col/sel
+      StatusBar_SetText(hStatusbar, 2, "")    ' file type (normal, main, resource, module)
+      StatusBar_SetText(hStatusbar, 3, "")    ' file disktype (Unicode/Ansi)
+      StatusBar_SetText(hStatusbar, 4, "")    ' compile messages
       Dim wzText As WString * MAX_PATH
       wzText = APPNAME            
       If gApp.IsProjectActive Then
@@ -111,6 +106,7 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
       pDoc->DisplayStats
    End If
    frmMain_ChangeToolbarButtonsState
+   LoadBuildComboBox
 
   Function = 0
 End Function
@@ -717,6 +713,15 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    ' Relate this pDoc to the correct project even if it is Project0
    pDoc->ProjectIndex = idx
    
+   ' Set the default build configuration for this document. If no IsDefault option
+   ' has been checked then we simply use whatever the current selected build is.
+   if pDoc->DocumentBuild = "" THEN 
+      pDoc->DocumentBuild = GetDefaultBuildGUID()
+      if pDoc->DocumentBuild = "" THEN 
+         pDoc->DocumentBuild = GetSelectedBuildGUID()
+      end if
+   end if      
+   
    Treeview_SortChildren( hTree, hRootNode, 0 )
    TreeView_Expand( hTree, hRootNode, TVE_EXPAND)
 
@@ -1034,6 +1039,20 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
    
    Select Case id 
+      case IDC_FRMMAIN_COMBOBUILDS
+         if codeNotify = CBN_SELCHANGE THEN
+            dim as long nCurSel = ComboBox_GetCurSel(hwndCtl)
+            dim as long idx = gApp.GetActiveProjectIndex()
+            if nCurSel = -1 THEN exit function
+            If gApp.IsProjectActive Then
+               gApp.Projects(idx).ProjectBuild = gConfig.Builds(nCurSel).Id
+            Else
+               Dim pDocMain As clsDocument Ptr 
+               pDocMain = gTTabCtl.GetActiveDocumentPtr()
+               If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
+            end if
+            frmMain_UpdateLineCol(HWND)
+         END IF  
       
       Case IDM_NEXTTAB:            Function = gTTabCtl.NextTab()
       Case IDM_PREVTAB:            Function = gTTabCtl.PrevTab()
@@ -1234,20 +1253,17 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          
            
       ''  COMPILE MENU          
-      Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL
+      Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
          Function = code_Compile(id)
 
       Case IDM_RUNEXE
-         RunExe gConfig.LastRunFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine
+         ' Generate the gCompile.OutputFilename
+         code_Compile(IDM_COMPILEOUTPUTFILE)
+         RunExe( gCompile.OutputFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
       
+      case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
 
-      Case IDM_USE32BIT, IDM_USE64BIT
-         Function = frmMain_MenuSetCompiler(id)
- 
-      Case IDM_GUI, IDM_CONSOLE
-         Function = frmMain_MenuSetCompileMode(id)
-      
       Case IDM_HELP
          ShowContextHelp() 
      
@@ -1299,32 +1315,19 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             Dim lpnm As NMMOUSE Ptr
             lpnm = Cast(NMMOUSE Ptr, pNMHDR)
             If lpnm->dwItemSpec = 0 Then   ' compiler panel is panel 0
-               Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
-                  Case "FBC 32BIT"  ' toggle from 32 bit to 64 bit
-                     frmMain_MenuSetCompiler( IDM_USE64BIT )
-                  Case "FBC 64BIT"  ' toggle from 64 bit to 32 bit
-                     frmMain_MenuSetCompiler( IDM_USE32BIT )
-               End Select
+               frmCompileConfig_Show( HWND ) 
             End If
-            If lpnm->dwItemSpec = 1 Then   ' compilemode panel is panel 1
-               Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode)
-                  Case "GUI"      ' toggle from GUI to CONSOLE
-                     frmMain_MenuSetCompileMode( IDM_CONSOLE )
-                  Case "CONSOLE"  ' toggle from CONSOLE to GUI
-                     frmMain_MenuSetCompileMode( IDM_GUI )
-               End Select
-            End If
-            If lpnm->dwItemSpec = 2 Then   ' line/column panel is panel 2
+            If lpnm->dwItemSpec = 1 Then   ' line/column panel 
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
                if pDoc THEN Function = frmGoto_Show(pDoc->hWindow)
             end if
-            If lpnm->dwItemSpec = 3 Then   ' ProjectFiletype is panel 3
+            If lpnm->dwItemSpec = 2 Then   ' ProjectFiletype 
                hPopupMenu = CreateStatusBarFileTypeContextMenu
                GetCursorPos @pt
                TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
                DestroyMenu hPopUpMenu
             end if
-            If lpnm->dwItemSpec = 4 Then   ' Ansi/Unicode is panel 4
+            If lpnm->dwItemSpec = 3 Then   ' Ansi/Unicode 
                ' Toggle through the encoding states
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
                if pDoc = 0 THEN exit function
@@ -1339,7 +1342,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                pDoc->UserModified = true
                frmMain_UpdateLineCol( HWND_FRMMAIN )
             end if   
-            If lpnm->dwItemSpec = 5 Then   ' Compile results is panel 5
+            If lpnm->dwItemSpec = 4 Then   ' Compile results is 
                ' Toggle show/hide compile results
                ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
                frmMain_PositionWindows(HWND_FRMMAIN)
@@ -1408,6 +1411,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                   Case IDM_FUNCTIONLIST    : wszText = L(222,"Function List (F4)")
                   Case IDM_COMPILE         : wszText = L(96,"Compile (Ctrl+F5)")
                   Case IDM_BUILDEXECUTE    : wszText = L(97,"Compile and Execute (F5)")
+                  Case IDM_QUICKRUN        : wszText = L(284,"Quick Run (Ctrl+Shift+F5)")
                   Case IDM_RUNEXE          : wszText = L(98,"Run Executable (Shift+F5)")
                   Case IDM_HELP            : wszText = L(99,"Help (F1)")
                End Select
@@ -1444,26 +1448,42 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
                ' Bypass any 'new' untitled files.
                If pDoc->IsNewFlag Then Continue For
                
-               ' Compare the disk file date time to the value currently
-               ' stored in document class.
-               ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
-
-               If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
-                  OpenSelectedDocument( pDoc, "" )
-
+               ' Has the external file been deleted or is now not available?
+               if AfxFileExists(pDoc->DiskFilename) = false THEN
                   If MessageBox( HWND_FRMMAIN, _
                                   pDoc->DiskFilename & vbCrLf & _ 
-                                  L(266, "File was changed by another application. Reload it?"), _
+                                  L(286, "This document has been deleted...?"), _
                                   L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                     dim sText as string
-                     if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
-                        pDoc->SetText( sText ) 
-                        pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
-                     else
-                        print "Error opening: "; pDoc->DiskFilename
-                     End If
-                  End If                
-               End If
+                     ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
+                     pDoc->UserModified = true                
+                  else
+                     ' No. Close the file.
+                     OnCommand_FileClose(HWND)
+                  end if
+               
+               else
+                  ' Compare the disk file date time to the value currently
+                  ' stored in document class.
+                  ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
+
+                  If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
+                     OpenSelectedDocument( pDoc, "" )
+
+                     If MessageBox( HWND_FRMMAIN, _
+                                     pDoc->DiskFilename & vbCrLf & _ 
+                                     L(266, "File was changed by another application. Reload it?"), _
+                                     L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                        dim sText as string
+                        if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
+                           pDoc->SetText( sText ) 
+                           pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
+                        else
+                           print "Error opening: "; pDoc->DiskFilename
+                        End If
+                     End If                
+                  End If
+               end if
+            
             End If
          Next
       NEXT
@@ -1549,6 +1569,14 @@ End Function
 ' ========================================================================================
 Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
 
+   ' If configuration option to confirm closing editor is active then ask now.
+   if gConfig.AskExit THEN
+      if MessageBox( HWND_FRMMAIN, L(275,"Are you sure you want to exit?"), L(276,"Confirm"), _
+                  MB_YESNOCANCEL or MB_ICONQUESTION Or MB_DEFBUTTON1 ) <> IDYES then
+         return true
+      end if            
+   END IF
+   
    ' Save whether the Explorer should be shown the next time the program is run.
    ' Also save the Explorer panel width. 
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
@@ -1822,28 +1850,28 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    frmMain_CreateToolbar(pWindow)
    frmMain_ChangeToolbarButtonsState
 
-
+   ' Load the build configurations into the toolbar
+   LoadBuildComboBox()
 
    ' Add a status bar
    Dim As HWnd hStatusbar = pWindow->AddControl("Statusbar", pWindow->hWindow, IDC_FRMMAIN_STATUSBAR)
    Dim As Long rgParts(5)
-   rgParts(0) = pWindow->ScaleX(100)   ' 32/64bit
-   rgParts(1) = pWindow->ScaleX(200)   ' GUI/Console
-   rgParts(2) = pWindow->ScaleX(400)   ' Line/Col
-   rgParts(3) = pWindow->ScaleX(500)   ' Normal/Module/Main/Resource
-   rgParts(4) = pWindow->ScaleX(600)   ' Unicode/ANSI
-   rgParts(5) = -1
-   If SendMessage( hStatusBar, SB_SETPARTS, 6, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
+   rgParts(0) = pWindow->ScaleX(200)   ' Build configuration
+   rgParts(1) = pWindow->ScaleX(400)   ' Line/Col
+   rgParts(2) = pWindow->ScaleX(500)   ' Normal/Module/Main/Resource
+   rgParts(3) = pWindow->ScaleX(600)   ' Unicode/ANSI
+   rgParts(4) = -1
+   If SendMessage( hStatusBar, SB_SETPARTS, 5, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
       SendMessage( hStatusBar, SB_SIMPLE, False, 0 )
    End If
 
-   ' Add a progress bar to the status bar (panel5) (to show compiling progress)
+   ' Add a progress bar to the status bar (panel4) (to show compiling progress)
    dim hProgressBar AS hwnd
    hProgressBar = pWindow->AddControl( "ProgressBar", hStatusbar, IDC_FRMMAIN_PROGRESSBAR, "", _
                              0, 0, 0, 0, WS_CHILD Or PBS_MARQUEE)
    ' Move the Progressbar into the correct StatusBar panel
    Dim rc As Rect
-   SendMessage( hStatusBar, SB_GETRECT, 5, Cast(LPARAM, @rc) )
+   SendMessage( hStatusBar, SB_GETRECT, 4, Cast(LPARAM, @rc) )
    MoveWindow( hProgressBar, rc.Left, rc.Top, pWindow->ScaleY(200), rc.Bottom - rc.Top, True )
 
    ' Add the top tabcontrol (initially not visible)
@@ -1929,6 +1957,9 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
          If IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
          If IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) Then Continue Do
          
+         ' Check for any QuickRun exes that can be deleted.
+         gApp.CheckQuickRunExe
+         
          If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
             TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
             DispatchMessage @uMsg    ' Dispatches a message to a window procedure.
@@ -1953,7 +1984,3 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 End Function
 
 
-
-
-
-

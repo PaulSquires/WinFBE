@@ -21,6 +21,7 @@
 #Define IDC_FRMMAIN_STATUSBAR                       1003
 #Define IDC_FRMMAIN_PROGRESSBAR                     1004
 #Define IDC_FRMMAIN_COMPILETIMER                    1005
+#Define IDC_FRMMAIN_COMBOBUILDS                     1006
 
 #Define IDC_FRMOUTPUT_TABCONTROL                    1000
 #Define IDC_FRMOUTPUT_LISTVIEW                      1001
@@ -49,6 +50,7 @@
 #Define IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST      1002
 #Define IDC_FRMOPTIONSGENERAL_CHKCLOSEPROJMGR       1003
 #Define IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE        1004
+#Define IDC_FRMOPTIONSGENERAL_CHKASKEXIT            1005
 
 #Define IDC_FRMOPTIONSEDITOR_LBLTABSIZE             1000
 #Define IDC_FRMOPTIONSEDITOR_TXTTABSIZE             1001
@@ -100,26 +102,28 @@
 
 #Define IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS          1000
 
-#Define IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH        1000
-#Define IDC_FRMPROJECTOPTIONS_CMDSELECT             1001
-#Define IDC_FRMPROJECTOPTIONS_OPTEXE                1002
-#Define IDC_FRMPROJECTOPTIONS_OPTDLL                1003
-#Define IDC_FRMPROJECTOPTIONS_OPTLIB                1004
-#Define IDC_FRMPROJECTOPTIONS_OPTNOERROR            1005
-#Define IDC_FRMPROJECTOPTIONS_OPTERROR              1006
-#Define IDC_FRMPROJECTOPTIONS_OPTRESUME             1007
-#Define IDC_FRMPROJECTOPTIONS_OPTERRORPLUS          1008
-#Define IDC_FRMPROJECTOPTIONS_FRAME1                1009
-#Define IDC_FRMPROJECTOPTIONS_FRAME2                1010
-#Define IDC_FRMPROJECTOPTIONS_CHKDEBUG              1011
-#Define IDC_FRMPROJECTOPTIONS_CHKTHREAD             1012
-#Define IDC_FRMPROJECTOPTIONS_LABEL1                1013
-#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS32          1014
-#Define IDC_FRMPROJECTOPTIONS_LABEL2                1015
-#Define IDC_FRMPROJECTOPTIONS_LABEL3                1016
-#Define IDC_FRMPROJECTOPTIONS_LABEL4                1017
-#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS64          1018
-#Define IDC_FRMPROJECTOPTIONS_CHKSHOWCONSOLE        1019
+#Define IDC_FRMPROJECTOPTIONS_LABEL1                1000
+#Define IDC_FRMPROJECTOPTIONS_LABEL2                1001
+#Define IDC_FRMPROJECTOPTIONS_LABEL3                1002
+#Define IDC_FRMPROJECTOPTIONS_LABEL4                1003
+#Define IDC_FRMPROJECTOPTIONS_LABEL5                1004
+#Define IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH        1005
+#Define IDC_FRMPROJECTOPTIONS_CMDSELECT             1006
+#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS32          1007
+#Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS64          1008
+
+#DEFINE IDC_FRMCOMPILECONFIG_LIST1                  1000
+#DEFINE IDC_FRMCOMPILECONFIG_LABEL1                 1001
+#DEFINE IDC_FRMCOMPILECONFIG_TXTDESCRIPTION         1002
+#DEFINE IDC_FRMCOMPILECONFIG_LABEL2                 1003
+#DEFINE IDC_FRMCOMPILECONFIG_TXTOPTIONS             1004
+#DEFINE IDC_FRMCOMPILECONFIG_CHKISDEFAULT           1005
+#DEFINE IDC_FRMCOMPILECONFIG_CMDUP                  1006
+#DEFINE IDC_FRMCOMPILECONFIG_CMDDOWN                1007
+#DEFINE IDC_FRMCOMPILECONFIG_CMDINSERT              1008
+#DEFINE IDC_FRMCOMPILECONFIG_CMDDELETE              1009
+#DEFINE IDC_FRMCOMPILECONFIG_OPT32                  1010
+#DEFINE IDC_FRMCOMPILECONFIG_OPT64                  1011
 
 #Define IDC_FRMTEMPLATES_LISTBOX                    1000
 
@@ -234,13 +238,13 @@ Enum
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT
    IDM_PROJECTFILESADDTONODE, IDM_REMOVEFILEFROMPROJECT 
    IDM_PROJECTCLOSE, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS  
-   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_COMMANDLINE
-   IDM_USE32BIT, IDM_USE64BIT
-   IDM_GUI, IDM_CONSOLE
+   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_QUICKRUN, IDM_COMPILECONFIG, IDM_COMMANDLINE
    IDM_HELP, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
-
+   IDM_CONSOLE, IDM_GUI   ' used for compiler directives in code
+   IDM_COMPILEOUTPUTFILE  ' passed to modCompile when all we want is to generate the gCompile.OutputFilename (Run Executable)
+   IDM_32BIT, IDM_64BIT   ' mainly used for identifying compiler associated with a project
 End Enum
 
 
@@ -248,6 +252,7 @@ End Enum
 '  Global window handle for the main form
 Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR, HWND_FRMEXPLORER, HWND_FRMRECENT, HWND_FRMOUTPUT
 Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
+dim shared as hwnd HWND_FRMMAIN_COMBOBUILDS 
 
 Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
@@ -258,7 +263,7 @@ dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES
-Dim Shared As HWnd HWND_FRMFNLIST
+Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG 
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
@@ -344,7 +349,8 @@ Type clsDocument
       hNodeExplorer    As HTREEITEM
       FileEncoding     as long       
       UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
-
+      DocumentBuild    as string   ' specific build configuration to use for this document
+      
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
@@ -409,15 +415,26 @@ Type clsTopTabCtl
       
 End Type
 
+' Create array to hold unlimited number of build configurations.
+type TYPE_BUILDS
+   id             as string 
+   wszDescription as CWSTR
+   wszOptions     as CWSTR
+   IsDefault      as Long      ' 0:False, 1:True
+   Is32bit        as Long      ' 0:False, 1:True
+   Is64bit        as Long      ' 0:False, 1:True
+END TYPE
 
 Type clsConfig
    Private:
       _ConfigFilename As String 
       
    Public:
+      Builds(any)          as TYPE_BUILDS  
+      BuildsTemp(any)      as TYPE_BUILDS  
       FBKeywords           As String 
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
-      LastRunFilename      As CWSTR                ' not saved to file
+      AskExit              As Long = false
       CloseFuncList        As Long = True
       ShowExplorer         As Long = True
       ShowExplorerWidth    As Long = 250
@@ -506,19 +523,13 @@ type clsProject
    
    public:
       InUse                as boolean     ' this spot in the Projects array is in use
-      ProjectType          As Long        ' dll, exe, lib               
       ProjectName          As CWSTR
       ProjectFilename      As CWSTR
+      ProjectBuild         As string      ' default build configuration for the project (GUID)
       ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
       ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
       hExplorerRootNode    As HTREEITEM
-      ProjectErrorOption   As Long
-      ProjectDebug         As Long
-      ProjectThread        As Long
-      ProjectShowConsole   As Long
       ProjectNotes         as CWSTR       ' Save/Load from project file
-      ProjectCompiler      as CWSTR = WSTR("FBC 32bit")
-      ProjectCompileMode   as CWSTR = WSTR("CONSOLE")
       ProjectCommandLine   as CWSTR
       
       Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
@@ -532,11 +543,13 @@ type clsProject
       Declare Function GetResourceDocumentPtr() As clsDocument Ptr
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
+      declare Function GetProjectCompiler() As long
       Declare Function Debug() As Long
 END TYPE
 
 Type clsApp
    Private: 
+      m_arrQuickRun(Any) As WSTRING * MAX_PATH
       
    Public:
       IsUnicodeCodetips       As BOOLEAN     ' UNICODE define exists. Use Unicode version of codetips
@@ -562,6 +575,9 @@ Type clsApp
          
       Declare Function IsProjectActive() As boolean
       declare function GetNewProjectIndex() As Long
+      
+      declare function AddQuickRunEXE( byref sFilename as wstring ) as Long
+      declare function CheckQuickRunEXE() as Long
       
       Declare Constructor()
       Declare Destructor()

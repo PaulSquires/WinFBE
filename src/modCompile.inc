@@ -25,13 +25,13 @@ Type COMPILE_TYPE
    ObjFolder       As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
    ObjFolderShort  As WString * MAX_PATH   ' ".\.wfbe\"
    ObjID           As WString * MAX_PATH   ' "32" or "64" appended to object name
-   CompileMode     As WString * MAX_PATH 
    CompileFlags    As WString * MAX_PATH
    BatchFile       As WString * MAX_PATH
    LogFile         As WString * MAX_PATH  
    RunAfterCompile As BOOLEAN
    StartTime       As Double
    EndTime         As Double
+   CompileID       as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
 End Type
 Dim Shared gCompile As COMPILE_TYPE
 
@@ -41,8 +41,8 @@ Dim Shared gCompile As COMPILE_TYPE
 '------------------------------------------------------------------------------------------------------------------------
 function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   StatusBar_SetIcon(hStatusBar, 5, hIconCompile)
-   StatusBar_SetText(hStatusBar, 5, wszText)
+   StatusBar_SetIcon(hStatusBar, 4, hIconCompile)
+   StatusBar_SetText(hStatusBar, 4, wszText)
    function = 0
 end function
 
@@ -53,10 +53,19 @@ end function
 '------------------------------------------------------------------------------------------------------------------------
 Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
+   ' Create a flag that prevents this function from being reentered if we have
+   ' initiated a compile. We need this because the GUI also uses this function
+   ' to generate "Run Executable" filenames for determining if the toolbar icon
+   ' and menu entry should be hgihlighted. If that call enters while a compile
+   ' is being performed then it will create incorrect compile filenames.
+   static NoEnterFlag as Boolean
+   if NoEnterFlag THEN exit function
+   if wID <> IDM_COMPILEOUTPUTFILE THEN NoEnterFlag = true
+   
    Dim ShExecInfo As SHELLEXECUTEINFOW  
     
    Dim As Long Parenthesis_Start, Parenthesis_End, Error_Start       
-   Dim As Long f, i, NumLines, NextLine, idx, r, nCount
+   Dim As Long f, i, NumLines, NextLine, idx, r, nCount, idxBuild
    Dim As Long NumWarnings, NumErrors, IsError, IsWarning
    Dim As Long nFirstErrorLine = -1
    Dim pDoc As clsDocument Ptr
@@ -78,35 +87,49 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
-   If gConfig.CompileAutosave Then
-      If OnCommand_FileSaveAll(HWND_FRMMAIN) Then Return True  ' user cancelled save
-   End If
+   if (wID <> IDM_QUICKRUN) andalso (wID <> IDM_COMPILEOUTPUTFILE) THEN
+      If gConfig.CompileAutosave Then
+         If OnCommand_FileSaveAll(HWND_FRMMAIN) Then 
+            NoEnterFlag = false
+            Return True  ' user cancelled save
+         end if   
+      End If
+   END IF
+   
+   ' Get the array index for the current selected build (project or document)
+   idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   if idxBuild = -1 then idxBuild = 0
    
    ' Perform some pre-compile checks to see if we should continue.
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   Select Case Ucase(gApp.Projects(idx).ProjectCompiler)
-      Case "FBC 32BIT"
-         fCompile32 = True: fCompile64 = False
-         gCompile.CompilerPath = gConfig.FBWINcompiler32
-      Case "FBC 64BIT"
-         gCompile.CompilerPath = gConfig.FBWINcompiler64
-         fCompile32 = False: fCompile64 = True
-   End Select
+   if gConfig.Builds(idxBuild).Is32bit then
+      fCompile32 = True: fCompile64 = False
+      gCompile.CompilerPath = gConfig.FBWINcompiler32
+   end if
+   if gConfig.Builds(idxBuild).Is64bit then
+      gCompile.CompilerPath = gConfig.FBWINcompiler64
+      fCompile32 = False: fCompile64 = True
+   End if
    
    
    ' Check to see if the compiler exists
-   If AfxFileExists(gCompile.CompilerPath) = 0 Then 
-      MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
-                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
-      Function = False: Exit Function
-   End If
+   if wID <> IDM_COMPILEOUTPUTFILE THEN
+      If AfxFileExists(gCompile.CompilerPath) = 0 Then 
+         MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
+                           MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
+         NoEnterFlag = false
+         Function = False: Exit Function
+      End If
+   END IF
    
    
    ' Set some compile flags depending on the type of compile requested.
+   gCompile.CompileID = wID
    Select Case wID
-      Case IDM_BUILDEXECUTE:  gCompile.RunAfterCompile = True
-      Case IDM_COMPILE:       gCompile.RunAfterCompile = False
+      Case IDM_BUILDEXECUTE: gCompile.RunAfterCompile = True
+      Case IDM_QUICKRUN:     gCompile.RunAfterCompile = True
+      Case IDM_COMPILE:      gCompile.RunAfterCompile = False
    End Select
    
    
@@ -116,17 +139,42 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       If pDocMain = 0 Then
          MessageBox( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
                            MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
+         NoEnterFlag = false
          Function = False: Exit Function
       End If
    Else
       pDocMain = gTTabCtl.GetActiveDocumentPtr()
    End If
-   If pDocMain = 0 Then Return 0
+   If pDocMain = 0 Then 
+      NoEnterFlag = false
+      Return 0
+   end if   
    
-   gCompile.MainFilename = pDocMain->DiskFilename
-   gCompile.MainName     = AfxStrPathname("NAME", pDocMain->DiskFilename)
-   gCompile.MainFolder   = AfxStrPathname("PATH", pDocMain->DiskFilename)
+   ' If this is a QuickRun then we need to copy the current source code to a temporary bas file
+   ' and compile that bas file instead. The resulting bas file will be deleted after the compiling
+   ' has completed and exe will be deleted when the exe is terminated. 
+   if wID = IDM_QUICKRUN THEN
+      if pDocMain->IsNewFlag then 
+         gCompile.MainFolder = AfxGetExePathName
+      else
+         gCompile.MainFolder = AfxStrPathname("PATH", pDocMain->DiskFilename)
+      end if
+      gCompile.MainFilename = GetTemporaryFilename(gCompile.MainFolder, "bas")
+      gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
+      
+      ' Copy the contents of the active document to the temporary source file.
+      f = freefile
+      open gCompile.MainFilename for output as #f
+      put #f, , pDocMain->GetText
+      close #f
+   else
+      gCompile.MainFilename = pDocMain->DiskFilename
+      gCompile.MainName     = AfxStrPathname("NAME", pDocMain->DiskFilename)
+      gCompile.MainFolder   = AfxStrPathname("PATH", pDocMain->DiskFilename)
+   END IF
+   
    gCompile.ResourceFile = WStr("")    ' default that there is no resource
+   gCompile.CompileFlags = gConfig.Builds(idxBuild).wszOptions
    
    If gApp.IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gApp.Projects(idx).GetResourceDocumentPtr()
@@ -137,86 +185,60 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
       If fCompile32 Then 
          gCompile.ObjID = wstr("32.o")
-         gCompile.CompileFlags = gApp.Projects(idx).ProjectOther32           
+         gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.Projects(idx).ProjectOther32           
       End If
       If fCompile64 Then 
          gCompile.ObjID = wstr("64.o")
-         gCompile.CompileFlags = gApp.Projects(idx).ProjectOther64           
+         gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.Projects(idx).ProjectOther64           
       End If   
       
       ' Make sure the folders exist
       SHCreateDirectory( 0, gCompile.ObjFolder )
-      
-      Select Case gApp.Projects(idx).ProjectType
-         Case 0:   ' EXE (no special compile switch)
-            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe") 
-         Case 1
-            gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll") 
-            gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -dll ")
-         Case 2
-            gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a") 
-            gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -lib ")
-      End Select
-
-      Select Case gApp.Projects(idx).ProjectErrorOption
-         Case 0:   ' No error checking (no special compile switch)
-         Case 1:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -e")           
-         Case 2:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -ex")           
-         Case 3:  gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -exx")           
-      End Select
-
-      If gApp.Projects(idx).ProjectDebug = BST_CHECKED Then
-         gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -g")           
-      End If
-      
-      If gApp.Projects(idx).ProjectThread = BST_CHECKED Then
-         gCompile.CompileFlags = gCompile.CompileFlags & wstr(" -mt")           
-      End If
 
    Else
       ' No active project
-      gCompile.CompileFlags = gConfig.CompilerSwitches   
-      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
-      If Instr(Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
-         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
-      End If
-      If Instr(Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
-         gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
-      End If
-      If Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
-         gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
-      End If
+      gCompile.CompileFlags = gCompile.CompileFlags + " " + gConfig.CompilerSwitches   
    End If
 
 
-   Select Case UCase(gApp.Projects(idx).ProjectCompileMode)   ' used on the Main source file
-      Case "GUI"
-         ' For non-projects simply suppress the console. For projects, the console
-         ' will not show unless option is selected in Project Options.
-         gCompile.CompileMode = wstr(" -s gui ")   ' default do not show console
-         If gApp.Projects(idx).ProjectShowConsole = BST_CHECKED Then
-            gCompile.CompileMode = wstr(" ")   ' console is not suppressed
-         End If   
-      Case "CONSOLE": gCompile.CompileMode = wstr(" -s console ")
-   End Select   
-  
    ' Search main source code for any user embedded compile directives. These will override
    ' anything that was set at the default or project level.
    dim directives as COMPILE_DIRECTIVES
    pDocMain->CompileDirectives(@directives)
    select case directives.ConsoleFlag 
       case IDM_CONSOLE
-         gCompile.CompileMode = wstr(" -s console ")
+         i = instr(gCompile.CompileFlags, " -S GUI ")
+         if i THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, i, 8)
+         gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s console ")
       case IDM_GUI
-         gCompile.CompileMode = wstr(" -s gui ")
+         i = instr(gCompile.CompileFlags, " -S CONSOLE ")
+         if i THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, i, 12)
+         gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s gui ")
    END select
 
 
+   ' Need to determine the output filename in order to search for any existing
+   ' running process.
+   gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
+   If Instr(Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
+   End If
+   If Instr(Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
+   End If
+   If Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
+      gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
+   End If
+
+   ' If all we are looking for is gCompile.OutputFilename then we can simply exit now.
+   if wID = IDM_COMPILEOUTPUTFILE THEN exit function
+   
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
    If IsProcessRunning(@gCompile.OutputFilename) Then
       MessageBox( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
+      NoEnterFlag = false
       Function = False: Exit Function
    End If
       
@@ -276,7 +298,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If Len(gCompile.ResourceFile) then
       print #f, " "; wDQ; gCompile.ResourceFile; wDQ; 
    end if   
-   print #f, " -v "; gCompile.CompileFlags; gCompile.CompileMode;
+   print #f, " -v "; gCompile.CompileFlags; 
         
    If gApp.IsProjectActive Then
       nCount = gApp.Projects(idx).GetDocumentCount 
@@ -373,6 +395,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Kill gCompile.BatchFile
    Kill gCompile.LogFile
 
+   ' If this was a QuickRun then delete the temporary code file that was created.
+   if wID = IDM_QUICKRUN THEN 
+      kill gCompile.MainFilename
+   end if   
+   
    ' Copy the log file text to the logfile textbox
    AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wsLogSt )
    
@@ -397,6 +424,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
          ShowWindow HWND_FRMOUTPUT, SW_SHOW
          frmMain_PositionWindows(HWND_FRMMAIN)
+         NoEnterFlag = false
          Exit function
       End If   
 
@@ -523,7 +551,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
                L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
                L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-         MessageBoxW( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
+         MessageBox( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
       else
          ' Simply sound a success
          MessageBeep(MB_OK)
@@ -553,7 +581,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized
-      SetDocumentErrorPosition(hLV)
+      SetDocumentErrorPosition(hLV, wID)
    End If
    
    If gCompile.RunAfterCompile Then 
@@ -631,8 +659,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
           
 '      end if
    End If
-   gConfig.LastRunFilename = gCompile.OutputFilename
       
+   NoEnterFlag = false
    Function = True   ' successful
 End Function
 
@@ -725,7 +753,8 @@ Function RunEXE( ByRef wszFileExe As CWSTR, _
                  ) As Long
                          
    dim as CWSTR wszPath = AfxStrPathname("PATH", wszFileExe)
-   dim as CWSTR wszBatchFile = AfxGetExePathName + "_run.bat"
+   dim as CWSTR wszBatchFile = AfxGetExePathName + AfxStrPathname("NAME", wszFileExe) + ".bat"
+   dim as CWSTR wszQuickRunExe = wszFileExe
    
    ' If option is specified to launch command window prior to running the
    ' compiled program then we do so by executing a shell to a batch file.
@@ -739,6 +768,7 @@ Function RunEXE( ByRef wszFileExe As CWSTR, _
       print #f, "cd "; chr(34); wszPath; chr(34)   ' change to correct folder
       print #f, chr(34); wszFileExe; chr(34); " "; wszParam
       print #f, "pause"
+      print #f, "del "; chr(34); wszBatchFile; chr(34); " >> nul"
       close #f
       wszFileExe = wszBatchFile
       wszParam = ""
@@ -747,6 +777,7 @@ Function RunEXE( ByRef wszFileExe As CWSTR, _
 
    Dim ShExecInfo As SHELLEXECUTEINFOW  
 
+   ' Run the EXE
    With ShExecInfo
       .cbSize       = Len(SHELLEXECUTEINFOW)
       .fMask        = SEE_MASK_NOCLOSEPROCESS
@@ -760,6 +791,16 @@ Function RunEXE( ByRef wszFileExe As CWSTR, _
    End With
    ShellExecuteEx(@ShExecInfo)
 
+   ' If this was a QuickRun then add the filename to the global tracking array
+   ' that checks if the file exists and then deletes it.
+   if gCompile.CompileID = IDM_QUICKRUN THEN
+      ' Give time for the application to start to run (especially if being run via
+      ' the RunViaCommandWindow batch file, otherwise the exe will be deleted even
+      ' before it gets a chance to execute.
+      sleep 500
+      gApp.AddQuickRunEXE(wszQuickRunExe)
+   END IF
+   
    Function = 0
 End Function
 
@@ -768,7 +809,7 @@ End Function
 ' ========================================================================================
 ' Set the cursor to the error position based on the selected line in frmCompileResults
 ' ========================================================================================
-Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
+Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Long
 
    Dim wszErrorLine As WString * MAX_PATH
    Dim wszErrorFile As WString * MAX_PATH
@@ -783,37 +824,37 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
    FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
    FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
 
-   If AfxFileExists(wszErrorFile) = 0 Then Exit Function
-   
-   ' Position the editor to the Error line
-   idx = gTTabCtl.GetTabIndexFromFilename( @wszErrorFile )
-   If idx >= 0 Then
-      gTTabCtl.SetFocusTab(idx)
+   ' If we are doing a QuickRun then it must be on the currently loaded
+   ' and active file in the editor, therefore simply use that pDoc.
+   if wID = IDM_QUICKRUN THEN
       pDoc = gTTabCtl.GetActiveDocumentPtr()
-   Else
-      ' File is not already loaded. Load it now.
-      pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                              False, _    ' bIsNewFile
-                              False, _    ' bIsTemplate
-                              true, _     ' bShowInTab
-                              false, _    ' bIsInclude
-                              @wszErrorFile, _  ' pwszName
-                              0 )  ' pDocIn
       
-      ' Position all of the controls into place
-      frmMain_PositionWindows(HWND_FRMMAIN)
-   End If 
+   else
+      If AfxFileExists(wszErrorFile) = 0 Then Exit Function
+   
+      ' Position the editor to the Error line
+      idx = gTTabCtl.GetTabIndexFromFilename( @wszErrorFile )
+      If idx >= 0 Then
+         gTTabCtl.SetFocusTab(idx)
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
+      Else
+         ' File is not already loaded. Load it now.
+         pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                 False, _    ' bIsNewFile
+                                 False, _    ' bIsTemplate
+                                 true, _     ' bShowInTab
+                                 false, _    ' bIsInclude
+                                 @wszErrorFile, _  ' pwszName
+                                 0 )  ' pDocIn
+         
+         ' Position all of the controls into place
+         frmMain_PositionWindows(HWND_FRMMAIN)
+      End If 
+   END IF
+
    SciExec( pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
 
 End Function
-
-
-
-
-
-
-
-
 
 
 

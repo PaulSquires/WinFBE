@@ -143,16 +143,13 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"&Compile")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And E&xecute") & Chr(9) & "F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"&Rebuild All") & Chr(9) & "Ctrl+Shift+F5"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"&Rebuild All") & Chr(9) & "Ctrl+Alt+F5"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_QUICKRUN, L(285,"&Quick Run") & Chr(9) & "Ctrl+Shift+F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"&Build Configurations...") & Chr(9) & "F7"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_USE32BIT, L(69,"Use &32-Bit Compiler") & Chr(9) & "Ctrl+1"
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_USE64BIT, L(70,"Use &64-Bit Compiler") & Chr(9) & "Ctrl+2"
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_GUI, L(71,"Compile &GUI application") & Chr(9) & "Ctrl+3"
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_CONSOLE, L(72,"Compile C&onsole application") & Chr(9) & "Ctrl+4"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
@@ -210,12 +207,10 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,  IDM_VIEWOUTPUT )
    pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_REBUILDALL)
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FALT, VK_F5,  IDM_REBUILDALL)
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_QUICKRUN)
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_1,  IDM_USE32BIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_2,  IDM_USE64BIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_3,  IDM_GUI )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_4,  IDM_CONSOLE )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_COMPILECONFIG )
    pWindow->AddAccelerator( FVIRTKEY, VK_F1, IDM_HELP )
    pWindow->CreateAcceleratorTable()
 
@@ -243,7 +238,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    For idMenu = IDM_ADDFILETOPROJECT To IDM_PROJECTOPTIONS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
-   For idMenu = IDM_BUILDEXECUTE To IDM_CONSOLE
+   For idMenu = IDM_BUILDEXECUTE To IDM_COMMANDLINE
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
    
@@ -259,34 +254,10 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_COMPILECONFIG, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
-
-   ' Check the correct default compiler
-   if IsWindowVisible(HWND_FRMRECENT) = 0 THEN
-      wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
-      Select Case UCase(wzText)
-         Case "FBC 64BIT": nSelected = IDM_USE64BIT
-         Case else   ' not defined or 32bit
-            nSelected = IDM_USE32BIT
-      End Select
-      CheckMenuRadioItem( hMenu, IDM_USE32BIT, IDM_USE64BIT, nSelected, MF_BYCOMMAND )
-      EnableMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_ENABLED
-      
-      ' Check the correct default compile mode
-      wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
-      Select Case Ucase(wzText)
-         Case "GUI":       nSelected = IDM_GUI
-         Case else   ' not defined or console
-            nSelected = IDM_CONSOLE
-      End Select
-      CheckMenuRadioItem( hMenu, IDM_GUI, IDM_CONSOLE, nSelected, MF_BYCOMMAND )
-      EnableMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_CONSOLE, MF_BYCOMMAND Or MF_ENABLED
-   end if
-   
    ' Enable everything if a document is open
    Dim As Long NumTabs = TabCtrl_GetItemCount(gTTabCtl.hWindow)
    If NumTabs > 0 Then
@@ -354,45 +325,16 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
-   If AfxFileExists(gConfig.LastRunFilename) Then
+   ' Generate the gCompile.OutputFilename
+   gCompile.OutputFilename = ""
+   code_Compile(IDM_COMPILEOUTPUTFILE)
+   If AfxFileExists(gCompile.OutputFilename) Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
    End If
 
 
-   Function = 0
-End Function
-
-
-''
-''
-Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
-   dim as long idx
-   idx = gApp.GetActiveProjectIndex
-   Select Case wID
-      Case IDM_USE32BIT
-         gApp.Projects(idx).ProjectCompiler = WSTR("FBC 32bit")
-      Case IDM_USE64BIT
-         gApp.Projects(idx).ProjectCompiler = WSTR("FBC 64bit")
-   End Select
-   frmMain_UpdateLineCol( HWND_FRMMAIN )
-   Function = 0
-End Function
-
-
-''
-''
-Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
-   dim as long idx
-   idx = gApp.GetActiveProjectIndex
-   Select Case wID
-      Case IDM_GUI
-         gApp.Projects(idx).ProjectCompileMode = WSTR("GUI")
-      Case IDM_CONSOLE
-         gApp.Projects(idx).ProjectCompileMode = WSTR("CONSOLE")
-   End Select
-   frmMain_UpdateLineCol( HWND_FRMMAIN )
    Function = 0
 End Function
 
@@ -536,12 +478,14 @@ Function CreateScintillaContextMenu() As HMENU
 
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
    
+   ' TODO: Append popup filename with correct compiler path
+   
    ' Determine the compiler path in case it needs to be prepended to the filename
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
-      Case "FBC 32BIT":   wCompilerPath = gConfig.FBWINcompiler32
-      Case "FBC 64BIT":   wCompilerPath = gConfig.FBWINcompiler64
+   Select Case gApp.Projects(gApp.GetActiveProjectIndex).GetProjectCompiler
+      Case IDM_32BIT:   wCompilerPath = gConfig.FBWINcompiler32
+      Case IDM_64BIT:   wCompilerPath = gConfig.FBWINcompiler64
    End Select
    wCompilerPath = AfxStrPathname( "PATH", wCompilerPath )
    wCompilerPath = wCompilerPath & "inc"

@@ -163,6 +163,7 @@ Function clsConfig.SaveToFile() as Long
    Print #f, "'  WINFBE CONFIGURATION" 
    print #f, ""
    print #f, "[Editor]"
+   print #f, "AskExit="               ; this.AskExit
    print #f, "MultipleInstances="     ; this.MultipleInstances    
    print #f, "CompileAutosave="       ; this.CompileAutosave      
    print #f, "CloseFuncList="         ; this.CloseFuncList        
@@ -212,10 +213,22 @@ Function clsConfig.SaveToFile() as Long
    print #f, "CompilerSwitches="      ; this.CompilerSwitches     
    print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
-   print #f, "DefaultCompiler="       ; gApp.Projects(0).ProjectCompiler
-   print #f, "DefaultCompileMode="    ; gApp.Projects(0).ProjectCompileMode
+'   print #f, "DefaultCompiler="       ; gApp.Projects(0).ProjectCompiler
+'   print #f, "DefaultCompileMode="    ; gApp.Projects(0).ProjectCompileMode
    print #f, "RunViaCommandWindow="   ; this.RunViaCommandWindow
    
+   print #f, ""
+   Print #f, "[Builds]"  
+   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+      print #f, "BUILD_"; Right("00" & Str(i), 2); "=";
+      print #f, gConfig.Builds(i).id; "|-|";
+      print #f, gConfig.Builds(i).wszDescription; "|-|";
+      print #f, gConfig.Builds(i).wszOptions; "|-|"; 
+      print #f, gConfig.Builds(i).IsDefault; "|-|";  
+      print #f, gConfig.Builds(i).Is32bit; "|-|";  
+      print #f, gConfig.Builds(i).Is64bit  
+   NEXT
+
    print #f, ""
    Print #f, "[MRU]"  
    For i As Long = 0 To 9
@@ -327,6 +340,20 @@ Function clsConfig.LoadFromFile() as Long
       wData = ProcessFromCurdrive(wData)
 
 
+      If Left(wKey, 6) = "BUILD_" Then  ' is this a BUILD entry
+         i = Val(Right(wKey,2))
+         If i > ubound(this.Builds) Then
+            redim preserve this.Builds(i) 
+            this.Builds(i).id             = AfxStrParse(wData, 1, "|-|")
+            this.Builds(i).wszDescription = AfxStrParse(wData, 2, "|-|")
+            this.Builds(i).wszOptions     = AfxStrParse(wData, 3, "|-|")
+            this.Builds(i).IsDefault      = val(**AfxStrParse(wData, 4, "|-|"))
+            this.Builds(i).Is32bit        = val(**AfxStrParse(wData, 5, "|-|"))
+            this.Builds(i).Is64bit        = val(**AfxStrParse(wData, 6, "|-|"))
+            Continue Do
+         End If
+      End If
+
       If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
          i = Val(Right(wKey,2))
          If (i >= 0) And (i <= 9) Then 
@@ -345,12 +372,13 @@ Function clsConfig.LoadFromFile() as Long
 
       
       Select Case wKey
-         Case "DefaultCompiler"
-            if len(wData) = 0 then wData = "FBC 32bit"
-            gApp.Projects(0).ProjectCompiler = wData
-         Case "DefaultCompileMode"
-            if len(wData) = 0 then wData = "CONSOLE"
-            gApp.Projects(0).ProjectCompileMode = wData
+'         Case "DefaultCompiler"
+'            if len(wData) = 0 then wData = "FBC 32bit"
+'            gApp.Projects(0).ProjectCompiler = wData
+'         Case "DefaultCompileMode"
+'            if len(wData) = 0 then wData = "CONSOLE"
+'            gApp.Projects(0).ProjectCompileMode = wData
+         Case "AskExit":              this.AskExit              = nData
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "CloseFuncList":        this.CloseFuncList        = nData
@@ -422,6 +450,84 @@ Function clsConfig.LoadFromFile() as Long
    
    Loop
    Close #f
+   
+   ' If no builds exist then create some default ones...
+   if ubound(gConfig.Builds) = -1 THEN
+      redim gConfig.Builds(11) 
+      gConfig.Builds(0).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(0).wszDescription = "Win32 GUI (Release)"
+      gConfig.Builds(0).wszOptions = "-s gui"
+      gConfig.Builds(0).Is32bit = 1
+      gConfig.Builds(0).Is64bit = 0
+      
+      gConfig.Builds(1).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(1).wszDescription = "Win32 GUI (Debug)"
+      gConfig.Builds(1).wszOptions = "-g -exx -s gui"
+      gConfig.Builds(1).Is32bit = 1
+      gConfig.Builds(1).Is64bit = 0
+      
+      gConfig.Builds(2).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(2).wszDescription = "Win32 Console (Release)"
+      gConfig.Builds(2).wszOptions = "-s console"
+      gConfig.Builds(2).IsDefault = 1
+      gConfig.Builds(2).Is32bit = 1
+      gConfig.Builds(2).Is64bit = 0
+      
+      gConfig.Builds(3).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(3).wszDescription = "Win32 Console (Debug)"
+      gConfig.Builds(3).wszOptions = "-g -exx -s console"
+      gConfig.Builds(3).Is32bit = 1
+      gConfig.Builds(3).Is64bit = 0
+      
+      gConfig.Builds(4).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(4).wszDescription = "Win32 Windows DLL"
+      gConfig.Builds(4).wszOptions = "-s gui -dll -export"
+      gConfig.Builds(4).Is32bit = 1
+      gConfig.Builds(4).Is64bit = 0
+
+      gConfig.Builds(5).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(5).wszDescription = "Win32 Static Library"
+      gConfig.Builds(5).wszOptions = "-lib"
+      gConfig.Builds(5).Is32bit = 1
+      gConfig.Builds(5).Is64bit = 0
+
+      gConfig.Builds(6).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(6).wszDescription = "Win64 GUI (Release)"
+      gConfig.Builds(6).wszOptions = "-s gui"
+      gConfig.Builds(6).Is32bit = 0
+      gConfig.Builds(6).Is64bit = 1
+      
+      gConfig.Builds(7).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(7).wszDescription = "Win64 GUI (Debug)"
+      gConfig.Builds(7).wszOptions = "-g -exx -s gui"
+      gConfig.Builds(7).Is32bit = 0
+      gConfig.Builds(7).Is64bit = 1
+      
+      gConfig.Builds(8).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(8).wszDescription = "Win64 Console (Release)"
+      gConfig.Builds(8).wszOptions = "-s console"
+      gConfig.Builds(8).Is32bit = 0
+      gConfig.Builds(8).Is64bit = 1
+      
+      gConfig.Builds(9).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(9).wszDescription = "Win64 Console (Debug)"
+      gConfig.Builds(9).wszOptions = "-g -exx -s console"
+      gConfig.Builds(9).Is32bit = 0
+      gConfig.Builds(9).Is64bit = 1
+
+      gConfig.Builds(10).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(10).wszDescription = "Win64 Windows DLL"
+      gConfig.Builds(10).wszOptions = "-s gui -dll -export"
+      gConfig.Builds(10).Is32bit = 0
+      gConfig.Builds(10).Is64bit = 1
+
+      gConfig.Builds(11).id = AfxGuidText(AfxGuid())
+      gConfig.Builds(11).wszDescription = "Win64 Static Library"
+      gConfig.Builds(11).wszOptions = "-lib"
+      gConfig.Builds(11).Is32bit = 0
+      gConfig.Builds(11).Is64bit = 1
+
+   END IF
 
    Function = 0
 End Function
@@ -443,16 +549,10 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    If Open( gApp.Projects(idx).ProjectFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
 
    Print #f, "' WINFBE PROJECT FILE"
-   Print #f, "ProjectType=";            gApp.Projects(idx).ProjectType
-   Print #f, "ProjectErrorOption=";     gApp.Projects(idx).ProjectErrorOption
-   Print #f, "ProjectDebug=";           gApp.Projects(idx).ProjectDebug
-   Print #f, "ProjectThread=";          gApp.Projects(idx).ProjectThread
-   Print #f, "ProjectShowConsole=";     gApp.Projects(idx).ProjectShowConsole
-   Print #f, "ProjectOther32=";         gApp.Projects(idx).ProjectOther32
-   Print #f, "ProjectOther64=";         gApp.Projects(idx).ProjectOther64
-   Print #f, "ProjectCompiler=";        gApp.Projects(idx).ProjectCompiler       
-   Print #f, "ProjectCompileMode=";     gApp.Projects(idx).ProjectCompileMode    
-   Print #f, "ProjectCommandLine=";     gApp.Projects(idx).ProjectCommandLine
+   Print #f, "ProjectBuild=";       gApp.Projects(idx).ProjectBuild
+   Print #f, "ProjectOther32=";     gApp.Projects(idx).ProjectOther32
+   Print #f, "ProjectOther64=";     gApp.Projects(idx).ProjectOther64
+   Print #f, "ProjectCommandLine="; gApp.Projects(idx).ProjectCommandLine
 
    ' Save all of the loaded tabs first
    nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
@@ -549,6 +649,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
 
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
+   SetCompileStatusBarMessage( "", 0 )
    SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
    ShowWindow( hProgressBar, SW_SHOW)
    AfxDoEvents()
@@ -617,17 +718,11 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       wData = ProcessFromCurdrive(wData)
 
       Select Case wKey
-         Case "ProjectType":            gApp.Projects(idx).ProjectType           = nData
-         Case "ProjectErrorOption":     gApp.Projects(idx).ProjectErrorOption    = nData
-         Case "ProjectDebug":           gApp.Projects(idx).ProjectDebug          = nData
-         Case "ProjectThread":          gApp.Projects(idx).ProjectThread         = nData
-         Case "ProjectShowConsole":     gApp.Projects(idx).ProjectShowConsole    = nData
-         Case "ProjectOther32":         gApp.Projects(idx).ProjectOther32        = wData
-         Case "ProjectOther64":         gApp.Projects(idx).ProjectOther64        = wData
-         Case "ProjectCompiler":        gApp.Projects(idx).ProjectCompiler       = wData
-         Case "ProjectCompileMode":     gApp.Projects(idx).ProjectCompileMode    = wData
-         Case "ProjectCommandLine":     gApp.Projects(idx).ProjectCommandLine    = wData
-         Case "ActiveTab":              nActiveTab = nData
+         Case "ProjectBuild":        gApp.Projects(idx).ProjectBuild       = wData
+         Case "ProjectOther32":      gApp.Projects(idx).ProjectOther32     = wData
+         Case "ProjectOther64":      gApp.Projects(idx).ProjectOther64     = wData
+         Case "ProjectCommandLine":  gApp.Projects(idx).ProjectCommandLine = wData
+         Case "ActiveTab":           nActiveTab = nData
          
          Case "File":                wszFilename = wData
          Case "FileType":            nFileType = nData
@@ -696,6 +791,11 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    ' It was a good project load so designate this project as being in use
    gApp.Projects(idx).InUse = true
 
+   ' If no active build configuration then assign the currently active selection
+   if gApp.Projects(idx).ProjectBuild = "" then 
+      gApp.Projects(idx).ProjectBuild = GetSelectedBuildGUID()
+   end if   
+   
    ' If no other Projects have been designated the as the active project then make
    ' this project the active one.
    if gApp.GetActiveProjectIndex = 0 THEN

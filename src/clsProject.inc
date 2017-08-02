@@ -251,6 +251,19 @@ Function clsProject.GetResourceDocumentPtr() As clsDocument Ptr
    function = 0
 End Function
 
+''
+''
+Function clsProject.GetProjectCompiler() As long
+   ' Get the compiler associated with this project
+   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+      if gConfig.Builds(i).Id = this.ProjectBuild then
+         if gConfig.Builds(i).Is32Bit THEN return IDM_32BIT
+         if gConfig.Builds(i).Is64Bit THEN return IDM_64BIT
+      end if   
+   NEXT
+   function = 0
+End Function
+
 
 ''
 ''

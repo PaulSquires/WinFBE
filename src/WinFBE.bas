@@ -31,12 +31,13 @@
 #Include Once "Afx\AfxTime.inc"
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxMenu.inc" 
+#Include Once "Afx\AfxCom.inc" 
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.3.9") 
+#Define APPVERSION    WStr("1.4.0") 
 
 
 #Include Once "modScintilla.bi"
@@ -53,9 +54,9 @@ Using Afx
 #Include Once "clsTopTabCtl.inc"
 #Include Once "modParser.inc"
 #Include Once "modHelp.inc"
+#Include Once "modCompile.inc"
 #Include Once "modMenus.inc"
 #Include Once "modToolbar.inc"
-#Include Once "modCompile.inc"
 #Include Once "modMRU.inc"
 #Include Once "modCodetips.inc"
 
@@ -63,6 +64,7 @@ Using Afx
 #Include Once "frmHotTxtBtn.inc"
 #Include Once "frmRecent.inc" 
 #Include Once "frmExplorer.inc" 
+#Include Once "frmCompileConfig.inc" 
 #Include Once "frmOutput.inc" 
 #Include Once "frmOptionsGeneral.inc"
 #Include Once "frmOptionsEditor.inc"

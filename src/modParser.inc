@@ -21,9 +21,9 @@ Function IsPreparsedFile( byref sFilename as string ) as boolean
    dim as string sPath, sTemp
    sFilename = AfxStrReplace( sFilename, "/", "\")
    
-   Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
-      Case "FBC 32BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-      Case "FBC 64BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+   Select Case gApp.Projects(gApp.GetActiveProjectIndex).GetProjectCompiler
+      Case IDM_32BIT:  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+      Case IDM_64BIT:  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    End Select
    sPath = AfxStrPathname("PATH", sPath) & "inc\"
    
@@ -66,9 +66,9 @@ Function GetIncludeFilename( byref sFilename as string, _    ' file where the #I
    end if
    
    ' Search the compiler's include folder path
-   Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
-      Case "FBC 32BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-      Case "FBC 64BIT":  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+   Select Case gApp.Projects(gApp.GetActiveProjectIndex).GetProjectCompiler
+      Case IDM_32BIT:  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+      Case IDM_64BIT:  sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
    End Select
    sTemp = AfxStrPathname("PATH", sPath) & "inc\" & sIncFilename
    if AfxFileExists(sTemp) THEN 

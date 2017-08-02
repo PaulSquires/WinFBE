@@ -1,3 +1,4 @@
+declare function GetSelectedBuildGUID() as String
 Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 Declare Function RemoveDuplicateSpaces( byref sText as const string) as string
 Declare Function ConvertCase( byval sText as string) as string
@@ -55,7 +56,7 @@ Declare Function frmMain_ChangeToolbarButtonsState() As Long
 Declare Function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
 Declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
 Declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
-Declare Function SetDocumentErrorPosition( ByVal hLV As HWnd ) As Long
+Declare Function SetDocumentErrorPosition( ByVal hLV As HWnd, byval wID as long ) As Long
 Declare Function GetMRUMenuHandle() as HMENU
 Declare Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long

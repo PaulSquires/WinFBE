@@ -13,6 +13,22 @@
 
 
 ' ========================================================================================
+' Return temporary file name
+' ========================================================================================
+FUNCTION GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
+   dim wszTempFilename as wstring * MAX_PATH
+   if GetTempFileName(@wszFolder, "TMP", 0, @wszTempFilename) then
+      ' Delete the temp file that gets created b/c we will create it ourselves based on the 
+      ' returned filename.
+      kill wszTempFilename
+      IF LEN(wszExtension) THEN 
+         wszTempFilename = LEFT(wszTempFilename, LEN(wszTempFilename) -  3) & wszExtension
+      end if
+   end if      
+   function = wszTempFilename
+END FUNCTION
+
+' ========================================================================================
 ' Get the Scintilla value for a character sets
 ' ========================================================================================
 Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long

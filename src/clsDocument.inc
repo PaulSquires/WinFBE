@@ -884,7 +884,7 @@ Function clsDocument.DisplayStats() As Long
       ' on the FindReplace window.
       frmFindReplace_SetButtonStates
    End If
-   StatusBar_SetText(hStatusbar, 2, wText)
+   StatusBar_SetText(hStatusbar, 1, wText)
    
 
    wText = ""
@@ -894,11 +894,11 @@ Function clsDocument.DisplayStats() As Long
       Case FILETYPE_MAIN:     wText = ucase(L(212,"Main"))
       Case FILETYPE_RESOURCE: wText = ucase(L(213,"Resource"))
    End Select
-   StatusBar_SetText(hStatusbar, 3, *wText)
+   StatusBar_SetText(hStatusbar, 2, *wText)
 
    
    wText = FileEncodingTextDescription(this.FileEncoding)
-   StatusBar_SetText(hStatusbar, 4, *wText)
+   StatusBar_SetText(hStatusbar, 3, *wText)
 
    if this.FileEncoding = FILE_ENCODING_ANSI THEN
       SciMsg( m_pSci, SCI_SETCODEPAGE, 0, 0 )
@@ -1335,7 +1335,7 @@ function clsDocument.CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES 
 
       if len(st) < 11 THEN continue for
       st = ucase(st)
-         
+
       ' '#CONSOLE ON|OFF
       if left(st, 11) = "#CONSOLE ON" THEN
          pDirectives->ConsoleFlag = IDM_CONSOLE

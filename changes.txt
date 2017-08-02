@@ -1,5 +1,12 @@
+Version 1.4.0 (August 2, 2017)
+- Added: Major change. New Build Configuration system. 
+- Added: Quick Run (added to Compile menu and Toolbar).
+- Added: Option (Environment Options :: General Options) for "Ask before exiting the editor".
+- Added: Check added to catch whether a loaded file has been *deleted* by something external. Message now displays asking whether to keep file open or close it.
+- Change: The "Run Executable" functionality now runs the currently active source code file should the EXE exist. Previously would always run the most recently executed exe.
+
 Version 1.3.9 (July 25, 2017)
-- Added: Option (Environment Options :: Compiler Setup) to run compiled programs from a spawned command window. Usefule for catching runtime errors.
+- Added: Option (Environment Options :: Compiler Setup) to run compiled programs from a spawned command window. Useful for catching runtime errors.
 
 Version 1.3.8 (July 22, 2017)
 - Added: More robust error reporting for Runtime errors trapping that was added in 1.3.7.

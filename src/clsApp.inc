@@ -179,4 +179,39 @@ Function clsApp.GetNewProjectIndex() As Long
 end function
 
 
+''
+''
+function clsApp.AddQuickRunEXE( byref wszFilename as wstring ) as Long
+   dim as long nFoundAt = -1
+   
+   ' Scan array for an empty slot
+   for i as long = lbound(m_arrQuickRun) to ubound(m_arrQuickRun)
+      if len(m_arrQuickRun(i)) = 0 THEN
+         m_arrQuickRun(i) = wszFilename
+         exit function
+      END IF
+   NEXT
+   if nFoundAt = -1 THEN
+      redim preserve m_arrQuickRun(ubound(m_arrQuickRun) + 1)
+      m_arrQuickRun(ubound(m_arrQuickRun)) = wszFilename
+   END IF      
 
+   function = 0
+end function
+
+''
+''
+function clsApp.CheckQuickRunEXE() as Long
+   ' Scan all array items to see if can be deleted
+   for i as long = lbound(m_arrQuickRun) to ubound(m_arrQuickRun)
+      if len(m_arrQuickRun(i)) THEN
+         if AfxFileExists(m_arrQuickRun(i)) THEN 
+            DeleteFile(m_arrQuickRun(i))
+         else
+            m_arrQuickRun(i) = ""
+         end if   
+      END IF
+   NEXT
+
+   function = 0
+end function
