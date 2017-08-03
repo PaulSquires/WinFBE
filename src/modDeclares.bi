@@ -243,7 +243,6 @@ Enum
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
    IDM_CONSOLE, IDM_GUI   ' used for compiler directives in code
-   IDM_COMPILEOUTPUTFILE  ' passed to modCompile when all we want is to generate the gCompile.OutputFilename (Run Executable)
    IDM_32BIT, IDM_64BIT   ' mainly used for identifying compiler associated with a project
 End Enum
 

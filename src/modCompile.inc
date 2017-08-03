@@ -53,15 +53,6 @@ end function
 '------------------------------------------------------------------------------------------------------------------------
 Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
-   ' Create a flag that prevents this function from being reentered if we have
-   ' initiated a compile. We need this because the GUI also uses this function
-   ' to generate "Run Executable" filenames for determining if the toolbar icon
-   ' and menu entry should be hgihlighted. If that call enters while a compile
-   ' is being performed then it will create incorrect compile filenames.
-   static NoEnterFlag as Boolean
-   if NoEnterFlag THEN exit function
-   if wID <> IDM_COMPILEOUTPUTFILE THEN NoEnterFlag = true
-   
    Dim ShExecInfo As SHELLEXECUTEINFOW  
     
    Dim As Long Parenthesis_Start, Parenthesis_End, Error_Start       
@@ -87,10 +78,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
-   if (wID <> IDM_QUICKRUN) andalso (wID <> IDM_COMPILEOUTPUTFILE) THEN
+   if wID <> IDM_QUICKRUN THEN
       If gConfig.CompileAutosave Then
          If OnCommand_FileSaveAll(HWND_FRMMAIN) Then 
-            NoEnterFlag = false
             Return True  ' user cancelled save
          end if   
       End If
@@ -114,14 +104,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    
    ' Check to see if the compiler exists
-   if wID <> IDM_COMPILEOUTPUTFILE THEN
-      If AfxFileExists(gCompile.CompilerPath) = 0 Then 
-         MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
-                           MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
-         NoEnterFlag = false
-         Function = False: Exit Function
-      End If
-   END IF
+   If AfxFileExists(gCompile.CompilerPath) = 0 Then 
+      MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
+                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
+      Function = False: Exit Function
+   End If
    
    
    ' Set some compile flags depending on the type of compile requested.
@@ -139,16 +126,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       If pDocMain = 0 Then
          MessageBox( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
                            MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
-         NoEnterFlag = false
          Function = False: Exit Function
       End If
    Else
       pDocMain = gTTabCtl.GetActiveDocumentPtr()
    End If
-   If pDocMain = 0 Then 
-      NoEnterFlag = false
-      Return 0
-   end if   
+   If pDocMain = 0 Then return 0
    
    ' If this is a QuickRun then we need to copy the current source code to a temporary bas file
    ' and compile that bas file instead. The resulting bas file will be deleted after the compiling
@@ -230,15 +213,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
    End If
 
-   ' If all we are looking for is gCompile.OutputFilename then we can simply exit now.
-   if wID = IDM_COMPILEOUTPUTFILE THEN exit function
-   
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
    If IsProcessRunning(@gCompile.OutputFilename) Then
       MessageBox( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
-      NoEnterFlag = false
       Function = False: Exit Function
    End If
       
@@ -424,7 +403,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
          ShowWindow HWND_FRMOUTPUT, SW_SHOW
          frmMain_PositionWindows(HWND_FRMMAIN)
-         NoEnterFlag = false
          Exit function
       End If   
 
@@ -660,7 +638,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 '      end if
    End If
       
-   NoEnterFlag = false
    Function = True   ' successful
 End Function
 

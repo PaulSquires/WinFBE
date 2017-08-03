@@ -325,10 +325,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
-   ' Generate the gCompile.OutputFilename
-   gCompile.OutputFilename = ""
-   code_Compile(IDM_COMPILEOUTPUTFILE)
-   If AfxFileExists(gCompile.OutputFilename) Then
+   If AfxFileExists(GetRunExecutableFilename) Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
@@ -477,8 +474,6 @@ Function CreateScintillaContextMenu() As HMENU
    ScreenToClient(HWND_FRMMAIN, @pt)
 
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
-   
-   ' TODO: Append popup filename with correct compiler path
    
    ' Determine the compiler path in case it needs to be prepended to the filename
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)

@@ -309,9 +309,7 @@ Function frmMain_ChangeToolbarButtonsState() As Long
    End If
    
    ' Generate the gCompile.OutputFilename
-   gCompile.OutputFilename = ""
-   code_Compile(IDM_COMPILEOUTPUTFILE)
-   If AfxFileExists(gCompile.OutputFilename) Then
+   If AfxFileExists(GetRunExecutableFilename) Then
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    Else
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)

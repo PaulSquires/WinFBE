@@ -1257,9 +1257,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Function = code_Compile(id)
 
       Case IDM_RUNEXE
-         ' Generate the gCompile.OutputFilename
-         code_Compile(IDM_COMPILEOUTPUTFILE)
-         RunExe( gCompile.OutputFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
+         RunExe( GetRunExecutableFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
       
       case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
@@ -1310,7 +1308,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
    Select Case pNMHDR->code 
    
       Case NM_CLICK
-         ' Process clicking on the "compiler" or "compilemode" panels in the statusbar
+         ' Process clicking on the panels in the statusbar
          If id = IDC_FRMMAIN_STATUSBAR Then   
             Dim lpnm As NMMOUSE Ptr
             lpnm = Cast(NMMOUSE Ptr, pNMHDR)

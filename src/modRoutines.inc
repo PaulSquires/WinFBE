@@ -1074,7 +1074,32 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 
 End Function
 
+''
+''
+function GetRunExecutableFilename() as CWSTR
+   ' Determine the EXE name of the currently active document or project. Used
+   ' by the top menu and toolbar to determine if the Run Executable options
+   ' should be grayed out.
+   dim wszFilename as CWSTR
+   Dim pDocMain As clsDocument Ptr 
+   dim as long idx = gApp.GetActiveProjectIndex()
+   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
 
+   pDocMain = iIf( gApp.IsProjectActive, gApp.Projects(idx).GetMainDocumentPtr, gTTabCtl.GetActiveDocumentPtr)
+   If pDocMain = 0 Then return ""
+   
+   if idxBuild > -1 then 
+      If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DLL"))   Then return ""
+      If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DYLIB")) Then return ""
+      If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -LIB"))   then return ""
+   end if
+   wszFilename = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
+                 AfxStrPathname("NAME", pDocMain->DiskFilename) + _
+                 wstr(".exe")
+   
+   return wszFilename
+
+END FUNCTION
 
 
 
