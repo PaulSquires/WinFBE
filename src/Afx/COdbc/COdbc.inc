@@ -3,7 +3,7 @@
 ' File: CODBC.inc
 ' Contents: ODBC wrapper classes (unicode)
 ' Compiler: FreeBasic 32 & 64-bit
-' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' Copyright (c) 2016-2017 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.

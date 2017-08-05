@@ -233,11 +233,11 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
       ' Set the default values for a new project
       gApp.Projects(idx).InUse = true
       wszTitle = wszTitle & " - " & L(215, "New Project")
-      gApp.Projects(idx).ProjectFilename = 0
-      gApp.Projects(idx).ProjectName     = 0
+      gApp.Projects(idx).ProjectFilename = ""
+      gApp.Projects(idx).ProjectName     = ""
       gApp.Projects(idx).ProjectBuild    = ""
-      gApp.Projects(idx).ProjectOther32  = 0
-      gApp.Projects(idx).ProjectOther64  = 0
+      gApp.Projects(idx).ProjectOther32  = ""
+      gApp.Projects(idx).ProjectOther64  = ""
       gApp.Projects(idx).ProjectNotes    = ""
    Else
       wszTitle = wszTitle + " - " + gApp.Projects(idx).ProjectName

@@ -1899,6 +1899,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    frmRecent_Show( HWND_FRMEXPLORER )     ' child of frmExplorer
    frmOutput_Show( HWND_FRMMAIN )
 
+   
    ' SET STARTUP POSITION
    ' If no valid window size exists then set to the default working area of the screen
    If (gConfig.StartupRight = 0) OrElse (gConfig.StartupBottom = 0) Then
@@ -1928,12 +1929,29 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' Post a message to process the application's command line as applicable.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE , 0, 0 )
 
+
+' TODO: Remove SetTimer (debug for showing GDI count)
+'SetTimer(HWND_FRMMAIN, 1000, 500, 0)
    
    ' Process windows events
    Dim uMsg As MSG
    
    ' Message loop
    Do While GetMessage(@uMsg, Null, 0, 0)
+
+
+'      if uMsg.message = WM_TIMER then
+'         Dim As HWnd hStatusbar = GetDlgItem(HWnd_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
+'         static GUILeak as wstring * 100
+'         dim hProcess AS HANDLE
+'         dim dwProcessID as dword
+'         getwindowthreadprocessid( HWnd_FRMMAIN, @dwProcessID)
+'         hProcess = openprocess(PROCESS_QUERY_INFORMATION OR PROCESS_VM_READ, 0, dwProcessID)
+'         GUILeak = "GDICount: " & str(getguiresources(hProcess, GR_GDIOBJECTS))
+'         StatusBar_SetText(hStatusbar, 0, GUILeak)
+'      end if
+
+
       ' Processes accelerator keys for menu commands
       If (pWindow->AccelHandle = 0) Or (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg)) = 0 Then
 

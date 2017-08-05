@@ -30,23 +30,6 @@ PRIVATE DESTRUCTOR CGpBrush
 END DESTRUCTOR
 ' ========================================================================================
 
-' ========================================================================================
-' Returns the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpBrush.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpBrush.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
 ' =====================================================================================
 ' * Creates a new Brush object based on this Brush object.
 ' =====================================================================================
@@ -283,14 +266,14 @@ END CONSTRUCTOR
 ' =====================================================================================
 ' Creates a LinearGradientBrush object from a set of boundary points and boundary colors.
 ' =====================================================================================
-PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS GpWrapMode)
+PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS LinearGradientMode)
    DIM brush AS GpLineGradient PTR
    m_Status = GdipCreateLineBrushFromRect(rc, color1, color2, nMode, WrapModeTile, @brush)
    m_pBrush = cast(GpBrush PTR, brush)
 END CONSTRUCTOR
 ' =====================================================================================
 ' =====================================================================================
-PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS GpWrapMode)
+PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS LinearGradientMode)
    DIM brush AS GpLineGradient PTR
    m_Status = GdipCreateLineBrushFromRectI(rc, color1, color2, nMode, WrapModeTile, @brush)
    m_pBrush = cast(GpBrush PTR, brush)
@@ -300,14 +283,14 @@ END CONSTRUCTOR
 ' =====================================================================================
 ' Creates a LinearGradientBrush object from a set of boundary points and boundary colors.
 ' =====================================================================================
-PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL angle AS SINGLE, BYVAL isAngleScalable AS BOOL = FALSE)
+PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL angle AS SINGLE, BYVAL isAngleScalable AS BOOL)
    DIM brush AS GpLineGradient PTR
    m_Status = GdipCreateLineBrushFromRectWithAngle(rc, color1, color2, angle, isAngleScalable, WrapModeTile, @brush)
    m_pBrush = cast(GpBrush PTR, brush)
 END CONSTRUCTOR
 ' =====================================================================================
 ' =====================================================================================
-PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL angle AS SINGLE, BYVAL isAngleScalable AS BOOL = FALSE)
+PRIVATE CONSTRUCTOR CGpLinearGradientBrush (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL angle AS SINGLE, BYVAL isAngleScalable AS BOOL)
    DIM brush AS GpLineGradient PTR
    m_Status = GdipCreateLineBrushFromRectWithAngleI(rc, color1, color2, angle, isAngleScalable, WrapModeTile, @brush)
    m_pBrush = cast(GpBrush PTR, brush)

@@ -1,4 +1,8 @@
-Version 1.4.0 (August 2, 2017)
+Version 1.4.2 (August 5, 2017)
+- Added: "Options" top menu item and moved "Environment Options" and "Build Configurations" under it.
+- Fixed: GDI resource leak when Find/Replace dialog invoked multiple times.
+
+Version 1.4.1 (August 3, 2017)
 - Added: Major change. New Build Configuration system. 
 - Added: Quick Run (added to Compile menu and Toolbar).
 - Added: Option (Environment Options :: General Options) for "Ask before exiting the editor".

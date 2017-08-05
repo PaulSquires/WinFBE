@@ -3,7 +3,7 @@
 ' File: CGraphCtx.inc
 ' Contents: Graphic control
 ' Compiler: FreeBasic 32 & 64-bit
-' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' Copyright (c) 2016-2017 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -11,9 +11,10 @@
 
 #pragma once
 #include once "windows.bi"
-#include once "Afx/CWindow.inc"
-#include once "win/ddraw.bi"   ' // needed to work together with CGdiPlus.inc
-#include once "Afx/AfxGdiplus.inc"
+#include once "Afx/CWindow.inc"     ' // CWindow framework
+#include once "Afx/AfxGdiplus.inc"  ' // for GdiPlus support
+#INCLUDE ONCE "GL/windows/glu.bi"   ' // for OpenGL support
+#include once "Afx/CMemBmp.inc"     ' // Memory bitmap
 
 NAMESPACE Afx
 
@@ -67,6 +68,8 @@ TYPE CGraphCtx
       m_Stretchable AS BOOLEAN       ' // Contents are stretchable
       m_StretchMode AS LONG          ' // Stretch mode
       m_Resizable   AS BOOLEAN       ' // Contents are resizable
+      m_bOpenGL     AS BOOLEAN       ' // OpenGL support: TRUE or FALSE
+      m_hRC         AS HGLRC         ' // OpenGL: Rendering context handle
 
    Public:
 
@@ -79,6 +82,7 @@ TYPE CGraphCtx
       DECLARE FUNCTION GetVirtualBufferWidth () AS LONG
       DECLARE FUNCTION GetVirtualBufferHeight () AS LONG
       DECLARE FUNCTION GetMemDC () AS HDC
+      DECLARE FUNCTION GethRC () AS HGLRC
       DECLARE FUNCTION GethBmp () AS HBITMAP
       DECLARE FUNCTION GetBits () AS ANY PTR
       DECLARE FUNCTION Clear (BYVAL RGBColor AS COLORREF) AS BOOLEAN
@@ -90,13 +94,27 @@ TYPE CGraphCtx
       DECLARE PROPERTY Resizable (BYVAL bResizable AS BOOLEAN)
       DECLARE SUB LoadImageFromFile (BYREF wszFileName AS WSTRING)
       DECLARE SUB CreateBitmapFromFile (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE)
+      DECLARE SUB LoadImageFromRes (BYVAL hInst AS HINSTANCE, BYREF wszImageName AS WSTRING, _
+              BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBackground AS ARGB = 0)
+'      DECLARE SUB DrawBitmap (BYVAL hbmp AS HBITMAP)
+      DECLARE FUNCTION DrawBitmap (BYVAL hbmp AS HBITMAP, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+              BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+      DECLARE FUNCTION DrawBitmap (BYVAL pBitmap AS GpBitmap PTR, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+              BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+      DECLARE FUNCTION DrawBitmap (BYREF pMemBmp AS CMemBmp, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+              BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
       DECLARE FUNCTION SaveImage (BYREF wszFileName AS WSTRING, BYREF wszMimeType AS WSTRING = "image/bmp") AS LONG
-      DECLARE FUNCTION SaveImageToBmp (BYREF wszFileName AS WSTRING) AS LONG
-      DECLARE FUNCTION SaveImageToJpeg (BYREF wszFileName AS WSTRING) AS LONG
-      DECLARE FUNCTION SaveImageToPng (BYREF wszFileName AS WSTRING) AS LONG
-      DECLARE FUNCTION SaveImageToGif (BYREF wszFileName AS WSTRING) AS LONG
-      DECLARE FUNCTION SaveImageToTiff (BYREF wszFileName AS WSTRING) AS LONG
-      DECLARE FUNCTION PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS LONG
+      DECLARE FUNCTION SaveImageAsBmp (BYREF wszFileName AS WSTRING) AS LONG
+      DECLARE FUNCTION SaveImageAsJpeg (BYREF wszFileName AS WSTRING) AS LONG
+      DECLARE FUNCTION SaveImageAsPng (BYREF wszFileName AS WSTRING) AS LONG
+      DECLARE FUNCTION SaveImageAsGif (BYREF wszFileName AS WSTRING) AS LONG
+      DECLARE FUNCTION SaveImageAsTiff (BYREF wszFileName AS WSTRING) AS LONG
+      DECLARE FUNCTION PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS BOOLEAN
+      DECLARE FUNCTION SetPixelFormat (BYVAL nBitsPerPel AS LONG) AS BOOLEAN
+      DECLARE FUNCTION CreateContext () AS HGLRC
+      DECLARE FUNCTION DeleteContext () AS BOOLEAN
+      DECLARE FUNCTION MakeCurrent () AS BOOLEAN
+      DECLARE FUNCTION MakeNotCurrent () AS BOOLEAN
       DECLARE STATIC FUNCTION CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 END TYPE
@@ -134,6 +152,14 @@ PRIVATE CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGE
 
    ' // Create the control
    IF dwStyle = 0 THEN dwStyle = WS_VISIBLE OR WS_CHILD OR WS_TABSTOP
+   ' OPENGL: Most Common Cause of SetPixelFormat() Failure
+   ' An OpenGL window has its own pixel format. Because of this, only device contexts
+   ' retrieved for the client area of an OpenGL window are allowed to draw into the window.
+   ' As a result, an OpenGL window should be created with the WS_CLIPCHILDREN and
+   ' WS_CLIPSIBLINGS styles. Additionally, the window class attribute should not include
+   ' the CS_PARENTDC style.
+   ' // Make sure that the control has the WS_CHILD, WS_CLIPCHILDREN and WS_CLIPSIBLINGS styles
+   IF wszTitle = "OPENGL" THEN dwStyle = dwStyle OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS
    IF pWindow THEN m_hCtl = pWindow->AddControl(wszClassName, pWindow->hWindow, cID, wszTitle, x, y, nWidth, nHeight, dwStyle, dwExStyle, lpParam)
    IF m_hCtl THEN
       .SetWindowLongPtrW m_hCtl, 0, CAST(LONG_PTR, @this)
@@ -163,6 +189,12 @@ PRIVATE CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGE
       m_vHeight = m_coord.Bottom - m_coord.Top
       ' // Default stretch mode
       m_StretchMode = HALFTONE
+      ' Add OpenGL support
+      IF UCASE(wszTitle) = "OPENGL" THEN
+         m_bOpenGL = TRUE
+         ' // OpenGL: Set the pixel format and ceate the rendering context
+         IF this.SetPixelFormat(m_BitsPerPel) THEN m_hRC = this.CreateContext
+      END IF
       ' // Initializes scroll bar ranges
       m_MaxX = m_coord.Right - m_coord.Left
       m_MaxY = m_coord.Bottom - m_coord.Top
@@ -187,9 +219,12 @@ END CONSTRUCTOR
 PRIVATE DESTRUCTOR CGraphCtx
    ' // Restore the original bitmap
    .SelectObject(m_hMemDc, m_hOldBmp)
+   ' // OpenGL: Release the device and rendering contexts
+   IF m_hMemDc THEN this.MakeNotCurrent
+   IF m_hRC THEN this.DeleteContext
    ' // Destroys the bitmap and the memory device context
-   IF m_hBmp THEN .DeleteObject m_hBmp
-   IF m_hMemDc THEN .DeleteObject m_hMemDc
+   IF m_hBmp THEN .DeleteObject(m_hBmp)
+   IF m_hMemDc THEN .DeleteDC(m_hMemDc)
 END DESTRUCTOR
 ' ========================================================================================
 
@@ -587,6 +622,9 @@ PRIVATE FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHe
    .ReleaseDc m_hCtl, hDc
    ' // Restore the original bitmap
    SelectObject(m_hMemDc, m_hOldBmp)
+   ' // OpenGL: Release the device and rendering contexts
+   IF m_hMemDc THEN this.MakeNotCurrent
+   IF m_hRC THEN this.DeleteContext
    ' // Destroys the bitmap and the memory device context
    IF m_hBmp THEN .DeleteObject m_hBmp
    IF m_hMemDc THEN .DeleteObject m_hMemDc
@@ -608,6 +646,7 @@ PRIVATE FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHe
    ' // Adjusts the coordinates
    m_coord.Right = m_coord.Left + nWidth
    m_coord.Bottom = m_coord.Top + nHeight
+
    ' // Erases the background with the specified or default color
    IF m_bkColor THEN
       DIM hBrush AS .HBRUSH = .CreateSolidBrush(m_bkColor)
@@ -620,6 +659,13 @@ PRIVATE FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHe
    END IF
    .ReleaseDc m_hCtl, hDC
 
+   ' Add OpenGL support
+   IF m_bOpenGL THEN
+      ' // OpenGL: Set the pixel format and ceate the rendering context
+      IF this.SetPixelFormat(m_BitsPerPel) THEN m_hRC = this.CreateContext
+   END IF
+
+   ' // Scroll bars
    IF m_Resizable = FALSE AND m_Stretchable = FALSE THEN
       ' // Adds scrollbars if needed
       DIM rcParent AS RECT, dwStyle AS DWORD
@@ -668,6 +714,14 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION CGraphCtx.GetMemDC () AS HDC
    FUNCTION = m_hMemDc
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' OpenGL - Returns the handle of the rendering context of the control.
+' ========================================================================================
+PRIVATE FUNCTION CGraphCtx.GethRC () AS HGLRC
+   FUNCTION = m_hRC
 END FUNCTION
 ' ========================================================================================
 
@@ -814,13 +868,13 @@ END PROPERTY
 ' ========================================================================================
 
 ' ========================================================================================
-' Shows the specified image in the specified device context
+' Loads and displays the specified image in the graphic control.
 ' Parameters:
 ' - wszFileName = Path of the file.
 ' Remarks:
 '   A quirk in the GDI+ GdipCreateBitmapFromFile function causes that black and white
 '   images are loaded with increased contrast. Therefore, it's better to use the
-'   CreateBitmapFromFile method.
+'   CreateBitmapFromFile method if the image has not transparency.
 ' ========================================================================================
 PRIVATE SUB CGraphCtx.LoadImageFromFile (BYREF wszFileName AS WSTRING)
    ' // Initialize Gdiplus
@@ -850,7 +904,7 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
-' Shows the specified image in the specified device context
+' Loads and displays the specified image in the graphic control.
 ' Parameters:
 ' - wszFileName = Path of the file.
 ' - dimPercent  = Percent of dimming (1-99)
@@ -869,11 +923,14 @@ PRIVATE SUB CGraphCtx.CreateBitmapFromFile (BYREF wszFileName AS WSTRING, BYVAL 
          IF .GetObject(hbmp, SIZEOF(BITMAP), @bm) THEN
             this.SetVirtualBufferSize(bm.bmWidth, bm.bmHeight)
             this.Clear m_bkcolor
-            .SelectObject hMemDC, hbmp
+            DIM Oldbmp AS HBITMAP
+            Oldbmp = .SelectObject(hMemDC, hbmp)
             .BitBlt m_hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY
+            .SelectObject(hMemDC, Oldbmp)
          END IF
          DeleteDC hMemDC
       END IF
+      DeleteObject hbmp
    END IF
 '   ' // Shutdown Gdiplus
 '   GdiplusShutdown token
@@ -881,7 +938,131 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
-' Saves the image to file.
+' Loads the specified image from a resource file in the Graphic Control.
+' Parameters:
+' - hInstance     = [in] A handle to the module whose portable executable file or an accompanying
+'                   MUI file contains the resource. If this parameter is NULL, the function searches
+'                   the module used to create the current process.
+' - wszImageName  = [in] Name of the image in the resource file (.RES). If the image resource uses
+'                   an integral identifier, wszImage should begin with a number symbol (#)
+'                   followed by the identifier in an ASCII format, e.g., "#998". Otherwise,
+'                   use the text identifier name for the image. Only images embedded as raw data
+'                   (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.
+' - dimPercent    = Percent of dimming (1-99)
+' - bGrayScale    = TRUE or FALSE. Convert to gray scale.
+' - clrBackground = [in] The background color. This parameter is ignored if the image type
+'                   is IMAGE_ICON or the bitmap is totally opaque.
+' ========================================================================================
+PRIVATE SUB CGraphCtx.LoadImageFromRes (BYVAL hInst AS HINSTANCE, BYREF wszImageName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBackground AS ARGB = 0)
+   ' // Initialize Gdiplus
+'   DIM token AS ULONG_PTR = AfxGdipInit
+'   IF token = NULL THEN EXIT SUB
+   DIM hbmp AS HBITMAP = AfxGdipBitmapFromRes(hInst, wszImageName, dimPercent, bGrayScale, clrBackground)
+   IF hbmp THEN
+      DIM bm AS BITMAP, hMemDC AS HDC
+      hMemDC = .CreateCompatibleDC(m_hMemDC)
+      IF hMemDC THEN
+         IF .GetObject(hbmp, SIZEOF(BITMAP), @bm) THEN
+            this.SetVirtualBufferSize(bm.bmWidth, bm.bmHeight)
+            this.Clear m_bkcolor
+            DIM Oldbmp AS HBITMAP
+            Oldbmp = .SelectObject(hMemDC, hbmp)
+            .BitBlt m_hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY
+            .SelectObject(hMemDC, Oldbmp)
+         END IF
+         DeleteDC hMemDC
+      END IF
+      DeleteObject hbmp
+   END IF
+   ' // Shutdown Gdiplus
+'   GdiplusShutdown token
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Draws a bitmap.
+' Parameter:
+' - hBitmap = A handle to the bitmap to draw.
+' Note: Does not work with the handle of the CMemBmp class.
+'' ========================================================================================
+'PRIVATE SUB CGraphCtx.DrawBitmap (BYVAL hbmp AS HBITMAP)
+'   IF hbmp = NULL THEN RETURN
+'   DIM bm AS BITMAP, hMemDC AS .HDC
+'   hMemDC = .CreateCompatibleDC(m_hMemDC)
+'   IF hMemDC THEN
+'      IF .GetObject(hbmp, SIZEOF(BITMAP), @bm) THEN
+'         this.SetVirtualBufferSize(bm.bmWidth, bm.bmHeight)
+'         this.Clear m_bkcolor
+'         DIM hOldBmp AS .HBITMAP = .SelectObject(hMemDC, hbmp)
+'         .BitBlt m_hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, hMemDC, 0, 0, SRCCOPY
+'         .SelectObject(hMemDC, hOldBmp)
+'      END IF
+'      .DeleteDC hMemDC
+'   END IF
+'END SUB
+'' ========================================================================================
+
+' ========================================================================================
+PRIVATE FUNCTION CGraphCtx.DrawBitmap (BYVAL hbmp AS HBITMAP, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+
+   IF hbmp = NULL THEN RETURN 2   ' // Invalid parameter
+   DIM nStatus AS GpStatus, pGraphics AS GpGraphics PTR, pBitmap AS GpBitmap PTR
+   DIM nWidth AS DWORD, nHeight AS DWORD
+   DO
+      nStatus = GdipCreateBitmapFromHBITMAP (hbmp, NULL, @pBitmap)
+      IF pBitmap = NULL THEN EXIT DO
+      GdipGetImageWidth(cast(GpImage PTR, pBitmap), @nWidth)
+      GdipGetImageHeight(cast(GpImage PTR, pBitmap), @nHeight)
+      nStatus = GdipCreateFromHDC(m_hMemDC, @pGraphics)
+      IF pGraphics = NULL THEN EXIT DO
+      IF nRight = 0 OR nBottom = 0 THEN
+         GdipDrawImage(pGraphics, cast(GpImage PTR, pBitmap), x, y)
+      ELSE
+         GdipDrawImageRect(pGraphics, cast(GpImage PTR, pBitmap), x, y, nRight, nBottom)
+      END IF
+      EXIT DO
+   LOOP
+   IF pBitmap THEN GdipDisposeImage(cast(GpImage PTR, pBitmap))
+   IF pGraphics THEN GdipDeleteGraphics(pGraphics)
+   RETURN nStatus
+
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION CGraphCtx.DrawBitmap (BYVAL pBitmap AS GpBitmap PTR, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+
+   IF pBitmap = NULL THEN RETURN 2   ' // Invalid parameter
+   DIM nStatus AS GpStatus, pGraphics AS GpGraphics PTR
+   DIM nWidth AS DWORD, nHeight AS DWORD
+   DO
+      GdipGetImageWidth(cast(GpImage PTR, pBitmap), @nWidth)
+      GdipGetImageHeight(cast(GpImage PTR, pBitmap), @nHeight)
+      nStatus = GdipCreateFromHDC(m_hMemDC, @pGraphics)
+      IF pGraphics = NULL THEN EXIT DO
+      IF nRight = 0 OR nBottom = 0 THEN
+         GdipDrawImage(pGraphics, cast(GpImage PTR, pBitmap), x, y)
+      ELSE
+         GdipDrawImageRect(pGraphics, cast(GpImage PTR, pBitmap), x, y, nRight, nBottom)
+      END IF
+      EXIT DO
+   LOOP
+   IF pGraphics THEN GdipDeleteGraphics(pGraphics)
+   RETURN nStatus
+
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION CGraphCtx.DrawBitmap (BYREF pMemBmp AS CMemBmp, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+   RETURN this.DrawBitmap(pMemBmp.m_hBmp, x, y, nRight, nBottom)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Saves the image to a file.
 ' Parameters:
 ' - wszFileName = Path name for the image to be saved.
 ' - wszMimeType = Mime type (default: "image/bmp").
@@ -899,27 +1080,27 @@ PRIVATE FUNCTION CGraphCtx.SaveImage (BYREF wszFileName AS WSTRING, BYREF wszMim
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGraphCtx.SaveImageToBmp (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageAsBmp (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/bmp")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGraphCtx.SaveImageToJpeg (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageAsJpeg (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/jpeg")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGraphCtx.SaveImageToPng (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageAsPng (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/png")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGraphCtx.SaveImageToGif (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageAsGif (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/gif")
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION CGraphCtx.SaveImageToTiff (BYREF wszFileName AS WSTRING) AS LONG
+PRIVATE FUNCTION CGraphCtx.SaveImageAsTiff (BYREF wszFileName AS WSTRING) AS LONG
    FUNCTION = AfxGdipSaveHBITMAPToFile(m_hBmp, wszFileName, "image/tiff")
 END FUNCTION
 ' ========================================================================================
@@ -938,8 +1119,90 @@ END FUNCTION
 '   InterpolationModeHighQualityBicubic = 7
 ' Return value: Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION CGraphCtx.PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS LONG
+PRIVATE FUNCTION CGraphCtx.PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS BOOLEAN
    FUNCTION = AfxGdipPrintHBITMAP(m_hBmp, bStretch, nStretchMode)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' OpenGL: Set the pixel format
+' ========================================================================================
+FUNCTION CGraphCtx.SetPixelFormat (BYVAL nBitsPerPel AS LONG) AS BOOLEAN
+
+   DIM pf AS LONG, pfd AS PIXELFORMATDESCRIPTOR, cDepthBits AS LONG
+
+   cDepthBits = nBitsPerPel - 8
+   IF cDepthBits < 16 THEN cDepthBits = 16
+
+   ' // Fill the PIXELFORMATDESCRIPTOR structure
+   pfd.nSize           = SIZEOF(PIXELFORMATDESCRIPTOR)   ' Size of the structure
+   pfd.nVersion        = 1                               ' Version number
+   pfd.dwFlags         = PFD_SUPPORT_OPENGL _            ' The buffer supports OpenGL drawing
+                         OR PFD_SUPPORT_GDI              ' The buffer supports GDI drawing.
+   pfd.iPixelType      = PFD_TYPE_RGBA                   ' Request an RGBA format
+   pfd.cColorBits      = nBitsPerPel                     ' Number of color bitplanes in each color buffer
+   pfd.cDepthBits      = cDepthBits                      ' Depth of the depth (z-axis) buffer.
+
+   ' // Find a matching pixel format
+   pf = .ChoosePixelFormat(m_hMemDC, @pfd)
+   IF pf = 0 THEN
+      .MessageBoxW(0, "Can't find a suitable pixel format, GetLastError = " & WSTR(GetLastError), "CGraphCtx.SetPixelFormat", _
+         MB_OK OR MB_ICONINFORMATION OR MB_APPLMODAL)
+      EXIT FUNCTION
+   END IF
+
+   ' // Set the pixel format
+   IF .SetPixelFormat(m_hMemDC, pf, @pfd) = FALSE THEN
+      .MessageBoxW(0, "Can't set the pixel format, GetLastError = " & WSTR(GetLastError), "CGraphCtx.SetPixelFormat", _
+         MB_OK OR MB_ICONINFORMATION OR MB_APPLMODAL)
+      EXIT FUNCTION
+   END IF
+   FUNCTION = TRUE
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' OpenGL: Create context
+' ========================================================================================
+FUNCTION CGraphCtx.CreateContext () AS HGLRC
+   ' // Create a new OpenGL rendering context
+   DIM hRC AS HGLRC = wglCreateContext(m_hMemDc)
+   IF hRC = NULL THEN
+      .MessageBoxW(0, "Can't create an OpenGL rendering context, GetLastError = " & WSTR(GetLastError), "CGraphCtx.CreateContext", _
+         MB_OK OR MB_ICONINFORMATION OR MB_APPLMODAL)
+   ELSE
+     ' // Make it current
+      IF wglMakeCurrent(m_hMemDc, m_hRC) = FALSE THEN
+         .MessageBoxW(0, "Can't activate the OpenGL rendering context, GetLastError = " & WSTR(GetLastError), "CGraphCtx.CreateContext", _
+            MB_OK OR MB_ICONINFORMATION OR MB_APPLMODAL)
+      END IF
+   END IF
+   FUNCTION = hRC
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' OpenGL: Delete context
+' ========================================================================================
+FUNCTION CGraphCtx.DeleteContext () AS BOOLEAN
+   FUNCTION = wglDeleteContext(m_hRC)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' OpenGL: As more than one instance of this control can be used on a form, we need to make
+' sure that OpenGL calls are directed to the correct rendering context. This is achieved
+' by calling the MakeCurrent method.
+' Return value: TRUE or FALSE.
+' ========================================================================================
+FUNCTION CGraphCtx.MakeCurrent () AS BOOLEAN
+   FUNCTION = wglMakeCurrent(m_hMemDc, m_hRC)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+FUNCTION CGraphCtx.MakeNotCurrent () AS BOOLEAN
+   FUNCTION = wglMakeCurrent(m_hMemDc, NULL)
 END FUNCTION
 ' ========================================================================================
 

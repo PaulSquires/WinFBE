@@ -38,23 +38,6 @@ PRIVATE DESTRUCTOR CGpCustomLineCap
 END DESTRUCTOR
 ' ========================================================================================
 
-' ========================================================================================
-' Returns the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpCustomLineCap.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpCustomLineCap.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
 ' =====================================================================================
 ' * Sets the LineCap object used to start and end lines within the GraphicsPath object
 ' that defines this CustomLineCap object.

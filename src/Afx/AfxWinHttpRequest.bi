@@ -19,7 +19,9 @@
 #include once "win/ole2.bi"
 #include once "win/unknwnbase.bi"
 
-' // The definition for BSTR in the FreeBASIC headers was incorrectly changed to WCHAR
+NAMESPACE Afx
+
+' // The definition for BSTR in the FreeBASIC headers was inconveniently changed to WCHAR
 #ifndef AFX_BSTR
    #define AFX_BSTR WSTRING PTR
 #endif
@@ -225,3 +227,5 @@ END TYPE
 
 TYPE AFX_LPWINHTTPREQUESTEVENTS AS Afx_IWinHttpRequestEvents_ PTR
 #endif
+
+END NAMESPACE

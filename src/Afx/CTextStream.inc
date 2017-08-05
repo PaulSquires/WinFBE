@@ -21,28 +21,32 @@ NAMESPACE Afx
 ' ########################################################################################
 TYPE CTextStream
 
+Public:
    m_pFileSys AS Afx_IFileSystem PTR
    m_pTxtStm AS Afx_ITextStream PTR
    m_Result AS HRESULT
+
+Private:
    m_bUninitCOM AS BOOLEAN
 
+Public:
    DECLARE CONSTRUCTOR
    DECLARE DESTRUCTOR
    DECLARE FUNCTION GetLastResult () AS HRESULT
    DECLARE FUNCTION SetResult (BYVAL Result AS HRESULT) AS HRESULT
-   DECLARE FUNCTION Create (BYREF cwsFileName AS CWSTR, BYVAL bOverwrite AS BOOLEAN = TRUE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
-   DECLARE FUNCTION Open (BYREF cwsFileName AS CWSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
-   DECLARE FUNCTION OpenUnicode (BYREF cwsFileName AS CWSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE) AS HRESULT
+   DECLARE FUNCTION Create (BYREF cbsFileName AS CBSTR, BYVAL bOverwrite AS BOOLEAN = TRUE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
+   DECLARE FUNCTION Open (BYREF cbsFileName AS CBSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
+   DECLARE FUNCTION OpenUnicode (BYREF cbsFileName AS CBSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE) AS HRESULT
    DECLARE FUNCTION Close () AS HRESULT
    DECLARE PROPERTY Line () AS LONG
    DECLARE PROPERTY Column () AS LONG
    DECLARE FUNCTION EOS () AS BOOLEAN
    DECLARE FUNCTION EOL () AS BOOLEAN
-   DECLARE FUNCTION Read (BYVAL numChars AS LONG) AS CWSTR
-   DECLARE FUNCTION ReadLine () AS CWSTR
-   DECLARE FUNCTION ReadAll () AS CWSTR
-   DECLARE FUNCTION Write (BYREF cwsText AS CWSTR) AS HRESULT
-   DECLARE FUNCTION WriteLine (BYREF cwsText AS CWSTR) AS HRESULT
+   DECLARE FUNCTION Read (BYVAL numChars AS LONG) AS CBSTR
+   DECLARE FUNCTION ReadLine () AS CBSTR
+   DECLARE FUNCTION ReadAll () AS CBSTR
+   DECLARE FUNCTION Write (BYREF cbsText AS CBSTR) AS HRESULT
+   DECLARE FUNCTION WriteLine (BYREF cbsText AS CBSTR) AS HRESULT
    DECLARE FUNCTION WriteBlankLines (BYVAL numLines AS LONG) AS HRESULT
    DECLARE FUNCTION Skip (BYVAL numChars AS LONG) AS HRESULT
    DECLARE FUNCTION SkipLine () AS HRESULT
@@ -107,16 +111,13 @@ END FUNCTION
 '   ASCII file. The value is true if the file is created as a Unicode file, false if it's
 '   created as an ASCII file. If omitted, an ASCII file is assumed.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.Create (BYREF cwsFileName AS CWSTR, BYVAL bOverwrite AS BOOLEAN = TRUE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
+PRIVATE FUNCTION CTextStream.Create (BYREF cbsFileName AS CBSTR, BYVAL bOverwrite AS BOOLEAN = TRUE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
    IF m_pTxtStm THEN
       SetResult(m_pTxtStm->Close)
       m_pTxtStm->Release
       m_pTxtStm = NULL
    END IF
-   DIM bstrFileName AS AFX_BSTR = SysAllocString(**cwsFileName)
-   SetResult(m_pFileSys->CreateTextFile(bstrFileName, bOverwrite, bUnicode, @m_pTxtStm))
-   SysFreeString bstrFileName
-   RETURN m_Result
+   RETURN SetResult(m_pFileSys->CreateTextFile(**cbsFileName, bOverwrite, bUnicode, @m_pTxtStm))
 END FUNCTION
 ' ========================================================================================
 
@@ -132,16 +133,13 @@ END FUNCTION
 ' - bUnicode: TRUE or FALSE. Indicates the format of the opened file. If omitted, the file
 '   is opened as ASCII.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.Open (BYREF cwsFileName AS CWSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
+PRIVATE FUNCTION CTextStream.Open (BYREF cbsFileName AS CBSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE, BYVAL bUnicode AS BOOLEAN = FALSE) AS HRESULT
    IF m_pTxtStm THEN
       SetResult(m_pTxtStm->Close)
       m_pTxtStm->Release
       m_pTxtStm = NULL
    END IF
-   DIM bstrFileName AS AFX_BSTR = SysAllocString(**cwsFileName)
-   SetResult(m_pFileSys->OpenTextFile(bstrFileName, IOMode, bCreate, bUnicode, @m_pTxtStm))
-   SysFreeString bstrFileName
-   RETURN m_Result
+   RETURN SetResult(m_pFileSys->OpenTextFile(**cbsFileName, IOMode, bCreate, bUnicode, @m_pTxtStm))
 END FUNCTION
 ' ========================================================================================
 
@@ -155,16 +153,13 @@ END FUNCTION
 '   filename doesn't exist. The value is True if a new file is created, False if it isn't
 '   created. If omitted, a new file isn't created.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.OpenUnicode (BYREF cwsFileName AS CWSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE) AS HRESULT
+PRIVATE FUNCTION CTextStream.OpenUnicode (BYREF cbsFileName AS CBSTR, BYVAL IOMode AS LONG = 1, BYVAL bCreate AS BOOLEAN = FALSE) AS HRESULT
    IF m_pTxtStm THEN
       SetResult(m_pTxtStm->Close)
       m_pTxtStm->Release
       m_pTxtStm = NULL
    END IF
-   DIM bstrFileName AS AFX_BSTR = SysAllocString(**cwsFileName)
-   SetResult(m_pFileSys->OpenTextFile(bstrFileName, IOMode, bCreate, Tristate_True, @m_pTxtStm))
-   SysFreeString bstrFileName
-   RETURN m_Result
+   RETURN SetResult(m_pFileSys->OpenTextFile(**cbsFileName, IOMode, bCreate, Tristate_True, @m_pTxtStm))
 END FUNCTION
 ' ========================================================================================
 
@@ -227,12 +222,10 @@ END FUNCTION
 ' Reads a specified number of characters from a TextStream file and returns the resulting string.
 ' After a file is initially opened and before anything is written, Line is equal to 1.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.Read (BYVAL numChars AS LONG) AS CWSTR
+PRIVATE FUNCTION CTextStream.Read (BYVAL numChars AS LONG) AS CBSTR
    DIM bstrText AS AFX_BSTR
    IF m_pTxtStm THEN SetResult(m_pTxtStm->Read(numChars, @bstrText))
-   DIM cwsText AS CWSTR = SysAllocString(*bstrText)
-   SysFreeString bstrText
-   RETURN cwsText
+   RETURN bstrText
 END FUNCTION
 ' ========================================================================================
 
@@ -240,46 +233,36 @@ END FUNCTION
 ' Reads an entire line (up to, but not including, the newline character) from a TextStream
 ' file and returns the resulting string.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.ReadLine () AS CWSTR
+PRIVATE FUNCTION CTextStream.ReadLine () AS CBSTR
    DIM bstrText AS AFX_BSTR
    IF m_pTxtStm THEN SetResult(m_pTxtStm->ReadLine(@bstrText))
-   DIM cwsText AS CWSTR = SysAllocString(*bstrText)
-   SysFreeString bstrText
-   RETURN cwsText
+   RETURN bstrText
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
 ' Reads an entire TextStream file and returns the resulting string.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.ReadAll () AS CWSTR
+PRIVATE FUNCTION CTextStream.ReadAll () AS CBSTR
    DIM bstrText AS AFX_BSTR
    IF m_pTxtStm THEN SetResult(m_pTxtStm->ReadAll(@bstrText))
-   DIM cwsText AS CWSTR = *bstrText
-   SysFreeString bstrText
-   RETURN cwsText
+   RETURN bstrText
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
 ' Writes a specified string to a TextStream file.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.Write (BYREF cwsText AS CWSTR) AS HRESULT
-   DIM bstrText AS AFX_BSTR = SysAllocString(**cwsText)
-   IF m_pTxtStm THEN SetResult(m_pTxtStm->Write(bstrText))
-   SysFreeString bstrText
-   RETURN m_Result
+PRIVATE FUNCTION CTextStream.Write (BYREF cbsText AS CBSTR) AS HRESULT
+   IF m_pTxtStm THEN RETURN(SetResult(m_pTxtStm->Write(*cbsText)))
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
 ' Writes a specified string and newline character to a TextStream file.
 ' ========================================================================================
-PRIVATE FUNCTION CTextStream.WriteLine (BYREF cwsText AS CWSTR) AS HRESULT
-   DIM bstrText AS AFX_BSTR = SysALlocString(**cwsText)
-   IF m_pTxtStm THEN SetResult(m_pTxtStm->WriteLine(bstrText))
-   SysFreeString bstrText
-   RETURN m_Result
+PRIVATE FUNCTION CTextStream.WriteLine (BYREF cbsText AS CBSTR) AS HRESULT
+   IF m_pTxtStm THEN RETURN(SetResult(m_pTxtStm->WriteLine(*cbsText)))
 END FUNCTION
 ' ========================================================================================
 

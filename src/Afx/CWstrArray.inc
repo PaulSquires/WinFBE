@@ -15,7 +15,7 @@
 
 NAMESPACE Afx
 
-' // The definition for BSTR in the FreeBASIC headers was incorrectly changed to WCHAR
+' // The definition for BSTR in the FreeBASIC headers was inconveniently changed to WCHAR
 #ifndef AFX_BSTR
    #define AFX_BSTR WSTRING PTR
 #endif
@@ -136,9 +136,9 @@ END CONSTRUCTOR
 
 ' ========================================================================================
 ' Creates a one-dimensional BSTR safe array.
+' - cElements: The number of elements in the array.
 ' - lLBound: The lower bound value; that is, the index of the first element in the array.
 '   Can be negative.
-' - cElements: The number of elements in the array.
 ' ========================================================================================
 PRIVATE CONSTRUCTOR CWstrArray (BYVAL cElements AS DWORD = 0, BYVAL lLBound AS LONG = 0)
    m_psa = this.Create(cElements, lLBound)

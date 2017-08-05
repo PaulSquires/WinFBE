@@ -286,7 +286,7 @@ FUNCTION CWebBrowserEventsImpl.Invoke (BYVAL dispIdMember AS DISPID, BYVAL riid 
       END IF
       IF m_pHTMLDocumentEvents2 <> NULL AND m_dwDocEventsCookie = 0 THEN
          ' // Connect with the HTMLDocumentEvents2 interface
-         pWebBrowser2->get_Document(@cast(IDispatch PTR, m_pHTMLDocument2))
+         pWebBrowser2->get_Document(@cast(ANY PTR, m_pHTMLDocument2))
          IF m_pHTMLDocument2 = NULL THEN EXIT FUNCTION
          AfxAdvise(m_pHTMLDocument2, m_pHTMLDocumentEvents2, DIID_HTMLDocumentEvents2_, @m_dwDocEventsCookie)
       END IF

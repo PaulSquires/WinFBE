@@ -13,6 +13,23 @@
 #include once "win/ddraw.bi"
 #include once "Afx/AfxGdiPlus.inc"
 
+' ========================================================================================
+' Macro for debug
+' To allow debugging, define _CGDIP_DEBUG_ 1 in your application before including this file.
+' ========================================================================================
+#ifndef _CGDIP_DEBUG_
+   #define _CGDIP_DEBUG_ 0
+#ENDIF
+#ifndef _CGDIP_DP_
+   #define _CGDIP_DP_ 1
+   #MACRO CGDIP_DP(st)
+      #IF (_CGDIP_DEBUG_ = 1)
+         OutputDebugStringW(st)
+      #ENDIF
+   #ENDMACRO
+#ENDIF
+' ========================================================================================
+
 TYPE CGpAdjustableArrowCap_ AS CGpAdjustableArrowCap
 TYPE CGpBitmap_ AS CGpBitmap
 TYPE CGpBrush_ AS CGpBrush
@@ -33,12 +50,94 @@ TYPE CGpRegion_ AS CGpRegion
 TYPE CGpStringFormat_ AS CGpStringFormat
 
 ' ########################################################################################
+' CGpBase class
+' ########################################################################################
+TYPE CGpBase
+
+   m_Status AS GpStatus   ' // Last status code
+
+   DECLARE CONSTRUCTOR
+   DECLARE DESTRUCTOR
+   DECLARE FUNCTION GetLastStatus () AS GpStatus
+   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
+   DECLARE FUNCTION RefCount (BYVAL bIncrement AS BOOLEAN) AS LONG
+
+END TYPE
+' ########################################################################################
+
+' ========================================================================================
+' Default constructor
+' ========================================================================================
+PRIVATE CONSTRUCTOR CGpBase
+   CGDIP_DP("CONSTRUCTOR CGpBase")
+   ' // Increase the reference count
+   this.RefCount(TRUE)
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' Destructor
+' ========================================================================================
+PRIVATE DESTRUCTOR CGpBase
+   CGDIP_DP("DESTRUCTOR CGpBase")
+   ' // Decrease the reference count
+   this.RefCount(FALSE)
+END DESTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' Increases/decreases the reference count and initializes or shutdowns GDI+ when required.
+' ========================================================================================
+PRIVATE FUNCTION CGpBase.RefCount (BYVAL bIncrement AS BOOLEAN) AS LONG
+   STATIC cRef AS LONG, token AS ULONG_PTR
+'   CGDIP_DP("--- BEGIN CGpBase - RefCount - cRef = " & WSTR(cRef))
+   IF cRef = 0 THEN
+      ' // Initialize the GDI+ library
+      DIM StartupInput AS GdiplusStartupInput
+      DIM version AS ULONG = 1
+      IF AfxWindowsVersion >= 600 THEN version = 2
+      StartupInput.GdiplusVersion = version
+      m_Status = GdiplusStartup(@token, @StartupInput, NULL)
+      IF m_Status <> 0 THEN MessageBoxW(0, "GDI+ initialization failed - Error: " & STR$(m_Status), "Error", MB_OK OR MB_ICONERROR OR MB_APPLMODAL)
+      CGDIP_DP("+++ CGpBase.RefCount Initialize GDI+ - version = " & WSTR(version) & "; token = " & WSTR(token))
+   END IF
+   ' // Increase or decrease the reference count
+   IF bIncrement THEN cRef += 1 ELSE cRef -= 1
+   CGDIP_DP("--- END CGpBase - RefCount - cRef = " & WSTR(cRef))
+   ' // If the reference count reaches a value of 0, shutdown GDI+
+   IF cRef = 0  THEN
+      ' // Shutdown GDI+
+      IF token THEN GdiplusShutdown(token)
+      token = 0
+      CGDIP_DP("+++ CGpBase.RefCount Shutdown GDI+")
+   END IF
+   RETURN cRef
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the last status code.
+' ========================================================================================
+PRIVATE FUNCTION CGpBase.GetLastStatus () AS GpStatus
+   RETURN m_Status
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Sets the last status code.
+' ========================================================================================
+PRIVATE FUNCTION CGpBase.SetStatus (BYVAL status AS GpStatus) AS GpStatus
+   m_Status = status
+   RETURN m_Status
+END FUNCTION
+' ========================================================================================
+
+' ########################################################################################
 ' CGpMatrix class
 ' ########################################################################################
-TYPE CGpMatrix
+TYPE CGpMatrix EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pMatrix AS GpMatrix PTR
 
 Public:
@@ -47,8 +146,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL rcf AS GpRectF PTR, BYVAL dstplg AS GpPointF PTR)
    DECLARE CONSTRUCTOR (BYVAL rc AS GpRect PTR, BYVAL dstplg AS GpPoint PTR)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pMatrix AS CGpMatrix PTR) AS GpStatus
    DECLARE FUNCTION GetElements (BYVAL m AS SINGLE PTR) AS GpStatus
    DECLARE FUNCTION SetElements (BYVAL m11 AS SINGLE, BYVAL m12 AS SINGLE, BYVAL m21 AS SINGLE, BYVAL m22 AS SINGLE, BYVAL dx AS SINGLE, BYVAL dy AS SINGLE) AS GpStatus
@@ -76,17 +173,14 @@ END TYPE
 ' ########################################################################################
 ' CGpImageAttributes class
 ' ########################################################################################
-TYPE CGpImageAttributes
+TYPE CGpImageAttributes EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pImgAttr AS GpImageAttributes PTR
 
 Public:
    DECLARE CONSTRUCTOR
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pCloneImgAttr AS CGpImageAttributes PTR) AS GpStatus
    DECLARE FUNCTION SetToIdentity (BYVAL nType AS ColorAdjustType = ColorAdjustTypeDefault) AS GpStatus
    DECLARE FUNCTION Reset (BYVAL nType AS ColorAdjustType = ColorAdjustTypeDefault) AS GpStatus
@@ -121,10 +215,9 @@ END TYPE
 ' ########################################################################################
 ' CGpImage class
 ' ########################################################################################
-TYPE CGpImage
+TYPE CGpImage EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pImage AS GpImage PTR
 
 Public:
@@ -132,8 +225,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL pwszFileName AS WSTRING PTR, BYVAL useEmbeddedColorManagement AS BOOLEAN = FALSE)
    DECLARE CONSTRUCTOR (BYVAL pStream AS IStream PTR, BYVAL useEmbeddedColorManagement AS BOOLEAN = FALSE)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION FromFile (BYVAL pwszFileName AS WSTRING PTR, BYVAL useEmbeddedColorManagement AS BOOLEAN) AS CGpImage
    DECLARE FUNCTION FromStream (BYVAL pStream AS IStream PTR, BYVAL useEmbeddedColorManagement AS BOOLEAN) AS CGpImage
    DECLARE FUNCTION GetEncoderParameterListSize (BYVAL clsidEncoder AS GUID PTR) AS UINT
@@ -265,17 +356,14 @@ END TYPE
 ' ########################################################################################
 ' CGpCachedBitmap class
 ' ########################################################################################
-TYPE CGpCachedBitmap
+TYPE CGpCachedBitmap EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pCachedBitmap AS GpCachedBitmap PTR
 
 Public:
    DECLARE CONSTRUCTOR (BYVAL pBitmap AS CGpBitmap PTR, BYVAL pGraphics AS CGpGraphics_ PTR)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
 
 END TYPE
 ' ########################################################################################
@@ -283,18 +371,15 @@ END TYPE
 ' ########################################################################################
 ' CGpBrush class
 ' ########################################################################################
-TYPE CGpBrush
+TYPE CGpBrush EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pBrush AS GpBrush PTR
 
 Public:
    ' // CGpBrush
    DECLARE CONSTRUCTOR
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pBrush AS CGpBrush PTR) AS GpStatus
    DECLARE FUNCTION GetType () AS GpBrushType
 
@@ -333,8 +418,8 @@ END TYPE
 TYPE CGpLinearGradientBrush EXTENDS CGpBrush
    DECLARE CONSTRUCTOR (BYVAL point1 AS GpPointF PTR, BYVAL point2 AS GpPointF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB)
    DECLARE CONSTRUCTOR (BYVAL point1 AS GpPoint PTR, BYVAL point2 AS GpPoint PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB)
-   DECLARE CONSTRUCTOR (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS GpWrapMode)
-   DECLARE CONSTRUCTOR (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS GpWrapMode)
+   DECLARE CONSTRUCTOR (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS LinearGradientMode)
+   DECLARE CONSTRUCTOR (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL nMode AS LinearGradientMode)
    DECLARE CONSTRUCTOR (BYVAL rc AS GpRectF PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL angle AS SINGLE, BYVAL isAngleScalable AS BOOL = FALSE)
    DECLARE CONSTRUCTOR (BYVAL rc AS GpRect PTR, BYVAL color1 AS ARGB, BYVAL color2 AS ARGB, BYVAL angle AS SINGLE, BYVAL isAngleScalable AS BOOL = FALSE)
    DECLARE FUNCTION SetLinearColors (BYVAL color1 AS ARGB, BYVAL color2 AS ARGB) AS GpStatus
@@ -416,10 +501,9 @@ END TYPE
 ' ########################################################################################
 ' CGpPen class
 ' ########################################################################################
-TYPE CGpPen
+TYPE CGpPen EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pPen AS GpPen PTR
 
 Public:
@@ -427,8 +511,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL colour AS ARGB, BYVAL nWidth AS SINGLE = 1.0)
    DECLARE CONSTRUCTOR (BYVAL pBrush AS CGpBrush PTR, BYVAL nWidth AS SINGLE = 1.0)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pPen AS CGpPen PTR) AS GpStatus
    DECLARE FUNCTION SetWidth (BYVAL nWidth AS SINGLE) AS GpStatus
    DECLARE FUNCTION GetWidth () AS SINGLE
@@ -478,18 +560,15 @@ END TYPE
 ' ########################################################################################
 ' CGpCustomLineCap class
 ' ########################################################################################
-TYPE CGpCustomLineCap
+TYPE CGpCustomLineCap EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pCustomLineCap AS GpCustomLineCap PTR
 
 Public:
    DECLARE CONSTRUCTOR
    DECLARE CONSTRUCTOR (BYVAL pFillPath AS CGpGraphicsPath_ PTR, BYVAL pStrokePath AS CGpGraphicsPath_ PTR, BYVAL baseCap AS LineCap = LinecapFLat, BYVAL baseInset AS SINGLE = 0.0)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION SetStrokeCaps (BYVAL startCap AS LineCap, BYVAL endCap AS LineCap) AS GpStatus
    DECLARE FUNCTION GetStrokeCaps (BYVAL startCap AS LineCap PTR, BYVAL endCap AS LineCap PTR) AS GpStatus
    DECLARE FUNCTION SetStrokeCap (BYVAL strokeCap AS LineCap) AS GpStatus
@@ -523,10 +602,9 @@ END TYPE
 ' ########################################################################################
 ' CGpRegion class
 ' ########################################################################################
-TYPE CGpRegion
+TYPE CGpRegion EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pRegion AS GpRegion PTR
 
 Public:
@@ -539,8 +617,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL regionData AS BYTE PTR, BYVAL nSize AS LONG)
    DECLARE CONSTRUCTOR (BYVAL hRgn AS HRGN)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pRegion AS CGpRegion PTR) AS GpStatus
    DECLARE FUNCTION MakeInfinite () AS GpStatus
    DECLARE FUNCTION MakeEmpty () AS GpStatus
@@ -592,10 +668,9 @@ END TYPE
 ' ########################################################################################
 ' CGpFont class
 ' ########################################################################################
-TYPE CGpFont
+TYPE CGpFont EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pFont AS GpFont PTR
 
 Public:
@@ -609,8 +684,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL pFamily AS CGpFontFamily_ PTR, BYVAL emSize AS SINGLE, BYVAL nStyle AS INT_ = 0, BYVAL nUnit AS GpUnit = 0)
    DECLARE CONSTRUCTOR (BYVAL pwszFamilyName AS WSTRING PTR, BYVAL emSize AS SINGLE, BYVAL nStyle AS INT_ = 0, BYVAL nUnit AS GpUnit = 0, BYVAL pFontCollection AS CGpFontCollection_ PTR = NULL)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
 #ifdef __FB_64BIT__
    DECLARE FUNCTION GetLogFontA (BYVAL pGraphics AS CGpGraphics_ PTR, BYVAL pfA AS LOGFONTA PTR) AS GpStatus
    DECLARE FUNCTION GetLogFontW (BYVAL pGraphics AS CGpGraphics_ PTR, BYVAL pfW AS LOGFONTW PTR) AS GpStatus
@@ -630,18 +703,15 @@ END TYPE
 ' ########################################################################################
 ' CGpFontFamily class
 ' ########################################################################################
-TYPE CGpFontFamily
+TYPE CGpFontFamily EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pFontFamily AS GpFontFamily PTR
 
 Public:
    DECLARE CONSTRUCTOR
    DECLARE CONSTRUCTOR (BYVAL pwszName AS WSTRING PTR, BYVAL pFontCollection AS CGpFontCollection_ PTR = NULL)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pFontFamily AS CGpFontFamily PTR) AS GpStatus
    DECLARE FUNCTION GenericSansSerif (BYVAL pFontFamily AS CGpFontFamily PTR) AS GpStatus
    DECLARE FUNCTION GenericSerif (BYVAL pFontFamily AS CGpFontFamily PTR) AS GpStatus
@@ -660,17 +730,14 @@ END TYPE
 ' ########################################################################################
 ' CGpFontCollection class
 ' ########################################################################################
-TYPE CGpFontCollection
+TYPE CGpFontCollection EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pFontCollection AS GpFontCollection PTR
 
 Public:
    DECLARE CONSTRUCTOR
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION GetFamilyCount () AS INT_
    DECLARE FUNCTION GetFamilies (BYVAL numSought AS INT_, BYVAL gpfamilies AS CGpFontFamily PTR, BYVAL numFound AS inT_ PTR) AS GpStatus
 
@@ -698,17 +765,14 @@ END TYPE
 ' ########################################################################################
 ' CGpStringFormat class
 ' ########################################################################################
-TYPE CGpStringFormat
+TYPE CGpStringFormat EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pStringFormat AS GpStringFormat PTR
 
 Public:
    DECLARE CONSTRUCTOR (BYVAL formatFlags AS INT_ = 0, BYVAL language AS LANGID = LANG_NEUTRAL)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pStringFormat AS CGpStringFormat PTR) AS GpStatus
    DECLARE FUNCTION GenericDefault (BYVAL pStringFormat AS CGpStringFormat PTR) AS GpStatus
    DECLARE FUNCTION GenericTypographic (BYVAL pStringFormat AS CGpStringFormat PTR) AS GpStatus
@@ -737,10 +801,9 @@ END TYPE
 ' ########################################################################################
 ' CGpGraphics class
 ' ########################################################################################
-TYPE CGpGraphics
+TYPE CGpGraphics EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pGraphics AS GpGraphics PTR
 
 Public:
@@ -750,8 +813,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL hwnd AS HWND, BYVAL icm AS BOOLEAN = FALSE)
    DECLARE CONSTRUCTOR (BYVAL pImage AS CGpImage PTR)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION FromHDC (BYVAL hdc AS HDC) AS GpStatus
    DECLARE FUNCTION FromHDC (BYVAL hdc AS HDC, BYVAL hDevice AS HANDLE) AS GpStatus
    DECLARE FUNCTION FromHWND (BYVAL hwnd AS HWND, BYVAL icm AS BOOLEAN = FALSE) AS GpStatus
@@ -968,10 +1029,9 @@ END TYPE
 ' ########################################################################################
 ' CGpGraphicsPath class
 ' ########################################################################################
-TYPE CGpGraphicsPath
+TYPE CGpGraphicsPath EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pPath AS GpPath PTR
 
 Public:
@@ -979,8 +1039,6 @@ Public:
    DECLARE CONSTRUCTOR (BYVAL pts AS GpPointF PTR, BYVAL types AS BYTE PTR, BYVAL nCount AS LONG, BYVAL nFillMode AS FillMode = FillModeAlternate)
    DECLARE CONSTRUCTOR (BYVAL pts AS GpPoint PTR, BYVAL types AS BYTE PTR, BYVAL nCount AS LONG, BYVAL nFillMode AS FillMode = FillModeAlternate)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION Clone (BYVAL pCloneGraphicsPath AS CGpGraphicsPath PTR) AS GpStatus
    DECLARE FUNCTION Reset () AS GpStatus
    DECLARE FUNCTION GetFillMode () AS FillMode
@@ -1065,17 +1123,14 @@ END TYPE
 ' ########################################################################################
 ' CGpGraphicsPathIterator class
 ' ########################################################################################
-TYPE CGpGraphicsPathIterator
+TYPE CGpGraphicsPathIterator EXTENDS CGpBase
 
 Public:
-   m_Status AS GpStatus
    m_pPathIretator AS GpPathIterator PTR
 
 Public:
    DECLARE CONSTRUCTOR (BYVAL pPath AS CGpGraphicsPath PTR)
    DECLARE DESTRUCTOR
-   DECLARE FUNCTION GetLastStatus () AS GpStatus
-   DECLARE FUNCTION SetStatus (BYVAL status AS GpStatus) AS GpStatus
    DECLARE FUNCTION NextSubpath (BYVAL startIndex AS INT_ PTR, BYVAL endIndex AS INT_ PTR, BYVAL isClosed AS BOOL PTR) AS INT_
    DECLARE FUNCTION NextSubpathPath (BYVAL pPath AS CGpGraphicsPath PTR, BYVAL isClosed AS BOOL PTR) AS INT_
    DECLARE FUNCTION NextPathType (BYVAL pathType AS BYTE PTR, BYVAL startIndex AS INT_ PTR, BYVAL endIndex AS INT_ PTR) AS INT_

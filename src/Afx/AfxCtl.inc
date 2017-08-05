@@ -16,6 +16,7 @@
 #include once "win/commctrl.bi"
 #include once "win/richedit.bi"
 #include once "win/uxtheme.bi"
+'#include once "win/windowsx.bi"
 #include once "Afx/windowsxx.bi"
 #include once "Afx/AfxWin.inc"
 
@@ -1086,6 +1087,11 @@ END FUNCTION
 ' ========================================================================================
 ' Sets the widths of the left and right margins for an edit control. The message redraws
 ' the control to reflect the new margins.
+' - nMargins: One or more of the following values:
+'   EC_LEFTMARGIN: Sets the left margin.
+'   EC_RIGHTMARGIN: Sets the right margin.
+' - nWidth: The low-order word specifies the new width of the left margin, in pixels.
+'   The high-order word specifies the new width of the right margin, in pixels.
 ' ========================================================================================
 PRIVATE SUB Edit_SetMargins (BYVAL hEdit AS HWND, BYVAL nMargins AS LONG, BYVAL nWidth AS LONG)
    SendMessageW(hEdit, EM_SETMARGINS, cast(WPARAM, nMargins), cast(LPARAM, nWidth))
@@ -1097,7 +1103,7 @@ END SUB
 ' to reflect the new margin.
 ' ========================================================================================
 PRIVATE SUB Edit_SetLeftMargin (BYVAL hEdit AS HWND, BYVAL nWidth AS WORD)
-   SendMessageW(hEdit, EM_SETMARGINS, cast(WPARAM, EC_LEFTMARGIN), cast(WPARAM, MAKELONG(nWidth, 0)))
+   SendMessageW(hEdit, EM_SETMARGINS, cast(WPARAM, EC_LEFTMARGIN), cast(LPARAM, MAKELONG(nWidth, 0)))
 END SUB
 ' ========================================================================================
 
@@ -1849,6 +1855,37 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
+' Retrieves the bounding rectangle of a part in a status window.
+' Parameters:
+' - hRebarBar = Handle of the rebar control. It can belong to another application.
+' - nBand = Zero-based index of the band for which the borders will be retrieved.
+' Return value: A RECT structure with the band border.
+'   If the rebar control has the RBS_BANDBORDERS style, each member of this structure will
+'   receive the number of pixels, on the corresponding side of the band, that constitute
+'   the border. If the rebar control does not have the RBS_BANDBORDERS style, only the left
+'   member of this structure receives valid information.
+' Remarks: The purpose of this function is to demonstrate how to retrieve information from
+' a rebar control belonging to another application.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetRebarBandRect (BYVAL hRebar AS HWND, BYVAL nBand AS LONG) AS RECT
+   DIM idProc AS DWORD, hProcess AS HANDLE, pRbRect AS ANY PTR, rc AS RECT, cbBytesRead AS SIZE_T
+   GetWindowThreadProcessId(hRebar, @idProc)
+   IF idProc = 0 THEN EXIT FUNCTION
+   hProcess = OpenProcess(PROCESS_VM_OPERATION OR PROCESS_VM_READ OR PROCESS_VM_WRITE OR _
+              PROCESS_QUERY_INFORMATION, FALSE, idProc)
+   IF hProcess = NULL THEN EXIT FUNCTION
+   pRbRect = VirtualAllocEx(hProcess, NULL, SIZEOF(RECT), MEM_COMMIT, PAGE_READWRITE)
+   IF pRbRect THEN
+      SendMessageW(hRebar, RB_GETBANDBORDERS, nBand, cast(LPARAM, pRbRect))
+      ReadProcessMemory(hProcess, pRbRect, @rc, SIZEOF(rc), @cbBytesRead)
+      VirtualFreeEx(hProcess, pRbRect, 0, MEM_RELEASE)
+   END IF
+   CloseHandle(hProcess)
+   FUNCTION = rc
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
 ' Retrieves the count of bands currently in the rebar control.
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_GetBandCount (BYVAL hRebar AS HWND) AS DWORD
@@ -1862,6 +1899,44 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION Rebar_GetBandInfo (BYVAL hRebar AS HWND, BYVAL uBand AS DWORD, BYVAL lprbbi AS REBARBANDINFOW PTR) AS BOOLEAN
    FUNCTION = SendMessageW(hRebar, RB_GETBANDINFO, cast(WPARAM, uBand), cast(LPARAM, lprbbi))
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves information about the specified band of the Rebar control
+' Parameters:
+' - hRebar : Handle to the rebar control. Can belong to another application.
+' - nBand : Zero-based index of the band for which the information will be retrieved.
+' Return value:
+'   A REBARBANDINFOW structure with the band information.
+' Remarks: The purpose of this function is to demonstrate howto retrieve information from
+' a rebar control belonging to another application.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetRebarBandInfo (BYVAL hRebar AS HWND, BYVAL nBand AS LONG) AS REBARBANDINFOW
+   DIM idProc AS DWORD, hProcess AS HANDLE, pInfo AS ANY PTR, cbBytesRead AS SIZE_T
+   DIM rbbi AS REBARBANDINFOW
+   IF AfxWindowsVersion >= 600 AND AfxComCtlVersion >= 600 THEN
+      rbbi.cbSize  = REBARBANDINFO_V6_SIZE
+   ELSE
+      rbbi.cbSize  = REBARBANDINFO_V3_SIZE
+   END IF
+   rbbi.fMask = RBBIM_BACKGROUND OR RBBIM_CHILD OR RBBIM_CHILDSIZE OR RBBIM_COLORS OR RBBIM_ID OR _
+                RBBIM_HEADERSIZE OR RBBIM_IDEALSIZE OR RBBIM_IMAGE OR RBBIM_SIZE OR RBBIM_STYLE OR RBBIM_TEXT
+   GetWindowThreadProcessId(hRebar, @idProc)
+   IF idProc = 0 THEN EXIT FUNCTION
+   hProcess = OpenProcess(PROCESS_VM_OPERATION OR PROCESS_VM_READ OR PROCESS_VM_WRITE OR _
+              PROCESS_QUERY_INFORMATION, FALSE, idProc)
+   IF hProcess = NULL THEN EXIT FUNCTION
+   pInfo = VirtualAllocEx(hProcess, NULL, SIZEOF(REBARBANDINFOW), MEM_COMMIT, PAGE_READWRITE)
+   IF pInfo THEN
+      WriteProcessMemory(hProcess, pInfo, @rbbi, SIZEOF(REBARBANDINFOW), NULL)
+      IF SendMessageW(hRebar, RB_GETBANDINFOW, CAST(WPARAM, nBand), CAST(LPARAM, pInfo)) THEN
+         ReadProcessMemory(hProcess, pInfo, @rbbi, SIZEOF(rbbi), @cbBytesRead)
+      END IF
+      VirtualFreeEx(hProcess, pInfo, 0, MEM_RELEASE)
+   END IF
+   CloseHandle(hProcess)
+   FUNCTION = rbbi
 END FUNCTION
 ' ========================================================================================
 
@@ -3219,7 +3294,7 @@ BYVAL pwszText AS WSTRING PTR, BYVAL lParam AS LPARAM = 0, BYVAL iImage AS LONG 
    tvinsert.Item.iImage         = iImage
    tvinsert.Item.iSelectedImage = iSelectedImage
    tvinsert.Item.lParam         = lParam
-   tvinsert.Item.mask           = TVIF_TEXT OR TVIF_IMAGE OR TVIF_SELECTEDIMAGE
+   tvinsert.Item.mask           = TVIF_TEXT OR TVIF_IMAGE OR TVIF_SELECTEDIMAGE OR TVIF_PARAM
    tvinsert.Item.pszText        = pwszText
    tvinsert.Item.cchTextMax     = LEN(*pwszText)
    FUNCTION = cast(HTREEITEM, SendMessageW(hwndTV, TVM_INSERTITEMW, 0, cast(LPARAM, cast(TVINSERTSTRUCTW PTR, @tvinsert))))
@@ -3985,7 +4060,7 @@ END FUNCTION
 '   than the number of parts in the window, the message retrieves coordinates for existing
 '   parts only.
 ' - rgRightCoords: Pointer to an integer array that has the same number of elements as parts
-'   specified by wParam. Each element in the array receives the client coordinate of the
+'   specified by nParts. Each element in the array receives the client coordinate of the
 '   right edge of the corresponding part. If an element is set to -1, the position of the
 '   right edge for that part extends to the right edge of the window. To retrieve the current
 '   number of parts, set this parameter to zero.
@@ -4089,9 +4164,8 @@ END SUB
 ' - hIcon: Handle to the icon to be set. If this value is NULL, the icon is removed from the part.
 ' Returns TRUE if successful, or FALSE otherwise.
 ' ========================================================================================
-'PRIVATE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS DWORD) AS BOOLEAN
 PRIVATE FUNCTION StatusBar_SetIcon (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG, BYVAL hIcon AS HICON) AS BOOLEAN
-   Function = SendMessageW(hStatusBar, SB_SETICON, Cast(WPARAM, nPart), Cast(LPARAM, hIcon))
+   FUNCTION = SendMessageW(hStatusBar, SB_SETICON, cast(WPARAM, nPart), cast(LPARAM, hIcon))
 END FUNCTION
 ' ========================================================================================
 
@@ -4189,6 +4263,32 @@ PRIVATE FUNCTION StatusBar_GetText (BYVAL hStatusBar AS HWND, BYVAL nPart AS DWO
 END FUNCTION
 ' ========================================================================================
 
+' ========================================================================================
+' Retrieves the bounding rectangle of a part in a status window.
+' Parameters:
+' - hStatusBar = Handle of the status bar control. It can belong to another application.
+' - nPart = Zero-based index of the part whose bounding rectangle is to be retrieved.
+' Return value: A RECT structure with the bounding rectangle.
+' Remarks: The purpose of this function is to demonstrate how to retrieve information from
+' a status bar control belonging to another application.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetStatusBarRect (BYVAL hStatusBar AS HWND, BYVAL nPart AS LONG) AS RECT
+   DIM idProc AS DWORD, hProcess AS HANDLE, pSbRect AS ANY PTR, rc AS RECT, cbBytesRead AS SIZE_T
+   GetWindowThreadProcessId(hStatusBar, @idProc)
+   IF idProc = 0 THEN EXIT FUNCTION
+   hProcess = OpenProcess(PROCESS_VM_OPERATION OR PROCESS_VM_READ OR PROCESS_VM_WRITE OR _
+              PROCESS_QUERY_INFORMATION, FALSE, idProc)
+   IF hProcess = NULL THEN EXIT FUNCTION
+   pSbRect = VirtualAllocEx(hProcess, NULL, SIZEOF(RECT), MEM_COMMIT, PAGE_READWRITE)
+   IF pSbRect THEN
+      SendMessageW(hStatusBar, SB_GETRECT, nPart, cast(LPARAM, pSbRect))
+      ReadProcessMemory(hProcess, pSbRect, @rc, SIZEOF(rc), @cbBytesRead)
+      VirtualFreeEx(hProcess, pSbRect, 0, MEM_RELEASE)
+   END IF
+   CloseHandle(hProcess)
+   FUNCTION = rc
+END FUNCTION
+' ========================================================================================
 
 ' ########################################################################################
 '                                      *** TAB ***
@@ -5047,21 +5147,23 @@ END FUNCTION
 ' ========================================================================================
 ' Creates a tooltip for a control.
 ' Parameters:
-' - hwndCtrl  = Handle of the control
+' - hwnd      = Handle of the window or control
 ' - wszText   = Tooltip text
 ' - bBalloon  = Ballon tip (TRUE or FALSE)
 ' - bCentered = Centered (TRUE or FALSE)
 ' Return Value:
 '   The handle of the tooltip control
 ' ========================================================================================
-PRIVATE FUNCTION AfxAddTooltip (BYVAL hwndCtrl AS HWND, BYREF wszText AS CONST WSTRING = "", BYVAL bBalloon AS BOOLEAN = FALSE, BYVAL bCentered AS BOOLEAN = FALSE) AS HWND
-   IF IsWindow(hwndCtrl) = 0 THEN EXIT FUNCTION
+PRIVATE FUNCTION AfxAddTooltip (BYVAL hwnd AS HWND, BYREF wszText AS CONST WSTRING = "", BYVAL bBalloon AS BOOLEAN = FALSE, BYVAL bCentered AS BOOLEAN = FALSE) AS HWND
+   IF IsWindow(hwnd) = 0 THEN EXIT FUNCTION
    ' // Creates the tooltip control
    DIM dwStyle AS DWORD = WS_POPUP OR TTS_ALWAYSTIP
    IF bBalloon THEN dwStyle = dwStyle OR TTS_BALLOON
    DIM hTooltip AS HWND
    hTooltip = CreateWindowExW(0, "tooltips_class32", "", dwStyle, 0, 0, 0, 0, NULL, NULL, NULL, NULL)
    IF hTooltip = NULL THEN EXIT FUNCTION
+   ' // You must explicitly define a tooltip control as topmost. Otherwise, it might be covered by the parent window.
+   SetWindowPos(hTooltip, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE OR SWP_NOSIZE OR SWP_NOACTIVATE)
    ' // Registers the window with the tooltip control
    ' // 32-bit: The size of the TOOLINFO structure is 48 bytes in
    '    version 6 of comctl32.dll, and 44 bytes in lower versions.
@@ -5073,10 +5175,17 @@ PRIVATE FUNCTION AfxAddTooltip (BYVAL hwndCtrl AS HWND, BYREF wszText AS CONST W
 #else
    IF AfxComCtlVersion < 600 THEN tti.cbSize = 44 ELSE tti.cbSize = 48
 #endif
-   tti.uFlags = TTF_IDISHWND OR TTF_SUBCLASS
+   IF (GetWindowLongPtrW(hwnd, GWL_STYLE) AND WS_CHILD) = WS_CHILD THEN
+      tti.uFlags = TTF_IDISHWND OR TTF_SUBCLASS
+      tti.hwnd = GetParent(hwnd)
+      tti.uId = CAST(UINT_PTR, hwnd)
+   ELSE
+      tti.uFlags = TTF_SUBCLASS
+      tti.hwnd = hwnd
+      tti.uId = 0
+      GetClientRect(hwnd, @tti.rect)
+   END IF
    IF bCentered THEN tti.uFlags = tti.uFlags OR TTF_CENTERTIP
-   tti.hwnd = GetParent(hwndCtrl)
-   tti.uId = CAST(UINT_PTR, hwndCtrl)
    tti.hinst = GetModuleHandleW(NULL)
    ' // The length of the string must not exceed of 80 characters, including the terminating null
    DIM wszTooltipText AS WSTRING * 80
@@ -5091,11 +5200,11 @@ END FUNCTION
 ' Sets/replaces the text of a tooltip control
 ' Parameters:
 ' - hTooltip = Handle of the tooltip control
-' - hwndCtrl = Handle of the control
+' - hwnd     = Handle of the window or control
 ' - wszText  = Tooltip text
 ' ========================================================================================
-PRIVATE SUB AfxSetTooltipText (BYVAL hTooltip AS HWND, BYVAL hwndCtrl AS HWND, BYREF wszText AS CONST WSTRING)
-   IF hTooltip = NULL OR hwndCtrl = NULL THEN EXIT SUB
+PRIVATE SUB AfxSetTooltipText (BYVAL hTooltip AS HWND, BYVAL hwnd AS HWND, BYREF wszText AS CONST WSTRING)
+   IF hTooltip = NULL OR hwnd = NULL THEN EXIT SUB
    ' // The length of the text must not exceed of 80 characters, including the terminating null.
    DIM wszTooltipText AS WSTRING * 80
    wszTooltipText = wszText
@@ -5109,8 +5218,13 @@ PRIVATE SUB AfxSetTooltipText (BYVAL hTooltip AS HWND, BYVAL hwndCtrl AS HWND, B
 #else
    IF AfxComCtlVersion < 600 THEN tti.cbSize = 44 ELSE tti.cbSize = 48
 #endif
-   tti.hwnd = GetParent(hwndCtrl)
-   tti.uId = CAST(UINT_PTR, hwndCtrl)
+   IF (GetWindowLongPtrW(hwnd, GWL_STYLE) AND WS_CHILD) = WS_CHILD THEN
+      tti.hwnd = GetParent(hwnd)
+      tti.uId = CAST(UINT_PTR, hwnd)
+   ELSE
+      tti.hwnd = hwnd
+      tti.uId = 0
+   END IF
    ' // Retrieve the tooltip information
    SendMessageW(hTooltip, TTM_GETTOOLINFOW, 0, CAST(LPARAM, @tti))
    IF SendMessageW(hTooltip, TTM_GETTOOLINFOW, 0, CAST(LPARAM, @tti)) THEN
@@ -5125,10 +5239,10 @@ END SUB
 ' Removes a tool from a tooltip control.
 ' Parameters:
 ' - hTooltip = Handle of the tooltip control
-' - hwndCtrl = Handle of the control
+' - hwnd     = Handle of the window or control
 ' ========================================================================================
-PRIVATE SUB AfxDeleteTooltip (BYVAL hTooltip AS HWND, BYVAL hwndCtrl AS HWND)
-   IF hTooltip = NULL OR hwndCtrl = NULL THEN EXIT SUB
+PRIVATE SUB AfxDeleteTooltip (BYVAL hTooltip AS HWND, BYVAL hwnd AS HWND)
+   IF hTooltip = NULL OR hwnd = NULL THEN EXIT SUB
    ' // 32-bit: The size of the TOOLINFO structure is 48 bytes in
    '    version 6 of comctl32.dll, and 44 bytes in lower versions.
    ' // 64-bit: The size of the TOOLINFO structure is 72 bytes in
@@ -5139,8 +5253,13 @@ PRIVATE SUB AfxDeleteTooltip (BYVAL hTooltip AS HWND, BYVAL hwndCtrl AS HWND)
 #else
    IF AfxComCtlVersion < 600 THEN tti.cbSize = 44 ELSE tti.cbSize = 48
 #endif
-   tti.hwnd = GetParent(hwndCtrl)
-   tti.uId = CAST(UINT_PTR, hwndCtrl)
+   IF (GetWindowLongPtrW(hwnd, GWL_STYLE) AND WS_CHILD) = WS_CHILD THEN
+      tti.hwnd = GetParent(hwnd)
+      tti.uId = CAST(UINT_PTR, hwnd)
+   ELSE
+      tti.hwnd = hwnd
+      tti.uId = 0
+   END IF
    ' // Remove the tooltip
    SendMessageW(hTooltip, TTM_DELTOOL, 0, CAST(LPARAM, @tti))
 END SUB

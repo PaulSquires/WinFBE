@@ -66,23 +66,6 @@ END DESTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpGraphics.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
 ' Creates a Graphics object that is associated with a specified device context.
 ' ========================================================================================
 PRIVATE FUNCTION CGpGraphics.FromHDC (BYVAL hdc AS HDC) AS GpStatus
@@ -1196,21 +1179,21 @@ END FUNCTION
 ' You can use this function to display a metafile by calling PlayRecord in the callback function.
 ' ========================================================================================
 'FUNCTION CGpGraphics.EnumerateMetafileDestPoint (BYVAL pMetafile AS CGpMetafile PTR, BYVAL destPoint AS GpPointF PTR, _
-'BYVAL pCallback AS EnumerateMetafileProc = NULL, BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes PTR) AS GpStatus
+'BYVAL pCallback AS EnumerateMetafileProc = NULL, BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
 '   RETURN SetStatus(GdipEnumerateMetafileDestPoint(m_pGraphics, IIF(pMetafile, pMetafile->m_pMetafile, NULL), _
 '          destPoint, pCallback, pCallbackData, IIF(pImageAttributes, pImageAttributes->m_pImgAttr, NULL)))
 'END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 'FUNCTION CGpGraphics.EnumerateMetafileDestRect (BYVAL pMetafile AS CGpMetafile PTR, BYVAL destRect AS GpRectF PTR, BYVAL pCallback AS EnumerateMetafileProc, _
-'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes = NULL) AS GpStatus
+'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
 '   RETURN SetStatus(GdipEnumerateMetafileDestRect(m_pGraphics, IIF(pMetafile, pMetafile->m_pMetafile, NULL), _
 '          destRect, pCallback, pCallbackData, IIF(pImageAttributes, pImageAttributes->m_pImgAttr, NULL)))
 'END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 'FUNCTION CGpGraphics.EnumerateMetafileDestPoints (BYVAL pMetafile AS CGpMetafile PTR, BYVAL destPoints AS GpPointF PTR, BYVAL nCount AS LONG, BYVAL pCallback AS EnumerateMetafileProc, _
-'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes) AS GpStatus
+'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
 '   RETURN SetStatus(GdipEnumerateMetafileDestPoints(m_pGraphics, IIF(ISOBJECT(pMetafile), pMetafile.Ptr, %NULL), _
 '          destPoints, nCount, pCallback, pCallbackData, IIF(ISOBJECT(pImageAttributes), pImageAttributes->m_pImgAttr, NULL)))
 'END FUNCTION
@@ -1218,7 +1201,7 @@ END FUNCTION
 ' ========================================================================================
 'FUNCTION CGpGraphics.EnumerateMetafileSrcRectDestPoint (BYVAL pMetafile AS CGpMetafile, BYVAL destPoint AS GpPointF PTR, _
 'BYVAL srcRect AS GpRectF PTR, BYVAL srcUnit AS GpUnit, BYVAL pCallback AS EnumerateMetafileProc, _
-'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes) AS GpStatus
+'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
 '   RETURN SetStatus(GdipEnumerateMetafileSrcRectDestPoint(m_pGraphics, IIF(pMetafile, pMetafile->m_pMetafile, NULL), _
 '         destPoint, srcRect, srcUnit, pCallback, pCallbackData, IIF(pImageAttributes, pImageAttributes->m_pImgAttr, NULL)))
 'END FUNCTION
@@ -1226,7 +1209,7 @@ END FUNCTION
 ' ========================================================================================
 'FUNCTION CGpGraphics.EnumerateMetafileSrcRectDestRect (BYVAL pMetafile AS CGpMetafile, BYVAL destRect AS GpRectF PTR, _
 'BYVAL srcRect AS GpRectF PTR, BYVAL srcUnit AS GpUnit, BYVAL pCallback AS EnumerateMetafileProc, _
-'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes) AS GpStatus
+'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes PTR = NULL) AS GpStatus
 '   RETURN SetStatus(GdipEnumerateMetafileSrcRectDestRect(m_pGraphics, IIF(pMetafile, pMetafile->m_pMetafile, NULL), _
 '          destRect, srcRect, srcUnit, pCallback, pCallbackData, IIF(pImageAttributes, pImageAttributes->m_pImgAtt, NULL)))
 'END FUNCTION
@@ -1234,7 +1217,7 @@ END FUNCTION
 ' ========================================================================================
 'FUNCTION CGpGraphics.EnumerateMetafileSrcRectDestPoints (BYVAL pMetafile AS CGpMetafile, BYVAL destPoints AS GpPointF PTR, _
 'BYVAL nCount AS INT_, BYVAL srcRect AS GpRectF PTR, BYVAL srcUnit AS GpUnit, BYVAL pCallback AS EnumerateMetafileProc, _
-'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes) AS GpStatus
+'BYVAL pCallbackData AS ANY PTR = NULL, BYVAL pImageAttributes AS CGpImageAttributes = NULL) AS GpStatus
 '   RETURN SetStatus(GdipEnumerateMetafileSrcRectDestPoints(m_pGraphics, IIF(pMetafile, pMetafile->m_pMetaFile, NULL), _
 '          destPoints, nCount, srcRect, srcUnit, pCallback, pCallbackData, IIF(pImageAttributes, pImageAttributes->m_pImgAtt, NULL)))
 'END FUNCTION

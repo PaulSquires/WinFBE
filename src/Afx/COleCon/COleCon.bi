@@ -42,7 +42,7 @@ CONST OC_CLASSNAME = "COleCon"   ' // Container's class name
 #endif
 ' ========================================================================================
 
-' // The definition for BSTR in the FreeBASIC headers was incorrectly changed to WCHAR
+' // The definition for BSTR in the FreeBASIC headers was inconveniently changed to WCHAR
 #ifndef AFX_BSTR
    #define AFX_BSTR WSTRING PTR
 #endif

@@ -445,11 +445,8 @@ Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
    GetClientRect HWnd, @rc
    MoveToEx( hDC, rc.left, rc.top, null)
    LineTo( hDC, rc.left, rc.bottom-1 ): LineTo( hDC, rc.right-1, rc.bottom-1): LineTo( hDC, rc.right-1, rc.top) 
-   RestoreDC hDC, -1 
    DeletePen(hPen)
    
- 
-   SaveDC hDC
    hPen = CreatePen( PS_SOLID, 1, BGR(0,0,255))  ' blue
    SelectPen( hDC, hPen )
  
@@ -466,8 +463,8 @@ Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
       Rectangle(hDC, rc.left - 1, rc.top - 1, rc.right + 1, rc.bottom + 1)
    END IF
    
-   RestoreDC hDC, -1 
    DeletePen(hPen)
+   RestoreDC hDC, -1 
    
    EndPaint hWnd, @ps
    
@@ -490,7 +487,6 @@ End Function
 Function frmFindReplace_OnDestroy(HWnd As HWnd) As LRESULT 
    dim as hwnd hCtl = GetDlgItem( hWnd, IDC_FRMFINDREPLACE_TXTFIND)
    gFind.txtFind = str(AfxGetWindowText(hCtl))
-   dim as HFONT hFont = AfxGetWindowFont(hCtl):  DeleteFont(hFont)
 
    hCtl = GetDlgItem( hWnd, IDC_FRMFINDREPLACE_TXTREPLACE)
    gFind.txtReplace = str(AfxGetWindowText(hCtl))
@@ -513,6 +509,11 @@ Function frmFindReplace_OnDestroy(HWnd As HWnd) As LRESULT
       
    SetFocusScintilla
    HWND_FRMFINDREPLACE = 0
+   
+   ' Delete the pWindow because it gets recreated everytime frmFindReplace is invoked
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+   if pWindow then Delete pWindow
+   
    Function = 0
 End Function
 
@@ -556,7 +557,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
       SetFocus hCtl 
       Exit Function
    End If
- 
+  
       
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -592,25 +593,22 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         WS_POPUP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->SetClientSize(frmWidth, frmHeight)
-   
-  ' Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 10) 
 
    frmHeight = AfxGetWindowHeight(HWND_FRMFINDREPLACE)
-   
+     
    ' Display the expand toggle icon for the Find/Replace 
    hCtl = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNTOGGLE, "IMAGE_CLOSED", "IMAGE_CLOSED",  _
                   L(270, "Toggle Replace mode"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
                   nLeft+1, 0, 20, frmHeight-1, false)
-                  
+                     
    ' Display the Find textbox               
    nTop  = margin
    nLeft = nLeft + 20 + margin
    hCtlFind = pWindow->AddControl("TEXTBOX", , IDC_FRMFINDREPLACE_TXTFIND, WSTR(sFindText), nLeft, nTop, 176, ctlHeight, _
               WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
               WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   'AfxSetWindowFont( hCtlFind, hFont, True )
    SendMessage hCtlFind, EM_SETCUEBANNER, 1, CAST(LPARAM, @L(158,"Find"))
-   
+      
    ' Display the Match Case button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtlFind))
@@ -618,7 +616,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
                   L(163,"Match Case"), iconHeight , iconHeight , GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_WINDOW), _
                   nLeft, nTop, ctlHeight, ctlHeight)
    frmHotImgBtn_SetSelected(hCtl, gFind.nMatchCase)
-   
+      
    ' Display the Match Whole Word button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl))  
@@ -634,8 +632,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         nLeft, nTop, 80, ctlHeight, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_CENTER Or SS_CENTERIMAGE, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   'AfxSetWindowFont( hCtl, hFont, True )
-   
+      
    ' Display the Left button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
@@ -663,9 +660,8 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    hCtlReplace = pWindow->AddControl("TEXTBOX", , IDC_FRMFINDREPLACE_TXTREPLACE, wstr(gFind.txtReplace), nLeft, nTop, 220, ctlHeight, _
               WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
               WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   'AfxSetWindowFont( hCtlReplace, hFont, True )
    SendMessage hCtlReplace, EM_SETCUEBANNER, 1, CAST(LPARAM, @L(173,"Replace"))
-   
+      
    ' Display the Replace button 
    nTop  = margin + pWindow->UnScaleX(AfxGetWindowHeight(hCtlFind)) + vmargin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtlReplace)) + margin  

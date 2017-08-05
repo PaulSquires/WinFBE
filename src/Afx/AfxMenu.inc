@@ -519,8 +519,8 @@ END FUNCTION
 '    DIM hIcon AS HICON
 '    hIcon = LoadImageW(NULL, "MyIcon.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE)
 '    IF hIcon THEN AfxAddIconToMenuItem(hSubMenu, 0, TRUE, hIcon)
-' PNG icons can be used by converting them to an icon with AfxGdipImageFromFileEx:
-'    hIcon = AfxGdipImageFromFileEx("MyIcon.png")
+' PNG icons can be used by converting them to an icon with AfxGdipImageFromFile:
+'    hIcon = AfxGdipImageFromFile("MyIcon.png")
 '    IF hIcon THEN AfxAddIconToMenuItem(hSubMenu, 0, TRUE, hIcon)
 
 #if _WIN32_WINNT = &h0602

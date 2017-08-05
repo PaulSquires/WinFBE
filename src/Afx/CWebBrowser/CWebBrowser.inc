@@ -182,6 +182,7 @@ END FUNCTION
 
 ' ========================================================================================
 ' Navigates to the specified URL.
+' Note: To clear a web page, simply navigate to "about:blank".
 ' ========================================================================================
 PRIVATE FUNCTION CWebBrowser.Navigate (BYVAL pwszUrl AS WSTRING PTR, BYVAL Flags AS VARIANT PTR = NULL, BYVAL TargetFrameName AS VARIANT PTR = NULL, BYVAL PostData AS VARIANT PTR = NULL, BYVAL Headers AS VARIANT PTR = NULL) AS HRESULT
    CWB_DP("CWebBrowser.Navigate - pwszUrl")
@@ -231,7 +232,7 @@ PRIVATE FUNCTION CWebBrowser.SetUIHandler () AS HRESULT
 
    ' // Get a reference to the active document
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   m_pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   m_pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF pIHTMLDocument2 = NULL THEN EXIT FUNCTION
 
    ' // Get a reference to the CustomDoc interface
@@ -500,7 +501,7 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE PROPERTY CWebBrowser.Document () AS IHtmlDocument2 PTR
    DIM pdisp AS IDispatch PTR
-   IF m_pWebBrowser THEN m_pWebBrowser->get_Document(@pdisp)
+   IF m_pWebBrowser THEN m_pWebBrowser->get_Document(cast(ANY PTR, @pdisp))
    PROPERTY = cast(IHtmlDocument2 PTR, pdisp)
 END PROPERTY
 ' ========================================================================================
@@ -628,7 +629,7 @@ PRIVATE FUNCTION AfxWriteHtml (BYVAL pWebBrowser AS Afx_IWebBrowser2 PTR, BYREF 
 
    IF pWebBrowser = NULL THEN RETURN E_POINTER
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN RETURN hr
 
    ' // Create a safearray of variants of one element
@@ -668,7 +669,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxGetActiveElementId (BYVAL pWebBrowser AS Afx_IWebBrowser2 PTR) AS CWSTR
    IF pWebBrowser = NULL THEN RETURN ""
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN RETURN ""
    DIM pIHTMLElement AS IHTMLElement PTR
    hr = pIHTMLDocument2->lpvtbl->get_activeElement(pIHTMLDocument2, @pIHTMLElement)
@@ -699,7 +700,7 @@ PRIVATE FUNCTION AfxGetElementValueById (BYVAL pWebBrowser AS Afx_IWebBrowser2 P
    IF pWebBrowser = NULL THEN EXIT FUNCTION
    ' // Get a reference to the IHTMLDocument2 interface
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN EXIT FUNCTION
    ' // Get a reference to the IHTMLDocument3 interface
    DIM pIHTMLDocument3 AS IHTMLDocument3 PTR
@@ -739,7 +740,7 @@ PRIVATE FUNCTION AfxSetElementValueById (BYVAL pWebBrowser AS Afx_IWebBrowser2 P
    IF pWebBrowser = NULL THEN RETURN E_POINTER
    ' // Get a reference to the IHTMLDocument2 interface
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN RETURN hr
    ' // Get a reference to the IHTMLDocument3 interface
    DIM pIHTMLDocument3 AS IHTMLDocument3 PTR
@@ -778,7 +779,7 @@ PRIVATE FUNCTION AfxGetElementInnerHtmlById (BYVAL pWebBrowser AS Afx_IWebBrowse
    IF pWebBrowser = NULL THEN RETURN ""
    ' // Get a reference to the IHTMLDocument2 interface
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN RETURN ""
    ' // Get a reference to the IHTMLDocument3 interface
    DIM pIHTMLDocument3 AS IHTMLDocument3 PTR
@@ -819,7 +820,7 @@ PRIVATE FUNCTION AfxSetElementInnerHtmlById (BYVAL pWebBrowser AS Afx_IWebBrowse
    IF pWebBrowser = NULL THEN RETURN E_POINTER
    ' // Get a reference to the IHTMLDocument2 interface
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN RETURN hr
    ' // Get a reference to the IHTMLDocument3 interface
    DIM pIHTMLDocument3 AS IHTMLDocument3 PTR
@@ -853,7 +854,7 @@ PRIVATE FUNCTION AfxSetElementFocusById (BYVAL pWebBrowser AS Afx_IWebBrowser2 P
    IF pWebBrowser = NULL THEN RETURN E_POINTER
    ' // Get a reference to the IHTMLDocument2 interface
    DIM pIHTMLDocument2 AS IHTMLDocument2 PTR
-   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(IDispatch PTR, pIHTMLDocument2))
+   DIM hr AS HRESULT = pWebBrowser->get_Document(@cast(ANY PTR, pIHTMLDocument2))
    IF hr <> S_OK OR pIHTMLDocument2 = NULL THEN RETURN hr
    ' // Get a reference to the IHTMLDocument3 interface
    DIM pIHTMLDocument3 AS IHTMLDocument3 PTR

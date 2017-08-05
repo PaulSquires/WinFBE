@@ -1,7 +1,7 @@
 ' ########################################################################################
 ' File: CWindow.inc
 ' Version: 1.0
-' Release candidate 26
+' Release candidate 30
 ' Contents: A wrapper class to create a SDK main window and add controls to it.
 ' Operating system: Microsoft Windows
 ' Compiler: FreeBasic 32 & 64-bit, Unicode.
@@ -89,6 +89,9 @@ TYPE CWindow
          BYVAL x AS LONG = CW_USEDEFAULT, BYVAL y AS LONG = CW_USEDEFAULT, BYVAL nWidth AS LONG = CW_USEDEFAULT, BYVAL nHeight AS LONG = CW_USEDEFAULT, _
          BYVAL dwStyle AS DWORD = WS_OVERLAPPEDWINDOW OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS, _
          BYVAL dwExStyle AS DWORD = WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE) AS HWND
+      DECLARE FUNCTION CreateOverlapped (BYVAL hParent AS HWND = NULL, BYREF wszTitle AS WSTRING = "", BYVAL lpfnWndProc AS WNDPROC = NULL, _
+         BYVAL x AS LONG = CW_USEDEFAULT, BYVAL y AS LONG = CW_USEDEFAULT, BYVAL nWidth AS LONG = CW_USEDEFAULT, BYVAL nHeight AS LONG = CW_USEDEFAULT, _
+         BYVAL dwExStyle AS UINT = WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE) AS HWND
       DECLARE SUB SetClientSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
       DECLARE SUB Center (BYVAL hwnd AS HWND = NULL, BYVAL hwndParent AS HWND = NULL)
       DECLARE PROPERTY hWindow () AS HWND
@@ -766,6 +769,18 @@ PRIVATE FUNCTION CWindow.Create (BYVAL hParent AS HWND = NULL, BYREF wszTitle AS
    IF m_hFont THEN .SendMessageW m_hwnd, WM_SETFONT, CAST(WPARAM, m_hFont), FALSE
    ' // Store the class pointer
    .SetWindowLongPtrW(m_hwnd, 0, CAST(LONG_PTR, @this))
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Creates an overlapped window. An overlapped window has a title bar and a border.
+' ========================================================================================
+PRIVATE FUNCTION CWindow.CreateOverlapped (BYVAL hParent AS HWND = NULL, BYREF wszTitle AS WSTRING = "", BYVAL lpfnWndProc AS WNDPROC = NULL, _
+   BYVAL x AS LONG = CW_USEDEFAULT, BYVAL y AS LONG = CW_USEDEFAULT, BYVAL nWidth AS LONG = CW_USEDEFAULT, BYVAL nHeight AS LONG = CW_USEDEFAULT, _
+   BYVAL dwExStyle AS UINT = WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE) AS HWND
+
+   RETURN this.Create(hParent, wszTitle, lpfnWndProc, x, y, nWidth, nHeight, WS_OVERLAPPED OR WS_CAPTION OR WS_SYSMENU, dwExStyle)
 
 END FUNCTION
 ' ========================================================================================
@@ -1450,34 +1465,28 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          IF dwStyle = BS_SPLITBUTTON THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_CENTER OR BS_VCENTER OR BS_SPLITBUTTON
          IF dwStyle = BS_DEFSPLITBUTTON THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_CENTER OR BS_VCENTER OR BS_DEFSPLITBUTTON
          #endif
-         dwExStyle = 0
       CASE "CUSTOMBUTTON", "OWNERDRAWBUTTON"
          ' Adds an ownerdraw button to the window.
          wsClassName = "Button"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_OWNERDRAW
-         dwExStyle = 0
       CASE "RADIOBUTTON", "OPTION"
          ' Adds a radio button to the window.
          ' Note: In PowerBASIC this control is called "Option".
          wsClassName = "Button"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER
          IF dwStyle = WS_GROUP THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER OR WS_GROUP
-         dwExStyle = 0
       CASE "CHECKBOX"
          ' Adds a checkbox to the window.
          wsClassName = "Button"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTOCHECKBOX OR BS_LEFT OR BS_VCENTER
-         dwExStyle = 0
       CASE "CHECK3STATE"
          ' Adds a 3 state checkbox to the window.
          wsClassName = "Button"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_AUTO3STATE OR BS_LEFT OR BS_VCENTER
-         dwExStyle = 0
       CASE "LABEL"
          ' Adds a label to the window.
          wsClassName = "Static"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR SS_LEFT OR WS_GROUP OR SS_NOTIFY
-         dwExStyle = 0
       CASE "BITMAPLABEL"
          ' Adds an image label to the window.
          ' You must delete the bitmap before the application ends.
@@ -1497,18 +1506,15 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' You must delete the bitmap before the application ends.
          wsClassName = "Button"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_BITMAP
-         dwExStyle = 0
       CASE "ICONBUTTON"
          ' Adds an image button to the window.
          ' You must delete the icon before the application ends.
          wsClassName = "Button"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_ICON
-         dwExStyle = 0
       CASE "CUSTOMLABEL"
          ' Adds an ownerdraw label to the window.
          wsClassName = "Static"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_GROUP OR SS_OWNERDRAW
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "FRAME", "FRAMEWINDOW"
          ' Adds a frame to the window.
@@ -1547,7 +1553,6 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' Adds a combo box ex to the window.
          wsClassName = "ComboBoxEx32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST
-         dwExStyle = 0
       CASE "LISTBOX"
          ' Adds a list box to the window.
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR LBS_STANDARD OR LBS_HASSTRINGS OR LBS_SORT OR LBS_NOTIFY
@@ -1556,13 +1561,11 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' Adds a progress bar to the window.
          wsClassName = "msctls_progress32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "HEADER", "SYSHEADER32"
          ' Adds an header control to the window.
          wsClassName = "SysHeader32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR CCS_TOP OR HDS_HORZ OR HDS_BUTTONS
-         dwExStyle = 0
       CASE "TREEVIEW", "SYSTREEVIEW32"
          ' Adds a tree view control to the window.
          wsClassName = "SysTreeView32"
@@ -1577,17 +1580,14 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' Adds a toolbar control to the window.
          wsClassName = "ToolbarWindow32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_TOP OR WS_BORDER OR TBSTYLE_FLAT OR TBSTYLE_TOOLTIPS
-         dwExStyle = 0
       CASE "REBAR", "REBARWINDOW32"
          ' Adds a rebar control to the window.
          wsClassName = "ReBarWindow32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_BORDER OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_NODIVIDER OR RBS_VARHEIGHT OR RBS_BANDBORDERS
-         dwExStyle = 0
       CASE "DATETIMEPICKER", "SYSDATETIMEPICK32"
          ' Adds a date time picker control to the window.
          wsClassName = "SysDateTimePick32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR DTS_SHORTDATEFORMAT
-         dwExStyle = 0
       CASE "MONTHCALENDAR", "MONTHCAL", "SYSMONTHCAL32"
          ' Adds a month calendar control to the window.
          wsClassName = "SysMonthCal32"
@@ -1607,19 +1607,16 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' Adds an animation control to the window.
          wsClassName = "SysAnimate32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR ACS_TRANSPARENT
-         dwExStyle = 0
       CASE "SYSLINK"
          ' Adds a SysLink control to the window.
          ' Note: The SysLink control is defined in the ComCtl32.dll version 6 and requires a manifest
          ' or directive that specifies that version 6 of the DLL should be used if it is available.
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "PAGER", "SYSPAGER"
          ' Adds a Pager control to the window.
          wsClassName = "SysPager"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR PGS_HORZ
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "TAB", "TABCONTROL", "SYSTABCONTROL32"
          ' Adds a Tab control to the window.
@@ -1631,12 +1628,10 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' Adds a StatusBar control to the window.
          wsClassName = "msctls_statusbar32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_SIZEGRIP
-         dwExStyle = 0
       CASE "SIZEBAR", "SIZEBOX", "SIZEGRIP"
          ' Adds a size box to the window.
          wsClassName = "Scrollbar"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR SBS_SIZEGRIP OR SBS_SIZEBOXBOTTOMRIGHTALIGN
-         dwExStyle = 0
          bSetFont = FALSE
          nWidth = GetSystemMetrics(SM_CXVSCROLL)
          nHeight = GetSystemMetrics(SM_CYHSCROLL)
@@ -1647,23 +1642,19 @@ PRIVATE FUNCTION CWindow.AddControl ( _
          ' Adds an horizontal scroll bar to the window.
          wsClassName = "Scrollbar"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR SBS_HORZ
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "VSCROLLBAR"
          ' Adds a vertical scroll bar to the window.
          wsClassName = "Scrollbar"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR SBS_VERT
-         dwExStyle = 0
          bSetFont = FALSE
-      CASE "TRACKBAR", "MSCTLS_TRACKBAR32"
+      CASE "TRACKBAR", "MSCTLS_TRACKBAR32", "SLIDER"
          wsClassName = "msctls_trackbar32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR TBS_AUTOTICKS OR TBS_HORZ OR TBS_BOTTOM OR TBS_TOOLTIPS
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "UPDOWN", "MSCTLS_UPDOWN32"
          wsClassName = "msctls_updown32"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR UDS_WRAP OR UDS_ARROWKEYS OR UDS_ALIGNRIGHT OR UDS_SETBUDDYINT
-         dwExStyle = 0
          bSetFont = FALSE
       CASE "RICHEDIT", "RichEdit50W"
          IF dwStyle = -1 THEN dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR WS_HSCROLL OR WS_VSCROLL OR ES_AUTOHSCROLL OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_WANTRETURN OR ES_NOHIDESEL OR ES_SAVESEL
@@ -2291,5 +2282,125 @@ PRIVATE FUNCTION AfxScrollWindowPtr (BYVAL hwnd AS HWND) AS CScrollWindow PTR
 END FUNCTION
 ' ========================================================================================
 
-END NAMESPACE
+' ########################################################################################
+'                                *** INPUT BOX DIALOG ***
+' ########################################################################################
 
+' ========================================================================================
+' Input box dialog
+' Parameters:
+' - hParent = Handle of the parent window
+' - x, y = The location on the screen to display the dialog. If both are 0, the dialog
+'   is centered on the screen.
+' - cwsCaption = Caption of the window
+' - cwsPrompt = Prompt string
+' - cwsText = Text to edit
+' - nLen = [opt] Maximum length of the string to edit (default = 260 characters)
+' - bPassword = [opt] TRUE or FALSE. Default FALSE. Displays all characters as an
+'     asterisk (*) as they are typed into the edit control.
+'   Note: The maximum length is 2048 characters.
+' ========================================================================================
+' Forward declaration of the callback function
+DECLARE FUNCTION AfxInputBoxWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+' ========================================================================================
+PRIVATE FUNCTION AfxInputBox (BYVAL hParent AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, _
+BYREF cwsCaption AS CWSTR, BYREF cwsPrompt AS CWSTR, BYREF cwsText AS CWSTR, _
+BYVAL nLen AS LONG = 260, BYVAL bPassword AS BOOLEAN = FALSE) AS CWSTR
+
+   ' // Create the window
+   DIM pInputBox AS CWindow
+   DIM dwStyle AS DWORD = WS_VISIBLE OR WS_CAPTION OR WS_POPUPWINDOW
+   DIM dwExStyle AS DWORD = WS_EX_DLGMODALFRAME OR WS_EX_CONTROLPARENT
+   DIM hInputBox AS HWND = pInputBox.Create(hParent, **cwsCaption, @AfxInputBoxWindowProc, x, y, 326, 142, dwStyle, dwExStyle)
+   ' // Center the window
+   IF x = 0 AND y = 0 THEN pInputBox.Center(hInputBox, hParent)
+   ' // Add a label control
+   pInputBox.AddControl("Label", hInputBox, -1, **cwsPrompt, 21, 10, 280, 19)
+   ' // Add a TextBox control
+   dwStyle = WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL
+   IF bPassWord THEN dwStyle = dwStyle OR ES_PASSWORD
+   DIM hEdit AS HWND = pInputBox.AddControl("Edit", hInputBox, 101, "", 21, 33, 280, 19, dwStyle)
+   ' // Add the buttons
+   DIM hOkButton AS HWND = pInputBox.AddControl("Button", hInputBox, IDOK, "&Ok", 21, 72, 75, 22)
+   DIM hCancelButton AS HWND = pInputBox.AddControl("Button", hInputBox, IDCANCEL, "&Cancel", 226, 72, 75, 22)
+   ' // Localized strings. In the resource file of user32.dll, the OK button has
+   ' // IDS_OK (801) as the identifier and the Cancel button IDS_CANCEL (801).
+   DIM hUser32Instance AS HINSTANCE = GetModuleHandleW("user32.dll")
+   DIM wszOk AS WSTRING * 260
+   DIM cbLen AS LONG = LoadStringW(hUser32Instance, 800, @wszOk, SIZEOF(wszOk))
+   IF cbLen THEN wszOk = "&" & wszOk : SendMessageW(hOkButton, WM_SETTEXT, 0, cast(LPARAM, @wszOk))
+   DIM wszCancel AS WSTRING * 260
+   cbLen = LoadStringW(hUser32Instance, 801, @wszCancel, SIZEOF(wszCancel))
+   IF cbLen THEN wszCancel = "&" & wszCancel : SendMessageW(hCancelButton, WM_SETTEXT, 0, cast(LPARAM, @wszCancel))
+   ' // Set the text and the limit
+   IF nLen = 0 THEN nLen = 260
+   IF nLen < 1 OR nLen > 2048 THEN nLen = 2048
+   SendMessageW hEdit, EM_LIMITTEXT, nLen, 0
+   IF LEN(cwsText) > nLen THEN cwsText = LEFT(**cwsText, nLen)
+   SendMessageW(hEdit, WM_SETTEXT, 0, cast(LPARAM, *cwsText))
+   SendMessageW(hEdit, EM_SETSEL, 0, -1)
+   ' // Set the focus in the edit control
+   SetFocus hEdit
+   ' // Pointer to the allocated string to return the result
+   DIM wszOut AS WSTRING * 2049
+   SendMessageW hInputBox, WM_USER + 1, CAST(WPARAM, @wszOut), 0
+   ' // Process Windows messages
+   pInputBox.DoEvents
+   ' // Enable the parent window
+   EnableWindow hParent, CTRUE
+   ' // Return the output string
+   RETURN wszOut
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Input box callback function.
+' ========================================================================================
+PRIVATE FUNCTION AfxInputBoxWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC pText AS WSTRING PTR   ' // Pointer to the string buffer
+
+   SELECT CASE uMsg
+      CASE WM_CREATE
+         ' Disable parent window to make popup window modal
+         EnableWindow GetParent(hwnd), FALSE
+         EXIT FUNCTION
+      CASE WM_USER + 1
+         ' // Pointer to allocated string to return the result
+         IF wParam THEN
+            pText = cast(WSTRING PTR, wParam)
+            EXIT FUNCTION
+         END IF
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDOK
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  DIM nLen AS LONG = SendMessageW(GetDlgItem(hwnd, 101), WM_GETTEXTLENGTH, 0, 0)
+                  IF nLen > 2048 THEN nLen = 2048
+                  nLen = SendMessageW(GetDlgItem(hwnd, 101), WM_GETTEXT, nLen + 1, cast(.LPARAM, pText))
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+      CASE WM_CLOSE
+         ' // Enables parent window keeping parent's zorder
+         EnableWindow GetParent(hwnd), CTRUE
+         ' // Don't exit; let DefWindowProcW perform the default action
+      CASE WM_DESTROY
+         ' // Close the main window
+         PostQuitMessage(0)
+         EXIT FUNCTION
+   END SELECT
+
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+END NAMESPACE

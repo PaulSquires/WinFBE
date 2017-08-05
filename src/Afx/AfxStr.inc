@@ -99,8 +99,7 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrRemoveAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
    DIM cws AS CWSTR = wszMainStr
-   DIM i AS LONG
-   FOR i = 1 TO LEN(wszMatchStr)
+   FOR i AS LONG = 1 TO LEN(wszMatchStr)
       cws = AfxStrRemove(cws, MID(wszMatchStr, i, 1))
    NEXT
    RETURN cws
@@ -141,9 +140,8 @@ PRIVATE FUNCTION AfxStrReplaceAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchSt
    DIM cws AS CWSTR = wszMainStr
    IF LEN(wszMatchStr) = 0 THEN RETURN cws
    IF LEN(wszReplaceWith) = 0 THEN RETURN cws
-   DIM i AS LONG, x AS LONG
-   FOR x = 1 TO LEN(wszMatchStr)
-      FOR i = 1 TO LEN(wszMainStr)
+   FOR x AS LONG = 1 TO LEN(wszMatchStr)
+      FOR i AS LONG = 1 TO LEN(wszMainStr)
          IF MID(wszMatchStr, x, 1) = MID(wszMainStr, i, 1) THEN
             MID(**cws, i, 1) = wszReplaceWith
          END IF
@@ -160,8 +158,8 @@ END FUNCTION
 PRIVATE FUNCTION AfxStrReverse (BYREF wszMainStr AS WSTRING) AS CWSTR
    DIM cws AS CWSTR = wszMainStr
    DIM wszChar AS WSTRING * 2
-   DIM i AS LONG, nLen AS LONG = LEN(wszMainStr)
-   FOR i = 1 TO nLen \ 2
+   DIM nLen AS LONG = LEN(wszMainStr)
+   FOR i AS LONG = 1 TO nLen \ 2
       wszChar = MID(cws, i, 1)
       MID(**cws, i, 1) = MID(**cws, nLen - i + 1, 1)
       MID(**cws, nLen - i + 1, 1) = wszChar
@@ -216,9 +214,8 @@ PRIVATE FUNCTION AfxStrRemainAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr
    IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
    IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN cws
    IF nStart < 0 THEN nStart = LEN(wszMainStr) + nStart + 1
-   DIM i AS LONG, x AS LONG
-   FOR i = nStart TO LEN(wszMainStr)
-      FOR x = 1 TO LEN(wszMatchStr)
+   FOR i AS LONG = nStart TO LEN(wszMainStr)
+      FOR x AS LONG = 1 TO LEN(wszMatchStr)
          IF MID(wszMainStr, i, 1) = MID(wszMatchStr, x, 1) THEN
             cws = MID(wszMainStr, i + 1)
             RETURN cws
@@ -263,18 +260,18 @@ END FUNCTION
 PRIVATE FUNCTION AfxStrTallyAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
    IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN EXIT FUNCTION
    ' // Remove possible duplicates in the matches string
-   DIM AS LONG i, nPos
+   DIM nPos AS LONG
    DIM cwsMatchStr AS CWSTR = wszMatchStr
-   FOR i = 1 TO LEN(cwsMatchStr)
+   FOR i AS LONG = 1 TO LEN(cwsMatchStr)
       nPos = INSTR(cwsMatchStr, MID(wszMatchStr, i, 1))
       IF nPos = 0 THEN cwsMatchStr = cwsMatchStr & MID(wszMatchStr, i, 1)
    NEXT
    ' // Do the count
    DIM nCount AS LONG
-   FOR i = 1 TO LEN(cwsMatchStr)
+   FOR i AS LONG = 1 TO LEN(cwsMatchStr)
       nPos = 1
       DO
-         nPos = Instr(nPos, wszMainStr, MID(cwsMatchStr, i, 1))
+         nPos = INSTR(nPos, wszMainStr, MID(cwsMatchStr, i, 1))
          IF nPos = 0 THEN EXIT DO
          IF nPos THEN
             nCount += 1
@@ -299,9 +296,9 @@ END FUNCTION
 PRIVATE FUNCTION AfxStrVerify (BYVAL nStart AS LONG, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
    IF nStart <= 0 OR nStart > LEN(wszMainStr) THEN RETURN 0
    ' // Get each character in wszMainStr and look for it in wszMatchStr
-   DIM AS LONG i, nPos, idx
-   For i = nStart TO LEN(wszMainStr)
-      nPos = Instr(wszMatchStr, MID(wszMainStr, i, 1))
+   DIM AS LONG nPos, idx
+   For i AS LONG = nStart TO LEN(wszMainStr)
+      nPos = INSTR(wszMatchStr, MID(wszMainStr, i, 1))
       IF nPos = 0 THEN
          idx = i
          EXIT FOR
@@ -378,7 +375,6 @@ PRIVATE FUNCTION AfxStrPathName (BYREF wszOption AS WSTRING, BYREF wszFileSpec A
          ' // Returns the path portion of file spec
          DIM nPos AS LONG = InstrRev(wszFileSpec, ANY ":/\")
          IF nPos THEN cws = MID(wszFileSpec, 1, nPos)
-         RETURN cws
       CASE "NAME"
          ' // Retrieve the full filename
          cws = wszFileSpec
@@ -387,12 +383,10 @@ PRIVATE FUNCTION AfxStrPathName (BYREF wszOption AS WSTRING, BYREF wszFileSpec A
          ' // Retrieve the filename
          nPos = InstrRev(cws, ".")
          IF nPos THEN cws = MID(cws, 1, nPos - 1)
-         RETURN cws
       CASE "NAMEX"
          ' // Retrieve the name and extension combined
          DIM nPos AS LONG = InStrRev(wszFileSpec, ANY ":/\")
          IF nPos THEN cws = MID(wszFileSpec, nPos + 1) ELSE cws = wszFileSpec
-         RETURN cws
       CASE "EXTN"
          ' // Retrieve the name and extension combined
          DIM nPos AS LONG = InstrRev(wszFileSpec, ANY ":/\")
@@ -400,8 +394,8 @@ PRIVATE FUNCTION AfxStrPathName (BYREF wszOption AS WSTRING, BYREF wszFileSpec A
          ' // Retrieve the extension
          nPos = InStrRev(cws, ".")
          IF nPos THEN cws = MID(cws, nPos) ELSE cws = ""
-         RETURN cws
    END SELECT
+   RETURN cws
 END FUNCTION
 ' ========================================================================================
 
@@ -417,8 +411,7 @@ PRIVATE FUNCTION AfxStrRepeat (BYVAL nCount AS LONG, BYREF wszMainStr AS WSTRING
    ' // in order to avoid nCount concatenations.
    DIM nLen AS LONG = LEN(wszMainStr)
    cws = SPACE(nCount * nLen)
-   DIM i AS LONG
-   FOR i = 0 TO nCount - 1
+   FOR i AS LONG = 0 TO nCount - 1
       MID(**cws, (i * nLen) + 1, nLen) = wszMainStr
    NEXT
    RETURN cws
@@ -570,7 +563,7 @@ PRIVATE FUNCTION AfxStrExtract (BYVAL nStart AS LONG, BYREF wszMainStr AS WSTRIN
       RETURN cws
    END IF
    IF nStart < 0 THEN nStart = nLen + nStart + 1
-   DIM nPos AS LONG = Instr(nStart, wszMainStr, wszMatchStr)
+   DIM nPos AS LONG = INSTR(nStart, wszMainStr, wszMatchStr)
    IF nPos THEN
       cws = MID(wszMainStr, nStart, nPos - nStart )
    ELSE
@@ -598,9 +591,8 @@ PRIVATE FUNCTION AfxStrExtractAny (BYVAL nStart AS LONG, BYREF wszMainStr AS WST
       RETURN cws
    END IF
    IF nStart < 0 THEN nStart = nLen + nStart + 1
-   DIM AS LONG i, x
-   FOR i = nStart TO LEN(wszMainStr)
-      FOR x = 1 TO LEN(wszMatchStr)
+   FOR i AS LONG = nStart TO LEN(wszMainStr)
+      FOR x AS LONG = 1 TO LEN(wszMatchStr)
          IF MID(wszMainStr, i, 1) = MID(wszMatchStr, x, 1) THEN
             cws = MID(wszMainStr, nStart, i - nStart)
             RETURN cws
@@ -622,7 +614,7 @@ PRIVATE FUNCTION AfxStrRetain (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS
    IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
    DIM nPos AS LONG = 1
    DO
-      nPos = Instr(nPos, wszMainStr, wszMatchStr)
+      nPos = INSTR(nPos, wszMainStr, wszMatchStr)
       IF nPos = 0 THEN EXIT DO
       cws = cws & MID(wszMainStr, nPos, LEN(wszMatchStr))
       nPos += LEN(wszMatchStr)
@@ -643,9 +635,9 @@ END FUNCTION
 PRIVATE FUNCTION AfxStrRetainAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
    DIM cws AS CWSTR = ""
    IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
-   DIM AS LONG i, x, nPos
-   FOR i = 1 TO LEN(wszMainStr)
-      nPos = Instr(wszMatchStr, MID(wszMainStr, i, 1))
+   DIM nPos AS LONG
+   FOR i AS LONG = 1 TO LEN(wszMainStr)
+      nPos = INSTR(wszMatchStr, MID(wszMainStr, i, 1))
       IF nPos THEN cws = cws & MID(wszMainStr, i, 1)
    NEXT
    RETURN cws
@@ -686,12 +678,12 @@ PRIVATE FUNCTION AfxStrShrink (BYREF wszMainStr AS WSTRING, BYREF wszMask AS WST
    DIM wszReplace AS WSTRING * 2 = MID(wszMask, 1, 1)
    DIM wszDuplicate AS WSTRING * 3
    DIM nMaskLen AS LONG = LEN(wszMask)
-   DIM AS LONG i, nPos
-   FOR i = 1 TO nMaskLen
+   DIM nPos AS LONG
+   FOR i AS LONG = 1 TO nMaskLen
       wszDuplicate = MID(wszMask, i, 1) & MID(wszMask, i, 1)   ' usually double spaces
       nPos = 1
       DO
-         nPos = Instr(cws, wszDuplicate)
+         nPos = INSTR(cws, wszDuplicate)
          IF nPos = 0 THEN EXIT DO
          cws = MID(cws, 1, nPos - 1) & wszReplace & MID(cws, nPos + LEN(wszDuplicate))
       LOOP
@@ -699,7 +691,7 @@ PRIVATE FUNCTION AfxStrShrink (BYREF wszMainStr AS WSTRING, BYREF wszMask AS WST
    ' // Replace all single characters in the mask with the first character of the mask.
    nPos = 1
    DO
-      nPos = Instr(nPos, cws, ANY wszMask)
+      nPos = INSTR(nPos, cws, ANY wszMask)
       IF nPos = 0 THEN EXIT DO
       ' Only do the replace if the character at the position found is
       ' different than the character we need to replace it with. This saves
@@ -714,7 +706,7 @@ PRIVATE FUNCTION AfxStrShrink (BYREF wszMainStr AS WSTRING, BYREF wszMask AS WST
    wszDuplicate = MID(wszMask, 1, 1) & MID(wszMask, 1, 1)
    nPos = 1
    DO
-      nPos = Instr(cws, wszDuplicate)
+      nPos = INSTR(cws, wszDuplicate)
       IF nPos = 0 THEN EXIT DO
       cws = MID(cws, 1, nPos - 1) & wszReplace & MID(cws, nPos + LEN(wszDuplicate))
    LOOP
@@ -734,7 +726,7 @@ PRIVATE FUNCTION AfxStrParseCount (BYREF wszMainStr AS WSTRING, BYREF wszDelimit
    DIM nCount AS LONG = 1
    DIM nPos AS LONG = 1
    DO
-      nPos = Instr(nPos, wszMainStr, wszDelimiter)
+      nPos = INSTR(nPos, wszMainStr, wszDelimiter)
       IF nPos = 0 THEN EXIT DO
       nCount += 1
       nPos += LEN(wszDelimiter)
@@ -755,7 +747,7 @@ PRIVATE FUNCTION AfxStrParseCountAny (BYREF wszMainStr AS WSTRING, BYREF wszDeli
    DIM nCount AS LONG = 1
    DIM nPos AS LONG = 1
    DO
-      nPos = Instr(nPos, wszMainStr, ANY wszDelimiter)
+      nPos = INSTR(nPos, wszMainStr, ANY wszDelimiter)
       IF nPos = 0 THEN EXIT DO
       nCount += 1
       nPos += LEN(wszDelimiter)
@@ -796,9 +788,9 @@ PRIVATE FUNCTION AfxStrParse OVERLOAD (BYREF wszMainStr AS WSTRING, BYREF wszDel
       IF nPos = 0 THEN nStart = 1
       ' Now continue forward to get the end of the token
       IF bIsAny THEN
-         nPos = Instr(nStart, wszMainStr, ANY wszDelimiter)
+         nPos = INSTR(nStart, wszMainStr, ANY wszDelimiter)
       ELSE
-         nPos = Instr(nStart, wszMainStr, wszDelimiter)
+         nPos = INSTR(nStart, wszMainStr, wszDelimiter)
       END IF
       IF nPos > 0 OR nCount = nPosition THEN
          IF nPos = 0 THEN
@@ -812,9 +804,9 @@ PRIVATE FUNCTION AfxStrParse OVERLOAD (BYREF wszMainStr AS WSTRING, BYREF wszDel
       DO
          nStart = nPos
          IF bIsAny THEN
-            nPos = Instr(nPos, wszMainStr, ANY wszDelimiter)
+            nPos = INSTR(nPos, wszMainStr, ANY wszDelimiter)
          ELSE
-            nPos = Instr(nPos, wszMainStr, wszDelimiter)
+            nPos = INSTR(nPos, wszMainStr, wszDelimiter)
          END IF
          IF nPos THEN
             nCount += 1
@@ -867,7 +859,7 @@ END FUNCTION
 ' any of the characters that are part of delimiters.
 ' - wszStr = The string to split.
 ' - wszDelimiters = The delimiter characters.
-' Return value: A CBSTRSA (safe array) containing a token in each element.
+' Return value: A CWstrArray containing a token in each element.
 ' Usage example:
 ' DIM cws AS CWSTR = "- This, a sample string."
 ' DIM cwsa AS CWstrArray = AfxStrSplit(cws, " ,.-")

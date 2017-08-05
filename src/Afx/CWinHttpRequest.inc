@@ -12,7 +12,7 @@
 #pragma once
 #include once "windows.bi"
 #include once "Afx/AfxWinHttpRequest.bi"
-#include once "Afx/CWSTR.inc"
+#include once "Afx/CVar.inc"
 
 NAMESPACE Afx
 
@@ -40,34 +40,37 @@ END FUNCTION
 ' ########################################################################################
 TYPE CWinHttpRequest
 
+Public:
    m_Result AS HRESULT
    m_pWinHttp AS Afx_IWinHttpRequest PTR
+
+Private:
    m_bUninitCOM AS BOOLEAN
 
+Public:
    DECLARE CONSTRUCTOR
    DECLARE DESTRUCTOR
    DECLARE FUNCTION GetLastResult () AS HRESULT
    DECLARE FUNCTION SetResult (BYVAL Result AS HRESULT) AS HRESULT
-   DECLARE FUNCTION Open (BYREF cwsMethod AS CWSTR, BYREF cwsUrl AS CWSTR, BYVAL bAsync AS BOOLEAN = FALSE) AS HRESULT
-   DECLARE FUNCTION Send (BYVAL vBody AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND)) AS HRESULT
+   DECLARE FUNCTION Open (BYREF cbsMethod AS CBSTR, BYREF cbsUrl AS CBSTR, BYVAL bAsync AS BOOLEAN = FALSE) AS HRESULT
+   DECLARE FUNCTION Send (BYREF cvBody AS CVAR = "") AS HRESULT
    DECLARE FUNCTION WaitForResponse (BYVAL nTimeout AS LONG = 0) AS BOOLEAN
-   DECLARE FUNCTION GetResponseHeader (BYREF cwsHeader AS CWSTR) AS CWSTR
-   DECLARE FUNCTION GetAllResponseHeaders () AS CWSTR
+   DECLARE FUNCTION GetResponseHeader (BYREF cbsHeader AS CBSTR) AS CBSTR
+   DECLARE FUNCTION GetAllResponseHeaders () AS CBSTR
    DECLARE FUNCTION GetResponseBody () AS STRING
    DECLARE FUNCTION GetResponseStream () AS STRING
-   DECLARE FUNCTION GetResponseText () AS CWSTR
-   DECLARE FUNCTION SetProxy (BYVAL ProxySetting AS HTTPREQUEST_PROXY_SETTING, BYVAL vProxyServer AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND), BYVAL vBypassList AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND)) AS HRESULT
-   DECLARE FUNCTION SetCredentials (BYREF cwsUserName AS CWSTR, BYREF cwsPassword AS CWSTR, BYVAL Flags AS HTTPREQUEST_SETCREDENTIALS_FLAGS) AS HRESULT
-   DECLARE FUNCTION SetRequestHeader (BYREF cwsHeader AS CWSTR, BYREF cwsValue AS CWSTR) AS HRESULT
+   DECLARE FUNCTION GetResponseText () AS CBSTR
+   DECLARE FUNCTION SetProxy (BYVAL ProxySetting AS HTTPREQUEST_PROXY_SETTING, BYREF cvProxyServer AS CVAR = "", BYVAL cvBypassList AS CVAR = "") AS HRESULT
+   DECLARE FUNCTION SetCredentials (BYREF cbsUserName AS CBSTR, BYREF cbsPassword AS CBSTR, BYVAL Flags AS HTTPREQUEST_SETCREDENTIALS_FLAGS) AS HRESULT
+   DECLARE FUNCTION SetRequestHeader (BYREF cbsHeader AS CBSTR, BYREF cbsValue AS CBSTR) AS HRESULT
    DECLARE FUNCTION GetStatus () AS LONG
-   DECLARE FUNCTION GetStatusText () AS CWSTR
+   DECLARE FUNCTION GetStatusText () AS CBSTR
    DECLARE FUNCTION Abort () AS HRESULT
    DECLARE FUNCTION SetTimeouts (BYVAL ResolveTimeout AS LONG, BYVAL ConnectTimeout AS LONG, BYVAL SendTimeout AS LONG, BYVAL ReceiveTimeout AS LONG) AS HRESULT
-   DECLARE FUNCTION SetClientCertificate (BYREF cwsClientCertificate AS CWSTR) AS HRESULT
+   DECLARE FUNCTION SetClientCertificate (BYREF cbsClientCertificate AS CBSTR) AS HRESULT
    DECLARE FUNCTION SetAutoLogonPolicy (BYVAL AutoLogonPolicy AS WinHttpRequestAutoLogonPolicy) AS HRESULT
-   DECLARE FUNCTION GetOption (BYVAL nOption AS WinHttpRequestOption) AS VARIANT
-   DECLARE FUNCTION SetOption (BYVAL nOption AS WinHttpRequestOption, BYVAL vValue AS VARIANT) AS HRESULT
-   DECLARE FUNCTION SetOption (BYVAL nOption AS WinHttpRequestOption, BYREF cwsValue AS CWSTR) AS HRESULT
+   DECLARE FUNCTION GetOption (BYVAL nOption AS WinHttpRequestOption) AS CVAR
+   DECLARE FUNCTION SetOption (BYVAL nOption AS WinHttpRequestOption, BYREF cvValue AS CVAR) AS HRESULT
 
 END TYPE
 ' ########################################################################################
@@ -124,29 +127,24 @@ END FUNCTION
 '   TRUE: Opens the HTTP connection in asynchronous mode.
 ' The return value is S_OK on success or an error value otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.Open (BYREF cwsMethod AS CWSTR, BYREF cwsUrl AS CWSTR, BYVAL bAsync AS BOOLEAN = FALSE) AS HRESULT
+PRIVATE FUNCTION CWinHttpRequest.Open (BYREF cbsMethod AS CBSTR, BYREF cbsUrl AS CBSTR, BYVAL bAsync AS BOOLEAN = FALSE) AS HRESULT
    DIM vAsync AS VARIANT : V_VT(@vAsync) = VT_BOOL : V_BOOL(@vAsync) = bAsync
-   DIM bstrMethod AS AFX_BSTR = SysAllocString(**cwsMethod)
-   DIM bstrUrl AS AFX_BSTR = SysAllocString(**cwsUrl)
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->Open(bstrMethod, bstrUrl, vAsync))
-   SysFreeString bstrMethod
-   SysFreeString bstrUrl
-   RETURN m_Result
+   IF m_pWinHttp THEN RETURN SetResult(m_pWinHttp->Open(cbsMethod.m_bstr, cbsUrl.m_bstr, vAsync))
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
 ' The Send method sends an HTTP request to an HTTP server.
 ' Parameter:
-' - vBody [in, optional]: Data to be sent to the server.
+' - pBody [in, optional]: Data to be sent to the server.
 ' The return value is S_OK on success or an error value otherwise.
 ' Remarks: The request to be sent was defined in a prior call to the Open method. The
 ' calling application can provide data to be sent to the server through the Body parameter.
 ' If the HTTP verb of the object's Open is "GET", this method sends the request without
 ' Body, even if it is provided by the calling application.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.Send (BYVAL vBody AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND)) AS HRESULT
-   IF m_pWinHttp THEN RETURN SetResult(m_pWinHttp->Send(vBody))
+PRIVATE FUNCTION CWinHttpRequest.Send (BYREF cvBody AS CVAR = "") AS HRESULT
+   IF m_pWinHttp THEN RETURN SetResult(m_pWinHttp->Send(cvBody))
 END FUNCTION
 ' ========================================================================================
 
@@ -172,20 +170,17 @@ END FUNCTION
 ' ========================================================================================
 ' Retrieves the HTTP response headers.
 ' Parameters:
-' - cwsHeader [in]: Specifies the case-insensitive header name.
+' - cbsHeader [in]: Specifies the case-insensitive header name.
 ' Return value: The resulting header information.
 ' Result code (GetLastResult):
 ' The result code is S_OK on success or an error value otherwise.
 ' Remarks: This method returns the value of the response header named in Header. Invoke
 ' this method only after the Send method has been called.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.GetResponseHeader (BYREF cwsHeader AS CWSTR) AS CWSTR
-   DIM bstrValue AS AFX_BSTR, bstrHeader AS AFX_BSTR = SysAllocString(**cwsHeader)
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->GetResponseHeader(bstrHeader, @bstrValue))
-   SysFreeString bstrHeader
-   DIM cwsValue AS CWSTR = *bstrValue
-   SysFreeString bstrValue
-   RETURN cwsValue
+PRIVATE FUNCTION CWinHttpRequest.GetResponseHeader (BYREF cbsHeader AS CBSTR) AS CBSTR
+   DIM bstrValue AS AFX_BSTR
+   IF m_pWinHttp THEN SetResult(m_pWinHttp->GetResponseHeader(cbsHeader.m_bstr, @bstrValue))
+   RETURN bstrValue
 END FUNCTION
 ' ========================================================================================
 
@@ -199,12 +194,10 @@ END FUNCTION
 ' combination (ASCII 13 and 10). The last entry is followed by two delimiters (13, 10, 13, 10).
 ' Invoke this method only after the Send method has been called.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.GetAllResponseHeaders () AS CWSTR
+PRIVATE FUNCTION CWinHttpRequest.GetAllResponseHeaders () AS CBSTR
    DIM bstrHeaders AS AFX_BSTR
    IF m_pWinHttp THEN SetResult(m_pWinHttp->GetAllResponseHeaders(@bstrHeaders))
-   DIM cwsHeaders AS CWSTR = *bstrHeaders
-   SysFreeString bstrHeaders
-   RETURN cwsHeaders
+   RETURN bstrHeaders
 END FUNCTION
 ' ========================================================================================
 
@@ -283,12 +276,10 @@ END FUNCTION
 ' Result code (GetLastResult):
 ' The result value is S_OK on success or an error value otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.GetResponseText () AS CWSTR
+PRIVATE FUNCTION CWinHttpRequest.GetResponseText () AS CBSTR
    DIM bstrResponse AS AFX_BSTR
    IF m_pWinHttp THEN SetResult(m_pWinHttp->get_ResponseText(@bstrResponse))
-   DIM cwsResponse AS CWSTR = *bstrResponse
-   SysFreeString bstrResponse
-   RETURN cwsResponse
+   RETURN bstrResponse
 END FUNCTION
 ' ========================================================================================
 
@@ -309,9 +300,9 @@ END FUNCTION
 '      When HTTPREQUEST_PROXYSETTING_PROXY is specified, varProxyServer should be set to a
 '      proxy server string and varBypassList should be set to a domain bypass list string.
 '      This proxy configuration applies only to the current instance of the WinHttpRequest object.
-' - vProxyServer [in, optional]
+' - cvProxyServer [in, optional]
 '      Set to a proxy server string when ProxySetting equals HTTPREQUEST_PROXYSETTING_PROXY.
-' - vBypassList [in, optional]
+' - cvBypassList [in, optional]
 '      Set to a domain bypass list string when ProxySetting equals HTTPREQUEST_PROXYSETTING_PROXY.
 ' Return value:
 '   The return value is S_OK on success or an error value otherwise.
@@ -320,8 +311,8 @@ END FUNCTION
 ' by the proxy configuration tool) or to override Proxycfg.exe. This method must be called
 ' before calling the Send method. If this method is called after the Send method, it has no effect.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.SetProxy (BYVAL ProxySetting AS HTTPREQUEST_PROXY_SETTING, BYVAL vProxyServer AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND), BYVAL vBypassList AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND)) AS HRESULT
-   IF m_pWinHttp THEN RETURN SetResult(m_pWinHttp->SetProxy(ProxySetting, vProxyServer, vBypassList))
+PRIVATE FUNCTION CWinHttpRequest.SetProxy (BYVAL ProxySetting AS HTTPREQUEST_PROXY_SETTING, BYREF cvProxyServer AS CVAR = "", BYVAL cvBypassList AS CVAR = "") AS HRESULT
+   IF m_pWinHttp THEN RETURN SetResult(m_pWinHttp->SetProxy(ProxySetting, cvProxyServer, cvBypassList))
 END FUNCTION
 ' ========================================================================================
 
@@ -349,13 +340,8 @@ END FUNCTION
 ' twice; first with the Flags parameter set to HTTPREQUEST_SETCREDENTIALS_FOR_SERVER, and
 ' second, with the Flags parameter set to HTTPREQUEST_SETCREDENTIALS_FOR_PROXY.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.SetCredentials (BYREF cwsUserName AS CWSTR, BYREF cwsPassword AS CWSTR, BYVAL Flags AS HTTPREQUEST_SETCREDENTIALS_FLAGS) AS HRESULT
-   DIM bstrUserName AS AFX_BSTR = SysAllocString(**cwsUserName)
-   DIM bstrPassword AS AFX_BSTR = SysAllocString(**cwsPassword)
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->SetCredentials(bstrUserName, bstrPassword, Flags))
-   SysFreeString bstrUserName
-   SysFreeString bstrPassword
-   RETURN m_Result
+PRIVATE FUNCTION CWinHttpRequest.SetCredentials (BYREF cbsUserName AS CBSTR, BYREF cbsPassword AS CBSTR, BYVAL Flags AS HTTPREQUEST_SETCREDENTIALS_FLAGS) AS HRESULT
+   IF m_pWinHttp THEN RETURN(SetResult(m_pWinHttp->SetCredentials(cbsUserName.m_bstr, cbsPassword.m_bstr, Flags)))
 END FUNCTION
 ' ========================================================================================
 
@@ -381,13 +367,8 @@ END FUNCTION
 ' be well formed. For more information about valid HTTP headers, see RFC 2616. If an
 ' invalid header is used, an error occurs and the header is not added.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.SetRequestHeader (BYREF cwsHeader AS CWSTR, BYREF cwsValue AS CWSTR) AS HRESULT
-   DIM bstrHeader AS AFX_BSTR = SysAllocString(**cwsHeader)
-   DIM bstrValue AS AFX_BSTR = SysAllocString(**cwsValue)
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->SetRequestHeader(bstrHeader, bstrValue))
-   SysFreeString bstrHeader
-   SysFreeString bstrValue
-   RETURN m_Result
+PRIVATE FUNCTION CWinHttpRequest.SetRequestHeader (BYREF cbsHeader AS CBSTR, BYREF cbsValue AS CBSTR) AS HRESULT
+   IF m_pWinHttp THEN RETURN(SetResult(m_pWinHttp->SetRequestHeader(cbsHeader.m_bstr, cbsValue.m_bstr)))
 END FUNCTION
 ' ========================================================================================
 
@@ -399,9 +380,9 @@ END FUNCTION
 ' Remarks: This is not the same that the values returned by GetLastResult.
 ' ========================================================================================
 PRIVATE FUNCTION CWinHttpRequest.GetStatus () AS LONG
-   DIM nStatus AS LONG
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->get_Status(@nStatus))
-   RETURN nStatus
+   DIM status AS LONG
+   IF m_pWinHttp THEN SetResult(m_pWinHttp->get_Status(@status))
+   RETURN status
 END FUNCTION
 ' ========================================================================================
 
@@ -413,12 +394,10 @@ END FUNCTION
 ' Result code (GetLastResult):
 ' The return value is S_OK on success or an error value otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.GetStatusText () AS CWSTR
+PRIVATE FUNCTION CWinHttpRequest.GetStatusText () AS CBSTR
    DIM bstrText AS AFX_BSTR
    IF m_pWinHttp THEN SetResult(m_pWinHttp->get_StatusText(@bstrText))
-   DIM cwsText AS CWSTR = *bstrText
-   SysFreeString bstrText
-   RETURN cwsText
+   RETURN bstrText
 END FUNCTION
 ' ========================================================================================
 
@@ -476,11 +455,8 @@ END FUNCTION
 ' Microsoft Windows HTTP Services (WinHTTP) does not provide client certificates to proxy
 ' servers that request certificates for authentication.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.SetClientCertificate (BYREF cwsClientCertificate AS CWSTR) AS HRESULT
-   DIM bstrClientCertificate AS AFX_BSTR = SysAllocString(**cwsClientCertificate)
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->SetClientCertificate(bstrClientCertificate))
-   SysFreeString bstrClientCertificate
-   RETURN m_Result
+PRIVATE FUNCTION CWinHttpRequest.SetClientCertificate (BYREF cbsClientCertificate AS CBSTR) AS HRESULT
+   IF m_pWinHttp THEN RETURN(SetResult(m_pWinHttp->SetClientCertificate(cbsClientCertificate.m_bstr)))
 END FUNCTION
 ' ========================================================================================
 
@@ -500,7 +476,7 @@ END FUNCTION
 ' ========================================================================================
 ' Retrieves a Microsoft Windows HTTP Services (WinHTTP) option value.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.GetOption (BYVAL nOption AS WinHttpRequestOption) AS VARIANT
+PRIVATE FUNCTION CWinHttpRequest.GetOption (BYVAL nOption AS WinHttpRequestOption) AS CVAR
    DIM vValue AS VARIANT
    IF m_pWinHttp THEN SetResult(m_pWinHttp->get_Option(nOption, @vValue))
    RETURN vValue
@@ -510,16 +486,8 @@ END FUNCTION
 ' ========================================================================================
 ' Sets a Microsoft Windows HTTP Services (WinHTTP) option value.
 ' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.SetOption (BYVAL nOption AS WinHttpRequestOption, BYVAL vValue AS VARIANT) AS HRESULT
-   IF m_pWinHttp THEN RETURN(SetResult(m_pWinHttp->put_Option(nOption, vValue)))
-END FUNCTION
-' ========================================================================================
-' ========================================================================================
-PRIVATE FUNCTION CWinHttpRequest.SetOption (BYVAL nOption AS WinHttpRequestOption, BYREF cwsValue AS CWSTR) AS HRESULT
-   DIM vValue AS VARIANT : vValue.vt = VT_BSTR : vValue.bstrVal = SysAllocString(**cwsValue)
-   IF m_pWinHttp THEN SetResult(m_pWinHttp->put_Option(nOption, vValue))
-   VariantClear @vValue
-   RETURN m_Result
+PRIVATE FUNCTION CWinHttpRequest.SetOption (BYVAL nOption AS WinHttpRequestOption, BYREF cvValue AS CVAR) AS HRESULT
+   IF m_pWinHttp THEN RETURN(SetResult(m_pWinHttp->put_Option(nOption, cvValue)))
 END FUNCTION
 ' ========================================================================================
 

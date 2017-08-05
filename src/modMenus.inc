@@ -119,8 +119,6 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWOUTPUT, L(251,"View Ou&tput Window") & Chr(9) & "Ctrl+F9"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_RESTOREMAIN, L(61,"&Restore Main Window Size")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
@@ -147,9 +145,12 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_QUICKRUN, L(285,"&Quick Run") & Chr(9) & "Ctrl+Shift+F5"
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
          AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"&Build Configurations...") & Chr(9) & "F7"
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
+
+   hPopUpMenu = CreatePopupMenu
+      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"&Options")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"&Build Configurations...") & Chr(9) & "F7"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")

@@ -55,23 +55,6 @@ END DESTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpImage.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpImage.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
 ' Gets the size, in bytes, of the parameter list for a specified image encoder
 ' ========================================================================================
 PRIVATE FUNCTION CGpImage.GetEncoderParameterListSize (BYVAL clsidEncoder AS GUID PTR) AS UINT
@@ -673,22 +656,6 @@ PRIVATE DESTRUCTOR CGpCachedBitmap
 END DESTRUCTOR
 ' =====================================================================================
 
-' ========================================================================================
-' Returns the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpCachedBitmap.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpCachedBitmap.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
 
 ' ########################################################################################
 ' CGpMetafile Class
@@ -804,7 +771,7 @@ END CONSTRUCTOR
 
 ' =====================================================================================
 ' The GetMetafileHeader method gets the metafile header of this metafile.
-' GdipGetMetafileHeaderFromWmf isn't declared in the 64-bit headers.
+' GdipGetMetafileHeaderFromWmf isn't exported by the FB 64-bit library.
 ' =====================================================================================
 'PRIVATE FUNCTION CGpMetafile.GetMetafileHeader (BYVAL hWmf AS HMETAFILE, BYVAL wmfPFH AS WmfPlaceableFileHeader PTR, BYVAL mh AS MetafileHeader PTR) AS GpStatus
 '   RETURN SetStatus(GdipGetMetafileHeaderFromWmf(hWmf, wmfPFH, mh))

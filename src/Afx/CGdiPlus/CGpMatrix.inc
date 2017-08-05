@@ -48,23 +48,6 @@ PRIVATE DESTRUCTOR CGpMatrix
 END DESTRUCTOR
 ' ========================================================================================
 
-' ========================================================================================
-' Returns the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpMatrix.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Sets the last status code.
-' ========================================================================================
-PRIVATE FUNCTION CGpMatrix.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ========================================================================================
-
 ' =====================================================================================
 ' Gets the elements of this matrix. The elements are placed in an array in the order
 ' m11, m12, m21, m22, m31, m32, where mij denotes the element in row i, column j.

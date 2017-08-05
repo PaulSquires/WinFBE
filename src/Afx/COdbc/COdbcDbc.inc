@@ -4,14 +4,14 @@
 ' Contents: ODBC wrapper classes (unicode)
 ' Implementation of the ODBC connection class.
 ' Compiler: FreeBasic 32 & 64-bit
-' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' Copyright (c) 2016-2017 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
 ' ========================================================================================
-' Allocates a connection handle and, if needed, an environment handle, and opens the database.
+' Allocates a connection handle and opens the database.
 ' In Windows 7, the Driver Manager version is 03.80. In Windows 8, the Driver Manager
 ' version is 03.81 via the SQLGetInfo SQL_DM_VER (InfoType parameter). SQL_ODBC_VER reports
 ' the version as 03.80 in both Windows 7 and Windows 8.

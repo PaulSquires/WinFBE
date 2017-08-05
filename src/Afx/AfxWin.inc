@@ -18,7 +18,6 @@
 #INCLUDE ONCE "win/KnownFolders.bi"
 #INCLUDE ONCE "win/commdlg.bi"
 #INCLUDE ONCE "win/cderr.bi"
-
 #INCLUDE ONCE "Afx/AfxPath.inc"
 #INCLUDE ONCE "Afx/AfxStr.inc"
 
@@ -27,13 +26,40 @@ USING Afx
 ' ========================================================================================
 ' Helper procedures to display feedback and errors
 ' ========================================================================================
-PRIVATE FUNCTION AfxMsg OVERLOAD (BYVAL pwszText AS WSTRING PTR, BYVAL uType AS DWORD = 0) AS LONG
-   IF pwszText <> NULL THEN FUNCTION = MessageBoxW(GetActiveWindow, pwszText, "Message", MB_APPLMODAL OR uType) ELSE FUNCTION = MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL OR uType)
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYVAL pwszText AS WSTRING PTR, BYREF wszCaption AS WSTRING = "Message", BYVAL uType AS DWORD = 0) AS LONG
+   IF pwszText <> NULL THEN FUNCTION = MessageBoxW(GetActiveWindow, pwszText, @wszCaption, MB_APPLMODAL OR uType) ELSE FUNCTION = MessageBoxW(GetActiveWindow, "", "", MB_APPLMODAL OR uType)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-PRIVATE FUNCTION AfxMsg OVERLOAD (BYREF cws AS CWSTR, BYVAL uType AS DWORD = 0) AS LONG
-   FUNCTION = MessageBoxW(GetActiveWindow, *cws, "Message", MB_APPLMODAL OR uType)
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYREF cws AS CWSTR, BYREF wszCaption AS WSTRING = "Message", BYVAL uType AS DWORD = 0) AS LONG
+   FUNCTION = MessageBoxW(GetActiveWindow, *cws, @wszCaption, MB_APPLMODAL OR uType)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYREF cbs AS CBSTR, BYREF wszCaption AS WSTRING = "Message", BYVAL uType AS DWORD = 0) AS LONG
+   FUNCTION = MessageBoxW(GetActiveWindow, *cbs, @wszCaption, MB_APPLMODAL OR uType)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYVAL nValue AS DOUBLE, BYREF wszCaption AS WSTRING = "Message", BYVAL uType AS DWORD = 0) AS LONG
+   FUNCTION = MessageBoxW(GetActiveWindow, WSTR(nValue), @wszCaption, MB_APPLMODAL OR uType)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the description of the specified Windows error code.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetWinErrMsg (BYVAL dwError AS DWORD) AS CWSTR
+   DIM cbLen AS DWORD, pBuffer AS WSTRING PTR, cwsMsg AS CWSTR
+   cbLen = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER OR _
+           FORMAT_MESSAGE_FROM_SYSTEM OR FORMAT_MESSAGE_IGNORE_INSERTS, _
+           NULL, dwError, BYVAL MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), _
+           cast(LPWSTR, @pBuffer), 0, NULL)
+   IF cbLen THEN
+      cwsMsg = *pBuffer
+      LocalFree pBuffer
+   END IF
+   RETURN cwsMsg
 END FUNCTION
 ' ========================================================================================
 
@@ -550,6 +576,7 @@ END FUNCTION
 '                     See: http://msdn.microsoft.com/en-us/library/windows/desktop/bb773205%28v=vs.85%29.aspx
 '                     Default value = BIF_RETURNONLYFSDIRS OR BIF_DONTGOBELOWDOMAIN OR BIF_USENEWUI OR BIF_RETURNFSANCESTORS
 ' Note: To display the old style dialog, pass -1 in the dwFlags parameter.
+' Don't forget to call CoInitialize before using this function.
 ' ========================================================================================
 ' // Browse for folder dialog procedure
 PRIVATE FUNCTION AfxBrowseForFolderProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
@@ -817,6 +844,50 @@ PRIVATE FUNCTION AfxSaveFileDialog ( _
 END FUNCTION
 ' ========================================================================================
 
+' ========================================================================================
+' Displays Windows System Information.
+' - hwnd = Handle to the parent window or NULL.
+' Returns TRUE on success or FALSE on failure.
+' ========================================================================================
+PRIVATE FUNCTION AfxShowSysInfo (BYVAL hwnd AS HWND) AS BOOLEAN
+   DIM hKey AS HKEY, wszPath AS WSTRING * MAX_PATH, cbData AS DWORD = SIZEOF(wszPath)
+   IF RegOpenKeyExW(HKEY_LOCAL_MACHINE, "Software\Microsoft\Shared Tools\MSInfo", 0, _
+                    KEY_QUERY_VALUE, @hKey) <> ERROR_SUCCESS THEN EXIT FUNCTION
+   RegQueryValueExW hKey, "Path", 0, 0, cast(LPBYTE, @wszPath), @cbData
+   RegCloseKey hKey
+   IF LEN(wszPath) = 0 THEN EXIT FUNCTION
+   IF ShellExecuteW(hwnd, "open", @wszPath, NULL, NULL, SW_SHOWNORMAL) > 32 THEN FUNCTION = TRUE
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Displays the choose color dialog.
+' - hParent = Handle to the parent window or null.
+' - rgbDefaultColor = Optional. Initial default color.
+' - lpCustColors = Optional. A pointer to an array of 16 values that contain red, green,
+'   blue (RGB) values for the custom color boxes in the dialog box. If the user modifies
+'   these colors, the system updates the array with the new RGB values.
+' Return value: The selected color.
+' ========================================================================================
+PRIVATE FUNCTION AfxChooseColorDialog (BYVAL hParent AS HWND, BYVAL rgbDefaultColor AS COLORREF = 0, BYVAL lpCustColors AS COLORREF PTR = NULL) AS COLORREF
+   DIM ColorSpec AS CHOOSECOLORW, lCustomColor(15) AS LONG
+   ColorSpec.lStructSize  = SIZEOF(ColorSpec)
+   ColorSpec.hwndOwner    = hParent     ' // Handle of owner window.  If 0, dialog appears at top/left.
+   IF lpCustColors = NULL THEN
+      FOR lCounter AS LONG = 0 TO 15
+         lCustomColor(lCounter) = BGR(0, lCounter * 16, (15 - lCounter) * 16)
+      NEXT
+      ColorSpec.lpCustColors = VARPTR(lCustomColor(0))
+   ELSE
+      ColorSpec.lpCustColors = lpCustColors
+   END IF
+   ColorSpec.rgbResult = rgbDefaultColor
+   ColorSpec.Flags = ColorSpec.Flags OR CC_RGBINIT OR CC_FULLOPEN
+   IF ChooseColorW(@ColorSpec) THEN FUNCTION = Colorspec.rgbResult
+END FUNCTION
+' ========================================================================================
+
+
 ' ########################################################################################
 '                                      *** WINDOW ***
 ' ########################################################################################
@@ -842,7 +913,7 @@ PRIVATE FUNCTION AfxGetWindowText (BYVAL hwnd AS HWND) AS CWSTR
    DIM nLen AS LONG = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0)
    DIM cwsText AS CWSTR = SPACE(nLen + 1)
    SendMessageW(hwnd, WM_GETTEXT, nLen + 1, cast(LPARAM, *cwsText))
-   RETURN cwsText
+   RETURN LEFT(**cwsText, LEN(cwsText) - 1)
 END FUNCTION
 ' ========================================================================================
 
@@ -2132,6 +2203,8 @@ END FUNCTION
 
 ' ========================================================================================
 ' Sets the font with which the window is currently drawing its text.
+' hwnd
+'   Handle to the window.
 ' hFont
 '   Handle to the font. If this parameter is NULL, the control uses the default system
 '   font to draw text.
@@ -2519,7 +2592,7 @@ PRIVATE FUNCTION AfxDibSaveImage (BYVAL pwszFileName AS WSTRING PTR, BYVAL pbmfh
    IF pbmfh = NULL THEN EXIT FUNCTION
    hFile = CreateFileW(pwszFileName, GENERIC_WRITE, 0, BYVAL NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)
    IF hFile = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
-   bSuccess = WriteFile(hFile, BYVAL pbmfh, BYVAL pbmfh->bfSize, @dwBytesWritten, NULL)
+   bSuccess = WriteFile(hFile, pbmfh, pbmfh->bfSize, @dwBytesWritten, NULL)
    CloseHandle(hFile)
    IF bSuccess = 0 OR dwBytesWritten <> pbmfh->bfSize THEN
       DeleteFileW(pwszFileName)
@@ -2641,6 +2714,23 @@ PRIVATE FUNCTION AfxFileExists (BYVAL pwszFileSpec AS WSTRING PTR) AS BOOLEAN
       (fd.dwFileAttributes AND FILE_ATTRIBUTE_TEMPORARY) <> FILE_ATTRIBUTE_TEMPORARY THEN
       FUNCTION = TRUE
    END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Parameter:
+' - pwszFileSpec: The full path and name of the file to delete.
+' Return value:
+'   If the function succeeds, the return value is nonzero.
+'   If the function fails, the return value is zero (0). To get extended error information, call GetLastError.
+' Remarks:
+'   If an application attempts to delete a file that does not exist, this function fails
+'   with ERROR_FILE_NOT_FOUND. If the file is a read-only file, the function fails with
+'   ERROR_ACCESS_DENIED.
+' ========================================================================================
+PRIVATE FUNCTION AfxDeleteFile (BYVAL pwszFileSpec AS WSTRING PTR) AS LONG
+   IF pwszFileSpec = NULL THEN EXIT FUNCTION
+   FUNCTION = DeleteFileW(pwszFileSpec)
 END FUNCTION
 ' ========================================================================================
 
@@ -2914,5 +3004,32 @@ PRIVATE FUNCTION AfxGetFileLastWriteTime (BYREF wszFileSpec AS WSTRING, BYVAL bU
          RETURN FT
       END IF
    END IF
+END FUNCTION
+' ========================================================================================
+
+' ########################################################################################
+'                                     *** SIDs ***
+' ########################################################################################
+
+' ========================================================================================
+' Tests whether the current user is a member of the Administrator's group.
+' Caller is NOT expected to be impersonating anyone and is expected to be able to
+' open its own process and process token.
+' See: http://msdn.microsoft.com/en-us/library/windows/desktop/aa376389%28v=vs.85%29.aspx
+' Return Value:
+'   TRUE - Caller has Administrators local group.
+'   FALSE - Caller does not have Administrators local group.
+' Note: Replacement for the Windows API function IsUserAnAdmin because Microsoft warns
+' about the use of this function and advices to call CheckTokenMembership directly.
+' ========================================================================================
+FUNCTION AfxIsUserAnAdmin () AS BOOLEAN
+   DIM IsMember AS LONG, AdministratorsGroup AS SID PTR
+   DIM ntAuthority AS SID_IDENTIFIER_AUTHORITY = ({0, 0, 0, 0, 0, 5})
+   IF AllocateAndInitializeSid(@NtAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID, _
+      DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, @AdministratorsGroup) = 0 THEN EXIT FUNCTION
+   IF CheckTokenMembership(NULL, AdministratorsGroup, @IsMember) <> 0 THEN
+      FUNCTION = IsMember
+   END IF
+   FreeSid(AdministratorsGroup)
 END FUNCTION
 ' ========================================================================================

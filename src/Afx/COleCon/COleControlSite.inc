@@ -35,7 +35,7 @@ TYPE Afx_IOleControlSiteImpl EXTENDS Afx_IUnknown
    DECLARE CONSTRUCTOR (BYVAL pData AS Afx_OleConDispatch PTR)
    DECLARE DESTRUCTOR
 
-   cRef AS DWORD                        ' // Reference count
+   cRef AS DWORD                       ' // Reference count
    m_pData AS Afx_OleConDispatch PTR   ' // Pointer to the Afx_OleConDispatch object
 
 END TYPE

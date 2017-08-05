@@ -3,7 +3,7 @@
 ' File: CLayout.inc
 ' Contents: Layout manager
 ' Purpose: When a parent window is resized, this class manages the location and size
-' of the child windows
+' of the child windows.
 ' Based on code originally written by Patrice Terrier and used with his permission.
 ' Compiler: FreeBasic 32 & 64-bit
 ' Copyright for the FreeBASIC adaptation (c) 2016 José Roca. Freeware. Use at your own risk.

@@ -129,27 +129,10 @@ PRIVATE DESTRUCTOR CGpFont
 END DESTRUCTOR
 ' ===========================================================================================
 
-' ===========================================================================================
-' Returns the last status code.
-' ===========================================================================================
-PRIVATE FUNCTION CGpFont.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ===========================================================================================
-
-' ===========================================================================================
-' Sets the last status code.
-' ===========================================================================================
-PRIVATE FUNCTION CGpFont.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ===========================================================================================
-
 ' ========================================================================================
 ' The GetLogFontA method uses a LOGFONTA structure to get the attributes of this Font object.
 ' Note: Because of a mess in the FB GDI+ headers for 32 bit, it's not possible to call
-' GdipGetLogFontA and GdipGetLogFont, only GdipGetLogFont.
+' GdipGetLogFontA and GdipGetLogFontW, only GdipGetLogFont.
 ' ========================================================================================
 #ifdef __FB_64BIT__
 PRIVATE FUNCTION CGpFont.GetLogFontA (BYVAL pGraphics AS CGpGraphics PTR, BYVAL pfA AS LOGFONTA PTR) AS GpStatus
@@ -277,23 +260,6 @@ PRIVATE DESTRUCTOR CGpFontFamily
    IF m_pFontFamily THEN GdipDeleteFontFamily(m_pFontFamily)
 END DESTRUCTOR
 ' =====================================================================================
-
-' ===========================================================================================
-' Returns the last status code.
-' ===========================================================================================
-PRIVATE FUNCTION CGpFontFamily.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ===========================================================================================
-
-' ===========================================================================================
-' Sets the last status code.
-' ===========================================================================================
-PRIVATE FUNCTION CGpFontFamily.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ===========================================================================================
 
 ' =====================================================================================
 ' * Creates a new FontFamily object based on this Brush object.
@@ -425,23 +391,6 @@ END CONSTRUCTOR
 PRIVATE DESTRUCTOR CGpFontCollection
 END DESTRUCTOR
 ' =====================================================================================
-
-' ===========================================================================================
-' Returns the last status code.
-' ===========================================================================================
-PRIVATE FUNCTION CGpFontCollection.GetLastStatus () AS GpStatus
-   RETURN m_Status
-END FUNCTION
-' ===========================================================================================
-
-' ===========================================================================================
-' Sets the last status code.
-' ===========================================================================================
-PRIVATE FUNCTION CGpFontCollection.SetStatus (BYVAL status AS GpStatus) AS GpStatus
-   m_Status = status
-   RETURN m_Status
-END FUNCTION
-' ===========================================================================================
 
 ' =====================================================================================
 ' Gets the number of font families contained in this font collection.

@@ -416,7 +416,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns TRUE if today is the first day of the month; False, otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION IsFirstDayOfMonth () AS BOOLEAN
+PRIVATE FUNCTION AfxIsFirstDayOfMonth () AS BOOLEAN
    DIM ST AS SYSTEMTIME
    GetLocalTime @ST
    RETURN (ST.wDay = 1)
@@ -426,7 +426,7 @@ END FUNCTION
 ' ========================================================================================
 ' Returns TRUE if the date is the last day of the month; False, otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION IsLastDayOfMonth () AS BOOLEAN
+PRIVATE FUNCTION AfxIsLastDayOfMonth () AS BOOLEAN
    DIM ST AS SYSTEMTIME
    GetLocalTime @ST
    RETURN (ST.wDay = AfxDaysInMonth(ST.wMonth, ST.wYear))
@@ -786,7 +786,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Converts a SYSTEMTIME type to a string containing the date and the time. based on the
+' Converts a SYSTEMTIME type to a string containing the date and the time based on the
 ' specified mask, e.g. "dd-MM-yyyy"
 ' ========================================================================================
 PRIVATE FUNCTION AfxSystemTimeToDateStr (BYREF ST AS SYSTEMTIME, BYREF wszMask AS WSTRING, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR

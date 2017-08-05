@@ -34,6 +34,8 @@ TYPE COleCon
 
 Public:
    m_pData AS Afx_OleConDispatch PTR
+
+Private:
    m_bUninitOLE AS BOOLEAN
    m_dwCookie AS DWORD          ' // Cookie for Unadvise
    m_riidEvt AS IID PTR         ' // IID of the events interface
@@ -699,8 +701,8 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a reference to the hosted ActiveX control dispatch interface given the handle of
-' the window that hosts it. Don't call IUnknown_Release.
+' Returns a reference to the hosted ActiveX control dispatch interface.
+' Don't call IUnknown_Release.
 ' ========================================================================================
 PRIVATE FUNCTION COleCon.OcxDispPtr () AS IDispatch PTR
    RETURN m_pData->m_pOcx
@@ -708,8 +710,8 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a counted reference to the hosted ActiveX control dispatch interface given the
-' handle of the window that hosts it. You must call IUnknown_Release when no longer need it.
+' Returns a counted reference to the hosted ActiveX control dispatch interface.
+' You must call IUnknown_Release when no longer need it.
 ' ========================================================================================
 PRIVATE FUNCTION COleCon.OcxDispObj () AS IDispatch PTR
    IF m_pData->m_pOcx <> NULL THEN

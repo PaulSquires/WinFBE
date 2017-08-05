@@ -140,6 +140,8 @@ PRIVATE PROPERTY CWstrDic.Item (BYREF cwsKey AS CWSTR) AS CWSTR
    V_VT(@vKey) = VT_BSTR : V_BSTR(@vKey) = SysAllocString(cwsKey)
    SetResult(m_pDictionary->get_Item(@vKey, @vRetItem))
    PROPERTY = *cast(AFX_BSTR, vRetItem.bstrVal)
+   ' // It is safe to clear vRetItem because PROPERTY = creates a temporary CWSTR
+   ' // with a copy of the BSTR stored in vRetItem.
    VariantClear @vKey : VariantClear @vRetItem
 END PROPERTY
 ' ========================================================================================

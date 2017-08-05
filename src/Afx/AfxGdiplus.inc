@@ -48,8 +48,7 @@ UNION GDIP_BGRA
    END TYPE
 END UNION
 
-' // Another mess in the FB headers: declared as PathData, both as an structure and as a class.
-' // And GpPathData data declared AS ANY PTR.
+' // Another mess in the FB headers: GpPathData declared both as PathData and as ANY.
 TYPE GDIP_PATHDATA
    Count AS LONG
    Points AS GpPointF PTR
@@ -510,19 +509,42 @@ PRIVATE FUNCTION AfxGdipImageFromFile (BYREF wszFileName AS WSTRING, _
       EXIT FUNCTION
    END IF
 
+'   ' // Open the file and store its contents into a buffer
+'   DIM nFile AS LONG, bufferSize AS SIZE_T_
+'   nFile = FREEFILE
+'   OPEN wszFileName FOR BINARY AS nFile
+'   IF ERR THEN EXIT FUNCTION
+'   bufferSize = LOF(nFile)
+'   DIM pBuffer AS UBYTE PTR
+'   pBuffer = CAllocate(1, bufferSize)
+'   GET #nFile, , *pBuffer, bufferSize
+'   CLOSE nFile
+'   IF pBuffer THEN
+'      FUNCTION = AfxGdipImageFromBuffer(pBuffer, bufferSize, dimPercent, bGrayScale, imageType, clrBackground)
+'      DeAllocate(pBuffer)
+'   END IF
+
+   ' // Use CreateFileW because Free Basic OPEN does not work with unicode file names.
    ' // Open the file and store its contents into a buffer
-   DIM nFile AS LONG, bufferSize AS SIZE_T_
-   nFile = FREEFILE
-   OPEN wszFileName FOR BINARY AS nFile
-   IF ERR THEN EXIT FUNCTION
-   bufferSize = LOF(nFile)
+   DIM bSuccess AS LONG, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
+   ' // Get the size of the file
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   IF dwHighSize THEN
+      CloseHandle(hFile)
+      EXIT FUNCTION
+   END IF
    DIM pBuffer AS UBYTE PTR
-   pBuffer = CAllocate(1, bufferSize)
-   GET #nFile, , *pBuffer, bufferSize
-   CLOSE nFile
-   IF pBuffer THEN
-      FUNCTION = AfxGdipImageFromBuffer(pBuffer, bufferSize, dimPercent, bGrayScale, imageType, clrBackground)
-      DeAllocate(pBuffer)
+   pBuffer = CAllocate(1, dwFileSize)
+   bSuccess = ReadFile(hFile, pBuffer, dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess THEN
+      IF pBuffer THEN
+         FUNCTION = AfxGdipImageFromBuffer(pBuffer, dwFileSize, dimPercent, bGrayScale, imageType, clrBackground)
+         DeAllocate(pBuffer)
+      END IF
    END IF
 
 END FUNCTION
@@ -563,7 +585,7 @@ END FUNCTION
 
 ' ========================================================================================
 ' Loads an image from a resource, converts it to an icon or bitmap and returns the handle.
-' Parameter:
+' Parameters:
 ' - hInstance     = [in] A handle to the module whose portable executable file or an accompanying
 '                   MUI file contains the resource. If this parameter is NULL, the function searches
 '                   the module used to create the current process.
@@ -751,6 +773,7 @@ PRIVATE FUNCTION AfxGdipGetEncoderClsid (BYREF wszMimeType AS WSTRING) AS GUID
          END IF
       NEXT
    END IF
+   Deallocate(pImageCodecInfo)
    ' // Shutdown Gdiplus
    GdiplusShutdown token
 END FUNCTION
@@ -833,6 +856,7 @@ PRIVATE FUNCTION AfxGdipSaveHBITMAPToFile (BYVAL hbmp AS HBITMAP, BYREF wszFileN
    IF pBitmap THEN
       DIM clsidEncoder AS GUID = AfxGdipGetEncoderClsid(wszMimeType)
       FUNCTION = GdipSaveImageToFile(CAST(GpImage PTR, pBitmap), @wszFileName, @clsidEncoder, NULL)
+      GdipDisposeImage(cast(GpImage PTR, pBitmap))
    END IF
    IF token = 0 THEN EXIT FUNCTION
    ' // Shutdown Gdiplus
@@ -843,8 +867,8 @@ END FUNCTION
 ' ========================================================================================
 ' Prints a Windows bitmap in the default printer.
 ' Parameters:
-' - hbmp         = Handle to the bitmap.
-' - bStretch     = Stretch the image.
+' - hbmp = Handle to the bitmap.
+' - bStretch = Stretch the image.
 ' - nStretchMode = Stretching mode. Default value = InterpolationModeHighQualityBicubic.
 '   InterpolationModeLowQuality = 1
 '   InterpolationModeHighQuality = 2
@@ -855,16 +879,16 @@ END FUNCTION
 '   InterpolationModeHighQualityBicubic = 7
 ' Return value: Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.
 ' ========================================================================================
-PRIVATE FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS LONG
+PRIVATE FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS BOOLEAN = FALSE, BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS BOOLEAN
 
    ' // Initialize Gdiplus
    DIM token AS ULONG_PTR = AfxGdipInit
    IF token = NULL THEN EXIT FUNCTION
    DIM hPrinter AS HANDLE
    DIM pbufferDoc AS UBYTE PTR
+   DIM pBitmap AS GpBitmap PTR
 
-   ' // Note: Using a DO... LOOP, with an EXIT DO before LOOP,
-   ' // to avoid the use of GOTO.
+   ' // Note: Using a DO... LOOP, with an EXIT DO before LOOP, to avoid the use of GOTO.
    DO
       ' // Get the name of the default printer
       DIM wszPrinterName AS WSTRING * MAX_PATH
@@ -890,7 +914,6 @@ PRIVATE FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS B
       GdipCreateFromHDC(hDC, @pGraphics)
       IF pGraphics = NULL THEN EXIT DO
       ' // Create a Bitmap object from an HBITMAP
-      DIM pBitmap AS GpBitmap PTR
       GdipCreateBitmapFromHBITMAP(hbmp, NULL, @pBitmap)
       IF pBitmap = NULL THEN EXIT DO
       ' // Stretching
@@ -927,6 +950,7 @@ PRIVATE FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS B
       EXIT DO
    LOOP
 
+   IF pBitmap THEN GdipDisposeImage(cast(GpImage PTR, pBitmap))
    ' // Finished with the printer
    IF hPrinter THEN ClosePrinter(hPrinter)
    ' // Cleanup
@@ -936,5 +960,189 @@ PRIVATE FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS B
 
 END FUNCTION
 ' ========================================================================================
+
+' =======================================================================================
+' Loads an image from disk an converts it to a texture for use with OpenGL.
+' Parameters:
+' * wszFileSpec = [in] The path of the image.
+' * TextureWidth = [out] Width of the texture.
+' * TextureHeight = [out] Height of the texture.
+' * strTextureData = [out] The texture data.
+' Return value:
+' * ERROR_FILE_NOT_FOUND = File not found.
+' * ERROR_INVALID_DATA = Bad image size.
+' * A GdiPlus status value.
+' =======================================================================================
+PRIVATE FUNCTION AfxGdipLoadTexture OVERLOAD (BYREF wszFileName AS WSTRING, BYREF TextureWidth AS LONG, _
+   BYREF TextureHeight AS LONG, BYREF strTextureData AS STRING) AS LONG
+
+   DIM pImage AS GpImage PTR, pThumb AS GpImage PTR
+   DIM nStatus AS GpStatus, pixColor AS GDIP_BGRA
+   DIM pTextureData AS ANY PTR
+
+   ' // Initialize Gdiplus
+   DIM token AS ULONG_PTR = AfxGdipInit
+   IF token = NULL THEN FUNCTION = 18 : EXIT FUNCTION   ' // GdiplusNotInitialized
+
+   DO
+      ' // Load the image from file
+      nStatus = GdipLoadImageFromFile(@wszFileName, @pImage)
+      IF nStatus <> 0 THEN EXIT DO
+      ' // Get the image width and height
+      nStatus = GdipGetImageWidth(pImage, @TextureWidth)
+      IF nStatus <> 0 THEN EXIT DO
+      nStatus = GdipGetImageHeight(pImage, @TextureHeight)
+      IF nStatus <> 0 THEN EXIT DO
+      IF TextureWidth <> TextureHeight THEN nStatus = ERROR_INVALID_DATA : EXIT DO
+      ' // Check if the texture if a power of 2
+      DIM nCount AS LONG, nPos AS LONG = 1
+      DO
+         nPos = INSTR(nPos, BIN(TextureWidth), "1")
+         IF nPos = 0 THEN EXIT DO
+         nCount += 1
+         nPos += 1
+      LOOP
+      IF nCount <> 1 THEN nStatus = ERROR_INVALID_DATA : EXIT DO
+      ' // Get a thumbnail image from the Image object
+      nStatus = GdipGetImageThumbnail(pImage, TextureWidth, TextureHeight, @pThumb, NULL, NULL)
+      IF nStatus <> 0 THEN EXIT DO
+      ' // Flip the image vertically
+      nStatus = GdipImageRotateFlip(pThumb, 6) ' 6 = RotateNoneFlipY
+      IF nStatus <> 0 THEN EXIT DO
+      ' // Fill the strings with nulls
+      strTextureData = STRING(TextureWidth * TextureHeight * 4, CHR(0))
+      ' // Get a pointer to the beginning of the string buffer
+      pTextureData = STRPTR(strTextureData)
+      ' // Swap the red and blue colors
+      FOR y AS LONG = 0 TO TextureWidth - 1
+         FOR x AS LONG = 0 TO TextureHeight - 1
+            GdipBitmapGetPixel(cast(GpBitmap PTR, pThumb), x, y, @pixColor.color)
+            SWAP pixColor.red, pixColor.blue
+            memcpy pTextureData, @pixColor.color, 4
+            pTextureData += 4
+         NEXT
+      NEXT
+      EXIT DO
+   LOOP
+
+   ' // Free the image
+   IF pImage THEN GdipDisposeImage pImage
+   ' // Shutdown Gdiplus
+   GdiplusShutdown token
+
+   FUNCTION = nStatus
+
+END FUNCTION
+' =======================================================================================
+
+' =======================================================================================
+' Loads an image from a resource file an converts it to a texture for use with OpenGL.
+' Parameters:
+' * hInstance = [in] The instance handle.
+' * wszResourceName = [in] The name of the resource.
+' * TextureWidth = [out] Width of the texture.
+' * TextureHeight = [out] Height of the texture.
+' * strTextureData = [out] The texture data.
+' Return value:
+' * E_POINTER = Invalid pointer.
+' * ERROR_FILE_NOT_FOUND = File not found.
+' * ERROR_INVALID_DATA = Bad image size.
+' * A GdiPlus status value.
+' =======================================================================================
+PRIVATE FUNCTION AfxGdipLoadTexture OVERLOAD (BYVAL hInstance AS HINSTANCE, _
+   BYREF wszResourceName AS WSTRING, BYREF TextureWidth AS LONG, _
+   BYREF TextureHeight AS LONG, BYREF strTextureData AS STRING) AS LONG
+
+   DIM pImage AS GpImage PTR, pThumb AS GpImage PTR
+   DIM nStatus AS GpStatus, pixColor AS GDIP_BGRA
+   DIM pTextureData AS ANY PTR
+
+   DIM hResource     AS HRSRC                 ' // Resource handle
+   DIM pResourceData AS ANY PTR               ' // Pointer to the resoruce data
+   DIM hGlobal       AS HGLOBAL               ' // Global memory handle
+   DIM pGlobalBuffer AS ANY PTR               ' // Pointer to global memory buffer
+   DIM pImageStream  AS IStream PTR           ' // IStream interface pointer
+   DIM imageSize     AS DWORD                 ' // Image size
+
+
+   ' // Initialize Gdiplus
+   DIM token AS ULONG_PTR = AfxGdipInit
+   IF token = NULL THEN FUNCTION = 18 : EXIT FUNCTION   ' // GdiplusNotInitialized
+
+   DO
+      ' // Find the resource and lock it
+      hResource = FindResourceW(cast(HMODULE, hInstance), @wszResourceName, CAST(LPCWSTR, RT_RCDATA))
+      IF hResource = NULL THEN nStatus = E_POINTER : EXIT DO
+      imageSize = SizeofResource(cast(HMODULE, hInstance), hResource)
+      IF imageSize = 0 THEN nStatus = ERROR_INVALID_DATA : EXIT DO
+      pResourceData = LockResource(LoadResource(cast(HMODULE, hInstance), hResource))
+      IF pResourceData = NULL THEN nStatus = E_POINTER : EXIT DO
+      ' // Allocate memory to hold the image
+      hGlobal = GlobalAlloc(GMEM_MOVEABLE, imageSize)
+      IF hGlobal = NULL THEN nStatus = E_POINTER : EXIT DO
+      ' // Lock the memory
+      pGlobalBuffer = GlobalLock(hGlobal)
+      IF pGlobalBuffer = NULL THEN nStatus = E_POINTER : EXIT DO
+      ' // Copy the image from the resource file to global memory
+      memcpy pGlobalBuffer, pResourceData, imageSize
+      ' // Create an stream in global memory
+      DIM hr AS HRESULT = CreateStreamOnHGlobal(hGlobal, FALSE, @pImageStream)
+      IF hr <> S_OK THEN nStatus = hr : EXIT DO
+      ' // Create a bitmap from the data contained in the stream
+      nStatus = GdipCreateBitmapFromStream(pImageStream, @cast(GpBitmap PTR, pImage))
+      IF nStatus <> 0 THEN EXIT DO
+      ' // Get the image width and height
+      nStatus = GdipGetImageWidth(pImage, @TextureWidth)
+      IF nStatus <> 0 THEN EXIT DO
+      nStatus = GdipGetImageHeight(pImage, @TextureHeight)
+      IF nStatus <> 0 THEN EXIT DO
+      IF TextureWidth <> TextureHeight THEN nStatus = ERROR_INVALID_DATA : EXIT DO
+      ' // Check if the texture if a power of 2
+      DIM nCount AS LONG, nPos AS LONG = 1
+      DO
+         nPos = INSTR(nPos, BIN(TextureWidth), "1")
+         IF nPos = 0 THEN EXIT DO
+         nCount += 1
+         nPos += 1
+      LOOP
+      IF nCount <> 1 THEN nStatus = ERROR_INVALID_DATA : EXIT DO
+      ' // Get a thumbnail image from the Image object
+      nStatus = GdipGetImageThumbnail(pImage, TextureWidth, TextureHeight, @pThumb, NULL, NULL)
+      IF nStatus <> 0 THEN EXIT DO
+      ' // Flip the image vertically
+      nStatus = GdipImageRotateFlip(pThumb, 6) ' 6 = RotateNoneFlipY
+      IF nStatus <> 0 THEN EXIT DO
+      ' // Fill the strings with nulls
+      strTextureData = STRING(TextureWidth * TextureHeight * 4, CHR(0))
+      ' // Get a pointer to the beginning of the string buffer
+      pTextureData = STRPTR(strTextureData)
+      ' // Swap the red and blue colors
+      FOR y AS LONG = 0 TO TextureWidth - 1
+         FOR x AS LONG = 0 TO TextureHeight - 1
+            GdipBitmapGetPixel(cast(GpBitmap PTR, pThumb), x, y, @pixColor.color)
+            SWAP pixColor.red, pixColor.blue
+            memcpy pTextureData, @pixColor.color, 4
+            pTextureData += 4
+         NEXT
+      NEXT
+      EXIT DO
+   LOOP
+
+   ' // Release if IStream interface
+   IF pImageStream THEN pImageStream->lpvtbl->Release(pImageStream)
+   ' // Unlock the memory
+   IF pGlobalBuffer THEN GlobalUnlock(pGlobalBuffer)
+   ' // Free the global memory
+   IF hGlobal THEN GlobalFree(hGlobal)
+
+   ' // Free the image
+   IF pImage THEN GdipDisposeImage pImage
+   ' // Shutdown Gdiplus
+   GdiplusShutdown token
+
+   FUNCTION = nStatus
+
+END FUNCTION
+' =======================================================================================
 
 END NAMESPACE

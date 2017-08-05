@@ -4,7 +4,7 @@
 ' Contents: ODBC wrapper classes (unicode)
 ' Implementation of the ODBC statement class.
 ' Compiler: FreeBasic 32 & 64-bit
-' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' Copyright (c) 2016-2017 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -33,7 +33,7 @@ END DESTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the connection handle
+' Returns the statement handle
 ' ========================================================================================
 PRIVATE FUNCTION COdbcStmt.Handle () AS SQLHANDLE
    RETURN m_hStmt
@@ -1596,7 +1596,7 @@ BYVAL SubTypePtr AS SQLSMALLINT PTR, BYVAL LengthPtr AS SQLLEN PTR, BYVAL Precis
 BYVAL ScalePtr AS SQLSMALLINT PTR, BYVAL NullablePtr AS SQLSMALLINT PTR) AS SQLRETURN
    ' Gets the handle of the IPD (implicitily allocated descriptor).
    DIM hIpd AS SQLUINTEGER
-   m_Result = SetResult(SQLGetStmtAttrW(m_hStmt, SQL_ATTR_IMP_PARAM_DESC, @hIpd, SQL_IS_UINTEGER, NULL), "COdbcStmt.GetImpRowDescRec", SQL_HANDLE_STMT, m_hStmt)
+   m_Result = SetResult(SQLGetStmtAttrW(m_hStmt, SQL_ATTR_IMP_ROW_DESC, @hIpd, SQL_IS_UINTEGER, NULL), "COdbcStmt.GetImpRowDescRec", SQL_HANDLE_STMT, m_hStmt)
    IF SQL_SUCCEEDED(m_Result) THEN
       m_Result = SetResult(SQLGetDescRecW(cast(SQLHDESC, cast(LONG_PTR, hIpd)), RecNumber, pwszName, BufferLength, StringLength, TypePtr, _
                  SubTypePtr, LengthPtr, PrecisionPtr, ScalePtr, ScalePtr), "COdbcStmt.GetImpRowDescRec", SQL_HANDLE_STMT, m_hStmt)

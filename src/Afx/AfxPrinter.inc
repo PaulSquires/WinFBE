@@ -50,7 +50,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the handle of the printer device context.
+' Returns the handle of the default printer device context.
 ' The caller is resposible of deleting the returned handle with DeleteDC.
 ' Note: The same code using PRINTDLGEXW and PrintDlgExW returns the E_HANDLE error.
 ' ========================================================================================
@@ -68,7 +68,8 @@ END FUNCTION
 ' ========================================================================================
 ' Displays the printer dialog. Returns TRUE or FALSE.
 ' The caller is resposible of deleting the returned HDC handle with DeleteDC.
-' DIM flags AS DWORD, hdc AS HDC, nCopies AS WORD, nFromPage AS WORD, nToPage AS WORD, nMinPage AS WORD, nMaxPage AS WORD
+' DIM flags AS DWORD = PD_RETURNDC, hdc AS HDC, nCopies AS WORD
+' DIM nFromPage AS WORD, nToPage AS WORD, nMinPage AS WORD, nMaxPage AS WORD
 ' IF AfxPrinterDialog(hwnd, flags, hdc, nCopies, nFromPage, nToPage, nMinPage, nMaxPage) THEN
 '   ' // do printing
 '   IF hdc THEN DeleteDC hdc
@@ -86,23 +87,13 @@ PRIVATE FUNCTION AfxPrinterDialog (BYVAL hwndOwner AS HWND, BYREF flags AS DWORD
    pd.nMinPage = nMinPage
    pd.nMaxPage = nMaxPage
    IF PrintDlgW(@pd) THEN
-      IF pd.hDevMode THEN GlobalFree(pd.hDevMode)
-      IF pd.hDevNames THEN GlobalFree(pd.hDevNames)
-      RETURN TRUE
-   END IF
-   RETURN FALSE
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Printer setup dialog
-' ========================================================================================
-PRIVATE FUNCTION AfxPrinterSetup (BYVAL hwndOwner AS HWND) AS BOOLEAN
-   DIM pd AS PRINTDLGW
-   pd.lStructSize = SIZEOF(pd)
-   pd.hwndOwner = hwndOwner
-   pd.Flags = PD_SHOWHELP OR PD_PRINTSETUP
-   IF PrintDlgW(@pd) THEN
+      hdc = pd.hDC
+      nCopies = pd.nCopies
+      nFromPage = pd.nFromPage
+      nToPage = pd.nToPage
+      flags = pd.flags
+      nMinPage = pd.nMinPage
+      nMaxPage = pd.nMaxPage
       IF pd.hDevMode THEN GlobalFree(pd.hDevMode)
       IF pd.hDevNames THEN GlobalFree(pd.hDevNames)
       RETURN TRUE

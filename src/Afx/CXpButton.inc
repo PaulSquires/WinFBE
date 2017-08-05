@@ -990,6 +990,8 @@ PRIVATE SUB CXpButton.SetImage (BYVAL hImage AS HANDLE, BYVAL ImageType AS LONG,
                m_ImageWidth = tbm.bmWidth
                m_ImageHeight = tbm.bmHeight
             END IF
+            IF tii.hbmMask THEN DeleteObject(tii.hbmMask)
+            IF tii.hbmColor THEN DeleteObject(tii.hbmColor)
          END IF
       CASE IMAGE_BITMAP
          IF .GetObject(hImage, SIZEOF(tbm), @tbm) THEN
