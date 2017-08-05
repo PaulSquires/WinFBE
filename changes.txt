@@ -1,5 +1,6 @@
 Version 1.4.2 (August 5, 2017)
 - Added: "Options" top menu item and moved "Environment Options" and "Build Configurations" under it.
+- Changed: Updated CWindow framework to Release Candidate 30.
 - Fixed: GDI resource leak when Find/Replace dialog invoked multiple times.
 
 Version 1.4.1 (August 3, 2017)
