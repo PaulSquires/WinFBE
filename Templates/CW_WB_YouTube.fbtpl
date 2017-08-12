@@ -1,11 +1,11 @@
 2
 FBGUI
 .bas
-CWindow: WebBrowser: YouTube
+CWindow: WebBrowser: YouTube (Shockwave-Flash)
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_WB_GoogleMap.fbtpl
-' Contents: WebBrowser - Google Map
+' File: CW_WB_YouTube.fbtpl
+' Contents: WebBrowser - YouTube (Shockwave-Flash)
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
@@ -44,7 +44,7 @@ FUNCTION BuildYouTubeScript (BYVAL strCode AS STRING, BYVAL nWidth AS LONG, BYVA
    s += "<html>"
    s += "<head>"
    s += "<meta http-equiv='MSThemeCompatible' content='Yes'>"
-   s += "<title>YouTube video</title>"
+   s += "<title>YouTube video (Shockwave-Flash)</title>"
    s += "</head>"
    s += "<body scroll='no' style='MARGIN: 0px 0px 0px 0px'>"
    s += "<object width=" & STR(nWidth) & " height=" & STR(nHeight) & ">" & _
@@ -75,7 +75,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Creates the main window
    DIM pWindow AS CWindow
    ' -or- DIM pWindow AS CWindow = "MyClassName" (use the name that you wish)
-   DIM hwndMain AS HWND = pWindow.Create(NULL, "WebBrowser - YouTube", @WndProc)
+   DIM hwndMain AS HWND = pWindow.Create(NULL, "WebBrowser - YouTube (Shockwave-Flash)", @WndProc)
    ' // Sizes it by setting the wanted width and height of its client area
    pWindow.SetClientSize(750, 450)
    ' // Centers the window
@@ -87,7 +87,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    pwb.SetUIHandler
 
    ' // Build the script
-   DIM strCode AS STRING = "IUGfC7GYi18"   ' --> Change me: 11 character video code
+   DIM strCode AS STRING = "sJFOhTBelpU"   ' --> Change me: 11 character video code
    DIM s AS STRING = BuildYouTubeScript(strCode, pWindow.ClientWidth, pWindow.ClientHeight)
    ' // Save the script as a temporary file
    DIM wszPath AS WSTRING * MAX_PATH = AfxSaveTempFile(s, "html")

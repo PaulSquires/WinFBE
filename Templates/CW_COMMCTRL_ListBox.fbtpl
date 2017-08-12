@@ -43,8 +43,11 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Create the main window
    DIM pWindow AS CWindow
    pWindow.Create(NULL, "CWindow with a ListBox", @WndProc)
-   pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
+   ' // Change the class style to avoid flicker
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Size the window by setting the wanted width and height of its client area
    pWindow.SetClientSize(320, 375)
+   ' // Center the window
    pWindow.Center
 
    ' // Adds a listbox

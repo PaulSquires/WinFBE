@@ -444,7 +444,7 @@ END OPERATOR
 ' Destroys the safe array and returns the address of the descriptor.
 ' To be used with BYVAL OUT safe array parameters to avoid a memory leak.
 ' Gotcha: The returned safe array won't be locked. Better declare a variable as a safe
-' array, e.g. DIM psa AS SAFEARRAY PTR, pass it to that function or methos, e.g. @psa,
+' array, e.g. DIM psa AS SAFEARRAY PTR, pass it to that function or method, e.g. @psa,
 ' and then attach if to the class.
 ' ========================================================================================
 'PRIVATE FUNCTION CSafeArray.vptr () AS SAFEARRAY PTR
@@ -2140,17 +2140,17 @@ END FUNCTION
 ' any of the characters that are part of delimiters.
 ' - wszStr = The string to split.
 ' - wszDelimiters = The delimiter characters.
-' Return value: A CBSTRSA (safe array) containing a token in each element.
+' Return value: A CSafeArray containing a token in each element.
 ' Usage example:
 ' DIM wsz AS WSTRING * 260 = "- This, a sample string."
-' DIM csa AS CSafeArray = AfxStrSplitSA(wsz, " ,.-")
+' DIM csa AS CSafeArray = AfxStrSplit(wsz, " ,.-")
 ' FOR i AS LONG = csa.LBound TO csa.UBound
 '    DIM cbsOut AS CBSTR
 '    csa.GetElement(i, cbsOut)
 '    print cbsOut
 ' NEXT
 ' ========================================================================================
-PRIVATE FUNCTION AfxStrSplitSA (BYREF wszStr AS WSTRING, BYREF wszDelimiters AS WSTRING) AS CSafeArray
+PRIVATE FUNCTION AfxStrSplit (BYREF wszStr AS WSTRING, BYREF wszDelimiters AS WSTRING) AS CSafeArray
    DIM cws AS CWSTR = wszStr
    DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 0, 1)
    DIM pwsz AS WSTRING PTR = wcstok(cws, @wszDelimiters)
@@ -2176,10 +2176,10 @@ END FUNCTION
 ' csa.PutElement(1, CBSTR("One"))
 ' csa.PutElement(2, CBSTR("Two"))
 ' csa.PutElement(3, CBSTR("Three"))
-' DIM cws AS CWSTR = AfxStrJoinSA(csa, ",")
+' DIM cws AS CWSTR = AfxStrJoin(csa, ",")
 ' PRINT cws   ' ouput: One,Two,Three
 ' ========================================================================================
-PRIVATE FUNCTION AfxStrJoinSA (BYREF csa AS CSafeArray, BYREF wszDelimiter AS WSTRING) AS CWSTR
+PRIVATE FUNCTION AfxStrJoin (BYREF csa AS CSafeArray, BYREF wszDelimiter AS WSTRING) AS CWSTR
    DIM cws AS CWSTR
    IF csa.NumDims <> 1 THEN RETURN cws
    IF csa.GetType <> VT_BSTR THEN RETURN cws

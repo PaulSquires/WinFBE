@@ -624,6 +624,8 @@ Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 
    ' Ensure that the Project Manager window has been created (show it now as well)
    frmProjectOptions_Show( HWnd, SW_SHOW, true )
+   if gApp.IsNewProjectFlag = false then return 0  ' New project was Cancelled
+      
    PositionExplorerWindows(HWND_FRMEXPLORER)
    
    ' This will update the main window to show the project name in the window caption
@@ -1187,9 +1189,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Dim rc As Rect
          SystemParametersInfo SPI_GETWORKAREA, 0, @rc, 0
          MoveWindow HWnd, 0, 0, rc.Right - rc.Left, rc.Bottom - rc.Top, CTRUE
-         
-      Case IDM_OPTIONS:            Function = frmOptions_Show( HWnd, SW_NORMAL )
-      
+               
       
       ''  PROJECT MENU
       Case IDM_PROJECTNEW:            Function = OnCommand_ProjectNew( HWnd )
@@ -1259,8 +1259,16 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_RUNEXE
          RunExe( GetRunExecutableFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
       
-      case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
+
+      ''  OPTIONS MENU
+      Case IDM_OPTIONS:               Function = frmOptions_Show( HWnd, SW_NORMAL )
+      case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
+      case IDM_USERTOOLSDIALOG:       function = frmUserTools_Show( HWND ) 
+         
+      Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
+         ExecuteUserTool( id - IDM_USERTOOL )
+
 
       Case IDM_HELP
          ShowContextHelp() 
@@ -1271,7 +1279,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        vbcrlf & vbcrlf & _
                        "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "José Roca (Scintilla and CWindow)", _
+                       "José© Roca (Scintilla and CWindow)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
@@ -1326,19 +1334,10 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                DestroyMenu hPopUpMenu
             end if
             If lpnm->dwItemSpec = 3 Then   ' Ansi/Unicode 
-               ' Toggle through the encoding states
-               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-               if pDoc = 0 THEN exit function
-               if pDoc->FileEncoding = FILE_ENCODING_ANSI then
-                  ConvertTextBuffer(pDoc, FILE_ENCODING_UTF8_BOM)
-               elseif pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM then
-                  ConvertTextBuffer(pDoc, FILE_ENCODING_UTF16_BOM)
-               elseif pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM then
-                  ConvertTextBuffer(pDoc, FILE_ENCODING_ANSI)
-               END IF
-               ' Encoding has changed so set the file buffer to dirty
-               pDoc->UserModified = true
-               frmMain_UpdateLineCol( HWND_FRMMAIN )
+               hPopupMenu = CreateStatusBarFileEncodingContextMenu
+               GetCursorPos @pt
+               TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+               DestroyMenu hPopUpMenu
             end if   
             If lpnm->dwItemSpec = 4 Then   ' Compile results is 
                ' Toggle show/hide compile results
@@ -1899,6 +1898,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    frmRecent_Show( HWND_FRMEXPLORER )     ' child of frmExplorer
    frmOutput_Show( HWND_FRMMAIN )
 
+   ' Create the UserTools accelerator table
+   CreateUserTools_AcceleratorTable            
    
    ' SET STARTUP POSITION
    ' If no valid window size exists then set to the default working area of the screen
@@ -1953,33 +1954,37 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
 
       ' Processes accelerator keys for menu commands
-      If (pWindow->AccelHandle = 0) Or (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg)) = 0 Then
-
-         ' Intercept all MouseMove messages in order to test if we are over the splitter area. This
-         ' easier and more efficent than trying to deal with mouse messages at the child control/form level.
-         Select case uMsg.message
-            Case WM_LBUTTONDOWN:   Splitter_OnLButtonDown
-            Case WM_LBUTTONUP:     Splitter_OnLButtonUp
-            Case WM_MOUSEMOVE:     Splitter_OnMouseMove
-         End Select      
-
-         if (uMsg.message = WM_KEYDOWN) andAlso (uMsg.wParam = VK_ESCAPE) THEN
-            if IsWindowVisible( HWND_FRMFINDREPLACE ) THEN SendMessage( HWND_FRMFINDREPLACE, WM_CLOSE, 0, 0 )
-         END IF
-
-         ' Determines whether a message is intended for the specified
-         ' dialog box and, if it is, processes the message.
-         ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
-         If IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
-         If IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) Then Continue Do
+      If (pWindow->AccelHandle = 0) Orelse (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg) = 0) then
          
-         ' Check for any QuickRun exes that can be deleted.
-         gApp.CheckQuickRunExe
+         if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) Then 
+
+            ' Intercept all MouseMove messages in order to test if we are over the splitter area. This
+            ' easier and more efficent than trying to deal with mouse messages at the child control/form level.
+            Select case uMsg.message
+               Case WM_LBUTTONDOWN: Splitter_OnLButtonDown
+               Case WM_LBUTTONUP:   Splitter_OnLButtonUp
+               Case WM_MOUSEMOVE:   Splitter_OnMouseMove
+            End Select      
+
+            if (uMsg.message = WM_KEYDOWN) andAlso (uMsg.wParam = VK_ESCAPE) THEN
+               if IsWindowVisible( HWND_FRMFINDREPLACE ) THEN SendMessage( HWND_FRMFINDREPLACE, WM_CLOSE, 0, 0 )
+            END IF
+
+            ' Determines whether a message is intended for the specified
+            ' dialog box and, if it is, processes the message.
+            ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
+            If IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
+            If IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) Then Continue Do
+            
+            ' Check for any QuickRun exes that can be deleted.
+            gApp.CheckQuickRunExe
+            
+            If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
+               TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
+               DispatchMessage @uMsg    ' Dispatches a message to a window procedure.
+            End If
+         end if
          
-         If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
-            TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
-            DispatchMessage @uMsg    ' Dispatches a message to a window procedure.
-         End If
       End If
    Loop
    Function = uMsg.wParam
@@ -1990,6 +1995,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
    If ghIconGood Then DestroyIcon(ghIconGood) 
    If ghIconBad  Then DestroyIcon(ghIconBad)
+   if ghAccelUserTools THEN DestroyAcceleratorTable(ghAccelUserTools)
 
    ' Delete the allocated memory for the various child windows
    pWindow = AfxCWindowPtr(HWND_FRMEXPLORER):       Delete pWindow
@@ -1998,5 +2004,4 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
-
 

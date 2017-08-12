@@ -597,6 +597,13 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
    Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
 
    Select Case idButton
+      case IDC_FRMUSERTOOLS_CMDBROWSEEXE
+         rgFileTypes(1).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 1, @rgFileTypes(1))
+         ' Set the title of the dialog
+         hr = pofd->lpVtbl->SetTitle(pofd, L(291,"Command:"))
+
       Case IDM_PROJECTOPEN
          rgFileTypes(1).pszName = @L(216,"Project files")
          rgFileTypes(1).pszSpec = @WSTR("*.wfbe")

@@ -221,6 +221,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Function = False: Exit Function
    End If
       
+   ' Run any precompile tools
+   for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
+      if gConfig.Tools(y).Action = USERTOOL_ACTION_PRECOMPILE then
+         ExecuteUserTool(y)
+      end if   
+   NEXT
+
    ' Create a temporary batch that will contain the compile commands. We shell
    ' to and run this batch file in order to do the compile.
    ' Replace any embedded spaces with underscores
@@ -562,6 +569,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       SetDocumentErrorPosition(hLV, wID)
    End If
    
+   ' Run any postcompile tools
+   for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
+      if gConfig.Tools(y).Action = USERTOOL_ACTION_POSTCOMPILE then
+         ExecuteUserTool(y)
+      end if   
+   NEXT
+
    If gCompile.RunAfterCompile Then 
       RunEXE( gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine)
       

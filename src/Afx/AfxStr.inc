@@ -14,7 +14,6 @@
 #include once "win/ole2.bi"
 #include once "Afx/AfxWin.inc"
 #include once "Afx/CWStr.inc"
-#include once "Afx/CWStrArray.inc"
 USING Afx
 
 ' ========================================================================================
@@ -853,58 +852,3 @@ PRIVATE FUNCTION AfxStrParseAny (BYREF wszMainStr AS WSTRING, BYVAL nPosition AS
    RETURN AfxStrParse(wszMainStr, wszDelimiter, nPosition, TRUE, 1)
 END FUNCTION
 '==============================================================================
-
-' ========================================================================================
-' Splits a string into tokens, which are sequences of contiguous characters separated by
-' any of the characters that are part of delimiters.
-' - wszStr = The string to split.
-' - wszDelimiters = The delimiter characters.
-' Return value: A CWstrArray containing a token in each element.
-' Usage example:
-' DIM cws AS CWSTR = "- This, a sample string."
-' DIM cwsa AS CWstrArray = AfxStrSplit(cws, " ,.-")
-' FOR i AS LONG = cwsa.LBound TO cwsa.UBound
-'    PRINT cwsa.Item(i)
-' NEXT
-' ========================================================================================
-PRIVATE FUNCTION AfxStrSplit (BYREF wszStr AS WSTRING, BYREF wszDelimiters AS WSTRING = " ") AS CWstrArray
-   DIM cws AS CWSTR = wszStr
-   DIM cwsa AS CWstrArray
-   DIM pwsz AS WSTRING PTR = wcstok(cws, @wszDelimiters)
-   WHILE pwsz <> NULL
-      cwsa.Append(pwsz)
-      pwsz = wcstok(NULL, @wszDelimiters)
-   WEND
-   RETURN cwsa
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Returns a string consisting of all of the strings in an array, each separated by a delimiter.
-' If the delimiter is a null (zero-length) string then no separators are inserted between
-' the string sections. If the delimiter expression is the 3-byte value of "," which may be
-' expressed in your source code as the string literal """,""" or as Chr(34,44,34) then a
-' leading and trailing double-quote is added to each string section. This ensures that the
-' returned string contains standard comma-delimited quoted fields that can be easily parsed.
-' Usage example:
-' DIM cwsa AS CWstrArray = CWstrArray(3, 1)
-' cwsa.Item(1) = "One"
-' cwsa.Item(2) = "Two"
-' cwsa.Item(3) = "Three"
-' DIM cws AS CWSTR = AfxStrJoin(cwsa, ",")
-' PRINT cws   ' ouput: One,Two,Three
-' ========================================================================================
-PRIVATE FUNCTION AfxStrJoin (BYREF cwsa AS CWstrArray, BYREF wszDelimiter AS WSTRING = " ") AS CWSTR
-   ' // Add a leading ""
-   DIM cws AS CWSTR
-   IF wszDelimiter = CHR(34, 44, 34) THEN cws = CHR(34)
-   DIM nUBound AS LONG = cwsa.UBound
-   FOR i AS LONG = cwsa.LBound TO cwsa.UBound
-      cws += cwsa.Item(i)
-      IF i <> nUBound AND wszDelimiter <> "" THEN cws += wszDelimiter
-   NEXT
-   ' // Add a trailing ""
-   IF wszDelimiter = CHR(34, 44, 34) THEN cws += CHR(34)
-   RETURN cws
-END FUNCTION
-' ========================================================================================

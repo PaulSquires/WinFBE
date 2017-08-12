@@ -548,7 +548,7 @@ PRIVATE FUNCTION CSQLite.RefCount (BYVAL bIncrement AS BOOLEAN, BYREF wszDllPath
    m_hLib = _hLib
    ' // Increase or decrease the reference count
    IF bIncrement THEN cRef += 1 ELSE cRef -= 1
-   ' // If the reference count reaches a value of 0, shutdown GDI+
+   ' // If the reference count reaches a value of 0, free the library
    IF cRef = 0  THEN
       ' // Free the SQLite library
       IF _hLib THEN FreeLibrary _hLib
@@ -1377,6 +1377,8 @@ Public:
    DECLARE FUNCTION ColumnLongInt (BYREF wszColName AS WSTRING) AS LONGINT
    DECLARE FUNCTION ColumnType (BYVAL nCol AS LONG) AS LONG
    DECLARE FUNCTION ColumnType (BYREF wszColName AS WSTRING) AS LONG
+   DECLARE FUNCTION IsColumnNull (BYVAL nCol AS LONG) AS BOOLEAN
+   DECLARE FUNCTION IsColumnNull (BYREF wszColName AS WSTRING) AS BOOLEAN
 
 END TYPE
 ' ########################################################################################
@@ -1685,11 +1687,11 @@ END FUNCTION
 ' Binds a longint value with the statement.
 ' The leftmost SQL parameter has an index of 1.
 ' ===========================================================================================
-PRIVATE FUNCTION CSQLiteStmt.BindLongInt (BYVAL idx AS LONG, BYVAL longValue AS sqlite3_int64) AS LONG
+PRIVATE FUNCTION CSQLiteStmt.BindLongInt (BYVAL idx AS LONG, BYVAL longintValue AS sqlite3_int64) AS LONG
    DIM pProc AS PFNSQLITE3BINDINT64PROC = _
    cast(PFNSQLITE3BINDINT64PROC, GetProcAddress(m_hLib, "sqlite3_bind_int64"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
-   FUNCTION = pProc(m_hStmt, idx, longValue)
+   FUNCTION = pProc(m_hStmt, idx, longintValue)
 END FUNCTION
 ' ===========================================================================================
 
@@ -2058,6 +2060,32 @@ PRIVATE FUNCTION CSQLiteStmt.ColumnType (BYREF wszColName AS WSTRING) AS LONG
          DIM nCol AS LONG = m_pColNames->Item(wszColName).ValLong
          IF m_pColNames->GetLastResult = S_OK THEN
             FUNCTION = pProc(m_hStmt, nCol)
+         END IF
+      END IF
+   END IF
+END FUNCTION
+' ===========================================================================================
+
+' ===========================================================================================
+' Return TRUE if the column has a null value.
+' ===========================================================================================
+PRIVATE FUNCTION CSQLiteStmt.IsColumnNull (BYVAL nCol AS LONG) AS BOOLEAN
+   DIM pProc AS PFNSQLITE3COLUMNTYPEPROC = _
+   cast(PFNSQLITE3COLUMNTYPEPROC, GetProcAddress(m_hLib, "sqlite3_column_type"))
+   IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
+   IF pProc(m_hStmt, nCol) = SQLITE_NULL THEN FUNCTION = TRUE
+END FUNCTION
+' ===========================================================================================
+' ===========================================================================================
+PRIVATE FUNCTION CSQLiteStmt.IsColumnNull (BYREF wszColName AS WSTRING) AS BOOLEAN
+   DIM pProc AS PFNSQLITE3COLUMNTYPEPROC = _
+   cast(PFNSQLITE3COLUMNTYPEPROC, GetProcAddress(m_hLib, "sqlite3_column_type"))
+   IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
+   IF m_pColNames THEN
+      IF m_pColNames->Exists(wszColName) THEN
+         DIM nCol AS LONG = m_pColNames->Item(wszColName).ValLong
+         IF m_pColNames->GetLastResult = S_OK THEN
+            IF pProc(m_hStmt, nCol) = SQLITE_NULL THEN FUNCTION = TRUE
          END IF
       END IF
    END IF

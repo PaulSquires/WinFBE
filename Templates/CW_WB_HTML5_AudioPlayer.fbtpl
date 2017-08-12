@@ -37,6 +37,7 @@ FUNCTION BuildScript (BYREF strAudioFileName AS STRING) AS STRING
    DIM s AS STRING
    s  = "<!DOCTYPE html>"
    s += "<html>"
+   s += "<head>"
    s += "   <title>YouTube sample</title>"
    s += "   <meta http-equiv='X-UA-Compatible' content='IE=edge' />"
    s += "   <meta http-equiv='MSThemeCompatible' content='Yes'>"
@@ -80,7 +81,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    pwb.SetUIHandler
 
    ' // Build the script (remember to change the path of the url of the audio file)
-   DIM s AS STRING = BuildScript("C:\Users\Public\Music\Sample Music\Kalimba.mp3")
+   DIM s AS STRING = BuildScript($"C:\Users\Public\Music\Sample Music\Kalimba.mp3")
    ' // Save the script as a temporary file
    DIM wszPath AS WSTRING * MAX_PATH = AfxSaveTempFile(s, "html")
    ' // Navigate to the path

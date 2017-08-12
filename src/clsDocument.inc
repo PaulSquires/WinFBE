@@ -883,7 +883,7 @@ Function clsDocument.DisplayStats() As Long
       ' If this is a multiline selection then update the selected button
       ' on the FindReplace window.
       frmFindReplace_SetButtonStates
-   End If
+   End If 
    StatusBar_SetText(hStatusbar, 1, wText)
    
 
@@ -1107,6 +1107,11 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
    END IF
    
+   '' RIGHT EDGE COLUMN
+   SciMsg( m_pSci, SCI_SETEDGEMODE, iif(gConfig.RightEdge, EDGE_LINE, EDGE_NONE), 0 )
+   SciMsg( m_pSci, SCI_SETEDGECOLUMN, val(**gConfig.RightEdgePosition), 0 )
+   'SciMsg( m_pSci, SCI_SETEDGECOLOR, iif(gConfig.RightEdge, EDGE_LINE, EDGE_NONE) )
+
    ''
    ''  OTHER
    SciMsg( m_pSci, SCI_SETADDITIONALSELECTIONTYPING, True, 0 )

@@ -1,3 +1,12 @@
+Version 1.4.3 (August 12, 2017)
+- Added: User Tools dialog (and top menu "Tools"). 
+- Added: Editor option "Right edge margin".
+- Added: Project option to create generic resource file and manifest (if none already exists).
+- Changed: Updated CWindow framework to Release Candidate 31.
+- Changed: All Templates and Sample Projects updated.
+- Changed: Clicking "File Encoding" value in StatusBar now shows popup menu instead of cycling through choices. 
+- Fixed: Issue where cancelling "New Project" dialog would internally still set flags that a new project was being created.
+
 Version 1.4.2 (August 5, 2017)
 - Added: "Options" top menu item and moved "Environment Options" and "Build Configurations" under it.
 - Changed: Updated CWindow framework to Release Candidate 30.

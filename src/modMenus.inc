@@ -151,6 +151,10 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"&Options")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
          AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"&Build Configurations...") & Chr(9) & "F7"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"&User Tools...") & Chr(9) & "Ctrl+F7"
+
+   hPopUpMenu = CreatePopupMenu
+      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(305,"&Tools")
 
    hPopUpMenu = CreatePopupMenu
       AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
@@ -212,6 +216,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_QUICKRUN)
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_COMPILECONFIG )
+   pWindow->AddAccelerator( FVIRTKEY or FCONTROL, VK_F7,  IDM_USERTOOLSDIALOG )
    pWindow->AddAccelerator( FVIRTKEY, VK_F1, IDM_HELP )
    pWindow->CreateAcceleratorTable()
 
@@ -256,6 +261,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_COMPILECONFIG, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_USERTOOLSDIALOG, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
@@ -377,6 +383,30 @@ Function CreateStatusBarFileTypeContextMenu() As HMENU
          hPopUpMenu = CreatePopupMenu
          AddProjectFileTypesToMenu( hPopUpMenu, pDoc, true ) 
       End If
+   End If
+
+   Function = hPopupMenu
+End Function
+
+''
+''
+Function CreateStatusBarFileEncodingContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      hPopUpMenu = CreatePopupMenu
+      AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_ANSI, "ANSI"
+      AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
+      AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF16BOM, "UTF-16 (BOM)"
+
+      Dim nEncoding As Long
+      Select Case pDoc->FileEncoding
+         Case FILE_ENCODING_ANSI:      nEncoding = IDM_ANSI
+         Case FILE_ENCODING_UTF8_BOM:  nEncoding = IDM_UTF8BOM
+         Case FILE_ENCODING_UTF16_BOM: nEncoding = IDM_UTF16BOM
+      End Select
+      CheckMenuRadioItem( hPopupMenu, IDM_ANSI, IDM_UTF16BOM, nEncoding, MF_BYCOMMAND )
    End If
 
    Function = hPopupMenu

@@ -1,7 +1,7 @@
 ' ########################################################################################
 ' File: CWindow.inc
 ' Version: 1.0
-' Release candidate 30
+' Release candidate 31
 ' Contents: A wrapper class to create a SDK main window and add controls to it.
 ' Operating system: Microsoft Windows
 ' Compiler: FreeBasic 32 & 64-bit, Unicode.

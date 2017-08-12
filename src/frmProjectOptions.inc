@@ -13,6 +13,42 @@
 
 
 ' ========================================================================================
+' Create a generic resource file and manifest for the Project
+' ========================================================================================
+function CreateResourceManifest( byval idx as long ) as Long
+
+   dim as CWSTR wszProjectPath = AfxStrPathname("PATH", gApp.Projects(idx).ProjectFilename)
+   dim as CWSTR wszManifest = wszProjectPath + "manifest.xml"
+   dim as CWSTR wszResource = wszProjectPath + "resource.rc"
+   dim as CWSTR wszManifestTemplate = AfxGetExePathName + "Settings\WinFBE_manifest.xml"
+   dim as CWSTR wszResourceTemplate = AfxGetExePathName + "Settings\WinFBE_resource.rc" 
+   
+   if AfxFileExists(wszManifest) = false THEN
+      CopyFile( wszManifestTemplate, wszManifest, true )
+   END IF
+   
+   if AfxFileExists(wszResource) = false THEN
+      CopyFile( wszResourceTemplate, wszResource, true )
+      ' Add the resource file to the project
+      If AfxFileExists(wszResource) Then
+         dim pDoc as clsDocument ptr
+         pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                                 False, _    ' bIsNewFile
+                                 False, _    ' bIsTemplate
+                                 FALSE, _    ' bShowInTab
+                                 false, _    ' bIsInclude
+                                 wszResource, _  ' pwszName
+                                 0 )  ' pDocIn
+         gApp.Projects(idx).ProjectSetFileType(pDoc, FILETYPE_RESOURCE)
+         pDoc->ProjectIndex = idx
+      end if
+   END IF
+   
+   function = 0
+end function
+   
+
+' ========================================================================================
 ' Save all options for the Project
 ' ========================================================================================
 Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN    
@@ -38,6 +74,9 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    gApp.Projects(idx).ProjectOther32 = AfxGetWindowText(hCtrl)
    hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS64)
    gApp.Projects(idx).ProjectOther64 = AfxGetWindowText(hCtrl)
+   hCtrl = GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKMANIFEST) 
+   gApp.Projects(idx).ProjectManifest = Button_GetCheck(hCtrl)
+
    
    Return gConfig.ProjectSaveToFile()   
 
@@ -95,6 +134,10 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
                   ' Open the new project so it displays in the Explorer treeview
                   OpenMRUProjectFile( HWND_FRMMAIN, 0, gApp.Projects(idx).ProjectFilename )
                end if
+               ' Create the resource file and manifest if applicable
+               if gApp.Projects(idx).ProjectManifest THEN
+                  CreateResourceManifest(idx)
+               END IF
                SendMessage( HWnd, WM_CLOSE, 0, 0 )
             End If
             gProjectLoading = FALSE
@@ -103,8 +146,9 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
       
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
+            gApp.IsNewProjectFlag = false
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
-            Exit Function
+            exit function
          End If
    End Select
 
@@ -206,6 +250,11 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
+   dim as hwnd hManifest = _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKMANIFEST, L(308,"Create resource file and manifest"), 26, 222, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 250, 572, 3, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
@@ -238,6 +287,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
       gApp.Projects(idx).ProjectBuild    = ""
       gApp.Projects(idx).ProjectOther32  = ""
       gApp.Projects(idx).ProjectOther64  = ""
+      gApp.Projects(idx).ProjectManifest = true
       gApp.Projects(idx).ProjectNotes    = ""
    Else
       wszTitle = wszTitle + " - " + gApp.Projects(idx).ProjectName
@@ -248,6 +298,8 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    
    SetWindowTextW( hProjectOther32, gApp.Projects(idx).ProjectOther32 )
    SetWindowTextW( hProjectOther64, gApp.Projects(idx).ProjectOther64 )
+
+   Button_SetCheck( hManifest, gApp.Projects(idx).ProjectManifest)
 
    SetFocus GetDlgItem(hForm, IDOK)
    

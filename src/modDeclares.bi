@@ -68,6 +68,9 @@
 #Define IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN      1013
 #Define IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES        1014
 #Define IDC_FRMOPTIONSEDITOR_CHKUNICODE             1015
+#Define IDC_FRMOPTIONSEDITOR_CHKSHOWRIGHTEDGE       1016
+#Define IDC_FRMOPTIONSEDITOR_TXTRIGHTEDGE           1017
+#Define IDC_FRMOPTIONSEDITOR_LBLRIGHTEDGE           1018
 
 #Define IDC_FRMOPTIONSCOLORS_LSTCOLORS              1000
 #Define IDC_FRMOPTIONSCOLORS_FRMCOLORS              1001
@@ -111,6 +114,7 @@
 #Define IDC_FRMPROJECTOPTIONS_CMDSELECT             1006
 #Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS32          1007
 #Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS64          1008
+#Define IDC_FRMPROJECTOPTIONS_CHKMANIFEST           1009
 
 #DEFINE IDC_FRMCOMPILECONFIG_LIST1                  1000
 #DEFINE IDC_FRMCOMPILECONFIG_LABEL1                 1001
@@ -192,6 +196,36 @@
 
 #Define IDC_FRMFNLIST_LISTBOX                       1000
 
+#DEFINE IDC_FRMUSERTOOLS_LSTTOOLS                   1000
+#DEFINE IDC_FRMUSERTOOLS_CMDINSERT                  1001
+#DEFINE IDC_FRMUSERTOOLS_CMDDELETE                  1002
+#DEFINE IDC_FRMUSERTOOLS_CMDUP                      1003
+#DEFINE IDC_FRMUSERTOOLS_CMDDOWN                    1004
+#DEFINE IDC_FRMUSERTOOLS_TXTTOOLNAME                1005
+#DEFINE IDC_FRMUSERTOOLS_TXTCOMMAND                 1006
+#DEFINE IDC_FRMUSERTOOLS_TXTPARAMETERS              1007
+#DEFINE IDC_FRMUSERTOOLS_TXTKEY                     1008
+#DEFINE IDC_FRMUSERTOOLS_LABEL1                     1009
+#DEFINE IDC_FRMUSERTOOLS_LABEL2                     1010
+#DEFINE IDC_FRMUSERTOOLS_LABEL3                     1011
+#DEFINE IDC_FRMUSERTOOLS_CMDBROWSEEXE               1012
+#DEFINE IDC_FRMUSERTOOLS_LABEL4                     1013
+#DEFINE IDC_FRMUSERTOOLS_TXTWORKINGFOLDER           1014
+#DEFINE IDC_FRMUSERTOOLS_CMDBROWSEFOLDER            1015
+#DEFINE IDC_FRMUSERTOOLS_LABEL5                     1016
+#DEFINE IDC_FRMUSERTOOLS_LABEL6                     1017
+#DEFINE IDC_FRMUSERTOOLS_CHKCTRL                    1018
+#DEFINE IDC_FRMUSERTOOLS_CHKALT                     1019
+#DEFINE IDC_FRMUSERTOOLS_CHKSHIFT                   1020
+#DEFINE IDC_FRMUSERTOOLS_LABEL7                     1021
+#DEFINE IDC_FRMUSERTOOLS_CHKPROMPT                  1022
+#DEFINE IDC_FRMUSERTOOLS_CHKMINIMIZED               1023
+#DEFINE IDC_FRMUSERTOOLS_CHKWAIT                    1024
+#DEFINE IDC_FRMUSERTOOLS_COMBOACTION                1025
+#DEFINE IDC_FRMUSERTOOLS_LABEL8                     1026
+#DEFINE IDC_FRMUSERTOOLS_LABEL9                     1027
+#Define IDC_FRMUSERTOOLS_CHKDISPLAYMENU             1028
+#Define IDC_FRMUSERTOOLS_CMDOK                      1029
 
 Const DELIM = "|"                    ' character used as delimiter for function names in data1 of gFunctionLists hash
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
@@ -209,6 +243,10 @@ const FILE_ENCODING_ANSI      = 0
 const FILE_ENCODING_UTF8_BOM  = 1
 const FILE_ENCODING_UTF16_BOM = 2
 
+' User Tool actions (selected, pre/post compile)
+const USERTOOL_ACTION_SELECTED    = 0   
+const USERTOOL_ACTION_PRECOMPILE  = 1   
+const USERTOOL_ACTION_POSTCOMPILE = 2
    
 ''  Menu message identifiers
 Enum
@@ -234,16 +272,17 @@ Enum
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
    IDM_VIEWEXPLORER, IDM_VIEWOUTPUT
-   IDM_OPTIONS
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT
    IDM_PROJECTFILESADDTONODE, IDM_REMOVEFILEFROMPROJECT 
    IDM_PROJECTCLOSE, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS  
-   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_QUICKRUN, IDM_COMPILECONFIG, IDM_COMMANDLINE
+   IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_QUICKRUN, IDM_COMMANDLINE
+   IDM_OPTIONS, IDM_COMPILECONFIG, IDM_USERTOOLSDIALOG
    IDM_HELP, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
    IDM_CONSOLE, IDM_GUI   ' used for compiler directives in code
    IDM_32BIT, IDM_64BIT   ' mainly used for identifying compiler associated with a project
+   IDM_USERTOOL   ' + n number of user tools
 End Enum
 
 
@@ -262,13 +301,15 @@ dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES
-Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG 
+Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG, HWND_FRMUSERTOOLS
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
 
 dim shared as HICON ghIconGood, ghIconBad
 dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
+
+dim shared as HACCEL ghAccelUserTools
 
 ' Create a temporary array to hold the selected color values
 ' for the different editor elements. When the form is saved then 
@@ -414,6 +455,23 @@ Type clsTopTabCtl
       
 End Type
 
+' Create array to hold unlimited number of UserTool configurations.
+type TYPE_TOOLS
+   wszDescription   as CWSTR
+   wszCommand       as CWSTR
+   wszParameters    as CWSTR
+   wszKey           as CWSTR
+   wszWorkingFolder as CWSTR
+   IsCtrl           as long
+   IsAlt            as Long
+   IsShift          as Long
+   IsPromptRun      as Long
+   IsMinimized      as Long
+   IsWaitFinish     as Long
+   IsDisplayMenu    as Long
+   Action           as long 
+END TYPE
+
 ' Create array to hold unlimited number of build configurations.
 type TYPE_BUILDS
    id             as string 
@@ -429,6 +487,8 @@ Type clsConfig
       _ConfigFilename As String 
       
    Public:
+      Tools(any)           as TYPE_TOOLS
+      ToolsTemp(any)       as TYPE_TOOLS  
       Builds(any)          as TYPE_BUILDS  
       BuildsTemp(any)      as TYPE_BUILDS  
       FBKeywords           As String 
@@ -440,6 +500,8 @@ Type clsConfig
       SyntaxHighlighting   As Long = True
       Codetips             As Long = True
       AutoComplete         As Long = True
+      RightEdge            As Long = TRUE
+      RightEdgePosition    As CWSTR = "255"
       LeftMargin           As Long = True
       FoldMargin           As Long = false
       AutoIndentation      As Long = True
@@ -527,6 +589,7 @@ type clsProject
       ProjectBuild         As string      ' default build configuration for the project (GUID)
       ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
       ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
+      ProjectManifest      as long        ' T/F create a generic resource and manifest file
       hExplorerRootNode    As HTREEITEM
       ProjectNotes         as CWSTR       ' Save/Load from project file
       ProjectCommandLine   as CWSTR

@@ -118,8 +118,8 @@ function SetCompilerConfigTextboxes() as long
    
    dim as long nCurSel = ListBox_GetCurSel(hList1)
    if nCurSel < 0 THEN 
-      SetWindowText( hText1, "")
-      SetWindowText( hText2, "")
+      AfxSetWindowText( hText1, "")
+      AfxSetWindowText( hText2, "")
       Button_SetCheck( hCheck, 0)
       CheckRadioButton(HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT32, IDC_FRMCOMPILECONFIG_OPT64, IDC_FRMCOMPILECONFIG_OPT32)
       EnableWindow(hText1, false)
@@ -128,8 +128,8 @@ function SetCompilerConfigTextboxes() as long
       EnableWindow(hOpt32, false)
       EnableWindow(hOpt64, false)
    else
-      SetWindowText( hText1, gConfig.BuildsTemp(nCurSel).wszDescription)
-      SetWindowText( hText2, gConfig.BuildsTemp(nCurSel).wszOptions)
+      AfxSetWindowText( hText1, gConfig.BuildsTemp(nCurSel).wszDescription)
+      AfxSetWindowText( hText2, gConfig.BuildsTemp(nCurSel).wszOptions)
       Button_SetCheck( hCheck, gConfig.BuildsTemp(nCurSel).IsDefault)
       if gConfig.BuildsTemp(nCurSel).Is32bit THEN
          CheckRadioButton(HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT32, IDC_FRMCOMPILECONFIG_OPT64, IDC_FRMCOMPILECONFIG_OPT32)
@@ -428,10 +428,10 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->AddControl("RADIOBUTTON", , IDC_FRMCOMPILECONFIG_OPT32, "FBC 32-bit", 10, 285, 100, 20, _
         WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER or WS_GROUP, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->AddControl("RADIOBUTTON", , IDC_FRMCOMPILECONFIG_OPT64, "FBC 64-bit", 115, 285, 100, 20, _
         WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, WSTR("#1001"), 243, 10, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)

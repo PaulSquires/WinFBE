@@ -171,6 +171,8 @@ Function clsConfig.SaveToFile() as Long
    print #f, "SyntaxHighlighting="    ; this.SyntaxHighlighting   
    print #f, "Codetips="              ; this.Codetips             
    print #f, "AutoComplete="          ; this.AutoComplete
+   print #f, "RightEdge="             ; this.RightEdge
+   print #f, "RigtEdgePosition="      ; this.RightEdgePosition           
    print #f, "LeftMargin="            ; this.LeftMargin           
    print #f, "FoldMargin="            ; this.FoldMargin           
    print #f, "AutoIndentation="       ; this.AutoIndentation      
@@ -213,20 +215,38 @@ Function clsConfig.SaveToFile() as Long
    print #f, "CompilerSwitches="      ; this.CompilerSwitches     
    print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
-'   print #f, "DefaultCompiler="       ; gApp.Projects(0).ProjectCompiler
-'   print #f, "DefaultCompileMode="    ; gApp.Projects(0).ProjectCompileMode
    print #f, "RunViaCommandWindow="   ; this.RunViaCommandWindow
    
+
+   print #f, ""
+   Print #f, "[UserTools]"  
+   for i as long = lbound(this.Tools) to ubound(this.Tools)
+      print #f, "USERTOOL_"; Right("00" & Str(i), 2); "=";
+      print #f, this.Tools(i).wszDescription; "|-|";
+      print #f, this.Tools(i).wszCommand; "|-|"; 
+      print #f, this.Tools(i).wszParameters; "|-|"; 
+      print #f, this.Tools(i).wszKey; "|-|"; 
+      print #f, this.Tools(i).wszWorkingFolder; "|-|"; 
+      print #f, this.Tools(i).IsCtrl; "|-|";  
+      print #f, this.Tools(i).IsAlt; "|-|";  
+      print #f, this.Tools(i).IsShift; "|-|";  
+      print #f, this.Tools(i).IsPromptRun; "|-|";  
+      print #f, this.Tools(i).IsMinimized; "|-|";  
+      print #f, this.Tools(i).IsWaitFinish; "|-|";  
+      print #f, this.Tools(i).IsDisplayMenu; "|-|";    
+      print #f, this.Tools(i).Action   
+   NEXT
+
    print #f, ""
    Print #f, "[Builds]"  
-   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+   for i as long = lbound(this.Builds) to ubound(this.Builds)
       print #f, "BUILD_"; Right("00" & Str(i), 2); "=";
-      print #f, gConfig.Builds(i).id; "|-|";
-      print #f, gConfig.Builds(i).wszDescription; "|-|";
-      print #f, gConfig.Builds(i).wszOptions; "|-|"; 
-      print #f, gConfig.Builds(i).IsDefault; "|-|";  
-      print #f, gConfig.Builds(i).Is32bit; "|-|";  
-      print #f, gConfig.Builds(i).Is64bit  
+      print #f, this.Builds(i).id; "|-|";
+      print #f, this.Builds(i).wszDescription; "|-|";
+      print #f, this.Builds(i).wszOptions; "|-|"; 
+      print #f, this.Builds(i).IsDefault; "|-|";  
+      print #f, this.Builds(i).Is32bit; "|-|";  
+      print #f, this.Builds(i).Is64bit  
    NEXT
 
    print #f, ""
@@ -340,6 +360,27 @@ Function clsConfig.LoadFromFile() as Long
       wData = ProcessFromCurdrive(wData)
 
 
+      If Left(wKey, 9) = "USERTOOL_" Then  ' is this a User Tool entry
+         i = Val(Right(wKey,2))
+         If i > ubound(this.Tools) Then
+            redim preserve this.Tools(i) 
+            this.Tools(i).wszDescription   = AfxStrParse(wData, 1, "|-|")
+            this.Tools(i).wszCommand       = AfxStrParse(wData, 2, "|-|")
+            this.Tools(i).wszParameters    = AfxStrParse(wData, 3, "|-|")
+            this.Tools(i).wszKey           = AfxStrParse(wData, 4, "|-|")
+            this.Tools(i).wszWorkingFolder = AfxStrParse(wData, 5, "|-|")
+            this.Tools(i).IsCtrl           = val(**AfxStrParse(wData, 6, "|-|"))
+            this.Tools(i).IsAlt            = val(**AfxStrParse(wData, 7, "|-|"))
+            this.Tools(i).IsShift          = val(**AfxStrParse(wData, 8, "|-|"))
+            this.Tools(i).IsPromptRun      = val(**AfxStrParse(wData, 9, "|-|"))
+            this.Tools(i).IsMinimized      = val(**AfxStrParse(wData, 10, "|-|"))
+            this.Tools(i).IsWaitFinish     = val(**AfxStrParse(wData, 11, "|-|"))
+            this.Tools(i).IsDisplayMenu    = val(**AfxStrParse(wData, 12, "|-|"))
+            this.Tools(i).Action           = val(**AfxStrParse(wData, 13, "|-|"))
+            Continue Do
+         End If
+      End If
+
       If Left(wKey, 6) = "BUILD_" Then  ' is this a BUILD entry
          i = Val(Right(wKey,2))
          If i > ubound(this.Builds) Then
@@ -372,12 +413,6 @@ Function clsConfig.LoadFromFile() as Long
 
       
       Select Case wKey
-'         Case "DefaultCompiler"
-'            if len(wData) = 0 then wData = "FBC 32bit"
-'            gApp.Projects(0).ProjectCompiler = wData
-'         Case "DefaultCompileMode"
-'            if len(wData) = 0 then wData = "CONSOLE"
-'            gApp.Projects(0).ProjectCompileMode = wData
          Case "AskExit":              this.AskExit              = nData
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
@@ -386,6 +421,8 @@ Function clsConfig.LoadFromFile() as Long
          Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
          Case "Codetips":             this.Codetips             = nData
          Case "AutoComplete":         this.AutoComplete         = nData
+         Case "RightEdge":            this.RightEdge            = nData
+         Case "RightEdgePosition":    this.RightEdgePosition    = wData
          Case "LeftMargin":           this.LeftMargin           = nData
          Case "FoldMargin":           this.FoldMargin           = nData
          Case "AutoIndentation":      this.AutoIndentation      = nData
@@ -452,80 +489,80 @@ Function clsConfig.LoadFromFile() as Long
    Close #f
    
    ' If no builds exist then create some default ones...
-   if ubound(gConfig.Builds) = -1 THEN
-      redim gConfig.Builds(11) 
-      gConfig.Builds(0).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(0).wszDescription = "Win32 GUI (Release)"
-      gConfig.Builds(0).wszOptions = "-s gui"
-      gConfig.Builds(0).Is32bit = 1
-      gConfig.Builds(0).Is64bit = 0
+   if ubound(this.Builds) = -1 THEN
+      redim this.Builds(11) 
+      this.Builds(0).id = AfxGuidText(AfxGuid())
+      this.Builds(0).wszDescription = "Win32 GUI (Release)"
+      this.Builds(0).wszOptions = "-s gui"
+      this.Builds(0).Is32bit = 1
+      this.Builds(0).Is64bit = 0
       
-      gConfig.Builds(1).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(1).wszDescription = "Win32 GUI (Debug)"
-      gConfig.Builds(1).wszOptions = "-g -exx -s gui"
-      gConfig.Builds(1).Is32bit = 1
-      gConfig.Builds(1).Is64bit = 0
+      this.Builds(1).id = AfxGuidText(AfxGuid())
+      this.Builds(1).wszDescription = "Win32 GUI (Debug)"
+      this.Builds(1).wszOptions = "-g -exx -s gui"
+      this.Builds(1).Is32bit = 1
+      this.Builds(1).Is64bit = 0
       
-      gConfig.Builds(2).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(2).wszDescription = "Win32 Console (Release)"
-      gConfig.Builds(2).wszOptions = "-s console"
-      gConfig.Builds(2).IsDefault = 1
-      gConfig.Builds(2).Is32bit = 1
-      gConfig.Builds(2).Is64bit = 0
+      this.Builds(2).id = AfxGuidText(AfxGuid())
+      this.Builds(2).wszDescription = "Win32 Console (Release)"
+      this.Builds(2).wszOptions = "-s console"
+      this.Builds(2).IsDefault = 1
+      this.Builds(2).Is32bit = 1
+      this.Builds(2).Is64bit = 0
       
-      gConfig.Builds(3).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(3).wszDescription = "Win32 Console (Debug)"
-      gConfig.Builds(3).wszOptions = "-g -exx -s console"
-      gConfig.Builds(3).Is32bit = 1
-      gConfig.Builds(3).Is64bit = 0
+      this.Builds(3).id = AfxGuidText(AfxGuid())
+      this.Builds(3).wszDescription = "Win32 Console (Debug)"
+      this.Builds(3).wszOptions = "-g -exx -s console"
+      this.Builds(3).Is32bit = 1
+      this.Builds(3).Is64bit = 0
       
-      gConfig.Builds(4).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(4).wszDescription = "Win32 Windows DLL"
-      gConfig.Builds(4).wszOptions = "-s gui -dll -export"
-      gConfig.Builds(4).Is32bit = 1
-      gConfig.Builds(4).Is64bit = 0
+      this.Builds(4).id = AfxGuidText(AfxGuid())
+      this.Builds(4).wszDescription = "Win32 Windows DLL"
+      this.Builds(4).wszOptions = "-s gui -dll -export"
+      this.Builds(4).Is32bit = 1
+      this.Builds(4).Is64bit = 0
 
-      gConfig.Builds(5).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(5).wszDescription = "Win32 Static Library"
-      gConfig.Builds(5).wszOptions = "-lib"
-      gConfig.Builds(5).Is32bit = 1
-      gConfig.Builds(5).Is64bit = 0
+      this.Builds(5).id = AfxGuidText(AfxGuid())
+      this.Builds(5).wszDescription = "Win32 Static Library"
+      this.Builds(5).wszOptions = "-lib"
+      this.Builds(5).Is32bit = 1
+      this.Builds(5).Is64bit = 0
 
-      gConfig.Builds(6).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(6).wszDescription = "Win64 GUI (Release)"
-      gConfig.Builds(6).wszOptions = "-s gui"
-      gConfig.Builds(6).Is32bit = 0
-      gConfig.Builds(6).Is64bit = 1
+      this.Builds(6).id = AfxGuidText(AfxGuid())
+      this.Builds(6).wszDescription = "Win64 GUI (Release)"
+      this.Builds(6).wszOptions = "-s gui"
+      this.Builds(6).Is32bit = 0
+      this.Builds(6).Is64bit = 1
       
-      gConfig.Builds(7).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(7).wszDescription = "Win64 GUI (Debug)"
-      gConfig.Builds(7).wszOptions = "-g -exx -s gui"
-      gConfig.Builds(7).Is32bit = 0
-      gConfig.Builds(7).Is64bit = 1
+      this.Builds(7).id = AfxGuidText(AfxGuid())
+      this.Builds(7).wszDescription = "Win64 GUI (Debug)"
+      this.Builds(7).wszOptions = "-g -exx -s gui"
+      this.Builds(7).Is32bit = 0
+      this.Builds(7).Is64bit = 1
       
-      gConfig.Builds(8).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(8).wszDescription = "Win64 Console (Release)"
-      gConfig.Builds(8).wszOptions = "-s console"
-      gConfig.Builds(8).Is32bit = 0
-      gConfig.Builds(8).Is64bit = 1
+      this.Builds(8).id = AfxGuidText(AfxGuid())
+      this.Builds(8).wszDescription = "Win64 Console (Release)"
+      this.Builds(8).wszOptions = "-s console"
+      this.Builds(8).Is32bit = 0
+      this.Builds(8).Is64bit = 1
       
-      gConfig.Builds(9).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(9).wszDescription = "Win64 Console (Debug)"
-      gConfig.Builds(9).wszOptions = "-g -exx -s console"
-      gConfig.Builds(9).Is32bit = 0
-      gConfig.Builds(9).Is64bit = 1
+      this.Builds(9).id = AfxGuidText(AfxGuid())
+      this.Builds(9).wszDescription = "Win64 Console (Debug)"
+      this.Builds(9).wszOptions = "-g -exx -s console"
+      this.Builds(9).Is32bit = 0
+      this.Builds(9).Is64bit = 1
 
-      gConfig.Builds(10).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(10).wszDescription = "Win64 Windows DLL"
-      gConfig.Builds(10).wszOptions = "-s gui -dll -export"
-      gConfig.Builds(10).Is32bit = 0
-      gConfig.Builds(10).Is64bit = 1
+      this.Builds(10).id = AfxGuidText(AfxGuid())
+      this.Builds(10).wszDescription = "Win64 Windows DLL"
+      this.Builds(10).wszOptions = "-s gui -dll -export"
+      this.Builds(10).Is32bit = 0
+      this.Builds(10).Is64bit = 1
 
-      gConfig.Builds(11).id = AfxGuidText(AfxGuid())
-      gConfig.Builds(11).wszDescription = "Win64 Static Library"
-      gConfig.Builds(11).wszOptions = "-lib"
-      gConfig.Builds(11).Is32bit = 0
-      gConfig.Builds(11).Is64bit = 1
+      this.Builds(11).id = AfxGuidText(AfxGuid())
+      this.Builds(11).wszDescription = "Win64 Static Library"
+      this.Builds(11).wszOptions = "-lib"
+      this.Builds(11).Is32bit = 0
+      this.Builds(11).Is64bit = 1
 
    END IF
 

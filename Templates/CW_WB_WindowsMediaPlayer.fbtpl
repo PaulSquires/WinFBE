@@ -4,7 +4,7 @@ FBGUI
 CWindow: WebBrowser: Windows Media Player
 ' ########################################################################################
 ' Microsoft Windows
-' File: CW_WB_EmbedPDF.fbtpl
+' File: CW_WB_WindowsMediaPlayer.fbtpl
 ' Contents: WebBrowser - Windows Media Player
 ' Compiler: FreeBasic 32 & 64 bit
 ' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
@@ -97,7 +97,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    pwb.SetUIHandler
 
    ' // Embed Windows Media Player
-   DIM s AS STRING = EmbedWindowsMediaPlayer("C:\Users\Public\Videos\Sample Videos\Wildlife.wmv")   ' --> change me!
+   DIM s AS STRING = EmbedWindowsMediaPlayer($"C:\Users\Public\Videos\Sample Videos\Wildlife.wmv")   ' --> change me!
    pwb.WriteHtml(s)
 
    ' // Displays the window and dispatches the Windows messages

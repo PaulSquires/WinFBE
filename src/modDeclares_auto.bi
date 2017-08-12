@@ -1,3 +1,4 @@
+declare Function ExecuteUserTool( ByVal nToolNum As Long ) As Long            
 declare function GetSelectedBuildGUID() as String
 Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 Declare Function RemoveDuplicateSpaces( byref sText as const string) as string
