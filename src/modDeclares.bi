@@ -501,7 +501,7 @@ Type clsConfig
       Codetips             As Long = True
       AutoComplete         As Long = True
       RightEdge            As Long = TRUE
-      RightEdgePosition    As CWSTR = "255"
+      RightEdgePosition    As CWSTR = "80"
       LeftMargin           As Long = True
       FoldMargin           As Long = false
       AutoIndentation      As Long = True

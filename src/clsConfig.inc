@@ -172,7 +172,7 @@ Function clsConfig.SaveToFile() as Long
    print #f, "Codetips="              ; this.Codetips             
    print #f, "AutoComplete="          ; this.AutoComplete
    print #f, "RightEdge="             ; this.RightEdge
-   print #f, "RigtEdgePosition="      ; this.RightEdgePosition           
+   print #f, "RightEdgePosition="     ; this.RightEdgePosition           
    print #f, "LeftMargin="            ; this.LeftMargin           
    print #f, "FoldMargin="            ; this.FoldMargin           
    print #f, "AutoIndentation="       ; this.AutoIndentation      
