@@ -229,8 +229,6 @@ Function CreateUserTools_AcceleratorTable() As Long
          Case "X":   nKey = VK_X
          Case "Y":   nKey = VK_Y
          Case "Z":   nKey = VK_Z  
-         Case Else
-            continue For
       End Select
          
       wszShortcut = trim(wszShortcut + UCase(Trim(gConfig.Tools(y).wszKey)), any " +")
