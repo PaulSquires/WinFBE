@@ -230,55 +230,55 @@ function frmFindReplace_SetButtonStates() as LONG
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNLEFT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFT", "IMAGE_LEFT")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFT", "IMAGE_LEFT", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNRIGHT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHT", "IMAGE_RIGHT")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHT", "IMAGE_RIGHT", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACE)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACE", "IMAGE_REPLACE")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACE", "IMAGE_REPLACE", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACEALL)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALL", "IMAGE_REPLACEALL")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALL", "IMAGE_REPLACEALL", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
    else
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNLEFT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFTD", "IMAGE_LEFTD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFTD", "IMAGE_LEFTD", true)
       frmHotImgBtn_Enabled(hCtl, false )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNRIGHT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHTD", "IMAGE_RIGHTD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHTD", "IMAGE_RIGHTD", true)
       frmHotImgBtn_Enabled(hCtl, false )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACE)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACED", "IMAGE_REPLACED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACED", "IMAGE_REPLACED", true)
       frmHotImgBtn_Enabled(hCtl, false )
       
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACEALL)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALLD", "IMAGE_REPLACEALLD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALLD", "IMAGE_REPLACEALLD", true)
       frmHotImgBtn_Enabled(hCtl, false )
    END IF
 
    hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNSELECTION)      
    if (pDoc->IsMultilineSelection) or (pDoc->HasMarkerHighlight) THEN
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTED", "IMAGE_SELECTED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTED", "IMAGE_SELECTED", true)
       frmHotImgBtn_Enabled(hCtl, true)
    else   
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTEDD", "IMAGE_SELECTEDD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTEDD", "IMAGE_SELECTEDD", true)
       frmHotImgBtn_Enabled(hCtl, false )
    end if
    
@@ -299,14 +299,14 @@ function frmFindReplace_ShowControls() as long
    dim as hwnd hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNTOGGLE)
    
    if gReplaceOpen THEN
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_OPENED", "IMAGE_OPENED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_OPENED", "IMAGE_OPENED", true)
       pWindow->SetClientSize(435, 64)
-      SetWindowPos(hCtl, 0, 0, 0, 20, 63, SWP_NOMOVE or SWP_NOZORDER)
+      pWindow->SetWindowPos(hCtl, 0, 0, 0, 20, 63, SWP_NOMOVE or SWP_NOZORDER)
       fShow = SW_SHOW
    else   
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_CLOSED", "IMAGE_CLOSED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_CLOSED", "IMAGE_CLOSED", true)
       pWindow->SetClientSize(435, 32)
-      SetWindowPos(hCtl, 0, 0, 0, 20, 31, SWP_NOMOVE or SWP_NOZORDER)
+      pWindow->SetWindowPos(hCtl, 0, 0, 0, 20, 31, SWP_NOMOVE or SWP_NOZORDER)
       fShow = SW_HIDE
    END IF
    ShowWindow( GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), fShow )
@@ -568,7 +568,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    dim as long frmWidth   = 435
    dim as long frmHeight  = 64
    dim as long ctlHeight  = 22
-   dim as long iconHeight = pWindow->ScaleY(16)
+   dim as long iconHeight = 16  
    dim as long margin     = 4
    dim as long vmargin    = 6
    dim as long nLeft      = 0
@@ -594,12 +594,10 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         WS_EX_CONTROLPARENT or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->SetClientSize(frmWidth, frmHeight)
 
-   frmHeight = AfxGetWindowHeight(HWND_FRMFINDREPLACE)
-     
    ' Display the expand toggle icon for the Find/Replace 
    hCtl = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNTOGGLE, "IMAGE_CLOSED", "IMAGE_CLOSED",  _
                   L(270, "Toggle Replace mode"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft+1, 0, 20, frmHeight-1, false)
+                  nLeft+1, 0, 20, frmHeight-1, false, True, true)
                      
    ' Display the Find textbox               
    nTop  = margin
@@ -614,7 +612,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtlFind))
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNMATCHCASE, "IMAGE_CASED", "IMAGE_CASED",  _
                   L(163,"Match Case"), iconHeight , iconHeight , GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_WINDOW), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
    frmHotImgBtn_SetSelected(hCtl, gFind.nMatchCase)
       
    ' Display the Match Whole Word button 
@@ -622,7 +620,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl))  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNMATCHWHOLEWORD, "IMAGE_WHOLED", "IMAGE_WHOLED",  _
                   L(162,"Match Whole Words"), iconHeight, iconHeight, GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_WINDOW), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
    frmHotImgBtn_SetSelected(hCtl, gFind.nWholeWord)
 
    ' Display the Results label
@@ -638,21 +636,22 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNLEFT, "IMAGE_LEFTD", "IMAGE_LEFTD",  _
                   L(45,"Find Previous") & WSTR(" (Shift+F3)"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Display the Right button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNRIGHT, "IMAGE_RIGHTD", "IMAGE_RIGHTD",  _
                   L(44,"Find Next") & WSTR(" (F3)"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Display the Selection button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNSELECTION, "IMAGE_SELECTEDD", "IMAGE_SELECTEDD",  _
                   L(148,"Selection"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
+
 
    ' Display the Replace textbox               
    nTop  = margin + pWindow->UnScaleX(AfxGetWindowHeight(hCtlFind)) + vmargin
@@ -667,19 +666,19 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtlReplace)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACE, "IMAGE_REPLACED", "IMAGE_REPLACED",  _
                   L(173,"Replace"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Display the Replace All button 
    nTop  = margin + pWindow->UnScaleX(AfxGetWindowHeight(hCtlFind)) + vmargin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACEALL, "IMAGE_REPLACEALLD", "IMAGE_REPLACEALLD",  _
                   L(174,"Replace All"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Diplay the Close icon
    frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
                   L(161, "Close"), ctlHeight, ctlHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  frmWidth - ctlHeight - margin, margin, ctlHeight, ctlHeight)
+                  frmWidth - ctlHeight - margin, margin, ctlHeight, ctlHeight, true, true, true)
 
    frmFindReplace_SetButtonStates
    frmFindReplace_ShowControls

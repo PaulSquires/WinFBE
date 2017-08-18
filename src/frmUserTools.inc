@@ -21,13 +21,14 @@ Function ExecuteUserTool( ByVal nToolNum As Long ) As Long
    Dim pDocMain    As clsDocument Ptr 
    Dim pDocCurrent As clsDocument Ptr 
    
-   dim wszCommand     As CWSTR
-   dim wszParameters  As CWSTR
-   dim wszProjectName As CWSTR
-   dim wszMainSource  As CWSTR
-   dim wszExeName     As CWSTR
-   dim wszWord        As CWSTR
-   dim sCurrentDir    As String
+   dim wszCommand       As CWSTR
+   dim wszParameters    As CWSTR
+   dim wszProjectName   As CWSTR
+   dim wszMainSource    As CWSTR
+   dim wszExeName       As CWSTR
+   dim wszWord          As CWSTR
+   dim wszWorkingFolder as CWSTR 
+   dim sCurrentDir      As String
    
    dim nWndStyle      As Long = SW_SHOWNORMAL
 
@@ -99,11 +100,23 @@ Function ExecuteUserTool( ByVal nToolNum As Long ) As Long
        
    ' Change the working folder
    sCurrentDir = CurDir
-   If Len(gConfig.Tools(nToolNum).wszWorkingFolder) Then
+   ' Is the specified working folder valid? If it is not, then maybe try same path 
+   ' but use the current drive.
+   wszWorkingFolder = gConfig.Tools(nToolNum).wszWorkingFolder
+   If Len(wszWorkingFolder) Then
+      if AfxPathIsDirectory(wszWorkingFolder) = false then
+         wszWorkingFolder = left(**AfxGetExePathName, 1) + mid(wszWorkingFolder, 2)
+      end if
       ChDir gConfig.Tools(nToolNum).wszWorkingFolder
    End If
        
-   wszCommand = chr(34) + gConfig.Tools(nToolNum).wszCommand + chr(34)
+   ' Is the specified exe command to execute valid? If it is not, then maybe try same path 
+   ' but use the current drive.
+   wszCommand = gConfig.Tools(nToolNum).wszCommand 
+   if AfxPathFileExists(wszCommand) = false THEN
+      wszCommand = left(**AfxGetExePathName, 1) + mid(wszCommand, 2)
+   END IF
+   wszCommand = chr(34) + wszCommand + chr(34)
    
    With ShExecInfo
       .cbSize       = Len(SHELLEXECUTEINFOW)

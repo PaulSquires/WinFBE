@@ -1088,22 +1088,69 @@ function GetRunExecutableFilename() as CWSTR
    ' by the top menu and toolbar to determine if the Run Executable options
    ' should be grayed out.
    dim wszFilename as CWSTR
+   dim wszOptions as CWSTR
    Dim pDocMain As clsDocument Ptr 
+
    dim as long idx = gApp.GetActiveProjectIndex()
    dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
-
+   dim as Boolean bInString = false
+   
    pDocMain = iIf( gApp.IsProjectActive, gApp.Projects(idx).GetMainDocumentPtr, gTTabCtl.GetActiveDocumentPtr)
    If pDocMain = 0 Then return ""
    
    if idxBuild > -1 then 
-      If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DLL"))   Then return ""
-      If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DYLIB")) Then return ""
-      If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -LIB"))   then return ""
+      wszOptions = gConfig.Builds(idxBuild).wszOptions 
+
+      if gApp.IsProjectActive THEN
+         if gConfig.Builds(idxBuild).Is32bit then
+            wszOptions = wszOptions + " " + gApp.Projects(idx).ProjectOther32
+         end if   
+         if gConfig.Builds(idxBuild).Is64bit then
+            wszOptions = wszOptions + " " + gApp.Projects(idx).ProjectOther64
+         end if   
+      else
+         wszOptions = wszOptions + " " + gConfig.CompilerSwitches
+      END IF
+      wszOptions = " " + ucase(wszOptions) + " "
+      
+      If Instr(wszOptions, wstr(" -DLL "))   Then return ""
+      If Instr(wszOptions, wstr(" -DYLIB ")) Then return ""
+      If Instr(wszOptions, wstr(" -LIB "))   then return ""
+      
    end if
-   wszFilename = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
-                 AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                 wstr(".exe")
    
+   ' Need to check the compiler options to see if the -x switch is used. That switch specifically
+   ' names the output file.
+   dim y as long = Instr(wszOptions, wstr(" -X "))
+   if y THEN
+      y = y + 4  ' skip over the switch itself
+      for i as long = y to len(wszOptions)
+         ' iterate to the beginning of the next switch or end of the string
+         ' skip over spaces that are part of a filename string
+         if wszOptions[i-1] = 34 THEN bInString = not bInString  ' double quotes
+         if bInString THEN continue for
+         if wszOptions[i-1] = 45 then  ' dash   
+            wszFilename = mid(wszOptions, y, i-y-1)
+            exit for
+         end if   
+      NEXT
+      ' There was no other switch so we made it to the end of the string
+      if len(wszFilename) = 0 then wszFilename = mid(wszOptions, y)
+   END IF
+   
+   ' Has a filename been determined yet? If it has then it possibly does not have
+   ' a path assigned to it so we should add one.
+   if len(wszFilename) THEN
+      if len(AfxStrPathname("PATH", wszFilename)) = 0 THEN
+         wszFilename = AfxStrPathname("PATH", pDocMain->DiskFilename) + wszFilename
+      END IF
+   else
+      ' Default 
+      wszFilename = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
+                    AfxStrPathname("NAME", pDocMain->DiskFilename) + _
+                    wstr(".exe")
+   END IF
+
    return wszFilename
 
 END FUNCTION

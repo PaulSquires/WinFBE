@@ -40,126 +40,127 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    ' Add buttons to the toolbar
    Dim As Long i
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_NEW_FILE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_NEW_FILE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_NEW_FILE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_NEW_FILE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_NEW_FILE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_NEW_FILE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_FILENEW, 0, TBSTYLE_DROPDOWN
   
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_OPEN_FILE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_OPEN_FILE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_OPEN_FILE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_OPEN_FILE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_OPEN_FILE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_OPEN_FILE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_FILEOPEN, 0, TBSTYLE_DROPDOWN
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_SAVE_FILE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_SAVE_FILE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_SAVE_FILE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_SAVE_FILE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_SAVE_FILE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_SAVE_FILE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_FILESAVE
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_CUT")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_CUT")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_CUT", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_CUT")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_CUT")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_CUT", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_CUT
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_COPY")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_COPY")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_COPY", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_COPY")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_COPY")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_COPY", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_COPY
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_PASTE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_PASTE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_PASTE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_PASTE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_PASTE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_PASTE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_PASTE
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_FIND")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_FIND")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_FIND", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_FIND")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_FIND")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_FIND", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_FIND
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_REPLACE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_REPLACE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_REPLACE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_REPLACE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_REPLACE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_REPLACE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_REPLACE
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_UNDO")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_UNDO")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_UNDO", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_UNDO")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_UNDO")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_UNDO", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_UNDO
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_REDO")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_REDO")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_REDO", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_REDO")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_REDO")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_REDO", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_REDO
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_INDENT")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_INDENT")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_INDENT", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_INDENT")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_INDENT")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_INDENT", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_INDENTBLOCK
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_INDENT_REMOVE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_INDENT_REMOVE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_INDENT_REMOVE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_INDENT_REMOVE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_INDENT_REMOVE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_INDENT_REMOVE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_UNINDENTBLOCK
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_COMMENT")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_COMMENT")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_COMMENT", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_COMMENT")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_COMMENT")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_COMMENT", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_COMMENTBLOCK
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_COMMENT_REMOVE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_COMMENT_REMOVE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_COMMENT_REMOVE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_COMMENT_REMOVE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_COMMENT_REMOVE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_COMMENT_REMOVE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_UNCOMMENTBLOCK
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_FUNCTIONLIST")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_FUNCTIONLIST")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_FUNCTIONLIST", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_FUNCTIONLIST")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_FUNCTIONLIST")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_FUNCTIONLIST", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_FUNCTIONLIST
 
    Toolbar_AddSeparator hToolBar
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_COMPILE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_COMPILE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_COMPILE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_COMPILE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_COMPILE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_COMPILE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_COMPILE
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_COMPILE_AND_EXECUTE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_COMPILE_AND_EXECUTE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_COMPILE_AND_EXECUTE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_COMPILE_AND_EXECUTE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_COMPILE_AND_EXECUTE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_COMPILE_AND_EXECUTE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_BUILDEXECUTE
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_QUICKRUN")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_QUICKRUN")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_QUICKRUN", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_QUICKRUN")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_QUICKRUN")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_QUICKRUN", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_QUICKRUN
 
-   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_EXECUTE")
-   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_EXECUTE")
-   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_EXECUTE", 10, True)
+   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_EXECUTE")
+   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_EXECUTE")
+   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_EXECUTE", 10, True)
    Toolbar_AddButton hToolBar, i, IDM_RUNEXE
 
    Toolbar_AddSeparator hToolBar
 
-'   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_HELP")
-'   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_HELP")
-'   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_HELP", 10, True)
+'   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_HELP")
+'   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_HELP")
+'   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_HELP", 10, True)
 '   Toolbar_AddButton hToolBar, i, IDM_HELP
 
    ' Combobox to switch amongst the different build options
    ' Get the last button's rect and position the combobox immediately the right
    HWND_FRMMAIN_COMBOBUILDS = _
-   pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", 800, 8, 200, 20, _
+   pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", _
+        pWindow->UnScaleX(800), iif(pWindow->DPI = 96, 8, 2), 200, 20, _
         WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST OR CBS_HASSTRINGS, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 

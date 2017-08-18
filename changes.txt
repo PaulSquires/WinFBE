@@ -1,3 +1,9 @@
+Version 1.4.4 (August 18, 2017)
+- Added: Determining if "Run Executable" file exists now checks for any defined "-x" compiler switch.
+- Added: User Tool paths for Command and Working Folder will adjust drive letter to current drive should specified location be invalid. This allows you to run the tool on systems where the assigned drive letter may change (eg. when using a portable hard drive).
+- Changed: Converted Find/Replace icons to PNG format and better optimized the Find/Replace dialog for High DPI settings.
+- Changed: Updated the German language file.
+
 Version 1.4.3 (August 12, 2017)
 - Added: User Tools dialog (and top menu "Tools"). 
 - Added: Editor option "Right edge margin".

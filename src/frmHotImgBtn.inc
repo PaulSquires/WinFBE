@@ -15,7 +15,7 @@
 ''
 ''  FRMHOTIMGBTN
 ''
-''  Image or Text button with hot mouse over (ICONS ONLY)
+''  Image button with hot mouse over 
 ''
 ''
 
@@ -86,7 +86,8 @@ End Function
 ' ========================================================================================
 Function frmHotImgBtn_SetImages( ByVal HWnd As HWnd, _
                                  ByRef wszImgNormal As WString = "", _
-                                 ByRef wszImgHot    As WString = ""  _
+                                 ByRef wszImgHot    As WString = "",  _
+                                 byval bIsGDI       as Boolean = false _
                                  ) As Long
  
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
@@ -97,11 +98,17 @@ Function frmHotImgBtn_SetImages( ByVal HWnd As HWnd, _
 
    DestroyIcon(pData->hImgNormal)
    DestroyIcon(pData->hImgHot)
-       
-   pData->hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
-   pData->hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+   
+   ' Load the image depending on the file type. Use LoadImage for ICO and GDI for PNG/BMP, etc
+   if bIsGDI then
+      pData->hImgNormal = AfxGdipIconFromRes(pWindow->InstanceHandle, wszImgNormal)
+      pData->hImgHot    = AfxGdipIconFromRes(pWindow->InstanceHandle, wszImgHot)
+   else   
+      pData->hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+      pData->hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+   END IF
 
-   AfxRedrawWindow( hWnd )
+   AfxRedrawWindow( HWnd )
    
    Function = 0
 End Function
@@ -229,7 +236,9 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
 
       ' Draw the icon
       DrawState memDC, NULL, NULL, CAST(LPARAM, hIcon), 0, _
-                  rc.Left + nHMargin, rc.Top + nVMargin, 0, 0, DST_ICON Or DSS_NORMAL
+                  rc.Left + nHMargin, rc.Top + nVMargin, _
+                  0, 0, _
+                  DST_ICON Or DSS_NORMAL
        
       if pData->fSelected THEN
          ' If the button is in a selected state then draw a thin
@@ -323,7 +332,8 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
                        BYVAL nWidth       AS LONG = 0, _
                        BYVAL nHeight      AS LONG = 0, _
                        byval fSelectedFrame as BOOLEAN = true, _
-                       byval fEnabled       as BOOLEAN = true _
+                       byval fEnabled       as BOOLEAN = true, _
+                       byval fIsGDI         as Boolean = false _
                        ) As HWND
 
    '  Create the main window and child controls
@@ -345,15 +355,15 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
    With *pData
       .hWndParent = hWndParent
       .cID        = cID
-      .nImgWidth  = pWindow->ScaleX( nImgWidth )
-      .nImgHeight = pWindow->ScaleY( nImgHeight )
-      .hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
-      .hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+      .nImgWidth  = nImgWidth 
+      .nImgHeight = nImgHeight
       .clrBg      = clrBg
       .clrBgHot   = clrBgHot
       .fSelectedFrame = fSelectedFrame
       .fEnabled   = fEnabled
    End With
+   
+   frmHotImgBtn_SetImages(hWindow, wszImgNormal, wszImgHot, fIsGDI)
    
    ' Register a tooltip for this window. Change the text of the tooltip to the full filename/path as
    ' the mouse changes from tab to tab.

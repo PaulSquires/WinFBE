@@ -1126,7 +1126,9 @@ Function clsDocument.ApplyProperties() As Long
          OrElse cbool(wFileExt = ".BI") OrElse (this.IsNewFlag = True) _
          orelse cbool(wFileExt = ".FBTPL") Then
      
+
       SciMsg( m_pSci, SCI_SETLEXER, SCLEX_VB, 0 )
+      'SciMsg( m_pSci, SCI_SETLEXER, SCLEX_FREEBASIC, 0 )
       bitsNeeded = SciMsg( m_pSci, SCI_GETSTYLEBITSNEEDED, 0, 0)
       SciMsg( m_pSci, SCI_SETSTYLEBITS, bitsNeeded, 0 )
 

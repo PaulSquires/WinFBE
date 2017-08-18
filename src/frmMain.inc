@@ -1824,7 +1824,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow("WinFBE_Class")
-   'pWindow->DPI = 144 '96   ' eg. 144 or any other value (96 is default)
+   ' Comment out the next line to let WinFBE use the current active system DPI setting.
+   'pWindow->DPI = 144   ' eg. 144 or any other value (96 is default)
    
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
