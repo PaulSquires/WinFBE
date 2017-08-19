@@ -31,7 +31,7 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 
    ' Create the ImageLists that will hold the images for the toolbar
    Dim As HIMAGELIST hImageListNormal, hImageListHot, hImageListDisabled
-   Dim cx As Long = 24 * (pWindow->DPI \ 96)
+   Dim cx As Long = 24 * pWindow->DPI \ 96
 
    hImageListNormal   = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 20, 1)
    hImageListDisabled = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 20, 1)
@@ -194,7 +194,7 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    ' Get the last button's rect and position the combobox immediately the right
    HWND_FRMMAIN_COMBOBUILDS = _
    pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", _
-        pWindow->UnScaleX(rc.right) + 10, iif(pWindow->DPI = 96, 8, 2), 200, 20, _
+        pWindow->UnScaleX(rc.right + 10), pWindow->UnScaleY(8), 200, 20, _
         WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST OR CBS_HASSTRINGS, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
