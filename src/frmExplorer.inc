@@ -428,7 +428,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    frmHotImgBtn( HWND_FRMEXPLORER, IDC_FRMEXPLORER_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
-                  L(161, "Close"), 24, 24, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_WINDOW), 0, 0, 24, 24 )
+                  L(161, "Close"), 24, 24, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_WINDOW), 0, 0, 24, 24, true, true, true )
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _

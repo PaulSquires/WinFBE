@@ -388,7 +388,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
                   L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT), _
-                  0, 0, nWidth, nHeight )
+                  0, 0, nWidth, nHeight, true, true, true )
                   
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _

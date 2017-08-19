@@ -156,14 +156,6 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 '   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_HELP", 10, True)
 '   Toolbar_AddButton hToolBar, i, IDM_HELP
 
-   ' Combobox to switch amongst the different build options
-   ' Get the last button's rect and position the combobox immediately the right
-   HWND_FRMMAIN_COMBOBUILDS = _
-   pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", _
-        pWindow->UnScaleX(800), iif(pWindow->DPI = 96, 8, 2), 200, 20, _
-        WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST OR CBS_HASSTRINGS, _
-        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-
    SendMessage hToolBar, TB_SETIMAGELIST, 0, Cast(LPARAM, hImageListNormal)
    SendMessage hToolBar, TB_SETDISABLEDIMAGELIST, 0, Cast(LPARAM, hImageListDisabled)
    SendMessage hToolBar, TB_SETHOTIMAGELIST, 0, Cast(LPARAM, hImageListHot)
@@ -194,6 +186,17 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 
    ' Insert band into rebar
    SendMessage hRebar, RB_INSERTBANDW, -1, Cast(LPARAM, @rbbi)
+
+   dim rc as RECT
+   Toolbar_GetItemRect(hToolBar, 26, @rc)
+   
+   ' Combobox to switch amongst the different build options
+   ' Get the last button's rect and position the combobox immediately the right
+   HWND_FRMMAIN_COMBOBUILDS = _
+   pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", _
+        pWindow->UnScaleX(rc.right) + 10, iif(pWindow->DPI = 96, 8, 2), 200, 20, _
+        WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST OR CBS_HASSTRINGS, _
+        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    Function = True
 

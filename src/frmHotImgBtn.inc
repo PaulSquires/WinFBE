@@ -23,8 +23,9 @@ Type HOTIMGBTN_TYPE
    hWndParent As HWND
    cID        As Long
    hTooltip   as HWND
-   hImgNormal As HICON
-   hImgHot    As HICON
+   hImageList AS HIMAGELIST
+   idxNormal  As long         ' position in imagelist of normal icon
+   idxHot     As long         ' position in imagelist of hot icon
    clrBg      As COLORREF
    clrBgHot   As COLORREF
    nImgWidth  As Long
@@ -96,16 +97,33 @@ Function frmHotImgBtn_SetImages( ByVal HWnd As HWnd, _
    Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
    If pData = 0 Then exit function 
 
-   DestroyIcon(pData->hImgNormal)
-   DestroyIcon(pData->hImgHot)
+   dim as HICON hIcon
    
-   ' Load the image depending on the file type. Use LoadImage for ICO and GDI for PNG/BMP, etc
-   if bIsGDI then
-      pData->hImgNormal = AfxGdipIconFromRes(pWindow->InstanceHandle, wszImgNormal)
-      pData->hImgHot    = AfxGdipIconFromRes(pWindow->InstanceHandle, wszImgHot)
-   else   
-      pData->hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
-      pData->hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+   ' Destroy any existing ImageList
+   ImageList_Destroy(pData->hImageList)
+   
+   ' Calculate the size of the icon according the DPI
+   DIM cx AS LONG = pData->nImgWidth * pWindow->DPI \ 96
+
+   ' Create an image list to hold the normal and hot images
+   pData->hImageList = ImageList_Create(cx, cx, ILC_COLOR32 OR ILC_MASK, 2, 0)
+   IF pData->hImageList THEN
+      ' Load the image depending on the file type. Use LoadImage for ICO and GDI for PNG/BMP, etc
+      if bIsGDI then
+         pData->idxNormal = AfxGdipAddIconFromRes(pData->hImageList, pWindow->InstanceHandle, wszImgNormal)
+         pData->idxHot    = AfxGdipAddIconFromRes(pData->hImageList, pWindow->InstanceHandle, wszImgHot)
+      else   
+         hIcon = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+         IF hIcon THEN 
+            pData->idxNormal = ImageList_ReplaceIcon(pData->hImageList, -1, hIcon)
+            DestroyIcon(hIcon)
+         end if
+         hIcon = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+         IF hIcon THEN 
+            pData->idxHot = ImageList_ReplaceIcon(pData->hImageList, -1, hIcon)
+            DestroyIcon(hIcon)
+         end if
+      end if
    END IF
 
    AfxRedrawWindow( HWnd )
@@ -170,8 +188,7 @@ Function frmHotImgBtn_OnDestroy(HWnd As HWnd) As LRESULT
    
    Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
    If pData Then
-      DestroyIcon(pData->hImgNormal)
-      DestroyIcon(pData->hImgHot)
+      ImageList_Destroy(pData->hImageList)
       AfxDeleteTooltip(pData->hTooltip, HWND)
       DestroyWindow pData->hTooltip
       Delete pData
@@ -199,7 +216,8 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
    Dim As POINT pt
    Dim As RECT rc
    Dim As Long nHMargin, nVMargin
-   Dim As HICON hIcon
+   Dim As long idxImage
+   dim as long cx, cy
    Dim As BOOLEAN bIsHot
 
    hDC = BeginPaint(hWnd, @ps)
@@ -216,29 +234,26 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
 
       bIsHot = IIf( GetProp(hWnd, "HOT") = 0, False, True ) 
 
-      ' Center the image
-      nHMargin = (rc.right - pData->nImgWidth) / 2
-      nVMargin = (rc.bottom - pData->nImgHeight) / 2
-      
       dim as HPEN hPen = CreatePen(PS_SOLID, 1, BGR(0,0,255))  ' blue
       SelectObject( memDC, hPen )
 
       If ( bIsHot = True ) Or (pData->fSelected = True) Then
-         hIcon = pData->hImgHot
+         idxImage = pData->idxHot
          hBrush = CreateSolidBrush( pData->clrBgHot )
       Else
-         hIcon = pData->hImgNormal
+         idxImage = pData->idxNormal
          hBrush = CreateSolidBrush( pData->clrBg )
       End If
       ' Paint the entire client background
       FillRect(memDC, @rc, hBrush) 
       DeleteBrush(hBrush)
 
-      ' Draw the icon
-      DrawState memDC, NULL, NULL, CAST(LPARAM, hIcon), 0, _
-                  rc.Left + nHMargin, rc.Top + nVMargin, _
-                  0, 0, _
-                  DST_ICON Or DSS_NORMAL
+      ' Draw the icon (center it in the rectangle)
+      ImageList_GetIconSize(pData->hImageList, @cx, @cy)
+      nHMargin = (rc.right - cx) / 2
+      nVMargin = (rc.bottom - cy) / 2
+      ImageList_Draw(pData->hImageList, idxImage, memDC, _
+                     rc.Left + nHMargin, rc.Top + nVMargin, ILD_TRANSPARENT)
        
       if pData->fSelected THEN
          ' If the button is in a selected state then draw a thin
@@ -339,7 +354,6 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
-
    Dim As HWND hWindow = _
    pWindow->Create( hWndParent, "", @frmHotImgBtn_WndProc, x, y, nWidth, nHeight, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
