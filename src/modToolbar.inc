@@ -187,11 +187,11 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    ' Insert band into rebar
    SendMessage hRebar, RB_INSERTBANDW, -1, Cast(LPARAM, @rbbi)
 
+   ' Get the last button's rect and position the combobox immediately the right
    dim rc as RECT
    Toolbar_GetItemRect(hToolBar, 26, @rc)
    
    ' Combobox to switch amongst the different build options
-   ' Get the last button's rect and position the combobox immediately the right
    HWND_FRMMAIN_COMBOBUILDS = _
    pWindow->AddControl("COMBOBOX", hToolBar, IDC_FRMMAIN_COMBOBUILDS, "", _
         pWindow->UnScaleX(rc.right + 10), pWindow->UnScaleY(8), 200, 20, _
