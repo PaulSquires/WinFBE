@@ -856,7 +856,7 @@ Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
    dim wFilename as wstring * MAX_PATH
    static wText as wstring * MAX_PATH
    
-   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "")
+   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "bi")
    If pwszName Then
       wFilename = *pwszName
       wText = AfxStrPathname( "NAMEX", wFilename )

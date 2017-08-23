@@ -163,16 +163,16 @@ Function CreateUserTools_AcceleratorTable() As Long
    
    ' Delete the existing Tools top menu and reinsert making it enabled only
    ' if one or more Tools are designated to display in the top menu.
-   DeleteMenu(HWND_FRMMAIN_TOPMENU, 7, MF_BYPOSITION)
+   DeleteMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION)
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
       if gConfig.Tools(y).IsDisplayMenu then
          nEnabled = MF_ENABLED: exit for
       end if   
    NEXT
-   InsertMenu(HWND_FRMMAIN_TOPMENU, 7, MF_BYPOSITION or MF_POPUP Or nEnabled, _
+   InsertMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION or MF_POPUP Or nEnabled, _
                Cast(UINT_PTR, hPopUpMenu), L(305,"&Tools"))
    
-   dim as HMENU hToolsMenu = GetSubMenu(HWND_FRMMAIN_TOPMENU, 7)
+   dim as HMENU hToolsMenu = GetSubMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION)
 
    NumKeys = 0
    For y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)

@@ -64,6 +64,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim wszTemp      As WString * MAX_PATH 
    Dim wszFileExe   As WString * MAX_PATH
    Dim wszParam     As WString * MAX_PATH  
+   dim wszCompile   as CWSTR
    
    Dim As CWSTR wexecmd, wDQ, wsLogSt, wst, wst_ucase, wszOutputMsg
    Dim As CWSTR wst1, wst2, wst3        
@@ -228,25 +229,34 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       end if   
    NEXT
 
-   ' Create a temporary batch that will contain the compile commands. We shell
-   ' to and run this batch file in order to do the compile.
-   ' Replace any embedded spaces with underscores
-   wszTemp = wstr("_") + AfxStrPathname("NAME", gApp.Projects(idx).ProjectName)
-   wszTemp = AfxStrReplace(wszTemp, wstr(" "), wstr("_") )
-   gCompile.BatchFile = wszTemp & wstr("_compile.bat") 
-   gCompile.LogFile   = wszTemp & wstr("_compile.log")
+'   ' Create a temporary batch that will contain the compile commands. We shell
+'   ' to and run this batch file in order to do the compile.
+'   ' Replace any embedded spaces with underscores
+'   wszTemp = wstr("_") + AfxStrPathname("NAME", gApp.Projects(idx).ProjectName)
+'   wszTemp = AfxStrReplace(wszTemp, wstr(" "), wstr("_") )
+'   gCompile.BatchFile = wszTemp & wstr("_compile.bat") 
+'   gCompile.LogFile   = wszTemp & wstr("_compile.log")
    
    ' Change to the output code directory
    ChDir gCompile.MainFolder
    
-   ' Must delete any previous instance of the compiler log file in case it was not deleted. Need
-   ' to do this because the compiler appends to the log file rather than overwriting.
-   Kill gCompile.LogFile
+'   ' Must delete any previous instance of the compiler log file in case it was not deleted. Need
+'   ' to do this because the compiler appends to the log file rather than overwriting.
+'   Kill gCompile.LogFile
+    
+'   f = Freefile
+'   Open gCompile.BatchFile For Output as #f
+
+
+'   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+'   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
+'   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
+'   ShowWindow( hProgressBar, SW_SHOW)
+
+   ' Indicate in the StatusBar that we have started to compile
+   SetCompileStatusBarMessage( L(203, "Compiling..."), 0 )
+   AfxDoEvents
    
-   f = Freefile
-   Open gCompile.BatchFile For Output as #f
-
-
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
@@ -266,26 +276,39 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
             If (AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2)) or _
                (wID = IDM_REBUILDALL)  Then
-               Print #f, wDQ; gCompile.CompilerPath; wDQ; _
-                         " -c "; wDQ; pDoc->DiskFilename; wDQ; _
-                         " -o "; wDQ; wszTemp; wDQ;
-               Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
+'               Print #f, wDQ; gCompile.CompilerPath; wDQ; _
+'                         " -c "; wDQ; pDoc->DiskFilename; wDQ; _
+'                         " -o "; wDQ; wszTemp; wDQ;
+'               Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
+
+               wst = L(203, "Compiling...") + " " + AfxStrPathname("NAMEX", pDoc->DiskFilename) 
+               SetCompileStatusBarMessage( wst, 0 )
+               AfxDoEvents
+
+               wszCompile = wDQ + gCompile.CompilerPath + wDQ + " -c " + _
+                            wDQ + pDoc->DiskFilename + wDQ + " -o " + wDQ + wszTemp + wDQ + " 2>&1"
+               f = freefile
+               open Pipe wDQ + wszCompile + wDQ for input as #f    ' wrap entire pipe string in quotes
+               while not eof(f)
+                  line input #f, wszTemp  
+                  wsLogSt = wsLogSt + wszTemp + vbcrlf   
+               WEND
+               close #f
+               AfxDoEvents   ' breathe...
             End If
             
          End If
       Next
    End If
 
-   
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
-   Print #f, wDQ; gCompile.CompilerPath; wDQ; _
-            " "; wDQ; gCompile.MainFilename; wDQ; 
+   wszCompile =  wDQ + gCompile.CompilerPath + wDQ + " " + wDQ + gCompile.MainFilename + wDQ 
    If Len(gCompile.ResourceFile) then
-      print #f, " "; wDQ; gCompile.ResourceFile; wDQ; 
+      wszCompile = wszCompile + " " + wDQ + gCompile.ResourceFile + wDQ
    end if   
-   print #f, " -v "; gCompile.CompileFlags; 
-        
+   wszCompile = wszCompile + " -v " + gCompile.CompileFlags 
+   
    If gApp.IsProjectActive Then
       nCount = gApp.Projects(idx).GetDocumentCount 
       For i = 0 To nCount - 1
@@ -293,39 +316,66 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          If pDoc->ProjectFileType = FILETYPE_MODULE Then
             ' Get the base name of the file for constructing the object filename
             wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
-            Print #f, " "; gCompile.ObjFolderShort; wszTemp; gCompile.ObjID;
+            wszCompile = wszCompile + " " + gCompile.ObjFolderShort + wszTemp + gCompile.ObjID
          End If
       Next
    End If
+   wszCompile = wszCompile + " 2>&1"
+   
+   wst = L(203, "Compiling...") + " " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
+   SetCompileStatusBarMessage( wst, 0 )
+   AfxDoEvents
 
-   Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
-   Close #f
+   f = freefile
+   open Pipe wDQ + wszCompile + wDQ for input as #f    ' wrap entire pipe string in quotes
+   while not eof(f)
+      line input #f, wszTemp  
+      wsLogSt = wsLogSt + wszTemp + vbcrlf   
+   WEND
+   close #f
+
+   
+'   ' Compile the Main file. If this is a project then we also need to link
+'   ' in all of the *.o object files.
+'   Print #f, wDQ; gCompile.CompilerPath; wDQ; _
+'            " "; wDQ; gCompile.MainFilename; wDQ; 
+'   If Len(gCompile.ResourceFile) then
+'      print #f, " "; wDQ; gCompile.ResourceFile; wDQ; 
+'   end if   
+'   print #f, " -v "; gCompile.CompileFlags; 
          
-   wszFileExe = Environ("COMSPEC")
-   'wszParam   = " /U /C " & gCompile.BatchFile
-   wszParam   = " /C " & gCompile.BatchFile
+'   If gApp.IsProjectActive Then
+'      nCount = gApp.Projects(idx).GetDocumentCount 
+'      For i = 0 To nCount - 1
+'         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+'         If pDoc->ProjectFileType = FILETYPE_MODULE Then
+'            ' Get the base name of the file for constructing the object filename
+'            wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
+'            Print #f, " "; gCompile.ObjFolderShort; wszTemp; gCompile.ObjID;
+'         End If
+'      Next
+'   End If
 
-   With ShExecInfo
-      .cbSize       = Len(SHELLEXECUTEINFOW)
-      .fMask        = SEE_MASK_NOCLOSEPROCESS
-      .HWnd         = 0
-      .lpVerb       = Null
-      .lpFile       = @wszFileExe
-      .lpParameters = @wszParam   
-      .lpDirectory  = 0
-      .nShow        = SW_HIDE
-      .hInstApp     = 0 
-   End With
+'   Print #f, " >> "; gCompile.LogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
+'   Close #f
+          
+'   wszFileExe = Environ("COMSPEC")
+'   'wszParam   = " /U /C " & gCompile.BatchFile
+'   wszParam   = " /C " & gCompile.BatchFile
+
+'   With ShExecInfo
+'      .cbSize       = Len(SHELLEXECUTEINFOW)
+'      .fMask        = SEE_MASK_NOCLOSEPROCESS
+'      .HWnd         = 0
+'      .lpVerb       = Null
+'      .lpFile       = @wszFileExe
+'      .lpParameters = @wszParam   
+'      .lpDirectory  = 0
+'      .nShow        = SW_HIDE
+'      .hInstApp     = 0 
+'   End With
    
    
-   ' Indicate in the StatusBar that we have started to compile
-   SetCompileStatusBarMessage( "", 0 )
-
-   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
-   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
-   ShowWindow( hProgressBar, SW_SHOW)
-
 
    ' Shell to the command interpreter and run the batch file
    gCompile.StartTime = Timer
@@ -337,49 +387,50 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
       
-   
-   ' Shell to the compiler 
-   ShellExecuteEx(@ShExecInfo)
-    
-   ' Give the process 33 ms (you can use a different value here depending on 
-   ' how responsive you wish your app to be)
-   Dim uMsg As MSG
-   while WaitForSingleObject(ShExecInfo.hProcess, 33) = WAIT_TIMEOUT
-   '  if after 33 ms the object's handle is not signaled..       
-   '  we examine the message queue and if there are any waiting..
-   '  Note:  see PeekMessage documentation for details on how to limit
-   '         the types of messages to look for
-      while(PeekMessage(@uMsg, HWND_FRMMAIN,  0, 0, PM_NOREMOVE))
-        ' we process them..
-        if(GetMessage(@uMsg, NULL, 0, 0) > 0) then
-            TranslateMessage(@uMsg)
-            DispatchMessage(@uMsg)
-         end if
-      wend
-   wend
+
+'   ' Shell to the compiler 
+'   ShellExecuteEx(@ShExecInfo)
+     
+'   ' Give the process 33 ms (you can use a different value here depending on 
+'   ' how responsive you wish your app to be)
+'   Dim uMsg As MSG
+'   while WaitForSingleObject(ShExecInfo.hProcess, 33) = WAIT_TIMEOUT
+'   '  if after 33 ms the object's handle is not signaled..       
+'   '  we examine the message queue and if there are any waiting..
+'   '  Note:  see PeekMessage documentation for details on how to limit
+'   '         the types of messages to look for
+'      while(PeekMessage(@uMsg, HWND_FRMMAIN,  0, 0, PM_NOREMOVE))
+'        ' we process them..
+'        if(GetMessage(@uMsg, NULL, 0, 0) > 0) then
+'            TranslateMessage(@uMsg)
+'            DispatchMessage(@uMsg)
+'         end if
+'      wend
+'   wend
 
    SetCursor( hCurSave )
    if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
    gCompile.EndTime = Timer
    gCompiling = false
-   ShowWindow( hProgressBar, SW_HIDE)
+'   ShowWindow( hProgressBar, SW_HIDE)
 
-   ' Get the log file contents into a string in order to parse it for errors, etc
-   If AfxFileExists(gCompile.LogFile) Then
-      dim st as string 
-      wsLogSt = ""
-      f = Freefile
-      Open gCompile.LogFile For INPUT as #f
-      while eof(f) = 0
-         line input #f, st
-         wsLogSt = wsLogSt + wstr(st) + vbcrlf
-      WEND
-      Close #f
-   End If   
-   
-   ' Delete the temporary batch file and the compiler log file
-   Kill gCompile.BatchFile
-   Kill gCompile.LogFile
+
+'   ' Get the log file contents into a string in order to parse it for errors, etc
+'   If AfxFileExists(gCompile.LogFile) Then
+'      dim st as string 
+'      wsLogSt = ""
+'      f = Freefile
+'      Open gCompile.LogFile For INPUT as #f
+'      while eof(f) = 0
+'         line input #f, st
+'         wsLogSt = wsLogSt + wstr(st) + vbcrlf
+'      WEND
+'      Close #f
+'   End If   
+    
+'   ' Delete the temporary batch file and the compiler log file
+'   Kill gCompile.BatchFile
+'   Kill gCompile.LogFile
 
    ' If this was a QuickRun then delete the temporary code file that was created.
    if wID = IDM_QUICKRUN THEN 

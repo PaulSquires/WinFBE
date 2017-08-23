@@ -1,3 +1,7 @@
+Version 1.4.6 (August 23, 2017)
+- Changed: "Save Declares File" now defaults to *.bi file extension rather than *.bas.
+- Changed: Converted compiling process from batch file to Pipe in order to better handle international languages.
+
 Version 1.4.5 (August 20, 2017)
 - Fixed: Improve several areas for better high DPI compatibility.
 
