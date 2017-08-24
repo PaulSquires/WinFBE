@@ -1,3 +1,4 @@
+declare SUB RedirConsoleToFile( byref szExe AS zstring, byref szCmdLine AS zstring, byref sConsoleText AS string)
 Declare Function GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
 Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 Declare Function RemoveDuplicateSpaces( byref sText as const string) as string

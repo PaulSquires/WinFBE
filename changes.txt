@@ -1,3 +1,6 @@
+Version 1.4.7 (August 23, 2017)
+- Changed: Replaced FB's OPEN PIPE with WinAPI in order to prevent console window on screen during compiling.
+
 Version 1.4.6 (August 23, 2017)
 - Changed: "Save Declares File" now defaults to *.bi file extension rather than *.bas.
 - Changed: Converted compiling process from batch file to Pipe in order to better handle international languages.

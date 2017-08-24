@@ -257,6 +257,19 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    SetCompileStatusBarMessage( L(203, "Compiling..."), 0 )
    AfxDoEvents
    
+   gCompile.StartTime = Timer
+   gCompiling = true    
+   
+   dim as HCURSOR hCurSave = GetCursor()
+   SetCursor( LoadCursor(0, IDC_WAIT) )
+
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+
+   dim wszCommand as CWSTR = gCompile.CompilerPath
+   dim wszParams as CWSTR
+   dim as string sConsoleText
+
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
@@ -285,29 +298,35 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                SetCompileStatusBarMessage( wst, 0 )
                AfxDoEvents
 
-               wszCompile = wDQ + gCompile.CompilerPath + wDQ + " -c " + _
-                            wDQ + pDoc->DiskFilename + wDQ + " -o " + wDQ + wszTemp + wDQ + " 2>&1"
-               f = freefile
-               open Pipe wDQ + wszCompile + wDQ for input as #f    ' wrap entire pipe string in quotes
-               while not eof(f)
-                  line input #f, wszTemp  
-                  wsLogSt = wsLogSt + wszTemp + vbcrlf   
-               WEND
-               close #f
+'               wszCompile = wDQ + gCompile.CompilerPath + wDQ + " -c " + _
+'                            wDQ + pDoc->DiskFilename + wDQ + " -o " + wDQ + wszTemp + wDQ + " 2>&1"
+'               f = freefile
+'               open Pipe wDQ + wszCompile + wDQ for input as #f    ' wrap entire pipe string in quotes
+'               while not eof(f)
+'                  line input #f, wszTemp  
+'                  wsLogSt = wsLogSt + wszTemp + vbcrlf   
+'               WEND
+'               close #f
                AfxDoEvents   ' breathe...
+
+               wszParams = " -c " + wDQ + pDoc->DiskFilename + wDQ + _
+                           " -o " + wDQ + wszTemp + wDQ 
+               RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
+
             End If
             
          End If
       Next
    End If
 
+
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
-   wszCompile =  wDQ + gCompile.CompilerPath + wDQ + " " + wDQ + gCompile.MainFilename + wDQ 
+   wszParams = wDQ + gCompile.MainFilename + wDQ 
    If Len(gCompile.ResourceFile) then
-      wszCompile = wszCompile + " " + wDQ + gCompile.ResourceFile + wDQ
+      wszParams = wszParams + " " + wDQ + gCompile.ResourceFile + wDQ
    end if   
-   wszCompile = wszCompile + " -v " + gCompile.CompileFlags 
+   wszParams = wszParams + " -v " + gCompile.CompileFlags 
    
    If gApp.IsProjectActive Then
       nCount = gApp.Projects(idx).GetDocumentCount 
@@ -316,23 +335,48 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          If pDoc->ProjectFileType = FILETYPE_MODULE Then
             ' Get the base name of the file for constructing the object filename
             wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
-            wszCompile = wszCompile + " " + gCompile.ObjFolderShort + wszTemp + gCompile.ObjID
+            wszParams = wszParams + " " + gCompile.ObjFolderShort + wszTemp + gCompile.ObjID
          End If
       Next
    End If
-   wszCompile = wszCompile + " 2>&1"
+'   wszCompile = wszCompile + " 2>&1"
    
+'   ' Compile the Main file. If this is a project then we also need to link
+'   ' in all of the *.o object files.
+'   wszCompile =  wDQ + gCompile.CompilerPath + wDQ + " " + wDQ + gCompile.MainFilename + wDQ 
+'   If Len(gCompile.ResourceFile) then
+'      wszCompile = wszCompile + " " + wDQ + gCompile.ResourceFile + wDQ
+'   end if   
+'   wszCompile = wszCompile + " -v " + gCompile.CompileFlags 
+    
+'   If gApp.IsProjectActive Then
+'      nCount = gApp.Projects(idx).GetDocumentCount 
+'      For i = 0 To nCount - 1
+'         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+'         If pDoc->ProjectFileType = FILETYPE_MODULE Then
+'            ' Get the base name of the file for constructing the object filename
+'            wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
+'            wszCompile = wszCompile + " " + gCompile.ObjFolderShort + wszTemp + gCompile.ObjID
+'         End If
+'      Next
+'   End If
+'   wszCompile = wszCompile + " 2>&1"
+
    wst = L(203, "Compiling...") + " " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
    SetCompileStatusBarMessage( wst, 0 )
    AfxDoEvents
 
-   f = freefile
-   open Pipe wDQ + wszCompile + wDQ for input as #f    ' wrap entire pipe string in quotes
-   while not eof(f)
-      line input #f, wszTemp  
-      wsLogSt = wsLogSt + wszTemp + vbcrlf   
-   WEND
-   close #f
+'   f = freefile
+'   open Pipe wDQ + wszCompile + wDQ for input as #f    ' wrap entire pipe string in quotes
+'   while not eof(f)
+'      line input #f, wszTemp  
+'      wsLogSt = wsLogSt + wszTemp + vbcrlf   
+'   WEND
+'   close #f
+
+   sConsoleText = ""
+   RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
+   wsLogSt = sConsoleText
 
    
 '   ' Compile the Main file. If this is a project then we also need to link
@@ -375,17 +419,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 '      .hInstApp     = 0 
 '   End With
    
-   
-
-   ' Shell to the command interpreter and run the batch file
-   gCompile.StartTime = Timer
-   gCompiling = true    
-   
-   dim as HCURSOR hCurSave = GetCursor()
-   SetCursor( LoadCursor(0, IDC_WAIT) )
-
-   pDoc = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
       
 
 '   ' Shell to the compiler 
@@ -409,6 +442,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 '   wend
 
    SetCursor( hCurSave )
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
    gCompile.EndTime = Timer
    gCompiling = false
@@ -635,72 +669,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 '      dim sBuffer as String
 '      RedirConsoleToFile( gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine, sBuffer )
        
-'      if len(sBuffer) THEN
-'         cwsCompileMsg = L(193, "Errors:") & " 1" & "  " & _
-'                         L(192, "Warnings:") & " 0" & _
-'                         "  [" + Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
-'         SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
-'         MessageBeep(MB_ICONWARNING)
-'         TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
-'         PositionOutputWindows(HWND_FRMOUTPUT)
-
-'         ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
-'         frmMain_PositionWindows(HWND_FRMMAIN)
-
-'      ' Set to error line position only after all windows have been shown and resized
-''Aborting due to runtime error 6 (out of bounds array access) at line 2 of D:\Use
-''rs\T0003830\Documents\Mes Outils Personnels\FBIde0.4.6r4_fbc1.06.0\FBIDETEMP.bas
-''::()
-
-''Aborting due to runtime error 12 ("segmentation violation" signal) in D:\Users\T
-''0003830\Documents\Mes Outils Personnels\FBIde0.4.6r4_fbc1.06.0\FBIDETEMP.bas::S()
-
-
-'         ' Is this a runtime error?
-'         if instr(sBuffer, "Aborting due to runtime error ") THEN
-'            dim as long f1, f2
-'            ' Can we retrieve a line number?
-'            f1 = instr(sBuffer, " at line ")
-'            if f1 THEN
-'               wst3 = wstr(left(sBuffer, f1-1))
-'               f2 = instr(f1, sBuffer, " of ")
-'               wst2 = AfxStrParse(mid(sBuffer, f1+9), 1, " ")   ' line#
-'               wst1 = mid(sBuffer, f2+4)
-'               wst1 = AfxStrParse(wst1, 1, "::")   ' filename
-'               FF_ListView_InsertItem( hLV, 0, 0, wst2 )  ' line#
-'               FF_ListView_InsertItem( hLV, 0, 1, wst1 )  ' filename
-'               FF_ListView_InsertItem( hLV, 0, 2, wst3 )  ' error message
-'               ListView_SelectItem( hLV, 0 )
-'               SetDocumentErrorPosition(hLV)
-'            else
-'               ' Could not identify a line number so position to the line
-'               ' number of the specified sub/function   
-'               wst2 = rtrim(AfxStrParse(sBuffer, 2, "::"), any chr(0,32,13,10))   ' sub/function name
-'               wst2 = rtrim(wst2, "()")
-'               wst3 = wstr(sBuffer)
-'               f1 = instr(sBuffer, ":\")
-'               if f1 THEN
-'                  wst1 = AfxStrParse(mid(sBuffer, f1-1), 1, "::")
-'               END IF
-'               if len(wst2) = 0 THEN
-'                  FF_ListView_InsertItem( hLV, 0, 0, "main()" )  ' line#
-'               else   
-'                  FF_ListView_InsertItem( hLV, 0, 0, wst2+"()" )  ' line#
-'               END IF
-'               FF_ListView_InsertItem( hLV, 0, 1, wst1 )  ' filename
-'               FF_ListView_InsertItem( hLV, 0, 2, wst3 )  ' error message
-'               ListView_SelectItem( hLV, 0 )
-'               OpenSelectedDocument(0, wst2)
-'            END IF
-'         else
-'            wst3 = wstr(sBuffer)
-'            FF_ListView_InsertItem( hLV, 0, 0, "0" )    ' line#
-'            FF_ListView_InsertItem( hLV, 0, 1, "???" )  ' filename
-'            FF_ListView_InsertItem( hLV, 0, 2, wst3 )   ' error message
-'            ListView_SelectItem( hLV, 0 )
-'         END IF
-          
-'      end if
    End If
       
    Function = True   ' successful
@@ -714,79 +682,83 @@ End Function
 
 ''
 ''
-'FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
-'                             byref zParams  AS zstring, _
-'                             byval hChildStdOutWrite AS HANDLE _
-'                             ) AS BOOLEAN
+FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
+                             byref zParams  AS zstring, _
+                             byval hChildStdOutWrite AS HANDLE _
+                             ) AS BOOLEAN
     
-'   dim ProcessInfo AS PROCESS_INFORMATION
-'   dim StartupInf  AS STARTUPINFO
+   dim ProcessInfo AS PROCESS_INFORMATION
+   dim StartupInf  AS STARTUPINFO
 
-'   StartupInf.cb         = SIZEOF(STARTUPINFO)
-'   StartupInf.hStdError  = hChildStdOutWrite    ' only capture the error messages
-'   StartupInf.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE)  'hChildStdOutWrite
-'   StartupInf.dwFlags    = STARTF_USESTDHANDLES
+   StartupInf.cb         = SIZEOF(STARTUPINFO)
+   StartupInf.hStdError  = hChildStdOutWrite   
+   StartupInf.hStdOutput = hChildStdOutWrite  
+   StartupInf.dwFlags    = STARTF_USESTDHANDLES
+   
+   IF CreateProcess( zCmdLine,  _                ' Create the child process.
+                     zCmdLine & " " & zParams, _ ' Command line
+                     BYVAL 0,     _  ' Process security attributes
+                     BYVAL 0,     _  ' Primary thread security attributes
+                     TRUE,        _  ' Handles are inherited
+                     CREATE_NO_WINDOW, _  ' Creation flags  
+                     BYVAL 0,     _  ' Use parent's environment
+                     BYVAL 0,     _  ' Use parent's current directory
+                     @StartupInf,  _  ' STARTUPINFO pointer
+                     @ProcessInfo) = FALSE THEN
+      ? "error createprocess"
+   ELSE
+      ' Close handles to the child process and its primary thread.
+      ' Some applications might keep these handles to monitor the status 
+      ' of the child process, for example.
+      CloseHandle( ProcessInfo.hProcess )
+      CloseHandle( ProcessInfo.hThread )
+      FUNCTION = TRUE
+ END IF
+END FUNCTION
 
-'   IF CreateProcess( zCmdLine,  _                ' Create the child process.
-'                     zCmdLine & " " & zParams, _ ' Command line
-'                     BYVAL 0,     _  ' Process security attributes
-'                     BYVAL 0,     _  ' Primary thread security attributes
-'                     TRUE,        _  ' Handles are inherited
-'                     0,           _  ' Creation flags
-'                     BYVAL 0,     _  ' Use parent's environment
-'                     BYVAL 0,     _  ' Use parent's current directory
-'                     @StartupInf,  _  ' STARTUPINFO pointer
-'                     @ProcessInfo) = FALSE THEN
-'      ? "error createprocess"
-'   ELSE
-'      ' Close handles to the child process and its primary thread.
-'      ' Some applications might keep these handles to monitor the status 
-'      ' of the child process, for example.
-'      CloseHandle( ProcessInfo.hProcess )
-'      CloseHandle( ProcessInfo.hThread )
-'      FUNCTION = TRUE
-' END IF
-'END FUNCTION
-
-'''
-'''
-'SUB RedirConsoleToFile( byref szExe AS zstring, _
-'                        byref szCmdLine AS zstring, _
-'                        byref sSaveToFile AS STRING _
-'                        )
-'   dim SecurityAttribute AS SECURITY_ATTRIBUTES
-'   dim hChildStdOutRead  AS PHANDLE
-'   dim hChildStdOutWrite AS PHANDLE
-'   dim dwReadBytes       AS long
-'   dim sBuffer AS STRING * 4096
+''
+''
+SUB RedirConsoleToFile( byref szExe AS zstring, _
+                        byref szCmdLine AS zstring, _
+                        byref sConsoleText AS string _
+                        )
+   dim SecurityAttribute AS SECURITY_ATTRIBUTES
+   dim hChildStdOutRead  AS PHANDLE
+   dim hChildStdOutWrite AS PHANDLE
+   dim dwReadBytes       AS long
+   dim sBuffer AS STRING * 4096
   
-'   ' Set the bInheritHandle flag so pipe handles are inherited.
-'   SecurityAttribute.nLength              = SIZEOF(SECURITY_ATTRIBUTES)
-'   SecurityAttribute.bInheritHandle       = TRUE
-'   SecurityAttribute.lpSecurityDescriptor = NULL
+   ' Set the bInheritHandle flag so pipe handles are inherited.
+   SecurityAttribute.nLength              = SIZEOF(SECURITY_ATTRIBUTES)
+   SecurityAttribute.bInheritHandle       = TRUE
+   SecurityAttribute.lpSecurityDescriptor = NULL
 
-'   ' Create a pipe for the child process's STDOUT.
-'   IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
-'      ? "error creating pipe"
-'   ELSE
-'      ' Ensure the read handle to the pipe for STDOUT is not inherited.
-'      IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
-'         ? "error SetHandleInformation"
-'      ELSE
-'         ' Create the child process and read from its standard output
-'         IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
-'            CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
-'            DO
-'              IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN EXIT DO
-'              ? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
-'              sSaveToFile = sSaveToFile & LEFT(sBuffer, dwReadBytes)
-'              '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
-'              ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
-'            LOOP
-'         END IF
-'      END IF
-'   END IF
-'END SUB
+   ' Create a pipe for the child process's STDOUT.
+   IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
+      ? "error creating pipe"
+   ELSE
+      ' Ensure the read handle to the pipe for STDOUT is not inherited.
+      IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
+         ? "error SetHandleInformation"
+      ELSE
+         ' Create the child process and read from its standard output
+         IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
+            CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
+            DO
+               IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN 
+                  ? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead, "dwReadBytes=";dwReadBytes
+                  ? "GetLastError: "; GetLastError
+                  EXIT DO
+               end if  
+               ? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
+               sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
+               '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
+               ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
+            LOOP
+         END IF
+      END IF
+   END IF
+END SUB
 
 ''
 ''
