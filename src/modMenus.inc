@@ -291,7 +291,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    For idMenu = IDM_ADDFILETOPROJECT To IDM_PROJECTOPTIONS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
-   For idMenu = IDM_BUILDEXECUTE To IDM_COMMANDLINE
+   For idMenu = IDM_BUILDEXECUTE To IDM_LOCKCONTROLS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
    
@@ -309,6 +309,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_COMPILECONFIG, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_USERTOOLSDIALOG, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_NEWFORM, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
@@ -322,6 +323,14 @@ Function frmMain_ChangeTopMenuStates() As Long
       ' Enable or disable specific edit menu items (based on the currently active document)
       Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
       If pDoc Then 
+         
+         ' If this is not a visual designer window then disable
+         for idMenu = IDM_VIEWTOOLBOX to IDM_LOCKCONTROLS
+            if pDoc->IsDesigner = false THEN
+               EnableMenuItem( hMenu, idMenu, MF_GRAYED)
+            end if
+         NEXT
+         
          hEdit = pDoc->hWindow
          If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
             EnableMenuItem( hMenu, IDM_PASTE, MF_GRAYED)

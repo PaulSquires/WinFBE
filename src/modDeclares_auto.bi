@@ -1,3 +1,4 @@
+declare function ParseLogForError( byref wsLogSt as CWSTR, byval bAllowSuccessMessage as Boolean, Byval wID as long) as Boolean
 declare SUB RedirConsoleToFile( byref szExe AS zstring, byref szCmdLine AS zstring, byref sConsoleText AS string)
 Declare Function GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
 Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
@@ -228,7 +229,9 @@ Declare Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOO
 Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr ) As clsDocument Ptr
+Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, _
+                           ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, _
+                           ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false ) As clsDocument Ptr
 Declare Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT

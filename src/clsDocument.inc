@@ -200,7 +200,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    If bSaveAs Then
       ' Display the Save File Dialog
       wText = AfxStrPathname( "NAMEX", wFilename )
-      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "")
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "", IDM_FILESAVEAS)
       If pwszName Then
          wFilename = *pwszName
          CoTaskMemFree(pwszName)

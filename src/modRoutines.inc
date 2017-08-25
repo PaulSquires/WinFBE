@@ -739,22 +739,24 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC 
    
    Select Case id
-      Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE
+      Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS
          rgFileTypes(1).pszName = @L(216,"Project files")
          rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.wfbe")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+         ' // Set the title of the dialog
+         hr = psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(185,"Save Project &As..."),"&"))
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
          rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+         if id = IDM_FILESAVEAS THEN psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(8,"Save &As..."),"&"))
+         if id = IDM_FILESAVEDECLARES THEN psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(265,"Save &Declares File"),"&"))
    End Select
    
-   ' // Set the title of the dialog
-   hr = psfd->lpVtbl->SetTitle(psfd, L(107,"Save source file"))
    ' // Set the file name
    hr = psfd->lpVtbl->SetFileName(psfd, pwszFileName)
    ' // Set the extension

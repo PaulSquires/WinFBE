@@ -1,3 +1,8 @@
+Version 1.4.8 (August 25, 2017)
+- Changed: Failed results when compiling individual module files to object files are now displayed.
+- Changed: Corrected captions on save dialogbox for "Save As", "Save Declares File", "Save Project As".
+- Fixed: Compiling failed in situations where spaces in file path to compiler (CreateProcess and/or FBC assembling would fail). 
+
 Version 1.4.7 (August 23, 2017)
 - Changed: Replaced FB's OPEN PIPE with WinAPI in order to prevent console window on screen during compiling.
 

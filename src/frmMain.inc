@@ -662,7 +662,8 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                  ByVal bShowInTab  As BOOLEAN, _
                                  byval bIsInclude  as BOOLEAN, _
                                  ByVal pwszName    As WString Ptr, _
-                                 ByVal pDocIn      As clsDocument Ptr _
+                                 ByVal pDocIn      As clsDocument Ptr, _
+                                 byval bIsDesigner as Boolean _
                                  ) As clsDocument Ptr
    
    Dim As Long iTab = -1
@@ -681,11 +682,20 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    
    If pDocIn = 0 Then   ' Create a new pDoc 
       pDoc = New clsDocument
-      If bIsNewFile Then
-         pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
-      Else
-         pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
-      End If   
+      if bIsDesigner THEN
+         If bIsNewFile Then
+            AfxMsg("New designer window")
+            'pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+         Else
+            'pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
+         End If   
+      else
+         If bIsNewFile Then
+            pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+         Else
+            pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
+         End If   
+      END IF
       gApp.Projects(idx).AddDocument(pDoc)          
    Else
       pDoc = pDocIn     ' deal with the existing pDoc
@@ -745,6 +755,20 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
 End Function
 
 
+' ========================================================================================
+' Create a new visual designer window
+' ========================================================================================
+Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
+   frmMain_OpenFileSafely(HWnd, _
+                           True,  _   ' bIsNewFile
+                           False, _   ' bIsTemplate
+                           True,  _   ' bShowInTab
+                           false, _   ' bIsInclude
+                           0, _       ' pwszName
+                           0, _       ' pDocIn
+                           true )     ' Create a visual designer   
+   Function = 0
+End Function
 
 ' ========================================================================================
 ' Create a new editing window
@@ -856,7 +880,7 @@ Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
    dim wFilename as wstring * MAX_PATH
    static wText as wstring * MAX_PATH
    
-   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "bi")
+   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "bi", IDM_FILESAVEDECLARES)
    If pwszName Then
       wFilename = *pwszName
       wText = AfxStrPathname( "NAMEX", wFilename )
@@ -1255,17 +1279,22 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       ''  COMPILE MENU          
       Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
          Function = code_Compile(id)
-
       Case IDM_RUNEXE
          RunExe( GetRunExecutableFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
-      
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
+
 
       ''  OPTIONS MENU
       Case IDM_OPTIONS:               Function = frmOptions_Show( HWnd, SW_NORMAL )
       case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
       case IDM_USERTOOLSDIALOG:       function = frmUserTools_Show( HWND ) 
          
+      
+      ''   DESIGNER MENU
+      case IDM_NEWFORM:               function = OnCommand_DesignerNewForm(HWND)
+
+      
+      ''   TOOLS MENU
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
          ExecuteUserTool( id - IDM_USERTOOL )
 
