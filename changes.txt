@@ -1,3 +1,6 @@
+Version 1.4.9 (not released yet)
+- Changed: Filters for "Save As", "Save Declares File", "Open', and "Insert File".
+
 Version 1.4.8 (August 25, 2017)
 - Changed: Failed results when compiling individual module files to object files are now displayed.
 - Changed: Corrected captions on save dialogbox for "Save As", "Save Declares File", "Save Project As".

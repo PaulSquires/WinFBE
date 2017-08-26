@@ -594,7 +594,7 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
    If pofd = Null Then Return Null
 
    ' Set the file types depending on the button pushed that calls this open dialog
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
+   Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
 
    Select Case idButton
       case IDC_FRMUSERTOOLS_CMDBROWSEEXE
@@ -614,11 +614,17 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          hr = pofd->lpVtbl->SetTitle(pofd, L(216,"Project files"))
       
       Case IDM_INSERTFILE
-         rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(79,"All files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
-         rgFileTypes(2).pszSpec = @WSTR("*.*")
-         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         rgFileTypes(1).pszName = @L(106,"Open source file")
+         rgFileTypes(2).pszName = @L(77,"FB code files")
+         rgFileTypes(3).pszName = @L(78,"FB Include files")
+         rgFileTypes(4).pszName = @L(209,"Resource files")
+         rgFileTypes(5).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas")
+         rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(4).pszSpec = @WSTR("*.rc")
+         rgFileTypes(5).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
 
@@ -685,12 +691,18 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
    If pofd = Null Then Return Null
 
    ' Set the file types
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
-   rgFileTypes(1).pszName = @L(77,"FB code files")
-   rgFileTypes(2).pszName = @L(79,"All files")
-   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
-   rgFileTypes(2).pszSpec = @WSTR("*.*")
-   pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+   Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
+   rgFileTypes(1).pszName = @L(106,"Open source file")
+   rgFileTypes(2).pszName = @L(77,"FB code files")
+   rgFileTypes(3).pszName = @L(78,"FB Include files")
+   rgFileTypes(4).pszName = @L(209,"Resource files")
+   rgFileTypes(5).pszName = @L(79,"All files")
+   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
+   rgFileTypes(2).pszSpec = @WSTR("*.bas")
+   rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+   rgFileTypes(4).pszSpec = @WSTR("*.rc")
+   rgFileTypes(5).pszSpec = @WSTR("*.*")
+   pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
 
    ' Set the title of the dialog
    hr = pofd->lpVtbl->SetTitle(pofd, L(106,"Open source file"))
@@ -736,7 +748,7 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    If psfd = Null Then Return Null
 
    ' // Set the file types
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC 
+   Dim rgFileTypes(1 To 4) As COMDLG_FILTERSPEC 
    
    Select Case id
       Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS
@@ -747,14 +759,29 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
          ' // Set the title of the dialog
          hr = psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(185,"Save Project &As..."),"&"))
+
+      case IDM_FILESAVEDECLARES 
+         rgFileTypes(1).pszName = @L(78,"FB Include files")
+         rgFileTypes(2).pszName = @L(77,"FB code files")
+         rgFileTypes(3).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas")
+         rgFileTypes(3).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
+         psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(265,"Save &Declares File"),"&"))
+
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(79,"All files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
-         rgFileTypes(2).pszSpec = @WSTR("*.*")
-         psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
-         if id = IDM_FILESAVEAS THEN psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(8,"Save &As..."),"&"))
-         if id = IDM_FILESAVEDECLARES THEN psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(265,"Save &Declares File"),"&"))
+         rgFileTypes(2).pszName = @L(78,"FB Include files")
+         rgFileTypes(3).pszName = @L(209,"Resource files")
+         rgFileTypes(4).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas")
+         rgFileTypes(2).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(3).pszSpec = @WSTR("*.rc")
+         rgFileTypes(4).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 4, @rgFileTypes(1))
+         psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(8,"Save &As..."),"&"))
+     
    End Select
    
    ' // Set the file name
