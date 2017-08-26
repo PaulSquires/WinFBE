@@ -631,9 +631,11 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
       Case IDC_FRMOPTIONSCOMPILER_CMDFBWIN32, IDC_FRMOPTIONSCOMPILER_CMDFBWIN64
          rgFileTypes(1).pszName = @L(100,"FB Compiler")
          rgFileTypes(1).pszSpec = @WSTR("fbc.exe")
-         rgFileTypes(2).pszName = @L(79,"All files")
-         rgFileTypes(2).pszSpec = @WSTR("*.*")
-         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         rgFileTypes(2).pszName = @L(230,"Executable")
+         rgFileTypes(2).pszSpec = @WSTR("*.exe")
+         rgFileTypes(3).pszName = @L(79,"All files")
+         rgFileTypes(3).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(101,"Find FreeBASIC Compiler"))
    
