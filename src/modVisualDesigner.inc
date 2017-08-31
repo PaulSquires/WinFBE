@@ -314,6 +314,8 @@ function DesignerFrame_OnMouseMove( ByVal HWnd As HWnd, _
          Case GRAB_BOTTOM
             pDoc->rcSize.bottom = pDoc->rcSize.bottom + (y - pDoc->ptPrev.y)
       End Select
+
+? pDoc->rcSize.bottom; "  "; pDoc->rcSize.top, pDoc->rcSize.right; "  "; pDoc->rcSize.left
       
       ' Save the current mouse position
       pDoc->ptPrev.x = x
@@ -329,12 +331,12 @@ function DesignerFrame_OnMouseMove( ByVal HWnd As HWnd, _
       If pDoc->rcSize.bottom - pDoc->rcSize.top <= AfxScaleY(8) Then pDoc->rcSize.bottom = pDoc->rcSize.top + AfxScaleY(8)
 
       ' Map the window based rcSize to client coordinates
-      MapWindowPoints(0, hWnd, cast(point ptr, @pDoc->rcSize), 2)
+'      MapWindowPoints(0, hWnd, cast(point ptr, @pDoc->rcSize), 2)
       
       ' Move the form/control to its new position
-      SetWindowPos( pDoc->hWndForm, 0, pDoc->rcSize.left, pDoc->rcSize.top, _
+      SetWindowPos( pDoc->hWndForm, 0, 0, 0, _
                     pDoc->rcSize.right - pDoc->rcSize.left, pDoc->rcSize.bottom - pDoc->rcSize.top, _
-                    SWP_NOZORDER)
+                    SWP_NOMOVE or SWP_NOZORDER)
       
    else
       pDoc->GrabHit = SetGrabHandleMouseCursor(pDoc, x, y)

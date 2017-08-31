@@ -1838,8 +1838,6 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          pDataToGet = cast(COPYDATASTRUCT ptr, lParam)
          pwszArg = pDataToGet->lpData
           
-AfxMsg(*pwszArg)
-
          ' We have a valid filename so determine what type it is.
          wszExt = AfxStrPathname( "EXTN", *pwszArg )
          wszExt = Ucase(wszExt)
