@@ -103,6 +103,9 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
       fAddChildren = True
    End If
  
+   ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
+   Treeview_SortChildren( hTree, hRootNode, 0 )
+      
    If fAddChildren Then
       dim wszText as wstring * MAX_PATH
       dim as HTREEITEM hNode

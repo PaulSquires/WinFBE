@@ -239,6 +239,9 @@ Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located 
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
 CONST IDM_ADDFILETOPROJECT = 6100    ' 6100 to 6199 Popup menu will show list of open projects to choose from. 
 
+const IDC_DESIGNFRAME = 100
+const IDC_DESIGNFORM  = 101
+      
 Const FILETYPE_UNDEFINED = 0
 Const FILETYPE_MAIN      = 1
 Const FILETYPE_MODULE    = 2
@@ -255,6 +258,27 @@ const USERTOOL_ACTION_SELECTED    = 0
 const USERTOOL_ACTION_PRECOMPILE  = 1   
 const USERTOOL_ACTION_POSTCOMPILE = 2
    
+
+'  Control types   
+enum
+   CTRL_FORM = 1
+   
+end enum
+   
+'  Grab handles (clockwise starting at top left corner)
+enum
+   GRAB_NOHIT = 0
+   GRAB_TOPLEFT 
+   GRAB_TOP
+   GRAB_TOPRIGHT
+   GRAB_RIGHT
+   GRAB_BOTTOMRIGHT
+   GRAB_BOTTOM
+   GRAB_BOTTOMLEFT
+   GRAB_LEFT
+end enum   
+
+
 ''  Menu message identifiers
 Enum
 ''  Custom messages
@@ -389,13 +413,52 @@ End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
 
+type clsControl
+   private:
+   
+   public:
+      hWindow      as hwnd
+      ControlType  as long 
+      IsSelected   as Boolean
+      IsActive     as Boolean
+      rcHandles(1 to 8) as RECT       ' 8 grab handles
+END TYPE
+
+Type clsCollection
+   Private:
+      Dim _arrControls(Any) As clsControl Ptr
+      
+   Public:
+      Declare Property Count() As Long
+      Declare Property ItemFirst() As Long
+      Declare Property ItemLast() As Long
+      Declare Function ItemAt( ByVal nIndex As Long ) As clsControl Ptr 
+      'declare function ItemByName( byref wszName as wstring ) as clsControl ptr
+      Declare Function Add( ByVal pCtrl As clsControl Ptr ) As Long
+      declare function Remove( byval pCtrl as clsControl ptr ) as long
+      Declare Constructor
+      Declare Destructor
+End Type
+
+
 Type clsDocument
    Private:
       m_pSci           As Any Ptr      
       
    Public:
-      hWindow          As HWnd
       IsNewFlag        As BOOLEAN
+      
+      ' Visual designer related
+      Controls         as clsCollection
+      hWindow          As HWnd      ' This is also the DesignMain for visual designer windows
+      hWndFrame        as hwnd      ' DesignFrame for visual designer windows
+      hWndForm         as hwnd      ' DesignForm for visual designer windows
+      GrabHit          as long      ' Which grab handle is currently active for sizing action
+      ptPrev           as point     ' Used for sizing action
+      bSizing          as Boolean   ' Flag that sizing action is in progress
+      rcSize           as RECT      ' Current size of form/control. Used during sizing action
+      
+      ' Code document related
       IsDesigner       As BOOLEAN
       ProjectIndex     as long      ' array index into gApp.Projects
       ProjectFileType  As Long = FILETYPE_UNDEFINED
@@ -406,7 +469,10 @@ Type clsDocument
       UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
       DocumentBuild    as string   ' specific build configuration to use for this document
       
+      static NextFileNum as Long
+      
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
+      declare Function CreateDesignerWindow( ByVal hWndParent As HWnd, ByVal IsNewFile  As BOOLEAN, ByVal pwszFile   As WString Ptr = 0) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
@@ -449,6 +515,7 @@ Type clsDocument
       Declare Constructor
       Declare Destructor
 End Type
+dim clsDocument.NextFileNum as long = 0
 
 Type clsTopTabCtl
    Private:
@@ -649,6 +716,7 @@ Type clsApp
       declare Function EnsureDefaultActiveProject(byval hNode as HTREEITEM = 0) As long
       declare Function RemoveAllSelectionAttributes() As long
       declare Function GetProjectIndexByFilename( byref sFilename as wstring ) As long
+      declare Function GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
          
       Declare Function IsProjectActive() As boolean
       declare function GetNewProjectIndex() As Long

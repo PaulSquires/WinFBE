@@ -1279,7 +1279,7 @@ END FUNCTION
 ' Returns a pointer to the scroll window class
 ' =====================================================================================
 PRIVATE PROPERTY CWindow.ScrollWindowPtr () AS CScrollWindow PTR
-   PROPERTY = m_pScrollWindow
+   Property = m_pScrollWindow
 END PROPERTY
 ' =====================================================================================
 ' =====================================================================================
@@ -2277,9 +2277,9 @@ END FUNCTION
 ' ========================================================================================
 ' Returns a pointer to the CScrollWindow class given the handle of the window attached to it.
 ' ========================================================================================
-PRIVATE FUNCTION AfxScrollWindowPtr (BYVAL hwnd AS HWND) AS CScrollWindow PTR
-   FUNCTION = cast(CWindow PTR, GetWindowLongPtr(hwnd, 0))->ScrollWindowPtr
-END FUNCTION
+Private Function AfxScrollWindowPtr (ByVal HWnd As HWnd) As CScrollWindow Ptr
+   Function = Cast(CWindow Ptr, GetWindowLongPtr(HWnd, 0))->ScrollWindowPtr
+End Function
 ' ========================================================================================
 
 ' ########################################################################################

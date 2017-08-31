@@ -1,3 +1,6 @@
+declare Function DesignerMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
+declare Function DesignerFrame_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
+declare Function DesignerForm_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare function ParseLogForError( byref wsLogSt as CWSTR, byval bAllowSuccessMessage as Boolean, Byval wID as long) as Boolean
 declare SUB RedirConsoleToFile( byref szExe AS zstring, byref szCmdLine AS zstring, byref sConsoleText AS string)
 Declare Function GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string

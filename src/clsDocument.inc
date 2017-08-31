@@ -26,8 +26,81 @@ End Constructor
 ''
 ''
 Destructor clsDocument
-   DestroyWindow this.hWindow    ' destroy the scintilla window
+   DestroyWindow this.hWindow    ' destroy the scintilla/designer window
 End Destructor
+
+''
+''
+Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
+                                           ByVal IsNewFile  As BOOLEAN, _     
+                                           ByVal pwszFile   As WString Ptr = 0 _
+                                           ) As HWnd   
+   
+   ' For the Visual Designer, there exists three (3) levels of windows:
+   ' (1) The DesignMain (hWindow) used by the top tabcontrol to display the document. 
+   '     This is the highest level window and is basically just the container for 
+   '     the other two windows.
+   ' (2) The DesignFrame window. This is the scrollable window.
+   ' (3) The DesignForm window. This is the actual visual for that we manipulate by
+   '     adding controls to it, etc.
+   '
+   this.IsDesigner = true
+
+   
+   ' (1) Create the DesignMain (hWindow) window
+   dim pMain as CWindow ptr = New CWindow
+   pMain->DPI = AfxCWindowPtr(hwndParent)->DPI
+   this.hWindow = _
+   pMain->Create( hWndParent, "", @DesignerMain_WndProc, 0, 0, 0, 0, _
+        WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
+        WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pMain->Brush = GetSysColorBrush(COLOR_WINDOW)
+   pMain->SetClientSize(2500, 2500)
+   ' Allow the Designer Frame window to scroll. This allows us to create Forms that
+   ' are larger than the current viewable screen area.
+   DIM pScrollWindow AS CScrollWindow PTR = NEW CScrollWindow(pMain->hWindow)
+   'pScrollWindow->SetClientRect(@rc)
+   pMain->ScrollWindowPtr = pScrollWindow
+   
+   
+   ' (2) Create the Design Frame window (child of the Main)
+   dim pFrame as CWindow ptr = New CWindow
+   pFrame->DPI = AfxCWindowPtr(hwndParent)->DPI
+   this.hWndFrame = _
+   pFrame->Create( pMain->hWindow, "", @DesignerFrame_WndProc, 0, 0, 0, 0, _
+        WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_VISIBLE, _
+        WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   SetWindowLongPtr( pFrame->hWindow, GWLP_ID, IDC_DESIGNFRAME )
+   pFrame->Brush = GetSysColorBrush(COLOR_WINDOW)
+   
+   
+   ' (3) Create the Design Form (child of the Frame)
+   dim pForm as CWindow ptr = New CWindow
+   pForm->DPI = AfxCWindowPtr(hwndParent)->DPI
+   this.hWndForm = _
+   pForm->Create( pFrame->hWindow, "Form1", @DesignerForm_WndProc, 0, 0, 0, 0, _
+        WS_CHILD or WS_OVERLAPPED Or WS_OVERLAPPEDWINDOW or _
+        WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_VISIBLE, _
+        WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE)
+   SetWindowLongPtr( pForm->hWindow, GWLP_ID, IDC_DESIGNFORM )
+   pForm->SetWindowPos(pForm->hWindow, 0, 10, 10, 500, 310, SWP_NOZORDER)
+    
+   dim pCtrl as clsControl ptr = new clsControl 
+   pCtrl->ControlType = CTRL_FORM
+   pCtrl->IsSelected  = true
+   pCtrl->IsActive    = true
+   pCtrl->hWindow     = this.hWndForm
+   this.Controls.Add(pCtrl)
+   
+   ' If a disk file was specified then open it and load it into the editor
+   this.IsNewFlag = IsNewFile
+   If IsNewFile Then
+      this.NextFileNum = this.NextFileNum + 1
+      this.DiskFilename = "Untitled" & this.NextFileNum
+   End If
+
+   function = this.hWindow
+end function
 
 ''
 ''
@@ -56,13 +129,12 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    End If
 
    Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
-   Static nNextFileNum As Long 
       
    ' If a disk file was specified then open it and load it into the editor
    this.IsNewFlag = IsNewFile
    If (IsNewFile = true) orelse (IsTemplate = true) Then
-      nNextFileNum = nNextFileNum + 1
-      this.DiskFilename = "Untitled" & nNextFileNum
+      this.NextFileNum = this.NextFileNum + 1
+      this.DiskFilename = "Untitled" & this.NextFileNum
    End If
    this.ProjectFileType = FILETYPE_UNDEFINED
    
@@ -859,7 +931,7 @@ Function clsDocument.DisplayStats() As Long
    ' application caption to the filename names, etc. Only do so once the project
    ' has been finally loaded.
    if gProjectLoading THEN exit function
-
+      
    Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
 
    Dim As Long i, curPos, nLine, nCol
@@ -871,6 +943,21 @@ Function clsDocument.DisplayStats() As Long
    Static wText As CWSTR         ' General purpose variable
    Static wTag  As WString * 10  ' * display if modified
    
+   ' Set the filename text that displays on the tab. 
+   gTTabCtl.SetTabText(-1)
+
+   ' Update the main window caption with the full filename and path. Only
+   ' do the update if the text has changed in order to prevent flicker.
+   wTemp = AfxGetWindowText( HWND_FRMMAIN )
+   wText = APPNAMESHORT 
+   If this.ProjectIndex > 0 Then  ' belongs to a regular project
+      wText = wText + " - [" + gApp.Projects(this.ProjectIndex).ProjectName + "]"
+   end if   
+   wText = wText + " - [" + this.DiskFilename + wTag + "]"
+   If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
+
+   if this.IsDesigner THEN exit function
+
    ' Retrieve the information and show it in the status bar
    curPos    = SciMsg( m_pSci, SCI_GETCURRENTPOS, 0, 0)
    nLine     = SciMsg( m_pSci, SCI_LINEFROMPOSITION, curPos, 0) 
@@ -906,19 +993,6 @@ Function clsDocument.DisplayStats() As Long
       ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
       SciMsg( m_pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
    end if
-
-   ' Set the filename text that displays on the tab. 
-   gTTabCtl.SetTabText(-1)
-
-   ' Update the main window caption with the full filename and path. Only
-   ' do the update if the text has changed in order to prevent flicker.
-   wTemp = AfxGetWindowText( HWND_FRMMAIN )
-   wText = APPNAMESHORT 
-   If this.ProjectIndex > 0 Then  ' belongs to a regular project
-      wText = wText + " - [" + gApp.Projects(this.ProjectIndex).ProjectName + "]"
-   end if   
-   wText = wText + " - [" + this.DiskFilename + wTag + "]"
-   If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
 
    if IsWindowVisible(HWND_FRMFINDREPLACE) THEN frmFindReplace_SetButtonStates
    

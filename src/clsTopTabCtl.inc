@@ -177,7 +177,7 @@ End Function
 ''
 ''
 Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEAN ) As Long
-   ' Show/Hide the Scintilla editing window for the incoming tab index
+   ' Show/Hide the Scintilla editing window (or visual designer window) for the incoming tab index
    Dim TB As TC_ITEM 
    TB.Mask = TCIF_PARAM
    

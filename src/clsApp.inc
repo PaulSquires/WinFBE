@@ -72,6 +72,33 @@ End Function
 
 ''
 ''
+Function clsApp.GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
+   ' Find the pDoc pointer based on all the available hWindow for the any loaded
+   ' document or visual designer.
+   dim pDoc as clsDocument ptr
+   IF hWindow = NULL THEN EXIT FUNCTION
+   
+   for idx as long = 0 to ubound(this.Projects)
+      if this.Projects(idx).InUse = true THEN
+         For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
+            pDoc = this.Projects(idx).GetDocumentPtr(i)
+            if pDoc THEN
+               ' Determine if the incoming hWindow matches the clsDocument hWindow or
+               ' is the Frame or Form windows.
+               if (hWindow = pDoc->hWindow) orelse _
+                  (hWindow = pDoc->hWndFrame ) orelse _
+                  (hWindow = pDoc->hWndForm) THEN
+                  return pDoc
+               end if   
+            END IF
+         Next
+      end if
+   next   
+   function = 0
+End Function
+
+''
+''
 Function clsApp.GetProjectCount() As long
    dim as long nCount = 0
    for i as long = 1 to ubound(this.Projects)

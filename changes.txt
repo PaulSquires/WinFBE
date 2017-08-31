@@ -1,5 +1,7 @@
-Version 1.4.9 (not released yet)
-- Changed: Filters for "Save As", "Save Declares File", "Open', and "Insert File".
+Version 1.4.9 (August 31, 2017)
+- Changed: If "Allow multiple instances" is unchecked, then subsequent file opens will open in the current active editor instance.
+- Changed: Filters for "Save As", "Save Declares File", "Open', "Insert File" and "Select Compiler".
+- Fixed: Explorer Treeview filenames immediately resorted when filename changed (new file or save as).
 
 Version 1.4.8 (August 25, 2017)
 - Changed: Failed results when compiling individual module files to object files are now displayed.

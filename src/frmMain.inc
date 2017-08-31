@@ -129,44 +129,42 @@ Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
    If Len(Command(1)) = 0 Then Exit Function
    
    Dim wszPath As WString * MAX_PATH
-   Dim wszExt  As WString * MAX_PATH
    Dim wszArg  As WString * MAX_PATH
+   dim DataToSend AS COPYDATASTRUCT   
+   
+   IF IsIconic(hwnd) THEN 
+      Dim WinPla As WINDOWPLACEMENT
+      With WinPla
+         .Length = Sizeof(WinPla)
+         .rcNormalPosition.Left   = gConfig.StartupLeft
+         .rcNormalPosition.Top    = gConfig.StartupTop
+         .rcNormalPosition.Right  = gConfig.StartupRight
+         .rcNormalPosition.Bottom = gConfig.StartupBottom
+         .showCmd = Iif( gConfig.StartupMaximized, SW_MAXIMIZE, SW_SHOWNORMAL )
+      End With
+      SetWindowPlacement(HWND, @WinPla)
+   end if
+   SetForegroundWindow(hwnd)
    
    Dim As Long i = 1
    Do
-       wszArg = Command(i)
-       If Len(wszArg) = 0 Then Exit Do
+      wszArg = Command(i)
+      If Len(wszArg) = 0 Then Exit Do
        
-       ' Remove any double quotes from the argument.
-       wszPath = AfxStrRemove( wszArg, WChr(34) )
+      ' Remove any double quotes from the argument.
+      wszPath = AfxStrRemove( wszArg, WChr(34) )
        
-       ' If no path exists for the file then add the current folder
-       wszPath = AfxStrPathname( "PATH", wszArg )
-       If Len(wszPath) = 0 Then wszArg = AfxGetExePathName & wszArg 
+      ' If no path exists for the file then add the current folder
+      wszPath = AfxStrPathname( "PATH", wszArg )
+      If Len(wszPath) = 0 Then wszArg = AfxGetExePathName & wszArg 
        
-       If AfxFileExists(wszArg) Then
-          ' We have a valid filename so determine what type it is.
-          wszExt = AfxStrPathname( "EXTN", wszArg )
-          wszExt = Ucase(wszExt)
-          
-          Select Case wszExt
-             Case ".WFBE"    ' project file
-                ' Pass the info to our generic project open function to handle everything.
-                OpenMRUProjectFile( HWnd, 0, @wszArg )
-             
-             Case Else   ' .bas, .bi, .rc, etc...
-               frmMain_OpenFileSafely(HWND, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       True,  _    ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       @wszArg, _  ' pwszName
-                                       0 )          ' pDocIn
-          End Select   
-          
-       End If
+      If AfxFileExists(wszArg) Then
+         DataToSend.lpData  = @wszArg
+         DataToSend.cbdata  = (LEN(wszArg)*2) + 1
+         SendMessage(hwnd, WM_COPYDATA, LEN(DataToSend), cast(lParam, @DataToSend))
+      End If
        
-       i += 1
+      i += 1
    Loop
 
    Function = 0
@@ -684,10 +682,9 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       pDoc = New clsDocument
       if bIsDesigner THEN
          If bIsNewFile Then
-            AfxMsg("New designer window")
-            'pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+            pDoc->CreateDesignerWindow(HWnd, True)  ' Create the new visual designer window
          Else
-            'pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
+            pDoc->CreateDesignerWindow(HWnd, false, pwszName)
          End If   
       else
          If bIsNewFile Then
@@ -1782,6 +1779,17 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
 
+       Case WM_NCACTIVATE
+          ' Ensure that the caption bar for any DesignerForm retains its active 
+          ' state. This looks better than having it lose and gain active colors. 
+          If wParam Then
+             ' The DesignerForm never receives the WM_NCACTIVATE message because it
+             ' is a child form. We need to manually send it the message whenever the
+             ' focus of the Designer form changes (i.e. whenever we switch back and
+             ' forth away from the main application window).
+             PostMessage HWND, MSG_USER_SETFOCUS, 0, 0
+          End If
+          
       Case WM_SYSCOMMAND
          If (wParam And &HFFF0) = SC_CLOSE Then
             SendMessage( HWND, WM_CLOSE, wParam, lParam )
@@ -1822,6 +1830,36 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          UpdateMRUProjectMenu( Cast(HMENU, wParam) )
          frmMain_ChangeTopMenuStates()
 
+      CASE WM_COPYDATA      ' used during processing of commandline
+         dim pDataToGet AS COPYDATASTRUCT ptr
+         Dim pwszArg As WString ptr 
+         Dim wszExt As WString * MAX_PATH
+
+         pDataToGet = cast(COPYDATASTRUCT ptr, lParam)
+         pwszArg = pDataToGet->lpData
+          
+AfxMsg(*pwszArg)
+
+         ' We have a valid filename so determine what type it is.
+         wszExt = AfxStrPathname( "EXTN", *pwszArg )
+         wszExt = Ucase(wszExt)
+          
+         Select Case wszExt
+            Case ".WFBE"    ' project file
+               ' Pass the info to our generic project open function to handle everything.
+               OpenMRUProjectFile( HWnd, 0, pwszArg )
+             
+            Case Else   ' .bas, .bi, .rc, etc...
+               frmMain_OpenFileSafely( HWND, _
+                                       False, _    ' bIsNewFile
+                                       False, _    ' bIsTemplate
+                                       True,  _    ' bShowInTab
+                                       false, _    ' bIsInclude
+                                       pwszArg, _  ' pwszName
+                                       0 )         ' pDocIn
+         End Select   
+          
+
       ''  CUSTOM MESSAGES
       Case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
@@ -1829,6 +1867,9 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
          if pDoc THEN
             frmMain_UpdateLineCol(HWnd)
+            if pDoc->IsDesigner THEN
+               SendMessage pDoc->hWndForm, WM_NCACTIVATE, true, 0
+            END IF
             SetFocus(pDoc->hWindow)
          END IF
 

@@ -37,7 +37,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.4.8") 
+#Define APPVERSION    WStr("1.4.9") 
 
 '#Define USE_VISUAL_DESIGNER 1
 
@@ -49,11 +49,12 @@ Using Afx
 #Include Once "modRoutines.inc"
 #Include Once "modSplitter.inc" 
 #Include Once "modCBColor.inc"
+#Include Once "clsCollection.inc"
 #Include Once "clsDocument.inc"
 #Include Once "clsProject.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
-#Include Once "clsDesigner.inc"
+#Include Once "modVisualDesigner.inc"
 #Include Once "modParser.inc"
 #Include Once "modHelp.inc"
 #Include Once "modCompile.inc"
@@ -110,7 +111,10 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
 
    ' Check for previous instance 
    If gConfig.MultipleInstances = False Then
-      If FindWindow("WinFBE_Class", 0) Then
+      dim as HWND hWindow = FindWindow("WinFBE_Class", 0)
+      If hWindow Then
+         SetForegroundWindow(hWindow)
+         frmMain_ProcessCommandLine(hWindow)
          Return True
       End If
    End If
