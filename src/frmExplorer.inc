@@ -12,7 +12,6 @@
 '    GNU General Public License for more details.
 
 
-
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
@@ -234,26 +233,39 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
             Function = True
          End If
 
+         
+'      Case NM_CUSTOMDRAW
+'         Dim tvcd As NMTVCUSTOMDRAW Ptr = Cast(NMTVCUSTOMDRAW Ptr, pNMHDR)
+
+'         Select Case tvcd->nmcd.dwDrawStage
+'            Case CDDS_PREPAINT
+'               Return CDRF_NOTIFYITEMDRAW 
+
+'            Case CDDS_ITEMPREPAINT 
+'               Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(hWnd, id))
+'               SelectFont(tvcd->nmcd.hdc, hFont)
+''               If (tvcd->nmcd.uItemState And ODS_SELECTED) And (GetFocus() = tvcd->nmcd.hdr.hwndFrom) Then
+''                  tvcd->clrTextBk = gTheme.exlistbox_selected_active_bg
+''                  tvcd->clrText   = gTheme.exlistbox_selected_active_fg
+''               ElseIf (tvcd->nmcd.uItemState And ODS_SELECTED) Then
+''                  tvcd->clrTextBk = gTheme.exlistbox_selected_inactive_bg
+''                  tvcd->clrText   = gTheme.exlistbox_selected_inactive_fg
+''               ElseIf (tvcd->nmcd.uItemState And CDIS_HOT) Then
+''                  tvcd->clrTextBk = gTheme.exlistbox_hot_bg
+''                  tvcd->clrText   = gTheme.exlistbox_hot_fg
+''               Else
+'                  tvcd->clrText   = gConfig.Themes(gConfig.idxTheme).colors(CLR_PANELTEXT).nFg
+'                  tvcd->clrTextBk = gConfig.Themes(gConfig.idxTheme).colors(CLR_PANELTEXT).nBg
+''               End If
+                                    
+'               Return CDRF_NEWFONT 
+'
+'         End Select
+
    End Select
  
    Function = 0
 End Function
-
-
-' ========================================================================================
-' Process WM_DESTROY message for window/dialog: frmExplorer
-' ========================================================================================
-Function frmExplorer_OnDestroy(HWnd As HWnd) As LRESULT
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
-
-   Dim As HFONT hFont
-   Dim As HWnd hTree
-   hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
-   hFont = AfxGetWindowFont(hTree):  DeleteFont(hFont)
-   
-   Function = 0
-End Function
-
 
 
 ' ========================================================================================
@@ -365,9 +377,13 @@ Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_SIZE,    frmExplorer_OnSize)
       HANDLE_MSG (HWnd, WM_COMMAND, frmExplorer_OnCommand)
       HANDLE_MSG (HWnd, WM_NOTIFY,  frmExplorer_OnNotify)
-      HANDLE_MSG (HWnd, WM_DESTROY, frmExplorer_OnDestroy)
       HANDLE_MSG (HWnd, WM_PAINT,   frmExplorer_OnPaint)
    
+      case WM_DESTROY
+         Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
+         dim as HFONT hFont = AfxGetWindowFont(hTree)
+         DeleteFont(hFont)
+         
       case WM_ERASEBKGND
          return true
 
@@ -423,7 +439,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
    pWindow->SetFont( "Segoe UI Semibold", 9)
-   pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
+   'pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    Dim As HWnd hBtn = _
    pWindow->AddControl("LABEL", , IDC_FRMEXPLORER_LBLEXPLORER, L(247,"EXPLORER"), 10, 12, 75, 20, _
@@ -431,12 +447,16 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    frmHotImgBtn( HWND_FRMEXPLORER, IDC_FRMEXPLORER_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
-                  L(161, "Close"), 24, 24, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_WINDOW), 0, 0, 24, 24, true, true, true )
+                  L(161, "Close"), 24, 24, _
+                  GetSysColor(COLOR_BTNFACE), _
+                  GetSysColor(COLOR_WINDOW), _
+                  0, 0, 24, 24, true, true, true )
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
-        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
+        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
+        TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
 

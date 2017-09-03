@@ -869,7 +869,7 @@ END FUNCTION
 '   these colors, the system updates the array with the new RGB values.
 ' Return value: The selected color.
 ' ========================================================================================
-PRIVATE FUNCTION AfxChooseColorDialog (BYVAL hParent AS HWND, BYVAL rgbDefaultColor AS COLORREF = 0, BYVAL lpCustColors AS COLORREF PTR = NULL) AS COLORREF
+PRIVATE FUNCTION AfxChooseColorDialog (BYVAL hParent AS HWND, BYVAL rgbDefaultColor AS COLORREF = 0, BYVAL lpCustColors AS COLORREF PTR = NULL) AS LONG
    DIM ColorSpec AS CHOOSECOLORW, lCustomColor(15) AS LONG
    ColorSpec.lStructSize  = SIZEOF(ColorSpec)
    ColorSpec.hwndOwner    = hParent     ' // Handle of owner window.  If 0, dialog appears at top/left.
@@ -883,8 +883,8 @@ PRIVATE FUNCTION AfxChooseColorDialog (BYVAL hParent AS HWND, BYVAL rgbDefaultCo
    END IF
    ColorSpec.rgbResult = rgbDefaultColor
    ColorSpec.Flags = ColorSpec.Flags OR CC_RGBINIT OR CC_FULLOPEN
-   IF ChooseColorW(@ColorSpec) THEN FUNCTION = Colorspec.rgbResult
-END FUNCTION
+   Function =  Iif( ChooseColorW(@ColorSpec), Colorspec.rgbResult, -1)
+End Function
 ' ========================================================================================
 
 

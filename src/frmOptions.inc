@@ -27,6 +27,8 @@ Sub SaveEditorOptions()
    gConfig.CloseFuncList        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST) )
    gConfig.HideCompile          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE) )
    gConfig.AskExit              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT) )
+   gConfig.HideToolbar          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR) )
+   gConfig.HideStatusbar        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR) )
 
    ' EDITOR OPTIONS   
    HWnd = HWND_FRMOPTIONSEDITOR
@@ -61,38 +63,15 @@ Sub SaveEditorOptions()
    
    ' COLOR/FONT OPTIONS
    HWnd = HWND_FRMOPTIONSCOLORS
-   gConfig.clrBookmarksFG       = gTempColors(0).nFg 
-   gConfig.clrBookmarksBG       = gTempColors(0).nBg
-   gConfig.clrCaretFG           = gTempColors(1).nFg
-   gConfig.clrCaretBG           = gTempColors(1).nBg
-   gConfig.clrCommentsFG        = gTempColors(2).nFg
-   gConfig.clrCommentsBG        = gTempColors(2).nBg
-   gConfig.clrHighlightedFG     = gTempColors(3).nFg
-   gConfig.clrHighlightedBG     = gTempColors(3).nBg
-   gConfig.clrKeywordFG         = gTempColors(4).nFg
-   gConfig.clrKeywordBG         = gTempColors(4).nBg
-   gConfig.clrFoldMarginFG      = gTempColors(5).nFg
-   gConfig.clrFoldMarginBG      = gTempColors(5).nBg
-   gConfig.clrFoldSymbolFG      = gTempColors(6).nFg
-   gConfig.clrFoldSymbolBG      = gTempColors(6).nBg
-   gConfig.clrIndentGuidesFG    = gTempColors(7).nFg
-   gConfig.clrIndentGuidesBG    = gTempColors(7).nBg
-   gConfig.clrLineNumbersFG     = gTempColors(8).nFg
-   gConfig.clrLineNumbersBG     = gTempColors(8).nBg
-   gConfig.clrOperatorsFG       = gTempColors(9).nFg
-   gConfig.clrOperatorsBG       = gTempColors(9).nBg
-   gConfig.clrPreprocessorFG    = gTempColors(10).nFg
-   gConfig.clrPreprocessorBG    = gTempColors(10).nBg
-   gConfig.clrSelectionFG       = gTempColors(11).nFg
-   gConfig.clrSelectionBG       = gTempColors(11).nBg
-   gConfig.clrStringsFG         = gTempColors(12).nFg
-   gConfig.clrStringsBG         = gTempColors(12).nBg
-   gConfig.clrTextFG            = gTempColors(13).nFg
-   gConfig.clrTextBG            = gTempColors(13).nBg
-   gConfig.clrWinApiBG          = gTempColors(14).nFg
-   gConfig.clrWinApiBG          = gTempColors(14).nBg
-   gConfig.clrWindowFG          = gTempColors(15).nFg
-   gConfig.clrWindowBG          = gTempColors(15).nBg
+   ' Copy the temporary items to the main array  
+   redim gConfig.Themes(ubound(gConfig.ThemesTemp))
+   for i as long = lbound(gConfig.ThemesTemp) to ubound(gConfig.ThemesTemp)
+      gConfig.Themes(i) = gConfig.ThemesTemp(i)   
+   NEXT
+   dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
+   Dim As Long idxTheme = Combobox_GetCurSel( hWndCombo )
+   gConfig.SelectedTheme = gConfig.ThemesTemp(idxTheme).id
+   erase gConfig.ThemesTemp
 
    Dim idx As Long 
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME) )
@@ -156,6 +135,8 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
       Case IDOK
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
+            ' Reposition main windows in case hide toolbar/statusbar selected
+            frmMain_PositionWindows(HWND_FRMMAIN)
             ' Apply the newly saved options to all open Scintilla windows
             Dim pDoc As clsDocument Ptr
             for i as long = lbound(gApp.Projects) to ubound(gApp.Projects)

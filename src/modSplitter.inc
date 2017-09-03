@@ -116,6 +116,7 @@ Function Splitter_OnMouseMove() As BOOLEAN
          Dim As Long nWidth = (rc.Right - rc.Left + nDiff)
          SetWindowPos HWND_FRMEXPLORER, 0, 0, 0, nWidth, rc.Bottom - rc.Top, SWP_NOMOVE Or SWP_NOZORDER
          frmMain_PositionWindows(HWND_FRMMAIN)
+         AfxDoEvents   ' allow screen to repaint
          Exit Function
       End If
    End If

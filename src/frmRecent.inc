@@ -144,7 +144,7 @@ Function frmRecent_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
    Function = 0
 End Function
 
-
+      
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmRecent
 ' ========================================================================================
@@ -289,9 +289,9 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
-   SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
    SendMessage( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(24), 0 )
    SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
+   SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
    
    LoadRecentFilesTreeview(HWND_FRMRECENT)
    PositionRecentWindows(HWND_FRMRECENT)

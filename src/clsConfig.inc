@@ -24,6 +24,13 @@ Constructor clsConfig
    this.LoadKeywords
 End Constructor
 
+''
+''  DESTRUCTOR
+''
+DESTRUCTOR clsConfig
+'
+end DESTRUCTOR
+
 
 ''
 ''
@@ -164,6 +171,8 @@ Function clsConfig.SaveToFile() as Long
    print #f, ""
    print #f, "[Editor]"
    print #f, "AskExit="               ; this.AskExit
+   print #f, "HideToolbar="           ; this.HideToolbar
+   print #f, "HideStatusbar="         ; this.HideStatusbar
    print #f, "MultipleInstances="     ; this.MultipleInstances    
    print #f, "CompileAutosave="       ; this.CompileAutosave      
    print #f, "CloseFuncList="         ; this.CloseFuncList        
@@ -264,40 +273,18 @@ Function clsConfig.SaveToFile() as Long
    Next         
 
    Print #f, ""
-   print #f, "[Colors]" 
-   print #f, "clrCaretFG="            ; this.clrCaretFG           
-   print #f, "clrCaretBG="            ; this.clrCaretBG           
-   print #f, "clrCommentsFG="         ; this.clrCommentsFG        
-   print #f, "clrCommentsBG="         ; this.clrCommentsBG        
-   print #f, "clrHighlightedFG="      ; this.clrHighlightedFG     
-   print #f, "clrHighlightedBG="      ; this.clrHighlightedBG     
-   print #f, "clrKeywordFG="          ; this.clrKeywordFG         
-   print #f, "clrKeywordBG="          ; this.clrKeywordBG         
-   print #f, "clrFoldMarginFG="       ; this.clrFoldMarginFG      
-   print #f, "clrFoldMarginBG="       ; this.clrFoldMarginBG      
-   print #f, "clrFoldSymbolFG="       ; this.clrFoldSymbolFG      
-   print #f, "clrFoldSymbolBG="       ; this.clrFoldSymbolBG      
-   print #f, "clrLineNumbersFG="      ; this.clrLineNumbersFG     
-   print #f, "clrLineNumbersBG="      ; this.clrLineNumbersBG     
-   print #f, "clrBookmarksFG="        ; this.clrBookmarksFG       
-   print #f, "clrBookmarksBG="        ; this.clrBookmarksBG       
-   print #f, "clrOperatorsFG="        ; this.clrOperatorsFG       
-   print #f, "clrOperatorsBG="        ; this.clrOperatorsBG       
-   print #f, "clrIndentGuidesFG="     ; this.clrIndentGuidesFG    
-   print #f, "clrIndentGuidesBG="     ; this.clrIndentGuidesBG    
-   print #f, "clrPreprocessorFG="     ; this.clrPreprocessorFG    
-   print #f, "clrPreprocessorBG="     ; this.clrPreprocessorBG    
-   print #f, "clrSelectionFG="        ; this.clrSelectionFG       
-   print #f, "clrSelectionBG="        ; this.clrSelectionBG       
-   print #f, "clrStringsFG="          ; this.clrStringsFG         
-   print #f, "clrStringsBG="          ; this.clrStringsBG         
-   print #f, "clrTextFG="             ; this.clrTextFG            
-   print #f, "clrTextBG="             ; this.clrTextBG            
-   print #f, "clrWinAPIFG="           ; this.clrWinAPIFG          
-   print #f, "clrWinAPIBG="           ; this.clrWinAPIBG          
-   print #f, "clrWindowFG="           ; this.clrWindowFG          
-   print #f, "clrWindowBG="           ; this.clrWindowBG          
-   
+   print #f, "[Themes]" 
+   print #f, "SelectedTheme="; this.SelectedTheme
+   for i as long = lbound(this.Themes) to ubound(this.Themes)
+      print #f, "THEME_"; Right("00" & Str(i), 2); "=";
+      print #f, this.Themes(i).id; ",";
+      print #f, AfxStrReplaceAny(this.Themes(i).wszDescription, ",|", "_"); 
+      for ii as long = CLR_CARET to CLR_WINDOW
+         print #f, "|"; this.Themes(i).colors(ii).nFg; ","; this.Themes(i).colors(ii).nBg; ","; this.Themes(i).colors(ii).bUseDefaultBg;
+      NEXT
+      print #f, ""
+   NEXT
+
    dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
    dim wszText as CWSTR = wstr("NOTES-START") + vbcrlf + _
                           gApp.NonProjectNotes + vbcrlf + _
@@ -317,11 +304,12 @@ End Function
 ''
 Function clsConfig.LoadFromFile() as Long
 
-   Dim st    As WString * MAX_PATH
-   Dim wKey  As WString * MAX_PATH
-   Dim wData As WString * MAX_PATH
-   Dim nData As Long  
-   Dim i     as Long
+   Dim st     As WString * 1024
+   Dim wKey   As WString * 1024
+   Dim wData  As WString * 1024
+   Dim wData2 As WString * 1024
+   Dim nData  As Long  
+   Dim i      as Long
    dim bReadingNote as Boolean
 
    If AfxFileExists(_ConfigFilename) = 0 Then Exit Function
@@ -395,6 +383,35 @@ Function clsConfig.LoadFromFile() as Long
          End If
       End If
 
+      If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
+         i = Val(Right(wKey,2))
+         If i > ubound(this.Themes) Then
+            redim preserve this.Themes(i)
+            ' Theme data is saved in parse blocks separated by a "|" pipe symbol. Within
+            ' each of of those parsed pipe blocks the data is further divided and separated
+            ' by "," comma blocks. The first pipe block is always the theme id and description.
+            ' From pipe block 2 to parsecount, the pipe blocks are the actual colors. Each
+            ' color block is comma separated and composed of foreground color, background color,
+            ' and 0/1 indicating if to use default background color.
+            dim as long nNumPipes = AfxStrParseCount(wData, "|")
+            if nNumPipes > ubound(this.Themes(i).colors) THEN
+               nNumPipes = ubound(this.Themes(i).colors)
+            END IF
+            for xx as long = 1 to nNumPipes
+               wData2 = AfxStrParse(wData, xx, "|")
+               if xx = 1 THEN
+                  this.Themes(i).id             = AfxStrParse(wData2, 1, ",")
+                  this.Themes(i).wszDescription = AfxStrParse(wData2, 2, ",")
+               else
+                  this.Themes(i).colors(xx).nFg = val(**AfxStrParse(wData2, 1, ","))
+                  this.Themes(i).colors(xx).nBg = val(**AfxStrParse(wData2, 2, ","))   
+                  this.Themes(i).colors(xx).bUseDefaultBg = val(**AfxStrParse(wData2, 3, ","))   
+               END IF
+            NEXT
+            Continue Do
+         End If
+      End If
+
       If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
          i = Val(Right(wKey,2))
          If (i >= 0) And (i <= 9) Then 
@@ -413,7 +430,10 @@ Function clsConfig.LoadFromFile() as Long
 
       
       Select Case wKey
+         Case "SelectedTheme":        this.SelectedTheme        = wData
          Case "AskExit":              this.AskExit              = nData
+         Case "HideToolbar":          this.HideToolbar          = nData
+         Case "HideStatusbar":        this.HideStatusbar        = nData
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "CloseFuncList":        this.CloseFuncList        = nData
@@ -451,38 +471,6 @@ Function clsConfig.LoadFromFile() as Long
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
          case "RunViaCommandWindow":  this.RunViaCommandWindow  = nData
-         Case "clrCaretFG":           this.clrCaretFG           = nData
-         Case "clrCaretBG":           this.clrCaretBG           = nData
-         Case "clrCommentsFG":        this.clrCommentsFG        = nData
-         Case "clrCommentsBG":        this.clrCommentsBG        = nData
-         Case "clrHighlightedFG":     this.clrHighlightedFG     = nData
-         Case "clrHighlightedBG":     this.clrHighlightedBG     = nData
-         Case "clrKeywordFG":         this.clrKeywordFG         = nData
-         Case "clrKeywordBG":         this.clrKeywordBG         = nData
-         Case "clrFoldMarginFG":      this.clrFoldMarginFG      = nData
-         Case "clrFoldMarginBG":      this.clrFoldMarginBG      = nData
-         Case "clrFoldSymbolFG":      this.clrFoldSymbolFG      = nData
-         Case "clrFoldSymbolBG":      this.clrFoldSymbolBG      = nData
-         Case "clrLineNumbersFG":     this.clrLineNumbersFG     = nData
-         Case "clrLineNumbersBG":     this.clrLineNumbersBG     = nData
-         Case "clrBookmarksFG":       this.clrBookmarksFG       = nData
-         Case "clrBookmarksBG":       this.clrBookmarksBG       = nData
-         Case "clrOperatorsFG":       this.clrOperatorsFG       = nData
-         Case "clrOperatorsBG":       this.clrOperatorsBG       = nData
-         Case "clrIndentGuidesFG":    this.clrIndentGuidesFG    = nData
-         Case "clrIndentGuidesBG":    this.clrIndentGuidesBG    = nData
-         Case "clrPreprocessorFG":    this.clrPreprocessorFG    = nData
-         Case "clrPreprocessorBG":    this.clrPreprocessorBG    = nData
-         Case "clrSelectionFG":       this.clrSelectionFG       = nData
-         Case "clrSelectionBG":       this.clrSelectionBG       = nData
-         Case "clrStringsFG":         this.clrStringsFG         = nData
-         Case "clrStringsBG":         this.clrStringsBG         = nData
-         Case "clrTextFG":            this.clrTextFG            = nData
-         Case "clrTextBG":            this.clrTextBG            = nData
-         Case "clrWinAPIFG":          this.clrWinAPIFG          = nData
-         Case "clrWinAPIBG":          this.clrWinAPIBG          = nData
-         Case "clrWindowFG":          this.clrWindowFG          = nData
-         Case "clrWindowBG":          this.clrWindowBG          = nData 
       End Select
    
    Loop
@@ -565,6 +553,91 @@ Function clsConfig.LoadFromFile() as Long
       this.Builds(11).Is64bit = 1
 
    END IF
+
+   ' Create a default Theme if none exist
+   if ubound(this.Themes) = -1 THEN
+      redim this.Themes(1) 
+   
+      with this.Themes(0)
+         .id = AfxGuidText(AfxGuid())
+         .wszDescription = "Default Theme"
+         .colors(CLR_CARET).nFg        = BGR(0,0,0)          ' black          
+         .colors(CLR_CARET).nBg        = -1
+         .colors(CLR_COMMENTS).nFg     = BGR(0,128,0)        ' green          
+         .colors(CLR_COMMENTS).nBg     = BGR(255,255,255)    ' white
+         .colors(CLR_HIGHLIGHTED).nFg  = BGR(255,255,0)      ' yellow
+         .colors(CLR_HIGHLIGHTED).nBg  = -1
+         .colors(CLR_KEYWORD).nFg      = BGR(0,0,255)        ' blue
+         .colors(CLR_KEYWORD).nBg      = BGR(255,255,255)    ' white
+         .colors(CLR_FOLDMARGIN).nFg   = BGR(237,236,235)    ' pale gray
+         .colors(CLR_FOLDMARGIN).nBg   = -1
+         .colors(CLR_FOLDSYMBOL).nFg   = BGR(255,255,255)    ' white
+         .colors(CLR_FOLDSYMBOL).nBg   = BGR(0,0,0)          ' black
+         .colors(CLR_LINENUMBERS).nFg  = BGR(0,0,0)          ' black
+         .colors(CLR_LINENUMBERS).nBg  = BGR(204,204,204)    ' light gray
+         .colors(CLR_BOOKMARKS).nFg    = BGR(0,0,0)          ' black
+         .colors(CLR_BOOKMARKS).nBg    = BGR(0,0,255)        ' blue
+         .colors(CLR_OPERATORS).nFg    = BGR(196,0,0)        ' red
+         .colors(CLR_OPERATORS).nBg    = BGR(255,255,255)    ' white
+         .colors(CLR_INDENTGUIDES).nFg = BGR(255,255,255)    ' white
+         .colors(CLR_INDENTGUIDES).nBg = BGR(0,0,0)          ' black
+         .colors(CLR_PREPROCESSOR).nFg = BGR(196,0,0)        ' red
+         .colors(CLR_PREPROCESSOR).nBg = BGR(255,255,255)    ' white
+         .colors(CLR_SELECTION).nFg    = BGR(255,255,255)    ' white
+         .colors(CLR_SELECTION).nBg    = BGR(038,079,120)    ' light blue
+         .colors(CLR_STRINGS).nFg      = BGR(173,0,173)      ' Purple (little darker than Magenta)
+         .colors(CLR_STRINGS).nBg      = BGR(255,255,255)    ' white
+         .colors(CLR_TEXT).nFg         = BGR(0,0,0)          ' black
+         .colors(CLR_TEXT).nBg         = BGR(255,255,255)    ' white
+         .colors(CLR_WINAPI).nFg       = BGR(0,0,255)        ' blue
+         .colors(CLR_WINAPI).nBg       = BGR(255,255,255)    ' white
+         .colors(CLR_WINDOW).nFg       = BGR(255,255,255)    ' white
+         .colors(CLR_WINDOW).nBg       = -1
+      end with
+      this.SelectedTheme = this.Themes(0).id
+
+      with this.Themes(1)
+         .id = AfxGuidText(AfxGuid())
+         .wszDescription = "Visual Studio Code (Dark)"
+         .colors(CLR_CARET).nFg        = BGR(204,204,204)    ' light gray          
+         .colors(CLR_CARET).nBg        = -1
+         .colors(CLR_COMMENTS).nFg     = BGR(095,125,049)    ' moss green          
+         .colors(CLR_COMMENTS).nBg     = BGR(030,030,030)    ' light black
+         .colors(CLR_HIGHLIGHTED).nFg  = BGR(050,050,050)    ' charcoal black
+         .colors(CLR_HIGHLIGHTED).nBg  = -1
+         .colors(CLR_KEYWORD).nFg      = BGR(148,202,240)    ' powder blue
+         .colors(CLR_KEYWORD).nBg      = BGR(030,030,030)    ' light black
+         .colors(CLR_FOLDMARGIN).nFg   = BGR(030,030,030)    ' light black
+         .colors(CLR_FOLDMARGIN).nBg   = -1
+         .colors(CLR_FOLDSYMBOL).nFg   = BGR(030,030,030)    ' light black
+         .colors(CLR_FOLDSYMBOL).nBg   = BGR(090,090,090)    ' evening black
+         .colors(CLR_LINENUMBERS).nFg  = BGR(090,090,090)    ' evening black
+         .colors(CLR_LINENUMBERS).nBg  = BGR(030,030,030)    ' light black
+         .colors(CLR_BOOKMARKS).nFg    = BGR(090,090,090)    ' evening black
+         .colors(CLR_BOOKMARKS).nBg    = BGR(030,030,030)    ' light black
+         .colors(CLR_OPERATORS).nFg    = BGR(204,204,204)    ' light gray
+         .colors(CLR_OPERATORS).nBg    = BGR(030,030,030)    ' light black
+         .colors(CLR_INDENTGUIDES).nFg = BGR(030,030,030)    ' light black
+         .colors(CLR_INDENTGUIDES).nBg = BGR(204,204,204)    ' light gray
+         .colors(CLR_PREPROCESSOR).nFg = BGR(165,134,181)    ' light purple
+         .colors(CLR_PREPROCESSOR).nBg = BGR(030,030,030)    ' light black
+         .colors(CLR_SELECTION).nFg    = BGR(204,204,204)    ' light gray
+         .colors(CLR_SELECTION).nBg    = BGR(038,079,120)    ' light blue
+         .colors(CLR_STRINGS).nFg      = BGR(195,137,080)    ' orange brown
+         .colors(CLR_STRINGS).nBg      = BGR(030,030,030)    ' light black
+         .colors(CLR_TEXT).nFg         = BGR(204,204,204)    ' light gray
+         .colors(CLR_TEXT).nBg         = BGR(030,030,030)    ' light black
+         .colors(CLR_WINAPI).nFg       = BGR(204,204,204)    ' light gray
+         .colors(CLR_WINAPI).nBg       = BGR(030,030,030)    ' light black
+         .colors(CLR_WINDOW).nFg       = BGR(030,030,030)    ' light black
+         .colors(CLR_WINDOW).nBg       = -1
+      end with
+   end if
+   for i as long = lbound(this.Themes) to ubound(this.Themes)
+      if this.Themes(i).id = this.SelectedTheme THEN 
+         this.idxTheme = i: exit for
+      end if   
+   NEXT
 
    Function = 0
 End Function
@@ -689,11 +762,12 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    SetCompileStatusBarMessage( "", 0 )
    SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
    ShowWindow( hProgressBar, SW_SHOW)
+   dim as HCURSOR hCurSave = GetCursor()
+   SetCursor( LoadCursor(0, IDC_WAIT) )
    AfxDoEvents()
 
    ' Determine the ProjectIndex for where to store this project
    idx = gApp.GetNewProjectIndex()
-
 
    with gApp.Projects(idx)
       .ProjectFilename = wzFile
@@ -845,6 +919,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    frmOutput_ShowNotes
 
    ShowWindow( hProgressBar, SW_HIDE)
+   SetCursor( hCurSave )
 
    Function = True   ' successful open
 End Function

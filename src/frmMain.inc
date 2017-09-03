@@ -468,6 +468,11 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    Dim As Long nHeightOutput    = AfxGetWindowHeight( HWND_FRMOUTPUT)
    Dim As Long nWidthExplorer   = AfxGetWindowWidth( HWND_FRMEXPLORER )
 
+   ShowWindow( GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), iif(gConfig.HideToolbar, SW_HIDE, SW_SHOW) )
+   ShowWindow( GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR), iif(gConfig.HideStatusbar, SW_HIDE, SW_SHOW) )
+   if gConfig.HideToolbar THEN nHeightRebar = 0
+   if gConfig.HideStatusbar THEN nHeightStatusBar = 0
+      
    nLeft = rc.Left 
    
    ' Set the Explorer pane into place if applicable
@@ -1528,11 +1533,18 @@ Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
    Dim hPopupMenu as HMENU 
    Dim pt         As Point 
    
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then Return 0
+
    SetFocus hWndContext
    pt.x = xPos
    pt.y = yPos
    ScreenToClient hWndContext, @pt
-   hPopupMenu = CreateScintillaContextMenu()
+   if pDoc->IsDesigner THEN
+      ' TODO: Display right-click popup menu for visual design form
+   else
+      hPopupMenu = CreateScintillaContextMenu()
+   END IF
    GetCursorPos @pt
    TrackPopupMenu hPopupMenu, 0, pt.x, pt.y, 0, HWnd, 0
    DestroyMenu hPopupMenu
@@ -1812,11 +1824,6 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             Return True      ' prevents painting the background
          End If
          
-      Case WM_SYSCOMMAND
-         If (wParam And &HFFF0) = SC_CLOSE Then
-            SendMessage HWnd, WM_CLOSE, 0, 0
-         End If
-
       case WM_CAPTURECHANGED
          gApp.bDragTabActive = false
          
@@ -1837,7 +1844,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
 
          pDataToGet = cast(COPYDATASTRUCT ptr, lParam)
          pwszArg = pDataToGet->lpData
-          
+
          ' We have a valid filename so determine what type it is.
          wszExt = AfxStrPathname( "EXTN", *pwszArg )
          wszExt = Ucase(wszExt)
@@ -1897,7 +1904,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
-
+   
    HWND_FRMMAIN = pWindow->Create(Null, APPNAME, @frmMain_WndProc )
 
    ' Set the small and large icon for the main window (must be set after main window is created)

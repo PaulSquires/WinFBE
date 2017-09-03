@@ -16,6 +16,7 @@
 ''  Owner draw combo box for color selection
 ''  Based on code by José Roca 2011 and Börje Hagsten, January 2001
 
+const MODCBCOLOR_USERSELECTED = 41
 
 ' ========================================================================================
 ' GetColorInfo
@@ -27,41 +28,48 @@ Sub GetColorInfo( ByVal nIndex      As Long, _
                        
    Select Case nIndex
       Case 0:  *wColorName = "Black":          nColorValue = BGR(000,000,000)
-      Case 1:  *wColorName = "Gray":           nColorValue = BGR(128,128,128)
-      Case 2:  *wColorName = "Light Gray":     nColorValue = BGR(196,196,196)
-      Case 3:  *wColorName = "Pale Gray":      nColorValue = BGR(237,236,235)
-      Case 4:  *wColorName = "White":          nColorValue = BGR(255,255,255)
-      Case 5:  *wColorName = "Dark Green":     nColorValue = BGR(051,102,000)
-      Case 6:  *wColorName = "Green":          nColorValue = BGR(000,128,000)
-      Case 7:  *wColorName = "Teal":           nColorValue = BGR(000,128,128)
-      Case 8:  *wColorName = "Signal Green":   nColorValue = BGR(000,255,000)
-      Case 9:  *wColorName = "Military Green": nColorValue = BGR(237,255,102)
-      Case 10: *wColorName = "Lime":           nColorValue = BGR(237,255,127)
-      Case 11: *wColorName = "Mint":           nColorValue = BGR(238,255,185)
-      Case 12: *wColorName = "Pale Green":     nColorValue = BGR(244,255,223)
-      Case 13: *wColorName = "Brown":          nColorValue = BGR(128,064,000)
-      Case 14: *wColorName = "Dark Red":       nColorValue = BGR(153,000,000)
-      Case 15: *wColorName = "Red":            nColorValue = BGR(196,000,000)
-      Case 16: *wColorName = "Signal Red":     nColorValue = BGR(255,000,000)
-      Case 17: *wColorName = "Orange":         nColorValue = BGR(255,102,000)
-      Case 18: *wColorName = "Light Orange":   nColorValue = BGR(255,204,000)
-      Case 19: *wColorName = "Yellow":         nColorValue = BGR(255,255,000)
-      Case 20: *wColorName = "Light Yellow":   nColorValue = BGR(255,255,136)
-      Case 21: *wColorName = "Pale Yellow":    nColorValue = BGR(255,255,223)
-      Case 22: *wColorName = "Deep Purple":    nColorValue = BGR(128,000,128)
-      Case 23: *wColorName = "Dark Purple":    nColorValue = BGR(173,000,173)
-      Case 24: *wColorName = "Magenta":        nColorValue = BGR(128,000,128)
-      Case 25: *wColorName = "Purple":         nColorValue = BGR(210,000,210)
-      Case 26: *wColorName = "Pink":           nColorValue = BGR(255,000,178)
-      Case 27: *wColorName = "Light Purple":   nColorValue = BGR(233,145,253)
-      Case 28: *wColorName = "Pale Purple":    nColorValue = BGR(250,235,255)
-      Case 29: *wColorName = "Dark Blue":      nColorValue = BGR(000,000,128)
-      Case 30: *wColorName = "Blue":           nColorValue = BGR(000,000,255)
-      Case 31: *wColorName = "Lavender":       nColorValue = BGR(101,158,254)
-      Case 32: *wColorName = "Bright Cyan":    nColorValue = BGR(000,255,255)
-      Case 33: *wColorName = "Light Blue":     nColorValue = BGR(51,153,255)
-      Case 34: *wColorName = "Pale Blue":      nColorValue = BGR(230,245,255)
-
+      Case 1:  *wColorName = "Light Black":    nColorValue = BGR(030,030,030)
+      Case 2:  *wColorName = "Charcoal Black": nColorValue = BGR(050,050,050)
+      Case 3:  *wColorName = "Evening Black":  nColorValue = BGR(090,090,090)
+      Case 4:  *wColorName = "Gray":           nColorValue = BGR(128,128,128)
+      Case 5:  *wColorName = "Light Gray":     nColorValue = BGR(204,204,204)
+      Case 6:  *wColorName = "Pale Gray":      nColorValue = BGR(237,236,235)
+      Case 7:  *wColorName = "White":          nColorValue = BGR(255,255,255)
+      Case 8:  *wColorName = "Dark Green":     nColorValue = BGR(051,102,000)
+      Case 9:  *wColorName = "Green":          nColorValue = BGR(000,128,000)
+      Case 10: *wColorName = "Moss Green":     nColorValue = BGR(095,125,049)
+      Case 11: *wColorName = "Teal":           nColorValue = BGR(000,128,128)
+      Case 12: *wColorName = "Signal Green":   nColorValue = BGR(000,255,000)  
+      Case 13: *wColorName = "Military Green": nColorValue = BGR(237,255,102)
+      Case 14: *wColorName = "Lime":           nColorValue = BGR(237,255,127)
+      Case 15: *wColorName = "Mint":           nColorValue = BGR(238,255,185)
+      Case 16: *wColorName = "Pale Green":     nColorValue = BGR(244,255,223)
+      Case 17: *wColorName = "Brown":          nColorValue = BGR(128,064,000)
+      Case 18: *wColorName = "Dark Red":       nColorValue = BGR(153,000,000)
+      Case 19: *wColorName = "Red":            nColorValue = BGR(196,000,000)
+      Case 20: *wColorName = "Signal Red":     nColorValue = BGR(255,000,000)
+      Case 21: *wColorName = "Orange":         nColorValue = BGR(255,102,000)
+      Case 22: *wColorName = "Orange Brown":   nColorValue = BGR(195,137,080)
+      Case 23: *wColorName = "Light Orange":   nColorValue = BGR(255,204,000)
+      Case 24: *wColorName = "Yellow":         nColorValue = BGR(255,255,000)
+      Case 25: *wColorName = "Light Yellow":   nColorValue = BGR(255,255,136)
+      Case 26: *wColorName = "Pale Yellow":    nColorValue = BGR(255,255,223)
+      Case 27: *wColorName = "Deep Purple":    nColorValue = BGR(128,000,128)
+      Case 28: *wColorName = "Dark Purple":    nColorValue = BGR(173,000,173)
+      Case 29: *wColorName = "Magenta":        nColorValue = BGR(128,000,128)
+      Case 30: *wColorName = "Purple":         nColorValue = BGR(210,000,210)
+      Case 31: *wColorName = "Pink":           nColorValue = BGR(255,000,178)
+      Case 32: *wColorName = "Light Purple":   nColorValue = BGR(165,134,181)
+      Case 33: *wColorName = "Pale Purple":    nColorValue = BGR(250,235,255)
+      Case 34: *wColorName = "Dark Blue":      nColorValue = BGR(000,000,128)
+      Case 35: *wColorName = "Blue":           nColorValue = BGR(000,000,255)
+      Case 36: *wColorName = "Lavender":       nColorValue = BGR(101,158,254)
+      Case 37: *wColorName = "Light Blue":     nColorValue = BGR(038,079,120)
+      Case 38: *wColorName = "Powder Blue":    nColorValue = BGR(148,202,240)
+      Case 39: *wColorName = "Bright Cyan":    nColorValue = BGR(000,255,255)
+      Case 40: *wColorName = "Pale Blue":      nColorValue = BGR(230,245,255)
+      Case 41: *wColorName = L(341, "User selected..."): nColorValue = BGR(255,255,255)
+    
    End Select
    
 End Sub
@@ -80,6 +88,10 @@ Function CBProc( ByVal HWnd   As HWnd, _
 
    Select Case wMsg
    
+      case MSG_USER_SETCOLORCUSTOM
+         SendMessage(hwnd, CB_SETITEMDATA, MODCBCOLOR_USERSELECTED, Cast(LPARAM, wParam))
+         
+         
       Case WM_DESTROY
          ' Unsubclass the combo box
          If OldWndProc Then SetWindowLongPtr( HWnd, GWLP_WNDPROC, Cast(LONG_PTR, OldWndProc) )
@@ -96,21 +108,24 @@ Function CBProc( ByVal HWnd   As HWnd, _
          If lpdis->itemID = &HFFFFFFFF Then Exit Function
 
          GetColorInfo lpdis->itemID, @wColorName, nColorValue
+         ' Actually, get the colorvalue from the item of the row
+         ' being drawn because the "user selected" value can change.
+         nColorValue = lpdis->itemData
 
          Select Case lpdis->itemAction
             Case ODA_DRAWENTIRE, ODA_SELECT
                Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(HWnd)
                ' Clear background
-               FillRect lpdis->hDC, @lpdis->rcItem, GetSysColorBrush(COLOR_WINDOW)
+               FillRect( lpdis->hDC, @lpdis->rcItem, GetSysColorBrush(COLOR_WINDOW))
                ' Set the font
                SelectFont( lpdis->hDC, pWindow->Font)
                ' Set text background
-               SetBkColor lpdis->hDC, GetSysColor(COLOR_WINDOW)
+               SetBkColor( lpdis->hDC, GetSysColor(COLOR_WINDOW))
                ' Set text color
-               SetTextColor lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT)
+               SetTextColor( lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
                rc = lpdis->rcItem
                rc.Left = pWindow->ScaleX(28)
-               DrawTextW lpdis->hDC, @wColorName, Len(wColorName), @rc, DT_SINGLELINE Or DT_LEFT Or DT_VCENTER
+               DrawText( lpdis->hDC, @wColorName, Len(wColorName), @rc, DT_SINGLELINE Or DT_LEFT Or DT_VCENTER)
                ' Selected item
                If (lpdis->itemState And ODS_SELECTED) Then    ' // If selected
                   If (lpdis->itemState And &H1000) = 0 Then   ' // If not ODS_COMBOBOXEDIT (= &H1000)
@@ -119,10 +134,10 @@ Function CBProc( ByVal HWnd   As HWnd, _
                      rc.Top    = lpdis->rcItem.Top
                      rc.Bottom = lpdis->rcItem.Bottom
                      ' Invert area around text only
-                     InvertRect lpdis->hDC, @rc
+                     InvertRect( lpdis->hDC, @rc)
                   End If
                   'and draw a focus rectangle around all
-                  DrawFocusRect lpdis->hDC, @lpdis->rcItem
+                  DrawFocusRect( lpdis->hDC, @lpdis->rcItem)
                End If
 
                ' color rectangle (using RoundRect for nicer looks..
@@ -142,7 +157,7 @@ Function CBProc( ByVal HWnd   As HWnd, _
                ' Select brush into device context
                hBrush = SelectObject( Cast(HDC, lpdis->hDC), hBrush)
                ' Draw   
-               RoundRect lpdis->hDC, rc.Left, rc.Top, rc.Right, rc.Bottom, pWindow->ScaleX(3), pWindow->ScaleY(3)
+               RoundRect( lpdis->hDC, rc.Left, rc.Top, rc.Right, rc.Bottom, pWindow->ScaleX(3), pWindow->ScaleY(3))
                ' Select old brush and delete the new one
                DeleteObject SelectObject(lpdis->hDC, hBrush)
                
@@ -153,7 +168,7 @@ Function CBProc( ByVal HWnd   As HWnd, _
 
    ' Pass on for processing to OldWndProc
    If OldWndProc Then
-      Function = CallWindowProcW( Cast(WNDPROC, OldWndProc), HWnd, wMsg, wParam, lParam) 
+      Function = CallWindowProc( Cast(WNDPROC, OldWndProc), HWnd, wMsg, wParam, lParam) 
    End If
    
 End Function
@@ -187,10 +202,10 @@ Function CreateCBColorList( ByVal HWnd As HWnd, ByVal CtrlId As Long, _
    SetWindowLongPtr( hCombo, GWLP_USERDATA, OldWndProc )
 
    ' Add items to the combo box
-   For i = 0 To 34
+   For i = 0 To MODCBCOLOR_USERSELECTED
       GetColorInfo i, @wColorName, nColorValue
-      idx = SendMessageW(hCombo, CB_ADDSTRING, 0, Cast(LPARAM, @wColorName) )
-      SendMessageW hCombo, CB_SETITEMDATA, idx, Cast(LPARAM, nColorValue)
+      idx = SendMessage(hCombo, CB_ADDSTRING, 0, Cast(LPARAM, @wColorName))
+      SendMessage(hCombo, CB_SETITEMDATA, idx, Cast(LPARAM, nColorValue))
    Next
 
    Function = hCombo

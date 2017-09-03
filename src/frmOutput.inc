@@ -365,7 +365,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   HWND_FRMOUTPUT= pWindow->Create( hWndParent, "", @frmOutput_WndProc, 0, 0, 0, 180, _
+   HWND_FRMOUTPUT = pWindow->Create( hWndParent, "", @frmOutput_WndProc, 0, 0, 0, 180, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 

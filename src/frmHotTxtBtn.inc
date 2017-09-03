@@ -57,8 +57,7 @@ Function frmHotTxtBtn_OnDestroy(HWnd As HWnd) As LRESULT
    If pWindow = 0 Then Exit Function
    
    Dim pData As HOTTXTBTN_TYPE Ptr = Cast(HOTTXTBTN_TYPE Ptr, pWindow->UserData(0))
-   If pData Then
-   End If
+   If pData Then delete pData
       
    Function = 0
 End Function

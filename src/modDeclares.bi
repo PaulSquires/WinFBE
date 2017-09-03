@@ -51,6 +51,8 @@
 #Define IDC_FRMOPTIONSGENERAL_CHKCLOSEPROJMGR       1003
 #Define IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE        1004
 #Define IDC_FRMOPTIONSGENERAL_CHKASKEXIT            1005
+#Define IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR        1006
+#Define IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR      1007
 
 #Define IDC_FRMOPTIONSEDITOR_LBLTABSIZE             1000
 #Define IDC_FRMOPTIONSEDITOR_TXTTABSIZE             1001
@@ -82,6 +84,9 @@
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTNAME          1007
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET       1008
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE          1009
+#Define IDC_FRMOPTIONSCOLORS_COMBOTHEMES            1010
+#Define IDC_FRMOPTIONSCOLORS_NEWTHEME               1011
+#Define IDC_FRMOPTIONSCOLORS_DELETETHEME            1012
 
 #Define IDC_FRMOPTIONSCOMPILER_CMDFBWIN32           1000
 #Define IDC_FRMOPTIONSCOMPILER_LBLSWITCHES          1001
@@ -258,11 +263,33 @@ const USERTOOL_ACTION_SELECTED    = 0
 const USERTOOL_ACTION_PRECOMPILE  = 1   
 const USERTOOL_ACTION_POSTCOMPILE = 2
    
+' Colors
+enum
+   ' Start the enum at 2 because when theme is saved to file the first parse is the
+   ' theme id and theme description. The colors start at parse 2.
+   CLR_CARET = 2          
+   CLR_COMMENTS
+   CLR_HIGHLIGHTED     
+   CLR_KEYWORD         
+   CLR_FOLDMARGIN
+   CLR_FOLDSYMBOL      
+   CLR_LINENUMBERS     
+   CLR_BOOKMARKS       
+   CLR_OPERATORS       
+   CLR_INDENTGUIDES    
+   CLR_PREPROCESSOR    
+   CLR_SELECTION       
+   CLR_STRINGS         
+   CLR_TEXT            
+   CLR_WINAPI          
+   CLR_WINDOW
+end enum
+
 
 '  Control types   
 enum
    CTRL_FORM = 1
-   
+   CTRL_BUTTON
 end enum
    
 '  Grab handles (clockwise starting at top left corner)
@@ -283,6 +310,9 @@ end enum
 Enum
 ''  Custom messages
    MSG_USER_SETFOCUS = WM_USER + 1
+   MSG_USER_SHOWCOLORCOMBOBOXES
+   MSG_USER_SETCOLORCUSTOM
+   MSG_USER_GETCOLORCUSTOM
    MSG_USER_PROCESS_COMMANDLINE 
    MSG_USER_TOGGLE_TVCHECKBOXES
    IDM_FILE, IDM_FILENEW 
@@ -348,16 +378,6 @@ dim shared as HICON ghIconGood, ghIconBad
 dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
 
 dim shared as HACCEL ghAccelUserTools
-
-' Create a temporary array to hold the selected color values
-' for the different editor elements. When the form is saved then 
-' the values from this temporary struture is saved to the 
-' configuration table.
-Type TYPE_COLORS
-   nFg As COLORREF
-   nBg As COLORREF
-End Type
-Dim Shared gTempColors(15) As TYPE_COLORS   
 
 
 ' Create a dynamic array that will hold all localization words/phrases. This
@@ -556,7 +576,7 @@ END TYPE
 
 ' Create array to hold unlimited number of build configurations.
 type TYPE_BUILDS
-   id             as string 
+   id             as string    ' GUID
    wszDescription as CWSTR
    wszOptions     as CWSTR
    IsDefault      as Long      ' 0:False, 1:True
@@ -564,11 +584,28 @@ type TYPE_BUILDS
    Is64bit        as Long      ' 0:False, 1:True
 END TYPE
 
+' Used for Themes.
+Type TYPE_COLORS
+   nFg As COLORREF
+   nBg As COLORREF
+   bUseDefaultBg as Long = 1     ' do not use BOOLEAN (don't want the words true/false outputted to ini file)
+End Type
+
+type TYPE_THEMES
+   id             as string    ' GUID
+   wszDescription as CWSTR
+   colors(CLR_CARET to CLR_WINDOW) as TYPE_COLORS
+END TYPE
+
 Type clsConfig
    Private:
       _ConfigFilename As String 
       
    Public:
+      SelectedTheme        as string          ' GUID of selected theme
+      idxTheme             as long            ' need global b/c can't GetCurSel from CBN_EDITCHANGE
+      Themes(any)          as TYPE_THEMES
+      ThemesTemp(any)      as TYPE_THEMES
       Tools(any)           as TYPE_TOOLS
       ToolsTemp(any)       as TYPE_TOOLS  
       Builds(any)          as TYPE_BUILDS  
@@ -576,6 +613,8 @@ Type clsConfig
       FBKeywords           As String 
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
       AskExit              As Long = false
+      HideToolbar          as long = false
+      HideStatusbar        as long = false
       CloseFuncList        As Long = True
       ShowExplorer         As Long = True
       ShowExplorerWidth    As Long = 250
@@ -615,40 +654,9 @@ Type clsConfig
       RunViaCommandWindow  As Long = False
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
-      clrCaretFG           As Long = BGR(0,0,0)          ' black
-      clrCaretBG           As Long = -1
-      clrCommentsFG        As Long = BGR(0,128,0)        ' green
-      clrCommentsBG        As Long = BGR(255,255,255)    ' white
-      clrHighlightedFG     As Long = BGR(255,255,0)      ' yellow
-      clrHighlightedBG     As Long = -1
-      clrKeywordFG         As Long = BGR(0,0,255)        ' blue
-      clrKeywordBG         As Long = BGR(255,255,255)    ' white
-      clrFoldMarginFG      As Long = BGR(237,236,235)    ' pale gray
-      clrFoldMarginBG      As Long = -1
-      clrFoldSymbolFG      As Long = BGR(255,255,255)    ' white
-      clrFoldSymbolBG      As Long = BGR(0,0,0)          ' black
-      clrLineNumbersFG     As Long = BGR(0,0,0)          ' black
-      clrLineNumbersBG     As Long = BGR(196,196,196)    ' light gray
-      clrBookmarksFG       As Long = BGR(0,0,0)          ' black
-      clrBookmarksBG       As Long = BGR(0,0,255)        ' blue
-      clrOperatorsFG       As Long = BGR(196,0,0)        ' red
-      clrOperatorsBG       As Long = BGR(255,255,255)    ' white
-      clrIndentGuidesFG    As Long = BGR(255,255,255)    ' white
-      clrIndentGuidesBG    As Long = BGR(0,0,0)          ' black
-      clrPreprocessorFG    As Long = BGR(196,0,0)        ' red
-      clrPreprocessorBG    As Long = BGR(255,255,255)    ' white
-      clrSelectionFG       As Long = GetSysColor(COLOR_HIGHLIGHTTEXT) ' white
-      clrSelectionBG       As Long = GetSysColor(COLOR_HIGHLIGHT)     ' light blue
-      clrStringsFG         As Long = BGR(173,0,173)      ' Purple (little darker than Magenta)
-      clrStringsBG         As Long = BGR(255,255,255)    ' white
-      clrTextFG            As Long = BGR(0,0,0)          ' black
-      clrTextBG            As Long = BGR(255,255,255)    ' white
-      clrWinAPIFG          As Long = BGR(0,0,255)        ' blue
-      clrWinAPIBG          As Long = BGR(255,255,255)    ' white
-      clrWindowFG          As Long = BGR(255,255,255)    ' white
-      clrWindowBG          As Long = -1 
       
       Declare Constructor()
+      Declare Destructor()
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long
       Declare Function SaveToFile() As Long
@@ -726,7 +734,6 @@ Type clsApp
       
       Declare Constructor()
       Declare Destructor()
-      
       
 End Type
 

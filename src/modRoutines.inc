@@ -28,6 +28,23 @@ FUNCTION GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS
    function = wszTempFilename
 END FUNCTION
 
+
+' ========================================================================================
+' Replace a string in a combobox
+' ========================================================================================
+FUNCTION ComboBox_ReplaceString (BYVAL hComboBox AS HWND, BYVAL index AS LONG, BYVAL pwszNewText AS WSTRING PTR, BYVAL pNewData AS LONG_PTR = 0) AS LONG
+   ' Delete the string
+   DIM lRes AS LRESULT = SendMessage(hComboBox, CB_DELETESTRING, index, 0)
+   IF lRes = LB_ERR THEN RETURN lRes
+   ' Insert the new string
+   index = SendMessage(hComboBox, CB_INSERTSTRING, index, CAST(LPARAM, pwszNewText))
+   IF index = LB_ERR OR index = LB_ERRSPACE THEN Return index
+   lRes = SendMessage(hComboBox, CB_SETITEMDATA, index, CAST(LPARAM, pNewData))
+   IF lRes = LB_ERR THEN Return lRes
+   FUNCTION = SendMessage(hComboBox, CB_SETCURSEL, index, 0)
+END FUNCTION
+
+
 ' ========================================================================================
 ' Get the Scintilla value for a character sets
 ' ========================================================================================

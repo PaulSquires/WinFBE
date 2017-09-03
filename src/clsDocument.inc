@@ -70,6 +70,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    pFrame->Create( pMain->hWindow, "", @DesignerFrame_WndProc, 0, 0, 0, 0, _
         WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_VISIBLE, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pFrame->ClassStyle = CS_DBLCLKS
    SetWindowLongPtr( pFrame->hWindow, GWLP_ID, IDC_DESIGNFRAME )
    pFrame->Brush = GetSysColorBrush(COLOR_WINDOW)
    
@@ -82,6 +83,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
         WS_CHILD or WS_OVERLAPPED Or WS_OVERLAPPEDWINDOW or _
         WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_VISIBLE, _
         WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE)
+   pForm->ClassStyle = CS_DBLCLKS
    SetWindowLongPtr( pForm->hWindow, GWLP_ID, IDC_DESIGNFORM )
    pForm->SetWindowPos(pForm->hWindow, 0, 10, 10, 500, 310, SWP_NOZORDER)
     
@@ -91,6 +93,19 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    pCtrl->IsActive    = true
    pCtrl->hWindow     = this.hWndForm
    this.Controls.Add(pCtrl)
+   
+   ' Add a button
+   pCtrl = new clsControl 
+   dim as hwnd hWndCtrl = _
+   pForm->AddControl("Button", , IDCANCEL, "&Close", 50, 50, 75, 28, , , , _
+             CAST(WNDPROC, @Control_SubclassProc), CTRL_BUTTON, CAST(DWORD_PTR, @this))
+   pCtrl->ControlType = CTRL_BUTTON
+   pCtrl->IsSelected  = true
+   pCtrl->IsActive    = true
+   pCtrl->hWindow     = hWndCtrl
+   this.Controls.Add(pCtrl)
+   
+   
    
    ' If a disk file was specified then open it and load it into the editor
    this.IsNewFlag = IsNewFile
@@ -1026,6 +1041,7 @@ Function clsDocument.ApplyProperties() As Long
    Dim nFontCase   As Long 
    Dim rxRatio     As Single = 1
    Dim ryRatio     As Single = 1
+   dim pTheme      as TYPE_THEMES ptr
    
    ' Determine the pWindow parent of the Scintilla window in order
    ' to ensure that DPI ratios are correctly used.
@@ -1047,20 +1063,28 @@ Function clsDocument.ApplyProperties() As Long
    
    If m_pSci = 0 Then Exit Function
 
+   ' Determine the default theme index.
+   for i = lbound(gConfig.Themes) to ubound(gConfig.Themes)
+      if gConfig.Themes(i).id = gConfig.SelectedTheme then 
+         pTheme = @gConfig.Themes(i): exit for
+      end if   
+   NEXT
+   if pTheme = 0 THEN pTheme = @gConfig.Themes(0)
+
    SciMsg( m_pSci, SCI_STYLESETFONT, STYLE_DEFAULT, Cast(LPARAM, Strptr(strFontName)) )
    SciMsg( m_pSci, SCI_STYLESETSIZE, STYLE_DEFAULT, nFontSize )
    SciMsg( m_pSci, SCI_STYLESETCHARACTERSET, STYLE_DEFAULT, GetFontCharSetID(gConfig.EditorFontCharset) )
 
-   SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_DEFAULT, gConfig.clrTextFG )
-   SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_DEFAULT, gConfig.clrWindowFG )
+   SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).nFg)
+   SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_DEFAULT, pTheme->colors(CLR_WINDOW).nFg)
    SciMsg( m_pSci, SCI_STYLECLEARALL, 0, 0 )  ' Copies global style to all others
 
    ''
    ''  MARGIN 0: Line Numbering (defaults to width 0)
    nPixels = SciMsg( m_pSci, SCI_TEXTWIDTH, 0, Cast(LPARAM, @"_99999"))
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER )
-   SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_LINENUMBER, gConfig.clrLineNumbersFG )
-   SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_LINENUMBER, gConfig.clrLineNumbersBG )
+   SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).nFg )
+   SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).nBg )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 0, Iif(gConfig.LineNumbering, nPixels, 0) )
    
    ''
@@ -1073,8 +1097,8 @@ Function clsDocument.ApplyProperties() As Long
    ''  MARGIN 2: Folding symbols (defaults to width 0)
    SciMsg( m_pSci, SCI_SETMARGINTYPEN, 2, SC_MARGIN_SYMBOL )
    SciMsg( m_pSci, SCI_SETMARGINMASKN, 2, SC_MASK_FOLDERS )
-   SciMsg( m_pSci, SCI_SETFOLDMARGINCOLOUR, CTRUE, gConfig.clrFoldMarginFG )
-   SciMsg( m_pSci, SCI_SETFOLDMARGINHICOLOUR, CTRUE, gConfig.clrFoldMarginFG )
+   SciMsg( m_pSci, SCI_SETFOLDMARGINCOLOUR, CTRUE, pTheme->colors(CLR_FOLDMARGIN).nFg )
+   SciMsg( m_pSci, SCI_SETFOLDMARGINHICOLOUR, CTRUE, pTheme->colors(CLR_FOLDMARGIN).nFg )
    SciMsg( m_pSci, SCI_SETMARGINSENSITIVEN, 2, 1 )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 2, Iif(gConfig.FoldMargin, 16 * rxRatio, 0) )
 
@@ -1131,12 +1155,12 @@ Function clsDocument.ApplyProperties() As Long
    Else
       SciMsg( m_pSci, SCI_SETINDENTATIONGUIDES, False, 0)
    End If
-   SciMsg( m_pSci, SCI_SETSELFORE, STYLE_INDENTGUIDE, gConfig.clrIndentGuidesFG )
-   SciMsg( m_pSci, SCI_SETSELBACK, STYLE_INDENTGUIDE, gConfig.clrIndentGuidesBG )
+   SciMsg( m_pSci, SCI_SETSELFORE, STYLE_INDENTGUIDE, pTheme->colors(CLR_INDENTGUIDES).nFg )
+   SciMsg( m_pSci, SCI_SETSELBACK, STYLE_INDENTGUIDE, pTheme->colors(CLR_FOLDMARGIN).nBg )
    
    ''
    ''  CARET
-   SciMsg( m_pSci, SCI_SETCARETFORE, gConfig.clrCaretFG, 0 )
+   SciMsg( m_pSci, SCI_SETCARETFORE, pTheme->colors(CLR_CARET).nFg, 0 )
    SciMsg( m_pSci, SCI_SETCARETWIDTH, 2, 0 )       ' 2 pixels
 
    ''
@@ -1149,12 +1173,12 @@ Function clsDocument.ApplyProperties() As Long
 
    ''
    ''  CARET LINE COLOR
-   SciMsg( m_pSci, SCI_SETCARETLINEBACK, gConfig.clrHighlightedFG, 0 )
+   SciMsg( m_pSci, SCI_SETCARETLINEBACK, pTheme->colors(CLR_HIGHLIGHTED).nFg, 0 )
    
    ''
    ''  SELECTION COLORS
-   SciMsg( m_pSci, SCI_SETSELFORE, CTRUE, gConfig.clrSelectionFG )
-   SciMsg( m_pSci, SCI_SETSELBACK, CTRUE, gConfig.clrSelectionBG )
+   SciMsg( m_pSci, SCI_SETSELFORE, CTRUE, pTheme->colors(CLR_SELECTION).nFg)
+   SciMsg( m_pSci, SCI_SETSELBACK, CTRUE, pTheme->colors(CLR_SELECTION).nBg)
    
    ''
    ''  MULTIPLE SELECTIONS
@@ -1214,12 +1238,12 @@ Function clsDocument.ApplyProperties() As Long
       If gConfig.SyntaxHighlighting Then
     
          ' Set the Comments style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_COMMENT, gConfig.clrCommentsFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_COMMENT, gConfig.clrCommentsBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).nBg)
 
          ' Set the Keywords style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_KEYWORD, gConfig.clrKeywordFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_KEYWORD, gConfig.clrKeywordBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).nBg)
          SciMsg( m_pSci, SCI_STYLESETCASE, SCE_B_KEYWORD, nFontCase )
 
          ' Set the Constants style
@@ -1227,24 +1251,24 @@ Function clsDocument.ApplyProperties() As Long
 '            SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_CONSTANT, GetOptionVal("CLRKEYWORD_BG") )
 
          ' Set the Identifiers style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_IDENTIFIER, gConfig.clrTextFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_IDENTIFIER, gConfig.clrTextBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_IDENTIFIER, pTheme->colors(CLR_TEXT).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_IDENTIFIER, pTheme->colors(CLR_TEXT).nBg)
 
          ' Set the Numbers style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_NUMBER, gConfig.clrTextFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_NUMBER, gConfig.clrTextBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_NUMBER, pTheme->colors(CLR_TEXT).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_NUMBER, pTheme->colors(CLR_TEXT).nBg)
 
          ' Set the Operators style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_OPERATOR, gConfig.clrOperatorsFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_OPERATOR, gConfig.clrOperatorsBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).nBg)
 
          ' Set the Preprocessor style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_PREPROCESSOR, gConfig.clrPreprocessorFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_PREPROCESSOR, gConfig.clrPreprocessorBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).nBg)
 
          ' Set the Strings style
-         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_STRING, gConfig.clrStringsFG )
-         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_STRING, gConfig.clrStringsBG )
+         SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_STRING, pTheme->colors(CLR_STRINGS).nFg)
+         SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_STRING, pTheme->colors(CLR_STRINGS).nBg)
 
       End If
 
@@ -1288,10 +1312,10 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci, SCI_SETFOLDFLAGS, 16, 0 )
 
       ' Colors for folders closed and folders opened
-      SciMsg( m_pSci, SCI_MARKERSETFORE, SC_MARKNUM_FOLDER,     gConfig.clrFoldSymbolFG )
-      SciMsg( m_pSci, SCI_MARKERSETBACK, SC_MARKNUM_FOLDER,     gConfig.clrFoldSymbolBG )
-      SciMsg( m_pSci, SCI_MARKERSETFORE, SC_MARKNUM_FOLDEROPEN, gConfig.clrFoldSymbolFG )
-      SciMsg( m_pSci, SCI_MARKERSETBACK, SC_MARKNUM_FOLDEROPEN, gConfig.clrFoldSymbolBG )
+      SciMsg( m_pSci, SCI_MARKERSETFORE, SC_MARKNUM_FOLDER,     pTheme->colors(CLR_FOLDSYMBOL).nFg)
+      SciMsg( m_pSci, SCI_MARKERSETBACK, SC_MARKNUM_FOLDER,     pTheme->colors(CLR_FOLDSYMBOL).nBg)
+      SciMsg( m_pSci, SCI_MARKERSETFORE, SC_MARKNUM_FOLDEROPEN, pTheme->colors(CLR_FOLDSYMBOL).nFg)
+      SciMsg( m_pSci, SCI_MARKERSETBACK, SC_MARKNUM_FOLDEROPEN, pTheme->colors(CLR_FOLDSYMBOL).nBg)
    
    Else
       ' Disable folding of the procedures and functions

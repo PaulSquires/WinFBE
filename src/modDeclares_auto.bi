@@ -1,3 +1,4 @@
+declare FUNCTION Control_SubclassProc( BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM, BYVAL uIdSubclass AS UINT_PTR, BYVAL dwRefData AS DWORD_PTR ) AS LRESULT
 declare Function DesignerMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare Function DesignerFrame_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare Function DesignerForm_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
@@ -152,7 +153,7 @@ Declare Function DrawFontCombo(ByVal HWnd As HWnd, ByVal wParam As WPARAM, ByVal
 Declare Sub FillFontSizeCombo( ByVal hCb As HWnd, ByVal strFontName As WString Ptr )
 Declare Sub FillFontCharSets( ByVal hCtl As HWnd )
 Declare Function SetTempColorSelection( ByVal HWnd As HWnd, ByVal nCtrlID As Long ) As Long
-Declare Function ShowComboColors( ByVal HWnd As HWnd, ByVal nCurSel As Long ) As Long
+Declare Function ShowComboColors( ByVal HWnd As HWnd ) As Long
 Declare Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function frmOptionsColors_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmOptionsColors_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
