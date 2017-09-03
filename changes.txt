@@ -1,9 +1,12 @@
 Version 1.5.0 (September 3, 2017)
+- Fixed: Accidently included unfinished visual designer code in v1.5.0 release.
+ 
+Version 1.5.0 (September 3, 2017)
 - Added: Theme support. Create user defined color themes.
 - Added: Default Theme and Visual Studio Code (Dark) theme.
 - Added: "User selected" option when choosing colors allows user to select any color rather than just the predefined ones. 
 - Added: Environment option to show/hide main window Toolbar and Statusbar.
-- Fixed: Screen artifacts on code wwindow when Explorer resized.
+- Fixed: Screen artifacts on code window when Explorer resized.
 
 Version 1.4.9 (August 31, 2017)
 - Changed: If "Allow multiple instances" is unchecked, then subsequent file opens will open in the current active editor instance.
