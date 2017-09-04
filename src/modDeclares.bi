@@ -85,8 +85,10 @@
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET       1008
 #Define IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE          1009
 #Define IDC_FRMOPTIONSCOLORS_COMBOTHEMES            1010
-#Define IDC_FRMOPTIONSCOLORS_NEWTHEME               1011
-#Define IDC_FRMOPTIONSCOLORS_DELETETHEME            1012
+#Define IDC_FRMOPTIONSCOLORS_CHKFONTBOLD            1011
+#Define IDC_FRMOPTIONSCOLORS_CHKFONTITALIC          1012
+#Define IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE       1013
+#Define IDC_FRMOPTIONSCOLORS_BTNACTIONS             1014
 
 #Define IDC_FRMOPTIONSCOMPILER_CMDFBWIN32           1000
 #Define IDC_FRMOPTIONSCOMPILER_LBLSWITCHES          1001
@@ -315,6 +317,7 @@ Enum
    MSG_USER_GETCOLORCUSTOM
    MSG_USER_PROCESS_COMMANDLINE 
    MSG_USER_TOGGLE_TVCHECKBOXES
+   IDM_CREATE_THEME, IDM_IMPORT_THEME, IDM_DELETE_THEME
    IDM_FILE, IDM_FILENEW 
    IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS
    IDM_FILESAVEALL, IDM_FILESAVEDECLARES
@@ -588,7 +591,10 @@ END TYPE
 Type TYPE_COLORS
    nFg As COLORREF
    nBg As COLORREF
-   bUseDefaultBg as Long = 1     ' do not use BOOLEAN (don't want the words true/false outputted to ini file)
+   bUseDefaultBg as Long = 0  '  (currently not used) do not use BOOLEAN (don't want the words true/false outputted to ini file)
+   bFontBold   as Long = 0
+   bFontItalic as Long = 0
+   bFontUnderline as long = 0
 End Type
 
 type TYPE_THEMES
@@ -657,6 +663,7 @@ Type clsConfig
       
       Declare Constructor()
       Declare Destructor()
+      declare function ImportTheme( byref st as wstring, byval bImportExternal as Boolean = false ) as Long
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long
       Declare Function SaveToFile() As Long

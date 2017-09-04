@@ -1077,6 +1077,9 @@ Function clsDocument.ApplyProperties() As Long
 
    SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).nFg)
    SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_DEFAULT, pTheme->colors(CLR_WINDOW).nFg)
+   SciMsg( m_pSci, SCI_STYLESETBOLD, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).bFontBold )
+   SciMsg( m_pSci, SCI_STYLESETITALIC, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).bFontItalic )
+   SciMsg( m_pSci, SCI_STYLESETUNDERLINE, STYLE_DEFAULT, pTheme->colors(CLR_TEXT).bFontUnderline )
    SciMsg( m_pSci, SCI_STYLECLEARALL, 0, 0 )  ' Copies global style to all others
 
    ''
@@ -1086,6 +1089,9 @@ Function clsDocument.ApplyProperties() As Long
    SciMsg( m_pSci, SCI_STYLESETFORE, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).nFg )
    SciMsg( m_pSci, SCI_STYLESETBACK, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).nBg )
    SciMsg( m_pSci, SCI_SETMARGINWIDTHN, 0, Iif(gConfig.LineNumbering, nPixels, 0) )
+   SciMsg( m_pSci, SCI_STYLESETBOLD, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).bFontBold )
+   SciMsg( m_pSci, SCI_STYLESETITALIC, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).bFontItalic )
+   SciMsg( m_pSci, SCI_STYLESETUNDERLINE, STYLE_LINENUMBER, pTheme->colors(CLR_LINENUMBERS).bFontUnderline )
    
    ''
    ''  MARGIN 1: Non-Folding symbols (defaults to width 16) (Bookmark symbol, etc) (will be same color as line numbering)
@@ -1240,15 +1246,17 @@ Function clsDocument.ApplyProperties() As Long
          ' Set the Comments style
          SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).nFg)
          SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).nBg)
+         SciMsg( m_pSci, SCI_STYLESETBOLD, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).bFontBold )
+         SciMsg( m_pSci, SCI_STYLESETITALIC, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).bFontItalic )
+         SciMsg( m_pSci, SCI_STYLESETUNDERLINE, SCE_B_COMMENT, pTheme->colors(CLR_COMMENTS).bFontUnderline )
 
          ' Set the Keywords style
          SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).nFg)
          SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).nBg)
          SciMsg( m_pSci, SCI_STYLESETCASE, SCE_B_KEYWORD, nFontCase )
-
-         ' Set the Constants style
-'            SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_CONSTANT, GetOptionVal("CLRKEYWORD_FG") )
-'            SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_CONSTANT, GetOptionVal("CLRKEYWORD_BG") )
+         SciMsg( m_pSci, SCI_STYLESETBOLD, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).bFontBold )
+         SciMsg( m_pSci, SCI_STYLESETITALIC, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).bFontItalic )
+         SciMsg( m_pSci, SCI_STYLESETUNDERLINE, SCE_B_KEYWORD, pTheme->colors(CLR_KEYWORD).bFontUnderline )
 
          ' Set the Identifiers style
          SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_IDENTIFIER, pTheme->colors(CLR_TEXT).nFg)
@@ -1261,14 +1269,23 @@ Function clsDocument.ApplyProperties() As Long
          ' Set the Operators style
          SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).nFg)
          SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).nBg)
+         SciMsg( m_pSci, SCI_STYLESETBOLD, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).bFontBold )
+         SciMsg( m_pSci, SCI_STYLESETITALIC, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).bFontItalic )
+         SciMsg( m_pSci, SCI_STYLESETUNDERLINE, SCE_B_OPERATOR, pTheme->colors(CLR_OPERATORS).bFontUnderline )
 
          ' Set the Preprocessor style
          SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).nFg)
          SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).nBg)
+         SciMsg( m_pSci, SCI_STYLESETBOLD, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).bFontBold )
+         SciMsg( m_pSci, SCI_STYLESETITALIC, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).bFontItalic )
+         SciMsg( m_pSci, SCI_STYLESETUNDERLINE, SCE_B_PREPROCESSOR, pTheme->colors(CLR_PREPROCESSOR).bFontUnderline )
 
          ' Set the Strings style
          SciMsg( m_pSci, SCI_STYLESETFORE, SCE_B_STRING, pTheme->colors(CLR_STRINGS).nFg)
          SciMsg( m_pSci, SCI_STYLESETBACK, SCE_B_STRING, pTheme->colors(CLR_STRINGS).nBg)
+         SciMsg( m_pSci, SCI_STYLESETBOLD, SCE_B_STRING, pTheme->colors(CLR_STRINGS).bFontBold )
+         SciMsg( m_pSci, SCI_STYLESETITALIC, SCE_B_STRING, pTheme->colors(CLR_STRINGS).bFontItalic )
+         SciMsg( m_pSci, SCI_STYLESETUNDERLINE, SCE_B_STRING, pTheme->colors(CLR_STRINGS).bFontUnderline )
 
       End If
 

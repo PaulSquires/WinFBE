@@ -205,6 +205,13 @@ Function SetTempColorSelection( ByVal HWnd As HWnd, ByVal nCtrlID As Long ) As L
          gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).nBg = nBg
    End Select
    
+   gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontBold = _
+      Button_GetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTBOLD) )
+   gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontItalic = _
+      Button_GetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTITALIC) )
+   gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontUnderline = _
+      Button_GetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE) )
+
    Function = 0
 End Function
 
@@ -214,13 +221,9 @@ End Function
 ' ========================================================================================
 Function ShowComboColors( ByVal HWnd As HWnd ) As Long
 
-   Dim fHideBack As BOOLEAN
-   Dim nFg       As COLORREF
-   Dim nBg       As COLORREF
-   Dim NumItems  As Long
-   dim foundat   as long 
-   Dim nItem     As Long
-   Dim i         As Long
+   Dim as long NumItems, foundat, nItem, i 
+   Dim as Boolean fHideBack, fShowStyles
+   Dim as COLORREF nFg, nBg
    
    Dim As HWnd hList = GetDlgItem( HWnd, IDC_FRMOPTIONSCOLORS_LSTCOLORS )
    Dim As HWnd hCB1  = GetDlgItem( HWnd, IDC_FRMOPTIONSCOLORS_CBCOLOR1 )
@@ -269,9 +272,25 @@ Function ShowComboColors( ByVal HWnd As HWnd ) As Long
    If nCurSel = 2  Then fHideBack = True   ' Highlight current line
    If nCurSel = 4  Then fHideBack = True   ' Fold Margin
    If nCurSel = 15 Then fHideBack = True   ' Window
-
    ShowWindow hCB2, Iif( fHideBack, SW_HIDE, SW_SHOW )
    ShowWindow GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND), Iif( fHideBack, SW_HIDE, SW_SHOW )
+
+   if nCurSel = 1  THEN fShowStyles = true    ' comments
+   if nCurSel = 3  THEN fShowStyles = true    ' keywords
+   if nCurSel = 6  THEN fShowStyles = true    ' line numbers
+   if nCurSel = 8  THEN fShowStyles = true    ' operators
+   if nCurSel = 10 THEN fShowStyles = true    ' preprocessor
+   if nCurSel = 12 THEN fShowStyles = true    ' strings
+   if nCurSel = 13 THEN fShowStyles = true    ' text
+   Button_SetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTBOLD), _
+      gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontBold)
+   Button_SetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTITALIC), _
+      gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontItalic)
+   Button_SetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE), _
+      gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontUnderline)
+   ShowWindow GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTBOLD), Iif( fShowStyles, SW_SHOW, SW_HIDE)
+   ShowWindow GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTITALIC), Iif( fShowStyles, SW_SHOW, SW_HIDE)
+   ShowWindow GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE), Iif( fShowStyles, SW_SHOW, SW_HIDE)
 
    Function = 0
 End Function
@@ -282,6 +301,83 @@ End Function
 ' ========================================================================================
 Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
+   select CASE id
+      case IDM_CREATE_THEME
+         dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
+         gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
+         dim cwsText as CWSTR
+         cwsText = AfxInputBox( hwnd, 0, 0, L(336,"New Theme"), L(337,"Theme Name"), "")
+         if len(cwsText) THEN
+            dim as long ub = ubound(gConfig.ThemesTemp) + 1
+            redim preserve gConfig.ThemesTemp(ub) as TYPE_THEMES
+            ' Copy all of the current theme attributes to the new theme.
+            gConfig.ThemesTemp(ub) = gConfig.ThemesTemp(gConfig.idxTheme)
+            gConfig.ThemesTemp(ub).id = AfxGuidText(AfxGuid())
+            gConfig.ThemesTemp(ub).wszDescription = cwsText
+            FillThemesCombo(hWndCombo)
+            ub = ComboBox_GetCount(hWndCombo) - 1
+            ComboBox_SetCurSel(hWndCombo, ub )
+            Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
+            ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+         END IF
+         
+      case IDM_DELETE_THEME
+         dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
+         gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
+         ' Don't allow the first (Default) theme to be deleted.
+         If gConfig.idxTheme > 0 Then 
+            if MessageBox( HWND, L(338, "Are you sure you want to delete this theme?"), L(276,"Confirm"), _
+                              MB_YESNOCANCEL Or MB_ICONINFORMATION Or MB_DEFBUTTON1 ) = IDYES then
+               if ubound(gConfig.ThemesTemp) = 0 THEN
+                  erase gConfig.ThemesTemp
+                  gConfig.idxTheme = -1
+               else
+                  ' remove the item from the internal array
+                  for i as long = gConfig.idxTheme to ubound(gConfig.ThemesTemp) - 1
+                     gConfig.ThemesTemp(i) = gConfig.ThemesTemp(i+1)
+                  NEXT
+                  redim preserve gConfig.ThemesTemp(ubound(gConfig.ThemesTemp)-1)
+               END IF
+               ' reload the combobox
+               FillThemesCombo(hWndCombo)
+               ComboBox_SetCurSel(hWndCombo, 0 )
+               Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
+               ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+            end if
+         END IF
+
+      CASE IDM_IMPORT_THEME
+         dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
+         gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
+         dim as CWSTR wszFilename = _
+            AfxOpenFileDialog( hwnd, _
+                               L(346,"Import theme"), "", curdir, _
+                               L(79,"All files")+" (*.*)|*.*", "" )
+         if AfxFileExists(wszFilename) THEN
+            Dim f as Long = Freefile
+            dim fErrOpen as boolean = false
+            ' Attempt to open as unicode and then fallback as ansi
+            If Open( wszFilename For Input Encoding "utf16" As #f ) <> 0 Then 
+               fErrOpen = true
+               fErrOpen = Open( wszFilename For Input As #f ) 
+            end if   
+            if fErrOpen THEN exit function
+            Dim st As WString * 1024
+            Do Until EOF(f)
+               Line Input #f, st
+               gConfig.ImportTheme(st, true)
+            loop
+            close #f   
+            ' reload the combobox
+            FillThemesCombo(hWndCombo)
+            ComboBox_SetCurSel(hWndCombo, 0 )
+            Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
+            ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+            Exit Function
+         END IF
+         
+   END SELECT
+   
    Select Case codeNotify
 
       Case CBN_SELENDOK
@@ -297,8 +393,6 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
          If id = IDC_FRMOPTIONSCOLORS_COMBOTHEMES Then 
             gConfig.idxTheme = Combobox_GetCurSel( hwndCtl )
             if gConfig.idxTheme < 0 THEN exit function
-            ' Don't allow the first (Default) theme to be deleted.
-            EnableWindow(GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_DELETETHEME), iif(gConfig.idxTheme=0, false, true))
             Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
             ShowComboColors( HWND_FRMOPTIONSCOLORS )
             ' Make sure the text in the edit control is not highlighted
@@ -325,52 +419,49 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
          dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
          gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
          
-         if id = IDC_FRMOPTIONSCOLORS_NEWTHEME THEN
-            dim cwsText as CWSTR
-            cwsText = AfxInputBox( hwnd, 0, 0, L(336,"New Theme"), L(337,"Theme Name"), "")
-            if len(cwsText) THEN
-               dim as long ub = ubound(gConfig.ThemesTemp) + 1
-               redim preserve gConfig.ThemesTemp(ub) as TYPE_THEMES
-               ' Copy all of the current theme attributes to the new theme.
-               gConfig.ThemesTemp(ub) = gConfig.ThemesTemp(gConfig.idxTheme)
-               gConfig.ThemesTemp(ub).id = AfxGuidText(AfxGuid())
-               gConfig.ThemesTemp(ub).wszDescription = cwsText
-               FillThemesCombo(hWndCombo)
-               ub = ComboBox_GetCount(hWndCombo) - 1
-               ComboBox_SetCurSel(hWndCombo, ub )
-               Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
-               ShowComboColors( HWND_FRMOPTIONSCOLORS )   
-            END IF
-         END IF   
-         
-         if id = IDC_FRMOPTIONSCOLORS_DELETETHEME THEN
+         if (id = IDC_FRMOPTIONSCOLORS_CHKFONTBOLD) orelse _
+            (id = IDC_FRMOPTIONSCOLORS_CHKFONTITALIC) orelse _
+            (id = IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE) then
+            SetTempColorSelection(HWnd, id)
+         end if
+         if id = IDC_FRMOPTIONSCOLORS_BTNACTIONS then
+            ' Get screen coordinates of the button
+            dim as RECT rcButton
+            GetWindowRect(hwndCtl, @rcButton)
+            DIM pt AS POINT = (rcButton.left, rcButton.bottom)
+            'ClientToScreen(pNmh->hwndFrom, @pt)
             ' Don't allow the first (Default) theme to be deleted.
-            If gConfig.idxTheme > 0 Then 
-               if MessageBox( HWND, L(338, "Are you sure you want to delete this theme?"), L(276,"Confirm"), _
-                                 MB_YESNOCANCEL Or MB_ICONINFORMATION Or MB_DEFBUTTON1 ) = IDYES then
-                  if ubound(gConfig.ThemesTemp) = 0 THEN
-                     erase gConfig.ThemesTemp
-                     gConfig.idxTheme = -1
-                  else
-                     ' remove the item from the internal array
-                     for i as long = gConfig.idxTheme to ubound(gConfig.ThemesTemp) - 1
-                        gConfig.ThemesTemp(i) = gConfig.ThemesTemp(i+1)
-                     NEXT
-                     redim preserve gConfig.ThemesTemp(ubound(gConfig.ThemesTemp)-1)
-                  END IF
-                  ' reload the combobox
-                  FillThemesCombo(hWndCombo)
-                  ComboBox_SetCurSel(hWndCombo, 0 )
-                  Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
-                  ShowComboColors( HWND_FRMOPTIONSCOLORS )   
-               end if
-            END IF
-         END IF   
+            dim as long fGrayed = iif(gConfig.idxTheme = 0, MF_GRAYED, MF_ENABLED)
+            ' Create a menu and add items
+            DIM hSplitMenu AS HMENU = CreatePopupMenu
+            AppendMenu(hSplitMenu, MF_BYPOSITION, IDM_CREATE_THEME, L(348,"Create new theme"))
+            AppendMenu(hSplitMenu, MF_BYPOSITION, IDM_IMPORT_THEME, L(346,"Import theme"))
+            AppendMenu(hSplitMenu, MF_BYPOSITION or fGrayed, IDM_DELETE_THEME, L(347,"Delete theme"))
+            ' Display the menu
+            TrackPopupMenu(hSplitMenu, TPM_LEFTALIGN OR TPM_TOPALIGN, pt.x, pt.y, 0, hwnd, NULL)
+         end if
+            
    End Select
 
    Function = 0
 End Function
 
+
+' ========================================================================================
+' Process WM_NOTIFY message for window/dialog: frmMain
+' ========================================================================================
+Function frmOptionsColors_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+
+   ' Processs notify messages sent by the split button
+   DIM pNmh AS NMHDR PTR = CAST(NMHDR PTR, pNMHDR)
+   IF (id = IDC_FRMOPTIONSCOLORS_BTNACTIONS) ANDalso (pNmh->code = BCN_DROPDOWN) THEN
+      PostMessage(hwnd, WM_COMMAND, MAKEWPARAM(IDC_FRMOPTIONSCOLORS_BTNACTIONS, BN_CLICKED), cast(LPARAM, pNMHDR->hwndFrom))
+      FUNCTION = CTRUE
+      EXIT FUNCTION
+   END IF
+
+   Function = 0
+End Function
 
 ' ========================================================================================
 ' frmOptionsColors Window procedure
@@ -383,6 +474,7 @@ Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsColors_OnCommand)
+      HANDLE_MSG (HWnd, WM_NOTIFY,  frmOptionsColors_OnNotify)
       
       Case WM_DRAWITEM  ' must pass this one on to ownerdrawn combo
          If (wParam = IDC_FRMOPTIONSCOLORS_CBCOLOR1) Or _
@@ -460,12 +552,9 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    Dim As HWnd hComboThemes = _
    pWindow->AddControl("COMBOBOX", , IDC_FRMOPTIONSCOLORS_COMBOTHEMES, "", 11, 22, 200, 23, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWN, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOLORS_NEWTHEME, L(3,"&New"), 224, 21, 74, 25, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOLORS_DELETETHEME, L(282,"&Delete"), 305, 21, 74, 25, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)   
+   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOLORS_BTNACTIONS, L(345,"&Actions"), 224, 21, 146, 25, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_SPLITBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HWnd hList = _
    pWindow->AddControl("LISTBOX",, IDC_FRMOPTIONSCOLORS_LSTCOLORS, "", 11, 50, 200, 225, _
@@ -487,6 +576,16 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    CreateCBColorList(pWindow->hWindow, IDC_FRMOPTIONSCOLORS_CBCOLOR2, _
                  pWindow->ScaleX(224), pWindow->ScaleY(150), pWindow->ScaleX(146), pWindow->ScaleY(200) )
                  
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSCOLORS_CHKFONTBOLD, L(342,"Bold"), 224, 210, 400, 20, _
+        WS_CHILD Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSCOLORS_CHKFONTITALIC, L(343,"Italic"), 224, 231, 400, 20, _
+        WS_CHILD Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE, L(344,"Underline"), 224, 252, 400, 20, _
+        WS_CHILD Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
    pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMFONT, L(136,"Font (applies to all styles)"), 0, 291, 385, 55, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
@@ -530,9 +629,7 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
       gConfig.ThemesTemp(i) = gConfig.Themes(i)
    NEXT
    FillThemesCombo(hComboThemes)   
-   ' Don't allow the first (Default) theme to be deleted.
    ComboBox_SetCurSel( hComboThemes, gConfig.idxTheme )
-   EnableWindow(GetDlgItem(HWND_FRMOPTIONSCOLORS, IDC_FRMOPTIONSCOLORS_DELETETHEME), iif(gConfig.idxTheme=0, false, true))
 
    Listbox_SetCurSel( hList, 0 )
    ShowComboColors( HWND_FRMOPTIONSCOLORS )   

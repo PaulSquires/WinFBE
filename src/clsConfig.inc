@@ -280,7 +280,12 @@ Function clsConfig.SaveToFile() as Long
       print #f, this.Themes(i).id; ",";
       print #f, AfxStrReplaceAny(this.Themes(i).wszDescription, ",|", "_"); 
       for ii as long = CLR_CARET to CLR_WINDOW
-         print #f, "|"; this.Themes(i).colors(ii).nFg; ","; this.Themes(i).colors(ii).nBg; ","; this.Themes(i).colors(ii).bUseDefaultBg;
+         print #f, "|"; this.Themes(i).colors(ii).nFg; ","; _
+                        this.Themes(i).colors(ii).nBg; ","; _
+                        this.Themes(i).colors(ii).bUseDefaultBg; ","; _
+                        this.Themes(i).colors(ii).bFontBold; ","; _
+                        this.Themes(i).colors(ii).bFontItalic; ","; _
+                        this.Themes(i).colors(ii).bFontUnderline;
       NEXT
       print #f, ""
    NEXT
@@ -297,6 +302,68 @@ Function clsConfig.SaveToFile() as Long
    
    Function = 0
 End Function
+
+
+''
+''  IMPORT THEME CONTAINED IN INCOMING STRING (THEME_00=)
+''
+Function clsConfig.ImportTheme( byref st as wstring, _
+                                byval bImportExternal as Boolean = false _
+                                ) as Long
+
+   Dim wKey   As WString * 1024
+   Dim wData  As WString * 1024
+   Dim wData2 As WString * 1024
+   dim as long i
+   dim theme as TYPE_THEMES
+   
+   i = InStr(st, "=")
+   If i = 0 Then exit function
+   
+   wKey  = Left(st, i-1)
+   wData = Mid(st, i+1)
+
+   If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
+      ' Theme data is saved in parse blocks separated by a "|" pipe symbol. Within
+      ' each of of those parsed pipe blocks the data is further divided and separated
+      ' by "," comma blocks. The first pipe block is always the theme id and description.
+      ' From pipe block 2 to parsecount, the pipe blocks are the actual colors. Each
+      ' color block is comma separated and composed of foreground color, background color,
+      ' and 0/1 indicating if to use default background color.
+      dim as long nNumPipes = AfxStrParseCount(wData, "|")
+      if nNumPipes > ubound(theme.colors) THEN
+         nNumPipes = ubound(theme.colors)
+      END IF
+      for xx as long = 1 to nNumPipes
+         wData2 = AfxStrParse(wData, xx, "|")
+         if xx = 1 THEN
+            ' We set the id later depending on whether existing or import
+            theme.id = AfxStrParse(wData2, 1, ",")
+            theme.wszDescription = AfxStrParse(wData2, 2, ",")
+         else
+            theme.colors(xx).nFg = val(**AfxStrParse(wData2, 1, ","))
+            theme.colors(xx).nBg = val(**AfxStrParse(wData2, 2, ","))   
+            theme.colors(xx).bUseDefaultBg = val(**AfxStrParse(wData2, 3, ","))   
+            theme.colors(xx).bFontBold = val(**AfxStrParse(wData2, 4, ","))   
+            theme.colors(xx).bFontItalic = val(**AfxStrParse(wData2, 5, ","))   
+            theme.colors(xx).bFontUnderline = val(**AfxStrParse(wData2, 6, ","))   
+         END IF
+      NEXT
+   
+      if bImportExternal THEN
+         theme.id = AfxGuidText(AfxGuid())
+         i = ubound(this.ThemesTemp) + 1
+         redim preserve this.ThemesTemp(i)
+         this.ThemesTemp(i) = theme
+      else
+         i = ubound(this.Themes) + 1
+         redim preserve this.Themes(i)
+         this.Themes(i) = theme
+      end if   
+   end if
+   
+   function = 0
+end function
 
 
 ''
@@ -384,32 +451,8 @@ Function clsConfig.LoadFromFile() as Long
       End If
 
       If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
-         i = Val(Right(wKey,2))
-         If i > ubound(this.Themes) Then
-            redim preserve this.Themes(i)
-            ' Theme data is saved in parse blocks separated by a "|" pipe symbol. Within
-            ' each of of those parsed pipe blocks the data is further divided and separated
-            ' by "," comma blocks. The first pipe block is always the theme id and description.
-            ' From pipe block 2 to parsecount, the pipe blocks are the actual colors. Each
-            ' color block is comma separated and composed of foreground color, background color,
-            ' and 0/1 indicating if to use default background color.
-            dim as long nNumPipes = AfxStrParseCount(wData, "|")
-            if nNumPipes > ubound(this.Themes(i).colors) THEN
-               nNumPipes = ubound(this.Themes(i).colors)
-            END IF
-            for xx as long = 1 to nNumPipes
-               wData2 = AfxStrParse(wData, xx, "|")
-               if xx = 1 THEN
-                  this.Themes(i).id             = AfxStrParse(wData2, 1, ",")
-                  this.Themes(i).wszDescription = AfxStrParse(wData2, 2, ",")
-               else
-                  this.Themes(i).colors(xx).nFg = val(**AfxStrParse(wData2, 1, ","))
-                  this.Themes(i).colors(xx).nBg = val(**AfxStrParse(wData2, 2, ","))   
-                  this.Themes(i).colors(xx).bUseDefaultBg = val(**AfxStrParse(wData2, 3, ","))   
-               END IF
-            NEXT
-            Continue Do
-         End If
+         this.ImportTheme(st, false)
+         continue do
       End If
 
       If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry

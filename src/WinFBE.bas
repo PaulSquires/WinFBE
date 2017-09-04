@@ -37,7 +37,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.5.1") 
+#Define APPVERSION    WStr("1.5.2") 
 
 '#Define USE_VISUAL_DESIGNER 1
 
@@ -54,11 +54,9 @@ Using Afx
 #Include Once "clsProject.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
-
 #Include Once "modVDDesignForm.inc"
 #Include Once "modVDDesignFrame.inc"
 #Include Once "modVDDesignMain.inc"
-
 #Include Once "modParser.inc"
 #Include Once "modHelp.inc"
 #Include Once "modCompile.inc"
