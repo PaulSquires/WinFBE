@@ -20,8 +20,13 @@
 ''  CONSTRUCTOR
 ''
 Constructor clsConfig
-   _ConfigFilename = AfxGetExePathName & "\Settings\WinFBE.ini" 
+   _ConfigFilename = AfxGetExePathName & "Settings\WinFBE.ini" 
    this.LoadKeywords
+   ' Set default path to WinFBX should it not yet be specified
+   if len(this.AfxPath) = 0 THEN
+      this.AfxPath = AfxGetExePathName & "src"
+   END IF
+   
 End Constructor
 
 ''
@@ -215,12 +220,14 @@ Function clsConfig.SaveToFile() as Long
    ' drive letter.
    this.FBWINCompiler32  = ProcessToCurdrive(this.FBWINCompiler32)
    this.FBWINCompiler64  = ProcessToCurdrive(this.FBWINCompiler64)
+   this.AfxPath          = ProcessToCurdrive(this.AfxPath)
    this.CompilerHelpfile = ProcessToCurdrive(this.CompilerHelpfile)
    this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
 
    Print #f, "[Compiler]" 
    print #f, "FBWINCompiler32="       ; this.FBWINCompiler32      
    print #f, "FBWINCompiler64="       ; this.FBWINCompiler64      
+   print #f, "WinFBXPath="            ; this.AfxPath     
    print #f, "CompilerSwitches="      ; this.CompilerSwitches     
    print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
@@ -510,6 +517,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "ShowExplorerWidth":    this.ShowExplorerWidth    = nData
          Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
          Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
+         Case "WinFBXPath":           this.AfxPath              = wData
          Case "CompilerSwitches":     this.CompilerSwitches     = wData
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
@@ -681,7 +689,7 @@ Function clsConfig.LoadFromFile() as Long
          this.idxTheme = i: exit for
       end if   
    NEXT
-
+   
    Function = 0
 End Function
 

@@ -25,7 +25,7 @@ Type COMPILE_TYPE
    ObjFolder       As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
    ObjFolderShort  As WString * MAX_PATH   ' ".\.wfbe\"
    ObjID           As WString * MAX_PATH   ' "32" or "64" appended to object name
-   CompileFlags    As WString * MAX_PATH
+   CompileFlags    As WString * 2048
    RunAfterCompile As BOOLEAN
    StartTime       As Double
    EndTime         As Double
@@ -86,6 +86,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Perform some pre-compile checks to see if we should continue.
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+   gConfig.AfxPath         = ProcessFromCurdrive(gConfig.AfxPath)
    if gConfig.Builds(idxBuild).Is32bit then
       fCompile32 = True: fCompile64 = False
       gCompile.CompilerPath = gConfig.FBWINcompiler32
@@ -151,6 +152,18 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    gCompile.ResourceFile = WStr("")    ' default that there is no resource
    gCompile.CompileFlags = gConfig.Builds(idxBuild).wszOptions
+   
+   ' If the path to the WinFBX (Afx) library is valid then add that path
+   ' as a -i switch to the compiler.
+   if AfxIsFolder(gConfig.AfxPath) THEN
+      gCompile.CompileFlags = gCompile.CompileFlags + " -i " + chr(34) + gConfig.AfxPath + chr(34)
+   else
+      ' WinFBX was not specified in the compiler setup so let's look for it
+      if AfxIsFolder(AfxGetExePathName & "src") then
+         gCompile.CompileFlags = gCompile.CompileFlags + " -i " + _
+              chr(34) + AfxGetExePathName & "src" + chr(34)
+      END IF
+   END IF
    
    If gApp.IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gApp.Projects(idx).GetResourceDocumentPtr()
