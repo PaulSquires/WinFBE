@@ -26,7 +26,7 @@ Function LoadRecentFilesTreeview( ByVal HWnd As HWnd ) As LRESULT
    Treeview_DeleteAllItems(hTree) 
 
    ''  RECENT FILES
-   wzStr = UCase(AfxStrRemove( L(10, "&Recent Files"), "&")) 
+   wzStr = UCase(L(10, "Recent Files")) 
    hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr )
    hFirstNode = hNode
    gApp.hRecentFilesRootNode = hNode
@@ -48,7 +48,7 @@ Function LoadRecentFilesTreeview( ByVal HWnd As HWnd ) As LRESULT
 
 
    ''  RECENT PROJECTS
-   wzStr = UCase(AfxStrRemove( L(219, "&Recent Projects"), "&")) 
+   wzStr = UCase(L(219, "Recent Projects")) 
    hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr ) 
    gApp.hRecentProjectsRootNode = hNode
    Treeview_SetBold( hTree, hNode, TRUE) 

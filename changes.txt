@@ -1,5 +1,8 @@
-Version 1.5.3 (Not released yet)
+Version 1.5.3 (September 6, 2017)
 - Added: compiler set new field added for WinFBX library path.
+- Changed: Modified some AfxStrRemove code when "&" character is removed would interfere with Chinese localization.
+- Changed: Editor option "Confine caret to text" is now checked by default.
+- Changed: Removed DShow_PlayClip example project due to potential include file conflicts.
 
 Version 1.5.2 (September 4, 2017)
 - Added: Import theme from external disk file (unicode or ansi).

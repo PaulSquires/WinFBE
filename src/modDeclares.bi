@@ -622,7 +622,7 @@ Type clsConfig
       BuildsTemp(any)      as TYPE_BUILDS  
       FBKeywords           As String 
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
-      AskExit              As Long = false
+      AskExit              As Long = false         ' use Long so True/False string not written to file
       HideToolbar          as long = false
       HideStatusbar        as long = false
       CloseFuncList        As Long = True
@@ -636,7 +636,7 @@ Type clsConfig
       LeftMargin           As Long = True
       FoldMargin           As Long = false
       AutoIndentation      As Long = True
-      ConfineCaret         As Long = false
+      ConfineCaret         As Long = true
       LineNumbering        As Long = True
       HighlightCurrentLine As Long = True
       IndentGuides         As Long = True

@@ -401,7 +401,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    Dim As HWnd hForm = _
-   pWindow->Create(hWndParent, rtrim(AfxStrRemove(L(277,"&Build Configurations..."), "&"),"."), _
+   pWindow->Create(hWndParent, rtrim(L(277,"Build Configurations..."),"."), _
         @frmCompileConfig_WndProc, 0, 0, 396, 323, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT )

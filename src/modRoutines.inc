@@ -777,7 +777,7 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
          ' // Set the title of the dialog
-         hr = psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(185,"Save Project &As..."),"&"))
+         hr = psfd->lpVtbl->SetTitle(psfd, L(185,"Save Project As..."))
 
       case IDM_FILESAVEDECLARES 
          rgFileTypes(1).pszName = @L(78,"FB Include files")
@@ -787,7 +787,7 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          rgFileTypes(2).pszSpec = @WSTR("*.bas")
          rgFileTypes(3).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
-         psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(265,"Save &Declares File"),"&"))
+         psfd->lpVtbl->SetTitle(psfd, L(265,"Save Declares File"))
 
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
@@ -799,7 +799,7 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          rgFileTypes(3).pszSpec = @WSTR("*.rc")
          rgFileTypes(4).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 4, @rgFileTypes(1))
-         psfd->lpVtbl->SetTitle(psfd, AfxStrRemove(L(8,"Save &As..."),"&"))
+         psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
      
    End Select
    
