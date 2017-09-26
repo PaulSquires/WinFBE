@@ -1011,7 +1011,7 @@ PRIVATE FUNCTION CGraphCtx.DrawBitmap (BYVAL hbmp AS HBITMAP, BYVAL x AS SINGLE 
    DIM nStatus AS GpStatus, pGraphics AS GpGraphics PTR, pBitmap AS GpBitmap PTR
    DIM nWidth AS DWORD, nHeight AS DWORD
    DO
-      nStatus = GdipCreateBitmapFromHBITMAP (hbmp, NULL, @pBitmap)
+      nStatus = GdipCreateBitmapFromHBITMAP(hbmp, NULL, @pBitmap)
       IF pBitmap = NULL THEN EXIT DO
       GdipGetImageWidth(cast(GpImage PTR, pBitmap), @nWidth)
       GdipGetImageHeight(cast(GpImage PTR, pBitmap), @nHeight)

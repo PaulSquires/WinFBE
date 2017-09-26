@@ -270,7 +270,7 @@ PRIVATE FUNCTION AfxGregorianToJulian (BYVAL nDay AS LONG, BYVAL nMonth AS LONG,
    IF nMonth < 3 THEN nMonth += 12 : nYear -=1
    ' // Day 1 of julian calendar is 1/1/-4712 and there are 365.25 days per year
    DaysElapsed = INT((nYear + 4712) * 365.25)
-   ' // Substract invalid leap years
+   ' // Subtract invalid leap years
    InvalidLeapYears = nYear \ 100
    ' // Add valid leap years
    ValidLeapYears = nYear \ 400
@@ -304,7 +304,7 @@ END FUNCTION
 ' - nDay: A number between 1-31.
 ' - nMonth:s A number between 1-12.
 ' - nYear: A four digit year, e.g. 2011.
-' - nDays: The number of days to add (or substract, if the number is negative).
+' - nDays: The number of days to add (or subtract, if the number is negative).
 ' Return Value:
 ' - The new date in Julian format. To convert it to Gregorian, call functions such
 '   AfxJulianToGregorian or AfxJulianToGregorianStr.

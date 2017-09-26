@@ -950,7 +950,7 @@ Function clsDocument.DisplayStats() As Long
    Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
 
    Dim As Long i, curPos, nLine, nCol
-   Dim As Long startPos, endPos, startLine, endLine, nSelLines
+   Dim As Long startPos, endPos, startLine, endLine, nSelLines, nLines
    Dim pDoc As clsDocument Ptr
    Dim TB As TC_ITEM 
    
@@ -977,6 +977,7 @@ Function clsDocument.DisplayStats() As Long
    curPos    = SciMsg( m_pSci, SCI_GETCURRENTPOS, 0, 0)
    nLine     = SciMsg( m_pSci, SCI_LINEFROMPOSITION, curPos, 0) 
    nCol      = SciMsg( m_pSci, SCI_GETCOLUMN, curPos, 0) 
+   nLines    = SciMsg( m_pSci, SCI_GETLINECOUNT, 0, 0) 
    this.GetSelectedLineRange(startLine, endLine, startPos, endPos )
 
    wText = " Ln " & Str(nLine+1) & ", Col " & Str(nCol+1) 
@@ -985,6 +986,8 @@ Function clsDocument.DisplayStats() As Long
       ' If this is a multiline selection then update the selected button
       ' on the FindReplace window.
       frmFindReplace_SetButtonStates
+   else
+      wText = wText + ", Lines " + Str(nLines)
    End If 
    StatusBar_SetText(hStatusbar, 1, wText)
    
@@ -1468,9 +1471,5 @@ function clsDocument.CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES 
 
    function = 0
 END FUNCTION
-
-
-
-
 
 

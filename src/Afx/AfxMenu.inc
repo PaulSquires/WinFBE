@@ -427,10 +427,11 @@ PRIVATE FUNCTION AfxGetMenuItemText OVERLOAD (BYVAL hMenu AS HMENU, BYVAL uItem 
    ' // Allocate the buffer
    DIM buffer AS CWSTR = SPACE(mii.cch)
    ' // Get the menu string
-   mii.dwTypeData = cast(WSTRING PTR, @buffer)
+   mii.dwTypeData = cast(WSTRING PTR, *buffer)
    IF GetMenuItemInfoW(hMenu, uItem, fByPosition, @mii) THEN
       RETURN RTRIM(buffer, CHR(0))
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 

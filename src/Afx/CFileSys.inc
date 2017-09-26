@@ -709,6 +709,7 @@ PRIVATE FUNCTION CFileSys.IsRootFolder (BYREF cbsFolder AS CBSTR) AS BOOLEAN
       pFolder->Release
       RETURN fRootFolder
    END IF
+   RETURN FALSE
 END FUNCTION
 ' ========================================================================================
 

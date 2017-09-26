@@ -20,6 +20,7 @@
 #INCLUDE ONCE "win/cderr.bi"
 #INCLUDE ONCE "Afx/AfxPath.inc"
 #INCLUDE ONCE "Afx/AfxStr.inc"
+#INCLUDE ONCE "crt/string.bi"
 
 USING Afx
 
@@ -224,6 +225,20 @@ END FUNCTION
 
 ' ========================================================================================
 ' Returns the path of the program which is currently executing.
+' The path name has not a trailing backslash, except if it is a drive, e.g. "C:\".
+' ========================================================================================
+PRIVATE FUNCTION AfxGetExePath () AS CWSTR
+   DIM buffer AS WSTRING * MAX_PATH, p AS LONG
+   GetModuleFileNameW NULL, buffer, SIZEOF(buffer)
+   p = INSTRREV(buffer, ANY ":/\")
+   IF p THEN buffer = AfxPathRemoveBackslash(LEFT(buffer, p))
+   RETURN buffer
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the path of the program which is currently executing.
+' The path name has a trailing backslash.
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetExePathName () AS CWSTR
    DIM buffer AS WSTRING * MAX_PATH, p AS LONG
@@ -363,6 +378,7 @@ PRIVATE FUNCTION AfxGetPathName (BYREF wszPath AS WSTRING) AS CWSTR
    DIM p AS LONG
    p = INSTRREV(cwsPath, ANY ":\/")
    IF p THEN RETURN LEFT(**cwsPath, p)
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -408,6 +424,7 @@ PRIVATE FUNCTION AfxGetPathFromWindowHandle (BYVAL hwnd AS HWND) AS CWSTR
          RETURN wszPath
       END IF
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -448,6 +465,7 @@ PRIVATE FUNCTION AfxGetKnowFolderPath (BYVAL rfid AS CONST KNOWNFOLDERID CONST P
       CoTaskMemFree pidl
       RETURN wszPath
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 #endif
@@ -466,6 +484,7 @@ PRIVATE FUNCTION AfxGetSpecialFolderLocation (BYVAL nFolder AS LONG) AS CWSTR
       CoTaskMemFree pidl
       RETURN wszPath
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -511,6 +530,7 @@ PRIVATE FUNCTION AfxSaveTempFile (BYVAL pwszBuffer AS WSTRING PTR, BYREF wszExte
          END IF
       END IF
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -533,6 +553,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxGetDefaultBrowserPath () AS CWSTR
    DIM wszPath AS WSTRING * MAX_PATH, cchOut AS DWORD = SIZEOF(wszPath)
    IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "http", "open", wszPath, @cchOut)) THEN RETURN wszPath
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -544,6 +565,7 @@ PRIVATE FUNCTION AfxGetDefaultBrowserName () AS CWSTR
    IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "http", "open", wszPath, @cchOut)) THEN
       RETURN AfxGetFileName(wszPath)
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -553,6 +575,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxGetDefaultMailClientPath () AS CWSTR
    DIM wszPath AS WSTRING * MAX_PATH, cchOut AS DWORD = SIZEOF(wszPath)
    IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "mailto", "open", wszPath, @cchOut)) THEN RETURN wszPath
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -564,6 +587,7 @@ PRIVATE FUNCTION AfxGetDefaultMailClientName () AS CWSTR
    IF SUCCEEDED(AssocQueryStringW(0, ASSOCSTR_EXECUTABLE, "mailto", "open", wszPath, @cchOut)) THEN
       RETURN AfxGetFileName(wszPath)
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -867,7 +891,7 @@ END FUNCTION
 ' - lpCustColors = Optional. A pointer to an array of 16 values that contain red, green,
 '   blue (RGB) values for the custom color boxes in the dialog box. If the user modifies
 '   these colors, the system updates the array with the new RGB values.
-' Return value: The selected color.
+' Return value: The selected color, or -1 if the user has canceled the dialog.
 ' ========================================================================================
 PRIVATE FUNCTION AfxChooseColorDialog (BYVAL hParent AS HWND, BYVAL rgbDefaultColor AS COLORREF = 0, BYVAL lpCustColors AS COLORREF PTR = NULL) AS LONG
    DIM ColorSpec AS CHOOSECOLORW, lCustomColor(15) AS LONG
@@ -883,8 +907,8 @@ PRIVATE FUNCTION AfxChooseColorDialog (BYVAL hParent AS HWND, BYVAL rgbDefaultCo
    END IF
    ColorSpec.rgbResult = rgbDefaultColor
    ColorSpec.Flags = ColorSpec.Flags OR CC_RGBINIT OR CC_FULLOPEN
-   Function =  Iif( ChooseColorW(@ColorSpec), Colorspec.rgbResult, -1)
-End Function
+   FUNCTION =  IIF(ChooseColorW(@ColorSpec), Colorspec.rgbResult, -1)
+END FUNCTION
 ' ========================================================================================
 
 
@@ -1632,6 +1656,54 @@ PRIVATE FUNCTION AfxSetDlgMsgResult(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVA
 END FUNCTION
 ' ========================================================================================
 
+' ========================================================================================
+' Returns the width, in pixels, of the current display device on the computer on which the
+' calling thread is running. Contrarily to GetSystemMetrics or GetDeviceCaps, it returns
+' the real width even when it is called from an application that is not DPI aware, e.g. an
+' application running virtualized in a monitor 1920 pixels width and a DPI of 192, will
+' return 960 pixels if it calls GetSystemMetrics or GetDeviceCaps, but will return 1920
+' pixels calling EnumDisplaySettingsW.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDisplayPixelsWidth () AS DWORD
+   DIM dm AS DEVMODEW
+   dm.dmSize = SIZEOF(dm)
+   EnumDisplaySettingsW(NULL, ENUM_CURRENT_SETTINGS, @dm)
+   FUNCTION = dm.dmPelsWidth
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Returns the height, in pixels, of the current display device on the computer on which the
+' calling thread is running.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDisplayPixelsHeight () AS DWORD
+   DIM dm AS DEVMODEW
+   dm.dmSize = SIZEOF(dm)
+   EnumDisplaySettingsW(NULL, ENUM_CURRENT_SETTINGS, @dm)
+   FUNCTION = dm.dmPelsHeight
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Returns the color resolution, in bits per pixel, of the display device.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDisplayBitsPerPixel () AS DWORD
+   DIM dm AS DEVMODEW
+   dm.dmSize = SIZEOF(dm)
+   EnumDisplaySettingsW(NULL, ENUM_CURRENT_SETTINGS, @dm)
+   FUNCTION = dm.dmBitsPerPel
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Returns the frequency, in hertz (cycles per second), of the display device in a
+' particular mode. This value is also known as the display device's vertical refresh rate.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetDisplayFrequency () AS DWORD
+   DIM dm AS DEVMODEW
+   dm.dmSize = SIZEOF(dm)
+   EnumDisplaySettingsW(NULL, ENUM_CURRENT_SETTINGS, @dm)
+   FUNCTION = dm.dmDisplayFrequency
+END FUNCTION
+' ========================================================================================
+
 
 ' ########################################################################################
 '                              *** DPI RELATED PROCEDURES ***
@@ -1816,6 +1888,98 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
+' Returns the logical width of the monitor that the window is currently displayed on.
+' If the application to which the window belongs is not DPI aware, a monitor with a
+' width resolution of 1920 pixels in a computer using 192 DPI, will return 960 pixels.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetMonitorLogicalWidth (BYVAL hwnd AS HWND = NULL) AS DWORD
+   ' // Get the monitor that the window is currently displayed on
+   IF hwnd = NULL THEN hwnd = GetDesktopWindow
+   DIM hMonitor AS HMONITOR = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+   ' // Get the logical width of the monitor.
+   DIM miex AS MONITORINFOEXW
+   miex.cbSize = SIZEOF(miex)
+   GetMonitorInfoW(hMonitor, CAST(LPMONITORINFO, @miex))
+   FUNCTION = (miex.rcMonitor.right  - miex.rcMonitor.left)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the logical height of the monitor that the window is currently displayed on.
+' If the application to which the window belongs is not DPI aware, a monitor with an
+' height resolution of 1080 pixels in a computer using 192 DPI, will return 540 pixels.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetMonitorLogicalHeight (BYVAL hwnd AS HWND = NULL) AS DWORD
+   ' // Get the monitor that the window is currently displayed on
+   IF hwnd = NULL THEN hwnd = GetDesktopWindow
+   DIM hMonitor AS HMONITOR = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+   ' // Get the logical width of the monitor.
+   DIM miex AS MONITORINFOEXW
+   miex.cbSize = SIZEOF(miex)
+   GetMonitorInfoW(hMonitor, CAST(LPMONITORINFO, @miex))
+   FUNCTION = (miex.rcMonitor.bottom - miex.rcMonitor.top)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the horizontal scaling of the monitor that the window is currently displayed on.
+' If the application to which the window belongs is not DPI aware, a computer using
+' 192 DPI, will return an scaling ratio of 2.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetMonitorHorizontalScaling (BYVAL hwnd AS HWND = NULL) AS DWORD
+   ' // Get the monitor that the window is currently displayed on
+   IF hwnd = NULL THEN hwnd = GetDesktopWindow
+   DIM hMonitor AS HMONITOR = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+   ' // Get the logical width and height of the monitor.
+   DIM miex AS MONITORINFOEXW
+   miex.cbSize = sizeof(miex)
+   GetMonitorInfoW(hMonitor, CAST(LPMONITORINFO, @miex))
+   DIM cxLogical AS LONG = (miex.rcMonitor.right  - miex.rcMonitor.left)
+   DIM cyLogical AS LONG = (miex.rcMonitor.bottom - miex.rcMonitor.top)
+   ' // Get the physical width and height of the monitor.
+   DIM dm AS DEVMODEW
+   dm.dmSize = sizeof(dm)
+   dm.dmDriverExtra = 0
+   EnumDisplaySettingsW(miex.szDevice, ENUM_CURRENT_SETTINGS, @dm)
+   DIM cxPhysical AS LONG = dm.dmPelsWidth
+   DIM cyPhysical as LONG = dm.dmPelsHeight
+   ' // Calculate the scaling factor.
+   DIM horzScale AS DOUBLE = cxPhysical / cxLogical
+   DIM vertScale AS DOUBLE = cyPhysical / cyLogical
+   FUNCTION = horzScale
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns the vertical scaling of the monitor that the window is currently displayed on.
+' If the application to which the window belongs is not DPI aware, a computer using
+' 192 DPI, will return an scaling ratio of 2.
+' ========================================================================================
+PRIVATE FUNCTION AfxGetMonitorVerticalScaling (BYVAL hwnd AS HWND = NULL) AS DWORD
+   ' // Get the monitor that the window is currently displayed on
+   IF hwnd = NULL THEN hwnd = GetDesktopWindow
+   DIM hMonitor AS HMONITOR = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+   ' // Get the logical width and height of the monitor.
+   DIM miex AS MONITORINFOEXW
+   miex.cbSize = sizeof(miex)
+   GetMonitorInfoW(hMonitor, CAST(LPMONITORINFO, @miex))
+   DIM cxLogical AS LONG = (miex.rcMonitor.right  - miex.rcMonitor.left)
+   DIM cyLogical AS LONG = (miex.rcMonitor.bottom - miex.rcMonitor.top)
+   ' // Get the physical width and height of the monitor.
+   DIM dm AS DEVMODEW
+   dm.dmSize = sizeof(dm)
+   dm.dmDriverExtra = 0
+   EnumDisplaySettingsW(miex.szDevice, ENUM_CURRENT_SETTINGS, @dm)
+   DIM cxPhysical AS LONG = dm.dmPelsWidth
+   DIM cyPhysical as LONG = dm.dmPelsHeight
+   ' // Calculate the scaling factor.
+   DIM horzScale AS DOUBLE = cxPhysical / cxLogical
+   DIM vertScale AS DOUBLE = cyPhysical / cyLogical
+   FUNCTION = vertScale
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
 ' Loads a specified icon resource with a client-specified system metric.
 ' See: https://msdn.microsoft.com/en-us/library/windows/desktop/bb775701(v=vs.85).aspx
 ' ========================================================================================
@@ -1824,8 +1988,7 @@ PRIVATE FUNCTION AfxLoadIconMetric (BYVAL hinst AS HINSTANCE, BYVAL pszName AS P
    IF pLib = NULL THEN EXIT FUNCTION
    DIM pLoadIconMetric AS FUNCTION (BYVAL hinst AS HINSTANCE, BYVAL pszName AS PCWSTR, BYVAL lims AS LONG, BYVAL phico AS HICON PTR) AS HRESULT
    pLoadIconMetric = DyLibSymbol(pLib, "LoadIconMetric")
-   IF pLoadIconMetric = NULL THEN EXIT FUNCTION
-   FUNCTION = pLoadIconMetric(hinst, pszName, lims, phico)
+   IF pLoadIconMetric THEN FUNCTION = pLoadIconMetric(hinst, pszName, lims, phico)
    DyLibFree(pLib)
 END FUNCTION
 ' ========================================================================================
@@ -3004,6 +3167,68 @@ PRIVATE FUNCTION AfxGetFileLastWriteTime (BYREF wszFileSpec AS WSTRING, BYVAL bU
          RETURN FT
       END IF
    END IF
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Scans a text file ans returns the number of occurrences of the specified delimiter.
+' Default value is CHR(13, 10), which returns the number of lines.
+' ========================================================================================
+PRIVATE FUNCTION AfxFileScanA (BYREF wszFileName AS WSTRING, BYREF szDelimiter AS ZSTRING = CHR(13, 10)) AS DWORD
+   DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   IF LEN(szDelimiter) = 0 THEN EXIT FUNCTION
+   ' // Open the file
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
+   ' // Get the size of the file
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   DIM pBuffer AS UBYTE PTR
+   pBuffer = CAllocate(1, dwFileSize)
+   IF pBuffer = NULL THEN EXIT FUNCTION
+   DIM bSuccess AS LONG = ReadFile(hFile, pBuffer, dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess = FALSE THEN EXIT FUNCTION
+   DIM nLen AS LONG = LEN(szDelimiter)
+   DIM pstr AS ANY PTR = pBuffer
+   DO
+      pstr = strstr(pstr, szDelimiter)
+      IF pstr = NULL THEN EXIT DO
+      pstr += nLen
+      dwCount += 1
+   LOOP
+   DeAllocate(pBuffer)
+   FUNCTION = dwCount
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Version for unicode text files.
+' ========================================================================================
+PRIVATE FUNCTION AfxFileScanW (BYREF wszFileName AS WSTRING, BYREF wszDelimiter AS WSTRING = CHR(13, 10)) AS DWORD
+   DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   IF LEN(wszDelimiter) = 0 THEN EXIT FUNCTION
+   ' // Open the file
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
+   ' // Get the size of the file
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   DIM pBuffer AS UBYTE PTR
+   pBuffer = CAllocate(1, dwFileSize)
+   IF pBuffer = NULL THEN EXIT FUNCTION
+   DIM bSuccess AS LONG = ReadFile(hFile, pBuffer, dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess = FALSE THEN EXIT FUNCTION
+   DIM nLen AS LONG = LEN(wszDelimiter) * 2
+   DIM pstr AS ANY PTR = pBuffer
+   DO
+      pstr = wcsstr(pstr, @wszDelimiter)
+      IF pstr = NULL THEN EXIT DO
+      pstr += nLen
+      dwCount += 1
+   LOOP
+   DeAllocate(pBuffer)
+   FUNCTION = dwCount
 END FUNCTION
 ' ========================================================================================
 

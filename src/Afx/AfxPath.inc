@@ -330,6 +330,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxPathFindSuffixArray (BYREF wszPath AS WSTRING, BYVAL apwszSuffix AS WSTRING PTR PTR, BYVAL iArraySize AS LONG) AS CWSTR
    DIM pwszSuffix AS WSTRING PTR = cast(WSTRING PTR, PathFindSuffixArrayW(wszPath, apwszSuffix, iArraySize))
    IF pwszSuffix THEN RETURN *pwszSuffix
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -343,6 +344,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxPathGetArgs (BYREF wszPath AS CONST WSTRING) AS CWSTR
    DIM pwszArgs AS WSTRING PTR = PathGetArgsW(wszPath)
    IF pwszArgs THEN RETURN *pwszArgs
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -674,6 +676,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxPathRelativePathTo (BYREF wszFrom AS CONST WSTRING, BYVAL dwAttrFrom AS DWORD, BYREF wszTo AS CONST WSTRING, BYVAL dwAttrTo AS DWORD) AS CWSTR
    DIM _wszPath AS WSTRING * MAX_PATH
    IF PathRelativePathToW(_wszPath, wszFrom, dwAttrFrom, wszTo, dwAttrto) THEN RETURN _wszPath
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -772,6 +775,7 @@ PRIVATE FUNCTION AfxUrlGetPart (BYREF wszUrl AS CONST WSTRING, BYVAL dwPart AS D
    DIM cchOut AS DWORD = SIZEOF(_wszOut)
    DIM hr AS HRESULT = UrlGetPartW(wszUrl, _wszOut, @cchOut, dwPart, dwFlags)
    IF hr = S_OK THEN RETURN _wszOut
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -827,6 +831,7 @@ PRIVATE FUNCTION AfxUrlUnescape (BYREF wszURL AS WSTRING, BYVAL dwFlags AS DWORD
    ELSE
       RETURN wszURL
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 

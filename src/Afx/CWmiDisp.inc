@@ -560,7 +560,7 @@ PRIVATE PROPERTY CWmiServices.PropValue (BYREF cbsName AS CBSTR) AS CVAR
    DIM cvValue AS CVAR
    m_Result = pProperty->get_Value(cvValue.vptr)
    pProperty->Release
-   IF m_Result = S_OK THEN PROPERTY = cvValue
+   PROPERTY = cvValue
 END PROPERTY
 ' ========================================================================================
 

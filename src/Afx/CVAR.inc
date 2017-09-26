@@ -33,28 +33,32 @@ NAMESPACE Afx
 #ENDIF
 ' ========================================================================================
 
-#define AFX_BOOL VT_BOOL
-#define AFX_BYTE VT_I1
-#define AFX_UBYTE VT_UI1
-#define AFX_SHORT VT_I2
-#define AFX_USHORT VT_UI2
-#define AFX_INT VT_INT
-#define AFX_UINT VT_UINT
-#define AFX_LONG VT_I4
-#define AFX_ULONG VT_UI4
-#define AFX_LONGINT VT_I8
-#define AFX_ULONGINT VT_UI8
-#define AFX_SINGLE VT_R4
-#define AFX_FLOAT VT_R4
-#define AFX_DOUBLE VT_R8
-#define AFX_NULL VT_NULL
-#define AFX_ARRAY VT_ARRAY
+'#define AFX_BOOL VT_BOOL
+'#define AFX_BYTE VT_I1
+'#define AFX_UBYTE VT_UI1
+'#define AFX_SHORT VT_I2
+'#define AFX_USHORT VT_UI2
+'#define AFX_INT VT_INT
+'#define AFX_UINT VT_UINT
+'#define AFX_LONG VT_I4
+'#define AFX_ULONG VT_UI4
+'#define AFX_LONGINT VT_I8
+'#define AFX_ULONGINT VT_UI8
+'#define AFX_SINGLE VT_R4
+'#define AFX_FLOAT VT_R4
+'#define AFX_DOUBLE VT_R8
+'#define AFX_NULL VT_NULL
+'#define AFX_ARRAY VT_ARRAY
 
 ' ########################################################################################
 ' CVar - VARIANT class
 ' ########################################################################################
 TYPE CVar
 
+Private:
+   cws AS CWSTR          ' // To allow to return a WSTRING by reference
+
+Public:
    vd AS VARIANT         ' // Variant data
 
    ' // COnstructors
@@ -66,6 +70,8 @@ TYPE CVar
    DECLARE CONSTRUCTOR (BYREF cws AS CWSTR)
    DECLARE CONSTRUCTOR (BYREF cbs AS CBSTR)
    DECLARE CONSTRUCTOR (BYVAL pvar AS VARIANT PTR)
+   DECLARE CONSTRUCTOR (BYVAL cy AS CURRENCY)
+   DECLARE CONSTRUCTOR (BYVAL dec AS DECIMAL)
    DECLARE CONSTRUCTOR (BYVAL pdisp AS IDispatch PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
    DECLARE CONSTRUCTOR (BYVAL punk AS IUnknown PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
    DECLARE CONSTRUCTOR (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT_I4)
@@ -82,6 +88,7 @@ TYPE CVar
    DECLARE FUNCTION bstr () AS CBSTR
    DECLARE OPERATOR CAST () AS VARIANT
    DECLARE OPERATOR CAST () AS ANY PTR
+   DECLARE OPERATOR CAST () BYREF AS WSTRING
    DECLARE FUNCTION ToStr () AS CWSTR
    DECLARE FUNCTION ToWStr () AS CWSTR
    DECLARE FUNCTION ToBStr () AS CBSTR
@@ -121,11 +128,13 @@ TYPE CVar
    DECLARE FUNCTION ToStringArrayAlloc (BYVAL pprgsz AS PWSTR PTR) AS ULONG
    ' // LET assignments
    DECLARE OPERATOR Let (BYREF cv AS CVAR)
-   DECLARE OPERATOR Let (BYREF v AS VARIANT)
+   DECLARE OPERATOR Let (BYVAL v AS VARIANT)
    DECLARE OPERATOR Let (BYREF wszStr AS WSTRING)
    DECLARE OPERATOR Let (BYREF cws AS CWSTR)
    DECLARE OPERATOR Let (BYREF cbs AS CBSTR)
    DECLARE OPERATOR Let (BYVAL pvar AS VARIANT PTR)
+   DECLARE OPERATOR Let (BYVAL cy AS CURRENCY)
+   DECLARE OPERATOR Let (BYVAL dec AS DECIMAL)
    DECLARE OPERATOR Let (BYVAL pdisp AS IDispatch PTR)
    DECLARE OPERATOR Let (BYVAL punk AS IUnknown PTR)
    ' // Assignments
@@ -166,10 +175,10 @@ TYPE CVar
    DECLARE FUNCTION PutVbDate (BYVAL vbDate AS DATE_) AS HRESULT
    DECLARE FUNCTION PutSystemTime (BYVAL st AS SYSTEMTIME PTR) AS BOOLEAN
    DECLARE FUNCTION PutGuid (BYVAL guid AS IID PTR) AS HRESULT
-   DEClARE FUNCTION PutFileTime (BYVAL pft AS FILETIME PTR) AS HRESULT
+   DECLARE FUNCTION PutFileTime (BYVAL pft AS FILETIME PTR) AS HRESULT
    DECLARE FUNCTION PutFileTimeArray (BYVAL prgft AS FILETIME PTR, BYVAL cElems AS ULONG) AS HRESULT
    DECLARE FUNCTION PutStrRet (BYVAL pstrret AS STRRET PTR, BYVAL pidl AS PCUITEMID_CHILD) AS HRESULT
-   DECLARE FUNCTION PutDec (BYREF dec AS DECIMAL) AS HRESULT
+   DECLARE FUNCTION PutDec (BYVAL dec AS DECIMAL) AS HRESULT
    DECLARE FUNCTION PutDecFromStr (BYVAL pwszIn AS WSTRING PTR, BYVAL lcid AS LCID = 0, BYVAL dwFlags AS ULONG = 0) AS HRESULT
    DECLARE FUNCTION PutDecFromDouble (BYVAL dbIn AS DOUBLE) AS HRESULT
    DECLARE FUNCTION PutDecFromCy (BYVAL cyIn AS CY) AS HRESULT
@@ -212,6 +221,8 @@ TYPE CVar
    DECLARE FUNCTION vType () AS VARTYPE
    DECLARE FUNCTION ChangeType (BYVAL vtNew AS VARTYPE, BYVAL wFlags AS USHORT = 0) AS HRESULT
    DECLARE FUNCTION ChangeTypeEx (BYVAL vtNew AS VARTYPE, BYVAL lcid AS LCID = 0, BYVAL wFlags AS USHORT = 0) AS HRESULT
+   DECLARE FUNCTION Round (BYREF cv AS CVAR, BYVAL cDecimals AS LONG) AS CVAR
+   DECLARE FUNCTION Round (BYVAL cDecimals AS LONG) AS CVAR
    DECLARE FUNCTION FormatNumber (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
            BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS CWSTR
    ' // VAL wrappers
@@ -223,6 +234,20 @@ TYPE CVar
    DECLARE FUNCTION ValULongInt () AS ULONGINT
    DECLARE FUNCTION ValDouble () AS DOUBLE
    DECLARE FUNCTION Value () AS DOUBLE
+   ' // Math operators
+   DECLARE OPERATOR += (BYREF cv AS CVAR)
+   DECLARE OPERATOR &= (BYREF cv AS CVAR)
+   DECLARE OPERATOR -= (BYREF cv AS CVAR)
+   DECLARE OPERATOR *= (BYREF cv AS CVAR)
+   DECLARE OPERATOR /= (BYREF cv AS CVAR)
+   DECLARE OPERATOR \= (BYREF cv AS CVAR)
+   DECLARE OPERATOR ^= (BYREF cv AS CVAR)
+   DECLARE OPERATOR And= (BYREF cv AS CVAR)
+   DECLARE OPERATOR Or= (BYREF cv AS CVAR)
+   DECLARE OPERATOR XOr= (BYREF cv AS CVAR)
+   DECLARE OPERATOR Eqv= (BYREF cv AS CVAR)
+   DECLARE OPERATOR Imp= (BYREF cv AS CVAR)
+   DECLARE OPERATOR Mod= (BYREF cv AS CVAR)
 
 END TYPE
 ' ########################################################################################
@@ -232,7 +257,7 @@ END TYPE
 ' We can use the constructors to pass values to parameters in procedures without assigning
 ' them first to a variable, e.g.:
 ' SUB Foo (BYREF cv AS CVAR)   ' -or- (BYVAL cv AS CVAR PTR)
-'    AfxCVarToStr(cv)
+'    PRINT AfxCVarToStr(cv)
 ' END SUB
 ' Foo CVAR("Test string")
 ' Foo CVAR(12345)
@@ -306,6 +331,26 @@ END CONSTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
+' Initializes a CVAR from a CURRENCY structure.
+' ========================================================================================
+PRIVATE CONSTRUCTOR CVar (BYVAL cy AS CURRENCY)
+   CVAR_DP("CVAR CONSTRUCTOR - CURRENCY")
+   vd.vt = VT_CY
+   vd.cyVal = cy
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' Initializes a CVAR from a DECIMAL structure.
+' ========================================================================================
+PRIVATE CONSTRUCTOR CVar (BYVAL dec AS DECIMAL)
+   CVAR_DP("CVAR CONSTRUCTOR - DECIMAL")
+   vd.vt = VT_DECIMAL
+   vd.decVal = dec
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
 ' Initializes a CVAR from an IDispatch pointer
 ' ========================================================================================
 PRIVATE CONSTRUCTOR CVar (BYVAL pdisp AS IDispatch PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
@@ -329,7 +374,7 @@ END CONSTRUCTOR
 ' If _vType is wrong, default to VT_I8 (LongInt).
 ' ========================================================================================
 PRIVATE CONSTRUCTOR CVar (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT_I4)
-   CVAR_DP("CVAR CONSTRUCTOR - INTEGER")
+   CVAR_DP("CVAR CONSTRUCTOR - value, type")
    IF (_vType AND VT_ARRAY) = VT_ARRAY THEN
       ' // NULL array : Suitable for parameters that, instead of being optional,
       ' // require a variant with a null safearray of a given type.
@@ -352,7 +397,7 @@ PRIVATE CONSTRUCTOR CVar (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT_I4)
          CASE VT_I4    : vd.vt = VT_I4   : vd.lVal = CLNG(_value)
          CASE VT_UI4   : vd.vt = VT_UI4  : vd.ulVal = CULNG(_value)
          CASE VT_I8    : vd.vt = VT_I8   : vd.llVal = CLNGINT(_value)
-         CASE VT_UI8   : vd.vt = VT_UI8  : vd.ulVal = CULNGINT(_value)
+         CASE VT_UI8   : vd.vt = VT_UI8  : vd.ullVal = CULNGINT(_value)
          ' // If you need to assign an ULongInt value greater than a LongInt, use PutUlongInt.
          CASE VT_NULL  : vd.vt = VT_NULL
          CASE ELSE     : vd.vt = VT_I4   : vd.llVal = CLNG(_value)
@@ -376,7 +421,7 @@ PRIVATE CONSTRUCTOR CVar (BYVAL _value AS LONGINT, BYREF strType AS STRING)
       CASE "LONG"     : vd.vt = VT_I4   : vd.lVal = CLNG(_value)
       CASE "ULONG"    : vd.vt = VT_UI4  : vd.ulVal = CULNG(_value)
       CASE "LONGINT"  : vd.vt = VT_I8   : vd.llVal = CLNGINT(_value)
-      CASE "ULONGINT" : vd.vt = VT_UI8  : vd.ulVal = CULNGINT(_value)
+      CASE "ULONGINT" : vd.vt = VT_UI8  : vd.ullVal = CULNGINT(_value)
       ' // If you need to assign an ULongInt value greater than a LongInt, use PutUlongInt.
       CASE "NULL"     : vd.vt = VT_NULL
       CASE ELSE       : vd.vt = VT_I4   : vd.llVal = CLNG(_value)
@@ -387,7 +432,6 @@ END CONSTRUCTOR
 ' ========================================================================================
 ' Initializes a CVAR from a float value
 ' If _vType is wrong, default to VT_R8 (double).
-' ========================================================================================
 ' ========================================================================================
 PRIVATE CONSTRUCTOR CVar (BYVAL _value AS DOUBLE, BYVAL _vType AS WORD = VT_R8)
    CVAR_DP("CVAR CONSTRUCTOR - FLOAT")
@@ -415,9 +459,9 @@ END CONSTRUCTOR
 ' Initializes a CVAR from a value by reference (a pointer to a variable), e.g.:
 ' DIM dblVal AS DOUBLE = 123456.12
 ' DIM cv AS CVAR = CVAR(@dblVal, "DOUBLE")
-' print cv.ToStr(cv)   ' // prints 123456.12
+' print cv   ' // prints 123456.12
 ' dblVal = 345.12
-' print cv.ToStr   ' // prints 345.12
+' print cv   ' // prints 345.12
 ' ========================================================================================
 PRIVATE CONSTRUCTOR CVar (BYVAL _pvar AS ANY PTR, BYVAL _vType AS WORD)
    CVAR_DP("CVAR CONSTRUCTOR - ANY PTR - vType")
@@ -516,12 +560,12 @@ END CONSTRUCTOR
 ' END SUB
 ' DIM cv AS CVAR = "Test string"
 ' Foo cv.vptr
-' PRINT cv.ToStr
+' PRINT cv
 ' Otherwise, you need to clear the underlying variant before passing the CVAR.
 ' DIM cv AS CVAR = "Test string"
 ' cv.Clear
 ' Foo *cv
-' PRINT cv.ToStr
+' PRINT cv
 ' ========================================================================================
 PRIVATE FUNCTION CVar.vptr () AS VARIANT PTR
    CVAR_DP("CVAR FUNCTION vptr")
@@ -593,12 +637,12 @@ END OPERATOR
 ' Foo2 CVAR(12345, "LONG")
 '
 ' SUB Foo3 (BYREF cv AS CVAR)
-'    PRINT cv.ToStr
+'    PRINT cv
 ' END SUB
 ' Foo3 CVAR(12345, "LONG")
 '
 ' SUB Foo4 (BYVAL cv AS CVAR PTR)
-'    PRINT cv->ToStr
+'    PRINT *cv
 ' END SUB
 ' Foo4 CVAR(12345, "LONG")
 ' ========================================================================================
@@ -622,6 +666,13 @@ END OPERATOR
 
 ' =====================================================================================
 ' Extracts the contents of a VARIANT and returns them as a CWSTR.
+' =====================================================================================
+PRIVATE OPERATOR CVar.CAST () BYREF AS WSTRING
+   CVAR_DP("CVAR CAST BYREF AS WSTRING")
+   cws = AfxVarToStr(@vd)
+   OPERATOR = *cast(WSTRING PTR, cws.m_pBuffer)
+END OPERATOR
+' ========================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CVar.ToStr () AS CWSTR
    CVAR_DP("CVAR ToStr")
@@ -662,6 +713,7 @@ END FUNCTION
 PRIVATE FUNCTION CVar.ToUtf8 () AS STRING
    CVAR_DP("CVAR ToUtf8")
    IF vd.vt = VT_BSTR THEN RETURN AfxAcode(vd.bstrVal, CP_UTF8)
+   RETURN ""
 END FUNCTION
 ' =====================================================================================
 
@@ -688,6 +740,7 @@ PRIVATE FUNCTION CVar.ToBuffer () AS STRING
          RETURN s
       END IF
    END IF
+   RETURN ""
 END FUNCTION
 ' =====================================================================================
 
@@ -795,7 +848,7 @@ END FUNCTION
 ' =====================================================================================
 
 ' =====================================================================================
-' Extracts a GUID property value of a CWSTR.
+' Extracts a GUID property value as a CWSTR.
 ' =====================================================================================
 PRIVATE FUNCTION CVar.ToGuidStr () AS CWSTR
    CVAR_DP("CVAR ToGuidStr")
@@ -1136,7 +1189,7 @@ END OPERATOR
 ' ========================================================================================
 ' Assigns a VARIANT.
 ' ========================================================================================
-PRIVATE OPERATOR CVar.Let (BYREF v AS VARIANT)
+PRIVATE OPERATOR CVar.Let (BYVAL v AS VARIANT)
    CVAR_DP("CVAR LET = VARIANT")
    VariantClear(@vd) : VariantCopy(@vd, @v)
 END OPERATOR
@@ -1157,6 +1210,24 @@ END OPERATOR
 PRIVATE OPERATOR CVar.Let (BYVAL pvar AS VARIANT PTR)
    CVAR_DP("CVAR LET = VARIANT PTR")
    VariantClear(@vd) : VariantCopy(@vd, pvar)
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Assigns a CURRENCY structure.
+' ========================================================================================
+PRIVATE OPERATOR CVar.Let (BYVAL cy AS CURRENCY)
+   CVAR_DP("CVAR LET - CURRENCY")
+   VariantClear(@vd) : vd.vt = VT_CY : vd.cyVal = cy
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Assigns a CURRENCY structure.
+' ========================================================================================
+PRIVATE OPERATOR CVar.Let (BYVAL dec AS DECIMAL)
+   CVAR_DP("CVAR LET - DECIMAL")
+   VariantClear(@vd) : vd.vt = VT_DECIMAL : vd.decVal = dec
 END OPERATOR
 ' ========================================================================================
 
@@ -1229,7 +1300,7 @@ END SUB
 ' ========================================================================================
 
 ' ========================================================================================
-' Assigns a CWSTR.
+' Assigns a VARIANT.
 ' ========================================================================================
 PRIVATE FUNCTION CVar.Put (BYVAL pvar AS VARIANT PTR) As HRESULT
    CVAR_DP("CVAR Put = VARIANT PTR")
@@ -1340,7 +1411,7 @@ PRIVATE SUB CVar.Put (BYVAL _value AS LONGINT, BYREF strType AS STRING)
       CASE "LONG"     : vd.vt = VT_I4   : vd.lVal = CLNG(_value)
       CASE "ULONG"    : vd.vt = VT_UI4  : vd.ulVal = CULNG(_value)
       CASE "LONGINT"  : vd.vt = VT_I8   : vd.llVal = CLNGINT(_value)
-      CASE "ULONGINT" : vd.vt = VT_UI8  : vd.ulVal = CULNGINT(_value)
+      CASE "ULONGINT" : vd.vt = VT_UI8  : vd.ullVal = CULNGINT(_value)
       ' // If you need to assign an ULongInt value greater than a LongInt, use PutUlongInt.
       CASE "NULL"     : vd.vt = VT_NULL
       CASE ELSE       : vd.vt = VT_I8   : vd.llVal = CLNGINT(_value)
@@ -1624,6 +1695,7 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION CVar.PutUtf8 (BYREF strUtf8 AS STRING) AS HRESULT
    CVAR_DP("CVAR PutUtf8")
+   VariantClear(@vd)
    vd.vt = VT_BSTR
    vd.bstrVal = SysAllocString(AfxUcode(strUtf8, CP_UTF8))
    RETURN S_OK
@@ -1696,7 +1768,7 @@ END FUNCTION
 ' Initializes a CVAR as VT_DATE from a DATE type.
 ' =====================================================================================
 PRIVATE FUNCTION CVar.PutVbDate (BYVAL vbDate AS DATE_) AS HRESULT
-   CVAR_DP("CVAR AssigVbDate")
+   CVAR_DP("CVAR PutVbDate")
    VariantClear(@vd)
    vd.vt = VT_DATE
    vd.date = vbDate
@@ -1760,7 +1832,7 @@ END FUNCTION
 ' =====================================================================================
 ' Initializes a CVAR as VT_DECIMAL from a DECIMAL structure.
 ' =====================================================================================
-PRIVATE FUNCTION CVar.PutDec (BYREF dec AS DECIMAL) AS HRESULT
+PRIVATE FUNCTION CVar.PutDec (BYVAL dec AS DECIMAL) AS HRESULT
    CVAR_DP("CVAR PutDec")
    VariantClear(@vd)
    vd.vt = VT_DECIMAL
@@ -1915,7 +1987,7 @@ END FUNCTION
 ' VariantFromVariantArrayElem is more descriptive.
 ' ========================================================================================
 PRIVATE FUNCTION CVar.PutVariantArrayElem (BYVAL pvarIn AS VARIANT PTR, BYVAL iElem AS ULONG) AS CVAR
-   CVAR_DP("CVAR PutPropVariant")
+   CVAR_DP("CVAR PutVariantArrayElem")
    VariantClear(@vd)
    RETURN AfxVariantFromVariantArrayElem(pvarIn, iElem, @vd)
 END FUNCTION
@@ -1979,10 +2051,9 @@ PRIVATE FUNCTION CVar.GetVariantElem (BYVAL iElem AS ULONG) AS CVAR
    DIM hr AS HRESULT, vItem AS VARIANT
    IF vd.vt = VT_ARRAY OR VT_VARIANT THEN
       DIM idx AS LONG = iElem
-      hr = SafeArrayGetElement(vd.parray, @idx, @vItem)
-      SetLastError hr
-      IF hr = S_OK THEN RETURN vItem
+      SetLastError(SafeArrayGetElement(vd.parray, @idx, @vItem))
    END IF
+   RETURN vItem
 END FUNCTION
 ' =====================================================================================
 
@@ -2092,11 +2163,11 @@ END FUNCTION
 ' =====================================================================================
 ' Formats a variant containing numbers into a string form.
 ' =====================================================================================
-PRIVATE FUNCTION CVar.FormatNumber (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+PRIVATE FUNCTION CVar.FormatNumber (BYVAL iNumDig AS LONG = -1, BYVAL iIncLead AS LONG = -2, _
    BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS CWSTR
    CVAR_DP("CVAR FormatNumber")
    DIM cwsOut AS CWSTR, bstrOut AS AFX_BSTR
-   SetLastError VarFormatNumber(@vd, iNumDig, ilncLead, iUseParens, iGroup, dwFlags, @bstrOut)
+   SetLastError VarFormatNumber(@vd, iNumDig, iIncLead, iUseParens, iGroup, dwFlags, @bstrOut)
    cwsOut = *bstrOut
    SysFreeString bstrOut
    RETURN cwsOut
@@ -2193,6 +2264,23 @@ END FUNCTION
 ' =====================================================================================
 
 ' =====================================================================================
+PRIVATE FUNCTION CVar.Round (BYREF cv AS CVAR, BYVAL cDecimals AS LONG) AS CVAR
+   CVAR_DP("CVAR Round")
+   DIM cvRes AS CVAR
+   VarRound(@cv.vd, cDecimals, cvRes.vptr)
+   RETURN cvRes
+END FUNCTION
+' =====================================================================================
+' =====================================================================================
+PRIVATE FUNCTION CVar.Round (BYVAL cDecimals AS LONG) AS CVAR
+   CVAR_DP("CVAR Round=")
+   DIM cvRes AS CVAR = vd
+   IF VarRound(@vd, cDecimals, cvRes.vptr) = S_OK THEN vd = cvRes.vd
+   RETURN cvRes
+END FUNCTION
+' =====================================================================================
+
+' =====================================================================================
 ' Converts the string to a 32bit integer
 ' =====================================================================================
 PRIVATE FUNCTION CVar.ValLong () AS LONG
@@ -2246,6 +2334,121 @@ PRIVATE FUNCTION CVar.Value () AS DOUBLE
 END FUNCTION
 ' =====================================================================================
 
+' ========================================================================================
+' Math operators
+' ========================================================================================
+PRIVATE OPERATOR CVar.+= (BYREF cv AS CVAR)
+   IF vd.vt = VT_BSTR AND cv.vd.vt = VT_BSTR THEN
+      ' // One of the values is a string, so concatenate
+      VarCat(@vd, @cv.vd, @vd)
+   ELSE
+      ' // Add
+      DIM vRes AS VARIANT
+      IF VarAdd(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.&= (BYREF cv AS CVAR)
+   IF vd.vt = VT_BSTR AND cv.vd.vt = VT_BSTR THEN
+      ' // One of the values is a string, so concatenate
+      VarCat(@vd, @cv.vd, @vd)
+   ELSE
+      ' // Add
+      DIM vRes AS VARIANT
+      IF VarAdd(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.-= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarSub(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.*= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarMul(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar./= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarDiv(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.\= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarIDiv(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.^= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarPow(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.And= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarAnd(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.Or= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarOr(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.Xor= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarXor(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.Eqv= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarEqv(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.Imp= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarImp(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.Mod= (BYREF cv AS CVAR)
+   IF vd.vt <> VT_BSTR AND cv.vd.vt <> VT_BSTR THEN
+      DIM vRes AS VARIANT
+      IF VarMod(@vd, @cv.vd, @vRes) = S_OK THEN VariantCopy(@vd, @vRes)
+   END IF
+END OPERATOR
+' ========================================================================================
+
 ' ########################################################################################
 '                               *** HELPER FUNCTIONS ***
 ' ########################################################################################
@@ -2265,3 +2468,204 @@ END FUNCTION
 #define CVAR_TOSTR AfxCVarToStr
 
 END NAMESPACE
+
+' ########################################################################################
+'                               *** GLOBAL OPERATORS ***
+' ########################################################################################
+
+' // Outside a namespace because they are global
+using Afx
+
+' ========================================================================================
+PRIVATE OPERATOR & (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
+   DIM cvRes AS CVAR
+   VarCat(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION Left OVERLOAD (BYREF cv AS CVAR, BYVAL nChars AS INTEGER) AS CWSTR
+   DIM cws AS CWSTR = cv.wstr
+   RETURN LEFT(**cws, nChars)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION Right OVERLOAD (BYREF cv AS CVAR, BYVAL nChars AS INTEGER) AS CWSTR
+   DIM cws AS CWSTR = cv.wstr
+   RETURN RIGHT(**cws, nChars)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION Val OVERLOAD (BYREF cv AS CVAR) AS DOUBLE
+   DIM cws AS CWSTR = cv.wstr
+   RETURN .VAL(**cws)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Math operators
+' ========================================================================================
+PRIVATE OPERATOR + (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
+   DIM cvRes AS CVAR
+   IF cv1.vd.vt = VT_BSTR OR cv2.vd.vt = VT_BSTR THEN
+      ' // One of the values is a string, so concatenate
+      cvRes = cv1 & cv2
+   ELSE
+      ' // Add
+      VarAdd(@cv1.vd, @cv2.vd, cvRes.vptr)
+   END IF
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR - (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
+   ' // Subtract
+   DIM cvRes AS CVAR
+   VarSub(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR * (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
+   ' // Multiply
+   DIM cvRes AS CVAR
+   VarMul(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR / (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
+   ' // Divide
+   DIM cvRes AS CVAR
+   VarDiv(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR \ (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
+   ' // Integer divide
+   DIM cvRes AS CVAR
+   VarIDiv(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR = (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS BOOLEAN
+   ' // Equality
+   RETURN (VarCmp(@cv1.vd, @cv2.vd, GetThreadLocale(), 0) = VARCMP_EQ)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR <> (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS BOOLEAN
+   ' // Inequality
+   RETURN (VarCmp(@cv1.vd, @cv2.vd, GetThreadLocale(), 0) <> VARCMP_EQ)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR < (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS BOOLEAN
+   RETURN (VarCmp(@cv1.vd, @cv2.vd, GetThreadLocale(), 0) = VARCMP_LT)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR > (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS BOOLEAN
+   RETURN (VarCmp(@cv1.vd, @cv2.vd, GetThreadLocale(), 0) = VARCMP_GT)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR <= (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS BOOLEAN
+   DIM hr AS HRESULT = VarCmp(@cv1.vd, @cv2.vd, GetThreadLocale(), 0)
+   RETURN (hr = VARCMP_LT) OR (hr = VARCMP_EQ)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR >= (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS BOOLEAN
+   DIM hr AS HRESULT = VarCmp(@cv1.vd, @cv2.vd, GetThreadLocale(), 0)
+   RETURN (hr = VARCMP_GT) OR (hr = VARCMP_EQ)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR - (BYREF cv AS CVAR) AS CVAR
+   ' // Negate
+   DIM cvRes AS CVAR
+   VarNeg(@cv.vd, cvRes.vptr)
+   OPERATOR = cvRes
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Not (BYREF cv AS CVAR) AS INTEGER
+   ' // Bitwise negation
+   DIM cvRes AS CVAR
+   VarNot(@cv.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR And (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS INTEGER
+   DIM cvRes AS CVAR
+   VarAnd(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Or (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS INTEGER
+   DIM cvRes AS CVAR
+   VarOr(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Xor (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS INTEGER
+   DIM cvRes AS CVAR
+   VarXor(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Mod (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS INTEGER
+   DIM cvRes AS CVAR
+   VarMod(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Imp (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS INTEGER
+   DIM cvRes AS CVAR
+   VarImp(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Eqv (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS INTEGER
+   DIM cvRes AS CVAR
+   VarEqv(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR ^ (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS DOUBLE
+   DIM cvRes AS CVAR
+   VarPow(@cv1.vd, @cv2.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Abs (BYREF cv AS CVAR) AS DOUBLE
+   DIM cvRes AS CVAR
+   VarAbs(@cv.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Fix (BYREF cv AS CVAR) AS DOUBLE
+   DIM cvRes AS CVAR
+   VarFix(@cv.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR Int (BYREF cv AS CVAR) AS DOUBLE
+   DIM cvRes AS CVAR
+   VarInt(@cv.vd, cvRes.vptr)
+   OPERATOR = VAL(cvRes)
+END OPERATOR
+' ========================================================================================

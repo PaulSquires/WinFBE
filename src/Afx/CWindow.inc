@@ -215,7 +215,7 @@ END DESTRUCTOR
 ' ========================================================================================
 PRIVATE SUB CScrollWindow.SetClientRect (BYVAL pRect AS RECT PTR)
    IF pRect = NULL THEN EXIT SUB
-   m_CLientRect = *pRect
+   m_ClientRect = *pRect
 END SUB
 ' ========================================================================================
 
@@ -1279,7 +1279,7 @@ END FUNCTION
 ' Returns a pointer to the scroll window class
 ' =====================================================================================
 PRIVATE PROPERTY CWindow.ScrollWindowPtr () AS CScrollWindow PTR
-   Property = m_pScrollWindow
+   PROPERTY = m_pScrollWindow
 END PROPERTY
 ' =====================================================================================
 ' =====================================================================================
@@ -2277,9 +2277,9 @@ END FUNCTION
 ' ========================================================================================
 ' Returns a pointer to the CScrollWindow class given the handle of the window attached to it.
 ' ========================================================================================
-Private Function AfxScrollWindowPtr (ByVal HWnd As HWnd) As CScrollWindow Ptr
-   Function = Cast(CWindow Ptr, GetWindowLongPtr(HWnd, 0))->ScrollWindowPtr
-End Function
+PRIVATE FUNCTION AfxScrollWindowPtr (BYVAL hwnd AS HWND) AS CScrollWindow PTR
+   FUNCTION = cast(CWindow PTR, GetWindowLongPtr(hwnd, 0))->ScrollWindowPtr
+END FUNCTION
 ' ========================================================================================
 
 ' ########################################################################################
@@ -2303,8 +2303,8 @@ End Function
 ' Forward declaration of the callback function
 DECLARE FUNCTION AfxInputBoxWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 ' ========================================================================================
-PRIVATE FUNCTION AfxInputBox (BYVAL hParent AS HWND, BYVAL x AS LONG, BYVAL y AS LONG, _
-BYREF cwsCaption AS CWSTR, BYREF cwsPrompt AS CWSTR, BYREF cwsText AS CWSTR, _
+PRIVATE FUNCTION AfxInputBox (BYVAL hParent AS HWND = NULL, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, _
+BYREF cwsCaption AS CWSTR = "", BYREF cwsPrompt AS CWSTR = "", BYREF cwsText AS CWSTR = "", _
 BYVAL nLen AS LONG = 260, BYVAL bPassword AS BOOLEAN = FALSE) AS CWSTR
 
    ' // Create the window

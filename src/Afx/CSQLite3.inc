@@ -1516,6 +1516,7 @@ END FUNCTION
 ' for that column, if there is an AS clause.
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnName (BYVAL nCol AS LONG) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNNAME16PROC = _
    cast(PFNSQLITE3COLUMNNAME16PROC, GetProcAddress(m_hLib, "sqlite3_column_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1551,6 +1552,7 @@ END FUNCTION
 ' for that column, if there is an AS clause.
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnText (BYVAL nCol AS LONG) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNTEXT16PROC = _
    cast(PFNSQLITE3COLUMNTEXT16PROC, GetProcAddress(m_hLib, "sqlite3_column_text16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1560,6 +1562,7 @@ END FUNCTION
 ' ===========================================================================================
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnText (BYREF wszColName AS WSTRING) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNTEXT16PROC = _
    cast(PFNSQLITE3COLUMNTEXT16PROC, GetProcAddress(m_hLib, "sqlite3_column_text16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1793,6 +1796,7 @@ END FUNCTION
 ' The leftmost column of the result set has the index 0.
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnDatabaseName (BYVAL nCol AS LONG) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNDATABASENAMEPROC = _
    cast(PFNSQLITE3COLUMNDATABASENAMEPROC, GetProcAddress(m_hLib, "sqlite3_column_database_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1802,6 +1806,7 @@ END FUNCTION
 ' ===========================================================================================
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnDatabaseName (BYREF wszColName AS WSTRING) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNDATABASENAMEPROC = _
    cast(PFNSQLITE3COLUMNDATABASENAMEPROC, GetProcAddress(m_hLib, "sqlite3_column_database_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1822,6 +1827,7 @@ END FUNCTION
 ' The leftmost column of the result set has the index 0.
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnTableName (BYVAL nCol AS LONG) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNTABLENAMEPROC = _
    cast(PFNSQLITE3COLUMNTABLENAMEPROC, GetProcAddress(m_hLib, "sqlite3_column_table_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1831,6 +1837,7 @@ END FUNCTION
 ' ===========================================================================================
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnTableName (BYREF wszColName AS WSTRING) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNTABLENAMEPROC = _
    cast(PFNSQLITE3COLUMNTABLENAMEPROC, GetProcAddress(m_hLib, "sqlite3_column_table_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1851,6 +1858,7 @@ END FUNCTION
 ' The leftmost column of the result set has the index 0.
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnOriginName (BYVAL nCol AS LONG) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNORIGINNAMEPROC = _
    cast(PFNSQLITE3COLUMNORIGINNAMEPROC, GetProcAddress(m_hLib, "sqlite3_column_origin_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1860,6 +1868,7 @@ END FUNCTION
 ' ===========================================================================================
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnOriginName (BYREF wszColName AS WSTRING) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNORIGINNAMEPROC = _
    cast(PFNSQLITE3COLUMNORIGINNAMEPROC, GetProcAddress(m_hLib, "sqlite3_column_origin_name16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1880,6 +1889,7 @@ END FUNCTION
 ' The leftmost column of the result set has the index 0.
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnDeclaredType (BYVAL nCol AS LONG) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNDECLTYPEPROC = _
    cast(PFNSQLITE3COLUMNDECLTYPEPROC, GetProcAddress(m_hLib, "sqlite3_column_decltype16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION
@@ -1889,6 +1899,7 @@ END FUNCTION
 ' ===========================================================================================
 ' ===========================================================================================
 PRIVATE FUNCTION CSQLiteStmt.ColumnDeclaredType (BYREF wszColName AS WSTRING) AS CWSTR
+   FUNCTION = ""
    DIM pProc AS PFNSQLITE3COLUMNDECLTYPEPROC = _
    cast(PFNSQLITE3COLUMNDECLTYPEPROC, GetProcAddress(m_hLib, "sqlite3_column_decltype16"))
    IF pProc = 0 THEN this.SetResult(GetLastError) : EXIT FUNCTION

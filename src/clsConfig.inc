@@ -43,7 +43,7 @@ Function clsConfig.LoadKeywords() as Long
    Dim st as String 
    Dim f  as Long = Freefile
    
-   If Open( AfxGetExePathName & "\Settings\freebasic_keywords.txt" For Input As #f) = 0 Then
+   If Open( AfxGetExePathName & "Settings\freebasic_keywords.txt" For Input As #f) = 0 Then
       this.FBKeywords  = ""
       Do Until EOF(f)
          Line Input #f, st
@@ -61,7 +61,7 @@ End Function
 Function clsConfig.SaveKeywords() As Long
    Dim f As Long = Freefile
    
-   If Open( AfxGetExePathName & "\Settings\freebasic_keywords.txt" For Output As #f) = 0 Then
+   If Open( AfxGetExePathName & "Settings\freebasic_keywords.txt" For Output As #f) = 0 Then
       Print #f, this.FBKeywords
       Close #f
    End If

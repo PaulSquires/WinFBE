@@ -232,8 +232,8 @@ END PROPERTY
 ' ===========================================================================================
 PRIVATE PROPERTY CAdoRecord.Source () AS CVAR
    CADODB_DP("CAdoRecord.Source")
-   DIM cvSource AS VARIANT
-   IF m_pRecord THEN SetResult(m_pRecord->get_Source(@cvSource))
+   DIM cvSource AS CVAR
+   IF m_pRecord THEN SetResult(m_pRecord->get_Source(cvSource.vptr))
    RETURN cvSource
 END PROPERTY
 ' ===========================================================================================

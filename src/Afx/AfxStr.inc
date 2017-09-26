@@ -12,9 +12,112 @@
 #pragma once
 #include once "windows.bi"
 #include once "win/ole2.bi"
+#include once "win/shlwapi.bi"
 #include once "Afx/AfxWin.inc"
 #include once "Afx/CWStr.inc"
 USING Afx
+
+#if _WIN32_WINNT = &h0602
+' ========================================================================================
+' Returns an uppercase version of a string.
+' - pwszStr [in]:
+'      The string to convert. Cannot have a size of 0.
+' - pwszLocaleName [in, optional]:
+'      Pointer to a locale name or one of these pre-defined values:
+'         LOCALE_NAME_INVARIANT
+'         LOCALE_NAME_SYSTEM_DEFAULT
+'         LOCALE_NAME_USER_DEFAULT
+'      For a table of language culture names see:
+'         https://msdn.microsoft.com/es-es/library/ee825488(v=cs.20).aspx
+' - dwMapFlags [in, optional]:
+'      Flag specifying the type of transformation to use during string mapping or the type
+'      of sort key to generate. This parameter can have the following values
+'      For a complete list see:
+'      https://msdn.microsoft.com/en-us/library/windows/desktop/dd318702(v=vs.85).aspx
+' Return value:
+'   The uppercased string.
+' ========================================================================================
+PRIVATE FUNCTION AfxStrUCase (BYVAL pwszStr AS WSTRING PTR, _
+   BYVAL pwszLocaleName AS WSTRING PTR = LOCALE_NAME_USER_DEFAULT, _
+   BYVAL dwMapFlags AS DWORD = 0) AS CWSTR
+
+   ' // Check the vailidy of the passed parameters
+   IF pwszStr = NULL THEN RETURN ""
+   IF LEN(*pwszStr) = 0 THEN RETURN ""
+   DIM cwsOut AS CWSTR = *pwszStr
+   ' // Make sure that LCMAP_LOWERCASE is not being used
+   dwMapFlags = dwMapFlags AND (NOT LCMAP_LOWERCASE)
+   ' // Make sure that LCMAP_LINGUISTIC_CASING OR LCMAP_UPPERCASE is being used
+   dwMapFlags OR= LCMAP_LINGUISTIC_CASING OR LCMAP_UPPERCASE
+   ' // Ususally, the length of the converted string will be the same that the one of
+   ' // the input string, so let's try it
+   DIM cbLen AS LONG = LCMapStringEx(pwszLocaleName, dwMapFlags, pwszStr, LEN(*pwszStr), _
+       cwsOut.vptr, LEN(cwsOut), NULL, NULL, 0)
+   ' // If the output length is bigger than the input one, request the needed length,
+   ' // mke the buffer bigger and try it again
+   IF cbLen = 0 AND GetLastError = ERROR_INSUFFICIENT_BUFFER THEN
+      cbLen = LCMapStringEx(pwszLocaleName, dwMapFlags, pwszStr, LEN(*pwszStr), NULL, 0, NULL, NULL, 0)
+      IF cbLen THEN
+         cwsOut += SPACE(cbLen)
+         cbLen = LCMapStringEx(pwszLocaleName, dwMapFlags, pwszStr, LEN(*pwszStr), _
+                 cwsOut.vptr, LEN(cwsOut), NULL, NULL, 0)
+      END IF
+   END IF
+   RETURN cwsOut
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns a lowercase version of a string.
+' - pwszStr [in]:
+'      The string to convert. Cannot have a size of 0.
+' - pwszLocaleName [in, optional]:
+'      Pointer to a locale name or one of these pre-defined values:
+'         LOCALE_NAME_INVARIANT
+'         LOCALE_NAME_SYSTEM_DEFAULT
+'         LOCALE_NAME_USER_DEFAULT
+'      For a table of language culture names see:
+'         https://msdn.microsoft.com/es-es/library/ee825488(v=cs.20).aspx
+' - dwMapFlags [in, optional]:
+'      Flag specifying the type of transformation to use during string mapping or the type
+'      of sort key to generate. This parameter can have the following values
+'      For a complete list see:
+'      https://msdn.microsoft.com/en-us/library/windows/desktop/dd318702(v=vs.85).aspx
+' Return value:
+'   The lowercased string.
+' ========================================================================================
+PRIVATE FUNCTION AfxStrLCase (BYVAL pwszStr AS WSTRING PTR, _
+   BYVAL pwszLocaleName AS WSTRING PTR = LOCALE_NAME_USER_DEFAULT, _
+   BYVAL dwMapFlags AS DWORD = 0) AS CWSTR
+
+   ' // Check the vailidy of the passed parameters
+   IF pwszStr = NULL THEN RETURN ""
+   IF LEN(*pwszStr) = 0 THEN RETURN ""
+   DIM cwsOut AS CWSTR = *pwszStr
+   ' // Make sure that LCMAP_UPPERCASE is not being used
+   dwMapFlags = dwMapFlags AND (NOT LCMAP_UPPERCASE)
+   ' // Make sure that LCMAP_LINGUISTIC_CASING OR LCMAP_LOWERCASE is being used
+   dwMapFlags OR= LCMAP_LINGUISTIC_CASING OR LCMAP_LOWERCASE
+   ' // Ususally, the length of the converted string will be the same that the one of
+   ' // the input string, so let's try it
+   DIM cbLen AS LONG = LCMapStringEx(pwszLocaleName, dwMapFlags, pwszStr, LEN(*pwszStr), _
+       cwsOut.vptr, LEN(cwsOut), NULL, NULL, 0)
+   ' // If the output length is bigger than the input one, request the needed length,
+   ' // mke the buffer bigger and try it again
+   IF cbLen = 0 AND GetLastError = ERROR_INSUFFICIENT_BUFFER THEN
+      cbLen = LCMapStringEx(pwszLocaleName, dwMapFlags, pwszStr, LEN(*pwszStr), NULL, 0, NULL, NULL, 0)
+      IF cbLen THEN
+         cwsOut += SPACE(cbLen)
+         cbLen = LCMapStringEx(pwszLocaleName, dwMapFlags, pwszStr, LEN(*pwszStr), _
+                 cwsOut.vptr, LEN(cwsOut), NULL, NULL, 0)
+      END IF
+   END IF
+   RETURN cwsOut
+
+END FUNCTION
+' ========================================================================================
+#endif
 
 ' ========================================================================================
 ' Translates ansi bytes to unicode bytes.
@@ -40,6 +143,7 @@ PRIVATE FUNCTION AfxUcode (BYREF ansiStr AS CONST STRING, BYVAL nCodePage AS LON
       DIM dwLen AS DWORD = MultiByteToWideChar(nCodePage, MB_PRECOMPOSED, STRPTR(ansiStr), LEN(ansiStr), *cws, LEN(ansiStr) * 2)
       IF dwLen THEN RETURN cws
    END IF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -68,107 +172,268 @@ PRIVATE FUNCTION AfxAcode (BYVAL pwszStr AS WSTRING PTR, BYVAL nCodePage AS LONG
       DIM dwLen AS DWORD = WideCharToMultiByte(nCodePage, 0, pwszStr, LEN(*pwszStr), STRPTR(ansiStr), LEN(ansiStr), NULL, NULL)
       IF dwLen THEN RETURN ansiStr
    ENDIF
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a copy of a string with strings removed.
+' * Returns a copy of a string with substrings removed.
 ' If wszMatchStr is not present in wszMainStr, all of wszMainStr is returned intact.
 ' This function is case sensitive.
-' Example: DIM cws AS CWSTR = AfxStrRemove("[]Hello[]", "[]")
+' Example: AfxStrRemove("Hello World. Welcome to the Freebasic World", "World")
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrRemove (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
    DIM cws AS CWSTR = wszMainStr
+   DIM nLen AS LONG = LEN(wszMatchStr)
    DO
       DIM nPos AS LONG = INSTR(cws, wszMatchStr)
       IF nPos = 0 THEN EXIT DO
-      cws.DelChars nPos, LEN(wszMatchStr)
+      cws.DelChars nPos, nLen
    LOOP
    RETURN cws
 END FUNCTION
 ' ========================================================================================
-
 ' ========================================================================================
-' Returns a copy of a string with characters removed.
-' If wszMatchStr is not present in wszMainStr, all of wszMainStr is returned intact.
-' wszMatchStr specifies a list of single characters to be searched for individually,
-' a match on any one of which will cause that character to be removed from the result.
-' This function is case sensitive.
-' Example: DIM cws AS CWSTR = AfxStrRemoveAny("abacadabra", "bac")
+' * Case insensitive version of AfxStrRemove.
+' Example: AfxStrRemoveI("Hello World. Welcome to the Freebasic World", "world")
 ' ========================================================================================
-PRIVATE FUNCTION AfxStrRemoveAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszMainStr
-   FOR i AS LONG = 1 TO LEN(wszMatchStr)
-      cws = AfxStrRemove(cws, MID(wszMatchStr, i, 1))
-   NEXT
-   RETURN cws
+PRIVATE FUNCTION AfxStrRemoveI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   DIM nLen AS LONG = LEN(wszMatchStr)
+   DO
+      DIM nPos AS LONG = INSTR(UCASE(cwsMainStr), cwsMatchStr)
+      IF nPos = 0 THEN EXIT DO
+      cwsMainStr.DelChars nPos, nLen
+   LOOP
+   RETURN cwsMainStr
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Within a specified string, replace all occurrences of one string with another string.
+' * Returns a copy of a string with characters removed.
+' If wszMatchStr is not present in wszMainStr, all of wszMainStr is returned intact.
+' wszMatchStr specifies a list of single characters to be searched for individually,
+' a match on any one of which will cause that character to be removed from the result.
+' This function is case sensitive.
+' Example: AfxStrRemoveAny("abacadabra", "bac")   ' -> "dr"
+' ========================================================================================
+PRIVATE FUNCTION AfxStrRemoveAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   FOR i AS LONG = 1 TO LEN(wszMatchStr)
+      DO
+         DIM nPos AS LONG = INSTR(cwsMainStr, MID(wszMatchStr, i, 1))
+         IF nPos = 0 THEN EXIT DO
+         cwsMainStr.DelChars nPos, 1
+      LOOP
+   NEXT
+   RETURN cwsMainStr
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrRemoveAny.
+' Example: AfxStrRemoveAnyI("abacadabra", "BaC")   ' -> "dr"
+' ========================================================================================
+PRIVATE FUNCTION AfxStrRemoveAnyI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   FOR i AS LONG = 1 TO LEN(wszMatchStr)
+      DO
+         DIM nPos AS LONG = INSTR(UCASE(cwsMainStr), MID(cwsMatchStr, i, 1))
+         IF nPos = 0 THEN EXIT DO
+         cwsMainStr.DelChars nPos, 1
+      LOOP
+   NEXT
+   RETURN cwsMainStr
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Within a specified string, replace all occurrences of one string with another string.
 ' Replaces all occurrences of wszMatchStr in wszMainStr with wszReplaceWith
 ' The replacement can cause wszMainStr to grow or condense in size.
 ' When a match is found, the scan for the next match begins at the position immediately
 ' following the prior match.
 ' This function is case sensitive.
-' Example: DIM cws AS CWSTR = AfxStrReplace("Hello World", "World", "Earth")
+' Example: AfxStrReplace("Hello World", "World", "Earth")   ' -> "Hello Earth"
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrReplace OVERLOAD (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYREF wszReplaceWith AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszMainStr
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   DIM nLenReplaceWith AS LONG = LEN(wszReplaceWith)
+   DIM nLenMatchStr AS LONG = LEN(wszMatchStr)
    DIM nPos AS LONG = 1
    DO
-      nPos = INSTR(nPos, cws, wszMatchStr)
+      nPos = INSTR(nPos, cwsMainStr, wszMatchStr)
       IF nPos = 0 THEN EXIT DO
-      cws = MID(cws, 1, nPos - 1) & wszReplaceWith & MID(cws, nPos + LEN(wszMatchStr))
-      nPos += LEN(wszReplaceWith)
+      cwsMainStr = MID(cwsMainStr, 1, nPos - 1) + wszReplaceWith + MID(cwsMainStr, nPos + nLenMatchStr)
+      nPos += nLenReplaceWith
    LOOP
-   RETURN cws
+   RETURN cwsMainStr
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrReplace.
+' Example: AfxStrReplaceI("Hello world", "World", "Earth")   ' -> "Hello Earth"
+' ========================================================================================
+PRIVATE FUNCTION AfxStrReplaceI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYREF wszReplaceWith AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   DIM nLenReplaceWith AS LONG = LEN(wszReplaceWith)
+   DIM nLenMatchStr AS LONG = LEN(wszMatchStr)
+   DIM nPos AS LONG = 1
+   DO
+      nPos = INSTR(nPos, UCASE(cwsMainStr), cwsMatchStr)
+      IF nPos = 0 THEN EXIT DO
+      cwsMainStr = MID(cwsMainStr, 1, nPos - 1) + wszReplaceWith + MID(cwsMainStr, nPos + nLenMatchStr)
+      nPos += nLenReplaceWith
+   LOOP
+   RETURN cwsMainStr
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Within a specified string, replace all occurrences of any of the individual characters
+' * Within a specified string, replace all occurrences of any of the individual characters
 ' specified in the wszMainStr string.
 ' wszReplaceWith must be a single character. This function does not replace words therefore
 ' wszMatchStr will be the same size - it will not shrink or grow.
 ' This function is case-sensitive.
-' Example: DIM cws AS CWSTR = AfxStrReplaceAny("abacadabra", "bac", "*")
+' Example: AfxStrReplaceAny("abacadabra", "bac", "*")   ' -> *****d**r*
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrReplaceAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYREF wszReplaceWith AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszMainStr
-   IF LEN(wszMatchStr) = 0 THEN RETURN cws
-   IF LEN(wszReplaceWith) = 0 THEN RETURN cws
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   IF LEN(wszMatchStr) = 0 THEN RETURN cwsMainStr
+   IF LEN(wszReplaceWith) = 0 THEN RETURN cwsMainStr
    FOR x AS LONG = 1 TO LEN(wszMatchStr)
       FOR i AS LONG = 1 TO LEN(wszMainStr)
          IF MID(wszMatchStr, x, 1) = MID(wszMainStr, i, 1) THEN
-            MID(**cws, i, 1) = wszReplaceWith
+            MID(**cwsMainStr, i, 1) = wszReplaceWith
          END IF
       NEXT
    NEXT
-   RETURN cws
+   RETURN cwsMainStr
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrReplaceAny.
+' Example: AfxStrReplaceAnyI("abacadabra", "BaC", "*")   ' -> *****d**r*
+' ========================================================================================
+PRIVATE FUNCTION AfxStrReplaceAnyI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYREF wszReplaceWith AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   IF LEN(wszMatchStr) = 0 THEN RETURN cwsMainStr
+   IF LEN(wszReplaceWith) = 0 THEN RETURN cwsMainStr
+   FOR x AS LONG = 1 TO LEN(wszMatchStr)
+      FOR i AS LONG = 1 TO LEN(wszMainStr)
+         IF MID(UCASE(wszMatchStr), x, 1) = MID(UCASE(wszMainStr), i, 1) THEN
+            MID(**cwsMainStr, i, 1) = wszReplaceWith
+         END IF
+      NEXT
+   NEXT
+   RETURN cwsMainStr
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Reverses the contents of a string expression.
+' * Reverses the contents of a string expression.
 ' Usage example: DIM cws AS CWSTR = AfxStrReverse("garden")
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrReverse (BYREF wszMainStr AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszMainStr
+   DIM cwsMainStr AS CWSTR = wszMainStr
    DIM wszChar AS WSTRING * 2
    DIM nLen AS LONG = LEN(wszMainStr)
    FOR i AS LONG = 1 TO nLen \ 2
-      wszChar = MID(cws, i, 1)
-      MID(**cws, i, 1) = MID(**cws, nLen - i + 1, 1)
-      MID(**cws, nLen - i + 1, 1) = wszChar
+      wszChar = MID(cwsMainStr, i, 1)
+      MID(**cwsMainStr, i, 1) = MID(**cwsMainStr, nLen - i + 1, 1)
+      MID(**cwsMainStr, nLen - i + 1, 1) = wszChar
    NEXT
-   RETURN cws
+   RETURN cwsMainStr
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Complement to the AfxStrExtract function.
+' * Extracts characters from a string up to a character or group of characters.
+' Complement function to AfxStrRemain.
+' Returns a substring of wszMainStr starting with its first character (or the character
+' specified by nStart) and up to (but not including) the first occurrence of wszMatchStr
+' If wszMatchStr is not present in wszMainStr (or is null) then all of wszMainStr is
+' returned from the nStart position.
+' This function is case-sensitive.
+' The following line returns "aba" (match on "cad")
+' DIM cws AS CWSTR = AfxStrExtract(1, "abacadabra","cad")
+' ========================================================================================
+PRIVATE FUNCTION AfxStrExtract (BYVAL nStart AS LONG = 1, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM nLen AS LONG = LEN(wszMainStr)
+   IF (nStart = 0) OR (nStart > nLen) THEN RETURN ""
+   IF nStart < 0 THEN nStart = nLen + nStart + 1
+   DIM nPos AS LONG = INSTR(nStart, wszMainStr, wszMatchStr)
+   IF nPos THEN RETURN MID(wszMainStr, nStart, nPos - nStart)
+   RETURN MID(wszMainStr, nStart)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrExtract.
+' DIM cws AS CWSTR = AfxStrExtractI(1, "abacadabra","CaD")
+' ========================================================================================
+PRIVATE FUNCTION AfxStrExtractI (BYVAL nStart AS LONG = 1, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cws AS CWSTR = wszMainStr
+   DIM nLen AS LONG = LEN(wszMainStr)
+   IF (nStart = 0) OR (nStart > nLen) THEN RETURN ""
+   IF nStart < 0 THEN nStart = nLen + nStart + 1
+   DIM nPos AS LONG = INSTR(nStart, UCASE(wszMainStr), UCASE(wszMatchStr))
+   IF nPos THEN RETURN MID(wszMainStr, nStart, nPos - nStart )
+   RETURN cws = MID(wszMainStr, nStart)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Extract characters from a string up to a specific character.
+' Returns a substring of wszMainStr starting with its first character (or the character
+' specified by nStart) and up to (but not including) the first occurrence of wszMatchStr.
+' wszMatchStr specifies a list of single characters to be searched for individually, a
+' match on any one of which will cause the extract operation to be performed up to that character.
+' If wszMatchStr is not present in wszMainStr (or is null) then all of wszMainStr is returned.
+' This function is case-sensitive.
+' The following line returns "aba" (match on "c")
+' Example: AfxStrExtractAny(1, "abacadabra","cd")
+' ========================================================================================
+PRIVATE FUNCTION AfxStrExtractAny (BYVAL nStart AS LONG = 1, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   DIM nLen AS LONG = LEN(wszMainStr)
+   IF (nStart = 0) OR (nStart > nLen) THEN RETURN ""
+   IF nStart < 0 THEN nStart = nLen + nStart + 1
+   FOR i AS LONG = nStart TO nLen
+      FOR x AS LONG = 1 TO LEN(wszMatchStr)
+         IF MID(wszMainStr, i, 1) = MID(wszMatchStr, x, 1) THEN
+            cwsMainStr = MID(wszMainStr, nStart, i - nStart)
+            RETURN cwsMainStr
+         END IF
+      NEXT
+   NEXT
+   RETURN ""
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrExtractAny.
+' Example: AfxStrExtractAnyI(1, "abacadabra","CD")
+' ========================================================================================
+PRIVATE FUNCTION AfxStrExtractAnyI (BYVAL nStart AS LONG = 1, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   DIM nLen AS LONG = LEN(wszMainStr)
+   IF (nStart = 0) OR (nStart > nLen) THEN RETURN ""
+   IF nStart < 0 THEN nStart = nLen + nStart + 1
+   FOR i AS LONG = nStart TO nLen
+      FOR x AS LONG = 1 TO LEN(wszMatchStr)
+         IF MID(UCASE(wszMainStr), i, 1) = MID(UCASE(wszMatchStr), x, 1) THEN
+            cwsMainStr = MID(wszMainStr, nStart, i - nStart)
+            RETURN cwsMainStr
+         END IF
+      NEXT
+   NEXT
+   RETURN ""
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Complement to the AfxStrExtract function.
 ' Returns the portion of a string following the first occurrence of a substring.
 ' wszMainStr is searched for the string specified in wszMatchStr If found, all characters
 ' after cbMatchStr are returned. If wszMatchStr is not present in wszMainStr (or is null) then
@@ -178,23 +443,37 @@ END FUNCTION
 ' the starting position is counted from right to left: if -1, the search begins at the last
 ' character; if -2, the second to last, and so forth.
 ' This function is case-sensitive.
-' Example: DIM cws AS CWSTR = AfxStrRemain("Brevity is the soul of wit", "is ")
+' Example: AfxStrRemain("Brevity is the soul of wit", "is ")   ' -> "the soul of wit"
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrRemain (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
-   DIM cws AS CWSTR = ""
-   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
-   IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN cws
+   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN ""
+   IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN ""
    IF nStart < 0 THEN nStart = LEN(wszMainStr) + nStart + 1
    DIM nPos AS LONG = INSTR(nStart, wszMainStr, wszMatchStr)
-   IF nPos = 0 THEN RETURN cws
-   cws = wszMainStr
-   cws = MID(**cws, nPos + LEN(wszMatchStr))
-   RETURN cws
+   IF nPos = 0 THEN RETURN ""
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   cwsMainStr = MID(**cwsMainStr, nPos + LEN(wszMatchStr))
+   RETURN cwsMainStr
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrRemain.
+' Example: AfxStrRemainI("Brevity is the soul of wit", "Is ")   ' -> "the soul of wit"
+' ========================================================================================
+PRIVATE FUNCTION AfxStrRemainI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
+   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN ""
+   IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN ""
+   IF nStart < 0 THEN nStart = LEN(wszMainStr) + nStart + 1
+   DIM nPos AS LONG = INSTR(nStart, UCASE(wszMainStr), UCASE(wszMatchStr))
+   IF nPos = 0 THEN RETURN ""
+   DIM cwsMainStr AS CWSTR = wszMainStr
+   cwsMainStr = MID(**cwsMainStr, nPos + LEN(wszMatchStr))
+   RETURN cwsMainStr
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Complement to the AfxStrExtract function. Returns the portion of a string following the
+' * Complement to the AfxStrExtract function. Returns the portion of a string following the
 ' first occurrence of a character or group of characters.
 ' wszMainStr is searched for the string specified in wszMatchStr If found, all characters
 ' after wszMatchStr are returned. If wszMatchStr is not present in wszMainStr (or is null) then
@@ -206,55 +485,94 @@ END FUNCTION
 ' the starting position is counted from right to left: if -1, the search begins at the last
 ' character; if -2, the second to last, and so forth.
 ' This function is case-sensitive.
-' Example: DIM cws AS CWSTR = AfxStrRemainAny("I think, therefore I am", ",")
+' Example: AfxStrRemainAny("I think, therefore I am", ",")   ' -> " therefore I am"
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrRemainAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
-   DIM cws AS CWSTR = ""
-   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
-   IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN cws
+   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN ""
+   IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN ""
    IF nStart < 0 THEN nStart = LEN(wszMainStr) + nStart + 1
+   DIM cwsMainStr AS CWSTR
    FOR i AS LONG = nStart TO LEN(wszMainStr)
       FOR x AS LONG = 1 TO LEN(wszMatchStr)
          IF MID(wszMainStr, i, 1) = MID(wszMatchStr, x, 1) THEN
-            cws = MID(wszMainStr, i + 1)
-            RETURN cws
+            cwsMainStr = MID(wszMainStr, i + 1)
+            RETURN cwsMainStr
          END IF
       NEXT
    NEXT
-   RETURN cws
+   RETURN ""
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrRemainAny.
+' Example: AfxStrRemainAnyI("I think, therefore I am", "E")   ' -> "refore I am"
+' ========================================================================================
+PRIVATE FUNCTION AfxStrRemainAnyI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
+   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN ""
+   IF nStart = 0 OR nStart > LEN(wszMainStr) THEN RETURN ""
+   IF nStart < 0 THEN nStart = LEN(wszMainStr) + nStart + 1
+   DIM cwsMainStr AS CWSTR
+   FOR i AS LONG = nStart TO LEN(wszMainStr)
+      FOR x AS LONG = 1 TO LEN(wszMatchStr)
+         IF MID(UCASE(wszMainStr), i, 1) = MID(UCASE(wszMatchStr), x, 1) THEN
+            cwsMainStr = MID(wszMainStr, i + 1)
+            RETURN cwsMainStr
+         END IF
+      NEXT
+   NEXT
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Count the number of occurrences of strings within a string.
+' * Count the number of occurrences of strings within a string.
 ' wszMainStr is the string expression in which to count characters.
 ' cbMatchStr is the string expression to count all occurrences of.
 ' If cbMatchStr is not present in wszMainStr, zero is returned.
 ' When a match is found, the scan for the next match begins at the position immediately
 ' following the prior match.
 ' This function is case-sensitive.
-' Example: DIM nCount AS LONG = AfxStrTally("abacadabra", "ab")
+' Example: DIM nCount AS LONG = AfxStrTally("abacadabra", "ab")   ' -> 2
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrTally (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
    DIM nCount AS LONG, nPos AS LONG = 1
+   DIM nLen AS LONG = LEN(wszMatchStr)
    DO
       nPos = INSTR(nPos, wszMainStr, wszMatchStr)
       IF nPos = 0 THEN EXIT DO
       nCount += 1
-      nPos += LEN(wszMatchStr)
+      nPos += nLen
+   LOOP
+   RETURN nCount
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrTally.
+' Example: DIM nCount AS LONG = AfxStrTallyI("abacadabra", "Ab")   ' -> 2
+' ========================================================================================
+PRIVATE FUNCTION AfxStrTallyI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
+   DIM nCount AS LONG, nPos AS LONG = 1
+   DIM cwsMainStr AS CWSTR = UCASE(wszMainStr)
+   DIM cwsMatchStr AS CWSTR = UCASE (wszMatchStr)
+   DIM nLen AS LONG = LEN(wszMatchStr)
+   DO
+      nPos = INSTR(nPos, cwsMainStr, cwsMatchStr)
+      IF nPos = 0 THEN EXIT DO
+      nCount += 1
+      nPos += nLen
    LOOP
    RETURN nCount
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Count the number of occurrences of specified characters strings within a string.
+' * Count the number of occurrences of specified characters strings within a string.
 ' wszMainStr is the string expression in which to count characters.
 ' wszMatchStr is a list of single characters to be searched for individually. A match on
 ' any one of which will cause the count to be incremented for each occurrence of that
 ' character. Note that repeated characters in wszMatchStr will not increase the count.
 ' This function is case-sensitive.
-' Example: DIM nCount AS LONG = AfxStrTallyAny("abacadabra", "bac")
+' Example: DIM nCount AS LONG = AfxStrTallyAny("abacadabra", "bac")   ' -> 8
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrTallyAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
    IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN EXIT FUNCTION
@@ -263,7 +581,7 @@ PRIVATE FUNCTION AfxStrTallyAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr 
    DIM cwsMatchStr AS CWSTR = wszMatchStr
    FOR i AS LONG = 1 TO LEN(cwsMatchStr)
       nPos = INSTR(cwsMatchStr, MID(wszMatchStr, i, 1))
-      IF nPos = 0 THEN cwsMatchStr = cwsMatchStr & MID(wszMatchStr, i, 1)
+      IF nPos = 0 THEN cwsMatchStr += MID(wszMatchStr, i, 1)
    NEXT
    ' // Do the count
    DIM nCount AS LONG
@@ -281,23 +599,74 @@ PRIVATE FUNCTION AfxStrTallyAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr 
    RETURN nCount
 END FUNCTION
 ' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrTallyAny.
+' Example: DIM nCount AS LONG = AfxStrTallyAnyI("abacadabra", "bAc")
+' ========================================================================================
+PRIVATE FUNCTION AfxStrTallyAnyI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
+   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN EXIT FUNCTION
+   ' // Remove possible duplicates in the matches string
+   DIM nPos AS LONG
+   DIM cwsMainStr AS CWSTR = UCASE(wszMainStr)
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   FOR i AS LONG = 1 TO LEN(cwsMatchStr)
+      nPos = INSTR(cwsMatchStr, MID(wszMatchStr, i, 1))
+      IF nPos = 0 THEN cwsMatchStr += MID(wszMatchStr, i, 1)
+   NEXT
+   ' // Do the count
+   DIM nCount AS LONG
+   FOR i AS LONG = 1 TO LEN(cwsMatchStr)
+      nPos = 1
+      DO
+         nPos = INSTR(nPos, cwsMainStr, MID(cwsMatchStr, i, 1))
+         IF nPos = 0 THEN EXIT DO
+         IF nPos THEN
+            nCount += 1
+            nPos += 1
+         END IF
+      LOOP
+   NEXT
+   RETURN nCount
+END FUNCTION
+' ========================================================================================
 
 ' ========================================================================================
-' Determine whether each character of a string is present in another string.
+' * Determine whether each character of a string is present in another string.
 ' Returns zero if each character in wszMainStr is present in wszMatchStr
 ' If not, it returns the position of the first non-matching character in wszMainStr.
 ' This function is very useful for determining if a string contains only numeric digits, for example.
 ' This function is case-sensitive.
 ' If nStart evaluates to a position outside of the string, or if nStart is zero, then the
 ' function returns zero.
-' Example: DIM nCount AS LONG = AfxStrVerify(5, "123.65,22.5", "0123456789")
+' Example: DIM nCount AS LONG = AfxStrVerify(5, "123.65,22.5", "0123456789")   ' -> 7
+' Rreturns 7 since 5 starts it past the first non-digit ("." at position 4)
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrVerify (BYVAL nStart AS LONG, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
    IF nStart <= 0 OR nStart > LEN(wszMainStr) THEN RETURN 0
    ' // Get each character in wszMainStr and look for it in wszMatchStr
    DIM AS LONG nPos, idx
-   For i AS LONG = nStart TO LEN(wszMainStr)
+   FOR i AS LONG = nStart TO LEN(wszMainStr)
       nPos = INSTR(wszMatchStr, MID(wszMainStr, i, 1))
+      IF nPos = 0 THEN
+         idx = i
+         EXIT FOR
+      END IF
+   NEXT
+   RETURN  idx
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case sinsentive version of AfxStrVerify.
+' Example: AfxStrVerifyI(5, "123.65abcx22.5", "0123456789ABC")   ' -> 10
+' ========================================================================================
+PRIVATE FUNCTION AfxStrVerifyI (BYVAL nStart AS LONG, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS LONG
+   IF nStart <= 0 OR nStart > LEN(wszMainStr) THEN RETURN 0
+   ' // Get each character in wszMainStr and look for it in wszMatchStr
+   DIM cwsMainStr AS CWSTR = UCASE(wszMainStr)
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   DIM AS LONG nPos, idx
+   FOR i AS LONG = nStart TO LEN(cwsMainStr)
+      nPos = INSTR(cwsMatchStr, MID(cwsMainStr, i, 1))
       IF nPos = 0 THEN
          idx = i
          EXIT FOR
@@ -459,7 +828,7 @@ PRIVATE FUNCTION AfxStrClipMid (BYREF wszMainStr AS WSTRING, BYVAL nStart AS LON
    DIM cws AS CWSTR = wszMainStr
    IF (nCount <= 0) OR (nStart <= 0) THEN RETURN cws
    DIM nLen AS LONG = LEN(wszMainStr)
-   cws = LEFT(wszMainStr, nStart - 1) & MID(wszMainStr, nStart + nCount)
+   cws = LEFT(wszMainStr, nStart - 1) + MID(wszMainStr, nStart + nCount)
    RETURN cws
 END FUNCTION
 ' ========================================================================================
@@ -475,13 +844,13 @@ END FUNCTION
 '  For example: AfxStrWrap("Paul") results in "Paul"
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrWrap OVERLOAD (BYREF wszMainStr AS WSTRING, BYREF wszLeftChar AS WSTRING, BYREF wszRightChar AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszLeftChar & wszMainStr & wszRightChar
+   DIM cws AS CWSTR = wszLeftChar + wszMainStr & wszRightChar
    RETURN cws
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrWrap OVERLOAD (BYREF wszMainStr AS WSTRING, BYREF wszChar AS WSTRING = CHR(34)) AS CWSTR
-   DIM cws AS CWSTR = wszChar & wszMainStr & wszChar
+   DIM cws AS CWSTR = wszChar + wszMainStr + wszChar
    RETURN cws
 END FUNCTION
 ' ========================================================================================
@@ -510,7 +879,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Deletes a specified number of characters from a string expression.
+' * Deletes a specified number of characters from a string expression.
 ' Returns a string based on wszMainStr but with nCount characters deleted
 ' starting at position nStart. The first character in the string is position 1, etc.
 ' Usage example:
@@ -520,13 +889,14 @@ PRIVATE FUNCTION AfxStrDelete (BYREF wszMainStr AS WSTRING, BYVAL nStart AS LONG
    DIM cws AS CWSTR = wszMainStr
    DIM nLen AS LONG = LEN(wszMainStr)
    IF nLen = 0 OR nStart < 0 OR nCount <= 0 OR nStart > nLen THEN RETURN cws
-   cws = LEFT(wszMainStr, nStart) & MID(wszMainStr, nStart + 1 + nCount, nCount)
+'   cws = LEFT(wszMainStr, nStart) + MID(wszMainStr, nStart + 1 + nCount, nCount)   ' // wrong calculation
+   cws.DelChars nStart, nCount
    RETURN cws
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Inserts a string at a specified position within another string expression.
+' * Inserts a string at a specified position within another string expression.
 ' Returns a string consisting of wszMainStr with the string wszInsertString inserted
 ' at nPosition. If nPosition is greater than the length of wszMainStr or <= zero then
 ' wszInsertString is appended to wszMainStr. The first character in the string is position 1, etc.
@@ -534,110 +904,99 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrInsert (BYREF wszMainStr AS WSTRING, BYREF wszInsertString AS WSTRING, BYVAL nPosition AS LONG) AS CWSTR
    DIM cws AS CWSTR = wszMainStr
-   IF nPosition > LEN(wszMainStr) OR nPosition <= 0 THEN
-      cws = cws & wszInsertString
+'   IF nPosition > LEN(wszMainStr) OR nPosition <= 0 THEN
+'      cws += wszInsertString
+'   ELSE
+'      cws = MID(wszMainStr, 1, nPosition) + wszInsertString + MID(wszMainStr, nPosition + 1)
+'   END IF
+   IF nPosition <= 0 THEN RETURN CWS
+   IF nPosition > LEN(wszMainStr) THEN
+      cws += wszInsertString
+   ELSEIF nPosition = 1 THEN
+      cws = wszInsertString + MID(wszMainStr, 1)
    ELSE
-      cws = MID(wszMainStr, 1, nPosition) & wszInsertString & MID(wszMainStr, nPosition + 1)
+      cws = MID(wszMainStr, 1, nPosition - 1) + wszInsertString + MID(wszMainStr, nPosition)
    END IF
    RETURN cws
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Extracts characters from a string up to a character or group of characters.
-' Complement function to AfxStrRemain.
-' Returns a substring of wszMainStr starting with its first character (or the character
-' specified by nStart) and up to (but not including) the first occurrence of wszMatchStr
-' If wszMatchStr is not present in wszMainStr (or is null) then all of wszMainStr is
-' returned from the nStart position.
-' This function is case-sensitive.
-' The following line returns "aba" (match on "cad")
-' DIM cws AS CWSTR = AfxStrExtract(1, "abacadabra","cad")
-' ========================================================================================
-PRIVATE FUNCTION AfxStrExtract (BYVAL nStart AS LONG, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszMainStr
-   DIM nLen AS LONG = LEN(wszMainStr)
-   IF (nStart = 0) OR (nStart > nLen) THEN
-      cws = ""
-      RETURN cws
-   END IF
-   IF nStart < 0 THEN nStart = nLen + nStart + 1
-   DIM nPos AS LONG = INSTR(nStart, wszMainStr, wszMatchStr)
-   IF nPos THEN
-      cws = MID(wszMainStr, nStart, nPos - nStart )
-   ELSE
-      cws = MID(wszMainStr, nStart)
-   END IF
-   RETURN cws
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Extract characters from a string up to a specific character.
-' Returns a substring of wszMainStr starting with its first character (or the character
-' specified by nStart) and up to (but not including) the first occurrence of wszMatchStr.
-' wszMatchStr specifies a list of single characters to be searched for individually, a
-' match on any one of which will cause the extract operation to be performed up to that character.
-' If wszMatchStr is not present in wszMainStr (or is null) then all of wszMainStr is returned.
-' This function is case-sensitive.
-' Example: DIM cws AS CWSTR = AfxStrExtractAny(1, "abacadabra","cd")
-' ========================================================================================
-PRIVATE FUNCTION AfxStrExtractAny (BYVAL nStart AS LONG, BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
-   DIM cws AS CWSTR = wszMainStr
-   DIM nLen AS LONG = LEN(wszMainStr)
-   IF (nStart = 0) OR (nStart > nLen) THEN
-      cws = ""
-      RETURN cws
-   END IF
-   IF nStart < 0 THEN nStart = nLen + nStart + 1
-   FOR i AS LONG = nStart TO LEN(wszMainStr)
-      FOR x AS LONG = 1 TO LEN(wszMatchStr)
-         IF MID(wszMainStr, i, 1) = MID(wszMatchStr, x, 1) THEN
-            cws = MID(wszMainStr, nStart, i - nStart)
-            RETURN cws
-         END IF
-      NEXT
-   NEXT
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Returns a string containing only the characters contained in a specified match string.
+' * Returns a string containing only the characters contained in a specified match string.
 ' All other characters are removed. If wszMatchStr is an empty string the function returns
-' an empty string.
-' This function is case-sensitive.
-' Example: DIM cws AS CWSTR = AfxStrRetain("abacadabra","b")
+' an empty string. This function is case-sensitive.
+' Example: DIM cws AS CWSTR = AfxStrRetain("abacadabra","b")   ' -> "bb"
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrRetain (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
    DIM cws AS CWSTR = ""
    IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
+   DIM nLen AS LONG = LEN(wszMatchStr)
    DIM nPos AS LONG = 1
    DO
       nPos = INSTR(nPos, wszMainStr, wszMatchStr)
       IF nPos = 0 THEN EXIT DO
-      cws = cws & MID(wszMainStr, nPos, LEN(wszMatchStr))
-      nPos += LEN(wszMatchStr)
+      cws += MID(wszMainStr, nPos, nLen)
+      nPos += nLen
+   LOOP
+   RETURN cws
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrRetain.
+' Example: DIM cws AS CWSTR = AfxStrRetainI("abacadabra","B")   ' -> "bb"
+' ========================================================================================
+PRIVATE FUNCTION AfxStrRetainI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cws AS CWSTR = ""
+   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
+   DIM cwsMainStr AS CWSTR = UCASE(wszMainStr)
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   DIM nLen AS LONG = LEN(wszMatchStr)
+   DIM nPos AS LONG = 1
+   DO
+      nPos = INSTR(nPos, cwsMainStr, cwsMatchStr)
+      IF nPos = 0 THEN EXIT DO
+      cws += MID(wszMainStr, nPos, nLen)
+      nPos += nLen
    LOOP
    RETURN cws
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a string containing only the characters contained in a specified match string.
+' * Returns a string containing only the characters contained in a specified match string.
 ' All other characters are removed.
 ' If wszMatchStr is an empty string the function returns an empty string.
 ' wszMatchStr specifies a list of single characters to be searched for individually.
 ' A match on any one of which will cause that character to be removed from the result.
 ' This function is case-sensitive.
-' Example: DIM cws AS CWSTR = AfxStrRetainAny("<p>1234567890<ak;lk;l>1234567890</p>", "<;/p>")
+' Example: AfxStrRetainAny("<p>1234567890<ak;lk;l>1234567890</p>", "<;/p>")
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrRetainAny (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
    DIM cws AS CWSTR = ""
-   IF LEN(wszMainStr) = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
+   DIM nLen AS LONG = LEN(wszMainStr)
+   IF nLen = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
    DIM nPos AS LONG
-   FOR i AS LONG = 1 TO LEN(wszMainStr)
+   FOR i AS LONG = 1 TO nLen
       nPos = INSTR(wszMatchStr, MID(wszMainStr, i, 1))
-      IF nPos THEN cws = cws & MID(wszMainStr, i, 1)
+      IF nPos THEN cws += MID(wszMainStr, i, 1)
+   NEXT
+   RETURN cws
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' * Case insensitive version of AfxStrRetainAny.
+' Example: AfxStrRetainAnyI("<p>1234567890<ak;lk;l>1234567890</p>", "<;/P>")
+' ========================================================================================
+PRIVATE FUNCTION AfxStrRetainAnyI (BYREF wszMainStr AS WSTRING, BYREF wszMatchStr AS WSTRING) AS CWSTR
+   DIM cws AS CWSTR = ""
+   DIM nLen AS LONG = LEN(wszMainStr)
+   IF nLen = 0 OR LEN(wszMatchStr) = 0 THEN RETURN cws
+   DIM cwsMainStr AS CWSTR = UCASE(wszMainStr)
+   DIM cwsMatchStr AS CWSTR = UCASE(wszMatchStr)
+   DIM nPos AS LONG
+   FOR i AS LONG = 1 TO nLen
+      nPos = INSTR(cwsMatchStr, MID(cwsMainStr, i, 1))
+      IF nPos THEN cws += MID(wszMainStr, i, 1)
    NEXT
    RETURN cws
 END FUNCTION
@@ -653,7 +1012,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Shrinks a string to use a consistent single character delimiter.
+' * Shrinks a string to use a consistent single character delimiter.
 ' The purpose of this function is to create a string with consecutive data items (words)
 ' separated by a consistent single character. This makes it very straightforward to parse
 ' the results as needed.
@@ -679,12 +1038,12 @@ PRIVATE FUNCTION AfxStrShrink (BYREF wszMainStr AS WSTRING, BYREF wszMask AS WST
    DIM nMaskLen AS LONG = LEN(wszMask)
    DIM nPos AS LONG
    FOR i AS LONG = 1 TO nMaskLen
-      wszDuplicate = MID(wszMask, i, 1) & MID(wszMask, i, 1)   ' usually double spaces
+      wszDuplicate = MID(wszMask, i, 1) + MID(wszMask, i, 1)   ' usually double spaces
       nPos = 1
       DO
          nPos = INSTR(cws, wszDuplicate)
          IF nPos = 0 THEN EXIT DO
-         cws = MID(cws, 1, nPos - 1) & wszReplace & MID(cws, nPos + LEN(wszDuplicate))
+         cws = MID(cws, 1, nPos - 1) + wszReplace + MID(cws, nPos + LEN(wszDuplicate))
       LOOP
    NEXT
    ' // Replace all single characters in the mask with the first character of the mask.
@@ -696,25 +1055,25 @@ PRIVATE FUNCTION AfxStrShrink (BYREF wszMainStr AS WSTRING, BYREF wszMask AS WST
       ' different than the character we need to replace it with. This saves
       ' us from having to do an unneeded string concatenation.
       IF MID(cws, nPos, 1) <> wszReplace  THEN
-         cws = MID(cws, 1, nPos - 1) & wszReplace & MID(cws, nPos + 1)
+         cws = MID(cws, 1, nPos - 1) + wszReplace + MID(cws, nPos + 1)
       END IF
       nPos += 1
    LOOP
    ' Finally, do a pass to ensure that there are no duplicates of the
    ' first mask character because of the replacements in the step above.
-   wszDuplicate = MID(wszMask, 1, 1) & MID(wszMask, 1, 1)
+   wszDuplicate = MID(wszMask, 1, 1) + MID(wszMask, 1, 1)
    nPos = 1
    DO
       nPos = INSTR(cws, wszDuplicate)
       IF nPos = 0 THEN EXIT DO
-      cws = MID(cws, 1, nPos - 1) & wszReplace & MID(cws, nPos + LEN(wszDuplicate))
+      cws = MID(cws, 1, nPos - 1) + wszReplace + MID(cws, nPos + LEN(wszDuplicate))
    LOOP
    RETURN cws
 END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the count of delimited fields from a string expression.
+' * Returns the count of delimited fields from a string expression.
 ' If wszMainStr is empty (a null string) or contains no delimiter character(s), the string
 ' is considered to contain exactly one sub-field. In this case, AfxStrParseCount returns the value 1.
 ' Delimiter contains a string (one or more characters) that must be fully matched.
@@ -735,7 +1094,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Return the count of delimited fields from a string expression.
+' * Return the count of delimited fields from a string expression.
 ' If wszMainStr is empty (a null string) or contains no delimiter character(s), the string
 ' is considered to contain exactly one sub-field. In this case, AfxStrParseCountAny returns the value 1.
 ' Delimiter contains a set of characters (one or more), any of which may act as a delimiter character.
@@ -756,7 +1115,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the nPosition-th substring in a string wszMainStr with separations wszDelimiter
+' * Returns the nPosition-th substring in a string wszMainStr with separations wszDelimiter
 ' (one or more charcters), beginning with nPosition = 1.
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrParse OVERLOAD (BYREF wszMainStr AS WSTRING, BYREF wszDelimiter AS WSTRING, BYVAL nPosition AS LONG, BYVAL bIsAny AS BOOLEAN, BYVAL nLenDelimiter AS LONG) AS CWSTR
@@ -825,7 +1184,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns a delimited field from a string expression.
+' * Returns a delimited field from a string expression.
 ' wszDelimiter contains a string of one or more characters that must be fully matched to be successful.
 ' If nPosition evaluates to zero or is outside of the actual field count, an empty string is returned.
 ' If nPosition is negative then fields are searched from the right to left of the wszMainStr
@@ -837,18 +1196,76 @@ PRIVATE FUNCTION AfxStrParse OVERLOAD (BYREF wszMainStr AS WSTRING, BYVAL nPosit
    ' The parse must match the entire deliminter string
    RETURN AfxStrParse(wszMainStr, wszDelimiter, nPosition, FALSE, Len(wszDelimiter))
 END FUNCTION
-'==============================================================================
+' ========================================================================================
 
-'==============================================================================
-' Return a delimited field from a string expression.
+' ========================================================================================
+' * Return a delimited field from a string expression.
 ' Delimiter contains a set of characters (one or more), any of which may act as a delimiter character.
 ' If nPosition evaluates to zero or is outside of the actual field count, an empty string is returned.
 ' If nPosition is negative then fields are searched from the right to left of the MainString.
 ' Delimiters are case-sensitive.
 ' Example: DIM cws AS CWSTR = AfxStrParseAny("1;2,3", 2, ",;")
-'==============================================================================
+' ========================================================================================
 PRIVATE FUNCTION AfxStrParseAny (BYREF wszMainStr AS WSTRING, BYVAL nPosition AS LONG = 1, BYREF wszDelimiter AS WSTRING = ",") AS CWSTR
    ' The parse must match one character (len = 1) in the delimiter string
    RETURN AfxStrParse(wszMainStr, wszDelimiter, nPosition, TRUE, 1)
 END FUNCTION
-'==============================================================================
+' ========================================================================================
+
+' ========================================================================================
+' Returns the length of the initial portion of a string which consists only of characters
+' that are part of a specified set of characters.
+' Example:
+' DIM wszText AS WSTRING * 260 = "129th"
+' DIM wszSet AS WSTRING * 260 = "1234567890"
+' DIM n AS LONG = StrSpnW(@wszText, @wszSet)
+' printf(!"The initial number has %d digits.\n", n)
+' ========================================================================================
+PRIVATE FUNCTION AfxStrSpn (BYREF wszText AS WSTRING, BYREF wszSet AS WSTRING) AS LONG
+   RETURN StrSpnW(@wszText, @wszSet)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Converts a numeric value into a string that represents the number expressed as a size
+' value in bytes, kilobytes, megabytes, or gigabytes, depending on the size.
+' ========================================================================================
+PRIVATE FUNCTION AfxStrFormatByteSize (BYVAL ull AS ULONGLONG) AS CWSTR
+   DIM cws AS CWSTR = SPACE(260)
+   StrFormatByteSizeW(ull, cws.vptr, 260)
+   RETURN cws
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Converts a numeric value into a string that represents the number expressed as a size
+' value in kilobytes.
+' ========================================================================================
+PRIVATE FUNCTION AfxStrFormatKBSize (BYVAL ull AS ULONGLONG) AS CWSTR
+   DIM cws AS CWSTR = SPACE(260)
+   StrFormatKBSizeW(ull, cws.vptr, 260)
+   RETURN cws
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Converts a time interval, specified in milliseconds, to a string.
+' Parameters:
+' - dwTimeMS: The time interval, in milliseconds.
+' - digits  : The maximum number of significant digits to be represented in the output
+'             string. Some examples are:
+'             dwTimeMS digits   cwsOut
+'             -------- ------ -----------
+'                34000    3        34 sec
+'                34000    2        34 sec
+'                34000    1        30 sec
+'                74000    3  1 min 14 sec
+'                74000    2  1 min 10 sec
+'                74000    1  1 min
+' ========================================================================================
+PRIVATE FUNCTION AfxStrFromTimeInterval (BYVAL dwTimeMS AS DWORD, BYVAL digits AS LONG) AS CWSTR
+   DIM cws AS CWSTR = SPACE(260)
+   StrFromTimeIntervalW(cws.vptr, 260, dwTimeMS, digits)
+   RETURN cws
+END FUNCTION
+' ========================================================================================

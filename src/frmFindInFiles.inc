@@ -248,15 +248,15 @@ function DoFindInFilesEx() as LONG
    'FINDSTR [/B] [/E] [/L] [/R] [/S] [/I] [/X] [/V] [/N] [/M] [/O] [/P] [/F:file]
    '        [/C:string] [/G:file] [/D:dir list] [/A:color attributes] [/OFF[LINE]]
    '        strings [[drive:][path]filename[ ...]]
-   wszResults = wstr(AfxGetExePathName & "\_search.txt")
+   wszResults = AfxGetExePathName & "\_search.txt"
    if AfxFileExists(wszResults) then kill wszResults
    if instr(wszResults, " ") THEN wszResults = chr(34) & wszResults & chr(34)
-   wszFileExe = WSTR("FindStr.exe")  
+   wszFileExe = "FindStr.exe"  
    wszParam   = WSTR(sParam & " /C:") & chr(34) & wszText & chr(34) & _
                  " " & **sSearchFiles & " >> " & wszResults
 
    dim f as long = freefile
-   wszBatchFile = wstr(AfxGetExePathName & "\_search.bat")
+   wszBatchFile = AfxGetExePathName & "\_search.bat"
    ' Open filename does not use enclosing quotes
    Open wszBatchFile For Output as #f
    print #f, wszFileExe & " " & wszParam
@@ -283,7 +283,6 @@ function DoFindInFilesEx() as LONG
    ShowWindow( hProgressBar, SW_SHOW)
 
    ShellExecuteEx(@ShExecInfo)
-'   WaitForSingleObject(ShExecInfo.hProcess,INFINITE)
 
    ' Give the process 33 ms (you can use a different value here depending on 
    ' how responsive you wish your app to be)

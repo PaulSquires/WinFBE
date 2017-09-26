@@ -349,7 +349,7 @@ PRIVATE PROPERTY CAdoCommand.CommandStream () AS Afx_ADOStream PTR
    DIM vStream AS VARIANT
    IF m_pCommand THEN SetResult(m_pCommand->get_CommandStream(@vStream))
    RETURN cast(Afx_ADOStream PTR, cast(ULONG_PTR, vStream.pdispVal))
-   ' Don't clear the vStream variant becuase we are trabsfering owenership
+   ' Don't clear the vStream variant becuase we are transfering owenership
 END PROPERTY
 ' ===========================================================================================
 

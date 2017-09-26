@@ -714,10 +714,10 @@ END FUNCTION
 ' Returns the VARTYPE stored in the given safe array.
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.GetType () AS VARTYPE
-   CSAFEARRAY_DP("CSafeArray VarType")
    IF m_psa = NULL THEN RETURN 0
    DIM vt AS VARTYPE
    SafeArrayGetVartype(m_psa, @vt)
+   CSAFEARRAY_DP("CSafeArray VarType = " & WSTR(vt))
    RETURN vt
 END FUNCTION
 ' =====================================================================================
@@ -931,11 +931,6 @@ PRIVATE FUNCTION CSafeArray.Destroy () AS HRESULT
    RETURN hr
 END FUNCTION
 ' ========================================================================================
-' ========================================================================================
-PRIVATE FUNCTION CSafeArray.Clear () AS HRESULT
-   RETURN this.Destroy
-END FUNCTION
-' ========================================================================================
 
 ' ========================================================================================
 ' Destroys all the data in a safe array.
@@ -957,9 +952,15 @@ PRIVATE FUNCTION CSafeArray.DestroyData () AS HRESULT
    IF m_psa THEN
       SafeArrayUnlock(m_psa)
       hr = SafeArrayDestroyData(m_psa)
-      SafeArrayLock(m_psa)
+'      Don't lock the erased array
+'      SafeArrayLock(m_psa)
    END IF
    RETURN hr
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION CSafeArray.Clear () AS HRESULT
+   RETURN this.Destroy
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
@@ -2149,14 +2150,17 @@ END FUNCTION
 '    csa.GetElement(i, cbsOut)
 '    print cbsOut
 ' NEXT
+' -or-
+' FOR i AS LONG = csa.LBound TO csa.UBound
+'    print csa.GetStr(i)
+' NEXT
 ' ========================================================================================
 PRIVATE FUNCTION AfxStrSplit (BYREF wszStr AS WSTRING, BYREF wszDelimiters AS WSTRING) AS CSafeArray
    DIM cws AS CWSTR = wszStr
    DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 0, 1)
    DIM pwsz AS WSTRING PTR = wcstok(cws, @wszDelimiters)
    WHILE pwsz <> NULL
-      DIM cbs AS CBSTR = pwsz
-      csa.AppendElement(cbs)
+      csa.AppendStr(pwsz)
       pwsz = wcstok(NULL, @wszDelimiters)
    WEND
    RETURN csa
@@ -2341,6 +2345,147 @@ PRIVATE FUNCTION AfxBase64Decode (BYREF strData AS STRING) AS STRING
       IUnknown_Release(pXmlDocument)
    END IF
 
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Reads all the lines of the specified file into a safe array.
+' - wszFileName: Path of the file
+' - szDelimiter: Delimiter of the line (CHR(13, 10) in Windows, CHR(10) in Linmux).
+' ========================================================================================
+PRIVATE FUNCTION AfxFileReadAllLinesA (BYREF wszFileName AS WSTRING, BYREF szDelimiter AS ZSTRING = CHR(13, 10)) AS CSafeArray
+   DIM _csa AS CSafeArray = CSafeArray(VT_BSTR, 0, 1)
+   DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   IF LEN(szDelimiter) = 0 THEN RETURN _csa
+   ' // Open the file
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN RETURN _csa
+   ' // Get the size of the file
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   DIM pBuffer AS UBYTE PTR
+   pBuffer = CAllocate(1, dwFileSize)
+   IF pBuffer = NULL THEN RETURN _csa
+   DIM bSuccess AS LONG = ReadFile(hFile, pBuffer, dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess = FALSE THEN RETURN _csa
+   ' // Get the number of lines
+   DIM nLen AS LONG = LEN(szDelimiter)
+   DIM pstr AS ANY PTR = pBuffer
+   DO
+      pstr = strstr(pstr, szDelimiter)
+      IF pstr = NULL THEN EXIT DO
+      pstr += nLen
+      dwCount += 1
+   LOOP
+' -------------------------------------------------------------------
+  ' // Dimension a safe array with dwCount elements
+'   DIM csa AS CSafeArray = CSafeArray(VT_BSTR, dwCount, 1)
+'   Note: strtok can't be used because it skips empty lines.
+'   ' // Fill the array with the lines
+'   DIM pwsz AS ZSTRING PTR = strtok(pBuffer, @szDelimiter)
+'   DIM idx AS LONG = 1
+'   WHILE pwsz <> NULL
+'      IF idx < dwCount THEN csa.PutElement(idx, CBSTR(*pwsz))
+'      idx += 1
+'      pwsz = strtok(NULL, @szDelimiter)
+'   WEND
+' -------------------------------------------------------------------
+  ' // Dimension a safe array with dwCount elements
+   DIM csa AS CSafeArray = CSafeArray(VT_BSTR, dwCount, 1)
+   DIM s AS STRING, sLen AS LONG
+   DIM idx AS LONG = 1
+   DIM _pstr AS ANY PTR = pBuffer
+   pstr = pBuffer
+   ' // Check for UTF-8 BOM
+   s = "   "
+   strncpy STRPTR(s), _pstr, 3
+   IF s = CHR(&hEF, &hBB, &hBF) THEN _pstr += 3
+   ' // Parse the buffer
+   DO
+      pstr = strstr(pstr, szDelimiter)
+      IF pstr = NULL THEN EXIT DO
+      sLen = pstr - _pstr
+      s = ""
+      IF sLen > nLen THEN
+         s = STRING(sLen, CHR(0))
+         strncpy STRPTR(s), _pstr, sLen
+      END IF
+      IF idx <= dwCount THEN csa.PutElement(idx, CBSTR(s))
+      idx += 1
+      pstr += nLen
+      _pstr = pstr
+   LOOP
+   DeAllocate(pBuffer)
+   RETURN csa
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Reads all the lines of the specified file into a safe array.
+' - wszFileName: Path of the file
+' - szDelimiter: Delimiter of the line (CHR(13, 10) in Windows, CHR(10) in Linmux).
+' ========================================================================================
+PRIVATE FUNCTION AfxFileReadAllLinesW (BYREF wszFileName AS WSTRING, BYREF wszDelimiter AS WSTRING = CHR(13, 10)) AS CSafeArray
+   DIM _csa AS CSafeArray = CSafeArray(VT_BSTR, 0, 1)
+   DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   IF LEN(wszDelimiter) = 0 THEN RETURN _csa
+   ' // Open the file
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN RETURN _csa
+   ' // Get the size of the file
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   DIM pBuffer AS UBYTE PTR
+   pBuffer = CAllocate(1, dwFileSize)
+   IF pBuffer = NULL THEN RETURN _csa
+   DIM bSuccess AS LONG = ReadFile(hFile, pBuffer, dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess = FALSE THEN RETURN _csa
+   ' // Get the number of lines
+   DIM nLen AS LONG = LEN(wszDelimiter) * 2
+   DIM pstr AS ANY PTR = pBuffer
+   DO
+      pstr = wcsstr(pstr, @wszDelimiter)
+      IF pstr = NULL THEN EXIT DO
+      pstr += nLen
+      dwCount += 1
+   LOOP
+  ' // Dimension a safe array with dwCount elements
+   DIM csa AS CSafeArray = CSafeArray(VT_BSTR, dwCount, 1)
+   DIM cws AS CWSTR, sLen AS LONG
+   DIM idx AS LONG = 1
+   DIM _pstr AS ANY PTR = pBuffer
+   pstr = pBuffer
+   ' / Skip the BOM
+   DIM s AS STRING = "  "
+   strncpy STRPTR(s), _pstr, 2
+   ' // Check for UTF-16 BOM (little endian)
+   IF s = CHR(&hFF, &hFE) THEN
+      _pstr += 2
+   ELSE
+      ' // Check for UTF-8 BOM
+      s = "   "
+      strncpy STRPTR(s), _pstr, 3
+      IF s = CHR(&hEF, &hBB, &hBF) THEN _pstr += 3
+   END IF
+   ' // Parse the buffer
+   DO
+      pstr = wcsstr(pstr, @wszDelimiter)
+      IF pstr = NULL THEN EXIT DO
+      sLen = (pstr - _pstr) \ 2
+      cws = ""
+      IF sLen > nLen THEN
+         cws = STRING(sLen, CHR(0))
+         wcsncpy cws, _pstr, sLen
+      END IF
+      IF idx <= dwCount THEN csa.PutElement(idx, CBSTR(cws))
+      idx += 1
+      pstr += nLen
+      _pstr = pstr
+   LOOP
+   DeAllocate(pBuffer)
+   RETURN csa
 END FUNCTION
 ' ========================================================================================
 

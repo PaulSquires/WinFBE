@@ -380,6 +380,7 @@ PRIVATE FUNCTION CFindFile.FileExt () AS CWSTR
    DIM p AS LONG
    p = INSTRREV(m_FileInfo.cFileName, ".")
    IF p THEN RETURN MID(m_FileInfo.cFileName, p + 1)
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 
@@ -393,6 +394,7 @@ PRIVATE FUNCTION CFindFile.FilePath () AS CWSTR
    DIM nLen AS LONG, buffer AS WSTRING * 4096
    nLen = .GetFullPathNameW(m_FileInfo.cFileName, SIZEOF(buffer) \ 2, buffer, NULL)
    IF nLen THEN RETURN LEFT(buffer, nLen)
+   RETURN ""
 END FUNCTION
 ' ========================================================================================
 

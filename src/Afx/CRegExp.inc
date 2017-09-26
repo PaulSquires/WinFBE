@@ -32,6 +32,7 @@ TYPE CRegExp
 
    Public:
       DECLARE CONSTRUCTOR
+      DECLARE CONSTRUCTOR (BYVAL bIgnoreCase AS BOOLEAN, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = FALSE)
       DECLARE CONSTRUCTOR (BYREF cbsPattern AS CBSTR, BYVAL bIgnoreCase AS BOOLEAN = FALSE, _
         BYVAL bGlobal AS BOOLEAN = FALSE, BYVAL bMultiline AS BOOLEAN = FALSE)
       DECLARE DESTRUCTOR
@@ -54,6 +55,12 @@ TYPE CRegExp
       DECLARE FUNCTION MatchLen (BYVAL index AS LONG) AS LONG
       DECLARE FUNCTION SubMatchCount (BYVAL index AS LONG) AS LONG
       DECLARE FUNCTION SubMatchValue (BYVAL MatchIndex AS LONG, BYVAL SubMatchIndex AS LONG) AS CVAR
+      DECLARE FUNCTION RemoveStr (BYREF cbsSourceString AS CBSTR, BYREF cbsPattern AS CBSTR, _
+              BYVAL bIgnoreCase AS BOOLEAN = FALSE, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = FALSE) AS CBSTR
+      DECLARE FUNCTION ReplaceStr (BYREF cbsSourceString AS CBSTR, BYREF cbsPattern AS CBSTR, BYREF cvReplaceString AS CVAR, _
+              BYVAL bIgnoreCase AS BOOLEAN = FALSE, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = FALSE) AS CBSTR
+      DECLARE FUNCTION InStr (BYREF cbsSourceString AS CBSTR, BYREF cbsPattern AS CBSTR, _
+              BYVAL bIgnoreCase AS BOOLEAN = FALSE, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = TRUE) AS CBSTR
 
 END TYPE
 ' ========================================================================================
@@ -67,6 +74,21 @@ PRIVATE CONSTRUCTOR CRegExp
    IF hr = S_OK OR hr = S_FALSE THEN m_bUninitCOM = TRUE
    ' // Create an instance of the IRegExp2 interface
    m_pRegExp = AfxNewCom("VBScript.RegExp")
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' * CRegExp constructor
+' ========================================================================================
+PRIVATE CONSTRUCTOR CRegExp (BYVAL bIgnoreCase AS BOOLEAN, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = FALSE)
+   ' // Initialize the COM library
+   DIM hr AS HRESULT = CoInitialize(NULL)
+   IF hr = S_OK OR hr = S_FALSE THEN m_bUninitCOM = TRUE
+   ' // Create an instance of the IRegExp2 interface
+   m_pRegExp = AfxNewCom("VBScript.RegExp")
+   IF bIgnoreCase THEN m_pRegExp->put_IgnoreCase(TRUE)
+   IF bGlobal THEN m_pRegExp->put_Global(TRUE)
+   IF bMultiline THEN m_pRegExp->put_Multiline(TRUE)
 END CONSTRUCTOR
 ' ========================================================================================
 
@@ -208,12 +230,12 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' * Returns a copy of a string with text replaced using a regular expression or search string.
+' * Returns a copy of a string with text replaced using a regular expression as the search string.
 ' ========================================================================================
 FUNCTION CRegExp.Replace (BYREF cbsSourceString AS CBSTR, BYREF cvReplaceString AS CVAR) AS CBSTR
    DIM bstrDestString AS AFX_BSTR
    IF m_pRegExp = NULL THEN
-      this.SetResult(E_INVALIDARG)
+      this.SetResult(E_POINTER)
    ELSE
       this.SetResult(m_pRegExp->Replace(cbsSourceString, cvReplaceString, @bstrDestString))
    END IF
@@ -334,6 +356,114 @@ FUNCTION CRegExp.SubMatchValue (BYVAL MatchIndex AS LONG, BYVAL SubMatchIndex AS
       END IF
    END IF
    RETURN vValue
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Returns a copy of a string with text removed using a regular expression as the search string.
+' Parameters:
+' - cbsSourceString : The source string.
+' - cbsPattern : The pattern to search.
+' - bIgnoreCase : FALSE = case sensitive; TRUE = case insensitive.
+' - bGlobal : FALSE = Delete only the first match; TRUE = delete all matches.
+' - bMultiline : TRUE = Match at the start and the end of multiple lines separated by line breaks.
+' Examples:
+' DIM pRegExp AS CRegExp
+' PRINT pRegExp.RemoveStr("abacadabra", "ab") - prints "acadra"
+' PRINT pRegExp.RemoveStr("abacadabra", "[bAc]", TRUE) - prints "dr"
+' ========================================================================================
+PRIVATE FUNCTION CRegExp.RemoveStr (BYREF cbsSourceString AS CBSTR, BYREF cbsPattern AS CBSTR, _
+   BYVAL bIgnoreCase AS BOOLEAN = FALSE, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = FALSE) AS CBSTR
+   DIM bstrDestString AS AFX_BSTR
+   IF m_pRegExp = NULL THEN this.SetResult(E_POINTER): RETURN bstrDestString
+   m_pRegExp->put_IgnoreCase(bIgnoreCase)
+   m_pRegExp->put_Global(bGlobal)
+   m_pRegExp->put_Multiline(bMultiline)
+   m_pRegExp->put_Pattern(cbsPattern)
+   this.SetResult(m_pRegExp->Replace(cbsSourceString, CVAR(""), @bstrDestString))
+   RETURN bstrDestString
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Returns a copy of a string with text replaced using a regular expression as the search string.
+' Parameters:
+' - cbsSourceString : The source string.
+' - cbsPattern : The pattern to search.
+' - cvReplaceString : The replacement string.
+' - bIgnoreCase : FALSE = case sensitive; TRUE = case insensitive.
+' - bGlobal : FALSE = Delete only the first match; TRUE = delete all matches.
+' - bMultiline : TRUE = Match at the start and the end of multiple lines separated by line breaks.
+' Examples:
+' DIM pRegExp AS CRegExp
+' PRINT pRegExp.ReplaceStr("Hello World", "World", "Earth") - prints "Hello Earth"
+' PRINT pRegExp.ReplaceStr("abacadabra", "[bac]", "*") - prints "*****d**r*"
+' PRINT pRegExp.ReplaceStr("555-123-4567", "(\d{3})-(\d{3})-(\d{4})", "($1) $2-$3") - prints "(555) 123-4567"
+' PRINT pRegExp.ReplaceStr("Squires, Paul", "(\S+), (\S+)", "$2 $1") - prints "Paul Squires"
+' PRINT pRegExp.ReplaceStr("0000.34500044", $"\b0{1,}\.", ".") - prints ".34500044"
+' ========================================================================================
+PRIVATE FUNCTION CRegExp.ReplaceStr (BYREF cbsSourceString AS CBSTR, BYREF cbsPattern AS CBSTR, BYREF cvReplaceString AS CVAR, _
+   BYVAL bIgnoreCase AS BOOLEAN = FALSE, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = FALSE) AS CBSTR
+   DIM bstrDestString AS AFX_BSTR
+   IF m_pRegExp = NULL THEN this.SetResult(E_POINTER): RETURN bstrDestString
+   m_pRegExp->put_IgnoreCase(bIgnoreCase)
+   m_pRegExp->put_Global(bGlobal)
+   m_pRegExp->put_Multiline(bMultiline)
+   m_pRegExp->put_Pattern(cbsPattern)
+   this.SetResult(m_pRegExp->Replace(cbsSourceString, cvReplaceString, @bstrDestString))
+   RETURN bstrDestString
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Global, multiline in string function with VBScript regular expressions search patterns.
+' Parameters:
+' - cbsSourceString = The text to be parsed.
+' - cbsPattern = The pattern to match.
+' - bIgnoreCase = Ignore case.
+' Return value:
+' - Returns a list of comma separated "index, length" value pairs. The pairs are separated
+'   by a semicolon.
+' Usage Example:
+'   DIM cbsText AS CBSTR = "blah blah a234 blah blah x345 blah blah"
+'   DIM cbsPattern AS CBSTR = "[a-z][0-9][0-9][0-9]"
+'   DIM cbsOut AS CBSTR
+'   cbsOut = pRegExp.InStr(cbsText, cbsPattern)
+' ========================================================================================
+PRIVATE FUNCTION CRegExp.InStr (BYREF cbsSourceString AS CBSTR, BYREF cbsPattern AS CBSTR, _
+   BYVAL bIgnoreCase AS BOOLEAN = FALSE, BYVAL bGlobal AS BOOLEAN = TRUE, BYVAL bMultiline AS BOOLEAN = TRUE) AS CBSTR
+
+   IF m_pRegExp = NULL THEN this.SetResult(E_POINTER): RETURN ""
+   m_pRegExp->put_IgnoreCase(bIgnoreCase)
+   m_pRegExp->put_Global(bGlobal)
+   m_pRegExp->put_Multiline(bMultiline)
+   m_pRegExp->put_Pattern(cbsPattern)
+
+   DIM cbsOut AS CBSTR, pMatches AS Afx_IMatchCollection2 PTR
+   this.SetResult(m_pRegExp->Execute(cbsSourceString, cast(Afx_IDispatch PTR PTR, @pMatches)))
+   IF pMatches THEN
+      DIM nCount AS LONG
+      pMatches->get_Count(@nCount)
+      FOR i AS LONG = 0 TO nCount - 1
+         DIM pMatch AS Afx_IMatch2 PTR
+         this.SetResult(pMatches->get_Item(i, cast(Afx_IDispatch PTR PTR, @pMatch)))
+         IF pMatch THEN
+            DIM nFirstIndex AS LONG
+            pMatch->get_FirstIndex(@nFirstIndex)
+            DIM nLen AS LONG
+            pMatch->get_Length(@nLen)
+            IF i < nCount - 1 THEN
+               cbsOut += STR(nFirstIndex + 1) & "," & STR(nLen) & ";"
+            ELSE
+               cbsOut += STR(nFirstIndex + 1) & "," & STR(nLen)
+            END IF
+            AfxSafeRelease(pMatch)
+         END IF
+      NEXT
+      AfxSafeRelease(pMatches)
+   END IF
+   RETURN cbsOut
+
 END FUNCTION
 ' ========================================================================================
 
