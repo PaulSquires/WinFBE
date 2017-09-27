@@ -317,7 +317,7 @@ END OPERATOR
 PRIVATE FUNCTION CComplex.IsInf (BYVAL x AS DOUBLE) AS LONG
    CCOMPLEX_DP("CCOMPLEX IsInf")
    IF _finite(x) = TRUE AND _isnan(x) = FALSE THEN
-      FUNCTION = IIF&(x > 0, 1, -1)
+      FUNCTION = IIF(x > 0, 1, -1)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -325,7 +325,7 @@ END FUNCTION
 PRIVATE FUNCTION CComplex.IsInfinity (BYVAL x AS DOUBLE) AS LONG
    CCOMPLEX_DP("CCOMPLEX IsInfinity")
    IF _finite(x) = TRUE AND _isnan(x) = FALSE THEN
-      FUNCTION = IIF&(x > 0, 1, -1)
+      FUNCTION = IIF(x > 0, 1, -1)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -486,7 +486,7 @@ END OPERATOR
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR - (CComplex)")
-   RETURN TYPE<CComplex>(-z.m_cpx.x, -z.m_cpx.y) 
+   RETURN TYPE<CComplex>(-z.m_cpx.x, -z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
@@ -518,19 +518,19 @@ END SUB
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z1 AS CComplex, BYREF z2 AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR + (CComplex, CComplex)")
-   RETURN TYPE<CComplex>(z1.m_cpx.x + z2.m_cpx.x, z1.m_cpx.y + z2.m_cpx.y) 
+   RETURN TYPE<CComplex>(z1.m_cpx.x + z2.m_cpx.x, z1.m_cpx.y + z2.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR + (BYVAL a AS DOUBLE, BYREF z AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR + (Double, CComplex)")
-   RETURN TYPE<CComplex>(z.m_cpx.x + a, z.m_cpx.y) 
+   RETURN TYPE<CComplex>(z.m_cpx.x + a, z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z AS CComplex, BYVAL a AS DOUBLE) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR + (CComplex, Double)")
-   RETURN TYPE<CComplex>(z.m_cpx.x + a, z.m_cpx.y) 
+   RETURN TYPE<CComplex>(z.m_cpx.x + a, z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -542,19 +542,19 @@ END OPERATOR
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z1 AS CComplex, BYREF z2 AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR - (CComplex, CComplex)")
-   RETURN TYPE<CComplex>(z1.m_cpx.x - z2.m_cpx.x, z1.m_cpx.y - z2.m_cpx.y) 
+   RETURN TYPE<CComplex>(z1.m_cpx.x - z2.m_cpx.x, z1.m_cpx.y - z2.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR - (BYVAL a AS DOUBLE, BYREF z AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR - (Double, CComplex)")
-   RETURN TYPE<CComplex>(a - z.m_cpx.x, -z.m_cpx.y) 
+   RETURN TYPE<CComplex>(a - z.m_cpx.x, -z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z AS CComplex, BYVAL a AS DOUBLE) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR - (CComplex, Double)")
-   RETURN TYPE<_complex> (z.m_cpx.x - a, z.m_cpx.y) 
+   RETURN TYPE<_complex> (z.m_cpx.x - a, z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -566,19 +566,19 @@ END OPERATOR
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF z1 AS CComplex, BYREF z2 AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR * (CComplex, CComplex)")
-   RETURN TYPE<_complex>(z1.m_cpx.x * z2.m_cpx.x - z1.m_cpx.y * z2.m_cpx.y, z1.m_cpx.x * z2.m_cpx.y + z1.m_cpx.y * z2.m_cpx.x) 
+   RETURN TYPE<_complex>(z1.m_cpx.x * z2.m_cpx.x - z1.m_cpx.y * z2.m_cpx.y, z1.m_cpx.x * z2.m_cpx.y + z1.m_cpx.y * z2.m_cpx.x)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR * (BYVAL a AS DOUBLE, BYREF z AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR * (Double, CComplex)")
-   RETURN TYPE<_complex> (a * z.m_cpx.x, a * z.m_cpx.y) 
+   RETURN TYPE<_complex> (a * z.m_cpx.x, a * z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF z AS CComplex, BYVAL a AS DOUBLE) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR * (CComplex, Double)")
-   RETURN TYPE<_complex> (a * z.m_cpx.x, a * z.m_cpx.y) 
+   RETURN TYPE<_complex> (a * z.m_cpx.x, a * z.m_cpx.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -768,7 +768,7 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION CComplex.CMul (BYREF z AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX CMul (CComplex)")
-   RETURN TYPE<_complex>(m_cpx.x * z.m_cpx.x - m_cpx.y * z.m_cpx.y, m_cpx.x * z.m_cpx.y + m_cpx.y * z.m_cpx.x) 
+   RETURN TYPE<_complex>(m_cpx.x * z.m_cpx.x - m_cpx.y * z.m_cpx.y, m_cpx.x * z.m_cpx.y + m_cpx.y * z.m_cpx.x)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
@@ -777,7 +777,7 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION CComplex.CMul (BYVAL x AS DOUBLE, BYVAL y AS DOUBLE) AS CComplex
    CCOMPLEX_DP("CCOMPLEX CMul (Double, Double)")
-   RETURN TYPE<_complex>(m_cpx.x * x - m_cpx.y * y, m_cpx.x * y + m_cpx.y * x) 
+   RETURN TYPE<_complex>(m_cpx.x * x - m_cpx.y * y, m_cpx.x * y + m_cpx.y * x)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
@@ -841,7 +841,7 @@ END FUNCTION
 ' ========================================================================================
 ' - .NET 4.7 code:
 ' public static Complex Conjugate(Complex value) {
-'   // Conjugate of a Complex number: the conjugate of x+i*y is x-i*y 
+'   // Conjugate of a Complex number: the conjugate of x+i*y is x-i*y
 '   return (new Complex(value.m_real, (-value.m_imaginary)));
 ' }
 ' ========================================================================================
@@ -1250,7 +1250,7 @@ END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 ' - NET 4.7 code:
-'public static Complex Pow(Complex value, Double power) // A complex number raised to a real number 
+'public static Complex Pow(Complex value, Double power) // A complex number raised to a real number
 '{ return Pow(value, new Complex(power, 0)); }
 ' ========================================================================================
 PRIVATE FUNCTION CComplex.CPow (BYVAL power AS DOUBLE) AS CComplex

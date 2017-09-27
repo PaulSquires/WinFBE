@@ -412,7 +412,7 @@
 #Define SCE_B_KEYWORD2                             10
 #Define SCE_B_KEYWORD3                             11
 #Define SCE_B_KEYWORD4                             12
-#Define SCE_B_#DefineANT                             13
+#Define SCE_B_CONSTANT                             13
 #Define SCE_B_ASM                                  14
 #Define SCE_B_LABEL                                15
 #Define SCE_B_ERROR                                16

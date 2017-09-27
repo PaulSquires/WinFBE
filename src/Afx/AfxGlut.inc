@@ -413,9 +413,9 @@ SUB AfxGlutSolidSphere (BYVAL radius AS DOUBLE, BYVAL slices AS LONG, BYVAL stac
    ' /* The top stack is covered with a triangle fan */
 
    z0 = 1.0
-   z1 = cost2(IIF&(stacks > 0, 1, 0))
+   z1 = cost2(IIF(stacks > 0, 1, 0))
    r0 = 0.0
-   r1 = sint2(IIF&(stacks > 0, 1, 0))
+   r1 = sint2(IIF(stacks > 0, 1, 0))
 
    glBegin(GL_TRIANGLE_FAN)
       glNormal3d(0, 0, 1)
@@ -534,8 +534,8 @@ SUB AfxGlutSolidCone (BYVAL dbase AS DOUBLE, BYVAL height AS DOUBLE, BYVAL slice
    DIM AS DOUBLE r0, r1
 
    DIM AS DOUBLE zStep, rStep
-   zStep = height / IIF&(stacks > 0, stacks, 1)
-   rStep = dbase / IIF&(stacks > 0, stacks, 1)
+   zStep = height / IIF(stacks > 0, stacks, 1)
+   rStep = dbase / IIF(stacks > 0, stacks, 1)
 
    ' /* Scaling factors for vertex normals */
    DIM AS DOUBLE cosn, sinn
@@ -613,8 +613,8 @@ SUB AfxGlutWireCone (BYVAL dbase AS DOUBLE, BYVAL height AS DOUBLE, BYVAL slices
    r = dbase
 
    DIM AS DOUBLE zStep, rStep
-   zStep = height / IIF&(stacks > 0, stacks, 1)
-   rStep = dbase / IIF&(stacks > 0, stacks, 1)
+   zStep = height / IIF(stacks > 0, stacks, 1)
+   rStep = dbase / IIF(stacks > 0, stacks, 1)
 
    ' /* Scaling factors for vertex normals */
    DIM AS DOUBLE cosn, sinn
@@ -667,7 +667,7 @@ END SUB
 SUB AfxGlutSolidCylinder (BYVAL radius AS DOUBLE, BYVAL height AS DOUBLE, BYVAL slices AS LONG, BYVAL stacks AS LONG)
 
    ' /* Step in z and radius as stacks are drawn. */
-   DIM zStep AS DOUBLE = height / IIF&(stacks > 0, stacks, 1)
+   DIM zStep AS DOUBLE = height / IIF(stacks > 0, stacks, 1)
 
    ' /* Pre-computed circle */
    DIM sint(ANY) AS DOUBLE
@@ -726,7 +726,7 @@ SUB AfxGlutWireCylinder (BYVAL radius AS DOUBLE, BYVAL height AS DOUBLE, BYVAL s
 
    ' /* Step in z and radius as stacks are drawn. */
    DIM z AS DOUBLE
-   DIM zStep AS DOUBLE = height / IIF&(stacks > 0, stacks, 1)
+   DIM zStep AS DOUBLE = height / IIF(stacks > 0, stacks, 1)
 
    ' /* Pre-computed circle */
    DIM sint(ANY) AS DOUBLE

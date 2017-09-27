@@ -363,7 +363,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      strEnd = ConvertCase("END SELECT")
-                     strFill = vbcrlf & SPACE$(nSpaces) & strEnd
+                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
                      'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
                      SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
                      SciExec(hEdit, SCI_GOTOPOS, curPos + 5, 0)

@@ -137,7 +137,7 @@ END FUNCTION
 PRIVATE FUNCTION AfxWindowsPlatform () AS LONG
    DIM dwVersion AS DWORD
    dwVersion = GetVersion
-   FUNCTION = IIF&(dwVersion < &H80000000, 2, 1)
+   FUNCTION = IIF(dwVersion < &H80000000, 2, 1)
 END FUNCTION
 ' ========================================================================================
 
@@ -238,7 +238,7 @@ END FUNCTION
 
 ' ========================================================================================
 ' Returns the path of the program which is currently executing.
-' The path name has a trailing backslash.
+' The path has a trailing backslash.
 ' ========================================================================================
 PRIVATE FUNCTION AfxGetExePathName () AS CWSTR
    DIM buffer AS WSTRING * MAX_PATH, p AS LONG
@@ -1485,7 +1485,7 @@ PRIVATE FUNCTION AfxGetTopLevelWindow (BYVAL hwnd AS HWND) AS HWND
    hWndTmp = hwnd
    DO
       hWndParent = hWndTmp
-      hWndTmp = IIF&(GetWindowLongPtrW(hwndParent, GWL_STYLE) AND WS_CHILD, GetParent(hwndParent), GetWindow(hWndParent, GW_OWNER))
+      hWndTmp = IIF(GetWindowLongPtrW(hwndParent, GWL_STYLE) AND WS_CHILD, GetParent(hwndParent), GetWindow(hWndParent, GW_OWNER))
       IF hWndTmp = NULL THEN EXIT DO
    LOOP
    FUNCTION = hWndParent
@@ -1651,7 +1651,7 @@ PRIVATE FUNCTION AfxSetDlgMsgResult(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVA
       uMsg = WM_CHARTOITEM          OR _
       uMsg = WM_QUERYDRAGICON       OR _
       uMsg = WM_INITDIALOG          THEN
-      FUNCTION = IIF&(SetWindowLongPtrW(hwnd, DWLP_MSGRESULT, result), TRUE, FALSE)
+      FUNCTION = IIF(SetWindowLongPtrW(hwnd, DWLP_MSGRESULT, result), TRUE, FALSE)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -2701,7 +2701,7 @@ PRIVATE FUNCTION AfxCreateDIBSection (BYVAL hDC AS HDC, BYVAL nWidth AS DWORD, B
    bi.bmiHeader.biWidth = nWidth
    bi.bmiHeader.biHeight = nHeight
    bi.bmiHeader.biPlanes = 1
-   bi.bmiHeader.biBitCount = IIF&(bpp <> 0, bpp, GetDeviceCaps(hDC, BITSPIXEL_))
+   bi.bmiHeader.biBitCount = IIF(bpp <> 0, bpp, GetDeviceCaps(hDC, BITSPIXEL_))
    bi.bmiHeader.biCompression = BI_RGB
    FUNCTION = CreateDIBSection(hDC, @bi, DIB_RGB_COLORS, ppvBits, NULL, 0)
 END FUNCTION

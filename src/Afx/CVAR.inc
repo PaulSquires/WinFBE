@@ -387,7 +387,7 @@ PRIVATE CONSTRUCTOR CVar (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT_I4)
          _vType = VT_I8
       END IF
       SELECT CASE _vType
-         CASE VT_BOOL  : vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
+         CASE VT_BOOL  : vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
          CASE VT_I1    : vd.vt = VT_I1   : vd.cVal = CBYTE(_value)
          CASE VT_UI1   : vd.vt = VT_UI1  : vd.bVal = CUBYTE(_value)
          CASE VT_I2    : vd.vt = VT_I2   : vd.iVal = CSHORT(_value)
@@ -410,8 +410,8 @@ PRIVATE CONSTRUCTOR CVar (BYVAL _value AS LONGINT, BYREF strType AS STRING)
    CVAR_DP("CVAR CONSTRUCTOR - strType")
    DIM vt AS WORD
    SELECT CASE UCASE(strType)
-      CASE "BOOL"     : vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
-      CASE "BOOLEAN"  : vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
+      CASE "BOOL"     : vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
+      CASE "BOOLEAN"  : vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
       CASE "BYTE"     : vd.vt = VT_I1   : vd.cVal = CBYTE(_value)
       CASE "UBYTE"    : vd.vt = VT_UI1  : vd.bVal = CUBYTE(_value)
       CASE "SHORT"    : vd.vt = VT_I2   : vd.iVal = CSHORT(_value)
@@ -1376,7 +1376,7 @@ PRIVATE SUB CVar.Put (BYVAL _value AS LONGINT, BYVAL _vType AS WORD)
          _vType = VT_I8
       END IF
       SELECT CASE _vType
-         CASE VT_BOOL  : vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
+         CASE VT_BOOL  : vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
          CASE VT_I1    : vd.vt = VT_I1   : vd.cVal = CBYTE(_value)
          CASE VT_UI1   : vd.vt = VT_UI1  : vd.bVal = CUBYTE(_value)
          CASE VT_I2    : vd.vt = VT_I2   : vd.iVal = CSHORT(_value)
@@ -1400,8 +1400,8 @@ PRIVATE SUB CVar.Put (BYVAL _value AS LONGINT, BYREF strType AS STRING)
    VariantClear(@vd)
    DIM vt AS WORD
    SELECT CASE UCASE(strType)
-      CASE "BOOL"     : vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
-      CASE "BOOLEAN"  : vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
+      CASE "BOOL"     : vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
+      CASE "BOOLEAN"  : vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
       CASE "BYTE"     : vd.vt = VT_I1   : vd.cVal = CBYTE(_value)
       CASE "UBYTE"    : vd.vt = VT_UI1  : vd.bVal = CUBYTE(_value)
       CASE "SHORT"    : vd.vt = VT_I2   : vd.iVal = CSHORT(_value)
@@ -1536,7 +1536,7 @@ END SUB
 PRIVATE SUB CVar.PutBool (BYVAL _value AS BOOL)
    CVAR_DP("CVAR PutBool")
    VariantClear(@vd)
-   vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
+   vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
 END SUB
 ' ========================================================================================
 
@@ -1546,7 +1546,7 @@ END SUB
 PRIVATE SUB CVar.PutBoolean (BYVAL _value AS BOOLEAN)
    CVAR_DP("CVAR PutBoolean")
    VariantClear(@vd)
-   vd.vt = VT_BOOL : vd.boolVal = IIF&(_value = 0, 0, -1)
+   vd.vt = VT_BOOL : vd.boolVal = IIF(_value = 0, 0, -1)
 END SUB
 ' ========================================================================================
 

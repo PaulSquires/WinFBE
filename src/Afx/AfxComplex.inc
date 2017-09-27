@@ -145,14 +145,14 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION isinf (BYVAL x AS DOUBLE) AS LONG
    IF _finite(x) = TRUE AND _isnan(x) = FALSE THEN
-      FUNCTION = IIF&(x > 0, 1, -1)
+      FUNCTION = IIF(x > 0, 1, -1)
    END IF
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION isinfinity (BYVAL x AS DOUBLE) AS LONG
    IF _finite(x) = TRUE AND _isnan(x) = FALSE THEN
-      FUNCTION = IIF&(x > 0, 1, -1)
+      FUNCTION = IIF(x > 0, 1, -1)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -270,7 +270,7 @@ END FUNCTION
 ' * Returns the negative of a complex number.
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z AS _complex) AS _complex
-   RETURN TYPE<_complex>(-z.x, -z.y) 
+   RETURN TYPE<_complex>(-z.x, -z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -278,17 +278,17 @@ END OPERATOR
 ' * Returns the sum of complex numbers.
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z1 AS _complex, BYREF z2 AS _complex) AS _complex
-   RETURN TYPE<_complex>(z1.x + z2.x, z1.y + z2.y) 
+   RETURN TYPE<_complex>(z1.x + z2.x, z1.y + z2.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR + (BYVAL a AS DOUBLE, BYREF z AS _complex) AS _complex
-   RETURN TYPE<_complex>(z.x + a, z.y) 
+   RETURN TYPE<_complex>(z.x + a, z.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z AS _complex, BYVAL a AS DOUBLE) AS _complex
-   RETURN TYPE<_complex>(z.x + a, z.y) 
+   RETURN TYPE<_complex>(z.x + a, z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -296,17 +296,17 @@ END OPERATOR
 ' * Returns the difference of complex numbers.
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z1 AS _complex, BYREF z2 AS _complex) AS _complex
-   RETURN TYPE<_complex>(z1.x - z2.x, z1.y - z2.y) 
+   RETURN TYPE<_complex>(z1.x - z2.x, z1.y - z2.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR - (BYVAL a AS DOUBLE, BYREF z AS _complex) AS _complex
-   RETURN TYPE<_complex>(a - z.x, -z.y) 
+   RETURN TYPE<_complex>(a - z.x, -z.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z AS _complex, BYVAL a AS DOUBLE) AS _complex
-  RETURN TYPE<_complex> (z.x - a, z.y) 
+  RETURN TYPE<_complex> (z.x - a, z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -314,17 +314,17 @@ END OPERATOR
 ' * Returns the product of complex numbers.
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF z1 AS _complex, BYREF z2 AS _complex) AS _complex
-   RETURN TYPE<_complex>(z1.x * z2.x - z1.y * z2.y, z1.x * z2.y + z1.y * z2.x) 
+   RETURN TYPE<_complex>(z1.x * z2.x - z1.y * z2.y, z1.x * z2.y + z1.y * z2.x)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR * (BYVAL a AS DOUBLE, BYREF z AS _complex) AS _complex
-   RETURN TYPE<_complex> (a * z.x, a * z.y) 
+   RETURN TYPE<_complex> (a * z.x, a * z.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF z AS _complex, BYVAL a AS DOUBLE) AS _complex
-   RETURN TYPE<_complex> (a * z.x, a * z.y) 
+   RETURN TYPE<_complex> (a * z.x, a * z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -454,7 +454,7 @@ END FUNCTION
 ' ========================================================================================
 ' - .NET 4.7 code:
 ' public static Complex Conjugate(Complex value) {
-'   // Conjugate of a Complex number: the conjugate of x+i*y is x-i*y 
+'   // Conjugate of a Complex number: the conjugate of x+i*y is x-i*y
 '   return (new Complex(value.m_real, (-value.m_imaginary)));
 ' }
 ' ========================================================================================
@@ -844,7 +844,7 @@ END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 ' - NET 4.7 code:
-'public static Complex Pow(Complex value, Double power) // A complex number raised to a real number 
+'public static Complex Pow(Complex value, Double power) // A complex number raised to a real number
 '{ return Pow(value, new Complex(power, 0)); }
 ' ========================================================================================
 PRIVATE FUNCTION CPow OVERLOAD (BYREF value AS _complex, BYVAL power AS DOUBLE) AS _complex

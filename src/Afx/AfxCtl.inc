@@ -1458,7 +1458,7 @@ PRIVATE FUNCTION ListBox_ReplaceString (BYVAL hListBox AS HWND, BYVAL index AS L
    IF index = LB_ERR OR index = LB_ERRSPACE THEN Return index
    lRes = SendMessageW(hListBox, LB_SETITEMDATA, index, CAST(LPARAM, pNewData))
    IF lRes = LB_ERR THEN Return lRes
-   FUNCTION = SendMessageW(hListBox, IIF&((GetWindowLongPtrW(hListBox, GWL_STYLE) AND LBS_MULTIPLESEL), LB_SETSEL, LB_SETCURSEL), index, 0)
+   FUNCTION = SendMessageW(hListBox, IIF((GetWindowLongPtrW(hListBox, GWL_STYLE) AND LBS_MULTIPLESEL), LB_SETSEL, LB_SETCURSEL), index, 0)
 END FUNCTION
 ' ========================================================================================
 
@@ -2428,7 +2428,7 @@ END FUNCTION
 ' Returns the index of the first new string if successful, or -1 otherwise.
 ' ========================================================================================
 PRIVATE FUNCTION Toolbar_AddString (BYVAL hToolBar AS HWND, BYVAL hInst AS HINSTANCE, BYVAL idString AS INT_PTR) AS LONG
-   FUNCTION = SendMessageW(hToolBar, TB_ADDSTRINGW, CAST(WPARAM, hInst), IIF&(hInst = NULL, idString, MAKELONG(idString, 0)))
+   FUNCTION = SendMessageW(hToolBar, TB_ADDSTRINGW, CAST(WPARAM, hInst), IIF(hInst = NULL, idString, MAKELONG(idString, 0)))
 END FUNCTION
 ' ========================================================================================
 
@@ -3374,7 +3374,7 @@ END FUNCTION
 ' Sets/unsets the bold attribute of the specified item.
 ' ========================================================================================
 PRIVATE SUB TreeView_SetBold (BYVAL hwndTV AS HWND, BYVAL hItem AS HTREEITEM, BYVAL fBold AS BOOLEAN)
-   TreeView_SetItemState(hwndTV, hItem, IIF&(fBold = 0, 0, TVIS_BOLD), TVIS_BOLD)
+   TreeView_SetItemState(hwndTV, hItem, IIF(fBold = 0, 0, TVIS_BOLD), TVIS_BOLD)
 END SUB
 ' ========================================================================================
 

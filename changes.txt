@@ -1,3 +1,9 @@
+Version 1.5.5 (September 27, 2017)
+- Changed: Updated deutsch.lang language file thanks to Joerg Buckel.
+- Changed: Instances of IFF&() changed to IFF() and SPACE$() to SPACE()to allow compiling with FBC 1.06.
+- Changed: WinFBE32.exe and WinFBE64.exe now compiled using FBC 1.06.
+- Fixed: Error in #Define in modSciLexer.bi.
+
 Version 1.5.4 (September 26, 2017)
 - Added: StatusBar now displays number of lines in the loaded document.
 - Added: Chinese language file created by Steven Hua.

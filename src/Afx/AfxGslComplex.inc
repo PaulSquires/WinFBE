@@ -199,7 +199,7 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION isinf (BYVAL x AS DOUBLE) AS LONG
    IF _finite(x) = TRUE AND _isnan(x) = FALSE THEN
-      FUNCTION = IIF&(x > 0, 1, -1)
+      FUNCTION = IIF(x > 0, 1, -1)
    END IF
 END FUNCTION
 ' ========================================================================================
@@ -339,17 +339,17 @@ END FUNCTION
 ' * Returns the sum of complex numbers.
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z1 AS gsl_complex, BYREF z2 AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex>(z1.x + z2.x, z1.y + z2.y) 
+   RETURN TYPE<gsl_complex>(z1.x + z2.x, z1.y + z2.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR + (BYVAL a AS DOUBLE, BYREF z AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex>(z.x + a, z.y) 
+   RETURN TYPE<gsl_complex>(z.x + a, z.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z AS gsl_complex, BYVAL a AS DOUBLE) AS gsl_complex
-   RETURN TYPE<gsl_complex>(z.x + a, z.y) 
+   RETURN TYPE<gsl_complex>(z.x + a, z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -357,17 +357,17 @@ END OPERATOR
 ' * Returns the difference of complex numbers.
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z1 AS gsl_complex, BYREF z2 AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex>(z1.x - z2.x, z1.y - z2.y) 
+   RETURN TYPE<gsl_complex>(z1.x - z2.x, z1.y - z2.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR - (BYVAL a AS DOUBLE, BYREF z AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex>(a - z.x, -z.y) 
+   RETURN TYPE<gsl_complex>(a - z.x, -z.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z AS gsl_complex, BYVAL a AS DOUBLE) AS gsl_complex
-  RETURN TYPE<gsl_complex> (z.x - a, z.y) 
+  RETURN TYPE<gsl_complex> (z.x - a, z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -375,7 +375,7 @@ END OPERATOR
 ' * Returns the negative of a complex number.
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex>(-z.x, -z.y) 
+   RETURN TYPE<gsl_complex>(-z.x, -z.y)
 END OPERATOR
 ' ========================================================================================
 
@@ -383,17 +383,17 @@ END OPERATOR
 ' * Returns the product of complex numbers.
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF z1 AS gsl_complex, BYREF z2 AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex>(z1.x * z2.x - z1.y * z2.y, z1.x * z2.y + z1.y * z2.x) 
+   RETURN TYPE<gsl_complex>(z1.x * z2.x - z1.y * z2.y, z1.x * z2.y + z1.y * z2.x)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR * (BYVAL a AS DOUBLE, BYREF z AS gsl_complex) AS gsl_complex
-   RETURN TYPE<gsl_complex> (a * z.x, a * z.y) 
+   RETURN TYPE<gsl_complex> (a * z.x, a * z.y)
 END OPERATOR
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF z AS gsl_complex, BYVAL a AS DOUBLE) AS gsl_complex
-   RETURN TYPE<gsl_complex> (a * z.x, a * z.y) 
+   RETURN TYPE<gsl_complex> (a * z.x, a * z.y)
 END OPERATOR
 ' ========================================================================================
 

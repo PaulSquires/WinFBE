@@ -1643,7 +1643,7 @@ PRIVATE CONSTRUCTOR CPropVar (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT
          _vType = VT_I8
       END IF
       SELECT CASE _vType
-         CASE VT_BOOL  : pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
+         CASE VT_BOOL  : pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
          CASE VT_I1    : pvd.vt = VT_I1   : pvd.cVal = CBYTE(_value)
          CASE VT_UI1   : pvd.vt = VT_UI1  : pvd.bVal = CUBYTE(_value)
          CASE VT_I2    : pvd.vt = VT_I2   : pvd.iVal = CSHORT(_value)
@@ -1666,8 +1666,8 @@ PRIVATE CONSTRUCTOR CPropVar (BYVAL _value AS LONGINT, BYREF strType AS STRING)
    CPROPVAR_DP("CPropVar CONSTRUCTOR - strType")
    DIM vt AS WORD
    SELECT CASE UCASE(strType)
-      CASE "BOOL"     : pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
-      CASE "BOOLEAN"  : pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
+      CASE "BOOL"     : pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
+      CASE "BOOLEAN"  : pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
       CASE "BYTE"     : pvd.vt = VT_I1   : pvd.cVal = CBYTE(_value)
       CASE "UBYTE"    : pvd.vt = VT_UI1  : pvd.bVal = CUBYTE(_value)
       CASE "SHORT"    : pvd.vt = VT_I2   : pvd.iVal = CSHORT(_value)
@@ -2823,7 +2823,7 @@ PRIVATE SUB CPropVar.Put (BYVAL _value AS LONGINT, BYVAL _vType AS WORD)
          _vType = VT_I8
       END IF
       SELECT CASE _vType
-         CASE VT_BOOL  : pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
+         CASE VT_BOOL  : pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
          CASE VT_I1    : pvd.vt = VT_I1   : pvd.cVal = CBYTE(_value)
          CASE VT_UI1   : pvd.vt = VT_UI1  : pvd.bVal = CUBYTE(_value)
          CASE VT_I2    : pvd.vt = VT_I2   : pvd.iVal = CSHORT(_value)
@@ -2847,8 +2847,8 @@ PRIVATE SUB CPropVar.Put (BYVAL _value AS LONGINT, BYREF strType AS STRING)
    PropVariantClear(@pvd)
    DIM vt AS WORD
    SELECT CASE UCASE(strType)
-      CASE "BOOL"     : pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
-      CASE "BOOLEAN"  : pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
+      CASE "BOOL"     : pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
+      CASE "BOOLEAN"  : pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
       CASE "BYTE"     : pvd.vt = VT_I1   : pvd.cVal = CBYTE(_value)
       CASE "UBYTE"    : pvd.vt = VT_UI1  : pvd.bVal = CUBYTE(_value)
       CASE "SHORT"    : pvd.vt = VT_I2   : pvd.iVal = CSHORT(_value)
@@ -2985,7 +2985,7 @@ END SUB
 PRIVATE SUB CPropVar.PutBool (BYVAL _value AS BOOL)
    CPROPVAR_DP("CPropVar PutBool")
    PropVariantClear(@pvd)
-   pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
+   pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
 END SUB
 ' ========================================================================================
 
@@ -2995,7 +2995,7 @@ END SUB
 PRIVATE SUB CPropVar.PutBoolean (BYVAL _value AS BOOLEAN)
    CPROPVAR_DP("CPropVar PutBoolean")
    PropVariantClear(@pvd)
-   pvd.vt = VT_BOOL : pvd.boolVal = IIF&(_value = 0, 0, -1)
+   pvd.vt = VT_BOOL : pvd.boolVal = IIF(_value = 0, 0, -1)
 END SUB
 ' ========================================================================================
 
