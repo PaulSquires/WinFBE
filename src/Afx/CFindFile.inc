@@ -340,7 +340,7 @@ PRIVATE FUNCTION CFindFile.FileName () AS CWSTR
    DIM p AS LONG
    DIM wszFileName AS WSTRING * MAX_PATH = m_FileInfo.cFileName
    p = INSTRREV(wszFileName, ANY ":/\")
-   IF p THEN wszFileName = MID$(wszFileName, p + 1)
+   IF p THEN wszFileName = MID(wszFileName, p + 1)
    p = INSTRREV(wszFileName, ".")
    IF p THEN wszFileName = LEFT(wszFileName, p - 1)
    RETURN wszFileName
@@ -386,9 +386,7 @@ END FUNCTION
 
 ' ========================================================================================
 ' Method FilePath
-' GetFilePath returns the entire path for the file. For example, calling GetFilePath to
-' generate a user message about the file c:\myhtml\myfile.txt returns the file path
-' c:\myhtml\myfile.txt.
+' FilePath returns the entire path for the file.
 ' ========================================================================================
 PRIVATE FUNCTION CFindFile.FilePath () AS CWSTR
    DIM nLen AS LONG, buffer AS WSTRING * 4096

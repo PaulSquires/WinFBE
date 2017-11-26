@@ -1,7 +1,5 @@
 ' ########################################################################################
 ' File: CWindow.inc
-' Version: 1.0
-' Release candidate 31
 ' Contents: A wrapper class to create a SDK main window and add controls to it.
 ' Operating system: Microsoft Windows
 ' Compiler: FreeBasic 32 & 64-bit, Unicode.
@@ -150,7 +148,7 @@ TYPE CWindow
               BYVAL bItalic AS UBYTE = FALSE, BYVAL bUnderline AS UBYTE = FALSE, BYVAL bStrikeOut AS UBYTE = FALSE, BYVAL bCharSet AS UBYTE = DEFAULT_CHARSET) AS HFONT
       DECLARE FUNCTION SetFont (BYREF wszFaceName AS WSTRING, BYVAL lPointSize AS LONG, BYVAL lWeight AS LONG = 0, _
               BYVAL bItalic AS UBYTE = FALSE, BYVAL bUnderline AS UBYTE = FALSE, BYVAL bStrikeOut AS UBYTE = FALSE, BYVAL bCharSet AS UBYTE = DEFAULT_CHARSET) AS BOOLEAN
-      DECLARE FUNCTION AddControl (BYREF wszClassName AS WSTRING, BYVAL hParent AS HWND = NULL, BYVAL cID AS INTEGER = 0, _
+      DECLARE FUNCTION AddControl (BYREF wszClassName AS WSTRING, BYVAL hParent AS HWND = NULL, BYVAL cID AS LONG_PTR = 0, _
               BYREF wszTitle AS WSTRING = "", BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, _
               BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS LONG = -1, BYVAL dwExStyle AS LONG = -1, BYVAL lpParam AS LONG_PTR = 0, _
               BYVAL pWndProc AS WNDPROC = NULL, BYVAL uIdSubclass AS UINT_PTR = &HFFFFFFFF, BYVAL dwRefData AS DWORD_PTR = NULL) AS HWND
@@ -161,7 +159,7 @@ TYPE CWindow
       DECLARE FUNCTION CreateAcceleratorTable () AS HACCEL
       DECLARE SUB DestroyAcceleratorTable ()
       #ifdef USEMDI
-      DECLARE FUNCTION CreateMDIWindow (BYVAL cID AS LONG, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL dwStyle AS DWORD, BYVAL dwExStyle AS DWORD, BYVAL hSubMenu AS HANDLE, BYVAL lpfnWndProc AS WNDPROC) AS HWND
+      DECLARE FUNCTION CreateMDIWindow (BYVAL cID AS LONG_PTR, BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL dwStyle AS DWORD, BYVAL dwExStyle AS DWORD, BYVAL hSubMenu AS HANDLE, BYVAL lpfnWndProc AS WNDPROC) AS HWND
       DECLARE PROPERTY MDIClassName (BYREF wszClassName AS WSTRING)
       DECLARE PROPERTY hwndClient () AS HWND
       #endif
@@ -1432,7 +1430,7 @@ END FUNCTION
 PRIVATE FUNCTION CWindow.AddControl ( _
    BYREF wszClassName AS WSTRING, _                       ' // Class name
    BYVAL hParent AS HWND = NULL, _                        ' // Parent window handle
-   BYVAL cID AS INTEGER = 0, _                            ' // Control identifier
+   BYVAL cID AS LONG_PTR = 0, _                           ' // Control identifier
    BYREF wszTitle AS WSTRING = "", _                      ' // Control caption
    BYVAL x AS LONG = 0, _                                 ' // Horizontal position
    BYVAL y AS LONG = 0, _                                 ' // Vertical position
@@ -1669,7 +1667,7 @@ PRIVATE FUNCTION CWindow.AddControl ( _
    dwStyle = dwStyle OR WS_CHILD
    ' // Create the control
    hCtl = .CreateWindowExW(dwExStyle, wsClassName, wszTitle, dwStyle, x * m_rx, y * m_ry, nWidth * m_rx, nHeight * m_ry, _
-          hParent, CAST(HMENU, CAST(LONG_PTR, cID)), m_hInstance, CAST(LPVOID, lpParam))
+          hParent, CAST(HMENU, cID), m_hInstance, CAST(LPVOID, lpParam))
    IF hCtl = NULL THEN EXIT FUNCTION
    ' // Set the font
    IF m_hFont THEN
@@ -1904,7 +1902,7 @@ END FUNCTION
 ' Creates a MDI window
 ' =====================================================================================
 PRIVATE FUNCTION CWindow.CreateMDIWindow ( _
-   BYVAL cID AS LONG, _                  ' // Control identifier
+   BYVAL cID AS LONG_PTR, _              ' // Control identifier
    BYVAL x AS LONG, _                    ' // Horizontal position
    BYVAL y AS LONG, _                    ' // Vertical position
    BYVAL nWidth AS LONG, _               ' // Window width
@@ -1943,7 +1941,7 @@ PRIVATE FUNCTION CWindow.CreateMDIWindow ( _
    ' // Make sure that the control has the WS_CHILD style
    dwStyle = dwStyle OR WS_CHILD
    m_hwndClient = .CreateWindowExW(dwExStyle, "MDICLIENT", "", dwStyle, _
-                  x * m_rx, y * m_ry, nWidth * m_rx, nHeight * m_ry, m_hwnd, CAST(HMENU, CAST(LONG_PTR, cID)), m_hInstance, CAST(LPVOID, @tccs))
+                  x * m_rx, y * m_ry, nWidth * m_rx, nHeight * m_ry, m_hwnd, CAST(HMENU, cID), m_hInstance, CAST(LPVOID, @tccs))
    IF m_hwndClient = NULL THEN EXIT FUNCTION
    ' // Resize the window
    .SendMessageW m_hwnd, WM_SIZE, SIZE_RESTORED, MAKELONG (this.CLientWidth, this.ClientHeight)

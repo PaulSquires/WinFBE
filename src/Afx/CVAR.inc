@@ -137,6 +137,8 @@ Public:
    DECLARE OPERATOR Let (BYVAL dec AS DECIMAL)
    DECLARE OPERATOR Let (BYVAL pdisp AS IDispatch PTR)
    DECLARE OPERATOR Let (BYVAL punk AS IUnknown PTR)
+   DECLARE OPERATOR Let (BYVAL _value AS LONGINT)
+   DECLARE OPERATOR Let (BYVAL _value AS DOUBLE)
    ' // Assignments
    DECLARE SUB Put (BYREF wszStr AS WSTRING)
    DECLARE SUB Put (BYREF cws AS CWSTR)
@@ -244,7 +246,7 @@ Public:
    DECLARE OPERATOR ^= (BYREF cv AS CVAR)
    DECLARE OPERATOR And= (BYREF cv AS CVAR)
    DECLARE OPERATOR Or= (BYREF cv AS CVAR)
-   DECLARE OPERATOR XOr= (BYREF cv AS CVAR)
+   DECLARE OPERATOR Xor= (BYREF cv AS CVAR)
    DECLARE OPERATOR Eqv= (BYREF cv AS CVAR)
    DECLARE OPERATOR Imp= (BYREF cv AS CVAR)
    DECLARE OPERATOR Mod= (BYREF cv AS CVAR)
@@ -256,8 +258,23 @@ END TYPE
 ' Note about constructors:
 ' We can use the constructors to pass values to parameters in procedures without assigning
 ' them first to a variable, e.g.:
-' SUB Foo (BYREF cv AS CVAR)   ' -or- (BYVAL cv AS CVAR PTR)
+'
+' SUB Foo (BYREF cv AS CVAR)
 '    PRINT AfxCVarToStr(cv)
+' END SUB
+' Foo CVAR("Test string")
+' Foo CVAR(12345)
+' Foo CVAR(12345, "LONG")
+'
+' SUB Foo (BYVAL cv AS CVAR PTR)
+'    PRINT AfxCVarToStr(cv)
+' END SUB
+' Foo @CVAR("Test string")
+' Foo @CVAR(12345)
+' Foo @CVAR(12345, "LONG")
+'
+' SUB Foo (BYval v AS VARIANT PTR)
+'    PRINT AfxVarToStr(v)
 ' END SUB
 ' Foo CVAR("Test string")
 ' Foo CVAR(12345)
@@ -486,8 +503,7 @@ PRIVATE CONSTRUCTOR CVar (BYVAL _pvar AS ANY PTR, BYVAL _vType AS WORD)
       CASE VT_CY        : vd.vt = VT_CY OR VT_BYREF        : vd.pcyVal = _pvar
       CASE VT_DATE      : vd.vt = VT_DATE OR VT_BYREF      : vd.pdate = _pvar
       CASE VT_VARIANT   : vd.vt = VT_VARIANT OR VT_BYREF   : vd.pvarVal = _pvar
-      CASE VT_SAFEARRAY : vd.vt = VT_SAFEARRAY OR VT_BYREF : vd.pvarVal = _pvar
-      CASE VT_ERROR     : vd.vt = VT_ERROR OR VT_BYREF     : vd.pparray = _pvar
+      CASE VT_SAFEARRAY : vd.vt = VT_SAFEARRAY OR VT_BYREF : vd.pparray = _pvar
    END SELECT
 END CONSTRUCTOR
 ' ========================================================================================
@@ -519,8 +535,7 @@ PRIVATE CONSTRUCTOR CVar (BYVAL _pvar AS ANY PTR, BYREF strType AS STRING)
          CASE "CURRENCY"  : vd.vt = VT_CY OR VT_BYREF        : vd.pcyVal = _pvar
          CASE "DATE"      : vd.vt = VT_DATE OR VT_BYREF      : vd.pdate = _pvar
          CASE "VARIANT"   : vd.vt = VT_VARIANT OR VT_BYREF   : vd.pvarVal = _pvar
-         CASE "SAFEARRAY" : vd.vt = VT_SAFEARRAY OR VT_BYREF : vd.pvarVal = _pvar
-         CASE "ERROR"     : vd.vt = VT_ERROR OR VT_BYREF     : vd.pparray = _pvar
+         CASE "SAFEARRAY" : vd.vt = VT_SAFEARRAY OR VT_BYREF : vd.pparray = _pvar
       END SELECT
    END IF
 END CONSTRUCTOR
@@ -531,13 +546,13 @@ END CONSTRUCTOR
 ' Removed to allow to use @ to get the address of the class.
 ' After removing it, we can now do:
 ' SUB Foo (BYVAL cv AS CVAR PTR)
-'   AfxMsg AfxCVarToStr(cv)
+'   print AfxCVarToStr(cv)
 ' END SUB
 ' DIM cv AS CVAR = "Test string"
 ' Foo @cv
 ' --Or--:
 ' SUB Foo (BYREF v AS VARIANT)
-'    AfxMsg AfxVarToStr(@v)
+'    print AfxVarToStr(@v)
 ' END SUB
 ' DIM cv AS CVAR = "Test string"
 ' Foo cv
@@ -614,6 +629,7 @@ END FUNCTION
 ' Foo *pcv
 ' Delete pcv
 ' Using the constructors_
+' Foo CVAR(12345, "LONG")
 ' Foo **CVAR(12345, "LONG")
 ' ========================================================================================
 PRIVATE OPERATOR * (BYREF cv AS CVAR) AS VARIANT PTR
@@ -644,7 +660,11 @@ END OPERATOR
 ' SUB Foo4 (BYVAL cv AS CVAR PTR)
 '    PRINT *cv
 ' END SUB
-' Foo4 CVAR(12345, "LONG")
+' Foo4 @CVAR(12345, "LONG")
+'
+' Remarks: I haven't added a cast to return a numeric value because with procedures like
+' PRINT that can use both a number or a string the compiler will fail, not knowing which
+' cast it should use. If you want to convert it to a number, use VAL(cvar).
 ' ========================================================================================
 
 ' ========================================================================================
@@ -665,7 +685,7 @@ END OPERATOR
 ' ========================================================================================
 
 ' =====================================================================================
-' Extracts the contents of a VARIANT and returns them as a CWSTR.
+' Extracts the contents of a VARIANT and returns them as a WSTRING.
 ' =====================================================================================
 PRIVATE OPERATOR CVar.CAST () BYREF AS WSTRING
    CVAR_DP("CVAR CAST BYREF AS WSTRING")
@@ -673,6 +693,8 @@ PRIVATE OPERATOR CVar.CAST () BYREF AS WSTRING
    OPERATOR = *cast(WSTRING PTR, cws.m_pBuffer)
 END OPERATOR
 ' ========================================================================================
+' =====================================================================================
+' Extracts the contents of a VARIANT and returns them as a CWSTR.
 ' =====================================================================================
 PRIVATE FUNCTION CVar.ToStr () AS CWSTR
    CVAR_DP("CVAR ToStr")
@@ -1264,6 +1286,24 @@ END OPERATOR
 PRIVATE OPERATOR CVar.Let (BYVAL punk AS IUnknown PTR)
    CVAR_DP("CVAR LET = IUnknown PTR")
    VariantClear(@vd) : V_VT(@vd) = VT_UNKNOWN : V_UNKNOWN(@vd) = punk : IUnknown_AddRef(punk)
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Assigns numeric values
+' ========================================================================================
+PRIVATE OPERATOR CVar.Let (BYVAL _value AS LONGINT)
+   VariantClear(@vd)
+   IF CLNG(_value) = _value THEN
+      vd.vt = VT_I4   : vd.lVal = CLNG(_value)
+   ELSE
+      vd.vt = VT_I8   : vd.llVal = CLNGINT(_value)
+   END IF
+END OPERATOR
+' ========================================================================================
+' ========================================================================================
+PRIVATE OPERATOR CVar.Let (BYVAL _value AS DOUBLE)
+   VariantClear(@vd) : vd.vt = VT_R8   : vd.dblVal = CDBL(_value)
 END OPERATOR
 ' ========================================================================================
 
@@ -2465,7 +2505,23 @@ PRIVATE FUNCTION AfxCVarToStr OVERLOAD (BYVAL pcv AS CVAR PTR) AS CWSTR
    RETURN AfxVarToStr(@pcv->vd)
 END FUNCTION
 ' ========================================================================================
-#define CVAR_TOSTR AfxCVarToStr
+#define CVAR_TOSTR(cv) AfxCVarToStr(cv)
+' ========================================================================================
+PRIVATE FUNCTION AfxCVarOptPrm () AS CVAR
+   DIM v AS VARIANT = TYPE(VT_ERROR, 0, 0, 0, DISP_E_PARAMNOTFOUND)
+   DIM cvOpt AS CVAR = v
+   RETURN cvOpt
+END FUNCTION
+' ========================================================================================
+#define CVAR_OPTPRM AfxCVarOptPrm
+
+' ========================================================================================
+' Extracts the contents of a variant that contains an array of bytes.
+' ========================================================================================
+PRIVATE FUNCTION AfxCVariantToBuffer (BYREF cvIn AS CVAR, BYVAL pv AS LPVOID, BYVAL cb AS ULONG) AS ULONG
+   RETURN AfxVariantToBuffer(@cvIn.vd, pv, cb)
+END FUNCTION
+' ========================================================================================
 
 END NAMESPACE
 
@@ -2474,7 +2530,7 @@ END NAMESPACE
 ' ########################################################################################
 
 ' // Outside a namespace because they are global
-using Afx
+USING Afx
 
 ' ========================================================================================
 PRIVATE OPERATOR & (BYREF cv1 AS CVAR, BYREF cv2 AS CVAR) AS CVAR
@@ -2668,4 +2724,12 @@ PRIVATE OPERATOR Int (BYREF cv AS CVAR) AS DOUBLE
    VarInt(@cv.vd, cvRes.vptr)
    OPERATOR = VAL(cvRes)
 END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Helper procedure to display messages
+' ========================================================================================
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYREF cv AS CVAR, BYREF wszCaption AS WSTRING = "Message", BYVAL uType AS DWORD = 0) AS LONG
+   FUNCTION = MessageBoxW(GetActiveWindow, cv.wstr, @wszCaption, MB_APPLMODAL OR uType)
+END FUNCTION
 ' ========================================================================================

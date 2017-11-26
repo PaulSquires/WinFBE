@@ -98,7 +98,7 @@ PRIVATE FUNCTION CGpBase.RefCount (BYVAL bIncrement AS BOOLEAN) AS LONG
       IF AfxWindowsVersion >= 600 THEN version = 2
       StartupInput.GdiplusVersion = version
       m_Status = GdiplusStartup(@token, @StartupInput, NULL)
-      IF m_Status <> 0 THEN MessageBoxW(0, "GDI+ initialization failed - Error: " & STR$(m_Status), "Error", MB_OK OR MB_ICONERROR OR MB_APPLMODAL)
+      IF m_Status <> 0 THEN MessageBoxW(0, "GDI+ initialization failed - Error: " & STR(m_Status), "Error", MB_OK OR MB_ICONERROR OR MB_APPLMODAL)
       CGDIP_DP("+++ CGpBase.RefCount Initialize GDI+ - version = " & WSTR(version) & "; token = " & WSTR(token))
    END IF
    ' // Increase or decrease the reference count

@@ -186,8 +186,11 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
    Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
    If pDoc Then 
       ShowWindow(pDoc->hWindow, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
+      ' Also show/hide the Toolbox if applicable
+      if pDoc->IsDesigner THEN
+         ShowWindow(HWND_FRMVDTOOLBOX, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
+      END IF
    End If   
-   
    Function = 0
 End Function
    

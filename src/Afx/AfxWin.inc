@@ -72,7 +72,7 @@ END FUNCTION
 PRIVATE SUB AfxDoEvents (BYVAL hwnd AS HWND = NULL)
    DIM uMsg AS MSG
    IF hwnd = NULL THEN hwnd = GetActiveWindow
-   WHILE PeekMessage(@uMsg, NULL, 0, 0, PM_REMOVE)
+   WHILE PeekMessageW(@uMsg, NULL, 0, 0, PM_REMOVE)
       ' // Determines whether a message is intended for the specified
       ' // dialog box and, if it is, processes the message.
       IF IsDialogMessageW(hwnd, @uMsg) = 0 THEN
@@ -92,7 +92,7 @@ END SUB
 ' ========================================================================================
 PRIVATE SUB AfxPumpMessages
    DIM uMsg AS MSG
-   WHILE PeekMessage(@uMsg, NULL, 0, 0, PM_REMOVE)
+   WHILE PeekMessageW(@uMsg, NULL, 0, 0, PM_REMOVE)
       ' // Translates virtual-key messages into character messages.
       TranslateMessage @uMsg
       ' // Dispatches a message to a window procedure.

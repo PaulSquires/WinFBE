@@ -1,7 +1,15 @@
+declare function GetActiveToolboxControlName() as CWSTR
+declare function GetActiveToolboxControlClassName() as CWSTR
+declare function GetActiveToolboxControlType() as long
+declare function CreateToolboxControl( byval pDoc as clsDocument ptr, byval ControlType as long, byref rcDraw as RECT) as Long
+declare function GetActiveToolboxControl() as Long
+declare function SetActiveToolboxControl( byval ControlType as long ) as Long
+declare Function frmVDToolbox_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0) As Long
 declare FUNCTION Control_SubclassProc( BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM, BYVAL uIdSubclass AS UINT_PTR, BYVAL dwRefData AS DWORD_PTR ) AS LRESULT
 declare Function DesignerMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare Function DesignerFrame_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare Function DesignerForm_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
+declare Function Lasso_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare function ParseLogForError( byref wsLogSt as CWSTR, byval bAllowSuccessMessage as Boolean, Byval wID as long) as Boolean
 declare SUB RedirConsoleToFile( byref szExe AS zstring, byref szCmdLine AS zstring, byref sConsoleText AS string)
 Declare Function GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string

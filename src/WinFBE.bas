@@ -37,7 +37,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.5.5") 
+#Define APPVERSION    WStr("1.5.6") 
 
 '#Define USE_VISUAL_DESIGNER 1
 
@@ -54,6 +54,7 @@ Using Afx
 #Include Once "clsProject.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
+#Include Once "modVDControls.inc"
 #Include Once "modVDDesignForm.inc"
 #Include Once "modVDDesignFrame.inc"
 #Include Once "modVDDesignMain.inc"
@@ -86,6 +87,7 @@ Using Afx
 #Include Once "frmFindInFiles.inc"
 #Include Once "frmFindReplace.inc"
 #Include Once "frmProjectOptions.inc"
+#Include Once "frmVDToolbox.inc"
 #Include Once "frmMain.inc"
 
 
@@ -105,7 +107,7 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    dim wszLocalizationFile as WString * MAX_PATH
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\") + gConfig.LocalizationFile
    If LoadLocalizationFile(@wszLocalizationFile) = False Then
-      MessageBoxW( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
+      MessageBox( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
                    wszLocalizationFile, _
                    WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Return 1
@@ -140,6 +142,9 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    ' Load the WinAPI Codetips file
    gConfig.LoadCodetipsWinAPI( AfxGetExePathName & "Settings\codetips_winapi.ini" )
 
+   ' Initialize the controls in the ToolBox
+   gConfig.InitializeToolBox
+   
    ' Show the main form
    Function = frmMain_Show( 0, nCmdShow )
 

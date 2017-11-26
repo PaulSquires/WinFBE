@@ -124,7 +124,7 @@ TYPE CPgBar3D
 
    Public:
 
-      DECLARE CONSTRUCTOR (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+      DECLARE CONSTRUCTOR (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, BYREF wszTitle AS WSTRING = "", _
          BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
          BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
       DECLARE DESTRUCTOR
@@ -169,7 +169,7 @@ END TYPE
 ' ========================================================================================
 ' CPgBar3D class constructor
 ' ========================================================================================
-PRIVATE CONSTRUCTOR CPgBar3D (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+PRIVATE CONSTRUCTOR CPgBar3D (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, BYREF wszTitle AS WSTRING = "", _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
 
@@ -543,7 +543,7 @@ PRIVATE FUNCTION CPgBar3D.CPgBar3DProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, 
          EXIT FUNCTION
 
      ' // Get the font handle
-     CASE PGB_SETFONT
+     CASE PGB_GETFONT
          pPgBar = CAST(CPgBar3D PTR, .GetWindowLongPtrW(hwnd, 0))
          FUNCTION = CAST(LRESULT, pPgBar->m_hFont)
          EXIT FUNCTION
@@ -663,10 +663,10 @@ PRIVATE SUB CPgBar3D.CreateGradientBars
      m_PalClr(jj) = BGR(ic, ic - 117, ic) : jj += 1
    NEXT
    FOR ic = 117 TO 255 STEP 6         '6, gold table 145-168
-     m_PalClr(jj) = BGR(MIN&(ic + 64, 255), ic, ic - 117) : jj += 1
+     m_PalClr(jj) = BGR(MIN(ic + 64, 255), ic, ic - 117) : jj += 1
    NEXT
    FOR ic = 117 TO 255 STEP 6         '7, brown table 169-192
-     m_PalClr(jj) = BGR(MIN&(ic + 16, 255), ic - 48, ic - 117) : jj += 1
+     m_PalClr(jj) = BGR(MIN(ic + 16, 255), ic - 48, ic - 117) : jj += 1
    NEXT
    jj -=1
 

@@ -69,7 +69,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    ' // Create the main window
    DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with a menu", @WndProc)
+   pWindow.Create(NULL, "Menu with icons", @WndProc)
    pWindow.SetClientSize(400, 250)
    pWindow.Center
 

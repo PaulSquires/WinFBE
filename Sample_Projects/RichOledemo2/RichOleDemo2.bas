@@ -12,6 +12,7 @@
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/AfxRichEdit.inc"
 #INCLUDE ONCE "Afx/AfxCOM.inc"
 USING Afx
 
@@ -28,84 +29,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
-' RICHEDITCUSTOMDATA structure
-' ========================================================================================
-TYPE AFX_RICHEDIT_CUSTOMDATA
-   pData  AS BYTE PTR
-   nLen   AS LONG
-   curPos AS LONG
-END TYPE
-' ========================================================================================
-
-' ========================================================================================
-' The EditStreamCallback function is an application defined callback function used with
-' the EM_STREAMIN and EM_STREAMOUT messages. It is used to transfer a stream of data into
-' or out of a rich edit control.
-' ========================================================================================
-PRIVATE FUNCTION RichEdit_LoadRtfFromResourceCallback ( _
-   BYVAL pCustData AS AFX_RICHEDIT_CUSTOMDATA PTR _   ' // Value of the dwCookie member of the EDITSTREAM structure.
- , BYVAL lpBuff AS BYTE PTR _                         ' // Pointer to a buffer to write to.
- , BYVAL cb AS LONG _                                 ' // Number of bytes to write.
- , BYVAL pcb AS LONG PTR _                            ' // Number of bytes actually written.
- ) AS DWORD                                           ' // 0 for success, or an error code
-
-   DIM nBytes AS LONG
-   IF pCustData->nLen - pCustData->curPos > cb THEN nBytes = cb ELSE nBytes = pCustData->nLen - pCustData->curPos
-   IF nBytes THEN
-      CopyMemory(lpBuff, pCustData->pData + pCustData->curPos, nBytes)
-      pCustData->curPos = pCustData->curPos + nBytes
-      FUNCTION = 0
-   ELSE
-      FUNCTION = 1
-   END IF
-   *pcb = nBytes
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Loads a RTF resource file into a Rich Edit control.
-' The EM_STREAMIN message replaces the contents of a rich edit control with a stream of
-' data provided by an application defined–EditStreamCallback callback function.
-' ========================================================================================
-PRIVATE FUNCTION RichEdit_LoadRtfFromResourceW ( _
-   BYVAL hRichEdit AS HWND _                ' // Handle of the Rich Edit control
- , BYVAL hInstance AS HINSTANCE _           ' // Instance handle
- , BYREF wszResourceName AS WSTRING _       ' // Name of the resource to load
- ) AS BOOLEAN                               ' // TRUE or FALSE
-
-   DIM hResInfo AS HRSRC                        ' // Resource handle
-   DIM pResData AS LPVOID                       ' // Pointer to the resource data
-   DIM eds AS EDITSTREAM                        ' // EDITSTREAM structure
-   DIM rtfCustData AS AFX_RICHEDIT_CUSTOMDATA   ' // AFX_RICHEDIT_CUSTOMDATA structure
-
-   ' // Checks the validity of the parameters
-   IF hRichEdit = NULL OR hInstance = NULL THEN EXIT FUNCTION
-   IF LEN(wszResourceName) = 0 THEN EXIT FUNCTION
-
-   ' // Loads the resource
-   hResInfo = FindResourceW(hInstance, wszResourceName, RT_RCDATA)
-   IF hResInfo = NULL THEN EXIT FUNCTION
-
-   ' // Loads and locks the resource
-   pResData = LockResource(LoadResource(hInstance, hResInfo))
-   IF pResData = NULL THEN EXIT FUNCTION
-   DIM cbSize AS LONG = SizeofResource(hInstance, hResInfo)
-   DIM buffer AS STRING = SPACE(cbSize)
-   CopyMemory(STRPTR(buffer), pResData, cbSize)
-
-   ' // Sends the message
-   rtfCustData.pData = STRPTR(buffer)
-   rtfCustData.nLen = cbSize
-   rtfCustData.curPos = 0
-   eds.dwCookie = cast(DWORD_PTR, @rtfCustData)
-   eds.dwError = 0
-   eds.pfnCallback = cast(EDITSTREAMCALLBACK, @RichEdit_LoadRtfFromResourceCallback)
-   IF SendMessageW(hRichEdit, EM_STREAMIN, SF_RTF, cast(LPARAM, @eds)) > 0 AND eds.dwError = 0 THEN
-      FUNCTION = TRUE
-   END IF
-
-END FUNCTION
+' Implementation of the IRichEditOleCallback interface
 ' ========================================================================================
 
 #ifndef __Afx_IRichEditOleCallback_INTERFACE_DEFINED__

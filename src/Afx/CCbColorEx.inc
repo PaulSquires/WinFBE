@@ -43,7 +43,7 @@ TYPE CCbColorEx
          "Light Red", "Light Magenta", "Yellow", "Bright White", "User selected..."}
 
    Public:
-      DECLARE CONSTRUCTOR (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER,  _
+      DECLARE CONSTRUCTOR (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR,  _
          BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
          BYVAL dwAutoColor AS COLORREF = 0, BYVAL dwUserColor AS COLORREF = 0, _
          BYVAL prgNames AS WSTRING PTR = NULL, BYVAL numBytes AS DWORD = 0)
@@ -203,7 +203,7 @@ END FUNCTION
 ' ========================================================================================
 ' CCbColorEx class constructor
 ' ========================================================================================
-PRIVATE CONSTRUCTOR CCbColorEx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER,  _
+PRIVATE CONSTRUCTOR CCbColorEx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR,  _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwAutoColor AS COLORREF = 0, BYVAL dwUserColor AS COLORREF = 0, _
    BYVAL prgNames AS WSTRING PTR = NULL, BYVAL numBytes AS DWORD = 0)

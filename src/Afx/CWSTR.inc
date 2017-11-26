@@ -1689,3 +1689,54 @@ PRIVATE FUNCTION Val OVERLOAD (BYREF cbs AS CBSTR) AS DOUBLE
    RETURN .VAL(**cbs)
 END FUNCTION
 ' ========================================================================================
+
+' ########################################################################################
+'                                *** HELPER FUNCTIONS ***
+' ########################################################################################
+
+' ========================================================================================
+' qsort CWstr comparison function
+' ========================================================================================
+PRIVATE FUNCTION AfxCWstrArrayCompare CDECL (BYVAL a AS CWSTR PTR, BYVAL b AS CWSTR PTR) AS LONG
+   FUNCTION = wcscmp(cast(WSTRING PTR, a->m_pBuffer), cast(WSTRING PTR, b->m_pBuffer))
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Reverse qsort CWstr comparison function
+' ========================================================================================
+PRIVATE FUNCTION AfxCWStrArrayReverseCompare CDECL (BYVAL a AS CWSTR PTR, BYVAL b AS CWSTR PTR) AS LONG
+   DIM r AS LONG = wcscmp(cast(WSTRING PTR, a->m_pBuffer), cast(WSTRING PTR, b->m_pBuffer))
+   IF r = 1 THEN r = -1 ELSE IF r = -1 THEN r = 1
+   RETURN r
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Sorts a one-dimensional CWSTR array calling the C qsort function.
+' Parameters:
+' - rgwstr : Start of target array.
+' - numElm : Number of elements in the array.
+' - bAscend: TRUE for sorting in ascending order; FALSE for sorting in descending order.
+' Example:
+' DIM rg(1 TO 10) AS CWSTR
+' FOR i AS LONG = 1 TO 10
+'    rg(i) = "string " & i
+' NEXT
+' FOR i AS LONG = 1 TO 10
+'   print rg(i)
+' NEXT
+' print "---- after sorting ----"
+' AfxCWstrSort @rg(1), 10, TRUE
+' FOR i AS LONG = 1 TO 10
+'    print rg(i)
+' NEXT
+' ========================================================================================
+PRIVATE SUB AfxCWstrSort (BYREF rgwstr AS ANY PTR, BYVAL numElm AS LONG, BYVAL bAscend AS BOOLEAN = TRUE)
+   IF rgwstr = NULL OR numElm < 2 THEN EXIT SUB
+   IF bAscend THEN
+      qsort rgwstr, numElm, SIZEOF(CWSTR), CPTR(ANY PTR, @AfxCWstrArrayCompare)
+   ELSE
+      qsort rgwstr, numElm, SIZEOF(CWSTR) , CPTR(ANY PTR, @AfxCWStrArrayReverseCompare)
+   END IF
+END SUB
+' ========================================================================================

@@ -1241,6 +1241,10 @@ END FUNCTION
 ' ########################################################################################
 TYPE CPropVar
 
+Private:
+   cws AS CWSTR          ' // To allow to return a WSTRING by reference
+
+Public:
    pvd AS PROPVARIANT         ' // PropVariant data
 
    ' // Constructors
@@ -1253,6 +1257,8 @@ TYPE CPropVar
    DECLARE CONSTRUCTOR (BYREF cws AS CWSTR)
    DECLARE CONSTRUCTOR (BYREF cbs AS CBSTR)
    DECLARE CONSTRUCTOR (BYVAL pvar AS PROPVARIANT PTR)
+   DECLARE CONSTRUCTOR (BYVAL cy AS CURRENCY)
+   DECLARE CONSTRUCTOR (BYVAL dec AS DECIMAL)
    DECLARE CONSTRUCTOR (BYVAL pdisp AS IDispatch PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
    DECLARE CONSTRUCTOR (BYVAL punk AS IUnknown PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
    DECLARE CONSTRUCTOR (BYVAL pStream AS IStream PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
@@ -1275,6 +1281,7 @@ TYPE CPropVar
    DECLARE FUNCTION bstr () AS CBSTR
    DECLARE OPERATOR CAST () AS PROPVARIANT
    DECLARE OPERATOR CAST () AS ANY PTR
+   DECLARE OPERATOR CAST () BYREF AS WSTRING
    DECLARE FUNCTION ToStr () AS CWSTR
    DECLARE FUNCTION ToWStr () AS CWSTR
    DECLARE FUNCTION ToBStr () AS CBSTR
@@ -1322,6 +1329,8 @@ TYPE CPropVar
    DECLARE OPERATOR Let (BYREF cws AS CWSTR)
    DECLARE OPERATOR Let (BYREF cbs AS CBSTR)
    DECLARE OPERATOR Let (BYVAL pPropVar AS PROPVARIANT PTR)
+   DECLARE OPERATOR Let (BYVAL cy AS CURRENCY)
+   DECLARE OPERATOR Let (BYVAL dec AS DECIMAL)
    DECLARE OPERATOR Let (BYVAL pdisp AS IDispatch PTR)
    DECLARE OPERATOR Let (BYVAL punk AS IUnknown PTR)
    DECLARE OPERATOR Let (BYVAL pStream AS IStream PTR)
@@ -1413,6 +1422,10 @@ TYPE CPropVar
    ' // Assignments by reference
    DECLARE FUNCTION PutRef (BYVAL _value AS ANY PTR, BYVAL _vType AS WORD = VT_I8) AS HRESULT
    DECLARE FUNCTION PutRef (BYVAL _pvar AS ANY PTR, BYREF strType AS STRING) AS HRESULT
+   ' // Safe arrays
+   DECLARE FUNCTION GetDim () AS ULONG
+   DECLARE FUNCTION GetLBound (BYVAL nDim AS UINT = 1) AS LONG
+   DECLARE FUNCTION GetUBound (BYVAL nDim AS UINT = 1) AS LONG
    ' // Arrays
    DECLARE FUNCTION GetElementCount () AS ULONG
    DECLARE FUNCTION GetBooleanElem (BYVAL iElem AS ULONG) AS BOOLEAN
@@ -1549,6 +1562,26 @@ END CONSTRUCTOR
 PRIVATE CONSTRUCTOR CPropVar (BYVAL pPropVar AS PROPVARIANT PTR)
    CPROPVAR_DP("CPropVar CONSTRUCTOR - PROPVARIANT PTR")
    PropVariantCopy(@pvd, pPropVar)
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' Initializes a CPropVar from a CURRENCY structure.
+' ========================================================================================
+PRIVATE CONSTRUCTOR CPropVar (BYVAL cy AS CURRENCY)
+   CPROPVAR_DP("CPropVar CONSTRUCTOR - CURRENCY")
+   pvd.vt = VT_CY
+   pvd.cyVal = cy
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' Initializes a CPropVar from a DECIMAL structure.
+' ========================================================================================
+PRIVATE CONSTRUCTOR CPropVar (BYVAL dec AS DECIMAL)
+   CPROPVAR_DP("CPropVar CONSTRUCTOR - DECIMAL")
+   pvd.vt = VT_DECIMAL
+   pvd.decVal = dec
 END CONSTRUCTOR
 ' ========================================================================================
 
@@ -1921,6 +1954,16 @@ PRIVATE OPERATOR CPropVar.CAST () AS ANY PTR
    OPERATOR = cast(ANY PTR, @pvd)
 END OPERATOR
 ' ========================================================================================
+
+' =====================================================================================
+' Extracts the contents of a VARIANT and returns them as a WSTRING.
+' =====================================================================================
+PRIVATE OPERATOR CPropVar.CAST () BYREF AS WSTRING
+   CPROPVAR_DP("CPropVar CAST BYREF AS WSTRING")
+   cws = AfxPropVarToStr(@pvd)
+   OPERATOR = *cast(WSTRING PTR, cws.m_pBuffer)
+END OPERATOR
+' =====================================================================================
 
 ' =====================================================================================
 ' Extracts the contents of a PROPVARIANT and returns them as a CWSTR.
@@ -2516,6 +2559,24 @@ END OPERATOR
 PRIVATE OPERATOR CPropVar.Let (BYREF cbs AS CBSTR)
    CPROPVAR_DP("CPropVar LET = CBSTR")
    PropVariantClear(@pvd) : pvd.vt = VT_LPWSTR : SHStrDupW(cbs, @pvd.pwszVal)
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Assigns a CURRENCY structure.
+' ========================================================================================
+PRIVATE OPERATOR CPropVar.Let (BYVAL cy AS CURRENCY)
+   CPROPVAR_DP("CPropVar LET - CURRENCY")
+   PropVariantClear(@pvd) : pvd.vt = VT_CY : pvd.cyVal = cy
+END OPERATOR
+' ========================================================================================
+
+' ========================================================================================
+' Assigns a CURRENCY structure.
+' ========================================================================================
+PRIVATE OPERATOR CPropVar.Let (BYVAL dec AS DECIMAL)
+   CPROPVAR_DP("CPropVar LET - DECIMAL")
+   PropVariantClear(@pvd) : pvd.vt = VT_DECIMAL : pvd.decVal = dec
 END OPERATOR
 ' ========================================================================================
 
@@ -3551,6 +3612,47 @@ END FUNCTION
 ' ========================================================================================
 
 ' =====================================================================================
+' Returns the number of dimensions for variants of type VT_ARRAY; returns 0 otherwise.
+' =====================================================================================
+PRIVATE FUNCTION CPropVar.GetDim () AS ULONG
+   CPROPVAR_DP("CPropVar GetDim")
+   IF (pvd.vt AND VT_ARRAY) = VT_ARRAY THEN
+      IF pvd.parray THEN RETURN SafeArrayGetDim(pvd.parray)
+   END IF
+END FUNCTION
+' =====================================================================================
+
+' =====================================================================================
+' Returns the lower bound for the specified dimension of the safe array for variants of
+' type VT_ARRAY; returns 0 otherwise.
+' =====================================================================================
+PRIVATE FUNCTION CPropVar.GetLBound (BYVAL nDim AS UINT = 1) AS LONG
+   CPROPVAR_DP("CPropVar GetLBound")
+   DIM hr AS HRESULT
+   IF (pvd.vt AND VT_ARRAY) = VT_ARRAY THEN
+      DIM nBound AS LONG
+      IF pvd.parray THEN hr = SafeArrayGetLBound(pvd.parray, nDim, @nBound)
+      IF hr = S_OK THEN RETURN nBound
+   END IF
+END FUNCTION
+' =====================================================================================
+
+' Returns the upper bound for the specified dimension of the safe array for variants of
+' type VT_ARRAY; returns -1 otherwise.
+' =====================================================================================
+PRIVATE FUNCTION CPropVar.GetUBound (BYVAL nDim AS UINT = 1) AS LONG
+   CPROPVAR_DP("CPropVar GetUBound")
+   DIM hr AS HRESULT
+   IF (pvd.vt AND VT_ARRAY) = VT_ARRAY THEN
+      DIM nBound AS LONG
+      IF pvd.parray THEN hr = SafeArrayGetUBound(pvd.parray, nDim, @nBound)
+      IF hr = S_OK THEN RETURN nBound
+   END IF
+   RETURN -1
+END FUNCTION
+' =====================================================================================
+
+' =====================================================================================
 ' * Returns the element count of a VT_VECTOR or VT_ARRAY value: for single values,
 ' returns 1; for empty structures, returns 0.
 ' DIM rg(2) AS LONG = {123, 234, 456}
@@ -3963,7 +4065,25 @@ PRIVATE FUNCTION AfxCPropVarToStr OVERLOAD (BYVAL pcpv AS CPROPVAR PTR) AS CWSTR
    RETURN AfxPropVarToStr(@pcpv->pvd)
 END FUNCTION
 ' ========================================================================================
-#define CPROPVAR_TOSTR AfxCPropVarToStr
+#define CPROPVAR_TOSTR(cpv) AfxCPropVarToStr(cpv)
+' ========================================================================================
+PRIVATE FUNCTION AfxCPropVarOptPrm () AS CPROPVAR
+   DIM cpv AS PROPVARIANT
+   cpv.vt = VT_ERROR
+   cpv.scode = DISP_E_PARAMNOTFOUND
+   DIM cpvOpt AS CPROPVAR = cpv
+   RETURN cpvOpt
+END FUNCTION
+' ========================================================================================
+#define CPROPVAR_OPTPRM AfxCPropVarOptPrm
+
+' ========================================================================================
+' Extracts the contents of a propvariant that contains an array of bytes.
+' ========================================================================================
+PRIVATE FUNCTION AfxCPropVariantToBuffer (BYREF cvIn AS CPropVar, BYVAL pv AS LPVOID, BYVAL cb AS ULONG) AS ULONG
+   RETURN AfxPropVariantToBuffer(@cvIn.pvd, pv, cb)
+END FUNCTION
+' ========================================================================================
 
 ENUM PROPVAR_COMPARE_UNIT
    PVCU_DEFAULT = 0
@@ -4005,3 +4125,37 @@ END FUNCTION
 ' ========================================================================================
 
 END NAMESPACE
+
+' ########################################################################################
+'                              *** GLOBAL PROCEDURES ***
+' ########################################################################################
+
+' // Outside a namespace because they are global
+USING Afx
+
+' ========================================================================================
+PRIVATE FUNCTION Left OVERLOAD (BYREF cpv AS CPropVar, BYVAL nChars AS INTEGER) AS CWSTR
+   DIM cws AS CWSTR = cpv.wstr
+   RETURN LEFT(**cws, nChars)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION Right OVERLOAD (BYREF cpv AS CPropVar, BYVAL nChars AS INTEGER) AS CWSTR
+   DIM cws AS CWSTR = cpv.wstr
+   RETURN RIGHT(**cws, nChars)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION Val OVERLOAD (BYREF cpv AS CPropVar) AS DOUBLE
+   DIM cws AS CWSTR = cpv.wstr
+   RETURN .VAL(**cws)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Helper procedure to display messages
+' ========================================================================================
+PRIVATE FUNCTION AfxMsg OVERLOAD (BYREF cpv AS CPropVar, BYREF wszCaption AS WSTRING = "Message", BYVAL uType AS DWORD = 0) AS LONG
+   FUNCTION = MessageBoxW(GetActiveWindow, cpv.wstr, @wszCaption, MB_APPLMODAL OR uType)
+END FUNCTION
+' ========================================================================================

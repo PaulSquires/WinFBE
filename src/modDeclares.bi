@@ -207,6 +207,10 @@
 
 #Define IDC_FRMFNLIST_LISTBOX                       1000
 
+#Define IDC_FRMVDTOOLBOX_LSTTOOLBOX                 1000
+#Define IDC_FRMVDTOOLBOX_LSTPROPERTIES              1001
+#Define IDC_FRMVDTOOLBOX_TABCONTROL                 1002
+
 #DEFINE IDC_FRMUSERTOOLS_LSTTOOLS                   1000
 #DEFINE IDC_FRMUSERTOOLS_CMDINSERT                  1001
 #DEFINE IDC_FRMUSERTOOLS_CMDDELETE                  1002
@@ -295,7 +299,32 @@ end enum
 '  Control types   
 enum
    CTRL_FORM = 1
+   CTRL_POINTER 
+   CTRL_LABEL
    CTRL_BUTTON
+   CTRL_TEXTBOX
+   CTRL_CHECKBOX
+   CTRL_OPTION
+   CTRL_FRAME
+   CTRL_PICTURE
+   CTRL_COMBOBOX
+   CTRL_LISTBOX
+   CTRL_IMAGEBUTTON
+   CTRL_HSCROLL
+   CTRL_VSCROLL
+   CTRL_TIMER
+   CTRL_TABCONTROL
+   CTRL_RICHEDIT
+   CTRL_PROGRESSBAR
+   CTRL_UPDOWN
+   CTRL_LISTVIEW
+   CTRL_TREEVIEW
+   CTRL_SLIDER
+   CTRL_DATETIMEPICKER
+   CTRL_MONTHCALENDAR
+   CTRL_WEBBROWSER
+   CTRL_CUSTOM
+   CTRL_OCX
 end enum
    
 '  Grab handles (clockwise starting at top left corner)
@@ -375,7 +404,7 @@ dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
-Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES
+Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX
 Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG, HWND_FRMUSERTOOLS
 
 '  Global handle to hhctrl.ocx for context sensitive help
@@ -428,6 +457,17 @@ type COMPILE_DIRECTIVES
 END TYPE
 
 
+' Tools/controls that can be drawn on a Form.
+type TOOLBOX_TYPE
+   nToolType    as long 
+   wszName      as CWSTR
+   wszImage     as CWSTR
+   wszCursor    as CWSTR
+   wszClassName as CWSTR
+END TYPE
+dim shared gToolBox() as TOOLBOX_TYPE
+
+
 ' Forward reference
 Type clsDocument_ As clsDocument
 
@@ -440,6 +480,16 @@ End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
 
+type clsProperty
+   private:
+   
+   public:
+      wszPropDisplayName as CWSTR    ' This name displays in the PopertyList
+      wszPropName  as CWSTR          ' This is always UCASE. Used for Get/Set of property value
+      wszPropValue as CWSTR
+END TYPE
+
+
 type clsControl
    private:
    
@@ -448,7 +498,9 @@ type clsControl
       ControlType  as long 
       IsSelected   as Boolean
       IsActive     as Boolean
-      rcHandles(1 to 8) as RECT       ' 8 grab handles
+      SuspendLayoutChange as Boolean    ' prevent layout properties from being acted on individually (instead treat as a group)
+      rcHandles(1 to 8) as RECT         ' 8 grab handles
+      Properties(Any) As clsProperty
 END TYPE
 
 Type clsCollection
@@ -461,8 +513,13 @@ Type clsCollection
       Declare Property ItemLast() As Long
       Declare Function ItemAt( ByVal nIndex As Long ) As clsControl Ptr 
       'declare function ItemByName( byref wszName as wstring ) as clsControl ptr
+      declare function DeselectAllControls() as long
+      declare function SelectControl( byval hWndCtrl as hwnd) as long
+      declare function SetActiveControl( byval hWndCtrl as hwnd) as long
+      declare function GetCtrlPtr( byval hWndCtrl as hwnd) as clsControl ptr
       Declare Function Add( ByVal pCtrl As clsControl Ptr ) As Long
       declare function Remove( byval pCtrl as clsControl ptr ) as long
+      declare function Debug() as long
       Declare Constructor
       Declare Destructor
 End Type
@@ -473,6 +530,7 @@ Type clsDocument
       m_pSci           As Any Ptr      
       
    Public:
+      IsDesigner       As BOOLEAN
       IsNewFlag        As BOOLEAN
       
       ' Visual designer related
@@ -483,10 +541,14 @@ Type clsDocument
       GrabHit          as long      ' Which grab handle is currently active for sizing action
       ptPrev           as point     ' Used for sizing action
       bSizing          as Boolean   ' Flag that sizing action is in progress
+      bMoving          as Boolean   ' Flag that moving action is in progress
       rcSize           as RECT      ' Current size of form/control. Used during sizing action
+      pCtrlAction      as clsControl ptr  ' The control that the size/move action is being performed on
+      ptStart          as POINT     ' lasso starting point at LButtonDown
+      ptEnd            as POINT     ' lasso ending point at LButtonUp
+      bLasso           as Boolean   ' Flag that lasso operation is in progress.
       
       ' Code document related
-      IsDesigner       As BOOLEAN
       ProjectIndex     as long      ' array index into gApp.Projects
       ProjectFileType  As Long = FILETYPE_UNDEFINED
       DiskFilename     As WString * MAX_PATH
@@ -673,6 +735,7 @@ Type clsConfig
       Declare Function SaveKeywords() As Long
       Declare Function SaveToFile() As Long
       Declare Function LoadFromFile() As Long
+      declare Function InitializeToolBox() as Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
       declare Function LoadCodetips( ByRef sFilename As Const String ) as boolean

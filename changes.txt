@@ -1,3 +1,6 @@
+Version 1.5.6 (November 26, 2017)
+- Changed: Updated to use WinFBX Library Version 1.0.
+
 Version 1.5.5 (September 27, 2017)
 - Changed: Updated deutsch.lang language file thanks to Joerg Buckel.
 - Changed: Instances of IFF&() changed to IFF() and SPACE$() to SPACE()to allow compiling with FBC 1.06.

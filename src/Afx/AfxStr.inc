@@ -1004,7 +1004,13 @@ END FUNCTION
 
 ' ========================================================================================
 ' Retuns TRUE if c is a number (0-9), a numeric sign (+-) or a decimal point (.).
-' Note: Works both with single characters and strings.
+' Works both with single characters and strings.
+' Note: For strings that can contain floating decimal numbers with exponents, e.g.
+' "1.2345678901234567e+029", use the CRegExp (regular expressions class):
+' DIM pRegExp AS CRegExp
+' DIM cbsText AS CBSTR = "1.2345678901234567e+029"
+' DIM cbsPattern AS CBSTR = "^[\+\-]?\d*\.?\d+(?:[Ee][\+\-]?\d+)?$"
+' DIM bIsNumeric AS BOOLEAN = pRegExp.Test(cbsText, cbsPattern)
 ' ========================================================================================
 PRIVATE FUNCTION AfxIsNumeric (BYREF c AS WSTRING) AS BOOLEAN
    RETURN (AfxStrRetainAny(c, "+-.0123456789") = c) AND c <> ""
@@ -1267,6 +1273,109 @@ PRIVATE FUNCTION AfxStrFromTimeInterval (BYVAL dwTimeMS AS DWORD, BYVAL digits A
    DIM cws AS CWSTR = SPACE(260)
    StrFromTimeIntervalW(cws.vptr, 260, dwTimeMS, digits)
    RETURN cws
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Base64 is a group of similar encoding schemes that represent binary data in an ASCII
+' string format by translating it into a radix-64 representation. The Base64 term
+' originates from a specific MIME content transfer encoding.
+' Base64 encoding schemes are commonly used when there is a need to encode binary data
+' that needs be stored and transferred over media that are designed to deal with textual
+' data. This is to ensure that the data remains intact without modification during
+' transport. Base64 is used commonly in a number of applications including email via MIME,
+' and storing complex data in XML.
+' ========================================================================================
+
+' ========================================================================================
+' Converts an array of bytes into a formatted string.
+' Note: Wrapped because, at the time of writing, it is not supported by the provided
+' FreeBasic crypt32 import library.
+' ========================================================================================
+PRIVATE FUNCTION AfxCryptBinaryToStringA (BYVAL pbBinary AS CONST UBYTE PTR, BYVAL cbBinary AS DWORD, _
+BYVAL dwFlags AS DWORD, BYVAL pszString AS LPSTR, BYVAL pcchString AS DWORD PTR) AS WINBOOL
+   DIM AS ANY PTR pLib = DyLibLoad("crypt32.dll")
+   IF pLib = NULL THEN EXIT FUNCTION
+   DIM pCryptBinaryToStringA AS FUNCTION (BYVAL pbBinary AS CONST UBYTE PTR, BYVAL cbBinary AS DWORD, _
+       BYVAL dwFlags AS DWORD, BYVAL pszString AS LPSTR, BYVAL pcchString AS DWORD PTR) AS WINBOOL
+   pCryptBinaryToStringA = DyLibSymbol(pLib, "CryptBinaryToStringA")
+   IF pCryptBinaryToStringA THEN FUNCTION = pCryptBinaryToStringA(pbBinary, cbBinary, dwFlags, pszString, pcchString)
+   DyLibFree(pLib)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxCryptBinaryToStringW (BYVAL pbBinary AS CONST UBYTE PTR, BYVAL cbBinary AS DWORD, _
+BYVAL dwFlags AS DWORD, BYVAL pszString AS LPWSTR, BYVAL pcchString AS DWORD PTR) AS WINBOOL
+   DIM AS ANY PTR pLib = DyLibLoad("crypt32.dll")
+   IF pLib = NULL THEN EXIT FUNCTION
+   DIM pCryptBinaryToStringW AS FUNCTION (BYVAL pbBinary AS CONST UBYTE PTR, BYVAL cbBinary AS DWORD, _
+       BYVAL dwFlags AS DWORD, BYVAL pszString AS LPWSTR, BYVAL pcchString AS DWORD PTR) AS WINBOOL
+   pCryptBinaryToStringW = DyLibSymbol(pLib, "CryptBinaryToStringW")
+   IF pCryptBinaryToStringW THEN FUNCTION = pCryptBinaryToStringW(pbBinary, cbBinary, dwFlags, pszString, pcchString)
+   DyLibFree(pLib)
+END FUNCTION
+' ========================================================================================
+#ifndef UNICODE
+   #define AfxCryptBinaryToString(p1, p2, p3, p4, p5) AfxCryptBinaryToStringA(p1, p2, p3, p4, p5)
+#else
+   #define AfxCryptBinaryToString(p1, p2, p3, p4, p5) AfxCryptBinaryToStringW(p1, p2, p3, p4, p5)
+#endif
+
+' ========================================================================================
+PRIVATE FUNCTION AfxBase64Encode (BYREF strData AS STRING) AS STRING
+   DIM cchStr AS DWORD, strOut AS STRING
+   DIM bRes AS LONG = AfxCryptBinaryToStringA(STRPTR(strData), LEN(strData), CRYPT_STRING_BASE64, NULL, @cchStr)
+   IF bRes = 0 OR cchStr = 0 THEN EXIT FUNCTION
+   strOut = SPACE(cchStr)
+   bRes = AfxCryptBinaryToStringA(STRPTR(strData), LEN(strData), CRYPT_STRING_BASE64, STRPTR(strOut), @cchStr)
+   FUNCTION = strOut
+END FUNCTION
+' ========================================================================================
+   
+' ========================================================================================
+' Converts a formatted string into an array of bytes.
+' ========================================================================================
+PRIVATE FUNCTION AfxCryptStringToBinaryA (BYVAL pszString AS LPCSTR, BYVAL cchString AS DWORD, _
+BYVAL dwFlags AS DWORD, BYVAL pbBinary AS UBYTE PTR, BYVAL pcbBinary AS DWORD PTR, _
+BYVAL pdwSkip AS DWORD PTR, BYVAL pdwFlags AS DWORD PTR) AS WINBOOL
+   DIM AS ANY PTR pLib = DyLibLoad("crypt32.dll")
+   IF pLib = NULL THEN EXIT FUNCTION
+   DIM pCryptStringToBinaryA AS FUNCTION (BYVAL pszString AS LPCSTR, BYVAL cchString AS DWORD, _
+       BYVAL dwFlags AS DWORD, BYVAL pbBinary AS UBYTE PTR, BYVAL pcbBinary AS DWORD PTR, _
+       BYVAL pdwSkip AS DWORD PTR, BYVAL pdwFlags AS DWORD PTR) AS WINBOOL
+   pCryptStringToBinaryA = DyLibSymbol(pLib, "CryptStringToBinaryA")
+   IF pCryptStringToBinaryA THEN FUNCTION = pCryptStringToBinaryA(pszString, cchString, dwFlags, pbBinary, pcbBinary, pdwSkip, pdwFLags)
+   DyLibFree(pLib)
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxCryptStringToBinaryW (BYVAL pwszString AS LPCWSTR, BYVAL cchString AS DWORD, _
+BYVAL dwFlags AS DWORD, BYVAL pbBinary AS UBYTE PTR, BYVAL pcbBinary AS DWORD PTR, _
+BYVAL pdwSkip AS DWORD PTR, BYVAL pdwFlags AS DWORD PTR) AS WINBOOL
+   DIM AS ANY PTR pLib = DyLibLoad("crypt32.dll")
+   IF pLib = NULL THEN EXIT FUNCTION
+   DIM pCryptStringToBinaryW AS FUNCTION (BYVAL pwszString AS LPCWSTR, BYVAL cchString AS DWORD, _
+       BYVAL dwFlags AS DWORD, BYVAL pbBinary AS UBYTE PTR, BYVAL pcbBinary AS DWORD PTR, _
+       BYVAL pdwSkip AS DWORD PTR, BYVAL pdwFlags AS DWORD PTR) AS WINBOOL
+   pCryptStringToBinaryW = DyLibSymbol(pLib, "CryptStringToBinaryW")
+   IF pCryptStringToBinaryW THEN FUNCTION = pCryptStringToBinaryW(pwszString, cchString, dwFlags, pbBinary, pcbBinary, pdwSkip, pdwFLags)
+   DyLibFree(pLib)
+END FUNCTION
+' ========================================================================================
+#ifndef UNICODE
+   #define AfxCryptStringToBinary(p1, p2, p3, p4, p5, p6, p7) AfxCryptStringToBinaryA(p1, p2, p3, p4, p5, p6, p7)
+#else
+   #define AfxCryptStringToBinary(p1, p2, p3, p4, p5, p6, p7) AfxCryptStringToBinaryW(p1, p2, p3, p4, p5, p6, p7)
+#endif
+
+' ========================================================================================
+PRIVATE FUNCTION AfxBase64Decode (BYREF strData AS STRING) AS STRING
+   DIM cbBinary AS DWORD, strOut AS STRING
+   DIM bRes AS LONG = AfxCryptStringToBinaryA(STRPTR(strData), LEN(strData), CRYPT_STRING_BASE64, NULL, @cbBinary, NULL, NULL)
+   IF bRes = 0 OR cbBinary = 0 THEN EXIT FUNCTION
+   strOut = SPACE(cbBinary)
+   bRes = AfxCryptStringToBinaryA(STRPTR(strData), LEN(strData), CRYPT_STRING_BASE64, STRPTR(strOut), @cbBinary, NULL, NULL)
+   FUNCTION = strOut
 END FUNCTION
 ' ========================================================================================
 

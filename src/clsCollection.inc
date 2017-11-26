@@ -8,6 +8,9 @@ end constructor
 
 destructor clsCollection
    '_arrControls
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      delete _arrControls(i)
+   NEXT
 end destructor
 
 property clsCollection.Count() as long
@@ -64,4 +67,56 @@ function clsCollection.Remove( byval pCtrl as clsControl ptr ) as long
    function = idx
 end function
 
+function clsCollection.DeselectAllControls() as long
+   ' Deselect the selected state of all controls
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      _arrControls(i)->IsSelected = false
+   NEXT
+   function = 0
+end function
 
+function clsCollection.SelectControl( byval hWndCtrl as hwnd )as long
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      if _arrControls(i)->hWindow = hWndCtrl then
+         _arrControls(i)->IsSelected = true
+         exit for    
+      END IF
+   NEXT
+   function = 0
+end function
+
+function clsCollection.SetActiveControl( byval hWndCtrl as hwnd) as long
+   dim as long idxActive = -1
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      _arrControls(i)->IsActive = iif(_arrControls(i)->hWindow = hWndCtrl, true, false)
+      if _arrControls(i)->IsActive THEN idxActive = i
+   NEXT
+   ' Ensure that at least one control is active. Only controls that are
+   ' selected can also be an active control.
+   if idxActive = -1 THEN
+      idxActive = 0   ' default that the form will be selected
+      for i as long = lbound(_arrControls) to ubound(_arrControls)
+         if _arrControls(i)->IsSelected then idxActive = i
+      NEXT
+   END IF
+   _arrControls(idxActive)->IsActive = true
+   function = 0
+end function
+
+function clsCollection.GetCtrlPtr( byval hWndCtrl as hwnd) as clsControl ptr
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      if _arrControls(i)->hWindow = hWndCtrl then
+         return _arrControls(i)
+      END IF
+   NEXT
+   function = 0
+end function
+
+function clsCollection.Debug() as long
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+? _arrControls(i)->ControlType, _arrControls(i)->IsSelected, _arrControls(i)->IsActive, "";
+? _arrControls(i)->rcHandles(GRAB_TOP).Left, _arrControls(i)->rcHandles(GRAB_TOP).top, _arrControls(i)->rcHandles(GRAB_TOP).right, _arrControls(i)->rcHandles(GRAB_TOP).bottom
+   NEXT
+? ""
+   function = 0
+end function

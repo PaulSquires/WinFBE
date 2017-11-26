@@ -337,7 +337,7 @@ END FUNCTION
 '   DIM AS double x, y
 '   DIM c AS CComplex
 '   x = cosh(pi / 4)
-'   y = c.AfxArcCosH(x)
+'   y = c.ArcCosH(x)
 '   print "cosh = ", pi/4, x
 '   print "ArcCosH = ", x, y
 ' Output:
@@ -391,7 +391,7 @@ END FUNCTION
 
 ' ========================================================================================
 ' Uses the cartesian components (x,y) to set the real and imaginary parts of the complex number.
-' Example: DIM cpx AS CComplex : cpx.CSe = 3, 4
+' Example: DIM cpx AS CComplex : cpx.CSet = 3, 4
 ' Example: DIM cpx AS CComplex : cpx.CRect = 3, 4
 ' ========================================================================================
 PRIVATE PROPERTY CComplex.CSet (BYVAL x AS DOUBLE, BYVAL y AS DOUBLE)
@@ -407,7 +407,7 @@ END PROPERTY
 ' ========================================================================================
 
 ' ========================================================================================
-' * Gets/sets the real part of a complex numbe.
+' * Gets/sets the real part of a complex number.
 ' ========================================================================================
 PRIVATE PROPERTY CComplex.CReal () AS DOUBLE
    CCOMPLEX_DP("CCOMPLEX PROPGET CReal")
@@ -460,7 +460,7 @@ END SUB
 
 ' ========================================================================================
 ' * Returns true if the two complex numbers are equal, or false otherwise.
-' Example: DIM cpx1 AS CComplex = CComplex(1, 2) : DIM cpx2 AS CComplex = CComplex(3,4)
+' Example: DIM cpx1 AS CComplex = CComplex(1, 2) : DIM cpx2 AS CComplex = CComplex(3, 4)
 ' IF cpx1 = cpx2 THEN PRINT "equal" ELSE PRINT "different"
 ' ========================================================================================
 PRIVATE OPERATOR = (BYREF z1 AS CComplex, BYREF z2 AS CComplex) AS BOOLEAN
@@ -513,8 +513,8 @@ END SUB
 ' ========================================================================================
 ' * Returns the sum of complex numbers.
 ' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex = CComplex(5, 6) : cpx2 = cpx1 + cpx2
-' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 = CComplex(5, 6) : cpx2 = cpx1 + 11
-' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 = CComplex(5, 6) : cpx2 = 11 + cpx1
+' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex = CComplex(5, 6) : cpx2 = cpx1 + 11
+' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex = CComplex(5, 6) : cpx2 = 11 + cpx1
 ' ========================================================================================
 PRIVATE OPERATOR + (BYREF z1 AS CComplex, BYREF z2 AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR + (CComplex, CComplex)")
@@ -538,7 +538,7 @@ END OPERATOR
 ' * Returns the difference of complex numbers.
 ' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex = CComplex(5, 6) : cpx2 = cpx1 - cpx2
 ' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex : cpx2 = cpx1 - 11
-' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex: cpx2 = 11 - cpx1
+' Example: DIM cpx1 AS CComplex(3, 4) : DIM cpx2 AS CComplex : cpx2 = 11 - cpx1
 ' ========================================================================================
 PRIVATE OPERATOR - (BYREF z1 AS CComplex, BYREF z2 AS CComplex) AS CComplex
    CCOMPLEX_DP("CCOMPLEX OPERATOR - (CComplex, CComplex)")
@@ -733,7 +733,7 @@ PRIVATE FUNCTION CComplex.CSub (BYREF z AS CComplex) AS CComplex
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-' * Subtracts a real number.
+' * Subtracts a real and an imaginary number.
 ' Example: DIM cpx AS CComplex = CComplex(5, 6) : cpx = cpx.CSub(2, 3)
 ' ========================================================================================
 PRIVATE FUNCTION CComplex.CSub (BYVAL x AS DOUBLE, BYVAL y AS DOUBLE) AS CComplex
@@ -822,7 +822,7 @@ PRIVATE FUNCTION CComplex.CDivReal (BYVAL x AS DOUBLE) AS CComplex
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
-' * Divides by an imaginar number.
+' * Divides by an imaginary number.
 ' ========================================================================================
 PRIVATE FUNCTION CComplex.CDivImag (BYVAL y AS DOUBLE) AS CComplex
    CCOMPLEX_DP("CCOMPLEX CDivImag (Double)")
@@ -1455,7 +1455,7 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
-' Returns the complex arcsecant of the a number.
+' Returns the complex arcsecant of a real number.
 ' Example
 '   DIM cpx AS CComplex
 '   print cpx.CArcSecReal(1.1)

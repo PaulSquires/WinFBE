@@ -241,7 +241,7 @@ END OPERATOR
 ' ========================================================================================
 ' * Exchanges the contents of two complex numbers.
 ' ========================================================================================
-PRIVATE SUB AfxCSwap (BYREF z1 AS _complex, BYREF z2 AS _complex)
+PRIVATE SUB CSwap (BYREF z1 AS _complex, BYREF z2 AS _complex)
    DIM z AS _complex = z1 : z1 = z2 : z2 = z
 END SUB
 ' ========================================================================================
@@ -430,7 +430,7 @@ END FUNCTION
 ' ========================================================================================
 ' * Returns the quotient of a complex number and a real number.
 ' ========================================================================================
-PRIVATE FUNCTION AfxCDivReal (BYREF z AS _complex, BYVAL x AS DOUBLE) AS _complex
+PRIVATE FUNCTION CDivReal (BYREF z AS _complex, BYVAL x AS DOUBLE) AS _complex
    RETURN TYPE<_complex>(z.x / x, z.y / x)
 END FUNCTION
 ' ========================================================================================
@@ -1165,6 +1165,7 @@ PRIVATE FUNCTION CArcTan (BYREF value AS _complex) AS _complex
    DIM Two AS _complex = TYPE<_complex>(2.0, 0.0)
    RETURN (ImaginaryOne / Two) * (CLog(One - ImaginaryOne * value) - CLog(One + ImaginaryOne * value))
 END FUNCTION
+' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION CATan (BYREF value AS _complex) AS _complex
    DIM ImaginaryOne AS _complex = TYPE<_complex>(0.0, 1.0)

@@ -54,9 +54,6 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Dispatch messages
    FUNCTION = pWindow.DoEvents(nCmdShow)
 
-   ' // Uninitialize the COM library
-   CoUninitialize
-
 END FUNCTION
 ' ========================================================================================
 

@@ -988,7 +988,8 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       ' Set the active tab to the closest tab to the one just removed
       gTTabCtl.SetFocusTab(iTab-1)
       
-      ShowWindow pDoc->hWindow, SW_HIDE
+      ShowWindow( pDoc->hWindow, SW_HIDE)
+      ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE)
 
       ' Only remove this document from the global collection if it is not
       ' part of any active Project or if it is new/unsaved file. Files that are part of a project are

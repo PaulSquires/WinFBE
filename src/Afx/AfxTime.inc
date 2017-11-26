@@ -11,8 +11,21 @@
 
 #pragma once
 #INCLUDE ONCE "windows.bi"
+#include once "crt/time.bi"
 #include once "Afx/CWStr.inc"
 USING Afx
+
+' ========================================================================================
+' A simple union to avoid to having to copy a FILETIME structure to an ULARGE_INTEGER structure.
+' ========================================================================================
+UNION AFX_FILETIME
+   TYPE
+      LowPart AS ULONG
+      HighPart AS ULONG
+   END TYPE
+   QuadPart AS ULONGLONG
+END UNION
+' ========================================================================================
 
 ' ========================================================================================
 ' Returns the current local time as a FILETIME structure.
@@ -20,6 +33,16 @@ USING Afx
 PRIVATE FUNCTION AfxLocalFileTime () AS FILETIME
    DIM ST AS SYSTEMTIME, FT AS FILETIME
    GetLocalTime @ST
+   SystemTimeToFileTime @ST, @FT
+   RETURN FT
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Returns the current system time as a FILETIME structure.
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemFileTime () AS FILETIME
+   DIM ST AS SYSTEMTIME, FT AS FILETIME
+   GetSystemTime @ST
    SystemTimeToFileTime @ST, @FT
    RETURN FT
 END FUNCTION
@@ -34,6 +57,15 @@ PRIVATE FUNCTION AfxLocalSystemTime () AS SYSTEMTIME
    RETURN ST
 END FUNCTION
 ' ========================================================================================
+' ========================================================================================
+' Returns the current system time as a SYSTEMTIME structure.
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemSystemTime () AS SYSTEMTIME
+   DIM ST AS SYSTEMTIME
+   GetSystemTime @ST
+   RETURN ST
+END FUNCTION
+' ========================================================================================
 
 ' ========================================================================================
 ' Returns the current local year. The valid values are 1601 through 30827.
@@ -41,6 +73,15 @@ END FUNCTION
 PRIVATE FUNCTION AfxLocalYear () AS WORD
    DIM ST AS SYSTEMTIME
    GetLocalTime @ST
+   RETURN ST.wYear
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Returns the current system year. The valid values are 1601 through 30827.
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemYear () AS WORD
+   DIM ST AS SYSTEMTIME
+   GetSystemTime @ST
    RETURN ST.wYear
 END FUNCTION
 ' ========================================================================================
@@ -54,6 +95,15 @@ PRIVATE FUNCTION AfxLocalMonth () AS WORD
    RETURN ST.wMonth
 END FUNCTION
 ' ========================================================================================
+' ========================================================================================
+' Returns the current system month. The valid values are 1 thorugh 12 (1 = January, etc.).
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemMonth () AS WORD
+   DIM ST AS SYSTEMTIME
+   GetSystemTime @ST
+   RETURN ST.wMonth
+END FUNCTION
+' ========================================================================================
 
 ' ========================================================================================
 ' Returns the current local day. The valid values are 1 through 31.
@@ -61,6 +111,15 @@ END FUNCTION
 PRIVATE FUNCTION AfxLocalDay () AS WORD
    DIM ST AS SYSTEMTIME
    GetLocalTime @ST
+   RETURN ST.wDay
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+' Returns the current system day. The valid values are 1 through 31.
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemDay () AS WORD
+   DIM ST AS SYSTEMTIME
+   GetSystemTime @ST
    RETURN ST.wDay
 END FUNCTION
 ' ========================================================================================
@@ -74,11 +133,40 @@ PRIVATE FUNCTION AfxLocalHour () AS WORD
    RETURN ST.wHour
 END FUNCTION
 ' ========================================================================================
+' ========================================================================================
+' Retrieves the current system hour. The valid values are 0 through 23.
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemHour () AS WORD
+   DIM ST AS SYSTEMTIME
+   GetSystemTime @ST
+   RETURN ST.wHour
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Retrieves the localized name of the specified month.
+' ========================================================================================
+PRIVATE FUNCTION AfxMonthName (BYVAL nMonth AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
+   GetLocalTime(@ST)
+   ST.wMonth = nMonth
+   GetDateFormatW(lcid, NULL, @ST, "MMMM", wszDate, SIZEOF(wszDate))
+   RETURN wszDate
+END FUNCTION
+' ========================================================================================
 
 ' ========================================================================================
 ' Retrieves the localized name of today's month.
 ' ========================================================================================
 PRIVATE FUNCTION AfxLocalMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
+   GetLocalTime(@ST)
+   GetDateFormatW(lcid, NULL, @ST, "MMMM", wszDate, SIZEOF(wszDate))
+   RETURN wszDate
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
    DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
    GetSystemTime(@ST)
    GetDateFormatW(lcid, NULL, @ST, "MMMM", wszDate, SIZEOF(wszDate))
@@ -87,9 +175,29 @@ END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================
+' Retrieves the localized short name of the specified month.
+' ========================================================================================
+PRIVATE FUNCTION AfxShortMonthName (BYVAL nMonth AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
+   GetLocalTime(@ST)
+   ST.wMonth = nMonth
+   GetDateFormatW(lcid, NULL, @ST, "MMM", wszDate, SIZEOF(wszDate))
+   RETURN wszDate
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
 ' Retrieves the localized short name of today's month.
 ' ========================================================================================
 PRIVATE FUNCTION AfxLocalShortMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
+   GetLocalTime(@ST)
+   GetDateFormatW(lcid, NULL, @ST, "MMM", wszDate, SIZEOF(wszDate))
+   RETURN wszDate
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemShortMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
    DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
    GetSystemTime(@ST)
    GetDateFormatW(lcid, NULL, @ST, "MMM", wszDate, SIZEOF(wszDate))
@@ -102,6 +210,15 @@ END FUNCTION
 ' ========================================================================================
 PRIVATE FUNCTION AfxLocalDayName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
    DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
+   GetLocalTime(@ST)
+   IF lcid = 0 THEN lcid = LOCALE_USER_DEFAULT
+   GetDateFormatW(lcid, NULL, @ST, "dddd", wszDate, SIZEOF(wszDate))
+   RETURN wszDate
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemDayName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
    GetSystemTime(@ST)
    IF lcid = 0 THEN lcid = LOCALE_USER_DEFAULT
    GetDateFormatW(lcid, NULL, @ST, "dddd", wszDate, SIZEOF(wszDate))
@@ -113,6 +230,14 @@ END FUNCTION
 ' Retrieves the localized short name of today.
 ' ========================================================================================
 PRIVATE FUNCTION AfxLocalDayShortName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
+   GetLocalTime(@ST)
+   GetDateFormatW(lcid, NULL, @ST, "ddd", wszDate, SIZEOF(wszDate))
+   RETURN wszDate
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemDayShortName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
    DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
    GetSystemTime(@ST)
    GetDateFormatW(lcid, NULL, @ST, "ddd", wszDate, SIZEOF(wszDate))
@@ -127,6 +252,13 @@ END FUNCTION
 PRIVATE FUNCTION AfxLocalDayOfWeek () AS WORD
    DIM ST AS SYSTEMTIME
    GetLocalTime @ST
+   RETURN ST.wDayOfWeek
+END FUNCTION
+' ========================================================================================
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemDayOfWeek () AS WORD
+   DIM ST AS SYSTEMTIME
+   GetSystemTime @ST
    RETURN ST.wDayOfWeek
 END FUNCTION
 ' ========================================================================================
@@ -188,30 +320,6 @@ PRIVATE FUNCTION AfxLocalTimeStr (BYREF wszMask AS WSTRING, BYVAL lcid AS LCID =
    DIM wszDateStr AS WSTRING * 260
    GetTimeFormatW(lcid, NULL, NULL, wszMask, wszDateStr, SIZEOF(wszDateStr))
    RETURN wszDateStr
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Retrieves the localized name of the specified month.
-' ========================================================================================
-PRIVATE FUNCTION AfxMonthName (BYVAL nMonth AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
-   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
-   GetSystemTime(@ST)
-   ST.wMonth = nMonth
-   GetDateFormatW(lcid, NULL, @ST, "MMMM", wszDate, SIZEOF(wszDate))
-   RETURN wszDate
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-' Retrieves the localized short name of the specified month.
-' ========================================================================================
-PRIVATE FUNCTION AfxShortMonthName (BYVAL nMonth AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
-   DIM ST AS SYSTEMTIME, wszDate AS WSTRING * 260
-   GetSystemTime(@ST)
-   ST.wMonth = nMonth
-   GetDateFormatW(lcid, NULL, @ST, "MMM", wszDate, SIZEOF(wszDate))
-   RETURN wszDate
 END FUNCTION
 ' ========================================================================================
 
@@ -804,5 +912,181 @@ PRIVATE FUNCTION AfxSystemTimeToTimeStr (BYREF ST AS SYSTEMTIME, BYREF wszMask A
    DIM wszDateStr AS WSTRING * 260
    GetTimeFormatW(lcid, NULL, @ST, wszMask, wszDateStr, SIZEOF(wszDateStr))
    RETURN wszDateStr
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Converts a __time64_t (LONGLONG) value to a FILETIME structure.
+' ========================================================================================
+PRIVATE FUNCTION AfxTime64ToFileTime (BYVAL t64 AS LONGLONG) AS FILETIME
+   DIM ft AS FILETIME, uli AS ULARGE_INTEGER
+   uli.QuadPart = t64 * 10000000
+   ' 10000000 = ticks per second
+   ft.dwLowDateTime = uli.LowPart
+   ft.dwHighDateTime = uli.HighPart
+   RETURN ft
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Converts a FILETIME to a __time64_t (LONGLONG) value.
+' ========================================================================================
+PRIVATE FUNCTION AfxFileTimeToTime64 (BYREF ft AS FILETIME) AS LONGLONG
+   DIM uli AS ULARGE_INTEGER
+   uli.LowPart = ft.dwLowDateTime
+   uli.HighPart = ft.dwHighDateTime
+   DIM t64 AS LONGLONG = uli.QuadPart / 10000000
+   ' 10000000 = ticks per second
+   RETURN t64
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Converts a system time to a __time64_t (LONGLONG).
+' ========================================================================================
+PRIVATE FUNCTION AfxSystemTimeToTime64 (BYREF st AS SYSTEMTIME) AS LONGLONG
+   DIM ft AS FILETIME
+   SystemTimeToFileTime(@st, @ft)
+   DIM t64 AS LONGLONG = AfxFileTimeToTime64(ft) - 11644473600
+   ' 11644473600 = number of days from 1 Jan 1970
+   RETURN t64
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Converts a __time64_t (LONGLONG) to a system time.
+' ========================================================================================
+PRIVATE FUNCTION AfxTime64ToSystemTime (BYVAL t64 AS LONGLONG) AS SYSTEMTIME
+   DIM ft AS FILETIME
+   t64 += 11644473600
+   ft = AfxTime64ToFileTime(t64)
+   DIM st AS SYSTEMTIME
+   FileTimeToSystemTime(@ft, @st)
+   RETURN st
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Converts a __time64_t (LONGLONG) to a GMT time.
+' t64 : A __time64_t (LONGLONG) value.  The time is represented as seconds elapsed since
+' midnight (00:00:00), January 1, 1970, coordinated universal time (UTC).
+' Returns a tm structure. The fields of the returned structure hold the evaluated value of
+' the time argument in UTC rather than in local time. 
+' Note: Replacement for _gmtime64, not available in msvcrt.dll.
+' The fields of the structure type tm store the following values, each of which is an int:
+' tm_sec : Seconds after minute (0 – 59).
+' tm_min : Minutes after hour (0 – 59).
+' tm_hour : Hours after midnight (0 – 23).
+' tm_mday : Day of month (1 – 31).
+' tm_mon : Month (0 – 11; January = 0).
+' tm_year : Year (current year minus 1900).
+' tm_wday : Day of week (0 – 6; Sunday = 0).
+' tm_yday : Day of year (0 – 365; January 1 = 0).
+' tm_isdst : Positive value if daylight saving time is in effect; 0 if daylight saving
+' time is not in effect; negative value if status of daylight saving time is unknown.
+' ========================================================================================
+PRIVATE FUNCTION AfxGmtTime64 (BYVAL t64 AS LONGLONG) AS tm
+   DIM st AS SYSTEMTIME
+   st = AfxTime64ToSystemTime(t64)
+   DIM _tm AS tm
+   _tm.tm_wday = st.wDayOfWeek
+   _tm.tm_min = st.wMinute
+   _tm.tm_sec = st.wSecond
+   _tm.tm_mon = st.wMonth - 1
+   _tm.tm_mday = st.wDay
+   _tm.tm_hour = st.wHour
+   _tm.tm_year = st.wYear - 1900
+   DIM stYear AS SYSTEMTIME
+   DIM t64Year AS LONGLONG
+   stYear.wYear = st.wYear
+   stYear.wMonth = 1
+   stYear.wDay = 1
+   t64Year = AfxSystemTimeToTime64(stYear)
+   _tm.tm_yday = (t64 - t64Year) / 60*60*24   ' 60*60*24 = day in seconds
+   _tm.tm_isdst = 0
+   RETURN _tm
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Returns a UTC time as a local time.
+' Converts a time value and corrects for the local time zone.
+' Note: Replacement for _localtime64, not available in msvcrt.dll.
+' The fields of the structure type tm store the following values, each of which is an int:
+' tm_sec : Seconds after minute (0 – 59).
+' tm_min : Minutes after hour (0 – 59).
+' tm_hour : Hours after midnight (0 – 23).
+' tm_mday : Day of month (1 – 31).
+' tm_mon : Month (0 – 11; January = 0).
+' tm_year : Year (current year minus 1900).
+' tm_wday : Day of week (0 – 6; Sunday = 0).
+' tm_yday : Day of year (0 – 365; January 1 = 0).
+' tm_isdst : Positive value if daylight saving time is in effect; 0 if daylight saving
+' time is not in effect; negative value if status of daylight saving time is unknown.
+' ========================================================================================
+PRIVATE FUNCTION AfxLocalTime64 (BYVAL t64 AS LONGLONG) AS tm
+   DIM AS FILETIME ft, ftLocal
+   ft = AfxTime64ToFileTime(t64)
+   FileTimeToLocalFiletime(@ft, @ftLocal)
+   t64 = AfxFileTimeToTime64(ftLocal)
+   DIM _tm AS tm = AfxGmtTime64(t64)
+   DIM tzi AS TIME_ZONE_INFORMATION
+   SELECT CASE GetTimeZoneInformation(@tzi)
+      CASE TIME_ZONE_ID_DAYLIGHT : _tm.tm_isdst = 1
+      CASE TIME_ZONE_ID_STANDARD : _tm.tm_isdst = 0
+      CASE TIME_ZONE_ID_UNKNOWN  : _tm.tm_isdst = -1
+   END SELECT
+   RETURN _tm
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Converts the local time to a calendar value.
+' Note: Replacemenet for _mktime64, not available in msvcrt.dll.
+' Caveat: It does not support the tm_isdst parameter.
+' ========================================================================================
+PRIVATE FUNCTION AfxMakeTime64 (BYREF _tm AS tm) AS LONGLONG
+   DIM st AS SYSTEMTIME, stOut AS SYSTEMTIME
+   st.wDay = _tm.tm_mday
+   st.wDayOfWeek = _tm.tm_wday
+   st.wHour = _tm.tm_hour
+   st.wMinute = _tm.tm_min
+   st.wMonth = _tm.tm_mon + 1
+   st.wSecond = _tm.tm_sec
+   st.wYear = _tm.tm_year + 1900
+   st.wMilliseconds = 0
+   stOut = st
+   ' // Daylight savings
+   DIM tzi AS TIME_ZONE_INFORMATION
+   DIM r AS DWORD = GetTimeZoneInformation(@tzi)
+   ' // Converts a local time to a time in Coordinated Universal Time (UTC).
+   IF r <> TIME_ZONE_ID_INVALID THEN TzSpecificLocalTimeToSystemTime(@tzi, @st, @stOut)
+   RETURN AfxSystemTimeToTime64(stOut)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' * Returns the system time as a __time64_t (LONGLONG) value.
+' Returns the time as seconds elapsed since midnight, January 1, 1970.
+' Note: Replacement for _time64, not available in msvcrt.dll.
+' ========================================================================================
+PRIVATE FUNCTION AfxTime64 () AS LONGLONG
+   DIM t64 AS LONGLONG
+   DIM st AS SYSTEMTIME
+   GetSystemTime(@st)
+   RETURN AfxSystemTimeToTime64(st)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Checks if a FILETIME is valid.
+' ========================================================================================
+PRIVATE FUNCTION AfxIsValidFILETIME (BYREF ft AS FILETIME) AS BOOLEAN
+   DIM ftlocalTime AS FILETIME
+   IF FileTimeToLocalFileTime(@ft, @ftlocalTime) = 0 THEN RETURN FALSE
+	' // then convert that time to system time
+   DIM sysTime AS SYSTEMTIME
+   IF FileTimeToSystemTime(@ftlocalTime, @sysTime) = 0 THEN RETURN FALSE
+   RETURN TRUE
 END FUNCTION
 ' ========================================================================================

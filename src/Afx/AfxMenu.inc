@@ -552,7 +552,7 @@ END FUNCTION
 ' - phbmp   = A pointer to a variable that receives the handle to the newly created DIB.
 ' Return value: TRUE or FALSE.
 ' ========================================================================================
-PRIVATE FUNCTION AfxCreate32BitHBITMAP(BYVAL hDC AS HDC, BYVAL psize AS SIZE PTR, BYVAL ppvBits AS ANY PTR PTR, BYVAL phBmp AS HBITMAP PTR) AS BOOLEAN
+PRIVATE FUNCTION AfxCreate32BitHBITMAP (BYVAL hDC AS HDC, BYVAL psize AS SIZE PTR, BYVAL ppvBits AS ANY PTR PTR, BYVAL phBmp AS HBITMAP PTR) AS BOOLEAN
    IF psize = NULL OR phBmp = NULL THEN RETURN FALSE
    *phBmp = NULL
    DIM bmi AS BITMAPINFO

@@ -73,7 +73,7 @@ TYPE CGraphCtx
 
    Public:
 
-      DECLARE CONSTRUCTOR (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+      DECLARE CONSTRUCTOR (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, BYREF wszTitle AS WSTRING = "", _
          BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
          BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
       DECLARE DESTRUCTOR
@@ -123,7 +123,7 @@ END TYPE
 ' ========================================================================================
 ' CGraphCtx class constructor
 ' ========================================================================================
-PRIVATE CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, BYREF wszTitle AS WSTRING = "", _
+PRIVATE CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, BYREF wszTitle AS WSTRING = "", _
    BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
    BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
 
@@ -491,45 +491,52 @@ PRIVATE FUNCTION CGraphCtx.CGraphCtxProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT
          ' // Get a pointer to the class
          pGraphCtx = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
          IF pGraphCtx = NULL THEN EXIT FUNCTION
-         ' // Updates virtual window origins
-         DIM Increment AS LONG = LOWORD(lParam) - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left
-         IF Increment < 0 THEN Increment = 0
-         IF (Increment > 0) AND (pGraphCtx->m_OrgX >= (LOWORD(lParam) - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left)) THEN pGraphCtx->m_OrgX = pGraphCtx->m_OrgX - Increment
-         IF pGraphCtx->m_OrgX < 0 THEN  pGraphCtx->m_OrgX = 0
-         Increment = HIWORD(lParam) - pGraphCtx->m_coord.Bottom - pGraphCtx->m_coord.Top
-         IF Increment < 0 THEN Increment = 0
-         IF(Increment > 0) AND (pGraphCtx->m_OrgY >= (HIWORD(lParam) - pGraphCtx->m_coord.Bottom - pGraphCtx->m_coord.Top)) THEN pGraphCtx->m_OrgY = pGraphCtx->m_OrgY - Increment
-         IF pGraphCtx->m_OrgY < 0 THEN pGraphCtx->m_OrgY = 0
-         ' // Stores new window extents
-         pGraphCtx->m_coord.Right  = LOWORD(lParam)
-         pGraphCtx->m_coord.Bottom = HIWORD(lParam)
-         ' // If resizable or stretchable, disable scroll bars
-         IF pGraphCtx->m_Resizable = TRUE OR pGraphCtx->m_Stretchable = TRUE THEN
-            ' // Initializes scroll bar ranges
-            .GetClientRect hwnd, @rc
-            pGraphCtx->m_MaxX = rc.Right - rc.Left
-            pGraphCtx->m_MaxY = rc.Bottom - rc.Top
-            si.cbSize = SIZEOF(si)
-            si.fMask = SIF_RANGE
-            si.nMin = 0
-            si.nMax = pGraphCtx->m_MaxX - rc.Right - rc.Left
-            .SetScrollInfo hwnd, SB_HORZ, @si, 1
-            si.nMax = pGraphCtx->m_MaxY - rc.Bottom - rc.Top
-            .SetScrollInfo hwnd, SB_VERT, @si, 1
+         ' // If resizable, sets the virtual buffer to the size of the control.
+         ' // If the control is made smaller and then bigger, part of the contents
+         ' // are lost. Therefore, the caller must redraw it.
+         IF pGraphCtx->m_Resizable = TRUE THEN
+            pGraphCtx->SetVirtualBufferSize(LOWORD(lParam), HIWORD(lParam))
          ELSE
-            ' // Reinitializes scroll bar ranges
-            si.cbSize = SIZEOF(si)
-            si.fMask = SIF_RANGE OR SIF_POS
-            si.nMin = 0
-            si.nMax = pGraphCtx->m_MaxX - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left
-            si.nPos = pGraphCtx->m_OrgX
-            .SetScrollInfo hwnd, SB_HORZ, @si, 1
-            si.nMax = pGraphCtx->m_MaxY - pGraphCtx->m_coord.Bottom - pGraphCtx->m_coord.Top
-            si.nPos = pGraphCtx->m_OrgY
-            .SetScrollInfo hwnd, SB_VERT, @si, 1
+            ' // Updates virtual window origins
+            DIM Increment AS LONG = LOWORD(lParam) - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left
+            IF Increment < 0 THEN Increment = 0
+            IF (Increment > 0) AND (pGraphCtx->m_OrgX >= (LOWORD(lParam) - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left)) THEN pGraphCtx->m_OrgX = pGraphCtx->m_OrgX - Increment
+            IF pGraphCtx->m_OrgX < 0 THEN  pGraphCtx->m_OrgX = 0
+            Increment = HIWORD(lParam) - pGraphCtx->m_coord.Bottom - pGraphCtx->m_coord.Top
+            IF Increment < 0 THEN Increment = 0
+            IF(Increment > 0) AND (pGraphCtx->m_OrgY >= (HIWORD(lParam) - pGraphCtx->m_coord.Bottom - pGraphCtx->m_coord.Top)) THEN pGraphCtx->m_OrgY = pGraphCtx->m_OrgY - Increment
+            IF pGraphCtx->m_OrgY < 0 THEN pGraphCtx->m_OrgY = 0
+            ' // Stores new window extents
+            pGraphCtx->m_coord.Right  = LOWORD(lParam)
+            pGraphCtx->m_coord.Bottom = HIWORD(lParam)
+            ' // If resizable or stretchable, disable scroll bars
+            IF pGraphCtx->m_Resizable = TRUE OR pGraphCtx->m_Stretchable = TRUE THEN
+               ' // Initializes scroll bar ranges
+               .GetClientRect hwnd, @rc
+               pGraphCtx->m_MaxX = rc.Right - rc.Left
+               pGraphCtx->m_MaxY = rc.Bottom - rc.Top
+               si.cbSize = SIZEOF(si)
+               si.fMask = SIF_RANGE
+               si.nMin = 0
+               si.nMax = pGraphCtx->m_MaxX - rc.Right - rc.Left
+               .SetScrollInfo hwnd, SB_HORZ, @si, 1
+               si.nMax = pGraphCtx->m_MaxY - rc.Bottom - rc.Top
+               .SetScrollInfo hwnd, SB_VERT, @si, 1
+            ELSE
+               ' // Reinitializes scroll bar ranges
+               si.cbSize = SIZEOF(si)
+               si.fMask = SIF_RANGE OR SIF_POS
+               si.nMin = 0
+               si.nMax = pGraphCtx->m_MaxX - pGraphCtx->m_coord.Right - pGraphCtx->m_coord.Left
+               si.nPos = pGraphCtx->m_OrgX
+               .SetScrollInfo hwnd, SB_HORZ, @si, 1
+               si.nMax = pGraphCtx->m_MaxY - pGraphCtx->m_coord.Bottom - pGraphCtx->m_coord.Top
+               si.nPos = pGraphCtx->m_OrgY
+               .SetScrollInfo hwnd, SB_VERT, @si, 1
+            END IF
+            ' // Invalidates the window to force redrawing
+            .InvalidateRect hwnd, NULL, 0
          END IF
-         ' // Invalidates the window to force redrawing
-         .InvalidateRect hwnd, NULL, 0
          EXIT FUNCTION
 
       CASE WM_PRINTCLIENT
@@ -608,8 +615,8 @@ PRIVATE FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHe
 '   DIM hCloneBmp AS HBITMAP = .CreateBitmap(m_vWidth, m_vHeight, 1, m_BitsPerPel, NULL)
    ' // --- Use CreateDIBSection instead of CreateBitmap --- //
    bi.bmiHeader.biSize = SIZEOF(bi.bmiHeader)
-   bi.bmiHeader.biWidth = m_vHeight
-   bi.bmiHeader.biHeight = nHeight
+   bi.bmiHeader.biWidth = m_vWidth
+   bi.bmiHeader.biHeight = m_vHeight
    bi.bmiHeader.biPlanes = 1
    bi.bmiHeader.biBitCount = m_BitsPerPel
    bi.bmiHeader.biCompression = BI_RGB
@@ -647,21 +654,17 @@ PRIVATE FUNCTION CGraphCtx.SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHe
    m_coord.Right = m_coord.Left + nWidth
    m_coord.Bottom = m_coord.Top + nHeight
 
-   ' // Erases the background with the specified or default color
-   IF m_bkColor THEN
-      DIM hBrush AS .HBRUSH = .CreateSolidBrush(m_bkColor)
-      IF hBrush THEN
-         .FillRect m_hMemDc, @m_coord, hBrush
-         .DeleteObject hBrush
-      END IF
-   ELSE
-      .FillRect m_hMemDc, @m_coord, CAST(.HBRUSH, .GetClassLongPtr(.GetParent(m_hCtl), GCLP_HBRBACKGROUND))
+   ' // Erases the background
+   DIM hBrush AS .HBRUSH = .CreateSolidBrush(m_bkColor)
+   IF hBrush THEN
+      .FillRect m_hMemDc, @m_coord, hBrush
+      .DeleteObject hBrush
    END IF
    .ReleaseDc m_hCtl, hDC
 
    ' Add OpenGL support
    IF m_bOpenGL THEN
-      ' // OpenGL: Set the pixel format and ceate the rendering context
+      ' // OpenGL: Set the pixel format and create the rendering context
       IF this.SetPixelFormat(m_BitsPerPel) THEN m_hRC = this.CreateContext
    END IF
 
@@ -797,6 +800,7 @@ END PROPERTY
 ' ========================================================================================
 PRIVATE PROPERTY CGraphCtx.Stretchable (BYVAL bStretchable AS BOOLEAN)
    m_Stretchable = bStretchable
+   m_Resizable = FALSE
 END PROPERTY
 ' ========================================================================================
 
@@ -864,6 +868,7 @@ END PROPERTY
 ' ========================================================================================
 PRIVATE PROPERTY CGraphCtx.Resizable (BYVAL bResizable AS BOOLEAN)
    m_Resizable = bResizable
+   m_Stretchable = FALSE
 END PROPERTY
 ' ========================================================================================
 
@@ -1173,7 +1178,7 @@ FUNCTION CGraphCtx.CreateContext () AS HGLRC
          MB_OK OR MB_ICONINFORMATION OR MB_APPLMODAL)
    ELSE
      ' // Make it current
-      IF wglMakeCurrent(m_hMemDc, m_hRC) = FALSE THEN
+      IF wglMakeCurrent(m_hMemDc, hRC) = FALSE THEN
          .MessageBoxW(0, "Can't activate the OpenGL rendering context, GetLastError = " & WSTR(GetLastError), "CGraphCtx.CreateContext", _
             MB_OK OR MB_ICONINFORMATION OR MB_APPLMODAL)
       END IF
@@ -1203,6 +1208,14 @@ END FUNCTION
 ' ========================================================================================
 FUNCTION CGraphCtx.MakeNotCurrent () AS BOOLEAN
    FUNCTION = wglMakeCurrent(m_hMemDc, NULL)
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Returns a pointer to the CGraphCtx class given the handle of its associated window.
+' ========================================================================================
+PRIVATE FUNCTION AfxCGraphCtxPtr (BYVAL hwnd AS HWND) AS CGraphCtx PTR
+   FUNCTION = CAST(CGraphCtx PTR, .GetWindowLongPtrW(hwnd, 0))
 END FUNCTION
 ' ========================================================================================
 

@@ -49,9 +49,10 @@ Private:
 
 Public:
    DECLARE CONSTRUCTOR
+   DECLARE CONSTRUCTOR (BYREF pDic AS CDicObj)
    DECLARE DESTRUCTOR
    DECLARE FUNCTION DispPtr () AS ANY PTR
-   DECLARE FUNCTION DispObj () AS ANY PTR
+'   DECLARE FUNCTION DispObj () AS ANY PTR
    DECLARE FUNCTION GetLastResult () AS HRESULT
    DECLARE FUNCTION SetResult (BYVAL Result AS HRESULT) AS HRESULT
    DECLARE PROPERTY Item (BYREF cvKey AS CVAR, BYREF cvNewItem AS CVAR)
@@ -86,10 +87,34 @@ END CONSTRUCTOR
 ' ========================================================================================
 
 ' ========================================================================================
+' Creates a new instance of the Dictionary object and copies the contents of the
+' passed CDicObj.
+' ========================================================================================
+PRIVATE CONSTRUCTOR CDicObj (BYREF pDic AS CDicObj)
+   ' // Initialize the COM library
+   DIM hr AS HRESULT = CoInitialize(NULL)
+   IF hr = S_OK OR hr = S_FALSE THEN m_bUninitCOM = TRUE
+   ' // Create an instance of the Dictionary object
+   DIM CLSID_Dictionary_ AS CLSID = (&hEE09B103, &h97E0, &h11CF, {&h97, &h8F, &h00, &hA0, &h24, &h63, &hE0, &h6F})
+   DIM IID_IDictionary_  AS GUID  = (&h42C642C1, &h97E1, &h11CF, {&h97, &h8F, &h00, &hA0, &h24, &h63, &hE0, &h6F})
+   CoCreateInstance(@CLSID_Dictionary_, NULL, CLSCTX_INPROC_SERVER, @IID_IDictionary_, @m_pDictionary)
+   ' // Copy the contents of the passed CDicObj
+   DIm cvKey AS CVAR, cvValue AS CVAR
+   DIM cvKeys AS CVAR = pDic.Keys
+   FOR i AS LONG = cvKeys.GetLBound TO cvKeys.GetUBound
+      cvKey = cvKeys.GetVariantElem(i)
+      cvValue = pDic.Item(cvKey)
+      pDic.Add(cvKey, cvValue)
+   NEXT
+   CDICOBJ_DP("CDICOBJ CONSTRUCTOR pDic = " & WSTR(m_pDictionary) & " - m_pDictionary = " & WSTR(m_pDictionary))
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
 ' CDicObj destructor
 ' ========================================================================================
 PRIVATE DESTRUCTOR CDicObj
-   CDICOBJ_DP("CDICOBJ DESTRUCTOR")
+   CDICOBJ_DP("CDICOBJ DESTRUCTOR - m_pDictionary = " & WSTR(m_pDictionary))
    ' // Release the Dictionary object
    IF m_pDictionary THEN
       m_pDictionary->RemoveAll
@@ -112,13 +137,15 @@ END FUNCTION
 ' ========================================================================================
 ' Returns a counted reference of the underlying dispatch pointer.
 ' You must call IUnknown_Release when no longer need it.
+' Note: It is not possible to clone the object this way because the destructor of the
+' class removes all the contents.
 ' ========================================================================================
-PRIVATE FUNCTION CDicObj.DispObj () AS ANY PTR
-   IF m_pDictionary <> NULL THEN
-      m_pDictionary->AddRef
-      RETURN m_pDictionary
-   END IF
-END FUNCTION
+'PRIVATE FUNCTION CDicObj.DispObj () AS ANY PTR
+'   IF m_pDictionary <> NULL THEN
+'      m_pDictionary->AddRef
+'      RETURN m_pDictionary
+'   END IF
+'END FUNCTION
 ' ========================================================================================
 
 ' ========================================================================================

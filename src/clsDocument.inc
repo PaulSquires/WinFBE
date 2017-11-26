@@ -27,6 +27,16 @@ End Constructor
 ''
 Destructor clsDocument
    DestroyWindow this.hWindow    ' destroy the scintilla/designer window
+   ' Delete any manually allocated CWindows in the designer
+   if this.IsDesigner THEN
+      dim pForm as CWindow ptr
+      pForm = AfxCWindowPtr(this.hWindow)
+      if pForm THEN delete pForm
+      pForm = AfxCWindowPtr(this.hWndFrame)
+      if pForm THEN delete pForm
+      pForm = AfxCWindowPtr(this.hWndForm)
+      if pForm THEN delete pForm
+   END IF
 End Destructor
 
 ''
@@ -87,25 +97,37 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    SetWindowLongPtr( pForm->hWindow, GWLP_ID, IDC_DESIGNFORM )
    pForm->SetWindowPos(pForm->hWindow, 0, 10, 10, 500, 310, SWP_NOZORDER)
     
+
    dim pCtrl as clsControl ptr = new clsControl 
    pCtrl->ControlType = CTRL_FORM
-   pCtrl->IsSelected  = true
-   pCtrl->IsActive    = true
+   pCtrl->IsActive    = false
    pCtrl->hWindow     = this.hWndForm
+   this.Controls.Add(pCtrl)
+   
+' TODO: Remove these demo buttons from visual designer
+   ' Add a button
+   pCtrl = new clsControl 
+   pCtrl->hWindow = pForm->AddControl("Button", , IDCANCEL, "&OK", 50, 50, 75, 28, , , , _
+                      CAST(WNDPROC, @Control_SubclassProc), CTRL_BUTTON, CAST(DWORD_PTR, @this))
+   pCtrl->ControlType = CTRL_BUTTON
    this.Controls.Add(pCtrl)
    
    ' Add a button
    pCtrl = new clsControl 
-   dim as hwnd hWndCtrl = _
-   pForm->AddControl("Button", , IDCANCEL, "&Close", 50, 50, 75, 28, , , , _
-             CAST(WNDPROC, @Control_SubclassProc), CTRL_BUTTON, CAST(DWORD_PTR, @this))
+   pCtrl->hWindow = pForm->AddControl("Button", , IDCANCEL, "&Cancel", 150, 50, 75, 28, , , , _
+                     CAST(WNDPROC, @Control_SubclassProc), CTRL_BUTTON, CAST(DWORD_PTR, @this))
    pCtrl->ControlType = CTRL_BUTTON
-   pCtrl->IsSelected  = true
-   pCtrl->IsActive    = true
-   pCtrl->hWindow     = hWndCtrl
    this.Controls.Add(pCtrl)
-   
-   
+
+   ' Add a label
+   pCtrl = new clsControl 
+   pCtrl->hWindow = pForm->AddControl("Label", , IDCANCEL, "This is a label", 50, 100, 100, 24, , , , _
+                     CAST(WNDPROC, @Control_SubclassProc), CTRL_LABEL, CAST(DWORD_PTR, @this))
+   pCtrl->ControlType = CTRL_LABEL
+   this.Controls.Add(pCtrl)
+
+   this.Controls.SelectControl(pCtrl->hWindow)
+   this.Controls.SetActiveControl(pCtrl->hWindow)
    
    ' If a disk file was specified then open it and load it into the editor
    this.IsNewFlag = IsNewFile
@@ -114,6 +136,9 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
       this.DiskFilename = "Untitled" & this.NextFileNum
    End If
 
+   ' Display the ToolBox/PropertyList
+   frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
+   
    function = this.hWindow
 end function
 

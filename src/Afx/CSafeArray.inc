@@ -1176,7 +1176,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL idx AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
-   RETURN this.Get(idx, pData)
+   RETURN this.GetElement(idx, pData)
 END FUNCTION
 ' =====================================================================================
 
@@ -1192,7 +1192,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
-   RETURN this.Get(cElem, cDim, pData)
+   RETURN this.GetElement(cElem, cDim, pData)
 END FUNCTION
 ' =====================================================================================
 
@@ -1211,7 +1211,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL prgIndices AS LONG PTR, BYREF cbsData AS CBSTR) AS HRESULT
-   RETURN this.Get(prgIndices, cbsData)
+   RETURN this.GetElement(prgIndices, cbsData)
 END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
@@ -1238,7 +1238,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL idx AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
-   RETURN this.Get(idx, cbsData)
+   RETURN this.GetElement(idx, cbsData)
 END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
@@ -1267,7 +1267,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
-   RETURN this.Get(cElem, cDim, cbsData)
+   RETURN this.GetElement(cElem, cDim, cbsData)
 END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
@@ -1302,7 +1302,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL prgIndices AS LONG PTR, BYREF cvData AS CVAR) AS HRESULT
-   RETURN this.Get(prgIndices, cvData)
+   RETURN this.GetElement(prgIndices, cvData)
 END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
@@ -1331,7 +1331,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL idx AS LONG, BYREF cvData AS CVAR) AS HRESULT
-   RETURN this.Get(idx, cvData)
+   RETURN this.GetElement(idx, cvData)
 END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
@@ -1361,7 +1361,7 @@ END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
 PRIVATE FUNCTION CSafeArray.Get (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYREF cvData AS CVAR) AS HRESULT
-   RETURN this.Get(cElem, cDim, cvData)
+   RETURN this.GetElement(cElem, cDim, cvData)
 END FUNCTION
 ' =====================================================================================
 ' =====================================================================================
@@ -1587,7 +1587,7 @@ END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION CSafeArray.Append (BYVAL pData AS ANY PTR) AS HRESULT
-   RETURN this.Append(pData)
+   RETURN this.AppendElement(pData)
 END FUNCTION
 ' ========================================================================================
 
@@ -1623,7 +1623,7 @@ END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION CSafeArray.Append (BYREF cbsData AS CBSTR) AS HRESULT
-   RETURN this.Append(cbsData)
+   RETURN this.AppendElement(cbsData)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
@@ -1679,7 +1679,7 @@ END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION CSafeArray.Append (BYREF cvData AS CVAR) AS HRESULT
-   RETURN this.Append(cvData)
+   RETURN this.AppendElement(cvData)
 END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
@@ -1702,7 +1702,7 @@ END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION CSafeArray.Append (BYVAL vData AS VARIANT) AS HRESULT
-   RETURN this.Append(vData)
+   RETURN this.AppendElement(vData)
 END FUNCTION
 ' ========================================================================================
 
@@ -2089,7 +2089,7 @@ END FUNCTION
 ' ========================================================================================
 ' ========================================================================================
 PRIVATE FUNCTION CSafeArray.Find (BYREF wszFind AS WSTRING, BYVAL bNoCase AS BOOLEAN = FALSE) AS LONG
-   RETURN this.Find(wszFind, bNoCase)
+   RETURN this.FindElement(wszFind, bNoCase)
 END FUNCTION
 ' ========================================================================================
 
@@ -2214,12 +2214,13 @@ END FUNCTION
 ' data. This is to ensure that the data remains intact without modification during
 ' transport. Base64 is used commonly in a number of applications including email via MIME,
 ' and storing complex data in XML.
+' Note: For a non COM version, see AfxBase64Encode in AfxStr.inc
 ' ========================================================================================
 
 ' ========================================================================================
 ' Base64 mime encoding
 ' ========================================================================================
-PRIVATE FUNCTION AfxBase64Encode (BYREF strData AS STRING) AS STRING
+PRIVATE FUNCTION AfxXmlBase64Encode (BYREF strData AS STRING) AS STRING
 
    ' // Create a byte safe array
    DIM rgsabound AS SAFEARRAYBOUND
@@ -2285,7 +2286,7 @@ END FUNCTION
 ' ========================================================================================
 ' Base64 mime decoding
 ' ========================================================================================
-PRIVATE FUNCTION AfxBase64Decode (BYREF strData AS STRING) AS STRING
+PRIVATE FUNCTION AfxXmlBase64Decode (BYREF strData AS STRING) AS STRING
 
    ' // Create an instance of the IXMLDOMDocument interface
    DIM pXmlDocument AS IXMLDOMDocument PTR

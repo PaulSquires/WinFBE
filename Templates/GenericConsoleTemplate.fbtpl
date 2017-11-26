@@ -1,0 +1,12 @@
+2
+FBCONUI
+.bas
+.Generic Console Template
+'#CONSOLE ON
+#define UNICODE
+#INCLUDE ONCE "windows.bi"
+'USING Afx
+
+PRINT
+PRINT "Press any key..."
+SLEEP

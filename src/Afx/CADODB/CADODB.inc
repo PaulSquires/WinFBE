@@ -286,7 +286,7 @@ PRIVATE FUNCTION AfxAdoGetErrorInfo (BYVAL pConnection AS AFX_ADOConnection PTR,
    cbsDescription = AfxAdoGetRuntimeErrorInfo(wError)
    IF LEN(cbsDescription) THEN
       cbsErrorText += "ADO runtime error" & CHR(13, 10)
-      cbsErrorText += "Error code: " & STR(nError) & " [&h" & HEX$(nError, 8) & "]" & CHR(13, 10)
+      cbsErrorText += "Error code: " & STR(nError) & " [&h" & HEX(nError, 8) & "]" & CHR(13, 10)
       cbsErrorText += "Description: " & cbsDescription
    ELSE
       ' If it is not a Provider or an ADO runtime error then must be a Windows error
