@@ -29,7 +29,7 @@ Resources:
 
 
 WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 
 The WinFBE editor is licensed under the GNU GPLv3 or later.
 

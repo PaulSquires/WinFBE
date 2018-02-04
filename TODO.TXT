@@ -1,10 +1,3 @@
-[ ] Improve syntax keyword highlighting. 
-    [ ] WinAPI keyword list.
-
-[ ] Improve Codetips support. Loaded preparsed Windows includes (based on ANSI or UNICODE defined in files).
-
-[ ] Split editing windows.
-
 [ ] Print option.
 
 [ ] Integrated visual designer.
@@ -13,7 +6,7 @@
 
 [ ] Menu option. "Save as Template"
 
-[ ] Menu option. "New from Template"
+
  
 
 

@@ -1,3 +1,16 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
 ''  Scintilla source code edit control v. 3.0.3
 ''  @file Scintilla.h
 ''  Interface to the edit control.
@@ -160,7 +173,8 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SCI_GETMARGINSENSITIVEN                         2247
 #Define SCI_SETMARGINCURSORN                            2248
 #Define SCI_GETMARGINCURSORN                            2249
-#Define STYLE_DEFAULT                                   32
+#Define STYLE_AUTOCOMPLETE                              255      ' Added by Paul / WinFBE
+#define STYLE_DEFAULT                                   32
 #Define STYLE_LINENUMBER                                33
 #Define STYLE_BRACELIGHT                                34
 #Define STYLE_BRACEBAD                                  35
@@ -287,6 +301,7 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SCI_GETCARETLINEBACK                            2097
 #Define SCI_SETCARETLINEBACK                            2098
 #Define SCI_STYLESETCHANGEABLE                          2099
+#define SCN_AUTOCSELECTIONCHANGE                        2032
 #Define SCI_AUTOCSHOW                                   2100
 #Define SCI_AUTOCCANCEL                                 2101
 #Define SCI_AUTOCACTIVE                                 2102
@@ -419,6 +434,7 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SCI_CALLTIPSETFOREHLT                           2207
 #Define SCI_CALLTIPUSESTYLE                             2212
 #Define SCI_CALLTIPSETPOSITION                          2213
+#Define SCI_CALLTIPSETPOSSTART                          2214 
 #Define SCI_VISIBLEFROMDOCLINE                          2220
 #Define SCI_DOCLINEFROMVISIBLE                          2221
 #Define SCI_WRAPCOUNT                                   2235
@@ -983,6 +999,9 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 #Define SCN_AUTOCCANCELLED                              2025
 #Define SCN_AUTOCCHARDELETED                            2026
 #Define SCN_HOTSPOTRELEASECLICK                         2027
+#Define SCN_FOCUSIN                                     2028
+#Define SCN_FOCUSOUT                                    2029
+#Define SCN_AUTOCCOMPLETED                              2030
 
 #IfnDef SCI_DISABLE_PROVISIONAL
    #Define SC_LINE_END_TYPE_DEFAULT        0
@@ -1053,8 +1072,8 @@ Type Sci_RangeToFormat Field = 4
 End Type
 
 '#define RangeToFormat Sci_RangeToFormat
-
-Type Sci_NotifyHeader 'Field = 4
+         
+Type Sci_NotifyHeader 
   ' /* Compatible with Windows NMHDR.
   '  * hwndFrom is really an environment specific window handle or pointer
   '  * but most clients of Scintilla.h do not have this type visible. */
@@ -1062,30 +1081,57 @@ Type Sci_NotifyHeader 'Field = 4
 	idFrom As UINT_PTR
 	code As UINT
 End Type
-
-Type SCNotification
+    
+         
+#ifdef __FB_64BIT__       
+Type SCNotification        
    hdr                  As Sci_NotifyHeader
-   position             As LONG
-   ch                   As LONG
-   modifiers            As LONG
-   modificationType     As LONG
+   position             As long
+   ch                   As integer
+   modifiers            As long
+   modificationType     As long
+   lpText               As UINT_PTR
+   length               As long
+   linesAdded           As long
+   message              As long
+   wParam               As integer 'WPARAM
+   lParam               As integer 'LPARAM
+   nLine                As long
+   foldLevelNow         As integer
+   foldLevelPrev        As integer
+   margin               As integer
+   listType             As integer
+   x                    As integer
+   y                    As integer
+   token                As integer
+   annotationLinesAdded As integer
+   updated              As integer
+End Type       
+#else       
+Type SCNotification 
+   hdr                  As Sci_NotifyHeader
+   position             As long
+   ch                   As long
+   modifiers            As long
+   modificationType     As long
    lpText               As ZString Ptr
-   length               As LONG
-   linesAdded           As LONG
-   message              As LONG
+   length               As long
+   linesAdded           As long
+   message              As long
    wParam               As WPARAM
    lParam               As LPARAM
-   nLine                As LONG
-   foldLevelNow         As LONG
-   foldLevelPrev        As LONG
-   margin               As LONG
-   listType             As LONG
-   x                    As LONG
-   y                    As LONG
-   token                As LONG
-   annotationLinesAdded As LONG
-   updated              As LONG
+   nLine                As long
+   foldLevelNow         As long
+   foldLevelPrev        As long
+   margin               As long
+   listType             As long
+   x                    As long
+   y                    As long
+   token                As long
+   annotationLinesAdded As long
+   updated              As long
 End Type
+#endif
 
 'struct SCNotification {
 '	struct Sci_NotifyHeader nmhdr;

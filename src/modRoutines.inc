@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -341,13 +341,14 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
                             
    if pDoc = 0 then exit function
 
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    ' Save the current file position and first visible line
-   dim nFirstLine as long = SciExec( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-   Dim nPos As Long = SciExec(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
+   dim nFirstLine as long = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+   Dim nPos As Long = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
 
    pDoc->FileEncoding = FileEncoding
-   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(pDoc->hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-   dim as long sciCodePage = SciExec(pDoc->hWindow, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
+   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(hEdit, SCI_GETCHARACTERPOINTER, 0, 0) )
+   dim as long sciCodePage = SciExec(hEdit, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
    dim as string txtBuffer 
    
    ' Convert buffer to specified file encoding
@@ -358,7 +359,7 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
          else   
             ' need to convert from UTF8 to ANSI
             txtBuffer = Utf8ToAscii(*psz)
-            SciExec(pDoc->hWindow, SCI_SETCODEPAGE, 0, 0 )
+            SciExec(hEdit, SCI_SETCODEPAGE, 0, 0 )
          end if    
 
       case FILE_ENCODING_UTF8_BOM, FILE_ENCODING_UTF16_BOM
@@ -367,7 +368,7 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
          else
             ' need to convert from ANSI to UTF8
             txtBuffer = AnsiToUtf8(*psz)
-            SciExec(pDoc->hWindow, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+            SciExec(hEdit, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
          end if    
 
    END SELECT
@@ -375,8 +376,8 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
    ' Set the new buffer
    pDoc->SetText(txtBuffer)
     
-   SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
-   SciExec(pDoc->hWindow, SCI_GOTOPOS, nPos, 0)
+   SciExec(hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
+   SciExec(hEdit, SCI_GOTOPOS, nPos, 0)
    
    function = 0
 end function   
@@ -399,10 +400,10 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
       wszText = pDoc->DiskFilename
       nLineNumber = 0
    else 
-      dim pData as DBENGINE_DATA ptr
-      pData = gdb.dbFindFunctionName( str(wszFunctionName) ) 
+      dim pData as DB2_DATA ptr
+      pData = gdb2.dbFindFunction( wszFunctionName ) 
       if pData then
-         wszText = pData->DiskFilename
+         wszText = pData->fileName
          nLineNumber = pData->nLineNum
       end if
    end if   
@@ -420,8 +421,9 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
-      SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
-      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
+      dim as hwnd hEdit = pDoc->hWndActiveScintilla
+      SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
+      SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
    END IF
    
    function = 0
@@ -1030,29 +1032,25 @@ End Function
 Function CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
 
    dim pDoc as clsDocument ptr
-   dim pData as DBENGINE_DATA ptr
-   
+   dim pData as DB2_DATA ptr
+    
    dim as long idx = gApp.GetActiveProjectIndex()
 
    dim as long f = Freefile
    Open sFilename For Output As #f
 
-   gdb.dbRewind()
+   gdb2.dbRewind()
    do 
-      pData = gdb.dbGetNext()
+      pData = gdb2.dbGetNext()
       if pData = 0 THEN exit do
-      if pData->dataType <> DB_FUNCTION_NAME THEN continue do
-
-      ' data1 = Function name.
-      ' data2 = Function declare parameter list.
+      if pData->id <> DB2_FUNCTION THEN continue do
 
       ' Bypass any declares for Class subs/functions
-      if instr(pData->data1, ".") = 0 THEN
-         if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(pData->DiskFilename)) THEN 
-            Print #f, "Declare " & AfxStrShrink(pData->data2, Chr(32,9,13,10))
+      if instr(pData->ElementName, ".") = 0 THEN
+         if gApp.Projects(idx).GetDocumentPtrByFilename(pData->fileName) THEN 
+            Print #f, "Declare " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
          end if
       END IF
-
    loop
 
    Close #f
@@ -1204,5 +1202,63 @@ function GetRunExecutableFilename() as CWSTR
 END FUNCTION
 
 
+
+' ========================================================================================
+' Loads an image from a resource, converts it to an icon or bitmap and returns a pointer
+' to the raw PNG pixels. This is needed by the scintilla autocomplete popup.
+' Memory is ALLOCATE so it needs to be DEALLOCATE.
+' Parameters:
+' - hInstance     = [in] A handle to the module whose portable executable file or an accompanying
+'                   MUI file contains the resource. If this parameter is NULL, the function searches
+'                   the module used to create the current process.
+' - wszImageName  = [in] Name of the image in the resource file (.RES). If the image resource uses
+'                   an integral identifier, wszImage should begin with a number symbol (#)
+'                   followed by the identifier in an ASCII format, e.g., "#998". Otherwise,
+'                   use the text identifier name for the image. Only images embedded as raw data
+'                   (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.
+' ========================================================================================
+TYPE MYBITMAPINFO
+    bmiHeader AS BITMAPINFOHEADER
+    bmiColors(256) AS RGBQUAD 
+END TYPE
+             
+''
+''
+FUNCTION LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING) as any ptr
+   dim as HBITMAP hBitmap = AfxGdipImageFromRes(hInstance, wszImageName, 0, false, IMAGE_BITMAP) 
+        
+   dim bi AS MYBITMAPINFO
+   dim bm AS BITMAP
+   dim dwp AS DWORD PTR
+   dim as HDC hIC, hDC 
+   dim as any ptr pPixel
+   
+   IF hBitmap THEN
+      hIC = GetWindowDC(0)
+      hDC = CreateCompatibleDC(hIC)
+      SelectObject(hDC, hBitmap)
+
+      GetObject(hBitmap, SIZEOF(bm), @bm)
+      bi.bmiHeader.biSize        = SIZEOF(bi.bmiHeader)
+      bi.bmiHeader.biWidth       = bm.bmWidth
+      bi.bmiHeader.biHeight      = -bm.bmHeight ' Put top in TOP instead on bottom!
+      bi.bmiHeader.biPlanes      = 1
+      bi.bmiHeader.biBitCount    = 32
+      bi.bmiHeader.biCompression = BI_RGB
+                      
+      pPixel = ALLOCATE((bm.bmWidth * bm.bmHeight) * sizeof(DWORD))
+      dwp = cast(dword ptr, pPixel)
+      GetDIBits( hDC, hBitmap, 0, bm.bmHeight, _
+                        BYVAL dwp, cast(LPBITMAPINFO, @bi), DIB_RGB_COLORS)
+     
+      DeleteDC(hIC)
+      DeleteDC(hDC)
+   end if
+
+   ' // Return the handle to the PNG raw pixels
+   DeleteObject(hBitmap)
+   return pPixel
+END FUNCTION
+' ========================================================================================
 
 

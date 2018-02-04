@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -42,7 +42,10 @@ Function frmGoto_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             nLine = Val(swzText) - 1
             If nLine >= 0 Then
                Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-               If pDoc Then SciExec( pDoc->hWindow, SCI_GOTOLINE, nLine, 0 )
+               If pDoc Then 
+                  dim as hwnd hEdit = pDoc->hWndActiveScintilla
+                  SciExec( hEdit, SCI_GOTOLINE, nLine, 0 )
+               END IF
             End If
             SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
@@ -145,9 +148,10 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
-      curPos  = SciExec(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
-      nLine   = SciExec(pDoc->hWindow, SCI_LINEFROMPOSITION, curPos, 0) + 1
-      nLines  = SciExec(pDoc->hWindow, SCI_GETLINECOUNT, 0, 0)
+      dim as hwnd hEdit = pDoc->hWndActiveScintilla
+      curPos  = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
+      nLine   = SciExec(hEdit, SCI_LINEFROMPOSITION, curPos, 0) + 1
+      nLines  = SciExec(hEdit, SCI_GETLINECOUNT, 0, 0)
       SetWindowText( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLCURRENTVALUE), WStr(nLine) )
       SetWindowText( GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_LBLLASTVALUE), WStr(nLines) )
    End If

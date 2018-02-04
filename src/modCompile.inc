@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -248,7 +248,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    SetCursor( LoadCursor(0, IDC_WAIT) )
 
    pDoc = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+   if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
 
 
    ' If this is a project then we need to compile all of the modules first
@@ -291,7 +291,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                if ParseLogForError(sConsoleText, false, wID) then   ' error detected
                   SetCursor( hCurSave )
                   pDoc = gTTabCtl.GetActiveDocumentPtr()
-                  if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+                  if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
                   return true
                end if
                sConsoleText = ""
@@ -338,7 +338,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    SetCursor( hCurSave )
    pDoc = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN SciExec( pDoc->hWindow, SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+   if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
    gCompile.EndTime = Timer
    gCompiling = false
 
@@ -384,9 +384,9 @@ FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
    StartupInf.hStdOutput = hChildStdOutWrite  
    StartupInf.dwFlags    = STARTF_USESTDHANDLES
 
-? "CreateProcess:  "; zCmdLine; " "; zParams
-?
-?
+'? "CreateProcess:  "; zCmdLine; " "; zParams
+'?
+'?
    
    IF CreateProcess( zCmdLine,  _    ' Create the child process.
                      zParams, _      ' Command line
@@ -398,7 +398,7 @@ FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
                      BYVAL 0,     _  ' Use parent's current directory
                      @StartupInf,  _  ' STARTUPINFO pointer
                      @ProcessInfo) = FALSE THEN
-      ? "error createprocess"
+'      ? "error createprocess"
    ELSE
       ' Close handles to the child process and its primary thread.
       ' Some applications might keep these handles to monitor the status 
@@ -428,11 +428,11 @@ SUB RedirConsoleToFile( byref szExe AS zstring, _
 
    ' Create a pipe for the child process's STDOUT.
    IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
-      ? "error creating pipe"
+'      ? "error creating pipe"
    ELSE
       ' Ensure the read handle to the pipe for STDOUT is not inherited.
       IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
-         ? "error SetHandleInformation"
+'         ? "error SetHandleInformation"
       ELSE
          ' Create the child process and read from its standard output
          IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
@@ -444,7 +444,7 @@ SUB RedirConsoleToFile( byref szExe AS zstring, _
                   EXIT DO
                end if  
                '? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
-               ? LEFT(sBuffer, dwReadBytes)
+'               ? LEFT(sBuffer, dwReadBytes)
                sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
                '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
                ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
@@ -560,7 +560,8 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Lon
       End If 
    END IF
 
-   SciExec( pDoc->hWindow, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   SciExec( hEdit, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
 
 End Function
 
@@ -630,9 +631,12 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       ' Could Not Open source file (p.RC)
       ' OBJ file Not made
       ' compiling resource FAILED: Error Code 1
+      '
+      ' Very sorry, but GoRC had a problem.
                                           
       ' Check to see if linking failed
-      If (Left(**wst_ucase, 6) = WSTR("ERROR!")) Then
+      If (Left(**wst_ucase, 6) = WSTR("ERROR!")) or _
+         (left(**wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
          FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1") ) 

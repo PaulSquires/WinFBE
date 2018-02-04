@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -39,19 +39,17 @@ function UpdateToDoListview() as long
    ListView_DeleteAllItems( hLV )
    dim as long n = 0
 
-   dim pData as DBENGINE_DATA ptr
+   dim pData as DB2_DATA ptr
    
-   gdb.dbRewind()
+   gdb2.dbRewind()
    do 
-      pData = gdb.dbGetNext
+      pData = gdb2.dbGetNext
       if pData = 0 THEN exit do
-      if pData->dataType <> DB_TODO_ITEM THEN continue do
-      if AfxFileExists(pData->diskFilename) THEN
-         FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
-         FF_ListView_InsertItem( hLV, n, 1, WStr(pData->diskFilename) )
-         FF_ListView_InsertItem( hLV, n, 2, WStr(pData->data1) ) 
-         n = n + 1
-      end if
+      if pData->id <> DB2_TODO THEN continue do
+      FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
+      FF_ListView_InsertItem( hLV, n, 1, WStr(pData->fileName) )
+      FF_ListView_InsertItem( hLV, n, 2, WStr(pData->ElementValue) ) 
+      n = n + 1
    loop
 
    function = 0
@@ -97,7 +95,8 @@ function DoSearchFileSelected() as LONG
                            0 )         ' pDocIn
 
    if pDoc THEN
-      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNum-1, 0)
+      dim as hwnd hEdit = pDoc->hWndActiveScintilla
+      SciExec( hEdit, SCI_GOTOLINE, nLineNum-1, 0)
    END IF
 
    function = 0

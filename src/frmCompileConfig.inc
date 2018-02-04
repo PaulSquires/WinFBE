@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -396,6 +396,9 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
                                 ByVal nCmdShow   As Long = 0 _
                                 ) As Long
 
+   DIM hBitmap AS HBITMAP 
+   dim hCtrl as HWnd
+
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
@@ -432,12 +435,23 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("RADIOBUTTON", , IDC_FRMCOMPILECONFIG_OPT64, "FBC 64-bit", 115, 285, 100, 20, _
         WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, WSTR("#1001"), 243, 10, 32, 32, _
+
+   hCtrl = _
+   pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, "", 243, 10, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDDOWN, WSTR("#1000"), 243, 159, 32, 32, _
+   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_UP"), 0, false, IMAGE_BITMAP, 0)
+   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+   IF hBitmap THEN DeleteObject(hBitmap)
+
+   hCtrl = _
+   pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDDOWN, "", 243, 159, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_DOWN"), 0, false, IMAGE_BITMAP, 0)
+   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+   IF hBitmap THEN DeleteObject(hBitmap)
+
    pWindow->AddControl("BUTTON", , IDOK,  L(0,"&OK"), 300, 10, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)

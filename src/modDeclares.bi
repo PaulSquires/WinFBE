@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
 
 ''  Control identifiers
 #Define IDC_SCINTILLA 100
+#Define IDC_SCROLLV   200
 
 #Define IDC_FRMMAIN_TOPTABCONTROL                   1000
 #Define IDC_FRMMAIN_TOOLBAR                         1001
 #Define IDC_FRMMAIN_REBAR                           1002
 #Define IDC_FRMMAIN_STATUSBAR                       1003
-#Define IDC_FRMMAIN_PROGRESSBAR                     1004
-#Define IDC_FRMMAIN_COMPILETIMER                    1005
-#Define IDC_FRMMAIN_COMBOBUILDS                     1006
+#Define IDC_FRMMAIN_COMPILETIMER                    1004
+#Define IDC_FRMMAIN_COMBOBUILDS                     1005
 
 #Define IDC_FRMOUTPUT_TABCONTROL                    1000
 #Define IDC_FRMOUTPUT_LISTVIEW                      1001
@@ -254,6 +254,8 @@ Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located 
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
 CONST IDM_ADDFILETOPROJECT = 6100    ' 6100 to 6199 Popup menu will show list of open projects to choose from. 
 
+const SPLITSIZE   = 5      ' Width/Height of the scrollbar split buttons for split editing windows
+
 const IDC_DESIGNFRAME = 100
 const IDC_DESIGNFORM  = 101
       
@@ -272,7 +274,33 @@ const FILE_ENCODING_UTF16_BOM = 2
 const USERTOOL_ACTION_SELECTED    = 0   
 const USERTOOL_ACTION_PRECOMPILE  = 1   
 const USERTOOL_ACTION_POSTCOMPILE = 2
+
+' The type of autocomplete popup that is active. This is necessary
+' because the autocomplete popup list is rebuilt every time a new
+' character is entered.
+enum
+   AUTOCOMPLETE_NONE   = 0
+   AUTOCOMPLETE_DIM_AS 
+   AUTOCOMPLETE_TYPE
+end enum   
    
+   
+' Directions when determining next closest control pointer
+ENUM
+   DIRECTION_TOP = 1
+   DIRECTION_LEFT
+   DIRECTION_RIGHT
+   DIRECTION_BOTTOM
+end enum   
+
+' Index for scintilla autocomplete raw PNG for SCI_REGISTERRGBAIMAGE
+enum
+   IMAGE_AUTOC_BASETYPE = 1        ' default variable types. Long, String, Single, etc
+   IMAGE_AUTOC_CLASS    = 2        ' class/TYPEs
+   IMAGE_AUTOC_METHOD   = 3        ' subs/functions
+   IMAGE_AUTOC_PROPERTY = 4        ' variable within a TYPE that can be set directly
+end enum
+
 ' Colors
 enum
    ' Start the enum at 2 because when theme is saved to file the first parse is the
@@ -350,13 +378,15 @@ Enum
    MSG_USER_GETCOLORCUSTOM
    MSG_USER_PROCESS_COMMANDLINE 
    MSG_USER_TOGGLE_TVCHECKBOXES
+   MSG_USER_SHOWAUTOCOMPLETE
+   MSG_USER_APPENDEQUALSSIGN
    IDM_CREATE_THEME, IDM_IMPORT_THEME, IDM_DELETE_THEME
    IDM_FILE, IDM_FILENEW 
    IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS
    IDM_FILESAVEALL, IDM_FILESAVEDECLARES
    IDM_MRU, IDM_OPENINCLUDE, IDM_COMMAND, IDM_EXIT
    IDM_EDIT
-   IDM_UNDO, IDM_REDO, IDM_CUT, IDM_COPY, IDM_PASTE, IDM_DELETELINE, IDM_INSERTFILE
+   IDM_UNDO, IDM_REDO, IDM_CUT, IDM_COPY, IDM_PASTE, IDM_DELETELINE, IDM_DELETE, IDM_INSERTFILE
    IDM_ANSI, IDM_UTF8BOM, IDM_UTF16BOM
    IDM_INDENTBLOCK, IDM_UNINDENTBLOCK, IDM_COMMENTBLOCK, IDM_UNCOMMENTBLOCK
    IDM_DUPLICATELINE, IDM_MOVELINEUP, IDM_MOVELINEDOWN, IDM_TOUPPERCASE, IDM_TOLOWERCASE
@@ -364,11 +394,11 @@ Enum
    IDM_SPACESTOTABS, IDM_TABSTOSPACES
    IDM_SEARCH
    IDM_FIND, IDM_FINDNEXT, IDM_FINDPREV, IDM_FINDINFILES, IDM_REPLACE, IDM_DEFINITION
-   IDM_LASTPOSITION, IDM_FUNCTIONLIST
+   IDM_LASTPOSITION
    IDM_GOTO, IDM_BOOKMARKTOGGLE, IDM_BOOKMARKNEXT, IDM_BOOKMARKPREV, IDM_BOOKMARKCLEARALL
    IDM_VIEW
-   IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT, IDM_RESTOREMAIN
-   IDM_VIEWEXPLORER, IDM_VIEWOUTPUT
+   IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT
+   IDM_FUNCTIONLIST, IDM_VIEWEXPLORER, IDM_VIEWOUTPUT, IDM_RESTOREMAIN
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT
    IDM_PROJECTFILESADDTONODE, IDM_REMOVEFILEFROMPROJECT 
    IDM_PROJECTCLOSE, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS  
@@ -377,8 +407,6 @@ Enum
    IDM_TOOLBAREDITOR, IDM_STATUSBAREDITOR, IDM_ALIGNLEFTS
    IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, IDM_ALIGNTOPS, IDM_ALIGNMIDDLES
    IDM_ALIGNBOTTOMS, IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH 
-   IDM_HSPACEEQUAL, IDM_HSPACEINCREASE, IDM_HSPACEDECREASE 
-   IDM_HSPACEREMOVE, IDM_VSPACEEQUAL, IDM_VSPACEINCREASE 
    IDM_VSPACEDECREASE, IDM_VSPACEREMOVE, IDM_CENTERHORIZ
    IDM_CENTERVERT, IDM_CENTERBOTH, IDM_LOCKCONTROLS
    IDM_OPTIONS, IDM_COMPILECONFIG, IDM_USERTOOLSDIALOG
@@ -390,7 +418,6 @@ Enum
    IDM_USERTOOL   ' + n number of user tools
 End Enum
 
-
 '  Global window handle for the main form
 Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR, HWND_FRMEXPLORER, HWND_FRMRECENT, HWND_FRMOUTPUT
 Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
@@ -398,6 +425,7 @@ dim shared as hwnd HWND_FRMMAIN_COMBOBUILDS
 
 Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
+dim shared as BOOLEAN gFileLoading     ' T/F only parse Includes during initial file load.
 dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
 dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 
@@ -414,7 +442,14 @@ dim shared as HICON ghIconGood, ghIconBad
 dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
 
 dim shared as HACCEL ghAccelUserTools
+dim shared as HCURSOR ghCursorNS
 
+' PropertyList divider globals
+dim shared as long gPropDivPos
+dim shared as boolean gPropDivTracking
+
+' Global array thatt holds includes found during parsing
+dim shared gIncludeFiles(any) as CWSTR
 
 ' Create a dynamic array that will hold all localization words/phrases. This
 ' array is resized and loaded using the LoadLocalizationFile function.
@@ -427,6 +462,35 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 #Define SetFocusScintilla  PostMessage HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
 #Define ResizeExplorerWindow  PostMessage HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
 #Define SciExec(h, m, w, l) SendMessage(h, m, w, CAST(LPARAM, l))
+
+''
+''  Application in-memory database
+''
+const DB2_VARIABLE    = 1
+const DB2_FUNCTION    = 2
+const DB2_SUB         = 3
+const DB2_PROPERTY    = 4
+const DB2_TYPE        = 5
+const DB2_TODO        = 6
+const DB2_INCLUDEFILE = 7
+const DB2_STANDARDDATATYPE = 8    ' long, integer, string, etc...
+
+type DB2_DATA
+   deleted      as BOOLEAN = true  ' True/False
+   fileName     as CWSTR           ' Filename for #INCLUDE or source file (needed for deleting).
+   projectIndex as long            ' Needed for deleting
+   id           as LONG            ' See DB_* above for what type of record this is.
+   nLineNum     as long            ' Location in the file where found
+   ElementName  as string          ' Function name / Variable Name / Type Name
+   ElementValue as string          ' Function Calltip / TYPE associated with ElementName variable
+   Description  as string          ' Description of TYPE/FUNCTION/SUB from '#DESCRIPTION: tag.
+   IsPrivate    as Boolean         ' Element is private in a TYPE
+   IsTHIS       as Boolean         ' Dynamically set in DereferenceLine so caller can show/hide private elements
+   IsWinApi     as Boolean         ' If data item is WinApi related
+   IsEnum       as Boolean         ' If TYPE is treated as an ENUM
+   TypeExtends  as String          ' The TYPE is extended from this TYPE
+END TYPE
+
 
 ''
 ''  Save information related to Find/Replace and Find in Files operations
@@ -480,28 +544,54 @@ End Type
 Dim Shared gLastPosition As LASTPOSITION_TYPE
 
 
+type clsLasso
+   private:
+      pWindow      as CWindow ptr 
+      hWindow      as hwnd
+      hWndParent   as hwnd
+      ptStart      as POINT
+      ptEnd        as POINT
+      bLasso       as Boolean
+      
+   public:
+      declare destructor
+      declare function IsActive() as Boolean
+      declare function GetLassoRect() as RECT
+      declare function SetStartPoint( byval x as long, byval y as Long) as Long
+      declare function SetEndPoint( byval x as long, byval y as Long) as Long
+      declare function GetStartPoint() as POINT
+      declare function GetEndPoint() as POINT
+      declare function FillAlpha(byval hBmp as HBITMAP) as Boolean
+      declare function Show() as Long
+      declare function Create( byval hWndParent as HWND ) as boolean
+      declare function Destroy() as boolean
+END TYPE
+
+
 type clsProperty
    private:
    
    public:
-      wszPropDisplayName as CWSTR    ' This name displays in the PopertyList
-      wszPropName  as CWSTR          ' This is always UCASE. Used for Get/Set of property value
+      wszPropName  as CWSTR          ' Used for Get/Set of property value
       wszPropValue as CWSTR
 END TYPE
-
+         
 
 type clsControl
    private:
    
    public:
-      hWindow      as hwnd
-      ControlType  as long 
-      IsSelected   as Boolean
-      IsActive     as Boolean
-      SuspendLayoutChange as Boolean    ' prevent layout properties from being acted on individually (instead treat as a group)
+      hWindow       as hwnd
+      ControlType   as long 
+      IsSelected    as Boolean
+      IsActive      as Boolean
+      SuspendLayout as Boolean    ' prevent layout properties from being acted on individually (instead treat as a group)
       rcHandles(1 to 8) as RECT         ' 8 grab handles
       Properties(Any) As clsProperty
 END TYPE
+
+' Global array to hold cut/copy/paste controls
+dim shared gCopyControls(any) as clsControl
 
 Type clsCollection
    Private:
@@ -514,8 +604,11 @@ Type clsCollection
       Declare Function ItemAt( ByVal nIndex As Long ) As clsControl Ptr 
       'declare function ItemByName( byref wszName as wstring ) as clsControl ptr
       declare function DeselectAllControls() as long
+      declare function SelectAllControls() as long
       declare function SelectControl( byval hWndCtrl as hwnd) as long
+      declare function SelectedControlsCount() as long
       declare function SetActiveControl( byval hWndCtrl as hwnd) as long
+      declare function GetActiveControl() as clsControl ptr
       declare function GetCtrlPtr( byval hWndCtrl as hwnd) as clsControl ptr
       Declare Function Add( ByVal pCtrl As clsControl Ptr ) As Long
       declare function Remove( byval pCtrl as clsControl ptr ) as long
@@ -527,15 +620,21 @@ End Type
 
 Type clsDocument
    Private:
-      m_pSci           As Any Ptr      
+      ' 2 Scintilla direct pointers to accommodate split editing
+      m_pSci(1)             As Any Ptr      
+      m_hWndActiveScintilla as hwnd
       
    Public:
       IsDesigner       As BOOLEAN
       IsNewFlag        As BOOLEAN
       
+      ' 2 Scintilla controls to accommodate split editing
+      ' hWindow(0) is our MAIN control (bottom)
+      ' hWindow(1) is our split control (top)
+      hWindow(1)       As HWnd   ' Scintilla split edit windows (Also DesignMain for visual designer windows)
+      
       ' Visual designer related
       Controls         as clsCollection
-      hWindow          As HWnd      ' This is also the DesignMain for visual designer windows
       hWndFrame        as hwnd      ' DesignFrame for visual designer windows
       hWndForm         as hwnd      ' DesignForm for visual designer windows
       GrabHit          as long      ' Which grab handle is currently active for sizing action
@@ -544,9 +643,13 @@ Type clsDocument
       bMoving          as Boolean   ' Flag that moving action is in progress
       rcSize           as RECT      ' Current size of form/control. Used during sizing action
       pCtrlAction      as clsControl ptr  ' The control that the size/move action is being performed on
-      ptStart          as POINT     ' lasso starting point at LButtonDown
-      ptEnd            as POINT     ' lasso ending point at LButtonUp
-      bLasso           as Boolean   ' Flag that lasso operation is in progress.
+      pCtrlCloseLeft   as clsControl ptr  ' closest control to the left of selected control
+      pCtrlCloseTop    as clsControl ptr  ' closest control to the top of selected control
+      pCtrlCloseRight  as clsControl ptr  ' closest control to the right of selected control
+      pCtrlCloseBottom as clsControl ptr  ' closest control to the bottom of selected control
+      ptBlueStart      as POINT     ' Start of blue line for snapping
+      ptBlueEnd        as POINT     ' End of blue line for snapping
+      SnapUpWait       as long      ' #pixels of movement to wait until snap operation ends
       
       ' Code document related
       ProjectIndex     as long      ' array index into gApp.Projects
@@ -557,9 +660,22 @@ Type clsDocument
       FileEncoding     as long       
       UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
       DocumentBuild    as string   ' specific build configuration to use for this document
+      sMatchWord       as string   ' for the incremental autocomplete search
+      AutoCompleteType as long     ' AUTOC_DIMAS, AUTOC_TYPE
+      AutoCStartPos    as Long
+      
+      ' Following used for split edit views
+      hScrollBar       as hwnd
+      ScrInfo          As SCROLLINFO  ' Scrollbar parameters array
+      rcSplitButton    as RECT        ' Split gripper
+      SplitY           As long        ' Y coordinate of vertical splitter
       
       static NextFileNum as Long
       
+      declare property hWndActiveScintilla() as hwnd
+      declare property hWndActiveScintilla(byval hWindow as hwnd)
+      
+      declare function GetActiveScintillaPtr() as any ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd, ByVal IsNewFile  As BOOLEAN, ByVal pwszFile   As WString Ptr = 0) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
@@ -592,7 +708,7 @@ Type clsDocument
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Function GetBookmarks() As String
       Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
-      declare Function InFunction() As BOOLEAN
+      declare Function GetCurrentFunctionName() As string
       declare Function LineDuplicate() As Long
       declare function SetMarkerHighlight() As Long
       declare Function RemoveMarkerHighlight() As Long
@@ -738,8 +854,8 @@ Type clsConfig
       declare Function InitializeToolBox() as Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
-      declare Function LoadCodetips( ByRef sFilename As Const String ) as boolean
-      declare Function LoadCodetipsWinAPI( ByRef sFilename As Const String ) as boolean
+      declare Function LoadCodetips( ByRef sFilename As String ) as boolean
+      declare Function LoadCodetipsWinAPI( ByRef sFilename As String ) as boolean
 End Type
 
 
@@ -779,7 +895,7 @@ Type clsApp
       m_arrQuickRun(Any) As WSTRING * MAX_PATH
       
    Public:
-      IsUnicodeCodetips       As BOOLEAN     ' UNICODE define exists. Use Unicode version of codetips
+      IsWindowIncludes        as Boolean     ' T/F that Windows includes have already been loaded
       SuppressNotify          As BOOLEAN     ' temporarily suppress Scintilla notifications
       hRecentFilesRootNode    As HTREEITEM
       hRecentProjectsRootNode As HTREEITEM
@@ -790,6 +906,18 @@ Type clsApp
       NonProjectNotes         as CWSTR       ' Save/load from config file
       IsNewProjectFlag        As BOOLEAN
       ProjectOverrideIndex    as long        ' Do action to specific project rather than the active project
+      
+      ' Handles for images used in scintilla popup autocomplete
+      pImageAutocompleteBaseType as any ptr
+      pImageAutocompleteClass    as any ptr
+      pImageAutocompleteMethod   as any ptr
+      pImageAutocompleteProperty as any ptr
+      hWndAutoCListBox           as hwnd          ' handle of popup autocomplete ListBox window
+      pWindowAutoC               as CWindow       ' Our secondary popup info window
+      hWndAutoCTooltip           as hwnd          ' the label control on the secondary info window
+      AutoCTipsID(any)           as String        ' the keyword in the AutoC list used to find additional popup info
+      AutoCTipsData(any)         as DB2_DATA ptr  ' the pData into the DB2_DATA database
+      
       
       Projects(any) as clsProject 
       
@@ -812,6 +940,75 @@ Type clsApp
       
 End Type
 
+'  Internal flags for the parser routines
+enum
+   ACTION_NONE
+   ACTION_PARSEFUNCTION     
+   ACTION_PARSESUB     
+   ACTION_PARSEPROPERTY     
+   ACTION_PARSETYPE
+   ACTION_PARSEENUM
+   ACTION_PARSECOMMENT
+   ACTION_PARSEPARAMETERS   ' function parameters
+end enum
+
+type clsParser
+   public:
+      fileName      as CWSTR
+      action        as Long        ' current active action
+      lineNum       as long
+      idxProject    as Long
+      st            as String      ' full line, comments and double spaces removed
+      st_ucase      as String      ' full line (UCASE), comments and double spaces removed
+      funcName      as string      ' Name of function being parsed
+      funcParams    as string      ' Parameters to a function identifed in sFuncName
+      funcLineNum   as long        ' The line where the sub/function started. This is different than lineNum.
+      typeName      as string      ' Name of TYPE being parsed
+      typeElements  as string      ' Elements of the TYPE identified in sTypeName
+      typeAlias     as string      ' Same as typeName unless ALIAS was detected
+      varName       as string      ' Name of variable
+      varType       as string      ' Type of variable identified in sVarName
+      bIsAlias      as boolean     ' T/F if the stored TYPE name is an ALIAS for another TYPE.
+      todoText      as string      ' text description associated with a TODO item
+      bInTypePublic as Boolean     ' PRIVATE/PUBLIC sections of a TYPE
+      Description   as string      ' Text from '#Description: tag
+      IsWinApi      as boolean     ' If windows.bi was found then database items added
+      IsEnum        as Boolean     ' The TYPE is treated as an ENUM
+      TypeExtends   as String      ' The TYPE is extended from this TYPE
+      
+      declare function parseToDoItem(byval sText as string) as boolean
+      declare function IsIncludeFile(byval sText as string ) as Boolean
+      declare function IsMultilineComment(byval sLine as String) as boolean
+      declare function NormalizeLine() as boolean
+      declare function InspectLine() as boolean
+      declare function parseVariableDefinitions() as boolean
+      declare function parseTYPE() as boolean
+      declare function parseENUM() as boolean
+      declare function IsStandardDataType( byref sVarType as string ) as Boolean
+END TYPE   
+
+TYPE clsDB2
+   private:
+      m_arrData(any) as DB2_DATA
+      m_index as LONG
+      
+   public:  
+      declare function dbAdd( byref parser as clsParser, byref id as long) as DB2_DATA ptr
+      declare function dbDelete( byref wszFilename as WString) as long
+      declare function dbDeleteByProject( byval idx as long ) as boolean
+      declare function dbDeleteWinAPI() as boolean
+      declare function dbRewind() as LONG
+      declare function dbGetNext() as DB2_DATA ptr
+      declare function dbSeek( byval sLookFor as string, byval Action as long ) as DB2_DATA ptr
+      declare function dbFindFunction( byref sFunctionName as string ) as DB2_DATA ptr
+      declare function dbFindSub( byref sFunctionName as string ) as DB2_DATA ptr
+      declare function dbFindProperty( byref sFunctionName as string ) as DB2_DATA ptr
+      declare function dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
+      declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
+      declare function dbFilenameExists( byref sFilename as CWSTR ) as boolean
+      declare function dbDebug() as long
+      declare constructor
+END TYPE
 
 '  Global classes
 Dim Shared gApp As clsApp

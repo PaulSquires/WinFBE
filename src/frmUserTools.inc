@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -604,6 +604,9 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
                             ByVal nCmdShow   As Long = 0 _
                             ) As Long
 
+   DIM hBitmap AS HBITMAP
+   dim hCtrl as HWnd
+   
    '  Create the main window and child controls
    Dim pWindow as CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
@@ -625,12 +628,23 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDC_FRMUSERTOOLS_CMDDELETE, L(282, "Delete"), 87, 388, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDUP, WSTR("#1001"), 166, 388, 28, 28, _
+   
+   hCtrl = _
+   pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDUP, "", 166, 388, 28, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDDOWN, WSTR("#1000"), 199, 388, 28, 28, _
+   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_UP"), 0, false, IMAGE_BITMAP, 0)
+   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+   IF hBitmap THEN DeleteObject(hBitmap)
+
+   hCtrl = _
+   pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDDOWN, "", 199, 388, 28, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_DOWN"), 0, false, IMAGE_BITMAP, 0)
+   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+   IF hBitmap THEN DeleteObject(hBitmap)
+
    pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL1, L(290,"Tool Name:"), 230, 25, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)

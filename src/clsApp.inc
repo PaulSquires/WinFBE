@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -57,12 +57,12 @@ Function clsApp.RemoveAllSelectionAttributes() As long
          For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
             pDoc = this.Projects(idx).GetDocumentPtr(i)
             if pDoc THEN
-               SendMessage( pDoc->hWindow, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-               SendMessage( pDoc->hWindow, SCI_SETINDICATORCURRENT, 8, 0)
-               SendMessage( pDoc->hWindow, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-               startPos = SendMessage( pDoc->hWindow, SCI_GETTARGETSTART, 0, 0)
-               endPos =  SendMessage( pDoc->hWindow, SCI_GETTARGETEND, 0, 0)
-               SendMessage( pDoc->hWindow, SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
+               SendMessage( pDoc->hWindow(0), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+               SendMessage( pDoc->hWindow(0), SCI_SETINDICATORCURRENT, 8, 0)
+               SendMessage( pDoc->hWindow(0), SCI_TARGETWHOLEDOCUMENT, 0, 0)
+               startPos = SendMessage( pDoc->hWindow(0), SCI_GETTARGETSTART, 0, 0)
+               endPos =  SendMessage( pDoc->hWindow(0), SCI_GETTARGETEND, 0, 0)
+               SendMessage( pDoc->hWindow(0), SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
             END IF
          Next
       end if
@@ -85,8 +85,9 @@ Function clsApp.GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument pt
             if pDoc THEN
                ' Determine if the incoming hWindow matches the clsDocument hWindow or
                ' is the Frame or Form windows.
-               if (hWindow = pDoc->hWindow) orelse _
-                  (hWindow = pDoc->hWndFrame ) orelse _
+               if (hWindow = pDoc->hWindow(0)) orelse _
+                  (hWindow = pDoc->hWindow(1)) orelse _
+                  (hWindow = pDoc->hWndFrame)  orelse _
                   (hWindow = pDoc->hWndForm) THEN
                   return pDoc
                end if   

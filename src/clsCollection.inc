@@ -1,3 +1,16 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
 ''
 ''  Control Collection
 ''
@@ -58,7 +71,11 @@ function clsCollection.Remove( byval pCtrl as clsControl ptr ) as long
       _arrControls(i) = _arrControls(i+1)
    next
    
-   if ubound(_arrControls)-1 THEN
+   ' Destroy control and unallocate the memory.
+   DestroyWindow(pCtrl->hWindow)
+   delete pCtrl
+   
+   if ubound(_arrControls) = -1 THEN
       erase _arrControls
    else
       redim preserve _arrControls(ubound(_arrControls)-1) as clsControl ptr
@@ -72,6 +89,34 @@ function clsCollection.DeselectAllControls() as long
    for i as long = lbound(_arrControls) to ubound(_arrControls)
       _arrControls(i)->IsSelected = false
    NEXT
+   function = 0
+end function
+
+function clsCollection.SelectedControlsCount() as long
+   ' Return number of controls with selected status (except for form itself)
+   dim as Long nCount = 0
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      if _arrControls(i)->ControlType <> CTRL_FORM THEN
+         if _arrControls(i)->IsSelected then nCount = nCount + 1
+      END IF
+   NEXT
+   function = nCount
+end function
+
+function clsCollection.SelectAllControls() as long
+   ' Select the selected state of all controls (except for the form itself)
+   dim as long idxActive = -1
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      if _arrControls(i)->ControlType = CTRL_FORM then
+         _arrControls(i)->IsSelected = false
+      else
+         if _arrControls(i)->IsActive THEN idxActive = i
+         _arrControls(i)->IsSelected = true
+      end if   
+   NEXT
+   ' If there was no active control already set before selecting all
+   ' of the controls then we need to set one now.
+   if idxActive = -1 THEN this.SetActiveControl(0)
    function = 0
 end function
 
@@ -100,6 +145,16 @@ function clsCollection.SetActiveControl( byval hWndCtrl as hwnd) as long
       NEXT
    END IF
    _arrControls(idxActive)->IsActive = true
+   _arrControls(idxActive)->IsSelected = true
+   function = 0
+end function
+
+function clsCollection.GetActiveControl() as clsControl ptr
+   for i as long = lbound(_arrControls) to ubound(_arrControls)
+      if _arrControls(i)->IsActive then
+         return _arrControls(i)
+      end if   
+   NEXT
    function = 0
 end function
 

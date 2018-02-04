@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -19,18 +19,20 @@ Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
    If pDoc = 0 Then Exit Function
    
-   dim pData as DBENGINE_DATA ptr
+   dim pData as DB2_DATA ptr
+    
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
 
    ' Determine the word at the current caret position.
    Dim As String sWord = pDoc->GetWord
-   
+    
    ' Search the list of Function names
-   pData = gdb.dbFindFunctionName(sWord)
+   pData = gdb2.dbFindFunction(sWord)
    if pData THEN
       ' Save our current position in case user invokes "Last Position" option,   
       gLastPosition.pDoc = pDoc
-      gLastPosition.nFirstLine = SciExec( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-      gLastPosition.nPosition = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+      gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+      gLastPosition.nPosition = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
       OpenSelectedDocument(0, sWord)
    else
       MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
@@ -56,8 +58,8 @@ Function frmMain_GotoLastPosition() As Long
             false, _    ' bIsInclude
             gLastPosition.pDoc->DiskFilename, _ ' pwszName
             gLastPosition.pDoc )  ' pDocIn
-   SciExec( gLastPosition.pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
-   SciExec( gLastPosition.pDoc->hWindow, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
+   SciExec( GetFocus, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
+   SciExec( GetFocus, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
    
    Function = 0
 End Function
@@ -180,30 +182,54 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 
    If pNSC = 0 Then Exit Function
    
-   Dim as HWND hEdit
-   Dim as long nLine, curPos, LineLen, nFoldLevel, TabSize, nSpaces, IndentSize, i
-   Dim as string buffer, strFill, strEnd 
    Dim pDoc As clsDocument Ptr 
 
-   Select Case pNSC->hdr.code
-                     
-      Case SCN_UPDATEUI
-         ' Show line and column
-         frmMain_UpdateLineCol(HWnd)
-         
-      Case SCN_MODIFIED
-         If ((pNSC->modificationType And SC_MOD_INSERTTEXT) = SC_MOD_INSERTTEXT) Then
-            frmMain_UpdateLineCol(HWnd)
-         End If
+   Dim as HWND hEdit
+   Dim as long nLine, nFoldLevel
 
+   Select Case pNSC->hdr.code
+         
+      Case SCN_UPDATEUI    
+         if gApp.SuppressNotify then return true
+         If pNSC->hdr.idFrom = IDC_SCINTILLA Then
+            pDoc = gTTabCtl.GetActiveDocumentPtr()
+            If pDoc Then 
+               ' This code will position our substitute scrollbar thumbs only when the 
+               ' caret position crosses a page boundry via keyboard input
+               If pNSC->updated And SC_UPDATE_SELECTION And pNSC->updated > SC_UPDATE_SELECTION Then
+                  pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
+                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
+               End If
+
+               Select Case pNSC->updated
+               Case SC_UPDATE_V_SCROLL
+                  ' If there's only a V scroll update w/no selection update, then mousewheel was used - adj thumb pos.
+                  ' Scintilla eats the WM_VSCROLL msg from a mousewheel so we never get one to process. We do it here.
+                  pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
+                  SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
+               end select
+            end if
+            frmMain_UpdateLineCol(HWnd)
+         end if
+         return true
+         
+            
+      Case SCN_MODIFIED
+         if gApp.SuppressNotify then return true
+         ' Show line and column. Only do on modification of text otherwise we will have
+         ' a huge slowdown when notifications sent for UI updates.
+         If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+            frmMain_UpdateLineCol(HWnd)
+         end if
+         return true
+         
       Case SCN_MARGINCLICK
          ' Folder margin
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          If pDoc Then 
-            hEdit      = pDoc->hWindow
+            hEdit      = pDoc->hWndActiveScintilla
             nLine      = SciExec(hEdit, SCI_LINEFROMPOSITION, pNSC->position, 0)
             nFoldLevel = SciExec(hEdit, SCI_GETFOLDLEVEL, nLine, 0)
-
             Select Case pNSC->margin 
                Case 1   ' left margin (bookmarks)
                   pDoc->ToggleBookmark(nLine)
@@ -213,227 +239,174 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      SciExec(hEdit, SCI_TOGGLEFOLD, nLine, 0) 
                   End If   
             End Select
-         End If
-         
-      CASE SCN_CHARADDED
-         'TODO: Need to complete the TYPE autocomplete logic
-         'IF pNSC->ch = 46 THEN   ' "."  Show autocomplete list for TYPE variables
-         '   IF gConfig.AutoComplete THEN
-         '      if ShowTYPEAutocompleteList() then exit function
-         '   end if
-         'end if
-
-         IF pNSC->ch = 40 THEN   ' "("  Show code tip
-            if gConfig.CodeTips then ShowCodetip()                
-         end if
-            
-         If pNSC->ch = 13 Then  ' ENTER KEY PRESSED
-            If gConfig.AutoIndentation Then
-               pDoc = gTTabCtl.GetActiveDocumentPtr()
-               If pDoc = 0 Then exit function
-               hEdit = pDoc->hWindow
-               ' Current position
-               curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-               ' Current line
-               nLine = SciExec(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
-               ' Line length of the previous line
-               LineLen = SciExec(hEdit, SCI_LINELENGTH, nLine - 1, 0)
-               If LineLen < 1 Then Exit Function
-               ' Get the text of the previous line
-               buffer = Space(LineLen)
-               SciExec(hEdit, SCI_GETLINE, nLine - 1, Strptr(buffer))
-               ' Get the tab width
-               TabSize = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0)
-               ' Calculate the number of spaces to fill on the left
-               For i = 1 To Len(buffer)
-                  If Mid(buffer, i, 1) <> " " Then
-                     If Mid(buffer, i, 1) = Chr(9) Then
-                        nSpaces = nSpaces + TabSize
-                     Else
-                        Exit For
-                     End If
-                  Else
-                     nSpaces = nSpaces + 1
-                  End If
-               Next
-               ' Remove CRLF
-               buffer = AfxStrRemove(buffer, Chr(13))
-               buffer = AfxStrRemove(buffer, Chr(10))
-               ' Remove spaces and tabs and convert to uppercase
-               buffer = Trim(Ucase(buffer), Any Chr(32, 9))
-               If (Left(buffer, 3) = "IF " And Right(buffer, 5) = " THEN") Or _
-                  Left(buffer, 4) = "ELSE" Or _
-                  Left(buffer, 7) = "SELECT " Or _
-                  Left(buffer, 5) = "CASE " Or _
-                  Left(buffer, 4) = "FOR " Or _
-                  Left(buffer, 3) = "DO " Or _
-                  buffer = "DO" Or _
-                  Left(buffer, 6) = "WHILE " Or _
-                  buffer = "WHILE" Then
-                  ' Indentation size
-                  IndentSize = SciExec(hEdit, SCI_GETINDENT, 0, 0)
-                  ' Add spaces to indent the line
-                  strFill = Space(nSpaces + IndentSize)
-               Else
-                  ' Add the same spaces on the left that the line above
-                  strFill = Space(nSpaces)
-               End If
-               ' TODO: If using tabs, replace spaces with tabs
-               ' Indents the line
-               SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-            End If
-         End If
-   
-         IF pNSC->ch = 32 THEN   ' Space key pressed (Insert AutoComplete constructs if applicable)
-            IF gConfig.AutoComplete THEN
-               ' First check to see if the previous word is "AS" because we will then
-               ' show the list of data types.
-               if ShowAutocompleteList() then exit function
-               ' If the list was not shown then check the other special cases.
-               pDoc = gTTabCtl.GetActiveDocumentPtr()
-               If pDoc = 0 Then exit function
-               hEdit = pDoc->hWindow
-               curPos  = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-               nLine   = SciExec(hEdit, SCI_LINEFROMPOSITION, curPos, 0)
-               LineLen = SciExec(hEdit, SCI_LINELENGTH, nLine, 0)
-               IndentSize = SciExec(hEdit, SCI_GETINDENT, 0, 0)
-               buffer  = Space(LineLen)
-               SciExec(hEdit, SCI_GETLINE, nLine, Strptr(buffer))
-               TabSize = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0)
-               ' Calculate the number of spaces to fill on the left
-               nSpaces = 0
-               FOR i = 1 TO LEN(buffer)
-                  IF MID(buffer, i, 1) <> " " THEN
-                     IF MID(buffer, i, 1) = chr(9) THEN
-                        nSpaces = nSpaces + TabSize
-                     ELSE
-                        EXIT FOR
-                     END IF
-                  ELSE
-                     nSpaces = nSpaces + 1
-                  END IF
-               NEXT
-               ' Remove CRLF
-               buffer = AfxStrRemove(buffer, Chr(13))
-               buffer = AfxStrRemove(buffer, Chr(10))
-               ' Remove spaces and tabs and convert to uppercase
-               buffer = Trim(Ucase(buffer), Any Chr(32, 9))
-               SELECT CASE buffer
-                  CASE "IF"
-                     strFill = "x " & ConvertCase("THEN") & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END IF")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SciExec(hEdit, SCI_SETANCHOR, curPos + 1, 0)
-                  CASE "WHILE"
-                     strFill = "x" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("WEND")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SciExec(hEdit, SCI_SETANCHOR, curPos + 1, 0)
-                  CASE "FOR"
-                     strFill = "x" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("NEXT")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                     SciExec(hEdit, SCI_SETANCHOR, curPos + 1, 0)
-                  CASE "SELECT"
-                     strFill = ConvertCase("CASE") & " x" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("CASE ELSE")
-                     strFill = SPACE(nSpaces + 3) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END SELECT")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos + 5, 0)
-                     SciExec(hEdit, SCI_SETANCHOR, curPos + 6, 0)
-                  CASE "FUNCTION", "PRIVATE FUNCTION", "PUBLIC FUNCTION"
-                     if pDoc->InFunction then exit function
-                     strFill = "()" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END FUNCTION")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                  CASE "SUB", "PRIVATE SUB", "PUBLIC SUB"
-                     if pDoc->InFunction then exit function
-                     strFill = "()" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END SUB")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                  CASE "PROPERTY"
-                     strFill = "()" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END PROPERTY")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                  CASE "TYPE"
-                     strFill = "" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END TYPE")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-                  CASE "UNION"
-                     strFill = "" & vbcrlf
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strFill = SPACE(nSpaces + IndentSize)
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     strEnd = ConvertCase("END UNION")
-                     strFill = vbcrlf & SPACE(nSpaces) & strEnd
-                     'IF pSed.UseTabs THEN strFill = SCI_SpacesToTabs(pSed.hEdit, strFill)
-                     SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-                     SciExec(hEdit, SCI_GOTOPOS, curPos, 0)
-               END SELECT
-            END IF
+         End If           
+                     
+               
+      case SCN_AUTOCSELECTIONCHANGE
+         ' A listbox line has changed.
+         ' Iterate all windows to find the popup Autocomplete listbox (need to find the
+         ' handle here because the selection change fires when the listbox is created so
+         ' if we wait until after this notification then we will have missed our chance
+         ' to accurately display the codetip for the first item in the list).
+         gApp.hWndAutoCListBox = 0
+         EnumWindows(cast(EnumWindowsProc, @EnumWindowsProcCB), 0)
+         if IsWindow(gApp.pWindowAutoC.hWindow) = 0 then
+            ' Create the secondary popup window that shows additional information
+            ' related to the selected autocomplete item
+            gApp.pWindowAutoC.Create( HWND_FRMMAIN, "", @frmAutoCtooltip_WndProc, 0, 0, 0, 0, _
+                                      WS_POPUP OR WS_BORDER or WS_CLIPCHILDREN OR WS_CLIPSIBLINGS)
+            ' Set a monospaced font for better readibility
+            gApp.pWindowAutoC.SetFont("Courier New", gApp.pWindowAutoC.DefaultFontSize)
+            gApp.hWndAutoCTooltip = gApp.pWindowAutoC.AddControl("LABEL")
          END IF
+        
+'         if IsWindow(gApp.pWindowAutoC.hWindow) then
+'            dim as string sID = *cast(zstring ptr, pNSC->lpText)
+'            dim as string sText, sCodeTip
+'            dim as RECT rc     
+'            dim pData as DB2_DATA ptr
+'            pData = GetAutoCTooltip(sID)    
+'            if pData then
+'               Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
+'               If pWindow = 0 Then Exit Function
+'               GetWindowRect(gApp.hWndAutoCListBox, @rc )
+                
+'               dim as string sCodeTip = iif(len(pData->ElementValue), FormatCodetip(pData->ElementValue), " <no parameters>")
+                    
+'               select case pData->id
+'                  CASE DB2_TYPE
+'                     sText = iif(pData->IsEnum, "ENUM ", "TYPE ") & pData->ElementName
+'                  case DB2_FUNCTION
+'                     sText = "Function " & sCodeTip
+'                  case DB2_SUB         
+'                     sText = "Sub " & sCodeTip
+'                  case DB2_PROPERTY  
+'                     sText = "Property " & pData->ElementName & vbcrlf & sCodeTip
+'                  case DB2_VARIABLE
+'                     sText = pData->ElementName & vbcrlf & _
+'                             pData->ElementValue
+'                  case DB2_STANDARDDATATYPE
+'                     sText = pData->ElementName
+'               END SELECT
+'               sText = sText & vbcrlf & pData->Description
+'               sText = AfxStrReplace(sText, "..", ".")
+                
+'               ' Calculate the size of the tip window that will display all of
+'               ' the tip text.
+'               dim as HDC hDC = GetDC(gApp.hWndAutoCTooltip)
+'               dim as RECT rcTip = (0, 0, 300, 50)
+'               DrawText(hDC, sText, -1, @rcTip, DT_CALCRECT)
+'               ReleaseDC(gApp.hWndAutoCTooltip, hDC)
+'               ' Make the right side just a littler larger just in case
+'               rcTip.right = rcTip.right + gApp.pWindowAutoC.ScaleX(20)
+'               ' Make the static label control large enough
+'               SetWindowPos( gApp.hWndAutoCTooltip, 0, _
+'                             0, 0, _            
+'                             gApp.pWindowAutoC.ScaleX(rcTip.right-rcTip.left+20), _
+'                             gApp.pWindowAutoC.ScaleY(rcTip.bottom-rcTip.top+20), _
+'                             SWP_NOZORDER or SWP_NOMOVE or SWP_NOACTIVATE)
+'               ' Expand/contract the size of the parent tip window's client area              
+'               gApp.pWindowAutoC.SetClientSize(rcTip.right-rcTip.left, rcTip.bottom-rcTip.top)
+'               AfxSetWindowText(gApp.hWndAutoCTooltip, sText) 
+               
+'               SetWindowPos( gApp.pWindowAutoC.hWindow, HWND_TOPMOST, _
+'                             rc.right + pWindow->ScaleX(2), rc.top, _
+'                             0, 0, _
+'                             SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOACTIVATE)
+'               AfxRedrawWindow(gApp.pWindowAutoC.hWindow)
+'               AfxRedrawWindow(gApp.hWndAutoCTooltip)
+'            else     
+'               ShowWindow(gApp.pWindowAutoC.hWindow, SW_HIDE)
+'            end if      
+'         end if              
+        
+      case SCN_AUTOCCANCELLED
+         ' Destroy the secondary popup information window
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
+         If pDoc Then 
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            KillAutoCTooltip()
+         end if
+         
+      case SCN_AUTOCSELECTION
+         ' A selection occured from the AutoComplete listbox. We do the insertion
+         ' ourselves because the startpos of the word is not the same as the start position
+         ' used by the autocomplete listbox (because we are doing incremental searches).
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
+         If pDoc Then 
+            hEdit = pDoc->hWndActiveScintilla
+            ' Get the position where the listbox was opened.
+            'dim as long nStartPos = SciExec( hEdit, SCI_AUTOCPOSSTART, 0, 0 )
+            dim as long nStartPos = pDoc->AutoCStartPos
+            Dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            ' Get the match word that existed when the listbox was displayed
+            dim as long nLenMatchWord = len(pDoc->sMatchWord)
+            ' Set the word that was selected in the listbox
+            dim as String sText = *cast(zstring ptr, pNSC->lpText)
+            ' Remove and (Get)/(Set) that would have been added for Property
+            sText = AfxStrParse(sText, 1, " ")
+            SciExec( hEdit, SCI_SETSEL, nStartPos-nLenMatchWord, nPos)
+            SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, strptr(sText)))
+            nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            SciExec( hEdit, SCI_SETSEL, nPos, nPos)
+            ' Now that we have inserted our own text, cancel the autoinsertion by
+            ' the autocomplete listbox.
+            SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            KillAutoCTooltip   ' Destroy the secondary popup information window
+                            
+            if chr(pNSC->ch) = "=" then
+               ' Add a space before and after Equals sign whenever the user presses
+               ' the equals sign to terminate ab autocomplete popup list.
+               PostMessage(HWND, MSG_USER_APPENDEQUALSSIGN, 0, 0)
+            end if
+            return true   
+         end if
+
+      case SCN_AUTOCCHARDELETED    
+         ' Use deleted a character while autocompletion list was active. Display
+         ' new contents of list because the underlying word being typed as changed.
+         ShowAutocompleteList(SCN_AUTOCCHARDELETED)
+                                    
+      CASE SCN_CHARADDED
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
+         If pDoc = 0 Then exit function
+         hEdit = pDoc->hWndActiveScintilla
+       
+         select CASE chr(pNSC->ch)
+         case ".", ">"    '  Show autocomplete list for TYPE variables
+            ' dot "." or ">"  part of a pointer
+            ' Need to PostMessage in order to give time for notification to complete. the "."
+            ' is also used as a character that selects and closes the popup list. If no
+            ' PostMessage then the "." will automatically select the first entry in the list
+            ' and close.
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
+          
+         case ")"      ' Close and active code tip 
+            SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
+            KillAutoCTooltip()
+               
+         case "("      ' Show code tip 
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
+
+         case chr(13)  ' ENTER KEY PRESSED
+            AttemptAutoInsert()
+    
+         case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            if ShowAutocompleteList() then exit function
+
+         case else   ' all other letters
+            if ShowAutocompleteList() then exit function
+             
+         END SELECT
 
    End Select
 
    Function = 0
 End Function
-
 
 ' ========================================================================================
 ' Set focus to currently active Scintilla window
@@ -449,11 +422,52 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_PAINT message for window/dialog: frmMain
+' ========================================================================================
+Function frmMain_OnPaint( ByVal HWnd As HWnd) As LRESULT
+            
+   Dim As PAINTSTRUCT ps
+   Dim As HPEN hPen
+   Dim As HDC hDc
+   dim as RECT rc
+   
+   hDC = BeginPaint(hWnd, @ps)
+
+   SaveDC hDC
+
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   if pDoc THEN
+      ' Get location of vertical scrollbar and draw splitter button right above it.
+      if IsWindowVisible(pDoc->hScrollbar) then
+         GetWindowRect(pDoc->hScrollbar, @rc)
+         rc.top = rc.top - SPLITSIZE: rc.bottom = rc.top + SPLITSIZE
+         MapWindowPoints(0, HWND_FRMMAIN, cast(POINT ptr, @rc), 2)
+         pDoc->rcSplitButton = rc
+         if IsWindowVisible(pDoc->hWindow(1)) THEN 
+            ' If the window is visible then we need to extend the splitter hit
+            ' area to include all the way to left edge of the client area.
+            if IsWindowVisible(HWND_FRMEXPLORER) THEN 
+               rc.left = AfxGetWindowWidth( HWND_FRMEXPLORER )
+               pDoc->rcSplitButton.left = rc.left
+            end if   
+         End If
+         DrawFrameControl( hDC, @rc, DFC_BUTTON, DFCS_BUTTONPUSH)
+      end if
+   end if
+   
+   RestoreDC hDC, -1 
+   
+   EndPaint hWnd, @ps
+   
+   Function = 0
+End Function
+
+
+
+' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
 Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
-   
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    
    Dim As HWnd hEdit, hTabCtl
    Dim As Rect rc
@@ -461,7 +475,7 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Get the entire client area
    GetClientRect(HWnd, @rc)
-
+  
    ' Get the heights of the rebar and statusbar
    Dim As Long nHeightRebar     = AfxGetWindowHeight( GetDlgItem(HWnd, IDC_FRMMAIN_REBAR) )
    dim as long nHeightStatusBar = AfxGetWindowHeight( GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR) )
@@ -513,14 +527,60 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 
    ' Reduce the height of the client area by the size of the rebar and statusbar.
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc Then hEdit = pDoc->hWindow
+   If pDoc Then 
+      ' Position the Scintilla child edit windows
+      dim as RECT rcClient
+      rcClient.left = nLeft
+      rcClient.top = rc.Top + nHeightRebar + nHeightTabControl
+      rcClient.right = rc.Right - nWidthExplorer
+      rcClient.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
+      
+      dim as long iScrollbarWidth  = GetSystemMetrics(SM_CXVSCROLL)
+      dim as long iScrollbarHeight = GetSystemMetrics(SM_CXHSCROLL)
+      dim as long iWidth = rcClient.right - iScrollbarWidth
 
-   SetWindowPos hEdit, 0, _
-                  nLeft, rc.Top + nHeightRebar + nHeightTabControl, _
-                  rc.Right - nWidthExplorer, _
-                  rc.Bottom - nHeightRebar - nHeightStatusBar - nHeightTabControl - nHeightOutput, _
-                  SWP_SHOWWINDOW Or SWP_NOZORDER
+      dim as long lStyle = SWP_NOZORDER Or SWP_NOOWNERZORDER Or _
+                           SWP_SHOWWINDOW Or SWP_NOACTIVATE Or SWP_NOCOPYBITS
+      
+      dim as long nSplitSize 
+      
+      ' Position top (optional) edit window
+      if pDoc->SplitY - rcClient.top <= 0 THEN 
+         ShowWindow(pDoc->hWindow(1), SW_HIDE)      
+         nSplitSize = 0              
+      Else
+         SetWindowPos( pDoc->hWindow(1), 0, _
+                       rcClient.left, rcClient.top, _
+                       rcClient.right, pDoc->SplitY - rcClient.top, _ 
+                       lStyle)
+         nSplitSize = SPLITSIZE              
+      end if
+      
+      dim as long nTop = Max(rcClient.top, pDoc->SplitY)
 
+      ' Position main edit window
+      SetWindowPos( pDoc->hWindow(0), 0, _
+                    rcClient.left, nTop + nSplitSize, _
+                    iWidth, rcClient.bottom - nTop - nSplitSize, _
+                    lStyle)
+
+      ' Position the main view vertical scroll bar
+      SetWindowPos( pDoc->hScrollbar, 0, _ 
+                    rcClient.left + iWidth, _
+                    nTop + SPLITSIZE, _
+                    iScrollbarWidth, _
+                    rcClient.bottom - SPLITSIZE - nTop - iScrollbarHeight, _
+                    lStyle)
+
+      ' Update vertical scroll bar page value
+      pDoc->ScrInfo.nPage = SciExec(pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0)
+      pDoc->ScrInfo.nMax = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0) - 1    
+      pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
+      SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
+
+      AfxRedrawWindow(HWND_FRMMAIN)
+   end if
+   
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
    frmMain_UpdateLineCol(HWND)
@@ -565,7 +625,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
       if pDoc = 0 THEN continue for
       if pDoc->ProjectIndex <> idx THEN continue for
          
-      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          OpenSelectedDocument(pDoc, "")
          wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
@@ -583,17 +643,19 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
          TabCtrl_DeleteItem(gTTabCtl.hWindow, iTab)
          gTTabCtl.SetFocusTab(iTab-1)
       END IF
-      ShowWindow pDoc->hWindow, SW_HIDE
+      for ii as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
+         ShowWindow pDoc->hWindow(ii), SW_HIDE
+      NEXT
       
    NEXT
    
+   ' Reset the gdb database but reload the FB keywords (need valid pDocs)
+   gdb2.dbDeleteByProject(idx)
+
    ' If we get this far then we can safely remove all of the pDocs for
    ' this project from the global array
    gApp.Projects(idx).RemoveAllDocuments
 
-   ' Reset the gdb database but reload the FB keywords
-   gdb.dbDeleteByProject(idx)
-   
    DestroyWindow( HWND_FRMFNLIST )
 
    ' Remove the Explorer node for this project
@@ -609,6 +671,8 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    ' Make sure the next (if applicable) project is set as active so it can then be closed.
    gApp.EnsureDefaultActiveProject
 
+   gApp.IsWindowIncludes = false
+   gdb2.dbDeleteWinAPI
 
    PositionExplorerWindows(HWND_FRMEXPLORER)
    frmMain_PositionWindows(HWND_FRMMAIN)
@@ -674,67 +738,84 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    dim as HTREEITEM hRootNode
    Dim pDoc As clsDocument Ptr 
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   dim as boolean bAttachToProject = true
    
    ' Check to see if the document is already loaded and part of the
    ' project it is being added to.
    idx = gApp.GetActiveProjectIndex()
 
-   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(pwszName)
-
+   ' Need to determine if the document is already part of an open project
+   ' because if it is then we don't want to add the file to the current
+   ' project thus making a dual link.
+   for i as long = 1 to ubound(gApp.Projects)
+      if gApp.Projects(i).InUse = true THEN
+         pDoc = gApp.Projects(i).GetDocumentPtrByFilename(pwszName)
+         if pDoc then
+            bAttachToProject = false
+            exit for
+         end if   
+      END IF
+   NEXT
+   
    if pDoc then pDocIn = pDoc
    
-   If pDocIn = 0 Then   ' Create a new pDoc 
-      pDoc = New clsDocument
-      if bIsDesigner THEN
-         If bIsNewFile Then
-            pDoc->CreateDesignerWindow(HWnd, True)  ' Create the new visual designer window
-         Else
-            pDoc->CreateDesignerWindow(HWnd, false, pwszName)
-         End If   
-      else
-         If bIsNewFile Then
-            pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
-         Else
-            pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
-         End If   
-      END IF
-      gApp.Projects(idx).AddDocument(pDoc)          
-   Else
-      pDoc = pDocIn     ' deal with the existing pDoc
-   End If   
-   pwszName = @pDoc->DiskFilename
+   if bAttachToProject then
+      If pDocIn = 0 Then   ' Create a new pDoc 
+         gFileLoading = true  ' allows parsing of newly loading file
+         pDoc = New clsDocument
+         if bIsDesigner THEN
+            If bIsNewFile Then
+               pDoc->CreateDesignerWindow(HWnd, True)  ' Create the new visual designer window
+            Else
+               pDoc->CreateDesignerWindow(HWnd, false, pwszName)
+            End If   
+         else
+            If bIsNewFile Then
+               pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+            Else
+               pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
+            End If   
+         END IF
+         gApp.Projects(idx).AddDocument(pDoc) 
+         ParseDocument(idx, pDoc, "")
+         gFileLoading = false
+      Else
+         pDoc = pDocIn     ' deal with the existing pDoc
+      End If   
+      pwszName = @pDoc->DiskFilename
 
-   if idx = 0 THEN   ' Project0 "FILES"
-      If gApp.Projects(0).hExplorerRootNode = 0 Then
-         gApp.Projects(0).hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, "FILES" )
-         Treeview_RemoveCheckBox(hTree, gApp.Projects(0).hExplorerRootNode )
-         Treeview_SetBold(hTree, gApp.Projects(0).hExplorerRootNode, TRUE)
-      End If
-      hRootNode = gApp.Projects(0).hExplorerRootNode 
-      ' no project is active so add the file to the FILES Explorer list.
-      AddFunctionsToExplorerTreeview( pDoc, False )
-   else
-      hRootNode = gApp.Projects(idx).hExplorerRootNode
-      ' If a project is active then do not add any Include files to it and don't
-      ' show it in the Explorer's project list.
-      if bIsInclude = false then
+      if idx = 0 THEN   ' Project0 "FILES"
+         If gApp.Projects(0).hExplorerRootNode = 0 Then
+            gApp.Projects(0).hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, "FILES" )
+            Treeview_RemoveCheckBox(hTree, gApp.Projects(0).hExplorerRootNode )
+            Treeview_SetBold(hTree, gApp.Projects(0).hExplorerRootNode, TRUE)
+         End If
+         hRootNode = gApp.Projects(0).hExplorerRootNode 
+         ' no project is active so add the file to the FILES Explorer list.
          AddFunctionsToExplorerTreeview( pDoc, False )
-         ' Give this document a default project type depending on its file extension
-         gApp.Projects(idx).ProjectSetFileType(pDoc, pDoc->ProjectFileType)
-      end if
-   END IF
-
-   ' Relate this pDoc to the correct project even if it is Project0
-   pDoc->ProjectIndex = idx
-   
-   ' Set the default build configuration for this document. If no IsDefault option
-   ' has been checked then we simply use whatever the current selected build is.
-   if pDoc->DocumentBuild = "" THEN 
-      pDoc->DocumentBuild = GetDefaultBuildGUID()
+      else
+         hRootNode = gApp.Projects(idx).hExplorerRootNode
+         ' If a project is active then do not add any Include files to it and don't
+         ' show it in the Explorer's project list.
+         if bIsInclude = false then
+            AddFunctionsToExplorerTreeview( pDoc, False )
+            ' Give this document a default project type depending on its file extension
+            gApp.Projects(idx).ProjectSetFileType(pDoc, pDoc->ProjectFileType)
+         end if
+      END IF
+                       
+      ' Relate this pDoc to the correct project even if it is Project0
+      pDoc->ProjectIndex = idx
+      
+      ' Set the default build configuration for this document. If no IsDefault option
+      ' has been checked then we simply use whatever the current selected build is.
       if pDoc->DocumentBuild = "" THEN 
-         pDoc->DocumentBuild = GetSelectedBuildGUID()
-      end if
-   end if      
+         pDoc->DocumentBuild = GetDefaultBuildGUID()
+         if pDoc->DocumentBuild = "" THEN 
+            pDoc->DocumentBuild = GetSelectedBuildGUID()
+         end if
+      end if      
+   end if
    
    Treeview_SortChildren( hTree, hRootNode, 0 )
    TreeView_Expand( hTree, hRootNode, TVE_EXPAND)
@@ -771,6 +852,150 @@ Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
                            true )     ' Create a visual designer   
    Function = 0
 End Function
+
+
+' ========================================================================================
+' Align controls on the form
+' ========================================================================================
+function OnCommand_DesignerAlign( byval HWND as HWND, byval id as long) as LRESULT
+
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   if pDoc = 0 THEN exit function
+
+   dim pCtrlActive as clsControl ptr = pDoc->Controls.GetActiveControl()
+   dim pCtrl as clsControl ptr
+   dim as RECT rcCtrl, rcActive
+
+   dim as long nWidth, nHeight
+   dim as long nWidthActive, nHeightActive
+   
+   if pCtrlActive = 0 THEN exit function
+   rcActive = GetControlRECT(pCtrlActive)
+   nWidthActive  = rcActive.Right  - rcActive.Left
+   nHeightActive = rcActive.Bottom - rcActive.Top 
+   
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl->IsSelected THEN
+         ' Skip processing the active control because that is unnecessary.
+         if pCtrl = pCtrlActive THEN continue for
+         rcCtrl = GetControlRECT(pCtrl)
+         nWidth  = rcCtrl.Right  - rcCtrl.Left
+         nHeight = rcCtrl.Bottom - rcCtrl.Top 
+         select CASE id
+            case IDM_ALIGNLEFTS
+               SetControlProperty(pCtrl, "LEFT", str(rcActive.left))
+               ApplyControlProperties(pCtrl)
+            case IDM_ALIGNTOPS
+               SetControlProperty(pCtrl, "TOP", str(rcActive.top))
+               ApplyControlProperties(pCtrl)
+            case IDM_ALIGNRIGHTS
+               SetControlProperty(pCtrl, "LEFT", str(rcctrl.left + (rcActive.right-rcCtrl.right)) )
+               ApplyControlProperties(pCtrl)
+            case IDM_ALIGNBOTTOMS 
+               SetControlProperty(pCtrl, "TOP", str(rcCtrl.top + (rcActive.bottom-rcCtrl.bottom)) )
+               ApplyControlProperties(pCtrl)
+            case IDM_ALIGNCENTERS  
+               SetControlProperty(pCtrl, "LEFT", _
+                  str(rcActive.Left + (nWidthActive / 2) - ( nWidth / 2 )) )
+               ApplyControlProperties(pCtrl)
+            case IDM_ALIGNMIDDLES  
+               SetControlProperty(pCtrl, "TOP", _
+                  str(rcActive.Top + (nHeightActive / 2) - ( nHeight / 2 )) )
+               ApplyControlProperties(pCtrl)
+            case IDM_SAMEWIDTHS  
+               SetControlProperty(pCtrl, "WIDTH", str(nWidthActive))
+               ApplyControlProperties(pCtrl)
+            case IDM_SAMEHEIGHTS
+               SetControlProperty(pCtrl, "HEIGHT", str(nHeightActive))
+               ApplyControlProperties(pCtrl)
+            case IDM_SAMEBOTH
+               pCtrl->SuspendLayout = true
+               SetControlProperty(pCtrl, "WIDTH", str(nWidthActive))
+               SetControlProperty(pCtrl, "HEIGHT", str(nHeightActive))
+               ApplyControlProperties(pCtrl)
+               pCtrl->SuspendLayout = false
+         END SELECT
+      END IF
+   next
+
+   ' Ensure the grab handles are redrawn
+   AfxRedrawWindow(pDoc->hWndForm)
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Center controls on the form
+' ========================================================================================
+function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRESULT
+
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   if pDoc = 0 THEN exit function
+
+   dim pCtrl as clsControl ptr
+
+   dim as RECT rcCtrl, rcForm
+   dim as long nLeft, nTop, nMaxRight, nMaxBottom
+   dim as long nHorizSpacing, nVertSpacing, nFormWidth, nFormHeight
+   dim as long nMinLeft = 999999999
+   dim as long nMinTop  = 999999999
+   
+   ' Calculate the total distance from the far left (or top) control to the far
+   ' right (or bottom) control and subtract the widths of each control. This will
+   ' give us the amount of 'white' space. Divide that white space by
+   ' half to determine the amount to put on the left/top and right/bottom of the
+   ' group of controls.
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl->ControlType = CTRL_FORM THEN continue for
+      if pCtrl->IsSelected = false THEN continue for
+      rcCtrl     = GetControlRECT(pCtrl)
+      nMinLeft   = Min( nMinLeft, rcCtrl.left )
+      nMaxRight  = Max( nMaxRight, rcCtrl.right )
+      nMinTop    = Min( nMinTop, rcCtrl.top )
+      nMaxBottom = Max( nMaxBottom, rcCtrl.bottom )
+   next
+
+   ' Get the client area of the design form
+   GetClientRect(pDoc->hWndForm, @rcForm)
+   nFormWidth  = (rcForm.right - rcForm.left)
+   nFormHeight = (rcForm.bottom - rcForm.top)
+   
+   ' Determine the value by which the group of controls needs to be shifted by.  
+   nHorizSpacing = nMinLeft - ( (nFormWidth - (nMaxRight - nMinLeft)) / 2) 
+   nVertSpacing  = nMinTop - ( (nFormHeight - (nMaxBottom - nMinTop) ) / 2) 
+
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl->ControlType = CTRL_FORM THEN continue for
+      if pCtrl->IsSelected = false THEN continue for
+      select CASE id
+         case IDM_CENTERHORIZ
+            nLeft = val(GetControlProperty(pCtrl, "LEFT"))
+            SetControlProperty(pCtrl, "LEFT", str(nLeft-nHorizSpacing))
+            ApplyControlProperties(pCtrl)
+         case IDM_CENTERVERT
+            nTop  = val(GetControlProperty(pCtrl, "TOP"))
+            SetControlProperty(pCtrl, "TOP", str(nTop-nVertSpacing))
+            ApplyControlProperties(pCtrl)
+         case IDM_CENTERBOTH   
+            nLeft = val(GetControlProperty(pCtrl, "LEFT"))
+            nTop  = val(GetControlProperty(pCtrl, "TOP"))
+            pCtrl->SuspendLayout = true
+            SetControlProperty(pCtrl, "LEFT", str(nLeft-nHorizSpacing))
+            SetControlProperty(pCtrl, "TOP", str(nTop-nVertSpacing))
+            ApplyControlProperties(pCtrl)
+            pCtrl->SuspendLayout = false
+      END SELECT
+   next
+
+   ' Ensure the grab handles are redrawn
+   AfxRedrawWindow(pDoc->hWndForm)
+
+   function = 0
+end function
 
 ' ========================================================================================
 ' Create a new editing window
@@ -912,7 +1137,7 @@ Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
          End If   
          pDoc->SetText( sText ) 
          pDoc->DateFileTime = AfxGetFileLastWriteTime(pDoc->DiskFilename)
-         SciExec(pDoc->hWindow, SCI_SETSAVEPOINT, 0, 0)
+         SciExec(pDoc->hWindow(0), SCI_SETSAVEPOINT, 0, 0)
       End If
    end if
   
@@ -936,7 +1161,7 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       TB.Mask = TCIF_PARAM
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
-      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          ' If this is a new Untitled document that is also dirty then we
          ' need to set the focus to that tab because the SaveAs dialog will be shown.
          If pDoc->IsNewFlag Then
@@ -971,7 +1196,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       pDoc = gTTabCtl.GetActiveDocumentPtr()
       If pDoc = 0 Then Return true
    
-      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
          r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
                            MB_YESNOCANCEL Or MB_ICONQUESTION)
@@ -986,9 +1211,12 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       iTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
       TabCtrl_DeleteItem(gTTabCtl.hWindow, iTab)
       ' Set the active tab to the closest tab to the one just removed
-      gTTabCtl.SetFocusTab(iTab-1)
+      iTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+      gTTabCtl.SetFocusTab(iTab)
       
-      ShowWindow( pDoc->hWindow, SW_HIDE)
+      for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
+         ShowWindow( pDoc->hWindow(i), SW_HIDE)
+      NEXT
       ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE)
 
       ' Only remove this document from the global collection if it is not
@@ -1062,12 +1290,17 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
-      hEdit = pDoc->hWindow
+      select case codeNotify
+         case SCEN_SETFOCUS:  pDoc->hWndActiveScintilla = hwndCtl
+         case SCEN_KILLFOCUS: pDoc->hWndActiveScintilla = 0
+      end select      
+      hEdit = pDoc->hWndActiveScintilla
       frmMain_ChangeToolbarButtonsState
    End If   
 
    
-   Select Case id 
+   Select Case id
+             
       case IDC_FRMMAIN_COMBOBUILDS
          if codeNotify = CBN_SELCHANGE THEN
             dim as long nCurSel = ComboBox_GetCurSel(hwndCtl)
@@ -1110,13 +1343,120 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       ''  EDIT MENU
       Case IDM_REDO:               Function = SciExec( hEdit, SCI_REDO, 0, 0)
       Case IDM_UNDO, WM_UNDO:      Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
-      Case IDM_CUT, WM_CUT:        Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
-      Case IDM_COPY, WM_COPY:      Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
-      Case IDM_PASTE, WM_PASTE:    Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
+      
+      Case IDM_CUT, WM_CUT
+         if pDoc->IsDesigner then
+            SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
+            SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
+         else
+            Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+         end if   
+      
+      Case IDM_COPY, WM_COPY
+         if pDoc->IsDesigner then
+            dim as long NumControls = pDoc->Controls.SelectedControlsCount
+            if NumControls = 0 THEN exit function
+            redim gCopyControls(NumControls-1) as clsControl
+
+            dim as long NextControl = 0
+            dim pCtrl as clsControl ptr
+            for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+               pCtrl = pDoc->Controls.ItemAt(i)
+               if pCtrl->IsSelected THEN 
+                  gCopyControls(NextControl) = *pCtrl
+                  NextControl = NextControl + 1
+               END IF
+            NEXT
+         else
+            Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
+         end if
+
+            
+      Case IDM_PASTE, WM_PASTE
+         if pDoc->IsDesigner then
+            dim pCtrl as clsControl ptr
+            dim rc as RECT
+            dim as long nLeft, nTop, nLeftActive, nTopActive
+            
+            ' Need to get the Left/Top properties for the active control in the copy group
+            for i as long = lbound(gCopyControls) to ubound(gCopyControls)
+               if gCopyControls(i).IsActive THEN
+                  nLeftActive = val(GetControlProperty(@gCopyControls(i), "LEFT"))
+                  nTopActive  = val(GetControlProperty(@gCopyControls(i), "TOP"))
+                  exit for
+               END IF
+            next
+               
+            ' Create the control and copy the properties to it
+            for i as long = lbound(gCopyControls) to ubound(gCopyControls)
+               pCtrl = CreateToolboxControl(pDoc, gCopyControls(i).ControlType, rc)
+               
+               for ii as long = lbound(gCopyControls(i).Properties) to ubound(gCopyControls(i).Properties)
+                  select case ucase(gCopyControls(i).Properties(ii).wszPropName)
+                     case "NAME"  ' don't copy b/c we will then have duplicate control names
+                        continue for
+                     case "LEFT": nLeft = val(gCopyControls(i).Properties(ii).wszPropValue)
+                     case "TOP":  nTop  = val(gCopyControls(i).Properties(ii).wszPropValue)   
+                  END select
+                  pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
+               NEXT
+               
+               ' Set the left/top properties relative to the current insert position
+               dim pt as point
+               GetCursorPos(@pt)
+               MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pt), 1)
+               SetControlProperty(pCtrl, "LEFT", str(pt.x + (nLeft-nLeftActive)))
+               SetControlProperty(pCtrl, "TOP", str(pt.y + (nTop-nTopActive)))
+               pCtrl->IsActive = false
+               pCtrl->IsSelected = false
+               
+               pCtrl->SuspendLayout = true
+               ApplyControlProperties( pCtrl )
+               pCtrl->SuspendLayout = false
+            NEXT
+            ' Ensure the grab handles of form and controls are redrawn or hidden
+            pDoc->Controls.SetActiveControl(pDoc->hWndForm)
+            AfxRedrawWindow(pDoc->hWndFrame)
+            AfxRedrawWindow(pDoc->hWndForm)
+            frmMain_UpdateLineCol(HWND_FRMMAIN)
+            DisplayPropertyList(pDoc)
+         else
+            Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
+         end if   
+      
+      case IDM_DELETE
+         ' Delete selected controls
+         dim pCtrl as clsControl ptr
+         do until pDoc->Controls.SelectedControlsCount = 0
+            for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+               pCtrl = pDoc->Controls.ItemAt(i)
+               if pCtrl->IsSelected THEN 
+                  pDoc->Controls.Remove(pCtrl)
+                  exit for
+               END IF
+            NEXT
+         loop
+         ' Ensure the grab handles of form and controls are redrawn or hidden
+         pDoc->Controls.SetActiveControl(pDoc->hWndForm)
+         AfxRedrawWindow(pDoc->hWndFrame)
+         AfxRedrawWindow(pDoc->hWndForm)
+         frmMain_UpdateLineCol(HWND_FRMMAIN)
+         DisplayPropertyList(pDoc)
+        
       Case IDM_DELETELINE:         Function = SciExec(hEdit, SCI_LINECUT, 0, 0)
       Case IDM_INSERTFILE:         Function = pDoc->InsertFile()
-      Case IDM_INDENTBLOCK:        Function = SciExec(hEdit, SCI_TAB, 0, 0)
-      Case IDM_UNINDENTBLOCK:      Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
+      Case IDM_INDENTBLOCK
+         ' If a TAB was pressed then manually terminate any active autocomplete.
+         if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
+            SciExec(hEdit, SCI_AUTOCCOMPLETE, 0, 0) 
+         else
+            ' Do a block indent
+            gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_TAB, 0, 0)
+            gApp.SuppressNotify = false
+         end if
+      Case IDM_UNINDENTBLOCK
+         gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
+         gApp.SuppressNotify = false
       Case IDM_COMMENTBLOCK:       Function = pDoc->BlockComment(True) 
       Case IDM_UNCOMMENTBLOCK:     Function = pDoc->BlockComment(False) 
       Case IDM_DUPLICATELINE:      Function = pDoc->LineDuplicate()
@@ -1130,7 +1470,15 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_EOLTOLF:            Function = pDoc->ConvertEOL(SC_EOL_LF)
       'Case IDM_SPACESTOTABS:
       Case IDM_TABSTOSPACES:       Function = pDoc->TabsToSpaces()
-      Case IDM_SELECTALL:          Function = SciExec(hEdit, SCI_SELECTALL, 0, 0)
+      Case IDM_SELECTALL
+            if pDoc->IsDesigner THEN
+               pDoc->Controls.SelectAllControls
+               ' Ensure the grab handles of form and controls are redrawn or hidden
+               AfxRedrawWindow(pDoc->hWndFrame)
+               AfxRedrawWindow(pDoc->hWndForm)
+            else
+               Function = SciExec(hEdit, SCI_SELECTALL, 0, 0)
+            END IF
       Case IDM_SELECTLINE:         Function = pDoc->SelectLine(-1)
                                    
       case IDM_ANSI
@@ -1156,20 +1504,21 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             ConvertTextBuffer(pDoc, FILE_ENCODING_UTF16_BOM)
          end if   
          frmMain_UpdateLineCol( HWND_FRMMAIN )
-         
+
+
       ''  SEARCH MENU              
-      Case IDM_FIND:               Function = frmFindReplace_Show(pDoc->hWindow, false)
-      Case IDM_REPLACE:            Function = frmFindReplace_Show(pDoc->hWindow, true)
-      Case IDM_FINDINFILES:        Function = frmFindInFiles_Show(pDoc->hWindow)
+      Case IDM_FIND:               Function = frmFindReplace_Show(hEdit, false)
+      Case IDM_REPLACE:            Function = frmFindReplace_Show(hEdit, true)
+      Case IDM_FINDINFILES:        Function = frmFindInFiles_Show(hEdit)
 
       Case IDM_FINDNEXT, IDM_FINDPREV
          if pDoc = 0 then exit function
 
          dim as long startPos, endPos, curPos, mainSel
          Dim As String sFindText 
-         mainSel  = SciExec(pDoc->hWindow, SCI_GETMAINSELECTION, 0, 0)
-         startPos = SciExec(pDoc->hWindow, SCI_GETSELECTIONSTART, mainSel, 0)
-         endPos   = SciExec(pDoc->hWindow, SCI_GETSELECTIONEND, mainSel, 0)
+         mainSel  = SciExec(hEdit, SCI_GETMAINSELECTION, 0, 0)
+         startPos = SciExec(hEdit, SCI_GETSELECTIONSTART, mainSel, 0)
+         endPos   = SciExec(hEdit, SCI_GETSELECTIONEND, mainSel, 0)
          sFindText = pDoc->GetTextRange(startPos, endPos)
 
          if (GetForeGroundWindow = HWND_FRMFINDREPLACE) or (Len(sFindText) = 0) then
@@ -1178,20 +1527,20 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             exit function
          end if
 
-         curPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+         curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
          startPos = iif( id = IDM_FINDNEXT, curPos + 1, curPos - 1 )
-         endPos = iif( id = IDM_FINDNEXT, SciExec( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0), 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         endPos = iif( id = IDM_FINDNEXT, SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0), 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
          ' Search for the text to find
-         dim as long r = SciExec( pDoc->hWindow, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-         If r <> -1 Then SciExec( pDoc->hWindow, SCI_SETSEL, r, r + len(sFindText)) 
+         dim as long r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+         If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
 
 
       Case IDM_DEFINITION:         Function = frmMain_GotoDefinition( pDoc )
       Case IDM_LASTPOSITION:       Function = frmMain_GotoLastPosition()
       
-      Case IDM_GOTO:               Function = frmGoto_Show(pDoc->hWindow)
+      Case IDM_GOTO:               Function = frmGoto_Show(hEdit)
       Case IDM_FUNCTIONLIST:       Function = frmFnList_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_BOOKMARKTOGGLE:     Function = pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
       Case IDM_BOOKMARKNEXT:       Function = pDoc->NextBookmark()
@@ -1295,14 +1644,23 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       ''   DESIGNER MENU
       case IDM_NEWFORM:               function = OnCommand_DesignerNewForm(HWND)
+      case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
+           IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
+           IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            
+         function = OnCommand_DesignerAlign(HWND, id)
+      case IDM_CENTERHORIZ, IDM_CENTERVERT, IDM_CENTERBOTH
+         function = OnCommand_DesignerCenter(HWND, id)
+         
+      case IDM_LOCKCONTROLS
 
       
       ''   TOOLS MENU
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
          ExecuteUserTool( id - IDM_USERTOOL )
 
-
       Case IDM_HELP
+ ' TODO: Remove debug call in IDM_HELP
+' gdb2.dbDebug
          ShowContextHelp() 
      
 
@@ -1357,7 +1715,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             End If
             If lpnm->dwItemSpec = 1 Then   ' line/column panel 
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-               if pDoc THEN Function = frmGoto_Show(pDoc->hWindow)
+               if pDoc THEN Function = frmGoto_Show(pDoc->hWindow(0))
             end if
             If lpnm->dwItemSpec = 2 Then   ' ProjectFiletype 
                hPopupMenu = CreateStatusBarFileTypeContextMenu
@@ -1542,7 +1900,8 @@ Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
    pt.y = yPos
    ScreenToClient hWndContext, @pt
    if pDoc->IsDesigner THEN
-      ' TODO: Display right-click popup menu for visual design form
+      ' Right-click popup menu for visual design form is 
+      ' handled in the HandleDesignerRButtonDown function.
    else
       hPopupMenu = CreateScintillaContextMenu()
    END IF
@@ -1783,6 +2142,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,      frmMain_OnCreate)
+      HANDLE_MSG (HWnd, WM_PAINT,       frmMain_OnPaint)
       HANDLE_MSG (HWnd, WM_SIZE,        frmMain_OnSize)
       HANDLE_MSG (HWnd, WM_CLOSE,       frmMain_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,     frmMain_OnDestroy)
@@ -1792,16 +2152,81 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
 
-       Case WM_NCACTIVATE
-          ' Ensure that the caption bar for any DesignerForm retains its active 
-          ' state. This looks better than having it lose and gain active colors. 
-          If wParam Then
-             ' The DesignerForm never receives the WM_NCACTIVATE message because it
-             ' is a child form. We need to manually send it the message whenever the
-             ' focus of the Designer form changes (i.e. whenever we switch back and
-             ' forth away from the main application window).
-             PostMessage HWND, MSG_USER_SETFOCUS, 0, 0
-          End If
+      
+      case MSG_USER_SHOWAUTOCOMPLETE
+         return ShowAutocompleteList()
+
+      case MSG_USER_APPENDEQUALSSIGN
+         ' The = key was used to terminate a popup autocomplete. Take that
+         ' character and format it with a space before and a space after.
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc THEN
+            dim as hwnd hEdit = pDoc->hWndActiveScintilla
+            Dim As Long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            dim as string sWord = " = "
+            SciExec( hEdit, SCI_SETSEL, nPos-1, nPos)
+            SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(sWord)))
+            nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            SciExec( hEdit, SCI_SETSEL, nPos, nPos)
+         end if   
+              
+      case WM_MOUSEMOVE
+         ' Determine if we have mouse over a edit split area
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc THEN
+            dim as POINT pt = (LoWord(lParam), HiWord(lParam))
+            if pDoc->bSizing then
+               if pt.y <> pDoc->ptPrev.y then
+                  pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
+                  frmMain_PositionWindows(HWND)
+                  pDoc->ptPrev.y = pt.y
+               end if   
+            else   
+               if PtInRect(@pDoc->rcSplitButton, pt) THEN SetCursor(ghCursorNS)
+            END if
+         end if
+         
+      Case WM_LBUTTONDOWN
+         ' Are we over a split edit area
+         dim as POINT pt = (LoWord(lParam), hiword(lParam))
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc THEN 
+            SetCapture(hWnd)
+            if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+               pDoc->bSizing = true
+               pDoc->SplitY = pDoc->rcSplitButton.top  
+               pDoc->ptPrev.y = pt.y
+               SetCursor(ghCursorNS)
+            END IF
+         end if
+
+      case WM_LBUTTONUP
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc THEN pDoc->bSizing = false
+         ReleaseCapture
+         
+      Case WM_LBUTTONDBLCLK 
+         ' Are we over a split edit area (toggle off the split)
+         dim as POINT pt = (LoWord(lParam), hiword(lParam))
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc THEN 
+            if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+               pDoc->bSizing = false
+               pDoc->SplitY = 0
+               frmMain_PositionWindows(HWND)
+            END IF
+         end if
+          
+      Case WM_NCACTIVATE
+         ' Ensure that the caption bar for any DesignerForm retains its active 
+         ' state. This looks better than having it lose and gain active colors. 
+         If wParam Then
+            ' The DesignerForm never receives the WM_NCACTIVATE message because it
+            ' is a child form. We need to manually send it the message whenever the
+            ' focus of the Designer form changes (i.e. whenever we switch back and
+            ' forth away from the main application window).
+            PostMessage HWND, MSG_USER_SETFOCUS, 0, 0
+         End If
           
       Case WM_SYSCOMMAND
          If (wParam And &HFFF0) = SC_CLOSE Then
@@ -1876,12 +2301,47 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             if pDoc->IsDesigner THEN
                SendMessage pDoc->hWndForm, WM_NCACTIVATE, true, 0
             END IF
-            SetFocus(pDoc->hWindow)
+            SetFocus(pDoc->hWndActiveScintilla)
          END IF
 
       Case MSG_USER_PROCESS_COMMANDLINE 
          ' process any command line arguments that may have been passed to the program.
          frmMain_ProcessCommandLine(HWnd)
+
+
+      '-------------------------------------------------------------------------------
+      '                        Scrollbar Handler
+      '-------------------------------------------------------------------------------
+      Case WM_VSCROLL
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         If pDoc = 0 Then Return 0
+
+         dim as long OldPos = pDoc->ScrInfo.nPos
+
+         Select Case Loword(wParam)
+            Case SB_THUMBTRACK
+               GetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo)
+               pDoc->ScrInfo.nPos = pDoc->ScrInfo.nTrackPos
+            Case SB_LINEDOWN:   pDoc->ScrInfo.nPos += 1
+            Case SB_LINEUP:     pDoc->ScrInfo.nPos -= 1
+            Case SB_PAGEDOWN:   pDoc->ScrInfo.nPos += pDoc->ScrInfo.nPage - 1  
+            Case SB_PAGEUP:     pDoc->ScrInfo.nPos -= pDoc->ScrInfo.nPage - 1  
+         End Select 
+          
+         ' If the current position hasn't changed, do nothing.
+         If pDoc->ScrInfo.nPos = oldPos Then return true
+
+         ' Don't exceed range boundries
+         if pDoc->ScrInfo.nPos < pDoc->ScrInfo.nMin then
+            pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMin         
+         END IF
+         if pDoc->ScrInfo.nPos > pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1 then
+            pDoc->ScrInfo.nPos = pDoc->ScrInfo.nMax - pDoc->ScrInfo.nPage + 1        
+         END IF
+
+         dim as long lParm = pDoc->ScrInfo.nPos - oldPos        ' Amount/direction to V scroll
+         SciExec(pDoc->hWindow(0), SCI_LINESCROLL, 0, lParm)
+         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
 
    End Select
 
@@ -1913,8 +2373,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
    ' Load the good and bad compile icons
-   ghIconGood = LoadImage( pWindow->InstanceHandle, "IMAGE_GOODCOMPILE", IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR)
-   ghIconBad  = LoadImage( pWindow->InstanceHandle, "IMAGE_BADCOMPILE", IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR)
+   Dim cx As Long 
+   cx = 16 * (pWindow->DPI \ 96)
+   ghIconGood = LoadImage( pWindow->InstanceHandle, "IMAGE_GOODCOMPILE", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR)
+   ghIconBad  = LoadImage( pWindow->InstanceHandle, "IMAGE_BADCOMPILE", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR)
 
    ' Create the main application topmenu
    HWND_FRMMAIN_TOPMENU = frmMain_BuildMenu(pWindow)
@@ -1939,14 +2401,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
       SendMessage( hStatusBar, SB_SIMPLE, False, 0 )
    End If
 
-   ' Add a progress bar to the status bar (panel4) (to show compiling progress)
-   dim hProgressBar AS hwnd
-   hProgressBar = pWindow->AddControl( "ProgressBar", hStatusbar, IDC_FRMMAIN_PROGRESSBAR, "", _
-                             0, 0, 0, 0, WS_CHILD Or PBS_MARQUEE)
-   ' Move the Progressbar into the correct StatusBar panel
-   Dim rc As Rect
-   SendMessage( hStatusBar, SB_GETRECT, 4, Cast(LPARAM, @rc) )
-   MoveWindow( hProgressBar, rc.Left, rc.Top, pWindow->ScaleY(200), rc.Bottom - rc.Top, True )
 
    ' Add the top tabcontrol (initially not visible)
    gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _
@@ -1956,19 +2410,29 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
        Cast(WNDPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
     
    ' Create the imagelist for the TopTabControl tabs
+   cx = 16 * (pWindow->DPI \ 96)
    Dim As HICON hIcon = LoadIcon(pWindow->InstanceHandle, "IMAGE_TABCLOSE")
-   Dim As HANDLE hImageList = ImageList_Create(16, 16, ILC_MASK Or ILC_COLOR32, 1, 0)
+   Dim As HANDLE hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
    ImageList_AddIcon(hImageList, hIcon)
    DestroyIcon( hIcon )
    TabCtrl_SetImageList(gTTabCtl.hWindow, hImageList)
-   
+                                                        
    ' Create the ImageLists that will hold the images for the Explorer and Recent treeviews
-   Dim cx As Long = 24 * (pWindow->DPI \ 96)
+   cx = 24 * (pWindow->DPI \ 96)
    ghImageListNormal = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 4, 1)
    gidxImageBlank  = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_BLANK")
    gidxImageClosed = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_CLOSED")
    gidxImageOpened = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_OPENED")
    gidxImageCode   = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_CODE")
+
+   ' Load the splitter cursors
+   ghCursorNS = LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED)
+
+   ' Load the graphisc PNG pointers for the scintilla popup autocomplete listbox.
+   gApp.pImageAutocompleteBaseType = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_BASETYPE")     
+   gApp.pImageAutocompleteClass    = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_CLASS")     
+   gApp.pImageAutocompleteMethod   = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_METHOD")     
+   gApp.pImageAutocompleteProperty = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_PROPERTY")  
 
    ' Create the various child windows
    frmExplorer_Show( HWND_FRMMAIN )
@@ -2043,10 +2507,47 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                Case WM_MOUSEMOVE:   Splitter_OnMouseMove
             End Select      
 
+            ' Close any open Find/Replace window with ESC key
             if (uMsg.message = WM_KEYDOWN) andAlso (uMsg.wParam = VK_ESCAPE) THEN
                if IsWindowVisible( HWND_FRMFINDREPLACE ) THEN SendMessage( HWND_FRMFINDREPLACE, WM_CLOSE, 0, 0 )
             END IF
 
+            ' Handle any keypress that would move or resize control(s) on a Designer Form.
+            if uMsg.message = WM_KEYDOWN THEN
+               ' Ensure that an arrow key was pressed
+               select CASE uMsg.wParam
+
+                  case VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN
+                     dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+                     if pDoc THEN
+                        if pDoc->IsDesigner THEN
+                           select case GetFocus
+                              case GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX), _
+                                   GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES), _
+                                   GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+                              CASE ELSE
+                                 if pDoc->Controls.SelectedControlsCount > 0 then
+                                    ' Move control(s)
+                                    if (GetAsyncKeyState(VK_CONTROL) and &H8000) then
+                                       KeyboardMoveControls(pDoc, uMsg.wParam)
+                                       continue do
+                                    end if
+                                    ' Resize control(s)   
+                                    if (GetAsyncKeyState(VK_SHIFT) and &H8000) THEN
+                                       KeyboardResizeControls(pDoc, uMsg.wParam)
+                                       continue do
+                                    end if   
+                                    ' Move active selected control focus within group of controls
+                                    KeyboardCycleActiveControls(pDoc, uMsg.wParam)
+                                    continue do
+                                 end if   
+                           END SELECT
+                        END IF
+                     END IF
+               END SELECT
+            end if
+            
+            
             ' Determines whether a message is intended for the specified
             ' dialog box and, if it is, processes the message.
             ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
@@ -2074,6 +2575,11 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    If ghIconBad  Then DestroyIcon(ghIconBad)
    if ghAccelUserTools THEN DestroyAcceleratorTable(ghAccelUserTools)
 
+   if gApp.pImageAutocompleteBaseType then deallocate(gApp.pImageAutocompleteBaseType)
+   if gApp.pImageAutocompleteClass    then deallocate(gApp.pImageAutocompleteClass)
+   if gApp.pImageAutocompleteMethod   then deallocate(gApp.pImageAutocompleteMethod)
+   if gApp.pImageAutocompleteProperty then deallocate(gApp.pImageAutocompleteProperty)
+
    ' Delete the allocated memory for the various child windows
    pWindow = AfxCWindowPtr(HWND_FRMEXPLORER):       Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMRECENT):         Delete pWindow
@@ -2081,4 +2587,5 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
+
 

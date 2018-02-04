@@ -1,3 +1,16 @@
+Version 1.5.7 (February 4, 2018)
+- Added: Dual pane split screen file editing.
+- Added: Multiline comment support to scintilla dll editing component. /'  '/
+- Added: Additional error check to report failed GoRC resource file compiles.
+- Added: Autoinsert completion for CONSTRUCTOR, DESTRUCTOR, ENUM constructs.
+- Changed: Removed WinFBX Library from the distribution. Get it from: https://github.com/JoseRoca/WinFBX
+- Changed: Better handling of auto insert of IF/THEN single and and other mulitline statements.
+- Changed: Much improved autocomplete and codetips to handle shared/local variables and TYPE's.
+- Changed: Latest scintilla dll for Win32 and Win64.
+- Changed: Scaled some icons to display larger at higher screen resolutions.
+- Fixed: Popup autocomplete list will not show if activated as part of commented line (line commented using an "'").
+- Fixed: When multiple projects open selecting an open file would add that file to whatever the current active project was resulting in the file being linked to several open projects. This was not the intended behaviour.
+
 Version 1.5.6 (November 26, 2017)
 - Changed: Updated to use WinFBX Library Version 1.0.
 

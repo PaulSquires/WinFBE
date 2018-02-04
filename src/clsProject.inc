@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -142,9 +142,6 @@ Function clsProject.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
    ReDim Preserve m_arrDocuments(ub) As clsDocument Ptr             
    m_arrDocuments(ub) = pDoc
 
-   ' Parse the document to create sub/function list
-   ParseDocument(gApp.GetActiveProjectIndex, pDoc, "")
-   
    Function = 0
 End Function
 
@@ -196,8 +193,8 @@ Function clsProject.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    ' If not found then simply exit
    If idx = -1 Then Exit function
    
-   ' Remove all references from the gdb database
-   gdb.dbDelete(pDoc->DiskFilename)
+   ' Remove all references from the gdb2 database
+   gdb2.dbDelete(pDoc->DiskFilename)
 
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
@@ -287,7 +284,7 @@ Function clsProject.Debug() As Long
    print "GetDocumentCount = "; this.GetDocumentCount
    Print "lb = "; lb, "ub = "; ub
    For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
-      Print "Array[";i;"]", "hWindow="; m_arrDocuments(i)->hWindow, m_arrDocuments(i)->DiskFilename
+      Print "Array[";i;"]", "hWindow="; m_arrDocuments(i)->hWindow(0), m_arrDocuments(i)->DiskFilename
    Next                          
    Print:Print
    

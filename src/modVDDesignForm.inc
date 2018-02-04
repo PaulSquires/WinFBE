@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -14,40 +14,157 @@
 '    VISUAL DESIGNER ROUTINES
 '
 
-''
-''  Ensure that the rect's coordinates have the lowest values to the left.
-''
-Function NormalizeRect( ByRef rc As Rect ) As Long
-   If rc.Left > rc.Right   Then Swap rc.Right, rc.Left
-   If rc.Top  > rc.Bottom  Then Swap rc.Top, rc.Bottom
+
+' ========================================================================================
+' Reset the references to the closest controls to the selected control.
+' ========================================================================================
+Function ResetClosestControls( byval pDoc as clsDocument ptr ) as long
+   pDoc->pCtrlCloseLeft   = 0
+   pDoc->pCtrlCloseTop    = 0
+   pDoc->pCtrlCloseRight  = 0
+   pDoc->pCtrlCloseBottom = 0
+   function = 0
+end function
+
+' ========================================================================================
+' Set the values for the blue color snap line.
+' ========================================================================================
+Function SetBlueSnapLine( byval pDoc as clsDocument ptr, _
+                          byval x1 as long, byval y1 as long, _
+                          byval x2 as long, byval y2 as long _
+                          ) as long
+   if pDoc = 0 THEN exit function
+   pDoc->ptBlueStart.x = x1
+   pDoc->ptBlueStart.y = y1
+   pDoc->ptBlueEnd.x   = x2
+   pDoc->ptBlueEnd.y   = y2
+   function = 0
+end function
+
+      
+' ========================================================================================
+' Get the closest controls pointer to the current active control.
+' ========================================================================================
+Function SetClosestControls( byval pDoc as clsDocument ptr, _
+                             byval pCtrlActive as clsControl ptr _
+                             ) As clsControl ptr
+   dim pCtrl as clsControl ptr
+   dim as clsControl ptr pCtrlLeft, pCtrlTop, pCtrlRight, pCtrlBottom
+   dim as long nLeft, nTop, nRight = 9999999, nBottom = 9999999
+   dim as RECT rc, rcClient, rcActive, rcDest, rcTop, rcLeft, rcRight, rcBottom
+   
+   ResetClosestControls(pDoc)
+   
+   GetClientRect(pDoc->hWndForm, @rcClient)
+   GetWindowRect(pDoc->pCtrlAction->hWindow, @rcActive)
+   MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rcActive), 2)
+   
+   ' Define the rectangle search areas based on the active control
+   SetRect(@rcLeft, 0, rcActive.top, rcActive.left, rcActive.bottom)
+   SetRect(@rcTop, rcActive.left, 0, rcActive.right, rcActive.top)
+   SetRect(@rcRight, rcActive.right, rcActive.top, rcClient.right, rcActive.bottom)
+   SetRect(@rcBottom, rcActive.left, rcActive.bottom, rcClient.bottom, rcActive.right)
+   
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl->ControlType = CTRL_FORM then continue for
+      if pCtrl->IsSelected = true THEN continue for
+      if pCtrl = pCtrlActive THEN continue for
+      
+      GetWindowRect(pCtrl->hWindow, @rc)
+      MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
+      
+      ' LEFT
+      if IntersectRect(@rcDest, @rcLeft, @rc) then
+         if (rc.right > nLeft) THEN
+            nLeft = rc.right: pCtrlLeft = pCtrl
+         END IF
+      end if
+      ' TOP
+      if IntersectRect(@rcDest, @rcTop, @rc) then
+         if (rc.bottom > nTop) THEN
+            nTop = rc.bottom: pCtrlTop = pCtrl
+         END IF
+      end if
+      ' RIGHT
+      if IntersectRect(@rcDest, @rcRight, @rc) then
+         if (rc.left < nRight) THEN
+            nRight = rc.left: pCtrlRight = pCtrl
+         END IF
+      end if
+      ' BOTTOM
+      if IntersectRect(@rcDest, @rcBottom, @rc) then
+         if (rc.top < nBottom) THEN
+            nBottom = rc.top: pCtrlBottom = pCtrl
+         END IF
+      end if
+   next
+   
+   pDoc->pCtrlCloseLeft   = pCtrlLeft
+   pDoc->pCtrlCloseTop    = pCtrlTop
+   pDoc->pCtrlCloseRight  = pCtrlRight
+   pDoc->pCtrlCloseBottom = pCtrlBottom
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Create and display popup control menu.
+' ========================================================================================
+Function DisplayControlPopupMenu( byval hwnd as hwnd, byval xpos as long, byval ypos as long) As Long
+   static as HMENU hPopupMenu
+   
+   If hPopupMenu Then DestroyMenu(hPopupMenu)
+    
+   hPopupMenu = CreatePopupMenu()
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_CUT, L(17,"Cu&t") 
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_COPY, L(18,"&Copy")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"&Paste")
+      AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_DELETE, L(326,"&Delete")
+   TrackPopupMenu(hPopupMenu, TPM_LEFTALIGN Or TPM_LEFTBUTTON, xpos, ypos, 0, hWnd, 0)
+
+   function = 0
+end function
+
+' ========================================================================================
+' Create and display popup form menu.
+' ========================================================================================
+Function DisplayFormPopupMenu( byval hwnd as hwnd, byval xpos as long, byval ypos as long) As Long
+   static as HMENU hPopupMenu
+   
+   If hPopupMenu Then DestroyMenu(hPopupMenu)
+    
+   hPopupMenu = CreatePopupMenu()
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"&Paste")
+      AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"&Menu Editor...")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Tool&bar Editor...")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"&Statusbar Editor...")
+   TrackPopupMenu(hPopupMenu, TPM_LEFTALIGN Or TPM_LEFTBUTTON, xpos, ypos, 0, hWnd, 0)
+
+   function = 0
+end function
+
+' ========================================================================================
+' Change the mouse cursor depending on selected Toolbox control.
+' ========================================================================================
+Function SetMouseCursor() As Long
+   Dim As HWnd hList1 = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX)
+   dim as long nCurSel = ListBox_GetCurSel(hList1)
+   
+   if nCurSel = -1 THEN exit function
+   
+   ' The index into the global gToolbox array is stored in the line's data area.
+   dim as long idx = ListBox_GetItemData(hList1, nCurSel)
+   if idx > 0 THEN
+      SetCursor LoadCursor( GetModuleHandle(NULL), *gToolBox(idx).wszCursor)
+   else
+      SetCursor LoadCursor( 0, ByVal IDC_ARROW )
+   END IF
    function = 0
 End Function
-
-
-''
-''  Draw the rectangle lasso on the Window DC.
-''
-function DrawLasso( byval pDoc as clsDocument ptr, _
-                    ByVal ptStart As point, _
-                    byval ptEnd as point _
-                    ) as long 
-
-   dim as rect rc
-   SetRect(@rc, ptStart.x, ptStart.y, ptEnd.x, ptEnd.y)
-   
-   ' Normalize the Rect
-   NormalizeRect(rc)
-   If IsRectEmpty( @rc ) Then Exit function
-    
-   ' Get DC of entire screen to draw on top of all controls
-   dim as HDC hDC = GetWindowDC(0)
-   MapWindowPoints(pDoc->hWndForm, 0, cast(point ptr, @rc), 2)
-   DrawFocusRect( hDC, @rc)
-   ReleaseDC( 0, hDC )
-
-   function = 0
-End function
-
 
 ' ========================================================================================
 ' Change the mouse cursor if over a valid grab handle
@@ -224,27 +341,33 @@ function DrawGrabHandles( byval hDC as HDC, _
 end function
 
 
+
 ' ========================================================================================
 ' Handle WM_LBUTTONDOWN messages for the Form and Frame windows
 ' ========================================================================================
 function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
 
    dim as POINT pt
-   dim as long x, y
+   dim as RECT rc
    
+   SetCapture(hwnd)
+
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
    if pDoc = 0 THEN exit function
 
    dim pCtrl as clsControl ptr
-   SetCapture(hwnd)
 
    GetCursorPos(@pt)
    MapWindowPoints(0, HWND, @pt, 1)
-   x = pt.x
-   y = pt.y
+
+   ResetClosestControls(pDoc)
+
+   GetClientRect(pDoc->hWndForm, @rc)
+   MapWindowPoints(pDoc->hWndForm, 0, cast(point ptr, @rc), 2)
+   ClipCursor(@rc)
 
    ' #1: Determine if a grab handle has been clicked on
-   pDoc->GrabHit = SetGrabHandleMouseCursor(pDoc, x, y, pCtrl)
+   pDoc->GrabHit = SetGrabHandleMouseCursor(pDoc, pt.x, pt.y, pCtrl)
    if pDoc->GrabHit <> GRAB_NOHIT THEN
       ' One of the sizing handles was clicked on   
       pDoc->bSizing = true
@@ -256,35 +379,70 @@ function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
       pCtrl = pDoc->Controls.GetCtrlPtr(hWndCtrl)
       if pCtrl then
          ' If Ctrl is held down then toggle adding/removing the control 
-         if GetAsyncKeyState(VK_CONTROL) THEN
+         if (GetAsyncKeyState(VK_CONTROL) and &H8000) THEN
             pCtrl->IsSelected = not(pCtrl->IsSelected)
          else
             ' If the control being clicked on is already selected then it will become
-            ' the actice control. If not already selected then deselect all other controls
-            ' the the selection group.
+            ' the active control. If not already selected then deselect all other controls
+            ' in the selection group.
             if pCtrl->IsSelected = false THEN pDoc->Controls.DeselectAllControls
             pCtrl->IsSelected = true
             ' If the Form is clicked on the start the lasso process.
             if pCtrl->ControlType = CTRL_FORM THEN
-               pDoc->bLasso = true 
-               pDoc->ptStart = pt
-               pDoc->ptEnd = pt
+               gLasso.Create(pDoc->hWndForm)
+               gLasso.SetStartPoint(pt.x, pt.y)
+               gLasso.SetEndPoint(pt.x, pt.y)
             else
                pDoc->pCtrlAction = pCtrl
                pDoc->bMoving = true
+               SetClosestControls( pDoc, pCtrl)
             END IF
          END IF
          pDoc->Controls.SetActiveControl( iif(pCtrl->IsSelected, hWndCtrl, 0) )
+         frmMain_UpdateLineCol(HWND_FRMMAIN)
       END IF
    END IF
 
    ' Save the current mouse position
-   pDoc->ptPrev.x = x
-   pDoc->ptPrev.y = y
+   pDoc->ptPrev.x = pt.x
+   pDoc->ptPrev.y = pt.y
    
    ' Ensure the grab handles of form and controls are redrawn or hidden
    AfxRedrawWindow(pDoc->hWndFrame)
    AfxRedrawWindow(pDoc->hWndForm)
+   DisplayPropertyList(pDoc)
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Handle WM_RBUTTONDOWN messages for the Form and Frame windows
+' ========================================================================================
+function HandleDesignerRButtonDown( ByVal HWnd As HWnd ) as LRESULT
+
+   dim as POINT pt
+   
+   dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
+   if pDoc = 0 THEN exit function
+
+   dim pCtrl as clsControl ptr
+
+   HandleDesignerLButtonDown(HWnd) 
+   
+   pDoc->bMoving = false
+   pDoc->bSizing = false
+   
+   GetCursorPos(@pt)
+
+   pCtrl = pDoc->Controls.GetActiveControl
+   if pCtrl THEN
+      if pCtrl->ControlType = CTRL_FORM THEN
+         DisplayFormPopupMenu(HWND_FRMMAIN, pt.x, pt.y)
+      else   
+         DisplayControlPopupMenu(HWND_FRMMAIN, pt.x, pt.y)
+      END IF
+   END IF
 
    function = 0
 end function
@@ -295,16 +453,21 @@ end function
 ' ========================================================================================
 function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
 
+   ClipCursor(0)
+   ReleaseCapture
+
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
    if pDoc = 0 THEN exit function
    
+   ResetClosestControls(pDoc)
+
    ' Hide any previous lasso (and select controls)
-   if pDoc->bLasso THEN 
+   if gLasso.IsActive THEN 
       dim pCtrl as clsControl ptr
       dim as Rect rcIntersect, rcLasso, rcCtrl
-      DrawLasso(pDoc, pDoc->ptStart, pDoc->ptEnd)
-      SetRect(@rcLasso, pDoc->ptStart.x, pDoc->ptStart.y, pDoc->ptEnd.x, pDoc->ptEnd.y)
-      NormalizeRect(rcLasso)
+      
+      rcLasso = gLasso.GetLassoRect()
+      gLasso.Destroy
 
       ' If the Toolbox Pointer/Arrow is selected then attempt to select the controls
       ' that intersect with the lasso, otherwise draw and create the new Toolbox control.
@@ -331,20 +494,19 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
       end if   
    end if      
     
-   pDoc->ptStart  = pDoc->ptEnd
    pDoc->GrabHit  = GRAB_NOHIT
    pDoc->bSizing  = false
    pDoc->bMoving  = false
-   pDoc->bLasso   = false
    pDoc->pCtrlAction = 0
    
+   SetBlueSnapLine(pDoc, -1, -1, -1, -1)
    SetActiveToolboxControl(CTRL_POINTER)
-
-   ReleaseCapture
 
    ' Ensure the grab handles of form and controls are redrawn or hidden
    AfxRedrawWindow(pDoc->hWndFrame)
    AfxRedrawWindow(pDoc->hWndForm)
+   frmMain_UpdateLineCol(HWND_FRMMAIN)
+   DisplayPropertyList(pDoc)
    
    function = 0
 end function
@@ -362,25 +524,40 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
    
    dim pCtrl as clsControl ptr
 
-   ' Hide any previous lasso
-   if pDoc->bLasso THEN DrawLasso(pDoc, pDoc->ptStart, pDoc->ptEnd)
-
    GetCursorPos(@pt)
    MapWindowPoints(0, HWND, @pt, 1)
    xDelta = pt.x - pDoc->ptPrev.x
    yDelta = pt.y - pDoc->ptPrev.y
    
-   pDoc->ptEnd = pt
+   if (xDelta = 0) andalso (yDelta = 0) THEN exit function
+
+   SetMouseCursor
+   
+   SetBlueSnapLine(pDoc,-1,-1,-1,-1)
    
    if pDoc->bSizing THEN
+
       Select Case pDoc->GrabHit
          Case GRAB_BOTTOMRIGHT 
-            pDoc->rcSize.right  = pDoc->rcSize.right + xDelta
+            pDoc->rcSize.right  = pDoc->rcSize.right  + xDelta
             pDoc->rcSize.bottom = pDoc->rcSize.bottom + yDelta
          Case GRAB_RIGHT 
             pDoc->rcSize.right  = pDoc->rcSize.right + xDelta
          Case GRAB_BOTTOM
             pDoc->rcSize.bottom = pDoc->rcSize.bottom + yDelta
+         case GRAB_BOTTOMLEFT
+            pDoc->rcSize.left   = pDoc->rcSize.left   + xDelta
+            pDoc->rcSize.bottom = pDoc->rcSize.bottom + yDelta
+         Case GRAB_TOPLEFT 
+            pDoc->rcSize.left   = pDoc->rcSize.left + xDelta
+            pDoc->rcSize.top    = pDoc->rcSize.top  + yDelta
+         Case GRAB_TOPRIGHT
+            pDoc->rcSize.right  = pDoc->rcSize.right + xDelta
+            pDoc->rcSize.top    = pDoc->rcSize.top   + yDelta
+         Case GRAB_LEFT 
+            pDoc->rcSize.left   = pDoc->rcSize.left + xDelta
+         Case GRAB_TOP
+            pDoc->rcSize.top    = pDoc->rcSize.top + yDelta
       End Select
 
       ' NOTE:
@@ -393,14 +570,73 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       If pDoc->rcSize.bottom - pDoc->rcSize.top <= AfxScaleY(8) Then pDoc->rcSize.bottom = pDoc->rcSize.top + AfxScaleY(8)
 
       ' Resize all selected the form/control 
-      SetWindowPos( pDoc->pCtrlAction->hWindow, 0, 0, 0, _
-                    pDoc->rcSize.right - pDoc->rcSize.left, pDoc->rcSize.bottom - pDoc->rcSize.top, _
-                    SWP_NOMOVE or SWP_NOZORDER)
+      ' Convert pDoc->rcSize from Window to Client coordinates
+      dim as rect rc = pDoc->rcSize
+      MapWindowPoints(0, HWND, cast(point ptr, @rc), 2)
+      pDoc->pCtrlAction->SuspendLayout = true
+      SetControlProperty(pDoc->pCtrlAction, "LEFT", str(rc.left))
+      SetControlProperty(pDoc->pCtrlAction, "TOP", str(rc.top))
+      SetControlProperty(pDoc->pCtrlAction, "WIDTH", str(rc.right - rc.left))
+      SetControlProperty(pDoc->pCtrlAction, "HEIGHT", str(rc.bottom - rc.top))
+      ApplyControlProperties(pDoc->pCtrlAction)
+      pDoc->pCtrlAction->SuspendLayout = false
       
       ' Ensure the grab handles are redrawn
-      AfxRedrawWindow(GetParent(pDoc->pCtrlAction->hWindow))
+      AfxRedrawWindow(pDoc->hWndForm)
+      frmMain_UpdateLineCol(HWND_FRMMAIN)
+      DisplayPropertyList(pDoc)
       
    elseif pDoc->bMoving then
+      ' Iterate controls to determine if we can snap to another control
+      dim as long nDirection
+      dim as RECT rcActive, rc
+      dim as Boolean bSnap
+      
+      SetClosestControls( pDoc, pDoc->pCtrlAction)
+
+      GetWindowRect(pDoc->pCtrlAction->hWindow, @rcActive)
+      MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rcActive), 2)
+
+      if yDelta < 0 THEN nDirection = DIRECTION_TOP
+      if yDelta > 0 THEN nDirection = DIRECTION_BOTTOM
+      
+      SetBlueSnapLine(pDoc, -1, -1, -1, -1)
+
+      if nDirection = DIRECTION_TOP then
+
+         if pDoc->SnapUpWait <> 0 THEN 
+            pDoc->SnapUpWait = pDoc->SnapUpWait - abs(yDelta)
+            pDoc->ptPrev.x = pt.x: pDoc->ptPrev.y = pt.y
+            if pDoc->SnapUpWait > 0 then exit function
+            pDoc->SnapUpWait = 0
+         END IF
+
+         pCtrl = pDoc->pCtrlCloseTop
+         if cbool(pCtrl <> 0) andalso (bSnap = false) THEN
+            GetWindowRect(pCtrl->hWindow, @rc)
+            MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
+            if rcActive.top <= rc.top + 5 THEN 
+               yDelta = (rc.top - rcActive.top): bSnap = true
+            end if   
+         END IF
+         pCtrl = pDoc->pCtrlCloseLeft
+         if cbool(pCtrl <> 0) andalso (bSnap = false) THEN
+            GetWindowRect(pCtrl->hWindow, @rc)
+            MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
+            if (rcActive.top > rc.top) andalso (rcActive.top <= rc.top + 5) THEN 
+               yDelta = (rc.top - rcActive.top): bSnap = true
+               pDoc->SnapUpWait = abs(yDelta)
+               SetBlueSnapLine(pDoc, rc.left, rc.top, rcActive.left, rcActive.top)
+            end if
+         END IF
+      end if
+         
+      if nDirection = DIRECTION_BOTTOM then
+'            ? "BOTTOM"
+      end if
+            
+
+      
       ' Move the control to its new position
       for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
          pCtrl = pDoc->Controls.ItemAt(i)
@@ -409,16 +645,21 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
             MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pDoc->rcSize), 2)
             pDoc->rcSize.left  = pDoc->rcSize.left + xDelta
             pDoc->rcSize.top   = pDoc->rcSize.top + yDelta
-            SetWindowPos( pCtrl->hWindow, 0, _
-                          pDoc->rcSize.left, pDoc->rcSize.top, _
-                          0, 0, SWP_NOSIZE or SWP_NOZORDER)
+            pCtrl->SuspendLayout = true
+            SetControlProperty(pCtrl, "LEFT", str(pDoc->rcSize.left))
+            SetControlProperty(pCtrl, "TOP", str(pDoc->rcSize.top))
+            ApplyControlProperties(pCtrl)
+            pCtrl->SuspendLayout = false
          END IF
       next
       ' Ensure the grab handles are redrawn
-      AfxRedrawWindow(GetParent(pDoc->pCtrlAction->hWindow))
+      AfxRedrawWindow(pDoc->hWndForm)
+      frmMain_UpdateLineCol(HWND_FRMMAIN)
+      DisplayPropertyList(pDoc)
       
-   elseif pDoc->bLasso then
-      DrawLasso(pDoc, pDoc->ptStart, pDoc->ptEnd)
+   elseif gLasso.IsActive then
+      gLasso.SetEndPoint(pt.x, pt.y)
+      gLasso.Show()
    else   
       pDoc->GrabHit = SetGrabHandleMouseCursor(pDoc, pt.x, pt.y, pCtrl)
    end if      
@@ -443,15 +684,26 @@ Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
    
    Dim As PAINTSTRUCT ps
    Dim As HDC hDC
-
+   dim as HPEN hPen = CreatePen(PS_SOLID, 1, BGR(0,0,255))
+   
    hDC = BeginPaint(hWnd, @ps)
 
    SaveDC hDC
 
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
-   if pDoc THEN DrawGrabHandles(hDC, pDoc, false)
+   if pDoc THEN 
+      ' Draw any blue snap lines
+      SelectObject(hDC, hPen)
+      MoveToEx(hDC, pDoc->ptBlueStart.x, pDoc->ptBlueStart.y, 0)
+      LineTo(hDC, pDoc->ptBlueEnd.x, pDoc->ptBlueStart.y)
+      
+      ' Draw the control's grab handles 
+      DrawGrabHandles(hDC, pDoc, false)
+   end if   
 
    RestoreDC hDC, -1 
+   
+   DeleteObject(hPen)
    
    EndPaint hWnd, @ps
    
@@ -469,21 +721,6 @@ End Function
 
 
 ' ========================================================================================
-' Lasso popup window
-' ========================================================================================
-Function Lasso_WndProc( ByVal HWnd   As HWnd, _
-                        ByVal uMsg   As UINT, _
-                        ByVal wParam As WPARAM, _
-                        ByVal lParam As LPARAM _
-                        ) As LRESULT
-
-   ' for messages that we don't deal with
-   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
-
-End Function
-
-
-' ========================================================================================
 ' Visual Designer Form Window procedure 
 ' ========================================================================================
 Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
@@ -496,6 +733,7 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_PAINT,       DesignerForm_OnPaint)
       HANDLE_MSG (HWnd, WM_DESTROY,     DesignerForm_OnDestroy)
 
+      case WM_RBUTTONDOWN: HandleDesignerRButtonDown(HWND)
       case WM_LBUTTONDOWN: HandleDesignerLButtonDown(HWND)
       case WM_LBUTTONUP:   HandleDesignerLButtonUp(HWND)
       case WM_MOUSEMOVE:   HandleDesignerMouseMove(HWND)
@@ -503,21 +741,13 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
       Case WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN  
          ' Will only fire when the Caption bar, Min/Max/Close buttons are clicked.
          SetActiveWindow HWND_FRMMAIN
-
-         'GetPointers hWnd, pForm, pCtrl
-         'DeselectAllControls pForm
-         '@pForm.NumSelectedControls = 0
-         'HighlightSelectedControls pForm
-         'RepaintThunderClient pForm
          Function = TRUE: Exit Function
-         
 
       Case WM_NCLBUTTONDBLCLK
          SetActiveWindow HWND_FRMMAIN
          ' Prevent the user from double clicking on the caption bar thus
          ' causing the Form to maximize.
          Function = TRUE: Exit Function
-
 
       Case WM_NCHITTEST
          ' Catch certain critical mouseover points on the form so we can stop processing them.
@@ -535,14 +765,6 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
          Function = nHitTest    ' Return the default code from the default window handler.
          Exit Function
                               
-      Case WM_WINDOWPOSCHANGING 
-         'prevent the Form from being dragged (moved) via the mouse. But allow the Form
-         'to move when the ViewPort scrollbars are used.
-         'If g.ScrollViewPort = %FALSE Then
-         '   pWP = lParam
-         '   @pWP.flags = @pWP.flags Or %SWP_NOMOVE 
-         'End If
-
    End Select
 
    ' for messages that we don't deal with
@@ -571,11 +793,7 @@ FUNCTION Control_SubclassProc( BYVAL hwnd   AS HWND, _                 ' Control
          FUNCTION = DLGC_WANTALLKEYS
          EXIT FUNCTION
 
-      Case WM_RBUTTONDOWN  
-         ' Let the parent Form handle the right click mouse message
-         if pDoc THEN PostMessage( pDoc->hWndForm, uMsg, wParam, cast(lParam, dwRefData) )
-         Exit Function                                                                       
-
+      case WM_RBUTTONDOWN: HandleDesignerRButtonDown(pDoc->hWndForm)
       case WM_LBUTTONDOWN: HandleDesignerLButtonDown(pDoc->hWndForm)
       case WM_LBUTTONUP:   HandleDesignerLButtonUp(pDoc->hWndForm)
       case WM_MOUSEMOVE:   HandleDesignerMouseMove(pDoc->hWndForm)
@@ -612,5 +830,6 @@ FUNCTION Control_SubclassProc( BYVAL hwnd   AS HWND, _                 ' Control
    FUNCTION = DefSubclassProc(hwnd, uMsg, wParam, lParam)
 
 END FUNCTION
+
 
 

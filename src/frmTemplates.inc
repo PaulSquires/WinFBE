@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -69,8 +69,9 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
                                        0 )         ' pDocIn
    
                ' Ensure that the code window scrolls to the correct location
-               Dim As Long curPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
-               SciExec( pDoc->hWindow, SCI_GOTOPOS, curPos, 0 )
+               dim as hwnd hEdit = pDoc->hWndActiveScintilla
+               Dim As Long curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+               SciExec( hEdit, SCI_GOTOPOS, curPos, 0 )
 
             End If
             ' Close the dialog

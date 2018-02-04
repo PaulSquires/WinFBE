@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -183,14 +183,32 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
    
    TabCtrl_GetItem( this.hWindow, idx, @TB )
    
-   Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
-   If pDoc Then 
-      ShowWindow(pDoc->hWindow, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
-      ' Also show/hide the Toolbox if applicable
-      if pDoc->IsDesigner THEN
-         ShowWindow(HWND_FRMVDTOOLBOX, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
-      END IF
-   End If   
+   Dim pDocShow As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
+   If pDocShow = 0 Then exit function
+   
+   ' Hide all documents and their associated scrollbars
+   Dim pDoc As clsDocument Ptr 
+   dim as long idxProject = gApp.GetActiveProjectIndex()
+   
+   for i as long = 0 to gApp.Projects(idxProject).GetDocumentCount - 1
+      pDoc = gApp.Projects(idxProject).GetDocumentPtr(i)
+      if pDoc = 0 THEN continue for
+      if pDoc->ProjectIndex <> idxProject THEN continue for
+      ShowWindow(pDoc->hWindow(0), SW_HIDE)
+      ShowWindow(pDoc->hWindow(1), SW_HIDE)
+      ShowWindow(pDoc->hScrollbar, SW_HIDE)
+   next
+   
+   ' Show/Hide our current active Scintilla window and scrollbar
+   ShowWindow(pDocShow->hWindow(0), Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
+   ShowWindow(pDocShow->hWindow(1), Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
+   ShowWindow(pDocShow->hScrollbar, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
+      
+   ' Also show/hide the Toolbox if applicable
+   if pDocShow->IsDesigner THEN
+      ShowWindow(HWND_FRMVDTOOLBOX, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))
+   END IF
+
    Function = 0
 End Function
    
@@ -234,10 +252,10 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    If pDoc Then 
       ' Set the text that displays on the tab
       wText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-      If cbool(SciExec( pDoc->hWindow, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          wText = wText & "*"
       End If   
-
+            
       ' We only update the text if it has changed in order to prevent flicker.
       If wText <> wTemp Then
          TB.Mask    = TCIF_TEXT 
@@ -246,6 +264,8 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
          ' Also update the Explorer node's filename
          if pDoc->hNodeExplorer then
             Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+            ' We don't want any * modififer to show
+            wText = rtrim(wText, "*")
             TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wText )
          end if   
       End If

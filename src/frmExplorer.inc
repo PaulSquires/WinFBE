@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -108,19 +108,19 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
    If fAddChildren Then
       dim wszText as wstring * MAX_PATH
       dim as HTREEITEM hNode
-      dim pData as DBENGINE_DATA ptr
+      dim pData as DB2_DATA ptr
       dim as string sFilename = ucase(pDoc->DiskFilename)
       
-      gdb.dbRewind()
+      gdb2.dbRewind()
       do 
-         pData = gdb.dbGetNext
+         pData = gdb2.dbGetNext
          if pData = 0 THEN exit do
-         if pData->dataType <> DB_FUNCTION_NAME THEN continue do
-         if sFilename = ucase(pData->DiskFilename) THEN
-            hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->data1, 0 )
+         if pData->id <> DB2_FUNCTION THEN continue do
+         if sFilename = ucase(pData->fileName) THEN
+            hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0 )
             Treeview_RemoveCheckBox(hTree, hNode)
          END IF
-      loop
+      loop      
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
    

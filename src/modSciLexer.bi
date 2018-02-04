@@ -1,3 +1,17 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
+
 ''  Scintilla source code edit control 
 ''  @file SciLexer.h, v. 3.3.5
 ''  Interface to the added lexer functions in the SciLexer version of the edit control.
@@ -13,116 +27,116 @@
 ''  SciLexer features - not in standard Scintilla
 
 #Define SCLEX_CONTAINER                            0      ' // No lexer selected (default)
-#Define SCLEX_NULL                                 1      ' // Null lexer (does not syntax styling)
-#Define SCLEX_PYTHON                               2      ' // Python lexer
-#Define SCLEX_CPP                                  3      ' // C++ lexer
-#Define SCLEX_HTML                                 4      ' // HTML lexer
-#Define SCLEX_XML                                  5      ' // XML lexer
-#Define SCLEX_PERL                                 6      ' // Perl lexer
-#Define SCLEX_SQL                                  7      ' // SQL lexer
+'#Define SCLEX_NULL                                 1      ' // Null lexer (does not syntax styling)
+'#Define SCLEX_PYTHON                               2      ' // Python lexer
+'#Define SCLEX_CPP                                  3      ' // C++ lexer
+'#Define SCLEX_HTML                                 4      ' // HTML lexer
+'#Define SCLEX_XML                                  5      ' // XML lexer
+'#Define SCLEX_PERL                                 6      ' // Perl lexer
+'#Define SCLEX_SQL                                  7      ' // SQL lexer
 #Define SCLEX_VB                                   8      ' // Visual Basic lexer
-#Define SCLEX_PROPERTIES                           9      ' // Lexer for properies style files
-#Define SCLEX_ERRORLIST                            10     ' // Lexer for error style files
-#Define SCLEX_MAKEFILE                             11     ' // Makefile lexer
-#Define SCLEX_BATCH                                12     ' // Windows batch file lexer
-#Define SCLEX_XCODE                                13
-#Define SCLEX_LATEX                                14     ' // LaTex lexer
-#Define SCLEX_LUA                                  15     ' // LUA lexer
-#Define SCLEX_DIFF                                 16     ' // Lexer for diff output
-#Define SCLEX_CONF                                 17     ' // Lexer for Apache configuration files
-#Define SCLEX_PASCAL                               18     ' // Pascal lexer
-#Define SCLEX_AVE                                  19     ' // Avenue lexer
-#Define SCLEX_ADA                                  20     ' // Ada lexer
-#Define SCLEX_LISP                                 21     ' // Lisp lexer
-#Define SCLEX_RUBY                                 22     ' // Ruvy lexer
-#Define SCLEX_EIFFEL                               23     ' // Eiffel lexer
-#Define SCLEX_EIFFELKW                             24     ' // Eiffel lexer folding at keywords
-#Define SCLEX_TCL                                  25     ' // Tcl lexer
-#Define SCLEX_NNCRONTAB                            26     ' // Lexer for nnCron files
-#Define SCLEX_BULLANT                              27     ' // Bullant lexer
-#Define SCLEX_VBSCRIPT                             28     ' // VBScript lexer
-#Define SCLEX_BAAN                                 31     ' // Baan lexer
-#Define SCLEX_MATLAB                               32     ' // Matlab lexer
-#Define SCLEX_SCRIPTOL                             33     ' // Scriptol lexer
-#Define SCLEX_ASM                                  34     ' // ASM lexer
-#Define SCLEX_CPPNOCASE                            35     ' // CPP lexer with case insensitive keywords
-#Define SCLEX_FORTRAN                              36     ' // Fortran lexer
-#Define SCLEX_F77                                  37     ' // Fortran77 lexer
-#Define SCLEX_CSS                                  38     ' // CSS lexer
-#Define SCLEX_POV                                  39     ' // POV lexer
-#Define SCLEX_LOUT                                 40     ' // Basser Lout lexer
-#Define SCLEX_ESCRIPT                              41     ' // EScript lexer
-#Define SCLEX_PS                                   42     ' // PostCript lexer
-#Define SCLEX_NSIS                                 43     ' // NSIS lexer
-#Define SCLEX_MMIXAL                               44     ' // MMIX lexer
-#Define SCLEX_CLW                                  45     ' // Clarion lexer
-#Define SCLEX_CLWNOCASE                            46     ' // Clarion lexer with case insensitive keywords
-#Define SCLEX_LOT                                  47     ' // MPT text log file lexer
-#Define SCLEX_YAML                                 48     ' // YAML lexer
-#Define SCLEX_TEX                                  49     ' // TeX lexer
-#Define SCLEX_METAPOST                             50     ' // Metapost lexer
-#Define SCLEX_POWERBASIC                           51     ' // PowerBASIC lexer
-#Define SCLEX_FORTH                                52     ' // Forth lexer
-#Define SCLEX_ERLANG                               53     ' // Erlang lexer
-#Define SCLEX_OCTAVE                               54     ' // Octave lexer
-#Define SCLEX_MSSQL                                55     ' // MS SQL lexer
-#Define SCLEX_VERILOG                              56     ' // Verilog lexer
-#Define SCLEX_KIX                                  57     ' // Kix-Scripts lexer
-#Define SCLEX_GUI4CLI                              58     ' // Gui4Cli lexer
-#Define SCLEX_SPECMAN                              59     ' // Specman E lexer
-#Define SCLEX_AU3                                  60     ' // AutoIt3 lexer
-#Define SCLEX_APDL                                 61     ' // APDL lexer
-#Define SCLEX_BASH                                 62     ' // Bash lexer
-#Define SCLEX_ASN1                                 63     ' // ASN.1 lexer
-#Define SCLEX_VHDL                                 64     ' // VHDL lexer
-#Define SCLEX_CAML                                 65     ' // Canl lexer
-#Define SCLEX_BLITZBASIC                           66     ' // BlitzBasic lexer
-#Define SCLEX_PUREBASIC                            67     ' // PureBasic lexer
-#Define SCLEX_HASKELL                              68     ' // Haskell lexer
-#Define SCLEX_PHPSCRIPT                            69     ' // PHPScript lexer
-#Define SCLEX_TADS3                                70     ' // TADS3 lexer
-#Define SCLEX_REBOL                                71     ' // REBOL lexer
-#Define SCLEX_SMALLTALK                            72     ' // Smalltalk lexer
-#Define SCLEX_FLAGSHIP                             73     ' // FlagShip lexer
-#Define SCLEX_CSOUND                               74     ' // Csound lexer
-#Define SCLEX_FREEBASIC                            75     ' // FreeBasic lexer
-#Define SCLEX_INNOSETUP                            76     ' // InnoSetup lexer
-#Define SCLEX_OPAL                                 77     ' // Opal lexer
-#Define SCLEX_SPICE                                78     ' // Spice lexer
-#Define SCLEX_D                                    79     ' // D lexer
-#Define SCLEX_CMAKE                                80     ' // CMake lexer
-#Define SCLEX_GAP                                  81     ' // GAP lexer
-#Define SCLEX_PLM                                  82     ' // PLM lexer
-#Define SCLEX_PROGRESS                             83     ' // Progress lexer
-#Define SCLEX_ABAQUS                               84     ' // Abaqus lexer
-#Define SCLEX_ASYMPTOTE                            85     ' // Asymptote lexer
-#Define SCLEX_R                                    86     ' // R lexer
-#Define SCLEX_MAGIK                                87     ' // MagikSF lexer
-#Define SCLEX_POWERSHELL                           88     ' // PowerShell lexer
-#Define SCLEX_MYSQL                                89     ' // MySQL lexer
-#Define SCLEX_PO                                   90     ' // .po file lexer
-#Define SCLEX_TAL                                  91     ' // TAL lexer
-#Define SCLEX_COBOL                                92     ' // COBOL lexer
-#Define SCLEX_TACL                                 93     ' // TAL lexer
-#Define SCLEX_SORCUS                               94     ' // SORCUS installation files lexer
-#Define SCLEX_POWERPRO                             95     ' // PowerPro utility lexer
-#Define SCLEX_NIMROD                               96     ' // Nimrod lexer
-#Define SCLEX_SML                                  97     ' // SML lexer
-#Define SCLEX_MARKDOWN                             98     ' // Markdown lexer
-#Define SCLEX_TXT2TAGS                             99
-#Define SCLEX_A68K                                 100
-#Define SCLEX_MODULA                               101
-#Define SCLEX_COFFEESCRIPT                         102
-#Define SCLEX_TCMD                                 103
-#Define SCLEX_AVS                                  104
-#Define SCLEX_ECL                                  105
-#Define SCLEX_OSCRIPT                              106
-#Define SCLEX_VISUALPROLOG                         107
-#Define SCLEX_AUTOMATIC                            1000
-#Define SCLEX_LITERATEHASKELL                      108
-#Define SCLEX_STTXT                                109
-#Define SCLEX_KVIRC                                110
-#Define SCLEX_AUTOMATIC                            1000
+'#Define SCLEX_PROPERTIES                           9      ' // Lexer for properies style files
+'#Define SCLEX_ERRORLIST                            10     ' // Lexer for error style files
+'#Define SCLEX_MAKEFILE                             11     ' // Makefile lexer
+'#Define SCLEX_BATCH                                12     ' // Windows batch file lexer
+'#Define SCLEX_XCODE                                13
+'#Define SCLEX_LATEX                                14     ' // LaTex lexer
+'#Define SCLEX_LUA                                  15     ' // LUA lexer
+'#Define SCLEX_DIFF                                 16     ' // Lexer for diff output
+'#Define SCLEX_CONF                                 17     ' // Lexer for Apache configuration files
+'#Define SCLEX_PASCAL                               18     ' // Pascal lexer
+'#Define SCLEX_AVE                                  19     ' // Avenue lexer
+'#Define SCLEX_ADA                                  20     ' // Ada lexer
+'#Define SCLEX_LISP                                 21     ' // Lisp lexer
+'#Define SCLEX_RUBY                                 22     ' // Ruvy lexer
+'#Define SCLEX_EIFFEL                               23     ' // Eiffel lexer
+'#Define SCLEX_EIFFELKW                             24     ' // Eiffel lexer folding at keywords
+'#Define SCLEX_TCL                                  25     ' // Tcl lexer
+'#Define SCLEX_NNCRONTAB                            26     ' // Lexer for nnCron files
+'#Define SCLEX_BULLANT                              27     ' // Bullant lexer
+'#Define SCLEX_VBSCRIPT                             28     ' // VBScript lexer
+'#Define SCLEX_BAAN                                 31     ' // Baan lexer
+'#Define SCLEX_MATLAB                               32     ' // Matlab lexer
+'#Define SCLEX_SCRIPTOL                             33     ' // Scriptol lexer
+'#Define SCLEX_ASM                                  34     ' // ASM lexer
+'#Define SCLEX_CPPNOCASE                            35     ' // CPP lexer with case insensitive keywords
+'#Define SCLEX_FORTRAN                              36     ' // Fortran lexer
+'#Define SCLEX_F77                                  37     ' // Fortran77 lexer
+'#Define SCLEX_CSS                                  38     ' // CSS lexer
+'#Define SCLEX_POV                                  39     ' // POV lexer
+'#Define SCLEX_LOUT                                 40     ' // Basser Lout lexer
+'#Define SCLEX_ESCRIPT                              41     ' // EScript lexer
+'#Define SCLEX_PS                                   42     ' // PostCript lexer
+'#Define SCLEX_NSIS                                 43     ' // NSIS lexer
+'#Define SCLEX_MMIXAL                               44     ' // MMIX lexer
+'#Define SCLEX_CLW                                  45     ' // Clarion lexer
+'#Define SCLEX_CLWNOCASE                            46     ' // Clarion lexer with case insensitive keywords
+'#Define SCLEX_LOT                                  47     ' // MPT text log file lexer
+'#Define SCLEX_YAML                                 48     ' // YAML lexer
+'#Define SCLEX_TEX                                  49     ' // TeX lexer
+'#Define SCLEX_METAPOST                             50     ' // Metapost lexer
+'#Define SCLEX_POWERBASIC                           51     ' // PowerBASIC lexer
+'#Define SCLEX_FORTH                                52     ' // Forth lexer
+'#Define SCLEX_ERLANG                               53     ' // Erlang lexer
+'#Define SCLEX_OCTAVE                               54     ' // Octave lexer
+'#Define SCLEX_MSSQL                                55     ' // MS SQL lexer
+'#Define SCLEX_VERILOG                              56     ' // Verilog lexer
+'#Define SCLEX_KIX                                  57     ' // Kix-Scripts lexer
+'#Define SCLEX_GUI4CLI                              58     ' // Gui4Cli lexer
+'#Define SCLEX_SPECMAN                              59     ' // Specman E lexer
+'#Define SCLEX_AU3                                  60     ' // AutoIt3 lexer
+'#Define SCLEX_APDL                                 61     ' // APDL lexer
+'#Define SCLEX_BASH                                 62     ' // Bash lexer
+'#Define SCLEX_ASN1                                 63     ' // ASN.1 lexer
+'#Define SCLEX_VHDL                                 64     ' // VHDL lexer
+'#Define SCLEX_CAML                                 65     ' // Canl lexer
+'#Define SCLEX_BLITZBASIC                           66     ' // BlitzBasic lexer
+'#Define SCLEX_PUREBASIC                            67     ' // PureBasic lexer
+'#Define SCLEX_HASKELL                              68     ' // Haskell lexer
+'#Define SCLEX_PHPSCRIPT                            69     ' // PHPScript lexer
+'#Define SCLEX_TADS3                                70     ' // TADS3 lexer
+'#Define SCLEX_REBOL                                71     ' // REBOL lexer
+'#Define SCLEX_SMALLTALK                            72     ' // Smalltalk lexer
+'#Define SCLEX_FLAGSHIP                             73     ' // FlagShip lexer
+'#Define SCLEX_CSOUND                               74     ' // Csound lexer
+'#Define SCLEX_FREEBASIC                            75     ' // FreeBasic lexer
+'#Define SCLEX_INNOSETUP                            76     ' // InnoSetup lexer
+'#Define SCLEX_OPAL                                 77     ' // Opal lexer
+'#Define SCLEX_SPICE                                78     ' // Spice lexer
+'#Define SCLEX_D                                    79     ' // D lexer
+'#Define SCLEX_CMAKE                                80     ' // CMake lexer
+'#Define SCLEX_GAP                                  81     ' // GAP lexer
+'#Define SCLEX_PLM                                  82     ' // PLM lexer
+'#Define SCLEX_PROGRESS                             83     ' // Progress lexer
+'#Define SCLEX_ABAQUS                               84     ' // Abaqus lexer
+'#Define SCLEX_ASYMPTOTE                            85     ' // Asymptote lexer
+'#Define SCLEX_R                                    86     ' // R lexer
+'#Define SCLEX_MAGIK                                87     ' // MagikSF lexer
+'#Define SCLEX_POWERSHELL                           88     ' // PowerShell lexer
+'#Define SCLEX_MYSQL                                89     ' // MySQL lexer
+'#Define SCLEX_PO                                   90     ' // .po file lexer
+'#Define SCLEX_TAL                                  91     ' // TAL lexer
+'#Define SCLEX_COBOL                                92     ' // COBOL lexer
+'#Define SCLEX_TACL                                 93     ' // TAL lexer
+'#Define SCLEX_SORCUS                               94     ' // SORCUS installation files lexer
+'#Define SCLEX_POWERPRO                             95     ' // PowerPro utility lexer
+'#Define SCLEX_NIMROD                               96     ' // Nimrod lexer
+'#Define SCLEX_SML                                  97     ' // SML lexer
+'#Define SCLEX_MARKDOWN                             98     ' // Markdown lexer
+'#Define SCLEX_TXT2TAGS                             99
+'#Define SCLEX_A68K                                 100
+'#Define SCLEX_MODULA                               101
+'#Define SCLEX_COFFEESCRIPT                         102
+'#Define SCLEX_TCMD                                 103
+'#Define SCLEX_AVS                                  104
+'#Define SCLEX_ECL                                  105
+'#Define SCLEX_OSCRIPT                              106
+'#Define SCLEX_VISUALPROLOG                         107
+'#Define SCLEX_AUTOMATIC                            1000
+'#Define SCLEX_LITERATEHASKELL                      108
+'#Define SCLEX_STTXT                                109
+'#Define SCLEX_KVIRC                                110
+'#Define SCLEX_AUTOMATIC                            1000
 #Define SCE_P_DEFAULT                              0
 #Define SCE_P_COMMENTLINE                          1
 #Define SCE_P_NUMBER                               2
@@ -418,6 +432,7 @@
 #Define SCE_B_ERROR                                16
 #Define SCE_B_HEXNUMBER                            17
 #Define SCE_B_BINNUMBER                            18
+#Define SCE_B_MULTILINECOMMENT                     19
 #Define SCE_PROPS_DEFAULT                          0
 #Define SCE_PROPS_COMMENT                          1
 #Define SCE_PROPS_SECTION                          2

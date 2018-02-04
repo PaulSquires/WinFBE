@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -72,9 +72,14 @@ End Function
   
 ''
 ''
-Function clsConfig.LoadCodetips( ByRef sFilename As Const String ) as boolean
+Function clsConfig.LoadCodetips( ByRef sFilename As String ) as boolean
    Dim as string st, sFuncName, sFuncDeclare
    Dim as long f, i
+   
+   dim parser as clsParser
+
+   parser.fileName = ""     ' no need to store this sFilename
+   parser.idxProject = -1   ' do not associate it with any project
    
    f = Freefile
    If Open( sFilename For Input As #f ) = 0 Then
@@ -86,9 +91,9 @@ Function clsConfig.LoadCodetips( ByRef sFilename As Const String ) as boolean
          
          i = Instr(st, "=")
          If i Then
-            sFuncName    = Left(st, i-1)
-            sFuncDeclare = Mid(st, i+1)
-            gdb.dbAdd("", -1, DB_FUNCTION_NAME, 0, sFuncName, sFuncDeclare)
+            parser.funcName   = Left(st, i-1)
+            parser.funcParams = Mid(st, i+1)
+            gdb2.dbAdd(parser, DB2_FUNCTION)
          End If   
       Loop
       Close #f
@@ -101,20 +106,26 @@ End Function
 
 ''
 ''
-Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As Const String ) as boolean
-   Dim as string st, sID, sIdUnicode, sFuncName, sFuncDeclare
-   dim as string sTypeName, sTypeElements
-   Dim as long f, i
+Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String ) as boolean
+   Dim as string st, sID, sFuncName, sFuncDeclare
+   dim as string sTypeName, sTypeElements, sParts, sPart
+   Dim as long f, i, nCount
    
+   dim parser as clsParser
+
+   parser.fileName = ""     ' no need to store this sFilename
+   parser.idxProject = -1   ' do not associate it with any project
+
    ''
    ''  Codetips definition file for WinAPI
    ''
    ''  Format:
-   ''  1st character:  U=UNICODE, A=ANSI, B=BOTH
-   ''  2nd character:  F=FUNCTION, T=TYPE
-   ''  3rd character:  colon.
-   ''  TYPE elements are separated by | pipe symbol
+   ''  1st character:  F=FUNCTION, T=TYPE, S=STANDARD_DATATYPE
+   ''  2nd character:  colon.
+   ''  TYPE elements are separated by | pipe symbol. Each element name/datatype is separated by comma.
+   ''  STANDARD datatypes are separated by | pipe symobol (datatype followed by description of the datatype.
    ''
+
    f = Freefile
    If Open( sFilename For Input As #f ) = 0 Then
       Do Until Eof(f)
@@ -128,19 +139,42 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As Const String ) as bool
          
          sID = left(st, i - 1)
          st = mid(st, i + 1)
-         
-         sIdUnicode = mid(sID, 1, 1)
-         select CASE mid(sID, 2, 1)
+                   
+         select CASE sID
+            case "S"    ' standard datatype
+               i = instr(st, "|")
+               parser.typeName = Left(st, i-1)
+               parser.Description = mid(st, i+1)
+               parser.IsWinApi = true
+               gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
+               
             CASE "F"    ' function
                i = instr(st, "(")
-               sFuncName    = Left(st, i-1)
-               sFuncDeclare = st
-               gdb.dbAdd("", -1, DB_FUNCTION_NAME, 0, sFuncName, sFuncDeclare, sIdUnicode)
+               parser.funcName   = Left(st, i-1)
+               parser.funcParams = st
+               parser.IsWinApi = true
+               gdb2.dbAdd(parser, DB2_FUNCTION)
+
             case "T"     ' type
                i = instr(st, "|")
-               sTypeName     = Left(st, i-1)
-               stypeElements = mid(st, i + 1)
-               gdb.dbAdd("", -1, DB_TYPE_NAME, 0, sTypeName, sTypeElements, sIdUnicode)
+               parser.typeName = Left(st, i-1)
+               parser.typeAlias = parser.typeName
+               parser.IsWinApi = true
+               sParts = mid(st, i + 1)
+               gdb2.dbAdd(parser, DB2_TYPE)
+
+               ' Each element of the TYPE structure is added to the database. The
+               ' element is in the format elementname,elementtype
+               parser.funcName = ""
+               nCount = AfxStrParseCount(sParts, "|")
+               for i = 1 to nCount
+                  sPart = AfxStrParse(sParts, i, "|")
+                  parser.varName = AfxStrParse(sPart, 1, ",") 
+                  parser.varType = AfxStrParse(sPart, 2, ",") 
+                  parser.bInTypePublic = true
+                  gdb2.dbAdd(parser, DB2_VARIABLE)
+               NEXT
+
          END SELECT
   
       Loop
@@ -907,8 +941,12 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
             Print #f, "FileType="; pDoc->ProjectFileType
             Print #f, "TabIndex="; -1     ' use -1 rather than True
             Print #f, "Bookmarks="; pDoc->GetBookmarks()
-            Print #f, "FirstLine="; SendMessage( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            Print #f, "Position="; SendMessage( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)  
+            Print #f, "FirstLine="; SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+            Print #f, "Position="; SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
+            Print #f, "FirstLine1="; SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+            Print #f, "Position1="; SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
+            PRINT #f, "SplitPosition="; pDoc->SplitY
+            print #f, "FocusEdit="; iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
             Print #f, "FileEnd=[-]" 
          END IF
       end if
@@ -961,7 +999,8 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    Dim wData As WString * 1024
       
    Dim sBookmarks As String
-   Dim As Long nData, i, iTab, nFirstLine, nPosition, nActiveTab
+   Dim As Long nData, i, iTab, nActiveTab, nFocusEdit 
+   dim as long nFirstLine, nPosition, nFirstLine1, nPosition1, nSplitPosition
 
    ' Info saved for each File and used to create the file once FileEnd is found
    Dim pDoc As clsDocument Ptr
@@ -975,11 +1014,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    
    If AfxFileExists(wzFile) = 0 Then Exit Function
 
-   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
    SetCompileStatusBarMessage( "", 0 )
-   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
-   ShowWindow( hProgressBar, SW_SHOW)
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
    AfxDoEvents()
@@ -1008,7 +1043,12 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    ' Prevent the constant updating of the app caption bar with filename, (pDoc->DisplayStats)
    gProjectLoading = true 
    gApp.ProjectOverrideIndex = idx
-   
+   gApp.IsWindowIncludes = false
+   gdb2.dbDeleteWinAPI
+         
+   ' Set InUse here prior to parsing the files of the project
+   gApp.Projects(idx).InUse = true
+
    ' Prevent Treeview flickering during adding
    LockWindowUpdate(hTV)
 
@@ -1054,12 +1094,17 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
          Case "ActiveTab":           nActiveTab = nData
          
          Case "File":                wszFilename = wData
-         Case "FileType":            nFileType = nData
+         Case "FileType":            nFileType   = nData
          
-         Case "TabIndex":            bLoadInTab = nData
-         Case "Bookmarks":           sBookmarks = Str(wData)
-         Case "FirstLine":           nFirstLine = nData
-         Case "Position":            nPosition = nData
+         Case "TabIndex":            bLoadInTab  = nData
+         Case "Bookmarks":           sBookmarks  = Str(wData)
+         Case "FirstLine":           nFirstLine  = nData
+         Case "Position":            nPosition   = nData
+         Case "FirstLine1":          nFirstLine1 = nData
+         Case "Position1":           nPosition1  = nData
+         Case "SplitPosition":       nSplitPosition = nData
+         Case "FocusEdit":           nFocusEdit  = nData
+            
          Case "FileEnd":
             ' If this is a relative filename then convert it back.
             if AfxPathIsRelative(wszFilename) then 
@@ -1075,6 +1120,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
                                        0 )  ' pDocIn
                pDoc->ProjectFileType = nFileType
                pDoc->ProjectIndex = idx
+               pDoc->SplitY = nSplitPosition
                
                If bLoadInTab Then
                   If nTabIndex > Ubound(nTabs) Then
@@ -1085,9 +1131,14 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
                End If
                    
                ' Set the saved position
-               SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
-               SciExec( pDoc->hWindow, SCI_GOTOPOS, nPosition, 0) 
-               nFirstLine = 0: nPosition = 0
+               SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
+               SciExec( pDoc->hWindow(0), SCI_GOTOPOS, nPosition, 0) 
+               SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, nFirstLine1, 0) 
+               SciExec( pDoc->hWindow(1), SCI_GOTOPOS, nPosition1, 0) 
+               pDoc->hWndActiveScintilla = pDoc->hWindow(nFocusEdit)
+               nFirstLine  = 0: nPosition  = 0
+               nFirstLine1 = 0: nPosition1 = 0
+               nFocusEdit = 0
                
                ' Set any bookmarks
                pDoc->SetBookmarks(sBookmarks)
@@ -1117,9 +1168,6 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    gProjectLoading = false
    gApp.ProjectOverrideIndex = 0
 
-   ' It was a good project load so designate this project as being in use
-   gApp.Projects(idx).InUse = true
-
    ' If no active build configuration then assign the currently active selection
    if gApp.Projects(idx).ProjectBuild = "" then 
       gApp.Projects(idx).ProjectBuild = GetSelectedBuildGUID()
@@ -1136,7 +1184,6 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    ' Show the correct notes for this project
    frmOutput_ShowNotes
 
-   ShowWindow( hProgressBar, SW_HIDE)
    SetCursor( hCurSave )
 
    Function = True   ' successful open

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -277,11 +277,6 @@ function DoFindInFilesEx() as LONG
       .hInstApp     = 0 
    End With
 
-   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
-   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
-   ShowWindow( hProgressBar, SW_SHOW)
-
    ShellExecuteEx(@ShExecInfo)
 
    ' Give the process 33 ms (you can use a different value here depending on 
@@ -300,8 +295,6 @@ function DoFindInFilesEx() as LONG
          end if
       wend
    wend
-
-   ShowWindow( hProgressBar, SW_HIDE)
 
    kill wszBatchFile
    

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -57,7 +57,6 @@ Function DesignerMain_WndProc( ByVal HWnd   As HWnd, _
          IF pScrollWindow THEN 
             if uMsg = WM_VSCROLL then pScrollWindow->OnVScroll(wParam, lParam)
             if uMsg = WM_HSCROLL then pScrollWindow->OnHScroll(wParam, lParam)
-' TODO: Fix the scrolling because the design form does not repaint correctly.
             AfxRedrawWindow(hWndFrame)
             AfxRedrawWindow(hWndForm)
          end if   

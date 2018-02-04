@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -29,43 +29,44 @@ function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false ) as lon
 
    dim as long nPos, startPos, endPos, findFlags, r
    
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    if fReplaceAll = true then 
       if frmHotImgBtn_GetSelected(hWndCase) THEN findFlags = (findFlags Or SCFIND_MATCHCASE)
       if frmHotImgBtn_GetSelected(hWndWhole) THEN findFlags = (findFlags Or SCFIND_WHOLEWORD)
-      SendMessage( pDoc->hWindow, SCI_SETSEARCHFLAGS, findFlags, 0)
+      SendMessage( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
       
       if pDoc->HasMarkerHighlight THEN
-         startPos = SciExec( pDoc->hWindow, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
-         endPos = SciExec( pDoc->hWindow, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
+         endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       else
-         SciExec( pDoc->hWindow, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-         startPos = SciExec( pDoc->hWindow, SCI_GETTARGETSTART, 0, 0)
-         endPos = SciExec( pDoc->hWindow, SCI_GETTARGETEND, 0, 0)
+         SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+         startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+         endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
       END IF
-      SciExec( pDoc->hWindow, SCI_INDICATORCLEARRANGE, startPos, endPos)
+      SciExec( hEdit, SCI_INDICATORCLEARRANGE, startPos, endPos)
      
       do 
-         r = SciExec( pDoc->hWindow, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
+         r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
-         SciExec( pDoc->hWindow, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
+         SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
          startPos = r + len(txtFind)
          ' Adjust the searching positions
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
 
    else   
       ' Need to ensure that the current cursor/selection is actually the find
       ' phrase that we want to replace. If not, then move to the closest selection.
       if ucase(pDoc->GetSelText) <> ucase(txtFind) THEN
-         startPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
          frmFindReplace_NextSelection(startPos, true)
          exit function
       END IF
-      SciExec( pDoc->hWindow, SCI_TARGETFROMSELECTION, 0, 0)
-      SciExec( pDoc->hWindow, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
+      SciExec( hEdit, SCI_TARGETFROMSELECTION, 0, 0)
+      SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
    end if
       
    function = 0
@@ -82,11 +83,12 @@ function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as
 
    dim as long mainIdx, lenFind, endPos, nPos, iStart, iEnd
    
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    dim as hwnd hWndResults = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_LBLRESULTS)      
    dim as hwnd hWndFind    = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
    dim txtFind as string = Str(AfxGetWindowText(hWndFind))
    lenFind = len(txtFind)
-   endPos = SciExec( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
+   endPos = SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0)
    if endPos = 0 THEN exit function
     
    ' Build an array holding all of the selection positions
@@ -94,11 +96,11 @@ function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as
    
    gFind.foundCount = 0 
    while nPos <= endPos 
-      iStart = SciExec( pDoc->hWindow, SCI_INDICATORSTART, 8, nPos) 
-      iEnd   = SciExec( pDoc->hWindow, SCI_INDICATOREND, 8, iStart)
+      iStart = SciExec( hEdit, SCI_INDICATORSTART, 8, nPos) 
+      iEnd   = SciExec( hEdit, SCI_INDICATOREND, 8, iStart)
       if (iStart = 0) andalso (iEnd = 0) THEN exit while    ' no indicators found
 
-      if SciExec( pDoc->hWindow, SCI_INDICATORVALUEAT, 8, iStart-1) then
+      if SciExec( hEdit, SCI_INDICATORVALUEAT, 8, iStart-1) then
          gFind.foundCount = gFind.foundCount + 1
          if gFind.foundCount > ubound(iPositions) THEN
             redim preserve iPositions(gFind.foundCount) as long 
@@ -130,12 +132,12 @@ function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as
    ' Highlight the selection
    if gFind.foundCount > 0 THEN
       ' make sure target line is unfolded
-      dim as long currentLine = SciExec( pDoc->hWindow, SCI_LINEFROMPOSITION, iPositions(mainIdx), 0)
-      SciExec( pDoc->hWindow, SCI_ENSUREVISIBLE, currentLine, 0) 
-      SciExec( pDoc->hWindow, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
+      dim as long currentLine = SciExec( hEdit, SCI_LINEFROMPOSITION, iPositions(mainIdx), 0)
+      SciExec( hEdit, SCI_ENSUREVISIBLE, currentLine, 0) 
+      SciExec( hEdit, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
       AfxSetWindowText(hWndResults, mainIdx & " of " & gFind.foundCount)
    else
-      SciExec( pDoc->hWindow, SCI_SETSEL, startPos, startPos)
+      SciExec( hEdit, SCI_SETSEL, startPos, startPos)
       AfxSetWindowText(hWndResults, L(269, "No results"))
    END IF
    
@@ -157,54 +159,55 @@ function frmFindReplace_HighlightSearches() as long
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 THEN exit function
 
-   SciExec( pDoc->hWindow, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
-   SciExec( pDoc->hWindow, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-   SciExec( pDoc->hWindow, SCI_SETINDICATORCURRENT, 8, 0)
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   SciExec( hEdit, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
+   SciExec( hEdit, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+   SciExec( hEdit, SCI_SETINDICATORCURRENT, 8, 0)
    
    dim txtFind as string = Str(AfxGetWindowText(hWndFind))
       
    if frmHotImgBtn_GetSelected(hWndCase) THEN findFlags = (findFlags Or SCFIND_MATCHCASE)
    if frmHotImgBtn_GetSelected(hWndWhole) THEN findFlags = (findFlags Or SCFIND_WHOLEWORD)
-   SciExec( pDoc->hWindow, SCI_SETSEARCHFLAGS, findFlags, 0)
+   SciExec( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
    
    ' Remove all existing selection indicators
-   nLength = SendMessage( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
-   SciExec( pDoc->hWindow, SCI_INDICATORCLEARRANGE, 0, nLength)
+   nLength = SendMessage( hEdit, SCI_GETTEXTLENGTH, 0, 0)
+   SciExec( hEdit, SCI_INDICATORCLEARRANGE, 0, nLength)
 
    
    ' Are we searching a selection or the whole document
    if pDoc->HasMarkerHighlight THEN
-      startPos = SciExec( pDoc->hWindow, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
-      endPos = SciExec( pDoc->hWindow, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
-      SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-      SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+      startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
+      endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
+      SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+      SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
    else
-      SciExec( pDoc->hWindow, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-      startPos = SciExec( pDoc->hWindow, SCI_GETTARGETSTART, 0, 0)
-      endPos = SciExec( pDoc->hWindow, SCI_GETTARGETEND, 0, 0)
+      SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+      startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+      endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
    end if
 
 
    ' Search for the text to find
    if len(txtFind) then
       do 
-         r = SciExec( pDoc->hWindow, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
+         r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
          
-         SciExec( pDoc->hWindow, SCI_SETINDICATORVALUE, 8, 0 )
-         SciExec( pDoc->hWindow, SCI_INDICATORFILLRANGE, r, len(txtFind))
+         SciExec( hEdit, SCI_SETINDICATORVALUE, 8, 0 )
+         SciExec( hEdit, SCI_INDICATORFILLRANGE, r, len(txtFind))
          startPos = r + len(txtFind)
          
          ' Adjust the searching positions
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
-      startPos = SciExec( pDoc->hWindow, SCI_GETANCHOR, 0, 0) 
-      endPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+      startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
+      endPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
       if endPos < startPos then startPos = endPos
       startPos = startPos - 1
    else
-      startPos = SciExec( pDoc->hWindow, SCI_GETANCHOR, 0, 0) 
+      startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
    end if
 
    startPos = iif(startPos < 0, 0, startPos)
@@ -326,6 +329,8 @@ Function frmFindReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 THEN exit function
 
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+
    Select Case id
 
       case IDC_FRMFINDREPLACE_BTNTOGGLE
@@ -374,14 +379,14 @@ Function frmFindReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
       case IDC_FRMFINDREPLACE_BTNLEFT
          If codeNotify = BN_CLICKED Then
             if frmHotImgBtn_IsEnabled(hwndCtl) = false then exit function
-            dim as long startPos = SendMessage( pDoc->hWindow, SCI_GETANCHOR, 0, 0) 
+            dim as long startPos = SendMessage( hEdit, SCI_GETANCHOR, 0, 0) 
             frmFindReplace_NextSelection(startPos, false)
          end if
 
       case IDC_FRMFINDREPLACE_BTNRIGHT
          If codeNotify = BN_CLICKED Then
             if frmHotImgBtn_IsEnabled(hwndCtl) = false then exit function
-            dim as long startPos = SendMessage( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+            dim as long startPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0) 
             frmFindReplace_NextSelection(startPos, true)
          end if
 

@@ -1,7 +1,18 @@
+declare function RemoveComments( byval st as string) as string
+declare function MaskStringCharacters( byval st as string) as string
+declare function ChangeCommentCharacters( byval st as string) as string
+declare Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
+declare function KeyboardResizeControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
+declare function KeyboardMoveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
+declare function KeyboardCycleActiveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
+declare function GetControlRECT( byval pCtrl as clsControl ptr ) as RECT
+declare function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
+declare function GetControlProperty( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as CWSTR
+declare function SetControlProperty( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR, byval wszPropValue as CWSTR) as long
 declare function GetActiveToolboxControlName() as CWSTR
 declare function GetActiveToolboxControlClassName() as CWSTR
 declare function GetActiveToolboxControlType() as long
-declare function CreateToolboxControl( byval pDoc as clsDocument ptr, byval ControlType as long, byref rcDraw as RECT) as Long
+declare function CreateToolboxControl( byval pDoc as clsDocument ptr, byval ControlType as long, byref rcDraw as RECT) as clsControl ptr
 declare function GetActiveToolboxControl() as Long
 declare function SetActiveToolboxControl( byval ControlType as long ) as Long
 declare Function frmVDToolbox_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0) As Long
@@ -50,9 +61,9 @@ Declare Function Splitter_OnLButtonDown() As BOOLEAN
 Declare Function Splitter_OnLButtonUp() As BOOLEAN
 Declare Function Splitter_OnMouseMove() As BOOLEAN
 Declare Function IsPreparsedFile( byref sFilename as string ) as boolean
-Declare Function GetIncludeFilename( byref sFilename as string, byref sLine as const string ) as STRING
+Declare Function GetIncludeFilename( byref sFilename as CWSTR, byref sLine as string ) as CWSTR
 Declare Function ScintillaGetLine( byval pDoc as clsDocument ptr, ByVal nLine As Long ) As String
-Declare Function ParseDocument( byval idx as long, byval pDoc as clsDocument ptr, byval sFilename as string ) As Long
+Declare Function ParseDocument( byval idx as long, byval pDoc as clsDocument ptr, byval sFilename as CWSTR, byval bNoParseIncludes as Boolean = false ) As Long
 Declare Function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
 Declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
 Declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
@@ -79,9 +90,8 @@ Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVa
 Declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
 Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
 Declare Function FormatCodetip( byval strCodeTip as string ) as STRING
-Declare Function ShowCodetip() as BOOLEAN
-Declare Function ShowAutocompleteList() as BOOLEAN
-Declare Function ShowTYPEAutocompleteList() as BOOLEAN
+declare function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
+Declare Function ShowAutocompleteList(byval Notification as long = 0) as BOOLEAN
 Declare Function frmHotImgBtn_IsEnabled( ByVal HWnd As HWnd ) As boolean
 Declare Function frmHotImgBtn_Enabled( ByVal HWnd As HWnd, ByVal fEnabled as BOOLEAN ) As Long
 Declare Function frmHotImgBtn_SetBackColors( ByVal HWnd As HWnd, ByVal clrNormal As COLORREF, byval clrHot as COLORREF ) As Long
