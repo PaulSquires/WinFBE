@@ -22,9 +22,9 @@ Requirements:
 
 Resources:
 - Jose Roca: 
--- CWINDOW class (Windows GUI API encapsulation)
--- CWSTR class (Dynamic WSTRING Unicode class)
--- AFX* classes (various useful string, date/time, GUI control, GDIPlus, routines)
+  -- CWINDOW class (Windows GUI API encapsulation)
+  -- CWSTR class (Dynamic WSTRING Unicode class)
+  -- AFX* classes (various useful string, date/time, GUI control, GDIPlus, routines)  [](https://github.com/JoseRoca/WinFBX)
 - Visit http://www.planetsquires.com/protect/forum/index.php for support forum.
 
 
