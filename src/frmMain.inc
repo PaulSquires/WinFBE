@@ -747,7 +747,7 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    ' Need to determine if the document is already part of an open project
    ' because if it is then we don't want to add the file to the current
    ' project thus making a dual link.
-   for i as long = 1 to ubound(gApp.Projects)
+   for i as long = lbound(gApp.Projects) to ubound(gApp.Projects)
       if gApp.Projects(i).InUse = true THEN
          pDoc = gApp.Projects(i).GetDocumentPtrByFilename(pwszName)
          if pDoc then

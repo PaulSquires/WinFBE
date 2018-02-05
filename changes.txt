@@ -1,3 +1,6 @@
+Version 1.5.8 (February 5, 2018)
+- Fixed: In non-project situations, file would get loaded into File Explorer multiple times after each F4 Function selection.
+
 Version 1.5.7 (February 4, 2018)
 - Added: Dual pane split screen file editing.
 - Added: Multiline comment support to scintilla dll editing component. /'  '/
