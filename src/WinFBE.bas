@@ -37,7 +37,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.5.8") 
+#Define APPVERSION    WStr("1.5.9") 
 
 '#Define USE_VISUAL_DESIGNER 1
 

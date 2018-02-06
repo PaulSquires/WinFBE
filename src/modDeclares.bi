@@ -413,7 +413,7 @@ Enum
    IDM_HELP, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
-   IDM_CONSOLE, IDM_GUI   ' used for compiler directives in code
+   IDM_CONSOLE, IDM_GUI, IDM_RESOURCE   ' used for compiler directives in code
    IDM_32BIT, IDM_64BIT   ' mainly used for identifying compiler associated with a project
    IDM_USERTOOL   ' + n number of user tools
 End Enum
@@ -517,7 +517,8 @@ Dim Shared gFindInFiles As FINDREPLACE_TYPE
 ' in the source code. Currently, only the main source file is searched
 ' for the '#CONSOLE ON|OFF directive but others can be added as needed.
 type COMPILE_DIRECTIVES
-   ConsoleFlag as long              ' IDM_GUI, IDM_CONSOLE
+   DirectiveFlag as long              ' IDM_GUI, IDM_CONSOLE, IDM_RESOURCE
+   DirectiveText as String            ' reource filename
 END TYPE
 
 
@@ -716,7 +717,7 @@ Type clsDocument
       declare Function HasMarkerHighlight() As BOOLEAN
       declare Function FirstMarkerHighlight() As long
       declare Function LastMarkerHighlight() As long
-      declare function CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES ptr) as Long
+      declare function CompileDirectives( Directives() as COMPILE_DIRECTIVES) as Long
       Declare Constructor
       Declare Destructor
 End Type

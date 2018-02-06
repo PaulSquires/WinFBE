@@ -1566,9 +1566,10 @@ End Function
 
 ''
 ''
-function clsDocument.CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES ptr) as Long
+function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as Long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Search the source code for any user embedded compiler directives.
+   Dim ub     As Long    
    Dim i      As Long    
    Dim nLines As Long    
    dim st     as String
@@ -1582,13 +1583,26 @@ function clsDocument.CompileDirectives( byval pDirectives as COMPILE_DIRECTIVES 
 
       if len(st) < 11 THEN continue for
       st = ucase(st)
-
+      
+      ub = ubound(Directives)
+      
       ' '#CONSOLE ON|OFF
       if left(st, 11) = "#CONSOLE ON" THEN
-         pDirectives->ConsoleFlag = IDM_CONSOLE
+         redim preserve Directives(ub+1)
+         Directives(ub+1).DirectiveFlag = IDM_CONSOLE
       elseif left(st, 12) = "#CONSOLE OFF" THEN   
-         pDirectives->ConsoleFlag = IDM_GUI
+         redim preserve Directives(ub+1)
+         Directives(ub+1).DirectiveFlag = IDM_GUI
       END IF
+
+      ' '#RESOURCE "filename.rc"
+      if left(st, 10) = "#RESOURCE " THEN
+         redim preserve Directives(ub+1)
+         Directives(ub+1).DirectiveFlag = IDM_RESOURCE
+         st = mid(st, 11)
+         Directives(ub+1).DirectiveText = AfxStrExtract(st, chr(34), chr(34))
+      end if
+         
    Next
 
    function = 0

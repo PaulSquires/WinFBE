@@ -1,3 +1,6 @@
+Version 1.5.9 (February 6, 2018)
+- Added: '#RESOURCE "resourcefilename" compiler directive to be embedded in the code of the main file being compiled.
+
 Version 1.5.8 (February 5, 2018)
 - Fixed: In non-project situations, file would get loaded into File Explorer multiple times after each F4 Function selection.
 

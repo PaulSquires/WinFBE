@@ -65,7 +65,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    Dim As BOOLEAN fCompile32, fCompile64
    
    dim as long idx = gApp.GetActiveProjectIndex()
-   dim as long idxBuild, f, i, nCount
+   dim as long idxBuild, f, i, n, nCount
    
    wDQ = wchr(34) ' unicode double quotes
    
@@ -192,19 +192,24 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Search main source code for any user embedded compile directives. These will override
    ' anything that was set at the default or project level.
-   dim directives as COMPILE_DIRECTIVES
-   pDocMain->CompileDirectives(@directives)
-   select case directives.ConsoleFlag 
-      case IDM_CONSOLE
-         i = instr(gCompile.CompileFlags, " -S GUI ")
-         if i THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, i, 8)
-         gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s console ")
-      case IDM_GUI
-         i = instr(gCompile.CompileFlags, " -S CONSOLE ")
-         if i THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, i, 12)
-         gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s gui ")
-   END select
-
+   redim directives(any) as COMPILE_DIRECTIVES
+   pDocMain->CompileDirectives(directives())
+   
+   for i as long = lbound(directives) to ubound(directives)
+      select case directives(i).DirectiveFlag 
+         case IDM_CONSOLE
+            n = instr(gCompile.CompileFlags, " -S GUI ")
+            if n THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, n, 8)
+            gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s console ")
+         case IDM_GUI
+            n = instr(gCompile.CompileFlags, " -S CONSOLE ")
+            if n THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, n, 12)
+            gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s gui ")
+         case IDM_RESOURCE
+            gCompile.ResourceFile = directives(i).DirectiveText
+? gCompile.ResourceFile
+      END select
+   next
 
    ' Need to determine the output filename in order to search for any existing
    ' running process.
