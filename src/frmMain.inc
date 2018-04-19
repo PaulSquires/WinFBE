@@ -384,6 +384,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
           
          case ")"      ' Close and active code tip 
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
             KillAutoCTooltip()
                
@@ -392,6 +393,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
 
          case chr(13)  ' ENTER KEY PRESSED
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             AttemptAutoInsert()
     
          case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
@@ -539,52 +541,84 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
       dim as long iScrollbarHeight = GetSystemMetrics(SM_CXHSCROLL)
       dim as long iWidth = rcClient.right - iScrollbarWidth
 
-      dim as long lStyle = SWP_NOZORDER Or SWP_NOOWNERZORDER Or _
-                           SWP_SHOWWINDOW Or SWP_NOACTIVATE Or SWP_NOCOPYBITS
-      
-      dim as long nSplitSize 
-      
-      ' Position top (optional) edit window
-      if pDoc->SplitY - rcClient.top <= 0 THEN 
-         ShowWindow(pDoc->hWindow(1), SW_HIDE)      
-         nSplitSize = 0              
-      Else
-         SetWindowPos( pDoc->hWindow(1), 0, _
-                       rcClient.left, rcClient.top, _
-                       rcClient.right, pDoc->SplitY - rcClient.top, _ 
-                       lStyle)
-         nSplitSize = SPLITSIZE              
+      dim as long nDesignCodeTabHeight = 0
+      if pDoc->IsDesigner then
+         dim pWindow as CWindow ptr = AfxCWindowPtr(pDoc->hWndDesigner)
+         nDesignCodeTabHeight = pWindow->ScaleY(24)
       end if
       
-      dim as long nTop = Max(rcClient.top, pDoc->SplitY)
+      dim as long lStyle = SWP_SHOWWINDOW or SWP_NOZORDER Or SWP_NOOWNERZORDER Or SWP_NOACTIVATE Or SWP_NOCOPYBITS
+      
+      if pDoc->IsDesigner THEN
+         SetWindowPos( pDoc->hDesignTabCtrl, 0, _
+                       rcClient.left, rcClient.bottom - nDesignCodeTabHeight, _
+                       rcClient.right, rcClient.bottom - nDesignCodeTabHeight, _
+                       lStyle )
+      else   
+         ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
+      end if
+      
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) THEN
+         ' If the DesignView has been set to show the visual designer rather than the code
+         ' window then ensure that DesignMain is shown.
+         SetWindowPos( pDoc->hWndDesigner, 0, _
+                       rcClient.left, rcClient.top, _
+                       rcClient.right, rcClient.bottom - rcClient.top - nDesignCodeTabHeight, _
+                       lStyle )
+         ShowWindow(HWND_FRMVDTOOLBOX, SW_SHOWNORMAL)
+         ShowWindow(pDoc->hWindow(0), SW_HIDE)
+         ShowWindow(pDoc->hWindow(1), SW_HIDE)
+         ShowWindow(pDoc->hScrollbar, SW_HIDE)
+      else
+      
+         ShowWindow(pDoc->hWndDesigner, SW_HIDE)
+         ShowWindow(HWND_FRMVDTOOLBOX, SW_HIDE)
 
-      ' Position main edit window
-      SetWindowPos( pDoc->hWindow(0), 0, _
-                    rcClient.left, nTop + nSplitSize, _
-                    iWidth, rcClient.bottom - nTop - nSplitSize, _
-                    lStyle)
+         dim as long nSplitSize 
+         
+         ' Position top (optional) edit window
+         if pDoc->SplitY - rcClient.top <= 0 THEN 
+            ShowWindow(pDoc->hWindow(1), SW_HIDE)      
+            nSplitSize = 0              
+         Else
+            SetWindowPos( pDoc->hWindow(1), 0, _
+                          rcClient.left, rcClient.top, _
+                          rcClient.right, pDoc->SplitY - rcClient.top, _ 
+                          lStyle)
+            nSplitSize = SPLITSIZE              
+         end if
+         
+         dim as long nTop = Max(rcClient.top, pDoc->SplitY)
 
-      ' Position the main view vertical scroll bar
-      SetWindowPos( pDoc->hScrollbar, 0, _ 
-                    rcClient.left + iWidth, _
-                    nTop + SPLITSIZE, _
-                    iScrollbarWidth, _
-                    rcClient.bottom - SPLITSIZE - nTop - iScrollbarHeight, _
-                    lStyle)
+         ' Position main edit window
+         SetWindowPos( pDoc->hWindow(0), 0, _
+                       rcClient.left, nTop + nSplitSize, _
+                       iWidth, rcClient.bottom - nTop - nSplitSize - nDesignCodeTabHeight, _
+                       lStyle)
 
-      ' Update vertical scroll bar page value
-      pDoc->ScrInfo.nPage = SciExec(pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0)
-      pDoc->ScrInfo.nMax = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0) - 1    
-      pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
-      SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
+         ' Position the main view vertical scroll bar
+         SetWindowPos( pDoc->hScrollbar, 0, _ 
+                       rcClient.left + iWidth, _
+                       nTop + SPLITSIZE, _
+                       iScrollbarWidth, _
+                       rcClient.bottom - SPLITSIZE - nTop  - nDesignCodeTabHeight, _ ' - iScrollbarHeight, _
+                       lStyle)
 
+         ' Update vertical scroll bar page value
+         pDoc->ScrInfo.nPage = SciExec(pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0)
+         pDoc->ScrInfo.nMax = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0) - 1    
+         pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
+         SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
+         frmMain_UpdateLineCol(HWND)
+         frmMain_SetFocusToCurrentCodeWindow
+      end if
+      
       AfxRedrawWindow(HWND_FRMMAIN)
+
    end if
    
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
-   frmMain_UpdateLineCol(HWND)
-   frmMain_SetFocusToCurrentCodeWindow
 
    Function = 0
 End Function
@@ -643,9 +677,15 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
          TabCtrl_DeleteItem(gTTabCtl.hWindow, iTab)
          gTTabCtl.SetFocusTab(iTab-1)
       END IF
+      ' Hide Scintilla windows
       for ii as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
          ShowWindow pDoc->hWindow(ii), SW_HIDE
       NEXT
+      ' Hide visual designer window
+      if pDoc->IsDesigner THEN 
+         ShowWindow(pDoc->hWndDesigner, SW_HIDE)
+         ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
+      END IF
       
    NEXT
    
@@ -657,6 +697,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.Projects(idx).RemoveAllDocuments
 
    DestroyWindow( HWND_FRMFNLIST )
+   DestroyWindow(HWND_FRMVDTOOLBOX)
 
    ' Remove the Explorer node for this project
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
@@ -769,13 +810,13 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
             Else
                pDoc->CreateDesignerWindow(HWnd, false, pwszName)
             End If   
-         else
-            If bIsNewFile Then
-               pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
-            Else
-               pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
-            End If   
-         END IF
+         end if
+         ' All pDoc's will have an associated Scintilla window for code.
+         If bIsNewFile Then
+            pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+         Else
+            pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
+         End If   
          gApp.Projects(idx).AddDocument(pDoc) 
          ParseDocument(idx, pDoc, "")
          gFileLoading = false
@@ -1756,23 +1797,31 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
          End If
 
       Case TCN_SELCHANGING
-         If id = IDC_FRMMAIN_TOPTABCONTROL Then
-            nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
-            gTTabCtl.DisplayScintilla(nCurSel, False)
-         End If
-
+         select case id 
+            case IDC_FRMMAIN_TOPTABCONTROL 
+               ' Hide the current tab
+               nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
+               gTTabCtl.DisplayScintilla(nCurSel, False)
+            case IDC_DESIGNTABCTRL 
+               frmMain_PositionWindows(HWnd)
+         END SELECT
+         
       Case TCN_SELCHANGE
-         If id = IDC_FRMMAIN_TOPTABCONTROL Then
-            nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
-            gTTabCtl.DisplayScintilla(nCurSel, True)
-            frmMain_PositionWindows(HWnd)
-            dim pDoc as clsDocument ptr
-            pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc Then
-               Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
-                                    pDoc->hNodeExplorer )
-            end if
-         End If
+         select case id 
+            case IDC_FRMMAIN_TOPTABCONTROL 
+               ' Show the new tab
+               nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
+               gTTabCtl.DisplayScintilla(nCurSel, True)
+               frmMain_PositionWindows(HWnd)
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+               If pDoc Then
+                  Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
+                                       pDoc->hNodeExplorer )
+               end if
+            case IDC_DESIGNTABCTRL 
+               frmMain_PositionWindows(HWnd)
+         END SELECT
+
          
       Case TTN_GETDISPINFO
          ptttdi = Cast(NMTTDISPINFOW Ptr, pNMHDR)
@@ -1837,18 +1886,29 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
                
                ' Has the external file been deleted or is now not available?
                if AfxFileExists(pDoc->DiskFilename) = false THEN
-                  If MessageBox( HWND_FRMMAIN, _
-                                  pDoc->DiskFilename & vbCrLf & _ 
-                                  L(286, "This document has been deleted...?"), _
-                                  L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                     ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
-                     pDoc->UserModified = true                
-                  else
-                     ' No. Close the file.
-                     OnCommand_FileClose(HWND)
+                  if pDoc->DeletedButKeep = false then
+                     ' Ensure that the file is open and displayed
+                     frmMain_OpenFileSafely(HWnd, _
+                                             False, _    ' bIsNewFile
+                                             False, _    ' bIsTemplate
+                                             True,  _    ' bShowInTab
+                                             false, _    ' bIsInclude
+                                             0, _        ' pwszName
+                                             pDoc )      ' pDocIn
+                     If MessageBox( HWND_FRMMAIN, _
+                                     pDoc->DiskFilename & vbCrLf & _ 
+                                     L(286, "This document has been deleted...?"), _
+                                     L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                        ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
+                        pDoc->UserModified = true                
+                        pDoc->DeletedButKeep = true
+                     else
+                        ' No. Close the file.
+                        frmMain_OnCommand(HWnd, IDM_REMOVEFILEFROMPROJECT, 0, 0)
+                     end if
                   end if
-               
                else
+                  pDoc->DeletedButKeep = false
                   ' Compare the disk file date time to the value currently
                   ' stored in document class.
                   ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
@@ -1974,8 +2034,9 @@ Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
    
    ' Save whether the Explorer should be shown the next time the program is run.
    ' Also save the Explorer panel width. 
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
-   gConfig.ShowExplorerWidth = AfxGetWindowWidth( HWND_FRMEXPLORER )
+   gConfig.ShowExplorerWidth = pWindow->UnScaleX(AfxGetWindowWidth( HWND_FRMEXPLORER ))
    
    ' Prevent Treeview flickering during closing
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
@@ -2404,10 +2465,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
    ' Add the top tabcontrol (initially not visible)
    gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _
-       IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
-       WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
-       TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING, , _
-       Cast(WNDPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
+      IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
+      WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
+      TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING, , _
+      Cast(WNDPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
     
    ' Create the imagelist for the TopTabControl tabs
    cx = 16 * (pWindow->DPI \ 96)

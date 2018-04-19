@@ -4,7 +4,7 @@
 
 [ ] Integrated debugger (most likely based on FBDebugger code (if that license permits))
 
-[ ] Menu option. "Save as Template"
+
 
 
  

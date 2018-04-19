@@ -191,7 +191,7 @@ End Function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(25) as TOOLBOX_TYPE
+   redim gToolBox(6) as TOOLBOX_TYPE
    
    gToolBox(0).nToolType = CTRL_POINTER
    gToolBox(0).wszName   = "Pointer"
@@ -229,125 +229,125 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(5).wszCursor = "IMAGE_CURSOR_OPTION"
    gToolBox(5).wszClassName = "RADIOBUTTON"
 
-   gToolBox(6).nToolType = CTRL_FRAME
-   gToolBox(6).wszName   = "Frame"
-   gToolBox(6).wszImage  = "IMAGE_FRAME"
-   gToolBox(6).wszCursor = "IMAGE_CURSOR_FRAME"
-   gToolBox(6).wszClassName = "FRAME"
+   gToolBox(6).nToolType = CTRL_LISTBOX
+   gToolBox(6).wszName   = "ListBox"
+   gToolBox(6).wszImage  = "IMAGE_LISTBOX"
+   gToolBox(6).wszCursor = "IMAGE_CURSOR_LISTBOX"
+   gToolBox(6).wszClassName = "LISTBOX"
 
-   gToolBox(7).nToolType = CTRL_PICTURE
-   gToolBox(7).wszName   = "Picture"
-   gToolBox(7).wszImage  = "IMAGE_PICTURE"
-   gToolBox(7).wszCursor = "IMAGE_CURSOR_PICTURE"
-   gToolBox(7).wszClassName = "STATIC"
+'   gToolBox(7).nToolType = CTRL_FRAME
+'   gToolBox(7).wszName   = "Frame"
+'   gToolBox(7).wszImage  = "IMAGE_FRAME"
+'   gToolBox(7).wszCursor = "IMAGE_CURSOR_FRAME"
+'   gToolBox(7).wszClassName = "FRAME"
 
-   gToolBox(8).nToolType = CTRL_COMBOBOX
-   gToolBox(8).wszName   = "ComboBox"
-   gToolBox(8).wszImage  = "IMAGE_COMBOBOX"
-   gToolBox(8).wszCursor = "IMAGE_CURSOR_COMBOBOX"
-   gToolBox(8).wszClassName = "COMBOBOX"
+'   gToolBox(8).nToolType = CTRL_PICTURE
+'   gToolBox(8).wszName   = "Picture"
+'   gToolBox(8).wszImage  = "IMAGE_PICTURE"
+'   gToolBox(8).wszCursor = "IMAGE_CURSOR_PICTURE"
+'   gToolBox(8).wszClassName = "STATIC"
 
-   gToolBox(9).nToolType = CTRL_LISTBOX
-   gToolBox(9).wszName   = "ListBox"
-   gToolBox(9).wszImage  = "IMAGE_LISTBOX"
-   gToolBox(9).wszCursor = "IMAGE_CURSOR_LISTBOX"
-   gToolBox(9).wszClassName = "LISTBOX"
+'   gToolBox(9).nToolType = CTRL_COMBOBOX
+'   gToolBox(9).wszName   = "ComboBox"
+'   gToolBox(9).wszImage  = "IMAGE_COMBOBOX"
+'   gToolBox(9).wszCursor = "IMAGE_CURSOR_COMBOBOX"
+'   gToolBox(9).wszClassName = "COMBOBOX"
 
-   gToolBox(10).nToolType = CTRL_IMAGEBUTTON
-   gToolBox(10).wszName   = "ImageButton"
-   gToolBox(10).wszImage  = "IMAGE_IMGBUTTON"
-   gToolBox(10).wszCursor = "IMAGE_CURSOR_IMGBUTTON"
-   gToolBox(10).wszClassName = "BUTTON"
+'   gToolBox(10).nToolType = CTRL_IMAGEBUTTON
+'   gToolBox(10).wszName   = "ImageButton"
+'   gToolBox(10).wszImage  = "IMAGE_IMGBUTTON"
+'   gToolBox(10).wszCursor = "IMAGE_CURSOR_IMGBUTTON"
+'   gToolBox(10).wszClassName = "BUTTON"
 
-   gToolBox(11).nToolType = CTRL_HSCROLL
-   gToolBox(11).wszName   = "HScroll"
-   gToolBox(11).wszImage  = "IMAGE_HSCROLL"
-   gToolBox(11).wszCursor = "IMAGE_CURSOR_HSCROLL"
-   gToolBox(11).wszClassName = "HSCROLLBAR"
+'   gToolBox(11).nToolType = CTRL_HSCROLL
+'   gToolBox(11).wszName   = "HScroll"
+'   gToolBox(11).wszImage  = "IMAGE_HSCROLL"
+'   gToolBox(11).wszCursor = "IMAGE_CURSOR_HSCROLL"
+'   gToolBox(11).wszClassName = "HSCROLLBAR"
 
-   gToolBox(12).nToolType = CTRL_VSCROLL
-   gToolBox(12).wszName   = "VScroll"
-   gToolBox(12).wszImage  = "IMAGE_VSCROLL"
-   gToolBox(12).wszCursor = "IMAGE_CURSOR_VSCROLL"
-   gToolBox(12).wszClassName = "VSCROLLBAR"
+'   gToolBox(12).nToolType = CTRL_VSCROLL
+'   gToolBox(12).wszName   = "VScroll"
+'   gToolBox(12).wszImage  = "IMAGE_VSCROLL"
+'   gToolBox(12).wszCursor = "IMAGE_CURSOR_VSCROLL"
+'   gToolBox(12).wszClassName = "VSCROLLBAR"
 
-   gToolBox(13).nToolType = CTRL_TIMER
-   gToolBox(13).wszName   = "Timer"
-   gToolBox(13).wszImage  = "IMAGE_TIMER"
-   gToolBox(13).wszCursor = "IMAGE_CURSOR_TIMER"
-   gToolBox(13).wszClassName = ""
+'   gToolBox(13).nToolType = CTRL_TIMER
+'   gToolBox(13).wszName   = "Timer"
+'   gToolBox(13).wszImage  = "IMAGE_TIMER"
+'   gToolBox(13).wszCursor = "IMAGE_CURSOR_TIMER"
+'   gToolBox(13).wszClassName = ""
 
-   gToolBox(14).nToolType = CTRL_TABCONTROL
-   gToolBox(14).wszName   = "TabControl"
-   gToolBox(14).wszImage  = "IMAGE_TABCONTROL"
-   gToolBox(14).wszCursor = "IMAGE_CURSOR_TABCONTROL"
-   gToolBox(14).wszClassName = "TABCONTROL"
+'   gToolBox(14).nToolType = CTRL_TABCONTROL
+'   gToolBox(14).wszName   = "TabControl"
+'   gToolBox(14).wszImage  = "IMAGE_TABCONTROL"
+'   gToolBox(14).wszCursor = "IMAGE_CURSOR_TABCONTROL"
+'   gToolBox(14).wszClassName = "TABCONTROL"
 
-   gToolBox(15).nToolType = CTRL_RICHEDIT
-   gToolBox(15).wszName   = "RichEdit"
-   gToolBox(15).wszImage  = "IMAGE_RICHEDIT"
-   gToolBox(15).wszCursor = "IMAGE_CURSOR_RICHEDIT"
-   gToolBox(15).wszClassName = "RICHEDIT"
+'   gToolBox(15).nToolType = CTRL_RICHEDIT
+'   gToolBox(15).wszName   = "RichEdit"
+'   gToolBox(15).wszImage  = "IMAGE_RICHEDIT"
+'   gToolBox(15).wszCursor = "IMAGE_CURSOR_RICHEDIT"
+'   gToolBox(15).wszClassName = "RICHEDIT"
 
-   gToolBox(16).nToolType = CTRL_PROGRESSBAR
-   gToolBox(16).wszName   = "ProgressBar"
-   gToolBox(16).wszImage  = "IMAGE_PROGRESSBAR"
-   gToolBox(16).wszCursor = "IMAGE_CURSOR_PROGRESSBAR"
-   gToolBox(16).wszClassName = "PROGRESSBAR"
+'   gToolBox(16).nToolType = CTRL_PROGRESSBAR
+'   gToolBox(16).wszName   = "ProgressBar"
+'   gToolBox(16).wszImage  = "IMAGE_PROGRESSBAR"
+'   gToolBox(16).wszCursor = "IMAGE_CURSOR_PROGRESSBAR"
+'   gToolBox(16).wszClassName = "PROGRESSBAR"
 
-   gToolBox(17).nToolType = CTRL_UPDOWN
-   gToolBox(17).wszName   = "UpDown"
-   gToolBox(17).wszImage  = "IMAGE_UPDOWN"
-   gToolBox(17).wszCursor = "IMAGE_CURSOR_UPDOWN"
-   gToolBox(17).wszClassName = "UPDOWN"
+'   gToolBox(17).nToolType = CTRL_UPDOWN
+'   gToolBox(17).wszName   = "UpDown"
+'   gToolBox(17).wszImage  = "IMAGE_UPDOWN"
+'   gToolBox(17).wszCursor = "IMAGE_CURSOR_UPDOWN"
+'   gToolBox(17).wszClassName = "UPDOWN"
 
-   gToolBox(18).nToolType = CTRL_LISTVIEW
-   gToolBox(18).wszName   = "ListView"
-   gToolBox(18).wszImage  = "IMAGE_LISTVIEW"
-   gToolBox(18).wszCursor = "IMAGE_CURSOR_LISTVIEW"
-   gToolBox(18).wszClassName = "LISTVIEW"
+'   gToolBox(18).nToolType = CTRL_LISTVIEW
+'   gToolBox(18).wszName   = "ListView"
+'   gToolBox(18).wszImage  = "IMAGE_LISTVIEW"
+'   gToolBox(18).wszCursor = "IMAGE_CURSOR_LISTVIEW"
+'   gToolBox(18).wszClassName = "LISTVIEW"
 
-   gToolBox(19).nToolType = CTRL_TREEVIEW
-   gToolBox(19).wszName   = "TreeView"
-   gToolBox(19).wszImage  = "IMAGE_TREEVIEW"
-   gToolBox(19).wszCursor = "IMAGE_CURSOR_TREEVIEW"
-   gToolBox(19).wszClassName = "TREEVIEW"
+'   gToolBox(19).nToolType = CTRL_TREEVIEW
+'   gToolBox(19).wszName   = "TreeView"
+'   gToolBox(19).wszImage  = "IMAGE_TREEVIEW"
+'   gToolBox(19).wszCursor = "IMAGE_CURSOR_TREEVIEW"
+'   gToolBox(19).wszClassName = "TREEVIEW"
 
-   gToolBox(20).nToolType = CTRL_SLIDER
-   gToolBox(20).wszName   = "Slider"
-   gToolBox(20).wszImage  = "IMAGE_SLIDER"
-   gToolBox(20).wszCursor = "IMAGE_CURSOR_SLIDER"
-   gToolBox(20).wszClassName = "SLIDER"
+'   gToolBox(20).nToolType = CTRL_SLIDER
+'   gToolBox(20).wszName   = "Slider"
+'   gToolBox(20).wszImage  = "IMAGE_SLIDER"
+'   gToolBox(20).wszCursor = "IMAGE_CURSOR_SLIDER"
+'   gToolBox(20).wszClassName = "SLIDER"
 
-   gToolBox(21).nToolType = CTRL_DATETIMEPICKER
-   gToolBox(21).wszName   = "DateTimePicker"
-   gToolBox(21).wszImage  = "IMAGE_DATETIMEPICKER"
-   gToolBox(21).wszCursor = "IMAGE_CURSOR_DATETIMEPICKER"
-   gToolBox(21).wszClassName = "DATETIMEPICKER"
+'   gToolBox(21).nToolType = CTRL_DATETIMEPICKER
+'   gToolBox(21).wszName   = "DateTimePicker"
+'   gToolBox(21).wszImage  = "IMAGE_DATETIMEPICKER"
+'   gToolBox(21).wszCursor = "IMAGE_CURSOR_DATETIMEPICKER"
+'   gToolBox(21).wszClassName = "DATETIMEPICKER"
 
-   gToolBox(22).nToolType = CTRL_MONTHCALENDAR
-   gToolBox(22).wszName   = "MonthCalendar"
-   gToolBox(22).wszImage  = "IMAGE_MONTHCALENDAR"
-   gToolBox(22).wszCursor = "IMAGE_CURSOR_MONTHCALENDAR"
-   gToolBox(22).wszClassName = "MONTHCALENDAR"
+'   gToolBox(22).nToolType = CTRL_MONTHCALENDAR
+'   gToolBox(22).wszName   = "MonthCalendar"
+'   gToolBox(22).wszImage  = "IMAGE_MONTHCALENDAR"
+'   gToolBox(22).wszCursor = "IMAGE_CURSOR_MONTHCALENDAR"
+'   gToolBox(22).wszClassName = "MONTHCALENDAR"
 
-   gToolBox(23).nToolType = CTRL_WEBBROWSER
-   gToolBox(23).wszName   = "WebBrowser"
-   gToolBox(23).wszImage  = "IMAGE_WEBBROWSER"
-   gToolBox(23).wszCursor = "IMAGE_CURSOR_WEBBROWSER"
-   gToolBox(23).wszClassName = ""
+'   gToolBox(23).nToolType = CTRL_WEBBROWSER
+'   gToolBox(23).wszName   = "WebBrowser"
+'   gToolBox(23).wszImage  = "IMAGE_WEBBROWSER"
+'   gToolBox(23).wszCursor = "IMAGE_CURSOR_WEBBROWSER"
+'   gToolBox(23).wszClassName = ""
 
-   gToolBox(24).nToolType = CTRL_CUSTOM
-   gToolBox(24).wszName   = "Custom"
-   gToolBox(24).wszImage  = "IMAGE_CUSTOM"
-   gToolBox(24).wszCursor = "IMAGE_CURSOR_CUSTOM"
-   gToolBox(24).wszClassName = ""
+'   gToolBox(24).nToolType = CTRL_CUSTOM
+'   gToolBox(24).wszName   = "Custom"
+'   gToolBox(24).wszImage  = "IMAGE_CUSTOM"
+'   gToolBox(24).wszCursor = "IMAGE_CURSOR_CUSTOM"
+'   gToolBox(24).wszClassName = ""
 
-   gToolBox(25).nToolType = CTRL_OCX
-   gToolBox(25).wszName   = "OCX"
-   gToolBox(25).wszImage  = "IMAGE_OCX"
-   gToolBox(25).wszCursor = "IMAGE_CURSOR_OCX"
-   gToolBox(25).wszClassName = ""
+'   gToolBox(25).nToolType = CTRL_OCX
+'   gToolBox(25).wszName   = "OCX"
+'   gToolBox(25).wszImage  = "IMAGE_OCX"
+'   gToolBox(25).wszCursor = "IMAGE_CURSOR_OCX"
+'   gToolBox(25).wszClassName = ""
 
    function = 0
 end function

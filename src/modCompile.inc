@@ -207,7 +207,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s gui ")
          case IDM_RESOURCE
             gCompile.ResourceFile = directives(i).DirectiveText
-? gCompile.ResourceFile
       END select
    next
 

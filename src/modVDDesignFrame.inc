@@ -53,8 +53,8 @@ Function DesignerFrame_WndProc( ByVal HWnd   As HWnd, _
                                 ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_PAINT,       DesignerFrame_OnPaint)
-      HANDLE_MSG (HWnd, WM_DESTROY,     DesignerFrame_OnDestroy)
+      HANDLE_MSG (HWnd, WM_PAINT,   DesignerFrame_OnPaint)
+      HANDLE_MSG (HWnd, WM_DESTROY, DesignerFrame_OnDestroy)
       
       case WM_LBUTTONDOWN: HandleDesignerLButtonDown(HWND)
       case WM_LBUTTONUP:   HandleDesignerLButtonUp(HWND)

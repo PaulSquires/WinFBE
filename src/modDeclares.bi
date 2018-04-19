@@ -254,10 +254,12 @@ Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located 
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
 CONST IDM_ADDFILETOPROJECT = 6100    ' 6100 to 6199 Popup menu will show list of open projects to choose from. 
 
-const SPLITSIZE   = 5      ' Width/Height of the scrollbar split buttons for split editing windows
+dim shared as long SPLITSIZE 
+SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
 
-const IDC_DESIGNFRAME = 100
-const IDC_DESIGNFORM  = 101
+const IDC_DESIGNFRAME   = 100
+const IDC_DESIGNFORM    = 101
+const IDC_DESIGNTABCTRL = 102
       
 Const FILETYPE_UNDEFINED = 0
 Const FILETYPE_MAIN      = 1
@@ -632,10 +634,12 @@ Type clsDocument
       ' 2 Scintilla controls to accommodate split editing
       ' hWindow(0) is our MAIN control (bottom)
       ' hWindow(1) is our split control (top)
-      hWindow(1)       As HWnd   ' Scintilla split edit windows (Also DesignMain for visual designer windows)
+      hWindow(1)       As HWnd   ' Scintilla split edit windows 
       
       ' Visual designer related
       Controls         as clsCollection
+      hWndDesigner     as HWnd      ' DesignMain window (switch to this window when in design mode (versus code mode)
+      hDesignTabCtrl   as HWnd      ' TabCtrl to switch between Design/Code
       hWndFrame        as hwnd      ' DesignFrame for visual designer windows
       hWndForm         as hwnd      ' DesignForm for visual designer windows
       GrabHit          as long      ' Which grab handle is currently active for sizing action
@@ -660,6 +664,7 @@ Type clsDocument
       hNodeExplorer    As HTREEITEM
       FileEncoding     as long       
       UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
+      DeletedButKeep   as boolean  ' file no longer exists but keep open anyway
       DocumentBuild    as string   ' specific build configuration to use for this document
       sMatchWord       as string   ' for the incremental autocomplete search
       AutoCompleteType as long     ' AUTOC_DIMAS, AUTOC_TYPE
@@ -681,6 +686,7 @@ Type clsDocument
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd, ByVal IsNewFile  As BOOLEAN, ByVal pwszFile   As WString Ptr = 0) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
+      declare function CreateDesignerString() as CWSTR 
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
       Declare Function ApplyProperties() As Long
       Declare Function GetTextRange( ByVal cpMin As Long, ByVal cpMax As Long) As String

@@ -26,23 +26,21 @@ End Constructor
 ''
 ''
 Destructor clsDocument
+   ' Delete any manually allocated CWindows in the designer
    for i as long = lbound(this.hWindow) to ubound(this.hWindow)
       DestroyWindow this.hWindow(i)    ' destroy the scintilla/designer windows
    NEXT
    DestroyWindow this.hScrollbar       ' destroy the scrollbar
+   if this.IsDesigner THEN
+      DestroyWindow(this.hWndForm)
+      DestroyWindow(this.hWndFrame)
+      DestroyWindow(this.hWndDesigner)
+      DestroyWindow(this.hDesignTabCtrl)
+   END IF
+
    ' Repaint the main area because we don't want any splitter to show
    AfxRedrawWindow(HWND_FRMMAIN)
    
-   ' Delete any manually allocated CWindows in the designer
-   if this.IsDesigner THEN
-      dim pForm as CWindow ptr
-      pForm = AfxCWindowPtr(this.hWindow(0))
-      if pForm THEN delete pForm
-      pForm = AfxCWindowPtr(this.hWndFrame)
-      if pForm THEN delete pForm
-      pForm = AfxCWindowPtr(this.hWndForm)
-      if pForm THEN delete pForm
-   END IF
 End Destructor
 
 ''
@@ -76,19 +74,21 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    ' For the Visual Designer, there exists three (3) levels of windows:
    ' (1) The DesignMain (hWindow) used by the top tabcontrol to display the document. 
    '     This is the highest level window and is basically just the container for 
-   '     the other two windows.
+   '     the other two windows. Contains tab control to switch between design/code views.
    ' (2) The DesignFrame window. This is the scrollable window.
    ' (3) The DesignForm window. This is the actual visual for that we manipulate by
    '     adding controls to it, etc.
+   ' (*4) There is a 4th window in the sense that the Scintilla code window swaps
+   '      out the DesignFrame whenever the tabcontrol switches between design/code view.
    '
    this.IsDesigner = true
 
    dim rc as RECT
    
-   ' (1) Create the DesignMain (hWindow) window
+   ' (1) Create the DesignMain window
    dim pMain as CWindow ptr = New CWindow
    pMain->DPI = AfxCWindowPtr(hwndParent)->DPI
-   this.hWindow(0) = _
+   this.hWndDesigner = _
    pMain->Create( hWndParent, "", @DesignerMain_WndProc, 0, 0, 0, 0, _
         WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
@@ -101,6 +101,28 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    DIM pScrollWindow AS CScrollWindow PTR = NEW CScrollWindow(pMain->hWindow)
    pMain->ScrollWindowPtr = pScrollWindow
    
+   ' Create a tabcontrol that allows us to switch between design/code views.
+   this.hDesignTabCtrl = _
+      pMain->AddControl("TABCONTROL", hWndParent, _
+         IDC_DESIGNTABCTRL, "", 0, 0, 0, 24, _
+         WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
+         TCS_TABS Or TCS_FOCUSNEVER, WS_EX_LEFT Or WS_EX_LTRREADING )
+   
+   dim wszTemp as wstring * MAX_PATH
+   Dim TB As TC_ITEM 
+   TB.Mask = TCIF_TEXT
+   
+   ' Add the two tabs. Design and Code views.
+   wszTemp = L(327, "Design")
+   TB.pszText = @wszTemp
+   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 0, Cast(LPARAM, @TB) )     
+
+   wszTemp = L(328, "Code")
+   TB.pszText = @wszTemp
+   SendMessage( this.hDesignTabCtrl, TCM_INSERTITEM, 1, Cast(LPARAM, @TB) )     
+
+   TabCtrl_SetCurSel( this.hDesignTabCtrl, 0 )
+
    
    ' (2) Create the Design Frame window (child of the Main)
    dim pFrame as CWindow ptr = New CWindow
@@ -109,7 +131,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    pFrame->Create( pMain->hWindow, "", @DesignerFrame_WndProc, 0, 0, 0, 0, _
         WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_VISIBLE, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pFrame->ClassStyle = CS_DBLCLKS
+   'pFrame->ClassStyle = CS_DBLCLKS
    SetWindowLongPtr( pFrame->hWindow, GWLP_ID, IDC_DESIGNFRAME )
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(this.hWndFrame, GCLP_HCURSOR, 0)   
@@ -118,24 +140,24 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    
    ' (3) Create the Design Form (child of the Frame)
    dim pCtrl as clsControl ptr
-   SetRect(@rc,10,10,510,310)
+   SetRect(@rc, pFrame->ScaleX(10), pFrame->ScaleY(10), pFrame->ScaleX(510), pFrame->ScaleY(310))
    pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
    ApplyControlProperties(pCtrl)
    
 
 ' TODO: Remove these demo buttons from visual designer
    
-   SetRect(@rc,50,50,125,78)
+   SetRect(@rc, pFrame->ScaleX(50), pFrame->ScaleY(50), pFrame->ScaleX(125), pFrame->ScaleY(78))
    pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
    SetControlProperty(pCtrl, "TEXT", "OK")
    ApplyControlProperties(pCtrl)
    
-   SetRect(@rc,150,50,225,78)
+   SetRect(@rc, pFrame->ScaleX(150), pFrame->ScaleY(50), pFrame->ScaleX(225), pFrame->ScaleY(78))
    pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
    SetControlProperty(pCtrl, "TEXT", "Cancel")
    ApplyControlProperties(pCtrl)
 
-   SetRect(@rc,50,100,200,128)
+   SetRect(@rc, pFrame->ScaleX(50), pFrame->ScaleY(100), pFrame->ScaleX(200), pFrame->ScaleY(128))
    pCtrl = CreateToolboxControl( @this, CTRL_LABEL, rc )
    SetControlProperty(pCtrl, "TEXT", "This is a label")
    ApplyControlProperties(pCtrl)
@@ -144,13 +166,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    this.Controls.SetActiveControl(pCtrl->hWindow)
    DisplayPropertyList(@this)
    
-   ' If a disk file was specified then open it and load it into the editor
-   this.IsNewFlag = IsNewFile
-   If IsNewFile Then
-      this.NextFileNum = this.NextFileNum + 1
-      this.DiskFilename = "Untitled" & this.NextFileNum
-   End If
-
+   ' Need to create 
    ' Display the ToolBox/PropertyList
    frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
    
@@ -334,6 +350,39 @@ Function clsDocument.InsertFile() As BOOLEAN
    Function = 0
 End Function
 
+' ========================================================================================
+' Generate the string that gets saved to theCreate the specified control on the design form
+' ========================================================================================
+function clsDocument.CreateDesignerString() as CWSTR 
+   dim pCtrl as clsControl ptr
+   dim wszDesigner as CWSTR
+   dim wszControls as CWSTR
+   
+   ' Iterate all of the controls on the form
+   for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
+      pCtrl = this.Controls.ItemAt(i)
+      if pCtrl then
+         wszControls = wszControls & "' WINFBE CONTROL_START " & GetControlName(pCtrl->ControlType) & vbcrlf & _
+                                     "'   PROPERTIES_START" & vbcrlf 
+         for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
+            wszControls = wszControls & _
+                          "'     PROP_NAME "  & pCtrl->Properties(ii).wszPropName & vbcrlf & _
+                          "'     PROP_VALUE " & pCtrl->Properties(ii).wszPropValue & vbcrlf 
+         NEXT
+         wszControls = wszControls & "'   PROPERTIES_END" & vbcrlf & _
+                                     "' WINFBE CONTROL_END" & vbcrlf
+      END IF
+   NEXT
+
+   wszDesigner = "' WINFBE FORM" & vbcrlf & _
+                 "' WINFBE VERSION " & APPVERSION & vbcrlf & _
+                 "' WINFBE FORM_START" & vbcrlf & _
+                 wszControls & _
+                 "' WINFBE FORM_END" & vbcrlf 
+   
+   return wszDesigner 
+end function
+
 ''
 ''
 Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
@@ -341,7 +390,8 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    Dim sText     As String
    Dim wFilename As WString * MAX_PATH
    Dim wText     As WString * MAX_PATH  
-   Dim f         As Long 
+   Dim f         As Long
+   dim wszDesigner as CWSTR
    
    ' If this is a new Untitled document then set flag to display SaveAs dialog.
    If this.IsNewFlag Then bSaveAs = true
@@ -362,6 +412,12 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
 
+   ' If this is a FORM document then we need to create the string of controls and properties that gets
+   ' saved at the start of the file before any of the code is displayed.
+   if this.IsDesigner then
+      wszDesigner = this.CreateDesignerString
+   END IF
+   
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
    Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
@@ -379,9 +435,10 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       select CASE this.FileEncoding
          case FILE_ENCODING_ANSI
             if sciCodePage = 0 THEN    
-               ' no conversion necessary
-               put #f, , *psz
+               put #f, , STR(**wszDesigner)
+               put #f, , *psz     ' no conversion necessary
             else
+               put #f, , STR(**wszDesigner)
                ' need to convert
                put #f, , Utf8ToAscii(*psz)
             end if    
@@ -391,8 +448,10 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             put #f, , chr(&HEF, &HBB, &HBF)
             if sciCodePage = SC_CP_UTF8 THEN    
                ' no conversion necessary
+               put #f, , wszDesigner.Utf8
                put #f, , *psz
             else
+               put #f, , wszDesigner.Utf8
                ' need to convert
                put #f, , AnsiToUtf8(*psz)
             end if    
@@ -401,9 +460,11 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             ' Output the BOM first
             put #f, , chr(&HFF, &HFE)
             if sciCodePage = SC_CP_UTF8 THEN    
+               put #f, , **wszDesigner
                ' convert utf8 to utf16
                put #f, , Utf8ToUnicode(*psz)
             else
+               put #f, , **wszDesigner
                ' need to convert ansi to unicode
                put #f, , WStr(*psz)
             end if    

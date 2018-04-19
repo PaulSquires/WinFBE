@@ -1,3 +1,5 @@
+declare function GetControlName( byval nControlType as long ) as CWSTR
+declare function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
 declare function RemoveComments( byval st as string) as string
 declare function MaskStringCharacters( byval st as string) as string
 declare function ChangeCommentCharacters( byval st as string) as string

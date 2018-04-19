@@ -1,3 +1,11 @@
+Version 1.6.0 (April 19, 2018)
+- Added: italian.lang lanuage file thanks to Massimiliano Argenti from the PlanetSquires forum.
+- Added: czech.lang lanuage file thanks to Norcom (Robert) from the PlanetSquires forum.
+- Fixed: QuickRun in top menu now correctly disabled when a Project is active.
+- Fixed: Endless loop if file remained opened in editor but deleted manually from disk. 
+- Fixed: Corrected instances where the Autocomplete popup list would appear when it should not.
+- Fixed: Corrected saving/restoring Explorer width when moving between high/low resolution monitor settings.
+
 Version 1.5.9 (February 6, 2018)
 - Added: '#RESOURCE "resourcefilename" compiler directive to be embedded in the code of the main file being compiled.
 

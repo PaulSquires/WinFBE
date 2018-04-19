@@ -384,6 +384,19 @@ function GetControlClassName( byval pCtrl as clsControl ptr ) as CWSTR
    return ""
 end function
    
+' ========================================================================================
+' Get the control name based on the type of control
+' ========================================================================================
+function GetControlName( byval nControlType as long ) as CWSTR
+   if nControlType = CTRL_FORM then return "Form"
+   for i as long = lbound(gToolbox) to ubound(gToolbox)
+      if gToolbox(i).nToolType = nControlType THEN 
+         return gToolbox(i).wszName
+      END IF
+   NEXT
+   return ""
+end function
+
 
 ' ========================================================================================
 ' Generate a default name for the new form
@@ -439,12 +452,7 @@ function GenerateDefaultControlName( byval pDoc as clsDocument ptr, _
    dim as Boolean bOK 
    dim pCtrl as clsControl ptr 
    
-   for i as long = lbound(gToolbox) to ubound(gToolbox)
-      if gToolbox(i).nToolType = nControlType THEN
-         wszName = gToolbox(i).wszName
-         exit for
-      END IF
-   NEXT
+   wszName = GetControlName(nControlType)
 
    do 
       NextControlNumber = NextControlNumber + 1
@@ -502,7 +510,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
       case CTRL_TEXTBOX
          AddControlProperty(pCtrl, "Text")
          AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_TABSTOP|ES_LEFT|ES_AUTOHSCROLL")
-         AddControlProperty(pCtrl, "ExStyle")
+         AddControlProperty(pCtrl, "ExStyle", "WS_EX_CLIENTEDGE")
       case CTRL_CHECKBOX
          AddControlProperty(pCtrl, "Text")
          AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_TABSTOP|BS_AUTOCHECKBOX|BS_LEFT|BS_VCENTER")
@@ -518,10 +526,10 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
       case CTRL_PICTURE
       case CTRL_COMBOBOX
          AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_BORDER|WS_TABSTOP|CBS_DROPDOWNLIST")
-         AddControlProperty(pCtrl, "ExStyle")
+         AddControlProperty(pCtrl, "ExStyle", "WS_EX_CLIENTEDGE")
       case CTRL_LISTBOX
          AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_HSCROLL|WS_VSCROLL|WS_BORDER|WS_TABSTOP|LBS_STANDARD|LBS_HASSTRINGS|LBS_NOTIFY")
-         AddControlProperty(pCtrl, "ExStyle")
+         AddControlProperty(pCtrl, "ExStyle", "WS_EX_CLIENTEDGE")
       case CTRL_IMAGEBUTTON
       case CTRL_HSCROLL
       case CTRL_VSCROLL
@@ -683,3 +691,5 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
 
    function = pCtrl
 END FUNCTION
+
+
