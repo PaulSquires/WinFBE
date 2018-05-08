@@ -39,7 +39,7 @@ Using Afx
 #Define APPNAMESHORT  WStr("WinFBE")
 #Define APPVERSION    WStr("1.6.0") 
 
-'#Define USE_VISUAL_DESIGNER 1
+#Define USE_VISUAL_DESIGNER 1
 
 #Include Once "modScintilla.bi"
 #Include Once "modDeclares.bi"         ' TYPES, DEFINES, etc
@@ -68,6 +68,7 @@ Using Afx
 #Include Once "modToolbar.inc"
 #Include Once "modMRU.inc"
 #Include Once "modCodetips.inc"
+#Include Once "modGenerateCode.inc"
 
 #Include Once "frmHotImgBtn.inc"
 #Include Once "frmHotTxtBtn.inc"

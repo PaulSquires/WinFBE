@@ -40,6 +40,7 @@ function SetControlProperty( byval pCtrl as clsControl ptr, _
                              byval wszPropName as CWSTR, _
                              byval wszPropValue as CWSTR _
                              ) as long
+   if pCtrl = 0 then exit function
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)
    dim as CWSTR wszPropName_ucase = ucase(wszPropName)
@@ -58,6 +59,7 @@ end function
 ' Get the RECT of the specified control 
 ' ========================================================================================
 function GetControlRECT( byval pCtrl as clsControl ptr ) as RECT
+   if pCtrl = 0 then exit function
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)
    dim as long nLeft, nTop, nWidth, nHeight
@@ -397,6 +399,59 @@ function GetControlName( byval nControlType as long ) as CWSTR
    return ""
 end function
 
+<<<<<<< HEAD
+' ========================================================================================
+' Get the control type number based on the name of the control
+' ========================================================================================
+function GetControlType( byval wszControlName as CWSTR ) as long
+   wszControlName = ucase(wszControlName)
+   if wszControlName = "FORM" then return CTRL_FORM 
+   for i as long = lbound(gToolbox) to ubound(gToolbox)
+      if ucase(gToolbox(i).wszName) = wszControlName then
+         return gToolbox(i).nToolType 
+      END IF
+   NEXT
+   return 0
+end function
+
+' ========================================================================================
+' Get the WinFormsX class name for the incoming control type
+' ========================================================================================
+function GetWinformsXClassName( byval nControlType as long ) as CWSTR
+   dim wszText as CWSTR
+   select case nControlType 
+      CASE CTRL_FORM:              wszText = "wfxForm"
+      CASE CTRL_LABEL:             wszText = "wfxLabel"
+      CASE CTRL_BUTTON:            wszText = "wfxButton"   
+      CASE CTRL_TEXTBOX:           wszText = "wfxTextBox"  
+      CASE CTRL_CHECKBOX:          wszText = "wfxCheckBox" 
+      CASE CTRL_OPTION:            wszText = "wfxRadioButton"
+      CASE CTRL_FRAME:             wszText = "wfxFrame"    
+      CASE CTRL_PICTURE:           wszText = "wfxPicture"  
+      CASE CTRL_COMBOBOX:          wszText = "wfxComboBox" 
+      CASE CTRL_LISTBOX:           wszText = "wfxListBox"  
+      case CTRL_IMAGEBUTTON
+      case CTRL_HSCROLL
+      case CTRL_VSCROLL
+      case CTRL_TIMER
+      case CTRL_TABCONTROL
+      case CTRL_RICHEDIT
+      case CTRL_PROGRESSBAR
+      case CTRL_UPDOWN
+      case CTRL_LISTVIEW
+      case CTRL_TREEVIEW
+      case CTRL_SLIDER
+      case CTRL_DATETIMEPICKER
+      case CTRL_MONTHCALENDAR
+      case CTRL_WEBBROWSER
+      case CTRL_CUSTOM
+      case CTRL_OCX
+   END SELECT
+
+   return wszText
+end function
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 
 ' ========================================================================================
 ' Generate a default name for the new form
@@ -471,6 +526,134 @@ end function
 
 
 ' ========================================================================================
+' Add an event to the incoming control and optionally a value
+' ========================================================================================
+function AddControlEvent( byval pCtrl as clsControl ptr, _
+                          byref wszEventName as CWSTR, _
+                          byval bIsSelected as boolean = false _
+                          ) as Long
+   dim as long ub = ubound(pCtrl->Events) + 1
+   redim preserve pCtrl->Events(ub) as clsEvent
+   pCtrl->Events(ub).wszEventName = wszEventName
+   pCtrl->Events(ub).bIsSelected = bIsSelected
+   function = 0
+end function
+
+' ========================================================================================
+' Set the value for the specified control event
+' ========================================================================================
+function SetControlEvent( byval pCtrl as clsControl ptr, _
+                          byval wszEventName as CWSTR, _
+                          byval bIsSelected as boolean _
+                          ) as long
+   if pCtrl = 0 then exit function
+   dim as long lb = lbound(pCtrl->Events)
+   dim as long ub = ubound(pCtrl->Events)
+   dim as CWSTR wszEventName_ucase = ucase(wszEventName)
+   
+   for i as long = lb to ub
+      if ucase(pCtrl->Events(i).wszEventName) = wszEventName_ucase THEN
+         pCtrl->Events(i).bIsSelected = bIsSelected
+         exit for
+      END IF
+   NEXT
+   function = 0
+end function
+
+' ========================================================================================
+' Attach default events for the incoming control
+' ========================================================================================
+function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
+
+   ' Only add default events if the no events already exist for the control
+   if ubound(pCtrl->Events) - lbound(pCtrl->Events) + 1 > 0 then exit function
+  
+   ' Add the default AllEvents event that applies to all controls
+   AddControlEvent(pCtrl, "AllEvents")
+
+   ' Add control specific properties
+   select CASE pCtrl->ControlType
+      case CTRL_FORM
+         AddControlEvent(pCtrl, "Load")
+         AddControlEvent(pCtrl, "Shown")
+         AddControlEvent(pCtrl, "Activated")
+         AddControlEvent(pCtrl, "Deactivate")
+         AddControlEvent(pCtrl, "Resize")
+         AddControlEvent(pCtrl, "FormClosing")
+         AddControlEvent(pCtrl, "FormClosed")
+         AddControlEvent(pCtrl, "Move")
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
+      case CTRL_LABEL
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+      case CTRL_BUTTON
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+      case CTRL_TEXTBOX
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "GotFocus")
+         AddControlEvent(pCtrl, "LostFocus")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
+      case CTRL_CHECKBOX
+      case CTRL_OPTION
+      case CTRL_FRAME
+      case CTRL_PICTURE
+      case CTRL_COMBOBOX
+      case CTRL_LISTBOX
+      case CTRL_IMAGEBUTTON
+      case CTRL_HSCROLL
+      case CTRL_VSCROLL
+      case CTRL_TIMER
+      case CTRL_TABCONTROL
+      case CTRL_RICHEDIT
+      case CTRL_PROGRESSBAR
+      case CTRL_UPDOWN
+      case CTRL_LISTVIEW
+      case CTRL_TREEVIEW
+      case CTRL_SLIDER
+      case CTRL_DATETIMEPICKER
+      case CTRL_MONTHCALENDAR
+      case CTRL_WEBBROWSER
+      case CTRL_CUSTOM
+      case CTRL_OCX
+   END SELECT
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Add a property to the incoming control and optionally a value
 ' ========================================================================================
 function AddControlProperty( byval pCtrl as clsControl ptr, _
@@ -490,6 +673,9 @@ end function
 ' ========================================================================================
 function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
 
+   ' Only add default properties if the no properties already exist for the control
+   if ubound(pCtrl->Properties) - lbound(pCtrl->Properties) + 1 > 0 then exit function
+  
    ' Add the default same generic proprties that apply to all controls
    AddControlProperty(pCtrl, "Name")
    AddControlProperty(pCtrl, "Left")
@@ -556,6 +742,9 @@ end function
 ' Apply properties to the incoming control
 ' ========================================================================================
 function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
+   if pCtrl = 0 then exit function
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMMAIN)
 
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)
@@ -577,7 +766,8 @@ function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
                if pCtrl->ControlType = CTRL_FORM then
                   nLeft = 10: nTemp = 10
                end if
-               SetWindowPos(pCtrl->hWindow, 0, nLeft, nTemp, 0, 0, SWP_NOZORDER or SWP_NOSIZE)
+               'SetWindowPos(pCtrl->hWindow, 0, pWindow->ScaleX(nLeft), pWindow->ScaleY(nTemp), 0, 0, SWP_NOZORDER or SWP_NOSIZE)
+               pWindow->SetWindowPos(pCtrl->hWindow, 0, nLeft, nTemp, 0, 0, SWP_NOZORDER or SWP_NOSIZE)
             end if   
          CASE "TOP"
             nTop = nPropValue
@@ -586,19 +776,22 @@ function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
                if pCtrl->ControlType = CTRL_FORM then
                   nTop = 10: nTemp = 10
                end if
-               SetWindowPos(pCtrl->hWindow, 0, nTemp, nTop, 0, 0, SWP_NOZORDER or SWP_NOSIZE)
+               'SetWindowPos(pCtrl->hWindow, 0, pWindow->ScaleX(nTemp), pWindow->ScaleY(nTop), 0, 0, SWP_NOZORDER or SWP_NOSIZE)
+               pWindow->SetWindowPos(pCtrl->hWindow, 0, nTemp, nTop, 0, 0, SWP_NOZORDER or SWP_NOSIZE)
             end if   
          CASE "WIDTH"
             nWidth = nPropValue
             if pCtrl->SuspendLayout = false THEN
                nTemp = val(GetControlProperty(pCtrl, "HEIGHT"))
-               SetWindowPos(pCtrl->hWindow, 0, 0, 0, nWidth, nTemp, SWP_NOZORDER or SWP_NOMOVE)
+               'SetWindowPos(pCtrl->hWindow, 0, 0, 0, pWindow->ScaleX(nWidth), pWindow->ScaleY(nTemp), SWP_NOZORDER or SWP_NOMOVE)
+               pWindow->SetWindowPos(pCtrl->hWindow, 0, 0, 0, nWidth, nTemp, SWP_NOZORDER or SWP_NOMOVE)
             end if   
          CASE "HEIGHT"      
             nHeight = nPropValue
             if pCtrl->SuspendLayout = false THEN
                nTemp = val(GetControlProperty(pCtrl, "WIDTH"))
-               SetWindowPos(pCtrl->hWindow, 0, 0, 0, nTemp, nHeight, SWP_NOZORDER or SWP_NOMOVE)
+               'SetWindowPos(pCtrl->hWindow, 0, 0, 0, pWindow->ScaleX(nTemp), pWindow->ScaleY(nHeight), SWP_NOZORDER or SWP_NOMOVE)
+               pWindow->SetWindowPos(pCtrl->hWindow, 0, 0, 0, nTemp, nHeight, SWP_NOZORDER or SWP_NOMOVE)
             end if 
          case "TEXT"
             AfxSetWindowText(pCtrl->hWindow, wszPropValue)     
@@ -621,7 +814,9 @@ function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
    ' If layout has been suspended then only move/resize the control after
    ' all of the relevant properties have now been set.
    if pCtrl->SuspendLayout THEN
-      SetWindowPos(pCtrl->hWindow, 0, nLeft, nTop, nWidth, nHeight, SWP_NOZORDER)
+'      SetWindowPos( pCtrl->hWindow, 0, pWindow->ScaleX(nLeft), pWindow->ScaleY(nTop), _
+'                    pWindow->ScaleX(nWidth), pWindow->ScaleY(nHeight), SWP_NOZORDER)
+      pWindow->SetWindowPos( pCtrl->hWindow, 0, nLeft, nTop, nWidth, nHeight, SWP_NOZORDER)
    END IF
    
    function = 0
@@ -646,8 +841,9 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    pCtrl->ControlType = ControlType
    pCtrl->IsActive    = false
    
-   ' Set default properties for the created control
-   AttachDefaultControlProperties( pCtrl )
+   ' Set default properties and events for the created control
+   AttachDefaultControlProperties(pCtrl)
+   AttachDefaultControlEvents(pCtrl)
 
    if ControlType = CTRL_FORM THEN
       dim pForm as CWindow ptr = New CWindow
@@ -686,8 +882,10 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    ApplyControlProperties( pCtrl )
    pCtrl->SuspendLayout = false
 
+   pDoc->bRegenerateCode = true
    pDoc->Controls.SelectControl(pCtrl->hWindow)
    pDoc->Controls.SetActiveControl(pCtrl->hWindow)
+   DisplayPropertyList(pDoc)
 
    function = pCtrl
 END FUNCTION

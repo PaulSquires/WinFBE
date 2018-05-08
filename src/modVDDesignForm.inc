@@ -452,12 +452,13 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
    if pDoc = 0 THEN exit function
    
+   dim as Rect rcIntersect, rcLasso, rcCtrl
+   
    ResetClosestControls(pDoc)
 
    ' Hide any previous lasso (and select controls)
    if gLasso.IsActive THEN 
       dim pCtrl as clsControl ptr
-      dim as Rect rcIntersect, rcLasso, rcCtrl
       
       rcLasso = gLasso.GetLassoRect()
       gLasso.Destroy
@@ -483,7 +484,11 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
          pDoc->Controls.SetActiveControl(hCtrlSel)
       else
          ' Create the selected Toolbox control.
-         CreateToolboxControl( pDoc, GetActiveToolboxControlType, rcLasso )
+         ' Need to modify rcLasso dimensions in case of HighDPI
+         Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+         SetRect(@rcCtrl, pWindow->UnScaleX(rcLasso.Left), pWindow->UnScaleY(rcLasso.Top), _
+                         pWindow->UnScaleX(rcLasso.Right), pWindow->UnScaleY(rcLasso.Bottom))
+         CreateToolboxControl( pDoc, GetActiveToolboxControlType, rcCtrl )
       end if   
    end if      
     
@@ -500,7 +505,6 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    AfxRedrawWindow(pDoc->hWndFrame)
    AfxRedrawWindow(pDoc->hWndForm)
    frmMain_UpdateLineCol(HWND_FRMMAIN)
-   DisplayPropertyList(pDoc)
    
    function = 0
 end function
@@ -548,6 +552,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
    if pDoc = 0 THEN exit function
    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
    dim pCtrl as clsControl ptr
 
    GetCursorPos(@pt)
@@ -603,6 +608,9 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       ' Convert pDoc->rcSize from Window to Client coordinates
       dim as rect rc = pDoc->rcSize
       MapWindowPoints(0, HWND, cast(point ptr, @rc), 2)
+      ' Ensure that the rect is unscaled
+      SetRect(@rc, pWindow->UnScaleX(rc.Left), pWindow->UnScaleY(rc.Top), _
+                   pWindow->UnScaleX(rc.Right), pWindow->UnScaleY(rc.Bottom))
       pDoc->pCtrlAction->SuspendLayout = true
       SetControlProperty(pDoc->pCtrlAction, "LEFT", str(rc.left))
       SetControlProperty(pDoc->pCtrlAction, "TOP", str(rc.top))
@@ -613,7 +621,12 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       
       ' Indicate that the file is now dirty and will need to be saved
       pDoc->UserModified = true
+<<<<<<< HEAD
+      pDoc->bRegenerateCode = true
+
+=======
       
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
       ' Ensure the grab handles are redrawn
       AfxRedrawWindow(hwnd)   ' HWND because could be form or frame
       frmMain_UpdateLineCol(HWND_FRMMAIN)
@@ -678,6 +691,9 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
             MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pDoc->rcSize), 2)
             pDoc->rcSize.left  = pDoc->rcSize.left + xDelta
             pDoc->rcSize.top   = pDoc->rcSize.top + yDelta
+            ' Ensure that the rect is unscaled
+            SetRect(@pDoc->rcSize, pWindow->UnScaleX(pDoc->rcSize.Left), pWindow->UnScaleY(pDoc->rcSize.Top), _
+                                   pWindow->UnScaleX(pDoc->rcSize.Right), pWindow->UnScaleY(pDoc->rcSize.Bottom))
             pCtrl->SuspendLayout = true
             SetControlProperty(pCtrl, "LEFT", str(pDoc->rcSize.left))
             SetControlProperty(pCtrl, "TOP", str(pDoc->rcSize.top))
@@ -688,6 +704,10 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       
       ' Indicate that the file is now dirty and will need to be saved
       pDoc->UserModified = true
+<<<<<<< HEAD
+      pDoc->bRegenerateCode = true
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 
       ' Ensure the grab handles are redrawn
       AfxRedrawWindow(pDoc->hWndForm)
@@ -775,15 +795,17 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
       case WM_LBUTTONUP:   HandleDesignerLButtonUp(HWND)
       case WM_MOUSEMOVE:   HandleDesignerMouseMove(HWND)
 
-      Case WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN  
+      Case WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN, WM_NCLBUTTONDBLCLK  
          ' Will only fire when the Caption bar, Min/Max/Close buttons are clicked.
          SetActiveWindow HWND_FRMMAIN
-         Function = TRUE: Exit Function
-
-      Case WM_NCLBUTTONDBLCLK
-         SetActiveWindow HWND_FRMMAIN
-         ' Prevent the user from double clicking on the caption bar thus
-         ' causing the Form to maximize.
+         dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
+         if pDoc THEN 
+            pDoc->Controls.DeselectAllControls
+            pDoc->Controls.SetActiveControl(pDoc->hWndForm)
+            AfxRedrawWindow(pDoc->hWndFrame)
+            AfxRedrawWindow(pDoc->hWndForm)
+            DisplayPropertyList(pDoc)
+         END IF
          Function = TRUE: Exit Function
 
       Case WM_NCHITTEST

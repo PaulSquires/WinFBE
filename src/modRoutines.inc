@@ -265,7 +265,7 @@ FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
                      LEN(sUtf8), _              'Length of UTF-8 buffer
                      BYVAL 0, _                 'Invalid character replacement
                      BYVAL 0)                   'Replacement was used flag
- FUNCTION = sUtf8
+ FUNCTION = rtrim(sUtf8, chr(0))
 
 END FUNCTION
 

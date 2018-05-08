@@ -209,7 +209,8 @@
 
 #Define IDC_FRMVDTOOLBOX_LSTTOOLBOX                 1000
 #Define IDC_FRMVDTOOLBOX_LSTPROPERTIES              1001
-#Define IDC_FRMVDTOOLBOX_TABCONTROL                 1002
+#Define IDC_FRMVDTOOLBOX_LSTEVENTS                  1002
+#Define IDC_FRMVDTOOLBOX_TABCONTROL                 1003
 
 #DEFINE IDC_FRMUSERTOOLS_LSTTOOLS                   1000
 #DEFINE IDC_FRMUSERTOOLS_CMDINSERT                  1001
@@ -440,7 +441,7 @@ Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG, HWND_FRMUSERTOOLS
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
 
-dim shared as HICON ghIconGood, ghIconBad
+dim shared as HICON ghIconGood, ghIconBad, ghIconTick, ghIconNoTick
 dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
 
 dim shared as HACCEL ghAccelUserTools
@@ -573,10 +574,16 @@ END TYPE
 
 type clsProperty
    private:
-   
    public:
       wszPropName  as CWSTR          ' Used for Get/Set of property value
       wszPropValue as CWSTR
+END TYPE
+
+type clsEvent
+   private:
+   public:
+      wszEventName as CWSTR          ' Used for Get/Set of event value
+      bIsSelected  as Boolean
 END TYPE
          
 
@@ -591,6 +598,7 @@ type clsControl
       SuspendLayout as Boolean    ' prevent layout properties from being acted on individually (instead treat as a group)
       rcHandles(1 to 8) as RECT         ' 8 grab handles
       Properties(Any) As clsProperty
+      Events(Any) As clsEvent
 END TYPE
 
 ' Global array to hold cut/copy/paste controls
@@ -642,10 +650,12 @@ Type clsDocument
       hDesignTabCtrl   as HWnd      ' TabCtrl to switch between Design/Code
       hWndFrame        as hwnd      ' DesignFrame for visual designer windows
       hWndForm         as hwnd      ' DesignForm for visual designer windows
+      ErrorOffset      as long      ' Number of lines to account for when error thrown for visual designer code files.
       GrabHit          as long      ' Which grab handle is currently active for sizing action
       ptPrev           as point     ' Used for sizing action
       bSizing          as Boolean   ' Flag that sizing action is in progress
       bMoving          as Boolean   ' Flag that moving action is in progress
+      bRegenerateCode  as Boolean   ' Flag to regenerate code when switching to the code tab
       rcSize           as RECT      ' Current size of form/control. Used during sizing action
       pCtrlAction      as clsControl ptr  ' The control that the size/move action is being performed on
       pCtrlCloseLeft   as clsControl ptr  ' closest control to the left of selected control
@@ -683,9 +693,14 @@ Type clsDocument
       
       declare function GetActiveScintillaPtr() as any ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
-      declare Function CreateDesignerWindow( ByVal hWndParent As HWnd, ByVal IsNewFile  As BOOLEAN, ByVal pwszFile   As WString Ptr = 0) As HWnd   
+      declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
+<<<<<<< HEAD
+      declare function GenerateDesignerCode() as long
+      declare function ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as CWSTR ) as CWSTR 
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
       declare function CreateDesignerString() as CWSTR 
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
       Declare Function ApplyProperties() As Long
@@ -697,6 +712,7 @@ Type clsDocument
       Declare Function GetSelText() As String
       Declare Function GetText() As String
       Declare Function SetText( ByRef sText As Const String ) As Long 
+      declare Function AppendText( ByRef sText As Const String ) As Long 
       Declare Function GetSelectedLineRange( ByRef startLine As Long, ByRef endLine As Long, ByRef startPos As Long, ByRef endPos As Long ) As Long 
       Declare Function BlockComment( ByVal flagBlock As BOOLEAN ) As Long
       Declare Function CurrentLineUp() As Long

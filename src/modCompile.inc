@@ -564,8 +564,19 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Lon
       End If 
    END IF
 
+   ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
+   ' initiate the toggle between the code editor and visual designer.
+   if pDoc then
+      if pDoc->IsDesigner then
+         TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, 1)  ' 1 = code tab
+         frmMain_PositionWindows(HWND_FRMMAIN)
+      END IF
+   END IF
+
+   ' Move Scintilla cursor to the correct error line 
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   SciExec( hEdit, SCI_GOTOLINE, Val(wszErrorLine)-1, 0 )
+   dim as long nLineNum = Val(wszErrorLine) - pDoc->ErrorOffset - 1
+   SciExec( hEdit, SCI_GOTOLINE, nLineNum, 0 )
 
 End Function
 

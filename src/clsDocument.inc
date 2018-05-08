@@ -66,10 +66,7 @@ end property
 
 ''
 ''
-Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
-                                           ByVal IsNewFile  As BOOLEAN, _     
-                                           ByVal pwszFile   As WString Ptr = 0 _
-                                           ) As HWnd   
+Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd 
    
    ' For the Visual Designer, there exists three (3) levels of windows:
    ' (1) The DesignMain (hWindow) used by the top tabcontrol to display the document. 
@@ -140,6 +137,35 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    
    ' (3) Create the Design Form (child of the Frame)
    dim pCtrl as clsControl ptr
+<<<<<<< HEAD
+   if this.IsNewFlag then
+      this.UserModified = true
+      SetRect(@rc, 10, 10, 510, 310)
+      pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
+      ApplyControlProperties(pCtrl)
+   
+'   ' TODO: Remove these demo buttons from visual designer
+       
+'      SetRect(@rc, 50, 50, 125, 78)
+'      pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
+'      SetControlProperty(pCtrl, "TEXT", "OK")
+'      ApplyControlProperties(pCtrl)
+       
+'      SetRect(@rc, 150, 50, 225, 78)
+'      pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
+'      SetControlProperty(pCtrl, "TEXT", "Cancel")
+'      ApplyControlProperties(pCtrl)
+
+'      SetRect(@rc, 50, 100, 200, 128)
+'      pCtrl = CreateToolboxControl( @this, CTRL_LABEL, rc )
+'      SetControlProperty(pCtrl, "TEXT", "This is a label")
+'      ApplyControlProperties(pCtrl)
+
+      this.Controls.SelectControl(pCtrl->hWindow)
+      this.Controls.SetActiveControl(pCtrl->hWindow)
+      DisplayPropertyList(@this)
+   end if
+=======
    SetRect(@rc, pFrame->ScaleX(10), pFrame->ScaleY(10), pFrame->ScaleX(510), pFrame->ScaleY(310))
    pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
    ApplyControlProperties(pCtrl)
@@ -165,10 +191,14 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd, _
    this.Controls.SelectControl(pCtrl->hWindow)
    this.Controls.SetActiveControl(pCtrl->hWindow)
    DisplayPropertyList(@this)
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
    
    ' Need to create 
    ' Display the ToolBox/PropertyList
    frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
+   
+   ' Generate code for the visual designer and place it in the code editor
+   GenerateCode(@this)
    
    function = this.hWindow(0)
 end function
@@ -226,6 +256,9 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    If (IsNewFile = true) orelse (IsTemplate = true) Then
       this.NextFileNum = this.NextFileNum + 1
       this.DiskFilename = "Untitled" & this.NextFileNum
+      if this.IsDesigner then
+         this.CreateDesignerWindow(hWndParent)  ' Create the new visual designer window
+      end if   
    End If
    this.ProjectFileType = FILETYPE_UNDEFINED
    
@@ -269,6 +302,9 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
          Else
             dim sText as string
             if GetFileToString(*pwszFile, sText, @this) = false then
+               ' Need to parse sText to remove/process any possible visual designer code. Only
+               ' the non-VD text is returned.
+               sText = this.ParseDesignerString(hWndParent, sText)
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
             else
@@ -350,6 +386,77 @@ Function clsDocument.InsertFile() As BOOLEAN
    Function = 0
 End Function
 
+<<<<<<< HEAD
+
+' ========================================================================================
+' Parse all of the file's code to remove and process any visual designer specific code.
+' Returns a string representing just the code only (visual designer metastatements removed).
+' ========================================================================================
+function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as CWSTR ) as CWSTR 
+   dim pCtrl as clsControl ptr
+   
+   dim as RECT rc, rcCtrl
+   dim as CWSTR wst, wszControlType, wszPropName, wszPropValue, wszEventName
+   dim as Long nControlType, numLines, numOffsetLines
+   
+   ' The first line MUST contain the identifier that this is a form file.
+   if left(sAllText, 13) = "' WINFBE FORM" then
+      this.IsDesigner = true
+      this.CreateDesignerWindow(hWndParent)
+      numOffsetLines = 1
+   else
+      ' This is just a regular code file with no visual designer
+      this.IsDesigner = false
+      return sAllText   
+   END IF
+   
+   ' Iterate all of the lines related to the visual designer
+   numLines = AfxStrParseCount(sAllText, vbcrlf)
+
+   for i as long = 2 to numLines
+      wst = AfxStrParse(sAllText, i, vbcrlf)
+      
+      numOffsetLines = numOffsetLines + 1
+      
+      if left(wst, 17) = "' WINFBE FORM_END" then
+         this.ErrorOffset = numOffsetLines 
+         sAllText = ltrim(AfxStrRemain( sAllText, "' WINFBE FORM_END" ), vbcrlf)
+         return sAllText
+      
+      elseif left(wst, 23) = "' WINFBE CONTROL_START " then
+         ' The control type name is parse #4 (blank space)
+         wszControlType = AfxStrParse(wst, 4, " ")
+         nControlType = GetControlType(wszControlType)
+         pCtrl = CreateToolboxControl( @this, nControlType, rc )
+         
+      elseif left(wst, 20) = "' WINFBE CONTROL_END" then
+         ApplyControlProperties(pCtrl)
+
+      elseif left(wst, 20) = "'   PROPERTIES_START" then
+      elseif left(wst, 18) = "'   PROPERTIES_END" then
+
+      elseif left(wst, 16) = "'     PROP_NAME " then
+         wszPropName = mid(wst, 17)
+       
+      elseif left(wst, 17) = "'     PROP_VALUE " then
+         wszPropValue = mid(wst, 18)
+         SetControlProperty(pCtrl, wszPropName, wszPropValue)
+         
+      elseif left(wst, 16) = "'   EVENTS_START" then
+      elseif left(wst, 14) = "'   EVENTS_END" then
+
+      elseif left(wst, 17) = "'     EVENT_NAME " then
+         wszEventName = mid(wst, 18)
+         SetControlEvent(pCtrl, wszEventName, true)
+      end if   
+
+   NEXT
+
+end function
+
+
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 ' ========================================================================================
 ' Generate the string that gets saved to theCreate the specified control on the design form
 ' ========================================================================================
@@ -370,6 +477,18 @@ function clsDocument.CreateDesignerString() as CWSTR
                           "'     PROP_VALUE " & pCtrl->Properties(ii).wszPropValue & vbcrlf 
          NEXT
          wszControls = wszControls & "'   PROPERTIES_END" & vbcrlf & _
+<<<<<<< HEAD
+                                     "'   EVENTS_START" & vbcrlf 
+         for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
+            ' Only need to output the names of the Events that have been ticked as being in use.
+            if pCtrl->Events(ii).bIsSelected then
+               wszControls = wszControls & _
+                             "'     EVENT_NAME "   & pCtrl->Events(ii).wszEventName & vbcrlf 
+            end if
+         next
+         wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
                                      "' WINFBE CONTROL_END" & vbcrlf
       END IF
    NEXT
@@ -380,6 +499,11 @@ function clsDocument.CreateDesignerString() as CWSTR
                  wszControls & _
                  "' WINFBE FORM_END" & vbcrlf 
    
+<<<<<<< HEAD
+   this.ErrorOffset = AfxStrParseCount(wszDesigner, vbcrlf) - 1
+   
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
    return wszDesigner 
 end function
 
@@ -416,6 +540,18 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
       wszDesigner = this.CreateDesignerString
+<<<<<<< HEAD
+      ' Also, regenerate visual designer code
+      if this.bRegenerateCode then
+         dim as hwnd hEdit = this.hWindow(0)
+         dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
+         dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
+         GenerateCode(@this)
+         SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
+         SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+      END IF
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
    END IF
    
    ' Save text buffer to disk by directly accessing buffer rather
@@ -676,6 +812,15 @@ End Function
 Function clsDocument.SetText( ByRef sText As Const String ) As Long 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    SciMsg( pSci, SCI_SETTEXT, 0, Cast(LPARAM, Strptr(sText)) )
+   SciMsg( pSci, SCI_COLOURISE, 0, -1 )
+   Function = 0
+End Function
+
+''
+''
+Function clsDocument.AppendText( ByRef sText As Const String ) As Long 
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   SciMsg( pSci, SCI_APPENDTEXT, len(sText), Cast(LPARAM, Strptr(sText)) )
    SciMsg( pSci, SCI_COLOURISE, 0, -1 )
    Function = 0
 End Function
@@ -1137,7 +1282,7 @@ Function clsDocument.DisplayStats() As Long
    wText = wText + " - [" + this.DiskFilename + wTag + "]"
    If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
 
-   if this.IsDesigner THEN 
+   if (this.IsDesigner) andalso (IsDesignerView(@this)) THEN 
       wText = ""
       dim pCtrl as clsControl ptr = this.Controls.GetActiveControl
       if pCtrl THEN
@@ -1179,6 +1324,7 @@ Function clsDocument.DisplayStats() As Long
       Case FILETYPE_MAIN:     wText = ucase(L(212,"Main"))
       Case FILETYPE_RESOURCE: wText = ucase(L(213,"Resource"))
    End Select
+   if this.IsDesigner then wText = "FORM"
    StatusBar_SetText(hStatusbar, 2, *wText)
 
    

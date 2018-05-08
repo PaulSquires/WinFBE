@@ -619,7 +619,12 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
+<<<<<<< HEAD
+   frmMain_UpdateLineCol(hwnd)
+   
+=======
 
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
    Function = 0
 End Function
 
@@ -804,6 +809,9 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       If pDocIn = 0 Then   ' Create a new pDoc 
          gFileLoading = true  ' allows parsing of newly loading file
          pDoc = New clsDocument
+<<<<<<< HEAD
+         pDoc->IsDesigner = bIsDesigner 
+=======
          if bIsDesigner THEN
             If bIsNewFile Then
                pDoc->CreateDesignerWindow(HWnd, True)  ' Create the new visual designer window
@@ -811,6 +819,7 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                pDoc->CreateDesignerWindow(HWnd, false, pwszName)
             End If   
          end if
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
          ' All pDoc's will have an associated Scintilla window for code.
          If bIsNewFile Then
             pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
@@ -1807,19 +1816,39 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
          END SELECT
          
       Case TCN_SELCHANGE
+<<<<<<< HEAD
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
          select case id 
             case IDC_FRMMAIN_TOPTABCONTROL 
                ' Show the new tab
                nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
                gTTabCtl.DisplayScintilla(nCurSel, True)
                frmMain_PositionWindows(HWnd)
+<<<<<<< HEAD
+=======
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
                If pDoc Then
                   Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
                                        pDoc->hNodeExplorer )
                end if
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows(HWnd)
+<<<<<<< HEAD
+               if pDoc then
+                  if IsDesignerView(pDoc) = false then 
+                     dim as hwnd hEdit = pDoc->hWindow(0)
+                     dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
+                     dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
+                     GenerateCode(pDoc)
+                     SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
+                     SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+                  END IF
+               end if
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
          END SELECT
 
          
@@ -2109,6 +2138,26 @@ Function frmMain_TabCtl_SubclassProc ( _
       
    Select Case uMsg
 
+      Case WM_LBUTTONDBLCLK 
+         ' Process double clicking on a tab in the top tab control (which between code and visual designer)
+         ' Get the tab number
+         GetCursorPos( @pInfo.pt )
+         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
+         nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
+         if nCurSel = -1 then exit function
+         
+         ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
+         ' initiate the toggle between the code editor and visual designer.
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+         if pDoc then
+            if pDoc->IsDesigner then
+               nCurSel = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
+               nCurSel = iif(nCurSel = 0, 1, 0)
+               TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, nCurSel)
+               frmMain_PositionWindows(HWND_FRMMAIN)
+            END IF
+         END IF
+         
       Case WM_RBUTTONDOWN
          ' Get the tab number
          GetCursorPos( @pInfo.pt )
@@ -2438,6 +2487,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    cx = 16 * (pWindow->DPI \ 96)
    ghIconGood = LoadImage( pWindow->InstanceHandle, "IMAGE_GOODCOMPILE", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR)
    ghIconBad  = LoadImage( pWindow->InstanceHandle, "IMAGE_BADCOMPILE", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR)
+   
+   ' Load the tick and untick icons
+   ghIconTick   = LoadImage( pWindow->InstanceHandle, "IMAGE_TICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
+   ghIconNoTick = LoadImage( pWindow->InstanceHandle, "IMAGE_NOTICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
 
    ' Create the main application topmenu
    HWND_FRMMAIN_TOPMENU = frmMain_BuildMenu(pWindow)
@@ -2587,21 +2640,23 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                                    GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES), _
                                    GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
                               CASE ELSE
-                                 if pDoc->Controls.SelectedControlsCount > 0 then
-                                    ' Move control(s)
-                                    if (GetAsyncKeyState(VK_CONTROL) and &H8000) then
-                                       KeyboardMoveControls(pDoc, uMsg.wParam)
-                                       continue do
-                                    end if
-                                    ' Resize control(s)   
-                                    if (GetAsyncKeyState(VK_SHIFT) and &H8000) THEN
-                                       KeyboardResizeControls(pDoc, uMsg.wParam)
+                                 if IsDesignerView(pDoc) then
+                                    if pDoc->Controls.SelectedControlsCount > 0 then
+                                       ' Move control(s)
+                                       if (GetAsyncKeyState(VK_CONTROL) and &H8000) then
+                                          KeyboardMoveControls(pDoc, uMsg.wParam)
+                                          continue do
+                                       end if
+                                       ' Resize control(s)   
+                                       if (GetAsyncKeyState(VK_SHIFT) and &H8000) THEN
+                                          KeyboardResizeControls(pDoc, uMsg.wParam)
+                                          continue do
+                                       end if   
+                                       ' Move active selected control focus within group of controls
+                                       KeyboardCycleActiveControls(pDoc, uMsg.wParam)
                                        continue do
                                     end if   
-                                    ' Move active selected control focus within group of controls
-                                    KeyboardCycleActiveControls(pDoc, uMsg.wParam)
-                                    continue do
-                                 end if   
+                                 end if
                            END SELECT
                         END IF
                      END IF

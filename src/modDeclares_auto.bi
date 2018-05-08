@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+declare function GenerateCode( byval pDoc as clsDocument ptr ) as long
+declare function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
+declare function GetControlType( byval wszControlName as CWSTR ) as long
+=======
+>>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 declare function GetControlName( byval nControlType as long ) as CWSTR
 declare function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
 declare function RemoveComments( byval st as string) as string
@@ -11,6 +17,7 @@ declare function GetControlRECT( byval pCtrl as clsControl ptr ) as RECT
 declare function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
 declare function GetControlProperty( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as CWSTR
 declare function SetControlProperty( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR, byval wszPropValue as CWSTR) as long
+declare function SetControlEvent( byval pCtrl as clsControl ptr, byval wszEventName as CWSTR, byval bIsSelected as boolean ) as long
 declare function GetActiveToolboxControlName() as CWSTR
 declare function GetActiveToolboxControlClassName() as CWSTR
 declare function GetActiveToolboxControlType() as long

@@ -317,7 +317,7 @@ Function frmMain_ChangeTopMenuStates() As Long
          dim as hwnd hEdit = pDoc->hWndActiveScintilla
 
          ' Enable/Disable depending on if Visual Designer or Code Editor
-         if pDoc->IsDesigner THEN
+         if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
             ' Disable specific code editing menu options
             ' all of Edit/Search/View menu up to ZoomOut
             ' except for cut/copy/paste and FunctionList
@@ -404,7 +404,6 @@ Function frmMain_ChangeTopMenuStates() As Long
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
    End If
-
 
    Function = 0
 End Function

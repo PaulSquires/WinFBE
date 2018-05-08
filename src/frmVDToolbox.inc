@@ -80,7 +80,7 @@ end function
 
 
 ' ========================================================================================
-' Display the properties for the current active control/form.
+' Display the properties/events for the current active control/form.
 ' ========================================================================================
 Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    if pDoc = 0 then exit function
@@ -89,13 +89,21 @@ Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    if pCtrl = 0 THEN exit function
    
    dim as long idx
-   dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
    
    ' clear the listbox
+   dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
    ListBox_ResetContent(hList)
-   
    ' Iterate through all properties and add them to the listbox
    for i as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
+      idx = Listbox_AddString(hList, @"")
+      ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
+   NEXT
+
+   ' clear the listbox
+   hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS)
+   ListBox_ResetContent(hList)
+   ' Iterate through all events and add them to the listbox
+   for i as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
       idx = Listbox_AddString(hList, @"")
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
    NEXT
@@ -125,10 +133,12 @@ Function frmVDToolbox_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHD
                ' Show the selected page controls
                if iPage = 0 then ShowWindow( GetDlgItem(HWND, IDC_FRMVDTOOLBOX_LSTTOOLBOX), SW_SHOW)
                if iPage = 1 then ShowWindow( GetDlgItem(HWND, IDC_FRMVDTOOLBOX_LSTPROPERTIES), SW_SHOW)
+               if iPage = 2 then ShowWindow( GetDlgItem(HWND, IDC_FRMVDTOOLBOX_LSTEVENTS), SW_SHOW)
             CASE TCN_SELCHANGING
                ' Hide the current page
                if iPage = 0 then ShowWindow( GetDlgItem(HWND, IDC_FRMVDTOOLBOX_LSTTOOLBOX), SW_HIDE)
                if iPage = 1 then ShowWindow( GetDlgItem(HWND, IDC_FRMVDTOOLBOX_LSTPROPERTIES), SW_HIDE)
+               if iPage = 2 then ShowWindow( GetDlgItem(HWND, IDC_FRMVDTOOLBOX_LSTEVENTS), SW_HIDE)
          END SELECT
 
    END SELECT
@@ -150,11 +160,13 @@ Function frmVDToolbox_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim As HWnd hList1 = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LSTTOOLBOX )
    Dim As HWnd hList2 = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LSTPROPERTIES )
+   Dim As HWnd hList3 = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LSTEVENTS )
    Dim As HWnd hTabCtl = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_TABCONTROL )
    
    pWindow->SetWindowPos( hTabCtl, 0, 0, 0, rc.Right-rc.Left, 24, SWP_SHOWWINDOW Or SWP_NOZORDER )
    pWindow->SetWindowPos( hList1, 0, 0, 24, rc.Right-rc.Left, rc.Bottom-rc.top-24, SWP_NOZORDER )
    pWindow->SetWindowPos( hList2, 0, 0, 24, rc.Right-rc.Left, rc.Bottom-rc.top-24, SWP_NOZORDER )
+   pWindow->SetWindowPos( hList3, 0, 0, 24, rc.Right-rc.Left, rc.Bottom-rc.top-24, SWP_NOZORDER )
 
    Function = 0
 End Function
@@ -295,6 +307,52 @@ Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWI
                end if
             END IF
          end if
+         
+         if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTEVENTS then
+            dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+            dim pCtrl as clsControl ptr 
+            if pDoc then
+               pCtrl = pDoc->Controls.GetActiveControl
+               if pCtrl THEN
+                  rc  = lpdis->rcItem
+                  rc2 = lpdis->rcItem: rc2.Left = pWindow->ScaleX(20)
+                  
+                  ' CLEAR BACKGROUND
+                  If (lpdis->itemState And ODS_SELECTED) Then     
+                     SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
+                     SetTextColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT))
+                     hBrush = GetSysColorBrush(COLOR_HIGHLIGHT) 
+                  else
+                     SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
+                     SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
+                     hBrush = GetSysColorBrush(COLOR_WINDOW) 
+                  end if
+
+                  ' Draw the tick/untick image
+                  ' The line height is 20 so center the 16x16 icon vertically and horizontally
+                  FillRect(lpdis->hDC, @rc, GetSysColorBrush(COLOR_WINDOW))  
+                  DrawIconEx( lpdis->hDC, _
+                              rc.Left + pWindow->ScaleX(2), _
+                              rc.Top + pWindow->ScaleY(2), _
+                              iIf( pCtrl->Events(lpdis->itemData).bIsSelected, ghIconTick, ghIconNoTick), _
+                              pWindow->ScaleX(16), pWindow->ScaleY(16), 0, 0, DI_NORMAL) 
+                  
+                  ' Draw the event name 
+                  SelectObject(lpdis->hDC, hBrush)      
+                  FillRect(lpdis->hDC, @rc2, hBrush)  
+                  DrawText( lpdis->hDC, _
+                            pCtrl->Events(lpdis->itemData).wszEventName, _
+                            -1, Cast(lpRect, @rc2), _
+                            DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
+
+                  ' Draw the border edges
+                  SetBkMode(lpdis->hDC, TRANSPARENT)   
+                  rc = lpdis->rcItem
+                  DrawEdge( lpdis->hDC, @rc, EDGE_SUNKEN, BF_BOTTOMRIGHT)
+               end if
+            END IF
+
+         end if
 
          Function = True : Exit Function
    
@@ -363,25 +421,57 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
          END IF
          
       case WM_LBUTTONUP
-         if gPropDivTracking = true THEN
-            gPropDivTracking = false
-            ReleaseCapture
-            AfxRedrawWindow(hwnd)
-         end if
-         
-      case WM_MOUSEMOVE
-         ' Hit test to see if the mouse is over the vertical splitter bar
-         dim as long hPos = loword(lParam)
-         dim as RECT rc: GetClientRect(hwnd, @rc)
-         if (hPos >= gPropDivPos - 2) andalso (hPos <= gPropDivPos + 2) THEN
-            SetCursor( LoadCursor(0, ByVal IDC_SIZEWE) )
+         if hwnd = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES) THEN
             if gPropDivTracking = true THEN
-               gPropDivPos = loword(lParam)
+               gPropDivTracking = false
+               ReleaseCapture
                AfxRedrawWindow(hwnd)
             end if
-         else
-            SetCursor( LoadCursor(0, ByVal IDC_ARROW) )
-         END IF
+         end if
+         
+         if hwnd = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS) THEN
+            ' Handle if the Events checkbox is clicked
+            dim as long nCurSel = ListBox_GetCurSel(hwnd)
+            if nCurSel = -1 then exit function
+            dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+            dim pCtrl as clsControl ptr 
+            if pDoc then
+               pCtrl = pDoc->Controls.GetActiveControl
+               if pCtrl THEN
+                  Dim pWindow As CWindow Ptr = AfxCWindowPtr(GetParent(HWnd))
+                  if pWindow = 0 THEN exit function
+                  dim as RECT rc: SendMessage(hwnd, LB_GETITEMRECT, nCurSel, cast(LPARAM, @rc))
+                  ' The checkbox is the first 20x20 area (16x16 icon)
+                  rc.Left   = rc.Left + pWindow->ScaleX(2)
+                  rc.Top    = rc.Top  + pWindow->ScaleY(2)
+                  rc.Right  = rc.Left + pWindow->ScaleX(16)
+                  rc.Bottom = rc.Top  + pWindow->ScaleY(16)
+                  dim as POINT pt = (loword(lParam), Hiword(lParam))
+                  if PtInRect(@rc, pt) then
+                     pCtrl->Events(nCurSel).bIsSelected = not pCtrl->Events(nCurSel).bIsSelected
+                     InvalidateRect(hwnd, @rc, true): UpdateWindow(hwnd)
+                     pDoc->bRegenerateCode = true
+                  END IF
+               end if
+            end if   
+         end if
+         
+         
+      case WM_MOUSEMOVE
+         if hwnd = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES) THEN
+            ' Hit test to see if the mouse is over the vertical splitter bar
+            dim as long hPos = loword(lParam)
+            dim as RECT rc: GetClientRect(hwnd, @rc)
+            if (hPos >= gPropDivPos - 2) andalso (hPos <= gPropDivPos + 2) THEN
+               SetCursor( LoadCursor(0, ByVal IDC_SIZEWE) )
+               if gPropDivTracking = true THEN
+                  gPropDivPos = loword(lParam)
+                  AfxRedrawWindow(hwnd)
+               end if
+            else
+               SetCursor( LoadCursor(0, ByVal IDC_ARROW) )
+            END IF
+         end if
          
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
@@ -472,6 +562,7 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
         
    TabCtrl_AddTab(hTabCtl, 0, L(351,"Tools"))
    TabCtrl_AddTab(hTabCtl, 0, L(350,"Properties"))
+   TabCtrl_AddTab(hTabCtl, 0, L(353,"Events"))
    
    Dim As HWnd hList1 = _ 
         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTTOOLBOX, "", 0, 0, 0, 0, _
@@ -484,6 +575,12 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTPROPERTIES, Cast(DWORD_PTR, @pWindow))
+
+   Dim As HWnd hList3 = _ 
+        pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTEVENTS, "", 0, 0, 0, 0, _
+        WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
+        LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(WNDPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTEVENTS, Cast(DWORD_PTR, @pWindow))
    
    ' Set the default position for the vertical sizing bar
    gPropDivPos = pWindow->ScaleY(0.3 * 300)
