@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 declare function GenerateCode( byval pDoc as clsDocument ptr ) as long
 declare function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
 declare function GetControlType( byval wszControlName as CWSTR ) as long
-=======
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 declare function GetControlName( byval nControlType as long ) as CWSTR
 declare function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
 declare function RemoveComments( byval st as string) as string

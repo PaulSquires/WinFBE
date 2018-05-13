@@ -104,7 +104,7 @@ end function
 ''
 ''
 function AttemptAutoInsert() as Long
-   If gConfig.AutoIndentation = false Then exit function
+   If gConfig.AutoComplete = false Then exit function
    
    Dim as HWND hEdit
    Dim as long nLine, curPos, LineLen, nFoldLevel, TabSize, nSpaces, IndentSize, i

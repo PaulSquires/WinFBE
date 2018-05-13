@@ -399,7 +399,6 @@ function GetControlName( byval nControlType as long ) as CWSTR
    return ""
 end function
 
-<<<<<<< HEAD
 ' ========================================================================================
 ' Get the control type number based on the name of the control
 ' ========================================================================================
@@ -450,8 +449,6 @@ function GetWinformsXClassName( byval nControlType as long ) as CWSTR
 
    return wszText
 end function
-=======
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 
 ' ========================================================================================
 ' Generate a default name for the new form

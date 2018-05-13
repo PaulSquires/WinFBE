@@ -619,12 +619,7 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
-<<<<<<< HEAD
    frmMain_UpdateLineCol(hwnd)
-   
-=======
-
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
    Function = 0
 End Function
 
@@ -809,17 +804,7 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       If pDocIn = 0 Then   ' Create a new pDoc 
          gFileLoading = true  ' allows parsing of newly loading file
          pDoc = New clsDocument
-<<<<<<< HEAD
          pDoc->IsDesigner = bIsDesigner 
-=======
-         if bIsDesigner THEN
-            If bIsNewFile Then
-               pDoc->CreateDesignerWindow(HWnd, True)  ' Create the new visual designer window
-            Else
-               pDoc->CreateDesignerWindow(HWnd, false, pwszName)
-            End If   
-         end if
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
          ' All pDoc's will have an associated Scintilla window for code.
          If bIsNewFile Then
             pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
@@ -1816,27 +1801,20 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
          END SELECT
          
       Case TCN_SELCHANGE
-<<<<<<< HEAD
          dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
-=======
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
          select case id 
             case IDC_FRMMAIN_TOPTABCONTROL 
                ' Show the new tab
                nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
                gTTabCtl.DisplayScintilla(nCurSel, True)
                frmMain_PositionWindows(HWnd)
-<<<<<<< HEAD
-=======
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
                If pDoc Then
                   Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
                                        pDoc->hNodeExplorer )
                end if
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows(HWnd)
-<<<<<<< HEAD
                if pDoc then
                   if IsDesignerView(pDoc) = false then 
                      dim as hwnd hEdit = pDoc->hWindow(0)
@@ -1847,8 +1825,6 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                      SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
                   END IF
                end if
-=======
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
          END SELECT
 
          

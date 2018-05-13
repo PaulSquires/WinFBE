@@ -696,11 +696,8 @@ Type clsDocument
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
-<<<<<<< HEAD
       declare function GenerateDesignerCode() as long
       declare function ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as CWSTR ) as CWSTR 
-=======
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
       declare function CreateDesignerString() as CWSTR 
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
       Declare Function ApplyProperties() As Long

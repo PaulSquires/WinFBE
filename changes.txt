@@ -1,8 +1,7 @@
-<<<<<<< HEAD
-Version 1.6.0
-=======
+Version 1.6.1 
+- Fixed: Autoinsert was testing for AutoIndent config flag rather than AutoComplete flag.
+
 Version 1.6.0 (April 19, 2018)
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 - Added: italian.lang lanuage file thanks to Massimiliano Argenti from the PlanetSquires forum.
 - Added: czech.lang lanuage file thanks to Norcom (Robert) from the PlanetSquires forum.
 - Fixed: QuickRun in top menu now correctly disabled when a Project is active.

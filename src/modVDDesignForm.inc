@@ -621,12 +621,8 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       
       ' Indicate that the file is now dirty and will need to be saved
       pDoc->UserModified = true
-<<<<<<< HEAD
       pDoc->bRegenerateCode = true
 
-=======
-      
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
       ' Ensure the grab handles are redrawn
       AfxRedrawWindow(hwnd)   ' HWND because could be form or frame
       frmMain_UpdateLineCol(HWND_FRMMAIN)
@@ -704,10 +700,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       
       ' Indicate that the file is now dirty and will need to be saved
       pDoc->UserModified = true
-<<<<<<< HEAD
       pDoc->bRegenerateCode = true
-=======
->>>>>>> 8def4e4a3566d8133cff238b6dd0c2439fc5543e
 
       ' Ensure the grab handles are redrawn
       AfxRedrawWindow(pDoc->hWndForm)
