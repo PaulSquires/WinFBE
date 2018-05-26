@@ -402,6 +402,7 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    else 
       dim pData as DB2_DATA ptr
       pData = gdb2.dbFindFunction( wszFunctionName ) 
+      if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName ) 
       if pData then
          wszText = pData->fileName
          nLineNumber = pData->nLineNum

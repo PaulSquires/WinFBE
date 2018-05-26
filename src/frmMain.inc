@@ -1700,7 +1700,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
      
 
       Case IDM_ABOUT
-         MessageBox( HWnd, APPNAME & vbcrlf & "Version " & APPVERSION & _
+         MessageBox( HWnd, APPNAME & vbcrlf & _
+                       "Version " & APPVERSION & APPBITS & _
                        vbcrlf & vbcrlf & _
                        "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _

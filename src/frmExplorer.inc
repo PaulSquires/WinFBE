@@ -115,11 +115,13 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
       do 
          pData = gdb2.dbGetNext
          if pData = 0 THEN exit do
-         if pData->id <> DB2_FUNCTION THEN continue do
-         if sFilename = ucase(pData->fileName) THEN
-            hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0 )
-            Treeview_RemoveCheckBox(hTree, hNode)
-         END IF
+         select case pData->id 
+            case DB2_FUNCTION, DB2_SUB
+               if sFilename = ucase(pData->fileName) THEN
+                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0 )
+                  Treeview_RemoveCheckBox(hTree, hNode)
+               END IF
+         END SELECT
       loop      
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
