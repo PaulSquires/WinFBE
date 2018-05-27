@@ -1,3 +1,6 @@
+Version 1.6.2 (May 27, 2018)
+- Fixed: Conflicting issue with AutoComplete and AutoIndent config flags.
+
 Version 1.6.1 (May 26, 2018)
 - Added: Help/About now shows if running 32 or 64 bit version of WinFBE.
 - Fixed: Explorer treeview and popup Function List were not displaying SUB routines.

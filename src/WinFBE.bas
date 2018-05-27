@@ -37,7 +37,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.6.1") 
+#Define APPVERSION    WStr("1.6.2") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
