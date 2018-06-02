@@ -142,53 +142,10 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
       SetRect(@rc, 10, 10, 510, 310)
       pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
       ApplyControlProperties(pCtrl)
-   
-'   ' TODO: Remove these demo buttons from visual designer
-       
-'      SetRect(@rc, 50, 50, 125, 78)
-'      pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
-'      SetControlProperty(pCtrl, "TEXT", "OK")
-'      ApplyControlProperties(pCtrl)
-       
-'      SetRect(@rc, 150, 50, 225, 78)
-'      pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
-'      SetControlProperty(pCtrl, "TEXT", "Cancel")
-'      ApplyControlProperties(pCtrl)
-
-'      SetRect(@rc, 50, 100, 200, 128)
-'      pCtrl = CreateToolboxControl( @this, CTRL_LABEL, rc )
-'      SetControlProperty(pCtrl, "TEXT", "This is a label")
-'      ApplyControlProperties(pCtrl)
-
       this.Controls.SelectControl(pCtrl->hWindow)
       this.Controls.SetActiveControl(pCtrl->hWindow)
       DisplayPropertyList(@this)
    end if
-   SetRect(@rc, pFrame->ScaleX(10), pFrame->ScaleY(10), pFrame->ScaleX(510), pFrame->ScaleY(310))
-   pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
-   ApplyControlProperties(pCtrl)
-   
-
-' TODO: Remove these demo buttons from visual designer
-   
-   SetRect(@rc, pFrame->ScaleX(50), pFrame->ScaleY(50), pFrame->ScaleX(125), pFrame->ScaleY(78))
-   pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
-   SetControlProperty(pCtrl, "TEXT", "OK")
-   ApplyControlProperties(pCtrl)
-   
-   SetRect(@rc, pFrame->ScaleX(150), pFrame->ScaleY(50), pFrame->ScaleX(225), pFrame->ScaleY(78))
-   pCtrl = CreateToolboxControl( @this, CTRL_BUTTON, rc )
-   SetControlProperty(pCtrl, "TEXT", "Cancel")
-   ApplyControlProperties(pCtrl)
-
-   SetRect(@rc, pFrame->ScaleX(50), pFrame->ScaleY(100), pFrame->ScaleX(200), pFrame->ScaleY(128))
-   pCtrl = CreateToolboxControl( @this, CTRL_LABEL, rc )
-   SetControlProperty(pCtrl, "TEXT", "This is a label")
-   ApplyControlProperties(pCtrl)
-
-   this.Controls.SelectControl(pCtrl->hWindow)
-   this.Controls.SetActiveControl(pCtrl->hWindow)
-   DisplayPropertyList(@this)
    
    ' Need to create 
    ' Display the ToolBox/PropertyList

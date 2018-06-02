@@ -32,12 +32,13 @@
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxMenu.inc" 
 #Include Once "Afx\AfxCom.inc" 
+#INCLUDE ONCE "Afx\CFindFile.inc"
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.6.2") 
+#Define APPVERSION    WStr("1.6.3") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -75,6 +76,7 @@ Using Afx
 #Include Once "modMRU.inc"
 #Include Once "modCodetips.inc"
 #Include Once "modGenerateCode.inc"
+#Include Once "modPreParse.inc"
 
 #Include Once "frmHotImgBtn.inc"
 #Include Once "frmHotTxtBtn.inc"
@@ -146,8 +148,34 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    ' Load the HTML help library for displaying FreeBASIC help *.chm file
    gpHelpLib = DyLibLoad( "hhctrl.ocx" )
    
-   ' Load the Codetips file
-   gConfig.LoadCodetips( AfxGetExePathName & "Settings\codetips.ini" )
+   ' Load preparsed codetip files for the compiler's \inc folders.
+   if gConfig.Codetips then
+      dim as string sPreparseTimestamps = AfxGetExePathName & "Settings\Preparse_Timestamps.ini"
+      dim as string sPreparseDatabase = AfxGetExePathName & "Settings\Preparse_Database.ini"
+      dim as CWSTR wszIncludePath 
+      #IfDef __FB_64BIT__
+         wszIncludePath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+         sPreparseTimestamps = AfxGetExePathName & "Settings\Preparse_Timestamps64.ini"
+         sPreparseDatabase = AfxGetExePathName & "Settings\Preparse_Database64.ini"
+      #Else
+         wszIncludePath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
+         sPreparseTimestamps = AfxGetExePathName & "Settings\Preparse_Timestamps32.ini"
+         sPreparseDatabase = AfxGetExePathName & "Settings\Preparse_Database32.ini"
+      #EndIf
+      wszIncludePath = AfxStrPathname("PATH", wszIncludePath) & "inc\"
+      gPreparsing = true
+      LoadPreparseTimestamps(sPreparseTimestamps)
+      LoadPreparseDatabase(sPreparseDatabase)
+      PreparseFolder(wszIncludePath, "")
+      gPreparsing = false
+      if gPreparsingChanges then
+         SavePreparseTimestamps(sPreparseTimestamps)
+         SavePreparseDatabase(sPreparseDatabase)
+      end if
+      ' Load the Codetips file
+      gConfig.LoadCodetips( AfxGetExePathName & "Settings\codetips.ini" )
+   end if
+   
 
    ' Initialize the controls in the ToolBox
    gConfig.InitializeToolBox

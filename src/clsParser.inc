@@ -28,6 +28,10 @@ end function
 
 
 function clsParser.IsIncludeFile(byval sText as string ) as Boolean
+   ' If user does not want CodeTips then do not parse.
+   if gConfig.Codetips = false then return false
+   if gPreparsing then return false
+   
    ' Is this an Include file that will need to be parsed? If yes, then
    ' get the filename and do a recursive call to ParseDocument.
    dim as long nPos = instr(ucase(sText), "#INCLUDE ")
@@ -97,46 +101,48 @@ function clsParser.InspectLine() as boolean
    dim as string sTemp
    
    ' CHECK FOR THE START OF A TYPE STRUCTURE.
-   if len(st_ucase) > 5 THEN 
-      if left(st_ucase, 5) = "TYPE " THEN
-         ' If " AS " exists then this is not a TYPE structure but rather an ALIAS 
-         ' for another TYPE.
-         i = instr(st_ucase, " AS ") 
-         if i THEN 
-            this.typeName  = trim(mid(st, 6, (i-6)))
-            this.typeAlias = trim(AfxStrRemainI(st, " AS "))
-            gdb2.dbAdd(this, DB2_TYPE)
-            this.typeName  = "": this.typeAlias = ""
-            this.funcLineNum = this.lineNum
-            return true
-         else
-            ' We have encountered the start of a TYPE structure. Save the TYPE name.
-            ' Syntax:   TYPE typename [Extends base_typename] [Field = alignment]
-            action = ACTION_PARSETYPE
-            this.typeName  = AfxStrParse(st, 2, " ")
-            this.typeAlias = this.typeName
-            ' Handle case where this Type extends from another Type
-            i = instr(st_ucase, " EXTENDS") 
+   if gPreparsing = false then
+      if len(st_ucase) > 5 THEN 
+         if left(st_ucase, 5) = "TYPE " andalso gConfig.CodeTips = true THEN
+            ' If " AS " exists then this is not a TYPE structure but rather an ALIAS 
+            ' for another TYPE.
+            i = instr(st_ucase, " AS ") 
             if i THEN 
-               sTemp = AfxStrParse(st, 4, " ")
-               if ucase(sTemp) <> "OBJECT" then
-                  this.TypeExtends = sTemp
-               end if   
-            end if
-            this.bInTypePublic = true    ' assume that all elements in TYPE are public
-            this.IsEnum = false
-            this.funcLineNum = this.lineNum
-            return true
-         END IF
+               this.typeName  = trim(mid(st, 6, (i-6)))
+               this.typeAlias = trim(AfxStrRemainI(st, " AS "))
+               gdb2.dbAdd(this, DB2_TYPE)
+               this.typeName  = "": this.typeAlias = ""
+               this.funcLineNum = this.lineNum
+               return true
+            else
+               ' We have encountered the start of a TYPE structure. Save the TYPE name.
+               ' Syntax:   TYPE typename [Extends base_typename] [Field = alignment]
+               action = ACTION_PARSETYPE
+               this.typeName  = AfxStrParse(st, 2, " ")
+               this.typeAlias = this.typeName
+               ' Handle case where this Type extends from another Type
+               i = instr(st_ucase, " EXTENDS") 
+               if i THEN 
+                  sTemp = AfxStrParse(st, 4, " ")
+                  if ucase(sTemp) <> "OBJECT" then
+                     this.TypeExtends = sTemp
+                  end if   
+               end if
+               this.bInTypePublic = true    ' assume that all elements in TYPE are public
+               this.IsEnum = false
+               this.funcLineNum = this.lineNum
+               return true
+            END IF
 
-      ' CHECK FOR THE END OF A TYPE STRUCTURE
-      elseif left(st_ucase, 8) = "END TYPE" THEN
-         gdb2.dbAdd(this, DB2_TYPE)
-         this.action = ACTION_NONE
-         this.typeName  = ""
-         this.typeAlias = ""
-         return true
-      end if   
+         ' CHECK FOR THE END OF A TYPE STRUCTURE
+         elseif left(st_ucase, 8) = "END TYPE" andalso gConfig.CodeTips = true THEN
+            gdb2.dbAdd(this, DB2_TYPE)
+            this.action = ACTION_NONE
+            this.typeName  = ""
+            this.typeAlias = ""
+            return true
+         end if   
+      end if
    end if
    
    ' Check for any SUB/FUNCTION blocks of code. Bypass doing this test
@@ -190,7 +196,6 @@ function clsParser.InspectLine() as boolean
          (left(st_ucase, 12) = "END FUNCTION") orelse _
          (left(st_ucase, 12) = "END PROPERTY") THEN 
 
-
          ' Need to parse any function parameters to ensure that they get added
          ' as variables in the database. 
          ' Isolate the parameter list from the codetip
@@ -237,6 +242,8 @@ end function
 
 
 function clsParser.parseVariableDefinitions() as boolean
+   if gConfig.CodeTips = false then return false
+   if gPreparsing then return false
    if len(this.st) < 6 THEN return false  ' minimum line length needed "AS " (see below)
    if this.action = ACTION_PARSEENUM THEN return false
    
@@ -341,6 +348,9 @@ end function
 
 
 function clsParser.parseTYPE() as boolean
+   if gConfig.CodeTips = false then return false
+   if gPreparsing then return false
+
    ' We are inside of a TYPE structure. Need to examine all lines that are marked
    ' as public in order to construct the "|" delimited list of TYPE elements (variables and functions).
    if this.action <> ACTION_PARSETYPE THEN return false
@@ -387,6 +397,8 @@ end function
 
 
 function clsParser.parseENUM() as boolean
+   if gConfig.CodeTips = false then return false
+   if gPreparsing then return false
    ' We are inside of an ENUM structure. 
    
    ' CHECK FOR THE START OF AN ENUM STRUCTURE.

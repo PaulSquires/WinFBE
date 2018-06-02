@@ -168,7 +168,6 @@ function clsDB2.dbAdd( byref parser as clsParser, _
             .ElementName  = parser.typeName
             .ElementValue = parser.typeName
             .IsWinApi     = parser.IsWinApi
-            .Description  = parser.Description
             if .ElementName = "" then exit function
             
          case DB2_TYPE    ' this handles ENUM also
@@ -180,20 +179,17 @@ function clsDB2.dbAdd( byref parser as clsParser, _
             .IsWinApi     = parser.IsWinApi
             .IsEnum       = parser.IsEnum
             .TypeExtends  = parser.TypeExtends
-            .Description  = ""
             if .ElementName = "" then exit function
          
          case DB2_TODO
             .ElementName  = ""
             .ElementValue = parser.todoText
-            .Description  = ""
          
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
             .nLineNum     = parser.funcLineNum
             .ElementName  = parser.funcName
             .ElementValue = parser.funcParams   ' Calltip
             .IsWinApi     = parser.IsWinApi
-            .Description  = ""
             if .ElementName = "" then exit function
          
          case DB2_VARIABLE
@@ -208,13 +204,11 @@ function clsDB2.dbAdd( byref parser as clsParser, _
             .ElementValue = parser.varType 
             .IsPrivate = iif(parser.bInTypePublic, false, true)
             .IsWinApi     = parser.IsWinApi
-            .Description  = ""
             if .ElementName = "" then exit function
 
          case DB2_INCLUDEFILE
             .ElementName  = ""
             .ElementValue = parser.varName
-            .Description  = ""
       END SELECT
 
    end with
@@ -495,6 +489,22 @@ function clsDB2.dbDebug() as long
       print #f, "   lineNum: "; pData->nLineNum
       print #f, ""
    loop
+
+   ' PRINT ALL PREPARSE FUNCTION DEFINITIONS
+   print #f, "PREPARSE FUNCTIONS"
+   this.dbRewind()
+   do 
+      pData = this.dbGetNext
+      if pData = 0 THEN exit do
+      if pData->projectIndex = -2 THEN continue do
+      if pData->deleted = true THEN continue do
+      if pData->id <> DB2_FUNCTION then continue do
+      print #f, "   fileName: "; pData->fileName
+      print #f, "   ElementName: "; pData->ElementName
+      print #f, "   ElementValue: "; pData->ElementValue
+      print #f, ""
+   loop
+   print #f, ""
 
    close #f
    function = 0

@@ -268,43 +268,43 @@ Function ParseDocument( byval idx as long, _     ' project index
    erase gIncludeFiles
    ParseOneDocument(idx, pDoc, wszFilename, true)
 
-   ' NoParseIncludes is set to True during normal editing of a file (rather than
-   ' during file loading or saving when we do want to parse includes). Disabling 
-   ' parsing during an edit prevents parsing when an autocomplete is open and the
-   ' user is typing. Parsing includes during every keypress would be very slow.
-   if bNoParseIncludes then exit function
-   if gFileLoading = false THEN exit function   ' only parse includes during initial load
-      
-   dim as long i = lbound(gIncludeFiles)
-   do until i > ubound(gIncludeFiles)
-      ' ubound will continue to change as more include files are identified.
-      if bWindowsIncludes = false then
-         if lcase(AfxStrPathName("NAMEX", gIncludeFiles(i))) = "windows.bi" then
-            ' Make sure that we don't add the windows.bi to the list.
-            bWindowsIncludes = true
-            i = i + 1
-            continue do
-         END IF
-      end if
-      ' TODO: Parsing shobjidl.bi causes a GPF for some reason.
-      if lcase(AfxStrPathName("NAMEX", gIncludeFiles(i))) <> "shobjidl.bi" then
-         ' If this is an initial loading then no need to reparse the same
-         ' file multiple times.
-         if gdb2.dbFilenameExists(gIncludeFiles(i)) = 0 THEN          
-            ParseOneDocument(idx, 0, gIncludeFiles(i), true)
-         end if
-      end if
-      i = i + 1
-   loop
-                                
-   ' If the "windows.bi" file was included then parse the main windows files
-   if gApp.IsWindowIncludes = false then     ' flag to only parse Win includes once
-      if bWindowsIncludes then
-         ' Load the WinAPI Codetips file
-         gConfig.LoadCodetipsWinAPI( AfxGetExePathName & "Settings\codetips_winapi.ini" )
-         gApp.IsWindowIncludes = true
-      end if
-   end if
+'   ' NoParseIncludes is set to True during normal editing of a file (rather than
+'   ' during file loading or saving when we do want to parse includes). Disabling 
+'   ' parsing during an edit prevents parsing when an autocomplete is open and the
+'   ' user is typing. Parsing includes during every keypress would be very slow.
+'   if bNoParseIncludes then exit function
+'   if gFileLoading = false THEN exit function   ' only parse includes during initial load
+       
+'   dim as long i = lbound(gIncludeFiles)
+'   do until i > ubound(gIncludeFiles)
+'      ' ubound will continue to change as more include files are identified.
+'      if bWindowsIncludes = false then
+'         if lcase(AfxStrPathName("NAMEX", gIncludeFiles(i))) = "windows.bi" then
+'            ' Make sure that we don't add the windows.bi to the list.
+'            bWindowsIncludes = true
+'            i = i + 1
+'            continue do
+'         END IF
+'      end if
+'      ' TODO: Parsing shobjidl.bi causes a GPF for some reason.
+'      if lcase(AfxStrPathName("NAMEX", gIncludeFiles(i))) <> "shobjidl.bi" then
+'         ' If this is an initial loading then no need to reparse the same
+'         ' file multiple times.
+'         if gdb2.dbFilenameExists(gIncludeFiles(i)) = 0 THEN          
+'            ParseOneDocument(idx, 0, gIncludeFiles(i), true)
+'         end if
+'      end if
+'      i = i + 1
+'   loop
+                                 
+'   ' If the "windows.bi" file was included then parse the main windows files
+'   if gApp.IsWindowIncludes = false then     ' flag to only parse Win includes once
+'      if bWindowsIncludes then
+'         ' Load the WinAPI Codetips file
+'         gConfig.LoadCodetipsWinAPI( AfxGetExePathName & "Settings\codetips_winapi.ini" )
+'         gApp.IsWindowIncludes = true
+'      end if
+'   end if
    
    function = 0
    

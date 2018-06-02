@@ -1695,7 +1695,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
       Case IDM_HELP
  ' TODO: Remove debug call in IDM_HELP
-' gdb2.dbDebug
+ 'gdb2.dbDebug
          ShowContextHelp() 
      
 

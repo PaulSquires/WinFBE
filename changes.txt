@@ -1,3 +1,10 @@
+Version 1.6.3 (June 2, 2018)
+- Added: WinFBE_Suite package as an attached binary release. Includes all-in-one package to start coding immediately. Editor, compiler, help files, include files.
+- Added: Automatically create and use preparsed sub/function definitions from the compiler's \inc folders. The database is stored in the "settings" folder in files "preparse_timestamps.ini" and "preparse_database.ini".
+- Added: French language localization file. Thanks to Marc Pons.
+- Changed: If option to display Codetips is OFF, then files are not parsed for anything other than Subs/Functions.
+- Fixed: Regression adding incorrect leading spaces for IF/THEN autoinsert blocks.
+
 Version 1.6.2 (May 27, 2018)
 - Fixed: Conflicting issue with AutoComplete and AutoIndent config flags.
 

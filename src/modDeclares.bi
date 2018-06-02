@@ -428,6 +428,8 @@ dim shared as hwnd HWND_FRMMAIN_COMBOBUILDS
 
 Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
+dim shared as BOOLEAN gPreparsing      ' T/F we are preparsing one or more \inc files (idx = -2).
+dim shared as BOOLEAN gPreparsingChanges  ' T/F preparsing had changes. Flag to save new databases.
 dim shared as BOOLEAN gFileLoading     ' T/F only parse Includes during initial file load.
 dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
 dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
@@ -486,13 +488,18 @@ type DB2_DATA
    nLineNum     as long            ' Location in the file where found
    ElementName  as string          ' Function name / Variable Name / Type Name
    ElementValue as string          ' Function Calltip / TYPE associated with ElementName variable
-   Description  as string          ' Description of TYPE/FUNCTION/SUB from '#DESCRIPTION: tag.
    IsPrivate    as Boolean         ' Element is private in a TYPE
    IsTHIS       as Boolean         ' Dynamically set in DereferenceLine so caller can show/hide private elements
    IsWinApi     as Boolean         ' If data item is WinApi related
    IsEnum       as Boolean         ' If TYPE is treated as an ENUM
    TypeExtends  as String          ' The TYPE is extended from this TYPE
 END TYPE
+
+type PreparseTimestamps
+   wszFilename as CWSTR
+   tFiletime AS LONGLONG
+END TYPE
+dim shared gPreparseTimestamps(any) as PreparseTimestamps
 
 
 ''

@@ -147,7 +147,7 @@ function AttemptAutoInsert() as Long
    Next
    strPrevLine = Trim(Ucase(strPrevLine), Any Chr(32, 9))
    
-   If gConfig.AutoIndentation = false Then 
+   If gConfig.AutoIndentation = false Then
       nSpaces = 0: IndentSize = 0: TabSize = 0
    END IF
 
@@ -160,9 +160,9 @@ function AttemptAutoInsert() as Long
       ' once we have wrapped it in an END IF. It will include any chunk of
       ' text that was after the THEN in a single line IF/THEN
       SciExec(hEdit, SCI_LINEDELETE, 0, 0)
-      strFill = Space(nSpaces + IndentSize) & ltrim(strCurline, any chr(32,9)) 
+      strFill = Space(nSpaces + IndentSize) & ltrim(strCurline, any chr(32,9)) & vbcrlf
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_IF, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END IF") & vbcrlf
+         strFill = strFill & SPACE(nSpaces) & ConvertCase("END IF") & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize
