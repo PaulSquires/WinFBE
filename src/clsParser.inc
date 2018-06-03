@@ -26,44 +26,6 @@ function clsParser.parseToDoItem( byval sText as string ) as boolean
    return true
 end function
 
-
-function clsParser.IsIncludeFile(byval sText as string ) as Boolean
-   ' If user does not want CodeTips then do not parse.
-   if gConfig.Codetips = false then return false
-   if gPreparsing then return false
-   
-   ' Is this an Include file that will need to be parsed? If yes, then
-   ' get the filename and do a recursive call to ParseDocument.
-   dim as long nPos = instr(ucase(sText), "#INCLUDE ")
-   if nPos = 0 THEN return false
-
-   ' Everything leading up to the found "'" must be a space. Use pointer
-   ' indexing for speed to bypass expensive ltrim, etc.
-   ' convert to zero base and test up to char immediately before "'"
-   for i as Long = 0 to nPos - 2    
-      if sText[i] <> 32 THEN return false
-   NEXT
-
-   ' #INCLUDE "filename" or #INCLUDE ONCE "filename"
-   dim wszIncludeFilename as CWSTR
-   wszIncludeFilename = GetIncludeFilename(this.fileName, sText)
-
-   if AfxFileExists(wszIncludeFilename) then
-      ' Make sure that the file has not already been parsed
-      if gdb2.dbFilenameExists(wszIncludeFilename) = false THEN
-         ' Save the filename so it can be parsed after the main
-         ' document has been parsed.
-         dim as long lb = lbound(gIncludeFiles)
-         dim as long ub = ubound(gIncludeFiles)
-         redim preserve gIncludeFiles(ub + 1)
-         gIncludeFiles(ub + 1) = AfxStrReplace(wszIncludeFilename, "/", "\")
-         return true
-      end if
-   END IF
-   return false
-end function
-       
-
 function clsParser.IsMultilineComment(byval sLine as String) as boolean
    ' If we are already in a comment then test to see if we have now reached the end of it.
    if action = ACTION_PARSECOMMENT THEN 
@@ -103,7 +65,7 @@ function clsParser.InspectLine() as boolean
    ' CHECK FOR THE START OF A TYPE STRUCTURE.
    if gPreparsing = false then
       if len(st_ucase) > 5 THEN 
-         if left(st_ucase, 5) = "TYPE " andalso gConfig.CodeTips = true THEN
+         if (left(st_ucase, 5) = "TYPE ") and (gConfig.CodeTips) THEN
             ' If " AS " exists then this is not a TYPE structure but rather an ALIAS 
             ' for another TYPE.
             i = instr(st_ucase, " AS ") 
@@ -135,7 +97,7 @@ function clsParser.InspectLine() as boolean
             END IF
 
          ' CHECK FOR THE END OF A TYPE STRUCTURE
-         elseif left(st_ucase, 8) = "END TYPE" andalso gConfig.CodeTips = true THEN
+         elseif (left(st_ucase, 8) = "END TYPE") and (gConfig.CodeTips) THEN
             gdb2.dbAdd(this, DB2_TYPE)
             this.action = ACTION_NONE
             this.typeName  = ""

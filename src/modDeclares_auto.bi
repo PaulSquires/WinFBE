@@ -69,7 +69,7 @@ Declare Function Splitter_OnMouseMove() As BOOLEAN
 Declare Function IsPreparsedFile( byref sFilename as string ) as boolean
 Declare Function GetIncludeFilename( byref sFilename as CWSTR, byref sLine as string ) as CWSTR
 Declare Function ScintillaGetLine( byval pDoc as clsDocument ptr, ByVal nLine As Long ) As String
-Declare Function ParseDocument( byval idx as long, byval pDoc as clsDocument ptr, byval sFilename as CWSTR, byval bNoParseIncludes as Boolean = false ) As Long
+Declare Function ParseDocument( byval idx as long, byval pDoc as clsDocument ptr, byval sFilename as CWSTR) As Long
 Declare Function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
 Declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
 Declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long

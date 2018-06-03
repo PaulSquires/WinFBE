@@ -193,7 +193,7 @@ function clsDB2.dbAdd( byref parser as clsParser, _
             if .ElementName = "" then exit function
          
          case DB2_VARIABLE
-            ' Variabls are always in the format:
+            ' Variables are always in the format:
             ' <OwnerName>.<FunctionName>.<VariableName>
             if instr(parser.funcName, ".") = 0 then
                .ElementName = parser.typeName & "." & parser.funcName & "." & parser.varName
@@ -206,9 +206,6 @@ function clsDB2.dbAdd( byref parser as clsParser, _
             .IsWinApi     = parser.IsWinApi
             if .ElementName = "" then exit function
 
-         case DB2_INCLUDEFILE
-            .ElementName  = ""
-            .ElementValue = parser.varName
       END SELECT
 
    end with
@@ -375,19 +372,6 @@ function clsDB2.dbDebug() as long
    open "_debug.txt" for output as #f
    dim pData as DB2_DATA ptr
    
-   ' PRINT ALL FILENAMES
-   print #f, "INCLUDE FILENAMES"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->projectIndex = -1 THEN continue do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_INCLUDEFILE then continue do
-      print #f, "   ElementValue: "; pData->ElementValue
-   loop
-   print #f, ""
-   
    ' PRINT ALL TYPES
    print #f, "CLASSES/TYPES"
    this.dbRewind()
@@ -412,6 +396,7 @@ function clsDB2.dbDebug() as long
       pData = this.dbGetNext
       if pData = 0 THEN exit do
       if pData->projectIndex = -1 THEN continue do
+      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_FUNCTION then continue do
       print #f, "   fileName: "; pData->fileName
@@ -429,6 +414,7 @@ function clsDB2.dbDebug() as long
       pData = this.dbGetNext
       if pData = 0 THEN exit do
       if pData->projectIndex = -1 THEN continue do
+      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_SUB then continue do
       print #f, "   fileName: "; pData->fileName
@@ -446,6 +432,7 @@ function clsDB2.dbDebug() as long
       pData = this.dbGetNext
       if pData = 0 THEN exit do
       if pData->projectIndex = -1 THEN continue do
+      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_PROPERTY then continue do
       print #f, "   fileName: "; pData->fileName
@@ -463,6 +450,7 @@ function clsDB2.dbDebug() as long
       pData = this.dbGetNext
       if pData = 0 THEN exit do
       if pData->projectIndex = -1 THEN continue do
+      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_VARIABLE then continue do
       print #f, "   fileName: "; pData->fileName
@@ -489,22 +477,23 @@ function clsDB2.dbDebug() as long
       print #f, "   lineNum: "; pData->nLineNum
       print #f, ""
    loop
-
-   ' PRINT ALL PREPARSE FUNCTION DEFINITIONS
-   print #f, "PREPARSE FUNCTIONS"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->projectIndex = -2 THEN continue do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_FUNCTION then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, ""
-   loop
    print #f, ""
+
+'   ' PRINT ALL PREPARSE FUNCTION DEFINITIONS
+'   print #f, "PREPARSE FUNCTIONS"
+'   this.dbRewind()
+'   do 
+'      pData = this.dbGetNext
+'      if pData = 0 THEN exit do
+'      if pData->projectIndex <> -2 THEN continue do
+'      if pData->deleted = true THEN continue do
+'      if pData->id <> DB2_FUNCTION then continue do
+'      print #f, "   fileName: "; pData->fileName
+'      print #f, "   ElementName: "; pData->ElementName
+'      print #f, "   ElementValue: "; pData->ElementValue
+'      print #f, ""
+'   loop
+'   print #f, ""
 
    close #f
    function = 0

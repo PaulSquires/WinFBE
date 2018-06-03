@@ -1,3 +1,6 @@
+Version 1.6.4 (June 3, 2018)
+- Fixed: Tweak code related Codetips to fix several regressions preventing TYPE elements from displaying.
+
 Version 1.6.3 (June 2, 2018)
 - Added: WinFBE_Suite package as an attached binary release. Includes all-in-one package to start coding immediately. Editor, compiler, help files, include files.
 - Added: Automatically create and use preparsed sub/function definitions from the compiler's \inc folders. The database is stored in the "settings" folder in files "preparse_timestamps.ini" and "preparse_database.ini".

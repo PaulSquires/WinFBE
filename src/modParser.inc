@@ -12,75 +12,6 @@
 '    GNU General Public License for more details.
 
 
-
-''
-''
-Function GetIncludeFilename( byref wszFilename as CWSTR, _    ' file where the #Include was found in (needed for pathing)
-                             byref sLine as string _
-                             ) as CWSTR
-   ' With the incoming line parse it to determine the fully pathed
-   ' include file that it represents. Incoming line is original case.
-   ' #INCLUDE "filename" or #INCLUDE ONCE "filename"
-   dim as long f1, f2
-   dim as CWSTR sIncFilename, sPath, sCompilerPath, sTemp, sFilename, sTestPath
-   
-   f1 = instr(9, sLine, chr(34))                ' opening quote
-   if f1 THEN f2 = instr(f1+1, sLine, chr(34))  ' ending quote
-   sIncFilename = mid(sLine, f1+1, f2-f1-1)
-
-   ' Search the compiler's include folder path
-   ' Get the array index for the current selected build (project or document)
-   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
-   if idxBuild = -1 then idxBuild = 0
-   if gConfig.Builds(idxBuild).Is32bit then
-      sPath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-      sCompilerPath = lcase(AfxStrPathname("PATH", sPath))
-   end if
-   if gConfig.Builds(idxBuild).Is64bit then
-      sPath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-      sCompilerPath = lcase(AfxStrPathname("PATH", sPath))
-   End if
-   sTemp = sCompilerPath & "inc\" & sIncFilename
-   if AfxFileExists(sTemp) THEN 
-      ' We don't want to parse all Windows include files. If the windows.bi file
-      ' was found then later we will load our winapi include through gConfig.
-      if ucase(sIncFilename) = "WINDOWS.BI" then return sTemp
-      ' Never allow parsing of any windows api include files because we use our
-      ' own version of winapi preparsed.
-      sTestPath = sCompilerPath & "inc\win"
-      if left(sTemp, len(sTestPath)) = sTestPath then 
-         return ""
-      else
-         return sTemp
-      end if      
-   end if   
-
-   ' Begin our search for the file relative to the file that this #Include directive was found in.
-   sPath = AfxStrPathname("PATH", wszFilename)
-   if AfxPathIsRelative(sIncFilename) then  ' If this is a relative filename then convert it back.
-      sTemp = AfxPathCombine( sPath, sIncFilename)
-      if AfxFileExists(sTemp) THEN return sTemp
-   else
-      sTemp = sPath & sIncFilename
-      if AfxFileExists(sTemp) THEN return sTemp 
-   end if
-   
-   ' search relative to the project file of the active project
-   dim as long idx = gApp.GetActiveProjectIndex()
-   if idx then
-      sPath = AfxStrPathname("PATH", gApp.Projects(idx).ProjectFilename)
-      if AfxPathIsRelative(sIncFilename) then  ' If this is a relative filename then convert it back.
-         sTemp = AfxPathCombine( sPath, sIncFilename)
-         if AfxFileExists(sTemp) THEN return sTemp
-      else
-         sTemp = sPath & sIncFilename
-         if AfxFileExists(sTemp) THEN return sTemp 
-      end if
-   end if
-      
-   return ""
-End Function
-
 ''
 ''
 Function ScintillaGetLine( byval pDoc as clsDocument ptr, _
@@ -96,14 +27,12 @@ Function ScintillaGetLine( byval pDoc as clsDocument ptr, _
 End Function
 
 
-   
 ''
 ''
-Function ParseOneDocument( byval idx as long, _     ' project index
-                           byval pDoc as clsDocument ptr, _
-                           byval wszFilename as CWSTR, _    
-                           byval bAllowIncludes as Boolean _
-                           ) As Long
+Function ParseDocument( byval idx as long, _     ' project index
+                        byval pDoc as clsDocument ptr, _
+                        byval wszFilename as CWSTR _    
+                        ) As Long
 
    dim as long nLineCount, nLineNum, nPos
    Dim As String st, st_ucase, sLine
@@ -150,9 +79,6 @@ Function ParseOneDocument( byval idx as long, _     ' project index
    ' Before starting to parse this document we must remove any previously saved
    ' data that exists in the gdb2 database for this file.
    gdb2.dbDelete(wszFilename)
-   ' Add back a record to indicate that this file has been parsed
-   parser.varName = wszFilename
-   gdb2.dbAdd(parser, DB2_INCLUDEFILE)
 
 
    ' Analyze all lines in the file
@@ -175,12 +101,6 @@ Function ParseOneDocument( byval idx as long, _     ' project index
          ' TODO's are found as part of a comment.
          if parser.parseToDoItem(st) THEN continue for
          
-         ' If we encounter a #Include then do a recursive parse of it. Must parse it here
-         ' prior to the call that masks out all characters in a quoted string.
-         if bAllowIncludes then
-            if parser.IsIncludeFile(st) THEN continue for
-         end if
-           
          ' Mask out all characters inside of a string. This enables us to correctly
          ' test for embedded comment characters and multiple line ":" separators.
          st = trim(MaskStringCharacters(st))   ' important to remove all pre/post spaces
@@ -205,7 +125,7 @@ Function ParseOneDocument( byval idx as long, _     ' project index
     
       ' If the line contains ":" characters then the line needs to be broken up
       ' into as many sublines to be processed. Don't use AfxStrParse because we
-      ' need to manually check whether the substring was actually crated because
+      ' need to manually check whether the substring was actually created because
       ' of a trailing ":". Using AfxStrParse and adding a trailing ":" will cause
       ' parse problems.
       for nPos = 1 to len(sLine)
@@ -254,59 +174,4 @@ Function ParseOneDocument( byval idx as long, _     ' project index
 End Function
 
 
-''
-''
-Function ParseDocument( byval idx as long, _     ' project index
-                        byval pDoc as clsDocument ptr, _
-                        byval wszFilename as CWSTR, _    
-                        byval bNoParseIncludes as Boolean = false _
-                        ) As Long
-   ' Parse the incoming document. During parsing of this main document we
-   ' will collect any occurences of #INCLUDE files and then parse them afterwards.
-   dim as Boolean bWindowsIncludes 
-   
-   erase gIncludeFiles
-   ParseOneDocument(idx, pDoc, wszFilename, true)
-
-'   ' NoParseIncludes is set to True during normal editing of a file (rather than
-'   ' during file loading or saving when we do want to parse includes). Disabling 
-'   ' parsing during an edit prevents parsing when an autocomplete is open and the
-'   ' user is typing. Parsing includes during every keypress would be very slow.
-'   if bNoParseIncludes then exit function
-'   if gFileLoading = false THEN exit function   ' only parse includes during initial load
-       
-'   dim as long i = lbound(gIncludeFiles)
-'   do until i > ubound(gIncludeFiles)
-'      ' ubound will continue to change as more include files are identified.
-'      if bWindowsIncludes = false then
-'         if lcase(AfxStrPathName("NAMEX", gIncludeFiles(i))) = "windows.bi" then
-'            ' Make sure that we don't add the windows.bi to the list.
-'            bWindowsIncludes = true
-'            i = i + 1
-'            continue do
-'         END IF
-'      end if
-'      ' TODO: Parsing shobjidl.bi causes a GPF for some reason.
-'      if lcase(AfxStrPathName("NAMEX", gIncludeFiles(i))) <> "shobjidl.bi" then
-'         ' If this is an initial loading then no need to reparse the same
-'         ' file multiple times.
-'         if gdb2.dbFilenameExists(gIncludeFiles(i)) = 0 THEN          
-'            ParseOneDocument(idx, 0, gIncludeFiles(i), true)
-'         end if
-'      end if
-'      i = i + 1
-'   loop
-                                 
-'   ' If the "windows.bi" file was included then parse the main windows files
-'   if gApp.IsWindowIncludes = false then     ' flag to only parse Win includes once
-'      if bWindowsIncludes then
-'         ' Load the WinAPI Codetips file
-'         gConfig.LoadCodetipsWinAPI( AfxGetExePathName & "Settings\codetips_winapi.ini" )
-'         gApp.IsWindowIncludes = true
-'      end if
-'   end if
-   
-   function = 0
-   
-end function
 

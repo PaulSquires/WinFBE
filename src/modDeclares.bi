@@ -453,9 +453,6 @@ dim shared as HCURSOR ghCursorNS
 dim shared as long gPropDivPos
 dim shared as boolean gPropDivTracking
 
-' Global array thatt holds includes found during parsing
-dim shared gIncludeFiles(any) as CWSTR
-
 ' Create a dynamic array that will hold all localization words/phrases. This
 ' array is resized and loaded using the LoadLocalizationFile function.
 ReDim Shared LL(Any) As WString * MAX_PATH
@@ -477,8 +474,7 @@ const DB2_SUB         = 3
 const DB2_PROPERTY    = 4
 const DB2_TYPE        = 5
 const DB2_TODO        = 6
-const DB2_INCLUDEFILE = 7
-const DB2_STANDARDDATATYPE = 8    ' long, integer, string, etc...
+const DB2_STANDARDDATATYPE = 7    ' long, integer, string, etc...
 
 type DB2_DATA
    deleted      as BOOLEAN = true  ' True/False
@@ -1004,7 +1000,6 @@ type clsParser
       TypeExtends   as String      ' The TYPE is extended from this TYPE
       
       declare function parseToDoItem(byval sText as string) as boolean
-      declare function IsIncludeFile(byval sText as string ) as Boolean
       declare function IsMultilineComment(byval sLine as String) as boolean
       declare function NormalizeLine() as boolean
       declare function InspectLine() as boolean

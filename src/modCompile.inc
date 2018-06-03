@@ -96,6 +96,10 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       fCompile32 = False: fCompile64 = True
    End if
    
+   ' Convert relative path to absolute path if needed.
+   if AfxPathIsRelative(gCompile.CompilerPath) then
+      gCompile.CompilerPath = AfxPathCombine(AfxGetExePathName, gCompile.CompilerPath)
+   END IF
    
    ' Check to see if the compiler exists
    If AfxFileExists(gCompile.CompilerPath) = 0 Then 

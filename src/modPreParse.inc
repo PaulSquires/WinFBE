@@ -111,7 +111,15 @@ function LoadPreparseDatabase( byref sFilename as string ) as boolean
          .funcName   = AfxStrParse(st, 2, "|")
          .funcParams = AfxStrParse(st, 3, "|")    ' Calltip
       end with
-      gdb2.dbAdd(parser, DB2_FUNCTION)
+      
+      ' Jose's Afx functions define Left/Right/Val in several files. We don't want
+      ' these definitions to override FB's builtin definitions, so on't add them.
+      select case ucase(parser.funcName)
+         CASE "LEFT", "RIGHT", "VAL"
+         case else   
+            gdb2.dbAdd(parser, DB2_FUNCTION)
+      END SELECT
+
    LOOP
    close #f
    
@@ -190,7 +198,7 @@ function PreparseFolder( byval wszIncludePath as CWSTR, byval wszSubFolder as CW
                         ' Parse the found file   
                         gPreparseTimestamps(i).tFiletime = LongFileTime
                         gdb2.dbDelete(wszUCaseFilename)
-                        ParseOneDocument(-2, 0, pFinder.FilePath, false)
+                        ParseDocument(-2, 0, pFinder.FilePath)
                         gPreparsingChanges = true
                      end if
                      exit for
@@ -204,7 +212,7 @@ function PreparseFolder( byval wszIncludePath as CWSTR, byval wszSubFolder as CW
                   gPreparseTimestamps(ub).wszFilename = wszUCaseFilename
                   gPreparseTimestamps(ub).tFiletime = LongFileTime
                   gdb2.dbDelete(wszUCaseFilename)
-                  ParseOneDocument(-2, 0, pFinder.FilePath, false)
+                  ParseDocument(-2, 0, pFinder.FilePath)
                   gPreparsingChanges = true
                end if
             end if

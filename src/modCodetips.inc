@@ -481,7 +481,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
          If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-            ParseDocument(gApp.GetActiveProjectIndex, pDoc, "", true)
+            ParseDocument(gApp.GetActiveProjectIndex, pDoc, "")
          End If   
       end if
    END IF
