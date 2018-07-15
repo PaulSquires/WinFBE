@@ -72,6 +72,7 @@ function clsCollection.Remove( byval pCtrl as clsControl ptr ) as long
    next
    
    ' Destroy control and unallocate the memory.
+   if pCtrl->AfxButtonPtr then delete pCtrl->AfxButtonPtr
    DestroyWindow(pCtrl->hWindow)
    delete pCtrl
    

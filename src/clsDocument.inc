@@ -141,18 +141,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
       this.UserModified = true
       SetRect(@rc, 10, 10, 510, 310)
       pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
-      ApplyControlProperties(pCtrl)
-      this.Controls.SelectControl(pCtrl->hWindow)
-      this.Controls.SetActiveControl(pCtrl->hWindow)
-      DisplayPropertyList(@this)
    end if
-   
-   ' Need to create 
-   ' Display the ToolBox/PropertyList
-   frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
-   
-   ' Generate code for the visual designer and place it in the code editor
-   GenerateCode(@this)
    
    function = this.hWindow(0)
 end function
@@ -254,6 +243,10 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             this.FindReplace( "|", "" )
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
          Else
+            ' Set a flag that we are loading code from a file. This is important because if the file
+            ' contains visual designer code then we only want to apply control properties after all of 
+            ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
+            this.LoadingFromFile = true
             dim sText as string
             if GetFileToString(*pwszFile, sText, @this) = false then
                ' Need to parse sText to remove/process any possible visual designer code. Only
@@ -264,6 +257,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             else
                print "Error opening: "; *pwszFile
             End If
+            this.LoadingFromFile = false
             this.DiskFilename = *pwszFile
             SciMsg( m_pSci(0), SCI_SETSAVEPOINT, 0, 0)
             SciMsg( m_pSci(0), SCI_EMPTYUNDOBUFFER, 0, 0)
@@ -276,8 +270,18 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       End If   
    End If
 
+   if this.IsDesigner then
+      ' Select the Form as the default focus control
+      this.Controls.SelectControl(this.hWndForm)
+      this.Controls.SetActiveControl(this.hWndForm)
+      ' Display the ToolBox/PropertyList
+      frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
+      DisplayPropertyList(@this)
+      ' Set flag to regenerate code for the visual designer 
+      this.bRegenerateCode = true
+   end if   
+
    this.ApplyProperties()
-   
    Function = this.hWindow(0)
 End Function
 
@@ -346,6 +350,7 @@ End Function
 ' ========================================================================================
 function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as CWSTR ) as CWSTR 
    dim pCtrl as clsControl ptr
+   dim pCtrlActive as clsControl ptr
    
    dim as RECT rc, rcCtrl
    dim as CWSTR wst, wszControlType, wszPropName, wszPropValue, wszEventName
@@ -380,24 +385,27 @@ function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref sAllTe
          wszControlType = AfxStrParse(wst, 4, " ")
          nControlType = GetControlType(wszControlType)
          pCtrl = CreateToolboxControl( @this, nControlType, rc )
+         pCtrlActive = pCtrl
          
       elseif left(wst, 20) = "' WINFBE CONTROL_END" then
-         ApplyControlProperties(pCtrl)
+         pCtrl->SuspendLayout = true
+         ApplyControlProperties( @this, pCtrl )
+         pCtrl->SuspendLayout = false
 
       elseif left(wst, 20) = "'   PROPERTIES_START" then
       elseif left(wst, 18) = "'   PROPERTIES_END" then
 
-      elseif left(wst, 16) = "'     PROP_NAME " then
+      elseif left(wst, 16) = "'     PROP_NAME=" then
          wszPropName = mid(wst, 17)
        
-      elseif left(wst, 17) = "'     PROP_VALUE " then
+      elseif left(wst, 17) = "'     PROP_VALUE=" then
          wszPropValue = mid(wst, 18)
          SetControlProperty(pCtrl, wszPropName, wszPropValue)
          
       elseif left(wst, 16) = "'   EVENTS_START" then
       elseif left(wst, 14) = "'   EVENTS_END" then
 
-      elseif left(wst, 17) = "'     EVENT_NAME " then
+      elseif left(wst, 17) = "'     EVENT_NAME=" then
          wszEventName = mid(wst, 18)
          SetControlEvent(pCtrl, wszEventName, true)
       end if   
@@ -422,8 +430,8 @@ function clsDocument.CreateDesignerString() as CWSTR
                                      "'   PROPERTIES_START" & vbcrlf 
          for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
             wszControls = wszControls & _
-                          "'     PROP_NAME "  & pCtrl->Properties(ii).wszPropName & vbcrlf & _
-                          "'     PROP_VALUE " & pCtrl->Properties(ii).wszPropValue & vbcrlf 
+                          "'     PROP_NAME="  & pCtrl->Properties(ii).wszPropName & vbcrlf & _
+                          "'     PROP_VALUE=" & pCtrl->Properties(ii).wszPropValue & vbcrlf 
          NEXT
          wszControls = wszControls & "'   PROPERTIES_END" & vbcrlf & _
                                      "'   EVENTS_START" & vbcrlf 
@@ -431,7 +439,7 @@ function clsDocument.CreateDesignerString() as CWSTR
             ' Only need to output the names of the Events that have been ticked as being in use.
             if pCtrl->Events(ii).bIsSelected then
                wszControls = wszControls & _
-                             "'     EVENT_NAME "   & pCtrl->Events(ii).wszEventName & vbcrlf 
+                             "'     EVENT_NAME="   & pCtrl->Events(ii).wszEventName & vbcrlf 
             end if
          next
          wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
@@ -1229,10 +1237,6 @@ Function clsDocument.DisplayStats() As Long
                  "W:" & GetControlProperty(pCtrl, "WIDTH") & " x H:" & GetControlProperty(pCtrl, "HEIGHT")
       END IF
       StatusBar_SetText(hStatusbar, 1, wText)
-      StatusBar_SetText(hStatusbar, 2, "FORM")
-      wText = FileEncodingTextDescription(this.FileEncoding)
-      StatusBar_SetText(hStatusbar, 3, *wText)
-      exit function
    else
       ' Retrieve the information and show it in the status bar
       curPos    = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
@@ -1256,28 +1260,30 @@ Function clsDocument.DisplayStats() As Long
       SetScrollInfo(this.hScrollbar, SB_CTL, @this.ScrInfo, TRUE) 
    end if
 
-   wText = ""
-   Select Case this.ProjectFileType
-      Case FILETYPE_NORMAL:   wText = ucase(L(210,"Normal")) 
-      Case FILETYPE_MODULE:   wText = ucase(L(211,"Module"))
-      Case FILETYPE_MAIN:     wText = ucase(L(212,"Main"))
-      Case FILETYPE_RESOURCE: wText = ucase(L(213,"Resource"))
-   End Select
-   if this.IsDesigner then wText = "FORM"
-   StatusBar_SetText(hStatusbar, 2, *wText)
-
-   
    wText = FileEncodingTextDescription(this.FileEncoding)
    StatusBar_SetText(hStatusbar, 3, *wText)
 
-   if this.FileEncoding = FILE_ENCODING_ANSI THEN
-      SciMsg( pSci, SCI_SETCODEPAGE, 0, 0 )
-   ELSE
-      ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
-      SciMsg( pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
-   end if
+   wText = ""
+   Select Case this.ProjectFileType
+      Case FILETYPE_NORMAL:    wText = ucase(L(210,"Normal")) 
+      Case FILETYPE_MODULE:    wText = ucase(L(211,"Module"))
+      Case FILETYPE_MAIN:      wText = ucase(L(212,"Main"))
+      Case FILETYPE_RESOURCE:  wText = ucase(L(213,"Resource"))
+   End Select
 
-   if IsWindowVisible(HWND_FRMFINDREPLACE) THEN frmFindReplace_SetButtonStates
+   if (this.IsDesigner) andalso (IsDesignerView(@this)) andalso (this.ProjectFileType = FILETYPE_UNDEFINED) THEN 
+      wText = "FORM"
+      StatusBar_SetText(hStatusbar, 2, *wText)
+   else
+      StatusBar_SetText(hStatusbar, 2, *wText)
+      if this.FileEncoding = FILE_ENCODING_ANSI THEN
+         SciMsg( pSci, SCI_SETCODEPAGE, 0, 0 )
+      ELSE
+         ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
+         SciMsg( pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+      end if
+      if IsWindowVisible(HWND_FRMFINDREPLACE) THEN frmFindReplace_SetButtonStates
+   end if
    
    Function = 0
 End Function

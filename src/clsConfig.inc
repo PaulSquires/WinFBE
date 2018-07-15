@@ -22,11 +22,6 @@
 Constructor clsConfig
    _ConfigFilename = AfxGetExePathName & "Settings\WinFBE.ini" 
    this.LoadKeywords
-   ' Set default path to WinFBX should it not yet be specified
-   if len(this.AfxPath) = 0 THEN
-      this.AfxPath = AfxGetExePathName & "src"
-   END IF
-   
 End Constructor
 
 ''
@@ -106,15 +101,16 @@ End Function
 
 ''
 ''
-Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String ) as boolean
+Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI as boolean ) as boolean
    Dim as string st, sID, sFuncName, sFuncDeclare
-   dim as string sTypeName, sTypeElements, sParts, sPart
+   dim as string sTypeName, sTypeElements, sParts, sPart, sBaseType
    Dim as long f, i, nCount
    
    dim parser as clsParser
 
    parser.fileName = ""     ' no need to store this sFilename
    parser.idxProject = -1   ' do not associate it with any project
+   parser.IsWinApi = IsWinAPI
 
    ''
    ''  Codetips definition file for WinAPI
@@ -145,22 +141,32 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String ) as boolean
                i = instr(st, "|")
                parser.typeName = Left(st, i-1)
                parser.Description = mid(st, i+1)
-               parser.IsWinApi = true
                gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
                
             CASE "F"    ' function
                i = instr(st, "(")
                parser.funcName   = Left(st, i-1)
                parser.funcParams = st
-               parser.IsWinApi = true
                gdb2.dbAdd(parser, DB2_FUNCTION)
 
             case "T"     ' type
                i = instr(st, "|")
                parser.typeName = Left(st, i-1)
                parser.typeAlias = parser.typeName
-               parser.IsWinApi = true
                sParts = mid(st, i + 1)
+               
+               if IsWinAPI = false then
+                  ' Check for the WFXBASE type. We save that string and add it to subsequent
+                  ' types for the visual designer.
+                  select case ucase(parser.typeName)
+                     CASE "WFXBASE" 
+                        sBaseType = sParts
+                        continue do
+                     case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
+                          "WFXCHECKBOX"
+                        sParts = sParts & iif(len(sBaseType), "|" & sBaseType, "")
+                  END SELECT
+               END IF
                gdb2.dbAdd(parser, DB2_TYPE)
 
                ' Each element of the TYPE structure is added to the database. The
@@ -187,6 +193,13 @@ End Function
       
 
 ''
+''
+Function clsConfig.LoadCodetipsVD( ByRef sFilename As String ) as boolean
+   function = this.LoadCodetipsWINAPI(sFilename, false)
+end function
+
+
+''
 ''  INITIALIZE THE TOOLBOX CONTROLS
 ''
 Function clsConfig.InitializeToolBox() as Long
@@ -199,41 +212,41 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(0).wszCursor = ""
    gToolBox(0).wszClassName = ""
    
-   gToolBox(1).nToolType = CTRL_LABEL
-   gToolBox(1).wszName   = "Label"
-   gToolBox(1).wszImage  = "IMAGE_LABEL"
-   gToolBox(1).wszCursor = "IMAGE_CURSOR_LABEL"
-   gToolBox(1).wszClassName = "STATIC"
+   gToolBox(1).nToolType = CTRL_BUTTON
+   gToolBox(1).wszName   = "Button"
+   gToolBox(1).wszImage  = "IMAGE_BUTTON"
+   gToolBox(1).wszCursor = "IMAGE_CURSOR_BUTTON"
+   gToolBox(1).wszClassName = "BUTTON"
 
-   gToolBox(2).nToolType = CTRL_BUTTON
-   gToolBox(2).wszName   = "Button"
-   gToolBox(2).wszImage  = "IMAGE_BUTTON"
-   gToolBox(2).wszCursor = "IMAGE_CURSOR_BUTTON"
-   gToolBox(2).wszClassName = "BUTTON"
+   gToolBox(2).nToolType = CTRL_CHECKBOX
+   gToolBox(2).wszName   = "CheckBox"
+   gToolBox(2).wszImage  = "IMAGE_CHECKBOX"
+   gToolBox(2).wszCursor = "IMAGE_CURSOR_CHECKBOX"
+   gToolBox(2).wszClassName = "CHECKBOX"
 
-   gToolBox(3).nToolType = CTRL_TEXTBOX
-   gToolBox(3).wszName   = "TextBox"
-   gToolBox(3).wszImage  = "IMAGE_TEXTBOX"
-   gToolBox(3).wszCursor = "IMAGE_CURSOR_TEXTBOX"
-   gToolBox(3).wszClassName = "TEXTBOX"
+   gToolBox(3).nToolType = CTRL_LABEL
+   gToolBox(3).wszName   = "Label"
+   gToolBox(3).wszImage  = "IMAGE_LABEL"
+   gToolBox(3).wszCursor = "IMAGE_CURSOR_LABEL"
+   gToolBox(3).wszClassName = "LABEL"
 
-   gToolBox(4).nToolType = CTRL_CHECKBOX
-   gToolBox(4).wszName   = "CheckBox"
-   gToolBox(4).wszImage  = "IMAGE_CHECKBOX"
-   gToolBox(4).wszCursor = "IMAGE_CURSOR_CHECKBOX"
-   gToolBox(4).wszClassName = "CHECKBOX"
+   gToolBox(4).nToolType = CTRL_LISTBOX
+   gToolBox(4).wszName   = "ListBox"
+   gToolBox(4).wszImage  = "IMAGE_LISTBOX"
+   gToolBox(4).wszCursor = "IMAGE_CURSOR_LISTBOX"
+   gToolBox(4).wszClassName = "LISTBOX"
 
-   gToolBox(5).nToolType = CTRL_OPTION
-   gToolBox(5).wszName   = "Option"
-   gToolBox(5).wszImage  = "IMAGE_OPTION"
-   gToolBox(5).wszCursor = "IMAGE_CURSOR_OPTION"
-   gToolBox(5).wszClassName = "RADIOBUTTON"
+   gToolBox(5).nToolType = CTRL_TEXTBOX
+   gToolBox(5).wszName   = "TextBox"
+   gToolBox(5).wszImage  = "IMAGE_TEXTBOX"
+   gToolBox(5).wszCursor = "IMAGE_CURSOR_TEXTBOX"
+   gToolBox(5).wszClassName = "TEXTBOX"
 
-   gToolBox(6).nToolType = CTRL_LISTBOX
-   gToolBox(6).wszName   = "ListBox"
-   gToolBox(6).wszImage  = "IMAGE_LISTBOX"
-   gToolBox(6).wszCursor = "IMAGE_CURSOR_LISTBOX"
-   gToolBox(6).wszClassName = "LISTBOX"
+'   gToolBox(5).nToolType = CTRL_OPTION
+'   gToolBox(5).wszName   = "Option"
+'   gToolBox(5).wszImage  = "IMAGE_OPTION"
+'   gToolBox(5).wszCursor = "IMAGE_CURSOR_OPTION"
+'   gToolBox(5).wszClassName = "RADIOBUTTON"
 
 '   gToolBox(7).nToolType = CTRL_FRAME
 '   gToolBox(7).wszName   = "Frame"
@@ -349,6 +362,185 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(25).wszCursor = "IMAGE_CURSOR_OCX"
 '   gToolBox(25).wszClassName = ""
 
+   ' System Colors
+   redim gColors(172)
+   gColors(0).SetColor("ActiveBorder", COLOR_SYSTEM, GetSysColor(COLOR_ACTIVEBORDER))
+   gColors(1).SetColor("ActiveCaption", COLOR_SYSTEM, GetSysColor(COLOR_ACTIVECAPTION))
+   gColors(2).SetColor("ActiveCaptionText", COLOR_SYSTEM, GetSysColor(COLOR_CAPTIONTEXT))
+   gColors(3).SetColor("AppWorkspace", COLOR_SYSTEM, GetSysColor(COLOR_APPWORKSPACE))
+   gColors(4).SetColor("ButtonFace", COLOR_SYSTEM, GetSysColor(COLOR_BTNFACE))
+   gColors(5).SetColor("ButtonHighlight", COLOR_SYSTEM, GetSysColor(COLOR_BTNHILIGHT))
+   gColors(5).SetColor("ButtonShadow", COLOR_SYSTEM,GetSysColor(COLOR_BTNSHADOW) )
+   gColors(6).SetColor("Control", COLOR_SYSTEM, GetSysColor(COLOR_3DFACE))
+   gColors(7).SetColor("ControlDark", COLOR_SYSTEM, GetSysColor(COLOR_3DSHADOW))
+   gColors(8).SetColor("ControlDarkDark", COLOR_SYSTEM, GetSysColor(COLOR_3DDKSHADOW))
+   gColors(9).SetColor("ControlLight", COLOR_SYSTEM, GetSysColor(COLOR_3DLIGHT))
+   gColors(10).SetColor("ControlLightLight", COLOR_SYSTEM, GetSysColor(COLOR_3DHILIGHT))
+   gColors(11).SetColor("ControlText", COLOR_SYSTEM, GetSysColor(COLOR_BTNTEXT))
+   gColors(12).SetColor("Desktop", COLOR_SYSTEM, GetSysColor(COLOR_DESKTOP))
+   gColors(13).SetColor("GradientActiveCaption", COLOR_SYSTEM, GetSysColor(COLOR_GRADIENTACTIVECAPTION))
+   gColors(14).SetColor("GradientInactiveCaption", COLOR_SYSTEM, GetSysColor(COLOR_GRADIENTINACTIVECAPTION))
+   gColors(15).SetColor("GrayText", COLOR_SYSTEM, GetSysColor(COLOR_GRAYTEXT))
+   gColors(16).SetColor("Highlight", COLOR_SYSTEM, GetSysColor(COLOR_HIGHLIGHT))
+   gColors(17).SetColor("HighlightText", COLOR_SYSTEM, GetSysColor(COLOR_HIGHLIGHTTEXT))
+   gColors(18).SetColor("HotTrack", COLOR_SYSTEM, GetSysColor(COLOR_HOTLIGHT))
+   gColors(19).SetColor("InactiveBorder", COLOR_SYSTEM, GetSysColor(COLOR_INACTIVEBORDER))
+   gColors(20).SetColor("InactiveCaption", COLOR_SYSTEM, GetSysColor(COLOR_INACTIVECAPTION))
+   gColors(21).SetColor("InactiveCaptionText", COLOR_SYSTEM, GetSysColor(COLOR_INACTIVECAPTIONTEXT))
+   gColors(22).SetColor("Info", COLOR_SYSTEM, GetSysColor(COLOR_INFOBK))
+   gColors(23).SetColor("InfoText", COLOR_SYSTEM, GetSysColor(COLOR_INFOTEXT))
+   gColors(24).SetColor("Menu", COLOR_SYSTEM, GetSysColor(COLOR_MENU))
+   gColors(25).SetColor("MenuBar", COLOR_SYSTEM, GetSysColor(COLOR_MENUBAR))
+   gColors(26).SetColor("MenuHighlight", COLOR_SYSTEM, GetSysColor(COLOR_MENUHILIGHT))
+   gColors(27).SetColor("MenuText", COLOR_SYSTEM, GetSysColor(COLOR_MENUTEXT))
+   gColors(28).SetColor("ScrollBar", COLOR_SYSTEM, GetSysColor(COLOR_SCROLLBAR))
+   gColors(29).SetColor("Window", COLOR_SYSTEM, GetSysColor(COLOR_WINDOW))
+   gColors(30).SetColor("WindowFrame", COLOR_SYSTEM, GetSysColor(COLOR_WINDOWFRAME))
+   gColors(31).SetColor("WindowText", COLOR_SYSTEM, GetSysColor(COLOR_WINDOWTEXT))
+
+   ' QUICK COLORS
+   gColors(32).SetColor("AliceBlue"            , COLOR_COLORS, BGR(240,248,255))
+   gColors(33).SetColor("AntiqueWhite"         , COLOR_COLORS, BGR(250,235,215))
+   gColors(34).SetColor("Aqua"                 , COLOR_COLORS, BGR(  0,255,255))
+   gColors(35).SetColor("Aquamarine"           , COLOR_COLORS, BGR(127,255,212)) 
+   gColors(36).SetColor("Azure"                , COLOR_COLORS, BGR(240,255,255))
+   gColors(37).SetColor("Beige"                , COLOR_COLORS, BGR(245,245,220))
+   gColors(38).SetColor("Bisque"               , COLOR_COLORS, BGR(255,228,196))
+   gColors(39).SetColor("Black"                , COLOR_COLORS, BGR(  0,  0,  0))
+   gColors(40).SetColor("BlanchedAlmond"       , COLOR_COLORS, BGR(255,255,205))
+   gColors(41).SetColor("Blue"                 , COLOR_COLORS, BGR(  0,  0,255))
+   gColors(42).SetColor("BlueViolet"           , COLOR_COLORS, BGR(138, 43,226))
+   gColors(43).SetColor("Brown"                , COLOR_COLORS, BGR(165, 42, 42))
+   gColors(44).SetColor("Burlywood"            , COLOR_COLORS, BGR(222,184,135))
+   gColors(45).SetColor("CadetBlue"            , COLOR_COLORS, BGR( 95,158,160))
+   gColors(46).SetColor("Chartreuse"           , COLOR_COLORS, BGR(127,255,  0))
+   gColors(47).SetColor("Chocolate"            , COLOR_COLORS, BGR(210,105, 30))
+   gColors(48).SetColor("Coral"                , COLOR_COLORS, BGR(255,127, 80))
+   gColors(49).SetColor("CornflowerBlue"       , COLOR_COLORS, BGR(100,149,237))
+   gColors(50).SetColor("Cornsilk"             , COLOR_COLORS, BGR(255,248,220))
+   gColors(51).SetColor("Crimson"              , COLOR_COLORS, BGR(220, 20, 60))
+   gColors(52).SetColor("Cyan"                 , COLOR_COLORS, BGR(  0,255,255))
+   gColors(53).SetColor("DarkBlue"             , COLOR_COLORS, BGR(  0,  0,139))
+   gColors(54).SetColor("DarkCyan"             , COLOR_COLORS, BGR(  0,139,139))
+   gColors(55).SetColor("DarkGoldenRod"        , COLOR_COLORS, BGR(184,134, 11)) 
+   gColors(56).SetColor("DarkGray"             , COLOR_COLORS, BGR(169,169,169))
+   gColors(57).SetColor("DarkGreen"            , COLOR_COLORS, BGR(  0,100,  0))
+   gColors(58).SetColor("DarkKhaki"            , COLOR_COLORS, BGR(189,183,107))
+   gColors(59).SetColor("DarkMagenta"          , COLOR_COLORS, BGR(139,  0,139))
+   gColors(60).SetColor("DarkOliveGreen"       , COLOR_COLORS, BGR( 85,107, 47)) 
+   gColors(61).SetColor("DarkOrange"           , COLOR_COLORS, BGR(255,140,  0)) 
+   gColors(62).SetColor("DarkOrchid"           , COLOR_COLORS, BGR(153, 50,204))
+   gColors(63).SetColor("DarkRed"              , COLOR_COLORS, BGR(139,  0,  0))
+   gColors(64).SetColor("DarkSalmon"           , COLOR_COLORS, BGR(233,150,122))
+   gColors(65).SetColor("DarkSeaGreen"         , COLOR_COLORS, BGR(143,188,143))
+   gColors(66).SetColor("DarkSlateBlue"        , COLOR_COLORS, BGR( 72, 61,139))
+   gColors(67).SetColor("DarkSlateGray"        , COLOR_COLORS, BGR( 47, 79, 79))
+   gColors(68).SetColor("DarkTurquoise"        , COLOR_COLORS, BGR(  0,206,209))
+   gColors(69).SetColor("DarkViolet"           , COLOR_COLORS, BGR(148,  0,211))
+   gColors(70).SetColor("DeepPink"             , COLOR_COLORS, BGR(255, 20,147))
+   gColors(71).SetColor("DeepSkyBlue"          , COLOR_COLORS, BGR(  0,191,255))
+   gColors(72).SetColor("DimGray"              , COLOR_COLORS, BGR(105,105,105))
+   gColors(73).SetColor("DodgerBlue"           , COLOR_COLORS, BGR( 30,144,255))
+   gColors(74).SetColor("FireBrick"            , COLOR_COLORS, BGR(178, 34, 34))
+   gColors(75).SetColor("FloralWhite"          , COLOR_COLORS, BGR(255,250,240))
+   gColors(76).SetColor("ForestGreen"          , COLOR_COLORS, BGR( 34,139, 34))
+   gColors(77).SetColor("Fuchsia"              , COLOR_COLORS, BGR(255,  0,255))
+   gColors(78).SetColor("Gainsboro"            , COLOR_COLORS, BGR(220,220,220))
+   gColors(79).SetColor("GhostWhite"           , COLOR_COLORS, BGR(248,248,255))
+   gColors(80).SetColor("Gold"                 , COLOR_COLORS, BGR(255,215,  0))
+   gColors(81).SetColor("GoldenRod"            , COLOR_COLORS, BGR(218,165, 32))
+   gColors(82).SetColor("Gray"                 , COLOR_COLORS, BGR(127,127,127))
+   gColors(83).SetColor("Green"                , COLOR_COLORS, BGR(  0,128,  0))
+   gColors(84).SetColor("GreenYellow"          , COLOR_COLORS, BGR(173,255, 47))
+   gColors(85).SetColor("HoneyDew"             , COLOR_COLORS, BGR(240,255,240))
+   gColors(86).SetColor("HotPink"              , COLOR_COLORS, BGR(255,105,180))
+   gColors(87).SetColor("IndianRed"            , COLOR_COLORS, BGR(205, 92, 92))
+   gColors(88).SetColor("Indigo"               , COLOR_COLORS, BGR( 75,  0,130))
+   gColors(89).SetColor("Ivory"                , COLOR_COLORS, BGR(255,255,240))
+   gColors(90).SetColor("Khaki"                , COLOR_COLORS, BGR(240,230,140))
+   gColors(91).SetColor("Lavender"             , COLOR_COLORS, BGR(230,230,250))
+   gColors(92).SetColor("LavenderBlush"        , COLOR_COLORS, BGR(255,240,245))
+   gColors(93).SetColor("Lawngreen"            , COLOR_COLORS, BGR(124,252,  0))
+   gColors(94).SetColor("LemonChiffon"         , COLOR_COLORS, BGR(255,250,205))
+   gColors(95).SetColor("LightBlue"            , COLOR_COLORS, BGR(173,216,230))
+   gColors(96).SetColor("LightCoral"           , COLOR_COLORS, BGR(240,128,128))
+   gColors(97).SetColor("LightCyan"            , COLOR_COLORS, BGR(224,255,255))
+   gColors(98).SetColor("LightGoldenRodYellow" , COLOR_COLORS, BGR(250,250,210))
+   gColors(99).SetColor("LightGreen"           , COLOR_COLORS, BGR(144,238,144))
+   gColors(100).SetColor("LightGrey"           , COLOR_COLORS, BGR(211,211,211))
+   gColors(101).SetColor("LightPink"           , COLOR_COLORS, BGR(255,182,193))
+   gColors(102).SetColor("LightSalmon"         , COLOR_COLORS, BGR(255,160,122))
+   gColors(103).SetColor("LightSeaGreen"       , COLOR_COLORS, BGR( 32,178,170))
+   gColors(104).SetColor("LightSkyBlue"        , COLOR_COLORS, BGR(135,206,250))
+   gColors(105).SetColor("LightSlateGray"      , COLOR_COLORS, BGR(119,136,153))
+   gColors(106).SetColor("LightSteelBlue"      , COLOR_COLORS, BGR(176,196,222))
+   gColors(107).SetColor("LightYellow"         , COLOR_COLORS, BGR(255,255,224))
+   gColors(108).SetColor("Lime"                , COLOR_COLORS, BGR(  0,255,  0))
+   gColors(109).SetColor("LimeGreen"           , COLOR_COLORS, BGR( 50,205, 50))
+   gColors(110).SetColor("Linen"               , COLOR_COLORS, BGR(250,240,230))
+   gColors(111).SetColor("Magenta"             , COLOR_COLORS, BGR(255,  0,255))
+   gColors(112).SetColor("Maroon"              , COLOR_COLORS, BGR(128,  0,  0))
+   gColors(113).SetColor("MediumAquamarine"    , COLOR_COLORS, BGR(102,205,170))
+   gColors(114).SetColor("MediumBlue"          , COLOR_COLORS, BGR(  0,  0,205))
+   gColors(115).SetColor("MediumOrchid"        , COLOR_COLORS, BGR(186, 85,211))
+   gColors(116).SetColor("MediumPurple"        , COLOR_COLORS, BGR(147,112,219))
+   gColors(117).SetColor("MediumSeaGreen"      , COLOR_COLORS, BGR( 60,179,113))
+   gColors(118).SetColor("MediumSlateBlue"     , COLOR_COLORS, BGR(123,104,238))
+   gColors(119).SetColor("MediumSpringGreen"   , COLOR_COLORS, BGR(  0,250,154))
+   gColors(120).SetColor("MediumTurquoise"     , COLOR_COLORS, BGR( 72,209,204))
+   gColors(121).SetColor("MediumVioletRed"     , COLOR_COLORS, BGR(199, 21,133))
+   gColors(122).SetColor("MidnightBlue"        , COLOR_COLORS, BGR( 25, 25,112))
+   gColors(123).SetColor("MintCream"           , COLOR_COLORS, BGR(245,255,250))
+   gColors(124).SetColor("MistyRose"           , COLOR_COLORS, BGR(255,228,225))
+   gColors(125).SetColor("Moccasin"            , COLOR_COLORS, BGR(255,228,181))
+   gColors(126).SetColor("NavajoWhite"         , COLOR_COLORS, BGR(255,222,173))
+   gColors(127).SetColor("Navy"                , COLOR_COLORS, BGR(  0,  0,128))
+   gColors(128).SetColor("Navyblue"            , COLOR_COLORS, BGR(159,175,223))
+   gColors(129).SetColor("OldLace"             , COLOR_COLORS, BGR(253,245,230))
+   gColors(130).SetColor("Olive"               , COLOR_COLORS, BGR(128,128,  0))
+   gColors(131).SetColor("OliveDrab"           , COLOR_COLORS, BGR(107,142, 35))
+   gColors(132).SetColor("Orange"              , COLOR_COLORS, BGR(255,165,  0))
+   gColors(133).SetColor("OrangeRed"           , COLOR_COLORS, BGR(255, 69,  0))
+   gColors(134).SetColor("Orchid"              , COLOR_COLORS, BGR(218,112,214))
+   gColors(135).SetColor("PaleGoldenRod"       , COLOR_COLORS, BGR(238,232,170))
+   gColors(136).SetColor("PaleGreen"           , COLOR_COLORS, BGR(152,251,152))
+   gColors(137).SetColor("PaleTurquoise"       , COLOR_COLORS, BGR(175,238,238))
+   gColors(138).SetColor("PaleVioletRed"       , COLOR_COLORS, BGR(219,112,147))
+   gColors(139).SetColor("PapayaWhip"          , COLOR_COLORS, BGR(255,239,213))
+   gColors(140).SetColor("PeachPuff"           , COLOR_COLORS, BGR(255,218,185))
+   gColors(141).SetColor("Peru"                , COLOR_COLORS, BGR(205,133, 63))
+   gColors(142).SetColor("Pink"                , COLOR_COLORS, BGR(255,192,203))
+   gColors(143).SetColor("Plum"                , COLOR_COLORS, BGR(221,160,221))
+   gColors(144).SetColor("PowderBlue"          , COLOR_COLORS, BGR(176,224,230))
+   gColors(145).SetColor("Purple"              , COLOR_COLORS, BGR(128,  0,128))
+   gColors(146).SetColor("Red"                 , COLOR_COLORS, BGR(255,  0,  0))
+   gColors(147).SetColor("RosyBrown"           , COLOR_COLORS, BGR(188,143,143))
+   gColors(148).SetColor("RoyalBlue"           , COLOR_COLORS, BGR( 65,105,225))
+   gColors(149).SetColor("SaddleBrown"         , COLOR_COLORS, BGR(139, 69, 19))
+   gColors(150).SetColor("Salmon"              , COLOR_COLORS, BGR(250,128,114))
+   gColors(151).SetColor("SandyBrown"          , COLOR_COLORS, BGR(244,164, 96))
+   gColors(152).SetColor("SeaGreen"            , COLOR_COLORS, BGR( 46,139, 87))
+   gColors(153).SetColor("SeaShell"            , COLOR_COLORS, BGR(255,245,238))
+   gColors(154).SetColor("Sienna"              , COLOR_COLORS, BGR(160, 82, 45))
+   gColors(155).SetColor("Silver"              , COLOR_COLORS, BGR(192,192,192))
+   gColors(156).SetColor("SkyBlue"             , COLOR_COLORS, BGR(135,206,235))
+   gColors(157).SetColor("SlateBlue"           , COLOR_COLORS, BGR(106, 90,205))
+   gColors(158).SetColor("SlateGray"           , COLOR_COLORS, BGR(112,128,144))
+   gColors(159).SetColor("Snow"                , COLOR_COLORS, BGR(255,250,250))
+   gColors(160).SetColor("SpringGreen"         , COLOR_COLORS, BGR(  0,255,127))
+   gColors(161).SetColor("SteelBlue"           , COLOR_COLORS, BGR( 70,130,180))
+   gColors(162).SetColor("Tan"                 , COLOR_COLORS, BGR(210,180,140))
+   gColors(163).SetColor("Teal"                , COLOR_COLORS, BGR(  0,128,128))
+   gColors(164).SetColor("Thistle"             , COLOR_COLORS, BGR(216,191,216))
+   gColors(165).SetColor("Tomato"              , COLOR_COLORS, BGR(255, 99, 71))
+   gColors(166).SetColor("Turquoise"           , COLOR_COLORS, BGR( 64,224,208))
+   gColors(167).SetColor("Violet"              , COLOR_COLORS, BGR(238,130,238))
+   gColors(168).SetColor("Wheat"               , COLOR_COLORS, BGR(245,222,179))
+   gColors(169).SetColor("White"               , COLOR_COLORS, BGR(255,255,255))
+   gColors(170).SetColor("WhiteSmoke"          , COLOR_COLORS, BGR(245,245,245))
+   gColors(171).SetColor("Yellow"              , COLOR_COLORS, BGR(255,255,  0))
+   gColors(172).SetColor("YellowGreen"         , COLOR_COLORS, BGR(139,205, 50))
+   
    function = 0
 end function
 
@@ -421,18 +613,17 @@ Function clsConfig.SaveToFile() as Long
    ' drive letter.
    this.FBWINCompiler32  = ProcessToCurdrive(this.FBWINCompiler32)
    this.FBWINCompiler64  = ProcessToCurdrive(this.FBWINCompiler64)
-   this.AfxPath          = ProcessToCurdrive(this.AfxPath)
    this.CompilerHelpfile = ProcessToCurdrive(this.CompilerHelpfile)
    this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
 
    Print #f, "[Compiler]" 
    print #f, "FBWINCompiler32="       ; this.FBWINCompiler32      
    print #f, "FBWINCompiler64="       ; this.FBWINCompiler64      
-   print #f, "WinFBXPath="            ; this.AfxPath     
    print #f, "CompilerSwitches="      ; this.CompilerSwitches     
    print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
    print #f, "RunViaCommandWindow="   ; this.RunViaCommandWindow
+   print #f, "WinFBXPath="            ; this.WinFBXPath
    
 
    print #f, ""
@@ -718,7 +909,8 @@ Function clsConfig.LoadFromFile() as Long
          Case "ShowExplorerWidth":    this.ShowExplorerWidth    = nData
          Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
          Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
-         Case "WinFBXPath":           this.AfxPath              = wData
+         case "WinFBXPath":           this.WinFBXPath           = wData
+
          Case "CompilerSwitches":     this.CompilerSwitches     = wData
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData

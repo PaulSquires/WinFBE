@@ -85,7 +85,6 @@ Sub SaveEditorOptions()
    HWnd = HWND_FRMOPTIONSCOMPILER
    gConfig.FBWINCompiler32  = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN32) )
    gConfig.FBWINCompiler64  = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN64) )
-   gConfig.AfxPath          = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTAFXPATH) )
    gConfig.CompilerSwitches = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBSWITCHES) )
    gConfig.CompilerHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBHELPFILE) )
    gConfig.Win32APIHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH) )

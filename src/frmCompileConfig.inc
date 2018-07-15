@@ -398,6 +398,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
 
    DIM hBitmap AS HBITMAP 
    dim hCtrl as HWnd
+   dim wszImage as wstring * 100
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -437,20 +438,22 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    hCtrl = _
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, "", 243, 10, 32, 32, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, "", 243, 10, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_UP"), 0, false, IMAGE_BITMAP, 0)
-   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-   IF hBitmap THEN DeleteObject(hBitmap)
+   wszImage = iif(pWindow->DPI > 96, "IMAGE_UP", "IMAGE_UP16")
+         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
+         SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+         IF hBitmap THEN DeleteObject(hBitmap)
 
    hCtrl = _
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMCOMPILECONFIG_CMDDOWN, "", 243, 159, 32, 32, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCOMPILECONFIG_CMDDOWN, "", 243, 159, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_DOWN"), 0, false, IMAGE_BITMAP, 0)
-   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-   IF hBitmap THEN DeleteObject(hBitmap)
+   wszImage = iif(pWindow->DPI > 96, "IMAGE_DOWN", "IMAGE_DOWN16")
+         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
+         SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+         IF hBitmap THEN DeleteObject(hBitmap)
 
    pWindow->AddControl("BUTTON", , IDOK,  L(0,"&OK"), 300, 10, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _

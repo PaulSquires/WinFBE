@@ -105,10 +105,6 @@
 #Define IDC_FRMOPTIONSCOMPILER_LBLAPIHELP           1012
 #Define IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH     1013
 #Define IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW 1014
-#Define IDC_FRMOPTIONSCOMPILER_LBLAFXPATH           1015
-#Define IDC_FRMOPTIONSCOMPILER_TXTAFXPATH           1016
-#Define IDC_FRMOPTIONSCOMPILER_CMDAFXPATH           1017
-
 
 #Define IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION         1000
 #Define IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION         1001
@@ -211,6 +207,17 @@
 #Define IDC_FRMVDTOOLBOX_LSTPROPERTIES              1001
 #Define IDC_FRMVDTOOLBOX_LSTEVENTS                  1002
 #Define IDC_FRMVDTOOLBOX_TABCONTROL                 1003
+#Define IDC_FRMVDTOOLBOX_COMBOCONTROLS              1004
+#Define IDC_FRMVDTOOLBOX_TEXTEDIT                   1005
+#Define IDC_FRMVDTOOLBOX_COMBO                      1006
+#Define IDC_FRMVDTOOLBOX_COMBOLIST                  1007
+#Define IDC_FRMVDTOOLBOX_LBLPROPNAME                1008
+#Define IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE            1009
+
+#Define IDC_FRMVDCOLORS_TABCONTROL                  1000
+#Define IDC_FRMVDCOLORS_LSTCUSTOM                   1001
+#Define IDC_FRMVDCOLORS_LSTCOLORS                   1002
+#Define IDC_FRMVDCOLORS_LSTSYSTEM                   1003
 
 #DEFINE IDC_FRMUSERTOOLS_LSTTOOLS                   1000
 #DEFINE IDC_FRMUSERTOOLS_CMDINSERT                  1001
@@ -257,6 +264,8 @@ CONST IDM_ADDFILETOPROJECT = 6100    ' 6100 to 6199 Popup menu will show list of
 
 dim shared as long SPLITSIZE 
 SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
+
+const LISTBOX_LINEHEIGHT = 20  ' used for ownerdrawn listboxes in the PropertyList
 
 const IDC_DESIGNFRAME   = 100
 const IDC_DESIGNFORM    = 101
@@ -340,7 +349,6 @@ enum
    CTRL_PICTURE
    CTRL_COMBOBOX
    CTRL_LISTBOX
-   CTRL_IMAGEBUTTON
    CTRL_HSCROLL
    CTRL_VSCROLL
    CTRL_TIMER
@@ -433,12 +441,16 @@ dim shared as BOOLEAN gPreparsingChanges  ' T/F preparsing had changes. Flag to 
 dim shared as BOOLEAN gFileLoading     ' T/F only parse Includes during initial file load.
 dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
 dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
+' Create a global bold font that is used in the PropertyList controls combobox and also for
+' the label that describes the property name/description.
+dim shared as HFONT ghNormalFont, ghBoldFont
 
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
-Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX
+Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX, HWND_FRMVDCOLORS
 Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG, HWND_FRMUSERTOOLS
+Dim Shared As HWnd HWND_PROPLIST_EDIT, HWND_PROPLIST_COMBO, HWND_PROPLIST_COMBOLIST
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
@@ -448,6 +460,10 @@ dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
 
 dim shared as HACCEL ghAccelUserTools
 dim shared as HCURSOR ghCursorNS
+
+' Global string to track the last accessed property/event in the PropertyList. This allows the
+' user to quickly sqitch between controls that share common properties like 'Text'.
+dim shared as CWSTR gwszPreviousPropName, gwszPreviousEventName
 
 ' PropertyList divider globals
 dim shared as long gPropDivPos
@@ -575,20 +591,84 @@ type clsLasso
 END TYPE
 
 
+enum PropertyType
+   EditEnter = 1
+   EditEnterNumericOnly
+   TrueFalse
+   ComboPicker
+   ColorPicker
+   FontPicker
+   ImagePicker
+end enum
+   
 type clsProperty
    private:
    public:
-      wszPropName  as CWSTR          ' Used for Get/Set of property value
-      wszPropValue as CWSTR
+      wszPropName    as CWSTR          ' Used for Get/Set of property value
+      wszPropValue   as CWSTR
+      wszPropDefault as CWSTR
+      PropType       as PropertyType 
 END TYPE
 
 type clsEvent
    private:
    public:
       wszEventName as CWSTR          ' Used for Get/Set of event value
-      bIsSelected  as Boolean
+      bIsSelected  as Boolean        ' User has selected this event to include into code
 END TYPE
-         
+
+Enum FontStyles
+   Normal    = 0
+   Bold      = 1
+   Italic    = 2
+   Strikeout = 4
+   Underline = 8
+End Enum
+
+Enum FontCharset
+   Default     = DEFAULT_CHARSET
+   Ansi        = ANSI_CHARSET
+   Arabic      = ARABIC_CHARSET
+   Baltic      = BALTIC_CHARSET
+   ChineseBig5 = CHINESEBIG5_CHARSET
+   EastEurope  = EASTEUROPE_CHARSET
+   GB2312      = GB2312_CHARSET
+   Greek       = GREEK_CHARSET
+   Hangul      = HANGUL_CHARSET
+   Hebrew      = HEBREW_CHARSET
+   Johab       = JOHAB_CHARSET
+   Mac         = MAC_CHARSET
+   OEM         = OEM_CHARSET
+   Russian     = RUSSIAN_CHARSET
+   Shiftjis    = SHIFTJIS_CHARSET
+   Symbol      = SYMBOL_CHARSET
+   Thai        = THAI_CHARSET
+   Turkish     = TURKISH_CHARSET
+   Vietnamese  = VIETNAMESE_CHARSET
+End Enum
+
+enum
+   COLOR_CUSTOM = 1
+   COLOR_COLORS
+   COLOR_SYSTEM
+end enum
+    
+type clsColors
+   private:
+   public:
+      wszColorName as CWSTR          
+      ColorType    as long       ' COLOR_QUICK, COLOR_SYSTEM
+      ColorValue   as COLORREF
+      declare function SetColor( byref wszColorName as wstring, byval ColorType as long, byval ColorValue as COLORREF) as long
+END TYPE
+function clsColors.SetColor( byref wszColorName as wstring, byval ColorType as long, byval ColorValue as COLORREF) as Long
+   this.wszColorName = wszColorName
+   this.ColorType    = ColorType   ' COLOR_QUICK, COLOR_SYSTEM
+   this.ColorValue   = ColorValue  ' COLORREF
+   function = 0
+end function
+dim shared gColors(any) as clsColors
+
 
 type clsControl
    private:
@@ -596,16 +676,29 @@ type clsControl
    public:
       hWindow       as hwnd
       ControlType   as long 
+      AfxButtonPtr  as CXPButton Ptr   ' we use XPButton rather than built in Windows button
       IsSelected    as Boolean
       IsActive      as Boolean
-      SuspendLayout as Boolean    ' prevent layout properties from being acted on individually (instead treat as a group)
-      rcHandles(1 to 8) as RECT         ' 8 grab handles
+      SuspendLayout as Boolean         ' prevent layout properties from being acted on individually (instead treat as a group)
+      rcHandles(1 to 8) as RECT        ' 8 grab handles
       Properties(Any) As clsProperty
       Events(Any) As clsEvent
+      hBackBrush    as HBRUSH          ' needed for STATIC/LABEL controls (destroyed in destructor)
+      Declare Destructor
 END TYPE
+destructor clsControl
+   if this.hBackBrush then DeleteBrush(this.hBackBrush)
+END DESTRUCTOR
 
 ' Global array to hold cut/copy/paste controls
 dim shared gCopyControls(any) as clsControl
+
+type clsTabOrder
+   private:
+   public:
+      pCtrl as clsControl ptr
+      TabIndex   as Long        ' 999999 if TabStop=False or TabIndex property doesn't exist
+END TYPE
 
 Type clsCollection
    Private:
@@ -641,6 +734,7 @@ Type clsDocument
    Public:
       IsDesigner       As BOOLEAN
       IsNewFlag        As BOOLEAN
+      LoadingFromFile  as Boolean
       
       ' 2 Scintilla controls to accommodate split editing
       ' hWindow(0) is our MAIN control (bottom)
@@ -859,10 +953,10 @@ Type clsConfig
       StartupMaximized     As Long = False
       FBWINCompiler32      As CWSTR
       FBWINCompiler64      As CWSTR
-      AfxPath              As CWSTR
       CompilerSwitches     As CWSTR
       CompilerHelpfile     As CWSTR
       Win32APIHelpfile     As CWSTR
+      WinFBXPath           as CWSTR
       RunViaCommandWindow  As Long = False
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
@@ -878,7 +972,8 @@ Type clsConfig
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
       declare Function LoadCodetips( ByRef sFilename As String ) as boolean
-      declare Function LoadCodetipsWinAPI( ByRef sFilename As String ) as boolean
+      declare Function LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI as boolean  ) as boolean
+      declare Function LoadCodetipsVD( ByRef sFilename As String ) as boolean
 End Type
 
 

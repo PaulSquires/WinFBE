@@ -113,7 +113,7 @@ function LoadPreparseDatabase( byref sFilename as string ) as boolean
       end with
       
       ' Jose's Afx functions define Left/Right/Val in several files. We don't want
-      ' these definitions to override FB's builtin definitions, so on't add them.
+      ' these definitions to override FB's builtin definitions, so don't add them.
       select case ucase(parser.funcName)
          CASE "LEFT", "RIGHT", "VAL"
          case else   
@@ -180,7 +180,7 @@ function PreparseFolder( byval wszIncludePath as CWSTR, byval wszSubFolder as CW
                ' Filter out known folders that we are not interested in parsing.
                select case ucase(pFinder.FilenameX)
                   case "AL", "ALLEGRO", "ALLEGRO5", "CUNIT", "CURSES", "DOS", "GDK-PIXBUF"
-                  case "GRX", "GSL", "GTK", "GTKGL", "WIN", "X11"
+                  case "GRX", "GSL", "GTK", "GTKGL", "WIN", "X11", "WINFORMSX"
                   CASE else
                      wszSubFolder = mid(pFinder.FilePath, len(wszIncludePath)+1)
                      PreparseFolder(wszIncludePath, wszSubFolder)

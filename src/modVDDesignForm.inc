@@ -345,8 +345,10 @@ function DrawGrabHandles( byval hDC as HDC, _
                RoundRect(hDC, pCtrl->rcHandles(ii).left, pCtrl->rcHandles(ii).top, _
                               pCtrl->rcHandles(ii).right, pCtrl->rcHandles(ii).bottom, 2, 2 )
             else
+               ' Make the non-active control grab handles a little smaller so as not to 
+               ' visually overpower the active control's white handles.
                Rectangle(hDC, pCtrl->rcHandles(ii).left, pCtrl->rcHandles(ii).top, _
-                              pCtrl->rcHandles(ii).right, pCtrl->rcHandles(ii).bottom )
+                              pCtrl->rcHandles(ii).right-2, pCtrl->rcHandles(ii).bottom-2 )
             END IF
          NEXT
       END IF
@@ -398,6 +400,7 @@ function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
       pDoc->bSizing = true
       pDoc->pCtrlAction = pCtrl
       GetWindowRect(pDoc->pCtrlAction->hWindow, @pDoc->rcSize)
+      pDoc->Controls.SetActiveControl(pDoc->pCtrlAction->hWindow)
    else
       ' #2: Determine what control/form was clicked on
       dim as hwnd hWndCtrl = RealChildWindowFromPoint(pDoc->hWndForm, pt)
@@ -488,7 +491,12 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
          Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
          SetRect(@rcCtrl, pWindow->UnScaleX(rcLasso.Left), pWindow->UnScaleY(rcLasso.Top), _
                          pWindow->UnScaleX(rcLasso.Right), pWindow->UnScaleY(rcLasso.Bottom))
-         CreateToolboxControl( pDoc, GetActiveToolboxControlType, rcCtrl )
+         pCtrl = CreateToolboxControl( pDoc, GetActiveToolboxControlType, rcCtrl )
+         pDoc->UserModified = true
+         pDoc->bRegenerateCode = true
+         pDoc->Controls.SelectControl(pCtrl->hWindow)
+         pDoc->Controls.SetActiveControl(pCtrl->hWindow)
+         DisplayPropertyList(pDoc)
       end if   
    end if      
     
@@ -523,6 +531,8 @@ function HandleDesignerRButtonDown( ByVal HWnd As HWnd ) as LRESULT
 
    ' Call LButtonDown to select control
    HandleDesignerLButtonDown(HWnd) 
+   ClipCursor(0)
+   ReleaseCapture
 
    GetCursorPos(@pt)
    pCtrl = pDoc->Controls.GetActiveControl
@@ -616,7 +626,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       SetControlProperty(pDoc->pCtrlAction, "TOP", str(rc.top))
       SetControlProperty(pDoc->pCtrlAction, "WIDTH", str(rc.right - rc.left))
       SetControlProperty(pDoc->pCtrlAction, "HEIGHT", str(rc.bottom - rc.top))
-      ApplyControlProperties(pDoc->pCtrlAction)
+      ApplyControlProperties(pDoc, pDoc->pCtrlAction)
       pDoc->pCtrlAction->SuspendLayout = false
       
       ' Indicate that the file is now dirty and will need to be saved
@@ -693,7 +703,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
             pCtrl->SuspendLayout = true
             SetControlProperty(pCtrl, "LEFT", str(pDoc->rcSize.left))
             SetControlProperty(pCtrl, "TOP", str(pDoc->rcSize.top))
-            ApplyControlProperties(pCtrl)
+            ApplyControlProperties(pDoc, pCtrl)
             pCtrl->SuspendLayout = false
          END IF
       next
@@ -741,7 +751,7 @@ Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
    SaveDC hDC
 
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
-   if pDoc THEN 
+   if pDoc THEN
       ' Draw any blue snap lines
       SelectObject(hDC, hPen)
       MoveToEx(hDC, pDoc->ptBlueStart.x, pDoc->ptBlueStart.y, 0)
@@ -817,6 +827,31 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
          Function = nHitTest    ' Return the default code from the default window handler.
          Exit Function
                               
+      case WM_CTLCOLORSTATIC, WM_CTLCOLOREDIT, WM_CTLCOLORBTN, WM_CTLCOLORLISTBOX 
+         ' wParam: HDC of the control. 
+         ' lParam: Handle to the control.
+         ' Need to determine the child control handle that is sending the request to be painted.
+         dim pCtrl as clsControl ptr 
+         dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
+         if pDoc THEN 
+            pCtrl = pDoc->Controls.GetCtrlPtr(cast(hwnd, lParam) )
+            if pCtrl then
+               dim pProp as clsProperty ptr
+               pProp = GetControlPropertyPtr(pCtrl, "FORECOLOR")
+               if pProp then 
+                  SetTextColor(cast(HDC, wParam), GetRGBColorFromProperty(pProp))
+               end if
+               pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
+               if pProp then 
+                  dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+                  SetBkColor(cast(HDC, wParam), clrBack)
+                  if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
+                  pCtrl->hBackBrush = CreateSolidBrush(clrBack)
+                  Return Cast(LRESULT, pCtrl->hBackBrush)
+               end if
+            end if   
+         end if
+   
    End Select
 
    ' for messages that we don't deal with
@@ -845,29 +880,24 @@ FUNCTION Control_SubclassProc( BYVAL hwnd   AS HWND, _                 ' Control
          FUNCTION = DLGC_WANTALLKEYS
          EXIT FUNCTION
 
-      case WM_RBUTTONDOWN: HandleDesignerRButtonDown(pDoc->hWndForm)
-      case WM_LBUTTONDOWN: HandleDesignerLButtonDown(pDoc->hWndForm)
-      case WM_LBUTTONUP:   HandleDesignerLButtonUp(pDoc->hWndForm)
+      case WM_RBUTTONDOWN: HandleDesignerRButtonDown(pDoc->hWndForm): return CTRUE
+      case WM_LBUTTONDOWN: HandleDesignerLButtonDown(pDoc->hWndForm): return CTRUE
+      case WM_LBUTTONUP:   HandleDesignerLButtonUp(pDoc->hWndForm): return CTRUE
       case WM_MOUSEMOVE:   HandleDesignerMouseMove(pDoc->hWndForm)
 
-'      CASE WM_KEYDOWN
-'         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
-'            CASE VK_ESCAPE
-'               SendMessage(GetParent(hwnd), WM_CLOSE, 0, 0)
-'               EXIT FUNCTION
-'         END SELECT
-
       Case WM_MOUSEACTIVATE
-         ' Defeat this message so that mouse clicks do not activate the control
+         ' Defeat this message so that mouse clicks do not activate the control. However, we
+         ' do need to set focus to the control in order to allow keyboard movem/resize.
+         SetFocus(hwnd) 
          Function = MA_NOACTIVATE: uMsg = WM_NULL
          Exit Function
 
       Case WM_SETCURSOR
-         Function = TRUE: uMsg = WM_NULL
+         Function = CTRUE: uMsg = WM_NULL
          Exit Function
           
       Case WM_SETFOCUS
-         ' Defeat the caret activation for the RichEdit Control, for some
+         ' Defeat the caret activation, for some
          ' reason MA_NOACTIVATE does not work for right clicks.
          Function = 0: uMsg = WM_NULL
          Exit Function

@@ -86,7 +86,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Perform some pre-compile checks to see if we should continue.
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   gConfig.AfxPath         = ProcessFromCurdrive(gConfig.AfxPath)
    if gConfig.Builds(idxBuild).Is32bit then
       fCompile32 = True: fCompile64 = False
       gCompile.CompilerPath = gConfig.FBWINcompiler32
@@ -144,10 +143,53 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
       
       ' Copy the contents of the active document to the temporary source file.
+      ' Save text buffer to disk by directly accessing buffer rather
+      ' saving it to an intermediary string variable first.
+      Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(pDocMain->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
+      dim as long sciCodePage = SciExec(pDocMain->hWindow(0), SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
+      
       f = freefile
-      open gCompile.MainFilename for output as #f
-      put #f, , pDocMain->GetText
+      open gCompile.MainFilename for binary as #f
+      if Err > 0 then 
+         ' error saving file
+         print "Error saving file: "; gCompile.MainFilename
+      else
+         select CASE pDocMain->FileEncoding
+            case FILE_ENCODING_ANSI
+               if sciCodePage = 0 THEN    
+                  put #f, , *psz     ' no conversion necessary
+               else
+                  ' need to convert
+                  put #f, , Utf8ToAscii(*psz)
+               end if    
+
+            case FILE_ENCODING_UTF8_BOM
+               ' Output the BOM first
+               put #f, , chr(&HEF, &HBB, &HBF)
+               if sciCodePage = SC_CP_UTF8 THEN    
+                  ' no conversion necessary
+                  put #f, , *psz
+               else
+                  ' need to convert
+                  put #f, , AnsiToUtf8(*psz)
+               end if    
+
+            case FILE_ENCODING_UTF16_BOM
+               ' Output the BOM first
+               put #f, , chr(&HFF, &HFE)
+               if sciCodePage = SC_CP_UTF8 THEN    
+                  ' convert utf8 to utf16
+                  put #f, , Utf8ToUnicode(*psz)
+               else
+                  ' need to convert ansi to unicode
+                  put #f, , WStr(*psz)
+               end if    
+               
+            CASE ELSE
+         END SELECT
+      end if
       close #f
+
    else
       gCompile.MainFilename = pDocMain->DiskFilename
       gCompile.MainName     = AfxStrPathname("NAME", pDocMain->DiskFilename)
@@ -156,18 +198,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    gCompile.ResourceFile = WStr("")    ' default that there is no resource
    gCompile.CompileFlags = gConfig.Builds(idxBuild).wszOptions
-   
+
    ' If the path to the WinFBX (Afx) library is valid then add that path
    ' as a -i switch to the compiler.
-   if AfxIsFolder(gConfig.AfxPath) THEN
-      gCompile.CompileFlags = gCompile.CompileFlags + " -i " + chr(34) + gConfig.AfxPath + chr(34)
-   else
-      ' WinFBX was not specified in the compiler setup so let's look for it
-      if AfxIsFolder(AfxGetExePathName & "src") then
-         gCompile.CompileFlags = gCompile.CompileFlags + " -i " + _
-              chr(34) + AfxGetExePathName & "src" + chr(34)
-      END IF
-   END IF
+   if AfxIsFolder(gConfig.WinFBXPath) THEN
+      gCompile.CompileFlags = gCompile.CompileFlags + " -i " + chr(34) + gConfig.WinFBXPath + chr(34)
+   end if
    
    If gApp.IsProjectActive Then
       Dim pDocResource As clsDocument Ptr = gApp.Projects(idx).GetResourceDocumentPtr()

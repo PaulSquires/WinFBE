@@ -1,3 +1,5 @@
+declare function GetActivePropertyPtr() as clsProperty ptr
+declare function GetActiveEventPtr() as clsEvent ptr
 declare function GenerateCode( byval pDoc as clsDocument ptr ) as long
 declare function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
 declare function GetControlType( byval wszControlName as CWSTR ) as long
@@ -11,7 +13,7 @@ declare function KeyboardResizeControls( byval pDoc as clsDocument ptr, byval vK
 declare function KeyboardMoveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
 declare function KeyboardCycleActiveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
 declare function GetControlRECT( byval pCtrl as clsControl ptr ) as RECT
-declare function ApplyControlProperties( byval pCtrl as clsControl ptr ) as Long
+declare function ApplyControlProperties( byval pDoc as clsDocument ptr, byval pCtrl as clsControl ptr ) as Long
 declare function GetControlProperty( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as CWSTR
 declare function SetControlProperty( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR, byval wszPropValue as CWSTR) as long
 declare function SetControlEvent( byval pCtrl as clsControl ptr, byval wszEventName as CWSTR, byval bIsSelected as boolean ) as long

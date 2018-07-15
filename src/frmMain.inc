@@ -920,35 +920,35 @@ function OnCommand_DesignerAlign( byval HWND as HWND, byval id as long) as LRESU
          select CASE id
             case IDM_ALIGNLEFTS
                SetControlProperty(pCtrl, "LEFT", str(rcActive.left))
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNTOPS
                SetControlProperty(pCtrl, "TOP", str(rcActive.top))
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNRIGHTS
                SetControlProperty(pCtrl, "LEFT", str(rcctrl.left + (rcActive.right-rcCtrl.right)) )
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNBOTTOMS 
                SetControlProperty(pCtrl, "TOP", str(rcCtrl.top + (rcActive.bottom-rcCtrl.bottom)) )
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNCENTERS  
                SetControlProperty(pCtrl, "LEFT", _
                   str(rcActive.Left + (nWidthActive / 2) - ( nWidth / 2 )) )
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNMIDDLES  
                SetControlProperty(pCtrl, "TOP", _
                   str(rcActive.Top + (nHeightActive / 2) - ( nHeight / 2 )) )
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_SAMEWIDTHS  
                SetControlProperty(pCtrl, "WIDTH", str(nWidthActive))
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_SAMEHEIGHTS
                SetControlProperty(pCtrl, "HEIGHT", str(nHeightActive))
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
             case IDM_SAMEBOTH
                pCtrl->SuspendLayout = true
                SetControlProperty(pCtrl, "WIDTH", str(nWidthActive))
                SetControlProperty(pCtrl, "HEIGHT", str(nHeightActive))
-               ApplyControlProperties(pCtrl)
+               ApplyControlProperties(pDoc, pCtrl)
                pCtrl->SuspendLayout = false
          END SELECT
       END IF
@@ -1010,18 +1010,18 @@ function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRES
          case IDM_CENTERHORIZ
             nLeft = val(GetControlProperty(pCtrl, "LEFT"))
             SetControlProperty(pCtrl, "LEFT", str(nLeft-nHorizSpacing))
-            ApplyControlProperties(pCtrl)
+            ApplyControlProperties(pDoc, pCtrl)
          case IDM_CENTERVERT
             nTop  = val(GetControlProperty(pCtrl, "TOP"))
             SetControlProperty(pCtrl, "TOP", str(nTop-nVertSpacing))
-            ApplyControlProperties(pCtrl)
+            ApplyControlProperties(pDoc, pCtrl)
          case IDM_CENTERBOTH   
             nLeft = val(GetControlProperty(pCtrl, "LEFT"))
             nTop  = val(GetControlProperty(pCtrl, "TOP"))
             pCtrl->SuspendLayout = true
             SetControlProperty(pCtrl, "LEFT", str(nLeft-nHorizSpacing))
             SetControlProperty(pCtrl, "TOP", str(nTop-nVertSpacing))
-            ApplyControlProperties(pCtrl)
+            ApplyControlProperties(pDoc, pCtrl)
             pCtrl->SuspendLayout = false
       END SELECT
    next
@@ -1446,7 +1446,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                pCtrl->IsSelected = false
                
                pCtrl->SuspendLayout = true
-               ApplyControlProperties( pCtrl )
+               ApplyControlProperties( pDoc, pCtrl )
                pCtrl->SuspendLayout = false
             NEXT
             ' Ensure the grab handles of form and controls are redrawn or hidden
@@ -1466,7 +1466,22 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
                pCtrl = pDoc->Controls.ItemAt(i)
                if pCtrl->IsSelected THEN 
+                  ' If this was a BUTTON control then we need to potentially update the form ACCEPTBUTTON 
+                  ' or CANCELBUTTON properties that depend on this button name.
+                  if pCtrl->ControlType = CTRL_BUTTON then
+                     dim as CWSTR wszCtrlName = GetControlProperty(pCtrl, "NAME")
+                     dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
+                     if pCtrlForm then
+                        If GetControlProperty(pCtrlForm, "ACCEPTBUTTON") = wszCtrlName then
+                           SetControlProperty(pCtrlForm, "ACCEPTBUTTON", "")
+                        end if    
+                        If GetControlProperty(pCtrlForm, "CANCELBUTTON") = wszCtrlName then
+                           SetControlProperty(pCtrlForm, "CANCELBUTTON", "")
+                        end if    
+                     end if
+                  end if
                   pDoc->Controls.Remove(pCtrl)
+                  pDoc->UserModified = true
                   exit for
                END IF
             NEXT
@@ -1676,7 +1691,6 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
       case IDM_USERTOOLSDIALOG:       function = frmUserTools_Show( HWND ) 
          
-      
       ''   DESIGNER MENU
       case IDM_NEWFORM:               function = OnCommand_DesignerNewForm(HWND)
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
@@ -1817,13 +1831,13 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows(HWnd)
                if pDoc then
-                  if IsDesignerView(pDoc) = false then 
+                  if IsDesignerView(pDoc) = false then  ' clicked on the code window
                      dim as hwnd hEdit = pDoc->hWindow(0)
                      dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
                      dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
                      GenerateCode(pDoc)
-                     SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
-                     SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+                     if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
+                     if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
                   END IF
                end if
          END SELECT
@@ -2469,6 +2483,11 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ghIconTick   = LoadImage( pWindow->InstanceHandle, "IMAGE_TICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
    ghIconNoTick = LoadImage( pWindow->InstanceHandle, "IMAGE_NOTICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
 
+   ' Create a global bold font that is used in the controls combobox and also for
+   ' the label that describes the property name/description.
+   ghNormalFont = pWindow->CreateFont(pWindow->DefaultFontName, pWindow->DefaultFontSize, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
+   ghBoldFont = pWindow->CreateFont(pWindow->DefaultFontName, pWindow->DefaultFontSize, 700, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
+   
    ' Create the main application topmenu
    HWND_FRMMAIN_TOPMENU = frmMain_BuildMenu(pWindow)
    SetMenu pWindow->hWindow, HWND_FRMMAIN_TOPMENU
@@ -2615,7 +2634,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                            select case GetFocus
                               case GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX), _
                                    GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES), _
-                                   GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+                                   GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
+                                   HWND_PROPLIST_EDIT
                               CASE ELSE
                                  if IsDesignerView(pDoc) then
                                     if pDoc->Controls.SelectedControlsCount > 0 then
@@ -2667,7 +2687,9 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    If ghIconGood Then DestroyIcon(ghIconGood) 
    If ghIconBad  Then DestroyIcon(ghIconBad)
    if ghAccelUserTools THEN DestroyAcceleratorTable(ghAccelUserTools)
-
+   if ghNormalFont then DeleteFont(ghNormalFont)
+   if ghBoldFont   then DeleteFont(ghBoldFont)
+   
    if gApp.pImageAutocompleteBaseType then deallocate(gApp.pImageAutocompleteBaseType)
    if gApp.pImageAutocompleteClass    then deallocate(gApp.pImageAutocompleteClass)
    if gApp.pImageAutocompleteMethod   then deallocate(gApp.pImageAutocompleteMethod)

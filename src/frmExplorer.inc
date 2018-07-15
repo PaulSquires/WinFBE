@@ -436,6 +436,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_CHILD Or iif(gConfig.ShowExplorer, WS_VISIBLE, 0) Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
+
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
    pWindow->SetFont( "Segoe UI Semibold", 9)
@@ -459,6 +460,13 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
+
+      ' Use the new style Explorer Treeview (triangles instead of boxes).
+      ' Set an undocumented extended style that enables the treeview glyphs to resize
+      ' according to the high dpi setting.
+      ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
+      SendMessage(hTree, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
+      SetWindowTheme(hTree, @wstr("EXPLORER"), 0)
 
       ' items that are initially checked will appear checked (must add TVS_CHECKBOXES after control is created)
       SetWindowLongPtr( hTree, GWL_STYLE, GetWindowLongPtr(hTree, GWL_STYLE) OR TVS_CHECKBOXES )

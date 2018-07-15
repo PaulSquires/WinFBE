@@ -151,11 +151,6 @@ Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 
    Toolbar_AddSeparator hToolBar
 
-'   i = AfxGdipAddIconFromRes(hImageListNormal, hInst, "IMAGE_TB_HELP")
-'   i = AfxGdipAddIconFromRes(hImageListHot, hInst, "IMAGE_TB_HELP")
-'   i = AfxGdipAddIconFromRes(hImageListDisabled, hInst, "IMAGE_TB_HELP", 10, True)
-'   Toolbar_AddButton hToolBar, i, IDM_HELP
-
    SendMessage hToolBar, TB_SETIMAGELIST, 0, Cast(LPARAM, hImageListNormal)
    SendMessage hToolBar, TB_SETDISABLEDIMAGELIST, 0, Cast(LPARAM, hImageListDisabled)
    SendMessage hToolBar, TB_SETHOTIMAGELIST, 0, Cast(LPARAM, hImageListHot)
@@ -246,55 +241,64 @@ Function frmMain_ChangeToolbarButtonsState() As Long
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then hEdit = pDoc->hWndActiveScintilla
 
-   ' Enables or disables toolbar buttons
-   If IsWindow(hEdit) Then
+   ' Enable/Disable depending on if Visual Designer or Code Editor
+   if (cbool(pDoc <> 0)) andalso (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
       FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FIND)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REPLACE)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_INDENTBLOCK)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNINDENTBLOCK)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
-   
-      If cbool(SciExec(hEdit, SCI_GETMODIFY, 0, 0)) = false and (pDoc->UserModified = false) Then 
+      If pDoc->UserModified = false Then 
          FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
-      Else 
-         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
-      End If
-   
-      startSelPos = SciExec(hEdit, SCI_GETSELECTIONSTART, 0, 0)
-      endSelPos   = SciExec(hEdit, SCI_GETSELECTIONEND, 0, 0)
-      If startSelPos = endSelPos Then
-         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
-         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
-      Else
-         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
-         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
-      End If
-   
-      If SciExec(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
-         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE) 
-      Else 
-         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
-      End If
-      
-      If SciExec(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
-         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO) 
-      Else 
-         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
-      End If
-   
-      If SciExec(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
-         FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO) 
-      Else 
-         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
       End If
 
+   else
+      ' Code editor is active
+      ' Enables or disables toolbar buttons
+      If IsWindow(hEdit) Then
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FIND)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REPLACE)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_INDENTBLOCK)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNINDENTBLOCK)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_COMMENTBLOCK)
+         FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNCOMMENTBLOCK)
+      
+         If cbool(SciExec(hEdit, SCI_GETMODIFY, 0, 0)) = false and (pDoc->UserModified = false) Then 
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE) 
+         End If
+      
+         startSelPos = SciExec(hEdit, SCI_GETSELECTIONSTART, 0, 0)
+         endSelPos   = SciExec(hEdit, SCI_GETSELECTIONEND, 0, 0)
+         If startSelPos = endSelPos Then
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_COPY)
+         End If
+      
+         If SciExec(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_PASTE) 
+         End If
+         
+         If SciExec(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_UNDO) 
+         End If
+      
+         If SciExec(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_REDO) 
+         End If
+   
+         ' If the Explorer treeview window is visible then at least one document or project is open
+         if IsWindowVisible( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE) ) THEN
+            FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
+         else   
+            FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
+         END IF
+   
+      end if
    End If
    
    If gApp.IsProjectActive OrElse cBool(IsWindow(hEdit)) Then
@@ -318,14 +322,7 @@ Function frmMain_ChangeToolbarButtonsState() As Long
    Else
       FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_RUNEXE)
    End If
-   
-   ' If the Explorer treeview window is visible then at least one document or project is open
-   if IsWindowVisible( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE) ) THEN
-      FF_Toolbar_EnableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
-   else   
-      FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FUNCTIONLIST)
-   END IF
-   
+      
    Function = 0
 End Function
 

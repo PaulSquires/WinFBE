@@ -1,3 +1,10 @@
+Version 1.6.5 (July 15, 2018)
+- Added: Visual Designer enabled but it is limited and experiemental at this point.
+- Added: FreeBASIC Compiler nightly build July 3, 2018 (32 and 64 bit versions).
+- Added: Extended style to the Explorer treeview to give it modern looking icons rather than +/- boxes.
+- Changed: Removed WinFBX include paths from "Environment Options" / "Compiler Setup". No longer needed.
+- Fixed: Quick Run was failing when invoked against unicode editor files. Temp file now output using correct unicode settings.
+
 Version 1.6.4 (June 3, 2018)
 - Fixed: Tweak code related Codetips to fix several regressions preventing TYPE elements from displaying.
 

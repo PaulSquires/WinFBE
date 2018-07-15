@@ -33,12 +33,13 @@
 #Include Once "Afx\AfxMenu.inc" 
 #Include Once "Afx\AfxCom.inc" 
 #INCLUDE ONCE "Afx\CFindFile.inc"
+#Include Once "Afx\CXpButton.inc"
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.6.4") 
+#Define APPVERSION    WStr("1.6.5") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -46,7 +47,7 @@ Using Afx
    #Define APPBITS WStr(" (32-bit)")
 #endif
 
-'#Define USE_VISUAL_DESIGNER 1
+#Define USE_VISUAL_DESIGNER 1
 
 #Include Once "modScintilla.bi"
 #Include Once "modDeclares.bi"         ' TYPES, DEFINES, etc
@@ -63,10 +64,15 @@ Using Afx
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
 #Include Once "clsLasso.inc"
+#Include Once "modVDRoutines.inc"
+#Include Once "modVDProperties.inc"
+#Include Once "modVDApplyProperties.inc"
+#Include Once "modVDColors.inc"
 #Include Once "modVDControls.inc"
 #Include Once "modVDDesignForm.inc"
 #Include Once "modVDDesignFrame.inc"
 #Include Once "modVDDesignMain.inc"
+#Include Once "modVDToolbox.inc"
 #Include Once "modParser.inc"
 #Include Once "modAutoInsert.inc"
 #Include Once "modHelp.inc"
@@ -99,7 +105,6 @@ Using Afx
 #Include Once "frmFindInFiles.inc"
 #Include Once "frmFindReplace.inc"
 #Include Once "frmProjectOptions.inc"
-#Include Once "frmVDToolbox.inc"
 #Include Once "frmMain.inc"
 
 
@@ -174,6 +179,8 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
       end if
       ' Load the Codetips file
       gConfig.LoadCodetips( AfxGetExePathName & "Settings\codetips.ini" )
+      ' Load the visual designer codetips (WinFormsX library)
+      gConfig.LoadCodetipsVD( AfxGetExePathName & "Settings\codetips_visualdesigner.ini" )
    end if
    
 
