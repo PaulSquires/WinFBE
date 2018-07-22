@@ -391,6 +391,7 @@ Enum
    MSG_USER_TOGGLE_TVCHECKBOXES
    MSG_USER_SHOWAUTOCOMPLETE
    MSG_USER_APPENDEQUALSSIGN
+   MSG_USER_GENERATECODE
    IDM_CREATE_THEME, IDM_IMPORT_THEME, IDM_DELETE_THEME
    IDM_FILE, IDM_FILENEW 
    IDM_FILEOPEN, IDM_FILECLOSE, IDM_FILECLOSEALL, IDM_FILESAVE, IDM_FILESAVEAS
@@ -762,6 +763,7 @@ Type clsDocument
       ptBlueStart      as POINT     ' Start of blue line for snapping
       ptBlueEnd        as POINT     ' End of blue line for snapping
       SnapUpWait       as long      ' #pixels of movement to wait until snap operation ends
+      wszCodeGen       as CWSTR     ' Code generated via 
       
       ' Code document related
       ProjectIndex     as long      ' array index into gApp.Projects
@@ -794,7 +796,7 @@ Type clsDocument
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
       declare function GenerateDesignerCode() as long
-      declare function ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as CWSTR ) as CWSTR 
+      declare function ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as wstring ) as CWSTR
       declare function CreateDesignerString() as CWSTR 
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
       Declare Function ApplyProperties() As Long

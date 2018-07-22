@@ -269,6 +269,35 @@ FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
 
 END FUNCTION
 
+' ========================================================================================
+' Return if string is UTF8 encoded
+' ========================================================================================
+'function isutf8( byval _string as  zstring ptr ) as boolean
+'     if _string = 0 then return 0
+'    if left(*_string,2)= wchr(&hFF,&hFE) or left(*_string,2)=wchr(&hFE,&hFF) then print "utf16":exit function 'utf-16 boms
+'     if left(*_string,3)=wchr(&hEF,&hBB,&hBF) then return 1  'utf-8 bom
+'   dim bytes as const ubyte ptr = cptr(const ubyte ptr, _string)
+'   while *bytes
+'      if (((bytes[0] = &h09) orelse (bytes[0] = &h0A)) orelse (bytes[0] = &h0D)) orelse ((&h20 <= bytes[0]) andalso (bytes[0] <= &h7E)) then
+'         bytes += 1
+'         continue while
+'      end if
+'      if ((&hC2 <= bytes[0]) andalso (bytes[0] <= &hDF)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF)) then
+'         bytes += 2
+'         continue while
+'      end if
+'      if ((((bytes[0] = &hE0) andalso ((&hA0 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) orelse ((((((&hE1 <= bytes[0]) andalso (bytes[0] <= &hEC)) orelse (bytes[0] = &hEE)) orelse (bytes[0] = &hEF)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF)))) orelse (((bytes[0] = &hED) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &h9F))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) then
+'         bytes += 3
+'         continue while
+'      end if
+'      if (((((bytes[0] = &hF0) andalso ((&h90 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF))) orelse (((((&hF1 <= bytes[0]) andalso (bytes[0] <= &hF3)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF)))) orelse ((((bytes[0] = &hF4) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &h8F))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF))) then
+'         bytes += 4
+'         continue while
+'      end if
+'      return 0
+'   wend
+'   return 1
+'end function
 
 ' ========================================================================================
 ' Return text description of the specified file encoding
@@ -290,17 +319,19 @@ end function
 ' ========================================================================================
 function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
    
+   if pDoc = 0 then return true
+   
    ' Load the entire file into a string
-   dim as long f = freefile
-   If Open( wszFilename for Binary Access Read As #f ) = 0 Then 
-      If LOF(f) > 0 Then
-         txtBuffer = String(LOF(f), 0)
-         Get #f, , txtBuffer
-      End If
-   else
-      return true  ' error opening file
-   end if
-   close #f   
+   DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN return true
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   txtBuffer = String(dwFileSize, 0)
+   DIM bSuccess AS LONG = ReadFile(hFile, strptr(txtBuffer), dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess = FALSE THEN return true
+
 
    ' Check for BOM signatures
    if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
@@ -323,9 +354,19 @@ function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as
          ' No conversion needed. clsDocument ApplyProperties will set
          ' the editor to UTF8 code.
       case FILE_ENCODING_UTF16_BOM
+         ' Convert the whole buffer to UTF-16 unicode string
+         dim as CWSTR wszText = string(len(txtBuffer),0)
+         MemCpy( CAST(any PTR, wszText.m_pBuffer), strptr(txtBuffer), len(txtBuffer))
+
+         ' Need to parse wszText to remove/process any possible visual designer code. Only
+         ' the non-VD text is returned. We also skip over any codegen code.
+         wszText = pDoc->ParseDesignerString(HWND_FRMMAIN, wszText)
+
          ' Convert to UTF8 so it can display in the editor
          ' Need to pass a WSTRING pointer to the conversion function.
-         txtBuffer = UnicodeToUtf8( cast(WSTRING ptr, strptr(txtBuffer)) )
+         'txtBuffer = UnicodeToUtf8( wszText )
+         txtBuffer = wszText.utf8
+
    END select
       
    function = false

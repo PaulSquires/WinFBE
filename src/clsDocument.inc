@@ -79,7 +79,8 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
    '      out the DesignFrame whenever the tabcontrol switches between design/code view.
    '
    this.IsDesigner = true
-
+   this.FileEncoding = FILE_ENCODING_UTF16_BOM
+   
    dim rc as RECT
    
    ' (1) Create the DesignMain window
@@ -247,11 +248,8 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
             this.LoadingFromFile = true
-            dim sText as string
+            dim sText as string  ' this will be a UTF-8 encoded string
             if GetFileToString(*pwszFile, sText, @this) = false then
-               ' Need to parse sText to remove/process any possible visual designer code. Only
-               ' the non-VD text is returned.
-               sText = this.ParseDesignerString(hWndParent, sText)
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
             else
@@ -277,8 +275,9 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       ' Display the ToolBox/PropertyList
       frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
       DisplayPropertyList(@this)
-      ' Set flag to regenerate code for the visual designer 
+      ' Regenerate code for the visual designer 
       this.bRegenerateCode = true
+      GenerateCode(@this)
    end if   
 
    this.ApplyProperties()
@@ -344,42 +343,63 @@ Function clsDocument.InsertFile() As BOOLEAN
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' Parse all of the file's code to remove and process any visual designer specific code.
 ' Returns a string representing just the code only (visual designer metastatements removed).
 ' ========================================================================================
-function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as CWSTR ) as CWSTR 
+function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref wszAllText as wstring ) as CWSTR
+   
+   ' NOTE: The incoming wszAllText string is UTF-16 encoded. The resulting string that
+   ' is returned from this function is also UTF-16 encoded. All WinFBE form files
+   ' must be unicode encoded.
+   
+   ' This function filters out all form metadata as well as any code generated code between
+   ' the two codegen tags:
+   '    ' WINFBE_CODEGEN_START
+   '    ' WINFBE_CODEGEN_END
+
+   
    dim pCtrl as clsControl ptr
    dim pCtrlActive as clsControl ptr
    
    dim as RECT rc, rcCtrl
-   dim as CWSTR wst, wszControlType, wszPropName, wszPropValue, wszEventName
+   dim as CWSTR wszControlType, wszPropName, wszPropValue, wszEventName
+   dim as CWSTR wst
    dim as Long nControlType, numLines, numOffsetLines
    
    ' The first line MUST contain the identifier that this is a form file.
-   if left(sAllText, 13) = "' WINFBE FORM" then
+   if left(wszAllText, 13) = "' WINFBE FORM" then
       this.IsDesigner = true
       this.CreateDesignerWindow(hWndParent)
       numOffsetLines = 1
    else
       ' This is just a regular code file with no visual designer
       this.IsDesigner = false
-      return sAllText   
+      return wszAllText   
    END IF
    
    ' Iterate all of the lines related to the visual designer
-   numLines = AfxStrParseCount(sAllText, vbcrlf)
+   dim as long iLineStart = 1
+   dim as long iLineEnd
 
-   for i as long = 2 to numLines
-      wst = AfxStrParse(sAllText, i, vbcrlf)
+   do until iLineStart >= len(wszAllText)
+      
+      iLineEnd = instr(iLineStart, wszAllText, vbcrlf)
+      if iLineEnd = 0 then iLineEnd = len(wszAllText)  ' cr/lf not found
+      wst = mid(wszAllText, iLineStart, iLineEnd - iLineStart)   
+      iLineStart = iLineStart + len(wst) + len(vbcrlf)
       
       numOffsetLines = numOffsetLines + 1
       
       if left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
-         sAllText = ltrim(AfxStrRemain( sAllText, "' WINFBE FORM_END" ), vbcrlf)
-         return sAllText
       
+      elseif left(wst, 20) = "' WINFBE_CODEGEN_END" then
+         this.ErrorOffset = numOffsetLines 
+         wszAllText = ltrim(AfxStrRemain( wszAllText, "' WINFBE_CODEGEN_END" ), vbcrlf)
+         return wszAllText
+         
       elseif left(wst, 23) = "' WINFBE CONTROL_START " then
          ' The control type name is parse #4 (blank space)
          wszControlType = AfxStrParse(wst, 4, " ")
@@ -392,26 +412,28 @@ function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref sAllTe
          ApplyControlProperties( @this, pCtrl )
          pCtrl->SuspendLayout = false
 
-      elseif left(wst, 20) = "'   PROPERTIES_START" then
-      elseif left(wst, 18) = "'   PROPERTIES_END" then
+      'elseif left(sLine, 20) = "'   PROPERTIES_START" then
+      'elseif left(sLine, 18) = "'   PROPERTIES_END" then
 
       elseif left(wst, 16) = "'     PROP_NAME=" then
          wszPropName = mid(wst, 17)
        
       elseif left(wst, 17) = "'     PROP_VALUE=" then
-         wszPropValue = mid(wst, 18)
+         wszPropValue = mid(wst, 18)   ' utf8 encoded 
          SetControlProperty(pCtrl, wszPropName, wszPropValue)
          
-      elseif left(wst, 16) = "'   EVENTS_START" then
-      elseif left(wst, 14) = "'   EVENTS_END" then
+      'elseif left(sLine, 16) = "'   EVENTS_START" then
+      'elseif left(sLine, 14) = "'   EVENTS_END" then
 
       elseif left(wst, 17) = "'     EVENT_NAME=" then
          wszEventName = mid(wst, 18)
          SetControlEvent(pCtrl, wszEventName, true)
       end if   
 
-   NEXT
+   loop
 
+   return wszAllText
+   
 end function
 
 ' ========================================================================================
@@ -490,15 +512,9 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
       wszDesigner = this.CreateDesignerString
-      ' Also, regenerate visual designer code
       if this.bRegenerateCode then
-         dim as hwnd hEdit = this.hWindow(0)
-         dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
-         dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
-         GenerateCode(@this)
-         SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
-         SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
-      END IF
+         GenerateCode(@this)      ' Also, regenerate visual designer code
+      end if
    END IF
    
    ' Save text buffer to disk by directly accessing buffer rather
@@ -518,10 +534,8 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       select CASE this.FileEncoding
          case FILE_ENCODING_ANSI
             if sciCodePage = 0 THEN    
-               put #f, , STR(**wszDesigner)
                put #f, , *psz     ' no conversion necessary
             else
-               put #f, , STR(**wszDesigner)
                ' need to convert
                put #f, , Utf8ToAscii(*psz)
             end if    
@@ -531,10 +545,8 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             put #f, , chr(&HEF, &HBB, &HBF)
             if sciCodePage = SC_CP_UTF8 THEN    
                ' no conversion necessary
-               put #f, , wszDesigner.Utf8
                put #f, , *psz
             else
-               put #f, , wszDesigner.Utf8
                ' need to convert
                put #f, , AnsiToUtf8(*psz)
             end if    
@@ -543,11 +555,13 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             ' Output the BOM first
             put #f, , chr(&HFF, &HFE)
             if sciCodePage = SC_CP_UTF8 THEN    
-               put #f, , **wszDesigner
+               put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
+               put #f, , CAST(BYTE PTR, this.wszCodeGen.m_pBuffer)[0], wszCodeGen.m_BufferLen
                ' convert utf8 to utf16
                put #f, , Utf8ToUnicode(*psz)
             else
-               put #f, , **wszDesigner
+               put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
+               put #f, , CAST(BYTE PTR, this.wszCodeGen.m_pBuffer)[0], wszCodeGen.m_BufferLen
                ' need to convert ansi to unicode
                put #f, , WStr(*psz)
             end if    

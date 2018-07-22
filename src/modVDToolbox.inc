@@ -109,7 +109,7 @@ Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    ' If the current control property being displayed has not changed then do not
    ' clear the listboxes. It only causes flicker. Instead, simply invalidate them
    ' to cause them to repaint and show most up to date property values (for example,
-   ' when controls are bing moved or resized).
+   ' when controls are being moved or resized).
    static pCtrlDisplayed as clsControl ptr
    if pCtrlDisplayed = pCtrlActive then
       AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
@@ -118,7 +118,7 @@ Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    pCtrlDisplayed = pCtrlActive
    
    dim as long idx, nCurSel
-   
+
    ' clear the combobox
    dim as hwnd hCombo = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_COMBOCONTROLS)
    Combobox_ResetContent(hCombo)
@@ -157,17 +157,17 @@ Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
       idx = Listbox_AddString(hList, wszPropName)
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
    NEXT
-   
 
    ' clear the listbox (EVENTS)
    hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS)
    ListBox_ResetContent(hList)
    ' Iterate through all events and add them to the listbox
    for i as long = lbound(pCtrlActive->Events) to ubound(pCtrlActive->Events)
-      idx = Listbox_AddString(hList, @"")
+      dim as CWSTR wszBlank = ""
+      idx = Listbox_AddString(hList, wszBlank)
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
    NEXT
-      
+
    ' Set the Property and Events listboxes to their default matches for the specified control
    ' or to the most previously accessed property/event should that exist.
    ShowDefaultPropertyForControl(pCtrlActive)
@@ -568,30 +568,34 @@ Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWI
             FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
 
             dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-            dim pCtrl as clsControl ptr
-            pCtrl = pDoc->Controls.ItemAt(lpdis->itemData)
-            if pCtrl then
-               SelectObject(lpdis->hDC, ghBoldFont)
-               rc = lpdis->rcItem
-               dim as CWSTR wszCtrlName = GetControlProperty(pCtrl, "NAME")
-               ' Get the size of this string because the Control type string must be drawn after this.
-               Dim nSize As SIZE
-               GetTextExtentPoint32( lpdis->hDC, wszCtrlName, Len(wszCtrlName), @nSIZE)
-               rc.left = rc.left + pWindow->ScaleX(4)
-               DrawText( lpdis->hDC, _
-                         wszCtrlName, _
-                         -1, Cast(lpRect, @rc), _
-                         DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
             
-               ' Determine the Control Type
-               SelectObject(lpdis->hDC, ghNormalFont)
-               wszCtrlName = GetControlName(pCtrl->ControlType) & " (" & GetWinformsXClassName(pCtrl->ControlType) & ")"
-               ' Text is drawn immediately after the Control Name
-               rc.left = rc.left + nSize.cx + pWindow->ScaleX(4)
-               DrawText( lpdis->hDC, _
-                         wszCtrlName, _
-                         -1, Cast(lpRect, @rc), _
-                         DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
+            if (pDoc <> 0) andalso (lpdis->itemData < pDoc->Controls.Count) then
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+               dim pCtrl as clsControl ptr
+               pCtrl = pDoc->Controls.ItemAt(lpdis->itemData)
+               if pCtrl then
+                  SelectObject(lpdis->hDC, ghBoldFont)
+                  rc = lpdis->rcItem
+                  dim as CWSTR wszCtrlName = GetControlProperty(pCtrl, "NAME")
+                  ' Get the size of this string because the Control type string must be drawn after this.
+                  Dim nSize As SIZE
+                  GetTextExtentPoint32( lpdis->hDC, wszCtrlName, Len(wszCtrlName), @nSIZE)
+                  rc.left = rc.left + pWindow->ScaleX(4)
+                  DrawText( lpdis->hDC, _
+                            wszCtrlName, _
+                            -1, Cast(lpRect, @rc), _
+                            DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
+                
+                  ' Determine the Control Type
+                  SelectObject(lpdis->hDC, ghNormalFont)
+                  wszCtrlName = GetControlName(pCtrl->ControlType) & " (" & GetWinformsXClassName(pCtrl->ControlType) & ")"
+                  ' Text is drawn immediately after the Control Name
+                  rc.left = rc.left + nSize.cx + pWindow->ScaleX(4)
+                  DrawText( lpdis->hDC, _
+                            wszCtrlName, _
+                            -1, Cast(lpRect, @rc), _
+                            DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
+               end if
             end if
          end if
 
@@ -625,8 +629,10 @@ Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWI
 
             ' DRAW TEXT
             rc = lpdis->rcItem: rc.left = rc.left + pWindow->ScaleX(30)
-            DrawText( lpdis->hDC, gToolBox(lpdis->itemData).wszName, -1, Cast(lpRect, @rc), _
-                      DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
+            if (lpdis->itemData >= lbound(gToolBox)) andalso (lpdis->itemData <= ubound(gToolBox)) then
+               DrawText( lpdis->hDC, gToolBox(lpdis->itemData).wszName, -1, Cast(lpRect, @rc), _
+                         DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
+            end if          
          end if
 
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTPROPERTIES then
@@ -677,12 +683,15 @@ Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWI
                      END SELECT
                   end if   
                   if ucase(pCtrl->Properties(lpdis->itemData).wszPropName) = "FONT" then
-                     hFont = AfxGetWindowFont(HWND)
                      dim as LOGFONT lf
                      GetObject(ghNormalFont, sizeof(lf), @lf)
+                     dim as CWSTR wszFaceName = lf.lfFaceName
                      dim as long nHeight = lf.lfHeight
-                     lf = SetLogFontFromPropValue(wszPropValue)
-                     lf.lfHeight = nHeight
+                     dim as long nCharSet = lf.lfCharSet
+                     lf = SetLogFontFromPropValue(wszPropValue)  ' create font with bold, underline, strikeout
+                     lf.lfFaceName = wszFaceName
+                     lf.lfHeight   = nHeight
+                     lf.lfCharSet  = nCharSet
                      hFont = CreateFontIndirect(@lf)
                      SelectObject(lpdis->hDC, hFont)
                      dim as CWSTR wszFont = AfxStrParse(wszPropValue, 1, ",") & ", " & _ 

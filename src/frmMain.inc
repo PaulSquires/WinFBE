@@ -628,8 +628,10 @@ End Function
 ' Save project file to disk
 ' ========================================================================================
 Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
-
-   ' Do the actual saving to disk
+   ' Save all dirty files
+   OnCommand_FileSaveAll( HWnd )
+   
+   ' Do the actual saving to disk of the Project file
    dim idx as long = gApp.GetActiveProjectIndex() 
    gApp.Projects(idx).SaveProject(bSaveAs)
 
@@ -1481,6 +1483,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                      end if
                   end if
                   pDoc->Controls.Remove(pCtrl)
+                  pDoc->bRegenerateCode = true
                   pDoc->UserModified = true
                   exit for
                END IF
@@ -1830,16 +1833,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                end if
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows(HWnd)
-               if pDoc then
-                  if IsDesignerView(pDoc) = false then  ' clicked on the code window
-                     dim as hwnd hEdit = pDoc->hWindow(0)
-                     dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
-                     dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
-                     GenerateCode(pDoc)
-                     if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
-                     if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
-                  END IF
-               end if
+               PostMessage(hwnd, MSG_USER_GENERATECODE, 0, 0)
          END SELECT
 
          
@@ -2144,7 +2138,7 @@ Function frmMain_TabCtl_SubclassProc ( _
             if pDoc->IsDesigner then
                nCurSel = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
                nCurSel = iif(nCurSel = 0, 1, 0)
-               TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, nCurSel)
+               TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, nCurSel)
                frmMain_PositionWindows(HWND_FRMMAIN)
             END IF
          END IF
@@ -2254,6 +2248,19 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
 
       
+      case MSG_USER_GENERATECODE
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc then
+            if IsDesignerView(pDoc) = false then  ' clicked on the code window
+               dim as hwnd hEdit = pDoc->hWindow(0)
+               dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
+               dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
+               GenerateCode(pDoc)
+               if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
+               if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+            END IF
+         end if
+
       case MSG_USER_SHOWAUTOCOMPLETE
          return ShowAutocompleteList()
 

@@ -38,30 +38,63 @@ Function ParseDocument( byval idx as long, _     ' project index
    Dim As String st, st_ucase, sLine
    redim as string sLineArray(5000)   ' dynamic array 
    
+   dim as boolean bParseCodeGenString = false
+   
+ParseAgain:
    ' The incoming document may already be loaded into a clsDocument so we can simply 
    ' use that pDoc to retrieve the lines. If the pDoc = Null then we need to load
    ' the file from disk into a standard string array.
-   if pDoc THEN
-      nLineCount = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0)
-      wszFilename = pDoc->DiskFilename
-      idx = pDoc->ProjectIndex
+   if bParseCodeGenString then
+      ' Load the codegen lines into the sLineArray
+      if pDoc THEN
+         wszFilename = pDoc->DiskFilename
+         idx = pDoc->ProjectIndex
+         dim as CWSTR wst
+         dim as long iLineStart = 1
+         dim as long iLineEnd
+         nLineCount = 0
+         do until iLineStart >= len(pDoc->wszCodeGen)
+            iLineEnd = instr(iLineStart, pDoc->wszCodeGen, vbcrlf)
+            if iLineEnd = 0 then iLineEnd = len(pDoc->wszCodeGen)  ' cr/lf not found
+            wst = mid(pDoc->wszCodeGen, iLineStart, iLineEnd - iLineStart)
+            iLineStart = iLineStart + len(wst) + len(vbcrlf)
+            if nLineCount >= ubound(sLineArray) THEN
+               redim preserve sLineArray(nLineCount + 5000)
+            END IF
+            sLineArray(nLineCount) = wst   
+            nLineCount = nLineCount + 1
+         loop
+         pDoc = 0
+      end if
    else
-      ' These are often the FB/WinAPI codetip files and Include Files. Everything else in
-      ' a project would have a valid pDoc.
-      if AfxFileExists(wszFilename) = 0 THEN exit function
+      if pDoc THEN
+         nLineCount = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0)
+         wszFilename = pDoc->DiskFilename
+         idx = pDoc->ProjectIndex
+         ' Before starting to parse this document we must remove any previously saved
+         ' data that exists in the gdb2 database for this file.
+         gdb2.dbDelete(wszFilename)
+      else
+         ' These are often the FB/WinAPI codetip files and Include Files. Everything else in
+         ' a project would have a valid pDoc.
+         if AfxFileExists(wszFilename) = 0 THEN exit function
 
-      dim as long f = freefile
-      open wszFilename for input as #f
-      do until eof(f)
-         if nLineCount >= ubound(sLineArray) THEN
-            redim preserve sLineArray(nLineCount + 5000)
-         END IF
-         line input #f, sLineArray(nLineCount)
-         nLineCount = nLineCount + 1
-      loop
-      close #f
-   END IF                     
-
+         dim as long f = freefile
+         open wszFilename for input as #f
+         do until eof(f)
+            if nLineCount >= ubound(sLineArray) THEN
+               redim preserve sLineArray(nLineCount + 5000)
+            END IF
+            line input #f, sLineArray(nLineCount)
+            nLineCount = nLineCount + 1
+         loop
+         close #f
+         ' Before starting to parse this document we must remove any previously saved
+         ' data that exists in the gdb2 database for this file.
+         gdb2.dbDelete(wszFilename)
+      END IF                     
+   end if
+   
    if gFileLoading then
       SetCompileStatusBarMessage( "Parsing: " & wszFilename, 0 )
    END IF
@@ -74,11 +107,6 @@ Function ParseDocument( byval idx as long, _     ' project index
       .idxProject = idx
       .fileName   = wszFilename
    end with
-
-
-   ' Before starting to parse this document we must remove any previously saved
-   ' data that exists in the gdb2 database for this file.
-   gdb2.dbDelete(wszFilename)
 
 
    ' Analyze all lines in the file
@@ -165,6 +193,15 @@ Function ParseDocument( byval idx as long, _     ' project index
       NEXT
    next
 
+   if bParseCodeGenString = false then
+      ' Check to see if this is a visual design form. If it is, then we need
+      ' to parse the codegen string.
+      if pDoc->IsDesigner then
+         bParseCodeGenString = true
+         goto ParseAgain
+      END IF
+   END IF
+   
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
    

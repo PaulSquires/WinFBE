@@ -44,8 +44,8 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
    dim pCtrl as clsControl ptr
    dim as CWSTR wszText, wszFormName, wszCtrlName, wszPropName, wszPropValue, wszPropDefault
    dim as CWSTR wszFunction, wszAllEvents, wszPrototype, wszAllDeclares
-   dim as CWSTR wszCombinedName
-   dim as string sStartTag, sEndTag, sReplaceText
+   dim as CWSTR wszCombinedName, wszCodeGen
+   dim as CWSTR wszStartTag, wszEndTag
    dim as CWSTR DQ = chr(34)
    dim as long nStartTag, nEndTag, nPropType
    dim pData as DB2_DATA ptr
@@ -56,8 +56,10 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
    NEXT
    
    wszFormName = GetFormName(pDoc)
-   sStartTag = "' WINFBE_CODEGEN_START"
-   sEndTag   = "' WINFBE_CODEGEN_END"
+   wszStartTag = "' WINFBE_CODEGEN_START"
+   wszEndTag   = "' WINFBE_CODEGEN_END"
+
+   wszText = "#include once " & DQ & "WinFormsX\WinFormsX.bi" & DQ & vbcrlf 
 
    ''
    ''  Generate the Declares for all of the Events for the Form & Controls
@@ -81,6 +83,7 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
                
                ' If the Event/function does not already exist in code then create it now.
+               ParseDocument(pDoc->ProjectIndex, pDoc, "")
                pData = gdb2.dbFindFunction(wszFunction)
                if pData = 0 THEN
                   wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
@@ -92,6 +95,7 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
          next
       END IF
    next   
+
    
    ''
    ''  Generate the TYPE definition for the Form
@@ -114,7 +118,6 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
    wszText = wszText & _
    "end type" & vbcrlf & vbcrlf 
 
-
    ''
    ''  Generate the Constructor that defines the properties for the form and controls
    ''
@@ -126,7 +129,11 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
       if pCtrl then
          wszCtrlName = GetControlProperty(pCtrl, "NAME")
 
-         wszCombinedName = "this" & iif(pCtrl->ControlType = CTRL_FORM, "", "." & wszCtrlName.Utf8)
+         wszCombinedName = "this" 
+         if pCtrl->ControlType <> CTRL_FORM then
+            wszCombinedName = wszCombinedName & "." & **wszCtrlName
+         end if
+            
          if pCtrl->ControlType <> CTRL_FORM then 
             wszText = wszText & sp(1) & wszCombinedName & ".Parent = @this" & vbcrlf
          END IF
@@ -179,7 +186,7 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
                   case PropertyType.FontPicker
                      wszPropValue = "New wfxFont(" & SetFontClassFromPropValue(wszPropValue) & ")"
                END SELECT
-               wszText = wszText & sp(1) & wszCombinedName & "." & wszPropName.Utf8 & " = " & wszPropValue.Utf8 & vbcrlf
+               wszText = wszText & sp(1) & wszCombinedName & "." & wszPropName & " = " & wszPropValue & vbcrlf
             end if
          NEXT
          wszText = wszText & sp(1) & wszCombinedName & ".SetBounds(" & nLeft & "," & nTop & "," & nWidth & "," & nHeight & ")" & vbcrlf
@@ -222,6 +229,7 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
       end if   
    next
 
+
    ' Sort the array using a simple bubble sort
    Dim As Long lb = LBound(TabOrder)
    Dim As Long ub = UBound(TabOrder)
@@ -235,7 +243,7 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
          End If
       Next
    Loop Until bHasChanged = false
-    
+
    ' Finally, output the controls 
    for i as long = lb to ub 
       pCtrl = TabOrder(i).pCtrl
@@ -243,11 +251,10 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
          if pCtrl->ControlType <> CTRL_FORM then 
             wszCtrlName = GetControlProperty(pCtrl, "NAME")
             wszText = wszText & _
-            sp(1) & "this.Controls.Add(ControlType." & GetControlName(pCtrl->ControlType) & ", @this." & wszCtrlName.Utf8 & ")" & vbcrlf
+            sp(1) & "this.Controls.Add(ControlType." & GetControlName(pCtrl->ControlType) & ", @this." & wszCtrlName & ")" & vbcrlf
          end if
       end if
    next
-   
    
    ''
    ''  Add the form to the application
@@ -259,25 +266,13 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
    wszText = wszText & _ 
    "dim shared " & wszFormName & " as " & wszFormName & "Type" & vbcrlf
    
-   ' Get the file positions of any existing start and end tags
-   dim as hwnd hEdit = pDoc->hWindow(0)
-   SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-   nStartTag = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sStartTag), strptr(sStartTag))
-   SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-   nEndTag   = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sEndTag), strptr(sEndTag))
-   
-   sReplaceText = sStartTag & vbcrlf & _ 
-                  wszText.Utf8 & _  ' Convert the unicode CWSTR to UTF-8
-                  sEndTag & vbcrlf 
+   wszCodeGen = wszStartTag & vbcrlf & wszText & wszEndTag & vbcrlf 
                      
-   ' Save current position in order to restore it later
-   dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
-    
-   if (nStartTag = -1) andalso (nEndTag = -1) then
+   dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+   if SciMsg( pSci, SCI_GETLENGTH, 0 , 0) = 0 then
       ' If this is the first time generating code then add the boilerplate code
       ' to start the application and show the form.
-      dim as CWSTR wszHeader = _
-      "#include once " & DQ & "WinFormsX\WinFormsX.bi" & DQ & vbcrlf 
+      dim as CWSTR wszHeader
       if gApp.IsProjectActive = false then
          wszHeader = wszHeader & _
          "' You should always include a resource file that references a valid manifest.xml" & vbcrlf & _
@@ -288,24 +283,21 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
          "' one will be generated automatically." & vbcrlf & _
          "'#RESOURCE " & DQ & "resource.rc" & DQ & vbcrlf & vbcrlf 
       END IF
-      sReplaceText = wszHeader & sReplaceText & vbcrlf & _
+      wszHeader = wszHeader & vbcrlf & _
       "''" & vbcrlf & _
       "''  Remove the following Application.Run code if it used elsewhere in your application." & vbcrlf & _
       "Application.Run(" & wszFormName & ")" & vbcrlf & vbcrlf
-      pDoc->AppendText(sReplaceText)
-   else
-      ' Ensure that both tags were found
-      if (nStartTag <> -1) andalso (nEndTag <> -1) then
-         SciExec( hEdit, SCI_SETTARGETSTART, nStartTag, 0)
-         SciExec( hEdit, SCI_SETTARGETEND, nEndTag + len(sEndTag) + 2, 0)   ' add 2 to account for vbcrlf
-         SciExec( hEdit, SCI_REPLACETARGET, len(sReplaceText), strptr(sReplaceText))
-      end if
+      pDoc->AppendText(wszHeader)
    end if
 
+   ' If any new Events were discovered then append them to the code editor
    if len(wszAllEvents) then
       pDoc->AppendText(wszAllEvents)
       ParseDocument(gApp.GetActiveProjectIndex(), pDoc, "")
    END IF
+  
+   ' Save the generated codegen code because we will output it to a disk file
+   pDoc->wszCodeGen = wszCodeGen
    
    pDoc->bRegenerateCode = false
    

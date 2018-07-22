@@ -1,5 +1,8 @@
+Version 1.6.6 (July 22, 2018)
+- Fixed: Many changes related to the experimental visual designer.
+
 Version 1.6.5 (July 15, 2018)
-- Added: Visual Designer enabled but it is limited and experiemental at this point.
+- Added: Visual Designer enabled but it is limited and experimental at this point.
 - Added: FreeBASIC Compiler nightly build July 3, 2018 (32 and 64 bit versions).
 - Added: Extended style to the Explorer treeview to give it modern looking icons rather than +/- boxes.
 - Changed: Removed WinFBX include paths from "Environment Options" / "Compiler Setup". No longer needed.
