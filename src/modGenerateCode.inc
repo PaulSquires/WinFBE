@@ -84,12 +84,17 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
                
                ' If the Event/function does not already exist in code then create it now.
                ParseDocument(pDoc->ProjectIndex, pDoc, "")
-               pData = gdb2.dbFindFunction(wszFunction)
-               if pData = 0 THEN
-                  wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
-                                 wszPrototype & _
-                                 sp(1) & "Function = 0" & vbcrlf & _
-                                 "End Function" & vbcrlf & vbcrlf
+               ' Only check if we are not loading the project because the event handling
+               ' could already exist but just be in another source code file that has
+               ' not yet been loaded.
+               if (gProjectLoading = false) orelse (gFileLoading = false) then
+                  pData = gdb2.dbFindFunction(wszFunction)
+                  if pData = 0 THEN
+                     wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
+                                    wszPrototype & _
+                                    sp(1) & "Function = 0" & vbcrlf & _
+                                    "End Function" & vbcrlf & vbcrlf
+                  end if
                end if
             end if   
          next
@@ -287,7 +292,9 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
       "''" & vbcrlf & _
       "''  Remove the following Application.Run code if it used elsewhere in your application." & vbcrlf & _
       "Application.Run(" & wszFormName & ")" & vbcrlf & vbcrlf
-      pDoc->AppendText(wszHeader)
+      if pDoc->IsNewFlag then
+         pDoc->AppendText(wszHeader)
+      end if   
    end if
 
    ' If any new Events were discovered then append them to the code editor
