@@ -32,6 +32,14 @@ Destructor clsDocument
    NEXT
    DestroyWindow this.hScrollbar       ' destroy the scrollbar
    if this.IsDesigner THEN
+      ' Remove all controls
+      dim pCtrl as clsControl ptr 
+      do until this.Controls.Count <= 1 
+         for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
+            pCtrl = this.Controls.ItemAt(i)
+            this.Controls.Remove(pCtrl)
+         NEXT
+      loop   
       DestroyWindow(this.hWndForm)
       DestroyWindow(this.hWndFrame)
       DestroyWindow(this.hWndDesigner)
@@ -371,6 +379,12 @@ function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref wszAll
    ' The first line MUST contain the identifier that this is a form file.
    if left(wszAllText, 13) = "' WINFBE FORM" then
       this.IsDesigner = true
+      ' Remove any previously created controls, etc otherwise reloading the form
+      ' file will result in duplicates.
+      if this.hWndForm then DestroyWindow(this.hWndForm)
+      if this.hWndFrame then DestroyWindow(this.hWndFrame)
+      if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
+      if this.hDesignTabCtrl then DestroyWindow(this.hDesignTabCtrl)
       this.CreateDesignerWindow(hWndParent)
       numOffsetLines = 1
    else
@@ -552,6 +566,11 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             end if    
 
          case FILE_ENCODING_UTF16_BOM
+            ' Calculate the error offset that is used when an error is thrown to compensate
+            ' for the metadata that preceeds the actual code.
+            this.ErrorOffset = AfxStrTally(wszDesigner, vbcrlf)
+            this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszCodeGen, vbcrlf)
+            
             ' Output the BOM first
             put #f, , chr(&HFF, &HFE)
             if sciCodePage = SC_CP_UTF8 THEN    

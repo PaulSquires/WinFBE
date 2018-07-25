@@ -408,7 +408,15 @@ function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
       if pCtrl then
          ' If Ctrl is held down then toggle adding/removing the control 
          if (GetAsyncKeyState(VK_CONTROL) and &H8000) THEN
-            pCtrl->IsSelected = not(pCtrl->IsSelected)
+            ' If we are individually selecting/deselecting controls then ensure that
+            ' the form control itself is not part of the group otherwise any cut/copy
+            ' operation will fail with a GPF.
+            ' The form itself can not be part of a selected group
+            if pCtrl->ControlType <> CTRL_FORM then
+               dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
+               if pCtrlForm then pCtrlForm->IsSelected = false
+               pCtrl->IsSelected = not(pCtrl->IsSelected)
+            END IF
          else
             ' If the control being clicked on is already selected then it will become
             ' the active control. If not already selected then deselect all other controls

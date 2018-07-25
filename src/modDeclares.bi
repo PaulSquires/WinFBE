@@ -763,7 +763,7 @@ Type clsDocument
       ptBlueStart      as POINT     ' Start of blue line for snapping
       ptBlueEnd        as POINT     ' End of blue line for snapping
       SnapUpWait       as long      ' #pixels of movement to wait until snap operation ends
-      wszCodeGen       as CWSTR     ' Code generated via 
+      wszCodeGen       as CWSTR     ' Code generated  
       
       ' Code document related
       ProjectIndex     as long      ' array index into gApp.Projects

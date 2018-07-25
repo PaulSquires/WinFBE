@@ -94,15 +94,17 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.CompilerPath = gConfig.FBWINcompiler64
       fCompile32 = False: fCompile64 = True
    End if
-   
+
    ' Convert relative path to absolute path if needed.
    if AfxPathIsRelative(gCompile.CompilerPath) then
       gCompile.CompilerPath = AfxPathCombine(AfxGetExePathName, gCompile.CompilerPath)
    END IF
-   
+
    ' Check to see if the compiler exists
    If AfxFileExists(gCompile.CompilerPath) = 0 Then 
-      MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path."), L(201,"Error"), _
+      wszTemp = L(202,"Invalid defined compiler path.")
+      wszTemp = wszTemp & vbcrlf & "Path: " & gCompile.CompilerPath
+      MessageBox( HWND_FRMMAIN, wszTemp, L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
@@ -142,6 +144,16 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.MainFilename = GetTemporaryFilename(gCompile.MainFolder, "bas")
       gCompile.MainName     = AfxStrPathname("NAME", gCompile.MainFilename)
       
+      ' If this is a FORM document then we need to create the string of controls and properties that gets
+      ' saved at the start of the file before any of the code is displayed.
+      dim as CWSTR wszDesigner
+      if pDocMain->IsDesigner then
+         wszDesigner = pDocMain->CreateDesignerString
+         if pDocMain->bRegenerateCode then
+            GenerateCode(pDocMain)      ' Also, regenerate visual designer code
+         end if
+      END IF
+
       ' Copy the contents of the active document to the temporary source file.
       ' Save text buffer to disk by directly accessing buffer rather
       ' saving it to an intermediary string variable first.
@@ -175,18 +187,28 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                end if    
 
             case FILE_ENCODING_UTF16_BOM
+               ' Calculate the error offset that is used when an error is thrown to compensate
+               ' for the metadata that preceeds the actual code.
+               pDocMain->ErrorOffset = AfxStrTally(wszDesigner, vbcrlf)
+               pDocMain->ErrorOffset = pDocMain->ErrorOffset + AfxStrTally(pDocMain->wszCodeGen, vbcrlf)
+               
                ' Output the BOM first
                put #f, , chr(&HFF, &HFE)
                if sciCodePage = SC_CP_UTF8 THEN    
+                  put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
+                  put #f, , CAST(BYTE PTR, pDocMain->wszCodeGen.m_pBuffer)[0], pDocMain->wszCodeGen.m_BufferLen
                   ' convert utf8 to utf16
                   put #f, , Utf8ToUnicode(*psz)
                else
+                  put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
+                  put #f, , CAST(BYTE PTR, pDocMain->wszCodeGen.m_pBuffer)[0], pDocMain->wszCodeGen.m_BufferLen
                   ' need to convert ansi to unicode
                   put #f, , WStr(*psz)
                end if    
                
             CASE ELSE
          END SELECT
+
       end if
       close #f
 
@@ -319,13 +341,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                SetCompileStatusBarMessage( wst, 0 )
                AfxDoEvents
  
-               ' If spaces exist in the compiler path then convert the path to shortpathname in 
-               ' order to work well with CreateProcess and FBC. Just using double quotes causes problems.
-               if instr(gCompile.CompilerPath, " ") THEN
-                  wszCommand = AfxGetShortPathName(gCompile.CompilerPath)
-               else   
-                  wszCommand = gCompile.CompilerPath
-               END IF
+               wszCommand = gCompile.CompilerPath
                wszParams = " -c " + wDQ + pDoc->DiskFilename + wDQ + _
                            " -v -o " + wDQ + wszTemp + wDQ 
                RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
@@ -371,13 +387,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    AfxDoEvents
 
    sConsoleText = ""
-   ' If spaces exist in the compiler path then convert the path to shortpathname in 
-   ' order to work well with CreateProcess and FBC. Just using double quotes causes problems.
-   if instr(gCompile.CompilerPath, " ") THEN
-      wszCommand = AfxGetShortPathName(gCompile.CompilerPath)
-   else   
-      wszCommand = gCompile.CompilerPath
-   END IF
+   wszCommand = gCompile.CompilerPath
    RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
 
    SetCursor( hCurSave )
@@ -415,8 +425,8 @@ End Function
 
 ''
 ''
-FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
-                             byref zParams  AS zstring, _
+FUNCTION CreateChildProcess( byref zCmdLine AS wstring, _
+                             byref zParams  AS wstring, _
                              byval hChildStdOutWrite AS HANDLE _
                              ) AS BOOLEAN
     
@@ -428,10 +438,6 @@ FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
    StartupInf.hStdOutput = hChildStdOutWrite  
    StartupInf.dwFlags    = STARTF_USESTDHANDLES
 
-'? "CreateProcess:  "; zCmdLine; " "; zParams
-'?
-'?
-   
    IF CreateProcess( zCmdLine,  _    ' Create the child process.
                      zParams, _      ' Command line
                      BYVAL 0,     _  ' Process security attributes
@@ -442,7 +448,6 @@ FUNCTION CreateChildProcess( byref zCmdLine AS zstring, _
                      BYVAL 0,     _  ' Use parent's current directory
                      @StartupInf,  _  ' STARTUPINFO pointer
                      @ProcessInfo) = FALSE THEN
-'      ? "error createprocess"
    ELSE
       ' Close handles to the child process and its primary thread.
       ' Some applications might keep these handles to monitor the status 
@@ -455,10 +460,11 @@ END FUNCTION
 
 ''
 ''
-SUB RedirConsoleToFile( byref szExe AS zstring, _
-                        byref szCmdLine AS zstring, _
+SUB RedirConsoleToFile( byref szExe AS wstring, _
+                        byref szCmdLine AS wstring, _
                         byref sConsoleText AS string _
                         )
+
    dim SecurityAttribute AS SECURITY_ATTRIBUTES
    dim hChildStdOutRead  AS PHANDLE
    dim hChildStdOutWrite AS PHANDLE

@@ -225,21 +225,25 @@ function InitiatePropertyValueChange() as Long
          pProp->wszPropValue = wst
          '**********************           
 
-         ' If this was a NAME property change then we need to potentially update the form ACCEPTBUTTON 
-         ' or CANCELBUTTON properties that depend on this button name.
-         if ucase(pProp->wszPropName) = "NAME" then
-            ' Ensure that the controls combox is repainted to show any changes
-            AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_COMBOCONTROLS ))
-            dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
-            if pCtrlForm then
-               If GetControlProperty(pCtrlForm, "ACCEPTBUTTON") = wszOldValue then
-                  SetControlProperty(pCtrlForm, "ACCEPTBUTTON", wszValue)
-               end if    
-               If GetControlProperty(pCtrlForm, "CANCELBUTTON") = wszOldValue then
-                  SetControlProperty(pCtrlForm, "CANCELBUTTON", wszValue)
-               end if    
-            end if
-         end if
+         select case ucase(pProp->wszPropName)
+            CASE "NAME"
+               ' If this was a NAME property change then we need to potentially update the form ACCEPTBUTTON 
+               ' or CANCELBUTTON properties that depend on this button name.
+               ' Ensure that the controls combox is repainted to show any changes
+               AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_COMBOCONTROLS ))
+               dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
+               if pCtrlForm then
+                  If GetControlProperty(pCtrlForm, "ACCEPTBUTTON") = wszOldValue then
+                     SetControlProperty(pCtrlForm, "ACCEPTBUTTON", wszValue)
+                  end if    
+                  If GetControlProperty(pCtrlForm, "CANCELBUTTON") = wszOldValue then
+                     SetControlProperty(pCtrlForm, "CANCELBUTTON", wszValue)
+                  end if    
+               end if
+            case "ACCEPTBUTTON", "CANCELBUTTON"
+               ' If (none) was selected then ensure that the property value is set to blank
+               if pProp->wszPropValue = "(none)" then pProp->wszPropValue = ""
+         end select
 
          ApplyControlProperties(pDoc, pCtrl)
          ' Indicate that the file is now dirty and will need to be saved

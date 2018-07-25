@@ -1,3 +1,15 @@
+Version 1.6.8 (July 25, 2018)
+- Added: Form KeyPreview property.
+- Fixed: Ability to unset any previously set button for the form properties: AcceptButton, CancelButton.
+- Fixed: Positioning to wrong error line when error in visual designer code file.
+- Fixed: Incorrect code generation for CheckBox BackColor.
+- Fixed: Color System MenuText had a typo causing error during compilation.
+- Fixed: QuickRun was not working for Form source files.
+- Fixed: Changed RedirConsoleToFile function to use WSTRING rather than ZSTRING.
+- Fixed: Changed CreateChildProcess function to use WSTRING rather than ZSTRING.
+- Fixed: Form reload when source code changed by external editor.
+- Fixed: GPF during cut or copy operation if Form is part of the selected group of controls.
+
 Version 1.6.7 (July 22, 2018)
 - Fixed: Regression from 1.6.6 related to project loading and duplicate event handlers.
 

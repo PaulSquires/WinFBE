@@ -81,6 +81,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "The alignment of the image that will be displayed on the control."
       case "INTEGRALHEIGHT"   
          wszPropDescribe = "Indicates whether the list can contain only complete items."
+      case "KEYPREVIEW"
+         wszPropDescribe = "Determines whether the form will receive key events before the event is passed to the control that has focus."
       case "LOCKED"   
          wszPropDescribe = "Determines if the control can be moved or resized."
       case "MAXLENGTH"   
@@ -580,6 +582,9 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
       case CTRL_TEXTBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -608,6 +613,9 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
       case CTRL_LISTBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -621,6 +629,9 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
       case CTRL_OPTION
       case CTRL_FRAME
       case CTRL_PICTURE
@@ -694,6 +705,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "AcceptButton", "", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "KeyPreview", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackgroundImage", "", PropertyType.ImagePicker)
          AddControlProperty(pCtrl, "BackgroundImageLayout", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "CancelButton", "", PropertyType.ComboPicker)
@@ -866,6 +878,7 @@ function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
 
    select case ucase(pProp->wszPropName)
       case "ACCEPTBUTTON", "CANCELBUTTON"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("(none)"))
          for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
             pCtrl = pDoc->Controls.ItemAt(i)
             if pCtrl then

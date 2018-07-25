@@ -1442,6 +1442,11 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                dim pt as point
                GetCursorPos(@pt)
                MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pt), 1)
+               Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+               if pWindow then
+                  pt.x = pWindow->UnScaleX(pt.x)
+                  pt.y = pWindow->UnScaleY(pt.y)
+               end if   
                SetControlProperty(pCtrl, "LEFT", str(pt.x + (nLeft-nLeftActive)))
                SetControlProperty(pCtrl, "TOP", str(pt.y + (nTop-nTopActive)))
                pCtrl->IsActive = false
@@ -1720,7 +1725,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          MessageBox( HWnd, APPNAME & vbcrlf & _
                        "Version " & APPVERSION & APPBITS & _
                        vbcrlf & vbcrlf & _
-                       "Paul Squires / PlanetSquires Software" & vbcrlf & vbcrlf & _
+                       "PAUL SQUIRES / PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
                        "José Roca (WinFBX Framework)", _
                        @WStr("About"), _

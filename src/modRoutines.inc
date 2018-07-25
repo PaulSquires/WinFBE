@@ -317,7 +317,10 @@ end function
 ' ========================================================================================
 ' Open a disk file and read it into a string (ANSI or UTF8)
 ' ========================================================================================
-function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
+function GetFileToString( byref wszFilename as const wstring, _
+                          byref txtBuffer as string, _
+                          byval pDoc as clsDocument ptr _
+                          ) as boolean
    
    if pDoc = 0 then return true
    
