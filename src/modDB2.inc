@@ -479,22 +479,22 @@ function clsDB2.dbDebug() as long
    loop
    print #f, ""
 
-'   ' PRINT ALL PREPARSE FUNCTION DEFINITIONS
-'   print #f, "PREPARSE FUNCTIONS"
-'   this.dbRewind()
-'   do 
-'      pData = this.dbGetNext
-'      if pData = 0 THEN exit do
-'      if pData->projectIndex <> -2 THEN continue do
-'      if pData->deleted = true THEN continue do
-'      if pData->id <> DB2_FUNCTION then continue do
-'      print #f, "   fileName: "; pData->fileName
-'      print #f, "   ElementName: "; pData->ElementName
-'      print #f, "   ElementValue: "; pData->ElementValue
-'      print #f, ""
-'   loop
-'   print #f, ""
-
+   ' PRINT ALL WINAPI/WINFBX FUNCTION DEFINITIONS
+   print #f, "WINAPI/WINFBX FUNCTIONS"
+   this.dbRewind()
+   do 
+      pData = this.dbGetNext
+      if pData = 0 THEN exit do
+      if pData->projectIndex <> -1 THEN continue do
+      if pData->deleted = true THEN continue do
+      if pData->id <> DB2_FUNCTION then continue do
+      print #f, "   fileName: "; pData->fileName
+      print #f, "   ElementName: "; pData->ElementName
+      print #f, "   ElementValue: "; pData->ElementValue
+      print #f, ""
+   loop
+   print #f, ""
+   
    close #f
    function = 0
 end function

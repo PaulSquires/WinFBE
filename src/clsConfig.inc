@@ -145,7 +145,7 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI
                
             CASE "F"    ' function
                i = instr(st, "(")
-               parser.funcName   = Left(st, i-1)
+               parser.funcName   = trim(Left(st, i-1))
                parser.funcParams = st
                gdb2.dbAdd(parser, DB2_FUNCTION)
 
@@ -182,7 +182,7 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI
                NEXT
 
          END SELECT
-  
+         
       Loop
       Close #f
       return false
@@ -190,11 +190,17 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI
 
    Function = true   ' error
 End Function
-      
+    
 
 ''
 ''
-Function clsConfig.LoadCodetipsVD( ByRef sFilename As String ) as boolean
+Function clsConfig.LoadCodetipsWinFormsX( ByRef sFilename As String ) as boolean
+   function = this.LoadCodetipsWINAPI(sFilename, false)
+end function
+
+''
+''
+Function clsConfig.LoadCodetipsWinFBX( ByRef sFilename As String ) as boolean
    function = this.LoadCodetipsWINAPI(sFilename, false)
 end function
 

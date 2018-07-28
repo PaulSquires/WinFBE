@@ -1725,7 +1725,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          MessageBox( HWnd, APPNAME & vbcrlf & _
                        "Version " & APPVERSION & APPBITS & _
                        vbcrlf & vbcrlf & _
-                       "PAUL SQUIRES / PlanetSquires Software" & vbcrlf & vbcrlf & _
+                       "PAUL SQUIRES" & vbcrlf & _
+                       "PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
                        "José Roca (WinFBX Framework)", _
                        @WStr("About"), _

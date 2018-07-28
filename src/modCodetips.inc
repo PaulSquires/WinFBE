@@ -387,7 +387,7 @@ end function
 ' Don't add duplicates in the Autocomplete list    
 ' ========================================================================================
 function ExistsInAutocompleteList( byref sList as string, byref sMatch as string ) as long
-   if instr( "|" & ucase(sList) & "|", ucase(sMatch)) THEN return true
+   if instr( "|" & ucase(sList) & "|", ucase(sMatch) & "?") THEN return true
    return false
 end function
 
@@ -599,6 +599,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                                     end if
                                  end if         
                               end if
+                           
                            case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY    ' 2 parse parts  mytype.MyFunction
                               st = AfxStrParse(sElement, 2, ".")   ' Get the MyFunction portion
                               

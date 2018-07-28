@@ -1,3 +1,7 @@
+Version 1.6.9 (July 27, 2018)
+- Changed: Removed the Preparse database and replaced with static database codetips_winfbx.ini
+- Fixed: Some TYPE elements not showing in popup codetips (eg. Text property for Button).
+
 Version 1.6.8 (July 25, 2018)
 - Added: Form KeyPreview property.
 - Fixed: Ability to unset any previously set button for the form properties: AcceptButton, CancelButton.

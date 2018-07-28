@@ -975,7 +975,8 @@ Type clsConfig
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
       declare Function LoadCodetips( ByRef sFilename As String ) as boolean
       declare Function LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI as boolean  ) as boolean
-      declare Function LoadCodetipsVD( ByRef sFilename As String ) as boolean
+      declare Function LoadCodetipsWinFormsX( ByRef sFilename As String ) as boolean
+      declare Function LoadCodetipsWinFBX( ByRef sFilename As String ) as boolean
 End Type
 
 

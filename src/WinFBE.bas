@@ -32,14 +32,13 @@
 #Include Once "Afx\AfxGdiplus.inc"
 #Include Once "Afx\AfxMenu.inc" 
 #Include Once "Afx\AfxCom.inc" 
-#INCLUDE ONCE "Afx\CFindFile.inc"
 #Include Once "Afx\CXpButton.inc"
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.6.8") 
+#Define APPVERSION    WStr("1.6.9") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -82,7 +81,6 @@ Using Afx
 #Include Once "modMRU.inc"
 #Include Once "modCodetips.inc"
 #Include Once "modGenerateCode.inc"
-#Include Once "modPreParse.inc"
 
 #Include Once "frmHotImgBtn.inc"
 #Include Once "frmHotTxtBtn.inc"
@@ -155,35 +153,14 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    
    ' Load preparsed codetip files for the compiler's \inc folders.
    if gConfig.Codetips then
-      dim as string sPreparseTimestamps = AfxGetExePathName & "Settings\Preparse_Timestamps.ini"
-      dim as string sPreparseDatabase = AfxGetExePathName & "Settings\Preparse_Database.ini"
-      dim as CWSTR wszIncludePath 
-      #IfDef __FB_64BIT__
-         wszIncludePath = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-         sPreparseTimestamps = AfxGetExePathName & "Settings\Preparse_Timestamps64.ini"
-         sPreparseDatabase = AfxGetExePathName & "Settings\Preparse_Database64.ini"
-      #Else
-         wszIncludePath = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-         sPreparseTimestamps = AfxGetExePathName & "Settings\Preparse_Timestamps32.ini"
-         sPreparseDatabase = AfxGetExePathName & "Settings\Preparse_Database32.ini"
-      #EndIf
-      wszIncludePath = AfxStrPathname("PATH", wszIncludePath) & "inc\"
-      gPreparsing = true
-      LoadPreparseTimestamps(sPreparseTimestamps)
-      LoadPreparseDatabase(sPreparseDatabase)
-      PreparseFolder(wszIncludePath, "")
-      gPreparsing = false
-      if gPreparsingChanges then
-         SavePreparseTimestamps(sPreparseTimestamps)
-         SavePreparseDatabase(sPreparseDatabase)
-      end if
       ' Load the Codetips file
       gConfig.LoadCodetips( AfxGetExePathName & "Settings\codetips.ini" )
       ' Load the visual designer codetips (WinFormsX library)
-      gConfig.LoadCodetipsVD( AfxGetExePathName & "Settings\codetips_visualdesigner.ini" )
+      gConfig.LoadCodetipsWinFormsX( AfxGetExePathName & "Settings\codetips_winformsx.ini" )
+      ' Load the WinFBX (Afx) codetips
+      gConfig.LoadCodetipsWinFBX( AfxGetExePathName & "Settings\codetips_winfbx.ini" )
    end if
    
-
    ' Initialize the controls in the ToolBox
    gConfig.InitializeToolBox
    
