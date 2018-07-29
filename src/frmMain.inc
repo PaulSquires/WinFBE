@@ -1382,7 +1382,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_UNDO, WM_UNDO:      Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
       
       Case IDM_CUT, WM_CUT
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) then
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
          else
@@ -1390,7 +1390,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          end if   
       
       Case IDM_COPY, WM_COPY
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) then
             dim as long NumControls = pDoc->Controls.SelectedControlsCount
             if NumControls = 0 THEN exit function
             redim gCopyControls(NumControls-1) as clsControl
@@ -1410,7 +1410,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
             
       Case IDM_PASTE, WM_PASTE
-         if pDoc->IsDesigner then
+         if IsDesignerView(pDoc) then
             dim pCtrl as clsControl ptr
             dim rc as RECT
             dim as long nLeft, nTop, nLeftActive, nTopActive
@@ -1979,7 +1979,7 @@ Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
    pt.x = xPos
    pt.y = yPos
    ScreenToClient hWndContext, @pt
-   if pDoc->IsDesigner THEN
+   if IsDesignerView(pDoc) THEN
       ' Right-click popup menu for visual design form is 
       ' handled in the HandleDesignerRButtonDown function.
    else

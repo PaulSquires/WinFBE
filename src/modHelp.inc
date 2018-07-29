@@ -44,6 +44,11 @@ Function ShowContextHelp() As Long
    ' Ensure that the CurDrive parameter is converted if applicable
    gConfig.CompilerHelpFile = ProcessFromCurdrive( gConfig.CompilerHelpFile ) 
 
+   ' Convert relative path to absolute path if needed.
+   if AfxPathIsRelative(gConfig.CompilerHelpFile) then
+      gConfig.CompilerHelpFile = AfxPathCombine(AfxGetExePathName, gConfig.CompilerHelpFile)
+   END IF
+
    If AfxFileExists(gConfig.CompilerHelpFile) = 0 Then
       MessageBoxW( HWND_FRMMAIN, L(244,"FreeBASIC Help file not found."), L(201,"Error"), _
                     MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )

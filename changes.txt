@@ -1,3 +1,8 @@
+Version 1.7.0 (July 29, 2018)
+- Added: Button BackColorDown property added. The ThemeSupport property must be set to False.
+- Fixed: Right click mouse popup menu not showing in code editor of a visual designer form.
+- Fixed: Added a Relative path check for Help files.
+ 
 Version 1.6.9 (July 27, 2018)
 - Changed: Removed the Preparse database and replaced with static database codetips_winfbx.ini
 - Fixed: Some TYPE elements not showing in popup codetips (eg. Text property for Button).

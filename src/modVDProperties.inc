@@ -45,6 +45,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates whether the control can accept data that the user drags onto it."
       case "BACKCOLOR"   
          wszPropDescribe = "The background color of the control. For Button controls the ThemeSupport property must be set to False."
+      case "BACKCOLORDOWN"   
+         wszPropDescribe = "The background color of the control when pressed. For Button controls the ThemeSupport property must be set to False."
       case "BACKGROUNDIMAGE"   
          wszPropDescribe = "The background image used for the control."
       case "BACKGROUNDIMAGELAYOUT"   
@@ -734,6 +736,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
           
       case CTRL_BUTTON
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "TextForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
