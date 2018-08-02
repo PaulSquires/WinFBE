@@ -1467,6 +1467,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          end if   
       
       case IDM_DELETE
+? "delete"
          ' Delete selected controls
          dim pCtrl as clsControl ptr
          do until pDoc->Controls.SelectedControlsCount = 0
@@ -1529,7 +1530,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       'Case IDM_SPACESTOTABS:
       Case IDM_TABSTOSPACES:       Function = pDoc->TabsToSpaces()
       Case IDM_SELECTALL
-            if pDoc->IsDesigner THEN
+            if IsDesignerView(pDoc) THEN
                pDoc->Controls.SelectAllControls
                ' Ensure the grab handles of form and controls are redrawn or hidden
                AfxRedrawWindow(pDoc->hWndFrame)
@@ -1715,10 +1716,10 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
          ExecuteUserTool( id - IDM_USERTOOL )
 
-      Case IDM_HELP
+      Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBX
  ' TODO: Remove debug call in IDM_HELP
  'gdb2.dbDebug
-         ShowContextHelp() 
+         ShowContextHelp(id) 
      
 
       Case IDM_ABOUT
@@ -2637,19 +2638,58 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
             ' Handle any keypress that would move or resize control(s) on a Designer Form.
             if uMsg.message = WM_KEYDOWN THEN
+               dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+               if pDoc THEN
+                  ' We don't want keystrokes going into the scintilla control if the
+                  ' visual designer form is active.
+                  if pDoc->IsDesigner THEN
+                     if IsDesignerView(pDoc) then
+                        ' Handle the "DEL" delete key should the user want to delete a selected
+                        ' group of controls.
+                        if uMsg.wParam = VK_DELETE then
+                           frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
+                        end if   
+                        continue do
+                     end if
+                  end if
+               end if         
+
                ' Ensure that an arrow key was pressed
                select CASE uMsg.wParam
 
+                  case VK_SPACE
+                     dim as HWND hEventList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS)
+                     if pDoc andalso GetFocus() = hEventList then
+                        ' Toggle the selected Event listbox item
+                        dim as long nCurSel = ListBox_GetCurSel(hEventList)
+                        if nCurSel > -1 then 
+                           dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+                           dim pCtrl as clsControl ptr 
+                           if pDoc then
+                              pCtrl = pDoc->Controls.GetActiveControl
+                              if pCtrl THEN
+                                 pCtrl->Events(nCurSel).bIsSelected = not pCtrl->Events(nCurSel).bIsSelected
+                                 AfxRedrawWindow(hEventList)
+                                 pDoc->UserModified = true
+                                 pDoc->bRegenerateCode = true
+                                 frmMain_UpdateLineCol(HWND_FRMMAIN)
+                              end if
+                           end if
+                        end if   
+                     END IF
+
                   case VK_LEFT, VK_RIGHT, VK_UP, VK_DOWN
-                     dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
                      if pDoc THEN
                         if pDoc->IsDesigner THEN
                            select case GetFocus
+                              ' Allow arrows to move selected item in a listbox or edit textbox
                               case GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX), _
                                    GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES), _
+                                   GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS), _
                                    GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
                                    HWND_PROPLIST_EDIT
                               CASE ELSE
+                                 ' Allow arrows to move/resize selected controls
                                  if IsDesignerView(pDoc) then
                                     if pDoc->Controls.SelectedControlsCount > 0 then
                                        ' Move control(s)

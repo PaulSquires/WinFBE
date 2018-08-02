@@ -199,39 +199,66 @@ end function
 
 
 ' ========================================================================================
+' Determine if the specified control name already exists on the incoming form.
+' ========================================================================================
+function IsControlNameExists( byval pDoc as clsDocument ptr, byref wszControlName as wstring ) as boolean
+
+   dim pCtrl as clsControl ptr 
+   for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(ii)
+      if pCtrl->ControlType <> CTRL_FORM THEN
+         if ucase(GetControlProperty(pCtrl, "NAME")) = ucase(wszControlName) THEN
+            return true
+         END IF
+      END IF
+   NEXT
+   return false
+end function
+
+' ========================================================================================
+' Determine if the specified form name already exists.
+' ========================================================================================
+function IsFormNameExists( byref wszFormName as wstring ) as boolean
+
+   dim pDoc as clsDocument ptr 
+   dim pCtrl as clsControl ptr 
+   dim as Boolean bExists = false
+   dim as long idx = gApp.GetActiveProjectIndex
+   
+   For i As Long = 0 To gApp.Projects(idx).GetDocumentCount - 1
+      pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+      if pDoc THEN
+         for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+            pCtrl = pDoc->Controls.ItemAt(ii)
+            if pCtrl->ControlType = CTRL_FORM THEN
+               if ucase(GetControlProperty(pCtrl, "NAME")) = ucase(wszFormName) THEN
+                  bExists = true
+               END IF
+               exit for
+            END IF
+         NEXT
+      END IF
+      if bExists THEN exit for
+   Next
+   
+   return bExists
+end function
+
+' ========================================================================================
 ' Generate a default name for the new form
 ' ========================================================================================
 function GenerateDefaultFormName() as CWSTR
 
    ' Generate a default name for the form, then iterate the document collection
    ' to see if it already exists.
-   dim pDoc as clsDocument ptr 
-   dim pCtrl as clsControl ptr 
    dim as long NextFormNumber = 0
    dim as CWSTR wszDefaultName 
-   dim as Boolean bOK 
-   dim as long idx = gApp.GetActiveProjectIndex
    
    do 
       NextFormNumber = NextFormNumber + 1
       wszDefaultName = "Form" & NextFormNumber
-      bOK = true
-      For i As Long = 0 To gApp.Projects(idx).GetDocumentCount - 1
-         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-         if pDoc THEN
-            for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-               pCtrl = pDoc->Controls.ItemAt(ii)
-               if pCtrl->ControlType = CTRL_FORM THEN
-                  if ucase(GetControlProperty(pCtrl, "NAME")) = ucase(wszDefaultName) THEN
-                     bOK = false
-                  END IF
-                  exit for
-               END IF
-            NEXT
-         END IF
-         if bOK = false THEN exit for
-      Next
-   loop until bOK = true
+      if IsFormNameExists(wszDefaultName) = false then exit do
+   loop 
    
    return wszDefaultName
 end function

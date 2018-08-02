@@ -196,6 +196,16 @@ End Function
 ''
 Function clsConfig.LoadCodetipsWinFormsX( ByRef sFilename As String ) as boolean
    function = this.LoadCodetipsWINAPI(sFilename, false)
+   dim parser as clsParser
+   parser.fileName = ""     ' no need to store this sFilename
+   parser.idxProject = -1   ' do not associate it with any project
+   parser.IsWinApi = false
+   parser.typeName = "Application"
+   parser.typeAlias = "wfxApplication"
+   gdb2.dbAdd(parser, DB2_TYPE)
+   parser.typeName = "Colors"
+   parser.typeAlias = "wfxColors"
+   gdb2.dbAdd(parser, DB2_TYPE)
 end function
 
 ''
@@ -621,6 +631,7 @@ Function clsConfig.SaveToFile() as Long
    this.FBWINCompiler64  = ProcessToCurdrive(this.FBWINCompiler64)
    this.CompilerHelpfile = ProcessToCurdrive(this.CompilerHelpfile)
    this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
+   this.WinFBXHelpfile   = ProcessToCurdrive(this.WinFBXHelpfile)
 
    Print #f, "[Compiler]" 
    print #f, "FBWINCompiler32="       ; this.FBWINCompiler32      
@@ -628,6 +639,7 @@ Function clsConfig.SaveToFile() as Long
    print #f, "CompilerSwitches="      ; this.CompilerSwitches     
    print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
    print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
+   print #f, "WinFBXHelpfile="        ; this.WinFBXHelpfile     
    print #f, "RunViaCommandWindow="   ; this.RunViaCommandWindow
    print #f, "WinFBXPath="            ; this.WinFBXPath
    
@@ -920,6 +932,7 @@ Function clsConfig.LoadFromFile() as Long
          Case "CompilerSwitches":     this.CompilerSwitches     = wData
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
+         Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData
          case "RunViaCommandWindow":  this.RunViaCommandWindow  = nData
       End Select
    

@@ -197,8 +197,12 @@ function InitiatePropertyValueChange() as Long
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
    dim pProp as clsProperty ptr = GetActivePropertyPtr()
-   dim as CWSTR wszValue, wszOldValue 
-
+   dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
+   dim as CWSTR wszValue, wszOldValue
+   dim txtFind(1 to 3) as string
+   dim txtReplace(1 to 3) as string
+   dim as long startPos, endPos, r
+   
    if pProp THEN 
       wszOldValue = pProp->wszPropValue
       select case pProp->PropType
@@ -217,6 +221,81 @@ function InitiatePropertyValueChange() as Long
       END SELECT
   
       if wszValue <> wszOldValue then
+         select case ucase(pProp->wszPropName)
+            CASE "NAME"
+               wszValue = trim(wszValue)
+               ' The name can only be alphanumeric
+               static wszRetain as CWSTR = "abcdefghijklmnopqrstuvwxyz0123456789"
+               wszValue = AfxStrRetainAnyI(wszValue, wszRetain)
+               ' Do a check to ensure that the name does not already exist.
+               if pCtrl->ControlType = CTRL_FORM then               
+                  if IsFormNameExists(wszValue) then
+                     ' Don't put a messagebox here because it will cause the propertylist to
+                     ' lose focus and therefore trigger the propertyvalue change.
+                     wszValue = wszOldValue
+                  else
+                     txtFind(1) = wszOldValue    ' "Form1"  ' must use SCFIND_WHOLEWORD for this one
+                     txtFind(2) = wszOldValue & "."
+                     txtFind(3) = " " & wszOldValue & "_"
+                     txtReplace(1) = wszValue    ' "Form2"
+                     txtReplace(2) = wszValue & "."
+                     txtReplace(3) = " " & wszValue & "_"
+                  end if
+               else
+                  if IsControlNameExists(pDoc, wszValue) then
+                     ' Don't put a messagebox here because it will cause the propertylist to
+                     ' lose focus and therefore trigger the propertyvalue change.
+                     wszValue = wszOldValue
+                  else
+                     dim as CWSTR wszFormName 
+                     if pCtrlForm then wszFormName = GetControlProperty(pCtrlForm, "NAME")
+                     txtFind(1) = ""
+                     txtFind(2) = wszFormName & "." & wszOldValue & "."
+                     txtFind(3) = " " & wszFormName & "_" & wszOldValue & "_"
+                     txtReplace(1) = ""
+                     txtReplace(2) = wszFormName & "." & wszValue & "."
+                     txtReplace(3) = " " & wszFormName & "_" & wszValue & "_"
+                  end if
+               END IF
+               
+               ' If the form or control name has changed then update all source code
+               dim pDocParse as clsDocument ptr
+               dim as long idx = gApp.GetActiveProjectIndex
+               dim as hwnd hEdit 
+               dim as Boolean bReparse 
+
+               for i as long = lbound(txtReplace) to ubound(txtReplace)
+                  if len(txtReplace(i)) = 0 then continue for
+                  
+                  For ii As Long = 0 To gApp.Projects(idx).GetDocumentCount - 1
+                     pDocParse = gApp.Projects(idx).GetDocumentPtr(ii)
+                     if pDocParse THEN
+                        bReparse = false
+                        hEdit = pDocParse->hWndActiveScintilla
+                        if i = 1 then 
+                           SendMessage( hEdit, SCI_SETSEARCHFLAGS, SCFIND_WHOLEWORD, 0)
+                        else   
+                           SendMessage( hEdit, SCI_SETSEARCHFLAGS, 0, 0)
+                        end if
+                        SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+                        startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+                        endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
+                        do 
+                           r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind(i)), Strptr(txtFind(i)))
+                           if r = -1 THEN exit do
+                           bReparse = true
+                           SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace(i)), Strptr(txtReplace(i)) )
+                           startPos = r + len(txtFind(i))
+                           ' Adjust the searching positions
+                           SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+                           SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+                        loop
+                     end if
+                     if bReparse then ParseDocument(idx, pDocParse, "")
+                  next
+               next   
+         end select
+         
 ' TODO: Corruption in output string occurs if I simply try to assign CWSTR as below.
          ' Need to assign to intermediary wstring first for some reason.
          'pProp->wszPropValue = wszValue       
@@ -231,7 +310,7 @@ function InitiatePropertyValueChange() as Long
                ' or CANCELBUTTON properties that depend on this button name.
                ' Ensure that the controls combox is repainted to show any changes
                AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_COMBOCONTROLS ))
-               dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
+               pCtrlForm = GetFormCtrlPtr(pDoc)
                if pCtrlForm then
                   If GetControlProperty(pCtrlForm, "ACCEPTBUTTON") = wszOldValue then
                      SetControlProperty(pCtrlForm, "ACCEPTBUTTON", wszValue)
@@ -888,7 +967,6 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
                Exit Function
          End Select
 
-      
       case WM_LBUTTONDOWN
          ' Hit test to see if the mouse is over the vertical splitter bar
          if hwnd = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES) THEN

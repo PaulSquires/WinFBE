@@ -204,6 +204,12 @@ function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs whenever the form is activated."
       CASE "DEACTIVATE"
          wszEventDescribe = "Occurs whenever the form is deactivated."
+      CASE "DESTROY"
+         wszEventDescribe = "Occurs immediately before the control is about to be destroyed and all resources associated with it released."
+      CASE "GOTFOCUS"
+         wszEventDescribe = "Occurs when the control receives focus."
+      CASE "LOSTFOCUS"
+         wszEventDescribe = "Occurs when the control loses focus."
       CASE "RESIZE"
          wszEventDescribe = "Occurs when a form is resized."
       CASE "FORMCLOSING"
@@ -224,6 +230,14 @@ function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs when the mouse pointer is over a control and a mouse button is released."
       CASE "MOUSEDOUBLECLICK"
          wszEventDescribe = "Occurs when the control is double clicked by the mouse."
+      CASE "MOUSEENTER"
+         wszEventDescribe = "Occurs when the mouse pointer enters the control."
+      CASE "MOUSEHOVER"
+         wszEventDescribe = "Occurs when the mouse pointer rests on the control."
+      CASE "MOUSELEAVE"
+         wszEventDescribe = "Occurs when the mouse pointer leaves the control."
+      case "TEXTCHANGED"   
+         wszEventDescribe = "Occurs when the Text property is changed by either a programmatic modification or user interaction."
       CASE "KEYDOWN"
          wszEventDescribe = "Occurs when a key is first pressed."
       CASE "KEYPRESS"
@@ -599,6 +613,7 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "TextChanged")
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")

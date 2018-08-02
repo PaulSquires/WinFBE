@@ -1,3 +1,22 @@
+Version 1.7.1 (August 2, 2018)
+- Added: TextBox TextChanged event.
+- Added: (ToolBox) Event descriptions for Destroy, GotFocus, LostFocus, MouseEnter, MouseHover, MouseLeave.
+- Added: (ToolBox) Ability to use keyboard arrow keys to traverse list of Events for a control.
+- Added: (ToolBox) Ability to use keyboard Space key to toggle select/unselect of an Event for a control.
+- Added: BackColorDown to popup codetips for Button objects.
+- Added: Duplicate check for Form and Control names.
+- Added: Check to remove invalid characters from Form and Control names.
+- Added: Documentation for the global/shared Application variable.
+- Added: wfxApplication class codetips (for the global Application variable).
+- Added: wfxColors class codetips (for the global Colors variable)
+- Added: Changing a form or control name will automatically any code that references the old name.
+- Added: Compiler Setup fields for WinFBX Help file.
+- Added: New top menu Help options for WinAPI and WinFBX
+- added: Pressing "DELETE" key will now delete the selected group of controls. 
+- Changed: Removed the "On" prefix from the documentation for Methods related to forms and controls.
+- Fixed: SelectAll not selecting all code text for visual designer forms when the code editor is active.
+- Fixed: If visual design form had focus, typing characters would enter those characters into the code editor.
+
 Version 1.7.0 (July 29, 2018)
 - Added: Button BackColorDown property added. The ThemeSupport property must be set to False.
 - Fixed: Right click mouse popup menu not showing in code editor of a visual designer form.
