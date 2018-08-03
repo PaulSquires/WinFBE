@@ -1,3 +1,7 @@
+Version 1.7.2 (August 3, 2018) 
+- Added: Completed ListBox control documentation and tips.
+- Fixed: Regression from 1.7.1 preventing text input into PropertyList items (Name, Text, etc).
+
 Version 1.7.1 (August 2, 2018)
 - Added: TextBox TextChanged event.
 - Added: (ToolBox) Event descriptions for Destroy, GotFocus, LostFocus, MouseEnter, MouseHover, MouseLeave.

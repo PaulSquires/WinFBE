@@ -2644,12 +2644,13 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                   ' visual designer form is active.
                   if pDoc->IsDesigner THEN
                      if IsDesignerView(pDoc) then
-                        ' Handle the "DEL" delete key should the user want to delete a selected
-                        ' group of controls.
-                        if uMsg.wParam = VK_DELETE then
-                           frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
-                        end if   
-                        continue do
+                        ' Don't allow keys to the scintilla control
+                        if GetDlgCtrlID(GetFocus) = IDC_SCINTILLA then 
+                           if uMsg.wParam = VK_DELETE then
+                              frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
+                           end if   
+                           continue do
+                        end if
                      end if
                   end if
                end if         
