@@ -22,7 +22,7 @@ Function frmOptionsEditor_WndProc( ByVal HWnd   As HWnd, _
                                    ) As LRESULT
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 

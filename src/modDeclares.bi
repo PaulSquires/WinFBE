@@ -766,7 +766,8 @@ Type clsDocument
       ptBlueStart      as POINT     ' Start of blue line for snapping
       ptBlueEnd        as POINT     ' End of blue line for snapping
       SnapUpWait       as long      ' #pixels of movement to wait until snap operation ends
-      wszCodeGen       as CWSTR     ' Code generated  
+      wszFormCodeGen   as CWSTR     ' Form code generated  
+      wszFormMetaData  as CWSTR     ' Form metadata that defines the form
       
       ' Code document related
       ProjectIndex     as long      ' array index into gApp.Projects
@@ -798,9 +799,7 @@ Type clsDocument
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
-      declare function GenerateDesignerCode() as long
-      declare function ParseDesignerString( ByVal hWndParent As HWnd, byref sAllText as wstring ) as CWSTR
-      declare function CreateDesignerString() as CWSTR 
+      declare function ParseFormMetaData( ByVal hWndParent As HWnd, byref sAllText as wstring ) as CWSTR
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
       Declare Function ApplyProperties() As Long
       Declare Function GetTextRange( ByVal cpMin As Long, ByVal cpMax As Long) As String

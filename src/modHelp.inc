@@ -53,16 +53,22 @@ Function ShowContextHelp( byval id as long ) As Long
          ' Convert relative path to absolute path if needed.
          if AfxPathIsRelative(gConfig.CompilerHelpFile) then
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.CompilerHelpFile)
+         else
+            wszHelpFilename = gConfig.CompilerHelpFile
          END IF
       case IDM_HELPWINAPI
          ' Convert relative path to absolute path if needed.
          if AfxPathIsRelative(gConfig.Win32APIHelpfile) then
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.Win32APIHelpfile)
+         else   
+            wszHelpFilename = gConfig.Win32APIHelpfile 
          END IF
       case IDM_HELPWINFBX
          ' Convert relative path to absolute path if needed.
          if AfxPathIsRelative(gConfig.WinFBXHelpfile) then
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.WinFBXHelpfile)
+         else   
+            wszHelpFilename = gConfig.WinFBXHelpfile
          END IF
    END SELECT
 

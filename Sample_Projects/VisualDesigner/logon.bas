@@ -17,7 +17,7 @@ Function frmPopup_Load( ByRef sender As wfxForm, ByRef e As EventArgs) As LRESUL
    frmPopup.lblType.Text     = "Access Type: " & frmLogon.lstAccess.SelectedItem.Text
    frmPopup.lblUserName.Text = "Username: "    & frmLogon.txtUserName.Text
    frmPopup.lblPassword.Text = "Password: "    & frmLogon.txtPassword.Text
-   
+         error1
    Function = 0
 End Function
 

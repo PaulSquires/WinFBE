@@ -1,6 +1,8 @@
+declare function IsPropertyExists( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as boolean
 declare function GetActivePropertyPtr() as clsProperty ptr
 declare function GetActiveEventPtr() as clsEvent ptr
-declare function GenerateCode( byval pDoc as clsDocument ptr ) as long
+declare function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
+declare function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 declare function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
 declare function GetControlType( byval wszControlName as CWSTR ) as long
 declare function GetControlName( byval nControlType as long ) as CWSTR

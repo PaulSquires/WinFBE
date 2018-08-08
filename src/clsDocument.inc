@@ -256,7 +256,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
             this.LoadingFromFile = true
-            dim sText as string  ' this will be a UTF-8 encoded string
+            dim sText as string  ' this will be an UTF-8 encoded string
             if GetFileToString(*pwszFile, sText, @this) = false then
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
@@ -285,7 +285,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       DisplayPropertyList(@this)
       ' Regenerate code for the visual designer 
       this.bRegenerateCode = true
-      GenerateCode(@this)
+      GenerateFormCode(@this)
    end if   
 
    this.ApplyProperties()
@@ -356,7 +356,7 @@ End Function
 ' Parse all of the file's code to remove and process any visual designer specific code.
 ' Returns a string representing just the code only (visual designer metastatements removed).
 ' ========================================================================================
-function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref wszAllText as wstring ) as CWSTR
+function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllText as wstring ) as CWSTR
    
    ' NOTE: The incoming wszAllText string is UTF-16 encoded. The resulting string that
    ' is returned from this function is also UTF-16 encoded. All WinFBE form files
@@ -434,7 +434,16 @@ function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref wszAll
        
       elseif left(wst, 17) = "'     PROP_VALUE=" then
          wszPropValue = mid(wst, 18)   ' utf8 encoded 
-         SetControlProperty(pCtrl, wszPropName, wszPropValue)
+         ' Only set the loading property if it exists in the current property
+         ' listing. We do this otherwise older now unused properties will continue
+         ' to get loaded when we no longer want them to.
+         if IsPropertyExists(pCtrl, wszPropName) = false then
+            ' Set the flag to regenerate code otherwise a compile time error
+            ' will occur because the old property could exist in previously generated code.
+            this.bRegenerateCode = true
+         else   
+            SetControlProperty(pCtrl, wszPropName, wszPropValue)
+         end if
          
       'elseif left(sLine, 16) = "'   EVENTS_START" then
       'elseif left(sLine, 14) = "'   EVENTS_END" then
@@ -450,49 +459,6 @@ function clsDocument.ParseDesignerString( ByVal hWndParent As HWnd, byref wszAll
    
 end function
 
-' ========================================================================================
-' Generate the string that gets saved to theCreate the specified control on the design form
-' ========================================================================================
-function clsDocument.CreateDesignerString() as CWSTR 
-   dim pCtrl as clsControl ptr
-   dim wszDesigner as CWSTR
-   dim wszControls as CWSTR
-   
-   ' Iterate all of the controls on the form
-   for i as long = this.Controls.ItemFirst to this.Controls.ItemLast
-      pCtrl = this.Controls.ItemAt(i)
-      if pCtrl then
-         wszControls = wszControls & "' WINFBE CONTROL_START " & GetControlName(pCtrl->ControlType) & vbcrlf & _
-                                     "'   PROPERTIES_START" & vbcrlf 
-         for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
-            wszControls = wszControls & _
-                          "'     PROP_NAME="  & pCtrl->Properties(ii).wszPropName & vbcrlf & _
-                          "'     PROP_VALUE=" & pCtrl->Properties(ii).wszPropValue & vbcrlf 
-         NEXT
-         wszControls = wszControls & "'   PROPERTIES_END" & vbcrlf & _
-                                     "'   EVENTS_START" & vbcrlf 
-         for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
-            ' Only need to output the names of the Events that have been ticked as being in use.
-            if pCtrl->Events(ii).bIsSelected then
-               wszControls = wszControls & _
-                             "'     EVENT_NAME="   & pCtrl->Events(ii).wszEventName & vbcrlf 
-            end if
-         next
-         wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
-                                     "' WINFBE CONTROL_END" & vbcrlf
-      END IF
-   NEXT
-
-   wszDesigner = "' WINFBE FORM" & vbcrlf & _
-                 "' WINFBE VERSION " & APPVERSION & vbcrlf & _
-                 "' WINFBE FORM_START" & vbcrlf & _
-                 wszControls & _
-                 "' WINFBE FORM_END" & vbcrlf 
-   
-   this.ErrorOffset = AfxStrParseCount(wszDesigner, vbcrlf) - 1
-   return wszDesigner 
-end function
-
 ''
 ''
 Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
@@ -501,7 +467,6 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    Dim wFilename As WString * MAX_PATH
    Dim wText     As WString * MAX_PATH  
    Dim f         As Long
-   dim wszDesigner as CWSTR
    
    ' If this is a new Untitled document then set flag to display SaveAs dialog.
    If this.IsNewFlag Then bSaveAs = true
@@ -525,10 +490,11 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' If this is a FORM document then we need to create the string of controls and properties that gets
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
-      wszDesigner = this.CreateDesignerString
-      if this.bRegenerateCode then
-         GenerateCode(@this)      ' Also, regenerate visual designer code
-      end if
+      GenerateFormMetaData(@this)     ' recreate the metadata
+      GenerateFormCode(@this)         ' regenerate visual designer code
+      this.ErrorOffset = 0
+      this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormMetaData, vbcrlf) 
+      this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormCodegen, vbcrlf) 
    END IF
    
    ' Save text buffer to disk by directly accessing buffer rather
@@ -566,21 +532,16 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
             end if    
 
          case FILE_ENCODING_UTF16_BOM
-            ' Calculate the error offset that is used when an error is thrown to compensate
-            ' for the metadata that preceeds the actual code.
-            this.ErrorOffset = AfxStrTally(wszDesigner, vbcrlf)
-            this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszCodeGen, vbcrlf)
-            
             ' Output the BOM first
             put #f, , chr(&HFF, &HFE)
             if sciCodePage = SC_CP_UTF8 THEN    
-               put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
-               put #f, , CAST(BYTE PTR, this.wszCodeGen.m_pBuffer)[0], wszCodeGen.m_BufferLen
+               put #f, , CAST(BYTE PTR, this.wszFormMetaData.m_pBuffer)[0], this.wszFormMetaData.m_BufferLen
+               put #f, , CAST(BYTE PTR, this.wszFormCodegen.m_pBuffer)[0], this.wszFormCodegen.m_BufferLen
                ' convert utf8 to utf16
                put #f, , Utf8ToUnicode(*psz)
             else
-               put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
-               put #f, , CAST(BYTE PTR, this.wszCodeGen.m_pBuffer)[0], wszCodeGen.m_BufferLen
+               put #f, , CAST(BYTE PTR, this.wszFormMetaData.m_pBuffer)[0], this.wszFormMetaData.m_BufferLen
+               put #f, , CAST(BYTE PTR, this.wszFormCodegen.m_pBuffer)[0], this.wszFormCodegen.m_BufferLen
                ' need to convert ansi to unicode
                put #f, , WStr(*psz)
             end if    

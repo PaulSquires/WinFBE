@@ -133,13 +133,13 @@ function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
       end if
       
    case "BACKCOLOR"
-      pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(pProp) )
+      pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(pProp), true )
 
    case "TEXTFORECOLOR"
-      pCtrl->AfxButtonPtr->SetTextForeColor( GetRGBColorFromProperty(pProp) )
+      pCtrl->AfxButtonPtr->SetTextForeColor( GetRGBColorFromProperty(pProp), true )
 
    case "TEXTBACKCOLOR"
-      pCtrl->AfxButtonPtr->SetTextBkColor( GetRGBColorFromProperty(pProp) )
+      pCtrl->AfxButtonPtr->SetTextBkColor( GetRGBColorFromProperty(pProp), true )
 
    case "TEXTMARGIN"
       pCtrl->AfxButtonPtr->SetTextMargin( nPropValue, true )
@@ -384,20 +384,6 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    
    select CASE ucase(wszPropName)
       
-   case "PASSWORDCHAR"
-      Dim As Long iChr = 0
-      If Len(wszPropValue) Then iChr = wszPropValue[0]
-      SendMessage(pCtrl->hWindow, EM_SETPASSWORDCHAR, iChr, 0)
-      AfxRedrawWindow(pCtrl->hWindow)
-      
-   CASE "MULTILINE"
-      if wszPropValue = "True" then
-         AfxAddWindowStyle(pCtrl->hWindow, ES_MULTILINE)
-      else   
-         AfxRemoveWindowStyle(pCtrl->hWindow, ES_MULTILINE)
-      END IF
-      AfxRedrawWindow(pCtrl->hWindow)
-      
    case "BACKCOLOR"
       dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
@@ -406,7 +392,6 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    case "BORDERSTYLE"
       AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
       AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
-      dim as long wsStyle
       select case **wszPropValue
          case "ControlBorderStyle.None"
          case "ControlBorderStyle.Fixed3D"
@@ -416,20 +401,33 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       end select
       SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
 
-   case "TEXTALIGN"
-      AfxRemoveWindowStyle(pCtrl->hWindow, ES_CENTER)
-      AfxRemoveWindowStyle(pCtrl->hWindow, ES_LEFT)
-      AfxRemoveWindowStyle(pCtrl->hWindow, ES_RIGHT)
-      dim as long wsStyle
+   case "CHARACTERCASING"
+      AfxRemoveWindowStyle(pCtrl->hWindow, ES_LOWERCASE)
+      AfxRemoveWindowStyle(pCtrl->hWindow, ES_UPPERCASE)
       select case **wszPropValue
-         CASE "TextAlignment.Left":   wsStyle = ES_LEFT
-         CASE "TextAlignment.Center": wsStyle = ES_CENTER 
-         CASE "TextAlignment.Right":  wsStyle = ES_RIGHT  
-      END SELECT
-      AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+         Case "CharacterCase.Normal"
+         Case "CharacterCase.Upper"
+            AfxAddWindowStyle(pCtrl->hWindow, ES_UPPERCASE)
+         Case "CharacterCase.Lower"
+            AfxAddWindowStyle(pCtrl->hWindow, ES_LOWERCASE)
+      End Select
+      AfxRedrawWindow(pCtrl->hWindow)
 
-   case "SCROLLBARS"
+   CASE "MULTILINE"
+      if wszPropValue = "True" then
+         AfxAddWindowStyle(pCtrl->hWindow, ES_MULTILINE)
+      else   
+         AfxRemoveWindowStyle(pCtrl->hWindow, ES_MULTILINE)
+      END IF
+      AfxRedrawWindow(pCtrl->hWindow)
+
+   case "PASSWORDCHAR"
+      Dim As Long iChr = 0
+      If Len(wszPropValue) Then iChr = wszPropValue[0]
+      SendMessage(pCtrl->hWindow, EM_SETPASSWORDCHAR, iChr, 0)
+      AfxRedrawWindow(pCtrl->hWindow)
+      
+   case "TEXTSCROLLBARS"
       AfxRemoveWindowStyle(pCtrl->hWindow, WS_HSCROLL)
       AfxRemoveWindowStyle(pCtrl->hWindow, WS_VSCROLL)
       dim as long wsStyle
@@ -442,6 +440,19 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
          case "ScrollBars.Both"
             wsStyle = (WS_HSCROLL or WS_VSCROLL)
       end select
+      AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
+      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+
+   case "TEXTALIGN"
+      AfxRemoveWindowStyle(pCtrl->hWindow, ES_CENTER)
+      AfxRemoveWindowStyle(pCtrl->hWindow, ES_LEFT)
+      AfxRemoveWindowStyle(pCtrl->hWindow, ES_RIGHT)
+      dim as long wsStyle
+      select case **wszPropValue
+         CASE "TextAlignment.Left":   wsStyle = ES_LEFT
+         CASE "TextAlignment.Center": wsStyle = ES_CENTER 
+         CASE "TextAlignment.Right":  wsStyle = ES_RIGHT  
+      END SELECT
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
       SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
 

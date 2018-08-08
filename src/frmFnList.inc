@@ -300,6 +300,27 @@ Function frmFnList_WndProc( ByVal HWnd   As HWnd, _
 End Function
 
 
+''
+''  Need to re-parse any dirty files. This is especially important for QuickRun scenarios
+''  where the file is never physically saved.
+''
+function frmFnList_ReparseFiles() as Long
+   dim as long idx = gApp.GetActiveProjectIndex()
+   Dim pDoc As clsDocument Ptr
+   Dim As Long i, nCount
+   nCount = gApp.Projects(idx).GetDocumentCount 
+   For i = 0 To nCount - 1
+      pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+      If pDoc Then 
+         If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+            ParseDocument(idx, pDoc, "")
+            AddFunctionsToExplorerTreeview(pDoc, true)
+         end if
+      end if
+   next      
+   function = 0
+end function
+
 ' ========================================================================================
 ' frmFnList_Show
 ' ========================================================================================
@@ -313,6 +334,9 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMFNLIST), SW_HIDE, SW_SHOW)
       ShowWindow HWND_FRMFNLIST, nCmdShow
       If nCmdShow = SW_SHOW Then
+         ' Need to re-parse any dirty files. This is especially important for QuickRun scenarios
+         ' where the file is never physically saved.
+         frmFnList_ReparseFiles
          frmFnList_UpdateListBox()
          frmFnList_SetListBoxPosition()
          SetFocus GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
@@ -355,6 +379,7 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
 
    SendMessageW( hList, LB_SETCOLUMNWIDTH, 250 * pWindow->rxRatio, 0 )
    
+   frmFnList_ReparseFiles
    frmFnList_UpdateListBox()
    frmFnList_SetListBoxPosition()
 

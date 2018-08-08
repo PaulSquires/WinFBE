@@ -148,10 +148,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       ' saved at the start of the file before any of the code is displayed.
       dim as CWSTR wszDesigner
       if pDocMain->IsDesigner then
-         wszDesigner = pDocMain->CreateDesignerString
-         if pDocMain->bRegenerateCode then
-            GenerateCode(pDocMain)      ' Also, regenerate visual designer code
-         end if
+         GenerateFormMetaData(pDocMain)
+         GenerateFormCode(pDocMain)      ' Also, regenerate visual designer code
       END IF
 
       ' Copy the contents of the active document to the temporary source file.
@@ -187,21 +185,16 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                end if    
 
             case FILE_ENCODING_UTF16_BOM
-               ' Calculate the error offset that is used when an error is thrown to compensate
-               ' for the metadata that preceeds the actual code.
-               pDocMain->ErrorOffset = AfxStrTally(wszDesigner, vbcrlf)
-               pDocMain->ErrorOffset = pDocMain->ErrorOffset + AfxStrTally(pDocMain->wszCodeGen, vbcrlf)
-               
                ' Output the BOM first
                put #f, , chr(&HFF, &HFE)
                if sciCodePage = SC_CP_UTF8 THEN    
-                  put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
-                  put #f, , CAST(BYTE PTR, pDocMain->wszCodeGen.m_pBuffer)[0], pDocMain->wszCodeGen.m_BufferLen
+                  put #f, , CAST(BYTE PTR, pDocMain->wszFormMetaData.m_pBuffer)[0], pDocMain->wszFormMetaData.m_BufferLen
+                  put #f, , CAST(BYTE PTR, pDocMain->wszFormCodeGen.m_pBuffer)[0], pDocMain->wszFormCodeGen.m_BufferLen
                   ' convert utf8 to utf16
                   put #f, , Utf8ToUnicode(*psz)
                else
-                  put #f, , CAST(BYTE PTR, wszDesigner.m_pBuffer)[0], wszDesigner.m_BufferLen
-                  put #f, , CAST(BYTE PTR, pDocMain->wszCodeGen.m_pBuffer)[0], pDocMain->wszCodeGen.m_BufferLen
+                  put #f, , CAST(BYTE PTR, pDocMain->wszFormMetaData.m_pBuffer)[0], pDocMain->wszFormMetaData.m_BufferLen
+                  put #f, , CAST(BYTE PTR, pDocMain->wszFormCodeGen.m_pBuffer)[0], pDocMain->wszFormCodeGen.m_BufferLen
                   ' need to convert ansi to unicode
                   put #f, , WStr(*psz)
                end if    
@@ -609,19 +602,19 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Lon
          frmMain_PositionWindows(HWND_FRMMAIN)
       End If 
    END IF
-
+   if pDoc = 0 then exit function
+   
    ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
    ' initiate the toggle between the code editor and visual designer.
-   if pDoc then
-      if pDoc->IsDesigner then
-         TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, 1)  ' 1 = code tab
-         frmMain_PositionWindows(HWND_FRMMAIN)
-      END IF
+   if pDoc->IsDesigner then
+      ' Show the code editor.
+      TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, 1)  ' 1 = code tab
+      frmMain_PositionWindows(HWND_FRMMAIN)
    END IF
 
    ' Move Scintilla cursor to the correct error line 
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   dim as long nLineNum = Val(wszErrorLine) - pDoc->ErrorOffset - 1
+   dim as long nLineNum = Val(wszErrorLine) - 1   ' because visually the editor is one based line numbers
    SciExec( hEdit, SCI_GOTOLINE, nLineNum, 0 )
 
 End Function
@@ -700,24 +693,24 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
          (left(**wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1 (refer to log file)") ) 
          NumErrors = NumErrors + 1
       elseIf (Left(**wst_ucase, 5) = WSTR("ERROR")) Then
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Error Code 1") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Error Code 1 (refer to log file)") ) 
          NumErrors = NumErrors + 1
       elseIf (Left(**wst_ucase, 19) = WSTR("COMPILING C FAILED:")) Then
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling C FAILED: Error Code 1") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling C FAILED: Error Code 1 (refer to log file)") ) 
          NumErrors = NumErrors + 1
       end if
       
       If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") ) 
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, wst ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, wst & " (refer to log file)" ) 
          NumErrors = NumErrors + 1
       End If
  
@@ -754,6 +747,22 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
             wst2 = Mid( wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
             wst3 = Mid( wst, Error_Start + 1)  ' error message
  
+            ' If this is a visual designer form file then we need to modify the line
+            ' number based on the error offset number.
+            dim as long idx = gApp.GetActiveProjectIndex()
+            dim pDoc as clsDocument ptr = gApp.Projects(idx).GetDocumentPtrByFilename(wst1)
+            if pDoc then
+               if pDoc->IsDesigner then
+                  if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
+                  if len(pDoc->wszFormCodegen) = 0 then GenerateFormCode(pDoc)   ' regenerate visual designer code
+                  ' Offset is based on form metadata + code generation
+                  pDoc->ErrorOffset = 0
+                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
+                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
+                  wst2 = str( val(wst2) - pDoc->ErrorOffset)
+               end if
+            END IF
+
             FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, wst2 )  ' line#
             FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, wst1 )  ' filename
             FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, wst3 )  ' error message

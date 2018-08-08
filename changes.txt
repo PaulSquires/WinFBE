@@ -1,3 +1,16 @@
+Version 1.7.3 (August 8, 2018)
+- Added: Function names will now display for code files that do not have a disk filename (especially useful for QuickRun files).
+- Changed: Updated Italian language file.
+- Changed: Changing back colors of a button now also calls button refresh.
+- Changed: Temporarily removed some Properties that have not been fully implemented in order to prevent compile time errors.
+- Fixed: Compiler output listview now properly shows Form file error lines (adjusted to remove metadata and codegen lines).
+- Fixed: Help file displaying "Not found" error for fully qualified path names.
+- Fixed: TextBox WordWrap property was coded incorrectly.
+- Fixed: TextBox HideSelection property was coded incorrectly.
+- Fixed: TextBox CharacterCasing property not correctly referencing the CharacterCase Enum.
+- Fixed: TextBox TextScrollBars property changes not reflected visually in the visual designer.
+- Fixed: TextBox AcceptTab property was not fully implemented.
+
 Version 1.7.2 (August 3, 2018) 
 - Added: Completed ListBox control documentation and tips.
 - Fixed: Regression from 1.7.1 preventing text input into PropertyList items (Name, Text, etc).

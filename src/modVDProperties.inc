@@ -111,7 +111,7 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "Controls whether the text in the edit control can be changed or not."
       case "SCROLLALWAYSVISIBLE"   
          wszPropDescribe = "Indicates if the listbox should always have a scrollbar present regardless of how many items are in it."
-      case "SCROLLBARS"   
+      case "TEXTSCROLLBARS"   
          wszPropDescribe = "Indicates for multiline edit controls which scroll bars will be shown for the control."
       case "SELECTIONMODE"   
          wszPropDescribe = "Indicates if the listbox is to be simple-select, multiselect, or not selectable."
@@ -723,10 +723,10 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "AcceptButton", "", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "KeyPreview", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackgroundImage", "", PropertyType.ImagePicker)
-         AddControlProperty(pCtrl, "BackgroundImageLayout", "ImageLayout.None", PropertyType.ComboPicker)
+'         AddControlProperty(pCtrl, "BackgroundImage", "", PropertyType.ImagePicker)
+'         AddControlProperty(pCtrl, "BackgroundImageLayout", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "CancelButton", "", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Icon", "", PropertyType.ImagePicker)
+'         AddControlProperty(pCtrl, "Icon", "", PropertyType.ImagePicker)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MaximumHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "MaximumWidth", "0", PropertyType.EditEnterNumericOnly)
@@ -758,11 +758,11 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "TextBackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextForeColorDown", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextBackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
-         AddControlProperty(pCtrl, "ImageAlign", "ImageLayout.None", PropertyType.ComboPicker)
+'         AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
+'         AddControlProperty(pCtrl, "ImageAlign", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "TextMargin", "4", PropertyType.EditEnterNumericOnly)
+'         AddControlProperty(pCtrl, "TextMargin", "4", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ThemeSupport", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ToggleMode", "False", PropertyType.TrueFalse)
@@ -796,7 +796,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "TextAlignment.Left", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "WordWrap", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "WordWrap", "False", PropertyType.TrueFalse)
 
       case CTRL_CHECKBOX
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
@@ -923,9 +923,9 @@ function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          end select
          
       case "CHARACTERCASING"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCasing.Normal"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCasing.Upper"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCasing.Lower"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Normal"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Upper"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Lower"))
 
       case "CHECKSTATE"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Checked"))

@@ -125,6 +125,7 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
       loop      
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
+   AfxRedrawWindow(hTree)
    
    Function = 0
 End Function

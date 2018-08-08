@@ -34,9 +34,52 @@ end function
 
 
 ' ========================================================================================
+' Generate the metadata that defines the form
+' ========================================================================================
+function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
+   if pDoc = 0 then exit function
+   dim pCtrl as clsControl ptr
+   dim wszControls as CWSTR
+   
+   ' Iterate all of the controls on the form
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl then
+         wszControls = wszControls & "' WINFBE CONTROL_START " & GetControlName(pCtrl->ControlType) & vbcrlf & _
+                                     "'   PROPERTIES_START" & vbcrlf 
+         for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
+            wszControls = wszControls & _
+                          "'     PROP_NAME="  & pCtrl->Properties(ii).wszPropName & vbcrlf & _
+                          "'     PROP_VALUE=" & pCtrl->Properties(ii).wszPropValue & vbcrlf 
+         NEXT
+         wszControls = wszControls & "'   PROPERTIES_END" & vbcrlf & _
+                                     "'   EVENTS_START" & vbcrlf 
+         for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
+            ' Only need to output the names of the Events that have been ticked as being in use.
+            if pCtrl->Events(ii).bIsSelected then
+               wszControls = wszControls & _
+                             "'     EVENT_NAME="   & pCtrl->Events(ii).wszEventName & vbcrlf 
+            end if
+         next
+         wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
+                                     "' WINFBE CONTROL_END" & vbcrlf
+      END IF
+   NEXT
+
+   pDoc->wszFormMetaData = _
+                 "' WINFBE FORM" & vbcrlf & _
+                 "' WINFBE VERSION " & APPVERSION & vbcrlf & _
+                 "' WINFBE FORM_START" & vbcrlf & _
+                 wszControls & _
+                 "' WINFBE FORM_END" & vbcrlf 
+   
+   function = 0
+end function
+
+' ========================================================================================
 ' Generate (or regenerate) visual designer code and insert it into the code editor.
 ' ========================================================================================
-function GenerateCode( byval pDoc as clsDocument ptr ) as long
+function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    if pDoc = 0 then exit function
    if pDoc->IsDesigner = false then exit function
    if pDoc->bRegenerateCode = false then exit function
@@ -55,6 +98,8 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
       sp(i) = space(val(gConfig.TabSize) * i)
    NEXT
    
+   pDoc->wszFormCodegen = ""
+
    wszFormName = GetFormName(pDoc)
    wszStartTag = "' WINFBE_CODEGEN_START"
    wszEndTag   = "' WINFBE_CODEGEN_END"
@@ -304,7 +349,7 @@ function GenerateCode( byval pDoc as clsDocument ptr ) as long
    END IF
   
    ' Save the generated codegen code because we will output it to a disk file
-   pDoc->wszCodeGen = wszCodeGen
+   pDoc->wszFormCodeGen = wszCodeGen
    
    pDoc->bRegenerateCode = false
    

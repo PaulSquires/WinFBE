@@ -363,7 +363,7 @@ function GetFileToString( byref wszFilename as const wstring, _
 
          ' Need to parse wszText to remove/process any possible visual designer code. Only
          ' the non-VD text is returned. We also skip over any codegen code.
-         wszText = pDoc->ParseDesignerString(HWND_FRMMAIN, wszText)
+         wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
 
          ' Convert to UTF8 so it can display in the editor
          ' Need to pass a WSTRING pointer to the conversion function.
@@ -452,17 +452,34 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
          nLineNumber = pData->nLineNum
       end if
    end if   
+
+   ' Not all documents exist on disk file. For example, a QuickRun file will exist in
+   ' the editor but may never have a disk footprint. We need to search the project to
+   ' determine if the filename has a pDoc already associated with it. If it does, then
+   ' pass that pDoc rather than looking for a disk filename.
+   dim as long idx = gApp.GetActiveProjectIndex()
+   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(wszText)
    
-   if AfxFileExists(wszText) = 0 THEN exit function
-      
-   ' Display the document containing the selected sub/function       
-   pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                           False, _    ' bIsNewFile
-                           False, _    ' bIsTemplate
-                           true, _     ' bShowInTab
-                           false, _    ' bIsInclude
-                           wszText, _  ' pwszName
-                           0 )  ' pDocIn
+   if pDoc then
+      pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                              False, _    ' bIsNewFile
+                              False, _    ' bIsTemplate
+                              true, _     ' bShowInTab
+                              false, _    ' bIsInclude
+                              "", _       ' pwszName
+                              pDoc )  ' pDocIn
+   else   
+      if AfxFileExists(wszText) = 0 THEN exit function
+      ' Display the document containing the selected sub/function       
+      pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                              False, _    ' bIsNewFile
+                              False, _    ' bIsTemplate
+                              true, _     ' bShowInTab
+                              false, _    ' bIsInclude
+                              wszText, _  ' pwszName
+                              0 )  ' pDocIn
+   end if
+
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
