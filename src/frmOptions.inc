@@ -106,7 +106,7 @@ Sub SaveEditorOptions()
    End If
    
    ' Output the config settings to disk file
-   gConfig.SaveToFile
+   gConfig.SaveConfigFile
 
 End Sub
 

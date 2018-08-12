@@ -285,78 +285,6 @@ function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 END FUNCTION
 
   
-''
-''
-Function EnumWindowsProcCB(ByVal hWindow As hWnd, ByVal lParam As LPARAM) As boolean
-   dim wszClassName as wstring * 256
-   GetClassName(hWindow, wszClassName, 256)
-   if ucase(wszClassName) = "LISTBOXX" then
-      gApp.hWndAutoCListBox = hWindow
-      return false
-   END IF
-   ' EnumWindows will continue enumerating until all top level windows
-   ' have been passed to this proc or until this proc returns FALSE
-   Function = True 
-End Function
-     
-    
-' ========================================================================================
-' Get item from the popup AutoCTooltip list
-' ========================================================================================
-function GetAutoCTooltip( byval sTipID as string) as DB2_DATA ptr
-   dim as long lb = lbound(gApp.AutoCTipsID)
-   dim as long ub = ubound(gApp.AutoCTipsID)
-   for i as long = lb to ub
-      if ucase(gApp.AutoCTipsID(i) ) = ucase(sTipID) then
-         return gApp.AutoCTipsData(i)
-      END IF
-   NEXT
-   function = 0
-end function
-
-' ========================================================================================
-' Add item to popup AutoCTooltip list
-' ========================================================================================
-function AddAutoCTooltip( byval sTipID as string, byval pData as DB2_DATA ptr) as Long
-   dim as long ub = ubound(gApp.AutoCTipsID) + 1
-   redim preserve gApp.AutoCTipsID(ub):   gApp.AutoCTipsID(ub) = sTipID
-   redim preserve gApp.AutoCTipsData(ub): gApp.AutoCTipsData(ub) = pData
-   function = 0
-end function
-                     
-' ========================================================================================
-' Destroy the secondary popup info window
-' ========================================================================================
-function KillAutoCTooltip() as Long
-   ' Hide any previously created toolitp
-   ShowWindow( gApp.pWindowAutoC.hWindow, SW_HIDE)
-   erase gApp.AutoCTipsID 
-   erase gApp.AutoCTipsData 
-   function = 0
-end function
-         
-' ========================================================================================
-' frmAutoCtooltip Window procedure
-' ========================================================================================
-Function frmAutoCtooltip_WndProc( ByVal HWnd   As HWnd, _
-                                  ByVal uMsg   As UINT, _
-                                  ByVal wParam As WPARAM, _
-                                  ByVal lParam As LPARAM _
-                                  ) As LRESULT
-
-   select case uMsg
-      CASE WM_SIZE     
-         ' Fill the label to the full size of the popup window
-         SetWindowPos( gApp.hWndAutoCTooltip, 0, 0, 0, _
-                       loword(lParam), hiword(lParam), _
-                       SWP_NOZORDER)
-   END SELECT
-
-   ' for messages that we don't deal with
-   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
-
-End Function
-                
 ' ========================================================================================
 ' Display the actual Autocomplete popup list window
 ' ========================================================================================
@@ -413,11 +341,11 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
              
    ' Retrieve the position
    curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) + 1
+   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) '+ 1
   
    dim as string sLine = left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol)
    dim as string sLine_ucase
-    
+   
    ' Get the current entered word/characters to only match 
    pDoc->sMatchWord = ucase(trim(pDoc->GetWord))
    nLenMatchWord = len(pDoc->sMatchWord)
@@ -426,7 +354,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    ' a space or tab must have been pressed so autocomplete cancel and now exit.
    if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
       if nLenMatchWord = 0 THEN 
-         KillAutoCTooltip()
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
       end if   
@@ -447,7 +374,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
          ' okay
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       elseif right(sLine_ucase, 1) = "(" then 
-         pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS 
          ShowCodetip(pDoc)
          exit function 
       elseif right(sLine_ucase, 5) = " NEW " then 
@@ -474,7 +400,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       END IF
       ' Check if it is a "DIM i AS" type of statement
       if instr(sLine, "FOR ") then 
-         KillAutoCTooltip()
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
       END IF
@@ -501,11 +426,9 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                if pData->id = DB2_STANDARDDATATYPE then
                   if nLenMatchWord then
                      if left(ucase(pData->ElementValue), nLenMatchWord) = pDoc->sMatchWord THEN 
-                        AddAutoCTooltip(pData->ElementValue, pData)
                         sList = sList & pData->ElementValue & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
                      END IF
                   else   
-                     AddAutoCTooltip(pData->ElementValue, pData)
                      sList = sList & pData->ElementValue & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
                   END IF
                END IF      
@@ -518,14 +441,12 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                if nLenMatchWord then
                   if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
                      If ExistsInAutocompleteList(sList, st) = false THEN 
-                        AddAutoCTooltip(st, pData)
                         st = st & "?" & str(IMAGE_AUTOC_CLASS) 
                         sList = sList & st & "|" 
                      end if
                   end if
                elseif len(st) THEN 
                   If ExistsInAutocompleteList(sList, st) = false THEN 
-                     AddAutoCTooltip(st, pData)
                      st = st & "?" & str(IMAGE_AUTOC_CLASS) 
                      sList = sList & st & "|"
                   end if    
@@ -586,14 +507,12 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                                  if nLenMatchWord then
                                     if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
                                        If ExistsInAutocompleteList(sList, st) = false THEN 
-                                          AddAutoCTooltip(st, pData)
                                           st = st & "?" & str(IMAGE_AUTOC_PROPERTY) 
                                           sList = sList & st & "|"
                                        end if
                                     end if
                                  else
                                     If ExistsInAutocompleteList(sList, st) = false THEN 
-                                       AddAutoCTooltip(st, pData)
                                        st = st & "?" & str(IMAGE_AUTOC_PROPERTY) 
                                        sList = sList & st & "|"
                                     end if
@@ -616,7 +535,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                                  if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
                                     st = st & sProp
                                     If ExistsInAutocompleteList(sList, st) = false THEN 
-                                       AddAutoCTooltip(st, pData)
                                        st = st & "?" & str(IMAGE_AUTOC_METHOD) 
                                        sList = sList & st & "|"
                                     end if
@@ -624,7 +542,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                               else
                                  st = st & sProp
                                  If ExistsInAutocompleteList(sList, st) = false THEN 
-                                    AddAutoCTooltip(st, pData)
                                     st = st & "?" & str(IMAGE_AUTOC_METHOD) 
                                     sList = sList & st & "|"
                                  end if
@@ -647,7 +564,6 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       ShowAutoCompletePopup(hEdit, sList)
       return true
    else
-      KillAutoCTooltip()
       SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
    end if 
 

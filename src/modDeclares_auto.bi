@@ -62,8 +62,7 @@ Declare Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, ByVal iRow A
 Declare Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As BOOLEAN
 Declare Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As Long
 Declare Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, ByVal iRow As Long ) As LPARAM
-Declare Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
-Declare Function CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
+Declare Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
 Declare Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, ByVal pwszExeName As WString Ptr ) As Long
 Declare Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 Declare Function GetRunExecutableFilename() as CWSTR

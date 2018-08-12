@@ -193,6 +193,7 @@ Function CreateUserTools_AcceleratorTable() As Long
          wszShortcut = wszShortcut + "Alt+"
       end if   
           
+      nKey = 0   ' important to reset
       Select Case UCase(Trim(gConfig.Tools(y).wszKey))
          Case "F1":  nKey = VK_F1
          Case "F2":  nKey = VK_F2
@@ -246,7 +247,10 @@ Function CreateUserTools_AcceleratorTable() As Long
          
       wszShortcut = trim(wszShortcut + UCase(Trim(gConfig.Tools(y).wszKey)), any " +")
       
+? "Tool: "; y, "Key="; gConfig.Tools(y).wszKey, "wszShortcut="; wszShortcut
+
       If nKey > 0 Then
+? "nKey = "; nKey
          NumKeys = NumKeys + 1
          ReDim Preserve a(1 To NumKeys) As ACCEL
          a(NumKeys).fVirt = fVirt
@@ -539,7 +543,7 @@ Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
             NEXT
             erase gConfig.ToolsTemp
             CreateUserTools_AcceleratorTable            
-            gConfig.SaveToFile
+            gConfig.SaveConfigFile
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if

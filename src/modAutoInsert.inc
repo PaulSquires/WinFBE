@@ -78,25 +78,35 @@ function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
       sLine = ucase(ltrim(pDoc->GetLine(i)))
       
       nLenMatch = len(sStartMatch)
-      if sStartMatch = mid(sLine, 1, nLenMatch) then
-         return true    ' a start block was found before a matching end was found.
-      END IF
-
+      if nLenMatch then
+         if sStartMatch = mid(sLine, 1, nLenMatch) then
+            return true    ' a start block was found before a matching end was found.
+         END IF
+      end if
+      
       nLenMatch = len(sEndMatch)
-      if sEndMatch = mid(sLine, 1, nLenMatch-1) & "|" then
-         return false    ' a matching end to the block statement already exists
-      END IF
+      if nLenMatch then
+         if sEndMatch = mid(sLine, 1, nLenMatch-1) & "|" then
+            return false    ' a matching end to the block statement already exists
+         END IF
+      end if
       
       ' Stop search if we find the start of another block statement structure and
       ' allow the insert.
-      if left(sLine, 3)  = "IF "     then return true
-      if left(sLine, 4)  = "FOR "    then return true
-      if left(sLine, 3)  = "DO "     then return true
-      if left(sLine, 7)  = "SELECT " then return true
-      if left(sLine, 6)  = "WHILE "  then return true
-      if left(sLine, 12) = "END FUNCTION"  then return true
-      if left(sLine, 7)  = "END SUB"       then return true
-      if left(sLine, 12) = "END PROPERTY"  then return true
+      if left(sLine, 3)  = "IF "        then return true
+      if left(sLine, 4)  = "FOR "       then return true
+      if left(sLine, 3)  = "DO "        then return true
+      if left(sLine, 7)  = "SELECT "    then return true
+      if left(sLine, 6)  = "WHILE "     then return true
+      if left(sLine, 9)  = "FUNCTION "  then return true
+      if left(sLine, 4)  = "SUB "       then return true
+      if left(sLine, 17) = "PRIVATE FUNCTION " then return true
+      if left(sLine, 16) = "PUBLIC FUNCTION "  then return true
+      if left(sLine, 12) = "PRIVATE SUB "  then return true
+      if left(sLine, 11) = "PUBLIC SUB "   then return true
+      if left(sLine, 9)  = "PROPERTY "     then return true
+      if left(sLine, 6)  = "UNION "        then return true
+      if left(sLine, 5)  = "ENUM "         then return true
    next
       
    ' Default that we can allow the insert
@@ -162,7 +172,7 @@ function AttemptAutoInsert() as Long
       SciExec(hEdit, SCI_LINEDELETE, 0, 0)
       strFill = Space(nSpaces + IndentSize) & ltrim(strCurline, any chr(32,9)) & vbcrlf
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_IF, nLine) then
-         strFill = strFill & SPACE(nSpaces) & ConvertCase("END IF") & vbcrlf
+         strFill = strFill & SPACE(nSpaces) & "end if" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize
@@ -175,7 +185,7 @@ function AttemptAutoInsert() as Long
    If Left(strPrevLine, 4) = "FOR " then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FOR, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("NEXT") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "next" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -188,7 +198,7 @@ function AttemptAutoInsert() as Long
    If Left(strPrevLine, 12) = "SELECT CASE " then
       strFill = Space(nSpaces + IndentSize)  
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_SELECT, nLine) then
-         strFill = strFill & "CASE " & vbcrlf & SPACE(nSpaces) & ConvertCase("END SELECT") & vbcrlf
+         strFill = strFill & "case " & vbcrlf & SPACE(nSpaces) & "end select" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize + 5
@@ -201,7 +211,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 6) = "WHILE ") or (strPrevLine = "WHILE") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_WHILE, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("WEND") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "wend" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -214,7 +224,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 3) = "DO ") or (strPrevLine = "DO") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_DO, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("LOOP") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "loop" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -234,7 +244,7 @@ function AttemptAutoInsert() as Long
       if instr(strTemp, "=") then exit function
       strFill = Space(nSpaces + IndentSize)
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FUNCTION, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & ConvertCase("END FUNCTION") & vbcrlf
+         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end function" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -249,7 +259,7 @@ function AttemptAutoInsert() as Long
       (Left(strPrevLine, 11) = "PUBLIC SUB") then
       strFill = Space(nSpaces + IndentSize)
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_SUB, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & ConvertCase("END SUB") & vbcrlf
+         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end sub" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -262,7 +272,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 9)  = "PROPERTY ") then
       strFill = Space(nSpaces + IndentSize)
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_SUB, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & ConvertCase("END PROPERTY") & vbcrlf
+         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end property" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -275,7 +285,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 12)  = "CONSTRUCTOR ") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_CONSTRUCTOR, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END CONSTRUCTOR") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end constructor" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -288,7 +298,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 11)  = "DESTRUCTOR ") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_DESTRUCTOR, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END DESTRUCTOR") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end destructor" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -303,7 +313,7 @@ function AttemptAutoInsert() as Long
       if instr(ucase(strPrevLine), " AS ") then exit function
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_TYPE, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END TYPE") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end type" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -316,7 +326,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 4)  = "WITH") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_WITH, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END WITH") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end with" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -329,7 +339,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 4)  = "ENUM") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_ENUM, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END ENUM") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end enum" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 
@@ -342,7 +352,7 @@ function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 6)  = "UNION ") then
       strFill = Space(nSpaces + IndentSize) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_UNION, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & ConvertCase("END UNION") & vbcrlf
+         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end union" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + nSpaces + IndentSize 

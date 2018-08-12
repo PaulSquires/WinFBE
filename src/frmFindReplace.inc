@@ -47,6 +47,7 @@ function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false ) as lon
       END IF
       SciExec( hEdit, SCI_INDICATORCLEARRANGE, startPos, endPos)
      
+      gApp.SuppressNotify = true
       do 
          r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
@@ -56,6 +57,7 @@ function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false ) as lon
          SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
          SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
+      gApp.SuppressNotify = false
 
    else   
       ' Need to ensure that the current cursor/selection is actually the find

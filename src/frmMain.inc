@@ -128,7 +128,10 @@ Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
    '          A value of zero (0) returns the name of the executable; and values of 
    '          one (1) and greater return each command-line argument.
 
-   If Len(Command(1)) = 0 Then Exit Function
+   ' As of v1.7.4 start to use AfxCommand which is a unicode aware replacement for FB's
+   ' built in COMMAND function (that is not unicode compliant).
+   
+   If Len(AfxCommand(1)) = 0 Then Exit Function
    
    Dim wszPath As WString * MAX_PATH
    Dim wszArg  As WString * MAX_PATH
@@ -150,7 +153,7 @@ Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
    
    Dim As Long i = 1
    Do
-      wszArg = Command(i)
+      wszArg = AfxCommand(i)
       If Len(wszArg) = 0 Then Exit Do
        
       ' Remove any double quotes from the argument.
@@ -186,7 +189,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 
    Dim as HWND hEdit
    Dim as long nLine, nFoldLevel
-
+    
    Select Case pNSC->hdr.code
          
       Case SCN_UPDATEUI    
@@ -242,91 +245,13 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          End If           
                      
                
-      case SCN_AUTOCSELECTIONCHANGE
-         ' A listbox line has changed.
-         ' Iterate all windows to find the popup Autocomplete listbox (need to find the
-         ' handle here because the selection change fires when the listbox is created so
-         ' if we wait until after this notification then we will have missed our chance
-         ' to accurately display the codetip for the first item in the list).
-         gApp.hWndAutoCListBox = 0
-         EnumWindows(cast(EnumWindowsProc, @EnumWindowsProcCB), 0)
-         if IsWindow(gApp.pWindowAutoC.hWindow) = 0 then
-            ' Create the secondary popup window that shows additional information
-            ' related to the selected autocomplete item
-            gApp.pWindowAutoC.Create( HWND_FRMMAIN, "", @frmAutoCtooltip_WndProc, 0, 0, 0, 0, _
-                                      WS_POPUP OR WS_BORDER or WS_CLIPCHILDREN OR WS_CLIPSIBLINGS)
-            ' Set a monospaced font for better readibility
-            gApp.pWindowAutoC.SetFont("Courier New", gApp.pWindowAutoC.DefaultFontSize)
-            gApp.hWndAutoCTooltip = gApp.pWindowAutoC.AddControl("LABEL")
-         END IF
-        
-'         if IsWindow(gApp.pWindowAutoC.hWindow) then
-'            dim as string sID = *cast(zstring ptr, pNSC->lpText)
-'            dim as string sText, sCodeTip
-'            dim as RECT rc     
-'            dim pData as DB2_DATA ptr
-'            pData = GetAutoCTooltip(sID)    
-'            if pData then
-'               Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
-'               If pWindow = 0 Then Exit Function
-'               GetWindowRect(gApp.hWndAutoCListBox, @rc )
-                
-'               dim as string sCodeTip = iif(len(pData->ElementValue), FormatCodetip(pData->ElementValue), " <no parameters>")
-                    
-'               select case pData->id
-'                  CASE DB2_TYPE
-'                     sText = iif(pData->IsEnum, "ENUM ", "TYPE ") & pData->ElementName
-'                  case DB2_FUNCTION
-'                     sText = "Function " & sCodeTip
-'                  case DB2_SUB         
-'                     sText = "Sub " & sCodeTip
-'                  case DB2_PROPERTY  
-'                     sText = "Property " & pData->ElementName & vbcrlf & sCodeTip
-'                  case DB2_VARIABLE
-'                     sText = pData->ElementName & vbcrlf & _
-'                             pData->ElementValue
-'                  case DB2_STANDARDDATATYPE
-'                     sText = pData->ElementName
-'               END SELECT
-'               sText = sText & vbcrlf & pData->Description
-'               sText = AfxStrReplace(sText, "..", ".")
-                
-'               ' Calculate the size of the tip window that will display all of
-'               ' the tip text.
-'               dim as HDC hDC = GetDC(gApp.hWndAutoCTooltip)
-'               dim as RECT rcTip = (0, 0, 300, 50)
-'               DrawText(hDC, sText, -1, @rcTip, DT_CALCRECT)
-'               ReleaseDC(gApp.hWndAutoCTooltip, hDC)
-'               ' Make the right side just a littler larger just in case
-'               rcTip.right = rcTip.right + gApp.pWindowAutoC.ScaleX(20)
-'               ' Make the static label control large enough
-'               SetWindowPos( gApp.hWndAutoCTooltip, 0, _
-'                             0, 0, _            
-'                             gApp.pWindowAutoC.ScaleX(rcTip.right-rcTip.left+20), _
-'                             gApp.pWindowAutoC.ScaleY(rcTip.bottom-rcTip.top+20), _
-'                             SWP_NOZORDER or SWP_NOMOVE or SWP_NOACTIVATE)
-'               ' Expand/contract the size of the parent tip window's client area              
-'               gApp.pWindowAutoC.SetClientSize(rcTip.right-rcTip.left, rcTip.bottom-rcTip.top)
-'               AfxSetWindowText(gApp.hWndAutoCTooltip, sText) 
-               
-'               SetWindowPos( gApp.pWindowAutoC.hWindow, HWND_TOPMOST, _
-'                             rc.right + pWindow->ScaleX(2), rc.top, _
-'                             0, 0, _
-'                             SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOACTIVATE)
-'               AfxRedrawWindow(gApp.pWindowAutoC.hWindow)
-'               AfxRedrawWindow(gApp.hWndAutoCTooltip)
-'            else     
-'               ShowWindow(gApp.pWindowAutoC.hWindow, SW_HIDE)
-'            end if      
-'         end if              
-        
       case SCN_AUTOCCANCELLED
          ' Destroy the secondary popup information window
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          If pDoc Then 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            KillAutoCTooltip()
          end if
+         
          
       case SCN_AUTOCSELECTION
          ' A selection occured from the AutoComplete listbox. We do the insertion
@@ -353,7 +278,6 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             ' the autocomplete listbox.
             SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            KillAutoCTooltip   ' Destroy the secondary popup information window
                             
             if chr(pNSC->ch) = "=" then
                ' Add a space before and after Equals sign whenever the user presses
@@ -386,7 +310,6 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          case ")"      ' Close and active code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
             SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
-            KillAutoCTooltip()
                
          case "("      ' Show code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
@@ -1141,39 +1064,51 @@ End Function
 ' ========================================================================================
 Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 
-   dim wFilename as wstring * MAX_PATH
-   static wText as wstring * MAX_PATH
+   dim as CWSTR wszFilename 
    
-   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, "bi", IDM_FILESAVEDECLARES)
+   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, wszFilename, "bi", IDM_FILESAVEDECLARES)
    If pwszName Then
-      wFilename = *pwszName
-      wText = AfxStrPathname( "NAMEX", wFilename )
+      wszFilename = *pwszName
       CoTaskMemFree(pwszName)
    Else
       Return False
    End If
  
-   CreateDeclaresFile(wFilename)
+   dim pDoc as clsDocument ptr
+   dim pData as DB2_DATA ptr
+   dim as long idx = gApp.GetActiveProjectIndex()
+
+   dim pStream AS CTextStream
+   if pStream.Create(wszFileName) <> S_OK then exit function
+
+   gdb2.dbRewind()
+   do 
+      pData = gdb2.dbGetNext()
+      if pData = 0 THEN exit do
+      if (pData->id <> DB2_SUB) andalso (pData->id <> DB2_FUNCTION) THEN continue do
+
+      ' Bypass any declares for Class subs/functions
+      if instr(pData->ElementName, ".") = 0 THEN
+         if gApp.Projects(idx).GetDocumentPtrByFilename(pData->fileName) THEN 
+            if pData->id = DB2_SUB then
+               pStream.WriteLine "Declare Sub " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
+            end if
+            if pData->id = DB2_FUNCTION then
+               pStream.WriteLine "Declare Function " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
+            end if
+         end if
+      END IF
+   loop
+   pStream.Close
    
    ' If the declares file is loaded in the project then we need to reload
    ' it in order to ensure most current document data.
-   dim pDoc as clsDocument ptr
-   dim as long idx = gApp.GetActiveProjectIndex()
-   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(wFilename)
+   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(wszFilename)
    if pDoc THEN 
-      dim sText as string 
-      Dim As Long f = Freefile
-      If Open(pDoc->DiskFilename For Binary As #f) = 0 Then
-         sText = Space(Lof(f))
-         Get #f, , sText
-         Close #f
-         Dim nResult As Long = IS_TEXT_UNICODE_SIGNATURE
-         If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
-            sText = Mid(sText, 3)
-            sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
-         End If   
+      dim sText as string
+      if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
          pDoc->SetText( sText ) 
-         pDoc->DateFileTime = AfxGetFileLastWriteTime(pDoc->DiskFilename)
+         pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
          SciExec(pDoc->hWindow(0), SCI_SETSAVEPOINT, 0, 0)
       End If
    end if
@@ -2095,7 +2030,7 @@ Function frmMain_OnDestroy(byval HWnd As HWnd) As LRESULT
    ImageList_Destroy TabCtrl_GetImageList(gTTabCtl.hWindow) 
    
    ' Output the config settings to disk file
-   gConfig.SaveToFile
+   gConfig.SaveConfigFile
 
    ' Disable drag and drop files
    DragAcceptFiles HWnd, False

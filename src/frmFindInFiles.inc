@@ -103,16 +103,16 @@ function ParseSearchResults( byref wszResultFile as wstring ) as long
    dim as string st
    dim as long f1, f2
 
-   dim as long f = freefile
-   open wszResultFile for input as #f
+   dim pStream as CTextStream
+   if pStream.Open(wszResultFile) <> S_OK then exit function
    
    cwzStr = L(262, "Search Results") & ": " & gFindInFiles.txtFind
    ListBox_AddString(hLB, cwzStr)
    cwzStr = ""
    ListBox_AddString(hLB, cwzStr)
    
-   do until eof(f)
-      line input #f, st
+   do until pStream.EOS
+      st = pStream.ReadLine
       
       st = trim(st)
       if len(st) = 0 THEN continue do
@@ -137,7 +137,7 @@ function ParseSearchResults( byref wszResultFile as wstring ) as long
       cwzStr = st   
       ListBox_AddString(hLB, cwzStr)
    loop
-   close #f
+   pStream.Close
    
    kill wszResultFile 
    
@@ -255,12 +255,13 @@ function DoFindInFilesEx() as LONG
    wszParam   = WSTR(sParam & " /C:") & chr(34) & wszText & chr(34) & _
                  " " & **sSearchFiles & " >> " & wszResults
 
-   dim f as long = freefile
    wszBatchFile = AfxGetExePathName & "\_search.bat"
    ' Open filename does not use enclosing quotes
-   Open wszBatchFile For Output as #f
-   print #f, wszFileExe & " " & wszParam
-   close #f
+   dim pStream as CTextStream
+   if pStream.Create(wszBatchFile) = S_OK then
+      pStream.WriteLine wszFileExe & " " & wszParam
+   end if
+   pStream.Close   
  
    wszFileExe = Environ("COMSPEC")
    ' Batch filename must be enclosed in quotes b/c might have spaces in name

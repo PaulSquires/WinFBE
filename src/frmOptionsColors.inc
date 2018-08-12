@@ -220,7 +220,7 @@ End Function
 ' ShowComboColors
 ' ========================================================================================
 Function ShowComboColors( ByVal HWnd As HWnd ) As Long
-
+           
    Dim as long NumItems, foundat, nItem, i 
    Dim as Boolean fHideBack, fShowStyles
    Dim as COLORREF nFg, nBg
@@ -271,17 +271,17 @@ Function ShowComboColors( ByVal HWnd As HWnd ) As Long
    If nCurSel = 0  Then fHideBack = True   ' Caret
    If nCurSel = 2  Then fHideBack = True   ' Highlight current line
    If nCurSel = 4  Then fHideBack = True   ' Fold Margin
-   If nCurSel = 15 Then fHideBack = True   ' Window
+   If nCurSel = 13 Then fHideBack = True   ' Window
    ShowWindow hCB2, Iif( fHideBack, SW_HIDE, SW_SHOW )
    ShowWindow GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND), Iif( fHideBack, SW_HIDE, SW_SHOW )
 
    if nCurSel = 1  THEN fShowStyles = true    ' comments
    if nCurSel = 3  THEN fShowStyles = true    ' keywords
    if nCurSel = 6  THEN fShowStyles = true    ' line numbers
-   if nCurSel = 8  THEN fShowStyles = true    ' operators
-   if nCurSel = 10 THEN fShowStyles = true    ' preprocessor
-   if nCurSel = 12 THEN fShowStyles = true    ' strings
-   if nCurSel = 13 THEN fShowStyles = true    ' text
+   if nCurSel = 7  THEN fShowStyles = true    ' operators
+   if nCurSel = 9  THEN fShowStyles = true    ' preprocessor
+   if nCurSel = 11 THEN fShowStyles = true    ' strings
+   if nCurSel = 12 THEN fShowStyles = true    ' text
    Button_SetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTBOLD), _
       gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+CLR_CARET).bFontBold)
    Button_SetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_CHKFONTITALIC), _
@@ -354,20 +354,14 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
                                L(346,"Import theme"), "", curdir, _
                                L(79,"All files")+" (*.*)|*.*", "" )
          if AfxFileExists(wszFilename) THEN
-            Dim f as Long = Freefile
-            dim fErrOpen as boolean = false
             ' Attempt to open as unicode and then fallback as ansi
-            If Open( wszFilename For Input Encoding "utf16" As #f ) <> 0 Then 
-               fErrOpen = true
-               fErrOpen = Open( wszFilename For Input As #f ) 
-            end if   
-            if fErrOpen THEN exit function
-            Dim st As WString * 1024
-            Do Until EOF(f)
-               Line Input #f, st
-               gConfig.ImportTheme(st, true)
+            dim pStream as CTextStream
+            if pStream.Open(wszFilename, IOMode_ForReading, false, AfxIsFileUnicode(wszFilename)) <> S_OK then exit function
+            Do Until pStream.EOS
+               Dim as CWSTR wst = pStream.ReadLine
+               gConfig.ImportTheme(wst, true)
             loop
-            close #f   
+            pStream.Close
             ' reload the combobox
             FillThemesCombo(hWndCombo)
             ComboBox_SetCurSel(hWndCombo, 0 )
@@ -610,14 +604,12 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(142,"Fold Margin")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(143,"Fold Symbols")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(145,"LineNumbers")) )
-   SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(137,"Bookmarks")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(146,"Operators")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(144,"Indentation Guides")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(147,"Preprocessor")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(148,"Selection")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(149,"Strings")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(150,"Text")) )
-   SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(151,"WinAPI Keywords")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(152,"Window")) )
 
 

@@ -27,6 +27,7 @@
 #Include Once "crt\string.bi"
 #Include Once "win\Shlobj.bi"
 #Include Once "Afx\CWindow.inc"
+#Include Once "Afx\AfxFile.inc"
 #Include Once "Afx\AfxStr.inc"
 #Include Once "Afx\AfxTime.inc"
 #Include Once "Afx\AfxGdiplus.inc"
@@ -38,7 +39,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.7.3") 
+#Define APPVERSION    WStr("1.7.4") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -115,13 +116,14 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
                   ByVal nCmdShow      As Long _
                   ) As Long
 
-   ' Load configuration file 
-   gConfig.LoadFromFile()
+   ' Load configuration files 
+   gConfig.LoadConfigFile()
+   gConfig.LoadKeywords()
 
    ' Load the selected localization file
-   dim wszLocalizationFile as WString * MAX_PATH
+   dim as CWSTR wszLocalizationFile
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\") + gConfig.LocalizationFile
-   If LoadLocalizationFile(@wszLocalizationFile) = False Then
+   If LoadLocalizationFile(wszLocalizationFile) = False Then
       MessageBox( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
                    wszLocalizationFile, _
                    WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
@@ -153,12 +155,10 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    
    ' Load preparsed codetip files for the compiler's \inc folders.
    if gConfig.Codetips then
-      ' Load the Codetips file
-      gConfig.LoadCodetips( AfxGetExePathName & "Settings\codetips.ini" )
-      ' Load the visual designer codetips (WinFormsX library)
-      gConfig.LoadCodetipsWinFormsX( AfxGetExePathName & "Settings\codetips_winformsx.ini" )
-      ' Load the WinFBX (Afx) codetips
-      gConfig.LoadCodetipsWinFBX( AfxGetExePathName & "Settings\codetips_winfbx.ini" )
+      gConfig.LoadCodetipsFB()
+      gConfig.LoadCodetipsWinAPI()
+      gConfig.LoadCodetipsWinFormsX()
+      gConfig.LoadCodetipsWinFBX()
    end if
    
    ' Initialize the controls in the ToolBox

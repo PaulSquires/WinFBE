@@ -165,7 +165,7 @@ Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
    gConfig.MRU(0) = *wzFilename 
    
    ' Save the configuration file
-   gConfig.SaveToFile
+   gConfig.SaveConfigFile
 
    Function = 0
 End Function  
@@ -301,7 +301,7 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
    gConfig.MRUProject(0) = *wzFilename 
 
    ' Save the configuration file
-   gConfig.SaveToFile
+   gConfig.SaveConfigFile
 
    Function = 0
 End Function  

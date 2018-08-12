@@ -158,52 +158,54 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(pDocMain->hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
       dim as long sciCodePage = SciExec(pDocMain->hWindow(0), SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
       
-      f = freefile
-      open gCompile.MainFilename for binary as #f
-      if Err > 0 then 
-         ' error saving file
-         print "Error saving file: "; gCompile.MainFilename
-      else
+      dim pStream as CFileStream
+      if pStream.Open(gCompile.MainFilename, STGM_CREATE or STGM_WRITE) = S_OK then
+         dim as string st
          select CASE pDocMain->FileEncoding
             case FILE_ENCODING_ANSI
                if sciCodePage = 0 THEN    
-                  put #f, , *psz     ' no conversion necessary
+                  pStream.Write psz, len(*psz)     ' no conversion necessary
                else
                   ' need to convert
-                  put #f, , Utf8ToAscii(*psz)
+                  st = Utf8ToAscii(*psz)
+                  pStream.Write strptr(st), len(st) 
                end if    
 
             case FILE_ENCODING_UTF8_BOM
                ' Output the BOM first
-               put #f, , chr(&HEF, &HBB, &HBF)
+               st = chr(&HEF, &HBB, &HBF)
+               pStream.Write strptr(st), len(st)
                if sciCodePage = SC_CP_UTF8 THEN    
                   ' no conversion necessary
-                  put #f, , *psz
+                  pStream.Write psz, len(*psz)     ' no conversion necessary
                else
                   ' need to convert
-                  put #f, , AnsiToUtf8(*psz)
+                  st = AnsiToUtf8(*psz)
+                  pStream.Write strptr(st), len(st)
                end if    
 
             case FILE_ENCODING_UTF16_BOM
                ' Output the BOM first
-               put #f, , chr(&HFF, &HFE)
+               st = chr(&HFF, &HFE)
+               pStream.Write strptr(st), len(st)
                if sciCodePage = SC_CP_UTF8 THEN    
-                  put #f, , CAST(BYTE PTR, pDocMain->wszFormMetaData.m_pBuffer)[0], pDocMain->wszFormMetaData.m_BufferLen
-                  put #f, , CAST(BYTE PTR, pDocMain->wszFormCodeGen.m_pBuffer)[0], pDocMain->wszFormCodeGen.m_BufferLen
+                  pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
+                  pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
                   ' convert utf8 to utf16
-                  put #f, , Utf8ToUnicode(*psz)
+                  st = Utf8ToUnicode(*psz)   ' use a regular string b/c it is a byte buffer
+                  pStream.Write strptr(st), len(st)
                else
-                  put #f, , CAST(BYTE PTR, pDocMain->wszFormMetaData.m_pBuffer)[0], pDocMain->wszFormMetaData.m_BufferLen
-                  put #f, , CAST(BYTE PTR, pDocMain->wszFormCodeGen.m_pBuffer)[0], pDocMain->wszFormCodeGen.m_BufferLen
+                  pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
+                  pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
                   ' need to convert ansi to unicode
-                  put #f, , WStr(*psz)
+                  wst = WStr(*psz)
+                  pStream.Write wst.m_pBuffer, wst.m_BufferLen
                end if    
                
-            CASE ELSE
          END SELECT
 
       end if
-      close #f
+      pStream.Close
 
    else
       gCompile.MainFilename = pDocMain->DiskFilename
@@ -512,15 +514,16 @@ Function RunEXE( ByRef wszFileExe As CWSTR, _
    ' This allows being able to see any runtime errors that might be thrown.
    ' Otherwise, simple shell to the program.
    if gConfig.RunViaCommandWindow THEN
-      dim as long f = Freefile
-      Open wszBatchFile For Output as #f
-      print #f, "@echo off"
-      print #f, Left(**wszPath, 2)     ' ensure on correct drive
-      print #f, "cd "; chr(34); wszPath; chr(34)   ' change to correct folder
-      print #f, chr(34); wszFileExe; chr(34); " "; wszParam
-      print #f, "pause"
-      print #f, "del "; chr(34); wszBatchFile; chr(34); " >> nul"
-      close #f
+      dim pStream as CTextStream
+      if pStream.Create(wszBatchFile) = S_OK then
+         pStream.WriteLine "@echo off"
+         pStream.WriteLine Left(**wszPath, 2)     ' ensure on correct drive
+         pStream.WriteLine "cd " & chr(34) & wszPath & chr(34)   ' change to correct folder
+         pStream.WriteLine chr(34) & wszFileExe & chr(34) & " " & wszParam
+         pStream.WriteLine "pause"
+         pStream.WriteLine "del " & chr(34) & wszBatchFile & chr(34) & " >> nul"
+      end if
+      pStream.Close
       wszFileExe = wszBatchFile
       wszParam = ""
    END IF

@@ -1,3 +1,19 @@
+Version 1.7.4 (August 12, 2018)
+- Added: Loading of WinAPI codetips (\settings\codetips_winapi.ini).
+- Changed: Removed Bookmark color and WinAPI Keywords color. Basic themes will automatically be updated. USER DEFINED THEMES WILL NEED TO BE MANUALLY UPDATED. Sorry.
+- Changed: More specific error message for type of Help file not found.
+- Changed: Replaced FB's COMMAND with unicode aware replacement AfxCommand.
+- Changed: Commented out Scintilla code for SCI_SETFONTQUALITY and SCI_SETTECHNOLOGY to see if it helps in displaying older *.fon bitmap font files.
+- Fixed: User Tool problem assigning accelerator key 
+- Fixed: "Save Declares File" menu option was not outputting SUB declarations (only FUNCTIONS).
+- Fixed: AutoInsert inserting "End Function" and/or "End Sub" in situations when it should not.
+- Fixed: Calltips disappearing after typing characters past the opening "(" that triggered the codetip.
+- Fixed: Corrected triggers for Autocomplete popups.
+- Fixed: Button TextAlign property not having effect at runtime.
+- Fixed: Locked property causing compile time error (property still not implemented yet however).
+- Fixed: Form Resize event was not firing after the Load event.
+- Fixed: Greatly speed up the Replace All for large documents with many phrases to be replaced.
+
 Version 1.7.3 (August 8, 2018)
 - Added: Function names will now display for code files that do not have a disk filename (especially useful for QuickRun files).
 - Changed: Updated Italian language file.

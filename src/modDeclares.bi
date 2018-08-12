@@ -327,14 +327,12 @@ enum
    CLR_FOLDMARGIN
    CLR_FOLDSYMBOL      
    CLR_LINENUMBERS     
-   CLR_BOOKMARKS       
    CLR_OPERATORS       
    CLR_INDENTGUIDES    
    CLR_PREPROCESSOR    
    CLR_SELECTION       
    CLR_STRINGS         
    CLR_TEXT            
-   CLR_WINAPI          
    CLR_WINDOW
 end enum
 
@@ -908,9 +906,15 @@ END TYPE
 
 Type clsConfig
    Private:
-      _ConfigFilename As String 
+      _ConfigFilename As CWSTR 
+      _FBKeywordsFilename as CWSTR 
+      _FBCodetipsFilename as CWSTR
+      _WinAPICodetipsFilename as CWSTR 
+      _WinFormsXCodetipsFilename as CWSTR 
+      _WinFBXCodetipsFilename as CWSTR
       
    Public:
+      WinFBEversion        as CWSTR
       SelectedTheme        as string          ' GUID of selected theme
       idxTheme             as long            ' need global b/c can't GetCurSel from CBN_EDITCHANGE
       Themes(any)          as TYPE_THEMES
@@ -919,7 +923,7 @@ Type clsConfig
       ToolsTemp(any)       as TYPE_TOOLS  
       Builds(any)          as TYPE_BUILDS  
       BuildsTemp(any)      as TYPE_BUILDS  
-      FBKeywords           As String 
+      FBKeywords           As String
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
       AskExit              As Long = false         ' use Long so True/False string not written to file
       HideToolbar          as long = false
@@ -967,19 +971,19 @@ Type clsConfig
       MRUProject(9)        As CWSTR
       
       Declare Constructor()
-      Declare Destructor()
       declare function ImportTheme( byref st as wstring, byval bImportExternal as Boolean = false ) as Long
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long
-      Declare Function SaveToFile() As Long
-      Declare Function LoadFromFile() As Long
+      Declare Function SaveConfigFile() As Long
+      Declare Function LoadConfigFile() As Long
       declare Function InitializeToolBox() as Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
-      declare Function LoadCodetips( ByRef sFilename As String ) as boolean
-      declare Function LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI as boolean  ) as boolean
-      declare Function LoadCodetipsWinFormsX( ByRef sFilename As String ) as boolean
-      declare Function LoadCodetipsWinFBX( ByRef sFilename As String ) as boolean
+      declare Function LoadCodetipsFB() as boolean
+      declare Function LoadCodetipsWinAPI() as boolean
+      declare Function LoadCodetipsWinFormsX() as boolean
+      declare Function LoadCodetipsWinFBX() as boolean
+      declare Function LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWinAPI as boolean ) as boolean
 End Type
 
 
@@ -1037,11 +1041,6 @@ Type clsApp
       pImageAutocompleteMethod   as any ptr
       pImageAutocompleteProperty as any ptr
       hWndAutoCListBox           as hwnd          ' handle of popup autocomplete ListBox window
-      pWindowAutoC               as CWindow       ' Our secondary popup info window
-      hWndAutoCTooltip           as hwnd          ' the label control on the secondary info window
-      AutoCTipsID(any)           as String        ' the keyword in the AutoC list used to find additional popup info
-      AutoCTipsData(any)         as DB2_DATA ptr  ' the pData into the DB2_DATA database
-      
       
       Projects(any) as clsProject 
       

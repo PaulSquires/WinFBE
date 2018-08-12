@@ -79,16 +79,17 @@ ParseAgain:
          ' a project would have a valid pDoc.
          if AfxFileExists(wszFilename) = 0 THEN exit function
 
-         dim as long f = freefile
-         open wszFilename for input as #f
-         do until eof(f)
-            if nLineCount >= ubound(sLineArray) THEN
-               redim preserve sLineArray(nLineCount + 5000)
-            END IF
-            line input #f, sLineArray(nLineCount)
-            nLineCount = nLineCount + 1
-         loop
-         close #f
+         dim pStream as CTextStream
+         if pStream.Open(wszFilename) = S_OK then
+            do until pStream.EOS
+               if nLineCount >= ubound(sLineArray) THEN
+                  redim preserve sLineArray(nLineCount + 5000)
+               END IF
+               sLineArray(nLineCount) = pStream.ReadLine 
+               nLineCount = nLineCount + 1
+            loop
+         end if
+         pStream.Close
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
          gdb2.dbDelete(wszFilename)

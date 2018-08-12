@@ -172,7 +172,7 @@ function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
                                 byval pCtrl as clsControl ptr, _
                                 byval pProp as clsProperty ptr _ 
                                 ) as Long
-   
+    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
    dim as long nPropValue

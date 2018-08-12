@@ -368,12 +368,13 @@ end function
 ''
 ''
 function clsDB2.dbDebug() as long
-   dim as long f = freefile
-   open "_debug.txt" for output as #f
+   dim pStream as CTextStream
+   pStream.Create("_debug.txt")
+
    dim pData as DB2_DATA ptr
    
    ' PRINT ALL TYPES
-   print #f, "CLASSES/TYPES"
+   pStream.WriteLine "CLASSES/TYPES"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -381,16 +382,16 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex = -1 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_TYPE then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, "   lineNum: "; pData->nLineNum
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
       
    ' PRINT ALL FUNCTIONS
-   print #f, "FUNCTIONS"
+   pStream.WriteLine "FUNCTIONS"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -399,16 +400,16 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_FUNCTION then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, "   lineNum: "; pData->nLineNum
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
       
    ' PRINT ALL SUBS
-   print #f, "SUBS"
+   pStream.WriteLine "SUBS"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -417,16 +418,16 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_SUB then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, "   lineNum: "; pData->nLineNum
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
 
    ' PRINT ALL PROPERTIES
-   print #f, "PROPERTIES"
+   pStream.WriteLine "PROPERTIES"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -435,16 +436,16 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_PROPERTY then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, "   lineNum: "; pData->nLineNum
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
 
    ' PRINT ALL VARIABLES
-   print #f, "VARIABLES"
+   pStream.WriteLine "VARIABLES"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -453,17 +454,17 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_VARIABLE then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, "   IsPrivate: "; pData->IsPrivate
-      print #f, "   lineNum: "; pData->nLineNum
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine "   IsPrivate: " & pData->IsPrivate
+      pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
    
    ' PRINT ALL TODO
-   print #f, "TODO DESCRIPTIONS"
+   pStream.WriteLine "TODO DESCRIPTIONS"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -471,16 +472,16 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex = -1 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_TODO then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, "   lineNum: "; pData->nLineNum
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
 
    ' PRINT ALL WINAPI/WINFBX FUNCTION DEFINITIONS
-   print #f, "WINAPI/WINFBX FUNCTIONS"
+   pStream.WriteLine "WINAPI/WINFBX FUNCTIONS"
    this.dbRewind()
    do 
       pData = this.dbGetNext
@@ -488,14 +489,14 @@ function clsDB2.dbDebug() as long
       if pData->projectIndex <> -1 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_FUNCTION then continue do
-      print #f, "   fileName: "; pData->fileName
-      print #f, "   ElementName: "; pData->ElementName
-      print #f, "   ElementValue: "; pData->ElementValue
-      print #f, ""
+      pStream.WriteLine "   fileName: " & pData->fileName
+      pStream.WriteLine "   ElementName: " & pData->ElementName
+      pStream.WriteLine "   ElementValue: " & pData->ElementValue
+      pStream.WriteLine ""
    loop
-   print #f, ""
+   pStream.WriteLine ""
    
-   close #f
+   pStream.Close
    function = 0
 end function
 

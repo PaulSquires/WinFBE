@@ -1036,33 +1036,31 @@ End Function
 ' ========================================================================================
 ' Load a .lang localization file from disk and populate the localization array
 ' ========================================================================================
-Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
+Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
 
    ' default that the file failed to load
    Function = False
-   If pwszName = 0 Then Exit Function
-   If AfxFileExists(*pwszName) = 0 Then Exit Function
+   If AfxFileExists(wszFileName) = 0 Then Exit Function
 
-   Dim st    As WString * MAX_PATH
-   Dim wKey  As WString * MAX_PATH
-   Dim wData As WString * MAX_PATH
+   Dim as CWSTR wst, wKey, wData
    Dim nKey  As Long
    Dim nData As Long  
    Dim i     As Long
     
-   Dim f As Long = Freefile
-   If Open( *pwszName For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
-
-   Do Until Eof(f)
-      Line Input #f, st
-      If Len(st) = 0 Then Continue Do
-      If Left(st, 1) = "'" Then Continue Do
+   dim pStream AS CTextStream
+   if pStream.OpenUnicode(wszFileName) <> S_OK then exit function
+   
+   do until pStream.EOS
+      wst = pStream.ReadLine
       
-      i = Instr(st, ":")
+      If Len(wst) = 0 Then Continue Do
+      If Left(wst, 1) = "'" Then Continue Do
+      
+      i = Instr(wst, ":")
       If i = 0 Then Continue Do
       
-      wKey  = Left(st, i-1)
-      wData = Mid(st, i+1)
+      wKey  = Left(wst, i-1)
+      wData = Mid(wst, i+1)
       
       nKey  = Val(wKey)
       nData = Val(wData)
@@ -1083,41 +1081,9 @@ Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
       End If   
          
    Loop
-   Close #f
-
+   pStream.Close
+   
    Function = True
-End Function
-
-
-''
-''
-Function CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
-
-   dim pDoc as clsDocument ptr
-   dim pData as DB2_DATA ptr
-    
-   dim as long idx = gApp.GetActiveProjectIndex()
-
-   dim as long f = Freefile
-   Open sFilename For Output As #f
-
-   gdb2.dbRewind()
-   do 
-      pData = gdb2.dbGetNext()
-      if pData = 0 THEN exit do
-      if pData->id <> DB2_FUNCTION THEN continue do
-
-      ' Bypass any declares for Class subs/functions
-      if instr(pData->ElementName, ".") = 0 THEN
-         if gApp.Projects(idx).GetDocumentPtrByFilename(pData->fileName) THEN 
-            Print #f, "Declare " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
-         end if
-      END IF
-   loop
-
-   Close #f
-
-   Function = 0
 End Function
 
 

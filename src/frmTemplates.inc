@@ -37,13 +37,13 @@ Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
       Case IDOK  
          If codeNotify = BN_CLICKED Then
             ' Let the IDC_FRMTEMPLATES_LISTBOX message to process it
-            SendMessageW HWnd, WM_COMMAND, MAKELONG(IDC_FRMTEMPLATES_LISTBOX, LBN_DBLCLK), 0
+            SendMessage( HWnd, WM_COMMAND, MAKELONG(IDC_FRMTEMPLATES_LISTBOX, LBN_DBLCLK), 0 )
             Exit Function
          End If
       
       Case IDCANCEL ' button clicked or ESC pressed
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage ( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
 
@@ -178,25 +178,24 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
    idx = 0
 
    ' // Find the files
+   dim pStream as CTextStream
    hSearch = FindFirstFile(wszCurPath, @WFD)
    IF hSearch <> INVALID_HANDLE_VALUE THEN
       DO
          IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
             wszFullPath = wszPath & WFD.cFileName
             ' // Get the description
-            FileNo = FREEFILE
-            OPEN wszFullPath FOR INPUT AS #FileNo
-            IF ERR = 0 THEN
+            if pStream.Open(wszFullPath) = S_OK then
                nLin = 0
-               DO UNTIL EOF(FileNo)
-                  LINE INPUT #FileNo, wszText
+               DO UNTIL pStream.EOS
+                  wszText = pStream.ReadLine
                   nLin += 1
                   IF nLin = 1 THEN nType = VAL(wszText)
                   IF nType < 1 OR nType > 2 THEN EXIT DO
                   IF nType = 1 AND nLin = 3 THEN EXIT DO
                   IF nType = 2 AND nLin = 4 THEN EXIT DO
                LOOP
-               CLOSE FileNo
+               pStream.Close
                ' // Display the description in the listbox
                nItem = SendMessage(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
                ' // Store the full path in the array

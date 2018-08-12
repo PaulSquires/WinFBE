@@ -224,11 +224,12 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
          Dim As Long idx
          
          If IsTemplate Then
-            If Open(*pwszFile For Input As #f) = 0 Then
+            dim pStream as CTextStream
+            if pStream.Open(*pwszFile) = S_OK then
                ' Look at the first 4 lines
                ' Line 3 tells us the file type (bas or xml)
-               Do Until Eof(f)
-                  Line Input #f, st
+               Do Until pStream.EOS
+                  st = pStream.ReadLine
                   idx = idx + 1
                   Select Case idx
                      Case 1
@@ -239,7 +240,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                         sText = sText & st & vbCrLf
                   End Select   
                Loop
-               Close #f
+               pStream.Close
                If IsTextUnicode(StrPtr(sText), 2, Cast(LPINT, @nResult) ) Then
                   sText = Mid(sText, 3)
                   sText = AfxACode( Cast(WSTRING Ptr, StrPtr(sText)) )
@@ -505,51 +506,53 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    
    if AfxFileExists(wFilename) THEN Kill(wFilename)
       
-   f = freefile
-   open wFilename for binary as #f
-   if Err > 0 then 
-      ' error saving file
-      print "Error saving file: "; wFilename
-   else
+   dim pStream as CFileStream
+   if pStream.Open(wFilename, STGM_CREATE or STGM_WRITE) = S_OK then
+      dim as string st
       select CASE this.FileEncoding
          case FILE_ENCODING_ANSI
             if sciCodePage = 0 THEN    
-               put #f, , *psz     ' no conversion necessary
+               pStream.Write psz, len(*psz)     ' no conversion necessary
             else
                ' need to convert
-               put #f, , Utf8ToAscii(*psz)
+               st = Utf8ToAscii(*psz)
+               pStream.Write strptr(st), len(st) 
             end if    
 
          case FILE_ENCODING_UTF8_BOM
             ' Output the BOM first
-            put #f, , chr(&HEF, &HBB, &HBF)
+            st = chr(&HEF, &HBB, &HBF)
+            pStream.Write strptr(st), len(st)
             if sciCodePage = SC_CP_UTF8 THEN    
                ' no conversion necessary
-               put #f, , *psz
+               pStream.Write psz, len(*psz)     ' no conversion necessary
             else
                ' need to convert
-               put #f, , AnsiToUtf8(*psz)
+               st = AnsiToUtf8(*psz)
+               pStream.Write strptr(st), len(st)
             end if    
 
          case FILE_ENCODING_UTF16_BOM
             ' Output the BOM first
-            put #f, , chr(&HFF, &HFE)
+            st = chr(&HFF, &HFE)
+            pStream.Write strptr(st), len(st)
             if sciCodePage = SC_CP_UTF8 THEN    
-               put #f, , CAST(BYTE PTR, this.wszFormMetaData.m_pBuffer)[0], this.wszFormMetaData.m_BufferLen
-               put #f, , CAST(BYTE PTR, this.wszFormCodegen.m_pBuffer)[0], this.wszFormCodegen.m_BufferLen
+               pStream.Write this.wszFormMetaData.m_pBuffer, this.wszFormMetaData.m_BufferLen
+               pStream.Write this.wszFormCodeGen.m_pBuffer, this.wszFormCodeGen.m_BufferLen
                ' convert utf8 to utf16
-               put #f, , Utf8ToUnicode(*psz)
+               st = Utf8ToUnicode(*psz)   ' use a regular string b/c it is a byte buffer
+               pStream.Write strptr(st), len(st)
             else
-               put #f, , CAST(BYTE PTR, this.wszFormMetaData.m_pBuffer)[0], this.wszFormMetaData.m_BufferLen
-               put #f, , CAST(BYTE PTR, this.wszFormCodegen.m_pBuffer)[0], this.wszFormCodegen.m_BufferLen
+               pStream.Write this.wszFormMetaData.m_pBuffer, this.wszFormMetaData.m_BufferLen
+               pStream.Write this.wszFormCodeGen.m_pBuffer, this.wszFormCodeGen.m_BufferLen
                ' need to convert ansi to unicode
-               put #f, , WStr(*psz)
+               dim as CWSTR wst = WStr(*psz)
+               pStream.Write wst.m_pBuffer, wst.m_BufferLen
             end if    
             
-         CASE ELSE
       END SELECT
    end if
-   close #f
+   pStream.Close
 
    this.DiskFilename = wFilename
    this.DateFileTime = AfxGetFileLastWriteTime( wFilename )
@@ -1392,15 +1395,18 @@ Function clsDocument.ApplyProperties() As Long
       SciMsg( m_pSci(i), SCI_SETMARGINWIDTHN, 3, 4 * rxRatio )
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 3, SC_MARGIN_FORE )
       SciMsg( m_pSci(i), SCI_SETMARGINTYPEN, 3, SC_MARGIN_BACK )
-
+             
       '' 
       ''  FONT QUALITY
-      SciMsg( m_pSci(i), SCI_SETFONTQUALITY, SC_EFF_QUALITY_DEFAULT, 0 )
+      ' Commented out v1.7.4 to see if bitmap .fon fonts will now work
+      'SciMsg( m_pSci(i), SCI_SETFONTQUALITY, SC_EFF_QUALITY_DEFAULT, 0 )
       'SC_EFF_QUALITY_DEFAULT (backward compatible), SC_EFF_QUALITY_NON_ANTIALIASED, 
       'SC_EFF_QUALITY_ANTIALIASED, SC_EFF_QUALITY_LCD_OPTIMIZED
       
-      SciMsg( m_pSci(i), SCI_SETTECHNOLOGY, SC_TECHNOLOGY_DIRECTWRITE, 0 )
-      SciMsg( m_pSci(i), SCI_SETBUFFEREDDRAW, 0, 0 ) ' turn off b/c we are using Vista+ Direct Draw
+      ' Commented out v1.7.4 to see if bitmap .fon fonts will now work
+      'SciMsg( m_pSci(i), SCI_SETTECHNOLOGY, SC_TECHNOLOGY_DIRECTWRITE, 0 )
+      'SciMsg( m_pSci(i), SCI_SETBUFFEREDDRAW, 0, 0 ) ' turn off b/c we are using Vista+ Direct Draw
+      
       'SC_TECHNOLOGY_DEFAULT (0). 
       'On Windows Vista or later, 
       'SC_TECHNOLOGY_DIRECTWRITE (1), 

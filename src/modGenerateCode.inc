@@ -122,7 +122,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                
                ' Define the function prototype/declaration
                wszPrototype = "Function " & wszFunction & "( ByRef sender As " & _
-               GetWinformsXClassName(pCtrl->ControlType) & ", ByRef e As EventArgs) As LRESULT" & vbcrlf
+               GetWinformsXClassName(pCtrl->ControlType) & ", ByRef e As EventArgs ) As LRESULT" & vbcrlf
 
                ' Add the event/function to the list of declares
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype

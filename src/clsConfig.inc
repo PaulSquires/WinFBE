@@ -20,91 +20,75 @@
 ''  CONSTRUCTOR
 ''
 Constructor clsConfig
-   _ConfigFilename = AfxGetExePathName & "Settings\WinFBE.ini" 
-   this.LoadKeywords
+   _ConfigFilename     = AfxGetExePathName & "Settings\WinFBE.ini" 
+   _FBKeywordsFilename = AfxGetExePathName & "Settings\freebasic_keywords.txt" 
+   _FBCodetipsFilename = AfxGetExePathName & "Settings\codetips.ini" 
+   _WinAPICodetipsFilename = AfxGetExePathName & "Settings\codetips_winapi.ini" 
+   _WinFormsXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winformsx.ini" 
+   _WinFBXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winfbx.ini" 
 End Constructor
-
-''
-''  DESTRUCTOR
-''
-DESTRUCTOR clsConfig
-'
-end DESTRUCTOR
 
 
 ''
 ''
 Function clsConfig.LoadKeywords() as Long
-   Dim st as String 
-   Dim f  as Long = Freefile
-   
-   If Open( AfxGetExePathName & "Settings\freebasic_keywords.txt" For Input As #f) = 0 Then
-      this.FBKeywords  = ""
-      Do Until EOF(f)
-         Line Input #f, st
-         If Len(st) Then this.FBKeywords = this.FBKeywords & st & " "
-      Loop    
-      this.FBKeywords = Trim(this.FBKeywords)
-      Close #f
-   End If
-   
+   dim pStream AS CTextStream
+   if pStream.Open(_FBKeywordsFilename) <> S_OK then exit function
+   dim as CWSTR wst = pStream.ReadAll
+   this.FBKeywords = AfxStrShrink(wst, " " & wchr(13,10))
+   pStream.Close
    Function = 0
 End Function
 
 ''
 ''
 Function clsConfig.SaveKeywords() As Long
-   Dim f As Long = Freefile
-   
-   If Open( AfxGetExePathName & "Settings\freebasic_keywords.txt" For Output As #f) = 0 Then
-      Print #f, this.FBKeywords
-      Close #f
-   End If
-   
+   dim pStream AS CTextStream
+   if pStream.Create(_FBKeywordsFilename) <> S_OK then exit function
+   pStream.WriteLine this.FBKeywords
+   pStream.Close
    Function = 0
 End Function
 
   
 ''
 ''
-Function clsConfig.LoadCodetips( ByRef sFilename As String ) as boolean
-   Dim as string st, sFuncName, sFuncDeclare
-   Dim as long f, i
+Function clsConfig.LoadCodetipsFB() as boolean
+
+   Dim as CWSTR wst
+   Dim as long i
    
    dim parser as clsParser
 
    parser.fileName = ""     ' no need to store this sFilename
    parser.idxProject = -1   ' do not associate it with any project
    
-   f = Freefile
-   If Open( sFilename For Input As #f ) = 0 Then
-      Do Until Eof(f)
-         Line Input #f, st
-         
-         st = Trim(st)
-         If Len(st) = 0 Then Continue Do
-         
-         i = Instr(st, "=")
-         If i Then
-            parser.funcName   = Left(st, i-1)
-            parser.funcParams = Mid(st, i+1)
-            gdb2.dbAdd(parser, DB2_FUNCTION)
-         End If   
-      Loop
-      Close #f
-      return false
-   End If
+   dim pStream AS CTextStream
+   if pStream.Open(_FBCodetipsFilename) <> S_OK then return true  ' error
+   
+   do until pStream.EOS
+      wst = pStream.ReadLine
+      wst = Trim(wst)
+      If Len(wst) = 0 Then Continue Do
+      
+      i = Instr(wst, "=")
+      If i Then
+         parser.funcName   = Left(wst, i-1)
+         parser.funcParams = Mid(wst, i+1)
+         gdb2.dbAdd(parser, DB2_FUNCTION)
+      End If   
+   Loop
+   pStream.Close
 
-   Function = true   ' error
+   return false  ' no error
 End Function
 
 
 ''
 ''
-Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI as boolean ) as boolean
-   Dim as string st, sID, sFuncName, sFuncDeclare
-   dim as string sTypeName, sTypeElements, sParts, sPart, sBaseType
-   Dim as long f, i, nCount
+Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWinAPI as boolean ) as boolean
+   Dim as CWSTR wst, wsID, wsTypeName, wsTypeElements, wsParts, wsPart, wsBaseType
+   Dim as long i, nCount
    
    dim parser as clsParser
 
@@ -113,7 +97,7 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI
    parser.IsWinApi = IsWinAPI
 
    ''
-   ''  Codetips definition file for WinAPI
+   ''  Codetips definition file for WinAPI/WinFBX/WinFormsX
    ''
    ''  Format:
    ''  1st character:  F=FUNCTION, T=TYPE, S=STANDARD_DATATYPE
@@ -121,81 +105,79 @@ Function clsConfig.LoadCodetipsWinAPI( ByRef sFilename As String, byval IsWinAPI
    ''  TYPE elements are separated by | pipe symbol. Each element name/datatype is separated by comma.
    ''  STANDARD datatypes are separated by | pipe symobol (datatype followed by description of the datatype.
    ''
+   
+   dim pStream AS CTextStream
+   if pStream.Open(wszFilename) <> S_OK then return true   ' error
+   
+   do until pStream.EOS
+      wst = pStream.ReadLine
 
-   f = Freefile
-   If Open( sFilename For Input As #f ) = 0 Then
-      Do Until Eof(f)
-         Line Input #f, st
+      wst = Trim(wst)
+      If Len(wst) = 0 Then Continue Do
+      
+      i = Instr(wst, ":")
+      If i = 0 Then continue do
+      
+      wsID = left(wst, i - 1)
+      wst = mid(wst, i + 1)
+                
+      select CASE **wsID
+         case "S"    ' standard datatype
+            i = instr(wst, "|")
+            parser.typeName = Left(wst, i-1)
+            parser.Description = mid(wst, i+1)
+            gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
+            
+         CASE "F"    ' function
+            i = instr(wst, "(")
+            parser.funcName   = trim(Left(wst, i-1))
+            parser.funcParams = wst
+            gdb2.dbAdd(parser, DB2_FUNCTION)
+
+         case "T"     ' type
+            i = instr(wst, "|")
+            parser.typeName = Left(wst, i-1)
+            parser.typeAlias = parser.typeName
+            wsParts = mid(wst, i + 1)
+            
+            if IsWinAPI = false then
+               ' Check for the WFXBASE type. We save that string and add it to subsequent
+               ' types for the visual designer.
+               select case ucase(parser.typeName)
+                  CASE "WFXBASE" 
+                     wsBaseType = wsParts
+                     continue do
+                  case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
+                       "WFXCHECKBOX"
+                     if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
+               END SELECT
+            END IF
+            gdb2.dbAdd(parser, DB2_TYPE)
+
+            ' Each element of the TYPE structure is added to the database. The
+            ' element is in the format elementname,elementtype
+            parser.funcName = ""
+            nCount = AfxStrParseCount(wsParts, "|")
+            for i = 1 to nCount
+               wsPart = AfxStrParse(wsParts, i, "|")
+               parser.varName = AfxStrParse(wsPart, 1, ",") 
+               parser.varType = AfxStrParse(wsPart, 2, ",") 
+               parser.bInTypePublic = true
+               gdb2.dbAdd(parser, DB2_VARIABLE)
+            NEXT
+
+      END SELECT
          
-         st = Trim(st)
-         If Len(st) = 0 Then Continue Do
-         
-         i = Instr(st, ":")
-         If i = 0 Then continue do
-         
-         sID = left(st, i - 1)
-         st = mid(st, i + 1)
-                   
-         select CASE sID
-            case "S"    ' standard datatype
-               i = instr(st, "|")
-               parser.typeName = Left(st, i-1)
-               parser.Description = mid(st, i+1)
-               gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
-               
-            CASE "F"    ' function
-               i = instr(st, "(")
-               parser.funcName   = trim(Left(st, i-1))
-               parser.funcParams = st
-               gdb2.dbAdd(parser, DB2_FUNCTION)
-
-            case "T"     ' type
-               i = instr(st, "|")
-               parser.typeName = Left(st, i-1)
-               parser.typeAlias = parser.typeName
-               sParts = mid(st, i + 1)
-               
-               if IsWinAPI = false then
-                  ' Check for the WFXBASE type. We save that string and add it to subsequent
-                  ' types for the visual designer.
-                  select case ucase(parser.typeName)
-                     CASE "WFXBASE" 
-                        sBaseType = sParts
-                        continue do
-                     case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
-                          "WFXCHECKBOX"
-                        sParts = sParts & iif(len(sBaseType), "|" & sBaseType, "")
-                  END SELECT
-               END IF
-               gdb2.dbAdd(parser, DB2_TYPE)
-
-               ' Each element of the TYPE structure is added to the database. The
-               ' element is in the format elementname,elementtype
-               parser.funcName = ""
-               nCount = AfxStrParseCount(sParts, "|")
-               for i = 1 to nCount
-                  sPart = AfxStrParse(sParts, i, "|")
-                  parser.varName = AfxStrParse(sPart, 1, ",") 
-                  parser.varType = AfxStrParse(sPart, 2, ",") 
-                  parser.bInTypePublic = true
-                  gdb2.dbAdd(parser, DB2_VARIABLE)
-               NEXT
-
-         END SELECT
-         
-      Loop
-      Close #f
-      return false
-   End If
-
-   Function = true   ' error
+   Loop
+   pStream.Close
+   
+   return false  ' no error
 End Function
     
-
 ''
 ''
-Function clsConfig.LoadCodetipsWinFormsX( ByRef sFilename As String ) as boolean
-   function = this.LoadCodetipsWINAPI(sFilename, false)
+Function clsConfig.LoadCodetipsWinFormsX() as boolean
+   function = this.LoadCodetipsGeneric(_WinFormsXCodetipsFilename, false)
    dim parser as clsParser
    parser.fileName = ""     ' no need to store this sFilename
    parser.idxProject = -1   ' do not associate it with any project
@@ -210,8 +192,14 @@ end function
 
 ''
 ''
-Function clsConfig.LoadCodetipsWinFBX( ByRef sFilename As String ) as boolean
-   function = this.LoadCodetipsWINAPI(sFilename, false)
+Function clsConfig.LoadCodetipsWinFBX() as boolean
+   function = this.LoadCodetipsGeneric(_WinFBXCodetipsFilename, false)
+end function
+
+''
+''
+Function clsConfig.LoadCodetipsWinAPI() as boolean
+   function = this.LoadCodetipsGeneric(_WinAPICodetipsFilename, true)
 end function
 
 
@@ -564,7 +552,7 @@ end function
 ''
 ''  SAVE CONFIGURATION TO DISK FILE
 ''
-Function clsConfig.SaveToFile() as Long
+Function clsConfig.SaveConfigFile() as Long
 
    ' Determine the current editor positioning 
    Dim WinPla As WINDOWPLACEMENT
@@ -578,49 +566,51 @@ Function clsConfig.SaveToFile() as Long
       .StartupMaximized = Iif( WinPla.showCmd = SW_MAXIMIZE, True, False )
    End With
 
-   Dim f As Long = Freefile
-   If Open( _ConfigFilename For Output Encoding "utf16" As #f ) <> 0 Then Exit Function
-
-   Print #f, "'  WINFBE CONFIGURATION" 
-   print #f, ""
-   print #f, "[Editor]"
-   print #f, "AskExit="               ; this.AskExit
-   print #f, "HideToolbar="           ; this.HideToolbar
-   print #f, "HideStatusbar="         ; this.HideStatusbar
-   print #f, "MultipleInstances="     ; this.MultipleInstances    
-   print #f, "CompileAutosave="       ; this.CompileAutosave      
-   print #f, "CloseFuncList="         ; this.CloseFuncList        
-   print #f, "HideCompile="           ; this.HideCompile          
-   print #f, "SyntaxHighlighting="    ; this.SyntaxHighlighting   
-   print #f, "Codetips="              ; this.Codetips             
-   print #f, "AutoComplete="          ; this.AutoComplete
-   print #f, "RightEdge="             ; this.RightEdge
-   print #f, "RightEdgePosition="     ; this.RightEdgePosition           
-   print #f, "LeftMargin="            ; this.LeftMargin           
-   print #f, "FoldMargin="            ; this.FoldMargin           
-   print #f, "AutoIndentation="       ; this.AutoIndentation      
-   print #f, "ConfineCaret="          ; this.ConfineCaret         
-   print #f, "LineNumbering="         ; this.LineNumbering        
-   print #f, "HighlightCurrentLine="  ; this.HighlightCurrentLine 
-   print #f, "IndentGuides="          ; this.IndentGuides         
-   print #f, "TabIndentSpaces="       ; this.TabIndentSpaces      
-   print #f, "UnicodeEncoding="       ; this.UnicodeEncoding      
-   print #f, "KeywordCase="           ; this.KeywordCase          
-   print #f, "LocalizationFile="      ; this.LocalizationFile     
-   print #f, "TabSize="               ; this.TabSize              
-   print #f, "EditorFontname="        ; this.EditorFontname       
-   print #f, "EditorFontsize="        ; this.EditorFontsize       
-   print #f, "EditorFontCharSet="     ; this.EditorFontCharSet    
-   print #f, ""
-   print #f, "[Startup]" 
-   print #f, "StartupLeft="           ; this.StartupLeft          
-   print #f, "StartupTop="            ; this.StartupTop           
-   print #f, "StartupRight="          ; this.StartupRight         
-   print #f, "StartupBottom="         ; this.StartupBottom        
-   print #f, "StartupMaximized="      ; this.StartupMaximized     
-   print #f, "ShowExplorer="          ; this.ShowExplorer         
-   print #f, "ShowExplorerWidth="     ; this.ShowExplorerWidth    
-   print #f, ""
+   dim pStream AS CTextStream   '(utf16)
+   if pStream.Create(_ConfigFilename, true, true) <> S_OK then return true   ' error
+   
+   pStream.WriteLine "'  WINFBE CONFIGURATION" 
+   pStream.WriteLine ""
+   pStream.WriteLine "WinFBEversion="         & APPVERSION
+   pStream.WriteLine ""
+   pStream.WriteLine "[Editor]"
+   pStream.WriteLine "AskExit="               & this.AskExit
+   pStream.WriteLine "HideToolbar="           & this.HideToolbar
+   pStream.WriteLine "HideStatusbar="         & this.HideStatusbar
+   pStream.WriteLine "MultipleInstances="     & this.MultipleInstances    
+   pStream.WriteLine "CompileAutosave="       & this.CompileAutosave      
+   pStream.WriteLine "CloseFuncList="         & this.CloseFuncList        
+   pStream.WriteLine "HideCompile="           & this.HideCompile          
+   pStream.WriteLine "SyntaxHighlighting="    & this.SyntaxHighlighting   
+   pStream.WriteLine "Codetips="              & this.Codetips             
+   pStream.WriteLine "AutoComplete="          & this.AutoComplete
+   pStream.WriteLine "RightEdge="             & this.RightEdge
+   pStream.WriteLine "RightEdgePosition="     & this.RightEdgePosition           
+   pStream.WriteLine "LeftMargin="            & this.LeftMargin           
+   pStream.WriteLine "FoldMargin="            & this.FoldMargin           
+   pStream.WriteLine "AutoIndentation="       & this.AutoIndentation      
+   pStream.WriteLine "ConfineCaret="          & this.ConfineCaret         
+   pStream.WriteLine "LineNumbering="         & this.LineNumbering        
+   pStream.WriteLine "HighlightCurrentLine="  & this.HighlightCurrentLine 
+   pStream.WriteLine "IndentGuides="          & this.IndentGuides         
+   pStream.WriteLine "TabIndentSpaces="       & this.TabIndentSpaces      
+   pStream.WriteLine "UnicodeEncoding="       & this.UnicodeEncoding      
+   pStream.WriteLine "KeywordCase="           & this.KeywordCase          
+   pStream.WriteLine "LocalizationFile="      & this.LocalizationFile     
+   pStream.WriteLine "TabSize="               & this.TabSize              
+   pStream.WriteLine "EditorFontname="        & this.EditorFontname       
+   pStream.WriteLine "EditorFontsize="        & this.EditorFontsize       
+   pStream.WriteLine "EditorFontCharSet="     & this.EditorFontCharSet    
+   pStream.WriteLine ""
+   pStream.WriteLine "[Startup]" 
+   pStream.WriteLine "StartupLeft="           & this.StartupLeft          
+   pStream.WriteLine "StartupTop="            & this.StartupTop           
+   pStream.WriteLine "StartupRight="          & this.StartupRight         
+   pStream.WriteLine "StartupBottom="         & this.StartupBottom        
+   pStream.WriteLine "StartupMaximized="      & this.StartupMaximized     
+   pStream.WriteLine "ShowExplorer="          & this.ShowExplorer         
+   pStream.WriteLine "ShowExplorerWidth="     & this.ShowExplorerWidth    
+   pStream.WriteLine ""
 
    ' For each folder location determine if it resides on the same drive as
    ' the WinFBE application. If it does then substitute the replaceable parameter
@@ -633,89 +623,89 @@ Function clsConfig.SaveToFile() as Long
    this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
    this.WinFBXHelpfile   = ProcessToCurdrive(this.WinFBXHelpfile)
 
-   Print #f, "[Compiler]" 
-   print #f, "FBWINCompiler32="       ; this.FBWINCompiler32      
-   print #f, "FBWINCompiler64="       ; this.FBWINCompiler64      
-   print #f, "CompilerSwitches="      ; this.CompilerSwitches     
-   print #f, "CompilerHelpfile="      ; this.CompilerHelpfile     
-   print #f, "Win32APIHelpfile="      ; this.Win32APIHelpfile     
-   print #f, "WinFBXHelpfile="        ; this.WinFBXHelpfile     
-   print #f, "RunViaCommandWindow="   ; this.RunViaCommandWindow
-   print #f, "WinFBXPath="            ; this.WinFBXPath
+   pStream.WriteLine "[Compiler]" 
+   pStream.WriteLine "FBWINCompiler32="       & this.FBWINCompiler32      
+   pStream.WriteLine "FBWINCompiler64="       & this.FBWINCompiler64      
+   pStream.WriteLine "CompilerSwitches="      & this.CompilerSwitches     
+   pStream.WriteLine "CompilerHelpfile="      & this.CompilerHelpfile     
+   pStream.WriteLine "Win32APIHelpfile="      & this.Win32APIHelpfile     
+   pStream.WriteLine "WinFBXHelpfile="        & this.WinFBXHelpfile     
+   pStream.WriteLine "RunViaCommandWindow="   & this.RunViaCommandWindow
+   pStream.WriteLine "WinFBXPath="            & this.WinFBXPath
    
 
-   print #f, ""
-   Print #f, "[UserTools]"  
+   pStream.WriteLine ""
+   pStream.WriteLine "[UserTools]"  
    for i as long = lbound(this.Tools) to ubound(this.Tools)
-      print #f, "USERTOOL_"; Right("00" & Str(i), 2); "=";
-      print #f, this.Tools(i).wszDescription; "|-|";
-      print #f, this.Tools(i).wszCommand; "|-|"; 
-      print #f, this.Tools(i).wszParameters; "|-|"; 
-      print #f, this.Tools(i).wszKey; "|-|"; 
-      print #f, this.Tools(i).wszWorkingFolder; "|-|"; 
-      print #f, this.Tools(i).IsCtrl; "|-|";  
-      print #f, this.Tools(i).IsAlt; "|-|";  
-      print #f, this.Tools(i).IsShift; "|-|";  
-      print #f, this.Tools(i).IsPromptRun; "|-|";  
-      print #f, this.Tools(i).IsMinimized; "|-|";  
-      print #f, this.Tools(i).IsWaitFinish; "|-|";  
-      print #f, this.Tools(i).IsDisplayMenu; "|-|";    
-      print #f, this.Tools(i).Action   
+      pStream.Write "USERTOOL_" & Right("00" & Str(i), 2) & "="
+      pStream.Write this.Tools(i).wszDescription & "|-|"
+      pStream.Write this.Tools(i).wszCommand & "|-|" 
+      pStream.Write this.Tools(i).wszParameters & "|-|"
+      pStream.Write this.Tools(i).wszKey & "|-|" 
+      pStream.Write this.Tools(i).wszWorkingFolder & "|-|"
+      pStream.Write this.Tools(i).IsCtrl & "|-|"
+      pStream.Write this.Tools(i).IsAlt & "|-|"  
+      pStream.Write this.Tools(i).IsShift & "|-|"
+      pStream.Write this.Tools(i).IsPromptRun & "|-|"
+      pStream.Write this.Tools(i).IsMinimized & "|-|"  
+      pStream.Write this.Tools(i).IsWaitFinish & "|-|"
+      pStream.Write this.Tools(i).IsDisplayMenu & "|-|"    
+      pStream.WriteLine this.Tools(i).Action   
    NEXT
 
-   print #f, ""
-   Print #f, "[Builds]"  
+   pStream.WriteLine ""
+   pStream.WriteLine "[Builds]"  
    for i as long = lbound(this.Builds) to ubound(this.Builds)
-      print #f, "BUILD_"; Right("00" & Str(i), 2); "=";
-      print #f, this.Builds(i).id; "|-|";
-      print #f, this.Builds(i).wszDescription; "|-|";
-      print #f, this.Builds(i).wszOptions; "|-|"; 
-      print #f, this.Builds(i).IsDefault; "|-|";  
-      print #f, this.Builds(i).Is32bit; "|-|";  
-      print #f, this.Builds(i).Is64bit  
+      pStream.Write "BUILD_" & Right("00" & Str(i), 2) & "="
+      pStream.Write this.Builds(i).id & "|-|"
+      pStream.Write this.Builds(i).wszDescription & "|-|"
+      pStream.Write this.Builds(i).wszOptions & "|-|" 
+      pStream.Write this.Builds(i).IsDefault & "|-|"  
+      pStream.Write this.Builds(i).Is32bit & "|-|"  
+      pStream.WriteLine this.Builds(i).Is64bit  
    NEXT
 
-   print #f, ""
-   Print #f, "[MRU]"  
+   pStream.WriteLine ""
+   pStream.WriteLine "[MRU]"  
    For i As Long = 0 To 9
       this.MRU(i) = ProcessToCurdrive(this.MRU(i))
-      Print #f, "MRU_"; Right("00" & Str(i), 2); "="; this.MRU(i) 
+      pStream.WriteLine "MRU_" & Right("00" & Str(i), 2) & "=" & this.MRU(i) 
    Next         
    
-   Print #f, ""
-   Print #f, "[MRUPROJECTS]"  
+   pStream.WriteLine ""
+   pStream.WriteLine "[MRUPROJECTS]"  
    For i As Long = 0 To 9
       this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
-      Print #f, "MRUPROJECT_"; Right("00" & Str(i), 2); "="; this.MRUProject(i) 
+      pStream.WriteLine "MRUPROJECT_" & Right("00" & Str(i), 2) & "=" & this.MRUProject(i) 
    Next         
 
-   Print #f, ""
-   print #f, "[Themes]" 
-   print #f, "SelectedTheme="; this.SelectedTheme
+   pStream.WriteLine ""
+   pStream.WriteLine "[Themes]" 
+   pStream.WriteLine "SelectedTheme=" & this.SelectedTheme
    for i as long = lbound(this.Themes) to ubound(this.Themes)
-      print #f, "THEME_"; Right("00" & Str(i), 2); "=";
-      print #f, this.Themes(i).id; ",";
-      print #f, AfxStrReplaceAny(this.Themes(i).wszDescription, ",|", "_"); 
+      pStream.Write "THEME_" & Right("00" & Str(i), 2) & "=" & _
+                    this.Themes(i).id & "," & _
+                    AfxStrReplaceAny(this.Themes(i).wszDescription, ",|", "_") 
       for ii as long = CLR_CARET to CLR_WINDOW
-         print #f, "|"; this.Themes(i).colors(ii).nFg; ","; _
-                        this.Themes(i).colors(ii).nBg; ","; _
-                        this.Themes(i).colors(ii).bUseDefaultBg; ","; _
-                        this.Themes(i).colors(ii).bFontBold; ","; _
-                        this.Themes(i).colors(ii).bFontItalic; ","; _
-                        this.Themes(i).colors(ii).bFontUnderline;
+         pStream.Write "|" & this.Themes(i).colors(ii).nFg & "," & _
+                        this.Themes(i).colors(ii).nBg & "," & _
+                        this.Themes(i).colors(ii).bUseDefaultBg & "," & _
+                        this.Themes(i).colors(ii).bFontBold & "," & _
+                        this.Themes(i).colors(ii).bFontItalic & "," & _
+                        this.Themes(i).colors(ii).bFontUnderline
       NEXT
-      print #f, ""
+      pStream.WriteLine ""
    NEXT
 
    dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
    dim wszText as CWSTR = wstr("NOTES-START") + vbcrlf + _
                           gApp.NonProjectNotes + vbcrlf + _
                           wstr("NOTES-END") + vbcrlf
-   print #f, ""
-   print #f, "[Notes]"
-   print #f, wszText
+   pStream.WriteLine ""
+   pStream.WriteLine "[Notes]"
+   pStream.WriteLine wszText
 
-   Close #f
+   pStream.Close 
    
    Function = 0
 End Function
@@ -786,47 +776,45 @@ end function
 ''
 ''  LOAD CONFIGURATION FROM DISK FILE
 ''
-Function clsConfig.LoadFromFile() as Long
+Function clsConfig.LoadConfigFile() as Long
 
-   Dim st     As WString * 1024
-   Dim wKey   As WString * 1024
-   Dim wData  As WString * 1024
-   Dim wData2 As WString * 1024
+   Dim as CWSTR wst, wKey, wData, wData2
    Dim nData  As Long  
    Dim i      as Long
    dim bReadingNote as Boolean
 
    If AfxFileExists(_ConfigFilename) = 0 Then Exit Function
     
-   Dim f as Long = Freefile
-   If Open( _ConfigFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
+   dim pStream AS CTextStream   '(utf16)
+   if pStream.OpenUnicode(_ConfigFilename) <> S_OK then return true   ' error
 
    gApp.NonProjectNotes = ""
    
-   Do Until EOF(f)
-      Line Input #f, st
-      If Len(st) = 0 Then Continue Do
-      If Left(st, 1) = "'" Then Continue Do
-      If Left(st, 1) = "[" Then Continue Do
+   Do Until pStream.EOS
+      wst = pStream.ReadLine
+
+      If Len(wst) = 0 Then Continue Do
+      If Left(wst, 1) = "'" Then Continue Do
+      If Left(wst, 1) = "[" Then Continue Do
       
-      If Left(st, 11) = "NOTES-START" Then  
+      If Left(wst, 11) = "NOTES-START" Then  
          bReadingNote = true
          continue do
       end if   
-      If Left(st, 9) = "NOTES-END" Then  
+      If Left(wst, 9) = "NOTES-END" Then  
          bReadingNote = false
          continue do
       end if
       if bReadingNote THEN
-         gApp.NonProjectNotes = gApp.NonProjectNotes + st + vbcrlf
+         gApp.NonProjectNotes = gApp.NonProjectNotes + wst + vbcrlf
          continue do
       END IF
 
-      i = InStr(st, "=")
+      i = InStr(wst, "=")
       If i = 0 Then Continue Do
       
-      wKey  = Left(st, i-1)
-      wData = Mid(st, i+1)
+      wKey  = Left(wst, i-1)
+      wData = Mid(wst, i+1)
       nData = Val(wData)
       
       wData = ProcessFromCurdrive(wData)
@@ -868,7 +856,7 @@ Function clsConfig.LoadFromFile() as Long
       End If
 
       If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
-         this.ImportTheme(st, false)
+         this.ImportTheme(wst, false)
          continue do
       End If
 
@@ -889,7 +877,8 @@ Function clsConfig.LoadFromFile() as Long
       End If
 
       
-      Select Case wKey
+      Select Case **wKey
+         Case "WinFBEversion":        this.WinFBEversion        = wData
          Case "SelectedTheme":        this.SelectedTheme        = wData
          Case "AskExit":              this.AskExit              = nData
          Case "HideToolbar":          this.HideToolbar          = nData
@@ -937,7 +926,7 @@ Function clsConfig.LoadFromFile() as Long
       End Select
    
    Loop
-   Close #f
+   pStream.Close
    
    ' If no builds exist then create some default ones...
    if ubound(this.Builds) = -1 THEN
@@ -1017,85 +1006,97 @@ Function clsConfig.LoadFromFile() as Long
 
    END IF
 
+   
+   dim DefaultThemes(1) as TYPE_THEMES
+   with DefaultThemes(0)
+      .id = AfxGuidText(AfxGuid())
+      .wszDescription = "Default Theme"
+      .colors(CLR_CARET).nFg        = BGR(0,0,0)          ' black          
+      .colors(CLR_CARET).nBg        = -1
+      .colors(CLR_COMMENTS).nFg     = BGR(0,128,0)        ' green          
+      .colors(CLR_COMMENTS).nBg     = BGR(255,255,255)    ' white
+      .colors(CLR_HIGHLIGHTED).nFg  = BGR(255,255,0)      ' yellow
+      .colors(CLR_HIGHLIGHTED).nBg  = -1
+      .colors(CLR_KEYWORD).nFg      = BGR(0,0,255)        ' blue
+      .colors(CLR_KEYWORD).nBg      = BGR(255,255,255)    ' white
+      .colors(CLR_FOLDMARGIN).nFg   = BGR(237,236,235)    ' pale gray
+      .colors(CLR_FOLDMARGIN).nBg   = -1
+      .colors(CLR_FOLDSYMBOL).nFg   = BGR(255,255,255)    ' white
+      .colors(CLR_FOLDSYMBOL).nBg   = BGR(0,0,0)          ' black
+      .colors(CLR_LINENUMBERS).nFg  = BGR(0,0,0)          ' black
+      .colors(CLR_LINENUMBERS).nBg  = BGR(204,204,204)    ' light gray
+      .colors(CLR_OPERATORS).nFg    = BGR(196,0,0)        ' red
+      .colors(CLR_OPERATORS).nBg    = BGR(255,255,255)    ' white
+      .colors(CLR_INDENTGUIDES).nFg = BGR(255,255,255)    ' white
+      .colors(CLR_INDENTGUIDES).nBg = BGR(0,0,0)          ' black
+      .colors(CLR_PREPROCESSOR).nFg = BGR(196,0,0)        ' red
+      .colors(CLR_PREPROCESSOR).nBg = BGR(255,255,255)    ' white
+      .colors(CLR_SELECTION).nFg    = BGR(255,255,255)    ' white
+      .colors(CLR_SELECTION).nBg    = BGR(038,079,120)    ' light blue
+      .colors(CLR_STRINGS).nFg      = BGR(173,0,173)      ' Purple (little darker than Magenta)
+      .colors(CLR_STRINGS).nBg      = BGR(255,255,255)    ' white
+      .colors(CLR_TEXT).nFg         = BGR(0,0,0)          ' black
+      .colors(CLR_TEXT).nBg         = BGR(255,255,255)    ' white
+      .colors(CLR_WINDOW).nFg       = BGR(255,255,255)    ' white
+      .colors(CLR_WINDOW).nBg       = -1
+   end with
+
+   with DefaultThemes(1)
+      .id = AfxGuidText(AfxGuid())
+      .wszDescription = "Visual Studio Code (Dark)"
+      .colors(CLR_CARET).nFg        = BGR(204,204,204)    ' light gray          
+      .colors(CLR_CARET).nBg        = -1
+      .colors(CLR_COMMENTS).nFg     = BGR(095,125,049)    ' moss green          
+      .colors(CLR_COMMENTS).nBg     = BGR(030,030,030)    ' light black
+      .colors(CLR_HIGHLIGHTED).nFg  = BGR(050,050,050)    ' charcoal black
+      .colors(CLR_HIGHLIGHTED).nBg  = -1
+      .colors(CLR_KEYWORD).nFg      = BGR(148,202,240)    ' powder blue
+      .colors(CLR_KEYWORD).nBg      = BGR(030,030,030)    ' light black
+      .colors(CLR_FOLDMARGIN).nFg   = BGR(030,030,030)    ' light black
+      .colors(CLR_FOLDMARGIN).nBg   = -1
+      .colors(CLR_FOLDSYMBOL).nFg   = BGR(030,030,030)    ' light black
+      .colors(CLR_FOLDSYMBOL).nBg   = BGR(090,090,090)    ' evening black
+      .colors(CLR_LINENUMBERS).nFg  = BGR(090,090,090)    ' evening black
+      .colors(CLR_LINENUMBERS).nBg  = BGR(030,030,030)    ' light black
+      .colors(CLR_OPERATORS).nFg    = BGR(204,204,204)    ' light gray
+      .colors(CLR_OPERATORS).nBg    = BGR(030,030,030)    ' light black
+      .colors(CLR_INDENTGUIDES).nFg = BGR(030,030,030)    ' light black
+      .colors(CLR_INDENTGUIDES).nBg = BGR(204,204,204)    ' light gray
+      .colors(CLR_PREPROCESSOR).nFg = BGR(165,134,181)    ' light purple
+      .colors(CLR_PREPROCESSOR).nBg = BGR(030,030,030)    ' light black
+      .colors(CLR_SELECTION).nFg    = BGR(204,204,204)    ' light gray
+      .colors(CLR_SELECTION).nBg    = BGR(038,079,120)    ' light blue
+      .colors(CLR_STRINGS).nFg      = BGR(195,137,080)    ' orange brown
+      .colors(CLR_STRINGS).nBg      = BGR(030,030,030)    ' light black
+      .colors(CLR_TEXT).nFg         = BGR(204,204,204)    ' light gray
+      .colors(CLR_TEXT).nBg         = BGR(030,030,030)    ' light black
+      .colors(CLR_WINDOW).nFg       = BGR(030,030,030)    ' light black
+      .colors(CLR_WINDOW).nBg       = -1
+   end with
+
    ' Create a default Theme if none exist
    if ubound(this.Themes) = -1 THEN
       redim this.Themes(1) 
-   
-      with this.Themes(0)
-         .id = AfxGuidText(AfxGuid())
-         .wszDescription = "Default Theme"
-         .colors(CLR_CARET).nFg        = BGR(0,0,0)          ' black          
-         .colors(CLR_CARET).nBg        = -1
-         .colors(CLR_COMMENTS).nFg     = BGR(0,128,0)        ' green          
-         .colors(CLR_COMMENTS).nBg     = BGR(255,255,255)    ' white
-         .colors(CLR_HIGHLIGHTED).nFg  = BGR(255,255,0)      ' yellow
-         .colors(CLR_HIGHLIGHTED).nBg  = -1
-         .colors(CLR_KEYWORD).nFg      = BGR(0,0,255)        ' blue
-         .colors(CLR_KEYWORD).nBg      = BGR(255,255,255)    ' white
-         .colors(CLR_FOLDMARGIN).nFg   = BGR(237,236,235)    ' pale gray
-         .colors(CLR_FOLDMARGIN).nBg   = -1
-         .colors(CLR_FOLDSYMBOL).nFg   = BGR(255,255,255)    ' white
-         .colors(CLR_FOLDSYMBOL).nBg   = BGR(0,0,0)          ' black
-         .colors(CLR_LINENUMBERS).nFg  = BGR(0,0,0)          ' black
-         .colors(CLR_LINENUMBERS).nBg  = BGR(204,204,204)    ' light gray
-         .colors(CLR_BOOKMARKS).nFg    = BGR(0,0,0)          ' black
-         .colors(CLR_BOOKMARKS).nBg    = BGR(0,0,255)        ' blue
-         .colors(CLR_OPERATORS).nFg    = BGR(196,0,0)        ' red
-         .colors(CLR_OPERATORS).nBg    = BGR(255,255,255)    ' white
-         .colors(CLR_INDENTGUIDES).nFg = BGR(255,255,255)    ' white
-         .colors(CLR_INDENTGUIDES).nBg = BGR(0,0,0)          ' black
-         .colors(CLR_PREPROCESSOR).nFg = BGR(196,0,0)        ' red
-         .colors(CLR_PREPROCESSOR).nBg = BGR(255,255,255)    ' white
-         .colors(CLR_SELECTION).nFg    = BGR(255,255,255)    ' white
-         .colors(CLR_SELECTION).nBg    = BGR(038,079,120)    ' light blue
-         .colors(CLR_STRINGS).nFg      = BGR(173,0,173)      ' Purple (little darker than Magenta)
-         .colors(CLR_STRINGS).nBg      = BGR(255,255,255)    ' white
-         .colors(CLR_TEXT).nFg         = BGR(0,0,0)          ' black
-         .colors(CLR_TEXT).nBg         = BGR(255,255,255)    ' white
-         .colors(CLR_WINAPI).nFg       = BGR(0,0,255)        ' blue
-         .colors(CLR_WINAPI).nBg       = BGR(255,255,255)    ' white
-         .colors(CLR_WINDOW).nFg       = BGR(255,255,255)    ' white
-         .colors(CLR_WINDOW).nBg       = -1
-      end with
+      this.Themes(0) = DefaultThemes(0)   ' default theme
+      this.Themes(1) = DefaultThemes(1)   ' visual studio dark
       this.SelectedTheme = this.Themes(0).id
-
-      with this.Themes(1)
-         .id = AfxGuidText(AfxGuid())
-         .wszDescription = "Visual Studio Code (Dark)"
-         .colors(CLR_CARET).nFg        = BGR(204,204,204)    ' light gray          
-         .colors(CLR_CARET).nBg        = -1
-         .colors(CLR_COMMENTS).nFg     = BGR(095,125,049)    ' moss green          
-         .colors(CLR_COMMENTS).nBg     = BGR(030,030,030)    ' light black
-         .colors(CLR_HIGHLIGHTED).nFg  = BGR(050,050,050)    ' charcoal black
-         .colors(CLR_HIGHLIGHTED).nBg  = -1
-         .colors(CLR_KEYWORD).nFg      = BGR(148,202,240)    ' powder blue
-         .colors(CLR_KEYWORD).nBg      = BGR(030,030,030)    ' light black
-         .colors(CLR_FOLDMARGIN).nFg   = BGR(030,030,030)    ' light black
-         .colors(CLR_FOLDMARGIN).nBg   = -1
-         .colors(CLR_FOLDSYMBOL).nFg   = BGR(030,030,030)    ' light black
-         .colors(CLR_FOLDSYMBOL).nBg   = BGR(090,090,090)    ' evening black
-         .colors(CLR_LINENUMBERS).nFg  = BGR(090,090,090)    ' evening black
-         .colors(CLR_LINENUMBERS).nBg  = BGR(030,030,030)    ' light black
-         .colors(CLR_BOOKMARKS).nFg    = BGR(090,090,090)    ' evening black
-         .colors(CLR_BOOKMARKS).nBg    = BGR(030,030,030)    ' light black
-         .colors(CLR_OPERATORS).nFg    = BGR(204,204,204)    ' light gray
-         .colors(CLR_OPERATORS).nBg    = BGR(030,030,030)    ' light black
-         .colors(CLR_INDENTGUIDES).nFg = BGR(030,030,030)    ' light black
-         .colors(CLR_INDENTGUIDES).nBg = BGR(204,204,204)    ' light gray
-         .colors(CLR_PREPROCESSOR).nFg = BGR(165,134,181)    ' light purple
-         .colors(CLR_PREPROCESSOR).nBg = BGR(030,030,030)    ' light black
-         .colors(CLR_SELECTION).nFg    = BGR(204,204,204)    ' light gray
-         .colors(CLR_SELECTION).nBg    = BGR(038,079,120)    ' light blue
-         .colors(CLR_STRINGS).nFg      = BGR(195,137,080)    ' orange brown
-         .colors(CLR_STRINGS).nBg      = BGR(030,030,030)    ' light black
-         .colors(CLR_TEXT).nFg         = BGR(204,204,204)    ' light gray
-         .colors(CLR_TEXT).nBg         = BGR(030,030,030)    ' light black
-         .colors(CLR_WINAPI).nFg       = BGR(204,204,204)    ' light gray
-         .colors(CLR_WINAPI).nBg       = BGR(030,030,030)    ' light black
-         .colors(CLR_WINDOW).nFg       = BGR(030,030,030)    ' light black
-         .colors(CLR_WINDOW).nBg       = -1
-      end with
+   else
+      ' As of v1.7.4 we are eliminating colors for Bookmarks and WinAPI Keywords. This
+      ' means that the themes have to be re-created for at least the two base themes.
+      ' Any user created themes will also be affected unfortunately. I should have made
+      ' it easier to add/delete colors when this was first designed but I did not.
+      if this.WinFBEversion < "1.7.4" then
+         for i as long = lbound(this.Themes) to ubound(this.Themes)
+            select case **this.Themes(i).wszDescription
+               CASE "Default Theme"
+                  this.Themes(0) = DefaultThemes(0)   
+               case "Visual Studio Code (Dark)"
+                  this.Themes(1) = DefaultThemes(1)   
+            END SELECT
+         NEXT
+      end if
    end if
+
    for i as long = lbound(this.Themes) to ubound(this.Themes)
       if this.Themes(i).id = this.SelectedTheme THEN 
          this.idxTheme = i: exit for
@@ -1111,32 +1112,31 @@ End Function
 ' ========================================================================================
 Function clsConfig.ProjectSaveToFile() As BOOLEAN    
 
-   Dim wszText As WString * MAX_PATH
+   dim as CWSTR cwzRelative, wszText 
    Dim As Long nCount 
-   Dim pDoc As clsDocument Ptr
    Dim As Long i, nActiveTab
 
+   Dim pDoc As clsDocument Ptr
    dim as long idx = gApp.GetActiveProjectIndex()
 
-   Dim f As Long = Freefile
-   If Open( gApp.Projects(idx).ProjectFilename For Output Encoding "utf16" As #f ) <> 0 Then Return False
-
-   Print #f, "' WINFBE PROJECT FILE"
-   Print #f, "ProjectBuild=";       gApp.Projects(idx).ProjectBuild
-   Print #f, "ProjectOther32=";     gApp.Projects(idx).ProjectOther32
-   Print #f, "ProjectOther64=";     gApp.Projects(idx).ProjectOther64
-   Print #f, "ProjectCommandLine="; gApp.Projects(idx).ProjectCommandLine
+   dim pStream as CTextStream  ' (utf16)
+   if pStream.Create(gApp.Projects(idx).ProjectFilename, true, true) <> S_OK then return false
+   
+   pStream.WriteLine "' WINFBE PROJECT FILE"
+   pStream.WriteLine "ProjectBuild=" &       gApp.Projects(idx).ProjectBuild
+   pStream.WriteLine "ProjectOther32=" &     gApp.Projects(idx).ProjectOther32
+   pStream.WriteLine "ProjectOther64=" &     gApp.Projects(idx).ProjectOther64
+   pStream.WriteLine "ProjectCommandLine=" & gApp.Projects(idx).ProjectCommandLine
 
    ' Save all of the loaded tabs first
    nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    nActiveTab = TabCtrl_GetCurSel( gTTabCtl.hWindow )
 
-   Print #f, "ActiveTab="; nActiveTab
+   pStream.WriteLine "ActiveTab=" & nActiveTab
 
    Dim TB As TC_ITEM 
    TB.Mask = TCIF_PARAM
 
-   dim cwzRelative as CWSTR
    
    For i = 0 To nCount - 1
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
@@ -1148,17 +1148,17 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
             cwzRelative = AfxPathRelativePathTo( gApp.Projects(idx).ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
             if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
             wszText = ProcessToCurdrive(wszText)
-            Print #f, "File="; wszText
-            Print #f, "FileType="; pDoc->ProjectFileType
-            Print #f, "TabIndex="; -1     ' use -1 rather than True
-            Print #f, "Bookmarks="; pDoc->GetBookmarks()
-            Print #f, "FirstLine="; SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            Print #f, "Position="; SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
-            Print #f, "FirstLine1="; SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            Print #f, "Position1="; SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
-            PRINT #f, "SplitPosition="; pDoc->SplitY
-            print #f, "FocusEdit="; iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
-            Print #f, "FileEnd=[-]" 
+            pStream.WriteLine "File=" & wszText
+            pStream.WriteLine "FileType=" & pDoc->ProjectFileType
+            pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than True
+            pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+            pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+            pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
+            pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+            pStream.WriteLine "Position1=" & SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
+            pStream.WriteLine "SplitPosition=" & pDoc->SplitY
+            pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
+            pStream.WriteLine "FileEnd=[-]" 
          END IF
       end if
    Next
@@ -1175,10 +1175,10 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
                cwzRelative = AfxPathRelativePathTo( gApp.Projects(idx).ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
                if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
                wszText = ProcessToCurdrive(wszText)
-               Print #f, "File="; wszText
-               Print #f, "FileType="; pDoc->ProjectFileType
-               Print #f, "TabIndex="; 0    
-               Print #f, "FileEnd=[-]"
+               pStream.WriteLine "File=" & wszText
+               pStream.WriteLine "FileType=" & pDoc->ProjectFileType
+               pStream.WriteLine "TabIndex=" & 0    
+               pStream.WriteLine "FileEnd=[-]"
             End If
          end if
       End If
@@ -1189,12 +1189,12 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
       dim wszText as CWSTR = wstr("NOTES-START") + vbcrlf + _
                              gApp.Projects(idx).ProjectNotes + vbcrlf + _
                              wstr("NOTES-END") + vbcrlf
-      print #f, ""
-      print #f, "[Notes]"
-      print #f, wszText                       
+      pStream.WriteLine ""
+      pStream.WriteLine "[Notes]"
+      pStream.WriteLine wszText                       
    END IF
 
-   Close #f
+   pStream.Close
 
    Function = True   ' successful save
 End Function
@@ -1205,21 +1205,18 @@ End Function
 ' ========================================================================================
 Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
 
-   Dim st    As WString * MAX_PATH
-   Dim wKey  As WString * MAX_PATH
-   Dim wData As WString * 1024
+   Dim pDoc As clsDocument Ptr
+   Dim as CWSTR wst, wKey, wData, wszFilename
       
    Dim sBookmarks As String
    Dim As Long nData, i, iTab, nActiveTab, nFocusEdit 
    dim as long nFirstLine, nPosition, nFirstLine1, nPosition1, nSplitPosition
 
    ' Info saved for each File and used to create the file once FileEnd is found
-   Dim pDoc As clsDocument Ptr
-   Dim wszFilename As WString * MAX_PATH
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
    dim as Boolean bReadingNote
-   dim as long Idx    ' project index
+   dim as long idx    ' project index
 
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    
@@ -1242,8 +1239,8 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    Treeview_SetBold(hTV, gApp.Projects(idx).hExplorerRootNode, TRUE)
    
     
-   Dim f As Long = Freefile
-   If Open( gApp.Projects(idx).ProjectFilename For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
+   dim pStream as CTextStream  ' (utf16)
+   if pStream.OpenUnicode(gApp.Projects(idx).ProjectFilename) <> S_OK then return false
 
    ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
    ' here and open them only after all over documents have been loaded. This will look
@@ -1263,31 +1260,32 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    ' Prevent Treeview flickering during adding
    LockWindowUpdate(hTV)
 
-   Do Until Eof(f)
+   Do Until pStream.EOS
       AfxDoEvents()
-      Line Input #f, st
-      If Len(st) = 0 Then Continue Do
-      If Left(st, 1) = "'" Then Continue Do
-      If Left(st, 1) = "[" Then Continue Do
+      wst = pStream.ReadLine
       
-      If Left(st, 11) = "NOTES-START" Then  
+      If Len(wst) = 0 Then Continue Do
+      If Left(wst, 1) = "'" Then Continue Do
+      If Left(wst, 1) = "[" Then Continue Do
+      
+      If Left(wst, 11) = "NOTES-START" Then  
          bReadingNote = true
          continue do
       end if   
-      If Left(st, 9) = "NOTES-END" Then  
+      If Left(wst, 9) = "NOTES-END" Then  
          bReadingNote = false
          continue do
       end if
       if bReadingNote THEN
-         gApp.Projects(idx).ProjectNotes = gApp.Projects(idx).ProjectNotes + st + vbcrlf
+         gApp.Projects(idx).ProjectNotes = gApp.Projects(idx).ProjectNotes + wst + vbcrlf
          continue do
       END IF
 
-      i = Instr(st, "=")
+      i = Instr(wst, "=")
       If i = 0 Then Continue Do
       
-      wKey  = Left(st, i-1)
-      wData = Mid(st, i+1)
+      wKey  = Left(wst, i-1)
+      wData = Mid(wst, i+1)
       
       Select Case UCase(wData)
          Case "TRUE":   nData = True
@@ -1297,7 +1295,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
 
       wData = ProcessFromCurdrive(wData)
 
-      Select Case wKey
+      Select Case **wKey
          Case "ProjectBuild":        gApp.Projects(idx).ProjectBuild       = wData
          Case "ProjectOther32":      gApp.Projects(idx).ProjectOther32     = wData
          Case "ProjectOther64":      gApp.Projects(idx).ProjectOther64     = wData
@@ -1327,7 +1325,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
                                        False, _    ' bIsTemplate
                                        FALSE, _    ' bShowInTab
                                        false, _    ' bIsInclude
-                                       @wszFilename, _  ' pwszName
+                                       wszFilename, _  ' pwszName
                                        0 )  ' pDocIn
                pDoc->ProjectFileType = nFileType
                pDoc->ProjectIndex = idx
@@ -1360,7 +1358,8 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       End Select
    
    Loop                        
-
+   pStream.Close
+   
    LockWindowUpdate(0)
    
    ' Display all of the tabs
@@ -1374,8 +1373,6 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
    end if
    
-   Close #f
-
    gProjectLoading = false
    gApp.ProjectOverrideIndex = 0
 

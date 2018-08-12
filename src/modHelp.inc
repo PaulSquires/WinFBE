@@ -41,7 +41,7 @@ Function ShowContextHelp( byval id as long ) As Long
                                BYVAL dwData AS DWORD_PTR _
                                ) AS HWND
 
-   dim as CWSTR wszHelpFilename
+   dim as CWSTR wszHelpFilename, wszLabel
    
    ' Ensure that the CurDrive parameter is converted if applicable
    gConfig.CompilerHelpFile = ProcessFromCurdrive( gConfig.CompilerHelpFile ) 
@@ -50,6 +50,7 @@ Function ShowContextHelp( byval id as long ) As Long
 
    select Case id
       case IDM_HELP
+         wszLabel = "FreeBASIC "
          ' Convert relative path to absolute path if needed.
          if AfxPathIsRelative(gConfig.CompilerHelpFile) then
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.CompilerHelpFile)
@@ -57,6 +58,7 @@ Function ShowContextHelp( byval id as long ) As Long
             wszHelpFilename = gConfig.CompilerHelpFile
          END IF
       case IDM_HELPWINAPI
+         wszLabel = "WinAPI "
          ' Convert relative path to absolute path if needed.
          if AfxPathIsRelative(gConfig.Win32APIHelpfile) then
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.Win32APIHelpfile)
@@ -64,6 +66,7 @@ Function ShowContextHelp( byval id as long ) As Long
             wszHelpFilename = gConfig.Win32APIHelpfile 
          END IF
       case IDM_HELPWINFBX
+         wszLabel = "WinFBX "
          ' Convert relative path to absolute path if needed.
          if AfxPathIsRelative(gConfig.WinFBXHelpfile) then
             wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.WinFBXHelpfile)
@@ -74,7 +77,7 @@ Function ShowContextHelp( byval id as long ) As Long
 
 
    If AfxFileExists(wszHelpFilename) = 0 Then
-      MessageBoxW( HWND_FRMMAIN, L(244,"FreeBASIC Help file not found."), L(201,"Error"), _
+      MessageBoxW( HWND_FRMMAIN, wszLabel & L(244,"Help file not found."), L(201,"Error"), _
                     MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Exit Function
    End If
