@@ -1042,7 +1042,7 @@ Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
    Function = False
    If AfxFileExists(wszFileName) = 0 Then Exit Function
 
-   Dim as CWSTR wst, wKey, wData
+   Dim as CBSTR wst, wKey, wData
    Dim nKey  As Long
    Dim nData As Long  
    Dim i     As Long
