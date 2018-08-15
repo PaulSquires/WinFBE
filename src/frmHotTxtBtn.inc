@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -57,8 +57,7 @@ Function frmHotTxtBtn_OnDestroy(HWnd As HWnd) As LRESULT
    If pWindow = 0 Then Exit Function
    
    Dim pData As HOTTXTBTN_TYPE Ptr = Cast(HOTTXTBTN_TYPE Ptr, pWindow->UserData(0))
-   If pData Then
-   End If
+   If pData Then delete pData
       
    Function = 0
 End Function

@@ -1,5 +1,5 @@
 set FBLIBDIR=win64
-set FBCPATH=x:\FB\FreeBASIC-1.05.0-win64
+set FBCPATH=X:\FB\WinFBE_Suite-Editor\FreeBASIC-1.06.0-win64
 
 cd src
 %FBCPATH%\fbc WinFBE.bas -x ..\WinFBE64.exe WinFBE.rc -s gui

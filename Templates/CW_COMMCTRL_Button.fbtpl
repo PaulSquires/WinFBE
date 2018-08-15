@@ -74,7 +74,7 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
          ' // message has been processed.
          ' DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
          ' IF pWindow THEN pWindow->AddControl("Button", hwnd, IDCANCEL, "&Close", 350, 250, 75, 23)
-         ' // An alternative is no pass the value of the main window handle to CWindow with
+         ' // An alternative is to pass the value of the main window handle to CWindow with
          ' DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
          ' pWindow->hWindow = hwnd
          ' IF pWindow THEN pWindow->AddControl("Button", , IDCANCEL, "&Close", 350, 250, 75, 23)

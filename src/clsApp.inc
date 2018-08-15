@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -57,12 +57,40 @@ Function clsApp.RemoveAllSelectionAttributes() As long
          For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
             pDoc = this.Projects(idx).GetDocumentPtr(i)
             if pDoc THEN
-               SendMessage( pDoc->hWindow, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-               SendMessage( pDoc->hWindow, SCI_SETINDICATORCURRENT, 8, 0)
-               SendMessage( pDoc->hWindow, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-               startPos = SendMessage( pDoc->hWindow, SCI_GETTARGETSTART, 0, 0)
-               endPos =  SendMessage( pDoc->hWindow, SCI_GETTARGETEND, 0, 0)
-               SendMessage( pDoc->hWindow, SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
+               SendMessage( pDoc->hWindow(0), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+               SendMessage( pDoc->hWindow(0), SCI_SETINDICATORCURRENT, 8, 0)
+               SendMessage( pDoc->hWindow(0), SCI_TARGETWHOLEDOCUMENT, 0, 0)
+               startPos = SendMessage( pDoc->hWindow(0), SCI_GETTARGETSTART, 0, 0)
+               endPos =  SendMessage( pDoc->hWindow(0), SCI_GETTARGETEND, 0, 0)
+               SendMessage( pDoc->hWindow(0), SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
+            END IF
+         Next
+      end if
+   next   
+   function = 0
+End Function
+
+''
+''
+Function clsApp.GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
+   ' Find the pDoc pointer based on all the available hWindow for the any loaded
+   ' document or visual designer.
+   dim pDoc as clsDocument ptr
+   IF hWindow = NULL THEN EXIT FUNCTION
+   
+   for idx as long = 0 to ubound(this.Projects)
+      if this.Projects(idx).InUse = true THEN
+         For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
+            pDoc = this.Projects(idx).GetDocumentPtr(i)
+            if pDoc THEN
+               ' Determine if the incoming hWindow matches the clsDocument hWindow or
+               ' is the Frame or Form windows.
+               if (hWindow = pDoc->hWindow(0)) orelse _
+                  (hWindow = pDoc->hWindow(1)) orelse _
+                  (hWindow = pDoc->hWndFrame)  orelse _
+                  (hWindow = pDoc->hWndForm) THEN
+                  return pDoc
+               end if   
             END IF
          Next
       end if
@@ -179,4 +207,39 @@ Function clsApp.GetNewProjectIndex() As Long
 end function
 
 
+''
+''
+function clsApp.AddQuickRunEXE( byref wszFilename as wstring ) as Long
+   dim as long nFoundAt = -1
+   
+   ' Scan array for an empty slot
+   for i as long = lbound(m_arrQuickRun) to ubound(m_arrQuickRun)
+      if len(m_arrQuickRun(i)) = 0 THEN
+         m_arrQuickRun(i) = wszFilename
+         exit function
+      END IF
+   NEXT
+   if nFoundAt = -1 THEN
+      redim preserve m_arrQuickRun(ubound(m_arrQuickRun) + 1)
+      m_arrQuickRun(ubound(m_arrQuickRun)) = wszFilename
+   END IF      
 
+   function = 0
+end function
+
+''
+''
+function clsApp.CheckQuickRunEXE() as Long
+   ' Scan all array items to see if can be deleted
+   for i as long = lbound(m_arrQuickRun) to ubound(m_arrQuickRun)
+      if len(m_arrQuickRun(i)) THEN
+         if AfxFileExists(m_arrQuickRun(i)) THEN 
+            DeleteFile(m_arrQuickRun(i))
+         else
+            m_arrQuickRun(i) = ""
+         end if   
+      END IF
+   NEXT
+
+   function = 0
+end function

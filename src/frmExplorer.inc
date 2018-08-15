@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -10,7 +10,6 @@
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
-
 
 
 ' ========================================================================================
@@ -103,24 +102,30 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
       fAddChildren = True
    End If
  
+   ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
+   Treeview_SortChildren( hTree, hRootNode, 0 )
+      
    If fAddChildren Then
       dim wszText as wstring * MAX_PATH
       dim as HTREEITEM hNode
-      dim pData as DBENGINE_DATA ptr
+      dim pData as DB2_DATA ptr
       dim as string sFilename = ucase(pDoc->DiskFilename)
       
-      gdb.dbRewind()
+      gdb2.dbRewind()
       do 
-         pData = gdb.dbGetNext
+         pData = gdb2.dbGetNext
          if pData = 0 THEN exit do
-         if pData->dataType <> DB_FUNCTION_NAME THEN continue do
-         if sFilename = ucase(pData->DiskFilename) THEN
-            hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->data1, 0 )
-            Treeview_RemoveCheckBox(hTree, hNode)
-         END IF
-      loop
+         select case pData->id 
+            case DB2_FUNCTION, DB2_SUB
+               if sFilename = ucase(pData->fileName) THEN
+                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0 )
+                  Treeview_RemoveCheckBox(hTree, hNode)
+               END IF
+         END SELECT
+      loop      
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
+   AfxRedrawWindow(hTree)
    
    Function = 0
 End Function
@@ -231,26 +236,39 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
             Function = True
          End If
 
+         
+'      Case NM_CUSTOMDRAW
+'         Dim tvcd As NMTVCUSTOMDRAW Ptr = Cast(NMTVCUSTOMDRAW Ptr, pNMHDR)
+
+'         Select Case tvcd->nmcd.dwDrawStage
+'            Case CDDS_PREPAINT
+'               Return CDRF_NOTIFYITEMDRAW 
+
+'            Case CDDS_ITEMPREPAINT 
+'               Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(hWnd, id))
+'               SelectFont(tvcd->nmcd.hdc, hFont)
+''               If (tvcd->nmcd.uItemState And ODS_SELECTED) And (GetFocus() = tvcd->nmcd.hdr.hwndFrom) Then
+''                  tvcd->clrTextBk = gTheme.exlistbox_selected_active_bg
+''                  tvcd->clrText   = gTheme.exlistbox_selected_active_fg
+''               ElseIf (tvcd->nmcd.uItemState And ODS_SELECTED) Then
+''                  tvcd->clrTextBk = gTheme.exlistbox_selected_inactive_bg
+''                  tvcd->clrText   = gTheme.exlistbox_selected_inactive_fg
+''               ElseIf (tvcd->nmcd.uItemState And CDIS_HOT) Then
+''                  tvcd->clrTextBk = gTheme.exlistbox_hot_bg
+''                  tvcd->clrText   = gTheme.exlistbox_hot_fg
+''               Else
+'                  tvcd->clrText   = gConfig.Themes(gConfig.idxTheme).colors(CLR_PANELTEXT).nFg
+'                  tvcd->clrTextBk = gConfig.Themes(gConfig.idxTheme).colors(CLR_PANELTEXT).nBg
+''               End If
+                                    
+'               Return CDRF_NEWFONT 
+'
+'         End Select
+
    End Select
  
    Function = 0
 End Function
-
-
-' ========================================================================================
-' Process WM_DESTROY message for window/dialog: frmExplorer
-' ========================================================================================
-Function frmExplorer_OnDestroy(HWnd As HWnd) As LRESULT
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
-
-   Dim As HFONT hFont
-   Dim As HWnd hTree
-   hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
-   hFont = AfxGetWindowFont(hTree):  DeleteFont(hFont)
-   
-   Function = 0
-End Function
-
 
 
 ' ========================================================================================
@@ -362,9 +380,13 @@ Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_SIZE,    frmExplorer_OnSize)
       HANDLE_MSG (HWnd, WM_COMMAND, frmExplorer_OnCommand)
       HANDLE_MSG (HWnd, WM_NOTIFY,  frmExplorer_OnNotify)
-      HANDLE_MSG (HWnd, WM_DESTROY, frmExplorer_OnDestroy)
       HANDLE_MSG (HWnd, WM_PAINT,   frmExplorer_OnPaint)
    
+      case WM_DESTROY
+         Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
+         dim as HFONT hFont = AfxGetWindowFont(hTree)
+         DeleteFont(hFont)
+         
       case WM_ERASEBKGND
          return true
 
@@ -409,18 +431,17 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    ' Only make the Explorer initially visable if it was already visible
    ' when the most previous instance of the program closed. Also, set the width of
    ' the window to the last used visible width.
-   ' Because pWindow->Create scales the control according to the DPI, you must 
-   ' unscale the saved width:   
-   dim as long nWidth = iif(gConfig.ShowExplorer, pWindow->UnscaleX(gConfig.ShowExplorerWidth), 250)
+   dim as long nWidth = iif(gConfig.ShowExplorer, gConfig.ShowExplorerWidth, 250)
    
    HWND_FRMEXPLORER = pWindow->Create( hWndParent, "Explorer Window", @frmExplorer_WndProc, 0, 0, nWidth, 0, _
         WS_CHILD Or iif(gConfig.ShowExplorer, WS_VISIBLE, 0) Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
+
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
    pWindow->SetFont( "Segoe UI Semibold", 9)
-   pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
+   'pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    Dim As HWnd hBtn = _
    pWindow->AddControl("LABEL", , IDC_FRMEXPLORER_LBLEXPLORER, L(247,"EXPLORER"), 10, 12, 75, 20, _
@@ -428,14 +449,25 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    frmHotImgBtn( HWND_FRMEXPLORER, IDC_FRMEXPLORER_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
-                  L(161, "Close"), 24, 24, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_WINDOW), 0, 0, 24, 24 )
+                  L(161, "Close"), 24, 24, _
+                  GetSysColor(COLOR_BTNFACE), _
+                  GetSysColor(COLOR_WINDOW), _
+                  0, 0, 24, 24, true, true, true )
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
-        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
+        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
+        TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
         Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
+
+      ' Use the new style Explorer Treeview (triangles instead of boxes).
+      ' Set an undocumented extended style that enables the treeview glyphs to resize
+      ' according to the high dpi setting.
+      ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
+      SendMessage(hTree, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
+      SetWindowTheme(hTree, @wstr("EXPLORER"), 0)
 
       ' items that are initially checked will appear checked (must add TVS_CHECKBOXES after control is created)
       SetWindowLongPtr( hTree, GWL_STYLE, GetWindowLongPtr(hTree, GWL_STYLE) OR TVS_CHECKBOXES )

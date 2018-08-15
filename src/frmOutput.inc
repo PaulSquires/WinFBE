@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -39,19 +39,17 @@ function UpdateToDoListview() as long
    ListView_DeleteAllItems( hLV )
    dim as long n = 0
 
-   dim pData as DBENGINE_DATA ptr
+   dim pData as DB2_DATA ptr
    
-   gdb.dbRewind()
+   gdb2.dbRewind()
    do 
-      pData = gdb.dbGetNext
+      pData = gdb2.dbGetNext
       if pData = 0 THEN exit do
-      if pData->dataType <> DB_TODO_ITEM THEN continue do
-      if AfxFileExists(pData->diskFilename) THEN
-         FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
-         FF_ListView_InsertItem( hLV, n, 1, WStr(pData->diskFilename) )
-         FF_ListView_InsertItem( hLV, n, 2, WStr(pData->data1) ) 
-         n = n + 1
-      end if
+      if pData->id <> DB2_TODO THEN continue do
+      FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
+      FF_ListView_InsertItem( hLV, n, 1, WStr(pData->fileName) )
+      FF_ListView_InsertItem( hLV, n, 2, WStr(pData->ElementValue) ) 
+      n = n + 1
    loop
 
    function = 0
@@ -97,7 +95,8 @@ function DoSearchFileSelected() as LONG
                            0 )         ' pDocIn
 
    if pDoc THEN
-      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNum-1, 0)
+      dim as hwnd hEdit = pDoc->hWndActiveScintilla
+      SciExec( hEdit, SCI_GOTOLINE, nLineNum-1, 0)
    END IF
 
    function = 0
@@ -305,7 +304,7 @@ Function frmOutput_Listview_SubclassProc ( _
          Exit Function
 
       Case WM_LBUTTONDBLCLK
-         SetDocumentErrorPosition( HWND )    
+         SetDocumentErrorPosition( HWND, gCompile.CompileID )    
          Exit Function
          
       Case WM_KEYUP
@@ -365,7 +364,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   HWND_FRMOUTPUT= pWindow->Create( hWndParent, "", @frmOutput_WndProc, 0, 0, 0, 180, _
+   HWND_FRMOUTPUT = pWindow->Create( hWndParent, "", @frmOutput_WndProc, 0, 0, 0, 180, _
         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
@@ -388,7 +387,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    
    frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
                   L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT), _
-                  0, 0, nWidth, nHeight )
+                  0, 0, nWidth, nHeight, true, true, true )
                   
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _

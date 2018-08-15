@@ -69,7 +69,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    ' // Create the main window
    DIM pWindow AS CWindow
-   pWindow.Create(NULL, "CWindow with a menu", @WndProc)
+   pWindow.Create(NULL, "Menu with icons", @WndProc)
    pWindow.SetClientSize(400, 250)
    pWindow.Center
 
@@ -80,7 +80,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    DIM hMenu AS HMENU = BuildMenu
    SetMenu pWindow.hWindow, hMenu
 
-      ' // Add icons to the items of the File menu
+   ' // Add icons to the items of the File menu
    DIM hSubMenu AS HMENU = GetSubMenu(hMenu, 0)
    AfxAddIconToMenuItem(hSubMenu, 0, TRUE, AfxGdipIconFromRes(hInstance, "IDI_ARROW_LEFT_32"))
    AfxAddIconToMenuItem(hSubMenu, 1, TRUE, AfxGdipIconFromRes(hInstance, "IDI_ARROW_RIGHT_32"))

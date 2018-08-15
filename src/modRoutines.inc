@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -10,6 +10,39 @@
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
+
+
+' ========================================================================================
+' Return temporary file name
+' ========================================================================================
+FUNCTION GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
+   dim wszTempFilename as wstring * MAX_PATH
+   if GetTempFileName(@wszFolder, "TMP", 0, @wszTempFilename) then
+      ' Delete the temp file that gets created b/c we will create it ourselves based on the 
+      ' returned filename.
+      kill wszTempFilename
+      IF LEN(wszExtension) THEN 
+         wszTempFilename = LEFT(wszTempFilename, LEN(wszTempFilename) -  3) & wszExtension
+      end if
+   end if      
+   function = wszTempFilename
+END FUNCTION
+
+
+' ========================================================================================
+' Replace a string in a combobox
+' ========================================================================================
+FUNCTION ComboBox_ReplaceString (BYVAL hComboBox AS HWND, BYVAL index AS LONG, BYVAL pwszNewText AS WSTRING PTR, BYVAL pNewData AS LONG_PTR = 0) AS LONG
+   ' Delete the string
+   DIM lRes AS LRESULT = SendMessage(hComboBox, CB_DELETESTRING, index, 0)
+   IF lRes = LB_ERR THEN RETURN lRes
+   ' Insert the new string
+   index = SendMessage(hComboBox, CB_INSERTSTRING, index, CAST(LPARAM, pwszNewText))
+   IF index = LB_ERR OR index = LB_ERRSPACE THEN Return index
+   lRes = SendMessage(hComboBox, CB_SETITEMDATA, index, CAST(LPARAM, pNewData))
+   IF lRes = LB_ERR THEN Return lRes
+   FUNCTION = SendMessage(hComboBox, CB_SETCURSEL, index, 0)
+END FUNCTION
 
 
 ' ========================================================================================
@@ -232,10 +265,39 @@ FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
                      LEN(sUtf8), _              'Length of UTF-8 buffer
                      BYVAL 0, _                 'Invalid character replacement
                      BYVAL 0)                   'Replacement was used flag
- FUNCTION = sUtf8
+ FUNCTION = rtrim(sUtf8, chr(0))
 
 END FUNCTION
 
+' ========================================================================================
+' Return if string is UTF8 encoded
+' ========================================================================================
+'function isutf8( byval _string as  zstring ptr ) as boolean
+'     if _string = 0 then return 0
+'    if left(*_string,2)= wchr(&hFF,&hFE) or left(*_string,2)=wchr(&hFE,&hFF) then print "utf16":exit function 'utf-16 boms
+'     if left(*_string,3)=wchr(&hEF,&hBB,&hBF) then return 1  'utf-8 bom
+'   dim bytes as const ubyte ptr = cptr(const ubyte ptr, _string)
+'   while *bytes
+'      if (((bytes[0] = &h09) orelse (bytes[0] = &h0A)) orelse (bytes[0] = &h0D)) orelse ((&h20 <= bytes[0]) andalso (bytes[0] <= &h7E)) then
+'         bytes += 1
+'         continue while
+'      end if
+'      if ((&hC2 <= bytes[0]) andalso (bytes[0] <= &hDF)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF)) then
+'         bytes += 2
+'         continue while
+'      end if
+'      if ((((bytes[0] = &hE0) andalso ((&hA0 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) orelse ((((((&hE1 <= bytes[0]) andalso (bytes[0] <= &hEC)) orelse (bytes[0] = &hEE)) orelse (bytes[0] = &hEF)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF)))) orelse (((bytes[0] = &hED) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &h9F))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) then
+'         bytes += 3
+'         continue while
+'      end if
+'      if (((((bytes[0] = &hF0) andalso ((&h90 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF))) orelse (((((&hF1 <= bytes[0]) andalso (bytes[0] <= &hF3)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF)))) orelse ((((bytes[0] = &hF4) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &h8F))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF))) then
+'         bytes += 4
+'         continue while
+'      end if
+'      return 0
+'   wend
+'   return 1
+'end function
 
 ' ========================================================================================
 ' Return text description of the specified file encoding
@@ -255,19 +317,24 @@ end function
 ' ========================================================================================
 ' Open a disk file and read it into a string (ANSI or UTF8)
 ' ========================================================================================
-function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
+function GetFileToString( byref wszFilename as const wstring, _
+                          byref txtBuffer as string, _
+                          byval pDoc as clsDocument ptr _
+                          ) as boolean
+   
+   if pDoc = 0 then return true
    
    ' Load the entire file into a string
-   dim as long f = freefile
-   If Open( wszFilename for Binary Access Read As #f ) = 0 Then 
-      If LOF(f) > 0 Then
-         txtBuffer = String(LOF(f), 0)
-         Get #f, , txtBuffer
-      End If
-   else
-      return true  ' error opening file
-   end if
-   close #f   
+   DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+   DIM hFile AS HANDLE = CreateFileW(@wszFileName, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                         OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+   IF hFile = INVALID_HANDLE_VALUE THEN return true
+   dwFileSize = GetFileSize(hFile, @dwHighSize)
+   txtBuffer = String(dwFileSize, 0)
+   DIM bSuccess AS LONG = ReadFile(hFile, strptr(txtBuffer), dwFileSize, @dwBytesRead, NULL)
+   CloseHandle(hFile)
+   IF bSuccess = FALSE THEN return true
+
 
    ' Check for BOM signatures
    if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
@@ -290,9 +357,19 @@ function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as
          ' No conversion needed. clsDocument ApplyProperties will set
          ' the editor to UTF8 code.
       case FILE_ENCODING_UTF16_BOM
+         ' Convert the whole buffer to UTF-16 unicode string
+         dim as CWSTR wszText = string(len(txtBuffer),0)
+         MemCpy( CAST(any PTR, wszText.m_pBuffer), strptr(txtBuffer), len(txtBuffer))
+
+         ' Need to parse wszText to remove/process any possible visual designer code. Only
+         ' the non-VD text is returned. We also skip over any codegen code.
+         wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
+
          ' Convert to UTF8 so it can display in the editor
          ' Need to pass a WSTRING pointer to the conversion function.
-         txtBuffer = UnicodeToUtf8( cast(WSTRING ptr, strptr(txtBuffer)) )
+         'txtBuffer = UnicodeToUtf8( wszText )
+         txtBuffer = wszText.utf8
+
    END select
       
    function = false
@@ -308,13 +385,14 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
                             
    if pDoc = 0 then exit function
 
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    ' Save the current file position and first visible line
-   dim nFirstLine as long = SciExec( pDoc->hWindow, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-   Dim nPos As Long = SciExec(pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0)
+   dim nFirstLine as long = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+   Dim nPos As Long = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
 
    pDoc->FileEncoding = FileEncoding
-   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(pDoc->hWindow, SCI_GETCHARACTERPOINTER, 0, 0) )
-   dim as long sciCodePage = SciExec(pDoc->hWindow, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
+   Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(hEdit, SCI_GETCHARACTERPOINTER, 0, 0) )
+   dim as long sciCodePage = SciExec(hEdit, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
    dim as string txtBuffer 
    
    ' Convert buffer to specified file encoding
@@ -325,7 +403,7 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
          else   
             ' need to convert from UTF8 to ANSI
             txtBuffer = Utf8ToAscii(*psz)
-            SciExec(pDoc->hWindow, SCI_SETCODEPAGE, 0, 0 )
+            SciExec(hEdit, SCI_SETCODEPAGE, 0, 0 )
          end if    
 
       case FILE_ENCODING_UTF8_BOM, FILE_ENCODING_UTF16_BOM
@@ -334,7 +412,7 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
          else
             ' need to convert from ANSI to UTF8
             txtBuffer = AnsiToUtf8(*psz)
-            SciExec(pDoc->hWindow, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+            SciExec(hEdit, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
          end if    
 
    END SELECT
@@ -342,8 +420,8 @@ function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
    ' Set the new buffer
    pDoc->SetText(txtBuffer)
     
-   SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
-   SciExec(pDoc->hWindow, SCI_GOTOPOS, nPos, 0)
+   SciExec(hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
+   SciExec(hEdit, SCI_GOTOPOS, nPos, 0)
    
    function = 0
 end function   
@@ -366,29 +444,48 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
       wszText = pDoc->DiskFilename
       nLineNumber = 0
    else 
-      dim pData as DBENGINE_DATA ptr
-      pData = gdb.dbFindFunctionName( str(wszFunctionName) ) 
+      dim pData as DB2_DATA ptr
+      pData = gdb2.dbFindFunction( wszFunctionName ) 
+      if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName ) 
       if pData then
-         wszText = pData->DiskFilename
+         wszText = pData->fileName
          nLineNumber = pData->nLineNum
       end if
    end if   
+
+   ' Not all documents exist on disk file. For example, a QuickRun file will exist in
+   ' the editor but may never have a disk footprint. We need to search the project to
+   ' determine if the filename has a pDoc already associated with it. If it does, then
+   ' pass that pDoc rather than looking for a disk filename.
+   dim as long idx = gApp.GetActiveProjectIndex()
+   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(wszText)
    
-   if AfxFileExists(wszText) = 0 THEN exit function
-      
-   ' Display the document containing the selected sub/function       
-   pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                           False, _    ' bIsNewFile
-                           False, _    ' bIsTemplate
-                           true, _     ' bShowInTab
-                           false, _    ' bIsInclude
-                           wszText, _  ' pwszName
-                           0 )  ' pDocIn
+   if pDoc then
+      pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                              False, _    ' bIsNewFile
+                              False, _    ' bIsTemplate
+                              true, _     ' bShowInTab
+                              false, _    ' bIsInclude
+                              "", _       ' pwszName
+                              pDoc )  ' pDocIn
+   else   
+      if AfxFileExists(wszText) = 0 THEN exit function
+      ' Display the document containing the selected sub/function       
+      pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
+                              False, _    ' bIsNewFile
+                              False, _    ' bIsTemplate
+                              true, _     ' bShowInTab
+                              false, _    ' bIsInclude
+                              wszText, _  ' pwszName
+                              0 )  ' pDocIn
+   end if
+
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
-      SciExec( pDoc->hWindow, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
-      SciExec( pDoc->hWindow, SCI_GOTOLINE, nLineNumber, 0) 
+      dim as hwnd hEdit = pDoc->hWndActiveScintilla
+      SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
+      SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
    END IF
    
    function = 0
@@ -578,9 +675,16 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
    If pofd = Null Then Return Null
 
    ' Set the file types depending on the button pushed that calls this open dialog
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
+   Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
 
    Select Case idButton
+      case IDC_FRMUSERTOOLS_CMDBROWSEEXE
+         rgFileTypes(1).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 1, @rgFileTypes(1))
+         ' Set the title of the dialog
+         hr = pofd->lpVtbl->SetTitle(pofd, L(291,"Command:"))
+
       Case IDM_PROJECTOPEN
          rgFileTypes(1).pszName = @L(216,"Project files")
          rgFileTypes(1).pszSpec = @WSTR("*.wfbe")
@@ -591,20 +695,28 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          hr = pofd->lpVtbl->SetTitle(pofd, L(216,"Project files"))
       
       Case IDM_INSERTFILE
-         rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(79,"All files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
-         rgFileTypes(2).pszSpec = @WSTR("*.*")
-         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         rgFileTypes(1).pszName = @L(106,"Open source file")
+         rgFileTypes(2).pszName = @L(77,"FB code files")
+         rgFileTypes(3).pszName = @L(78,"FB Include files")
+         rgFileTypes(4).pszName = @L(209,"Resource files")
+         rgFileTypes(5).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas")
+         rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(4).pszSpec = @WSTR("*.rc")
+         rgFileTypes(5).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
 
       Case IDC_FRMOPTIONSCOMPILER_CMDFBWIN32, IDC_FRMOPTIONSCOMPILER_CMDFBWIN64
          rgFileTypes(1).pszName = @L(100,"FB Compiler")
          rgFileTypes(1).pszSpec = @WSTR("fbc.exe")
-         rgFileTypes(2).pszName = @L(79,"All files")
-         rgFileTypes(2).pszSpec = @WSTR("*.*")
-         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         rgFileTypes(2).pszName = @L(230,"Executable")
+         rgFileTypes(2).pszSpec = @WSTR("*.exe")
+         rgFileTypes(3).pszName = @L(79,"All files")
+         rgFileTypes(3).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(101,"Find FreeBASIC Compiler"))
    
@@ -662,12 +774,18 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
    If pofd = Null Then Return Null
 
    ' Set the file types
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC
-   rgFileTypes(1).pszName = @L(77,"FB code files")
-   rgFileTypes(2).pszName = @L(79,"All files")
-   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
-   rgFileTypes(2).pszSpec = @WSTR("*.*")
-   pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+   Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
+   rgFileTypes(1).pszName = @L(106,"Open source file")
+   rgFileTypes(2).pszName = @L(77,"FB code files")
+   rgFileTypes(3).pszName = @L(78,"FB Include files")
+   rgFileTypes(4).pszName = @L(209,"Resource files")
+   rgFileTypes(5).pszName = @L(79,"All files")
+   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
+   rgFileTypes(2).pszSpec = @WSTR("*.bas")
+   rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+   rgFileTypes(4).pszSpec = @WSTR("*.rc")
+   rgFileTypes(5).pszSpec = @WSTR("*.*")
+   pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
 
    ' Set the title of the dialog
    hr = pofd->lpVtbl->SetTitle(pofd, L(106,"Open source file"))
@@ -713,25 +831,42 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    If psfd = Null Then Return Null
 
    ' // Set the file types
-   Dim rgFileTypes(1 To 3) As COMDLG_FILTERSPEC 
+   Dim rgFileTypes(1 To 4) As COMDLG_FILTERSPEC 
    
    Select Case id
-      Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE
+      Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS
          rgFileTypes(1).pszName = @L(216,"Project files")
          rgFileTypes(2).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.wfbe")
          rgFileTypes(2).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+         ' // Set the title of the dialog
+         hr = psfd->lpVtbl->SetTitle(psfd, L(185,"Save Project As..."))
+
+      case IDM_FILESAVEDECLARES 
+         rgFileTypes(1).pszName = @L(78,"FB Include files")
+         rgFileTypes(2).pszName = @L(77,"FB code files")
+         rgFileTypes(3).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas")
+         rgFileTypes(3).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
+         psfd->lpVtbl->SetTitle(psfd, L(265,"Save Declares File"))
+
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
-         rgFileTypes(2).pszName = @L(79,"All files")
-         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi;*.rc")
-         rgFileTypes(2).pszSpec = @WSTR("*.*")
-         psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+         rgFileTypes(2).pszName = @L(78,"FB Include files")
+         rgFileTypes(3).pszName = @L(209,"Resource files")
+         rgFileTypes(4).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas")
+         rgFileTypes(2).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(3).pszSpec = @WSTR("*.rc")
+         rgFileTypes(4).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 4, @rgFileTypes(1))
+         psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
+     
    End Select
    
-   ' // Set the title of the dialog
-   hr = psfd->lpVtbl->SetTitle(psfd, L(107,"Save source file"))
    ' // Set the file name
    hr = psfd->lpVtbl->SetFileName(psfd, pwszFileName)
    ' // Set the extension
@@ -901,33 +1036,31 @@ End Function
 ' ========================================================================================
 ' Load a .lang localization file from disk and populate the localization array
 ' ========================================================================================
-Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
+Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
 
    ' default that the file failed to load
    Function = False
-   If pwszName = 0 Then Exit Function
-   If AfxFileExists(*pwszName) = 0 Then Exit Function
+   If AfxFileExists(wszFileName) = 0 Then Exit Function
 
-   Dim st    As WString * MAX_PATH
-   Dim wKey  As WString * MAX_PATH
-   Dim wData As WString * MAX_PATH
+   Dim as CWSTR wst, wKey, wData
    Dim nKey  As Long
    Dim nData As Long  
    Dim i     As Long
     
-   Dim f As Long = Freefile
-   If Open( *pwszName For Input Encoding "utf16" As #f ) <> 0 Then Exit Function
-
-   Do Until Eof(f)
-      Line Input #f, st
-      If Len(st) = 0 Then Continue Do
-      If Left(st, 1) = "'" Then Continue Do
+   dim pStream AS CTextStream
+   if pStream.OpenUnicode(wszFileName) <> S_OK then exit function
+   
+   do until pStream.EOS
+      wst = pStream.ReadLine
       
-      i = Instr(st, ":")
+      If Len(wst) = 0 Then Continue Do
+      If Left(wst, 1) = "'" Then Continue Do
+      
+      i = Instr(wst, ":")
       If i = 0 Then Continue Do
       
-      wKey  = Left(st, i-1)
-      wData = Mid(st, i+1)
+      wKey  = Left(wst, i-1)
+      wData = Mid(wst, i+1)
       
       nKey  = Val(wKey)
       nData = Val(wData)
@@ -948,45 +1081,9 @@ Function LoadLocalizationFile( ByVal pwszName As WString Ptr ) As BOOLEAN
       End If   
          
    Loop
-   Close #f
-
-   Function = True
-End Function
-
-
-''
-''
-Function CreateDeclaresFile( ByRef sFilename As Const String ) As LONG
-
-   dim pDoc as clsDocument ptr
-   dim pData as DBENGINE_DATA ptr
+   pStream.Close
    
-   dim as long idx = gApp.GetActiveProjectIndex()
-
-   dim as long f = Freefile
-   Open sFilename For Output As #f
-
-   gdb.dbRewind()
-   do 
-      pData = gdb.dbGetNext()
-      if pData = 0 THEN exit do
-      if pData->dataType <> DB_FUNCTION_NAME THEN continue do
-
-      ' data1 = Function name.
-      ' data2 = Function declare parameter list.
-
-      ' Bypass any declares for Class subs/functions
-      if instr(pData->data1, ".") = 0 THEN
-         if gApp.Projects(idx).GetDocumentPtrByFilename(wstr(pData->DiskFilename)) THEN 
-            Print #f, "Declare " & AfxStrShrink(pData->data2, Chr(32,9,13,10))
-         end if
-      END IF
-
-   loop
-
-   Close #f
-
-   Function = 0
+   Function = True
 End Function
 
 
@@ -1058,29 +1155,138 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 
 End Function
 
+''
+''
+function GetRunExecutableFilename() as CWSTR
+   ' Determine the EXE name of the currently active document or project. Used
+   ' by the top menu and toolbar to determine if the Run Executable options
+   ' should be grayed out.
+   dim wszFilename as CWSTR
+   dim wszOptions as CWSTR
+   Dim pDocMain As clsDocument Ptr 
+
+   dim as long idx = gApp.GetActiveProjectIndex()
+   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   dim as Boolean bInString = false
+   
+   pDocMain = iIf( gApp.IsProjectActive, gApp.Projects(idx).GetMainDocumentPtr, gTTabCtl.GetActiveDocumentPtr)
+   If pDocMain = 0 Then return ""
+   
+   if idxBuild > -1 then 
+      wszOptions = gConfig.Builds(idxBuild).wszOptions 
+
+      if gApp.IsProjectActive THEN
+         if gConfig.Builds(idxBuild).Is32bit then
+            wszOptions = wszOptions + " " + gApp.Projects(idx).ProjectOther32
+         end if   
+         if gConfig.Builds(idxBuild).Is64bit then
+            wszOptions = wszOptions + " " + gApp.Projects(idx).ProjectOther64
+         end if   
+      else
+         wszOptions = wszOptions + " " + gConfig.CompilerSwitches
+      END IF
+      wszOptions = " " + ucase(wszOptions) + " "
+      
+      If Instr(wszOptions, wstr(" -DLL "))   Then return ""
+      If Instr(wszOptions, wstr(" -DYLIB ")) Then return ""
+      If Instr(wszOptions, wstr(" -LIB "))   then return ""
+      
+   end if
+   
+   ' Need to check the compiler options to see if the -x switch is used. That switch specifically
+   ' names the output file.
+   dim y as long = Instr(wszOptions, wstr(" -X "))
+   if y THEN
+      y = y + 4  ' skip over the switch itself
+      for i as long = y to len(wszOptions)
+         ' iterate to the beginning of the next switch or end of the string
+         ' skip over spaces that are part of a filename string
+         if wszOptions[i-1] = 34 THEN bInString = not bInString  ' double quotes
+         if bInString THEN continue for
+         if wszOptions[i-1] = 45 then  ' dash   
+            wszFilename = mid(wszOptions, y, i-y-1)
+            exit for
+         end if   
+      NEXT
+      ' There was no other switch so we made it to the end of the string
+      if len(wszFilename) = 0 then wszFilename = mid(wszOptions, y)
+   END IF
+   
+   ' Has a filename been determined yet? If it has then it possibly does not have
+   ' a path assigned to it so we should add one.
+   if len(wszFilename) THEN
+      if len(AfxStrPathname("PATH", wszFilename)) = 0 THEN
+         wszFilename = AfxStrPathname("PATH", pDocMain->DiskFilename) + wszFilename
+      END IF
+   else
+      ' Default 
+      wszFilename = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
+                    AfxStrPathname("NAME", pDocMain->DiskFilename) + _
+                    wstr(".exe")
+   END IF
+
+   return wszFilename
+
+END FUNCTION
 
 
 
+' ========================================================================================
+' Loads an image from a resource, converts it to an icon or bitmap and returns a pointer
+' to the raw PNG pixels. This is needed by the scintilla autocomplete popup.
+' Memory is ALLOCATE so it needs to be DEALLOCATE.
+' Parameters:
+' - hInstance     = [in] A handle to the module whose portable executable file or an accompanying
+'                   MUI file contains the resource. If this parameter is NULL, the function searches
+'                   the module used to create the current process.
+' - wszImageName  = [in] Name of the image in the resource file (.RES). If the image resource uses
+'                   an integral identifier, wszImage should begin with a number symbol (#)
+'                   followed by the identifier in an ASCII format, e.g., "#998". Otherwise,
+'                   use the text identifier name for the image. Only images embedded as raw data
+'                   (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.
+' ========================================================================================
+TYPE MYBITMAPINFO
+    bmiHeader AS BITMAPINFOHEADER
+    bmiColors(256) AS RGBQUAD 
+END TYPE
+             
+''
+''
+FUNCTION LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING) as any ptr
+   dim as HBITMAP hBitmap = AfxGdipImageFromRes(hInstance, wszImageName, 0, false, IMAGE_BITMAP) 
+        
+   dim bi AS MYBITMAPINFO
+   dim bm AS BITMAP
+   dim dwp AS DWORD PTR
+   dim as HDC hIC, hDC 
+   dim as any ptr pPixel
+   
+   IF hBitmap THEN
+      hIC = GetWindowDC(0)
+      hDC = CreateCompatibleDC(hIC)
+      SelectObject(hDC, hBitmap)
 
+      GetObject(hBitmap, SIZEOF(bm), @bm)
+      bi.bmiHeader.biSize        = SIZEOF(bi.bmiHeader)
+      bi.bmiHeader.biWidth       = bm.bmWidth
+      bi.bmiHeader.biHeight      = -bm.bmHeight ' Put top in TOP instead on bottom!
+      bi.bmiHeader.biPlanes      = 1
+      bi.bmiHeader.biBitCount    = 32
+      bi.bmiHeader.biCompression = BI_RGB
+                      
+      pPixel = ALLOCATE((bm.bmWidth * bm.bmHeight) * sizeof(DWORD))
+      dwp = cast(dword ptr, pPixel)
+      GetDIBits( hDC, hBitmap, 0, bm.bmHeight, _
+                        BYVAL dwp, cast(LPBITMAPINFO, @bi), DIB_RGB_COLORS)
+     
+      DeleteDC(hIC)
+      DeleteDC(hDC)
+   end if
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+   ' // Return the handle to the PNG raw pixels
+   DeleteObject(hBitmap)
+   return pPixel
+END FUNCTION
+' ========================================================================================
 
 

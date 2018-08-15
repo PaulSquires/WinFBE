@@ -33,7 +33,7 @@ END TYPE
 ' ========================================================================================
 ' Show context help or general contents if word does not exist
 ' ========================================================================================
-Function ShowContextHelp() As Long
+Function ShowContextHelp( byval id as long ) As Long
 
    Dim HtmlHelpW As Function ( BYVAL hwndCaller AS HWnd, _
                                BYVAL pswzFile AS WSTRING Ptr, _
@@ -41,11 +41,43 @@ Function ShowContextHelp() As Long
                                BYVAL dwData AS DWORD_PTR _
                                ) AS HWND
 
+   dim as CWSTR wszHelpFilename, wszLabel
+   
    ' Ensure that the CurDrive parameter is converted if applicable
    gConfig.CompilerHelpFile = ProcessFromCurdrive( gConfig.CompilerHelpFile ) 
+   gConfig.Win32APIHelpfile = ProcessFromCurdrive( gConfig.Win32APIHelpfile ) 
+   gConfig.WinFBXHelpfile   = ProcessFromCurdrive( gConfig.WinFBXHelpfile ) 
 
-   If AfxFileExists(gConfig.CompilerHelpFile) = 0 Then
-      MessageBoxW( HWND_FRMMAIN, L(244,"FreeBASIC Help file not found."), L(201,"Error"), _
+   select Case id
+      case IDM_HELP
+         wszLabel = "FreeBASIC "
+         ' Convert relative path to absolute path if needed.
+         if AfxPathIsRelative(gConfig.CompilerHelpFile) then
+            wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.CompilerHelpFile)
+         else
+            wszHelpFilename = gConfig.CompilerHelpFile
+         END IF
+      case IDM_HELPWINAPI
+         wszLabel = "WinAPI "
+         ' Convert relative path to absolute path if needed.
+         if AfxPathIsRelative(gConfig.Win32APIHelpfile) then
+            wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.Win32APIHelpfile)
+         else   
+            wszHelpFilename = gConfig.Win32APIHelpfile 
+         END IF
+      case IDM_HELPWINFBX
+         wszLabel = "WinFBX "
+         ' Convert relative path to absolute path if needed.
+         if AfxPathIsRelative(gConfig.WinFBXHelpfile) then
+            wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.WinFBXHelpfile)
+         else   
+            wszHelpFilename = gConfig.WinFBXHelpfile
+         END IF
+   END SELECT
+
+
+   If AfxFileExists(wszHelpFilename) = 0 Then
+      MessageBoxW( HWND_FRMMAIN, wszLabel & L(244,"Help file not found."), L(201,"Error"), _
                     MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Exit Function
    End If
@@ -54,7 +86,7 @@ Function ShowContextHelp() As Long
    HtmlHelpW = DyLibSymbol( gpHelpLib, "HtmlHelpW" )
 
    If (gpHelpLib = 0) OrElse (HtmlHelpW = 0) Then
-      MessageBoxW( HWND_FRMMAIN, L(243,"Error loading HtmlHelp."), L(201,"Error"), _
+      MessageBox( HWND_FRMMAIN, L(243,"Error loading HtmlHelp."), L(201,"Error"), _
                     MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Exit Function
    End If
@@ -64,7 +96,7 @@ Function ShowContextHelp() As Long
    Dim pDoc as clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    
    If pDoc = 0 Then
-      HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_DISPLAY_TOC, NULL )
+      HtmlHelpW( 0, wszHelpFilename, HH_DISPLAY_TOC, NULL )
       Exit Function
    ENd If
 
@@ -85,13 +117,13 @@ Function ShowContextHelp() As Long
    End With
    
    ' Open the help and show the topic
-   HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_DISPLAY_TOC, Null )   '<-- needed?
+   HtmlHelpW( 0, wszHelpFilename, HH_DISPLAY_TOC, Null )   '<-- needed?
    
-   If HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) ) = 0 Then
+   If HtmlHelpW( 0, wszHelpFilename, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) ) = 0 Then
       ' Normal case search failed, try a ucase search
       wszKeyword     = UCase(wszKeyword)
       li.pszKeywords = @wszKeyword
-      HtmlHelpW( 0, gConfig.CompilerHelpFile, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) )
+      HtmlHelpW( 0, wszHelpFilename, HH_KEYWORD_LOOKUP, Cast(DWORD_PTR, @li) )
    End If
 
    Function = 0

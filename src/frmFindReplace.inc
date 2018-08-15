@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -29,43 +29,46 @@ function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false ) as lon
 
    dim as long nPos, startPos, endPos, findFlags, r
    
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    if fReplaceAll = true then 
       if frmHotImgBtn_GetSelected(hWndCase) THEN findFlags = (findFlags Or SCFIND_MATCHCASE)
       if frmHotImgBtn_GetSelected(hWndWhole) THEN findFlags = (findFlags Or SCFIND_WHOLEWORD)
-      SendMessage( pDoc->hWindow, SCI_SETSEARCHFLAGS, findFlags, 0)
+      SendMessage( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
       
       if pDoc->HasMarkerHighlight THEN
-         startPos = SciExec( pDoc->hWindow, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
-         endPos = SciExec( pDoc->hWindow, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
+         endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       else
-         SciExec( pDoc->hWindow, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-         startPos = SciExec( pDoc->hWindow, SCI_GETTARGETSTART, 0, 0)
-         endPos = SciExec( pDoc->hWindow, SCI_GETTARGETEND, 0, 0)
+         SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+         startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+         endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
       END IF
-      SciExec( pDoc->hWindow, SCI_INDICATORCLEARRANGE, startPos, endPos)
+      SciExec( hEdit, SCI_INDICATORCLEARRANGE, startPos, endPos)
      
+      gApp.SuppressNotify = true
       do 
-         r = SciExec( pDoc->hWindow, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
+         r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
-         SciExec( pDoc->hWindow, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
+         SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
          startPos = r + len(txtFind)
          ' Adjust the searching positions
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
+      gApp.SuppressNotify = false
 
    else   
       ' Need to ensure that the current cursor/selection is actually the find
       ' phrase that we want to replace. If not, then move to the closest selection.
       if ucase(pDoc->GetSelText) <> ucase(txtFind) THEN
-         startPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+         startPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
          frmFindReplace_NextSelection(startPos, true)
          exit function
       END IF
-      SciExec( pDoc->hWindow, SCI_TARGETFROMSELECTION, 0, 0)
-      SciExec( pDoc->hWindow, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
+      SciExec( hEdit, SCI_TARGETFROMSELECTION, 0, 0)
+      SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
    end if
       
    function = 0
@@ -82,22 +85,24 @@ function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as
 
    dim as long mainIdx, lenFind, endPos, nPos, iStart, iEnd
    
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    dim as hwnd hWndResults = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_LBLRESULTS)      
    dim as hwnd hWndFind    = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
    dim txtFind as string = Str(AfxGetWindowText(hWndFind))
    lenFind = len(txtFind)
-   endPos = SciExec( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
+   endPos = SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0)
+   if endPos = 0 THEN exit function
     
    ' Build an array holding all of the selection positions
    redim iPositions(100) as long
    
    gFind.foundCount = 0 
    while nPos <= endPos 
-      iStart = SciExec( pDoc->hWindow, SCI_INDICATORSTART, 8, nPos) 
-      iEnd   = SciExec( pDoc->hWindow, SCI_INDICATOREND, 8, iStart)
+      iStart = SciExec( hEdit, SCI_INDICATORSTART, 8, nPos) 
+      iEnd   = SciExec( hEdit, SCI_INDICATOREND, 8, iStart)
       if (iStart = 0) andalso (iEnd = 0) THEN exit while    ' no indicators found
 
-      if SciExec( pDoc->hWindow, SCI_INDICATORVALUEAT, 8, iStart-1) then
+      if SciExec( hEdit, SCI_INDICATORVALUEAT, 8, iStart-1) then
          gFind.foundCount = gFind.foundCount + 1
          if gFind.foundCount > ubound(iPositions) THEN
             redim preserve iPositions(gFind.foundCount) as long 
@@ -129,12 +134,12 @@ function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as
    ' Highlight the selection
    if gFind.foundCount > 0 THEN
       ' make sure target line is unfolded
-      dim as long currentLine = SciExec( pDoc->hWindow, SCI_LINEFROMPOSITION, iPositions(mainIdx), 0)
-      SciExec( pDoc->hWindow, SCI_ENSUREVISIBLE, currentLine, 0) 
-      SciExec( pDoc->hWindow, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
+      dim as long currentLine = SciExec( hEdit, SCI_LINEFROMPOSITION, iPositions(mainIdx), 0)
+      SciExec( hEdit, SCI_ENSUREVISIBLE, currentLine, 0) 
+      SciExec( hEdit, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
       AfxSetWindowText(hWndResults, mainIdx & " of " & gFind.foundCount)
    else
-      SciExec( pDoc->hWindow, SCI_SETSEL, startPos, startPos)
+      SciExec( hEdit, SCI_SETSEL, startPos, startPos)
       AfxSetWindowText(hWndResults, L(269, "No results"))
    END IF
    
@@ -156,54 +161,55 @@ function frmFindReplace_HighlightSearches() as long
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 THEN exit function
 
-   SciExec( pDoc->hWindow, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
-   SciExec( pDoc->hWindow, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-   SciExec( pDoc->hWindow, SCI_SETINDICATORCURRENT, 8, 0)
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   SciExec( hEdit, SCI_SETADDITIONALCARETSVISIBLE, false, 0) 
+   SciExec( hEdit, SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+   SciExec( hEdit, SCI_SETINDICATORCURRENT, 8, 0)
    
    dim txtFind as string = Str(AfxGetWindowText(hWndFind))
       
    if frmHotImgBtn_GetSelected(hWndCase) THEN findFlags = (findFlags Or SCFIND_MATCHCASE)
    if frmHotImgBtn_GetSelected(hWndWhole) THEN findFlags = (findFlags Or SCFIND_WHOLEWORD)
-   SciExec( pDoc->hWindow, SCI_SETSEARCHFLAGS, findFlags, 0)
+   SciExec( hEdit, SCI_SETSEARCHFLAGS, findFlags, 0)
    
    ' Remove all existing selection indicators
-   nLength = SendMessage( pDoc->hWindow, SCI_GETTEXTLENGTH, 0, 0)
-   SciExec( pDoc->hWindow, SCI_INDICATORCLEARRANGE, 0, nLength)
+   nLength = SendMessage( hEdit, SCI_GETTEXTLENGTH, 0, 0)
+   SciExec( hEdit, SCI_INDICATORCLEARRANGE, 0, nLength)
 
    
    ' Are we searching a selection or the whole document
    if pDoc->HasMarkerHighlight THEN
-      startPos = SciExec( pDoc->hWindow, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
-      endPos = SciExec( pDoc->hWindow, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
-      SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-      SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+      startPos = SciExec( hEdit, SCI_POSITIONFROMLINE, pDoc->FirstMarkerHighlight, 0)
+      endPos = SciExec( hEdit, SCI_GETLINEENDPOSITION, pDoc->LastMarkerHighlight, 0)
+      SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+      SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
    else
-      SciExec( pDoc->hWindow, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-      startPos = SciExec( pDoc->hWindow, SCI_GETTARGETSTART, 0, 0)
-      endPos = SciExec( pDoc->hWindow, SCI_GETTARGETEND, 0, 0)
+      SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+      startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+      endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
    end if
 
 
    ' Search for the text to find
    if len(txtFind) then
       do 
-         r = SciExec( pDoc->hWindow, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
+         r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
          
-         SciExec( pDoc->hWindow, SCI_SETINDICATORVALUE, 8, 0 )
-         SciExec( pDoc->hWindow, SCI_INDICATORFILLRANGE, r, len(txtFind))
+         SciExec( hEdit, SCI_SETINDICATORVALUE, 8, 0 )
+         SciExec( hEdit, SCI_INDICATORFILLRANGE, r, len(txtFind))
          startPos = r + len(txtFind)
          
          ' Adjust the searching positions
-         SciExec( pDoc->hWindow, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( pDoc->hWindow, SCI_SETTARGETEND, endPos, 0)
+         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
-      startPos = SciExec( pDoc->hWindow, SCI_GETANCHOR, 0, 0) 
-      endPos = SciExec( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+      startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
+      endPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
       if endPos < startPos then startPos = endPos
       startPos = startPos - 1
    else
-      startPos = SciExec( pDoc->hWindow, SCI_GETANCHOR, 0, 0) 
+      startPos = SciExec( hEdit, SCI_GETANCHOR, 0, 0) 
    end if
 
    startPos = iif(startPos < 0, 0, startPos)
@@ -229,55 +235,55 @@ function frmFindReplace_SetButtonStates() as LONG
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNLEFT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFT", "IMAGE_LEFT")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFT", "IMAGE_LEFT", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNRIGHT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHT", "IMAGE_RIGHT")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHT", "IMAGE_RIGHT", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACE)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACE", "IMAGE_REPLACE")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACE", "IMAGE_REPLACE", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACEALL)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALL", "IMAGE_REPLACEALL")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALL", "IMAGE_REPLACEALL", true)
       frmHotImgBtn_Enabled(hCtl, true )
 
    else
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNLEFT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFTD", "IMAGE_LEFTD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_LEFTD", "IMAGE_LEFTD", true)
       frmHotImgBtn_Enabled(hCtl, false )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNRIGHT)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHTD", "IMAGE_RIGHTD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_RIGHTD", "IMAGE_RIGHTD", true)
       frmHotImgBtn_Enabled(hCtl, false )
 
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACE)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACED", "IMAGE_REPLACED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACED", "IMAGE_REPLACED", true)
       frmHotImgBtn_Enabled(hCtl, false )
       
       hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACEALL)      
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALLD", "IMAGE_REPLACEALLD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_REPLACEALLD", "IMAGE_REPLACEALLD", true)
       frmHotImgBtn_Enabled(hCtl, false )
    END IF
 
    hCtl = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNSELECTION)      
    if (pDoc->IsMultilineSelection) or (pDoc->HasMarkerHighlight) THEN
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrHot)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTED", "IMAGE_SELECTED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTED", "IMAGE_SELECTED", true)
       frmHotImgBtn_Enabled(hCtl, true)
    else   
       frmHotImgBtn_SetBackColors(hCtl, clrBack, clrBack)
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTEDD", "IMAGE_SELECTEDD")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_SELECTEDD", "IMAGE_SELECTEDD", true)
       frmHotImgBtn_Enabled(hCtl, false )
    end if
    
@@ -298,14 +304,14 @@ function frmFindReplace_ShowControls() as long
    dim as hwnd hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNTOGGLE)
    
    if gReplaceOpen THEN
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_OPENED", "IMAGE_OPENED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_OPENED", "IMAGE_OPENED", true)
       pWindow->SetClientSize(435, 64)
-      SetWindowPos(hCtl, 0, 0, 0, 20, 63, SWP_NOMOVE or SWP_NOZORDER)
+      pWindow->SetWindowPos(hCtl, 0, 0, 0, 20, 63, SWP_NOMOVE or SWP_NOZORDER)
       fShow = SW_SHOW
    else   
-      frmHotImgBtn_SetImages(hCtl, "IMAGE_CLOSED", "IMAGE_CLOSED")
+      frmHotImgBtn_SetImages(hCtl, "IMAGE_CLOSED", "IMAGE_CLOSED", true)
       pWindow->SetClientSize(435, 32)
-      SetWindowPos(hCtl, 0, 0, 0, 20, 31, SWP_NOMOVE or SWP_NOZORDER)
+      pWindow->SetWindowPos(hCtl, 0, 0, 0, 20, 31, SWP_NOMOVE or SWP_NOZORDER)
       fShow = SW_HIDE
    END IF
    ShowWindow( GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), fShow )
@@ -324,6 +330,8 @@ Function frmFindReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 THEN exit function
+
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
 
    Select Case id
 
@@ -373,14 +381,14 @@ Function frmFindReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
       case IDC_FRMFINDREPLACE_BTNLEFT
          If codeNotify = BN_CLICKED Then
             if frmHotImgBtn_IsEnabled(hwndCtl) = false then exit function
-            dim as long startPos = SendMessage( pDoc->hWindow, SCI_GETANCHOR, 0, 0) 
+            dim as long startPos = SendMessage( hEdit, SCI_GETANCHOR, 0, 0) 
             frmFindReplace_NextSelection(startPos, false)
          end if
 
       case IDC_FRMFINDREPLACE_BTNRIGHT
          If codeNotify = BN_CLICKED Then
             if frmHotImgBtn_IsEnabled(hwndCtl) = false then exit function
-            dim as long startPos = SendMessage( pDoc->hWindow, SCI_GETCURRENTPOS, 0, 0) 
+            dim as long startPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0) 
             frmFindReplace_NextSelection(startPos, true)
          end if
 
@@ -444,11 +452,8 @@ Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
    GetClientRect HWnd, @rc
    MoveToEx( hDC, rc.left, rc.top, null)
    LineTo( hDC, rc.left, rc.bottom-1 ): LineTo( hDC, rc.right-1, rc.bottom-1): LineTo( hDC, rc.right-1, rc.top) 
-   RestoreDC hDC, -1 
    DeletePen(hPen)
    
- 
-   SaveDC hDC
    hPen = CreatePen( PS_SOLID, 1, BGR(0,0,255))  ' blue
    SelectPen( hDC, hPen )
  
@@ -465,8 +470,8 @@ Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
       Rectangle(hDC, rc.left - 1, rc.top - 1, rc.right + 1, rc.bottom + 1)
    END IF
    
-   RestoreDC hDC, -1 
    DeletePen(hPen)
+   RestoreDC hDC, -1 
    
    EndPaint hWnd, @ps
    
@@ -489,7 +494,6 @@ End Function
 Function frmFindReplace_OnDestroy(HWnd As HWnd) As LRESULT 
    dim as hwnd hCtl = GetDlgItem( hWnd, IDC_FRMFINDREPLACE_TXTFIND)
    gFind.txtFind = str(AfxGetWindowText(hCtl))
-   dim as HFONT hFont = AfxGetWindowFont(hCtl):  DeleteFont(hFont)
 
    hCtl = GetDlgItem( hWnd, IDC_FRMFINDREPLACE_TXTREPLACE)
    gFind.txtReplace = str(AfxGetWindowText(hCtl))
@@ -512,6 +516,11 @@ Function frmFindReplace_OnDestroy(HWnd As HWnd) As LRESULT
       
    SetFocusScintilla
    HWND_FRMFINDREPLACE = 0
+   
+   ' Delete the pWindow because it gets recreated everytime frmFindReplace is invoked
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+   if pWindow then Delete pWindow
+   
    Function = 0
 End Function
 
@@ -555,7 +564,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
       SetFocus hCtl 
       Exit Function
    End If
- 
+  
       
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -566,7 +575,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    dim as long frmWidth   = 435
    dim as long frmHeight  = 64
    dim as long ctlHeight  = 22
-   dim as long iconHeight = pWindow->ScaleY(16)
+   dim as long iconHeight = 16  
    dim as long margin     = 4
    dim as long vmargin    = 6
    dim as long nLeft      = 0
@@ -591,39 +600,34 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         WS_POPUP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->SetClientSize(frmWidth, frmHeight)
-   
-  ' Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 10) 
 
-   frmHeight = AfxGetWindowHeight(HWND_FRMFINDREPLACE)
-   
    ' Display the expand toggle icon for the Find/Replace 
    hCtl = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNTOGGLE, "IMAGE_CLOSED", "IMAGE_CLOSED",  _
                   L(270, "Toggle Replace mode"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft+1, 0, 20, frmHeight-1, false)
-                  
+                  nLeft+1, 0, 20, frmHeight-1, false, True, true)
+                     
    ' Display the Find textbox               
    nTop  = margin
    nLeft = nLeft + 20 + margin
    hCtlFind = pWindow->AddControl("TEXTBOX", , IDC_FRMFINDREPLACE_TXTFIND, WSTR(sFindText), nLeft, nTop, 176, ctlHeight, _
               WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
               WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   'AfxSetWindowFont( hCtlFind, hFont, True )
    SendMessage hCtlFind, EM_SETCUEBANNER, 1, CAST(LPARAM, @L(158,"Find"))
-   
+      
    ' Display the Match Case button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtlFind))
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNMATCHCASE, "IMAGE_CASED", "IMAGE_CASED",  _
                   L(163,"Match Case"), iconHeight , iconHeight , GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_WINDOW), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
    frmHotImgBtn_SetSelected(hCtl, gFind.nMatchCase)
-   
+      
    ' Display the Match Whole Word button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl))  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNMATCHWHOLEWORD, "IMAGE_WHOLED", "IMAGE_WHOLED",  _
                   L(162,"Match Whole Words"), iconHeight, iconHeight, GetSysColor(COLOR_WINDOW), GetSysColor(COLOR_WINDOW), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
    frmHotImgBtn_SetSelected(hCtl, gFind.nWholeWord)
 
    ' Display the Results label
@@ -633,28 +637,28 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
         nLeft, nTop, 80, ctlHeight, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_CENTER Or SS_CENTERIMAGE, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   'AfxSetWindowFont( hCtl, hFont, True )
-   
+      
    ' Display the Left button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNLEFT, "IMAGE_LEFTD", "IMAGE_LEFTD",  _
                   L(45,"Find Previous") & WSTR(" (Shift+F3)"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Display the Right button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNRIGHT, "IMAGE_RIGHTD", "IMAGE_RIGHTD",  _
                   L(44,"Find Next") & WSTR(" (F3)"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Display the Selection button 
    nTop  = margin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNSELECTION, "IMAGE_SELECTEDD", "IMAGE_SELECTEDD",  _
                   L(148,"Selection"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
+
 
    ' Display the Replace textbox               
    nTop  = margin + pWindow->UnScaleX(AfxGetWindowHeight(hCtlFind)) + vmargin
@@ -662,27 +666,26 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    hCtlReplace = pWindow->AddControl("TEXTBOX", , IDC_FRMFINDREPLACE_TXTREPLACE, wstr(gFind.txtReplace), nLeft, nTop, 220, ctlHeight, _
               WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
               WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   'AfxSetWindowFont( hCtlReplace, hFont, True )
    SendMessage hCtlReplace, EM_SETCUEBANNER, 1, CAST(LPARAM, @L(173,"Replace"))
-   
+      
    ' Display the Replace button 
    nTop  = margin + pWindow->UnScaleX(AfxGetWindowHeight(hCtlFind)) + vmargin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtlReplace)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACE, "IMAGE_REPLACED", "IMAGE_REPLACED",  _
                   L(173,"Replace"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Display the Replace All button 
    nTop  = margin + pWindow->UnScaleX(AfxGetWindowHeight(hCtlFind)) + vmargin
    nLeft = nLeft + pWindow->UnScaleX(AfxGetWindowWidth(hCtl)) + margin  
    hCtl  = frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNREPLACEALL, "IMAGE_REPLACEALLD", "IMAGE_REPLACEALLD",  _
                   L(174,"Replace All"), iconHeight, iconHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  nLeft, nTop, ctlHeight, ctlHeight)
+                  nLeft, nTop, ctlHeight, ctlHeight, true, true, true)
 
    ' Diplay the Close icon
    frmHotImgBtn( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
                   L(161, "Close"), ctlHeight, ctlHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_3DLIGHT), _
-                  frmWidth - ctlHeight - margin, margin, ctlHeight, ctlHeight)
+                  frmWidth - ctlHeight - margin, margin, ctlHeight, ctlHeight, true, true, true)
 
    frmFindReplace_SetButtonStates
    frmFindReplace_ShowControls

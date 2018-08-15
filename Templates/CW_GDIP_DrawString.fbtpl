@@ -37,8 +37,8 @@ CWindow: GDI+: Drawing a string
 ' constructor. The second argument passed to the Font constructor specifies the font size,
 ' and the third argument specifies the style. The value FontStyleRegular is a member of the
 ' FontStyle enumeration, which is declared in Gdiplusenums.bi. To make the font DPI aware,
-' the applications calls the function AfxPointsToPixelsX, which converts the point size to
-' pixels and divides it by the scaling ratio. The last argument to the Font constructor
+' the application calls the function AfxPointsToPixelsX, which converts the point size to
+' pixels, and divides it by the scaling ratio. The last argument to the Font constructor
 ' indicates that the size of the font is measured in pixels. The value UnitPixel is a member
 ' of the Unit enumeration.
 ' The first argument passed to the DrawString method is the address of a wide-character string.

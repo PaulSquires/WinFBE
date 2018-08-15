@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -116,6 +116,7 @@ Function Splitter_OnMouseMove() As BOOLEAN
          Dim As Long nWidth = (rc.Right - rc.Left + nDiff)
          SetWindowPos HWND_FRMEXPLORER, 0, 0, 0, nWidth, rc.Bottom - rc.Top, SWP_NOMOVE Or SWP_NOZORDER
          frmMain_PositionWindows(HWND_FRMMAIN)
+         AfxDoEvents   ' allow screen to repaint
          Exit Function
       End If
    End If

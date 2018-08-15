@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ Function frmOptionsGeneral_WndProc( ByVal HWnd   As HWnd, _
                                     ) As LRESULT
 
    ' for messages that we don't deal with
-   Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
+   Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
 
@@ -55,6 +55,15 @@ Function frmOptionsGeneral_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE, L(218,"Hide successful compile results message"), 0, 63, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKASKEXIT, L(274,"Ask before exiting the editor"), 0, 84, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR, L(339,"Hide main toolbar"), 0, 105, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR, L(340,"Hide main statusbar"), 0, 126, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long idx = 0
    Dim As HWnd HWnd = HWND_FRMOPTIONSGENERAL
@@ -63,6 +72,9 @@ Function frmOptionsGeneral_Show( ByVal hWndParent As HWnd, _
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST),      gConfig.CloseFuncList)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE),    gConfig.CompileAutoSave)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE),        gConfig.HideCompile)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT),            gConfig.AskExit)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR),        gConfig.HideToolbar)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR),      gConfig.HideStatusbar)
 
    Function = 0
    

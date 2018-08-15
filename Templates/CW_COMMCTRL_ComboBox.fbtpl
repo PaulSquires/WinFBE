@@ -85,17 +85,20 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                ' // The selection has changed
                IF GET_WM_COMMAND_CMD(wParam, lParam) = LBN_SELCHANGE THEN
                   ' // Handle of the combobox
-                  DIm hCombobox AS HWND = GetDlgItem(hwnd, IDC_COMBOBOX)
+                  DIM hCombobox AS HWND = GetDlgItem(hwnd, IDC_COMBOBOX)
                   ' // Retrieve the Item selected
                   DIM curSel AS LONG = ComboBox_GetCursel(hCombobox)
-                  ' // Retrieve the lenght of the text of the selected item
-                  DIM nLen AS LONG = ComboBox_GetLBTextLen(hComboBox, curSel)
-                  ' // Retrieve the text of the selected item
-                  DIM pwszText AS WSTRING PTR = CAllocate(nLen + 1, SIZEOF(WCHAR))
-                  ComboBox_GetLBText(hComboBox, curSel, pwszText)
-                  MessageBoxW hwnd, "You have selected " & *pwszText, "ComboBox Test", MB_OK
-                  Deallocate pwszText
-                  pwszText = NULL
+'                  ' // Retrieve the lenght of the text of the selected item
+'                  DIM nLen AS LONG = ComboBox_GetLBTextLen(hComboBox, curSel)
+'                  ' // Retrieve the text of the selected item
+'                  DIM pwszText AS WSTRING PTR = CAllocate(nLen + 1, SIZEOF(WCHAR))
+'                  ComboBox_GetLBText(hComboBox, curSel, pwszText)
+'                  MessageBoxW hwnd, "You have selected " & *pwszText, "ComboBox Test", MB_OK
+'                  Deallocate pwszText
+'                  pwszText = NULL
+                  ' // Alternate and shorter way
+                  MessageBoxW hwnd, "You have selected " & _
+                     AfxGetComboBoxText(hCombobox, curSel), "ComboBox Test", MB_OK
                END IF
          END SELECT
 

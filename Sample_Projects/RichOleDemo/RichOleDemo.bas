@@ -12,6 +12,7 @@
 
 #define UNICODE
 #INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/AfxRichEdit.inc"
 #INCLUDE ONCE "Afx/AfxCOM.inc"
 USING Afx
 
@@ -28,46 +29,7 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
 
 ' ========================================================================================
-' The EditStreamCallback function is an application defined callback function used with
-' the EM_STREAMIN and EM_STREAMOUT messages. It is used to transfer a stream of data into
-' or out of a rich edit control.
-' ========================================================================================
-FUNCTION RichEdit_LoadRtfFromFileCallback ( _
-   BYVAL hFile AS HANDLE _                  ' // Value of the dwCookie member of the EDITSTREAM structure.
- , BYVAL lpBuff AS BYTE PTR _               ' // Pointer to a buffer to write to
- , BYVAL cb AS LONG _                       ' // Maximum number of bytes to read
- , BYVAL pcb AS LONG PTR _                  ' // Number of bytes actually read
- ) AS UINT                                  ' // 0 for success, or an error code
-
-   IF ReadFile(hFile, lpBuff, cb, pcb, NULL) = 0 THEN FUNCTION = GetLastError
-
-END FUNCTION
-' ========================================================================================
-
-' ========================================================================================
-FUNCTION RichEdit_LoadRtfFromFileW ( _
-   BYVAL hRichEdit AS HWND _                ' // Handle of the Rich Edit control
- , BYREF wszFileName AS WSTRING _           ' // Name of the file to load
- ) AS BOOLEAN                               ' // TRUE or FALSE
-
-   DIM hFile AS HANDLE                      ' // File handle
-   DIM eds AS EDITSTREAM                    ' // EDITSTREAM structure
-
-   ' // Checks the validity of the parameters
-   IF hRichEdit = 0 THEN EXIT FUNCTION
-   IF LEN(wszFileName) = 0 THEN EXIT FUNCTION
-
-   ' // Opens the file and sends the message
-   hFile = CreateFileW(wszFileName, GENERIC_READ, FILE_SHARE_READ, _
-                       BYVAL NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
-   IF hFile = INVALID_HANDLE_VALUE THEN EXIT FUNCTION
-   eds.dwCookie = cast(DWORD_PTR, hFile)
-   eds.dwError = 0
-   eds.pfnCallback = cast(EDITSTREAMCALLBACK, @RichEdit_LoadRtfFromFileCallback)
-   IF SendMessageW(hRichEdit, EM_STREAMIN, SF_RTF, cast(LPARAM, @eds)) > 0 AND eds.dwError = 0 THEN FUNCTION = TRUE
-   CloseHandle hFile
-
-END FUNCTION
+' Implementation of the IRichEditOleCallback interface
 ' ========================================================================================
 
 #ifndef __Afx_IRichEditOleCallback_INTERFACE_DEFINED__

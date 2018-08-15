@@ -50,7 +50,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Disable background erasing
    pWindow.ClassStyle = CS_DBLCLKS
    ' // Set the client size
-   pWindow.SetClientSize(600, 300)
+   pWindow.SetClientSize(500, 300)
    ' // Center the window
    pWindow.Center
 

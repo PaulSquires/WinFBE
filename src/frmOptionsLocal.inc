@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ Function frmOptionsLocal_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal h
             If pwszName Then
                Dim wzFilename As WString * MAX_PATH 
                wzFilename = AfxStrPathname( "NAMEX", *pwszName )
-               SetWindowTextW( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), wzFilename )
+               SetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION), wzFilename )
                CoTaskMemFree pwszName
             End If
             Exit Function

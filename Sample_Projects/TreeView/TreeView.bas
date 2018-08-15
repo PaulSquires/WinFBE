@@ -54,6 +54,9 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    hTreeView = pWindow.AddControl("TreeView", , IDC_TREEVIEW, "")
    pWindow.SetWindowPos hTreeView, NULL, 8, 8, 300, 320, SWP_NOZORDER
 
+   ' // To add checkboxes, use:
+   ' AfxAddWindowStyle hTreeView, TVS_CHECKBOXES
+
    ' // Calculate the size of the icon according the DPI
    DIM cx AS LONG = 16 * pWindow.DPI \ 96
 

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -103,16 +103,16 @@ function ParseSearchResults( byref wszResultFile as wstring ) as long
    dim as string st
    dim as long f1, f2
 
-   dim as long f = freefile
-   open wszResultFile for input as #f
+   dim pStream as CTextStream
+   if pStream.Open(wszResultFile) <> S_OK then exit function
    
    cwzStr = L(262, "Search Results") & ": " & gFindInFiles.txtFind
    ListBox_AddString(hLB, cwzStr)
    cwzStr = ""
    ListBox_AddString(hLB, cwzStr)
    
-   do until eof(f)
-      line input #f, st
+   do until pStream.EOS
+      st = pStream.ReadLine
       
       st = trim(st)
       if len(st) = 0 THEN continue do
@@ -137,7 +137,7 @@ function ParseSearchResults( byref wszResultFile as wstring ) as long
       cwzStr = st   
       ListBox_AddString(hLB, cwzStr)
    loop
-   close #f
+   pStream.Close
    
    kill wszResultFile 
    
@@ -248,19 +248,20 @@ function DoFindInFilesEx() as LONG
    'FINDSTR [/B] [/E] [/L] [/R] [/S] [/I] [/X] [/V] [/N] [/M] [/O] [/P] [/F:file]
    '        [/C:string] [/G:file] [/D:dir list] [/A:color attributes] [/OFF[LINE]]
    '        strings [[drive:][path]filename[ ...]]
-   wszResults = wstr(AfxGetExePathName & "\_search.txt")
+   wszResults = AfxGetExePathName & "\_search.txt"
    if AfxFileExists(wszResults) then kill wszResults
    if instr(wszResults, " ") THEN wszResults = chr(34) & wszResults & chr(34)
-   wszFileExe = WSTR("FindStr.exe")  
+   wszFileExe = "FindStr.exe"  
    wszParam   = WSTR(sParam & " /C:") & chr(34) & wszText & chr(34) & _
                  " " & **sSearchFiles & " >> " & wszResults
 
-   dim f as long = freefile
-   wszBatchFile = wstr(AfxGetExePathName & "\_search.bat")
+   wszBatchFile = AfxGetExePathName & "\_search.bat"
    ' Open filename does not use enclosing quotes
-   Open wszBatchFile For Output as #f
-   print #f, wszFileExe & " " & wszParam
-   close #f
+   dim pStream as CTextStream
+   if pStream.Create(wszBatchFile) = S_OK then
+      pStream.WriteLine wszFileExe & " " & wszParam
+   end if
+   pStream.Close   
  
    wszFileExe = Environ("COMSPEC")
    ' Batch filename must be enclosed in quotes b/c might have spaces in name
@@ -277,13 +278,7 @@ function DoFindInFilesEx() as LONG
       .hInstApp     = 0 
    End With
 
-   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   dim as HWND hProgressBar = GetDlgItem(hStatusBar, IDC_FRMMAIN_PROGRESSBAR)
-   SendMessage( hProgressBar, PBM_SETMARQUEE, 1, 16 )   ' every 16 milliseconds
-   ShowWindow( hProgressBar, SW_SHOW)
-
    ShellExecuteEx(@ShExecInfo)
-'   WaitForSingleObject(ShExecInfo.hProcess,INFINITE)
 
    ' Give the process 33 ms (you can use a different value here depending on 
    ' how responsive you wish your app to be)
@@ -301,8 +296,6 @@ function DoFindInFilesEx() as LONG
          end if
       wend
    wend
-
-   ShowWindow( hProgressBar, SW_HIDE)
 
    kill wszBatchFile
    

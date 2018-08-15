@@ -1,3 +1,15 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
 
 ''
 ''
@@ -130,9 +142,6 @@ Function clsProject.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
    ReDim Preserve m_arrDocuments(ub) As clsDocument Ptr             
    m_arrDocuments(ub) = pDoc
 
-   ' Parse the document to create sub/function list
-   ParseDocument(gApp.GetActiveProjectIndex, pDoc, "")
-   
    Function = 0
 End Function
 
@@ -184,8 +193,8 @@ Function clsProject.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    ' If not found then simply exit
    If idx = -1 Then Exit function
    
-   ' Remove all references from the gdb database
-   gdb.dbDelete(pDoc->DiskFilename)
+   ' Remove all references from the gdb2 database
+   gdb2.dbDelete(pDoc->DiskFilename)
 
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
@@ -251,6 +260,19 @@ Function clsProject.GetResourceDocumentPtr() As clsDocument Ptr
    function = 0
 End Function
 
+''
+''
+Function clsProject.GetProjectCompiler() As long
+   ' Get the compiler associated with this project
+   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+      if gConfig.Builds(i).Id = this.ProjectBuild then
+         if gConfig.Builds(i).Is32Bit THEN return IDM_32BIT
+         if gConfig.Builds(i).Is64Bit THEN return IDM_64BIT
+      end if   
+   NEXT
+   function = 0
+End Function
+
 
 ''
 ''
@@ -262,7 +284,7 @@ Function clsProject.Debug() As Long
    print "GetDocumentCount = "; this.GetDocumentCount
    Print "lb = "; lb, "ub = "; ub
    For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
-      Print "Array[";i;"]", "hWindow="; m_arrDocuments(i)->hWindow, m_arrDocuments(i)->DiskFilename
+      Print "Array[";i;"]", "hWindow="; m_arrDocuments(i)->hWindow(0), m_arrDocuments(i)->DiskFilename
    Next                          
    Print:Print
    

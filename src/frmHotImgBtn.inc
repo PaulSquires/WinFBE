@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -15,15 +15,17 @@
 ''
 ''  FRMHOTIMGBTN
 ''
-''  Image or Text button with hot mouse over
+''  Image button with hot mouse over 
 ''
 ''
 
 Type HOTIMGBTN_TYPE
    hWndParent As HWND
    cID        As Long
-   hImgNormal As HICON
-   hImgHot    As HICON
+   hTooltip   as HWND
+   hImageList AS HIMAGELIST
+   idxNormal  As long         ' position in imagelist of normal icon
+   idxHot     As long         ' position in imagelist of hot icon
    clrBg      As COLORREF
    clrBgHot   As COLORREF
    nImgWidth  As Long
@@ -85,28 +87,46 @@ End Function
 ' ========================================================================================
 Function frmHotImgBtn_SetImages( ByVal HWnd As HWnd, _
                                  ByRef wszImgNormal As WString = "", _
-                                 ByRef wszImgHot    As WString = ""  _
+                                 ByRef wszImgHot    As WString = "",  _
+                                 byval bIsGDI       as Boolean = false _
                                  ) As Long
+ 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    If pWindow = 0 Then Exit Function
    
    Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
    If pData = 0 Then exit function 
 
-   with *pData
-      .hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
-      .hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+   dim as HICON hIcon
    
-      ' If the images failed to load then try loading them using GDI in cases of png format.
-      If .hImgNormal = 0 Then 
-         .hImgNormal = AfxGdipIconFromRes( pWindow->InstanceHandle, wszImgNormal )
-      End If
-      If .hImgHot = 0 Then 
-         .hImgHot = AfxGdipIconFromRes( pWindow->InstanceHandle, wszImgHot )
-      End If
-   end with
+   ' Destroy any existing ImageList
+   ImageList_Destroy(pData->hImageList)
+   
+   ' Calculate the size of the icon according the DPI
+   DIM cx AS LONG = pData->nImgWidth * pWindow->DPI \ 96
 
-   AfxRedrawWindow( hWnd )
+   ' Create an image list to hold the normal and hot images
+   pData->hImageList = ImageList_Create(cx, cx, ILC_COLOR32 OR ILC_MASK, 2, 0)
+   IF pData->hImageList THEN
+      ' Load the image depending on the file type. Use LoadImage for ICO and GDI for PNG/BMP, etc
+      if bIsGDI then
+         pData->idxNormal = AfxGdipAddIconFromRes(pData->hImageList, pWindow->InstanceHandle, wszImgNormal)
+         pData->idxHot    = AfxGdipAddIconFromRes(pData->hImageList, pWindow->InstanceHandle, wszImgHot)
+      else   
+         hIcon = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+         IF hIcon THEN 
+            pData->idxNormal = ImageList_ReplaceIcon(pData->hImageList, -1, hIcon)
+            DestroyIcon(hIcon)
+         end if
+         hIcon = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, pData->nImgWidth, pData->nImgHeight, LR_DEFAULTCOLOR)
+         IF hIcon THEN 
+            pData->idxHot = ImageList_ReplaceIcon(pData->hImageList, -1, hIcon)
+            DestroyIcon(hIcon)
+         end if
+      end if
+   END IF
+
+   AfxRedrawWindow( HWnd )
    
    Function = 0
 End Function
@@ -168,11 +188,14 @@ Function frmHotImgBtn_OnDestroy(HWnd As HWnd) As LRESULT
    
    Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
    If pData Then
-      DestroyIcon(pData->hImgNormal)
-      DestroyIcon(pData->hImgHot)
+      ImageList_Destroy(pData->hImageList)
+      AfxDeleteTooltip(pData->hTooltip, HWND)
+      DestroyWindow pData->hTooltip
       Delete pData
    End If
       
+   if pWindow then Delete pWindow
+
    Function = 0
 End Function
 
@@ -193,45 +216,44 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
    Dim As POINT pt
    Dim As RECT rc
    Dim As Long nHMargin, nVMargin
-   Dim As HICON hIcon
+   Dim As long idxImage
+   dim as long cx, cy
    Dim As BOOLEAN bIsHot
 
    hDC = BeginPaint(hWnd, @ps)
 
    SaveDC hDC
-   
-   GetClientRect hWnd, @rc
-
-   memDC = CreateCompatibleDC( ps.hDC )
-   hbit  = CreateCompatibleBitmap( ps.hDC, rc.Right, rc.Bottom )
-   If hbit Then hbit = SelectObject( memDC, hbit )
-
-   dim as HPEN hPen = CreatePen(PS_SOLID, 1, BGR(0,0,255))  ' blue
-   SelectObject( memDC, hPen )
 
    Dim pData As HOTIMGBTN_TYPE Ptr = Cast(HOTIMGBTN_TYPE Ptr, pWindow->UserData(0))
    
    If pData Then
+      GetClientRect hWnd, @rc
+      memDC = CreateCompatibleDC( ps.hDC )
+      hbit  = CreateCompatibleBitmap( ps.hDC, rc.Right, rc.Bottom )
+      If hbit Then hbit = SelectObject( memDC, hbit )
+
       bIsHot = IIf( GetProp(hWnd, "HOT") = 0, False, True ) 
 
-      ' Center the image
-      nHMargin = (rc.right - pData->nImgWidth) / 2
-      nVMargin = (rc.bottom - pData->nImgHeight) / 2
-      
+      dim as HPEN hPen = CreatePen(PS_SOLID, 1, BGR(0,0,255))  ' blue
+      SelectObject( memDC, hPen )
+
       If ( bIsHot = True ) Or (pData->fSelected = True) Then
-         hIcon = pData->hImgHot
+         idxImage = pData->idxHot
          hBrush = CreateSolidBrush( pData->clrBgHot )
       Else
-         hIcon = pData->hImgNormal
+         idxImage = pData->idxNormal
          hBrush = CreateSolidBrush( pData->clrBg )
       End If
       ' Paint the entire client background
       FillRect(memDC, @rc, hBrush) 
       DeleteBrush(hBrush)
 
-      ' Draw the close "X" icon
-      DrawState memDC, NULL, NULL, CAST(LPARAM, hIcon), 0, _
-                  rc.Left + nHMargin, rc.Top + nVMargin, 0, 0, DST_ICON Or DSS_NORMAL
+      ' Draw the icon (center it in the rectangle)
+      ImageList_GetIconSize(pData->hImageList, @cx, @cy)
+      nHMargin = (rc.right - cx) / 2
+      nVMargin = (rc.bottom - cy) / 2
+      ImageList_Draw(pData->hImageList, idxImage, memDC, _
+                     rc.Left + nHMargin, rc.Top + nVMargin, ILD_TRANSPARENT)
        
       if pData->fSelected THEN
          ' If the button is in a selected state then draw a thin
@@ -241,17 +263,18 @@ Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
             Rectangle(memDC, rc.left + 1, rc.top + 1, rc.right - 1, rc.bottom - 1)
          end if
       END IF
-   End If
    
-   ' Copy the entire memory bitmap over to the visual display
-   BitBlt ps.hDC, 0, 0, rc.Right, rc.Bottom, memDC, 0, 0, SRCCOPY 
+      ' Copy the entire memory bitmap over to the visual display
+      BitBlt ps.hDC, 0, 0, rc.Right, rc.Bottom, memDC, 0, 0, SRCCOPY 
 
-   ' Cleanup
-   If hbit  Then DeleteObject SelectObject(memDC, hbit)
-   If memDC Then DeleteDC memDC
+      ' Cleanup
+      If hbit  Then DeleteObject SelectObject(memDC, hbit)
+      If memDC Then DeleteDC memDC
+
+      DeleteObject(hPen)
+   End If
 
    RestoreDC hDC, -1 
-   DeleteObject(hPen)
    
    EndPaint hWnd, @ps
    
@@ -288,7 +311,7 @@ Function frmHotImgBtn_WndProc( ByVal HWnd   As HWnd, _
             AfxRedrawWindow hWnd
          END IF
          Exit Function
-         
+            
       CASE WM_MOUSELEAVE
          ' Repaint to remove any Hot state tab
          RemovePropW hwnd, "HOT"
@@ -324,46 +347,37 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
                        BYVAL nWidth       AS LONG = 0, _
                        BYVAL nHeight      AS LONG = 0, _
                        byval fSelectedFrame as BOOLEAN = true, _
-                       byval fEnabled       as BOOLEAN = true _
+                       byval fEnabled       as BOOLEAN = true, _
+                       byval fIsGDI         as Boolean = false _
                        ) As HWND
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
-
    Dim As HWND hWindow = _
    pWindow->Create( hWndParent, "", @frmHotImgBtn_WndProc, x, y, nWidth, nHeight, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->ClassStyle = 0  ' to ensure that there are no double clciks
+   pWindow->ClassStyle = 0  ' to ensure that there are no double clicks
    pWindow->Brush = Null
    
    SetWindowLongPtr( hWindow, GWLP_ID, cID )
-   
+
    Dim pData As HOTIMGBTN_TYPE Ptr = New HOTIMGBTN_TYPE
+   ' Save the control data elements
+   pWindow->UserData(0) = Cast(LONG_PTR, pData)
    With *pData
       .hWndParent = hWndParent
       .cID        = cID
-      .nImgWidth  = pWindow->ScaleX( nImgWidth )
-      .nImgHeight = pWindow->ScaleY( nImgHeight )
-      .hImgNormal = LoadImage( pWindow->InstanceHandle, wszImgNormal, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
-      .hImgHot    = LoadImage( pWindow->InstanceHandle, wszImgHot, IMAGE_ICON, .nImgWidth, .nImgHeight, LR_DEFAULTCOLOR)
+      .nImgWidth  = nImgWidth 
+      .nImgHeight = nImgHeight
       .clrBg      = clrBg
       .clrBgHot   = clrBgHot
       .fSelectedFrame = fSelectedFrame
       .fEnabled   = fEnabled
    End With
    
-   ' If the images failed to load then try loading them using GDI in cases of png format.
-   If pData->hImgNormal = 0 Then 
-      pData->hImgNormal = AfxGdipIconFromRes( pWindow->InstanceHandle, wszImgNormal )
-   End If
-   If pData->hImgHot = 0 Then 
-      pData->hImgHot = AfxGdipIconFromRes( pWindow->InstanceHandle, wszImgHot )
-   End If
-
-   ' Save the control data elements
-   pWindow->UserData(0) = Cast(LONG_PTR, pData)
+   frmHotImgBtn_SetImages(hWindow, wszImgNormal, wszImgHot, fIsGDI)
    
    ' Register a tooltip for this window. Change the text of the tooltip to the full filename/path as
    ' the mouse changes from tab to tab.
@@ -373,6 +387,7 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
       Tooltip_SetDelayTime( hTooltip, TTDT_INITIAL, 250 )
       Tooltip_SetDelayTime( hTooltip, TTDT_RESHOW, 1000 )
       Tooltip_SetDelayTime( hTooltip, TTDT_AUTOPOP, 2000 )
+      pData->hTooltip = hTooltip
    End If
    
    ' Refresh the control
@@ -381,15 +396,6 @@ Function frmHotImgBtn( ByVal hWndParent   As HWnd, _
    Function = hWindow
    
 End Function
-
-
-
-
-
-
-
-
-
 
 
 

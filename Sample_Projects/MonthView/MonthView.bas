@@ -2,15 +2,16 @@
 ' Microsoft Windows
 ' Contents: Embedded MonthView Calendar OCX
 ' Compiler: FreeBasic 32 bit only
-' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' Copyright (c) 2017 José Roca. Freeware. Use at your own risk.
 ' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
 ' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 ' ########################################################################################
 
 #define UNICODE
-#INCLUDE ONCE "Afx/CWindow.inc"
-#INCLUDE ONCE "Afx/COleCon/COleCon.inc"
+#INCLUDE ONCE "Afx/CAxHost/CAxHost.inc"
+#INCLUDE ONCE "Afx/CDispInvoke.inc"
+#INCLUDE ONCE "Afx/AfxCOM.inc"
 USING Afx
 
 DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
@@ -22,6 +23,8 @@ DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
 ' // Forward declaration
 DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+CONST IDC_MONTHVIEW = 1001
 
 ' ========================================================================================
 ' Main
@@ -38,7 +41,7 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
    ' // Creates the main window
    DIM pWindow AS CWindow
    ' -or- DIM pWindow AS CWindow = "MyClassName" (use the name that you wish)
-   pWindow.Create(NULL, "COleCon - Embedded MonthView Calendar OCX", @WndProc)
+   DIM hwndMain AS HWND = pWindow.Create(NULL, "CAxHost - Embedded MonthView Calendar OCX", @WndProc)
    ' // Sizes it by setting the wanted width and height of its client area
    pWindow.SetClientSize(580, 360)
    ' // Centers the window
@@ -46,13 +49,34 @@ FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
 
    DIM wszLibName AS WSTRING * 260 = ExePath & "\MSCOMCT2.OCX"
    DIM CLSID_MSComCtl2_MonthView AS CLSID = (&h232E456A, &h87C3, &h11D1, {&h8B, &hE3,&h00, &h00, &hF8, &h75, &h4D, &hA1})
-   DIM IID_MSComCtl2_MonthView AS CLSID = (&h232E4565, &h87C3, &h11D1, {&h8B, &hE3,&h00, &h00, &hF8, &h75, &h4D, &hA1})
+   DIM IID_MSComCtl2_MonthView AS IID = (&h232E4565, &h87C3, &h11D1, {&h8B, &hE3,&h00, &h00, &hF8, &h75, &h4D, &hA1})
    DIM RTLKEY_MSCOMCT2 AS WSTRING * 260 = "651A8940-87C5-11d1-8BE3-0000F8754DA1"
-   DIM pOleCon AS COleCon PTR = NEW COleCon(@pWindow, 1001, wszLibName, CLSID_MSComCtl2_MonthView, _
-       IID_MSComCtl2_MonthView, RTLKEY_MSCOMCT2, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
 
-   ' // Displays the window and dispatches the Windows messages
-   FUNCTION = pWindow.DoEvents(nCmdShow)
+   DIM pHost AS CAxHost = CAxHost(@pWindow, IDC_MONTHVIEW, wszLibName, CLSID_MSComCtl2_MonthView, _
+       IID_MSComCtl2_MonthView, RTLKEY_MSCOMCT2, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
+   SetFocus pHost.hWindow
+
+   ' // Use CDispInvoke to set the date
+   DIM pdisp AS CDispInvoke = pHost.OcxDispObj
+   pdisp.Put("Year") = 2017
+   pdisp.Put("Month") = 12
+   pdisp.Put("Day") = 1
+
+   ' // Display the window
+   ShowWindow(hwndMain, nCmdShow)
+   UpdateWindow(hwndMain)
+
+   ' // Dispatch Windows messages
+   DIM uMsg AS MSG
+   WHILE (GetMessageW(@uMsg, NULL, 0, 0) <> FALSE)
+      IF AfxCAxHostForwardMessage(GetFocus, @uMsg) = FALSE THEN
+         IF IsDialogMessageW(hwndMain, @uMsg) = 0 THEN
+            TranslateMessage(@uMsg)
+            DispatchMessageW(@uMsg)
+         END IF
+      END IF
+   WEND
+   FUNCTION = uMsg.wParam
 
 END FUNCTION
 ' ========================================================================================

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2017 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -119,50 +119,91 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWOUTPUT, L(251,"View Ou&tput Window") & Chr(9) & "Ctrl+F9"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_RESTOREMAIN, L(61,"&Restore Main Window Size")
+
+   hPopUpMenu = CreatePopupMenu
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"&New Project")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
-
-   hPopUpMenu = CreatePopupMenu
-      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"&New Project")
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenuW hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(219,"&Recent Projects")
-              AppendMenuW hPopUpSubMenu, MF_ENABLED, IDM_MRUPROJECT, L(11,"(Empty)")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"&Close Project")
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"&Save Project")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project &As...")
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, L(207,"&Add Files to Project...")
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project O&ptions...")      
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(219,"&Recent Projects")
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MRUPROJECT, L(11,"(Empty)")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"&Close Project")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"&Save Project")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project &As...")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, L(207,"&Add Files to Project...")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project O&ptions...")      
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"&Compile")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And E&xecute") & Chr(9) & "F5"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"&Rebuild All") & Chr(9) & "Ctrl+Shift+F5"
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_USE32BIT, L(69,"Use &32-Bit Compiler") & Chr(9) & "Ctrl+1"
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_USE64BIT, L(70,"Use &64-Bit Compiler") & Chr(9) & "Ctrl+2"
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_GUI, L(71,"Compile &GUI application") & Chr(9) & "Ctrl+3"
-         AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_CONSOLE, L(72,"Compile C&onsole application") & Chr(9) & "Ctrl+4"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"&Compile")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And E&xecute") & Chr(9) & "F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"&Rebuild All") & Chr(9) & "Ctrl+Alt+F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_QUICKRUN, L(285,"&Quick Run") & Chr(9) & "Ctrl+Shift+F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenuW hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_HELP, L(73,"&Help") & Chr(9) & "F1"
-         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"&About")
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"&Options")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"&Build Configurations...") & Chr(9) & "F7"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"&User Tools...") & Chr(9) & "Ctrl+F7"
+
+#ifdef USE_VISUAL_DESIGNER
+   hPopUpMenu = CreatePopupMenu
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(309,"&Designer")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_NEWFORM, L(310,"&New Form")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWTOOLBOX, L(311,"View &Toolbox")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"&Menu Editor...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Tool&bar Editor...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"&Statusbar Editor...")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(315,"&Align")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNLEFTS, L(316,"Lefts")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNCENTERS, L(317,"Centers")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNRIGHTS, L(318,"Rights")
+               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNTOPS, L(319,"Tops")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNMIDDLES, L(320,"Middles")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNBOTTOMS, L(321,"Bottoms")
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same &Size")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEWIDTHS, L(323,"Widths")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEHEIGHTS, L(324,"Heights")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEBOTH, L(325,"Both")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(332,"&Center in Form")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERHORIZ, L(333,"&Horizontally")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERVERT, L(334,"&Vertically")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERBOTH, L(325,"&Both")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LOCKCONTROLS, L(335,"&Lock Controls")
+#EndIf
+
+   hPopUpMenu = CreatePopupMenu
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(305,"&Tools")
+
+   hPopUpMenu = CreatePopupMenu
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELP, L(73,"&Help") & Chr(9) & "F1"
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINAPI, "WinAPI Help"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Help"
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"&About")
 
    Function = hMenu
 
    '  Create the accelerator table for the menu
+   pWindow->AddAccelerator( FVIRTKEY, VK_TAB,  IDM_INDENTBLOCK )
+   pWindow->AddAccelerator( FVIRTKEY or FSHIFT, VK_TAB,  IDM_UNINDENTBLOCK )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,  IDM_NEXTTAB )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,  IDM_PREVTAB )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,  IDM_CLOSETAB )
@@ -210,13 +251,13 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,  IDM_VIEWOUTPUT )
    pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_REBUILDALL)
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FALT, VK_F5,  IDM_REBUILDALL)
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_QUICKRUN)
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_1,  IDM_USE32BIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_2,  IDM_USE64BIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_3,  IDM_GUI )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_4,  IDM_CONSOLE )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_COMPILECONFIG )
+   pWindow->AddAccelerator( FVIRTKEY or FCONTROL, VK_F7,  IDM_USERTOOLSDIALOG )
    pWindow->AddAccelerator( FVIRTKEY, VK_F1, IDM_HELP )
+   
    pWindow->CreateAcceleratorTable()
 
 End Function
@@ -243,7 +284,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    For idMenu = IDM_ADDFILETOPROJECT To IDM_PROJECTOPTIONS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
-   For idMenu = IDM_BUILDEXECUTE To IDM_CONSOLE
+   For idMenu = IDM_BUILDEXECUTE To IDM_LOCKCONTROLS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
    
@@ -259,34 +300,14 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_COMPILECONFIG, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_USERTOOLSDIALOG, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_NEWFORM, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_HELPWINAPI, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_HELPWINFBX, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
-
-   ' Check the correct default compiler
-   if IsWindowVisible(HWND_FRMRECENT) = 0 THEN
-      wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler
-      Select Case UCase(wzText)
-         Case "FBC 64BIT": nSelected = IDM_USE64BIT
-         Case else   ' not defined or 32bit
-            nSelected = IDM_USE32BIT
-      End Select
-      CheckMenuRadioItem( hMenu, IDM_USE32BIT, IDM_USE64BIT, nSelected, MF_BYCOMMAND )
-      EnableMenuItem hMenu, IDM_USE32BIT, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_USE64BIT, MF_BYCOMMAND Or MF_ENABLED
-      
-      ' Check the correct default compile mode
-      wzText = gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompileMode
-      Select Case Ucase(wzText)
-         Case "GUI":       nSelected = IDM_GUI
-         Case else   ' not defined or console
-            nSelected = IDM_CONSOLE
-      End Select
-      CheckMenuRadioItem( hMenu, IDM_GUI, IDM_CONSOLE, nSelected, MF_BYCOMMAND )
-      EnableMenuItem hMenu, IDM_GUI, MF_BYCOMMAND Or MF_ENABLED
-      EnableMenuItem hMenu, IDM_CONSOLE, MF_BYCOMMAND Or MF_ENABLED
-   end if
-   
    ' Enable everything if a document is open
    Dim As Long NumTabs = TabCtrl_GetItemCount(gTTabCtl.hWindow)
    If NumTabs > 0 Then
@@ -297,41 +318,65 @@ Function frmMain_ChangeTopMenuStates() As Long
       ' Enable or disable specific edit menu items (based on the currently active document)
       Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
       If pDoc Then 
-         hEdit = pDoc->hWindow
-         If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
-            EnableMenuItem( hMenu, IDM_PASTE, MF_GRAYED)
-         End If
          
-         startSelPos = SendMessage(hEdit, SCI_GETSELECTIONSTART, 0, 0)
-         endSelPos   = SendMessage(hEdit, SCI_GETSELECTIONEND, 0, 0)
-         If startSelPos = endSelPos Then
-            EnableMenuItem hMenu, IDM_CUT, MF_GRAYED
-            EnableMenuItem hMenu, IDM_COPY, MF_GRAYED
-         End If
-      
-         If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
-            EnableMenuItem hMenu, IDM_UNDO, MF_GRAYED
-         End If
-               
-         If SendMessage(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
-            EnableMenuItem hMenu, IDM_REDO, MF_GRAYED
-         End If
+         dim as hwnd hEdit = pDoc->hWndActiveScintilla
 
-         If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
-            EnableMenuItem hMenu, IDM_PASTE, MF_GRAYED
-         End If
-      
-         ' Check the File Encoding
-         select CASE pDoc->FileEncoding
-            case FILE_ENCODING_ANSI: nSelected = IDM_ANSI
-            case FILE_ENCODING_UTF8_BOM: nSelected = IDM_UTF8BOM
-            case FILE_ENCODING_UTF16_BOM: nSelected = IDM_UTF16BOM
-            CASE ELSE
-         END SELECT
-         CheckMenuRadioItem( hMenu, IDM_ANSI, IDM_UTF16BOM, nSelected, MF_BYCOMMAND )
-         EnableMenuItem hMenu, IDM_ANSI, MF_BYCOMMAND Or MF_ENABLED
-         EnableMenuItem hMenu, IDM_UTF8BOM, MF_BYCOMMAND Or MF_ENABLED
-         EnableMenuItem hMenu, IDM_UTF16BOM, MF_BYCOMMAND Or MF_ENABLED
+         ' Enable/Disable depending on if Visual Designer or Code Editor
+         if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) THEN
+            ' Disable specific code editing menu options
+            ' all of Edit/Search/View menu up to ZoomOut
+            ' except for cut/copy/paste and FunctionList
+            for idMenu = IDM_UNDO to IDM_FUNCTIONLIST
+               EnableMenuItem( hMenu, idMenu, MF_GRAYED)
+            NEXT
+            if pDoc->Controls.SelectedControlsCount > 0 THEN
+               EnableMenuItem hMenu, IDM_CUT, MF_BYCOMMAND Or MF_ENABLED
+               EnableMenuItem hMenu, IDM_COPY, MF_BYCOMMAND Or MF_ENABLED
+            END IF
+            EnableMenuItem hMenu, IDM_PASTE, MF_BYCOMMAND Or MF_ENABLED
+            EnableMenuItem hMenu, IDM_SELECTALL, MF_BYCOMMAND Or MF_ENABLED
+         else
+            ' Code editor is active
+            ' Disable visual designer menu options except for "New Form"
+            for idMenu = IDM_VIEWTOOLBOX to IDM_LOCKCONTROLS
+               EnableMenuItem( hMenu, idMenu, MF_GRAYED)
+            NEXT
+
+            If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+               EnableMenuItem( hMenu, IDM_PASTE, MF_GRAYED)
+            End If
+            
+            startSelPos = SendMessage(hEdit, SCI_GETSELECTIONSTART, 0, 0)
+            endSelPos   = SendMessage(hEdit, SCI_GETSELECTIONEND, 0, 0)
+            If startSelPos = endSelPos Then
+               EnableMenuItem hMenu, IDM_CUT, MF_GRAYED
+               EnableMenuItem hMenu, IDM_COPY, MF_GRAYED
+            End If
+         
+            If SendMessageW(hEdit, SCI_CANUNDO, 0, 0) = 0 Then 
+               EnableMenuItem hMenu, IDM_UNDO, MF_GRAYED
+            End If
+                  
+            If SendMessage(hEdit, SCI_CANREDO, 0, 0) = 0 Then 
+               EnableMenuItem hMenu, IDM_REDO, MF_GRAYED
+            End If
+
+            If SendMessage(hEdit, SCI_CANPASTE, 0, 0) = 0 Then 
+               EnableMenuItem hMenu, IDM_PASTE, MF_GRAYED
+            End If
+         
+            ' Check the File Encoding
+            select CASE pDoc->FileEncoding
+               case FILE_ENCODING_ANSI: nSelected = IDM_ANSI
+               case FILE_ENCODING_UTF8_BOM: nSelected = IDM_UTF8BOM
+               case FILE_ENCODING_UTF16_BOM: nSelected = IDM_UTF16BOM
+               CASE ELSE
+            END SELECT
+            CheckMenuRadioItem( hMenu, IDM_ANSI, IDM_UTF16BOM, nSelected, MF_BYCOMMAND )
+            EnableMenuItem hMenu, IDM_ANSI, MF_BYCOMMAND Or MF_ENABLED
+            EnableMenuItem hMenu, IDM_UTF8BOM, MF_BYCOMMAND Or MF_ENABLED
+            EnableMenuItem hMenu, IDM_UTF16BOM, MF_BYCOMMAND Or MF_ENABLED
+         end if
          
       End If
    End If
@@ -354,45 +399,17 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_COMPILE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_COMMANDLINE, MF_BYCOMMAND Or fEnabled
 
-   If AfxFileExists(gConfig.LastRunFilename) Then
+   If gApp.IsProjectActive then 
+      ' QuickRun should be disabled for Projects
+      EnableMenuItem hMenu, IDM_QUICKRUN, MF_BYCOMMAND Or MF_GRAYED
+   end if
+
+   If AfxFileExists(GetRunExecutableFilename) Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_GRAYED
    End If
 
-
-   Function = 0
-End Function
-
-
-''
-''
-Function frmMain_MenuSetCompiler( ByVal wID As Long ) As Long
-   dim as long idx
-   idx = gApp.GetActiveProjectIndex
-   Select Case wID
-      Case IDM_USE32BIT
-         gApp.Projects(idx).ProjectCompiler = WSTR("FBC 32bit")
-      Case IDM_USE64BIT
-         gApp.Projects(idx).ProjectCompiler = WSTR("FBC 64bit")
-   End Select
-   frmMain_UpdateLineCol( HWND_FRMMAIN )
-   Function = 0
-End Function
-
-
-''
-''
-Function frmMain_MenuSetCompileMode( ByVal wID As Long ) As Long
-   dim as long idx
-   idx = gApp.GetActiveProjectIndex
-   Select Case wID
-      Case IDM_GUI
-         gApp.Projects(idx).ProjectCompileMode = WSTR("GUI")
-      Case IDM_CONSOLE
-         gApp.Projects(idx).ProjectCompileMode = WSTR("CONSOLE")
-   End Select
-   frmMain_UpdateLineCol( HWND_FRMMAIN )
    Function = 0
 End Function
 
@@ -405,12 +422,12 @@ Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
                                     ) As Long
 
    if fNoSeparator = false then
-      AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, "" 
+      AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
    end if
-   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
-   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
-   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMAIN,     L(206,"Main file") 
-   AppendMenuW hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILERESOURCE, L(209,"Resource file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMAIN,     L(206,"Main file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILERESOURCE, L(209,"Resource file") 
 
    Dim nFileType As Long
    Select Case pDoc->ProjectFileType
@@ -437,6 +454,33 @@ Function CreateStatusBarFileTypeContextMenu() As HMENU
          hPopUpMenu = CreatePopupMenu
          AddProjectFileTypesToMenu( hPopUpMenu, pDoc, true ) 
       End If
+   End If
+
+   Function = hPopupMenu
+End Function
+
+''
+''
+Function CreateStatusBarFileEncodingContextMenu() As HMENU
+   Dim hPopUpMenu As HMENU
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then
+      hPopUpMenu = CreatePopupMenu
+      ' winFBE forms must be UTF-16 so only allow other encodings for non-forms
+      if pDoc->IsDesigner = false then
+         AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_ANSI, "ANSI"
+         AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
+      end if
+      AppendMenu hPopUpMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF16BOM, "UTF-16 (BOM)"
+
+      Dim nEncoding As Long
+      Select Case pDoc->FileEncoding
+         Case FILE_ENCODING_ANSI:      nEncoding = IDM_ANSI
+         Case FILE_ENCODING_UTF8_BOM:  nEncoding = IDM_UTF8BOM
+         Case FILE_ENCODING_UTF16_BOM: nEncoding = IDM_UTF16BOM
+      End Select
+      CheckMenuRadioItem( hPopupMenu, IDM_ANSI, IDM_UTF16BOM, nEncoding, MF_BYCOMMAND )
    End If
 
    Function = hPopupMenu
@@ -523,25 +567,26 @@ Function CreateScintillaContextMenu() As HMENU
    Dim wCompilerPath As WString * MAX_PATH
    Dim wzText        As WString * MAX_PATH
    Dim sFilename     As String 
-   Dim hWindow       As HWnd   = pDoc->hWindow
    Dim nLine         As Long   = pDoc->GetCurrentLineNumber()
    Dim sLine         As String = LTrim(pDoc->GetLine(nLine))
    Dim i             As Long
    Dim pt            As Point
    
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+
    ' Ensure that the window under the cursor is actually a Scintilla window
    ' and not another window like a tab in the top tabcontrol.
    GetCursorPos(@pt)
    ScreenToClient(HWND_FRMMAIN, @pt)
 
-   If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> pDoc->hWindow Then Exit Function
+   If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> hEdit Then Exit Function
    
    ' Determine the compiler path in case it needs to be prepended to the filename
    gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
    gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   Select Case Ucase(gApp.Projects(gApp.GetActiveProjectIndex).ProjectCompiler)
-      Case "FBC 32BIT":   wCompilerPath = gConfig.FBWINcompiler32
-      Case "FBC 64BIT":   wCompilerPath = gConfig.FBWINcompiler64
+   Select Case gApp.Projects(gApp.GetActiveProjectIndex).GetProjectCompiler
+      Case IDM_32BIT:   wCompilerPath = gConfig.FBWINcompiler32
+      Case IDM_64BIT:   wCompilerPath = gConfig.FBWINcompiler64
    End Select
    wCompilerPath = AfxStrPathname( "PATH", wCompilerPath )
    wCompilerPath = wCompilerPath & "inc"
@@ -565,8 +610,8 @@ Function CreateScintillaContextMenu() As HMENU
          gApp.IncludeFilename = sFilename
       ElseIf AfxFileExists(AfxGetCurDir & "\" & sFilename) Then 
          gApp.IncludeFilename = AfxGetCurDir & "\" & sFilename
-      ElseIf AfxFileExists(AfxGetExePathName & "\" & sFilename) Then 
-         gApp.IncludeFilename = AfxGetExePathName & "\" & sFilename
+      ElseIf AfxFileExists(AfxGetExePathName & sFilename) Then 
+         gApp.IncludeFilename = AfxGetExePathName & sFilename
       ElseIf AfxFileExists(Str(wCompilerPath) & "\" & sFilename) Then 
          gApp.IncludeFilename = Str(wCompilerPath) & "\" & sFilename
       End If
