@@ -1368,7 +1368,21 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                      case "NAME"  ' don't copy b/c we will then have duplicate control names
                         continue for
                      case "LEFT": nLeft = val(gCopyControls(i).Properties(ii).wszPropValue)
-                     case "TOP":  nTop  = val(gCopyControls(i).Properties(ii).wszPropValue)   
+                     case "TOP":  nTop  = val(gCopyControls(i).Properties(ii).wszPropValue) 
+                     case "GROUPNAME"
+                        ' Copy the GroupName and then increment the Index property
+                        pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
+                     '   SetControlProperty(pCtrl, "INDEX", GenerateOptionButtonIndex(pDoc, pCtrl))
+                        continue for
+                     'case "INDEX"
+                     '   ' Do not set the Index to the copy control Index because we are assigned
+                     '   ' a new Index value when the GroupName property is set.
+                     '   continue for   
+                     ' Bypass setting the TabIndex because creating the
+                     ' new control will set the values to the next highest valid values. We
+                     ' do not want to now overwrite those values.
+                     CASE "TABINDEX"
+                        continue for    
                   END select
                   pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
                NEXT
@@ -1393,6 +1407,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             NEXT
             ' Ensure the grab handles of form and controls are redrawn or hidden
             pDoc->Controls.SetActiveControl(pDoc->hWndForm)
+            pDoc->bRegenerateCode = true
+            pDoc->UserModified = true
             AfxRedrawWindow(pDoc->hWndFrame)
             AfxRedrawWindow(pDoc->hWndForm)
             frmMain_UpdateLineCol(HWND_FRMMAIN)
@@ -1402,7 +1418,6 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          end if   
       
       case IDM_DELETE
-? "delete"
          ' Delete selected controls
          dim pCtrl as clsControl ptr
          do until pDoc->Controls.SelectedControlsCount = 0
@@ -1645,7 +1660,11 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          function = OnCommand_DesignerCenter(HWND, id)
          
       case IDM_LOCKCONTROLS
-
+         if pDoc then 
+            pDoc->bLockControls = not pDoc->bLockControls
+            pDoc->UserModified = true
+            frmMain_UpdateLineCol( HWND_FRMMAIN )
+         end if
       
       ''   TOOLS MENU
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))

@@ -24,7 +24,8 @@ Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) as Long
    dim as CWSTR wszDefaultProp, wszDefaultEvent
    
    select case pCtrl->ControlType
-      CASE CTRL_FORM, CTRL_BUTTON, CTRL_LABEL, CTRL_CHECKBOX
+      CASE CTRL_FORM, CTRL_BUTTON, CTRL_LABEL, CTRL_CHECKBOX, _
+           CTRL_OPTION, CTRL_FRAME
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "Click" 
       case CTRL_TEXTBOX
@@ -35,8 +36,6 @@ Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) as Long
          wszDefaultEvent = "Click" 
    
    ' TODO: Set default property/event for each control.
-   '   CTRL_OPTION
-   '   CTRL_FRAME
    '   CTRL_PICTURE
    '   CTRL_COMBOBOX
    '   CTRL_IMAGEBUTTON
@@ -102,24 +101,13 @@ Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    if IsWindow(HWND_FRMVDTOOLBOX) = 0 then exit function
    
    dim pCtrl as clsControl ptr  
-   
    dim pCtrlActive as clsControl ptr = pDoc->Controls.GetActiveControl
-   if pCtrlActive = 0 THEN exit function
-   
-   ' If the current control property being displayed has not changed then do not
-   ' clear the listboxes. It only causes flicker. Instead, simply invalidate them
-   ' to cause them to repaint and show most up to date property values (for example,
-   ' when controls are being moved or resized).
-   static pCtrlDisplayed as clsControl ptr
-   if pCtrlDisplayed = pCtrlActive then
-      AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
-      exit function
-   END IF
-   pCtrlDisplayed = pCtrlActive
    
    dim as long idx, nCurSel
 
-   ' clear the combobox
+   ' Always clear the controls combobox and repopuplate it. Do this even
+   ' if the active control has not changed. It is possible that that a 
+   ' group of controls may have been deleted.
    dim as hwnd hCombo = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_COMBOCONTROLS)
    Combobox_ResetContent(hCombo)
    ' Iterate through all controls and add them to the combobox
@@ -137,6 +125,20 @@ Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
          exit for
       end if
    next
+
+   if pCtrlActive = 0 THEN exit function
+   
+   ' If the current control property being displayed has not changed then do not
+   ' clear the listboxes. It only causes flicker. Instead, simply invalidate them
+   ' to cause them to repaint and show most up to date property values (for example,
+   ' when controls are being moved or resized).
+   static pCtrlDisplayed as clsControl ptr
+   if pCtrlDisplayed = pCtrlActive then
+      AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
+      exit function
+   END IF
+   pCtrlDisplayed = pCtrlActive
+   
       
    ' clear the listbox (PROPERTIES)
    dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
@@ -322,6 +324,39 @@ function InitiatePropertyValueChange() as Long
             case "ACCEPTBUTTON", "CANCELBUTTON"
                ' If (none) was selected then ensure that the property value is set to blank
                if pProp->wszPropValue = "(none)" then pProp->wszPropValue = ""
+            case "TABINDEX"
+               ' Now that a new TabIndex has been entered, ensure that there are no duplicates 
+               ' amongst all of the controls. Bypass the active control but increase the TabIndex
+               ' value of all controls with a higher TabIndex number should a duplicate exist.
+               dim as long nTabIndex = val(wst)
+               dim as long nCurTabIndex
+               dim pCtrlLoop as clsControl ptr
+               dim pCtrlFound as clsControl ptr = 0
+               
+               ' Text to see if TabIndex value already exists
+               for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+                  pCtrlLoop = pDoc->Controls.ItemAt(i)
+                  if pCtrl <> pCtrlLoop then
+                     nCurTabIndex = val(GetControlProperty(pCtrlLoop, "TABINDEX"))
+                     if nCurTabIndex = nTabIndex then
+                        pCtrlFound = pCtrlLoop
+                        exit for
+                     end if   
+                  END if
+               NEXT
+               ' If exists then increase TabIndex for 
+               if pCtrlFound then
+                  for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+                     pCtrlLoop = pDoc->Controls.ItemAt(i)
+                     if pCtrl <> pCtrlLoop then
+                        nCurTabIndex = val(GetControlProperty(pCtrlLoop, "TABINDEX"))
+                        if nCurTabIndex >= nTabIndex then
+                           SetControlProperty(pCtrlLoop, "TABINDEX", wstr(nCurTabIndex + 1))
+                        end if   
+                     END if
+                  NEXT
+               end if   
+               
          end select
 
          ApplyControlProperties(pDoc, pCtrl)
@@ -671,7 +706,7 @@ Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWI
                 
                   ' Determine the Control Type
                   SelectObject(lpdis->hDC, ghNormalFont)
-                  wszCtrlName = GetControlName(pCtrl->ControlType) & " (" & GetWinformsXClassName(pCtrl->ControlType) & ")"
+                  wszCtrlName = GetToolBoxName(pCtrl->ControlType) & " (" & GetWinformsXClassName(pCtrl->ControlType) & ")"
                   ' Text is drawn immediately after the Control Name
                   rc.left = rc.left + nSize.cx + pWindow->ScaleX(4)
                   DrawText( lpdis->hDC, _
@@ -713,7 +748,7 @@ Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWI
             ' DRAW TEXT
             rc = lpdis->rcItem: rc.left = rc.left + pWindow->ScaleX(30)
             if (lpdis->itemData >= lbound(gToolBox)) andalso (lpdis->itemData <= ubound(gToolBox)) then
-               DrawText( lpdis->hDC, gToolBox(lpdis->itemData).wszName, -1, Cast(lpRect, @rc), _
+               DrawText( lpdis->hDC, gToolBox(lpdis->itemData).wszToolBoxName, -1, Cast(lpRect, @rc), _
                          DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
             end if          
          end if
@@ -1257,7 +1292,7 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    ' Add the Tools to the toolbox
    dim as long ndx
    for i as long = lbound(gToolBox) to ubound(gToolBox)
-      ndx = ListBox_AddString(hList1, gToolBox(i).wszName)
+      ndx = ListBox_AddString(hList1, gToolBox(i).wszToolBoxName)
       ListBox_SetItemData(hList1, ndx, i)
    NEXT
    SetActiveToolboxControl(CTRL_POINTER)

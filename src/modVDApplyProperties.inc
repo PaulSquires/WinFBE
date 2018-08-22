@@ -297,6 +297,78 @@ function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    function = 0
 end function
 
+                       
+' ========================================================================================
+' Apply properties to the optionbutton
+' ========================================================================================
+function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                       byval pCtrl as clsControl ptr, _
+                                       byval pProp as clsProperty ptr _ 
+                                       ) as Long
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+   
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "BACKCOLOR"
+      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
+      pCtrl->hBackBrush = CreateSolidBrush(clrBack)
+      AfxRedrawWindow(pCtrl->hWindow)
+
+   case "CHECKED"
+      ' If Checked is True then cycle through all of the other OptionButtons in
+      ' the same group and toggle their Checked property to False.
+      if wszPropValue = "True" then
+         dim pCtrl2 as clsControl ptr
+         dim as CWSTR wszOptionGroup = ucase(GetControlProperty(pCtrl, "GROUPNAME")) 
+         for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+            pCtrl2 = pDoc->Controls.ItemAt(i)
+            if pCtrl2->ControlType <> CTRL_OPTION then continue for
+            if pCtrl2 = pCtrl then continue for
+            if ucase(GetControlProperty(pCtrl2, "GROUPNAME")) = wszOptionGroup THEN
+               SetControlProperty(pCtrl2, "CHECKED", "False") 
+               SendMessage( pCtrl2->hWindow, BM_SETCHECK, BST_UNCHECKED, 0)
+               AfxRedrawWindow(pCtrl2->hWindow)
+            end if
+         NEXT
+         SendMessage( pCtrl->hWindow, BM_SETCHECK, BST_CHECKED, 0)
+         AfxRedrawWindow(pCtrl->hWindow)
+      end if
+      
+   case "TEXTALIGN"
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_CENTER)
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_LEFT)
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_RIGHT)
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_TOP)
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_BOTTOM)
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_VCENTER)
+      dim as long wsStyle
+      select case **wszPropValue
+         CASE "ButtonAlignment.BottomCenter": wsStyle = BS_CENTER OR BS_BOTTOM
+         CASE "ButtonAlignment.BottomLeft":   wsStyle = BS_LEFT   OR BS_BOTTOM
+         CASE "ButtonAlignment.BottomRight":  wsStyle = BS_RIGHT  OR BS_BOTTOM
+         CASE "ButtonAlignment.MiddleCenter": wsStyle = BS_CENTER OR BS_VCENTER
+         CASE "ButtonAlignment.MiddleLeft":   wsStyle = BS_LEFT   OR BS_VCENTER
+         CASE "ButtonAlignment.MiddleRight":  wsStyle = BS_RIGHT  OR BS_VCENTER
+         CASE "ButtonAlignment.TopCenter":    wsStyle = BS_CENTER OR BS_TOP
+         CASE "ButtonAlignment.TopLeft":      wsStyle = BS_LEFT   OR BS_TOP
+         CASE "ButtonAlignment.TopRight":     wsStyle = BS_RIGHT  OR BS_TOP
+      END SELECT
+      AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
+      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+
+   end select
+   
+   function = 0
+end function
 
 ' ========================================================================================
 ' Apply properties to the listbox
@@ -461,6 +533,68 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    function = 0
 end function
 
+
+' ========================================================================================
+' Apply properties to the frame
+' ========================================================================================
+function Frame_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                byval pCtrl as clsControl ptr, _
+                                byval pProp as clsProperty ptr _ 
+                                ) as Long
+    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+   
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "BACKCOLOR"
+      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
+      pCtrl->hBackBrush = CreateSolidBrush(clrBack)
+      AfxRedrawWindow(pCtrl->hWindow)
+
+'   case "BORDERSTYLE"
+'      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
+'      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+'      dim as long wsStyle
+'      select case **wszPropValue
+'         case "ControlBorderStyle.None"
+'         case "ControlBorderStyle.Fixed3D"
+'            AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
+'         case "ControlBorderStyle.FixedSingle"
+'            AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+'      end select
+'      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+
+'   case "TEXTALIGN"
+'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTER)
+'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_LEFT)
+'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_RIGHT)
+'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTERIMAGE)
+'      dim as long wsStyle
+'      select case **wszPropValue
+'         CASE "LabelAlignment.MiddleCenter": wsStyle = SS_CENTER OR SS_CENTERIMAGE
+'         CASE "LabelAlignment.MiddleLeft":   wsStyle = SS_LEFT   OR SS_CENTERIMAGE
+'         CASE "LabelAlignment.MiddleRight":  wsStyle = SS_RIGHT  OR SS_CENTERIMAGE
+'         CASE "LabelAlignment.TopCenter":    wsStyle = SS_CENTER 
+'         CASE "LabelAlignment.TopLeft":      wsStyle = SS_LEFT   
+'         CASE "LabelAlignment.TopRight":     wsStyle = SS_RIGHT  
+'      END SELECT
+'      AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
+'      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+
+   end select
+   
+   function = 0
+end function
+
+
 ' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
@@ -543,8 +677,10 @@ function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       case CTRL_BUTTON:   Button_ApplyProperties(pDoc, pCtrl, pProp)
       case CTRL_LABEL:    Label_ApplyProperties(pDoc, pCtrl, pProp)
       case CTRL_CHECKBOX: CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_OPTION:   OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
       case CTRL_TEXTBOX:  TextBox_ApplyProperties(pDoc, pCtrl, pProp)      
       case CTRL_LISTBOX:  ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_FRAME:    Frame_ApplyProperties(pDoc, pCtrl, pProp)
       CASE ELSE
    END SELECT
 

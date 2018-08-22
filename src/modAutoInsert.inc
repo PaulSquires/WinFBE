@@ -93,12 +93,16 @@ function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
       
       ' Stop search if we find the start of another block statement structure and
       ' allow the insert.
-      if left(sLine, 3)  = "IF "        then return true
-      if left(sLine, 4)  = "FOR "       then return true
-      if left(sLine, 3)  = "DO "        then return true
-      if left(sLine, 7)  = "SELECT "    then return true
-      if left(sLine, 6)  = "WHILE "     then return true
-      if left(sLine, 9)  = "FUNCTION "  then return true
+      if (idBlockType <> BLOCK_STATEMENT_FUNCTION) and (idBlockType <> BLOCK_STATEMENT_SUB) then
+         if left(sLine, 3)  = "IF "        then return true
+         if left(sLine, 4)  = "FOR "       then return true
+         if left(sLine, 3)  = "DO "        then return true
+         if left(sLine, 7)  = "SELECT "    then return true
+         if left(sLine, 6)  = "WHILE "     then return true
+      end if
+      if left(sLine, 9) = "FUNCTION " then
+         if instr(10, sLine, "=") = 0 then return true
+      end if
       if left(sLine, 4)  = "SUB "       then return true
       if left(sLine, 17) = "PRIVATE FUNCTION " then return true
       if left(sLine, 16) = "PUBLIC FUNCTION "  then return true

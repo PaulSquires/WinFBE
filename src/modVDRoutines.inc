@@ -24,7 +24,7 @@ function GetActiveToolboxControlName() as CWSTR
    
    ' The index into the global gToolbox array is stored in the line's data area.
    dim as long idx = ListBox_GetItemData(hList1, nCurSel)
-   return gToolbox(idx).wszName
+   return gToolbox(idx).wszControlName
 end function
 
 
@@ -145,13 +145,26 @@ function GetControlClassName( byval pCtrl as clsControl ptr ) as CWSTR
 end function
    
 ' ========================================================================================
+' Get the control ToolBox name based on the type of control
+' ========================================================================================
+function GetToolBoxName( byval nControlType as long ) as CWSTR
+   if nControlType = CTRL_FORM then return "Form"
+   for i as long = lbound(gToolbox) to ubound(gToolbox)
+      if gToolbox(i).nToolType = nControlType THEN 
+         return gToolbox(i).wszToolBoxName
+      END IF
+   NEXT
+   return ""
+end function
+
+' ========================================================================================
 ' Get the control name based on the type of control
 ' ========================================================================================
 function GetControlName( byval nControlType as long ) as CWSTR
    if nControlType = CTRL_FORM then return "Form"
    for i as long = lbound(gToolbox) to ubound(gToolbox)
       if gToolbox(i).nToolType = nControlType THEN 
-         return gToolbox(i).wszName
+         return gToolbox(i).wszControlName
       END IF
    NEXT
    return ""
@@ -164,7 +177,7 @@ function GetControlType( byval wszControlName as CWSTR ) as long
    wszControlName = ucase(wszControlName)
    if wszControlName = "FORM" then return CTRL_FORM 
    for i as long = lbound(gToolbox) to ubound(gToolbox)
-      if ucase(gToolbox(i).wszName) = wszControlName then
+      if ucase(gToolbox(i).wszToolBoxName) = wszControlName then
          return gToolbox(i).nToolType 
       END IF
    NEXT
@@ -182,7 +195,7 @@ function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       CASE CTRL_BUTTON:            wszText = "wfxButton"   
       CASE CTRL_TEXTBOX:           wszText = "wfxTextBox"  
       CASE CTRL_CHECKBOX:          wszText = "wfxCheckBox" 
-      CASE CTRL_OPTION:            wszText = "wfxRadioButton"
+      CASE CTRL_OPTION:            wszText = "wfxOptionButton"
       CASE CTRL_FRAME:             wszText = "wfxFrame"    
       CASE CTRL_PICTURE:           wszText = "wfxPicture"  
       CASE CTRL_COMBOBOX:          wszText = "wfxComboBox" 

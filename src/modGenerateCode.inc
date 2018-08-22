@@ -45,7 +45,7 @@ function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
       if pCtrl then
-         wszControls = wszControls & "' WINFBE CONTROL_START " & GetControlName(pCtrl->ControlType) & vbcrlf & _
+         wszControls = wszControls & "' WINFBE CONTROL_START " & GetToolBoxName(pCtrl->ControlType) & vbcrlf & _
                                      "'   PROPERTIES_START" & vbcrlf 
          for ii as long = lbound(pCtrl->Properties) to ubound(pCtrl->Properties)
             wszControls = wszControls & _
@@ -69,6 +69,7 @@ function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    pDoc->wszFormMetaData = _
                  "' WINFBE FORM" & vbcrlf & _
                  "' WINFBE VERSION " & APPVERSION & vbcrlf & _
+                 "' LOCKCONTROLS=" & iif(pDoc->bLockControls, "True", "False") & vbcrlf & _
                  "' WINFBE FORM_START" & vbcrlf & _
                  wszControls & _
                  "' WINFBE FORM_END" & vbcrlf 
@@ -217,7 +218,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
             ' Only output properties that are different than the default WinFormsX values
             if ucase(wszPropValue) <> ucase(wszPropDefault) then
                select case ucase(wszPropName)
-                  case "TEXT", "TAG", "PASSWORDCHAR"            
+                  case "TEXT", "TAG", "PASSWORDCHAR", "GROUPNAME"            
                      ' Ensure that any embedded double quotes are escaped
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ
@@ -295,13 +296,24 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    Loop Until bHasChanged = false
 
    ' Finally, output the controls 
+   dim as CWSTR wszGroupName, wszTemp
    for i as long = lb to ub 
       pCtrl = TabOrder(i).pCtrl
       if pCtrl then
          if pCtrl->ControlType <> CTRL_FORM then 
+            ' If this is an optionbutton then add a group for each change in the 
+            ' groupname value.
             wszCtrlName = GetControlProperty(pCtrl, "NAME")
+            if pCtrl->ControlType = CTRL_OPTION then
+               wszTemp = ucase(GetControlProperty(pCtrl, "GROUPNAME"))
+               if wszTemp <> wszGroupName then
+                  wszText = wszText & _
+                  sp(1) & "this." & wszCtrlName & ".StartGroup = True" & vbcrlf
+                  wszGroupName = wszTemp 
+               end if   
+            end if
             wszText = wszText & _
-            sp(1) & "this.Controls.Add(ControlType." & GetControlName(pCtrl->ControlType) & ", @this." & wszCtrlName & ")" & vbcrlf
+            sp(1) & "this.Controls.Add(ControlType." & GetToolBoxName(pCtrl->ControlType) & ", @this." & wszCtrlName & ")" & vbcrlf
          end if
       end if
    next

@@ -205,6 +205,11 @@ function SetGrabHandleMouseCursor( byval pDoc as clsDocument ptr, _
       pCtrl = pDoc->Controls.ItemAt(i)
       for ii as long = GRAB_TOPLEFT to GRAB_LEFT
          if PtInRect(@pCtrl->rcHandles(ii), pt) then
+            ' Test to ensure that the specific control Locked property is not set, or
+            ' the global Locked setting for the entire form is not set.
+            if (pDoc->bLockControls = true) or (GetControlProperty(pCtrl, "Locked") = "True") then 
+               SetCursor( LoadCursor(Null, ByVal IDC_NO) ): return GRAB_NOHIT
+            end if
             select case ii
                Case GRAB_TOP, GRAB_BOTTOM:          SetCursor( LoadCursor(Null, ByVal IDC_SIZENS) )
                case GRAB_LEFT, GRAB_RIGHT:          SetCursor( LoadCursor(Null, ByVal IDC_SIZEWE) )
@@ -223,8 +228,17 @@ function SetGrabHandleMouseCursor( byval pDoc as clsDocument ptr, _
       GetWindowRect(pCtrl->hWindow, @rcCtrl)
       MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rcCtrl), 2)
       if PtInRect(@rcCtrl, pt) THEN
-         SetCursor( LoadCursor(Null, ByVal IDC_SIZEALL) )
-         return GRAB_NOHIT
+         ' Test to ensure that the specific control Locked property is not set, or
+         ' the global Locked setting for the entire form is not set.
+         if (pDoc->bLockControls = true) or (GetControlProperty(pCtrl, "Locked") = "True") then 
+            ' We will continue to allow the Arrow cursor for Locked controls in order to
+            ' indicate that the control can be selected. If the user attempts to move the 
+            ' control then the cursor will change to IDC_NO
+            return GRAB_NOHIT
+         else
+            ' Cursor is over a valid control
+            SetCursor( LoadCursor(Null, ByVal IDC_SIZEALL) ): return GRAB_NOHIT
+         end if   
       END IF  
    next
    
@@ -439,6 +453,7 @@ function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
       END IF
    END IF
 
+   
    ' Save the current mouse position
    pDoc->ptPrev.x = pt.x
    pDoc->ptPrev.y = pt.y
@@ -579,6 +594,15 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
    yDelta = pt.y - pDoc->ptPrev.y
    
    if (xDelta = 0) andalso (yDelta = 0) THEN exit function
+
+   ' Test to ensure that the specific control Locked property is not set, or
+   ' the global Locked setting for the entire form is not set.
+   if pDoc->bMoving then
+      if (pDoc->bLockControls = true) or (GetControlProperty(pDoc->pCtrlAction, "Locked") = "True") then 
+         SetCursor( LoadCursor(Null, ByVal IDC_NO) )
+         exit function
+      end if   
+   end if
 
    ' If the mouse cursor is not resizing or moving a control then determine the cursor
    ' based on what control is selected in the toolbox.
@@ -767,6 +791,7 @@ Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
       
       ' Draw the control's grab handles 
       DrawGrabHandles(hDC, pDoc, false)
+
    end if   
 
    RestoreDC hDC, -1 
@@ -775,8 +800,20 @@ Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
    
    EndPaint hWnd, @ps
    
+   ' Repaint any Frame controls because they disappear when the form's background is painted.
+   if pDoc THEN
+      dim pCtrl as clsControl ptr
+      for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+         pCtrl = pDoc->Controls.ItemAt(i)
+         if (pCtrl <> 0) andalso (pCtrl->ControlType = CTRL_FRAME) then
+            AfxRedrawWindow(pCtrl->hWindow)
+         end if
+      next
+   end if
+         
    Function = 0
 End Function
+
 
 ' ========================================================================================
 ' Process WM_DESTROY message for Visual Designer Form

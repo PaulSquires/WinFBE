@@ -39,7 +39,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.7.4") 
+#Define APPVERSION    WStr("1.7.5") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -47,7 +47,7 @@ Using Afx
    #Define APPBITS WStr(" (32-bit)")
 #endif
 
-#Define USE_VISUAL_DESIGNER 1
+#Define TOOLS_MENU_POSITION 8
 
 #Include Once "modScintilla.bi"
 #Include Once "modDeclares.bi"         ' TYPES, DEFINES, etc
