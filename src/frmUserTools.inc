@@ -247,10 +247,7 @@ Function CreateUserTools_AcceleratorTable() As Long
          
       wszShortcut = trim(wszShortcut + UCase(Trim(gConfig.Tools(y).wszKey)), any " +")
       
-? "Tool: "; y, "Key="; gConfig.Tools(y).wszKey, "wszShortcut="; wszShortcut
-
       If nKey > 0 Then
-? "nKey = "; nKey
          NumKeys = NumKeys + 1
          ReDim Preserve a(1 To NumKeys) As ACCEL
          a(NumKeys).fVirt = fVirt

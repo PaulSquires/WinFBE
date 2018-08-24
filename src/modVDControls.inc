@@ -298,6 +298,34 @@ end function
 
 
 ' ========================================================================================
+' Generate the next Index in an OptionButton group.
+' ========================================================================================
+'function GenerateOptionButtonIndex( byval pDoc as clsDocument ptr, _
+'                                    byval pCtrl as clsControl ptr _
+'                                    ) as CWSTR
+
+'   dim as long NextIndexNumber = 1
+'   dim as long nIndex
+'   dim as CWSTR wszOptionGroup
+'   dim pCtrl2 as clsControl ptr 
+    
+'   wszOptionGroup = ucase(GetControlProperty(pCtrl, "GROUPNAME"))
+
+'   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+'      pCtrl2 = pDoc->Controls.ItemAt(i)
+'      if pCtrl2->ControlType <> CTRL_OPTION then continue for
+'      if pCtrl2 = pCtrl then continue for
+'      if ucase(GetControlProperty(pCtrl2, "GROUPNAME")) = wszOptionGroup THEN
+'         nIndex = val(GetControlProperty(pCtrl2, "INDEX")) 
+'         if nIndex >= NextIndexNumber then NextIndexNumber = nIndex + 1
+'      end if
+'   NEXT
+    
+'   return wstr(NextIndexNumber)
+'end function
+
+
+' ========================================================================================
 ' Generate a default TabIndex value for the new control
 ' ========================================================================================
 function GenerateDefaultTabIndex( byval pDoc as clsDocument ptr ) as CWSTR
@@ -312,7 +340,7 @@ function GenerateDefaultTabIndex( byval pDoc as clsDocument ptr ) as CWSTR
       if nPropValue > HighTabIndex then HighTabIndex = nPropValue
    NEXT
    
-   return str(HighTabIndex+1)
+   return wstr(HighTabIndex+1)
 end function
 
 
@@ -326,7 +354,7 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
    dim pCtrl as clsControl ptr = new clsControl
-   dim as CWSTR wszDefaultControlName 
+   dim as CWSTR wszDefaultControlName, wszDefaultGroupName 
 
    pDoc->Controls.DeselectAllControls
    pCtrl->ControlType = ControlType
@@ -353,25 +381,31 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    else
       if pWindow = 0 THEN exit function
       wszDefaultControlName = GenerateDefaultControlName(pDoc, ControlType)
-      if ControlType = CTRL_BUTTON then
-         ' Use the custom control CXpButton instead of the standard Windows button control.
-         pCtrl->AfxButtonPtr = new CXpButton(pWindow, 100, wszDefaultControlName, _
-                          rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
-         pCtrl->hWindow = pCtrl->AfxButtonPtr->hWindow
-         SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
-      else   
-         dim as long dwStyle = -1
-         if ControlType = CTRL_LISTBOX then
-            ' WinFBX defaults to listbox with integralheight. We want to make sure that
-            ' our listboxes hae NoIntegralHeight.
-            dwStyle = WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
-                      WS_TABSTOP OR LBS_HASSTRINGS OR LBS_NOTIFY or LBS_NOINTEGRALHEIGHT
-         end if
-         pCtrl->hWindow = pWindow->AddControl( GetControlClassName(pCtrl), , 100, wszDefaultControlName, _
-                          rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top, _
-                          dwStyle, -1, , _
-                          CAST(WNDPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
-      end if
+      select case ControlType 
+         case CTRL_BUTTON
+            ' Use the custom control CXpButton instead of the standard Windows button control.
+            pCtrl->AfxButtonPtr = new CXpButton(pWindow, 100, wszDefaultControlName, _
+                             rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
+            pCtrl->hWindow = pCtrl->AfxButtonPtr->hWindow
+            SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+         case else   
+            dim as long dwExStyle = -1
+            dim as long dwStyle = -1
+            if ControlType = CTRL_LISTBOX then
+               ' WinFBX defaults to listbox with integralheight. We want to make sure that
+               ' our listboxes have NoIntegralHeight.
+               dwStyle = WS_CHILD or WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
+                         LBS_HASSTRINGS OR LBS_NOTIFY or LBS_NOINTEGRALHEIGHT
+            end if
+            if ControlType = CTRL_FRAME then
+               dwStyle = WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or BS_GROUPBOX
+               dwExStyle = WS_EX_TRANSPARENT
+            end if   
+            pCtrl->hWindow = pWindow->AddControl( GetControlClassName(pCtrl), , 100, wszDefaultControlName, _
+                             rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top, _
+                             dwStyle, dwExStyle, , _
+                             CAST(WNDPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+      end select
    END IF
 
    pDoc->Controls.Add(pCtrl)
@@ -389,6 +423,9 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    if pDoc->LoadingFromFile = false then
       ' By default, generate the next highest TabIndex value for this new control. 
       SetControlProperty(pCtrl, "TABINDEX", GenerateDefaultTabIndex(pDoc))
+      'if ControlType = CTRL_OPTION then
+      '   SetControlProperty(pCtrl, "INDEX", GenerateOptionButtonIndex(pDoc, pCtrl))
+      'end if   
       pCtrl->SuspendLayout = true
       ApplyControlProperties( pDoc, pCtrl )
       pCtrl->SuspendLayout = false

@@ -28,7 +28,6 @@ Constructor clsConfig
    _WinFBXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winfbx.ini" 
 End Constructor
 
-
 ''
 ''
 Function clsConfig.LoadKeywords() as Long
@@ -208,55 +207,64 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(6) as TOOLBOX_TYPE
+   redim gToolBox(7) as TOOLBOX_TYPE
    
    gToolBox(0).nToolType = CTRL_POINTER
-   gToolBox(0).wszName   = "Pointer"
+   gToolBox(0).wszToolBoxName   = "Pointer"
+   gToolBox(0).wszControlName   = "Pointer"
    gToolBox(0).wszImage  = "IMAGE_POINTER"
    gToolBox(0).wszCursor = ""
    gToolBox(0).wszClassName = ""
    
    gToolBox(1).nToolType = CTRL_BUTTON
-   gToolBox(1).wszName   = "Button"
+   gToolBox(1).wszToolBoxName   = "Button"
+   gToolBox(1).wszControlName   = "Button"
    gToolBox(1).wszImage  = "IMAGE_BUTTON"
    gToolBox(1).wszCursor = "IMAGE_CURSOR_BUTTON"
    gToolBox(1).wszClassName = "BUTTON"
 
    gToolBox(2).nToolType = CTRL_CHECKBOX
-   gToolBox(2).wszName   = "CheckBox"
+   gToolBox(2).wszToolBoxName   = "CheckBox"
+   gToolBox(2).wszControlName   = "Check"
    gToolBox(2).wszImage  = "IMAGE_CHECKBOX"
    gToolBox(2).wszCursor = "IMAGE_CURSOR_CHECKBOX"
    gToolBox(2).wszClassName = "CHECKBOX"
 
-   gToolBox(3).nToolType = CTRL_LABEL
-   gToolBox(3).wszName   = "Label"
-   gToolBox(3).wszImage  = "IMAGE_LABEL"
-   gToolBox(3).wszCursor = "IMAGE_CURSOR_LABEL"
-   gToolBox(3).wszClassName = "LABEL"
+   gToolBox(3).nToolType = CTRL_FRAME
+   gToolBox(3).wszToolBoxName   = "Frame"
+   gToolBox(3).wszControlName   = "Frame"
+   gToolBox(3).wszImage  = "IMAGE_FRAME"
+   gToolBox(3).wszCursor = "IMAGE_CURSOR_FRAME"
+   gToolBox(3).wszClassName = "GROUPBOX"
 
-   gToolBox(4).nToolType = CTRL_LISTBOX
-   gToolBox(4).wszName   = "ListBox"
-   gToolBox(4).wszImage  = "IMAGE_LISTBOX"
-   gToolBox(4).wszCursor = "IMAGE_CURSOR_LISTBOX"
-   gToolBox(4).wszClassName = "LISTBOX"
+   gToolBox(4).nToolType = CTRL_LABEL
+   gToolBox(4).wszToolBoxName   = "Label"
+   gToolBox(4).wszControlName   = "Label"
+   gToolBox(4).wszImage  = "IMAGE_LABEL"
+   gToolBox(4).wszCursor = "IMAGE_CURSOR_LABEL"
+   gToolBox(4).wszClassName = "LABEL"
 
-   gToolBox(5).nToolType = CTRL_TEXTBOX
-   gToolBox(5).wszName   = "TextBox"
-   gToolBox(5).wszImage  = "IMAGE_TEXTBOX"
-   gToolBox(5).wszCursor = "IMAGE_CURSOR_TEXTBOX"
-   gToolBox(5).wszClassName = "TEXTBOX"
+   gToolBox(5).nToolType = CTRL_LISTBOX
+   gToolBox(5).wszToolBoxName   = "ListBox"
+   gToolBox(5).wszControlName   = "List"
+   gToolBox(5).wszImage  = "IMAGE_LISTBOX"
+   gToolBox(5).wszCursor = "IMAGE_CURSOR_LISTBOX"
+   gToolBox(5).wszClassName = "LISTBOX"
 
-'   gToolBox(5).nToolType = CTRL_OPTION
-'   gToolBox(5).wszName   = "Option"
-'   gToolBox(5).wszImage  = "IMAGE_OPTION"
-'   gToolBox(5).wszCursor = "IMAGE_CURSOR_OPTION"
-'   gToolBox(5).wszClassName = "RADIOBUTTON"
+   gToolBox(6).nToolType = CTRL_OPTION
+   gToolBox(6).wszToolBoxName   = "OptionButton"
+   gToolBox(6).wszControlName   = "Option"
+   gToolBox(6).wszImage  = "IMAGE_OPTION"
+   gToolBox(6).wszCursor = "IMAGE_CURSOR_OPTION"
+   gToolBox(6).wszClassName = "RADIOBUTTON"
 
-'   gToolBox(7).nToolType = CTRL_FRAME
-'   gToolBox(7).wszName   = "Frame"
-'   gToolBox(7).wszImage  = "IMAGE_FRAME"
-'   gToolBox(7).wszCursor = "IMAGE_CURSOR_FRAME"
-'   gToolBox(7).wszClassName = "FRAME"
+   gToolBox(7).nToolType = CTRL_TEXTBOX
+   gToolBox(7).wszToolBoxName   = "TextBox"
+   gToolBox(7).wszControlName   = "Text"
+   gToolBox(7).wszImage  = "IMAGE_TEXTBOX"
+   gToolBox(7).wszCursor = "IMAGE_CURSOR_TEXTBOX"
+   gToolBox(7).wszClassName = "TEXTBOX"
+
 
 '   gToolBox(8).nToolType = CTRL_PICTURE
 '   gToolBox(8).wszName   = "Picture"

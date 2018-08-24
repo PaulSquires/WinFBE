@@ -376,6 +376,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    dim as CWSTR wszControlType, wszPropName, wszPropValue, wszEventName
    dim as CWSTR wst
    dim as Long nControlType, numLines, numOffsetLines
+   dim as Boolean bIsValidControl = true
    
    ' The first line MUST contain the identifier that this is a form file.
    if left(wszAllText, 13) = "' WINFBE FORM" then
@@ -407,6 +408,11 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       
       numOffsetLines = numOffsetLines + 1
       
+      if left(wst, 15) = "' LOCKCONTROLS=" then
+         wszPropValue = mid(wst, 16)
+         if wszPropValue = "True" then this.bLockControls = true
+      end if
+      
       if left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
       
@@ -419,39 +425,52 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          ' The control type name is parse #4 (blank space)
          wszControlType = AfxStrParse(wst, 4, " ")
          nControlType = GetControlType(wszControlType)
-         pCtrl = CreateToolboxControl( @this, nControlType, rc )
-         pCtrlActive = pCtrl
+         if nControlType = 0 then   
+            ' no longer a valid toolbox control
+            bIsValidControl = false
+         else
+            bIsValidControl = true
+            pCtrl = CreateToolboxControl( @this, nControlType, rc )
+            pCtrlActive = pCtrl
+         end if
          
       elseif left(wst, 20) = "' WINFBE CONTROL_END" then
-         pCtrl->SuspendLayout = true
-         ApplyControlProperties( @this, pCtrl )
-         pCtrl->SuspendLayout = false
-
+         if bIsValidControl then
+            pCtrl->SuspendLayout = true
+            ApplyControlProperties( @this, pCtrl )
+            pCtrl->SuspendLayout = false
+         end if
       'elseif left(sLine, 20) = "'   PROPERTIES_START" then
       'elseif left(sLine, 18) = "'   PROPERTIES_END" then
 
       elseif left(wst, 16) = "'     PROP_NAME=" then
-         wszPropName = mid(wst, 17)
-       
+         if bIsValidControl then
+            wszPropName = mid(wst, 17)
+         end if
+         
       elseif left(wst, 17) = "'     PROP_VALUE=" then
-         wszPropValue = mid(wst, 18)   ' utf8 encoded 
-         ' Only set the loading property if it exists in the current property
-         ' listing. We do this otherwise older now unused properties will continue
-         ' to get loaded when we no longer want them to.
-         if IsPropertyExists(pCtrl, wszPropName) = false then
-            ' Set the flag to regenerate code otherwise a compile time error
-            ' will occur because the old property could exist in previously generated code.
-            this.bRegenerateCode = true
-         else   
-            SetControlProperty(pCtrl, wszPropName, wszPropValue)
+         if bIsValidControl then
+            wszPropValue = mid(wst, 18)   ' utf8 encoded 
+            ' Only set the loading property if it exists in the current property
+            ' listing. We do this otherwise older now unused properties will continue
+            ' to get loaded when we no longer want them to.
+            if IsPropertyExists(pCtrl, wszPropName) = false then
+               ' Set the flag to regenerate code otherwise a compile time error
+               ' will occur because the old property could exist in previously generated code.
+               this.bRegenerateCode = true
+            else   
+               SetControlProperty(pCtrl, wszPropName, wszPropValue)
+            end if
          end if
          
       'elseif left(sLine, 16) = "'   EVENTS_START" then
       'elseif left(sLine, 14) = "'   EVENTS_END" then
 
       elseif left(wst, 17) = "'     EVENT_NAME=" then
-         wszEventName = mid(wst, 18)
-         SetControlEvent(pCtrl, wszEventName, true)
+         if bIsValidControl then
+            wszEventName = mid(wst, 18)
+            SetControlEvent(pCtrl, wszEventName, true)
+         end if
       end if   
 
    loop

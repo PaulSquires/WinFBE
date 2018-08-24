@@ -59,6 +59,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates if all characters should be left alone or converted to uppercase or lowercase."
       case "CHECKALIGN"   
          wszPropDescribe = "Determines the location of the check box inside the control."
+      case "CHECKED"   
+         wszPropDescribe = "Indicates whether the control is checked."
       case "CHECKSTATE"   
          wszPropDescribe = "Indicates the state of the control."
       case "COLUMNWIDTH"   
@@ -71,6 +73,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "The font used to display text in the control."
       case "FORECOLOR"   
          wszPropDescribe = "The foreground color of the control which is used to display text."
+      case "GROUPNAME"
+         wszPropDescribe = "Controls with the same GroupName form part of the same OptionButton group."
       case "HIDESELECTION"   
          wszPropDescribe = "Indicates that the selection should be hidden when the edit control loses focus."
       case "HORIZONTALEXTENT"   
@@ -81,6 +85,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "The image that will be displayed on the control."
       case "IMAGEALIGN"   
          wszPropDescribe = "The alignment of the image that will be displayed on the control."
+'      case "INDEX"   
+'         wszPropDescribe = "The position of the control within the OptionButton group."
       case "INTEGRALHEIGHT"   
          wszPropDescribe = "Indicates whether the list can contain only complete items."
       case "KEYPREVIEW"
@@ -604,6 +610,7 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
       case CTRL_TEXTBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
          AddControlEvent(pCtrl, "GotFocus")
          AddControlEvent(pCtrl, "LostFocus")
          AddControlEvent(pCtrl, "MouseMove")
@@ -650,7 +657,32 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
       case CTRL_OPTION
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "GotFocus")
+         AddControlEvent(pCtrl, "LostFocus")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
       case CTRL_FRAME
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
       case CTRL_PICTURE
       case CTRL_COMBOBOX
       case CTRL_HSCROLL
@@ -837,16 +869,38 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "UseTabStops", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
-'      case CTRL_OPTION
-'         AddControlProperty(pCtrl, "Text")
-'         AddControlProperty(pCtrl, "TabIndex", "0")
-'         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-'         AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_TABSTOP|BS_AUTORADIOBUTTON|BS_LEFT|BS_VCENTER")
-'         AddControlProperty(pCtrl, "ExStyle")
-'      case CTRL_FRAME
-'         AddControlProperty(pCtrl, "Text")
-'         AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_CLIPSIBLINGS|WS_GROUP|BS_GROUPBOX")
-'         AddControlProperty(pCtrl, "ExStyle", "WS_EX_TRANSPARENT")
+      case CTRL_OPTION
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
+         'AddControlProperty(pCtrl, "CheckAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "Checked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "GroupName", "OptionGroup1", PropertyType.EditEnter)
+         'AddControlProperty(pCtrl, "Index", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleLeft", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+
+      case CTRL_FRAME
+         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
+'         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
+'         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.None", PropertyType.ComboPicker)
+'         AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.TopLeft", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+
 '      case CTRL_PICTURE
 '      case CTRL_COMBOBOX
 '         AddControlProperty(pCtrl, "TabIndex", "0")
@@ -964,7 +1018,7 @@ function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
 
       case "TEXTALIGN"
          select case pCtrl->ControlType
-            case CTRL_BUTTON, CTRL_CHECKBOX
+            case CTRL_BUTTON, CTRL_CHECKBOX, CTRL_OPTION, CTRL_FRAME
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomCenter"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomLeft"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomRight"))

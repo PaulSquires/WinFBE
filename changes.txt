@@ -1,3 +1,16 @@
+Version 1.7.5 (August 22, 2018)
+- Added: OptionButton toolbox control.
+- Added: Frame toolbox control.
+- Added: Implemented logic for controls "Locked" property.
+- Added: Implemented logic for top menu option "Lock Controls" (this is a global override locking the form and all controls on the form).
+- Added: Pasting controls automatically increments the TabIndex property for the newly created controls.
+- Added: Entering an existing TabIndex number will automatically re-number all higher TabIndex value controls.  
+- Changed: Greatly refactored the underlying WinFormsX code dealing with the message pump and keyboard input handling and modal/modeless forms.
+- Fixed: Pasting controls was not immediately setting the form dirty thereby not saving the changes.
+- Fixed: Dropdown combobox in ToolBox that displays list of controls for the form was not updating when controls deleted from the form.
+- Fixed: AutoInsert inserting "End Function" and/or "End Sub" in situations when it should not. Fix from 1.7.4 failed on "FUNCTION =" lines.
+- Fixed: Keyboard focus is now correctly restored when a popup modal form is closed.
+ 
 Version 1.7.4 (August 12, 2018)
 - Added: Loading of WinAPI codetips (\settings\codetips_winapi.ini).
 - Changed: Removed Bookmark color and WinAPI Keywords color. Basic themes will automatically be updated. USER DEFINED THEMES WILL NEED TO BE MANUALLY UPDATED. Sorry.

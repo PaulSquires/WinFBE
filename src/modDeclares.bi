@@ -253,12 +253,9 @@
 #Define IDC_FRMUSERTOOLS_CHKDISPLAYMENU             1028
 #Define IDC_FRMUSERTOOLS_CMDOK                      1029
 
+#Define IsFalse(e) ( Not CBool(e) )
+#Define IsTrue(e) ( CBool(e) )
 
-#ifdef USE_VISUAL_DESIGNER
-   #Define TOOLS_MENU_POSITION 8
-#else
-   #Define TOOLS_MENU_POSITION 7
-#endif   
 
 Const DELIM = "|"                    ' character used as delimiter for function names in data1 of gFunctionLists hash
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
@@ -548,11 +545,12 @@ END TYPE
 
 ' Tools/controls that can be drawn on a Form.
 type TOOLBOX_TYPE
-   nToolType    as long 
-   wszName      as CWSTR
-   wszImage     as CWSTR
-   wszCursor    as CWSTR
-   wszClassName as CWSTR
+   nToolType       as long 
+   wszToolBoxName  as CWSTR    ' eg. OptionButton
+   wszControlName  as CWSTR    ' eg. Option
+   wszImage        as CWSTR
+   wszCursor       as CWSTR
+   wszClassName    as CWSTR    ' eg. RADIOBUTTON
 END TYPE
 dim shared gToolBox() as TOOLBOX_TYPE
 
@@ -755,6 +753,7 @@ Type clsDocument
       bSizing          as Boolean   ' Flag that sizing action is in progress
       bMoving          as Boolean   ' Flag that moving action is in progress
       bRegenerateCode  as Boolean   ' Flag to regenerate code when switching to the code tab
+      bLockControls    as Boolean   ' Global flag that locks the form and all controls from moving or resizing.
       rcSize           as RECT      ' Current size of form/control. Used during sizing action
       pCtrlAction      as clsControl ptr  ' The control that the size/move action is being performed on
       pCtrlCloseLeft   as clsControl ptr  ' closest control to the left of selected control

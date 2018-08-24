@@ -491,6 +491,7 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    function = 0
 end function
 
+
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
@@ -516,7 +517,6 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    Return wzFilename
 End Function
 
-
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
@@ -539,7 +539,6 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 
    Return wzFilename
 End Function
-
 
 
 ' ========================================================================================
