@@ -207,7 +207,7 @@ Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFi
    If gApp.IsProjectActive = false Then 
       ' If the Find/Replace window is open then close it.
       DestroyWindow(HWND_FRMFINDREPLACE)
-      if OnCommand_FileClose(HWnd, true) = 0 then
+      if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = 0 then
          ' save was cancelled
          exit function
       end if   

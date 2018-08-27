@@ -1160,13 +1160,45 @@ End Function
 ' Close current (or all) open file(s)
 ' ========================================================================================
 Function OnCommand_FileClose( ByVal HWnd As HWnd, _
-                              ByVal bCloseAll As BOOLEAN = False _
+                              ByVal veFileClose As eFileClose = EFC_CLOSECURRENT _
                               ) As LRESULT
 
    Dim wText As WString * MAX_PATH  
    Dim pDoc As clsDocument Ptr
-   Dim As Long r, iTab
+   Dim As Long r, iTab ,iTab4other = 0
    
+   SELECT CASE veFileClose
+      case EFC_CLOSEALLOTHERS
+         If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 1 Then  
+            OnCommand_FileClose(HWnd,EFC_CLOSEALLFORWARD) 
+            OnCommand_FileClose(HWnd,EFC_CLOSEALLBACKWARD)  
+         end if 
+         return true
+         
+      case EFC_CLOSEALLFORWARD 
+         iTab4other=0
+         FOR iTab=TabCtrl_GetCurSel(gTTabCtl.hWindow)-1 TO iTab4other step -1
+            TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab)
+            gTTabCtl.SetFocusTab(iTab)
+            OnCommand_FileClose(HWnd,EFC_CLOSECURRENT)
+         next
+         TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab4other)
+         gTTabCtl.SetFocusTab(iTab4other)
+         return true 
+           
+      case EFC_CLOSEALLBACKWARD
+         iTab4other=TabCtrl_GetCurSel(gTTabCtl.hWindow)
+         FOR iTab=TabCtrl_GetItemCount(gTTabCtl.hWindow)-1 TO iTab4other+1 step -1
+            TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab)
+            gTTabCtl.SetFocusTab(iTab)
+            OnCommand_FileClose(HWnd,EFC_CLOSECURRENT)
+         next
+         TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab4other)
+         gTTabCtl.SetFocusTab(iTab4other)
+         return true
+         
+   end select
+
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
 
    Do
@@ -1209,11 +1241,12 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       
       frmMain_PositionWindows(HWnd)
    
-      If bCloseAll = False Then Exit Do
-      
-      If bCloseAll Then
-         If TabCtrl_GetItemCount(gTTabCtl.hWindow) = 0 Then Exit Do
-      End If
+      SELECT CASE veFileClose 
+         case EFC_CLOSECURRENT
+            Exit Do
+         case EFC_CLOSEALL   
+            If TabCtrl_GetItemCount(gTTabCtl.hWindow) = 0 Then Exit Do
+      end select
    Loop
     
    PositionExplorerWindows(HWND_FRMEXPLORER)
@@ -1304,8 +1337,11 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_FILESAVEAS:         Function = OnCommand_FileSave( HWnd, True )
       Case IDM_FILESAVEDECLARES:   Function = OnCommand_FileSaveDeclares( HWnd )
       Case IDM_FILESAVEALL:        Function = OnCommand_FileSaveAll( HWnd ) 
-      Case IDM_FILECLOSE:          Function = OnCommand_FileClose( HWnd, False )
-      Case IDM_FILECLOSEALL:       Function = OnCommand_FileClose( HWnd, True )
+      Case IDM_FILECLOSE:          Function = OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
+      Case IDM_FILECLOSEALL:       Function = OnCommand_FileClose( HWnd, EFC_CLOSEALL )
+      Case IDM_FILECLOSEALLOTHERS: Function = OnCommand_FileClose( HWnd, EFC_CLOSEALLOTHERS )
+      Case IDM_CLOSEALLFORWARD:    Function = OnCommand_FileClose( HWnd, EFC_CLOSEALLFORWARD )
+      Case IDM_CLOSEALLBACKWARD:   Function = OnCommand_FileClose( HWnd, EFC_CLOSEALLBACKWARD )
       
       Case IDC_MRUBASE To (IDC_MRUBASE + 10)
          Function = OpenMRUFile( HWnd, id )
@@ -1630,7 +1666,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
          dim as long idx = pDoc->ProjectIndex
          dim as HTREEITEM hNode = pDoc->hNodeExplorer
-         if OnCommand_FileClose( HWnd, False ) then
+         if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) then
             ' File close succeeded. Remove this document from the project collection and remove treeview node 
             Treeview_DeleteItem( hTree, hNode)
             gApp.Projects(idx).RemoveDocument(pDoc)
@@ -1690,7 +1726,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        "PAUL SQUIRES" & vbcrlf & _
                        "PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "José Roca (WinFBX Framework)", _
+                       "Jos?Roca (WinFBX Framework)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
@@ -2036,7 +2072,7 @@ Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
    LOOP   
    
    ' Close any open files asking to save any that are dirty 
-   if OnCommand_FileClose(HWnd, True) = 0 then 
+   if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = 0 then 
       LockWindowUpdate(0): return 0
    end if   
    
@@ -2609,8 +2645,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                         if GetDlgCtrlID(GetFocus) = IDC_SCINTILLA then 
                            if uMsg.wParam = VK_DELETE then
                               frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
-                              continue do
                            end if   
+                           continue do
                         end if
                      end if
                   end if
@@ -2717,5 +2753,3 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
 
 End Function
-
-
