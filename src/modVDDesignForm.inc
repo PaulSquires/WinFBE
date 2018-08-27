@@ -330,6 +330,7 @@ function DrawGrabHandles( byval hDC as HDC, _
    dim as HPEN hSolidPen = CreatePen(PS_SOLID, 1, BGR(0,0,0))
    dim as HBRUSH hWhiteBrush = CreateSolidBrush(BGR(255,255,255))
    dim as HBRUSH hBlackBrush = CreateSolidBrush(BGR(0,0,0))
+   dim as HBRUSH hRedBrush   = CreateSolidBrush(BGR(255,0,0))
    
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
@@ -353,7 +354,14 @@ function DrawGrabHandles( byval hDC as HDC, _
          Rectangle(hDC, rc.left-nOffset, rc.top-nOffset, rc.right+nOffset, rc.bottom+nOffset)
 
          SelectObject( hDC, hSolidPen )
-         SelectObject( hDC, iif(pCtrl->IsActive, hWhiteBrush, hBlackBrush) )
+         
+         ' If Form level locking is set or the Control is locked then paint in red.
+         if IsControlLocked(pDoc, pCtrl) then
+            SelectObject( hDC, hRedBrush )
+         else   
+            SelectObject( hDC, iif(pCtrl->IsActive, hWhiteBrush, hBlackBrush) )
+         end if
+         
          for ii as long = GRAB_TOPLEFT to GRAB_LEFT
             if pCtrl->IsActive THEN
                RoundRect(hDC, pCtrl->rcHandles(ii).left, pCtrl->rcHandles(ii).top, _
@@ -374,6 +382,7 @@ function DrawGrabHandles( byval hDC as HDC, _
    DeleteObject(hSolidPen)
    DeleteObject(hWhiteBrush)
    DeleteObject(hBlackBrush)
+   DeleteObject(hRedBrush)
    
    function = 0   
 end function
@@ -597,11 +606,9 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
 
    ' Test to ensure that the specific control Locked property is not set, or
    ' the global Locked setting for the entire form is not set.
-   if pDoc->bMoving then
-      if (pDoc->bLockControls = true) or (GetControlProperty(pDoc->pCtrlAction, "Locked") = "True") then 
-         SetCursor( LoadCursor(Null, ByVal IDC_NO) )
-         exit function
-      end if   
+   if (pDoc->bMoving) andalso IsControlLocked(pDoc, pDoc->pCtrlAction) then 
+      SetCursor( LoadCursor(Null, ByVal IDC_NO) )
+      exit function
    end if
 
    ' If the mouse cursor is not resizing or moving a control then determine the cursor
@@ -725,6 +732,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
          pCtrl = pDoc->Controls.ItemAt(i)
          if pCtrl->IsSelected THEN
+            if IsControlLocked(pDoc, pCtrl) then continue for
             GetWindowRect(pCtrl->hWindow, @pDoc->rcSize)
             MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pDoc->rcSize), 2)
             pDoc->rcSize.left  = pDoc->rcSize.left + xDelta

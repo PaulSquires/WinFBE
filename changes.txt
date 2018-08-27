@@ -1,3 +1,11 @@
+Version 1.7.6 (August 26, 2018)
+- Added: Grab handles for locked controls/form now show using red color.
+- Added: BackColorHot property for Button controls.
+- Fixed: Label mouse double click caused a GPF.
+- Fixed: Changed all MID function code to use ** with CWSTR variables.
+- Fixed: Align and/or Resize for groups of controls was not respecting the Locked status.
+- Fixed: Center in form horizontally/vertically was not correctly accounting for High DPI resolutions.
+
 Version 1.7.5 (August 22, 2018)
 - Added: OptionButton toolbox control.
 - Added: Frame toolbox control.

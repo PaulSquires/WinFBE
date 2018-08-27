@@ -56,7 +56,7 @@ ParseAgain:
          do until iLineStart >= len(pDoc->wszFormCodeGen)
             iLineEnd = instr(iLineStart, pDoc->wszFormCodeGen, vbcrlf)
             if iLineEnd = 0 then iLineEnd = len(pDoc->wszFormCodeGen)  ' cr/lf not found
-            wst = mid(pDoc->wszFormCodeGen, iLineStart, iLineEnd - iLineStart)
+            wst = mid(pDoc->wszFormCodeGen.wstr, iLineStart, iLineEnd - iLineStart)
             iLineStart = iLineStart + len(wst) + len(vbcrlf)
             if nLineCount >= ubound(sLineArray) THEN
                redim preserve sLineArray(nLineCount + 5000)

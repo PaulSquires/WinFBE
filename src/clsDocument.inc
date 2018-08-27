@@ -409,7 +409,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       numOffsetLines = numOffsetLines + 1
       
       if left(wst, 15) = "' LOCKCONTROLS=" then
-         wszPropValue = mid(wst, 16)
+         wszPropValue = mid(**wst, 16)
          if wszPropValue = "True" then this.bLockControls = true
       end if
       
@@ -445,12 +445,12 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
 
       elseif left(wst, 16) = "'     PROP_NAME=" then
          if bIsValidControl then
-            wszPropName = mid(wst, 17)
+            wszPropName = mid(**wst, 17)
          end if
          
       elseif left(wst, 17) = "'     PROP_VALUE=" then
          if bIsValidControl then
-            wszPropValue = mid(wst, 18)   ' utf8 encoded 
+            wszPropValue = mid(**wst, 18)   ' utf8 encoded 
             ' Only set the loading property if it exists in the current property
             ' listing. We do this otherwise older now unused properties will continue
             ' to get loaded when we no longer want them to.
@@ -468,7 +468,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
 
       elseif left(wst, 17) = "'     EVENT_NAME=" then
          if bIsValidControl then
-            wszEventName = mid(wst, 18)
+            wszEventName = mid(**wst, 18)
             SetControlEvent(pCtrl, wszEventName, true)
          end if
       end if   

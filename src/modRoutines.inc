@@ -1058,8 +1058,10 @@ Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
       i = Instr(wst, ":")
       If i = 0 Then Continue Do
       
+      wKey = "": wData = "": nData = 0
+
       wKey  = Left(wst, i-1)
-      wData = Mid(wst, i+1)
+      wData = Mid(**wst, i+1)    ' MID causes problems with Chinese data so ** is used.
       
       nKey  = Val(wKey)
       nData = Val(wData)
@@ -1203,12 +1205,12 @@ function GetRunExecutableFilename() as CWSTR
          if wszOptions[i-1] = 34 THEN bInString = not bInString  ' double quotes
          if bInString THEN continue for
          if wszOptions[i-1] = 45 then  ' dash   
-            wszFilename = mid(wszOptions, y, i-y-1)
+            wszFilename = mid(**wszOptions, y, i-y-1)
             exit for
          end if   
       NEXT
       ' There was no other switch so we made it to the end of the string
-      if len(wszFilename) = 0 then wszFilename = mid(wszOptions, y)
+      if len(wszFilename) = 0 then wszFilename = mid(**wszOptions, y)
    END IF
    
    ' Has a filename been determined yet? If it has then it possibly does not have

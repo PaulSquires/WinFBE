@@ -837,6 +837,7 @@ function OnCommand_DesignerAlign( byval HWND as HWND, byval id as long) as LRESU
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
       if pCtrl->IsSelected THEN
+         if IsControlLocked(pDoc, pCtrl) then continue for
          ' Skip processing the active control because that is unnecessary.
          if pCtrl = pCtrlActive THEN continue for
          rcCtrl = GetControlRECT(pCtrl)
@@ -891,6 +892,9 @@ end function
 ' ========================================================================================
 function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRESULT
 
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
+   If pWindow = 0 Then Exit Function
+
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc = 0 THEN exit function
 
@@ -920,8 +924,8 @@ function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRES
 
    ' Get the client area of the design form
    GetClientRect(pDoc->hWndForm, @rcForm)
-   nFormWidth  = (rcForm.right - rcForm.left)
-   nFormHeight = (rcForm.bottom - rcForm.top)
+   nFormWidth  = (rcForm.right - rcForm.left) / pWindow->rxRatio
+   nFormHeight = (rcForm.bottom - rcForm.top) / pWindow->ryRatio
    
    ' Determine the value by which the group of controls needs to be shifted by.  
    nHorizSpacing = nMinLeft - ( (nFormWidth - (nMaxRight - nMinLeft)) / 2) 
@@ -931,6 +935,7 @@ function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRES
       pCtrl = pDoc->Controls.ItemAt(i)
       if pCtrl->ControlType = CTRL_FORM THEN continue for
       if pCtrl->IsSelected = false THEN continue for
+      if IsControlLocked(pDoc, pCtrl) then continue for
       select CASE id
          case IDM_CENTERHORIZ
             nLeft = val(GetControlProperty(pCtrl, "LEFT"))
@@ -1663,6 +1668,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          if pDoc then 
             pDoc->bLockControls = not pDoc->bLockControls
             pDoc->UserModified = true
+            AfxRedrawWindow(pDoc->hWndFrame)
+            AfxRedrawWindow(pDoc->hWndForm)
             frmMain_UpdateLineCol( HWND_FRMMAIN )
          end if
       
