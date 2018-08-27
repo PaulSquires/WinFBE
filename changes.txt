@@ -1,3 +1,10 @@
+Version 1.7.7
+- Added: OptionButton and Frame codetips.
+- Changed: Control refresh/repaint called when Text property changed.
+- Fixed: Regression: Ctrl/Shift Arrow keys not moving/resizing controls in designer.
+- Fixed: Regression: GPF when ListBox row selection changed.
+- Fixed: Compiles with only warnings (no errors) will now allow the resulting EXE to execute.
+
 Version 1.7.6 (August 26, 2018)
 - Added: Grab handles for locked controls/form now show using red color.
 - Added: BackColorHot property for Button controls.
