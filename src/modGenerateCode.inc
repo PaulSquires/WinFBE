@@ -228,11 +228,11 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                select case nPropType
                   CASE PropertyType.ColorPicker
                      if left(wszPropValue, 7) = "SYSTEM|" then
-                        wszPropValue = "Colors.System" & mid(wszPropValue, 8)
+                        wszPropValue = "Colors.System" & mid(**wszPropValue, 8)
                      elseif left(wszPropValue, 7) = "COLORS|" then
-                        wszPropValue = "Colors." & mid(wszPropValue, 8)
+                        wszPropValue = "Colors." & mid(**wszPropValue, 8)
                      elseif left(wszPropValue, 7) = "CUSTOM|" then
-                        wszPropValue = mid(wszPropValue, 8) & "  ' custom color"
+                        wszPropValue = mid(**wszPropValue, 8) & "  ' custom color"
                      end if   
                   case PropertyType.FontPicker
                      wszPropValue = "New wfxFont(" & SetFontClassFromPropValue(wszPropValue) & ")"

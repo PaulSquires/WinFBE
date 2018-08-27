@@ -73,7 +73,7 @@ Function clsConfig.LoadCodetipsFB() as boolean
       i = Instr(wst, "=")
       If i Then
          parser.funcName   = Left(wst, i-1)
-         parser.funcParams = Mid(wst, i+1)
+         parser.funcParams = Mid(**wst, i+1)
          gdb2.dbAdd(parser, DB2_FUNCTION)
       End If   
    Loop
@@ -118,13 +118,13 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
       If i = 0 Then continue do
       
       wsID = left(wst, i - 1)
-      wst = mid(wst, i + 1)
+      wst = mid(**wst, i + 1)
                 
       select CASE **wsID
          case "S"    ' standard datatype
             i = instr(wst, "|")
             parser.typeName = Left(wst, i-1)
-            parser.Description = mid(wst, i+1)
+            parser.Description = mid(**wst, i+1)
             gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
             
          CASE "F"    ' function
@@ -137,7 +137,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
             i = instr(wst, "|")
             parser.typeName = Left(wst, i-1)
             parser.typeAlias = parser.typeName
-            wsParts = mid(wst, i + 1)
+            wsParts = mid(**wst, i + 1)
             
             if IsWinAPI = false then
                ' Check for the WFXBASE type. We save that string and add it to subsequent
@@ -821,8 +821,10 @@ Function clsConfig.LoadConfigFile() as Long
       i = InStr(wst, "=")
       If i = 0 Then Continue Do
       
+      wKey = "": wData = "": nData = 0
+      
       wKey  = Left(wst, i-1)
-      wData = Mid(wst, i+1)
+      wData = Mid(wst.wstr, i+1)
       nData = Val(wData)
       
       wData = ProcessFromCurdrive(wData)
@@ -926,7 +928,9 @@ Function clsConfig.LoadConfigFile() as Long
          Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
          case "WinFBXPath":           this.WinFBXPath           = wData
 
-         Case "CompilerSwitches":     this.CompilerSwitches     = wData
+         Case "CompilerSwitches":     
+            this.CompilerSwitches     = wData
+? this.CompilerSwitches, wData         
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
          Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData
@@ -1293,7 +1297,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       If i = 0 Then Continue Do
       
       wKey  = Left(wst, i-1)
-      wData = Mid(wst, i+1)
+      wData = Mid(**wst, i+1)
       
       Select Case UCase(wData)
          Case "TRUE":   nData = True

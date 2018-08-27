@@ -723,7 +723,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
          ' -o "WinFBE.exe" 
          i = Instr(wst, WSTR(" -o "))
          If i Then
-            wszTemp = Mid(wst, i+4)
+            wszTemp = Mid(**wst, i+4)
             i = Instr(wszTemp, wDQ & WSTR(" "))
             If i Then gCompile.OutputFilename = AfxStrRemove(Left(wszTemp, i), wDQ)
          End If      
@@ -747,8 +747,8 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
             (Error_Start > 0) Then
    
             wst1 = AfxStrParse(wst, 1, WSTR("("))   ' filename
-            wst2 = Mid( wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
-            wst3 = Mid( wst, Error_Start + 1)  ' error message
+            wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
+            wst3 = Mid( **wst, Error_Start + 1)  ' error message
  
             ' If this is a visual designer form file then we need to modify the line
             ' number based on the error offset number.

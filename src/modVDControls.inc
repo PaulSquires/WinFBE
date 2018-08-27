@@ -216,6 +216,17 @@ function IsControlNameExists( byval pDoc as clsDocument ptr, byref wszControlNam
 end function
 
 ' ========================================================================================
+' Determines if the control is locked or full form is locked
+' ========================================================================================
+function IsControlLocked( byval pDoc as clsDocument ptr, _
+                          byval pCtrl as clsControl ptr _
+                          ) as boolean
+   if pDoc->bLockControls then return true
+   if GetControlProperty(pCtrl, "LOCKED") = "True" then return true
+   return false
+end function
+
+' ========================================================================================
 ' Determine if the specified form name already exists.
 ' ========================================================================================
 function IsFormNameExists( byref wszFormName as wstring ) as boolean
