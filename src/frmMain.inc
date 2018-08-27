@@ -2609,8 +2609,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                         if GetDlgCtrlID(GetFocus) = IDC_SCINTILLA then 
                            if uMsg.wParam = VK_DELETE then
                               frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
+                              continue do
                            end if   
-                           continue do
                         end if
                      end if
                   end if

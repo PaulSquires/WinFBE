@@ -844,7 +844,9 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized
       SetDocumentErrorPosition(hLV, wID)
-      return true
+      ' If Errors have occurred then return TRUE. We will allow processing
+      ' tocontinue if only Warnings occurred.
+      if NumErrors > 0 then return true
    End If
 
    function = false

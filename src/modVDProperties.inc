@@ -205,7 +205,7 @@ function DisplayEventDetails() as Long
       case "ALLEVENTS"
          wszEventDescribe = "Allows the user to respond to all Windows messages for the control."
       case "LOAD"
-         wszEventDescribe = "Occurs whenever the user loads the form."
+         wszEventDescribe = "Occurs whenever the user loads the form. Form and control window handles are valid at this point."
       CASE "SHOWN"
          wszEventDescribe = "Occurs whenever the form is first shown."
       CASE "ACTIVATED"
@@ -216,6 +216,8 @@ function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs immediately before the control is about to be destroyed and all resources associated with it released."
       CASE "GOTFOCUS"
          wszEventDescribe = "Occurs when the control receives focus."
+      case "INITIALIZE"   
+         wszEventDescribe = "Occurs before a form loads. Form and control window handles are invalid at this point."
       CASE "LOSTFOCUS"
          wszEventDescribe = "Occurs when the control loses focus."
       CASE "RESIZE"
@@ -566,6 +568,7 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
    select CASE pCtrl->ControlType
       case CTRL_FORM
          AddControlEvent(pCtrl, "Load")
+         AddControlEvent(pCtrl, "Initialize")
          AddControlEvent(pCtrl, "Shown")
          AddControlEvent(pCtrl, "Activated")
          AddControlEvent(pCtrl, "Deactivate")
