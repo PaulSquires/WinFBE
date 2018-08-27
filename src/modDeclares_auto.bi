@@ -269,7 +269,7 @@ Declare Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
 Declare Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
-Declare Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal bCloseAll As BOOLEAN = False ) As LRESULT
+Declare Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal veFileClose As eFileClose = EFC_CLOSECURRENT ) As LRESULT
 Declare Function frmMain_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmMain_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
 Declare Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT

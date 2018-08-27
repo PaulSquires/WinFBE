@@ -492,13 +492,18 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Dim hPopUpMenu As HMENU
    Dim hPopUpSubMenu As HMENU
    Dim wszText As WString * MAX_PATH
+   Dim As Long CuriTab=TabCtrl_GetCurSel(gTTabCtl.hWindow)
+   Dim As Long MaxiTab=TabCtrl_GetItemCount(gTTabCtl.hWindow)-1
 
    hPopUpMenu = CreatePopupMenu
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
-   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-   AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+   AppendMenu hPopUpMenu, iif(MaxiTab>0,MF_ENABLED,MF_DISABLED), IDM_FILECLOSEALL, L(6,"Close All")
+   AppendMenu hPopUpMenu, iif(MaxiTab>0,MF_ENABLED,MF_DISABLED), IDM_FILECLOSEALLOTHERS, L(354,"Close Others")
+   AppendMenu hPopUpMenu, iif(CuriTab>0,MF_ENABLED,MF_DISABLED), IDM_CLOSEALLFORWARD, L(355,"Close Tabs on the Left")
+   AppendMenu hPopUpMenu, iif(MaxiTab>CuriTab,MF_ENABLED,MF_DISABLED), IDM_CLOSEALLBACKWARD, L(356,"Close Tabs on the Right") 
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
    If pDoc Then

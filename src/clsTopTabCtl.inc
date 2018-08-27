@@ -142,7 +142,7 @@ End Function
 ''
 Function clsTopTabCtl.CloseTab() As Long
    ' Invoked by Ctl+W or by clicking "X" on tab
-   OnCommand_FileClose( HWND_FRMMAIN, False )
+   OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT )
    Function = 0
 End Function
 
