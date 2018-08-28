@@ -1,4 +1,5 @@
-Version 1.7.7
+Version 1.7.7 (August 27, 2018)
+- Added: Merged pull request from skyfish4tb for additional top tab control closing options. Thanks!
 - Added: OptionButton and Frame codetips.
 - Changed: Control refresh/repaint called when Text property changed.
 - Fixed: Regression: Ctrl/Shift Arrow keys not moving/resizing controls in designer.

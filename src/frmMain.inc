@@ -1726,7 +1726,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        "PAUL SQUIRES" & vbcrlf & _
                        "PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "Jos?Roca (WinFBX Framework)", _
+                       "José Roca (WinFBX Framework)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
