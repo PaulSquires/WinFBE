@@ -201,8 +201,8 @@ function InitiatePropertyValueChange() as Long
    dim pProp as clsProperty ptr = GetActivePropertyPtr()
    dim pCtrlForm as clsControl ptr = GetFormCtrlPtr(pDoc)
    dim as CWSTR wszValue, wszOldValue
-   dim txtFind(1 to 3) as string
-   dim txtReplace(1 to 3) as string
+   dim txtFind(3) as string
+   dim txtReplace(3) as string
    dim as long startPos, endPos, r
    
    if pProp THEN 
@@ -266,7 +266,7 @@ function InitiatePropertyValueChange() as Long
                dim as hwnd hEdit 
                dim as Boolean bReparse 
 
-               for i as long = lbound(txtReplace) to ubound(txtReplace)
+               for i as long = 1 to 3
                   if len(txtReplace(i)) = 0 then continue for
                   
                   For ii As Long = 0 To gApp.Projects(idx).GetDocumentCount - 1
@@ -1154,7 +1154,7 @@ End Function
 ' ========================================================================================
 ' frmVDToolbox Window procedure
 ' ========================================================================================
-Function frmVDToolbox_WndProc( ByVal HWnd   As HWnd, _
+Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
                                ByVal uMsg   As UINT, _
                                ByVal wParam As WPARAM, _
                                ByVal lParam As LPARAM _
@@ -1215,7 +1215,7 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    Dim nTop    As Long = (rcWork.Bottom - rcWork.Top - nHeight) / 2
       
    HWND_FRMVDTOOLBOX = _
-   pWindow->Create( hWndParent, L(352,"Toolbox"), @frmVDToolbox_WndProc, nLeft, nTop, 300, nHeight, _
+   pWindow->Create( hWndParent, L(352,"Toolbox"), @frmVDToolbox_SUBCLASSPROC, nLeft, nTop, 300, nHeight, _
         WS_POPUP Or WS_CAPTION or WS_SYSMENU or WS_THICKFRAME or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CLIENTEDGE)
    ' We will set our own mouse pointer as needed
@@ -1241,13 +1241,13 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTTOOLBOX, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or  _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTTOOLBOX, Cast(DWORD_PTR, @pWindow))
+        Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTTOOLBOX, Cast(DWORD_PTR, @pWindow))
 
    Dim As HWnd hList2 = _ 
         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTPROPERTIES, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_SORT or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTPROPERTIES, Cast(DWORD_PTR, @pWindow))
+        Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTPROPERTIES, Cast(DWORD_PTR, @pWindow))
 
    Dim As HWnd hLabel = _ 
    pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPNAME, "", 0, 0, 0, 0, _
@@ -1261,13 +1261,13 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTEVENTS, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTEVENTS, Cast(DWORD_PTR, @pWindow))
+        Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTEVENTS, Cast(DWORD_PTR, @pWindow))
    
    HWND_PROPLIST_EDIT = _
         pWindow->AddControl("TEXTBOX", hList2, IDC_FRMVDTOOLBOX_TEXTEDIT, "", 0, 0, 0, 0, _
             WS_CHILD Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
             0, , _
-            Cast(WNDPROC, @frmVDToolbox_TextEdit_SubclassProc), IDC_FRMVDTOOLBOX_TEXTEDIT, Cast(DWORD_PTR, @pWindow))
+            Cast(SUBCLASSPROC, @frmVDToolbox_TextEdit_SubclassProc), IDC_FRMVDTOOLBOX_TEXTEDIT, Cast(DWORD_PTR, @pWindow))
 
    DIM hBitmap AS HBITMAP
    HWND_PROPLIST_COMBO = _

@@ -460,7 +460,7 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
         TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
+        Cast(SUBCLASSPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
 
       ' Use the new style Explorer Treeview (triangles instead of boxes).
       ' Set an undocumented extended style that enables the treeview glyphs to resize

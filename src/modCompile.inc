@@ -311,7 +311,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
 
-
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
@@ -730,6 +729,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       End If
       
       ' Check for any compiler warnings
+      Error_Start = 0
       IsWarning = Instr(wst_ucase, WSTR(") WARNING "))
       If IsWarning Then Error_Start = IsWarning
       IsError   = Instr(wst_ucase, WSTR(") ERROR ")) 
@@ -740,16 +740,21 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
          'c:\freebasic\test.bas(1394) warning 1(1): Passing scalar as pointer, at parameter 2 (hwndOldFocus) of ONSETFOCUS()
          'sample error message
          'c:\freebasic\test.bas(17) error 41: Variable not declared, kjljjada in 'kjljjada Error'
-         Parenthesis_Start = Instr(1, wst, WSTR("("))
-         Parenthesis_End   = Instr(Parenthesis_Start, wst, WSTR(")"))
-         If (Parenthesis_Start < Parenthesis_End) And _
-            (Parenthesis_End <= Error_Start)      And _
-            (Error_Start > 0) Then
-   
-            wst1 = AfxStrParse(wst, 1, WSTR("("))   ' filename
+
+         ' Determine the line number. Error_Start variable holds the position of the closing
+         ' parenthesis of the line number. We simply need to reverse search from there for the
+         ' opening parenthesis.
+         ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
+         Parenthesis_End   = Error_Start
+         Parenthesis_Start = InStrRev(wst, WSTR("("), Parenthesis_End)
+         
+         If (Parenthesis_Start < Parenthesis_End) Andalso _
+            (Parenthesis_End <= Error_Start) then
+    
+            wst1 = left(**wst, Parenthesis_Start-1)   ' filename
             wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
             wst3 = Mid( **wst, Error_Start + 1)  ' error message
- 
+  
             ' If this is a visual designer form file then we need to modify the line
             ' number based on the error offset number.
             dim as long idx = gApp.GetActiveProjectIndex()
@@ -769,7 +774,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
             FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, wst2 )  ' line#
             FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, wst1 )  ' filename
             FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, wst3 )  ' error message
-            
+             
             If IsWarning Then 
                NumWarnings = NumWarnings + 1
             ElseIf IsError Then
@@ -779,6 +784,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
                NumErrors = NumErrors + 1
             End If            
          End If
+
       End If
  
    Next
@@ -789,40 +795,13 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
    ' the Output window (log file).
    If fGoodCompile = False Then NumErrors = NumErrors + 1
 
-   dim as CWSTR cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
-                                L(192, "Warnings:") & " " & NumWarnings 
-                                
+   dim as CWSTR cwsCompileMsg
 
-   If (NumWarnings = 0) AndAlso (NumErrors = 0) Then 
-      ' Hide the Output window is already open but there is no longer any warnings
-      ' or errors to show in the listview. Only close if the listview is active. Do not
-      ' close if the user is looking at the logfile textbox.
-      if bAllowSuccessMessage then  ' we are not compiling modules
-         if IsWindowVisible(HWND_FRMOUTPUT) THEN
-            if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
-               ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
-               frmMain_PositionWindows(HWND_FRMMAIN)
-            END IF   
-         END IF 
-         cwsCompileMsg = cwsCompileMsg + "  [ " + gCompile.OutputFilename + " ]"
-         SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
-         If gConfig.HideCompile = False Then
-            wst = wszOutputMsg & vbCrLf & _
-                  L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
-                  L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
-                  L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
-                  L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-            MessageBox( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
-         else
-            ' Simply sound a success
-            MessageBeep(MB_OK)
-         End If
-      end if
-   Else 
-      ' There were errors and/or warnings
-      If NumErrors > 0 Then gCompile.RunAfterCompile = False 
-      
-      cwsCompileMsg = cwsCompileMsg + "  [" + Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
+   ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
+   If (NumWarnings > 0) orelse (NumErrors > 0) then
+      cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
+                      L(192, "Warnings:") & " " & NumWarnings & _
+                      "  [" & Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
       
@@ -844,13 +823,53 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized
       SetDocumentErrorPosition(hLV, wID)
-      ' If Errors have occurred then return TRUE. We will allow processing
-      ' tocontinue if only Warnings occurred.
-      if NumErrors > 0 then return true
-   End If
+   end if
+   
+   ' If there were no errors or warnings then close any previously open compiler results listviews
+   If (NumWarnings = 0) andalso (NumErrors = 0) then
+      if IsWindowVisible(HWND_FRMOUTPUT) THEN
+         if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
+            ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
+            frmMain_PositionWindows(HWND_FRMMAIN)
+         END IF   
+      END IF 
+   end if
+   
+   If NumErrors = 0 Then 
+      ' 2018-08-29: Show popup compile message in cases where no errors but warnings may exist.
+      ' Hide the Output window is already open but there is no longer any warnings
+      ' or errors to show in the listview. Only close if the listview is active. Do not
+      ' close if the user is looking at the logfile textbox.
+      if bAllowSuccessMessage then  ' we are not compiling modules
+         cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
+                         L(192, "Warnings:") & " " & NumWarnings & _
+                         "  [ " & gCompile.OutputFilename & "  " & _
+                         FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & _
+                         "]"
+         SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
+         If gConfig.HideCompile = False Then
+            wst = wszOutputMsg & vbCrLf & _
+                  L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
+                  L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
+                  L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
+                  L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
+            MessageBox( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
+         else
+            ' Simply sound a success
+            MessageBeep(MB_OK)
+         End If
+      end if
+   End if 
 
+   ' If Errors have occurred then return TRUE. We will allow processing
+   ' to continue if only Warnings occurred.
+   ' There were errors then do not allow running the EXE (warnings are okay)
+   If NumErrors > 0 Then 
+      gCompile.RunAfterCompile = False 
+      return true
+   end if
+   
    function = false
-
 end function
 
 

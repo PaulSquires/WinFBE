@@ -1882,16 +1882,25 @@ End Function
 ' ========================================================================================
 Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, ByVal dwThreadId As DWORD) As LRESULT
 
+   Dim pDoc As clsDocument Ptr
+   
+   ' If the application is losing focus then validate any currently editing peroperty
+   ' in the ToolBox PropertyList.
+   If fActivate = false Then
+      pDoc = gTTabCtl.GetActiveDocumentPtr()
+      DisplayPropertyList(pDoc)
+      exit function
+   end if
+      
    ' If the application is gaining focus then determine if any of the loaded
    ' documents have been modified by an external application. If yes, then ask
    ' the user if wish to reload.
-   If fActivate Then
+   If fActivate = true Then
       ' Search all loaded documents
       Dim As FILETIME ft
       Dim As Long i, idx, nDocumentCount
       Dim As Double nSerial
       Dim As String sText
-      Dim pDoc As clsDocument Ptr
       
       for idx = 0 to gApp.GetProjectCount
          
@@ -2528,7 +2537,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
       IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
       WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
       TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING, , _
-      Cast(WNDPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
+      Cast(SUBCLASSPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
     
    ' Create the imagelist for the TopTabControl tabs
    cx = 16 * (pWindow->DPI \ 96)
@@ -2645,8 +2654,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                         if GetDlgCtrlID(GetFocus) = IDC_SCINTILLA then 
                            if uMsg.wParam = VK_DELETE then
                               frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
+                              continue do
                            end if   
-                           continue do
                         end if
                      end if
                   end if

@@ -1,6 +1,18 @@
+Version 1.7.8 (September 4, 2018)
+- Added: Resulting file size of successful compiled EXE now shows in the status bar.
+- Fixed: Compile error output not correctly parsed in cases where filenames contain embedded parenthesis.
+- Fixed: Situation where editing property and switching to different control could cause the property value to transfer to that control incorrectly.
+- Changed: FB 32/64 compilers updated to Sept 2, 2018, nightly build.
+- Changed: GCC compiler updated to version 8.1.
+- Changed: Merged both 32 and 64 bit FB compilers into one folder.
+- Changed: Updated code (WinFBE, WinFormsX, WinFBX) to prevent warnings due to stricter CAST type checking in latest FB nightly build compiler.
+- Changed: Successful compile popup messagebox will now display in cases where only compiler warnings (and no errors) exist.
+- Changed: Environment option "Hide successful compile results message" changed to "Hide compile results message (popup)". Non-English language files will need to be updated.
+
 Version 1.7.7 (August 27, 2018)
 - Added: Merged pull request from skyfish4tb for additional top tab control closing options. Thanks!
 - Added: OptionButton and Frame codetips.
+- Added: Form Initialize event.
 - Changed: Control refresh/repaint called when Text property changed.
 - Fixed: Regression: Ctrl/Shift Arrow keys not moving/resizing controls in designer.
 - Fixed: Regression: GPF when ListBox row selection changed.

@@ -285,7 +285,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _
         TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEVIEW, Cast(DWORD_PTR, @pWindow))
+        Cast(SUBCLASSPROC, @frmRecent_Tree_SubclassProc), IDC_FRMRECENT_TREEVIEW, Cast(DWORD_PTR, @pWindow))
 
    Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )

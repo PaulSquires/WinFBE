@@ -415,7 +415,7 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
             pCtrl->hWindow = pWindow->AddControl( GetControlClassName(pCtrl), , 100, wszDefaultControlName, _
                              rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top, _
                              dwStyle, dwExStyle, , _
-                             CAST(WNDPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+                             CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
       end select
    END IF
 

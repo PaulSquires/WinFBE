@@ -400,7 +400,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LISTVIEW, "", 0, 0, 0, 0, _
       WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS or LVS_SINGLESEL, _
       WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-      Cast(WNDPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LISTVIEW, Cast(DWORD_PTR, @pWindow))
+      Cast(SUBCLASSPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LISTVIEW, Cast(DWORD_PTR, @pWindow))
                                      
    ' Make the listview header flat
    ListView_MakeHeaderFlat(hLV)
@@ -428,7 +428,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
       pWindow->AddControl("LISTVIEW", , IDC_FRMOUTPUT_LVTODO, "", 0, 0, 0, 0, _
       WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS or LVS_SINGLESEL, _
       WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-      Cast(WNDPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LVTODO, Cast(DWORD_PTR, @pWindow))
+      Cast(SUBCLASSPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LVTODO, Cast(DWORD_PTR, @pWindow))
                                      
    ' Make the listview header flat
    ListView_MakeHeaderFlat(hLV)

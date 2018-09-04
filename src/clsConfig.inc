@@ -930,7 +930,6 @@ Function clsConfig.LoadConfigFile() as Long
 
          Case "CompilerSwitches":     
             this.CompilerSwitches     = wData
-? this.CompilerSwitches, wData         
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
          Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData

@@ -371,7 +371,7 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
         pWindow->AddControl("LISTBOX", , IDC_FRMFNLIST_LISTBOX, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_HSCROLL Or LBS_MULTICOLUMN Or LBS_NOINTEGRALHEIGHT Or _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(WNDPROC, @frmFnList_ListBox_SubclassProc), IDC_FRMFNLIST_LISTBOX, Cast(DWORD_PTR, @pWindow))
+        Cast(SUBCLASSPROC, @frmFnList_ListBox_SubclassProc), IDC_FRMFNLIST_LISTBOX, Cast(DWORD_PTR, @pWindow))
    
    ' Can not use a variable height multicolumn listbox because Microsoft says the following:
    ' "  The LBS_MULTICOLUMN and LBS_OWNERDRAWVARIABLE styles cannot be combined. If both are "

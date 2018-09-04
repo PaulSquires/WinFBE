@@ -1,8 +1,8 @@
 set FBLIBDIR=win64
-set FBCPATH=X:\FB\WinFBE_Suite-Editor\FreeBASIC-1.06.0-win64
+set FBCPATH=X:\FB\WinFBE_Suite-Editor\FreeBASIC-1.06.0
 
 cd src
-%FBCPATH%\fbc WinFBE.bas -x ..\WinFBE64.exe WinFBE.rc -s gui
+%FBCPATH%\fbc64 WinFBE.bas -x ..\WinFBE64.exe -O 2 WinFBE.rc -s gui
 cd ..
 
 @if ErrorLevel 1 goto compileerror
