@@ -16,7 +16,7 @@
 
 #INCLUDE ONCE "Afx\CWSTR.inc"
 #INCLUDE ONCE "Afx\CFindFile.inc"
-
+#INCLUDE ONCE "Afx\AfxFile.inc"
 
 #Define APPNAME       WStr("LangEdit")
 #Define APPVERSION    WStr("1.0.0") 
@@ -27,14 +27,14 @@
    #Define APPBITS WStr(" (32-bit)")
 #endif
 
+#Define MAXPHRASES  400
 
 
 #INCLUDE ONCE "clsLanguage.inc"
 #INCLUDE ONCE "modRoutines.inc"
 #INCLUDE ONCE "frmMain.inc"
 
-
-   
+  
 
 ''
 ''  

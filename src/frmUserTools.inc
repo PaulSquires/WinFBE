@@ -103,9 +103,15 @@ Function ExecuteUserTool( ByVal nToolNum As Long ) As Long
    ' Is the specified working folder valid? If it is not, then maybe try same path 
    ' but use the current drive.
    wszWorkingFolder = gConfig.Tools(nToolNum).wszWorkingFolder
+
+
    If Len(wszWorkingFolder) Then
+      ' Convert relative path to absolute path if needed.
+      if AfxPathIsRelative(wszWorkingFolder) then
+         wszWorkingFolder = AfxPathCombine(AfxGetExePathName, wszWorkingFolder)
+      END IF
       if AfxPathIsDirectory(wszWorkingFolder) = false then
-         wszWorkingFolder = left(**AfxGetExePathName, 1) + mid(wszWorkingFolder, 2)
+         wszWorkingFolder = left(AfxGetExePathName, 1) + mid(**wszWorkingFolder, 2)
       end if
       ChDir gConfig.Tools(nToolNum).wszWorkingFolder
    End If
@@ -113,8 +119,12 @@ Function ExecuteUserTool( ByVal nToolNum As Long ) As Long
    ' Is the specified exe command to execute valid? If it is not, then maybe try same path 
    ' but use the current drive.
    wszCommand = gConfig.Tools(nToolNum).wszCommand 
+   ' Convert relative path to absolute path if needed.
+   if AfxPathIsRelative(wszCommand) then
+      wszCommand = AfxPathCombine(AfxGetExePathName, wszCommand)
+   END IF
    if AfxPathFileExists(wszCommand) = false THEN
-      wszCommand = left(**AfxGetExePathName, 1) + mid(wszCommand, 2)
+      wszCommand = left(AfxGetExePathName, 1) + mid(**wszCommand, 2)
    END IF
    wszCommand = chr(34) + wszCommand + chr(34)
    
