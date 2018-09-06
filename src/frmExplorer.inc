@@ -310,6 +310,7 @@ Function frmExplorer_Tree_SubclassProc ( _
          pDoc = Cast(clsDocument Ptr, lParam)
          TreeView_GetItemText(hTree, hItem, @wszText, MAX_PATH)
          OpenSelectedDocument(pDoc, wszText)
+         TreeView_SelectItem(hTree, hItem)
          Exit Function
          
       Case WM_KEYUP

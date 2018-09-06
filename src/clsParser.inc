@@ -174,11 +174,14 @@ function clsParser.InspectLine() as boolean
          if len(sTemp) THEN 
             this.action = ACTION_PARSEPARAMETERS
             nCount = AfxStrParseCount(sTemp, ",")
+            dim as long tlineNum = this.lineNum
+            this.lineNum = this.funcLineNum
             for i = 1 to nCount
                this.st = trim(AfxStrParse(sTemp, i, ","))
                this.st_ucase = ucase(this.st)
                this.parseVariableDefinitions
             NEXT
+            this.lineNum=tlineNum
          end if
          
          ' Reset our function variables
@@ -226,7 +229,12 @@ function clsParser.parseVariableDefinitions() as boolean
       sTemp = mid(this.st, 12)
    elseif left(this.st_ucase, 4) = "DIM " THEN
       sTemp = mid(this.st, 5)
-   elseif left(this.st_ucase, 6) = "REDIM " THEN
+   elseif left(this.st_ucase, 13) = "REDIM SHARED " THEN
+      sTemp = mid(this.st, 14)
+   elseif left(this.st_ucase, 15) = "REDIM PRESERVE " THEN
+      return false
+   elseif left(this.st_ucase, 6) = "REDIM " THEN 
+      if instr(this.st_ucase, " AS ")=0 then return false
       sTemp = mid(this.st, 7)
    elseif left(this.st_ucase, 3) = "AS " then
       ' This type of declare syntax can only be valid inside a class/TYPE
@@ -262,16 +270,25 @@ function clsParser.parseVariableDefinitions() as boolean
    ' var1 as Long Pointer
    if len(sTemp) = 0 THEN return false
 
-   ' Remove any initializers
+   ' Remove any text and array parenthesis.
+   ' For example: "AS WString * MAX_PATH wszText=GETT("FFFF"), wszName ="TTTT""
+   sTemp = AfxStrRemove(sTemp, """", """", true ) 
+   sTemp = AfxStrRemoveWithMark(sTemp, "(", ")","",true,true) 
+
+   ' Remove any initializers 
    n = instr(sTemp, "=")
-   if n THEN sTemp = rtrim(left(sTemp, n-1))
+   if n THEN
+       sTemp = AfxStrRemoveWithMark(sTemp, "=", ",", ",", true, false) 
+       n = instr(sTemp, "=")
+       if n THEN 
+           sTemp =rtrim(left(sTemp, n-1))
+       end if
+   end if
    
    ' Remove all Pointer references (we don't need them)
    sTemp = AfxStrRemoveI(sTemp, " ptr")
    sTemp = AfxStrRemoveI(sTemp, " pointer")
    
-   ' Remove any text and array parenthesis.
-   sTemp = AfxStrRemove(sTemp, "(", ")", true )
    
              
    sTemp_ucase = ucase(sTemp)
@@ -285,9 +302,27 @@ function clsParser.parseVariableDefinitions() as boolean
       this.varType = mid(sTemp, 4, n-4) 
       ' Next is a comma separated list of elements DIM'd as the datatype
       sList = mid(sTemp, n)
+      n = instr(sList, ",")
+      if n then
+         n = instrrev(sList, " ",n)
+         if n then sList = mid(sList, n+1)
+      ELSE
+         n = instrrev(sList, " ") 
+         if n then sList = mid(sList, n+1) 
+      end if
       numParts = AfxStrParseCount(sList, ",")
       for i as long = 1 to numParts
          this.varName = trim(AfxStrParse(sList, i, ","), any " :")
+         gdb2.dbAdd(this, DB2_VARIABLE)
+      NEXT
+      return true
+   elseIF instr(sTemp, ",") THEN
+      'For example: "S1 AS Long , S2 AS BOOLEAN , ZZ AS WString * MAX_PATH"
+      numParts = AfxStrParseCount(sTemp, ",")
+      for i as long = 1 to numParts
+         sList= trim(AfxStrParse(sTemp, i, ","), any " :")
+         this.varName = AfxStrParse(sList, 1, " ") 
+         this.varType = trim(AfxStrParse(sList, 3, " "), any " :") 
          gdb2.dbAdd(this, DB2_VARIABLE)
       NEXT
       return true
@@ -365,7 +400,7 @@ function clsParser.parseENUM() as boolean
    
    ' CHECK FOR THE START OF AN ENUM STRUCTURE.
    if len(st_ucase) > 3 THEN 
-      if left(st_ucase, 4) = "ENUM" THEN
+      if left(st_ucase, 5) = "ENUM " or st_ucase = "ENUM" THEN
          ' An ENUM can have a name associated with it and also the "explicit" keyword
          ' eg.  ENUM myEnum Explicit
          ' Therefore, the ENUM name is always Parse = 2
