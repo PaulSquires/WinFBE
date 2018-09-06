@@ -1,3 +1,7 @@
+Version 1.7.9 (September 1.7.9)
+- Fixed: Relative paths in User Tools commands failing after compiles (a compile would change current folder).
+- Fixed: Per 1.7.8, accidently neglected to include latest FBC nightly build and GCC 8.1. It is now included in 1.7.9.
+
 Version 1.7.8 (September 4, 2018)
 - Added: Resulting file size of successful compiled EXE now shows in the status bar.
 - Fixed: Compile error output not correctly parsed in cases where filenames contain embedded parenthesis.

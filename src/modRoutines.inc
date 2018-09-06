@@ -508,9 +508,9 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    else
       zText = AfxGetExePathName
    end if      
-   Dim wzCurDrive As CWSTR = LCase(Left(**zText, 3))  ' eg. D:\
+   Dim wzCurDrive As CWSTR = LCase(Left(zText, 3))  ' eg. D:\
 
-   If LCase(Left(**wzFilename, 3)) = wzCurDrive Then 
+   If LCase(Left(wzFilename, 3)) = wzCurDrive Then 
       wzFilename = WSTR("{CURDRIVE}") & Mid(**wzFilename, 2)
    End If
 
@@ -533,8 +533,8 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    else
       zText = AfxGetExePathName
    end if      
-   If Ucase(Left(**wzFilename, 10)) = WSTR("{CURDRIVE}") Then 
-      wzFilename = Left(**zText, 1) & Mid(wzFilename, 11)
+   If Ucase(Left(wzFilename, 10)) = WSTR("{CURDRIVE}") Then 
+      wzFilename = Left(zText, 1) & Mid(wzFilename, 11)
    End If
 
    Return wzFilename
