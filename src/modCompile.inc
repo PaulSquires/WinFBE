@@ -730,9 +730,9 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       
       ' Check for any compiler warnings
       Error_Start = 0
-      IsWarning = Instr(wst_ucase, WSTR(") WARNING "))
+      IsWarning = Instr(**wst_ucase, WSTR(") WARNING "))
       If IsWarning Then Error_Start = IsWarning
-      IsError   = Instr(wst_ucase, WSTR(") ERROR ")) 
+      IsError   = Instr(**wst_ucase, WSTR(") ERROR ")) 
       If IsError Then Error_Start = IsError
       
       If (Error_Start > 0) Then 
@@ -746,7 +746,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
          ' opening parenthesis.
          ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
          Parenthesis_End   = Error_Start
-         Parenthesis_Start = InStrRev(wst, WSTR("("), Parenthesis_End)
+         Parenthesis_Start = InStrRev(**wst, WSTR("("), Parenthesis_End)
          
          If (Parenthesis_Start < Parenthesis_End) Andalso _
             (Parenthesis_End <= Error_Start) then

@@ -467,7 +467,7 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
                               true, _     ' bShowInTab
                               false, _    ' bIsInclude
                               "", _       ' pwszName
-                              pDoc )  ' pDocIn
+                              pDoc )      ' pDocIn
    else   
       if AfxFileExists(wszText) = 0 THEN exit function
       ' Display the document containing the selected sub/function       
@@ -477,7 +477,7 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
                               true, _     ' bShowInTab
                               false, _    ' bIsInclude
                               wszText, _  ' pwszName
-                              0 )  ' pDocIn
+                              0 )         ' pDocIn
    end if
 
    ' Set the top line to display in the editor. I chose to start 3 lines before the
@@ -1290,4 +1290,16 @@ FUNCTION LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTR
 END FUNCTION
 ' ========================================================================================
 
-
+FUNCTION AfxStrRemoveWithMark (BYREF wszMainStr AS CONST WSTRING, BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, BYREF MarkKeys AS CONST WSTRING="", BYVAL fRemoveAll AS BOOLEAN = FALSE, BYVAL IsInstrRev AS BOOLEAN = FALSE) AS CWSTR
+   DIM nPos1 AS LONG =iif(IsInstrRev=true, INSTRRev(wszMainStr, wszDelim1), INSTR(wszMainStr, wszDelim1))
+   IF nPos1 = 0 THEN RETURN wszMainStr
+   DIM nPos2 AS LONG = INSTR(nPos1 + LEN(wszDelim1), wszMainStr, wszDelim2)
+   IF nPos2 = 0 THEN RETURN wszMainStr
+   nPos2 += LEN(wszDelim2)
+   DIM nLen AS LONG = nPos2 - nPos1
+   IF fRemoveAll = FALSE THEN 
+      RETURN MID(wszMainStr, 1, nPos1 - 1)& MarkKeys & MID(wszMainStr, nPos2)
+   else
+      RETURN AfxStrRemoveWithMark(MID(wszMainStr, 1, nPos1 - 1) & MarkKeys & MID(wszMainStr, nPos2), wszDelim1, wszDelim2,MarkKeys, fRemoveAll,IsInstrRev)  
+   end if
+END FUNCTION

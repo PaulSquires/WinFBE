@@ -36,7 +36,7 @@
 '      Function MyType.CalculateAmount( ByVal nDollars As Single ) As Single  
 '         ' ElementName = MyType.CalculateAmount.nDollars   ElementValue = Single
 '         Dim n As Long        ' ElementName = MyType.CalculateAmount.n   ElementValue = Long
-'         Dim rc As RECT       ' ElementName = MyType.CalculateAmount.m   ElementValue = RECT
+'         Dim rc As RECT       ' ElementName = MyType.CalculateAmount.rc  ElementValue = RECT
 '      End Function
 '
 ' eg. (Standalone Function)
