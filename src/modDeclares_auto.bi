@@ -283,3 +283,4 @@ Declare Function frmMain_TabCtl_SubclassProc ( ByVal HWnd As HWnd, ByVal uMsg As
 Declare Function frmMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmMain_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
 Declare Function WinMain( ByVal hInstance As HINSTANCE, ByVal hPrevInstance As HINSTANCE, ByVal szCmdLine As ZString Ptr, ByVal nCmdShow As Long ) As Long
+Declare FUNCTION AfxStrRemoveWithMark (BYREF wszMainStr AS CONST WSTRING, BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, BYREF MarkKeys AS CONST WSTRING="", BYVAL fRemoveAll AS BOOLEAN = FALSE, BYVAL IsInstrRev AS BOOLEAN = FALSE) AS CWSTR

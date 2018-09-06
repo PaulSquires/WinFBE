@@ -484,12 +484,12 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ''
 ''  Application in-memory database
 ''
-const DB2_VARIABLE    = 1
-const DB2_FUNCTION    = 2
-const DB2_SUB         = 3
-const DB2_PROPERTY    = 4
-const DB2_TYPE        = 5
-const DB2_TODO        = 6
+const DB2_VARIABLE         = 1
+const DB2_FUNCTION         = 2
+const DB2_SUB              = 3
+const DB2_PROPERTY         = 4
+const DB2_TYPE             = 5
+const DB2_TODO             = 6
 const DB2_STANDARDDATATYPE = 7    ' long, integer, string, etc...
 
 type DB2_DATA
