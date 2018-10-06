@@ -376,6 +376,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Next
    End If
 
+   ' Attempt to delete any existing output file so it will not exist
+   ' should the compile fail.
+   if AfxFileExists(gCompile.OutputFilename) then
+      kill gCompile.OutputFilename
+   end if
+
    wst = L(203, "Compiling...") + " " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
    SetCompileStatusBarMessage( wst, 0 )
    AfxDoEvents
@@ -797,6 +803,13 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
 
    dim as CWSTR cwsCompileMsg
 
+   ' If the output file was never created then throw an error
+   If (NumWarnings = 0) andalso (NumErrors = 0) then
+      if FileLen(gCompile.OutputFilename) = 0 then 
+         NumErrors = NumErrors + 1
+      end if
+   end if
+   
    ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
    If (NumWarnings > 0) orelse (NumErrors > 0) then
       cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
@@ -834,7 +847,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
          END IF   
       END IF 
    end if
-   
+
    If NumErrors = 0 Then 
       ' 2018-08-29: Show popup compile message in cases where no errors but warnings may exist.
       ' Hide the Output window is already open but there is no longer any warnings
