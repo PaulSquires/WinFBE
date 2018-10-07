@@ -1,3 +1,7 @@
+Version 1.8.1 (October 7, 2018)
+- Fixed: Regression causing build combobox to immediately close when clicked.
+- Changed: Updated the Spanish language file (thanks Jose Roca).
+
 Version 1.8.0 (October 6, 2018)
 - Added: Merged pull request 7c5fb4d from skyfishtb. Parsing of ENUM and REDIM.
 - Added: Delete any previously existing compile output file (ie. .EXE, .DLL, .a) so it will not exist should the compile fail.
