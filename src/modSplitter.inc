@@ -68,9 +68,11 @@ End Function
 ' Process WM_LBUTTONUP message for splitter
 ' ========================================================================================
 Function Splitter_OnLButtonUp() As BOOLEAN
-   ReleaseCapture()
-   gApp.bDragActive = False 
-   gApp.hWndPanel = 0
+   if gApp.bDragActive then
+      ReleaseCapture()
+      gApp.bDragActive = False 
+      gApp.hWndPanel = 0
+   end if
    Function = 0
 End Function
 
