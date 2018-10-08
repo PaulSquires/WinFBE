@@ -11,6 +11,20 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+Function Listbox_ResetContentEx() As Long
+   Dim As HWnd hList  = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
+   dim as Type4lParam ptr pType4lParam
+   
+   ' Search for a match
+   For i As Long = 0 To Listbox_GetCount(hList) - 1
+      pType4lParam = Cast(Type4lParam ptr, ListBox_GetItemData(hList, i))
+      if pType4lParam THEN
+         Delete pType4lParam 
+      END IF
+   Next
+   ' Clear the listbox and add the new items
+   RETURN Listbox_ResetContent(hList) 
+end function
 
 ' ========================================================================================
 ' Set the Listbox selected item to the currently selected open document (if applicable)
@@ -24,12 +38,17 @@ Function frmFnList_SetListBoxPosition() As Long
 
    Dim As HWnd hList  = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
    Dim As Long nCount = Listbox_GetCount(hList)
+   dim as Type4lParam ptr pType4lParam
    
    ' Search for a match
    For i As Long = 0 To nCount - 1
-      pDoc = Cast(clsDocument ptr, ListBox_GetItemData(hList, i))
-      if pDoc = pDocActive THEN
-         nCurSel = i: Exit For
+      pType4lParam = Cast(Type4lParam ptr, ListBox_GetItemData(hList, i))
+      if pType4lParam then         
+         if pType4lParam->eType = ELP_pclsDocument THEN         
+            if pType4lParam->pDoc = pDocActive THEN
+               nCurSel = i: Exit For
+            END IF
+         END IF
       END IF
    Next
    
@@ -47,40 +66,77 @@ Function frmFnList_UpdateListBox() As Long
    Dim As HWnd hList = GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
    
    ' Clear the listbox and add the new items
-   Listbox_ResetContent(hList)
+   Listbox_ResetContentEx()
    
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   Dim As HTREEITEM hChild, hParent
+   Dim As HTREEITEM hChild, hParent,hChild2
    dim as long p, pDoc, idx
-   dim wszText as wstring * MAX_PATH
+   dim as wstring * MAX_PATH  wszText,wszClass
    
    dim as long nFirstProject = iif(gApp.IsProjectActive, 1, 0)
    Dim As Long nProjectCount = gApp.GetProjectCount()
-   
+   dim as Type4lParam ptr pType4lParam
+   Dim As LPARAM lParam 
    For idx = nFirstProject To nProjectCount 
       if gApp.Projects(idx).InUse = false THEN continue for
 
       hParent = Treeview_GetChild( hTree, gApp.Projects(gApp.GetActiveProjectIndex).hExplorerRootNode)
-      do until hParent = 0 
-         ' Filename
-         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
-         pDoc = FF_TreeView_GetlParam(hTree, hParent)
-         wszText = ucase(wszText)
-         p = Listbox_AddString( hList, strptr(wszText) )
-         ListBox_SetItemData( hList, p, pDoc )    ' pDoc is stored for a header
-         
-         ' Get all functions in the file
-         hChild = Treeview_GetChild( hTree, hParent)
-         do until hChild = 0 
-            Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+      DIM item AS TVITEMW
+      with item
+         .mask = TVIF_TEXT Or TVIF_IMAGE
+         .cchTextMax = MAX_PATH
+         do until hParent = 0 
+            ' Filename
+            Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
+             
+            lParam = FF_TreeView_GetlParam(hTree, hParent)
+            wszText = ucase(wszText)
             p = Listbox_AddString( hList, strptr(wszText) )
-            ListBox_SetItemData( hList, p, 0 )
-            hChild = Treeview_GetNextSibling(hTree, hChild)
+            pType4lParam=new Type4lParam
+            pType4lParam->eType=ELP_pclsDocument
+            pType4lParam->pDoc=cast(clsDocument ptr , lParam)
+            ListBox_SetItemData( hList, p, pType4lParam )    ' pDoc is stored for a header
+            
+            ' Get all functions in the file
+            hChild = Treeview_GetChild( hTree, hParent)
+            do until hChild = 0
+               .hitem = hChild
+               .pszText = @wszClass
+               TreeView_GetItem(hTree, @item)
+               select case .iImage
+               case II4E_TYPE4CLASS,II4E_TYPE4CLASS2
+                     .pszText = @wszText
+                     hChild2 = Treeview_GetChild( hTree, hChild)
+                     do until hChild2 = 0
+                        .hitem = hChild2
+                        TreeView_GetItem(hTree, @item)
+                        select case .iImage
+                        case II4E_TYPE4FUNCTION,II4E_TYPE4FUNCTION2,II4E_TYPE4SUB, _
+                          II4E_TYPE4SUB2, II4E_TYPE4PROPERTY,II4E_TYPE4PROPERTY2
+                          wszText = wszClass +"." + wszText
+                          p = Listbox_AddString( hList, strptr(wszText) )
+                          pType4lParam=new Type4lParam
+                          pType4lParam->eType=ELP_hTreeItem
+                          pType4lParam->hNode=hChild2
+                          ListBox_SetItemData( hList, p, pType4lParam )
+                        end select
+                        hChild2 = Treeview_GetNextSibling(hTree, hChild2)
+                     loop
+               case II4E_TYPE4FUNCTION,II4E_TYPE4FUNCTION2,II4E_TYPE4SUB, _
+                    II4E_TYPE4SUB2, II4E_TYPE4PROPERTY,II4E_TYPE4PROPERTY2
+                     p = Listbox_AddString( hList, strptr(wszClass) )
+                     pType4lParam=new Type4lParam
+                     pType4lParam->eType=ELP_hTreeItem
+                     pType4lParam->hNode=hChild
+                     ListBox_SetItemData( hList, p, pType4lParam )
+               end select
+               hChild = Treeview_GetNextSibling(hTree, hChild)
+            loop
+            
+            ' Get the next filename
+            hParent = Treeview_GetNextSibling(hTree, hParent)
          loop
-         
-         ' Get the next filename
-         hParent = Treeview_GetNextSibling(hTree, hParent)
-      loop 
+      end with 
 
    Next
    
@@ -104,8 +160,15 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
             dim pDoc as clsDocument ptr
             dim wszText as wstring * MAX_PATH
             ListBox_GetText( hwndCtl, nCurSel, @wszText )
-            pDoc = cast(clsDocument ptr, Listbox_GetItemData(hWndCtl, nCurSel))
-            OpenSelectedDocument(pDoc, wszText)
+            dim as Type4lParam ptr pType4lParam =cast(Type4lParam ptr, Listbox_GetItemData(hWndCtl, nCurSel))
+            if pType4lParam then
+               select case pType4lParam->eType
+                  case ELP_hTreeItem 
+                     OpenSelectedDocument(0, wszText, pType4lParam->hNode)
+                  case ELP_pclsDocument 
+                     OpenSelectedDocument(pType4lParam->pDoc, wszText,0)
+               end select
+            end if
             If gConfig.CloseFuncList Then ShowWindow( HWND_FRMFNLIST, SW_HIDE )
          end if      
    End Select
@@ -174,7 +237,7 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
 
    Dim As HBRUSH hBrush 
    Dim As HFONT hFont, hFontOld
-   dim as BOOLEAN bIsHeader
+   dim as BOOLEAN bIsHeader = false
    Dim As Rect rc 
    Dim wzText As WString * MAX_PATH
    
@@ -197,7 +260,12 @@ Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEM
          
          ' Determine what font to use and if itès a header line then only show
          ' the filename's name and extension (not full path)
-         bIsHeader = iif(lpdis->itemData, true, false)
+         dim as Type4lParam ptr pType4lParam =cast(Type4lParam ptr,lpdis->itemData)
+         if pType4lParam then         
+            if pType4lParam->eType = ELP_pclsDocument THEN
+               bIsHeader =  true
+            END IF
+         END IF
          if bIsHeader then wzText = AfxStrPathname( "NAMEX", wzText )
          hFont = pWindow->CreateFont("", 9, iif(bIsHeader, FW_BOLD, FW_NORMAL) )
 
@@ -230,6 +298,7 @@ End Function
 ' Process WM_DESTROY message for window/dialog: FnList
 ' ========================================================================================
 Function frmFnList_OnDestroy(HWnd As HWnd) As LRESULT
+   Listbox_ResetContentEx()
    HWND_FRMFNLIST = 0
    Function = 0
 End Function

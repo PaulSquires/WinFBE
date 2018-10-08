@@ -555,15 +555,7 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
    dim as HWND hCtl
 
    gReplaceOpen = fShowReplace
-   
-   ' If the FindReplace window already exists then simply set focus to it and exit.
-   If IsWindowVisible(HWND_FRMFINDREPLACE) Then
-      frmFindReplace_ShowControls
-      hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND )
-      if len(AfxGetWindowText(hCtl)) then Edit_SetSel(hCtl, 0, -1)
-      SetFocus hCtl 
-      Exit Function
-   End If
+
   
       
    '  Create the main window and child controls
@@ -595,6 +587,16 @@ Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BO
       sFindText = pDoc->GetSelText
    END IF
    
+   ' If the FindReplace window already exists then simply set focus to it and exit.
+   If IsWindowVisible(HWND_FRMFINDREPLACE) Then
+      frmFindReplace_ShowControls
+      hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND )
+      if len(sFindText) then AfxSetWindowText(hCtl,sFindText) 
+      if len(AfxGetWindowText(hCtl)) then Edit_SetSel(hCtl, 0, -1)
+      SetFocus hCtl 
+      Exit Function
+   End If
+      
    HWND_FRMFINDREPLACE = _
    pWindow->Create(hWndParent, "FINDREPLACE", @frmFindReplace_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _

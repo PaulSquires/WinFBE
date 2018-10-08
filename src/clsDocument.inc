@@ -379,7 +379,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    dim as Boolean bIsValidControl = true
    
    ' The first line MUST contain the identifier that this is a form file.
-   if left(wszAllText, 13) = "' WINFBE FORM" then
+   if WStrNIsEqual(wszAllText, "' WINFBE FORM", 13) = true then
       this.IsDesigner = true
       ' Remove any previously created controls, etc otherwise reloading the form
       ' file will result in duplicates.
@@ -408,20 +408,20 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       
       numOffsetLines = numOffsetLines + 1
       
-      if left(wst, 15) = "' LOCKCONTROLS=" then
+      if WStrNIsEqual(wst, "' LOCKCONTROLS=", 15) = true then
          wszPropValue = mid(**wst, 16)
          if wszPropValue = "True" then this.bLockControls = true
       end if
       
-      if left(wst, 17) = "' WINFBE FORM_END" then
+      if WStrNIsEqual(wst, "' WINFBE FORM_END", 17) = true then
          this.ErrorOffset = numOffsetLines 
       
-      elseif left(wst, 20) = "' WINFBE_CODEGEN_END" then
+      elseif WStrNIsEqual(wst, "' WINFBE_CODEGEN_END", 20) = true then
          this.ErrorOffset = numOffsetLines 
          wszAllText = ltrim(AfxStrRemain( wszAllText, "' WINFBE_CODEGEN_END" ), vbcrlf)
          return wszAllText
          
-      elseif left(wst, 23) = "' WINFBE CONTROL_START " then
+      elseif WStrNIsEqual(wst, "' WINFBE CONTROL_START ", 23) = true then
          ' The control type name is parse #4 (blank space)
          wszControlType = AfxStrParse(wst, 4, " ")
          nControlType = GetControlType(wszControlType)
@@ -434,21 +434,21 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
             pCtrlActive = pCtrl
          end if
          
-      elseif left(wst, 20) = "' WINFBE CONTROL_END" then
+      elseif WStrNIsEqual(wst, "' WINFBE CONTROL_END", 20) = true then
          if bIsValidControl then
             pCtrl->SuspendLayout = true
             ApplyControlProperties( @this, pCtrl )
             pCtrl->SuspendLayout = false
          end if
-      'elseif left(sLine, 20) = "'   PROPERTIES_START" then
-      'elseif left(sLine, 18) = "'   PROPERTIES_END" then
+      'elseif StrNIsEqual(wst, "'   PROPERTIES_START", 20) = True then
+      'elseif StrNIsEqual(wst, "'   PROPERTIES_END", 18) = True then
 
-      elseif left(wst, 16) = "'     PROP_NAME=" then
+      elseif WStrNIsEqual(wst, "'     PROP_NAME=", 16) = true then
          if bIsValidControl then
             wszPropName = mid(**wst, 17)
          end if
          
-      elseif left(wst, 17) = "'     PROP_VALUE=" then
+      elseif WStrNIsEqual(wst, "'     PROP_VALUE=", 17) = true then
          if bIsValidControl then
             wszPropValue = mid(**wst, 18)   ' utf8 encoded 
             ' Only set the loading property if it exists in the current property
@@ -463,10 +463,10 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
             end if
          end if
          
-      'elseif left(sLine, 16) = "'   EVENTS_START" then
-      'elseif left(sLine, 14) = "'   EVENTS_END" then
+      'elseif StrNIsEqual(wst, "'   EVENTS_START", 16) = True then
+      'elseif StrNIsEqual(wst, "'   EVENTS_END", 14) = True then
 
-      elseif left(wst, 17) = "'     EVENT_NAME=" then
+      elseif WStrNIsEqual(wst, "'     EVENT_NAME=", 17) = true then
          if bIsValidControl then
             wszEventName = mid(**wst, 18)
             SetControlEvent(pCtrl, wszEventName, true)
@@ -805,32 +805,36 @@ Function clsDocument.GetCurrentFunctionName() As string
       sFuncName = ""
          
       ' If we reached the bottom of a previous Sub/Function then exit out
-      if (left(sText, 12) = "END FUNCTION") orelse _
-         (left(sText, 7) = "END SUB") orelse _
-         (left(sText, 12) = "END PROPERTY") then
+      if (StrNIsEqual(sText, "END FUNCTION", 12) = True) orelse _
+         (StrNIsEqual(sText, "END SUB", 7) = True) orelse _
+         (StrNIsEqual(sText, "END PROPERTY", 12) = True) orelse _
+         (StrNIsEqual(sText, "END CONSTRUCTOR", 15) = True) orelse _
+         (StrNIsEqual(sText, "END DESTRUCTOR", 14) = True) then
          exit function
       END IF
-
-      If Left(sText, 9)  = "FUNCTION " then
-         sFuncName = ltrim(mid(sText, 9))
-      elseif Left(sText, 16) = "PUBLIC FUNCTION " then
-         sFuncName = ltrim(mid(sText, 16))
-      elseif Left(sText, 17) = "PRIVATE FUNCTION " then
-         sFuncName = ltrim(mid(sText, 17)) 
-      elseif Left(sText, 4)  = "SUB " then
-         sFuncName = ltrim(mid(sText, 4)) 
-      elseif Left(sText, 11) = "PUBLIC SUB " then
-         sFuncName = ltrim(mid(sText, 11))
-      elseif Left(sText, 12) = "PRIVATE SUB " Then
-         sFuncName = ltrim(mid(sText, 12))
-      ElseIf Left(sText, 9) = "PROPERTY " Then
+        
+      If StrNIsEqual(sText, "STATIC ", 7)  = True Then
+         sText = mid(sText, 8)
+      end if 
+      If StrNIsEqual(sText, "PUBLIC ", 7)  = True Then
+         sText = mid(sText, 8)
+      end if 
+      If StrNIsEqual(sText, "PRIVATE ", 8)  = True Then
+         sText = mid(sText, 9)
+      end if
+      
+      If StrNIsEqual(sText, "FUNCTION ", 9) = True then
+         sFuncName = ltrim(mid(sText, 9)) 
+      elseif StrNIsEqual(sText, "SUB ", 4)  = True then
+         sFuncName = ltrim(mid(sText, 4))
+      ElseIf StrNIsEqual(sText, "PROPERTY ", 9) = True Then
          sFuncName = ltrim(mid(sText, 10))
-      ElseIf Left(sText, 17) = "PRIVATE PROPERTY " Then
-         sFuncName = ltrim(mid(sText, 18))
-      ElseIf Left(sText, 12) = "CONSTRUCTOR " Then
-         sFuncName = ltrim(mid(sText, 13)) & "."
-      ElseIf Left(sText, 11) = "DESTRUCTOR " Then
-         sFuncName = ltrim(mid(sText, 12)) & "."
+      ElseIf StrNIsEqual(sText, "CONSTRUCTOR ", 12) = True Then
+         sFuncName = ltrim(AfxStrParse(mid(sText, 13), 1, "("))
+         sFuncName &= "." & sFuncName
+      ElseIf StrNIsEqual(sText, "DESTRUCTOR ", 11) = True Then
+         sFuncName = ltrim(AfxStrParse(mid(sText, 12), 1, "("))
+         sFuncName &= ".~" & sFuncName
       End If
       
       ' bypass any line with = that is a "FUNCTION = " line.
@@ -1758,16 +1762,16 @@ function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as 
       ub = ubound(Directives)
       
       ' '#CONSOLE ON|OFF
-      if left(st, 11) = "#CONSOLE ON" THEN
+      if StrNIsEqual(st, "#CONSOLE ON", 11) = True THEN
          redim preserve Directives(ub+1)
          Directives(ub+1).DirectiveFlag = IDM_CONSOLE
-      elseif left(st, 12) = "#CONSOLE OFF" THEN   
+      elseif StrNIsEqual(st,"#CONSOLE OFF", 12) = True THEN   
          redim preserve Directives(ub+1)
          Directives(ub+1).DirectiveFlag = IDM_GUI
       END IF
 
       ' '#RESOURCE "filename.rc"
-      if left(st, 10) = "#RESOURCE " THEN
+      if StrNIsEqual(st, "#RESOURCE ", 10) = True THEN
          redim preserve Directives(ub+1)
          Directives(ub+1).DirectiveFlag = IDM_RESOURCE
          st = mid(st, 11)
@@ -1779,4 +1783,79 @@ function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as 
    function = 0
 END FUNCTION
 
+Function clsDocument.FixSelectedRange() As boolean
+   dim as any ptr pSci      = any
+   dim as long lstartPos    = any, lendPos = any 
+   dim as long tmplstartPos = any
+   select case FileEncoding
+   case FILE_ENCODING_ANSI
+      pSci = this.GetActiveScintillaPtr() 
+      lstartPos  = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0) 
+      lendPos = SciMsg( pSci, SCI_GETSELECTIONEND, 0, 0)
+      if lstartPos <> lendPos then 
+         tmplstartPos = FixedPosition4DBCS(lstartPos,0,pSci,false)
+         IF lstartPos<>tmplstartPos THEN
+            lstartPos = tmplstartPos
+            SciMsg( pSci,SCI_GOTOPOS , lstartPos, 0)   
+            SciMsg( pSci, SCI_SETCURRENTPOS, lstartPos, 0)    
+            SciMsg( pSci,SCI_SETANCHOR, lendPos,0)
+         end if
+         tmplstartPos = FixedPosition4DBCS(lendPos,lstartPos,pSci,true)
+         IF lendPos<>tmplstartPos THEN             
+            SciMsg( pSci,SCI_GOTOPOS , lstartPos, 0)   
+            SciMsg( pSci, SCI_SETANCHOR, lstartPos, 0)    
+            SciMsg( pSci,SCI_SETCURRENTPOS, tmplstartPos,0)
+         end if
+      else
+         select case cast(ubyte,SciMsg( pSci, SCI_GETCHARAT, lstartPos, 0))
+         case &H80 to &HFF 
+            if ( GetAsyncKeyState(VK_LEFT) and &H8000 ) or _
+                                 ( GetAsyncKeyState(VK_UP) and &H8000 )  or _
+                                 ( GetAsyncKeyState(VK_LBUTTON) and &H8000 ) or _
+                                 ( GetAsyncKeyState(VK_RBUTTON) and &H8000 ) then  
+               tmplstartPos = FixedPosition4DBCS(lstartPos,0,pSci,false)
+               goto WellcomeToMe
+            elseif ( GetAsyncKeyState(VK_RIGHT) and &H8000) OR _
+                                 (GetAsyncKeyState(VK_DOWN) and &H8000 ) then   
+               tmplstartPos = FixedPosition4DBCS(lstartPos,0,pSci,true)
+               
+               WellcomeToMe:
+               IF lstartPos<>tmplstartPos THEN
+                  lstartPos = tmplstartPos
+                  SciMsg( pSci,SCI_GOTOPOS , lstartPos, 0)   
+                  SciMsg( pSci, SCI_SETCURRENTPOS, lstartPos, 0)    
+                  SciMsg( pSci,SCI_SETANCHOR, lstartPos,0)
+               end if         
+            end if  
+         end select
+      end if
+      return true
+   end select
+   Function = false 
+end function
+
+Function clsDocument.FixedPosition4DBCS(byval lCurrentPos As long, byval lStartPos As long=1, byval pSci as any ptr=0, byval IsMoveToRight as boolean = true) As long
+   dim as long tmplstartPos  = any
+   if lCurrentPos then
+      select case FileEncoding
+      case FILE_ENCODING_ANSI
+            if pSci=0 then pSci = this.GetActiveScintillaPtr()
+            tmplstartPos = lCurrentPos
+            if lStartPos<0 then lStartPos=0
+            while (tmplstartPos >=lStartPos)
+               select case cast(byte,SciMsg( pSci, SCI_GETCHARAT, tmplstartPos, 0))
+               case 0 to &H7F
+                  exit while  
+               end select
+               tmplstartPos -= 1
+            wend
+            IF lCurrentPos>tmplstartPos THEN
+               IF ((lCurrentPos-(tmplstartPos + 1)) mod 2) THEN                  
+                  lCurrentPos += iif(IsMoveToRight=true,1,-1)
+               ENDIF
+            end if
+      end select
+   end if
+   Function = lCurrentPos 
+end function 
 

@@ -418,9 +418,9 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       case AUTOCOMPLETE_DIM_AS
          ' Create the space separated data type list
          ' Add all of the TYPE definitions that were found
-         gdb2.dbRewind()
+         gdb2.dbRewind4DB()
          do 
-            pData = gdb2.dbGetNext()
+            pData = gdb2.dbGetNext4DB()
             if pData = 0 THEN exit do
             if bTypesOnly = false then
                if pData->id = DB2_STANDARDDATATYPE then
@@ -435,7 +435,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
             end if
             if pData->id = DB2_TYPE THEN
                if bTypesOnly then
-                  if pData->IsEnum then continue do
+                  if pData->SubType = DB2_SUBTYPE4ENUM then continue do
                END IF
                st = trim(AfxStrParse(pData->ElementValue, 1, " "))
                if nLenMatchWord then
@@ -484,9 +484,9 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
                iNextType = lbound(AllTypes)
                
                do until iNextType > ubound(AllTypes)
-                  gdb2.dbRewind()
+                  gdb2.dbRewind4DB()
                   do 
-                     pData = gdb2.dbGetNext()
+                     pData = gdb2.dbGetNext4DB()
                      if pData = 0 THEN exit do
                      sElement = pData->ElementName   
                      st = ucase(AfxStrParse(sElement, 1, "."))       ' MYTYPE

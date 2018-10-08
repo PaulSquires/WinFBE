@@ -89,8 +89,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    if gConfig.Builds(idxBuild).Is32bit then
       fCompile32 = True: fCompile64 = False
       gCompile.CompilerPath = gConfig.FBWINcompiler32
-   end if
-   if gConfig.Builds(idxBuild).Is64bit then
+   ELSE
       gCompile.CompilerPath = gConfig.FBWINcompiler64
       fCompile32 = False: fCompile64 = True
    End if
@@ -269,15 +268,14 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Need to determine the output filename in order to search for any existing
    ' running process.
-   gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
    If Instr(Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
       gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
-   End If
-   If Instr(Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
+   ElseIf Instr(Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
       gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
-   End If
-   If Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
+   ElseIf Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
       gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
+   else
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
    End If
 
    ' Need to test if the resulting application to be compiled is actually running

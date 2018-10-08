@@ -257,6 +257,7 @@
 #Define IsTrue(e) ( CBool(e) )
 
 
+Const ContinueLineFlag = CHR(&hD)    ' 
 Const DELIM = "|"                    ' character used as delimiter for function names in data1 of gFunctionLists hash
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
@@ -290,7 +291,7 @@ const USERTOOL_ACTION_POSTCOMPILE = 2
 ' The type of autocomplete popup that is active. This is necessary
 ' because the autocomplete popup list is rebuilt every time a new
 ' character is entered.
-enum
+enum AUTOCOMPLETE
    AUTOCOMPLETE_NONE   = 0
    AUTOCOMPLETE_DIM_AS 
    AUTOCOMPLETE_TYPE
@@ -298,7 +299,7 @@ end enum
    
    
 ' Directions when determining next closest control pointer
-ENUM
+ENUM DIRECTION
    DIRECTION_TOP = 1
    DIRECTION_LEFT
    DIRECTION_RIGHT
@@ -306,7 +307,7 @@ ENUM
 end enum   
 
 ' Index for scintilla autocomplete raw PNG for SCI_REGISTERRGBAIMAGE
-enum
+enum IMAGE_AUTOC
    IMAGE_AUTOC_BASETYPE = 1        ' default variable types. Long, String, Single, etc
    IMAGE_AUTOC_CLASS    = 2        ' class/TYPEs
    IMAGE_AUTOC_METHOD   = 3        ' subs/functions
@@ -314,7 +315,7 @@ enum
 end enum
 
 ' Colors
-enum
+enum CLR_THEME
    ' Start the enum at 2 because when theme is saved to file the first parse is the
    ' theme id and theme description. The colors start at parse 2.
    CLR_CARET = 2          
@@ -335,7 +336,7 @@ end enum
 
 
 '  Control types   
-enum
+enum CTRL_ENUM
    CTRL_FORM = 1
    CTRL_POINTER 
    CTRL_LABEL
@@ -365,7 +366,7 @@ enum
 end enum
    
 '  Grab handles (clockwise starting at top left corner)
-enum
+enum GRAB_ENUM
    GRAB_NOHIT = 0
    GRAB_TOPLEFT 
    GRAB_TOP
@@ -379,7 +380,7 @@ end enum
 
 
 ''  Menu message identifiers
-Enum
+Enum MSG_USER
 ''  Custom messages
    MSG_USER_SETFOCUS = WM_USER + 1
    MSG_USER_SHOWCOLORCOMBOBOXES
@@ -491,20 +492,58 @@ const DB2_PROPERTY         = 4
 const DB2_TYPE             = 5
 const DB2_TODO             = 6
 const DB2_STANDARDDATATYPE = 7    ' long, integer, string, etc...
+const DB2_CONST            = 8
+const DB2_DEFINE           = 9
+const DB2_CLASS            = 10
+const DB2_NAMESPACE        = 11
+
+const DB2_SUBTYPE4NORMAL   = 51
+const DB2_SUBTYPE4ENUM     = 52
+const DB2_SUBTYPE4ALIAS    = 53
+const DB2_SUBTYPE4UNION    = 54
+
+Const defCodetips4FB = "_Codetips4FB_"
+Const defPUBLICPROJECTDATA = "_PUBLICPROJECTDATA_"
+
+type DB24_DATA as DB2_DATA
+type Project2_DATA as Project_DATA
+
+type File_DATA
+   FileName             as WSTRING * MAX_PATH
+   pProjectDATA         as Project2_DATA ptr
+   FirstOwnerNode4DB    as DB24_DATA Ptr
+   LastOwnerNode4DB     as DB24_DATA ptr    
+	PrevNode             As File_DATA Ptr
+	NextNode             As File_DATA Ptr
+END TYPE
+
+type Project_DATA
+   ProjIndex             as long
+   ProjName              as WSTRING * MAX_PATH  
+	FirstNode4File        as File_DATA Ptr
+   LastNode4File         as File_DATA ptr    
+	PrevNode              As Project_DATA Ptr
+	NextNode              As Project_DATA Ptr
+END TYPE
 
 type DB2_DATA
-   deleted      as BOOLEAN = true  ' True/False
-   fileName     as CWSTR           ' Filename for #INCLUDE or source file (needed for deleting).
-   projectIndex as long            ' Needed for deleting
-   id           as LONG            ' See DB_* above for what type of record this is.
-   nLineNum     as long            ' Location in the file where found
-   ElementName  as string          ' Function name / Variable Name / Type Name
-   ElementValue as string          ' Function Calltip / TYPE associated with ElementName variable
-   IsPrivate    as Boolean         ' Element is private in a TYPE
-   IsTHIS       as Boolean         ' Dynamically set in DereferenceLine so caller can show/hide private elements
-   IsWinApi     as Boolean         ' If data item is WinApi related
-   IsEnum       as Boolean         ' If TYPE is treated as an ENUM
-   TypeExtends  as String          ' The TYPE is extended from this TYPE
+   deleted        as BOOLEAN = true        ' True/False
+   id             as LONG                  ' See DB_* above for what type of record this is.
+   pFileDATA      as File_DATA ptr         ' Filename for #INCLUDE or source file (needed for deleting).
+   pProjectDATA   as Project_DATA ptr      ' Needed for deleting
+   nStartLineNum  as long                  ' Location in the file where found (Start)
+   nEndLineNum    as long                  ' Location in the file where found (End)
+   ElementName    as string                ' Function name / Variable Name / Type Name
+   ElementValue   as string                ' Function Calltip / TYPE associated with ElementName variable
+   IsPrivate      as Boolean               ' Element is private in a TYPE
+   IsTHIS         as Boolean               ' Dynamically set in DereferenceLine so caller can show/hide private elements
+   IsWinApi       as Boolean               ' If data item is WinApi related
+   SubType        as long                  ' The TYPE is treated as an ENUM,UNION
+   TypeExtends    as String                ' The TYPE is extended from this TYPE
+   OwnerNode4DB   as DB2_DATA ptr
+   ChildNode4DB   as DB2_DATA ptr
+	PrevNode       As DB2_DATA Ptr
+	NextNode       As DB2_DATA Ptr
 END TYPE
 
 type PreparseTimestamps
@@ -648,7 +687,7 @@ Enum FontCharset
    Vietnamese  = VIETNAMESE_CHARSET
 End Enum
 
-enum
+enum COLOR_ENUM
    COLOR_CUSTOM = 1
    COLOR_COLORS
    COLOR_SYSTEM
@@ -836,6 +875,8 @@ Type clsDocument
       declare Function FirstMarkerHighlight() As long
       declare Function LastMarkerHighlight() As long
       declare function CompileDirectives( Directives() as COMPILE_DIRECTIVES) as Long
+      declare Function FixedPosition4DBCS(byval lCurrentPos As long, byval lStartPos As long=1, byval pSci as any ptr=0, byval IsMoveToRight as boolean = true) As long
+      Declare Function FixSelectedRange() As boolean 
       Declare Constructor
       Declare Destructor
 End Type
@@ -959,6 +1000,8 @@ Type clsConfig
       StartupRight         As Long = 0
       StartupBottom        As Long = 0
       StartupMaximized     As Long = False
+      MainAppPath          As CWSTR
+      MainHelpPath         As CWSTR
       FBWINCompiler32      As CWSTR
       FBWINCompiler64      As CWSTR
       CompilerSwitches     As CWSTR
@@ -994,6 +1037,12 @@ type clsProject
    public:
       InUse                as boolean     ' this spot in the Projects array is in use
       ProjectName          As CWSTR
+      ProjectPath          As CWSTR
+      MainFolderPath       As CWSTR
+      UsedCompilerPath     As CWSTR
+      UsedFbcPathName      As CWSTR
+      UsedIncludePath      As CWSTR
+      UsedLibraryPath      As CWSTR
       ProjectFilename      As CWSTR
       ProjectBuild         As string      ' default build configuration for the project (GUID)
       ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
@@ -1016,6 +1065,8 @@ type clsProject
       Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
       declare Function GetProjectCompiler() As long
       Declare Function Debug() As Long
+      Declare Function SetActiveProject() As BOOLEAN
+      declare Sub Format2FullPath(byref vFormatPath As CWSTR)
 END TYPE
 
 Type clsApp
@@ -1034,6 +1085,7 @@ Type clsApp
       NonProjectNotes         as CWSTR       ' Save/load from config file
       IsNewProjectFlag        As BOOLEAN
       ProjectOverrideIndex    as long        ' Do action to specific project rather than the active project
+      himl                    As HIMAGELIST  ' Project treeview imagelist
       
       ' Handles for images used in scintilla popup autocomplete
       pImageAutocompleteBaseType as any ptr
@@ -1051,6 +1103,7 @@ Type clsApp
       declare Function RemoveAllSelectionAttributes() As long
       declare Function GetProjectIndexByFilename( byref sFilename as wstring ) As long
       declare Function GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
+      declare Function DocumentPtrExists( byval pDoc as clsDocument ptr) As boolean
          
       Declare Function IsProjectActive() As boolean
       declare function GetNewProjectIndex() As Long
@@ -1064,7 +1117,7 @@ Type clsApp
 End Type
 
 '  Internal flags for the parser routines
-enum
+enum ACTION_ENUM
    ACTION_NONE
    ACTION_PARSEFUNCTION     
    ACTION_PARSESUB     
@@ -1073,6 +1126,9 @@ enum
    ACTION_PARSEENUM
    ACTION_PARSECOMMENT
    ACTION_PARSEPARAMETERS   ' function parameters
+   ACTION_PARSEUNION
+   ACTION_PARSECONSTRUCTOR
+   ACTION_PARSEDESTRUCTOR
 end enum
 
 type clsParser
@@ -1096,8 +1152,10 @@ type clsParser
       bInTypePublic as Boolean     ' PRIVATE/PUBLIC sections of a TYPE
       Description   as string      ' Text from '#Description: tag
       IsWinApi      as boolean     ' If windows.bi was found then database items added
-      IsEnum        as Boolean     ' The TYPE is treated as an ENUM
+      SubType       as Long        ' The TYPE is treated as an ENUM,UNION
       TypeExtends   as String      ' The TYPE is extended from this TYPE
+      OwnerNode4DB   as DB2_DATA ptr
+      CurrentNode4DB as DB2_DATA ptr
       
       declare function parseToDoItem(byval sText as string) as boolean
       declare function IsMultilineComment(byval sLine as String) as boolean
@@ -1109,27 +1167,90 @@ type clsParser
       declare function IsStandardDataType( byref sVarType as string ) as Boolean
 END TYPE   
 
+ENUM eLookFor
+  ELF_CurrentFile    =&h00001000
+  ELF_CurrentProject =&h00002000
+  ELF_PublicProject  =&h00004000
+  ELF_AllProject     =&h00008000
+  ELF_CurrentAndPublicProject  =ELF_CurrentProject or ELF_PublicProject
+END ENUM
+
 TYPE clsDB2
    private:
-      m_arrData(any) as DB2_DATA
+      FirstNode4Proj       as Project_DATA ptr
+      LastNode4Proj        as Project_DATA ptr
+      m_ptrUnUsedNode4DB   as DB2_DATA Ptr
+      m_ptrRewindData4DB as DB2_DATA ptr
+      m_ptrRewindData4File as File_DATA ptr
+      m_ptrRewindData4Proj as Project_DATA ptr
       m_index as LONG
+         
+   public:
+      declare function dbAdd4PublicProject() as boolean
+      declare function dbRewind4PublicProject() as boolean
+      Declare Property ptrRewindData4File() As File_DATA ptr
+      Declare Property ptrRewindData4Proj() As Project_DATA ptr
+      declare function dbFreeIndex4Proj() as long  
+      declare function dbFindIndex4Proj( byref wszProjName as wstring ) as long  
+      declare function dbAdd4Proj( byref wszProjName as wstring, byval ProjIndex as long=-1 ) as Project_DATA ptr
+      declare function dbDelete4Proj Overload( byval ProjIndex as long ) as boolean
+      declare function dbDelete4Proj Overload( byval pProjectDATA as Project_DATA ptr ) as boolean
+      declare function dbDelete4Proj Overload( byref wszProjName as wstring, byval ProjIndex as long=-1 ) as boolean
+      declare function dbFind4Proj Overload( byval wszProjName as long ) as Project_DATA ptr  
+      declare function dbFind4Proj Overload( byref wszProjName as wstring, byval ProjIndex as long=-1 ) as Project_DATA ptr
+      declare function dbRewind4Proj Overload() as Project_DATA ptr
+      declare function dbRewind4Proj Overload(byval ProjIndex as long) as Project_DATA ptr
+      declare function dbRewind4Proj Overload(byref wszProjName as wstring, byval ProjIndex as long=-1 ) as Project_DATA ptr
+      declare function dbGetNext4Proj() as Project_DATA ptr 
       
-   public:  
-      declare function dbAdd( byref parser as clsParser, byref id as long) as DB2_DATA ptr
-      declare function dbDelete( byref wszFilename as WString) as long
-      declare function dbDeleteByProject( byval idx as long ) as boolean
+      declare function dbAdd4File Overload( byref wszFilename as wstring) as File_DATA ptr
+      declare function dbAdd4File Overload( byval ProjIndex as long, byref wszFilename as wstring) as File_DATA ptr
+      declare function dbAdd4File Overload( byref wszProjName as wstring, byref wszFilename as wstring, byval ProjIndex as long=-1) as File_DATA ptr
+      declare function dbDelete4File Overload( byref wszFilename as wstring ) as boolean
+      declare function dbDelete4File Overload( byval pFileDATA as File_DATA ptr ) as boolean
+      declare function dbDelete4File Overload( byval ProjIndex as long, byref wszFilename as wstring ) as boolean  
+      declare function dbDelete4File Overload( byref wszProjName as wstring, byref wszFilename as wstring, byval ProjIndex as long=-1 ) as boolean
+      declare function dbFind4File( byref wszFilename as wstring) as File_DATA ptr
+      declare function dbRewind4File Overload() as File_DATA ptr
+      declare function dbRewind4File Overload(byref wszFilename as wstring) as File_DATA ptr
+      declare function dbRewind4File Overload(byval ProjIndex as long, byref wszFilename as wstring ) as File_DATA ptr
+      declare function dbRewind4File Overload(byref wszProjName as wstring, byref wszFilename as wstring, byval ProjIndex as long=-1 ) as File_DATA ptr
+      declare function dbGetNext4File() as File_DATA ptr
+           
+      declare function dbNew( ) as DB2_DATA ptr 
+      declare function dbAdd4DB Overload( byref db as DB2_DATA ) as boolean      
+      declare function dbAdd4DB Overload( byval ptrdb as DB2_DATA ptr ) as boolean                
+      declare function dbAdd4DB Overload( byval ptrdb as DB2_DATA ptr ,byval prevptrdb as DB2_DATA ptr ) as boolean                
+      declare function dbAdd4DB Overload( byref parser as clsParser, byref id as long ) as DB2_DATA ptr
+      declare function dbPushUnUsedNode4DB Overload( byval pDB2DATA as DB2_DATA ptr ) as boolean
+      declare function dbPushUnUsedNode4DB Overload( byref wszDB2Name as wstring, byval Action as long, byval Index as Long = 1 ) as boolean
+      declare function dbPopUnUsedNode4DB(byval MainNode4DB as DB2_DATA ptr) as DB2_DATA ptr
+      declare function dbDelete4DB(byval MainNode4DB as DB2_DATA ptr) as boolean
+      declare function dbRewind4DB() as DB2_DATA ptr
+      
       declare function dbDeleteWinAPI() as boolean
-      declare function dbRewind() as LONG
-      declare function dbGetNext() as DB2_DATA ptr
-      declare function dbSeek( byval sLookFor as string, byval Action as long ) as DB2_DATA ptr
-      declare function dbFindFunction( byref sFunctionName as string ) as DB2_DATA ptr
-      declare function dbFindSub( byref sFunctionName as string ) as DB2_DATA ptr
-      declare function dbFindProperty( byref sFunctionName as string ) as DB2_DATA ptr
-      declare function dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
-      declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
-      declare function dbFilenameExists( byref sFilename as CWSTR ) as boolean
+      declare function dbGetNext4DB() as DB2_DATA ptr
+      declare function dbGetChild4DB(byval ptrdb as DB2_DATA ptr ) as DB2_DATA ptr
+      declare function dbGetOwner4DB(byval ptrdb as DB2_DATA ptr ) as DB2_DATA ptr
+      declare function dbGetFirstSibling4DB(byval ptrdb as DB2_DATA ptr ) as DB2_DATA ptr
+      declare function dbGetLastSibling4DB(byval ptrdb as DB2_DATA ptr ) as DB2_DATA ptr
+      declare function dbGetPrevSibling4DB(byval ptrdb as DB2_DATA ptr ) as DB2_DATA ptr
+      declare function dbGetNextSibling4DB(byval ptrdb as DB2_DATA ptr ) as DB2_DATA ptr
+      declare function dbSeek4DB Overload( byval sLookFor as string, byval Action as long, byref SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbSeek4DB Overload( byval ptrdb as DB2_DATA ptr, byval sLookFor as string, byval Action as long, byref SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbSeek4File( byval sLookFor as string, byval Action as long, byref SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbSeek4Proj( byval sLookFor as string, byval Action as long, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbSeek( byval sLookFor as string, byval Action as long, byval Type4LookFor as eLookFor= ELF_CurrentProject, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbFindFunction( byref sFunctionName as string, byval Type4LookFor as eLookFor= ELF_CurrentProject, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbFindSub( byref sFunctionName as string, byval Type4LookFor as eLookFor= ELF_CurrentProject, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbFindProperty( byref sFunctionName as string, byval Type4LookFor as eLookFor= ELF_CurrentProject, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbFindVariable( byref sVariableName as string, byval Type4LookFor as eLookFor= ELF_CurrentProject, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbFindTYPE( byref sTypeName as string, byval Type4LookFor as eLookFor= ELF_CurrentProject, byval SequentialIndex as Long = 1 ) as DB2_DATA ptr
+      declare function dbFilenameExists Overload( byref wszFilename as wstring ) as boolean
+      declare function dbFilenameExists Overload(byref wszProjName as wstring, byref wszFilename as wstring, byval ProjIndex as long=-1 ) as boolean
       declare function dbDebug() as long
       declare constructor
+      Declare Destructor()
 END TYPE
 
 '  Global classes
@@ -1146,4 +1267,19 @@ enum  eFileClose
    EFC_CLOSEALLBACKWARD 
 end enum
 
+enum  Enum4lParam
+   ELP_hTreeItem =1
+   ELP_pclsDocument
+   ELP_DB2DATA
+end enum
+
+type DB24_DATA as DB2_DATA
+type Type4lParam
+   eType as Enum4lParam
+   union
+      hNode As HTREEITEM
+      pDoc As clsDocument Ptr
+      pDB2 As DB24_DATA Ptr
+   end union
+end type
 

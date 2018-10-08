@@ -20,6 +20,12 @@
 ''  CONSTRUCTOR
 ''
 Constructor clsConfig
+   dim  As WString * MAX_PATH MainAppPath	
+   GetModuleFileNameW(NULL,@MainAppPath,MAX_PATH) ' Get MainAppPath
+   with this
+      .MainAppPath = AfxStrPathName ("PATH", MainAppPath)
+      .MainHelpPath = .MainAppPath & "Help\"   
+   end with
    _ConfigFilename     = AfxGetExePathName & "Settings\WinFBE.ini" 
    _FBKeywordsFilename = AfxGetExePathName & "Settings\freebasic_keywords.txt" 
    _FBCodetipsFilename = AfxGetExePathName & "Settings\codetips.ini" 
@@ -64,7 +70,7 @@ Function clsConfig.LoadCodetipsFB() as boolean
    
    dim pStream AS CTextStream
    if pStream.Open(_FBCodetipsFilename) <> S_OK then return true  ' error
-   
+   gdb2.dbRewind4PublicProject()
    do until pStream.EOS
       wst = pStream.ReadLine
       wst = Trim(wst)
@@ -74,7 +80,7 @@ Function clsConfig.LoadCodetipsFB() as boolean
       If i Then
          parser.funcName   = Left(wst, i-1)
          parser.funcParams = Mid(**wst, i+1)
-         gdb2.dbAdd(parser, DB2_FUNCTION)
+         gdb2.dbAdd4DB(parser, DB2_FUNCTION)
       End If   
    Loop
    pStream.Close
@@ -107,6 +113,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
    
    dim pStream AS CTextStream
    if pStream.Open(wszFilename) <> S_OK then return true   ' error
+   gdb2.dbRewind4PublicProject()
    
    do until pStream.EOS
       wst = pStream.ReadLine
@@ -125,13 +132,13 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
             i = instr(wst, "|")
             parser.typeName = Left(wst, i-1)
             parser.Description = mid(**wst, i+1)
-            gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
+            gdb2.dbAdd4DB(parser, DB2_STANDARDDATATYPE)  
             
          CASE "F"    ' function
             i = instr(wst, "(")
             parser.funcName   = trim(Left(wst, i-1))
             parser.funcParams = wst
-            gdb2.dbAdd(parser, DB2_FUNCTION)
+            gdb2.dbAdd4DB(parser, DB2_FUNCTION)
 
          case "T"     ' type
             i = instr(wst, "|")
@@ -151,7 +158,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
                      if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
                END SELECT
             END IF
-            gdb2.dbAdd(parser, DB2_TYPE)
+            gdb2.dbAdd4DB(parser, DB2_TYPE)
 
             ' Each element of the TYPE structure is added to the database. The
             ' element is in the format elementname,elementtype
@@ -162,7 +169,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
                parser.varName = AfxStrParse(wsPart, 1, ",") 
                parser.varType = AfxStrParse(wsPart, 2, ",") 
                parser.bInTypePublic = true
-               gdb2.dbAdd(parser, DB2_VARIABLE)
+               gdb2.dbAdd4DB(parser, DB2_VARIABLE)
             NEXT
 
       END SELECT
@@ -178,15 +185,16 @@ End Function
 Function clsConfig.LoadCodetipsWinFormsX() as boolean
    function = this.LoadCodetipsGeneric(_WinFormsXCodetipsFilename, false)
    dim parser as clsParser
+   gdb2.dbRewind4PublicProject()
    parser.fileName = ""     ' no need to store this sFilename
    parser.idxProject = -1   ' do not associate it with any project
    parser.IsWinApi = false
    parser.typeName = "Application"
    parser.typeAlias = "wfxApplication"
-   gdb2.dbAdd(parser, DB2_TYPE)
+   gdb2.dbAdd4DB(parser, DB2_TYPE)
    parser.typeName = "Colors"
    parser.typeAlias = "wfxColors"
-   gdb2.dbAdd(parser, DB2_TYPE)
+   gdb2.dbAdd4DB(parser, DB2_TYPE)
 end function
 
 ''
@@ -805,11 +813,11 @@ Function clsConfig.LoadConfigFile() as Long
       If Left(wst, 1) = "'" Then Continue Do
       If Left(wst, 1) = "[" Then Continue Do
       
-      If Left(wst, 11) = "NOTES-START" Then  
+      If WStrNIsEqual(wst, "NOTES-START", 11) = true Then 
          bReadingNote = true
          continue do
       end if   
-      If Left(wst, 9) = "NOTES-END" Then  
+      If WStrNIsEqual(wst, "NOTES-END", 9) = true Then  
          bReadingNote = false
          continue do
       end if
@@ -830,7 +838,7 @@ Function clsConfig.LoadConfigFile() as Long
       wData = ProcessFromCurdrive(wData)
 
 
-      If Left(wKey, 9) = "USERTOOL_" Then  ' is this a User Tool entry
+      If WStrNIsEqual(wKey, "USERTOOL_", 9) = true Then  ' is this a User Tool entry
          i = Val(Right(wKey,2))
          If i > ubound(this.Tools) Then
             redim preserve this.Tools(i) 
@@ -851,7 +859,7 @@ Function clsConfig.LoadConfigFile() as Long
          End If
       End If
 
-      If Left(wKey, 6) = "BUILD_" Then  ' is this a BUILD entry
+      If WStrNIsEqual(wKey, "BUILD_", 6) = true Then  ' is this a BUILD entry
          i = Val(Right(wKey,2))
          If i > ubound(this.Builds) Then
             redim preserve this.Builds(i) 
@@ -865,12 +873,12 @@ Function clsConfig.LoadConfigFile() as Long
          End If
       End If
 
-      If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
+      If WStrNIsEqual(wKey, "THEME_", 6) = true Then  ' is this a THEME entry
          this.ImportTheme(wst, false)
          continue do
       End If
 
-      If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
+      If WStrNIsEqual(wKey, "MRU_", 4) = true Then  ' is this an MRU entry
          i = Val(Right(wKey,2))
          If (i >= 0) And (i <= 9) Then 
             this.MRU(i) = wData
@@ -878,7 +886,7 @@ Function clsConfig.LoadConfigFile() as Long
          End If
       End If
       
-      If Left(wKey, 11) = "MRUPROJECT_" Then  ' is this an MRU Project entry
+      If WStrNIsEqual(wKey, "MRUPROJECT_", 11) = true Then  ' is this an MRU Project entry
          i = Val(Right(wKey,2))
          If (i >= 0) And (i <= 9) Then 
             this.MRUProject(i) = wData
@@ -1243,11 +1251,12 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
 
    with gApp.Projects(idx)
       .ProjectFilename = wzFile
-      .ProjectName = AfxStrPathname( "NAMEX", gApp.Projects(idx).ProjectFilename )
-      .hExplorerRootNode = FF_TreeView_InsertItem (hTV, TVI_ROOT, UCase(gApp.Projects(idx).ProjectName) )
+      .ProjectPath = AfxStrPathname( "PATH", wzFile )
+      .ProjectName = AfxStrPathname( "NAMEX", wzFile )
+      .hExplorerRootNode = FF_TreeView_InsertItem (hTV, TVI_ROOT, UCase(.ProjectName),0,II4E_PROJECT,II4E_PROJECT)
       .ProjectNotes = ""
+      Treeview_SetBold(hTV, .hExplorerRootNode, TRUE)
    end with
-   Treeview_SetBold(hTV, gApp.Projects(idx).hExplorerRootNode, TRUE)
    
     
    dim pStream as CTextStream  ' (utf16)
@@ -1263,6 +1272,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    gProjectLoading = true 
    gApp.ProjectOverrideIndex = idx
    gApp.IsWindowIncludes = false
+   gdb2.dbRewind4Proj(idx)
    gdb2.dbDeleteWinAPI
          
    ' Set InUse here prior to parsing the files of the project
@@ -1276,14 +1286,14 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       wst = pStream.ReadLine
       
       If Len(wst) = 0 Then Continue Do
-      If Left(wst, 1) = "'" Then Continue Do
-      If Left(wst, 1) = "[" Then Continue Do
+      If WStrNIsEqual(wst, "'", 1) = true Then Continue Do
+      If WStrNIsEqual(wst, "[", 1) = true Then Continue Do
       
-      If Left(wst, 11) = "NOTES-START" Then  
+      If WStrNIsEqual(wst, "NOTES-START", 11) = true Then  
          bReadingNote = true
          continue do
       end if   
-      If Left(wst, 9) = "NOTES-END" Then  
+      If WStrNIsEqual(wst, "NOTES-END", 9) = true Then  
          bReadingNote = false
          continue do
       end if
@@ -1337,7 +1347,10 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
                                        FALSE, _    ' bShowInTab
                                        false, _    ' bIsInclude
                                        wszFilename, _  ' pwszName
-                                       0 )  ' pDocIn
+                                       0, _
+                                       0, _
+                                       nFileType, _
+                                       idx)  ' pDocIn
                pDoc->ProjectFileType = nFileType
                pDoc->ProjectIndex = idx
                pDoc->SplitY = nSplitPosition

@@ -1086,26 +1086,26 @@ End Type
 #ifdef __FB_64BIT__       
 Type SCNotification        
    hdr                  As Sci_NotifyHeader
-   position             As long
-   ch                   As integer
+   position             As integer
+   ch                   As long
    modifiers            As long
    modificationType     As long
-   lpText               As UINT_PTR
-   length               As long
-   linesAdded           As long
+   lpText               As integer
+   length               As integer
+   linesAdded           As integer
    message              As long
    wParam               As integer 'WPARAM
    lParam               As integer 'LPARAM
-   nLine                As long
-   foldLevelNow         As integer
-   foldLevelPrev        As integer
-   margin               As integer
-   listType             As integer
-   x                    As integer
-   y                    As integer
-   token                As integer
+   nLine                As integer
+   foldLevelNow         As long
+   foldLevelPrev        As long
+   margin               As long
+   listType             As long
+   x                    As long
+   y                    As long
+   token                As long
    annotationLinesAdded As integer
-   updated              As integer
+   updated              As long
 End Type       
 #else       
 Type SCNotification 

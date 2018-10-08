@@ -115,6 +115,9 @@ Function Splitter_OnMouseMove() As BOOLEAN
          SetWindowPos HWND_FRMEXPLORER, 0, 0, 0, nWidth, rc.Bottom - rc.Top, SWP_NOMOVE Or SWP_NOZORDER
          frmMain_PositionWindows(HWND_FRMMAIN)
          AfxDoEvents   ' allow screen to repaint
+         if ( GetAsyncKeyState(VK_LBUTTON) and &H8000 )=0 then 
+            Splitter_OnLButtonUp()
+         endif
          Exit Function
       End If
    End If
@@ -141,6 +144,9 @@ Function Splitter_OnMouseMove() As BOOLEAN
          rc.Top = rc.Top + nDiff
          SetWindowPos HWND_FRMOUTPUT, 0, 0, 0, rc.Right - rc.Left, rc.Bottom-rc.Top, SWP_NOMOVE Or SWP_NOZORDER
          frmMain_PositionWindows(HWND_FRMMAIN)
+         if ( GetAsyncKeyState(VK_LBUTTON) and &H8000 )=0 then 
+            Splitter_OnLButtonUp()
+         endif
          Exit Function
       End If
    End If

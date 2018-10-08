@@ -99,6 +99,7 @@ Function clsProject.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
       For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
          If m_arrDocuments(i)->ProjectFileType = FILETYPE_MAIN Then 
             m_arrDocuments(i)->ProjectFileType = FILETYPE_NORMAL
+            ChangeImage4ExplorerTreeview2Doc(m_arrDocuments(i))
          END IF
       Next   
    End If      
@@ -106,11 +107,13 @@ Function clsProject.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
       For i As Long = LBound(m_arrDocuments) To Ubound(m_arrDocuments)
          If m_arrDocuments(i)->ProjectFileType = FILETYPE_RESOURCE Then 
             m_arrDocuments(i)->ProjectFileType = FILETYPE_NORMAL
+            ChangeImage4ExplorerTreeview2Doc(m_arrDocuments(i))
          end if
       Next   
    End If      
 
    pDoc->ProjectFileType = nFileType
+   ChangeImage4ExplorerTreeview2Doc(pDoc)
 
    ' Refresh the statusbar to ensure that the file's type is displayed properly
    pDoc->DisplayStats
@@ -194,7 +197,7 @@ Function clsProject.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    If idx = -1 Then Exit function
    
    ' Remove all references from the gdb2 database
-   gdb2.dbDelete(pDoc->DiskFilename)
+   gdb2.dbDelete4File(idx,pDoc->DiskFilename)
 
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
@@ -265,11 +268,13 @@ End Function
 Function clsProject.GetProjectCompiler() As long
    ' Get the compiler associated with this project
    for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
-      if gConfig.Builds(i).Id = this.ProjectBuild then
-         if gConfig.Builds(i).Is32Bit THEN return IDM_32BIT
-         if gConfig.Builds(i).Is64Bit THEN return IDM_64BIT
-      end if   
-   NEXT
+      with gConfig.Builds(i)
+         if .Id = this.ProjectBuild then
+            if .Is32Bit THEN return IDM_32BIT
+            if .Is64Bit THEN return IDM_64BIT
+         end if
+      end with
+   next
    function = 0
 End Function
 
@@ -291,4 +296,66 @@ Function clsProject.Debug() As Long
    Function = 0
 End Function
 
+Function clsProject.SetActiveProject() As BOOLEAN
+   Dim pDocMain As clsDocument Ptr
+   with this
+      .ProjectPath = AfxStrPathname("PATH", this.ProjectFilename)
+      pDocMain = GetMainDocumentPtr()
+      if pDocMain then
+         .MainFolderPath = AfxStrPathname("PATH", pDocMain->DiskFilename)
+      else
+         .MainFolderPath = .ProjectPath  
+      endif
+      if .GetProjectCompiler()=IDM_32BIT then
+         .UsedFbcPathName = gConfig.FBWINCompiler32
+      else
+         .UsedFbcPathName = gConfig.FBWINCompiler64
+      end if
+      .UsedCompilerPath = AfxStrPathName ("PATH",.UsedFbcPathName)
+      .UsedIncludePath = .UsedCompilerPath & "Inc\"
+      .UsedLibraryPath = .UsedCompilerPath & "Lib\"      
+   end with
+   function = true
+end function
 
+Sub clsProject.Format2FullPath(byref vFormatPath As CWSTR)
+   '   Path acronymes: 
+   '   - {A} Where WinFBE.exe is located(MainApp).
+   '   - {C} Compiler path.
+   '   - {H} Help path.
+   '   - {P} Current project path.
+   
+   dim As WString * MAX_PATH AppPath = AfxStrReplace(vFormatPath,"/","\")
+   dim As long index = IIF(INSTR(AppPath,"\") = 4,5,4),index2=any
+
+   with this
+      AppPath=LTrim(AppPath,ANY " /\")
+      if len(AfxStrPathname("PATH", AppPath)) = 0 THEN
+         AppPath= .MainFolderPath & AppPath
+      ELSEif Mid(AppPath,2,2)<>":\" then   
+         select case ucase(left(AppPath,3))
+         case "..\"
+             AppPath= .MainFolderPath & AppPath
+         case "{A}" 'MainApp path
+            AppPath= gConfig.MainAppPath  & mid(AppPath ,index)
+         case "{C}"  'Help path
+            AppPath= gConfig.MainHelpPath  & mid(AppPath ,index)
+         case "{H}"  'Compiler path
+            AppPath= .UsedCompilerPath  & mid(AppPath ,index)
+         case "{P}"  'Current project path
+            AppPath= .ProjectPath  & mid(AppPath ,index) 
+         case else  
+            If WStrNIsEqual(AppPath, ".\", 2) = True Then
+               AppPath= .MainFolderPath & mid(AppPath ,3)
+            end If
+         end select
+      end if
+      do 
+         index = INSTR(AppPath,"\..\")
+         if index = 0 then exit do
+         index2= INSTRrev(AppPath,"\",index-1)
+         AppPath=left(AppPath, index2) & mid(AppPath, index+4)
+      loop   
+   end with
+   vFormatPath=AppPath
+End Sub

@@ -13,6 +13,301 @@
 
 
 ' ========================================================================================
+'  Get Image Index of Treeview 
+' ========================================================================================
+Function ImageIndex4ExplorerTreeview( ByVal pDoc As clsDocument Ptr ) As long
+   dim  As WString * MAX_PATH wzFileExt  = any
+   DIM AS LONG iImage=II4E_FILE4NORMAL
+   SELECT CASE pDoc->ProjectFileType
+   CASE FILETYPE_MAIN
+        iImage=II4E_FILE4MAINBAS
+   CASE FILETYPE_MODULE
+        iImage=II4E_FILE4MODULEBAS
+   CASE FILETYPE_RESOURCE
+        iImage=II4E_FILE4RESOURCE
+   'CASE FILETYPE_NORMAL
+   'CASE FILETYPE_UNDEFINED
+   CASE ELSE
+        wzFileExt=AfxStrPathname( "EXTN",  pDoc->DiskFilename) 
+        Select Case Ucase(wzFileExt)
+            Case ".BAS":  iImage = II4E_FILE4BAS
+            Case ".RC":   if(pDoc->ProjectFileType<> FILETYPE_NORMAL) then  iImage = II4E_FILE4RESOURCE
+            Case ".FRM":  iImage = II4E_FILE4FRM
+            Case ".INC":  iImage = II4E_FILE4INC
+            Case ".BI":   iImage = II4E_FILE4BI
+            Case ".TXT":  iImage = II4E_FILE4TXT
+            Case ".MASM": iImage = II4E_FILE4MASM
+        End Select
+   END SELECT
+   
+   Function = iImage
+End Function
+
+' ========================================================================================
+'  is a Document ptr ?
+' ========================================================================================
+function CheckIsDoc4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as Boolean
+   DIM item AS TVITEMW
+   with item
+      .hitem = hNode
+      .mask =  TVIF_IMAGE            
+      TreeView_GetItem(hWndControl, @item)
+      
+      IF .iImage<=II4E_FLAGS4MARK and .iImage>II4E_PROJECT then 
+         return true
+      end if            
+   end with
+   return false
+End function
+
+' ========================================================================================
+' 
+' ========================================================================================
+function GetProjecthNode4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as HTREEITEM
+   DIM item AS TVITEMW
+   dim as Project_DATA ptr  pProjectDATA=any
+   dim as DB2_DATA ptr  pDB2_DATA=any
+   with item
+      .mask =  TVIF_IMAGE      
+      while hNode<>0
+         .hitem = hNode            
+         TreeView_GetItem(hWndControl, @item)
+         if .iImage=II4E_PROJECT then
+            RETURN hNode
+         end if
+         hNode = TreeView_GetParent(hWndControl,hNode)
+      wend            
+   end with
+   function = 0
+End function
+
+' ========================================================================================
+' 
+' ========================================================================================
+function GetProjectIndex4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as long
+   DIM item AS TVITEMW
+   dim as Project_DATA ptr  pProjectDATA=any
+   dim as DB2_DATA ptr  pDB2_DATA=any
+   with item
+      .mask =  TVIF_IMAGE or LVIF_PARAM      
+      while hNode<>0
+         .hitem = hNode            
+         TreeView_GetItem(hWndControl, @item)
+         if .lParam then
+            select case .iImage
+               case is> II4E_FLAGS4MARK
+                   pDB2_DATA= cast(DB2_DATA ptr , .lParam)
+                   if pDB2_DATA->deleted=false then
+                      pProjectDATA =pDB2_DATA->pProjectDATA
+                     if pProjectDATA then                   
+                        return pProjectDATA->ProjIndex
+                     endif 
+                  end if
+               case is> II4E_PROJECT
+                  if gApp.DocumentPtrExists(cast(clsDocument ptr , .lParam))=true then
+                     return cast(clsDocument ptr , .lParam)->ProjectIndex
+                  else
+                     exit while  
+                  endif
+               case else
+                  exit while
+            end select
+         end if
+         hNode = TreeView_GetParent(hWndControl,hNode)
+      wend            
+   end with
+   function = -1
+End function
+' ========================================================================================
+' 
+' ========================================================================================
+function GetClsDocument4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as clsDocument ptr
+   DIM item AS TVITEMW
+   dim as Project_DATA ptr  pProjectDATA=any
+   dim as DB2_DATA ptr  pDB2_DATA=any
+   with item
+      .mask =  TVIF_IMAGE or LVIF_PARAM      
+      while hNode<>0
+         .hitem = hNode            
+         TreeView_GetItem(hWndControl, @item)
+         if .lParam then
+            select case .iImage
+               case is> II4E_FLAGS4MARK
+               case is> II4E_PROJECT
+                  if gApp.DocumentPtrExists(cast(clsDocument ptr , .lParam))=true then
+                     return cast(clsDocument ptr , .lParam)
+                  else
+                     exit while  
+                  endif
+               case else
+                  exit while
+            end select
+         end if
+         hNode = TreeView_GetParent(hWndControl,hNode)
+      wend
+   end with
+   function = 0
+End function
+
+' ========================================================================================
+' Change Image Index of Treeview  for  Document
+' ========================================================================================
+sub ChangeImage4ExplorerTreeview2doc( ByVal pDoc As clsDocument Ptr )
+   Dim ti As TV_ITEM    
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE) 
+   ti.hItem = pDoc->hNodeExplorer
+   ti.mask=TVIF_SELECTEDIMAGE Or TVIF_IMAGE 
+   ti.iImage=ImageIndex4ExplorerTreeview(pDoc)
+   ti.iSelectedImage=ti.iImage
+   TreeView_SetItem(hTree,Varptr(ti))
+End sub
+
+' ========================================================================================
+' Change Image Index of Treeview   for database
+' ========================================================================================
+sub ChangeImage4ExplorerTreeview2db(ByVal hWndControl As HWnd, _
+                                 ByVal hNode As HTREEITEM, _
+                                 ByVal DB2ID as LONG )
+   Dim ti As TV_ITEM  
+   with ti
+      .hItem = hNode
+      .mask=TVIF_SELECTEDIMAGE Or TVIF_IMAGE
+      select case DB2ID
+         case DB2_STANDARDDATATYPE,DB2_TYPE
+            .iImage=II4E_TYPE4TYPE
+            .iSelectedImage=II4E_TYPE4TYPE2
+         case DB2_FUNCTION
+            .iImage=II4E_TYPE4FUNCTION
+            .iSelectedImage=II4E_TYPE4FUNCTION2
+         case DB2_SUB  
+            .iImage=II4E_TYPE4SUB
+            .iSelectedImage=II4E_TYPE4SUB2
+         case DB2_PROPERTY
+            .iImage=II4E_TYPE4PROPERTY
+            .iSelectedImage=II4E_TYPE4PROPERTY2
+         case DB2_VARIABLE 
+            .iImage=II4E_TYPE4VARIABLE
+            .iSelectedImage=II4E_TYPE4VARIABLE2
+         case DB2_SUBTYPE4ENUM 
+            .iImage=II4E_TYPE4ENUM
+            .iSelectedImage=II4E_TYPE4ENUM2
+         case DB2_CLASS 
+            .iImage=II4E_TYPE4CLASS
+            .iSelectedImage=II4E_TYPE4CLASS2
+      end select
+   end with
+   TreeView_SetItem(hWndControl,Varptr(ti))
+End sub
+
+' ========================================================================================
+' Get the location level of the current Node  of ExplorerTreeview
+' ========================================================================================
+function GetLevels4ExplorerTreeview(ByVal hWndControl As HWnd, _
+                               ByVal hCurrentNode As HTREEITEM) as long
+      dim  as long Index=0 
+      DIM item AS TVITEMW
+
+      WITH item
+        .mask = TVIF_IMAGE
+        while hCurrentNode 
+            .hitem = hCurrentNode       
+            TreeView_GetItem(hWndControl, @item)
+            if .iImage<=II4E_FLAGS4MARK THEN
+                exit While     
+            end if
+            Index+=1        
+            hCurrentNode=TreeView_GetParent(hWndControl, hCurrentNode)
+         wend 
+      end with
+      return Index 
+ 
+end function
+
+' ========================================================================================
+' Get the location Index of the current Node  of ExplorerTreeview
+' ========================================================================================
+function GetPrevIndexOfPrevSibling4Treeview(ByVal hWndControl As HWnd, _
+                               ByVal hCurrentNode As HTREEITEM) as long
+      DIM item AS TVITEMW 
+      dim as long Index=0 ,iImage=any
+      DIM AS WString* MAX_PATH wszText="",wszName =""    
+      
+      WITH  item
+            .mask = TVIF_TEXT Or TVIF_IMAGE
+            .hitem = hCurrentNode
+            .pszText = @wszText
+            .cchTextMax = MAX_PATH
+            TreeView_GetItem(hWndControl, @item) 
+             
+            iImage=.iImage
+            .pszText = @wszName   
+           while hCurrentNode
+               .hitem = hCurrentNode
+               TreeView_GetItem(hWndControl, @item)
+               if WStrIsEqual(wszText,wszName,false)=true and iImage=.iImage THEN
+                  Index+=1     
+               end if        
+               hCurrentNode=TreeView_GetPrevSibling(hWndControl, hCurrentNode)
+            wend 
+      end with
+      function = Index 
+end function
+
+' ========================================================================================
+' Create Name of Treeview , according to the data types.
+' ========================================================================================
+function CreateName4ExplorerTreeview(ByVal hWndControl As HWnd, _
+                               byref ReturnValue as WSTRing , _
+                               ByVal hCurrentNode As HTREEITEM =0) as LONG
+     DIM item AS TVITEMW 
+     DIM AS WString* MAX_PATH wszText="",wszName =""
+     DIM AS LONG Index=GetPrevIndexOfPrevSibling4Treeview(hWndControl, hCurrentNode)
+     dim AS ImageIndex4Explorer ImageIndex=FF_TreeView_GetiImage(hWndControl,hCurrentNode)
+     TreeView_GetItemText(hWndControl, hCurrentNode, @wszName, MAX_PATH)
+     select case GetLevels4ExplorerTreeview(hWndControl,hCurrentNode)
+           case 1
+               select case ImageIndex  
+               case II4E_TYPE4VARIABLE, II4E_TYPE4VARIABLE2
+                  wszName = ".." & wszName
+               end select 
+           case 2    
+               WITH  item
+                  hCurrentNode=TreeView_GetParent(hWndControl, hCurrentNode)
+                  .mask = TVIF_TEXT Or TVIF_IMAGE
+                  .hitem = hCurrentNode
+                  .pszText = @wszText
+                  .cchTextMax = MAX_PATH
+                  TreeView_GetItem(hWndControl, @item)
+                  select case ImageIndex  
+                  case II4E_TYPE4VARIABLE, II4E_TYPE4VARIABLE2
+                     select case .iImage
+                     case II4E_TYPE4FUNCTION, II4E_TYPE4FUNCTION2,  II4E_TYPE4SUB, II4E_TYPE4SUB2, _
+                          II4E_TYPE4PROPERTY, II4E_TYPE4PROPERTY2
+                          wszName = "." & wszText & "." & wszName
+                     case else ' II4E_TYPE4TYPE, II4E_TYPE4TYPE2, II4E_TYPE4CLASS, II4E_TYPE4CLASS2
+                          wszName = wszText & ".." & wszName
+                     end select 
+                  case II4E_TYPE4FUNCTION, II4E_TYPE4FUNCTION2,  II4E_TYPE4SUB, II4E_TYPE4SUB2, _
+                     II4E_TYPE4PROPERTY, II4E_TYPE4PROPERTY2
+                     wszName = wszText & "." & wszName
+                  case else
+                     MessageBox NULL, wszText & "?" & wszName,"Unknown(CreateName4ExplorerTreeview)", MB_OK
+                  end select
+               end with
+           case 3
+               for I2 as long=1 to 2
+                 hCurrentNode=TreeView_GetParent(hWndControl, hCurrentNode)
+                 TreeView_GetItemText(hWndControl, hCurrentNode, @wszText, MAX_PATH) 
+                 wszName = wszText & "." & wszName 
+               next
+     end select
+
+   ReturnValue=wszName
+   function=Index
+
+end function
+
+' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
 Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
@@ -66,6 +361,139 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
    Function = 0
 End Function
  
+' ========================================================================================
+' Find Item of Treeview
+' ========================================================================================
+Function FindTreeViewItem( ByVal hWndControl As HWnd, _
+                                 ByVal hParent As HANDLE, _
+                                 ByRef TheText As WString, _
+                                 ByRef SearchItem4Last As boolean=false _
+                                 ) As HTREEITEM
+      DIM AS WString* MAX_PATH wszText
+      Dim As HTREEITEM hNode=TreeView_GetChild(hWndControl, hParent)
+      Dim As HTREEITEM tmphNode=0
+      do while hNode<>0
+         TreeView_GetItemText(hWndControl, hNode, @wszText, MAX_PATH)
+         if WStrIsEqual(wszText,TheText,false) then 
+            tmphNode= hNode
+            if SearchItem4Last=false then                  
+               EXIT DO
+            end if
+         end if
+         hNode=TreeView_GetNextSibling(hWndControl,hNode)
+      loop
+      Function = tmphNode
+End Function
+
+' ========================================================================================
+' Update Item of Treeview
+' ========================================================================================
+Function UpdateItem4ExploreTreeview( ByVal hWndControl As HWnd, _
+                                 ByVal hParent As HANDLE, _
+                                 Byval pData as DB2_DATA ptr, _
+                                 ByVal lParam As LPARAM = 0 _
+                                 ) As HANDLE
+      DIM AS LONG INDEX,INDEX2
+      Dim As HTREEITEM hNode
+      dim as LONG DB2ID=pData->id
+      DIM AS WString* MAX_PATH wzText(0 to 2)
+      DIM AS WString* MAX_PATH TheText=pData->ElementName
+      dim as ImageIndex4Explorer TYPE4CLASS,TYPE4CLASS2
+      for index=2 to 0 step -1 
+         if TheText="" then exit for     
+         INDEX2=instrRev(TheText,".") 
+         if INDEX2=0 then
+            wzText(index)=TheText
+            exit for
+         else
+            wzText(index)=mid(TheText,INDEX2+1)
+            TheText=left(TheText,INDEX2-1) 
+         end if
+      next
+
+      select CASE DB2ID
+         case DB2_STANDARDDATATYPE
+               
+         case DB2_TYPE
+               hNode =FindTreeViewItem(hWndControl, hParent, wzText(2), false) 
+               if hNode=0 then
+                  hNode=FF_TreeView_InsertItem(hWndControl, hParent, wzText(2),lParam,II4E_TYPE4CLASS,II4E_TYPE4CLASS2)
+                  Treeview_RemoveCheckBox(hWndControl, hNode) 
+               endif
+               if pData->SubType = DB2_SUBTYPE4ENUM then
+                  ChangeImage4ExplorerTreeview2db(hWndControl,hNode,DB2_SUBTYPE4ENUM)
+               else 
+                  ChangeImage4ExplorerTreeview2db(hWndControl,hNode,DB2_CLASS)
+               endif
+                
+         case DB2_FUNCTION,DB2_SUB,DB2_PROPERTY 
+            if wzText(1)<>"" then      'Type
+               hNode =FindTreeViewItem(hWndControl, hParent, wzText(1), false) 
+               if hNode=0 then
+                  hNode=FF_TreeView_InsertItem(hWndControl, hParent, wzText(1),0,II4E_TYPE4CLASS,II4E_TYPE4CLASS2)
+                  Treeview_RemoveCheckBox(hWndControl, hNode)  
+               else
+                  ChangeImage4ExplorerTreeview2db(hWndControl,hNode,DB2_CLASS)    
+               endif
+               hParent=hNode                
+            end if             
+            if wzText(2)<>"" then     'FUNCTION,SUB,PROPERTY etc.
+               'hNode =FindTreeViewItem(hWndControl, hParent, wzText(2), false) 
+               'if hNode=0 then
+                  hNode=FF_TreeView_InsertItem(hWndControl, hParent, wzText(2),lParam,II4E_TYPE4FUNCTION,II4E_TYPE4FUNCTION2)
+                  Treeview_RemoveCheckBox(hWndControl, hNode)
+               'endif
+               ChangeImage4ExplorerTreeview2db(hWndControl,hNode,DB2ID)              
+            end if
+         
+         case DB2_VARIABLE
+            if wzText(0)<>"" then      'Type
+               hNode =FindTreeViewItem(hWndControl, hParent, wzText(0), false) 
+               if hNode=0 then
+                  hNode=FF_TreeView_InsertItem(hWndControl, hParent, wzText(0),0,II4E_TYPE4CLASS,II4E_TYPE4CLASS2)
+                  Treeview_RemoveCheckBox(hWndControl, hNode) 
+               endif
+               'if pData->SubType = DB2_SUBTYPE4ENUM then
+               '   ChangeImage4ExplorerTreeview2db(hWndControl,hNode,DB2_SUBTYPE4ENUM)
+               'else 
+               '   ChangeImage4ExplorerTreeview2db(hWndControl,hNode,DB2_CLASS)
+               'endif
+               hParent=hNode                
+            end if    
+
+            if wzText(1)<>"" then    'FUNCTION,SUB,PROPERTY etc.
+               hNode =FindTreeViewItem(hWndControl, hParent, wzText(1), true) 
+               if hNode=0 then
+                  hNode=FF_TreeView_InsertItem(hWndControl, hParent, wzText(1),0,II4E_TYPE4FUNCTION,II4E_TYPE4FUNCTION2)
+                  Treeview_RemoveCheckBox(hWndControl, hNode)
+               endif
+               hParent=hNode                
+            end if
+
+            if wzText(2)<>"" then     'VARIABLE
+               hNode=FF_TreeView_InsertItem(hWndControl, hParent, wzText(2),lParam,II4E_TYPE4VARIABLE,II4E_TYPE4VARIABLE2)
+               Treeview_RemoveCheckBox(hWndControl, hNode)              
+            end if
+      END SELECT
+      return  hNode
+End Function
+
+function UpdateDATAToExplorerTreeview ( byval hTree As Hwnd, ByVal pDoc As clsDocument Ptr, byval Firstptrdb as DB2_DATA ptr ) as boolean
+   'ELF_CurrentFile
+   if pDoc<>0 then
+      while Firstptrdb<>0
+         select CASE Firstptrdb->id 
+         case DB2_FUNCTION,DB2_SUB,DB2_PROPERTY,DB2_VARIABLE,DB2_TYPE
+              UpdateItem4ExploreTreeview(hTree, pDoc->hNodeExplorer,Firstptrdb,cast(LPARAM,Firstptrdb))
+         END SELECT
+         if Firstptrdb->ChildNode4DB then
+            UpdateDATAToExplorerTreeview(hTree, pDoc, Firstptrdb->ChildNode4DB)
+         END IF 
+         Firstptrdb = Firstptrdb->NextNode
+      wend
+      function =true
+   endif
+END FUNCTION
 
 ' ========================================================================================
 ' Add the names of all subs/functions belonging to this document to the Explorer treeview
@@ -88,7 +516,8 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
    ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
       If pDoc->hNodeExplorer = 0 Then
-         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, hRootNode, wzFile, cast(LPARAM, pDoc) )
+         dim As Long iImage=ImageIndex4ExplorerTreeview(pDoc)
+         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, hRootNode, wzFile, cast(LPARAM, pDoc),iImage,iImage)
          fAddChildren = True
          Treeview_RemoveCheckBox(hTree, pDoc->hNodeExplorer)
       End If
@@ -106,23 +535,11 @@ Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fU
    Treeview_SortChildren( hTree, hRootNode, 0 )
       
    If fAddChildren Then
-      dim wszText as wstring * MAX_PATH
-      dim as HTREEITEM hNode
-      dim pData as DB2_DATA ptr
-      dim as string sFilename = ucase(pDoc->DiskFilename)
-      
-      gdb2.dbRewind()
-      do 
-         pData = gdb2.dbGetNext
-         if pData = 0 THEN exit do
-         select case pData->id 
-            case DB2_FUNCTION, DB2_SUB
-               if sFilename = ucase(pData->fileName) THEN
-                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0 )
-                  Treeview_RemoveCheckBox(hTree, hNode)
-               END IF
-         END SELECT
-      loop      
+      dim as DB2_DATA ptr pData = any 
+      gdb2.dbRewind4File(pDoc->ProjectIndex,pDoc->DiskFilename)
+      pData = gdb2.dbRewind4DB()
+      UpdateDATAToExplorerTreeview(hTree, pDoc, pData)
+   
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
    AfxRedrawWindow(hTree)
@@ -155,7 +572,7 @@ Function frmExplorer_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
             frmMain_PositionWindows(HWND_FRMMAIN)
          end if
    end select
-                       
+  
    Function = 0
 End Function
 
@@ -174,7 +591,7 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
    Dim pDoc As clsDocument Ptr
    Dim ht As TVHITTESTINFO
    Dim As POINT pt
-   
+   static As WString * MAX_PATH ElementValue
    ' Determine what node was clicked on
    Select Case pNMHDR->code 
       
@@ -193,11 +610,18 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
             END IF
          NEXT
          ' Second, search for a matching document
-         pDoc = Cast(clsDocument ptr, pnmTip->lParam)
-         if pDoc THEN
-            pnmTip->pszText = @pDoc->DiskFilename
-            pnmTip->cchTextMax = len(pDoc->DiskFilename)
-         END IF
+         if pnmTip->lParam then
+            Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+            if CheckIsDoc4ExplorerTreeview(hTree,pnmTip->hItem) then
+               pDoc = Cast(clsDocument ptr, pnmTip->lParam)
+               pnmTip->pszText = @pDoc->DiskFilename
+               pnmTip->cchTextMax = len(pDoc->DiskFilename)
+            else 
+               ElementValue = Cast(DB2_DATA ptr, pnmTip->lParam)->ElementValue
+               pnmTip->pszText = @ElementValue
+               pnmTip->cchTextMax = len(ElementValue)
+            endif
+          endif
          exit function   
 
       Case NM_CLICK, NM_RCLICK
@@ -210,7 +634,15 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
          ht.pt = pt 
          Treeview_HitTest(hTree, @ht )
          hItem = ht.hItem
-         If hItem Then Treeview_Select( hTree, hItem, TVGN_CARET)
+         If hItem Then 
+            Treeview_Select( hTree, hItem, TVGN_CARET)
+            pDoc=GetClsDocument4ExplorerTreeview(hTree, hItem)
+            if pDoc then
+               gdb2.dbRewind4File(gApp.SetActiveProject(hItem),pDoc->DiskFilename)
+            else
+               gdb2.dbRewind4Proj(gApp.SetActiveProject(hItem))
+            endif
+         end if
          
          ' Was the checkbox clicked on. If yes then post user messge to select/deselect
          ' the other checkboxes for the other projects (only one can be active).
@@ -225,8 +657,10 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
          
          If pNMHDR->code = NM_RCLICK Then
             ' Create the popup menu
-            lParam = FF_TreeView_GetlParam(hTree, hItem)
-            pDoc = Cast(clsDocument ptr, lParam)
+            IF CheckIsDoc4ExplorerTreeview(hTree, hItem) then
+               lParam = FF_TreeView_GetlParam(hTree, hItem) 
+               pDoc = Cast(clsDocument Ptr, lParam)
+            end if
             ' Select the node and show the document
             if pDoc then SendMessage(hTree, WM_LBUTTONDBLCLK, 0, 0)
             Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
@@ -303,13 +737,21 @@ Function frmExplorer_Tree_SubclassProc ( _
       Case WM_LBUTTONDBLCLK
          hTree = hWnd
          hItem = Treeview_GetSelection(hTree)
-         lParam = FF_TreeView_GetlParam(hTree, hItem)
 
          dim wszText as wstring * MAX_PATH
          Dim pDoc As clsDocument Ptr
-         pDoc = Cast(clsDocument Ptr, lParam)
-         TreeView_GetItemText(hTree, hItem, @wszText, MAX_PATH)
-         OpenSelectedDocument(pDoc, wszText)
+         DIM item AS TVITEMW
+
+         IF CheckIsDoc4ExplorerTreeview(hTree, hitem) then
+            lParam = FF_TreeView_GetlParam(hTree, hitem)
+            pDoc = Cast(clsDocument Ptr, lParam)
+            gdb2.dbRewind4File(gApp.SetActiveProject(hitem),pDoc->DiskFilename)
+         else         
+            gdb2.dbRewind4Proj(gApp.SetActiveProject(hitem)) 
+         end if
+         TreeView_Expand(hTree, hitem,TVE_TOGGLE)
+         TreeView_GetItemText(hTree, hitem, @wszText, MAX_PATH)
+         OpenSelectedDocument(pDoc, wszText, hItem)
          TreeView_SelectItem(hTree, hItem)
          Exit Function
          
@@ -387,6 +829,7 @@ Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
          Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
          dim as HFONT hFont = AfxGetWindowFont(hTree)
          DeleteFont(hFont)
+         ImageList_Destroy(gApp.himl)
          
       case WM_ERASEBKGND
          return true
@@ -479,6 +922,14 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
 '   SendMessage( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(20), 0 )
    SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
 
+   ' Create the imagelist  
+   Dim hBitmap As HBITMAP
+   DIM cx AS LONG = 16 * pWindow->DPI \ 96
+   gApp.himl=ImageList_Create(cx,cx,ILC_MASK Or ILC_COLOR8,32,0) 
+   hBitmap = LoadImage(pWindow->InstanceHandle, "IMAGE_FILES", IMAGE_BITMAP, 0, 0, LR_SHARED)
+   ImageList_AddMasked(gApp.himl,hBitmap,&HFFFFFF)
+   DeleteObject(hBitmap)
+   TreeView_SetImageList(hTree,gApp.himl,TVSIL_NORMAL)
    PositionExplorerWindows(HWND_FRMEXPLORER)
 
    Function = 0

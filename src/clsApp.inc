@@ -1,4 +1,4 @@
-'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+﻿'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
 '    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
@@ -33,11 +33,13 @@ End Destructor
 ''
 Function clsApp.GetProjectIndexByFilename( byref sFilename as wstring ) As long
    for idx as long = 0 to ubound(this.Projects)
-      if this.Projects(idx).InUse = true THEN
-         if ucase(this.Projects(idx).ProjectFilename) = ucase(sFilename) then
-            return idx
+      with this.Projects(idx)
+         if .InUse = true THEN
+            if WStrIsEqual(.ProjectFilename,sFilename)=TRUE then
+               return idx
+            end if
          end if
-      end if
+      end with
    next   
    function = 0
 End Function
@@ -53,19 +55,21 @@ Function clsApp.RemoveAllSelectionAttributes() As long
    dim as long startPos, endPos
    
    for idx as long = 0 to ubound(this.Projects)
-      if this.Projects(idx).InUse = true THEN
-         For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
-            pDoc = this.Projects(idx).GetDocumentPtr(i)
-            if pDoc THEN
-               SendMessage( pDoc->hWindow(0), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-               SendMessage( pDoc->hWindow(0), SCI_SETINDICATORCURRENT, 8, 0)
-               SendMessage( pDoc->hWindow(0), SCI_TARGETWHOLEDOCUMENT, 0, 0)
-               startPos = SendMessage( pDoc->hWindow(0), SCI_GETTARGETSTART, 0, 0)
-               endPos =  SendMessage( pDoc->hWindow(0), SCI_GETTARGETEND, 0, 0)
-               SendMessage( pDoc->hWindow(0), SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
-            END IF
-         Next
-      end if
+      with this.Projects(idx)
+         if .InUse = true THEN
+            For i As Long = 0 To .GetDocumentCount - 1
+               pDoc = .GetDocumentPtr(i)
+               if pDoc THEN
+                  SendMessage( pDoc->hWindow(0), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+                  SendMessage( pDoc->hWindow(0), SCI_SETINDICATORCURRENT, 8, 0)
+                  SendMessage( pDoc->hWindow(0), SCI_TARGETWHOLEDOCUMENT, 0, 0)
+                  startPos = SendMessage( pDoc->hWindow(0), SCI_GETTARGETSTART, 0, 0)
+                  endPos =  SendMessage( pDoc->hWindow(0), SCI_GETTARGETEND, 0, 0)
+                  SendMessage( pDoc->hWindow(0), SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
+               END IF
+            Next
+         end if
+      end with
    next   
    function = 0
 End Function
@@ -79,23 +83,43 @@ Function clsApp.GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument pt
    IF hWindow = NULL THEN EXIT FUNCTION
    
    for idx as long = 0 to ubound(this.Projects)
-      if this.Projects(idx).InUse = true THEN
-         For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
-            pDoc = this.Projects(idx).GetDocumentPtr(i)
-            if pDoc THEN
-               ' Determine if the incoming hWindow matches the clsDocument hWindow or
-               ' is the Frame or Form windows.
-               if (hWindow = pDoc->hWindow(0)) orelse _
-                  (hWindow = pDoc->hWindow(1)) orelse _
-                  (hWindow = pDoc->hWndFrame)  orelse _
-                  (hWindow = pDoc->hWndForm) THEN
-                  return pDoc
-               end if   
-            END IF
-         Next
-      end if
+      with this.Projects(idx)
+         if .InUse = true THEN
+            For i As Long = 0 To .GetDocumentCount - 1
+               pDoc = .GetDocumentPtr(i)
+               if pDoc THEN
+                  ' Determine if the incoming hWindow matches the clsDocument hWindow or
+                  ' is the Frame or Form windows.
+                  if (hWindow = pDoc->hWindow(0)) orelse _
+                     (hWindow = pDoc->hWindow(1)) orelse _
+                     (hWindow = pDoc->hWndFrame)  orelse _
+                     (hWindow = pDoc->hWndForm) THEN
+                     return pDoc
+                  end if   
+               END IF
+            Next
+         end if
+      end with
    next   
    function = 0
+End Function
+
+''
+''
+Function clsApp.DocumentPtrExists( byval pDoc as clsDocument ptr) As boolean
+   ' Find the pDoc pointer based on all the available hWindow for the any loaded
+   for idx as long = 0 to ubound(this.Projects)
+      with this.Projects(idx)
+         if .InUse = true THEN
+            For i As Long = 0 To .GetDocumentCount - 1            
+               if pDoc = .GetDocumentPtr(i) THEN               
+                  return true   
+               END IF
+            Next
+         end if
+      end with
+   next   
+   function = false
 End Function
 
 ''
@@ -115,16 +139,18 @@ end function
 Function clsApp.GetActiveProjectIndex() As long
    ' First check to see if the index override has been set. This occurs if we want
    ' to do an action to a specific project rather than the active project.
-   if gApp.ProjectOverrideIndex > 0 THEN return gApp.ProjectOverrideIndex
+   if this.ProjectOverrideIndex > 0 THEN return this.ProjectOverrideIndex
       
    ' Return the index of the project that has it's checkbox set
    dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         if TreeView_IsItemChecked(hTree, this.Projects(i).hExplorerRootNode) then
-            return i
-         end if   
-      END IF
+      with this.Projects(i)
+         if .InUse = true THEN
+            if TreeView_IsItemChecked(hTree, .hExplorerRootNode) then
+               return i
+            end if   
+         END IF
+      end with
    NEXT
    function = 0    ' Use Project0 "FILES" by default
 end function
@@ -133,17 +159,23 @@ end function
 ''
 Function clsApp.SetActiveProject( byval hNode As HTREEITEM) As long
    ' Set the treeview checkbox making it the active project
+   dim as long ProjectIndex = 0
    dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   hNode=GetProjecthNode4ExplorerTreeview(hTree,hNode)
    for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         if hNode = gApp.Projects(i).hExplorerRootNode THEN
-            Treeview_SetCheckState(hTree, gApp.Projects(i).hExplorerRootNode, TRUE)      
-         else   
-            Treeview_SetCheckState(hTree, gApp.Projects(i).hExplorerRootNode, false)      
-         END IF
-      end if
+      with this.Projects(i)
+         if .InUse = true THEN
+               if hNode = .hExplorerRootNode THEN
+                  ProjectIndex=i
+                  Treeview_SetCheckState(hTree, .hExplorerRootNode, TRUE)      
+               else   
+                  Treeview_SetCheckState(hTree, .hExplorerRootNode, false)      
+               END IF
+               .SetActiveProject()
+         end if
+      end with
    NEXT
-   function = 0
+   function = ProjectIndex
 end function
 
 ''
@@ -155,17 +187,22 @@ Function clsApp.EnsureDefaultActiveProject(byval hNodeBypass as HTREEITEM = 0) A
    ' active immediately again.
    dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    dim as HTREEITEM hNodeActive = 0
+   if hNodeBypass then
+      hNodeBypass=GetProjecthNode4ExplorerTreeview(hTree,hNodeBypass)
+   end if
    
    for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         if gApp.Projects(i).hExplorerRootNode = hNodeBypass THEN continue for
-         if TreeView_IsItemChecked(hTree, gApp.Projects(i).hExplorerRootNode) then
-            hNodeActive = gApp.Projects(i).hExplorerRootNode
-            exit for
-         else
-            if hNodeActive = 0 then hNodeActive = gApp.Projects(i).hExplorerRootNode
+      with this.Projects(i)
+         if .InUse = true THEN
+            if .hExplorerRootNode = hNodeBypass THEN continue for
+            if TreeView_IsItemChecked(hTree, .hExplorerRootNode) then
+               hNodeActive = .hExplorerRootNode
+               exit for
+            else
+               if hNodeActive = 0 then hNodeActive = .hExplorerRootNode
+            end if
          end if
-      end if
+      end with
    next
    Treeview_SetCheckState(hTree, hNodeActive, TRUE)      
    function = 0
@@ -194,10 +231,12 @@ Function clsApp.GetNewProjectIndex() As Long
    dim idx as long = -1
 
    for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = false THEN
-         this.Projects(i).InUse = true
-         return i
-      END IF
+      with this.Projects(i)
+         if .InUse = false THEN
+            .InUse = true
+            return i
+         END IF
+      end with   
    NEXT
    idx = ubound(this.Projects) + 1
    redim preserve this.Projects(idx) as clsProject 

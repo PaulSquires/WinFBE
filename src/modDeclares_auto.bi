@@ -44,12 +44,13 @@ Declare Function UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
 Declare Function FileEncodingTextDescription(byval FileEncoding as long) as CWSTR
 Declare Function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
 Declare Function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long
-Declare Function OpenSelectedDocument( byval pDoc as clsDocument ptr, byref wszFunctionName as WSTRING ) as long
+Declare Function OpenSelectedDocument( byval pDoc as clsDocument ptr, byref wszName as WSTRING, ByVal hCurrentNode As HTREEITEM =0) as long
 Declare Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function Treeview_RemoveCheckBox( byval hTree as hwnd, byval hNode as HTREEITEM) as long
 Declare Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, ByVal hParent As HANDLE, ByRef TheText As WString, ByVal lParam As LPARAM = 0, ByVal iImage As Long = 0, ByVal iSelectedImage As Long = 0 ) As HANDLE
 Declare Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As Long
+Declare Function FF_TreeView_GetiImage( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As Long
 Declare Function FF_TreeView_SetCheckState( ByVal hWndControl As HWnd, ByVal hItem As HANDLE, ByVal fCheck As Boolean ) As BOOLEAN
 Declare Function FF_TreeView_GetCheckState( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As BOOLEAN
 Declare Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, ByVal hItem as HANDLE, ByVal lParam as Long) as Long
@@ -262,7 +263,7 @@ Declare Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
 Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, _
                            ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, _
-                           ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false ) As clsDocument Ptr
+                           ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false, byval ProjectFileType as Long=-1,byval idx as Long=-1) As clsDocument Ptr
 Declare Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
@@ -283,4 +284,17 @@ Declare Function frmMain_TabCtl_SubclassProc ( ByVal HWnd As HWnd, ByVal uMsg As
 Declare Function frmMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmMain_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
 Declare Function WinMain( ByVal hInstance As HINSTANCE, ByVal hPrevInstance As HINSTANCE, ByVal szCmdLine As ZString Ptr, ByVal nCmdShow As Long ) As Long
+Declare Function ImageIndex4ExplorerTreeview( ByVal pDoc As clsDocument Ptr ) As long
+Declare Function WStrIsEqual(Byref lpWord As wString,Byref lpList As wString,ByVal fMatchCase As BOOLEAN=FALSE) As BOOLEAN
+Declare Function WStrNIsEqual(Byref lpWord As wString,Byref lpList As wString,Byref Size As long,ByVal fMatchCase As BOOLEAN=FALSE) As BOOLEAN
+Declare Function StrIsEqual(Byref lpWord As String,Byref lpList As String,ByVal fMatchCase As BOOLEAN=FALSE) As BOOLEAN
+Declare Function StrNIsEqual(Byref lpWord As String,Byref lpList As String,Byref Size As long,ByVal fMatchCase As BOOLEAN=FALSE) As BOOLEAN
+Declare sub ChangeImage4ExplorerTreeview2doc( ByVal pDoc As clsDocument Ptr )
+Declare sub ChangeImage4ExplorerTreeview2db(ByVal hWndControl As HWnd,  ByVal hNode As HTREEITEM,  ByVal DB2ID as LONG )
+Declare function GetClsDocument4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as clsDocument ptr
+Declare function CreateName4ExplorerTreeview(ByVal hWndControl As HWnd,byref ReturnValue as WSTRing, ByVal hCurrentNode As HTREEITEM =0) as LONG
 Declare FUNCTION AfxStrRemoveWithMark (BYREF wszMainStr AS CONST WSTRING, BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, BYREF MarkKeys AS CONST WSTRING="", BYVAL fRemoveAll AS BOOLEAN = FALSE, BYVAL IsInstrRev AS BOOLEAN = FALSE) AS CWSTR
+Declare FUNCTION AfxStrMid (BYREF wszMainStr AS CONST WSTRING, BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, BYVAL Index AS long = 1) AS CWSTR
+Declare function CheckIsDoc4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as Boolean
+Declare function GetProjectIndex4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as long
+Declare function GetProjecthNode4ExplorerTreeview( ByVal hWndControl As HWnd, byVal hNode As HTREEITEM ) as HTREEITEM

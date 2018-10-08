@@ -189,6 +189,7 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
 
    Dim as HWND hEdit
    Dim as long nLine, nFoldLevel
+   Static as boolean IsAutoDelete = false
     
    Select Case pNSC->hdr.code
          
@@ -197,6 +198,9 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          If pNSC->hdr.idFrom = IDC_SCINTILLA Then
             pDoc = gTTabCtl.GetActiveDocumentPtr()
             If pDoc Then 
+               If (pNSC->updated and SC_UPDATE_SELECTION) THEN
+                  pDoc->FixSelectedRange()
+               end if  
                ' This code will position our substitute scrollbar thumbs only when the 
                ' caret position crosses a page boundry via keyboard input
                If pNSC->updated And SC_UPDATE_SELECTION And pNSC->updated > SC_UPDATE_SELECTION Then
@@ -223,6 +227,33 @@ Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          ' a huge slowdown when notifications sent for UI updates.
          If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or (pNSC->modificationType And SC_MOD_DELETETEXT) Then
             frmMain_UpdateLineCol(HWnd)
+         elseIf (pNSC->modificationType And SC_MOD_BEFOREDELETE) Then
+            If pNSC->Length=1 THEN
+               pDoc = gTTabCtl.GetActiveDocumentPtr() 
+               If pDoc<>0 then
+                  if pDoc->FileEncoding=FILE_ENCODING_ANSI Then
+                     select case cast(ubyte,SendMessage( pNSC->hdr.hwndFrom, SCI_GETCHARAT,pNSC->position, 0))
+                     case &H80 to &HFF
+                        If (GetAsyncKeyState(VK_BACK) and &H8000 )  THEN   'Is Backspce?
+                           nLine=pDoc->FixedPosition4DBCS(pNSC->position,0,0,FALSE)
+                           If nLine<> pNSC->position THEN
+                              PostMessage(pNSC->hdr.hwndFrom, SCI_DELETERANGE,nLine, 1) 
+                           end if
+                        Elseif (GetAsyncKeyState(VK_Delete) and &H8000 ) THEN  ' Is Delete?
+                           If IsAutoDelete=false THEN
+                              nLine=pDoc->FixedPosition4DBCS(pNSC->position+1,0,0,FALSE)
+                              If nLine=pNSC->position THEN
+                                 IsAutoDelete = true 
+                                 PostMessage(pNSC->hdr.hwndFrom, SCI_DELETERANGE,pNSC->position, 1) 
+                              end if
+                           else
+                              IsAutoDelete = false 
+                           end if
+                        end if 
+                     end select
+                  end if
+               end if
+            end if 
          end if
          return true
          
@@ -615,7 +646,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    NEXT
    
    ' Reset the gdb database but reload the FB keywords (need valid pDocs)
-   gdb2.dbDeleteByProject(idx)
+   gdb2.dbDelete4Proj(idx)
 
    ' If we get this far then we can safely remove all of the pDocs for
    ' this project from the global array
@@ -696,11 +727,12 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                  byval bIsInclude  as BOOLEAN, _
                                  ByVal pwszName    As WString Ptr, _
                                  ByVal pDocIn      As clsDocument Ptr, _
-                                 byval bIsDesigner as Boolean _
+                                 byval bIsDesigner as Boolean, _
+                                 byval ProjectFileType as Long=-1, _
+                                 byval idx as Long=-1 _
                                  ) As clsDocument Ptr
    
    Dim As Long iTab = -1
-   dim as long idx
    dim as HTREEITEM hRootNode
    Dim pDoc As clsDocument Ptr 
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
@@ -708,7 +740,9 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    
    ' Check to see if the document is already loaded and part of the
    ' project it is being added to.
-   idx = gApp.GetActiveProjectIndex()
+   IF idx<0 THEN
+      idx = gApp.GetActiveProjectIndex()
+   end if
 
    ' Need to determine if the document is already part of an open project
    ' because if it is then we don't want to add the file to the current
@@ -735,7 +769,8 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
             pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
          Else
             pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
-         End If   
+         End If
+         pDoc->ProjectIndex = idx   
          gApp.Projects(idx).AddDocument(pDoc) 
          ParseDocument(idx, pDoc, "")
          gFileLoading = false
@@ -744,9 +779,10 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       End If   
       pwszName = @pDoc->DiskFilename
 
+      if ProjectFileType>=0 then pDoc->ProjectFileType = ProjectFileType
       if idx = 0 THEN   ' Project0 "FILES"
          If gApp.Projects(0).hExplorerRootNode = 0 Then
-            gApp.Projects(0).hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, "FILES" )
+            gApp.Projects(0).hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, "FILES",0,II4E_FILE4BAS,II4E_FILE4BAS)
             Treeview_RemoveCheckBox(hTree, gApp.Projects(0).hExplorerRootNode )
             Treeview_SetBold(hTree, gApp.Projects(0).hExplorerRootNode, TRUE)
          End If
@@ -786,8 +822,8 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       iTab = gTTabCtl.GetTabIndexFromFilename(pwszName)
       If iTab = -1 Then iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
       gTTabCtl.SetFocusTab(iTab)
-      Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
-                           pDoc->hNodeExplorer )
+      'Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
+      '                     pDoc->hNodeExplorer )
    End If
 
    ' Position all of the controls into place
@@ -1086,22 +1122,24 @@ Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
    dim pStream AS CTextStream
    if pStream.Create(wszFileName) <> S_OK then exit function
 
-   gdb2.dbRewind()
+   gdb2.dbRewind4file(idx,wszFileName)
    do 
-      pData = gdb2.dbGetNext()
+      pData = gdb2.dbGetNext4DB()
       if pData = 0 THEN exit do
       if (pData->id <> DB2_SUB) andalso (pData->id <> DB2_FUNCTION) THEN continue do
 
       ' Bypass any declares for Class subs/functions
-      if instr(pData->ElementName, ".") = 0 THEN
-         if gApp.Projects(idx).GetDocumentPtrByFilename(pData->fileName) THEN 
-            if pData->id = DB2_SUB then
-               pStream.WriteLine "Declare Sub " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
+      IF pData->deleted=FALSE THEN
+         if instr(pData->ElementName, ".") = 0 THEN
+            if gApp.Projects(idx).GetDocumentPtrByFilename(pData->pFileDATA->fileName) THEN 
+               SELECT case pData->id 
+                  case DB2_SUB
+                     pStream.WriteLine "Declare Sub " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10)) 
+                  case DB2_FUNCTION
+                     pStream.WriteLine "Declare Function " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
+               end select
             end if
-            if pData->id = DB2_FUNCTION then
-               pStream.WriteLine "Declare Function " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
-            end if
-         end if
+         END IF   
       END IF
    loop
    pStream.Close
@@ -1682,7 +1720,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
          Function = code_Compile(id)
       Case IDM_RUNEXE
-         RunExe( GetRunExecutableFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
+         dim as long idx = gApp.GetActiveProjectIndex()
+         RunExe( GetRunExecutableFilename, gApp.Projects(idx).ProjectCommandLine )
       Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
 
 
@@ -1726,7 +1765,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        "PAUL SQUIRES" & vbcrlf & _
                        "PlanetSquires Software" & vbcrlf & vbcrlf & _
                        "Special thanks to:" & vbcrlf & _
-                       "José Roca (WinFBX Framework)", _
+                       "Jos?Roca (WinFBX Framework)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
  
@@ -1832,6 +1871,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
                frmMain_PositionWindows(HWnd)
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
                If pDoc Then
+                  gdb2.dbRewind4File(gApp.SetActiveProject(pDoc->hNodeExplorer),pDoc->DiskFilename)
                   Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
                                        pDoc->hNodeExplorer )
                end if

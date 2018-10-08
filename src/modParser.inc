@@ -73,7 +73,7 @@ ParseAgain:
          idx = pDoc->ProjectIndex
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
-         gdb2.dbDelete(wszFilename)
+         gdb2.dbDelete4File(idx,wszFilename)
       else
          ' These are often the FB/WinAPI codetip files and Include Files. Everything else in
          ' a project would have a valid pDoc.
@@ -92,7 +92,7 @@ ParseAgain:
          pStream.Close
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
-         gdb2.dbDelete(wszFilename)
+         gdb2.dbDelete4File(idx,wszFilename)
       END IF                     
    end if
    
@@ -103,6 +103,8 @@ ParseAgain:
    ' Create a parse TYPE that handles the state information throughout parsing this document.
    dim parser as clsParser
    
+   gdb2.dbAdd4Proj(gApp.Projects(idx).ProjectFilename,idx)
+   gdb2.dbAdd4File(idx,wszFilename) 
    with parser
       .action     = ACTION_NONE
       .idxProject = idx
@@ -116,6 +118,7 @@ ParseAgain:
       parser.st_ucase = ""
       sLine           = ""   ' reset our full line string
       
+      parser.lineNum = nLineNum
       ' IMPORTANT: Get the full line as it could be across multiple lines via the line continuation underscore.
       do
          if pDoc THEN
@@ -124,7 +127,7 @@ ParseAgain:
             st = sLineArray(nLineNum)
          END IF
          
-         parser.lineNum = nLineNum 
+         'parser.lineNum = nLineNum 
              
          ' Check for a TODO entry. Do not normalize line until after this check is done because
          ' TODO's are found as part of a comment.
@@ -141,7 +144,7 @@ ParseAgain:
          st = trim(RemoveComments(st))
          
          if right(st, 2) = " _" THEN
-            sLine = sLine & left(st, len(st) - 1) & " "
+            sLine = sLine & left(st, len(st) - 1) & " " & ContinueLineFlag
             nLineNum = nLineNum + 1
          else
             ' no line continuation character so we now have all the characters for the current line.   
@@ -150,7 +153,7 @@ ParseAgain:
          end if
       loop
       
-      parser.lineNum = nLineNum 
+      'parser.lineNum = nLineNum 
     
       ' If the line contains ":" characters then the line needs to be broken up
       ' into as many sublines to be processed. Don't use AfxStrParse because we

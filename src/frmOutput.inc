@@ -41,13 +41,14 @@ function UpdateToDoListview() as long
 
    dim pData as DB2_DATA ptr
    
-   gdb2.dbRewind()
+   gdb2.dbRewind4DB()
    do 
-      pData = gdb2.dbGetNext
+      pData = gdb2.dbGetNext4DB
       if pData = 0 THEN exit do
       if pData->id <> DB2_TODO THEN continue do
-      FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
-      FF_ListView_InsertItem( hLV, n, 1, WStr(pData->fileName) )
+      IF pData->deleted=TRUE THEN  continue do
+      FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nStartLineNum) ) 
+      FF_ListView_InsertItem( hLV, n, 1, WStr(pData->pFileDATA->fileName) )
       FF_ListView_InsertItem( hLV, n, 2, WStr(pData->ElementValue) ) 
       n = n + 1
    loop
@@ -61,7 +62,7 @@ END FUNCTION
 ' ========================================================================================
 function DoSearchFileSelected() as LONG
 
-   dim as long nCursel, f1, f2, nSize, nLineNum
+   dim as long nCursel, f1, f2, nSize, nStartLineNum
    dim wzText as wstring * MAX_PATH
    dim wzFilename as wstring * MAX_PATH
 
@@ -79,7 +80,7 @@ function DoSearchFileSelected() as LONG
       f2 = instr(wzText, ")")
       if f2 THEN
          wzText = left(wzText, f2-1) 
-         nLineNum = val(wzText)
+         nStartLineNum = val(wzText)
       end if
    END IF
 
@@ -96,7 +97,7 @@ function DoSearchFileSelected() as LONG
 
    if pDoc THEN
       dim as hwnd hEdit = pDoc->hWndActiveScintilla
-      SciExec( hEdit, SCI_GOTOLINE, nLineNum-1, 0)
+      SciExec( hEdit, SCI_GOTOLINE, nStartLineNum-1, 0)
    END IF
 
    function = 0
