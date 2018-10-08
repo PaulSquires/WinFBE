@@ -1,6 +1,19 @@
+Version 1.8.1 (October 7, 2018)
+- Fixed: Regression causing build combobox to immediately close when clicked.
+- Changed: Updated the Spanish language file (thanks Jose Roca).
+
+Version 1.8.0 (October 6, 2018)
+- Added: Merged pull request 7c5fb4d from skyfishtb. Parsing of ENUM and REDIM.
+- Added: Delete any previously existing compile output file (ie. .EXE, .DLL, .a) so it will not exist should the compile fail.
+- Added: Code editor Calltips for the ListBox control.
+- Fixed: Updated gcc.exe to correct 64 version.
+- Fixed: Corrected libexec subfolder names for 32/64 bit versions of cc1.exe (part of the gcc toolchain).
+- Changed: Updated Italian language file (thanks Massimiliano).
+- Changed: Updated German language file (thanks Joerg Buckel).
+
 Version 1.7.9 (September 1.7.9)
 - Fixed: Relative paths in User Tools commands failing after compiles (a compile would change current folder).
-- Fixed: Per 1.7.8, accidently neglected to include latest FBC nightly build and GCC 8.1. It is now included in 1.7.9.
+- Fixed: Per 1.7.8, accidentally neglected to include latest FBC nightly build and GCC 8.1. It is now included in 1.7.9.
 
 Version 1.7.8 (September 4, 2018)
 - Added: Resulting file size of successful compiled EXE now shows in the status bar.
