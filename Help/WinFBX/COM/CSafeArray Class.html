@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CSafeArray Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="csafearray-class">CSafeArray Class</h1>
+<p><strong>CSafeArray</strong> is a class that provides wrapper methods for the SAFEARRAY structure, making it easy to create and manage single- and multidimensional arrays of almost any of the VARIANT-supported types. The lower bound of a CSafeArray can start at any user-defined value. Additional overloaded methods are provided for one and two-dimensional safe arrays, that are the ones most often used in COM programming.</p>
+<p>When the class is destroyed, the array descriptor and all of the data in the array is destroyed. If objects are stored in the array, Release is called on each object in the array. Safe arrays of variant will have VariantClear called on each member and safe arrays of BSTR will have SysFreeString called on each element. IRecordInfo.RecordClear will be called to release object references and other values of a record without deallocating the record.</p>
+<p><strong>Include file</strong>: CSafeArray.INC.</p>
+<h1 id="structures-and-vartype">Structures and VARTYPE</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#SAFEARRAY">SAFEARRAY</a></td>
+<td>Represents a safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#SAFEARRAYBOUND">SAFEARRAYBOUND</a></td>
+<td>Represents the bounds of one dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#VARTYPE">VARTYPE</a></td>
+<td>Safe array Variant type.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors">Constructors</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructor1">Constructor (SAFEARRAYBOUND)</a></td>
+<td>Creates a CSafeArray.</td>
+</tr>
+<tr class="even">
+<td><a href="#Constructor2">Constructor (CSafeArray)</a></td>
+<td>Creates a CSafeArray from another CSafeArray.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Constructor3">Constructor (SAFEARRAY PTR)</a></td>
+<td>Creates a CSafeArray from a safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#Constructor4">Constructor (VARIANT PTR)</a></td>
+<td>Creates a CSafeArray from a Variant of type VT_ARRAY.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operators">Operators</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Operator1">Operator *</a></td>
+<td>Returns a pointer to the safe array descriptor.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operator2">Operator LET</a></td>
+<td>Assigns a CSafeArray, a safe array or a Variant.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="methods">Methods</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AccessData">AccessData</a></td>
+<td>Increments the lock count of an array, and retrieves a pointer to the array data.</td>
+</tr>
+<tr class="even">
+<td><a href="#Append">Append</a></td>
+<td>Appends a value to the end of the one-dimensional safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Attach">Attach</a></td>
+<td>Attaches a safe array to a CSafeArray object.</td>
+</tr>
+<tr class="even">
+<td><a href="#DestroyData">Clear</a></td>
+<td>Like DestroyData, destroys all the data in a safe array. It is the same that Erase and Reset.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Copy">Copy</a></td>
+<td>Creates a copy of the safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#CopyData">CopyData</a></td>
+<td>Copies the source array to the target array after releasing any resources in the target array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#CopyFrom">CopyFrom</a></td>
+<td>Copies the contents of a safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#CopyFromVariant">CopyFromVariant</a></td>
+<td>Copies the contents of a VARIANT of type VT_ARRAY to the object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#CopyToVariant">CopyToVariant</a></td>
+<td>Copies the safe array to the passed variant.</td>
+</tr>
+<tr class="even">
+<td><a href="#Count">Count</a></td>
+<td>Returns the number of elements in the specified dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Create">Create</a></td>
+<td>Creates a safe array from the given VARTYPE, number of dimensions and bounds.</td>
+</tr>
+<tr class="even">
+<td><a href="#CreateEx">CreateEx</a></td>
+<td>Creates a safe array from the given VARTYPE, number of dimensions and bounds.</td>
+</tr>
+<tr class="odd">
+<td><a href="#CreateVector">CreateVector</a></td>
+<td>Creates a one-dimensional safe array from the given VARTYPE, lower bound and number elements.</td>
+</tr>
+<tr class="even">
+<td><a href="#CreateVectorEx">CreateVectorEx</a></td>
+<td>Creates a one-dimensional safe array from the given VARTYPE, lower bound and number elements.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Destroy">Destroy</a></td>
+<td>Destroys an existing array descriptor and all of the data in the array.</td>
+</tr>
+<tr class="even">
+<td><a href="#DestroyData">DestroyData</a></td>
+<td>Destroys all the data in a safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Detach">Detach</a></td>
+<td>Detaches the sage array descriptor from the CSafeArray.</td>
+</tr>
+<tr class="even">
+<td><a href="#ElemSize">ElemSize</a></td>
+<td>Returns the size of an element.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DestroyData">Erase</a></td>
+<td>Like DestroyData, destroys all the data in a safe array. It is the same that Clear and Reset.</td>
+</tr>
+<tr class="even">
+<td><a href="#Features">Features</a></td>
+<td>Returns the flags used by the safe array. This is the same that the Flags method.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Find">Find</a></td>
+<td>Scans the array to search for the specified string.</td>
+</tr>
+<tr class="even">
+<td><a href="#Features">Flags</a></td>
+<td>Returns the flags used by the safe array. This is the same that the <strong>Features</strong> method.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Get">Get</a></td>
+<td>Retrieves a single element of the array.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetIID">GetIID</a></td>
+<td>Returns the GUID of the interface contained within a given safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Operator1">GetPtr</a></td>
+<td>Returns the address of the safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetRecordInfo">GetRecordInfo</a></td>
+<td>Retrieves the IRecordInfo interface of a UDT contained in a given safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetType">GetType</a></td>
+<td>Returns the VARTYPE stored in the given safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#Insert">Insert</a></td>
+<td>Inserts a value at the specified position of the safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#IsResizable">IsResizable</a></td>
+<td>Tests if the safe array can be resized.</td>
+</tr>
+<tr class="even">
+<td><a href="#LBound">LBound</a></td>
+<td>Returns the lower bound for any dimension of a safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LocksCount">LocksCount</a></td>
+<td>Returns the number of times the array has been locked without the corresponding unlock.</td>
+</tr>
+<tr class="even">
+<td><a href="#MoveFromVariant">MoveFromVariant</a></td>
+<td>Transfers ownership of the safe array contained in the variant parameter to this object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#MoveToVariant">MoveToVariant</a></td>
+<td>Transfers ownership of the safe array to a variant and detaches it from the class.</td>
+</tr>
+<tr class="even">
+<td><a href="#NumDims">NumDims</a></td>
+<td>Returns the number of dimensions in the array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#PtrOfIndex">PtrOfIndex</a></td>
+<td>Returns a pointer to an array element.</td>
+</tr>
+<tr class="even">
+<td><a href="#Put">Put</a></td>
+<td>Stores the data element at a given location in the array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Redim">Redim</a></td>
+<td>Changes the right-most (least significant) bound of a safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#Remove">Remove</a></td>
+<td>Deletes the specified array element.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DestroyData">Reset</a></td>
+<td>Like DestroyData, destroys all the data in a safe array. It is the same that Clear and Erase.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetIID">SetIID</a></td>
+<td>Sets the GUID of the interface contained within a given safe array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetRecordInfo">SetRecordInfo</a></td>
+<td>Sets the IRecordInfo interface of the UDT contained in a given safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#Sort">Sort</a></td>
+<td>Sorts a one-dimensional VT_BSTR CSafeArray calling the C qsort function.</td>
+</tr>
+<tr class="odd">
+<td><a href="#UBound">UBound</a></td>
+<td>Returns the upper bound for any dimension of a safe array.</td>
+</tr>
+<tr class="even">
+<td><a href="#UnaccessData">UnaccessData</a></td>
+<td>Decrements the lock count of an array, and invalidates the pointer retrieved by AccessData.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="helper-procedures">Helper Procedures</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxStrJoin">AfxStrJoin</a></td>
+<td>Returns a string consisting of all of the strings in an array, each separated by a delimiter.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrSplit">AfxStrSplit</a></td>
+<td>Splits a string into tokens.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxXmlBase64Decode">AfxXmlBase64Decode</a></td>
+<td>Converts the contents of a Base64 mime encoded string to an ascii string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxXmlBase64Encode">AfxXmlBase64Encode</a></td>
+<td>Converts the contents of a string to Base64 mime encoding.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="safearray-structure"><a name="SAFEARRAY"></a>SAFEARRAY Structure</h1>
+<p>Represents a safe array.</p>
+<pre><code>TYPE tagSAFEARRAY
+   cDims as USHORT
+   fFeatures as USHORT
+   cbElements as ULONG
+   cLocks as ULONG
+   pvData as PVOID
+   rgsabound(0 to 0) as SAFEARRAYBOUND
+EBD TYPE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>cDims</strong></td>
+<td>Count of dimensions of the array.</td>
+</tr>
+<tr class="even">
+<td><strong>fFeatures</strong></td>
+<td>Flags.</td>
+</tr>
+<tr class="odd">
+<td><strong>cbElements</strong></td>
+<td>Size of an element of the array.</td>
+</tr>
+<tr class="even">
+<td><strong>cLocks</strong></td>
+<td>Number of times the array has been locked without corresponding unlock.</td>
+</tr>
+<tr class="odd">
+<td><strong>pvData</strong></td>
+<td>Pointer to the data.</td>
+</tr>
+<tr class="even">
+<td><strong>rgsabound</strong></td>
+<td>One bound for each dimension.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ffeatures-flags">fFeatures Flags</h4>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>FADF_AUTO</td>
+<td>An array that is allocated on the stack.</td>
+</tr>
+<tr class="even">
+<td>FADF_STATIC</td>
+<td>An array that is statically allocated.</td>
+</tr>
+<tr class="odd">
+<td>FADF_EMBEDDED</td>
+<td>An array that is embedded in a structure.</td>
+</tr>
+<tr class="even">
+<td>FADF_FIXEDSIZE</td>
+<td>An array that may not be resized or reallocated.</td>
+</tr>
+<tr class="odd">
+<td>FADF_RECORD</td>
+<td>An array that contains records. When set, there will be a pointer to the IRecordinfo interface at negative offset 4 in the array descriptor.</td>
+</tr>
+<tr class="even">
+<td>FADF_HAVEIID</td>
+<td>An array that has an IID identifying interface. When set, there will be a GUID at negative offset 16 in the safe array descriptor. Flag is set only when FADF_DISPATCH or FADF_UNKNOWN is also set.</td>
+</tr>
+<tr class="odd">
+<td>FADF_HAVEVARTYPE</td>
+<td>An array that has a VT type. When set, there will be a VT tag at negative offset 4 in the array descriptor that specifies the element type.</td>
+</tr>
+<tr class="even">
+<td>FADF_BSTR</td>
+<td>An array of BSTRs.</td>
+</tr>
+<tr class="odd">
+<td>FADF_UNKNOWN</td>
+<td>An array of IUnknown pointers.</td>
+</tr>
+<tr class="even">
+<td>FADF_DISPATCH</td>
+<td>An array of IDispatch pointers.</td>
+</tr>
+<tr class="odd">
+<td>FADF_VARIANT</td>
+<td>An array of VARIANTs.</td>
+</tr>
+<tr class="even">
+<td>FADF_RESERVED</td>
+<td>Bits reserved for future use.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>The array rgsabound is stored with the left-most dimension in rgsabound[0] and the right-most dimension in rgsabound(cDims - 1).</p>
+<p>The <strong>fFeatures</strong> flags describe attributes of an array that can affect how the array is released. The fFeatures field describes what type of data is stored in the SAFEARRAY and how the array is allocated. This allows freeing the array without referencing its containing variant. The bits are accessed using the following constants:</p>
+<h4 id="thread-safety">Thread Safety</h4>
+<p>All public static members of the SAFEARRAY data type are thread safe. Instance members are not guaranteed to be thread safe.</p>
+<p>For example, consider an application that uses the SafeArrayLock and SafeArrayUnlock functions. If these functions are called concurrently from different threads on the same SAFEARRAY data type instance, an inconsistent lock count may be created. This will eventually cause the SafeArrayUnlock function to return E_UNEXPECTED. You can prevent this by providing your own synchronization code.</p>
+<h1 id="safearraybound-structure"><a name="SAFEARRAYBOUND"></a>SAFEARRAYBOUND Structure</h1>
+<p>Represents the bounds of one dimension of the array. The lower bound of the dimension is represented by <strong>lLbound</strong>, and <strong>cElements</strong> represents the number of elements in the dimension. The structure is defined as follows:</p>
+<pre><code>TYPE SAFEARRAYBOUND
+   cElements as ULONG
+   lLbound as LONG
+END TYPE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>cElements</strong></td>
+<td>Number of elements in the dimension.</td>
+</tr>
+<tr class="even">
+<td><strong>lLbound</strong></td>
+<td>The lower bound of the dimension.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="safe-array-variant-type"><a name="VARTYPE"></a>Safe array Variant type</h1>
+<p>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</p>
+<table>
+<thead>
+<tr class="header">
+<th>VarType</th>
+<th>Meaning</th>
+<th>Data type</th>
+<th>strType</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>VT_BSTR</td>
+<td>Unicode string</td>
+<td>BSTR</td>
+<td>&quot;BSTR&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_I1</td>
+<td>Signed byte</td>
+<td>BYTE</td>
+<td>&quot;BYTE&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_UI1</td>
+<td>Unsigned byte</td>
+<td>UBYTE</td>
+<td>&quot;UBYTE&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_I2</td>
+<td>Signed short</td>
+<td>SHORT</td>
+<td>&quot;SHORT&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_UI2</td>
+<td>Unsigned short</td>
+<td>USHORT</td>
+<td>&quot;USHORT&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_I4</td>
+<td>Signed long</td>
+<td>LONG</td>
+<td>&quot;LONG&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_INT</td>
+<td>Signed long</td>
+<td>LONG</td>
+<td>&quot;ULONG&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_UI4</td>
+<td>Unsigned long</td>
+<td>ULONG</td>
+<td>&quot;LONG&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_UINT</td>
+<td>Unsigned long</td>
+<td>ULONG</td>
+<td>&quot;ULONG&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_I8</td>
+<td>Signed quad</td>
+<td>LONGINT</td>
+<td>&quot;LONGINT&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_UI8</td>
+<td>Unnsigned quad</td>
+<td>ULONGINT</td>
+<td>&quot;ULONGINT&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_R4</td>
+<td>Single</td>
+<td>SINGLE</td>
+<td>&quot;SINGLE&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_R8</td>
+<td>Double</td>
+<td>DOUBLE</td>
+<td>&quot;DOUBLE&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_CUR</td>
+<td>Currency</td>
+<td>CY</td>
+<td>&quot;CURRENCY&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_BOOL</td>
+<td>Boolean (cast to a signed short)</td>
+<td>SHORT</td>
+<td>&quot;BOOL&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_DATE</td>
+<td>Date</td>
+<td>DATE_</td>
+<td>&quot;DATE&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_DECIMAL</td>
+<td>Decimal structure</td>
+<td>DECIMAL</td>
+<td>&quot;DECIMAL&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_VARIANT</td>
+<td>Variant</td>
+<td>VARIANT</td>
+<td>&quot;VARIANT&quot;</td>
+</tr>
+<tr class="odd">
+<td>VT_UNKNOWN</td>
+<td>IUnknown pointer</td>
+<td>IUnknown PTR</td>
+<td>&quot;UNKNOWN&quot;</td>
+</tr>
+<tr class="even">
+<td>VT_DISPATCH</td>
+<td>IDispatch pointer</td>
+<td>IDispatch PTR</td>
+<td>&quot;DISPATCH&quot;</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor-(safearraybound)"><a name="Constructor1"></a>Constructor (SAFEARRAYBOUND)</h1>
+<p>Creates a CSafeArray.</p>
+<p>Multidimensional array:</p>
+<pre><code>CONSTRUCTOR CSafeArray (BYVAL vt AS VARTYPE, BYVAL cDims AS UINT, BYVAL prgsabounds AS SAFEARRAYBOUND PTR)
+CONSTRUCTOR CSafeArray (BYREF strType AS STRING, BYVAL cDims AS UINT, BYVAL prgsabounds AS SAFEARRAYBOUND PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>strType</em></td>
+<td>The base type of the array as a string literal.</td>
+</tr>
+<tr class="odd">
+<td><em>cDims</em></td>
+<td>Number of dimensions in the array. The number cannot be changed after the array is created.</td>
+</tr>
+<tr class="even">
+<td><em>rgsabound</em></td>
+<td>Pointer to a vector of bounds (one for each dimension) to allocate for the array.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>CONSTRUCTOR CSafeArray (BYVAL vt AS VARTYPE, BYVAL cElements AS ULONG = 0, BYVAL lLBound AS LONG = 0)
+CONSTRUCTOR (BYREF strType AS STRING, BYVAL cElements AS ULONG = 0, BYVAL lLBound AS LONG = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>strType</em></td>
+<td>The base type of the array as a string literal.</td>
+</tr>
+<tr class="odd">
+<td><em>cElements</em></td>
+<td>Optional. Number of elements in the array.</td>
+</tr>
+<tr class="even">
+<td><em>lLBound</em></td>
+<td>Optional. The lower bound of the array.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>CONSTRUCTOR CSafeArray (BYVAL vt AS VARTYPE, BYVAL cElements1 AS ULONG, BYVAL lLBound1 AS LONG, _
+   BYVAL cElements2 AS ULONG, BYVAL lLBound2 AS LONG)
+CONSTRUCTOR (BYREF strType AS STRING, BYVAL cElements1 AS ULONG, BYVAL lLBound1 AS LONG, _
+   BYVAL cElements2 AS ULONG, BYVAL lLBound2 AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>strType</em></td>
+<td>The base type of the array as a string literal.</td>
+</tr>
+<tr class="odd">
+<td><em>cElements1</em></td>
+<td>Number of elements in the first dimension of the array.</td>
+</tr>
+<tr class="even">
+<td><em>lLBound1</em></td>
+<td>The lower bound of the first dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>cElements2</em></td>
+<td>Number of elements in the second dimension of the array.</td>
+</tr>
+<tr class="even">
+<td><em>lLBound2</em></td>
+<td>The lower bound of the second dimension of the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-examples">Usage examples</h4>
+<pre><code>' // Two-dimensional array of BSTR
+' // 2D: elements = 5, lower bound = 1
+' // 2D: elements = 3, lower bound = 1
+DIM rgsabounds(0 TO 1) AS SAFEARRAYBOUND = {(5, 1), (3, 1)}
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 2, @rgsabounds(0))
+-or-
+' // Two-dimensional array of BSTR
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 5, 1, 3, 1)
+
+' // One-dimensional array of VT_VARIANT with 0 elements and a lower-bound of 0
+DIM csa AS CSafeArray = CSafeArray(VT_VARIANT, 0, 0)
+-or-
+DIM csa AS CSafeArray = CSafeArray(VT_VARIANT)
+
+' // One-dimensional array of VT_BSTR with 5 elements and a lower-bound of 1
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 5, 1)
+</code></pre>
+<h1 id="constructor-(safearraybound)-1"><a name="Constructor2"></a>Constructor (SAFEARRAYBOUND)</h1>
+<p>Creates a CSafeArray from another CSafeArray.</p>
+<pre><code>CONSTRUCTOR CSafeArray (BYREF csa AS CSafeArray)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>csa</em></td>
+<td>A CSafeArray object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cconstructor-(safearray-ptr)"><a name="Constructor3"></a>CConstructor (SAFEARRAY PTR)</h1>
+<p>Creates a CSafeArray from a safe array.</p>
+<pre><code>CONSTRUCTOR CSafeArray (BYVAL psa AS SafeArray PTR)
+CONSTRUCTOR CSafeArray (BYVAL psa AS SafeArray PTR, BYVAL fAttach AS BOOLEAN)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>psa</em></td>
+<td>Pointer to a safe array.</td>
+</tr>
+<tr class="even">
+<td><em>fAttach</em></td>
+<td>If TRUE, the safe array is attached, else a copy is made.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cconstructor-(variant-ptr)"><a name="Constructor4"></a>CConstructor (VARIANT PTR)</h1>
+<p>Creates a CSafeArray from a Variant of type VT_ARRAY.</p>
+<pre><code>CONSTRUCTOR CSafeArray (BYVAL pvar AS VARIANT PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pvar</em></td>
+<td>Pointer to the VARIANT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operator-*-(getptr)"><a name="Operator1"></a>Operator * (GetPtr)</h1>
+<p>Returns a pointer to the underlying safe array descriptor.</p>
+<pre><code>OPERATOR * () AS ANY PTR
+</code></pre>
+<h4 id="remark">Remark</h4>
+<p>You can also call the <strong>GetPtr</strong> method.</p>
+<h1 id="operator-let-(-=-)"><a name="Operator2"></a>Operator LET ( = )</h1>
+<p>Assigns a CSafeArray to another CSafeArray.<br> Assigns a safe array to a CSafeArray.<br> Assigns a variant of type VT_ARRAY to a CSafeArray.</p>
+<pre><code>OPERATOR Let (BYREF csa AS CSafeArray)
+OPERATOR Let (BYVAL psa AS SAFEARRAY PTR)
+OPERATOR Let (BYVAL pvar AS VARIANT PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>csa</em></td>
+<td>An instance of the CSafeArray class.</td>
+</tr>
+<tr class="even">
+<td><em>psa</em></td>
+<td>A safe array pointer.</td>
+</tr>
+<tr class="odd">
+<td><em>pvar</em></td>
+<td>Pointer to a VARIANT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrjoin"><a name="AfxStrJoin"></a>AfxStrJoin</h1>
+<p>Returns a string consisting of all of the strings in an array, each separated by a delimiter. If the delimiter is a null (zero-length) string then no separators are inserted between the string sections. If the delimiter expression is the 3-byte value of &quot;,&quot; which may be expressed in your source code as the string literal &quot;&quot;&quot;,&quot;&quot;&quot; or as Chr(34,44,34) then a leading and trailing double-quote is added to each string section. This ensures that the returned string contains standard comma-delimited quoted fields that can be easily parsed.</p>
+<pre><code>FUNCTION AfxStrJoin (BYREF cwsa AS CSafeArray, BYREF wszDelimiter AS WSTRING = &quot; &quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cwsa</em></td>
+<td>The one-dimensional VT_BSTR CSafeArray to join.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelimiter</em></td>
+<td>The delimiter character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>A CWSTR containing the joined string.</p>
+<h4 id="usage-example">Usage example</h4>
+<pre><code>DIM csa AS CSafeArray = CSafeArray(&quot;STRING&quot;, 3, 1)
+csa.PutStr(1, &quot;One&quot;)
+csa.PutStr(2, &quot;Two&quot;)
+csa.PutStr(3, &quot;Three&quot;)
+DIM cws AS CWSTR = AfxStrJoin(csa, &quot;,&quot;)
+PRINT cws   ' ouput: One,Two,Three
+</code></pre>
+<h1 id="afxstrsplit"><a name="AfxStrSplit"></a>AfxStrSplit</h1>
+<p>Splits a string into tokens, which are sequences of contiguous characters separated by any of the characters that are part of delimiters.</p>
+<pre><code>FUNCTION AfxStrSplit (BYREF wszStr AS CONST WSTRING, BYREF wszDelimiters AS WSTRING = &quot; &quot;) AS CSafeArray
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszStr</em></td>
+<td>The string to split.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelimiters</em></td>
+<td>The delimiter characters.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>A CSafeArray containing a token in each element.</p>
+<h4 id="usage-example-1">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = &quot;- This, a sample string.&quot;
+DIM cwsa AS CSafeArray = AfxStrSplit(cws, &quot; ,.-&quot;)
+FOR i AS LONG = cwsa.LBound TO cwsa.UBound
+  PRINT cwsa.GetStr(i)
+NEXT
+</code></pre>
+<h1 id="afxxmlbase64decode"><a name="AfxXmlBase64Decode"></a>AfxXmlBase64Decode</h1>
+<p>Converts the contents of a Base64 mime encoded string to an ascii string.</p>
+<pre><code>FUNCTION AfxXmlBase64Decode (BYREF strData AS STRING) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strData</em></td>
+<td>The string to decode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>The decoded string on success, or a null string on failure.</p>
+<p>Remaks</p>
+<p>Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.</p>
+<p>Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.</p>
+<h1 id="afxxmlbase64encode"><a name="AfxXmlBase64Encode"></a>AfxXmlBase64Encode</h1>
+<p>Converts the contents of a string to Base64 mime encoding.</p>
+<pre><code>FUNCTION AfxXmlBase64Encode (BYREF strData AS STRING) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strData</em></td>
+<td>The string to encode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>The encoded string on succeess, or a null string on failure.</p>
+<p>Remaks</p>
+<p>Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.</p>
+<p>Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.</p>
+<h1 id="accessdata"><a name="AccessData"></a>AccessData</h1>
+<p>Retrieves a pointer to the array data and increments the lock count of an array.</p>
+<pre><code>FUNCTION AccessData () AS ANY PTR
+</code></pre>
+<h4 id="return-value-4">Return value</h4>
+<p>IF it succeeds, it returns a pointer to the array data. If it fails, it returns a null pointer.</p>
+<h1 id="append"><a name="Append"></a>Append</h1>
+<p>Appends a value to the end of the one-dimensional safe array.</p>
+<pre><code>FUNCTION Append (BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION Append (BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION Append (BYREF cvData AS CVAR) AS HRESULT
+FUNCTION Append (BYVAL vData AS VARIANT) AS HRESULT
+</code></pre>
+<p>Appends a string to the end of the one-dimensional safe array.</p>
+<pre><code>FUNCTION AppendStr (BYVAL pwszData AS WSTRING PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pData</em></td>
+<td>Pointer to a variable of the appropriate data type.</td>
+</tr>
+<tr class="even">
+<td><em>cbsData</em></td>
+<td>The CBSTR to insert, if the safe array is of type VT_BSTR.</td>
+</tr>
+<tr class="odd">
+<td><em>cvData</em></td>
+<td>The CVAR to insert, if the safe array is of type VT_VARIANT.</td>
+</tr>
+<tr class="even">
+<td><em>vData</em></td>
+<td>The VARIANT to insert, if the safe array is of type VT_VARIANT.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-examples-1">Usage examples</h4>
+<pre><code>' // Create a one-dimensional array of doubles
+'DIM csa AS CSafeArray = CSafeArray(VT_R8, 2, 1)
+DIM csa AS CSafeArray = CSafeArray(&quot;DOUBLE&quot;, 2, 1)
+
+DIM dblVal AS DOUBLE = 12345.12
+csa.Put(1, @dblVal)
+dblVal = 74447.34
+csa.Put(2, @dblVal)
+dblVal = 63535.567
+csa.Append(@dblVal)
+
+csa.Get(1, @dblVal)
+print dblVal
+csa.Get(2, @dblVal)
+print dblVal
+csa.Get(3, @dblVal)
+print dblVal
+</code></pre>
+<pre><code>' // Create a one-dimensional array of variants
+'DIM csa AS CSafeArray = CSafeArray(VT_VARIANT, 2, 1)
+DIM csa AS CSafeArray = CSafeArray(&quot;VARIANT&quot;, 2, 1)
+
+csa.Put(1, CVAR(&quot;Test string&quot;))
+csa.Put(2, CVAR(12345))
+csa.Append(CVAR(&quot;Test string appended&quot;))
+
+DIM cvOut AS CVAR
+csa.Get(1, cvOut)
+print cvOut
+csa.Get(2, cvOut)
+print cvOut
+csa.Get(3, cvOut)
+print cvOut
+</code></pre>
+<h4 id="return-value-5">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HREUSLT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_BADINDEX</td>
+<td>The specified index is not valid.</td>
+</tr>
+<tr class="even">
+<td>E_INVALIDARG</td>
+<td>One of the arguments is not valid.</td>
+</tr>
+<tr class="odd">
+<td>E_OUTOFMEMORY</td>
+<td>Memory could not be allocated for the element.</td>
+</tr>
+<tr class="even">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="attach"><a name="Attach"></a>Attach</h1>
+<p>Attaches a safe array to a CSafeArray object.</p>
+<pre><code>FUNCTION Attach (BYVAL psaSrc AS SAFEARRAY PTR) AS HRESULT
+</code></pre>
+<h4 id="return-value-6">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code.</p>
+<h1 id="destroydata-/-clear-/-erase-/-reset"><a name="DestroyData"></a>DestroyData / Clear / Erase / Reset</h1>
+<p>Destroys all the data in a safe array.</p>
+<pre><code>FUNCTION DestroyData () AS HRESULT
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HREUSLT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_ARRAYISLOCKED</td>
+<td>The array is locked.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="copy"><a name="Copy"></a>Copy</h1>
+<p>Creates a copy of the safe array.</p>
+<pre><code>FUNCTION Copy () AS SAFEARRAY PTR
+</code></pre>
+<h4 id="return-value-8">Return value</h4>
+<p>Pointer of the new array descriptor. You must free this pointer calling the API function <strong>SafeArrayDestroy</strong>.</p>
+<h1 id="copydata"><a name="CopyData"></a>CopyData</h1>
+<p>Copies the source array to the target array after releasing any resources in the target array. This is similar to <strong>Copy</strong>, except that the target array has to be set up by the caller. The target is not allocated or reallocated.</p>
+<pre><code>FUNCTION CopyData (BYVAL psaTarget AS SAFEARRAY PTR) AS HRESULT
+</code></pre>
+<p>On exit, the array referred to by <em>psaTarget</em> contains a copy of the data if the call succeeds.</p>
+<h4 id="return-value-9">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HREUSLT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>E_INVALIDARG</td>
+<td>The dimensions or the number of dimensions don't match.</td>
+</tr>
+<tr class="even">
+<td>E_OUTOFMEMORY</td>
+<td>Insufficient memory to create the copy.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="copyfrom"><a name="CopyFrom"></a>CopyFrom</h1>
+<p>Copies the contents of the passed safe array.</p>
+<pre><code>FUNCTION CopyFrom (BYVAL psaSrc AS SAFEARRAY PTR) AS HRESULT
+</code></pre>
+<h4 id="return-value-10">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p><strong>CopyFrom</strong> calls the string or variant manipulation functions if the array to copy contains either of these data types. If the array being copied contains object references, the reference counts for the objects are incremented.</p>
+<h1 id="copyfromvariant"><a name="CopyFromVariant"></a>CopyFromVariant</h1>
+<p>Copies the contents of a VARIANT of type VT_ARRAY to the object. The VARIANT remains unaltered.</p>
+<pre><code>FUNCTION CopyFromVariant (BYVAL pvar AS VARIANT PTR) AS HRESULT
+</code></pre>
+<p><em>pvar</em> must be variant of type VT_ARRAY, i.e. containing a safe array. If it is of another type, an invalid data error is returned.</p>
+<h4 id="return-value-11">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<h4 id="remarks-2">Remarks</h4>
+<p><strong>CopyFromVariant</strong> calls the string or variant manipulation functions if the array to copy contains either of these data types. If the array being copied contains object references, the reference counts for the objects are incremented.</p>
+<h1 id="copytovariant"><a name="CopyToVariant"></a>CopyToVariant</h1>
+<p>Copies the safe array to the passed variant.</p>
+<pre><code>FUNCTION CopyToVariant (BYVAL pvar AS VARIANT PTR) AS HRESULT
+</code></pre>
+<p><em>pvar</em> is a pointer to the variant where the safe array will be copied.</p>
+<h4 id="return-value-12">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<h1 id="count"><a name="Count"></a>Count</h1>
+<p>Returns the number of elements in the specified dimension of the array.</p>
+<pre><code>FUNCTION Count (BYVAL nDim AS UINT = 1) AS UINT
+</code></pre>
+<p>The optional nDim parameter is the array dimension for which to get the number of elements. You don't need to pass this parameter if the safe array in one-dimensional.</p>
+<h4 id="return-value-13">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<h1 id="create"><a name="Create"></a>Create</h1>
+<p>Creates a safe array from the given VARTYPE, number of dimensions and bounds.</p>
+<p>Multidimensional array:</p>
+<pre><code>FUNCTION Create (BYVAL vt AS VARTYPE, BYVAL cDims AS UINT, BYVAL prgsabound AS SAFEARRAYBOUND PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>cDims</em></td>
+<td>Number of dimensions in the array. The number cannot be changed after the array is created.</td>
+</tr>
+<tr class="odd">
+<td><em>rgsabound</em></td>
+<td>Pointer to a vector of bounds (one for each dimension) to allocate for the array.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>FUNCTION Create (BYVAL vt AS VARTYPE, BYVAL cElements AS ULONG, BYVAL lLBound AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>cElements</em></td>
+<td>Optional. Number of elements in the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound</em></td>
+<td>Optional. The lower bound of the array.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>FUNCTION Create (BYVAL vt AS VARTYPE, BYVAL cElements1 AS ULONG, BYVAL lLBound1 AS LONG, _
+   BYVAL cElements2 AS ULONG, BYVAL lLBound2 AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>cElements1</em></td>
+<td>Number of elements in the first dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound1</em></td>
+<td>The lower bound of the first dimension of the array.</td>
+</tr>
+<tr class="even">
+<td><em>cElements2</em></td>
+<td>Number of elements in the second dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound2</em></td>
+<td>The lower bound of the second dimension of the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>S_OK (0) on success or an HREUSLT code on failure.</p>
+<h1 id="createex"><a name="CreateEx"></a>CreateEx</h1>
+<p>Creates a safe array from the given VARTYPE, number of dimensions and bounds.</p>
+<p>Multidimensional array:</p>
+<pre><code>FUNCTION CreateEx (BYVAL vt AS VARTYPE, BYVAL cDims AS UINT, _
+   BYVAL prgsabound AS SAFEARRAYBOUND PTR, BYVAL pvExtra AS PVOID) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal. The FADF_RECORD flag can be set for a variant type VT_RECORD, The FADF_HAVEIID flag can be set for VT_DISPATCH or VT_UNKNOWN, and FADF_HAVEVARTYPE can be set for all other VARTYPEs. For more information about the FADF_RECORD, FADF_HAVEIID or FADF_HAVEVARTYPE flags see SAFEARRAY Data Type.</td>
+</tr>
+<tr class="even">
+<td><em>cDims</em></td>
+<td>Number of dimensions in the array. The number cannot be changed after the array is created.</td>
+</tr>
+<tr class="odd">
+<td><em>rgsabound</em></td>
+<td>Pointer to a vector of bounds (one for each dimension) to allocate for the array.</td>
+</tr>
+<tr class="even">
+<td><em>pvExtra</em></td>
+<td>Points to the type information of the user-defined type, if you are creating a safe array of user-defined types. If the <em>vt</em> parameter is VT_RECORD, then <em>pvExtra</em> will be a pointer to an <strong>IRecordInfo</strong> interface describing the record. If the <em>vt</em> parameter is VT_DISPATCH or VT_UNKNOWN, then <em>pvExtra</em> will contain a pointer to a GUID representing the type of interface being passed to the array.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>FUNCTION CreateEx (BYVAL vt AS VARTYPE, BYVAL cElements AS ULONG, _
+   BYVAL lLBound AS LONG, BYVAL pvExtra AS PVOID) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal. The FADF_RECORD flag can be set for a variant type VT_RECORD, The FADF_HAVEIID flag can be set for VT_DISPATCH or VT_UNKNOWN, and FADF_HAVEVARTYPE can be set for all other VARTYPEs. For more information about the FADF_RECORD, FADF_HAVEIID or FADF_HAVEVARTYPE flags see SAFEARRAY Data Type.</td>
+</tr>
+<tr class="even">
+<td><em>cElements</em></td>
+<td>Optional. Number of elements in the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound</em></td>
+<td>Optional. The lower bound of the array.</td>
+</tr>
+<tr class="even">
+<td><em>pvExtra</em></td>
+<td>Points to the type information of the user-defined type, if you are creating a safe array of user-defined types. If the <em>vt</em> parameter is VT_RECORD, then <em>pvExtra</em> will be a pointer to an <strong>IRecordInfo</strong> interface describing the record. If the <em>vt</em> parameter is VT_DISPATCH or VT_UNKNOWN, then <em>pvExtra</em> will contain a pointer to a GUID representing the type of interface being passed to the array.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>FUNCTION CreateEx (BYVAL vt AS VARTYPE, BYVAL cElements1 AS ULONG, BYVAL lLBound1 AS LONG, _
+   BYVAL cElements2 AS ULONG, BYVAL lLBound2 AS LONG, BYVAL pvExtra AS PVOID) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal. The FADF_RECORD flag can be set for a variant type VT_RECORD, The FADF_HAVEIID flag can be set for VT_DISPATCH or VT_UNKNOWN, and FADF_HAVEVARTYPE can be set for all other VARTYPEs. For more information about the FADF_RECORD, FADF_HAVEIID or FADF_HAVEVARTYPE flags see SAFEARRAY Data Type.</td>
+</tr>
+<tr class="even">
+<td><em>cElements1</em></td>
+<td>Number of elements in the first dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound1</em></td>
+<td>The lower bound of the first dimension of the array.</td>
+</tr>
+<tr class="even">
+<td><em>cElements2</em></td>
+<td>Number of elements in the second dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound2</em></td>
+<td>The lower bound of the second dimension of the array.</td>
+</tr>
+<tr class="even">
+<td><em>pvExtra</em></td>
+<td>Points to the type information of the user-defined type, if you are creating a safe array of user-defined types. If the <em>vt</em> parameter is VT_RECORD, then <em>pvExtra</em> will be a pointer to an <strong>IRecordInfo</strong> interface describing the record. If the <em>vt</em> parameter is VT_DISPATCH or VT_UNKNOWN, then <em>pvExtra</em> will contain a pointer to a GUID representing the type of interface being passed to the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-15">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<h1 id="createvector"><a name="CreateVector"></a>CreateVector</h1>
+<p>Creates a fixed size safe array from the given VARTYPE, lower bound and number of elements.</p>
+<pre><code>FUNCTION CreateVector (BYVAL vt AS VARTYPE, BYVAL cElements AS ULONG, BYVAL lLBound AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal.</td>
+</tr>
+<tr class="even">
+<td><em>cElements</em></td>
+<td>The number of elements in the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound</em></td>
+<td>The lower bound for the array. Can be negative.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p><strong>CreateVector</strong> allocates a single block of memory containing a SAFEARRAY structure for a single-dimension array (24 bytes), immediately followed by the array data. All of the existing safe array functions work correctly for safe arrays that are allocated with CreateVector.</p>
+<p>A safe array created with CreateVector is allocated as a single block of memory. Both the SafeArray descriptor and the array data block are allocated contiguously in one allocation, which speeds up array allocation. However, a user can allocate the descriptor and data area separately using the <strong>SafeArrayAllocDescriptor</strong> and <strong>SafeArrayAllocData</strong>* calls.</p>
+<h1 id="createvectorex"><a name="CreateVectorEx"></a>CreateVectorEx</h1>
+<p>Creates a fixed size safe array from the given VARTYPE, lower bound and number of elements.</p>
+<pre><code>FUNCTION CreateVectorEx (BYVAL vt AS VARTYPE, BYVAL cElements AS ULONG, BYVAL lLBound AS LONG, _
+   BYVAL pvExtra AS ANY PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vt</em></td>
+<td>The base type of the array (the VARTYPE of each element of the array). The VARTYPE is restricted to a subset of the variant types. Neither the VT_ARRAY nor the VT_BYREF flag can be set. VT_EMPTY and VT_NULL are not valid base types for the array. All other types are legal. The FADF_RECORD flag can be set for a variant type VT_RECORD, The FADF_HAVEIID flag can be set for VT_DISPATCH or VT_UNKNOWN, and FADF_HAVEVARTYPE can be set for all other VARTYPEs. For more information about the FADF_RECORD, FADF_HAVEIID or FADF_HAVEVARTYPE flags see SAFEARRAY Data Type.</td>
+</tr>
+<tr class="even">
+<td><em>cElements</em></td>
+<td>The number of elements in the array.</td>
+</tr>
+<tr class="odd">
+<td><em>lLBound</em></td>
+<td>The lower bound for the array. Can be negative.</td>
+</tr>
+<tr class="even">
+<td><em>pvExtra</em></td>
+<td>Points to the type information of the user-defined type, if you are creating a safe array of user-defined types. If the <em>vt</em> parameter is VT_RECORD, then pvExtra will be a pointer to an <strong>IRecordInfo</strong> interface describing the record. If the <em>vt</em> parameter is VT_DISPATCH or VT_UNKNOWN, then <em>pvExtra</em> will contain a pointer to a GUID representing the type of interface being passed to the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<h1 id="destroy"><a name="Destroy"></a>Destroy</h1>
+<p>Destroys an existing array descriptor and all of the data in the array. If objects are stored in the array, Release is called on each object in the array.</p>
+<pre><code>FUNCTION Destroy () AS HRESULT
+</code></pre>
+<h4 id="return-value-18">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>E_INVALIDARG</td>
+<td>The dimensions or the number of dimensions don't match.</td>
+</tr>
+<tr class="even">
+<td>DISP_E_ARRAYISLOCKED</td>
+<td>The array is currently locked.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="detach"><a name="Detach"></a>Detach</h1>
+<p>Detaches the safe array descriptor from the CSafeArray.</p>
+<pre><code>FUNCTION Detach () AS SAFEARRAY PTR
+</code></pre>
+<h4 id="return-value-19">Return value</h4>
+<p>Returns a pointer to a SAFEARRAY descriptor.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>The caller takes ownership of it and must destroy it when no longer needed.</p>
+<h1 id="elemsize"><a name="ElemSize"></a>ElemSize</h1>
+<p>Returns the size of an element.</p>
+<pre><code>FUNCTION ElemSize () AS UINT
+</code></pre>
+<h4 id="return-value-20">Return value</h4>
+<p>Returns the size (in bytes) of an element in a safe array. Does not include size of pointed-to data.</p>
+<h1 id="features-/-flags"><a name="Features"></a>Features / Flags</h1>
+<p>Returns the flags used by the safe array. This is the same that the <strong>Flags</strong> method.</p>
+<pre><code>FUNCTION Features () AS USHORT
+</code></pre>
+<h1 id="find"><a name="Find"></a>Find</h1>
+<p>Scans the array to search for the specified string.</p>
+<pre><code>FUNCTION Find (BYREF wszFind AS WSTRING, BYVAL bNoCase AS BOOLEAN = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFind</em></td>
+<td>The string to find.</td>
+</tr>
+<tr class="even">
+<td><em>bNoCase</em></td>
+<td>Optional. TRUE = Ignore case.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>The index of the retrieved array element, or 0 on failue.</p>
+<h1 id="get-/-getstr-/-getvar"><a name="Get"></a>Get / GetStr / GetVar</h1>
+<p>Retrieves a single element of the array.</p>
+<p>Multidimensional array:</p>
+<pre><code>FUNCTION Get (BYVAL prgIndices AS LONG PTR, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION Get (BYVAL prgIndices AS LONG PTR, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION Get (BYVAL prgIndices AS LONG PTR, BYREF cvData AS CVAR) AS HRESULT
+FUNCTION GetStr (BYVAL prgIndices AS LONG PTR) AS CBSTR
+FUNCTION GetVar (BYVAL prgIndices AS LONG PTR) AS CVAR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>prgIndices</em></td>
+<td>Pointer to a vector of indexes for each dimension of the array. The right-most (least significant) dimension is rgIndices(0). The left-most dimension is stored at pgIndices(@psa.cDims – 1).</td>
+</tr>
+<tr class="even">
+<td><em>pData</em></td>
+<td>Pointer to the location to place the element of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsData</em></td>
+<td>A CBSTR passed by reference that will receive the result.</td>
+</tr>
+<tr class="even">
+<td><em>cvData</em></td>
+<td>A CVAR passed by reference that will receive the result.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>FUNCTION Get (BYVAL idx AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION Get (BYVAL idx AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION Get (BYVAL idx AS LONG, BYREF cvData AS CVAR) AS HRESULT
+FUNCTION GetStr (BYVAL idx AS LONG) AS CBSTR
+FUNCTION GetVar (BYVAL idx AS LONG) AS CVAR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>Index of the element.</td>
+</tr>
+<tr class="even">
+<td><em>pData</em></td>
+<td>Pointer to the location to place the element of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsData</em></td>
+<td>A CBSTR passed by reference that will receive the result.</td>
+</tr>
+<tr class="even">
+<td><em>cvData</em></td>
+<td>A CVAR passed by reference that will receive the result.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>FUNCTION Get (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION Get (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION Get (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYREF cvData AS CVAR) AS HRESULT
+FUNCTION GetStr (BYVAL cElem AS LONG, BYVAL cDim AS LONG) AS CVAR
+FUNCTION GetVar (BYVAL cElem AS LONG, BYVAL cDim AS LONG) AS CVAR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cElem</em></td>
+<td>Index of the element.</td>
+</tr>
+<tr class="even">
+<td><em>cDim</em></td>
+<td>Dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>pData</em></td>
+<td>Pointer to the location where to place the element of the array.</td>
+</tr>
+<tr class="even">
+<td><em>cbsData</em></td>
+<td>A CBSTR passed by reference that will receive the result.</td>
+</tr>
+<tr class="odd">
+<td><em>cvData</em></td>
+<td>A CVAR passed by reference that will receive the result.</td>
+</tr>
+</tbody>
+</table>
+<p>First element, then dimension, e.g. 2, 1 (element 2, first dimension), 1, 2 (element 1, 2nd dimension).</p>
+<h4 id="usage-example-2">Usage example</h4>
+<pre><code>' // One-dimensional array of VT_BSTR
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 2, 1)
+csa.PutStr(1, &quot;Test string 1&quot;)
+print csa.GetStr(1)
+csa.PutStr(2, &quot;Test string 2&quot;)
+print csa.GetStr(2)
+</code></pre>
+<pre><code>' // One-dimensional array of VT_VARIANT
+DIM csa AS CSafeArray = CSafeArray(VT_VARIANT, 5, 1)
+DIM cv1 AS CVAR = &quot;Test variant 1&quot;
+csa.Put(1, cv1)
+DIM cvOut AS CVAR
+csa.Get(1, cvOut)
+print cvOut
+DIM cv2 AS CVAR = &quot;Test variant 2&quot;
+csa.Put(1, cv2)
+csa.Get(1, cvOut)
+print cvOut
+</code></pre>
+<pre><code>' // Two-dimensional array of BSTR
+' // 2D: elements = 5, lower bound = 1
+' // 2D: elements = 3, lower bound = 1
+DIM rgsabounds(0 TO 1) AS SAFEARRAYBOUND = {(5, 1), (3, 1)}
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 2, @rgsabounds(0))
+
+' // array index: first element, first dimension
+DIM rgidx(0 TO 1) AS LONG = {1, 1}
+DIM cbs1 AS CBSTR = &quot;Test string 1&quot;
+' // Put the value
+csa.Put(@rgidx(0), cbs1)
+' // Get the value
+DIM cbsOut AS CBSTR
+csa.Get(@rgidx(0), cbsOut)
+print cbsOut
+' // array index: second element, first dimension
+rgidx(0) = 2 : rgidx(1) = 1
+' // Put the value
+DIM cbs2 AS CBSTR = &quot;Test string 2&quot;
+csa.Put(@rgidx(0), cbs2)
+' // Get the value
+csa.Get(@rgidx(0), cbsOut)
+print cbsOut
+
+' // array index: first element, second dimension
+rgidx(0) = 1 : rgidx(1) = 2
+' // Put the value
+DIM cbs3 AS CBSTR = &quot;Test string 3&quot;
+csa.Put(@rgidx(0), cbs3)
+' // Get the value
+csa.Get(@rgidx(0), cbsOut)
+print cbsOut
+
+' // array index: second element, second dimension
+rgidx(0) = 2 : rgidx(1) = 2
+' // Put the value
+DIM cbs4 AS CBSTR = &quot;Test string 4&quot;
+csa.Put(@rgidx(0), cbs4)
+' // Get the value
+csa.Get(@rgidx(0), cbsOut)
+print cbsOut
+</code></pre>
+<h4 id="return-value-(get)">Return value (Get)</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_BADINDEX</td>
+<td>The specified index is invalid.</td>
+</tr>
+<tr class="even">
+<td>E_INVALIDARG</td>
+<td>One of the arguments is invalid.</td>
+</tr>
+<tr class="odd">
+<td>E_OUTOFMEMORY</td>
+<td>Memory could not be allocated for the element.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-(getstr-/-getvar)">Return value (GetStr / GetVar)</h4>
+<p>The string or variant element.</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>This method calls <strong>SafearrayLock</strong> and <strong>SafearrayUnlock</strong> automatically, before and after retrieving the element. The caller must provide a storage area of the correct size to receive the data. If the data element is a string, object, or variant, the function copies the element in the correct way.</p>
+<h1 id="getiid"><a name="GetIID"></a>GetIID</h1>
+<p>Returns the GUID of the interface contained within a given safe array.</p>
+<pre><code>FUNCTION GetIID () AS GUID
+</code></pre>
+<h4 id="return-value-22">Return value</h4>
+<p>The GUID of the interface, on success, or a null guid on failure.</p>
+<h1 id="getrecordinfo"><a name="GetRecordInfo"></a>GetRecordInfo</h1>
+<p>Retrieves the IRecordInfo interface of a UDT contained in a given safe array.</p>
+<pre><code>FUNCTION GetRecordInfo () AS IRecordInfo PTR
+</code></pre>
+<h1 id="gettype"><a name="GetType"></a>GetType</h1>
+<p>Returns the VARTYPE stored in the given safe array.</p>
+<pre><code>FUNCTION GetType () AS VARTYPE
+</code></pre>
+<h1 id="insert"><a name="Insert"></a>Insert</h1>
+<p>Inserts a value at the specified position of the safe array.</p>
+<pre><code>FUNCTION Insert (BYVAL nPos AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION Insert (BYVAL nPos AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION Insert (BYVAL nPos AS LONG, BYREF cvData AS CVAR) AS HRESULT
+FUNCTION Insert (BYVAL nPos AS LONG, BYVAL vData AS VARIANT) AS HRESULT
+</code></pre>
+<p>Inserts a value at the beginning of the safe array.</p>
+<pre><code>FUNCTION Insert (BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION Insert (BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION Insert (BYREF cvData AS CVAR) AS HRESULT
+FUNCTION Insert (BYVAL vData AS VARIANT) AS HRESULT
+</code></pre>
+<p>Inserts a string.</p>
+<pre><code>FUNCTION InsertStr (BYVAL nPos AS LONG, BYVAL pwszData AS WSTRING PTR) AS HRESULT
+FUNCTION InsertStr (BYVAL pwszData AS WSTRING PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPos</em></td>
+<td>Optional. Index of the array in which the data will be inserted. If <em>nPos</em> is not specified, the item is inserted at the beginning of the array. If the array is empty, it is redimensioned to one element.</td>
+</tr>
+<tr class="even">
+<td><em>pData</em></td>
+<td>Pointer to a variable of the appropriate data type.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsData</em></td>
+<td>The CBSTR to insert, if the safe array is of type VT_BSTR.</td>
+</tr>
+<tr class="even">
+<td><em>cvData</em></td>
+<td>The CVAR to insert, if the safe array is of type VT_VARIANT.</td>
+</tr>
+<tr class="odd">
+<td><em>vData</em></td>
+<td>The VARIANT to insert, if the safe array is of type VT_VARIANT.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_BADINDEX</td>
+<td>The specified index is invalid.</td>
+</tr>
+<tr class="even">
+<td>E_INVALIDARG</td>
+<td>One of the arguments is invalid.</td>
+</tr>
+<tr class="odd">
+<td>E_OUTOFMEMORY</td>
+<td>Memory could not be allocated for the element.</td>
+</tr>
+<tr class="even">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-3">Usage example</h4>
+<pre><code>' // Create a one-dimensional array of variants
+'DIM csa AS CSafeArray = CSafeArray(VT_VARIANT, 2, 1)
+DIM csa AS CSafeArray = CSafeArray(&quot;VARIANT&quot;, 2, 1)
+
+csa.Put(1, CVAR(&quot;Test string 1&quot;))
+csa.Put(2, CVAR(&quot;Test string 2&quot;))
+csa.Insert(2, CVAR(12345.67, &quot;DOUBLE&quot;))
+
+DIM cvOut AS CVAR
+csa.Get(1, cvOut)
+print cvOut
+csa.Get(2, cvOut)
+print cvOut
+csa.Get(3, cvOut)
+print cvOut
+</code></pre>
+<h1 id="isresizable"><a name="IsResizable"></a>IsResizable</h1>
+<p>Tests if the safe array can be resized.</p>
+<pre><code>FUNCTION IsResizable () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-24">Return value</h4>
+<p>TRUE if the array can be resized; FALSE, otherwise.</p>
+<h1 id="lbound"><a name="LBound"></a>LBound</h1>
+<p>Returns the lower bound for any dimension of a safe array.</p>
+<pre><code>FUNCTION LBound (BYVAL nDim AS UINT = 1) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDim</em></td>
+<td>Optional. The array dimension for which to get the lower bound. You don't need to pass this parameter if it is a one-dimensional array.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="lbound-1"><a name="LBound"></a>LBound</h1>
+<p>Returns the lower bound for any dimension of a safe array.</p>
+<pre><code>FUNCTION LBound (BYVAL nDim AS UINT = 1) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDim</em></td>
+<td>Optional. The array dimension for which to get the lower bound. You don't need to pass this parameter if it is a one-dimensional array.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="ubound"><a name="UBound"></a>UBound</h1>
+<p>Returns the upper bound for any dimension of a safe array.</p>
+<pre><code>FUNCTION UBound (BYVAL nDim AS UINT = 1) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDim</em></td>
+<td>Optional. The array dimension for which to get the upper bound. You don't need to pass this parameter if it is a one-dimensional array.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="lockscount"><a name="LocksCount"></a>LocksCount</h1>
+<p>Returns the number of times the array has been locked without the corresponding unlock.</p>
+<pre><code>FUNCTION LocksCount () AS UINT
+</code></pre>
+<h1 id="movefromvariant"><a name="MoveFromVariant"></a>MoveFromVariant</h1>
+<p>Transfers ownership of the safe array contained in the variant parameter to this object. The variant is then changed to VT_EMPTY.</p>
+<pre><code>FUNCTION MoveFromVariant (BYVAL pvar AS VARIANT PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pvar</em></td>
+<td>Pointer to the variant containing the safe array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-25">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<h1 id="movetovariant"><a name="MoveToVariant"></a>MoveToVariant</h1>
+<p>Transfers ownership of the safe array to a variant and detaches it from the class.</p>
+<pre><code>FUNCTION MoveToVariant (BYVAL pvar AS VARIANT PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pvar</em></td>
+<td>Pointer to the variant where the safe array will be moved.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-4">Usage example</h4>
+<pre><code>' // One-dimensional array of VT_BSTR
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 2, 1)
+csa.Put(1, CBSTR(&quot;Test string 1&quot;))
+DIM cbsOut AS CBSTR
+csa.Get(1, cbsOut.vptr)
+print cbsOut
+csa.Put(2, CBSTR(&quot;Test string 2&quot;))
+csa.Get(2, cbsOut)
+print cbsOut
+
+DIM v AS VARIANT
+csa.MoveToVariant(@v)
+print AfxVarToStr(@v)
+VariantClear @v
+</code></pre>
+<h4 id="return-value-26">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<h1 id="numdims"><a name="NumDims"></a>NumDims</h1>
+<p>Returns the number of dimensions in the array.</p>
+<pre><code>FUNCTION NumDims () AS UINT
+</code></pre>
+<h1 id="ptrofindex"><a name="PtrOfIndex"></a>PtrOfIndex</h1>
+<p>Returns a pointer to an array element.</p>
+<p>Multidimensional array:</p>
+<pre><code>FUNCTION PtrOfIndex (BYVAL prgIndices AS LONG PTR) AS ANY PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>prgIndices</em></td>
+<td>An array of index values that identify an element of the array. All indexes for the element must be specified.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>FUNCTION PtrOfIndex (BYVAL idx AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>Index of the element.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>FUNCTION PtrOfIndex (BYVAL cElem AS LONG, BYVAL cDim AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cElem</em></td>
+<td>Index of the element.</td>
+</tr>
+<tr class="even">
+<td><em>cDim</em></td>
+<td>Dimension number of the array.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="put"><a name="Put"></a>Put</h1>
+<p>Stores the data element at a given location in the array.</p>
+<p>Multidimensional array:</p>
+<pre><code>FUNCTION Put (BYVAL prgIndices AS LONG PTR, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION PutStr (BYVAL prgIndices AS LONG PTR, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION PutVar (BYVAL prgIndices AS LONG PTR, BYREF cvData AS CVAR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>prgIndices</em></td>
+<td>Pointer to a vector of indexes for each dimension of the array. The right-most (least significant) dimension is rgIndices(0). The left-most dimension is stored at prgIndices(@psa.cDims – 1).</td>
+</tr>
+<tr class="even">
+<td><em>pData</em></td>
+<td>Pointer to the data to assign to the array. The variant types VT_DISPATCH, VT_UNKNOWN, and VT_BSTR are pointers, and do not require another level of indirection.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsData</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="even">
+<td><em>cbsData</em></td>
+<td>A CVAR.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>FUNCTION Put (BYVAL idx AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION PutStr (BYVAL idx AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION PutVar (BYVAL idx AS LONG, BYREF cvData AS CVAR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>Index of the element of the array.</td>
+</tr>
+<tr class="even">
+<td><em>pData</em></td>
+<td>Pointer to the data to assign to the array. The variant types VT_DISPATCH, VT_UNKNOWN, and VT_BSTR are pointers, and do not require another level of indirection.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsData</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="even">
+<td><em>cbsData</em></td>
+<td>A CVAR.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>Index of the element.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>FUNCTION Put (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYVAL pData AS ANY PTR) AS HRESULT
+FUNCTION PutStr (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYREF cbsData AS CBSTR) AS HRESULT
+FUNCTION PutVar (BYVAL cElem AS LONG, BYVAL cDim AS LONG, BYREF cvData AS CVAR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cElem</em></td>
+<td>Index of the element of the array.</td>
+</tr>
+<tr class="even">
+<td><em>cDim</em></td>
+<td>Dimension number of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>pData</em></td>
+<td>Pointer to the data to assign to the array. The variant types VT_DISPATCH, VT_UNKNOWN, and VT_BSTR are pointers, and do not require another level of indirection.</td>
+</tr>
+<tr class="even">
+<td><em>cbsData</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsData</em></td>
+<td>A CVAR.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-27">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_BADINDEX</td>
+<td>The specified index is invalid.</td>
+</tr>
+<tr class="even">
+<td>E_INVALIDARG</td>
+<td>One of the arguments is invalid.</td>
+</tr>
+<tr class="odd">
+<td>E_OUTOFMEMORY</td>
+<td>Memory could not be allocated for the element.</td>
+</tr>
+<tr class="even">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-6">Remarks</h4>
+<p>This function automatically calls <strong>SAfeArrayLock</strong> and <strong>SafeArrayUnlock</strong> before and after assigning the element. If the data element is a string, object, or variant, the function copies it correctly when the safe array is destroyed. If the existing element is a string, object, or variant, it is cleared correctly. If the data element is a VT_DISPATCH or VT_UNKNOWN, <strong>AddRef</strong> is called to increment the object's reference count.</p>
+<p>Multiple locks can be on an array. Elements can be put into an array while the array is locked by other operations.</p>
+<h1 id="redim"><a name="Redim"></a>Redim</h1>
+<p>Changes the right-most (least significant) bound of a safe array.</p>
+<p>Multidimensional array:</p>
+<pre><code>FUNCTION Redim (BYVAL pnewsabounds AS SAFEARRAYBOUND PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pnewsabounds</em></td>
+<td>Pointer to a new safe array bound structure that contains the new array boundary. You can change only the least significant dimension of an array.</td>
+</tr>
+</tbody>
+</table>
+<p>One-dimensional array:</p>
+<pre><code>FUNCTION Redim (BYVAL cElements AS ULONG, BYVAL lLBound AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cElements</em></td>
+<td>Number of elements in the array.</td>
+</tr>
+<tr class="even">
+<td><em>lLBound</em></td>
+<td>The lower bound of the array.</td>
+</tr>
+</tbody>
+</table>
+<p>Two-dimensional array:</p>
+<pre><code>FUNCTION Redim (BYVAL cElements1 AS ULONG, BYVAL lLBound1 AS LONG, _
+   BYVAL cElements2 AS ULONG, BYVAL lLBound2 AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cElements1</em></td>
+<td>Number of elements in the first dimension of the array</td>
+</tr>
+<tr class="even">
+<td><em>lLBound1</em></td>
+<td>The lower bound of the first dimension of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>cElements2</em></td>
+<td>Number of elements in the second dimension of the array</td>
+</tr>
+<tr class="even">
+<td><em>lLBound2</em></td>
+<td>The lower bound of the second dimension of the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-5">Usage example</h4>
+<pre><code>' // One-dimensional array of VT_VARIANT
+' // Two elements, lower-bound 1
+'DIM csa AS CSafeArray = CSafeArray(VT_VARIANT, 2, 1)
+DIM csa AS CSafeArray = CSafeArray(&quot;VARIANT&quot;, 2, 1)
+DIM cv1 AS CVAR = &quot;Test variant 1&quot;
+csa.Put(1, cv1)
+DIM cvOut AS CVAR
+csa.Get(1, cvOut)
+print cvOut
+
+DIM cv2 AS CVAR = &quot;Test variant 2&quot;
+csa.Put(1, cv2)
+csa.Get(1, cvOut)
+print cvOut
+
+' // Redim (preserve) the safe array
+csa.Redim(1, 3)
+DIM cv3 AS CVAR = &quot;Test variant 3&quot;
+csa.Put(3, cv3)
+csa.Get(3, cvOut)
+print cvOut
+</code></pre>
+<h4 id="return-value-28">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_ARRAYISLOCKED</td>
+<td>The array is currently locked.</td>
+</tr>
+<tr class="even">
+<td>E_INVALIDARG</td>
+<td>Invalid safe array descriptor.</td>
+</tr>
+<tr class="odd">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="remove"><a name="Remove"></a>Remove</h1>
+<p>Removes the specified array element.</p>
+<pre><code>FUNCTION Remove (BYVAL nPos AS LONG) AS HRESULT
+FUNCTION RemoveStr (BYVAL nPos AS LONG) AS HRESULT
+FUNCTION RemoveVar (BYVAL nPos AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPos</em></td>
+<td>Index of the array element which will be deleted.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-29">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DISP_E_BADINDEX</td>
+<td>The specified index is not valid.</td>
+</tr>
+<tr class="even">
+<td>E_INVALIDARG</td>
+<td>One of the arguments is not valid.</td>
+</tr>
+<tr class="odd">
+<td>E_OUTOFMEMORY</td>
+<td>Memory could not be allocated for the element.</td>
+</tr>
+<tr class="even">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setiid"><a name="SetIID"></a>SetIID</h1>
+<p>Sets the IID (a GUID) of the interface contained within a given safe array.</p>
+<pre><code>FUNCTION SetIID (BYVAL pguid AS GUID PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pguid</em></td>
+<td>Pointer to the IID.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-30">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>E_INVALIDARG</td>
+<td>If the array descriptor does not have the FADF_HAVEIID flag set.</td>
+</tr>
+<tr class="even">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setrecordinfo"><a name="SetRecordInfo"></a>SetRecordInfo</h1>
+<p>Sets the IRecordInfo interface of the UDT contained in a given safe array.</p>
+<pre><code>FUNCTION SetRecordInfo (BYVAL prinfo AS IRecordInfo PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>prinfo</em></td>
+<td>Pointer to an IRecordInfo interface.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-31">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>E_INVALIDARG</td>
+<td>If the array descriptor does not have the FADF_RECORD flag set.</td>
+</tr>
+<tr class="even">
+<td>E_FAIL</td>
+<td>Failure. The array descriptor is null.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="sort"><a name="Sort"></a>Sort</h1>
+<p>Sorts a one-dimensional VT_BSTR CSafeArray calling the C <strong>qsort</strong> function.</p>
+<pre><code>FUNCTION Sort (BYVAL bAscend AS BOOLEAN = TRUE) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bAscend</em></td>
+<td>TRUE for sorting in ascending order; FALSE for sorting in descending order.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-32">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+<table>
+<thead>
+<tr class="header">
+<th>HRESULT</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>E_FAIL</td>
+<td>The array descriptor is null or the safe array is not of of the type VT_BSTR.</td>
+</tr>
+<tr class="even">
+<td>E_UNEXPECTED</td>
+<td>The array could not be locked.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-6">Usage example</h4>
+<pre><code>' // Create a one-dimensional array of BSTR
+DIM csa AS CSafeArray = CSafeArray(VT_BSTR, 3, 1)
+
+DIM cbsVal AS CBSTR = &quot;bcde&quot;
+csa.Put(1, cbsVal)
+cbsVal = &quot;abc&quot;
+csa.Put(2, cbsVal)
+cbsVal = &quot;abcfg&quot;
+csa.Put(3, cbsVal)
+' // Sort the safe array
+csa.Sort
+
+csa.Get(1, cbsVal)
+print cbsVal
+csa.Get(2, cbsVal)
+print cbsVal
+csa.Get(3, cbsVal)
+print cbsVal
+
+--- or ---
+
+print csa.GetStr(1)
+print csa.GetStr(2)
+print csa.GetStr(3)
+</code></pre>
+<h1 id="unaccessdata"><a name="UnaccessData"></a>UnaccessData</h1>
+<p>Decrements the lock count of an array, and invalidates the pointer retrieved by <strong>AccessData</strong>.</p>
+<pre><code>FUNCTION UnaccessData () AS HRESULT
+</code></pre>
+<h4 id="return-value-33">Return value</h4>
+<p>S_OK (0) on success or an HRESULT code on failure.</p>
+</body>
+</html>
+

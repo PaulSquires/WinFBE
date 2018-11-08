@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CGpStringFormat Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cgpstringformat-class">CGpStringFormat Class</h1>
+<p>The <strong>CGpStringFormat</strong> class encapsulates text layout information (such as alignment, orientation, tab stops, and clipping) and display manipulations (such as trimming, font substitution for characters that are not supported by the requested font, and digit substitution for languages that do not use Western European digits). A <strong>StringFormat</strong> object can be passed to the <strong>DrawString</strong> methods to format a string.</p>
+<p><strong>Inherits from</strong>: CGpBase.<br> <strong>Include file</strong>: CGpStringFormat.inc.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors">Constructors</a></td>
+<td>Creates a <strong>StringFormat</strong> object based on string format flags and a language.</td>
+</tr>
+<tr class="even">
+<td><a href="#Clone">Clone</a></td>
+<td>Copies the contents of the existing <strong>StringFormat</strong> object into a new <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GenericDefault">GenericDefault</a></td>
+<td>Creates a generic, default <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GenericTypographic">GenericTypographic</a></td>
+<td>Creates a generic, typographic <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetAlignment">GetAlignment</a></td>
+<td>Gets an element of the <strong>StringAlignment</strong> enumeration that indicates the character alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDigitSubstitutionLanguage">GetDigitSubstitutionLanguage</a></td>
+<td>Gets the language that corresponds with the digits that are to be substituted for Western European digits.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDigitSubstitutionMethod">GetDigitSubstitutionMethod</a></td>
+<td>Gets an element of the <strong>StringDigitSubstitute</strong> enumeration that indicates the digit substitution method that is used by this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetFormatFlags">GetFormatFlags</a></td>
+<td>Gets the string format flags for this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetHotkeyPrefix">GetHotkeyPrefix</a></td>
+<td>Gets an element of the <strong>HotkeyPrefix</strong> enumeration that indicates the type of processing that is performed on a string when a hot key prefix, an ampersand (&amp;), is encountered.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetLineAlignment">GetLineAlignment</a></td>
+<td>Gets an element of the <strong>StringAlignment</strong> enumeration that indicates the line alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMeasurableCharacterRangeCount">GetMeasurableCharacterRangeCount</a></td>
+<td>Gets the number of measurable character ranges that are currently set.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTabStopCount">GetTabStopCount</a></td>
+<td>Gets the number of tab-stop offsets in this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetTabStops">GetTabStops</a></td>
+<td>Gets the offsets of the tab stops in this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTrimming">GetTrimming</a></td>
+<td>Gets an element of the <strong>StringTrimming</strong> enumeration that indicates the trimming style of this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetAlignment">SetAlignment</a></td>
+<td>Sets the character alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetDigitSubstitution">SetDigitSubstitution</a></td>
+<td>Sets the digit substitution method and the language that corresponds to the digit substitutes.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetFormatFlags">SetFormatFlags</a></td>
+<td>Sets the format flags for this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetHotkeyPrefix">SetHotkeyPrefix</a></td>
+<td>Sets the type of processing that is performed on a string when the hot key prefix, an ampersand (&amp;), is encountered.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetLineAlignment">SetLineAlignment</a></td>
+<td>Sets the line alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetMeasurableCharacterRanges">SetMeasurableCharacterRanges</a></td>
+<td>Sets a series of character ranges for this <strong>StringFormat</strong> object that, when in a string, can be measured by the <strong>MeasureCharacterRanges</strong> method.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetTabStops">SetTabStops</a></td>
+<td>Sets the offsets for tab stops in this <strong>StringFormat</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetTrimming">SetTrimming</a></td>
+<td>Sets the trimming style for this <strong>StringFormat</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors"><a name="Constructors"></a>Constructors</h1>
+<p>Creates <strong>StringFormat</strong> object from another <strong>StringFormat</strong> object.</p>
+<pre><code>CONSTRUCTOR CGpStringFormat (BYVAL pStringFormat AS CGpStringFormat PTR)
+</code></pre>
+<p>Creates a <strong>StringFormat</strong> object based on string format flags and a language.</p>
+<pre><code>CONSTRUCTOR CGpStringFormat (BYVAL formatFlags AS INT_ = 0, BYVAL language AS LANGID = LANG_NEUTRAL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>formatFlags</em></td>
+<td>Value that specifies the format flags that control most of the characteristics of the <strong>StringFormat</strong> object. The flags are set by applying a bitwise OR to elements of the <strong>StringFormatFlags</strong> enumeration. The default value is 0 (no flags set).</td>
+</tr>
+<tr class="even">
+<td><em>language</em></td>
+<td>Sixteen-bit value that specifies the language to use. The default value is LANG_NEUTRAL, which is the user's default language.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h1 id="clone"><a name="Clone"></a>Clone</h1>
+<p>Copies the contents of the existing <strong>StringFormat</strong> object into a new <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION Clone (BYVAL pStringFormat AS CGpStringFormat PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pStringFormat</em></td>
+<td>Pointer to the <strong>StringFormat</strong> object where to copy the contents of the existing object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, clones it, and then uses the clone
+' to draw a formatted string.
+' ========================================================================================
+SUB Example_Clone (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the alignment
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetAlignment(StringAlignmentCenter)
+
+   ' // Clone the StringFormat object
+   DIM pStringFormat AS CGpStringFormat
+   stringFormat.Clone(@pStringFormat)
+   ' // You can also use:
+   ' DIM pStringFormat AS CGpStringFormat = @stringFormat
+
+   ' // Use the cloned StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This text was formatted by a StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 200, 200, @pStringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 200, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="genericdefault"><a name="GenericDefault"></a>GenericDefault</h1>
+<p>Creates a generic, default <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION GenericDefault (BYVAL pStringFormat AS CGpStringFormat PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pStringFormat</em></td>
+<td>Pointer to the <strong>StringFormat</strong> object where to return the new <strong>StringFormat</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>A generic, default <strong>StringFormat</strong> object has the following characteristics:</p>
+<ul>
+<li>No string format flags are set.</li>
+<li>Character alignment and line alignment are set to <strong>StringAlignmentNear</strong>.</li>
+<li>Language ID is set to neutral language, which means that the current language associated with the calling thread is used.</li>
+<li>String digit substitution is set to <strong>StringDigitSubstituteUser</strong>.</li>
+<li>Hot key prefix is set to <strong>HotkeyPrefixNone</strong>.</li>
+<li>Number of tab stops is set to zero.</li>
+<li>String trimming is set to <strong>StringTrimmingCharacter</strong>.</li>
+</ul>
+<h4 id="example-1">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a generic, default StringFormat object and then uses it to
+' draw a formatted string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_GenericDefault (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   ' // Points must not be scaled for a generic font, so we are unscaling them dividing by rxRatio
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, AfxPointsToPixelsX(12) / rxRatio, FontStyleRegular, UnitPixel)
+
+   ' // Create a generic default string format
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.GenericDefault(@stringFormat)
+
+   ' // Use the generic StringFormat object in a call to DrawString.
+   DIM wszText AS WSTRING * 260 = &quot;This text was formatted by a generic StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 100, 120, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text.
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 100, 120)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="generictypographic"><a name="GenericTypographic"></a>GenericTypographic</h1>
+<p>Creates a generic, typographic <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION GenericTypographic (BYVAL pStringFormat AS CGpStringFormat PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pStringFormat</em></td>
+<td>Pointer to the <strong>StringFormat</strong> object where to return the new <strong>StringFormat</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-1">Remarks</h4>
+<p>A generic, typographic <strong>StringFormat</strong> object has the following characteristics:</p>
+<ul>
+<li>String format flags <strong>StringFormatFlagsLineLimit</strong>, <strong>StringFormatFlagsNoClip</strong>, and <strong>StringFormatFlagsNoFitBlackBox</strong> are set.</li>
+<li>Character alignment and line alignment are set to <strong>StringAlignmentNear</strong>.</li>
+<li>Language ID is set to neutral language, which means that the current language associated with the calling thread is used.</li>
+<li>String digit substitution is set to <strong>StringDigitSubstituteUser</strong>.</li>
+<li>Hot key prefix is set to <strong>HotkeyPrefixNone</strong>.</li>
+<li>Number of tab stops is set to zero.</li>
+<li>String trimming is set to <strong>StringTrimmingNone</strong>.</li>
+</ul>
+<h4 id="example-2">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a generic, default StringFormat object and then uses it to
+' draw a formatted string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_GenericTypographic (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   ' // Points must not be scaled for a typographic font, so we are unscaling them dividing by rxRatio
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, AfxPointsToPixelsX(12) / rxRatio, FontStyleRegular, UnitPixel)
+
+   ' // Create a typographic string format object
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.GenericTypographic(@stringFormat)
+
+   ' // Use the generic StringFormat object in a call to DrawString.
+   DIM wszText AS WSTRING * 260 = &quot;Formatted by a generic typographic StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 100, 120, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text.
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 100, 120)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getalignment"><a name="GetAlignment"></a>GetAlignment</h1>
+<p>Gets an element of the <strong>StringAlignment</strong> enumeration that indicates the character alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle. A layout rectangle is used to position the displayed string.</p>
+<pre><code>FUNCTION GetAlignment () AS StringAlignment
+</code></pre>
+<h4 id="example-3">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the string's character alignment,
+' gets the alignment value, and stores it in a variable. The code then creates a second
+' StringFormat object and uses the stored alignment value to set the character alignment
+' of the second StringFormat object. Next, the code uses the second StringFormat object to
+' draw a formatted string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_GetAlignment (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the alignment
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetAlignment(StringAlignmentFar)
+
+   ' // Get the alignment setting from the StringFormat object.
+   DIM nStringAlignment AS StringAlignment = stringFormat.GetAlignment
+
+   ' // Create a second StringFormat object with the same alignment.
+   DIM stringFormat2 AS CGpStringFormat
+   stringFormat2.SetAlignment(nStringAlignment)
+
+   ' // Use the second StringFormat object in a call to DrawString.
+   DIM wszText AS WSTRING * 260 = &quot;This text was formatted by a second StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat2, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getdigitsubstitutionlanguage"><a name="GetDigitSubstitutionLanguage"></a>GetDigitSubstitutionLanguage</h1>
+<p>Gets the language that corresponds with the digits that are to be substituted for Western European digits.</p>
+<pre><code>FUNCTION GetDigitSubstitutionLanguage () AS LANGID
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>This method returns a 16-bit value that forms a National Language Support (NLS) language identifier. This identifier indicates the language that corresponds with the substitution digits. For example, if this <strong>StringFormat</strong> object uses Arabic substitution digits, then this method will return a value that indicates an Arabic language. An NLS language identifier is constructed by the MAKELANGID macro declared in Winnt.bi.</p>
+<h1 id="getdigitsubstitutionmethod"><a name="GetDigitSubstitutionMethod"></a>GetDigitSubstitutionMethod</h1>
+<p>Gets an element of the <strong>StringDigitSubstitute</strong> enumeration that indicates the digit substitution method that is used by this <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION GetDigitSubstitutionMethod () AS StringDigitSubstitute
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>The digit substitution method replaces, in a string, Western European digits with digits that correspond to a user's locale or language.</p>
+<h1 id="getformatflags"><a name="GetFormatFlags"></a>GetFormatFlags</h1>
+<p>Gets the string format flags for this <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION GetFormatFlags () AS INT_
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>This method returns a value that indicates which string format flags are set for this <strong>StringFormat</strong> object. This value can be any combination (the result of a bitwise OR applied to two or more elements) of elements of the <strong>StringFormatFlag</strong>s enumeration.</p>
+<h4 id="example-4">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the string's format flags, and
+' then gets the 32-bit value that contains the format flags and stores it in a variable.
+' The code then creates another StringFormat object and uses the stored format flags value
+' to set the format flags of the second StringFormat object. Next, the code uses the second
+' StringFormat object to draw a formatted string . The code also draws the string's layout
+' rectangle.
+' ========================================================================================
+SUB Example_GetFormatFlags (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set its format flags
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetFormatFlags(StringFormatFlagsDirectionVertical OR StringFormatFlagsNoFitBlackBox)
+
+   ' // Get the format flags from the StringFormat object.
+   DIM flags AS LONG = stringFormat.GetFormatFlags
+
+   ' // Create a second StringFormat object with the same flags.
+   DIM stringFormat2 AS CGpStringFormat
+   stringFormat2.SetFormatFlags(flags)
+
+      ' // Use the second StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This text is vertical because of a format flag.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat2, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="gethotkeyprefix"><a name="GetHotkeyPrefix"></a>GetHotkeyPrefix</h1>
+<p>Gets an element of the <strong>HotkeyPrefix</strong> enumeration that indicates the type of processing that is performed on a string when a hot key prefix, an ampersand (&amp;), is encountered.</p>
+<pre><code>FUNCTION GetHotkeyPrefix () AS HotkeyPrefix
+</code></pre>
+<h4 id="remarks-2">Remarks</h4>
+<p>Hot keys, also called access keys, are keys that are programmed to provide an end user with keyboard shortcuts to functionality and are activated by pressing the ALT key. The keys are application dependent and are identified by an underscored letter, typically in a menu name or menu item; for example, when you press ALT, the letter F of the File menu is underscored. The F key is a shortcut to display the <strong>File</strong> menu.</p>
+<p>A client programmer designates a hot key in an application by using the hot key prefix, an ampersand (&amp;), in a string that typically is displayed as the name of a menu or an item in a menu and by using the <strong>SetHotkeyPrefix</strong> method to set the appropriate type of processing. When a character in a string is preceded with an ampersand, the key that corresponds to the character becomes a hot key during the processing that occurs when the string is drawn on the display device. The ampersand is called a hot key prefix because it precedes the character to be activated. If <strong>HotkeyPrefixNone</strong> is passed to <strong>SetHotkeyPrefix</strong>, no processing of hot key prefixes occurs.</p>
+<p><strong>Note</strong>: The term hot key is used synonymously here with the term access key. The term hot key may have a different meaning in other Windows APIs.</p>
+<h4 id="example-5">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the type of hot key prefix
+' processing to be performed on the string, and then gets the type of processing and stores
+' it in a variable. The code then creates a second StringFormat object and uses the stored
+' value to set the type of hot key prefix processing for the second StringFormat object.
+' The code uses the second StringFormat object to draw a string that contains the hot key
+' prefix character. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_GetHotKeyPrefix (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set its hot key prefix
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetHotkeyPrefix(HotkeyPrefixShow)
+
+   ' // Get the hot key prefix from the StringFormat object.
+   DIM nHotkeyPrefix AS HotkeyPrefix = stringFormat.GetHotkeyPrefix
+
+   ' // Create a second StringFormat object with the same hot key prefix.
+   DIM stringFormat2 AS CGpStringFormat
+   stringFormat2.SetHotkeyPrefix(nHotkeyPrefix)
+
+   ' // Use the seconds StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This &amp;text has some &amp;underlined characters.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 160, 200, @stringFormat2, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 160, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getlinealignment"><a name="GetLineAlignment"></a>GetLineAlignment</h1>
+<p>Gets an element of the <strong>StringAlignment</strong> enumeration that indicates the line alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle. The line alignment setting specifies how to align the string vertically in the layout rectangle. The layout rectangle is used to position the displayed string.</p>
+<pre><code>FUNCTION GetLineAlignment () AS StringAlignment
+</code></pre>
+<h4 id="example-6">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the string's line alignment,
+' and then gets the line alignment setting and stores it in a variable. The code then
+' creates a second StringFormat object and uses the stored alignment value to set the line
+' alignment of the second StringFormat object. Next, the code uses the second StringFormat
+' object to draw a formatted string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_GetLineAlignment (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the alignment
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetLineAlignment(StringAlignmentCenter)
+
+   ' // Get the line alignment setting from the StringFormat object.
+   DIM nStringAlignment AS StringAlignment = stringFormat.GetLineAlignment
+
+   ' // Create a second StringFormat object with the same line alignment.
+   DIM stringFormat2 AS CGpStringFormat
+   stringFormat2.SetLineAlignment(nStringAlignment)
+
+   ' // Use the second StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This text was formatted by a second StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat2, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getmeasurablecharacterrangecount"><a name="GetMeasurableCharacterRangeCount"></a>GetMeasurableCharacterRangeCount</h1>
+<p>Gets the number of measurable character ranges that are currently set. The character ranges that are set can be measured in a string by using the <strong>MeasureCharacterRanges</strong> method.</p>
+<pre><code>FUNCTION GetMeasurableCharacterRangeCount () AS INT_
+</code></pre>
+<h4 id="return-value-4">Return value</h4>
+<p>This method returns an integer that indicates the number of character ranges that can be measured by <strong>MeasureCharacterRanges</strong>.</p>
+<h4 id="example-7">Example</h4>
+<pre><code>' ========================================================================================
+' The following example defines three ranges of character positions within a string and sets
+' those ranges in a StringFormat object. Next, the StringFormat::GetMeasurableCharacterRangeCount
+' method is used to get the number of character ranges that are currently set in the StringFormat
+' object. This number is then used to allocate a buffer large enough to store the regions
+' that correspond with the ranges. Then, the MeasureCharacterRanges method is used to get
+' the three regions of the display that are occupied by the characters that are specified
+' by the ranges.
+' Remarks: It doesn't work with the 64-bit headers because they lack a declare for the
+' GdipMeasureCharacterRanges function.
+' ========================================================================================
+SUB Example_GetMeasurableCharacterRanges (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Brushes and pens used for drawing and painting
+   DIM blueBrush AS CGpSOlidBrush = GDIP_ARGB(255, 0, 0, 255)
+   DIM redBrush AS CGpSOlidBrush = GDIP_ARGB(255, 255, 0, 0)
+   DIM blackPen AS CGpPen = GDIP_ARGB(255, 0, 0, 0)
+
+   ' // Layout rectangles used for drawing strings
+   DIM layoutRect AS GpRectF = TYPE&lt;GpRectF&gt;(20.0, 20.0, 130.0, 130.0)
+
+   ' // Three ranges of character positions within the string
+   DIM charRanges(2) AS CharacterRange
+   charRanges(0).First = 3  : charRanges(0).Length = 5
+   charRanges(1).First = 15 : charRanges(1).Length = 2
+   charRanges(2).First = 30 : charRanges(2).Length = 15
+
+   ' // Font and string format used to apply to string when drawing
+   DIM myFont AS CGpFont = CGpFont(&quot;Times New Roman&quot;, AfxPointsToPixelsX(16) / rxRatio, FontStyleRegular, UnitPixel)
+   DIM strFormat AS CGpStringFormat
+
+   DIM wszText AS WSTRING * 260
+   wszText = &quot;The quick, brown fox easily jumps over the lazy dog.&quot;
+
+   ' // Set three ranges of character positions.
+   strFormat.SetMeasurableCharacterRanges(3, @charRanges(0))
+
+   ' // Get the number of ranges that have been set, and allocate memory to
+   ' // store the regions that correspond to the ranges.
+   DIM nCount AS LONG = strFormat.GetMeasurableCharacterRangeCount
+   DIM rgCharRangeRegions(nCount - 1) AS CGpRegion
+
+   ' // Get the regions that correspond to the ranges within the string
+   graphics.MeasureCharacterRanges(@wszText, -1, @myFont, @layoutRect, @strFormat, nCount, @rgCharRangeRegions(0))
+   graphics.DrawString(@wszText, -1, @myFont, @layoutRect, @strFormat, @blueBrush)
+   graphics.DrawRectangle(@blackPen, @layoutRect)
+   FOR i AS LONG = 0 TO nCount - 1
+      graphics.FillRegion(@redBrush, @rgCharRangeRegions(i))
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="gettabstopcount"><a name="GetTabStopCount"></a>GetTabStopCount</h1>
+<p>Gets the number of tab-stop offsets in this <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION GetTabStopCount () AS INT_
+</code></pre>
+<h4 id="example-8">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets tab stops, and uses the StringFormat
+' object to draw a string that contains tab characters (\t). The code also draws the string's
+' layout rectangle. Then, the code gets the tab stops and proceeds to use or inspect the
+' tab stops in some way.
+' ========================================================================================
+SUB Example_GetTabStopCount (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, rxRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 0, 0, 255)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 16, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the tab stops
+   DIM tabs(0 TO 2) AS SINGLE = {150, 100, 100}
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetTabStops(0, 3, @tabs(0))
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;Name&quot; &amp; CHR(9) &amp;&quot;Test 1&quot; &amp; CHR(9) &amp; &quot;Test 2&quot; &amp; CHR(9) &amp; &quot;Test 3&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 20, 20, 500, 100, @stringFormat, @solidBrush)
+
+   ' // Get the tab stops
+   DIM tabStopCount AS LONG, firstTabOffset AS SINGLE
+   DIM tabStops(ANY) AS SINGLE
+   tabStopCount = stringFormat.GetTabStopCount
+   REDIM tabStops(tabStopCount - 1)
+   stringFormat.GetTabStops(tabStopCount, @firstTabOffset, @tabStops(0))
+
+   FOR j AS LONG = 0 TO tabStopCount - 1
+      ' // Inspect or use the value in tabStops(j)
+      PRINT tabStops(j)
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="gettabstops"><a name="GetTabStops"></a>GetTabStops</h1>
+<p>Gets the offsets of the tab stops in this <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION GetTabStops (BYVAL count AS INT_, BYVAL firstTabOffset AS SINGLE PTR, _
+   BYVAL tabStops AS SINGLE PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>count</em></td>
+<td>Integer that specifies the number of tab-stop offsets in the <em>tabStops</em> array.</td>
+</tr>
+<tr class="even">
+<td><em>firstTabOffset</em></td>
+<td>Out. Pointer to a simple precision variable that receives the initial offset position. This initial offset position is relative to the string's origin and the offset of the first tab stop is relative to the initial offset position.</td>
+</tr>
+<tr class="odd">
+<td><em>tabStops</em></td>
+<td>Out. Pointer to an array of simple precision variables that receives the tab-stop offsets. The offset of the first tab stop is the first value in the array, the offset of the second tab stop, the second value in the array, and so on.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-9">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets tab stops, and uses the
+' StringFormat object to draw a string that contains tab characters. The code also draws
+' the string's layout rectangle. Then, the code gets the tab stops and proceeds to use or
+' inspect the tab stops in some way.
+' ========================================================================================
+SUB Example_GetTabStops (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, rxRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 0, 0, 255)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 16, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the tab stops
+   DIM tabs(0 TO 2) AS SINGLE = {150, 100, 100}
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetTabStops(0, 3, @tabs(0))
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;Name&quot; &amp; CHR(9) &amp;&quot;Test 1&quot; &amp; CHR(9) &amp; &quot;Test 2&quot; &amp; CHR(9) &amp; &quot;Test 3&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 20, 20, 500, 100, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0))
+   graphics.DrawRectangle(@pen, 20, 20, 500, 100)
+
+   ' // Get the tab stops
+   DIM tabStopCount AS LONG, firstTabOffset AS SINGLE
+   DIM tabStops(ANY) AS SINGLE
+   tabStopCount = stringFormat.GetTabStopCount
+   REDIM tabStops(tabStopCount - 1)
+   stringFormat.GetTabStops(tabStopCount, @firstTabOffset, @tabStops(0))
+
+   FOR j AS LONG = 0 TO tabStopCount - 1
+      ' // Inspect or use the value in tabStops(j)
+      PRINT tabStops(j)
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="gettrimming"><a name="GetTrimming"></a>GetTrimming</h1>
+<p>Gets an element of the <strong>StringTrimming</strong> enumeration that indicates the trimming style of this <strong>StringFormat</strong> object. The trimming style determines how to trim characters from a string that is too large to fit in the layout rectangle.</p>
+<pre><code>FUNCTION GetTrimming () AS StringTrimming
+</code></pre>
+<h4 id="example-10">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the string's trimming style,
+' and then gets the trimming style and stores it in a variable. The code then creates a
+' second StringFormat object and uses the stored trimming style to set the trimming style
+' of the second StringFormat object. Next, the code uses the second StringFormat object to
+' draw a formatted string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_GetTrimming (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set its trimming style
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetTrimming(StringTrimmingEllipsisWord)
+
+   ' // Get the trimming style from the StringFormat object.
+   DIM nStringTrimming AS StringTrimming = stringFormat.GetTrimming
+
+   ' // Create a second StringFormat object with the same trimming style.
+   DIM stringFormat2 AS CGpStringFormat
+   stringFormat2.SetTrimming(nStringTrimming)
+
+   ' // Use the second StringFormat object in a call to DrawString.
+   DIM wszText AS WSTRING * 260 = &quot;One two three four five six seven eight nine ten&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 160, 60, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 160, 60)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setalignment"><a name="SetAlignment"></a>SetAlignment</h1>
+<p>Sets the character alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle. A layout rectangle is used to position the displayed string.</p>
+<pre><code>FUNCTION SetAlignment (BYVAL nAlign AS StringAlignment) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nAlign</em></td>
+<td>Element of the <strong>StringAlignment</strong> enumeration that specifies how a string is aligned in reference to the bounding rectangle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-11">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the character alignment, and
+' draws the string using that alignment. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_SetAlignment (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the alignment
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetAlignment(StringAlignmentFar)
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This text was formatted by a StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setdigitsubstitution"><a name="SetDigitSubstitution"></a>SetDigitSubstitution</h1>
+<p>Sets the digit substitution method and the language that corresponds to the digit substitutes.</p>
+<pre><code>FUNCTION SetDigitSubstitution (BYVAL language AS LANGID, BYVAL substitute AS StringDigitSubstitute) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>language</em></td>
+<td>Sixteen-bit value that forms a NLS language identifier. The identifier specifies the language associated with the substitute digits. For example, if this <strong>StringFormat</strong> object uses Arabic substitution digits, then this method will return a value that indicates an Arabic language. An NLS language identifier is constructed by the <strong>MAKELANGID</strong> macro, declared in Winnt.inc.</td>
+</tr>
+<tr class="even">
+<td><em>substitute</em></td>
+<td>Element of the <strong>StringDigitSubstitute</strong> enumeration that specifies the digit substitution method to be used.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>The digit substitution method, specified by an element of the <strong>StringDigitSubstitute</strong> enumeration, replaces, in a string, Western European digits with digits that correspond to a user's locale or language.</p>
+<p>When specifying LANG_NEUTRAL as the language ID, it is common practice to pass just LANG_NEUTRAL as in the following example:</p>
+<p>stat = FontFamily.GetFamilyName(name, LANG_NEUTRAL)</p>
+<p>If you are specifying a language other than LANG_NEUTRAL, use MAKELANGID to create the language and sublanguage combination as in the following example:</p>
+<p>language = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL)</p>
+<p>For a list of the available languages and sublanguages, see Winnt.inc.</p>
+<h1 id="setformatflags"><a name="SetFormatFlags"></a>SetFormatFlags</h1>
+<p>Sets the format flags for this <strong>StringFormat</strong> object. The format flags determine most of the characteristics of a <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION SetFormatFlags (BYVAL flags AS INT_) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>flags</em></td>
+<td>Thirty-two bit value that specifies the format flags that control most of the characteristics of the <strong>StringFormat</strong> object. The flags are set by applying a bitwise OR to elements of the <strong>StringFormatFlags</strong> enumeration.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-12">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the format flags, and draws
+' the formatted string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_SetFormatFlags (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set its format flags
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetFormatFlags(StringFormatFlagsDirectionVertical OR StringFormatFlagsNoFitBlackBox)
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This text is vertical because of a format flag.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="sethotkeyprefix"><a name="SetHotkeyPrefix"></a>SetHotkeyPrefix</h1>
+<p>Sets the type of processing that is performed on a string when the hot key prefix, an ampersand (&amp;), is encountered. The ampersand is called the hot key prefix and can be used to designate certain keys as hot keys.</p>
+<pre><code>FUNCTION SetHotkeyPrefix (BYVAL nHotkeyPrefix AS HotkeyPrefix) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>flags</em></td>
+<td>Element of the <strong>HotkeyPrefix</strong> enumeration that specifies how to process the hot key prefix.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-13">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object and sets the type of hot key prefix
+' processing to be performed on the string. The code then uses the StringFormat object to
+' draw a string that contains the hot key prefix character. The code also draws the
+' string's layout rectangle.
+' ========================================================================================
+SUB Example_SetHotKeyPrefix (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set its hot key prefix
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetHotkeyPrefix(HotkeyPrefixShow)
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This &amp;text has some &amp;underlined characters.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setlinealignment"><a name="SetLineAlignment"></a>SetLineAlignment</h1>
+<p>Sets the line alignment of this <strong>StringFormat</strong> object in relation to the origin of the layout rectangle. The line alignment setting specifies how to align the string vertically in the layout rectangle. The layout rectangle is used to position the displayed string.</p>
+<pre><code>FUNCTION SetLineAlignment (BYVAL nAlign AS StringAlignment) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nAlign</em></td>
+<td>Element of the <strong>StringAlignment</strong> enumeration that specifies how to align a string in reference to the layout rectangle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-14">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the trimming style, and uses
+' the StringFormat object to draw a string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_SetLineAlignment (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the alignment
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetLineAlignment(StringAlignmentCenter)
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;This text was formatted by a StringFormat object.&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 150, 200, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 150, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setmeasurablecharacterranges"><a name="SetMeasurableCharacterRanges"></a>SetMeasurableCharacterRanges</h1>
+<p>Sets a series of character ranges for this <strong>StringFormat</strong> object that, when in a string, can be measured by the <strong>MeasureCharacterRanges</strong> method.</p>
+<pre><code>FUNCTION SetMeasurableCharacterRanges (BYVAL rangeCount AS INT_, _
+   BYVAL ranges AS CharacterRange PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rangeCount</em></td>
+<td>Integer that specifies the number of character ranges in the <em>ranges</em> array.</td>
+</tr>
+<tr class="even">
+<td><em>ranges</em></td>
+<td>Pointer to an array of <strong>CharacterRange</strong> objects that specify the character ranges to be measured.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-15">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets tab stops, and uses the
+' StringFormat object to draw a string that contains tab characters (\t). The code also
+' draws the string's layout rectangle.
+' Remarks: It doesn't work with the 64-bit headers because they lack a declare for the
+' GdipMeasureCharacterRanges function.
+' ========================================================================================
+SUB Example_SetMeasurableCharacterRanges (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Brushes and pens used for drawing and painting
+   DIM blueBrush AS CGpSOlidBrush = GDIP_ARGB(255, 0, 0, 255)
+   DIM redBrush AS CGpSOlidBrush = GDIP_ARGB(255, 255, 0, 0)
+   DIM blackPen AS CGpPen = GDIP_ARGB(255, 0, 0, 0)
+
+   ' // Layout rectangles used for drawing strings
+   DIM layoutRect_A AS GpRectF = TYPE&lt;GpRectF&gt;(20.0, 20.0, 130.0, 130.0)
+   DIM layoutRect_B AS GpRectF = TYPE&lt;GpRectF&gt;(160.0, 20.0, 165.0, 130.0)
+   DIM layoutRect_C AS GpRectF = TYPE&lt;GpRectF&gt;(335.0, 20.0, 165.0, 130.0)
+
+   ' // Three ranges of character positions within the string
+   DIM charRanges(2) AS CharacterRange
+   charRanges(0).First = 3  : charRanges(0).Length = 5
+   charRanges(1).First = 15 : charRanges(1).Length = 2
+   charRanges(2).First = 30 : charRanges(2).Length = 15
+
+   ' // Font and string format used to apply to string when drawing
+   DIM myFont AS CGpFont = CGpFont(&quot;Times New Roman&quot;, AfxPointsToPixelsX(16) / rxRatio, FontStyleRegular, UnitPixel)
+   DIM strFormat AS CGpStringFormat
+
+   DIM wszText AS WSTRING * 260
+   wszText = &quot;The quick, brown fox easily jumps over the lazy dog.&quot;
+
+   ' // Set three ranges of character positions.
+   strFormat.SetMeasurableCharacterRanges(3, @charRanges(0))
+
+   ' // Get the number of ranges that have been set, and allocate memory to
+   ' // store the regions that correspond to the ranges.
+   DIM nCount AS LONG = strFormat.GetMeasurableCharacterRangeCount
+   DIM rgCharRangeRegions(nCount - 1) AS CGpRegion
+
+   ' // Get the regions that correspond to the ranges within the string when
+   ' // layout rectangle A is used. Then draw the string, and show the regions.
+   graphics.MeasureCharacterRanges(@wszText, -1, @myFont, @layoutRect_A, @strFormat, nCount, @rgCharRangeRegions(0))
+   graphics.DrawString(@wszText, -1, @myFont, @layoutRect_A, @strFormat, @blueBrush)
+   graphics.DrawRectangle(@blackPen, @layoutRect_A)
+   FOR i AS LONG = 0 TO nCount - 1
+      graphics.FillRegion(@redBrush, @rgCharRangeRegions(i))
+   NEXT
+
+   ' // Get the regions that correspond to the ranges within the string when
+   ' // layout rectangle B is used. Then draw the string, and show the regions.
+   graphics.MeasureCharacterRanges(@wszText, -1, @myFont, @layoutRect_B, @strFormat, nCount, @rgCharRangeRegions(0))
+   graphics.DrawString(@wszText, -1, @myFont, @layoutRect_B, @strFormat, @blueBrush)
+   graphics.DrawRectangle(@blackPen, @layoutRect_B)
+   FOR i AS LONG = 0 TO nCount - 1
+      graphics.FillRegion(@redBrush, @rgCharRangeRegions(i))
+   NEXT
+
+   ' // Get the regions that correspond to the ranges within the string when
+   ' // layout rectangle C is used. Set trailing spaces to be included in the
+   ' // regions. Then draw the string, and show the regions.
+   strFormat.SetFormatFlags(StringFormatFlagsMeasureTrailingSpaces)
+   graphics.MeasureCharacterRanges(@wszText, -1, @myFont, @layoutRect_C, @strFormat, nCount, @rgCharRangeRegions(0))
+   graphics.DrawString(@wszText, -1, @myFont, @layoutRect_C, @strFormat, @blueBrush)
+   graphics.DrawRectangle(@blackPen, @layoutRect_C)
+   FOR i AS LONG = 0 TO nCount - 1
+      graphics.FillRegion(@redBrush, @rgCharRangeRegions(i))
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="settabstops"><a name="SetTabStops"></a>SetTabStops</h1>
+<p>Sets the offsets for tab stops in this <strong>StringFormat</strong> object.</p>
+<pre><code>FUNCTION SetTabStops (BYVAL firstTabOffset AS SINGLE, BYVAL nCount AS INT_, _
+   BYVAL tabStops AS SINGLE PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>firstTabOffset</em></td>
+<td>Simple precision number that specifies the initial offset position. This initial offset position is relative to the string's origin and the offset of the first tab stop is relative to the initial offset position.</td>
+</tr>
+<tr class="even">
+<td><em>nCount</em></td>
+<td>Integer that specifies the number of tab-stop offsets in the <em>tabStops</em> array.</td>
+</tr>
+<tr class="odd">
+<td><em>tabStops</em></td>
+<td>Pointer to an array of real numbers that specify the tab-stop offsets. The offset of the first tab stop is the first value in the array, the offset of the second tab stop, the second value in the array, and so on.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>Each tab-stop offset in the tabStops array, except the first one, is relative to the previous one. The first tab-stop offset is relative to the initial offset position specified by <em>firstTabOffset</em>. For example, if the initial offset position is 8 and the first tab-stop offset is 50, then the first tab stop is at position 58. If the initial offset position is zero, then the first tab-stop offset is relative to position 0, the string origin.</p>
+<h4 id="example-16">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets tab stops, and uses the
+' StringFormat object to draw a string that contains tab characters (\t). The code also
+' draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_SetTabStops (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, rxRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 0, 0, 255)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 16, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set the tab stops
+   DIM tabs(0 TO 2) AS SINGLE = {150, 100, 100}
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetTabStops(0, 3, @tabs(0))
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;Name&quot; &amp; CHR(9) &amp;&quot;Test 1&quot; &amp; CHR(9) &amp; &quot;Test 2&quot; &amp; CHR(9) &amp; &quot;Test 3&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 20, 20, 500, 100, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 20, 20, 500, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="settrimming"><a name="SetTrimming"></a>SetTrimming</h1>
+<p>Sets the trimming style for this <strong>StringFormat</strong> object. The trimming style determines how to trim a string so that it fits into the layout rectangle.</p>
+<pre><code>FUNCTION SetTrimming (BYVAL trimming AS StringTrimming) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>trimming</em></td>
+<td>Element of the <strong>StringTrimming</strong> enumeration that specifies the style of trimming to be performed on the string.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-17">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a StringFormat object, sets the trimming style, and uses
+' the StringFormat object to draw a string. The code also draws the string's layout rectangle.
+' ========================================================================================
+SUB Example_SetTrimming (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, rxRatio)
+
+   ' // Create a red solid brush
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 255, 0, 0)
+   ' // Create a font family from name
+   DIM fontFamily AS CGpFontFamily = &quot;Times New Roman&quot;
+   ' // Create a font from the font family
+   DIM pFont AS CGpFont = CGpFont(@fontFamily, 24, FontStyleRegular, UnitPixel)
+
+   ' // Create a string format object and set its trimming style
+   DIM stringFormat AS CGpStringFormat
+   stringFormat.SetTrimming(StringTrimmingEllipsisWord)
+
+   ' // Use the StringFormat object in a call to DrawString
+   DIM wszText AS WSTRING * 260 = &quot;One two three four five six seven eight nine ten&quot;
+   graphics.DrawString(@wszText, LEN(wszText), @pFont, 30, 30, 160, 60, @stringFormat, @solidBrush)
+
+   ' // Draw the rectangle that encloses the text
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   graphics.DrawRectangle(@pen, 30, 30, 160, 60)
+
+END SUB
+' ========================================================================================
+</code></pre>
+</body>
+</html>
+

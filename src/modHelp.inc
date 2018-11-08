@@ -65,14 +65,22 @@ Function ShowContextHelp( byval id as long ) As Long
          else   
             wszHelpFilename = gConfig.Win32APIHelpfile 
          END IF
+      case IDM_HELPWINFBE
+         gHelpViewerIndex = IDM_HELPWINFBE
+         frmHelpViewer_Show(HWND_FRMMAIN, SW_SHOW)
+         exit function
       case IDM_HELPWINFBX
-         wszLabel = "WinFBX "
-         ' Convert relative path to absolute path if needed.
-         if AfxPathIsRelative(gConfig.WinFBXHelpfile) then
-            wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.WinFBXHelpfile)
-         else   
-            wszHelpFilename = gConfig.WinFBXHelpfile
-         END IF
+         gHelpViewerIndex = IDM_HELPWINFBX
+         frmHelpViewer_Show(HWND_FRMMAIN, SW_SHOW)
+         exit function
+
+'         wszLabel = "WinFBX "
+'         ' Convert relative path to absolute path if needed.
+'         if AfxPathIsRelative(gConfig.WinFBXHelpfile) then
+'            wszHelpFilename = AfxPathCombine(AfxGetExePathName, gConfig.WinFBXHelpfile)
+'         else   
+'            wszHelpFilename = gConfig.WinFBXHelpfile
+'         END IF
    END SELECT
 
 

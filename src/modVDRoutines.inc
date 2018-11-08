@@ -215,6 +215,7 @@ function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM
       case CTRL_OCX
+      case CTRL_MASKEDEDIT:       wszText = "wfxMaskedEdit"
    END SELECT
 
    return wszText

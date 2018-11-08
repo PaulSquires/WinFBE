@@ -1495,18 +1495,31 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
         
       Case IDM_DELETELINE:         Function = SciExec(hEdit, SCI_LINECUT, 0, 0)
       Case IDM_INSERTFILE:         Function = pDoc->InsertFile()
+      
       Case IDM_INDENTBLOCK
          ' If a TAB was pressed then manually terminate any active autocomplete.
          if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
             SciExec(hEdit, SCI_AUTOCCOMPLETE, 0, 0) 
+         elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
+            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
+         elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
+            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
          else
             ' Do a block indent
             gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_TAB, 0, 0)
             gApp.SuppressNotify = false
          end if
+      
       Case IDM_UNINDENTBLOCK
-         gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
-         gApp.SuppressNotify = false
+         if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
+            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
+         elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
+            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+         else
+            gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
+            gApp.SuppressNotify = false
+         end if
+         
       Case IDM_COMMENTBLOCK:       Function = pDoc->BlockComment(True) 
       Case IDM_UNCOMMENTBLOCK:     Function = pDoc->BlockComment(False) 
       Case IDM_DUPLICATELINE:      Function = pDoc->LineDuplicate()
@@ -1713,7 +1726,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
          ExecuteUserTool( id - IDM_USERTOOL )
 
-      Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBX
+      Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
  ' TODO: Remove debug call in IDM_HELP
  'gdb2.dbDebug
          ShowContextHelp(id) 
@@ -2626,7 +2639,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
       ' Processes accelerator keys for menu commands
       If (pWindow->AccelHandle = 0) Orelse (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg) = 0) then
-         
+          
          if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) Then 
 
             ' Intercept all MouseMove messages in order to test if we are over the splitter area. This
@@ -2719,20 +2732,22 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                      END IF
                END SELECT
             end if
-            
-            
+             
+            ' Check for any QuickRun exes that can be deleted.
+            gApp.CheckQuickRunExe
+             
             ' Determines whether a message is intended for the specified
             ' dialog box and, if it is, processes the message.
             ' Ensure keystrokes like TAB are properly handled by the modeless dialogs
-            If IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
-            If IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) Then Continue Do
-            
-            ' Check for any QuickRun exes that can be deleted.
-            gApp.CheckQuickRunExe
-            
-            If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
-               TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
-               DispatchMessage @uMsg    ' Dispatches a message to a window procedure.
+            IF AfxCAxHostForwardMessage(GetFocus, @uMsg) = FALSE THEN
+               If IsDialogMessage( HWND_FRMFINDINFILES, @uMsg ) Then Continue Do
+               If IsDialogMessage( HWND_FRMFINDREPLACE, @uMsg ) Then Continue Do
+               IF IsDialogMessageW(HWND_FRMHELPVIEWER, @uMsg) Then Continue Do
+
+               If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
+                  TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
+                  DispatchMessage @uMsg    ' Dispatches a message to a window procedure.
+               end if
             End If
          end if
          

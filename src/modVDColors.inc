@@ -176,7 +176,7 @@ Function frmVDColors_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWIT
          SelectObject(lpdis->hDC, hBrush)      
          FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
 
-         If lpdis->itemData = Cast(DWORD, -1) Then
+         If cast(long, lpdis->itemData) = Cast(long, -1) Then
             wzText = "Custom Color"
             dim pProp as clsProperty ptr = GetActivePropertyPtr()
             if pProp then

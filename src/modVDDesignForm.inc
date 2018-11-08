@@ -940,7 +940,7 @@ FUNCTION Control_SubclassProc( BYVAL hwnd   AS HWND, _                 ' Control
 
       Case WM_MOUSEACTIVATE
          ' Defeat this message so that mouse clicks do not activate the control. However, we
-         ' do need to set focus to the control in order to allow keyboard movem/resize.
+         ' do need to set focus to the control in order to allow keyboard move/resize.
          SetFocus(hwnd) 
          Function = MA_NOACTIVATE: uMsg = WM_NULL
          Exit Function

@@ -69,6 +69,10 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates how wide each column should be in a multicolumn listbox."
       case "CONTROLBOX"   
          wszPropDescribe = "Determines whether a form has a Control/System menu box."
+      CASE "DEFAULTCHARACTER"
+         wszPropDescribe = "A default character that the control substitutes for each invalid character in the user input."
+      CASE "DROPDOWNSTYLE"
+         wszPropDescribe = "Specifies whether the list is always displayed or whether the list is displayed in a drop-down. Also specifies whether the text portion can be edited."
       case "ENABLED"   
          wszPropDescribe = "Indicates whether the control is enabled."
       case "FONT"   
@@ -87,6 +91,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "The image that will be displayed on the control."
       case "IMAGEALIGN"   
          wszPropDescribe = "The alignment of the image that will be displayed on the control."
+      CASE "INPUTSTRING"
+         wszPropDescribe = "A mask template string that specifies the literal characters that can appear at each position in the user input. Use the underscore character as a character placeholder."
 '      case "INDEX"   
 '         wszPropDescribe = "The position of the control within the OptionButton group."
       case "INTEGRALHEIGHT"   
@@ -95,6 +101,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "Determines whether the form will receive key events before the event is passed to the control that has focus."
       case "LOCKED"   
          wszPropDescribe = "Determines if the control can be moved or resized."
+      CASE "MASKSTRING"
+         wszPropDescribe = "A mask string that specifies the type of character that can appear at each position in the user input.."
       case "MAXLENGTH"   
          wszPropDescribe = "Indicates the maximum number of characters that can be entered into the edit control."
       case "MAXIMIZEBOX"   
@@ -167,6 +175,8 @@ function DisplayPropertyDetails() as Long
          wszPropDescribe = "Determines the initial visual state of the form."
       CASE "WORDWRAP"
          wszPropDescribe = "Indicates if lines are automatically word wrapped for multiline edit controls."
+      CASE "VALIDCHARACTERS"
+         wszPropDescribe = "Specifies a string of valid characters that the user can enter. Empty string means all characters are valid."
       CASE "VISIBLE"
          wszPropDescribe = "Determines whether the control is visible or hidden."
       case else
@@ -214,6 +224,10 @@ function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs whenever the form is deactivated."
       CASE "DESTROY"
          wszEventDescribe = "Occurs immediately before the control is about to be destroyed and all resources associated with it released."
+      CASE "DROPDOWN"
+         wszEventDescribe = "Occurs when the drop-down portion of the combobox is shown."
+      CASE "DROPDOWNCLOSED"
+         wszEventDescribe = "Indicates that the drop-down portion of the combobox has closed."
       CASE "GOTFOCUS"
          wszEventDescribe = "Occurs when the control receives focus."
       case "INITIALIZE"   
@@ -629,6 +643,23 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      case CTRL_MASKEDEDIT
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "GotFocus")
+         AddControlEvent(pCtrl, "LostFocus")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "TextChanged")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
       case CTRL_CHECKBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -688,8 +719,26 @@ function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
-      case CTRL_PICTURE
       case CTRL_COMBOBOX
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "DropDown")
+         AddControlEvent(pCtrl, "DropDownClosed")
+         AddControlEvent(pCtrl, "GotFocus")
+         AddControlEvent(pCtrl, "LostFocus")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
+         AddControlEvent(pCtrl, "TextChanged")
+      case CTRL_PICTURE
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
@@ -836,6 +885,26 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "WordWrap", "False", PropertyType.TrueFalse)
 
+      case CTRL_MASKEDEDIT
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "DefaultCharacter", "_", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "HideSelection", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "InputString", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "MaskString", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ReadOnly", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ValidCharacters", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+
       case CTRL_CHECKBOX
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
@@ -875,6 +944,23 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "UseTabStops", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
+      case CTRL_COMBOBOX
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         'AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
+         'AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "DropDownStyle", "ComboBoxStyle.DropDownList", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         'AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "IntegralHeight", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Sorted", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+
       case CTRL_OPTION
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
@@ -908,11 +994,6 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
 '      case CTRL_PICTURE
-'      case CTRL_COMBOBOX
-'         AddControlProperty(pCtrl, "TabIndex", "0")
-'         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-'         AddControlProperty(pCtrl, "Style", "WS_VISIBLE|WS_BORDER|WS_TABSTOP|CBS_DROPDOWNLIST")
-'         AddControlProperty(pCtrl, "ExStyle", "WS_EX_CLIENTEDGE")
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
@@ -991,6 +1072,11 @@ function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Checked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
+
+      case "DROPDOWNSTYLE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.Simple"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDown"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDownList"))
 
       case "TEXTSCROLLBARS"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.None"))

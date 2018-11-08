@@ -190,10 +190,11 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
 
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELP, L(73,"&Help") & Chr(9) & "F1"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELP, "FreeBASIC " + L(73,"&Help") & Chr(9) & "F1"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBE, "WinFBE Editor Help"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Framework Help"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINAPI, "WinAPI Help"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Help"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"&About")
 
@@ -303,6 +304,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_NEWFORM, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINAPI, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_HELPWINFBE, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINFBX, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 

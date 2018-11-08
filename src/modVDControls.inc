@@ -399,6 +399,11 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
                              rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
             pCtrl->hWindow = pCtrl->AfxButtonPtr->hWindow
             SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+         case CTRL_MASKEDEDIT
+            pCtrl->AfxMaskedPtr = new CMaskedEdit(pWindow, 100, _
+                             rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
+            pCtrl->hWindow = pCtrl->AfxMaskedPtr->hWindow
+            SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
          case else   
             dim as long dwExStyle = -1
             dim as long dwStyle = -1
@@ -407,8 +412,21 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
                ' our listboxes have NoIntegralHeight.
                dwStyle = WS_CHILD or WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
                          LBS_HASSTRINGS OR LBS_NOTIFY or LBS_NOINTEGRALHEIGHT
-            end if
-            if ControlType = CTRL_FRAME then
+            elseif ControlType = CTRL_COMBOBOX then
+               ' WinFBX defaults to combobox with integralheight. We want to make sure that
+               ' our comboboxes have NoIntegralHeight.
+               dwStyle = WS_CHILD or WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
+                         CBS_HASSTRINGS or CBS_NOINTEGRALHEIGHT or CBS_DROPDOWNLIST
+               ' Also subclass the combobox edit control
+               dim as HWND hWndEditCtrl = ComboBox_GetEditBoxHandle(pCtrl->hWindow)
+               if IsWindow(hWndEditCtrl) then
+                  SetWindowSubclass(hWndEditCtrl, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+               end if
+               dim as HWND hWndListCtrl = ComboBox_GetListBoxHandle(pCtrl->hWindow)
+               if IsWindow(hWndListCtrl) then
+                  SetWindowSubclass(hWndListCtrl, CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_COMBOBOX, CAST(DWORD_PTR, pDoc))
+               end if
+            elseif ControlType = CTRL_FRAME then
                dwStyle = WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS or WS_CLIPCHILDREN or BS_GROUPBOX
                dwExStyle = WS_EX_TRANSPARENT
             end if   

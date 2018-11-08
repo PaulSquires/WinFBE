@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CAxHost Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="caxhost-class">CAxHost Class</h1>
+<p><strong>CAxHost</strong> implements an OLE Container using a custom control to host ActiveX controls.</p>
+<p><strong>Include file</strong>: CaxHost.inc.</p>
+<h3 id="constructors">Constructors</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#CAXHOST_AMBIENTDISP">CAXHOST_AMBIENTDISP structure</a></td>
+<td>Contains information the ambient properties of the CAxHost control.</td>
+</tr>
+<tr class="even">
+<td><a href="#Constructor1">Constructor(ProgID)</a></td>
+<td>Creates an instance of the OLE container using a ProgId.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Constructor2">Constructor(ClsId)</a></td>
+<td>Creates an instance of the OLE container using a Clsid.</td>
+</tr>
+<tr class="even">
+<td><a href="#Constructor3">Constructor(LibName)</a></td>
+<td>Creates an instance of the OLE container using an unregistered OCX.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Advise">Advise</a></td>
+<td>Establishes a connection between a connection point object and the client's sink.</td>
+</tr>
+<tr class="even">
+<td><a href="#CtrlID">CtrlID</a></td>
+<td>Returns the identifier of the container's window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GuidFromStr">GuidFromStr</a></td>
+<td>Converts a string into a 16-byte (128-bit) Globally Unique Identifier (GUID).</td>
+</tr>
+<tr class="even">
+<td><a href="#GuidText">GuidText</a></td>
+<td>Returns a 38-byte human-readable guid string from a 16-byte GUID.</td>
+</tr>
+<tr class="odd">
+<td><a href="#hWindow">hWindow</a></td>
+<td>Returns the handle of the hosting window.</td>
+</tr>
+<tr class="even">
+<td><a href="#OcxDispObj">OcxDispObj</a></td>
+<td>Returns a reference to the control's default interface given the handle of the window that hosts it.</td>
+</tr>
+<tr class="odd">
+<td><a href="#OcxDispPtr">OcxDispPtr</a></td>
+<td>Returns a reference to the control's default interface given the handle of the window that hosts it.</td>
+</tr>
+<tr class="even">
+<td><a href="#OleCreateFont">OleCreateFont</a></td>
+<td>Creates a standard IFont object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#OleCreateFontDisp">OleCreateFontDisp</a></td>
+<td>Creates a standard IFont object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Unadvise">Unadvise</a></td>
+<td>Terminates an advisory connection previously established by the <strong>Advise</strong> method between a connection point object and a client's sink.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="helper-procedures">Helper Procedures</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxCAxHostDispObj">AfxCAxHostDispObj</a></td>
+<td>Returns a reference to the control's default interface given the handle of the window that hosts it.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCAxHostDispPtr">AfxCAxHostDispPtr</a></td>
+<td>Returns a reference to the control's default interface given the handle of the window that hosts it.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxCAxHostPtr">AfxCAxHostPtr</a></td>
+<td>Returns a reference to the OLE container class given the handle of its associated window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCAxHostWindow">AfxCAxHostWindow</a></td>
+<td>Returns the OLE container window handle given the handle of the form, or any control in the form, and its control identifier.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxCAxHostForwardMessage">AfxCAxHostForwardMessage</a></td>
+<td>Forwards the Windows messages to the OLE Container window for processing.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="caxhost_ambientdisp-structure"><a name="CAXHOST_AMBIENTDISP"></a>CAXHOST_AMBIENTDISP Structure</h1>
+<p>Contains information the ambient properties of the <strong>CAxHost</strong> control.</p>
+<pre><code>TYPE CAXHOST_AMBIENTDISP
+   Font AS IFontDisp PTR
+   BackColor AS LONG = &amp;hFFFFFF
+   ForeColor AS LONG = 0
+   LocaleID AS LONG = LOCALE_USER_DEFAULT
+   Silent AS VARIANT_BOOL = -1
+   UIDead AS VARIANT_BOOL = 0
+   DisplayAsDefault AS VARIANT_BOOL = 0
+   SupportMnemonics AS VARIANT_BOOL = -1
+   OffLineIfNoConnected AS VARIANT_BOOL = -1
+   DlCtFlags AS LONG = 0
+END TYPE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Member</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Font</strong></td>
+<td>Pointer to a <strong>IFontDisp</strong> interface. To create the font you can use the <strong>OleCreateFontDisp</strong> method of the CAxHost class or the <strong>AfxOleCreateFontDisp</strong> function. The default font is SegoeUI, 9 points.</td>
+</tr>
+<tr class="even">
+<td><strong>BackColor</strong></td>
+<td>Specifies the back color of the container. The default color is white. You can use the FreeBasic BGR macro to set the color.</td>
+</tr>
+<tr class="odd">
+<td><strong>ForeColor</strong></td>
+<td>Specifies the fore color of the container. The default color is black. You can use the FreeBasic BGR macro to set the color.</td>
+</tr>
+<tr class="even">
+<td><strong>LocaleID</strong></td>
+<td>Specifies the ambient locale ID of the container.</td>
+</tr>
+<tr class="odd">
+<td><strong>Silent</strong></td>
+<td>Indicates the bind operation will be completed silently. No user interface or user notification will occur.</td>
+</tr>
+<tr class="even">
+<td><strong>UIDead</strong></td>
+<td>Indicates whether the container wants the control to respond to user-interface actions. If TRUE, the control should not respond. Default value: FALSE.</td>
+</tr>
+<tr class="odd">
+<td><strong>DisplayAsDefault</strong></td>
+<td>A flag that is TRUE if the container has marked the control in this site to be a default button, and therefore a button control should draw itself with a thicker frame. Default value: FALSE.</td>
+</tr>
+<tr class="even">
+<td><strong>SupportMnemonics</strong></td>
+<td>Indicates whether the container supports keyboard mnemonics. Default value: TRUE.</td>
+</tr>
+<tr class="odd">
+<td><strong>OffLineIfNotConnected</strong></td>
+<td>WebBroser control. The control support offline browsing.</td>
+</tr>
+<tr class="even">
+<td><strong>DlCtFlags</strong></td>
+<td>A combination of following flags, using the bitwise OR operator, to indicate your preferences. Most of the flag values have negative effects, that is, they prevent behavior that normally happens. For instance, scripts are normally executed by the WebBrowser Control if you don't customize its behavior. But if you set the DLCTL_NOSCRIPTS flag, no scripts will execute in that instance of the control. However, three flags—DLCTL_DLIMAGES, DLCTL_VIDEOS, and DLCTL_BGSOUNDS—work exactly opposite. If you set flags at all, you must set these three for the WebBrowser Control to behave in its default manner vis-a-vis images, videos and sounds.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Flags</strong></p>
+<ul>
+<li>DLCTL_DLIMAGES, DLCTL_VIDEOS, and DLCTL_BGSOUNDS: Images, videos, and background sounds will be downloaded from the server and displayed or played if these flags are set. They will not be downloaded and displayed if the flags are not set.</li>
+<li>DLCTL_NO_SCRIPTS and DLCTL_NO_JAVA: Scripts and Java applets will not be executed.</li>
+<li>DLCTL_NO_DLACTIVEXCTLS and DLCTL_NO_RUNACTIVEXCTLS : ActiveX controls will not be downloaded or will not be executed.</li>
+<li>DLCTL_DOWNLOADONLY: The page will only be downloaded, not displayed.</li>
+<li>DLCTL_NO_FRAMEDOWNLOAD: The WebBrowser Control will download and parse a frameset, but not the individual frame objects within the frameset.</li>
+<li>DLCTL_RESYNCHRONIZE and DLCTL_PRAGMA_NO_CACHE: These flags cause cache refreshes. With DLCTL_RESYNCHRONIZE, the server will be asked for update status. Cached files will be used if the server indicates that the cached information is up-to-date. With DLCTL_PRAGMA_NO_CACHE, files will be re-downloaded from the server regardless of the update status of the files.</li>
+<li>DLCTL_NO_BEHAVIORS: Behaviors are not downloaded and are disabled in the document.</li>
+<li>DLCTL_NO_METACHARSET_HTML: Character sets specified in meta elements are suppressed.</li>
+<li>DLCTL_URL_ENCODING_DISABLE_UTF8 and DLCTL_URL_ENCODING_ENABLE_UTF8: These flags function similarly to the DOCHOSTUIFLAG_URL_ENCODING_DISABLE_UTF8 and DOCHOSTUIFLAG_URL_ENCODING_ENABLE_UTF8 flags used with IDocHostUIHandler.GetHostInfo. The difference is that the DOCHOSTUIFLAG flags are checked only when the WebBrowser Control is first instantiated. The download flags here for the ambient property change are checked whenever the WebBrowser Control needs to perform a download.</li>
+<li>DLCTL_NO_CLIENTPULL: No client pull operations will be performed.</li>
+<li>DLCTL_SILENT: No user interface will be displayed during downloads.</li>
+<li>DLCTL_FORCEOFFLINE: The WebBrowser Control always operates in offline mode.</li>
+<li>DLCTL_OFFLINEIFNOTCONNECTED and DLCTL_OFFLINE: These flags are the same. The WebBrowser Control will operate in offline mode if not connected to the Internet.</li>
+</ul>
+<h1 id="constructor(progid)"><a name="Constructor1"></a>Constructor(ProgId)</h1>
+<p>Creates an instance of the OLE container using a ProgId.</p>
+<pre><code>CONSTRUCTOR CAxHost (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, _
+   BYREF wszProgID AS WSTRING, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, _
+   BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
+   BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, _
+   BYVAL pAmbientDisp AS CAXHOST_AMBIENTDISP PTR = NULL)
+</code></pre>
+<pre><code>CONSTRUCTOR CAxHost (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, _
+   BYREF wszProgID AS WSTRING, BYREF wszLicKey AS WSTRING, BYVAL x AS LONG = 0, _
+   BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
+   BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, _
+   BYVAL pAmbientDisp AS CAXHOST_AMBIENTDISP PTR = NULL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pWindow</em></td>
+<td>Pointer to the instance of the <strong>CWindow</strong> class used to create the form.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>The identifier of the control. It must be unique.</td>
+</tr>
+<tr class="odd">
+<td><em>wszProgID</em></td>
+<td>The <strong>ProgID</strong> of the object to create, such &quot;MSCAL.Calendar&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>wszLicKey</em></td>
+<td>The license key of the control, if the control is licensed.</td>
+</tr>
+<tr class="odd">
+<td><em>x, y</em></td>
+<td>The coordinates of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The width of the window.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The height of the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwStyle</em></td>
+<td>The style of the window being created.</td>
+</tr>
+<tr class="odd">
+<td><em>dwExStyle</em></td>
+<td>The extended style of the window being created.</td>
+</tr>
+<tr class="even">
+<td><em>pAmbientDisp</em></td>
+<td>Pointer to a <strong>CAXHOST_AMBIENTDISP</strong> structure.</td>
+</tr>
+</tbody>
+</table>
+<p>The following example embeds an instance of the WebBrowser control and navigates to a site:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Example1">Example1</a></td>
+<td>Embedding the WebBroser control.</td>
+</tr>
+<tr class="even">
+<td><a href="#Example2">Example2</a></td>
+<td>Google Map.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor(clsid)"><a name="Constructor2"></a>Constructor(ClsId)</h1>
+<p>Creates an instance of the OLE container using a ClsId.</p>
+<pre><code>CONSTRUCTOR CAxHost (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, _
+   BYREF classID AS CONST CLSID, BYREF riid AS CONST IID, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, _
+   BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS DWORD = 0, _
+   BYVAL dwExStyle AS DWORD = 0, BYVAL pAmbientDisp AS CAXHOST_AMBIENTDISP PTR = NULL)
+</code></pre>
+<pre><code>CONSTRUCTOR CAxHost (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, _
+   BYREF classID AS CONST CLSID, BYREF riid AS CONST IID, BYREF wszLicKey AS WSTRING, _
+   BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
+   BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, _
+   BYVAL pAmbientDisp AS CAXHOST_AMBIENTDISP PTR = NULL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pWindow</em></td>
+<td>Pointer to the instance of the <strong>CWindow</strong> class used to create the form.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>The identifier of the control. It must be unique.</td>
+</tr>
+<tr class="odd">
+<td><em>classID</em></td>
+<td>The <strong>CLSID</strong> of the object to create, such &quot;{8E27C92B-1264-101C-8A2F-040224009C02}&quot;</td>
+</tr>
+<tr class="even">
+<td><em>riid</em></td>
+<td>The <strong>IID</strong> of the object to create, such &quot;{8E27C92C-1264-101C-8A2F-040224009C02}&quot;.</td>
+</tr>
+<tr class="odd">
+<td><em>wszLicKey</em></td>
+<td>The license key of the control, if the control is licensed.</td>
+</tr>
+<tr class="even">
+<td><em>x, y</em></td>
+<td>The coordinates of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>The width of the window.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>The height of the window.</td>
+</tr>
+<tr class="odd">
+<td><em>dwStyle</em></td>
+<td>The style of the window being created.</td>
+</tr>
+<tr class="even">
+<td><em>dwExStyle</em></td>
+<td>The extended style of the window being created.</td>
+</tr>
+<tr class="odd">
+<td><em>pAmbientDisp</em></td>
+<td>Pointer to a <strong>CAXHOST_AMBIENTDISP</strong> structure.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor(libname)"><a name="Constructor3"></a>Constructor(LibName)</h1>
+<p>Creates an instance of the OLE container using an unregistered OCX.</p>
+<pre><code>CONSTRUCTOR CAxHost (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, _
+   BYREF wszLibName AS WSTRING, BYREF classID AS CONST CLSID, BYREF riid AS CONST IID, _
+   BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, _
+   BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS DWORD = 0, BYVAL dwExStyle AS DWORD = 0, _
+   BYVAL pAmbientDisp AS CAXHOST_AMBIENTDISP = NULL)
+</code></pre>
+<pre><code>CONSTRUCTOR CAxHost (BYVAL pWindow AS CWindow PTR, BYVAL cID AS INTEGER, _
+   BYREF wszLibName AS WSTRING, BYREF classID AS CONST CLSID, BYREF riid AS CONST IID, _
+   BYREF wszLicKey AS WSTRING, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, _
+   BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS DWORD = 0, _
+   BYVAL dwExStyle AS DWORD = 0, BYVAL pAmbientDisp AS CAXHOST_AMBIENTDISP PTR = NULL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pWindow</em></td>
+<td>Pointer to the instance of the <strong>CWindow</strong> class used to create the form.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>The identifier of the control. It must be unique.</td>
+</tr>
+<tr class="odd">
+<td><em>wszLibName</em></td>
+<td>The full qualified path to the OCX file.</td>
+</tr>
+<tr class="even">
+<td><em>classID</em></td>
+<td>The <strong>CLSID</strong> of the object to create, such &quot;{8E27C92B-1264-101C-8A2F-040224009C02}&quot;</td>
+</tr>
+<tr class="odd">
+<td><em>riid</em></td>
+<td>The <strong>IID</strong> of the object to create, such &quot;{8E27C92C-1264-101C-8A2F-040224009C02}&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>wszLicKey</em></td>
+<td>The license key of the control, if the control is licensed.</td>
+</tr>
+<tr class="odd">
+<td><em>x, y</em></td>
+<td>The coordinates of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The width of the window.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The height of the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwStyle</em></td>
+<td>The style of the window being created.</td>
+</tr>
+<tr class="odd">
+<td><em>dwExStyle</em></td>
+<td>The extended style of the window being created.</td>
+</tr>
+<tr class="even">
+<td><em>pAmbientDisp</em></td>
+<td>Pointer to a <strong>CAXHOST_AMBIENTDISP</strong> structure.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>DIM wszLibName AS WSTRING * 260 = ExePath &amp; &quot;\MSCOMCT2.OCX&quot;
+DIM CLSID_MSComCtl2_MonthView AS CLSID = (&amp;h232E456A, &amp;h87C3, &amp;h11D1, {&amp;h8B, &amp;hE3,&amp;h00, &amp;h00, &amp;hF8, &amp;h75, &amp;h4D, &amp;hA1})
+DIM IID_MSComCtl2_MonthView AS CLSID = (&amp;h232E4565, &amp;h87C3, &amp;h11D1, {&amp;h8B, &amp;hE3,&amp;h00, &amp;h00, &amp;hF8, &amp;h75, &amp;h4D, &amp;hA1})
+DIM RTLKEY_MSCOMCT2 AS WSTRING * 260 = &quot;651A8940-87C5-11d1-8BE3-0000F8754DA1&quot;
+DIM pAxHost AS CAxHost PTR = CAxHost(@pWindow, IDC_WEBBROWSER, wszLibName, CLSID_MSComCtl2_MonthView, _
+    IID_MSComCtl2_MonthView, RTLKEY_MSCOMCT2, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
+</code></pre>
+<h1 id="advise"><a name="Advise"></a>Advise</h1>
+<p>Establishes a connection between a connection point object and the client's sink.</p>
+<pre><code>FUNCTION Advise (BYVAL pEvtObj AS IDispatch PTR, BYVAL riid AS IID PTR) AS HRESULT
+FUNCTION Advise (BYVAL pEvtObj AS IDispatch PTR, BYVAL riid AS CONST IID) AS HRESULT
+FUNCTION Advise (BYVAL pEvtObj AS IDispatch PTR, BYREF riid AS IID) AS HRESULT
+FUNCTION Advise (BYVAL pEvtObj AS IDispatch PTR, BYVAL riid AS IID PTR) AS HRESULT
+FUNCTION Advise (BYVAL pEvtObj AS IDispatch PTR, BYREF riid AS CONST IID) AS HRESULT
+FUNCTION Advise (BYVAL pEvtObj AS IDispatch PTR, BYREF riid AS IID) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pEvtObj</em></td>
+<td>Pointer to the sink event's class. The client's sink receives outgoing calls from the connection point.</td>
+</tr>
+<tr class="even">
+<td><em>riid</em></td>
+<td>IID of the events interface of the hosted OCX.</td>
+</tr>
+</tbody>
+</table>
+<p>Return value</p>
+<p>S_OK (0) or an error code.</p>
+<h1 id="ctrlid"><a name="CtrlID"></a>CtrlID</h1>
+<p>Returns the identifier of the container's window.</p>
+<pre><code>FUNCTION CtrlID () AS LONG
+</code></pre>
+<h1 id="guidfromstr"><a name="GuidFromStr"></a>GuidFromStr</h1>
+<p>Converts a string into a 16-byte (128-bit) Globally Unique Identifier (GUID)</p>
+<pre><code>FUNCTION GuidFromStr (BYVAL pwszGuidText AS WSTRING PTR = NULL) AS GUID
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszGuidText</em></td>
+<td>To be valid, the string must contain exactly 32 hexadecimal digits, delimited by hyphens and enclosed by curly braces. For example: {B09DE715-87C1-11D1-8BE3-0000F8754DA1}. If pwszGuidText is omited, <strong>GuidFromStr</strong> generates a new unique guid.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="guidtext"><a name="GuidText"></a>GuidText</h1>
+<p>Returns a 38-byte human-readable guid string from a 16-byte GUID.</p>
+<pre><code>FUNCTION GuidText (BYVAL classID AS CLSID PTR) AS STRING
+FUNCTION GuidText (BYVAL riid AS REFIID) AS STRING
+FUNCTION GuidText (BYVAL classID AS CLSID) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>classID, riid</em></td>
+<td>The 16-byte GUID.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>The GUID as a human readable string.</p>
+<h1 id="hwindow"><a name="hWindow"></a>hWindow</h1>
+<p>Returns the handle of the hosting window.</p>
+<pre><code>FUNCTION hWindow () AS HWND
+</code></pre>
+<h1 id="ocxdispobj"><a name="OcxDispObj"></a>OcxDispObj</h1>
+<p>Returns a reference to the control's default interface given the handle of the window that hosts it. This is a reference counted pointer, so you must release it calling the <strong>Release</strong> method of the interface, the <strong>IUnknown_Release</strong> macro or the <strong>AfxSaRelease</strong> function.</p>
+<pre><code>FUNCTION OcxDispObj () AS IDispatch PTR
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>IDispatch. A reference to the ActiveX control's default interface.</p>
+<h1 id="ocxdispptr"><a name="OcxDispPtr"></a>OcxDispPtr</h1>
+<p>Returns a reference to the control's default interface given the handle of the window that hosts it. This is not a reference counted pointer, so you must not release it.</p>
+<pre><code>FUNCTION OcxDispPtr () AS IDispatch PTR
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>IDispatch. A reference to the ActiveX control's default interface.</p>
+<h1 id="olecreatefont"><a name="OleCreateFont"></a>OleCreateFont</h1>
+<p>Creates a standard <strong>IFont</strong> object.</p>
+<pre><code>FUNCTION OleCreateFont (BYREF wszFaceName AS WSTRING, BYVAL cySize AS LONG, _
+   BYVAL fWeight AS LONG = FW_NORMAL, BYVAL fItalic AS UBYTE = FALSE, _
+   BYVAL fUnderline AS UBYTE = FALSE, BYVAL fStrikeOut AS UBYTE = FALSE, _
+   BYVAL fCharSet AS UBYTE = DEFAULT_CHARSET) AS IFont PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFaceName</em></td>
+<td>A string that specifies the typeface name of the font. The length of this string must not exceed 31 characters. The <strong>EnumFontFamilies</strong> function can be used to enumerate the typeface names of all currently available fonts. If <em>wszFaceName</em> is an empty string, GDI uses the first font that matches the other specified attributes.</td>
+</tr>
+<tr class="even">
+<td><em>cySize</em></td>
+<td>Specifies the height, in logical units, of the font's character cell or character.</td>
+</tr>
+<tr class="odd">
+<td><em>fWeight</em></td>
+<td>Initial weight of the font. If the weight is below 550 (the average of FW_NORMAL, 400, and FW_BOLD, 700), then the Bold property is also initialized to FALSE. If the weight is above 550, the Bold property is set to TRUE.<br>The following values are defined for convenience: FW_DONTCARE (0), FW_THIN (100), FW_EXTRALIGHT (200), FW_ULTRALIGHT (200), FW_LIGHT (300), FW_NORMAL (400), FW_REGULAR (400), FW_MEDIUM (500), FW_SEMIBOLD (600), FW_DEMIBOLD (600), FW_BOLD (700), FW_EXTRABOLD (800), FW_ULTRABOLD (800), FW_HEAVY (900), FW_BLACK (900)</td>
+</tr>
+<tr class="even">
+<td><em>fItalic</em></td>
+<td>Specifies an italic font if set to TRUE.</td>
+</tr>
+<tr class="odd">
+<td><em>fUnderline</em></td>
+<td>Specifies an underlined font if set to TRUE.</td>
+</tr>
+<tr class="even">
+<td><em>fStrikeOut</em></td>
+<td>Specifies a strikeout font if set to TRUE.</td>
+</tr>
+<tr class="odd">
+<td><em>fCharSet</em></td>
+<td>Specifies the character set. The following values are predefined:<br>ANSI_CHARSET, BALTIC_CHARSET, CHINESEBIG5_CHARSET, DEFAULT_CHARSET, EASTEUROPE_CHARSET, GB2312_CHARSET, GREEK_CHARSET, HANGUL_CHARSET, MAC_CHARSET, OEM_CHARSET, RUSSIAN_CHARSET, SHIFTJIS_CHARSET, SYMBOL_CHARSET, TURKISH_CHARSET.<br>Korean Windows: JOHAB_CHARSET<br>Middle-Eastern Windows: HEBREW_CHARSET, ARABIC_CHARSET.<br>Thai Windows: THAI_CHARSET.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>A pointer to the object indicates success. NULL indicates failure.</p>
+<h4 id="usage-examples">Usage examples</h4>
+<pre><code>DIM pFont AS IFont = CAxHost.CreateFont(&quot;MS Sans Serif&quot;, 8, FW_NORMAL, , , , DEFAULT_CHARSET)
+DIM pFont AS IFont = CAxHost.CreateFont(&quot;Courier New&quot;, 10, FW_BOLD, , , , DEFAULT_CHARSET)
+DIM pFont AS IFont = CAxHost.CreateFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
+</code></pre>
+<h1 id="olecreatefontdisp"><a name="OleCreateFontDisp"></a>OleCreateFontDisp</h1>
+<p>Creates a standard <strong>IFontDisp</strong> object.</p>
+<pre><code>FUNCTION OleCreateFontDisp (BYREF wszFaceName AS WSTRING, BYVAL cySize AS LONG, _
+   BYVAL fWeight AS LONG = FW_NORMAL, BYVAL fItalic AS UBYTE = FALSE, _
+   BYVAL fUnderline AS UBYTE = FALSE, BYVAL fStrikeOut AS UBYTE = FALSE, _
+   BYVAL fCharSet AS UBYTE = DEFAULT_CHARSET) AS IFont PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFaceName</em></td>
+<td>A string that specifies the typeface name of the font. The length of this string must not exceed 31 characters. The <strong>EnumFontFamilies</strong> function can be used to enumerate the typeface names of all currently available fonts. If <em>wszFaceName</em> is an empty string, GDI uses the first font that matches the other specified attributes.</td>
+</tr>
+<tr class="even">
+<td><em>cySize</em></td>
+<td>Specifies the height, in logical units, of the font's character cell or character.</td>
+</tr>
+<tr class="odd">
+<td><em>fWeight</em></td>
+<td>Initial weight of the font. If the weight is below 550 (the average of FW_NORMAL, 400, and FW_BOLD, 700), then the Bold property is also initialized to FALSE. If the weight is above 550, the Bold property is set to TRUE.<br>The following values are defined for convenience: FW_DONTCARE (0), FW_THIN (100), FW_EXTRALIGHT (200), FW_ULTRALIGHT (200), FW_LIGHT (300), FW_NORMAL (400), FW_REGULAR (400), FW_MEDIUM (500), FW_SEMIBOLD (600), FW_DEMIBOLD (600), FW_BOLD (700), FW_EXTRABOLD (800), FW_ULTRABOLD (800), FW_HEAVY (900), FW_BLACK (900)</td>
+</tr>
+<tr class="even">
+<td><em>fItalic</em></td>
+<td>Specifies an italic font if set to TRUE.</td>
+</tr>
+<tr class="odd">
+<td><em>fUnderline</em></td>
+<td>Specifies an underlined font if set to TRUE.</td>
+</tr>
+<tr class="even">
+<td><em>fStrikeOut</em></td>
+<td>Specifies a strikeout font if set to TRUE.</td>
+</tr>
+<tr class="odd">
+<td><em>fCharSet</em></td>
+<td>Specifies the character set. The following values are predefined:<br>ANSI_CHARSET, BALTIC_CHARSET, CHINESEBIG5_CHARSET, DEFAULT_CHARSET, EASTEUROPE_CHARSET, GB2312_CHARSET, GREEK_CHARSET, HANGUL_CHARSET, MAC_CHARSET, OEM_CHARSET, RUSSIAN_CHARSET, SHIFTJIS_CHARSET, SYMBOL_CHARSET, TURKISH_CHARSET.<br>Korean Windows: JOHAB_CHARSET<br>Middle-Eastern Windows: HEBREW_CHARSET, ARABIC_CHARSET.<br>Thai Windows: THAI_CHARSET.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>A pointer to the object indicates success. NULL indicates failure.</p>
+<h4 id="usage-examples-1">Usage examples</h4>
+<pre><code>DIM pFontDisp AS IFontDisp = CAxHost.CreateFontDisp(&quot;MS Sans Serif&quot;, 8, FW_NORMAL, , , , DEFAULT_CHARSET)
+DIM pFontDisp AS IFontDisp = CAxHost.CreateFontDisp(&quot;Courier New&quot;, 10, FW_BOLD, , , , DEFAULT_CHARSET)
+DIM pFontDisp AS IFontDisp = CAxHost.CreateFontDisp(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
+</code></pre>
+<h1 id="unadvise"><a name="Unadvise"></a>Unadvise</h1>
+<p>Terminates an advisory connection previously established by the <strong>Advise</strong> method between a connection point object and a client's sink.</p>
+<pre><code>FUNCTION Unadvise () AS HRESULT
+</code></pre>
+<h4 id="retgurn-value">Retgurn value</h4>
+<p>S_OK (0) or an error code.</p>
+<h1 id="afxcaxhostdispobj"><a name="AfxCAxHostDispObj"></a>AfxCAxHostDispObj</h1>
+<p>Returns a reference to the control's default interface given the handle of the window that hosts it. This is a reference counted pointer, so you must release it calling the <strong>Release</strong> method of the interface, the <strong>IUnknown_Release</strong> macro or the <strong>AfxSafeRelease</strong> function.</p>
+<pre><code>FUNCTION AfxCAxHostDispObj (BYVAL hwnd AS HWND) AS IDispatch PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle of the window that hosts he ActiveX control. If you don't know the value of this handle, you can get it calling the <strong>AfxCAxHostWindow</strong> function.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>IDispatch. A reference to the ActiveX control's default interface.</p>
+<h1 id="afxcaxhostdispptr"><a name="AfxCAxHostDispPtr"></a>AfxCAxHostDispPtr</h1>
+<p>Returns a reference to the OLE container class given the handle of its associated window. This is not and AddRefed pointer, so don't release it.</p>
+<pre><code>FUNCTION AfxCAxHostDispPtr (BYVAL hwnd AS HWND) AS IDispatch PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle of the window that hosts he ActiveX control. If you don't know the value of this handle, you can get it calling the <strong>AfxCAxHostWindow</strong> function.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>IDispatch. A reference to the ActiveX control's default interface.</p>
+<h1 id="afxcaxhostptr"><a name="AfxCAxHostPtr"></a>AfxCAxHostPtr</h1>
+<p>Returns a reference to the OLE container class given the handle of its associated window.</p>
+<pre><code>FUNCTION AfxCAxHostPtr (BYVAL hwnd AS HWND) AS CAxHost PTR
+FUNCTION AfxCAxHostPtr (BYVAL hwnd AS HWND, BYVAL cID AS WORD) AS CAxHost PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle of the window that hosts he ActiveX control. If you don't know the value of this handle, you can get it calling the <strong>AfxCAxHostWindow</strong> function.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>Identifier of the control, e.g. IDC_WEBBROWSER.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>A pointer to the <strong>CAxHost</strong> class or NULL.</p>
+<h1 id="afxcaxhostwindow"><a name="AfxCAxHostWindow"></a>AfxCAxHostWindow</h1>
+<p>Returns the OLE container window handle given the handle of the form, or any control in the form, and its control identifier.</p>
+<pre><code>FUNCTION AfxCAxHostWindow (BYVAL hwnd AS HWND, BYVAL cID AS WORD) AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle of the window that hosts he ActiveX control. If you don't know the value of this handle, you can get it calling the <strong>AfxCAxHostWindow</strong> function.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>Identifier of the control, e.g. IDC_WEBBROWSER.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>The handle of the window or NULL.</p>
+<h1 id="afxcaxhostforwardmessage"><a name="AfxCAxHostForwardMessage"></a>AfxCAxHostForwardMessage</h1>
+<p>Forwards the Windows messages to the OLE Container window for processing.</p>
+<pre><code>FUNCTION AfxCAxHostForwardMessage (BYVAL hctl AS HWND, BYVAL pMsg AS tagMSG PTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hctl</em></td>
+<td>Handle of the control.</td>
+</tr>
+<tr class="even">
+<td><em>pMsg</em></td>
+<td>A pointer to a <strong>MSG</strong> structure that contains information about a message</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>TRUE if the message was processed, FALSE if not.</p>
+<h4 id="remarks">Remarks</h4>
+<p>Active in-place objects must always be given the first chance at translating accelerator keystrokes. You can provide this opportunity by calling <strong>IOleInPlaceActiveObject.TranslateAccelerator</strong> from your container's message loop before doing any other translation. You should apply your own translation only when this method returns FALSE.</p>
+<h4 id="usage-example">Usage example</h4>
+<pre><code>' // Dispatch Windows messages
+DIM uMsg AS MSG
+WHILE (GetMessageW(@uMsg, NULL, 0, 0) &lt;&gt; FALSE)
+   IF AfxForwardMessage(GetFocus, @uMsg) = FALSE THEN
+      IF IsDialogMessageW(hWndMain, @uMsg) = 0 THEN
+         TranslateMessage(@uMsg)
+         DispatchMessageW(@uMsg)
+      END IF
+   END IF
+WEND
+</code></pre>
+<h1 id="embedding-the-webbrowser-control"><a name="Example1"></a>Embedding the WebBrowser control</h1>
+<p>The following example embeds an instance of the WebBrowser control and navigates to a site:</p>
+<pre><code>' ########################################################################################
+' Microsoft Windows
+' Compiler: FreeBasic 32 &amp; 64 bit
+' Copyright (c) 2017 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#include once &quot;Afx/CAxHost/CAxHost.inc&quot;
+USING Afx
+
+CONST IDC_WEBBROWSER = 1000
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recommended way is to use a manifest file
+   AfxSetProcessDPIAware
+
+   ' // Creates the main window
+   DIM pWindow AS CWindow
+   ' -or- DIM pWindow AS CWindow = &quot;MyClassName&quot; (use the name that you wish)
+   DIM hwndMain AS HWND = pWindow.Create(NULL, &quot;CAxHost test&quot;, @WndProc)
+   ' // Sizes it by setting the wanted width and height of its client area
+   pWindow.SetClientSize(900, 450)
+   ' // Centers the window
+   pWindow.Center
+
+   ' // Create an instance of the WebBrowser control
+   DIM pHost AS CAxHost = CAxHost(@pWindow, IDC_WEBBROWSER, &quot;Shell.Explorer&quot;, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
+   ' // Get a direct pointer to the Afx_IWebBrowser2 interface
+   DIM hWb AS HWND = GetDlgItem(pWindow.hWindow, IDC_WEBBROWSER)
+   DIM pWb AS Afx_IWebBrowser2 PTR = CAST(ANY PTR, AfxCAxHostDispPtr(hWb))
+   IF pWb THEN
+      ' // Navigate to a web page
+      DIM wszUrl AS WSTRING * 260 = &quot;http://www.planetsquires.com/protect/forum/index.php&quot;
+      DIM vUrl AS VARIANT : vUrl.vt = VT_BSTR : vUrl.bstrVal = SysAllocString(wszUrl)
+      DIM hr AS HRESULT = pWb-&gt;Navigate2(@vUrl, NULL, NULL, NULL, NULL)
+      VariantClear @vurl
+   END IF
+
+   ' // Display the window
+   ShowWindow(hWndMain, nCmdShow)
+   UpdateWindow(hWndMain)
+
+   ' // Dispatch Windows messages
+   DIM uMsg AS MSG
+   WHILE (GetMessageW(@uMsg, NULL, 0, 0) &lt;&gt; FALSE)
+      IF AfxCAxHostForwardMessage(GetFocus, @uMsg) = FALSE THEN
+         IF IsDialogMessageW(hWndMain, @uMsg) = 0 THEN
+            TranslateMessage(@uMsg)
+            DispatchMessageW(@uMsg)
+         END IF
+      END IF
+   WEND
+   FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Optional resizing code
+         IF wParam &lt;&gt; SIZE_MINIMIZED THEN
+            ' // Retrieve a pointer to the CWindow class
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            ' // Move the position of the control
+            IF pWindow THEN pWindow-&gt;MoveWindow GetDlgItem(hwnd, IDC_WEBBROWSER), 0, 0, pWindow-&gt;ClientWidth, pWindow-&gt;ClientHeight, CTRUE
+         END IF
+
+        CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+</code></pre>
+<h1 id="google-map"><a name="Example2"></a>Google Map</h1>
+<p>The following example embeds an instance of the WebBrowser control and uses an script to gost Google Map:</p>
+<pre><code>' ########################################################################################
+' Microsoft Windows
+' Contents: WebBrowser - Google Map
+' Compiler: FreeBasic 32 &amp; 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define _CAXH_DEBUG_ 1
+#include once &quot;Afx/CAxHost/CAxHost.inc&quot;
+USING Afx
+
+CONST IDC_WEBBROWSER = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Build the script
+' Added &quot;.infomsg {display:none;}&quot; to the style to avoid this message:
+' &quot;You are using a browser that is not supported by the Google Maps JavaScript API.
+' Consider changing your browser&quot;.
+' ========================================================================================
+FUNCTION BuildScript () AS STRING
+   DIM s AS STRING
+   s  = &quot;&lt;!DOCTYPE html&gt;&quot;
+   s += &quot;&lt;html&gt;&quot;
+   s += &quot;   &lt;head&gt;&quot;
+   s += &quot;      &lt;meta http-equiv='X-UA-Compatible' content='IE=edge'&gt;&quot;
+   s += &quot;      &lt;meta http-equiv='MSThemeCompatible' content='yes'&gt;&quot;
+   s += &quot;      &lt;style&gt;&quot;
+   s += &quot;         .infomsg {display:none;}&quot;
+   s += &quot;         html, body, #map-canvas&quot;
+   s += &quot;         {&quot;
+   s += &quot;            height: 100%;&quot;
+   s += &quot;            margin: 0px;&quot;
+   s += &quot;            padding: 0px&quot;
+   s += &quot;         }&quot;
+   s += &quot;      &lt;/style&gt;&quot;
+   s += &quot;      &lt;script src='https://maps.googleapis.com/maps/api/js?v=3'&gt;&lt;/script&gt;&quot;
+   s += &quot;      &lt;script&gt;&quot;
+   s += &quot;         var globalLatLng = '';&quot;
+   s += &quot;         function initialize()&quot;
+   s += &quot;         {&quot;
+   s += &quot;            var mapOptions =&quot;
+   s += &quot;            {&quot;
+   s += &quot;               zoom: 8,&quot;
+   s += &quot;               center: new google.maps.LatLng(51.5, -0.2),&quot;
+   s += &quot;               mapTypeId: google.maps.MapTypeId.ROADMAP&quot;
+   s += &quot;            };&quot;
+   s += &quot;            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);&quot;
+   s += &quot;         }&quot;
+   s += &quot;         google.maps.event.addDomListener(window, 'load', initialize);&quot;
+   s += &quot;      &lt;/script&gt;&quot;
+   s += &quot;   &lt;/head&gt;&quot;
+   s += &quot;   &lt;body&gt;&quot;
+   s += &quot;      &lt;div id='map-canvas'&gt;&lt;/div&gt;&quot;
+   s += &quot;   &lt;/body&gt;&quot;
+   s += &quot;&lt;/html&gt;&quot;
+   FUNCTION = s
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recommended way is to use a manifest file
+   AfxSetProcessDPIAware
+
+   ' // Creates the main window
+   DIM pWindow AS CWindow
+   ' -or- DIM pWindow AS CWindow = &quot;MyClassName&quot; (use the name that you wish)
+   DIM hwndMain AS HWND = pWindow.Create(NULL, &quot;WebBrowser - Google Map&quot;, @WndProc)
+   ' // Sizes it by setting the wanted width and height of its client area
+   pWindow.SetClientSize(750, 450)
+   ' // Centers the window
+   pWindow.Center
+
+   ' // Create an instance of the WebBrowser control
+   DIM pHost AS CAxHost = CAxHost(@pWindow, IDC_WEBBROWSER, &quot;Shell.Explorer&quot;, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
+   ' // Get a direct pointer to the Afx_IWebBrowser2 interface
+   DIM hWb AS HWND = GetDlgItem(pWindow.hWindow, IDC_WEBBROWSER)
+   DIM pWb AS Afx_IWebBrowser2 PTR = CAST(ANY PTR, AfxCAxHostDispPtr(hWb))
+   IF pWb THEN
+      ' // Build the script
+      DIM s AS STRING = BuildScript
+      ' // Save the script as a temporary file
+      DIM wszPath AS WSTRING * MAX_PATH = AfxSaveTempFile(s, &quot;html&quot;)
+      ' // Navigate to a web page
+      DIM vUrl AS VARIANT : vUrl.vt = VT_BSTR : vUrl.bstrVal = SysAllocString(wszPath)
+      DIM hr AS HRESULT = pWb-&gt;Navigate2(@vUrl, NULL, NULL, NULL, NULL)
+      VariantClear @vurl
+      ' // Processes pending Windows messages to allow the page to load
+      ' // Needed if the message pump isn't running
+      AfxPumpMessages
+      ' // Kill the temporary file
+      KILL wszPath
+   END IF
+
+   ' // Displays the window and dispatches the Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Optional resizing code
+         IF wParam &lt;&gt; SIZE_MINIMIZED THEN
+            ' // Retrieve a pointer to the CWindow class
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            ' // Move the position of the control
+            IF pWindow THEN pWindow-&gt;MoveWindow GetDlgItem(hwnd, IDC_WEBBROWSER), _
+               0, 0, pWindow-&gt;ClientWidth, pWindow-&gt;ClientHeight, CTRUE
+         END IF
+
+        CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+</code></pre>
+</body>
+</html>
+

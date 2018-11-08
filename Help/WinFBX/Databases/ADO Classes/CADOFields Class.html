@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CADOFields Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cadofields-class">CADOFields Class</h1>
+<p>Contains all the <strong>Field</strong> objects of a <strong>Recordset</strong> or <strong>Record</strong> object.</p>
+<p><strong>Include file</strong>: CADOFields.inc (include CADODB.inc)</p>
+<p>A <strong>Recordset</strong> object has a <strong>Fields</strong> collection made up of <strong>Field</strong> objects. Each <strong>Field</strong> object corresponds to a column in the <strong>Recordset</strong>. You can populate the <strong>Fields</strong> collection before opening the <strong>Recordset</strong> by calling the <strong>Refresh</strong> method on the collection.</p>
+<p>See the <strong>Field</strong> object topic for a more detailed explanation of how to use <strong>Field</strong> objects.</p>
+<p>The <strong>Fields</strong> collection has an <strong>Append</strong> method, which provisionally creates and adds a Field object to the collection, and an Update method, which finalizes any additions or deletions.</p>
+<p>A <strong>Record</strong> object has two special fields that can be indexed with <strong>FieldEnum</strong> constants. One constant accesses a field containing the default stream for the <strong>Record</strong>, and the other accesses a field containing the absolute URL string for the <strong>Record</strong>.</p>
+<p>Certain providers (for example, the Microsoft OLE DB Provider for Internet Publishing) may populate the <strong>Fields</strong> collection with a subset of available fields for the <strong>Record</strong> or <strong>Recordset</strong>. Other fields will not be added to the collection until they are first referenced by name or indexed by your code.</p>
+<p>If you attempt to reference a nonexistent field by name, a new <strong>Field</strong> object will be appended to the <strong>Fields</strong> collection with a <strong>Status</strong> of <strong>adFieldPendingInsert</strong>. When you call Update, ADO will create a new field in your data source if allowed by your provider.</p>
+<h3 id="methods-and-properties">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Append">Append</a></td>
+<td>Appends an object to a collection.</td>
+</tr>
+<tr class="even">
+<td><a href="#Attach1">Attach</a></td>
+<td>Attaches a reference to a <strong>Fields</strong> object to the class.</td>
+</tr>
+<tr class="odd">
+<td><a href="#CancelUpdate">CancelUpdate</a></td>
+<td>Cancels any changes made to the <strong>Fields</strong> collection of a <strong>Record</strong> object before calling the <strong>Update</strong> method.</td>
+</tr>
+<tr class="even">
+<td><a href="#Count">Count</a></td>
+<td>Retrieves the number of objects in the <strong>Fields</strong> collection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Delete_">Delete_</a></td>
+<td>Deletes an object from the <strong>Fields</strong> collection.</td>
+</tr>
+<tr class="even">
+<td><a href="#Item">Item</a></td>
+<td>Indicates a specific member of the <strong>Fields</strong> collection, by name or ordinal number.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Refresh">Refresh</a></td>
+<td>Refreshes the contents of the <strong>Fields</strong> collection.</td>
+</tr>
+<tr class="even">
+<td><a href="#Resync">Resync</a></td>
+<td>Resynchronizes the contents of the <strong>Fields</strong> collection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Update">Update</a></td>
+<td>Saves any changes you make to the current <strong>Fields</strong> collection of a <strong>Record</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cadofield-class">CADOField Class</h1>
+<p>Represents a column of data with a common data type.</p>
+<p><strong>Include file</strong>: CADOField.inc (include CADODB.inc)</p>
+<p>Each <strong>Field</strong> object corresponds to a column in the <strong>Recordset</strong>. You use the <strong>Value</strong> property of <strong>Field</strong> objects to set or return data for the current record. Depending on the functionality the provider exposes, some collections, methods, or properties of a <strong>Field</strong> object may not be available.</p>
+<p>With the collections, methods, and properties of a <strong>Field</strong> object, you can do the following:</p>
+<ul>
+<li>Return the name of a field with the <strong>Name</strong> property.</li>
+<li>View or change the data in the field with the <strong>Value</strong> property. <strong>Value</strong> is the default property of the <strong>Field</strong> object.</li>
+<li>Return the basic characteristics of a field with the <strong>Type_</strong>, <strong>Precision</strong>, and <strong>NumericScale</strong> properties.</li>
+<li>Return the declared size of a field with the <strong>DefinedSize</strong> property.</li>
+<li>Return the actual size of the data in a given field with the <strong>ActualSize</strong> property.</li>
+<li>Determine what types of functionality are supported for a given field with the <strong>Attributes</strong> property and <strong>Properties</strong> collection.</li>
+<li>Manipulate the values of fields containing long binary or long character data with the <strong>AppendChunk</strong> and <strong>GetChunk</strong> methods.</li>
+<li>If the provider supports batch updates, resolve discrepancies in field values during batch updating with the <strong>OriginalValue</strong> and <strong>UnderlyingValue</strong> properties.</li>
+</ul>
+<p>All of the metadata properties (<strong>Name</strong>, <strong>Type_</strong>, <strong>DefinedSize</strong>, <strong>Precision</strong>, and <strong>NumericScale</strong>) are available before opening the <strong>Field</strong> object's <strong>Recordset</strong>. Setting them at that time is useful for dynamically constructing forms.</p>
+<h3 id="methods-and-properties-1">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#ActualSize">ActualSize</a></td>
+<td>Indicates the actual length of a field's value.</td>
+</tr>
+<tr class="even">
+<td><a href="#AppendChunk">AppendChunk</a></td>
+<td>Appends data to a large text or binary data <strong>Field</strong>.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Attach2">Attach</a></td>
+<td>Attaches a reference to a <strong>Field</strong> object to the class.</td>
+</tr>
+<tr class="even">
+<td><a href="#Attributes">Attributes</a></td>
+<td>Indicates one or more characteristics of a field.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DataFormat">DataFormat</a></td>
+<td>Links the current <strong>Field</strong> object to a data-bound control.</td>
+</tr>
+<tr class="even">
+<td><a href="#DefinedSize">DefinedSize</a></td>
+<td>Indicates the data capacity of a field.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetChunk">GetChunk</a></td>
+<td>Returns all, or a portion, of the contents of a large text or binary data field.</td>
+</tr>
+<tr class="even">
+<td><a href="#Name">Name</a></td>
+<td>Returns the name of the field.</td>
+</tr>
+<tr class="odd">
+<td><a href="#NumericScale">NumericScale</a></td>
+<td>Sets or returns a Byte value that indicates the number of decimal places to which numeric values will be resolved.</td>
+</tr>
+<tr class="even">
+<td><a href="#OriginalValue">OriginalValue</a></td>
+<td>Indicates the value of a field that existed in the record before any changes were made.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Precision">Precision</a></td>
+<td>Sets or returns a Byte value that indicates the maximum number of digits used to represent values.</td>
+</tr>
+<tr class="even">
+<td><a href="#Properties">Properties</a></td>
+<td>Returns a reference to the Properties collection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Status">Status</a></td>
+<td>Indicates the status of a field.</td>
+</tr>
+<tr class="even">
+<td><a href="#Type_">Type_</a></td>
+<td>Sets or returns a <strong>DataTypeEnum</strong> value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#UnderlyingValue">UnderlyingValue</a></td>
+<td>Indicates a field's current value in the database.</td>
+</tr>
+<tr class="even">
+<td><a href="#Value">Value</a></td>
+<td>Sets or returns a Variant value that indicates the value of the object</td>
+</tr>
+</tbody>
+</table>
+<h1 id="append-(cadofields)"><a name="Append"></a>Append (CADOFields)</h1>
+<p>Appends an object to a collection. A new <strong>Field</strong> object may be created before it is appended to the collection.</p>
+<pre><code>FUNCTION Append (BYREF cbsName AS CBSTR, BYVAL nType AS DataTypeEnum, _
+   BYVAL DefinedSize AS ADO_LONGPTR = 0, BYVAL Attrib AS FieldAttributeEnum = 0, _
+   BYREF cvFieldValue AS CVAR = TYPE&lt;VARIANT&gt;(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND)) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsName</em></td>
+<td>An string value that contains the name of the new <strong>Field</strong> object, and must not be the same name as any other object in fields.</td>
+</tr>
+<tr class="even">
+<td><em>nType</em></td>
+<td>A <strong>DataTypeEnum</strong> value, whose default value is <strong>adEmpty</strong>, that specifies the data type of the new field. The following data types are not supported by ADO, and should not be used when appending new fields to a Recordset: <strong>adIDispatch</strong>, <strong>adIUnknown</strong>, <strong>adVariant</strong>.</td>
+</tr>
+<tr class="odd">
+<td><em>DefinedSize</em></td>
+<td>Optional. An ADO_LONGPTR value that represents the defined size, in characters or bytes, of the new field. The default value for this parameter is derived from Type. Fields with a <strong>DefinedSize</strong> greater than 255 bytes, and treated as variable length columns. (The default <strong>DefinedSize</strong> is unspecified.)</td>
+</tr>
+<tr class="even">
+<td><em>Attrib</em></td>
+<td>Optional. A <strong>FieldAttributeEnum</strong> value, whose default value is <strong>adFldDefault</strong>, that specifies attributes for the new field. If this value is not specified, the field will contain attributes derived from <strong>Type_</strong>.</td>
+</tr>
+<tr class="odd">
+<td><em>FieldValue</em></td>
+<td>Optional. A Vaiant that represents the value for the new field. If not specified, then the field is appended with a null value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>S_OK (0) or an HESULT code.</p>
+<h4 id="datatypeenum">DataTypeEnum</h4>
+<p>Specifies the data type of a <strong>Field</strong>, <strong>Parameter</strong>, or <strong>Property</strong>. The corresponding OLE DB type indicator is shown in parentheses in the description column of the following table.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>AdArray</strong></td>
+<td>A flag value, always combined with another data type constant, that indicates an array of that other data type. (Does not apply to ADOX.)</td>
+</tr>
+<tr class="even">
+<td><strong>adBigInt</strong></td>
+<td>Indicates an eight-byte signed integer (DBTYPE_I8).</td>
+</tr>
+<tr class="odd">
+<td><strong>adBinary</strong></td>
+<td>Indicates a binary value (DBTYPE_BYTES).</td>
+</tr>
+<tr class="even">
+<td><strong>adBoolean</strong></td>
+<td>Indicates a boolean value (DBTYPE_BOOL).</td>
+</tr>
+<tr class="odd">
+<td><strong>adBSTR</strong></td>
+<td>Indicates a null-terminated character string (Unicode) (DBTYPE_BSTR).</td>
+</tr>
+<tr class="even">
+<td><strong>adChapter</strong></td>
+<td>Indicates a four-byte chapter value that identifies rows in a child rowset (DBTYPE_HCHAPTER).</td>
+</tr>
+<tr class="odd">
+<td><strong>adChar</strong></td>
+<td>Indicates a string value (DBTYPE_STR).</td>
+</tr>
+<tr class="even">
+<td><strong>adCurrency</strong></td>
+<td>Indicates a currency value (DBTYPE_CY). Currency is a fixed-point number with four digits to the right of the decimal point. It is stored in an eight-byte signed integer scaled by 10,000.</td>
+</tr>
+<tr class="odd">
+<td><strong>adDate</strong></td>
+<td>Indicates a date value (DBTYPE_DATE). A date is stored as a double, the whole part of which is the number of days since December 30, 1899, and the fractional part of which is the fraction of a day.</td>
+</tr>
+<tr class="even">
+<td><strong>adDBDate</strong></td>
+<td>Indicates a date value (yyyymmdd) (DBTYPE_DBDATE).</td>
+</tr>
+<tr class="odd">
+<td><strong>adDBTime</strong></td>
+<td>Indicates a time value (hhmmss) (DBTYPE_DBTIME).</td>
+</tr>
+<tr class="even">
+<td><strong>adDBTimeStamp</strong></td>
+<td>Indicates a date/time stamp (yyyymmddhhmmss plus a fraction in billionths) (DBTYPE_DBTIMESTAMP).</td>
+</tr>
+<tr class="odd">
+<td><strong>adDecimal</strong></td>
+<td>Indicates an exact numeric value with a fixed precision and scale (DBTYPE_DECIMAL).</td>
+</tr>
+<tr class="even">
+<td><strong>adDouble</strong></td>
+<td>Indicates a double-precision floating-point value (DBTYPE_R8).</td>
+</tr>
+<tr class="odd">
+<td><strong>adEmpty</strong></td>
+<td>Specifies no value (DBTYPE_EMPTY).</td>
+</tr>
+<tr class="even">
+<td><strong>adError</strong></td>
+<td>Indicates a 32-bit error code (DBTYPE_ERROR).</td>
+</tr>
+<tr class="odd">
+<td><strong>adFileTime</strong></td>
+<td>Indicates a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (DBTYPE_FILETIME).</td>
+</tr>
+<tr class="even">
+<td><strong>adGUID</strong></td>
+<td>Indicates a globally unique identifier (GUID) (DBTYPE_GUID).</td>
+</tr>
+<tr class="odd">
+<td><strong>adIDispatch</strong></td>
+<td>Indicates a pointer to an IDispatch interface on a COM object (DBTYPE_IDISPATCH). Note: This data type is currently not supported by ADO. Usage may cause unpredictable results.</td>
+</tr>
+<tr class="even">
+<td><strong>adInteger</strong></td>
+<td>Indicates a four-byte signed integer (DBTYPE_I4).</td>
+</tr>
+<tr class="odd">
+<td><strong>adIUnknown</strong></td>
+<td>Indicates a pointer to an IUnknown interface on a COM object (DBTYPE_IUNKNOWN). Note: This data type is currently not supported by ADO. Usage may cause unpredictable results.</td>
+</tr>
+<tr class="even">
+<td><strong>adLongVarBinary</strong></td>
+<td>Indicates a long binary value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adLongVarChar</strong></td>
+<td>Indicates a long string value.</td>
+</tr>
+<tr class="even">
+<td><strong>adLongVarWChar</strong></td>
+<td>Indicates a long null-terminated Unicode string value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adNumeric</strong></td>
+<td>Indicates an exact numeric value with a fixed precision and scale (DBTYPE_NUMERIC).</td>
+</tr>
+<tr class="even">
+<td><strong>adPropVariant</strong></td>
+<td>Indicates an Automation PROPVARIANT (DBTYPE_PROP_VARIANT).</td>
+</tr>
+<tr class="odd">
+<td><strong>adSingle</strong></td>
+<td>Indicates a single-precision floating-point value (DBTYPE_R4).</td>
+</tr>
+<tr class="even">
+<td><strong>adSmallInt</strong></td>
+<td>Indicates a two-byte signed integer (DBTYPE_I2).</td>
+</tr>
+<tr class="odd">
+<td><strong>adTinyInt</strong></td>
+<td>Indicates a one-byte signed integer (DBTYPE_I1).</td>
+</tr>
+<tr class="even">
+<td><strong>adUnsignedBigInt</strong></td>
+<td>Indicates an eight-byte unsigned integer (DBTYPE_UI8).</td>
+</tr>
+<tr class="odd">
+<td><strong>adUnsignedInt</strong></td>
+<td>Indicates a four-byte unsigned integer (DBTYPE_UI4).</td>
+</tr>
+<tr class="even">
+<td><strong>adUnsignedSmallInt</strong></td>
+<td>Indicates a two-byte unsigned integer (DBTYPE_UI2).</td>
+</tr>
+<tr class="odd">
+<td><strong>adUnsignedTinyInt</strong></td>
+<td>Indicates a one-byte unsigned integer (DBTYPE_UI1).</td>
+</tr>
+<tr class="even">
+<td><strong>adVarBinary</strong></td>
+<td>Indicates a binary value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adVarChar</strong></td>
+<td>Indicates a string value.</td>
+</tr>
+<tr class="even">
+<td><strong>adVariant</strong></td>
+<td>Indicates an Automation Variant (DBTYPE_VARIANT). Note: This data type is currently not supported by ADO. Usage may cause unpredictable results.</td>
+</tr>
+<tr class="odd">
+<td><strong>adVarNumeric</strong></td>
+<td>Indicates a numeric value.</td>
+</tr>
+<tr class="even">
+<td><strong>adVarWChar</strong></td>
+<td>Indicates a null-terminated Unicode character string.</td>
+</tr>
+<tr class="odd">
+<td><strong>adWChar</strong></td>
+<td>Indicates a null-terminated Unicode character string (DBTYPE_WSTR).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>The <strong>FieldValue</strong> parameter is only valid when adding a <strong>Field</strong> object to a <strong>Record</strong> object, not to a <strong>Recordset</strong> object. With a <strong>Record</strong> object, you may append fields and provide values at the same time. With a <strong>Recordset</strong> object, you must create fields while the <strong>Recordset</strong> is closed, then open the <strong>Recordset</strong> and assign values to the fields.</p>
+<p><strong>Notes</strong>: For new <strong>Field</strong> objects that have been appended to the <strong>Fields</strong> collection of a <strong>Record</strong> object, the Value property must be set before any other <strong>Field</strong> properties can be specified. First, a specific value for the <strong>Value</strong> property must have been assigned and <strong>Update</strong> on the <strong>Fields</strong> collection called. Then, other properties such as Type or <strong>Attributes</strong> can be accessed.</p>
+<p><strong>Field</strong> objects of the following data types (<strong>DataTypeEnum</strong>) cannot be appended to the <strong>Fields</strong> collection and will cause an error to occur: <strong>adArray</strong>, <strong>adChapter</strong>, <strong>adEmpty</strong>, <strong>adPropVariant</strong>, and <strong>adUserDefined</strong>. Also, the following data types are not supported by ADO: <strong>adIDispatch</strong>, <strong>adIUnknown</strong>, and <strong>adIVariant</strong>. For these types, no error will occur when appended, but usage can produce unpredictable results including memory leaks.</p>
+<h1 id="attach-(cadofields)"><a name="Attach1"></a>Attach (CADOFields)</h1>
+<p>Attaches a reference to an ADO <strong>Fields</strong> object to the class.</p>
+<pre><code>SUB Attach (BYVAL pFields AS Afx_ADOFields PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pFields</em></td>
+<td>A reference to an ADO <strong>Fields</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>fAddRef</em></td>
+<td>TRUE = increase the reference count; FALSE = don't increase the reference count.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cancelupdate-(cadofields)"><a name="CancelUpdate"></a>CancelUpdate (CADOFields)</h1>
+<p>Cancels any changes made to the <strong>Fields</strong> collection of a <strong>Record</strong> object before calling the <strong>Update</strong> method.</p>
+<pre><code>FUNCTION CancelUpdate () AS HRESULT
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>The <strong>CancelUpdate</strong> method cancels any pending insertions or deletions of Field objects, and cancels pending updates of existing fields and restores them to their original values. The <strong>Status</strong> property of all fields in the Fields collection is set to <strong>adFieldOK</strong>.</p>
+<h1 id="count-(cadofields)"><a name="Count"></a>Count (CADOFields)</h1>
+<p>Retrieves the number of objects in the <strong>Fields</strong> collection.</p>
+<pre><code>PROPERTY Count () AS LONG
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>The number of objects in the <strong>Fields</strong> collection.</p>
+<h4 id="remarks-2">Remarks</h4>
+<p>Because numbering for members of a collection begins with zero, you should always code loops starting with the zero member and ending with the value of the <strong>Count</strong> property minus 1.</p>
+<p>If the <strong>Count</strong> property is zero, there are no objects in the collection.</p>
+<h1 id="delete_-(cadofields)"><a name="CoDelete_unt"></a>Delete_ (CADOFields)</h1>
+<p>Deletes an object from the <strong>Fields</strong> collection.</p>
+<pre><code>FUNCTION Delete_ (BYREF cvIndex AS CVAR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cvIndex</em></td>
+<td>A Variant that designates the <strong>Field</strong> object to delete. This parameter can be the name of the <strong>Field</strong> object or the ordinal position of the <strong>Field</strong> object itself.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>Calling the <strong>Delete_</strong> method on an open <strong>Recordset</strong> causes a run-time error.</p>
+<h1 id="item-(cadofields)"><a name="Item"></a>Item (CADOFields)</h1>
+<p>Indicates a specific member of the <strong>Fields</strong> collection, by name or ordinal number.</p>
+<pre><code>PROPERTY Item (BYREF cvIndex AS CVAR) AS Afx_ADOField PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cvIndex</em></td>
+<td>A Variant expression that evaluates either to the name or to the ordinal number of an object in a collection.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>An ADO <strong>Fields</strong> object reference.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>If <strong>Item</strong> cannot find an object in the collection corresponding to the <em>Index</em> argument, an error occurs.</p>
+<h1 id="refresh-(cadofields)"><a name="Refresh"></a>Refresh (CADOFields)</h1>
+<p>Refreshes the contents of the <strong>Fields</strong> collection.</p>
+<pre><code>FUNCTION Refresh () AS HRESULT
+</code></pre>
+<h4 id="return-value-5">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>Using the <strong>Refresh</strong> method on the <strong>Fields</strong> collection has no visible effect. To retrieve changes from the underlying database structure, you must use either the <strong>Requery</strong> method or, if the <strong>Recordset</strong> object does not support bookmarks, the <strong>MoveFirst</strong> method.</p>
+<h1 id="resync-(cadofields)"><a name="Resync"></a>Resync (CADOFields)</h1>
+<p>Resynchronizes the contents of the <strong>Fields</strong> collection.</p>
+<pre><code>FUNCTION Resync (BYVAL ResyncValues AS ResyncEnum = adResyncAllValues) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ResyncValues</em></td>
+<td>Optional. A <strong>ResyncEnum</strong> value that specifies whether underlying values are overwritten. The default value is <strong>adResyncAllValues</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="resyncenum">ResyncEnum</h4>
+<p>Specifies whether underlying values are overwritten by a call to <strong>Resync</strong>.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adResyncAllValues</strong></td>
+<td>Default. Overwrites data, and pending updates are canceled.</td>
+</tr>
+<tr class="even">
+<td><strong>adResyncUnderlyingValues</strong></td>
+<td>Does not overwrite data, and pending updates are not canceled.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-6">Remarks</h4>
+<p>Use the <strong>Resync</strong> method to resynchronize the values of the <strong>Fields</strong> collection of a <strong>Record</strong> object with the underlying data source. The <strong>Count</strong> property is not affected by this method.</p>
+<p>If <strong>ResyncValues</strong> is set to <strong>adResyncAllValues</strong> (the default value), then the <strong>UnderlyingValue</strong>, <strong>Value</strong>, and <strong>OriginalValue</strong> properties of <strong>Field</strong> objects in the collection are synchronized. If <strong>ResyncValues</strong> is set to <strong>adResyncUnderlyingValues</strong>, only the <strong>UnderlyingValue</strong> property is synchronized.</p>
+<p>The value of the <strong>Status</strong> property for each <strong>Field</strong> object at the time of the call also affects the behavior of <strong>Resync</strong>. For <strong>Field</strong> objects with <strong>Status</strong> values of <strong>adFieldPendingUnknown</strong> or <strong>adFieldPendingInsert</strong>, <strong>Resync</strong> has no effect. For <strong>Status</strong> values of <strong>adFieldPendingChange</strong> or <strong>adFieldPendingDelete</strong>, <strong>Resync</strong> synchronizes data values for fields that still exist at the data source.</p>
+<p><strong>Resync</strong> will not modify <strong>Status</strong> values of <strong>Field</strong> objects unless an error occurs when <strong>Resync</strong> is called. For example, if the field no longer exists, the provider will return an appropriate Status value for the <strong>Field</strong> object, such as <strong>adFieldDoesNotExist</strong>. Returned <strong>Status</strong> values may be logically combined within the value of the <strong>Status</strong> property.</p>
+<h1 id="update-(cadofields)"><a name="Update"></a>Update (CADOFields)</h1>
+<p>Saves any changes you make to the current <strong>Fields</strong> collection of a <strong>Record</strong> object.</p>
+<pre><code>FUNCTION Update () AS HRESULT
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>S_OK or an HRESULT code.</p>
+<h4 id="remarks-7">Remarks</h4>
+<p>The <strong>Update</strong> method finalizes additions, deletions, and updates to fields in the <strong>Fields</strong> collection of a <strong>Record</strong> object.</p>
+<p>For example, fields deleted with the <strong>Delete_</strong> method are marked for deletion immediately but remain in the collection. The <strong>Update</strong> method must be called to actually delete these fields from the provider's collection.</p>
+<h1 id="actualsize-(cadofield)"><a name="ActualSize"></a>ActualSize (CADOField)</h1>
+<p>Indicates the actual length of a field's value. Some providers may allow this property to be set to reserve space for BLOB data, in which case the default value is 0.</p>
+<pre><code>PROPERTY ActualSize () AS ADO_LONGPTR
+</code></pre>
+<h4 id="return-value-8">Return value</h4>
+<p>The actual length of the field's value.</p>
+<h4 id="remarks-8">Remarks</h4>
+<p>Use the <strong>ActualSize</strong> property to return the actual length of a field value. For all fields, the <strong>ActualSize</strong> property is read-only. If ADO cannot determine the length of the field value, the <strong>ActualSize</strong> property returns <strong>adUnknown</strong>.</p>
+<p>The <strong>ActualSize</strong> and <strong>DefinedSize</strong> properties are different. A field with a declared type of <strong>adVarChar</strong> and a maximum length of 50 characters returns a <strong>DefinedSize</strong> property value of 50, but the <strong>ActualSize</strong> property value it returns is the length of the data stored in the field for the current record. <strong>Fields</strong> with a <strong>DefinedSize</strong> greater than 255 bytes are treated as variable length columns.</p>
+<h4 id="example">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Set the cursor location
+DIM pRecordset AS CAdoRecordset
+pRecordset.CursorLocation = adUseClient
+
+' // Open the recordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Publishers&quot;
+pRecordset.Open(cvSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Get a reference to the Fields collection
+DIM pFields AS CAdoFields = pRecordset.Fields
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the contents of the fields
+   DIM pField AS CAdoField
+   pField.Attach(pFields.Item(&quot;Name&quot;))
+   DIM cvRes AS CVAR = pField.Value
+   PRINT &quot;Name: &quot;; cvRes; &quot; - &quot;; WSTR(pField.ActualSize); &quot; - &quot;; WSTR(pField.DefinedSize)
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+</code></pre>
+<h1 id="appendchunk-(cadofield)"><a name="AppendChunk"></a>AppendChunk (CADOField)</h1>
+<p>Appends data to a large text or binary data *<em>Field</em>.</p>
+<pre><code>FUNCTION AppendChunk (BYREF cvData AS CVAR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cvData</em></td>
+<td>A Variant that contains the data to append to the object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-9">Remarks</h4>
+<p>Use the <strong>AppendChunk</strong> method on a Field object to fill it with long binary or character data. In situations where system memory is limited, you can use the <strong>AppendChunk</strong> method to manipulate long values in portions rather than in their entirety.</p>
+<p>If the <strong>adFldLong</strong> bit in the <strong>Attributes</strong> property of a <strong>Field</strong> object is set to true, you can use the <strong>AppendChunk</strong> method for that field.</p>
+<p>The first <strong>AppendChunk</strong> call on a <strong>Field</strong> object writes data to the field, overwriting any existing data. Subsequent <strong>AppendChunk</strong> calls add to existing data. If you are appending data to one field and then you set or read the value of another field in the current record, ADO assumes that you are finished appending data to the first field. If you call the <strong>AppendChunk</strong> method on the first field again, ADO interprets the call as a new <strong>AppendChunk</strong> operation and overwrites the existing data. Accessing fields in other <strong>Recordset</strong> objects that are not clones of the first <strong>Recordset</strong> object will not disrupt <strong>AppendChunk</strong> operations.</p>
+<p>If there is no current record when you call <strong>AppendChunk</strong> on a <strong>Field</strong> object, an error occurs.</p>
+<p><strong>Note</strong>: The <strong>AppendChunk</strong> method does not operate on Field objects of a <strong>Record</strong> object. It does not perform any operation and will produce a run-time error.</p>
+<h1 id="attach-(cadofield)"><a name="Attach2"></a>Attach (CADOField)</h1>
+<p>Attaches a reference to an ADO <strong>Field</strong> object to the class.</p>
+<pre><code>SUB Attach (BYVAL pField AS Afx_ADOField PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pField</em></td>
+<td>A reference to an ADO <strong>Field</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>fAddRef</em></td>
+<td>TRUE = increase the reference count; FALSE = don't increase the reference count.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="attributes-(cadofield)"><a name="Attributes"></a>Attributes (CADOField)</h1>
+<p>Indicates one or more characteristics of a field.</p>
+<pre><code>PROPERTY Attributes () AS LONG
+PROPERTY Attributes (BYVAL lAttr AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lAttr</em></td>
+<td>Can be the sum of one or more <strong>FieldAttributeEnum</strong> values. It is normally read-only, However, for new <strong>Field</strong> objects that have been appended to the <strong>Fields</strong> collection of a <strong>Record</strong>, <strong>Attributes</strong> is read/write only after the <strong>Value</strong> property for the <strong>Field</strong> has been specified and the new <strong>Field</strong> has been successfully added by the data provider by calling the <strong>Update</strong> method of the <strong>Fields</strong> collection.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>One or more <strong>FieldAttributeEnum</strong> values.</p>
+<h4 id="fieldattributeenum">FieldAttributeEnum</h4>
+<p>Specifies one or more attributes of a <strong>Field</strong> object.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adFldCacheDeferred</strong></td>
+<td>Indicates that the provider caches field values and that subsequent reads are done from the cache.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldFixed</strong></td>
+<td>Indicates that the field contains fixed-length data.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldIsChapter</strong></td>
+<td>Indicates that the field contains a chapter value, which specifies a specific child recordset related to this parent field. Typically chapter fields are used with data shaping or filters.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldIsCollection</strong></td>
+<td>Indicates that the field specifies that the resource represented by the record is a collection of other resources, such as a folder, rather than a simple resource, such as a text file.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldIsDefaultStream</strong></td>
+<td>Indicates that the field contains the default stream for the resource represented by the record. For example, the default stream can be the HTML content of a root folder on a Web site, which is automatically served when the root URL is specified.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldIsNullable</strong></td>
+<td>Indicates that the field accepts null values.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldIsRowURL</strong></td>
+<td>Indicates that the field contains the URL that names the resource from the data store represented by the record.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldLong</strong></td>
+<td>Indicates that the field is a long binary field. Also indicates that you can use the <strong>AppendChunk</strong> and <strong>GetChunk</strong> methods.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldMayBeNull</strong></td>
+<td>Indicates that you can read null values from the field.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldMayDefer</strong></td>
+<td>Indicates that the field is deferred—that is, the field values are not retrieved from the data source with the whole record, but only when you explicitly access them.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldNegativeScale</strong></td>
+<td>Indicates that the field represents a numeric value from a column that supports negative scale values. The scale is specified by the <strong>NumericScale</strong> property.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldRowID</strong></td>
+<td>Indicates that the field contains a persistent row identifier that cannot be written to and has no meaningful value except to identify the row (such as a record number, unique identifier, and so forth).</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldRowVersion</strong></td>
+<td>Indicates that the field contains some kind of time or date stamp used to track updates.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldUnknownUpdatable</strong></td>
+<td>Indicates that the provider cannot determine if you can write to the field.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFldUnspecified</strong></td>
+<td>Indicates that the provider does not specify the field attributes.</td>
+</tr>
+<tr class="even">
+<td><strong>adFldUpdatable</strong></td>
+<td>Indicates that you can write to the field.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-10">Remarks</h4>
+<p>When you set multiple attributes, you can sum the appropriate constants. If you set the property value to a sum including incompatible constants, an error occurs.</p>
+<h4 id="remote-data-service-usage">Remote Data Service Usage</h4>
+<p>This property is not available on a client-side <strong>Connection</strong> object.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Open the recordset
+DIM pRecordset AS CAdoRecordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Publishers ORDER BY PubID&quot;
+DIM hr AS HRESULT = pRecordset.Open(cbsSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Get a reference to the Fields collection
+DIM pFields AS CAdoFields = pRecordset.Fields
+DIM nCount AS LONG = pFields.Count
+IF nCount THEN
+   PRINT
+   PRINT &quot;Nullable fields:&quot;
+   PRINT &quot;================&quot;
+   PRINT
+   FOR i AS LONG = 0 TO nCount - 1
+      DIM pField AS CAdoField
+      pField.Attach(pFields.Item(i))
+      ' // Get the attributes of the field
+      DIM lAttr AS LONG = pField.Attributes
+      ' // Display fields that are nullable
+      IF (lAttr AND adFldIsNullable) = adFldIsNullable THEN
+         PRINT &quot;Field name: &quot;; pField.Name
+      END IF
+   NEXT
+END IF
+</code></pre>
+<h1 id="dataformat-(cadofield)"><a name="DataFormat"></a>DataFormat (CADOField)</h1>
+<p>Links the current <strong>Field</strong> object to a data-bound control.</p>
+<pre><code>PROPERTY DataFormat () AS IUnknown PTR
+PROPERTY DataFormat (BYVAL piDF AS IUnknown PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>piDF</em></td>
+<td>A reference to a <strong>StdDataFormat</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>A reference to a <strong>StdDataFormat</strong> object.</p>
+<h4 id="remarks-11">Remarks</h4>
+<p>The <strong>DataFormat</strong> property is both read- and write-enabled. It accepts and returns a <strong>StdDataFormat</strong> object that is used to attach a bound object.</p>
+<h1 id="definedsize-(cadofield)"><a name="DefinedSize"></a>DefinedSize (CADOField)</h1>
+<p>Indicates the data capacity of a field.</p>
+<pre><code>PROPERTY DefinedSize () AS LONG
+PROPERTY DefinedSize (BYVAL lSize AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lSize</em></td>
+<td>The data capacity of the field's value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>The actual length of the field's value.</p>
+<h4 id="remarks-12">Remarks</h4>
+<p>Use the <strong>DefinedSize</strong> property to determine the data capacity of a field.</p>
+<p>The <strong>DefinedSize</strong> and <strong>ActualSize</strong> properties are different. For example, consider a field with a declared type of <em>adVarChar</em> and a <strong>DefinedSize</strong> property value of 50, containing a single character. The <strong>ActualSize</strong> property value it returns is the length in bytes of the single character.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Set the cursor location
+DIM pRecordset AS CAdoRecordset
+pRecordset.CursorLocation = adUseClient
+
+' // Open the recordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Publishers&quot;
+pRecordset.Open(cvSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Get a reference to the Fields collection
+DIM pFields AS CAdoFields = pRecordset.Fields
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the contents of the fields
+   DIM pField AS CAdoField
+   pField.Attach(pFields.Item(&quot;Name&quot;))
+   DIM cvRes AS CVAR = pField.Value
+   PRINT &quot;Name: &quot;; cvRes; &quot; - &quot;; WSTR(pField.ActualSize); &quot; - &quot;; WSTR(pField.DefinedSize)
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+</code></pre>
+<h1 id="getchunk-(cadofield)"><a name="GetChunk"></a>GetChunk (CADOField)</h1>
+<p>Returns all, or a portion, of the contents of a large text or binary data field.</p>
+<pre><code>FUNCTION GetChunk (BYVAL nLen AS LONG) AS CVAR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nLen</em></td>
+<td>The number of bytes to retrieve.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>The retrieved data.</p>
+<h4 id="remarks-13">Remarks</h4>
+<p>Use the <strong>GetChunk</strong> method on a <strong>Field</strong> object to retrieve part or all of its long binary or character data. In situations where system memory is limited, you can use the <strong>GetChunk</strong> method to manipulate long values in portions, rather than in their entirety.</p>
+<p>The data that a <strong>GetChunk</strong> call returns is assigned to variable. If <strong>Size</strong> is greater than the remaining data, the <strong>GetChunk</strong> method returns only the remaining data without padding variable with empty spaces. If the field is empty, the <strong>GetChunk</strong> method returns a null value.</p>
+<p>Each subsequent <strong>GetChunk</strong> call retrieves data starting from where the previous <strong>GetChunk</strong> call left off. However, if you are retrieving data from one field and then you set or read the value of another field in the current record, ADO assumes you have finished retrieving data from the first field. If you call the <strong>GetChunk</strong> method on the first field again, ADO interprets the call as a new <strong>GetChunk</strong> operation and starts reading from the beginning of the data. Accessing fields in other <strong>Recordset</strong> objects that are not clones of the first <strong>Recordset</strong> object will not disrupt <strong>GetChunk</strong> operations.</p>
+<p>If the <strong>adFldLong</strong> bit in the <strong>Attributes</strong> property of a <strong>Field</strong> object is set to True, you can use the <strong>GetChunk</strong> method for that field.</p>
+<p>If there is no current record when you use the <strong>GetChunk</strong> method on a <strong>Field</strong> object, error 3021 (no current record) occurs.</p>
+<p><strong>Note</strong>: The <strong>GetChunk</strong> method does not operate on <strong>Field</strong> objects of a Record object. It does not perform any operation and will produce a run-time error.</p>
+<h1 id="name-(cadofield)"><a name="Name"></a>Name (CADOField)</h1>
+<p>Returns the name of the field.</p>
+<pre><code>PROPERTY Name () AS CBSTR
+</code></pre>
+<h1 id="numericscale-(cadofield)"><a name="NumericScale"></a>NumericScale (CADOField)</h1>
+<p>Sets or returns a Byte value that indicates the number of decimal places to which numeric values will be resolved.</p>
+<pre><code>PROPERTY NumericScale () AS BYTE
+PROPERTY NumericScale (BYVAL bScale AS BYTE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bScale</em></td>
+<td>The number of decimal places.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>The number of decimal places. Returns -1 if it is not a numeric field.</p>
+<h4 id="remarks-14">Remarks</h4>
+<p>Use the <strong>NumericScale</strong> property to determine how many digits to the right of the decimal point will be used to represent values for a numeric field.</p>
+<p>For a field, <strong>NumericScale</strong> is normally read-only. However, for new fields that have been appended to a <strong>Record</strong>, <strong>NumericScale</strong> is read/write only after the <strong>Value</strong> property for the field has been specified and the data provider has successfully added the new field by calling the Update method of the <strong>Fields</strong> collection.</p>
+<h1 id="originalvalue-(cadofield)"><a name="OriginalValue"></a>OriginalValue (CADOField)</h1>
+<p>Indicates the value of a field that existed in the record before any changes were made.</p>
+<pre><code>PROPERTY OriginalValue () AS CVAR
+</code></pre>
+<h4 id="return-value-15">Return value</h4>
+<p>The original field value.</p>
+<h4 id="remarks-15">Remarks</h4>
+<p>Use the <strong>OriginalValue</strong> property to return the original field value for a field from the current record.</p>
+<p>In immediate update mode (in which the provider writes changes to the underlying data source after you call the <strong>Update</strong> method), the <strong>OriginalValue</strong> property returns the field value that existed prior to any changes (that is, since the last <strong>Update</strong> method call). This is the same value that the <strong>CancelUpdate</strong> method uses to replace the Value property.</p>
+<p>In batch update mode (in which the provider caches multiple changes and writes them to the underlying data source only when you call the <strong>UpdateBatch</strong> method), the <strong>OriginalValue</strong> property returns the field value that existed prior to any changes (that is, since the last <strong>UpdateBatch</strong> method call). This is the same value that the <strong>CancelBatch</strong> method uses to replace the <strong>Value</strong> property. When you use this property with the <strong>UnderlyingValue</strong> property, you can resolve conflicts that arise from batch updates.</p>
+<h1 id="name-(cadofield)-1"><a name="Name"></a>Name (CADOField)</h1>
+<p>Returns the name of the field.</p>
+<pre><code>PROPERTY Name () AS CBSTR
+</code></pre>
+<h1 id="precision-(cadofield)"><a name="Precision"></a>Precision (CADOField)</h1>
+<p>Sets or returns a Byte value that indicates the maximum number of digits used to represent values.</p>
+<pre><code>PROPERTY Precision () AS BYTE
+PROPERTY Precision (BYVAL bPrecision AS BYTE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bPrecision</em></td>
+<td>The maximum number of digits used to represent values.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>The degress of precision. Returns -1 if it is not a numeric field.</p>
+<h4 id="remarks-16">Remarks</h4>
+<p>Use the <strong>Precision</strong> property to determine the maximum number of digits used to represent values for a numeric parameter or field.</p>
+<p>For a field, <strong>Precision</strong> is normally read-only. However, for new fields that have been appended to a <strong>Record</strong>, <strong>Precision</strong> is read/write only after the <strong>Value</strong> property for the field has been specified and the data provider has successfully added the new field by calling the <strong>Update</strong> method of the <strong>Fields</strong> collection.</p>
+<h1 id="properties-(cadofield)"><a name="Properties"></a>Properties (CADOField)</h1>
+<p>Returns a reference to the <strong>Properties</strong> collection.</p>
+<pre><code>PROPERTY Properties () AS Afx_ADOProperties
+</code></pre>
+<h4 id="return-value-17">Return value</h4>
+<p>An ADO <strong>Properties</strong> object reference.</p>
+<h1 id="status-(cadofield)"><a name="Status"></a>Status (CADOField)</h1>
+<p>Indicates the status of a field. Returns a <strong>FieldStatusEnum</strong> value.</p>
+<pre><code>PROPERTY Status () AS LONG
+</code></pre>
+<h4 id="return-value-18">Return value</h4>
+<p>A <strong>FieldStatusEnum</strong> value. The default value is adFieldOK.</p>
+<h4 id="fieldstatusenum">FieldStatusEnum</h4>
+<p>Specifies the status of a Field object.</p>
+<p>The adFieldPending* values indicate the operation that caused the status to be set, and may be combined with other status values.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adFieldAlreadyExists</strong></td>
+<td>Indicates that the specified field already exists.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldBadStatus</strong></td>
+<td>Indicates that an invalid status value was sent from ADO to the OLE DB provider. Possible causes include an OLE DB 1.0 or 1.1 provider, or an improper combination of <strong>Value</strong> and <strong>Status</strong>.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldCannotComplete</strong></td>
+<td>Indicates that the server of the URL specified by Source could not complete the operation.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldCannotDeleteSource</strong></td>
+<td>Indicates that during a move operation, a tree or subtree was moved to a new location, but the source could not be deleted.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldCantConvertValue</strong></td>
+<td>Indicates that the field cannot be retrieved or stored without loss of data.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldCantCreate</strong></td>
+<td>Indicates that the field could not be added because the provider exceeded a limitation (such as the number of fields allowed).</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldDataOverflow</strong></td>
+<td>Indicates that the data returned from the provider overflowed the data type of the field.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldDefault</strong></td>
+<td>Indicates that the default value for the field was used when setting data.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldDoesNotExist</strong></td>
+<td>Indicates that the field specified does not exist.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldIgnore</strong></td>
+<td>Indicates that this field was skipped when setting data values in the source. The provider set no value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldIntegrityViolation</strong></td>
+<td>Indicates that the field cannot be modified because it is a calculated or derived entity.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldInvalidURL</strong></td>
+<td>Indicates that the data source URL contains invalid characters.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldIsNull</strong></td>
+<td>Indicates that the provider returned a VARIANT value of type VT_NULL and that the field is not empty.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldOK</strong></td>
+<td>Default. Indicates that the field was successfully added or deleted.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldOutOfSpace</strong></td>
+<td>Indicates that the provider is unable to obtain enough storage space to complete a move or copy operation.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldPendingChange</strong></td>
+<td>Indicates either that the field has been deleted and then re-added, perhaps with a different data type, or that the value of the field which previously had a status of adFieldOK has changed. The final form of the field will modify the Fields collection after the <strong>Update</strong> method is called.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldPendingDelete</strong></td>
+<td>Indicates that the <strong>Delete_</strong> operation caused the status to be set. The field has been marked for deletion from the <strong>Fields</strong> collection after the <strong>Update</strong> method is called.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldPendingInsert</strong></td>
+<td>Indicates that the <strong>Append</strong> operation caused the status to be set. The <strong>Field</strong> has been marked to be added to the Fields collection after the <strong>Update</strong> method is called.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldPendingUnknown</strong></td>
+<td>Indicates that the provider cannot determine what operation caused field status to be set.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldPendingUnknownDelete</strong></td>
+<td>Indicates that the provider cannot determine what operation caused field status to be set, and that the field will be deleted from the <strong>Fields</strong> collection after the <strong>Update</strong> method is called.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldPermissionDenied</strong></td>
+<td>Indicates that the field cannot be modified because it is defined as read-only.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldReadOnly</strong></td>
+<td>Indicates that the field in the data source is defined as read-only.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldResourceExists</strong></td>
+<td>Indicates that the provider was unable to perform the operation because an object already exists at the destination URL and it is not able to overwrite the object.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldResourceLocked</strong></td>
+<td>Indicates that the provider was unable to perform the operation because the data source is locked by one or more other application or process.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldResourceOutOfScope</strong></td>
+<td>Indicates that a source or destination URL is outside the scope of the current record.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldSchemaViolation</strong></td>
+<td>Indicates that the value violated the data source schema constraint for the field.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldSignMismatch</strong></td>
+<td>Indicates that data value returned by the provider was signed but the data type of the ADO field value was unsigned.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldTruncated</strong></td>
+<td>Indicates that variable-length data was truncated when reading from the data source.</td>
+</tr>
+<tr class="odd">
+<td><strong>adFieldUnavailable</strong></td>
+<td>Indicates that the provider could not determine the value when reading from the data source. For example, the row was just created, the default value for the column was not available, and a new value had not yet been specified.</td>
+</tr>
+<tr class="even">
+<td><strong>adFieldVolumeNotFound</strong></td>
+<td>Indicates that the provider is unable to locate the storage volume indicated by the URL.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-17">Remarks</h4>
+<p>Changes to the value of a <strong>Field</strong> object in the <strong>Fields</strong> collection of a <strong>Record</strong> object are cached until the object's <strong>Update</strong> method is called. At that point, if the change to the <strong>Field</strong>'s value caused an error, OLE DB raises the error DB_E_ERRORSOCCURRED (2147749409). The <strong>Status</strong> property of any of the <strong>Field</strong> objects in the <strong>Fields</strong> collection that caused the error will contain a value from the <strong>FieldStatusEnum</strong> describing the cause of the problem.</p>
+<p>To enhance performance, additions and deletions to the <strong>Fields</strong> collections of the <strong>Record</strong> object are cached until the <strong>Update</strong> method is called, and then the changes are made in a batch optimistic update. If the <strong>Update</strong> method is not called, the server is not updated. If any updates fail then an OLE DB provider error (DB_E_ERRORSOCCURRED) is returned and the <strong>Status</strong> property indicates the combined values of the operation and error status code. For example, <strong>adFieldPendingInsert OR adFieldPermissionDenied</strong>. The <strong>Status</strong> property for each <strong>Field</strong> can be used to determine why the <strong>Field</strong> was not added, modified, or deleted.</p>
+<p>Many types of problems encountered when adding, modifying, or deleting a <strong>Field</strong> are reported through the <strong>Status</strong> property. For example, if the user deletes a <strong>Field</strong>, it is marked for deletion from the <strong>Fields</strong> collection. If the subsequent <strong>Update</strong> returns an error because the user tried to delete a <strong>Field</strong> for which they do not have permission, the <strong>Field</strong> will have a <strong>Status</strong> of <strong>adFieldPermissionDenied</strong> or <strong>adFieldPendingDelete</strong>. Calling the <strong>CancelUpdate</strong> method restores original values and sets the <strong>Status</strong> to <strong>adFieldOK</strong>.</p>
+<p>Similarly, the <strong>Update</strong> method may return an error because a new <strong>Field</strong> was added and given an inappropriate value. In that case the new <strong>Field</strong> will be in the <strong>Fields</strong> collection and have a status of <strong>adFieldPendingInsert</strong> and perhaps <strong>adFieldCantCreate</strong> (depending upon your provider). You can supply an appropriate value for the new <strong>Field</strong> and call <strong>Update</strong> again.</p>
+<h4 id="recordset-field-status">Recordset Field Status</h4>
+<p>Changes to the value of a <strong>Field</strong> object in the <strong>Fields</strong> collection of either a <strong>Recordset</strong> are cached until the object's <strong>Update</strong> method is called. At that point, if the change to the <strong>Field</strong>'s value caused an error, OLE DB raises the error DB_E_ERRORSOCCURRED (2147749409). The <strong>Status</strong> property of any of the <strong>Field</strong> objects in the <strong>Fields</strong> collection that caused the error will contain a value from the <strong>FieldStatusEnum</strong> describing the cause of the problem.</p>
+<h1 id="type_-(cadofield)"><a name="Type_"></a>Type_ (CADOField)</h1>
+<p>Sets or returns a <strong>DataTypeEnum</strong> value.</p>
+<pre><code>PROPERTY Type_ () AS DataTypeEnum
+PROPERTY Type_ (BYVAL nType AS DataTypeEnum)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nType</em></td>
+<td>A <strong>DataTypeEnum</strong> value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>A <strong>DataTypeEnum</strong> value.</p>
+<h4 id="datatypeenum-1">DataTypeEnum</h4>
+<p>Specifies the data type of a <strong>Field</strong>, <strong>Parameter</strong>, or <strong>Property</strong>. The corresponding OLE DB type indicator is shown in parentheses in the description column of the following table.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>AdArray</strong></td>
+<td>A flag value, always combined with another data type constant, that indicates an array of that other data type. (Does not apply to ADOX.)</td>
+</tr>
+<tr class="even">
+<td><strong>adBigInt</strong></td>
+<td>Indicates an eight-byte signed integer (DBTYPE_I8).</td>
+</tr>
+<tr class="odd">
+<td><strong>adBinary</strong></td>
+<td>Indicates a binary value (DBTYPE_BYTES).</td>
+</tr>
+<tr class="even">
+<td><strong>adBoolean</strong></td>
+<td>Indicates a boolean value (DBTYPE_BOOL).</td>
+</tr>
+<tr class="odd">
+<td><strong>adBSTR</strong></td>
+<td>Indicates a null-terminated character string (Unicode) (DBTYPE_BSTR).</td>
+</tr>
+<tr class="even">
+<td><strong>adChapter</strong></td>
+<td>Indicates a four-byte chapter value that identifies rows in a child rowset (DBTYPE_HCHAPTER).</td>
+</tr>
+<tr class="odd">
+<td><strong>adChar</strong></td>
+<td>Indicates a string value (DBTYPE_STR).</td>
+</tr>
+<tr class="even">
+<td><strong>adCurrency</strong></td>
+<td>Indicates a currency value (DBTYPE_CY). Currency is a fixed-point number with four digits to the right of the decimal point. It is stored in an eight-byte signed integer scaled by 10,000.</td>
+</tr>
+<tr class="odd">
+<td><strong>adDate</strong></td>
+<td>Indicates a date value (DBTYPE_DATE). A date is stored as a double, the whole part of which is the number of days since December 30, 1899, and the fractional part of which is the fraction of a day.</td>
+</tr>
+<tr class="even">
+<td><strong>adDBDate</strong></td>
+<td>Indicates a date value (yyyymmdd) (DBTYPE_DBDATE).</td>
+</tr>
+<tr class="odd">
+<td><strong>adDBTime</strong></td>
+<td>Indicates a time value (hhmmss) (DBTYPE_DBTIME).</td>
+</tr>
+<tr class="even">
+<td><strong>adDBTimeStamp</strong></td>
+<td>Indicates a date/time stamp (yyyymmddhhmmss plus a fraction in billionths) (DBTYPE_DBTIMESTAMP).</td>
+</tr>
+<tr class="odd">
+<td><strong>adDecimal</strong></td>
+<td>Indicates an exact numeric value with a fixed precision and scale (DBTYPE_DECIMAL).</td>
+</tr>
+<tr class="even">
+<td><strong>adDouble</strong></td>
+<td>Indicates a double-precision floating-point value (DBTYPE_R8).</td>
+</tr>
+<tr class="odd">
+<td><strong>adEmpty</strong></td>
+<td>Specifies no value (DBTYPE_EMPTY).</td>
+</tr>
+<tr class="even">
+<td><strong>adError</strong></td>
+<td>Indicates a 32-bit error code (DBTYPE_ERROR).</td>
+</tr>
+<tr class="odd">
+<td><strong>adFileTime</strong></td>
+<td>Indicates a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (DBTYPE_FILETIME).</td>
+</tr>
+<tr class="even">
+<td><strong>adGUID</strong></td>
+<td>Indicates a globally unique identifier (GUID) (DBTYPE_GUID).</td>
+</tr>
+<tr class="odd">
+<td><strong>adIDispatch</strong></td>
+<td>Indicates a pointer to an IDispatch interface on a COM object (DBTYPE_IDISPATCH). Note: This data type is currently not supported by ADO. Usage may cause unpredictable results.</td>
+</tr>
+<tr class="even">
+<td><strong>adInteger</strong></td>
+<td>Indicates a four-byte signed integer (DBTYPE_I4).</td>
+</tr>
+<tr class="odd">
+<td><strong>adIUnknown</strong></td>
+<td>Indicates a pointer to an IUnknown interface on a COM object (DBTYPE_IUNKNOWN). Note: This data type is currently not supported by ADO. Usage may cause unpredictable results.</td>
+</tr>
+<tr class="even">
+<td><strong>adLongVarBinary</strong></td>
+<td>Indicates a long binary value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adLongVarChar</strong></td>
+<td>Indicates a long string value.</td>
+</tr>
+<tr class="even">
+<td><strong>adLongVarWChar</strong></td>
+<td>Indicates a long null-terminated Unicode string value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adNumeric</strong></td>
+<td>Indicates an exact numeric value with a fixed precision and scale (DBTYPE_NUMERIC).</td>
+</tr>
+<tr class="even">
+<td><strong>adPropVariant</strong></td>
+<td>Indicates an Automation PROPVARIANT (DBTYPE_PROP_VARIANT).</td>
+</tr>
+<tr class="odd">
+<td><strong>adSingle</strong></td>
+<td>Indicates a single-precision floating-point value (DBTYPE_R4).</td>
+</tr>
+<tr class="even">
+<td><strong>adSmallInt</strong></td>
+<td>Indicates a two-byte signed integer (DBTYPE_I2).</td>
+</tr>
+<tr class="odd">
+<td><strong>adTinyInt</strong></td>
+<td>Indicates a one-byte signed integer (DBTYPE_I1).</td>
+</tr>
+<tr class="even">
+<td><strong>adUnsignedBigInt</strong></td>
+<td>Indicates an eight-byte unsigned integer (DBTYPE_UI8).</td>
+</tr>
+<tr class="odd">
+<td><strong>adUnsignedInt</strong></td>
+<td>Indicates a four-byte unsigned integer (DBTYPE_UI4).</td>
+</tr>
+<tr class="even">
+<td><strong>adUnsignedSmallInt</strong></td>
+<td>Indicates a two-byte unsigned integer (DBTYPE_UI2).</td>
+</tr>
+<tr class="odd">
+<td><strong>adUnsignedTinyInt</strong></td>
+<td>Indicates a one-byte unsigned integer (DBTYPE_UI1).</td>
+</tr>
+<tr class="even">
+<td><strong>adVarBinary</strong></td>
+<td>Indicates a binary value.</td>
+</tr>
+<tr class="odd">
+<td><strong>adVarChar</strong></td>
+<td>Indicates a string value.</td>
+</tr>
+<tr class="even">
+<td><strong>adVariant</strong></td>
+<td>Indicates an Automation Variant (DBTYPE_VARIANT). Note: This data type is currently not supported by ADO. Usage may cause unpredictable results.</td>
+</tr>
+<tr class="odd">
+<td><strong>adVarNumeric</strong></td>
+<td>Indicates a numeric value.</td>
+</tr>
+<tr class="even">
+<td><strong>adVarWChar</strong></td>
+<td>Indicates a null-terminated Unicode character string.</td>
+</tr>
+<tr class="odd">
+<td><strong>adWChar</strong></td>
+<td>Indicates a null-terminated Unicode character string (DBTYPE_WSTR).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-18">Remarks</h4>
+<p>For a new fields that have been appended to the <strong>Fields</strong> collection of a <strong>Record</strong>, <strong>Type_</strong> is read/write only after the Value property for the field has been specified and the data provider has successfully added the new field by calling the <strong>Update</strong> method of the <strong>Fields</strong> collection.</p>
+<p>For all other objects, the <strong>Type_</strong> property is read-only.</p>
+<h1 id="underlyingvalue-(cadofield)"><a name="UnderlyingValue"></a>UnderlyingValue (CADOField)</h1>
+<p>Returns the current field's value in the database.</p>
+<pre><code>PROPERTY UnderlyingValue () AS CVAR
+</code></pre>
+<h1 id="value-(cadofield)"><a name="Value"></a>Value (CADOField)</h1>
+<p>Sets or returns a Variant value that indicates the value of the object</p>
+<pre><code>PROPERTY Value () AS CVAR
+PROPERTY Value (BYREF cvValue AS CVAR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cvValue</em></td>
+<td>The value of the field.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-20">Return value</h4>
+<p>The value of the field.</p>
+<h4 id="remarks-19">Remarks</h4>
+<p>The ADO Recorset object exposes a hidden member: the <strong>Collect</strong> property. This property is functionally similar to the <strong>Field</strong>'s <strong>Value</strong> property, but it doesn't need a reference (explicit or implicit) to the <strong>Field</strong> object. You can pass either a numeric index or a field's name to this property.</p>
+<h4 id="example-3">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Open the recordset
+DIM pRecordset AS CAdoRecordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Publishers ORDER BY PubID&quot;
+DIM hr AS HRESULT = pRecordset.Open(cvSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Get a reference to the Fields collection
+DIM pFields AS CAdoFields = pRecordset.Fields
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the contents of the fields
+   ' // Note: Instead of pField.Attach / pField.Value, we can use pRecordset.Collect
+    DIM pField AS CAdoField
+    pField.Attach(pFields.Item(&quot;PubID&quot;))
+    DIM cvRes1 AS CVAR = pField.Value
+    pField.Attach(pFields.Item(&quot;Name&quot;))
+    DIM cvRes2 AS CVAR = pField.Value
+    pField.Attach(pFields.Item(&quot;Company Name&quot;))
+    DIM cvRes3 AS CVAR = pField.Value
+    PRINT cvRes1; &quot; &quot;; cvRes2; &quot; &quot;; cvRes3
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+</code></pre>
+</body>
+</html>
+

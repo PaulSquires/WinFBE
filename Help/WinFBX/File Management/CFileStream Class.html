@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CFileStream Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cfilestream-class">CFileStream Class</h1>
+<p>Allows to work with binary file streams. A binary stream consists of one or more bytes of arbitrary information. <strong>CFileStream</strong> provides a stream for a file, allowing read, write and seek operations.</p>
+<p><strong>Include file</strong>: CStream.inc</p>
+<h3 id="constructors">Constructors</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Constructor (File Name)</td>
+<td>Opens or creates a file and retrieves a stream to read or write to that file.</td>
+</tr>
+<tr class="even">
+<td>Constructor (Stream)</td>
+<td>Initializes an instance of the class from an existing stream and attaches it.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>CONSTRUCTOR CFileStream ( _
+   BYVAL pwszFile AS WSTRING PTR, _
+   BYVAL grfMode AS DWORD = STGM_READ, _
+   BYVAL dwAttributes AS DWORD = FILE_ATTRIBUTE_NORMAL, _
+   BYVAL fCreate AS WINBOOL = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszFile</em></td>
+<td>A pointer to a unicode null-terminated string that specifies the file name.</td>
+</tr>
+<tr class="even">
+<td><em>grfMode</em></td>
+<td>One or more <strong>STGM</strong> values that are used to specify the file access mode and how the the stream is created and deleted.</td>
+</tr>
+<tr class="odd">
+<td><em>dwAttributes</em></td>
+<td>One or more flag values that specify file attributes in the case that a new file is created.</td>
+</tr>
+<tr class="even">
+<td><em>fCreate</em></td>
+<td>A BOOL value that helps specify, in conjunction with <em>grfMode</em>, how existing files should be treated when creating the stream.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>CONSTRUCTOR CFileStream (BYVAL pstm AS IStream PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pstm</em></td>
+<td>A pointer to the <strong>IStream</strong> interface of an existing stream that will be attached to the class.</td>
+</tr>
+<tr class="even">
+<td><em>fAddRef</em></td>
+<td>TRUE to increase the reference count of the stream; FALSE, otherwise.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operators">Operators</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LET</td>
+<td>Initializes the class from an existing stream and attaches it.</td>
+</tr>
+<tr class="even">
+<td>CAST</td>
+<td>Returns a pointer to the underlying <strong>IStream</strong> interface of the stream object.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>OPERATOR LET (BYVAL pstm AS IStream PTR)
+OPERATOR CAST () AS IStream PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pstm</em></td>
+<td>A pointer to the <strong>IStream</strong> interface of an existing stream that will be attached to the class.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Attach">Attach</a></td>
+<td>Attaches the passed stream to the class.</td>
+</tr>
+<tr class="even">
+<td><a href="#Detach">Detach</a></td>
+<td>Detaches the stream from the class.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Open">Open</a></td>
+<td>Opens or creates a file and retrieves a stream to read or write to that file.</td>
+</tr>
+<tr class="even">
+<td><a href="#Close">Close</a></td>
+<td>Releases the stream object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Read">Read</a></td>
+<td>Reads a specified number of bytes from the stream into memory, starting at the current seek pointer.</td>
+</tr>
+<tr class="even">
+<td><a href="#ReadTextA">ReadTextA</a></td>
+<td>Reads a specified number of characters from the stream into memory, starting at the current seek pointer, and returns then as an ansi string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ReadTextW">ReadTextW</a></td>
+<td>Reads a specified number of characters from the stream into memory, starting at the current seek pointer, and returns then as a unicode string.</td>
+</tr>
+<tr class="even">
+<td><a href="#Write">Write</a></td>
+<td>Writes a specified number of bytes into the stream starting at the current seek pointer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#WriteTextA">WriteTextA</a></td>
+<td>Writes a ansi string into the stream starting at the current seek pointer.</td>
+</tr>
+<tr class="even">
+<td><a href="#WriteTextW">WriteTextW</a></td>
+<td>Writes a unicode string into the stream starting at the current seek pointer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Seek">Seek</a></td>
+<td>Changes the seek pointer to a new location. The new location is relative to either the beginning of the stream, the end of the stream, or the current seek pointer.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSeekPosition">GetSeekPosition</a></td>
+<td>Returns the seek position.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ResetSeekPosition">ResetSeekPosition</a></td>
+<td>Sets the seek position at the beginning of the stream.</td>
+</tr>
+<tr class="even">
+<td><a href="#SeekAtEndOfFile">SeekAtEndOfFile</a></td>
+<td>Sets the seek position at the end of the stream.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SeekAtEndOfStream">SeekAtEndOfStream</a></td>
+<td>Sets the seek position at the end of the stream.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSize">GetSize</a></td>
+<td>Returns the size of the stream.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetSize">SetSize</a></td>
+<td>Changes the size of the stream.</td>
+</tr>
+<tr class="even">
+<td><a href="#CopyTo">CopyTo</a></td>
+<td>Copies a specified number of bytes from the current seek pointer in the stream to the current seek pointer in another stream.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LockRegion">LockRegion</a></td>
+<td>Restricts access to a specified range of bytes in the stream.</td>
+</tr>
+<tr class="even">
+<td><a href="#UnlockRegion">UnlockRegion</a></td>
+<td>Removes the access restriction on a range of bytes previously restricted with <em>LockRegion</em>.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Stat">Stat</a></td>
+<td>Retrieves the <strong>STATSTG</strong> structure for this stream.</td>
+</tr>
+<tr class="even">
+<td><a href="#Clone">Clone</a></td>
+<td>Creates a new stream with its own seek pointer that references the same bytes as the original stream.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetLastResult">GetLastResult</a></td>
+<td>Returns the last result code.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetErrorInfo">GetErrorInfo</a></td>
+<td>Returns a description of the last result code.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="attach"><a name="Attach"></a>Attach</h1>
+<p>Attaches the passed stream to the class.</p>
+<pre><code>FUNCTION Attach (BYVAL pstm AS IStream PTR, BYVAL fAddRef AS BOOLEAN = FALSE) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pstm</em></td>
+<td>A pointer to the <strong>IStream</strong> interface of an existing stream that will be attached to the class.</td>
+</tr>
+<tr class="even">
+<td><em>fAddRef</em></td>
+<td>TRUE to increase the reference count of the stream; FALSE, otherwise.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="detach"><a name="Detach"></a>Detach</h1>
+<p>Detaches the stream from the class.</p>
+<pre><code>FUNCTION Detach () AS IStream PTR
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>IStream PTR. A pointer to the <strong>IStream</strong> interface of the stream object.</p>
+<h1 id="open"><a name="Open"></a>Open</h1>
+<p>Opens or creates a file and retrieves a stream to read or write to that file.</p>
+<pre><code>FUNCTION Open (BYVAL pwszFile AS WSTRING PTR, _
+   BYVAL grfMode AS DWORD = STGM_READ, _
+   BYVAL dwAttributes AS DWORD = FILE_ATTRIBUTE_NORMAL, _
+   BYVAL fCreate AS WINBOOL = FALSE) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszFile</em></td>
+<td>A pointer to a unicode null-terminated string that specifies the file name.</td>
+</tr>
+<tr class="even">
+<td><em>grfMode</em></td>
+<td>One or more <strong>STGM</strong> values that are used to specify the file access mode and how the stream is created and deleted. The STGM constants are flags that indicate conditions for creating and deleting the stream and access modes for the stream. These elements are often combined using an <strong>OR</strong> operator. They are interpreted in groups as listed in the following table. It is not valid to use more than one element from a single group.</td>
+</tr>
+<tr class="odd">
+<td><em>dwAttributes</em></td>
+<td>One or more flag values that specify file attributes in the case that a new file is created.<br><strong><em>0</em></strong> = Prevents other processes from opening a file or device if they request delete, read, or write access.<br><strong>FILE_SHARE_DELETE</strong> : Enables subsequent open operations on a file or device to request delete access. Otherwise, other processes cannot open the file or device if they request delete access. If this flag is not specified, but the file or device has been opened for delete access, the function fails. Delete access allows both delete and rename operations.<br><strong>FILE_SHARE_READ</strong> : Enables subsequent open operations on a file or device to request read access. Otherwise, other processes cannot open the file or device if they request read access. If this flag is not specified, but the file or device has been opened for read access, the function fails.<br><strong>FILE_SHARE_WRITE</strong> : Enables subsequent open operations on a file or device to request write access. Otherwise, other processes cannot open the file or device if they request write access. If this flag is not specified, but the file or device has been opened for write access or has a file mapping with write access, the function fails.</td>
+</tr>
+<tr class="even">
+<td><em>fCreate</em></td>
+<td>BOOL value that helps specify, in conjunction with <em>grfMode</em>, how existing files should be treated when creating the stream</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h3 id="stgm-constants">STGM Constants</h3>
+<p>The STGM constants are flags that indicate conditions for creating and deleting the stream and access modes for the stream. These elements are often combined using an <strong>OR</strong> operator. They are interpreted in groups as listed in the following table. It is not valid to use more than one element from a single group.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Group</th>
+<th>Flag</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Access</td>
+<td>STGM_READ</td>
+<td>&amp;h00000000</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>STGM_WRITE</td>
+<td>&amp;h00000001</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>STGM_READWRITE</td>
+<td>&amp;h00000002</td>
+</tr>
+<tr class="even">
+<td>Sharing</td>
+<td>STGM_SHARE_DENY_NONE</td>
+<td>&amp;h00000040</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>STGM_SHARE_DENY_READ</td>
+<td>&amp;h00000030</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>STGM_SHARE_DENY_WRITE</td>
+<td>&amp;h00000020</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>STGM_SHARE_EXCLUSIVE</td>
+<td>&amp;h00000010</td>
+</tr>
+<tr class="even">
+<td>Creation</td>
+<td>STGM_CREATE</td>
+<td>&amp;h00001000</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>STGM_FAILIFTHERE</td>
+<td>&amp;h00000000</td>
+</tr>
+<tr class="even">
+<td>Transactioning</td>
+<td>STGM_DIRECT</td>
+<td>&amp;h00000000</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>STGM_TRANSACTED</td>
+<td>&amp;h00010000</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>STGM_READ</strong></td>
+<td>Indicates that the stream is read-only, meaning that modifications cannot be made. For example, if a stream is opened with <strong>STGM_READ</strong>, the <strong>Read</strong> method may be called, but the <strong>Write</strong> method may not.</td>
+</tr>
+<tr class="even">
+<td><strong>STGM_WRITE</strong></td>
+<td>Enables you to save changes to the stream, but does not permit access to its data.</td>
+</tr>
+<tr class="odd">
+<td><strong>STGM_SHARE_DENY_NONE</strong></td>
+<td>Specifies that subsequent openings of the stream are not denied read or write access. If no flag from the sharing group is specified, this flag is assumed.</td>
+</tr>
+<tr class="even">
+<td><strong>STGM_SHARE_DENY_READ</strong></td>
+<td>Prevents others from subsequently opening the stream in <strong>STGM_READ</strong> mode.</td>
+</tr>
+<tr class="odd">
+<td><strong>STGM_SHARE_DENY_WRITE</strong></td>
+<td>Prevents others from subsequently opening the stream for <strong>STGM_WRITE</strong> or <strong>STGM_READWRITE</strong> access. In transacted mode, sharing of <strong>STGM_SHARE_DENY_WRITE</strong> or <strong>STGM_SHARE_EXCLUSIVE</strong> can significantly improve performance because they do not require snapshots.</td>
+</tr>
+<tr class="even">
+<td><strong>STGM_SHARE_EXCLUSIVE</strong></td>
+<td>Prevents others from subsequently opening the stream in <strong>STGM_READ</strong> mode.</td>
+</tr>
+<tr class="odd">
+<td><strong>STGM_CREATE</strong></td>
+<td>Indicates that an existing stream should be removed before the new stream replaces it. A new stream is created when this flag is specified only if the existing stream has been successfully removed. This flag cannot be used with open operations.</td>
+</tr>
+<tr class="even">
+<td><strong>STGM_FAILIFTHERE</strong></td>
+<td>Causes the create operation to fail if an existing stream with the specified name exists. In this case, <strong>STG_E_FILEALREADYEXISTS</strong> is returned. This is the default creation mode; that is, if no other create flag is specified, <strong>STGM_FAILIFTHERE</strong> is implied.</td>
+</tr>
+<tr class="odd">
+<td><strong>STGM_DIRECT</strong></td>
+<td>Indicates that, in direct mode, each change to a stream element is written as it occurs. This is the default if neither <strong>STGM_DIRECT</strong> nor <strong>STGM_TRANSACTED</strong> is specified.</td>
+</tr>
+<tr class="even">
+<td><strong>STGM_TRANSACTED</strong></td>
+<td>Indicates that, in transacted mode, changes are buffered and written only if an explicit commit operation is called. To ignore the changes, call the <strong>Revert</strong> method.</td>
+</tr>
+</tbody>
+</table>
+<p>The <em>grfMode</em> and <em>fCreate</em> parameters work together to specify how the function should behave with respect to existing files.</p>
+<table>
+<thead>
+<tr class="header">
+<th>grfMode</th>
+<th>fCreate</th>
+<th>File exists?</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>STGM_CREATE</td>
+<td>Ignored</td>
+<td>Yes</td>
+<td>The file is recreated.</td>
+</tr>
+<tr class="even">
+<td>STGM_CREATE</td>
+<td>Ignored</td>
+<td>No</td>
+<td>The file is created.</td>
+</tr>
+<tr class="odd">
+<td>STGM_FAILIFTHERE</td>
+<td>FALSE</td>
+<td>Yes</td>
+<td>The file is opened.</td>
+</tr>
+<tr class="even">
+<td>STGM_FAILIFTHERE</td>
+<td>FALSE</td>
+<td>No</td>
+<td>The call fails.</td>
+</tr>
+<tr class="odd">
+<td>STGM_FAILIFTHERE</td>
+<td>TRUE</td>
+<td>Yes</td>
+<td>The call fails.</td>
+</tr>
+<tr class="even">
+<td>STGM_FAILIFTHERE</td>
+<td>TRUE</td>
+<td>No</td>
+<td>The file is created.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example">Example</h4>
+<pre><code>'#CONSOLE ON
+#INCLUDE ONCE &quot;\Afx\CStream.inc&quot;
+USING Afx
+
+SCOPE
+   DIM pStream AS CFileStream
+   IF pStream.Open(&quot;binary.txt&quot;, STGM_CREATE OR STGM_WRITE) = S_OK then
+      DIM s AS STRING = &quot;This is a test&quot;
+      pStream.Write(STRPTR(s), LEN(s))
+      ' // Because we are using a scope, we don't need to call the Close method,
+      ' // since the stream will be released when pStream goes out of scope.
+      ' pStream.Close
+   END IF
+END SCOPE
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
+<h1 id="close"><a name="Close"></a>Close</h1>
+<p>Releases the stream object.</p>
+<pre><code>FUNCTION Close
+</code></pre>
+<h1 id="read"><a name="Read"></a>Read</h1>
+<p>Reads a specified number of bytes from the stream into memory, starting at the current seek pointer.</p>
+<pre><code>FUNCTION Read (BYVAL pv AS ANY PTR, BYVAL cb AS ULONG, BYVAL pcbRead AS ULONG PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pv</em></td>
+<td>A pointer to the buffer which the stream data is read into.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>The number of bytes of data to read from the stream.</td>
+</tr>
+<tr class="odd">
+<td><em>pcbRead</em></td>
+<td>A pointer to a ULONG variable that receives the actual number of bytes read from the stream.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<pre><code>FUNCTION Read (BYVAL pv AS ANY PTR, BYVAL cb AS ULONG) AS ULONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pv</em></td>
+<td>A pointer to the buffer which the stream data is read into.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>The number of bytes of data to read from the stream.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>ULONG. The actual number of bytes read from the stream. Note: The number of bytes read may be zero.</p>
+<h1 id="readtexta"><a name="ReadTextA"></a>ReadTextA</h1>
+<p>Reads a specified number of characters from the stream into memory, starting at the current seek pointer. Ansio version.</p>
+<pre><code>FUNCTION ReadTextA (BYVAL numChars AS LONG) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>numChars</em></td>
+<td>The number of characters to read from the stream.<br>Pass -1 to read all the characters from the current seek position.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>STRING. The characters read.</p>
+<h1 id="readtextw"><a name="ReadTextW"></a>ReadTextW</h1>
+<p>Reads a specified number of characters from the stream into memory, starting at the current seek pointer. Unicode version.</p>
+<pre><code>FUNCTION ReadTextW (BYVAL numChars AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>numChars</em></td>
+<td>The number of characters to read from the stream.<br>Pass -1 to read all the characters from the current seek position.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>CWSTR. The characters read.</p>
+<h1 id="write"><a name="Write"></a>Write</h1>
+<p>Writes a specified number of bytes into the stream starting at the current seek pointer.</p>
+<pre><code>FUNCTION Write (BYVAL pv AS ANY PTR, BYVAL cb AS ULONG, BYVAL pcbWritten AS ULONG PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pv</em></td>
+<td>A pointer to the buffer that contains the data that is to be written to the stream. A valid pointer must be provided for this parameter even when cb is zero.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>The number of bytes of data to attempt to write into the stream. This value can be zero.</td>
+</tr>
+<tr class="odd">
+<td><em>pcbWritten</em></td>
+<td>A pointer to a ULONG variable where this method writes the actual number of bytes written to the stream. The caller can set this pointer to NULL, in which case this method does not provide the actual number of bytes written.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<pre><code>FUNCTION Write (BYVAL pv AS ANY PTR, BYVAL cb AS ULONG) AS ULONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pv</em></td>
+<td>A pointer to the buffer that contains the data that is to be written to the stream. A valid pointer must be provided for this parameter even when cb is zero.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>The number of bytes of data to attempt to write into the stream. This value can be zero.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>ULONG. The actual number of bytes written to the stream. Note: The number of bytes read may be zero.</p>
+<h1 id="writetexta"><a name="WriteTextA"></a>WriteTextA</h1>
+<p>Writes a string at the current seek position. Ansi version.</p>
+<pre><code>FUNCTION WriteTextA (BYREF strText AS STRING) AS ULONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strText</em></td>
+<td>STRING. The string to write.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>ULONG. The characters written.</p>
+<h1 id="writetextw"><a name="WriteTextW"></a>WriteTextW</h1>
+<p>Writes a string at the current seek position. Unicode version.</p>
+<pre><code>FUNCTION WriteTextW (BYREF wszText AS WSTRING) AS ULONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszText</em></td>
+<td>WSTRING. The string to write.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>ULONG. The characters written.</p>
+<h1 id="seek"><a name="Seek"></a>Seek</h1>
+<p>Changes the seek pointer to a new location. The new location is relative to either the beginning of the stream, the end of the stream, or the current seek pointer.</p>
+<pre><code>FUNCTION Seek (BYVAL dlibMove AS ULONGINT, _
+   BYVAL dwOrigin AS DWORD, _
+   BYVAL plibNewPosition AS ULONGINT PTR = NULL) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dlibMove</em></td>
+<td>ULONGINT. The displacement to be added to the location indicated by the dwOrigin parameter. If <em>dwOrigin</em> is <strong>STREAM_SEEK_SET</strong>, this is interpreted as an unsigned value rather than a signed value.</td>
+</tr>
+<tr class="even">
+<td><em>dwOrigin</em></td>
+<td>DWORD. The origin for the displacement specified in <em>dlibMove</em>. The origin can be the beginning of the file (<strong>STREAM_SEEK_SET</strong>), the current seek pointer (<strong>STREAM_SEEK_CUR</strong>), or the end of the file (<strong>STREAM_SEEK_END</strong>).<br><strong>STREAM_SEEK_SET</strong> : The new seek pointer is an offset relative to the beginning of the stream. In this case, the <em>dlibMove</em> parameter is the new seek position relative to the beginning of the stream.<br><strong>STREAM_SEEK_CUR</strong> : The new seek pointer is an offset relative to the current seek pointer location. In this case, the <em>dlibMove</em> parameter is the signed displacement from the current seek position.<br><strong>STREAM_SEEK_END</strong> : The new seek pointer is an offset relative to the end of the stream. In this case, the <em>dlibMove</em> parameter is the new seek position relative to the end of the stream.</td>
+</tr>
+<tr class="odd">
+<td><em>plibNewPosition</em></td>
+<td>ULONGINT PTR. A pointer to the location where this method writes the value of the new seek pointer from the beginning of the stream. You can set this pointer to NULL. In this case, this method does not provide the new seek pointer.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="getseekposition"><a name="GetSeekPosition"></a>GetSeekPosition</h1>
+<p>Returns the current seek position.</p>
+<pre><code>FUNCTION GetSeekPosition () AS ULONGINT
+</code></pre>
+<h4 id="return-value-12">Return value</h4>
+<p>ULONGINT. The current seek position.</p>
+<h1 id="resetseekposition"><a name="ResetSeekPosition"></a>ResetSeekPosition</h1>
+<p>Sets the seek position at the beginning of the stream.</p>
+<pre><code>FUNCTION ResetSeekPosition () AS ULONGINT
+</code></pre>
+<h4 id="return-value-13">Return value</h4>
+<p>ULONGINT. The new seek position.</p>
+<h1 id="seekatendoffile"><a name="SeekAtEndOfFile"></a>SeekAtEndOfFile</h1>
+<p>Sets the seek position at the end of the stream.</p>
+<pre><code>FUNCTION SeekAtEndOfFile () AS ULONGINT
+</code></pre>
+<h4 id="return-value-14">Return value</h4>
+<p>ULONGINT. The new seek position.</p>
+<h1 id="seekatendoffile-1"><a name="SeekAtEndOfStream"></a>SeekAtEndOfFile</h1>
+<p>Sets the seek position at the end of the stream.</p>
+<pre><code>FUNCTION SeekAtEndOfStream () AS ULONGINT
+</code></pre>
+<h4 id="return-value-15">Return value</h4>
+<p>ULONGINT. The new seek position.</p>
+<h1 id="getsize"><a name="GetSize"></a>GetSize</h1>
+<p>Returns the size of the stream in bytes.</p>
+<pre><code>FUNCTION GetSize () AS ULONGINT
+</code></pre>
+<h4 id="return-value-16">Return value</h4>
+<p>ULONGINT. The size of the stream in bytes.</p>
+<h1 id="setsize"><a name="SetSize"></a>SetSize</h1>
+<p>Changes the size of the stream object.</p>
+<pre><code>FUNCTION SetSize (BYVAL libNewSize AS ULONGINT) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>libNewSize</em></td>
+<td>ULONGINT. Specifies the new size, in bytes, of the stream.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="copyto"><a name="CopyTo"></a>CopyTo</h1>
+<p>Copies a specified number of bytes from the current seek pointer in the stream to the current seek pointer in another stream.</p>
+<pre><code>FUNCTION CopyTo (BYVAL pstm AS IStream PTR, _
+   BYVAL cb AS ULONGINT, _
+   BYVAL pcbRead AS ULONGINT PTR = NULL, _
+   BYVAL pcbWritten AS ULONGINT PTR = NULL) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pstm</em></td>
+<td>A pointer to the destination stream. The stream pointed to by <em>pstm</em> can be a new stream or a clone of the source stream.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>The number of bytes of data to attempt to copy into the stream.</td>
+</tr>
+<tr class="odd">
+<td><em>pcbRead</em></td>
+<td>A pointer to the location where this method writes the actual number of bytes read from the source. You can set this pointer to NULL. In this case, this method does not provide the actual number of bytes read.</td>
+</tr>
+<tr class="even">
+<td><em>pcbWritten</em></td>
+<td>A pointer to the location where this method writes the actual number of bytes written to the destination. You can set this pointer to NULL. In this case, this method does not provide the actual number of bytes written.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-18">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="lockregion"><a name="LockRegion"></a>LockRegion</h1>
+<p>Restricts access to a specified range of bytes in the stream.</p>
+<pre><code>FUNCTION LockRegion (BYVAL libOffset AS ULONGINT, BYVAL cb AS ULONGINT, BYVAL dwLockType AS DWORD) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>libOffset</em></td>
+<td>ULONGINT. Specifies the byte offset for the beginning of the range.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>ULONGINT. Specifies the length of the range, in bytes, to be restricted.</td>
+</tr>
+<tr class="odd">
+<td><em>dwLockType</em></td>
+<td>DWORD. Specifies the restrictions being requested on accessing the range.<br>- <strong>LOCK_WRITE</strong> : If this lock is granted, the specified range of bytes can be opened and read any number of times, but writing to the locked range is prohibited except for the owner that was granted this lock.<br>- <strong>LOCK_EXCLUSIVE</strong> : If this lock is granted, writing to the specified range of bytes is prohibited except by the owner that was granted this lock.<br>- <strong>LOCK_ONLYONCE</strong> : If this lock is granted, no other LOCK_ONLYONCE lock can be obtained on the range. Usually this lock type is an alias for some other lock type. Thus, specific implementations can have additional behavior associated with this lock type.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="unlockregion"><a name="UnlockRegion"></a>UnlockRegion</h1>
+<p>Unlocks a region previously locked with the <strong>LockRegion</strong> method. Locked regions must later be explicitly unlocked by calling <strong>UnlockRegion</strong> with exactly the same values for the <em>libOffset</em>, <em>cb</em>, and <em>dwLockType</em> parameters. The region must be unlocked before the stream is released. Two adjacent regions cannot be locked separately and then unlocked with a single unlock call.</p>
+<pre><code>FUNCTION UnlockRegion (BYVAL libOffset AS ULONGINT, BYVAL cb AS ULONGINT, BYVAL dwLockType AS DWORD) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>libOffset</em></td>
+<td>ULONGINT. Specifies the byte offset for the beginning of the range.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>ULONGINT. Specifies the length of the range, in bytes, to be restricted.</td>
+</tr>
+<tr class="odd">
+<td><em>dwLockType</em></td>
+<td>DWORD. Specifies the access restrictions previously placed on the range.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-20">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="stat"><a name="Stat"></a>Stat</h1>
+<p>Retrieves the <strong>STATSTG</strong> structure for this stream. For a detailed description of this structure see <a href="https://docs.microsoft.com/en-us/windows/desktop/api/objidl/ns-objidl-tagstatstg">STATSTG structure</a>.</p>
+<pre><code>FUNCTION Stat (BYVAL pstatstg AS STATSTG PTR, BYVAL grfStatFlag AS DWORD) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pstatstg</em></td>
+<td>Pointer to a <strong>STATSTG</strong> structure where this method places information about this stream.</td>
+</tr>
+<tr class="even">
+<td><em>grfStatFlag</em></td>
+<td>DWORD. Specifies that this method does not return some of the members in the <strong>STATSTG</strong> structure, thus saving a memory allocation operation. Values are taken from the <strong>STATFLAG</strong> enumeration.<br>- <strong>STATFLAG_DEFAULT</strong> : Requests that the statistics include the <em>pwcsName</em> member of the <strong>STATSTG</strong> structure.<br>- <strong>STATFLAG_NONAME</strong> : Requests that the statistics not include the <em>pwcsName</em> member of the <strong>STATSTG structure</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<pre><code>FUNCTION Stat (BYVAL grfStatFlag AS DWORD) AS STATSTG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>grfStatFlag</em></td>
+<td>DWORD. Specifies that this method does not return some of the members in the <strong>STATSTG</strong> structure, thus saving a memory allocation operation. Values are taken from the <strong>STATFLAG</strong> enumeration.<br>- <strong>STATFLAG_DEFAULT</strong> : Requests that the statistics include the <em>pwcsName</em> member of the <strong>STATSTG</strong> structure.<br>- <strong>STATFLAG_NONAME</strong> : Requests that the statistics not include the <em>pwcsName</em> member of the <strong>STATSTG structure</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>STATFLAG. The <strong>STATSTG</strong> structure for this stream.</p>
+<h1 id="clone"><a name="Clone"></a>Clone</h1>
+<p>Creates a new stream with its own seek pointer that references the same bytes as the original stream. The <strong>Clone</strong> method creates a new stream for accessing the same bytes but using a separate seek pointer. The new stream sees the same data as the source-stream. Changes written to one stream are immediately visible in the other. Range locking is shared between the streams. The initial setting of the seek pointer in the cloned stream instance is the same as the current setting of the seek pointer in the original stream at the time of the clone operation.</p>
+<pre><code>FUNCTION Clone (BYVAL ppstm AS IStream PTR PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ppstm</em></td>
+<td>When successful, pointer to the location of an <strong>IStream</strong> pointer to the new stream. If an error occurs, this parameter is NULL.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="getlastresult"><a name="GetLastResult"></a>GetLastResult</h1>
+<p>Returns the last result code.</p>
+<pre><code>FUNCTION GetLastResult () AS HRESULT
+</code></pre>
+<h4 id="return-value-24">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="geterrorinfo"><a name="GetErrorInfo"></a>GetErrorInfo</h1>
+<p>Returns a description of the last result code.</p>
+<pre><code>FUNCTION GetErrorInfo () AS CWSTR
+</code></pre>
+<h4 id="return-value-25">Return value</h4>
+<p>CWSTR. A description of the last result code. If the result code is S_OK (0), it returns &quot;Success&quot;; otherwise, it returns the hexadecimal value of the error code and a description such &quot;File not found&quot;, &quot;Seek error&quot;, &quot;Write fault&quot;, &quot;Read fault&quot; or &quot;Share violation&quot;.</p>
+</body>
+</html>
+

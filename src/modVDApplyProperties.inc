@@ -437,6 +437,79 @@ function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    function = 0
 end function
 
+
+' ========================================================================================
+' Apply properties to the combobox
+' ========================================================================================
+function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                   byval pCtrl as clsControl ptr, _
+                                   byval pProp as clsProperty ptr _ 
+                                   ) as Long
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+   if pWindow = 0 then exit function
+   
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+   
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "BACKCOLOR"
+      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
+      pCtrl->hBackBrush = CreateSolidBrush(clrBack)
+      AfxRedrawWindow(pCtrl->hWindow)
+
+   case "BORDERSTYLE"
+      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
+      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+      dim as long wsStyle                                     
+      select case **wszPropValue
+         case "ControlBorderStyle.None"
+         case "ControlBorderStyle.Fixed3D"
+            AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
+         case "ControlBorderStyle.FixedSingle"
+            AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+      end select
+      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+
+   case "DROPDOWNSTYLE"
+      dim as long nCtrlId, dwStyle, dwExStyle = -1
+      dwStyle = WS_CHILD or WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
+                CBS_HASSTRINGS or CBS_NOINTEGRALHEIGHT 
+      Select Case **wszPropValue
+         Case "ComboBoxStyle.Simple":       dwStyle = dwStyle OR CBS_SIMPLE 
+         Case "ComboBoxStyle.DropDown":     dwStyle = dwStyle OR CBS_DROPDOWN 
+         Case "ComboBoxStyle.DropDownList": dwStyle = dwStyle OR CBS_DROPDOWNLIST 
+      End Select
+      dim as CWSTR wszControlName = GetControlProperty(pCtrl, "NAME")
+      dim rcDraw as RECT = GetControlRect(pCtrl)
+      nCtrlId = GetDlgCtrlID(pCtrl->hWindow)
+      DestroyWindow(pCtrl->hWindow)
+      pCtrl->hWindow = pWindow->AddControl( "ComboBox", , nCtrlId, wszControlName, _
+                       rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top, _
+                       dwStyle, dwExStyle, , _
+                       CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_COMBOBOX, CAST(DWORD_PTR, pDoc))
+      ' Also subclass the combobox edit control
+      dim as HWND hWndEditCtrl = ComboBox_GetEditBoxHandle(pCtrl->hWindow)
+      if IsWindow(hWndEditCtrl) then
+         SetWindowSubclass(hWndEditCtrl, CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_COMBOBOX, CAST(DWORD_PTR, pDoc))
+      end if
+      dim as HWND hWndListCtrl = ComboBox_GetListBoxHandle(pCtrl->hWindow)
+      if IsWindow(hWndListCtrl) then
+         SetWindowSubclass(hWndListCtrl, CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_COMBOBOX, CAST(DWORD_PTR, pDoc))
+      end if
+      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      
+   end select
+   
+   function = 0
+end function
+
 ' ========================================================================================
 ' Apply properties to the textbox
 ' ========================================================================================
@@ -528,6 +601,57 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
       SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
 
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Apply properties to the MaskedEdit textbox
+' ========================================================================================
+function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                     byval pCtrl as clsControl ptr, _
+                                     byval pProp as clsProperty ptr _ 
+                                     ) as Long
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+   
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "BACKCOLOR"
+      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
+      pCtrl->hBackBrush = CreateSolidBrush(clrBack)
+
+   case "BORDERSTYLE"
+      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
+      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+      select case **wszPropValue
+         case "ControlBorderStyle.None"
+         case "ControlBorderStyle.Fixed3D"
+            AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
+         case "ControlBorderStyle.FixedSingle"
+            AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+      end select
+      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+
+   case "TEXT", "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER"
+      dim as CWSTR wszMaskString = GetControlProperty(pCtrl, "MASKSTRING")
+      dim as CWSTR wszInputString = GetControlProperty(pCtrl, "INPUTSTRING")
+      dim as CWSTR wszDefaultCharacter = GetControlProperty(pCtrl, "DEFAULTCHARACTER")
+      dim as CWSTR wszValidCharacters = GetControlProperty(pCtrl, "VALIDCHARACTERS")
+      dim as CWSTR wszText = GetControlProperty(pCtrl, "TEXT")
+      pCtrl->AfxMaskedPtr->EnableMask(wszMaskString, wszInputString, wszDefaultCharacter, wszValidCharacters)
+      pCtrl->AfxMaskedPtr->SetText(wszText, false)
+      
    end select
    
    function = 0
@@ -660,7 +784,9 @@ function ApplyControlProperties( byval pDoc as clsDocument ptr, _
                pWindow->SetWindowPos(pCtrl->hWindow, 0, 0, 0, nTemp, nHeight, SWP_NOZORDER or SWP_NOMOVE)
             end if 
          case "TEXT"
-            AfxSetWindowText(pCtrl->hWindow, wszPropValue)     
+            if pCtrl->ControlType <> CTRL_MASKEDEDIT then
+               AfxSetWindowText(pCtrl->hWindow, wszPropValue)     
+            end if   
          case "FONT"
             dim as HFONT hFontOld = AfxGetWindowFont(pCtrl->hWindow)
             dim as LOGFONT lf
@@ -673,14 +799,16 @@ function ApplyControlProperties( byval pDoc as clsDocument ptr, _
    
    ' Handle control specific properties
    select CASE pCtrl->ControlType
-      case CTRL_FORM:     Form_ApplyProperties(pDoc, pCtrl, pProp)
-      case CTRL_BUTTON:   Button_ApplyProperties(pDoc, pCtrl, pProp)
-      case CTRL_LABEL:    Label_ApplyProperties(pDoc, pCtrl, pProp)
-      case CTRL_CHECKBOX: CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_OPTION:   OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_TEXTBOX:  TextBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_LISTBOX:  ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_FRAME:    Frame_ApplyProperties(pDoc, pCtrl, pProp)
+      case CTRL_FORM:       Form_ApplyProperties(pDoc, pCtrl, pProp)
+      case CTRL_BUTTON:     Button_ApplyProperties(pDoc, pCtrl, pProp)
+      case CTRL_LABEL:      Label_ApplyProperties(pDoc, pCtrl, pProp)
+      case CTRL_CHECKBOX:   CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_OPTION:     OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_TEXTBOX:    TextBox_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_MASKEDEDIT: MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_LISTBOX:    ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_COMBOBOX:   ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
+      case CTRL_FRAME:      Frame_ApplyProperties(pDoc, pCtrl, pProp)
       CASE ELSE
    END SELECT
 

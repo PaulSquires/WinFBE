@@ -147,7 +147,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
                      wsBaseType = wsParts
                      continue do
                   case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
-                       "WFXCHECKBOX"
+                       "WFXCHECKBOX", "WFXMASKEDEDIT", "WFXCOMBOBOX"
                      if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
                END SELECT
             END IF
@@ -207,7 +207,7 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(7) as TOOLBOX_TYPE
+   redim gToolBox(9) as TOOLBOX_TYPE
    
    gToolBox(0).nToolType = CTRL_POINTER
    gToolBox(0).wszToolBoxName   = "Pointer"
@@ -230,40 +230,54 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(2).wszCursor = "IMAGE_CURSOR_CHECKBOX"
    gToolBox(2).wszClassName = "CHECKBOX"
 
-   gToolBox(3).nToolType = CTRL_FRAME
-   gToolBox(3).wszToolBoxName   = "Frame"
-   gToolBox(3).wszControlName   = "Frame"
-   gToolBox(3).wszImage  = "IMAGE_FRAME"
-   gToolBox(3).wszCursor = "IMAGE_CURSOR_FRAME"
-   gToolBox(3).wszClassName = "GROUPBOX"
+   gToolBox(3).nToolType = CTRL_COMBOBOX
+   gToolBox(3).wszToolBoxName = "ComboBox"
+   gToolBox(3).wszControlName = "Combo"
+   gToolBox(3).wszImage  = "IMAGE_COMBOBOX"
+   gToolBox(3).wszCursor = "IMAGE_CURSOR_COMBOBOX"
+   gToolBox(3).wszClassName = "COMBOBOX"
 
-   gToolBox(4).nToolType = CTRL_LABEL
-   gToolBox(4).wszToolBoxName   = "Label"
-   gToolBox(4).wszControlName   = "Label"
-   gToolBox(4).wszImage  = "IMAGE_LABEL"
-   gToolBox(4).wszCursor = "IMAGE_CURSOR_LABEL"
-   gToolBox(4).wszClassName = "LABEL"
+   gToolBox(4).nToolType = CTRL_FRAME
+   gToolBox(4).wszToolBoxName   = "Frame"
+   gToolBox(4).wszControlName   = "Frame"
+   gToolBox(4).wszImage  = "IMAGE_FRAME"
+   gToolBox(4).wszCursor = "IMAGE_CURSOR_FRAME"
+   gToolBox(4).wszClassName = "GROUPBOX"
 
-   gToolBox(5).nToolType = CTRL_LISTBOX
-   gToolBox(5).wszToolBoxName   = "ListBox"
-   gToolBox(5).wszControlName   = "List"
-   gToolBox(5).wszImage  = "IMAGE_LISTBOX"
-   gToolBox(5).wszCursor = "IMAGE_CURSOR_LISTBOX"
-   gToolBox(5).wszClassName = "LISTBOX"
+   gToolBox(5).nToolType = CTRL_LABEL
+   gToolBox(5).wszToolBoxName   = "Label"
+   gToolBox(5).wszControlName   = "Label"
+   gToolBox(5).wszImage  = "IMAGE_LABEL"
+   gToolBox(5).wszCursor = "IMAGE_CURSOR_LABEL"
+   gToolBox(5).wszClassName = "LABEL"
 
-   gToolBox(6).nToolType = CTRL_OPTION
-   gToolBox(6).wszToolBoxName   = "OptionButton"
-   gToolBox(6).wszControlName   = "Option"
-   gToolBox(6).wszImage  = "IMAGE_OPTION"
-   gToolBox(6).wszCursor = "IMAGE_CURSOR_OPTION"
-   gToolBox(6).wszClassName = "RADIOBUTTON"
+   gToolBox(6).nToolType = CTRL_LISTBOX
+   gToolBox(6).wszToolBoxName   = "ListBox"
+   gToolBox(6).wszControlName   = "List"
+   gToolBox(6).wszImage  = "IMAGE_LISTBOX"
+   gToolBox(6).wszCursor = "IMAGE_CURSOR_LISTBOX"
+   gToolBox(6).wszClassName = "LISTBOX"
 
-   gToolBox(7).nToolType = CTRL_TEXTBOX
-   gToolBox(7).wszToolBoxName   = "TextBox"
-   gToolBox(7).wszControlName   = "Text"
-   gToolBox(7).wszImage  = "IMAGE_TEXTBOX"
-   gToolBox(7).wszCursor = "IMAGE_CURSOR_TEXTBOX"
-   gToolBox(7).wszClassName = "TEXTBOX"
+   gToolBox(7).nToolType = CTRL_MASKEDEDIT
+   gToolBox(7).wszToolBoxName   = "MaskedEdit"
+   gToolBox(7).wszControlName   = "Masked"
+   gToolBox(7).wszImage  = "IMAGE_MASKED"
+   gToolBox(7).wszCursor = "IMAGE_CURSOR_MASKED"
+   gToolBox(7).wszClassName = "MASKEDEDIT"
+
+   gToolBox(8).nToolType = CTRL_OPTION
+   gToolBox(8).wszToolBoxName   = "OptionButton"
+   gToolBox(8).wszControlName   = "Option"
+   gToolBox(8).wszImage  = "IMAGE_OPTION"
+   gToolBox(8).wszCursor = "IMAGE_CURSOR_OPTION"
+   gToolBox(8).wszClassName = "RADIOBUTTON"
+
+   gToolBox(9).nToolType = CTRL_TEXTBOX
+   gToolBox(9).wszToolBoxName   = "TextBox"
+   gToolBox(9).wszControlName   = "Text"
+   gToolBox(9).wszImage  = "IMAGE_TEXTBOX"
+   gToolBox(9).wszCursor = "IMAGE_CURSOR_TEXTBOX"
+   gToolBox(9).wszClassName = "TEXTBOX"
 
 
 '   gToolBox(8).nToolType = CTRL_PICTURE
@@ -271,12 +285,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(8).wszImage  = "IMAGE_PICTURE"
 '   gToolBox(8).wszCursor = "IMAGE_CURSOR_PICTURE"
 '   gToolBox(8).wszClassName = "STATIC"
-
-'   gToolBox(9).nToolType = CTRL_COMBOBOX
-'   gToolBox(9).wszName   = "ComboBox"
-'   gToolBox(9).wszImage  = "IMAGE_COMBOBOX"
-'   gToolBox(9).wszCursor = "IMAGE_CURSOR_COMBOBOX"
-'   gToolBox(9).wszClassName = "COMBOBOX"
 
 '   gToolBox(10).nToolType = CTRL_IMAGEBUTTON
 '   gToolBox(10).wszName   = "ImageButton"

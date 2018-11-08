@@ -218,7 +218,8 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
             ' Only output properties that are different than the default WinFormsX values
             if ucase(wszPropValue) <> ucase(wszPropDefault) then
                select case ucase(wszPropName)
-                  case "TEXT", "TAG", "PASSWORDCHAR", "GROUPNAME"            
+                  case "TEXT", "TAG", "PASSWORDCHAR", "GROUPNAME", _
+                       "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER", "VALIDCHARACTERS"            
                      ' Ensure that any embedded double quotes are escaped
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ

@@ -1,3 +1,11 @@
+Version 1.8.2 (November 8, 2018)
+- Added: CMaskedEdit control (from the WinFBX Library framework). 
+- Added: ComboBox control.
+- Added: Code editor Calltips for the Frame control.
+- Fixed: CheckBox and OptionButton now correctly test for BN_CLICKED notification.
+- Fixed: "Custom Color" label in the PropertyList color picker would not disply properly in WinFBE64.
+- Fixed: Pressing TAB key in the Replace popup form (Ctrl+R) will now move keyboard input focus between the Find and Replace textboxes.
+
 Version 1.8.1 (October 7, 2018)
 - Fixed: Regression causing build combobox to immediately close when clicked.
 - Changed: Updated the Spanish language file (thanks Jose Roca).

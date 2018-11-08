@@ -253,6 +253,13 @@
 #Define IDC_FRMUSERTOOLS_CHKDISPLAYMENU             1028
 #Define IDC_FRMUSERTOOLS_CMDOK                      1029
 
+#Define IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE         1000
+#Define IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX         1001
+#Define IDC_FRMHELPVIEWER_TABCONTROL                1002
+#Define IDC_FRMHELPVIEWER_TVWINFBE                  1003
+#Define IDC_FRMHELPVIEWER_TVWINFBX                  1004
+ 
+
 #Define IsFalse(e) ( Not CBool(e) )
 #Define IsTrue(e) ( CBool(e) )
 
@@ -362,6 +369,7 @@ enum
    CTRL_WEBBROWSER
    CTRL_CUSTOM
    CTRL_OCX
+   CTRL_MASKEDEDIT
 end enum
    
 '  Grab handles (clockwise starting at top left corner)
@@ -421,7 +429,7 @@ Enum
    IDM_VSPACEDECREASE, IDM_VSPACEREMOVE, IDM_CENTERHORIZ
    IDM_CENTERVERT, IDM_CENTERBOTH, IDM_LOCKCONTROLS
    IDM_OPTIONS, IDM_COMPILECONFIG, IDM_USERTOOLSDIALOG
-   IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBX, IDM_ABOUT
+   IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
    IDM_CONSOLE, IDM_GUI, IDM_RESOURCE   ' used for compiler directives in code
@@ -444,16 +452,20 @@ dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 ' Create a global bold font that is used in the PropertyList controls combobox and also for
 ' the label that describes the property name/description.
 dim shared as HFONT ghNormalFont, ghBoldFont
+dim shared as long gHelpViewerIndex
 
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX, HWND_FRMVDCOLORS
 Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG, HWND_FRMUSERTOOLS
-Dim Shared As HWnd HWND_PROPLIST_EDIT, HWND_PROPLIST_COMBO, HWND_PROPLIST_COMBOLIST
+Dim Shared As HWnd HWND_PROPLIST_EDIT, HWND_PROPLIST_COMBO, HWND_PROPLIST_COMBOLIST, HWND_FRMHELPVIEWER
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
+
+'  Global holding all full path/name for HTML files linked to Help Treeview (index in lParam)
+dim shared as CWSTR gHTMLHelpFiles(any)
 
 dim shared as HICON ghIconGood, ghIconBad, ghIconTick, ghIconNoTick
 dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
@@ -677,7 +689,8 @@ type clsControl
    public:
       hWindow       as hwnd
       ControlType   as long 
-      AfxButtonPtr  as CXPButton Ptr   ' we use XPButton rather than built in Windows button
+      AfxButtonPtr  as CXPButton Ptr    ' we use XPButton rather than the built in Windows button
+      AfxMaskedPtr  as CMaskedEdit Ptr 
       IsSelected    as Boolean
       IsActive      as Boolean
       SuspendLayout as Boolean         ' prevent layout properties from being acted on individually (instead treat as a group)

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CMemBmp Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cmembmp-class">CMemBmp Class</h1>
+<p>The <strong>CMemBmp</strong> class implements a memory bitmap.</p>
+<p>You can create an empty bitmap of the specified width an height, e.g.</p>
+<pre><code>DIM pMemBmp AS CMemBmp = CMemBmp(500, 400)
+</code></pre>
+<p>or loading an image</p>
+<pre><code>DIM pMemBmp AS CMemBmp = CMemBmp($&quot;C:\Users\Pepe\Pictures\MyPicture.jpg&quot;)
+</code></pre>
+<p>You can manipulate its contents using GDI+ or GDI, e.g.</p>
+<pre><code>Rectangle pMemBmp.GetMemDC, 10, 10, 150, 150
+LineTo pMemBmp.GetMemDC, 30, 180
+</code></pre>
+<p>And you can display it in a Graphic Control, e.g.</p>
+<pre><code>pGraphCtx.DrawBitmap pMemBmp
+</code></pre>
+<p>The bitmap can be saved to a file with</p>
+<pre><code>SaveBitmap
+SaveBitmapAsBmp
+SaveBitmapAsJpeg
+SaveBitmapAsPng
+SaveBitmapAsGif
+SaveBitmapAsTiff
+</code></pre>
+<p>Finally, the <strong>PrintBitmap</strong> method prints the bitmap in the default printer.</p>
+<p>The bitmap created by <strong>CMemBmp</strong> is a DDB (Device-Dependent Bitmap), compatible with the device that is associated with the specified device context (hDC parameter of the default constructor). If no device context is specified or the memory bitmap is constructed using the other two additional constructors (the one that use an image from a disk file or a resource file), the created memory bitmap will be compatible with the device context of the screen.</p>
+<p>To create a DIB (device-independent bitmap) from the memory bitmap, use the function <strong>GetDIBits</strong>.</p>
+<p>To create a GDI+ bitmap from the memory bitmap, use the function <strong>GdipCreateBitmapFromHBITMAP</strong>.</p>
+<p>As the <strong>CGraphCtx</strong> graphic control uses DIBs, to draw a <strong>CMemBmp</strong> memory bitmap into it call the method <strong>DrawBitmap</strong> of the <strong>CGraphCtx</strong> class.</p>
+<h1 id="constructors">Constructors</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructor1">Constructor(Width,Height)</a></td>
+<td>Creates an empty memory bitmap of the specified size.</td>
+</tr>
+<tr class="even">
+<td><a href="#Constructor2">Constructor(FileName)</a></td>
+<td>Creates a memory bitmap of the same size that the specified image to load.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Constructor3">Constructor(ResourceFile)</a></td>
+<td>Creates a memory bitmap of the same size that the specified image to load from a resource file.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="methods">Methods</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#DrawBitmap">DrawBitmap</a></td>
+<td>Draws a bitmap in the memory bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetBitsPixel">GetBitsPixel</a></td>
+<td>Returns the number of bits required to indicate the color of a pixel.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GethBmp">GethBmp</a></td>
+<td>Returns the handle of the compatible memory bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetHeight">GetHeight</a></td>
+<td>Returns the height of the memory bitmap in pixels.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMemDC">GetMemDC</a></td>
+<td>Returns the handle of the memory device context of the bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetPixel">GetPixel</a></td>
+<td>Retrieves the red, green, blue (RGB) color value of the pixel at the specified coordinates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetPlanes">GetPlanes</a></td>
+<td>Returns the count of color planes of the memory bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetWidth">GetWidth</a></td>
+<td>Returns the width of the memory bitmap in pixels.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetWidthBytes">GetWidthBytes</a></td>
+<td>Returns the number of bytes in each scan line of the memory bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#PrintBtmap">PrintBtmap</a></td>
+<td>Prints the bitmap in the default printer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SaveBitmap">SaveBitmap</a></td>
+<td>Saves the bitmap to a file.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetPixel">SetPixel</a></td>
+<td>Sets the pixel at the specified coordinates to the specified color.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor(width,-height)"><a name="Constructor1"></a>Constructor(Width, Height)</h1>
+<p>Creates an empty memory bitmap of the specified size.</p>
+<pre><code>CONSTRUCTOR CMemBmp (BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
+   BYVAL hdc AS .HDC = NULL, BYVAL clrBkg AS COLORREF = BGR(255, 255, 255))
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>Optional. The width of the bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>Optional. The height of the bitmap.</td>
+</tr>
+<tr class="odd">
+<td><em>hdc</em></td>
+<td>Optional. A handle to a device context. If no device context is provided, the one of the screen will be used.</td>
+</tr>
+<tr class="even">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color of the bitmap. Default is white.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor(file-name)"><a name="Constructor2"></a>Constructor(File Name)</h1>
+<p>Creates a memory bitmap of the same size that the specified image to load. It also allows to convert the image to gray scale and/or dim the image.</p>
+<pre><code>CONSTRUCTOR CMemBmp (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, _
+   BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBackground AS ARGB = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Absolute path to the file.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. The height of the bitmap.</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>Optional. A handle to a device context. If no device context is provided, the one of the screen will be used.</td>
+</tr>
+<tr class="even">
+<td><em>clrBackground</em></td>
+<td>Optional. The background color of the bitmap. Default is white.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor(resource-file)"><a name="Constructor3"></a>Constructor(Resource File)</h1>
+<p>Creates a memory bitmap of the same size that the specified image to load from a resource file. It also allows to convert the image to gray scale and/or dim the image.</p>
+<pre><code>CONSTRUCTOR CMemBmp (BYVAL hInst AS HINSTANCE, BYREF wszImageName AS WSTRING, BYVAL dimPercent AS LONG = 0, _
+   BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBackground AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hInst</em></td>
+<td>A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process.</td>
+</tr>
+<tr class="even">
+<td><em>wszImageName</em></td>
+<td>Name of the image in the resource file (.RES). If the image resource uses an integral identifier, wszImage should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., &quot;#998&quot;. Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. The height of the bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. A handle to a device context. If no device context is provided, the one of the screen will be used.</td>
+</tr>
+<tr class="odd">
+<td><em>clrBackground</em></td>
+<td>Optional. The background color of the bitmap. Default is white.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="drawbitmap"><a name="DrawBitmap"></a>DrawBitmap</h1>
+<p>Draws a bitmap in the memory bitmap.</p>
+<pre><code>SUB DrawBitmap (BYVAL hbmp AS HBITMAP, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+</code></pre>
+<pre><code>SUB DrawBitmap (BYVAL pBitmap AS GpBitmap PTR, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hbmp</em></td>
+<td>A handle to the bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>pBitmap</em></td>
+<td>A pointer to a GDI+ bitmap</td>
+</tr>
+<tr class="odd">
+<td><em>x</em></td>
+<td>Optional. Left position.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>Optional. Top position.</td>
+</tr>
+<tr class="odd">
+<td><em>nRight</em></td>
+<td>Optional. Right position.</td>
+</tr>
+<tr class="even">
+<td><em>nBottom</em></td>
+<td>Optional. Bottom position.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>Returns OK (0) on success or a GdiPlus status code on failure.</p>
+<h1 id="getbitspixel"><a name="GetBitsPixel"></a>GetBitsPixel</h1>
+<p>Returns the number of bits required to indicate the color of a pixel.</p>
+<pre><code>FUNCTION GetBitsPixel () AS LONG
+</code></pre>
+<h1 id="gethbmp"><a name="GethBmp"></a>GethBmp</h1>
+<p>Returns the handle of the compatible memory bitmap.</p>
+<pre><code>FUNCTION GethBmp () AS HBITMAP
+</code></pre>
+<h1 id="getheight"><a name="GetHeight"></a>GetHeight</h1>
+<p>Returns the height of the memory bitmap in pixels.</p>
+<pre><code>FUNCTION GetHeight () AS LONG
+</code></pre>
+<h1 id="getmemdc"><a name="GetMemDC"></a>GetMemDC</h1>
+<p>Returns the handle of the memory device context of the bitmap.</p>
+<pre><code>FUNCTION GetMemDC () AS HDC
+</code></pre>
+<h1 id="getpixel"><a name="GetPixel"></a>GetPixel</h1>
+<p>Retrieves the red, green, blue (RGB) color value of the pixel at the specified coordinates.</p>
+<pre><code>FUNCTION GetPixel (BYVAL x AS LONG, BYVAL y AS LONG) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>x</em></td>
+<td>The x-coordinate, in logical units, of the pixel to be examined.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The y-coordinate, in logical units, of the pixel to be examined.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>The return value is the COLORREF value that specifies the RGB of the pixel. If the pixel is outside of the current clipping region, the return value is CLR_INVALID (hFFFFFFFF defined in Wingdi.bi).</p>
+<h4 id="remarks">Remarks</h4>
+<p>The function fails if the pixel coordinates lie outside of the current clipping region.</p>
+<h1 id="getplanes"><a name="GetPlanes"></a>GetPlanes</h1>
+<p>Returns the count of color planes of the memory bitmap.</p>
+<pre><code>FUNCTION GetPlanes () AS LONG
+</code></pre>
+<h1 id="getwidth"><a name="GetWidth"></a>GetWidth</h1>
+<p>Returns the width of the memory bitmap in pixels.</p>
+<pre><code>FUNCTION GetWidth () AS LONG
+</code></pre>
+<h1 id="getwidthbytes"><a name="GetWidthBytes"></a>GetWidthBytes</h1>
+<p>Returns the number of bytes in each scan line of the memory bitmap.</p>
+<pre><code>FUNCTION GetWidthBytes () AS LONG
+</code></pre>
+<h1 id="printbtmap"><a name="PrintBtmap"></a>PrintBtmap</h1>
+<p>Prints the bitmap in the default printer.</p>
+<pre><code>FUNCTION PrintBtmap (BYVAL bStretch AS BOOLEAN = FALSE, _
+   BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bStretch</em></td>
+<td>Optional. Stretch the image (TRUE or FALSE).</td>
+</tr>
+<tr class="even">
+<td><em>nStretchMode</em></td>
+<td>Stretching mode.<br>InterpolationModeLowQuality = 1<br>InterpolationModeHighQuality = 2<br>InterpolationModeBilinear = 3<br>InterpolationModeBicubic = 4<br>InterpolationModeNearestNeighbor = 5<br>InterpolationModeHighQualityBilinear = 6<br>InterpolationModeHighQualityBicubic = 7<br>Default value = InterpolationModeHighQualityBicubic.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.</p>
+<h1 id="savebitmap"><a name="SaveBitmap"></a>SaveBitmap</h1>
+<p>Saves the bitmap to a file.</p>
+<pre><code>FUNCTION SaveBitmap (BYREF wszFileName AS WSTRING, BYREF wszMimeType AS WSTRING) AS LONG
+</code></pre>
+<pre><code>FUNCTION SaveBitmapAsBmp (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveBitmapAsJpeg (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveBitmapAsPng (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveBitmapAsGif (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveBimapAsTiff (BYREF wszFileName AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Absolute path name of the file.</td>
+</tr>
+<tr class="even">
+<td><em>wszMimeType</em></td>
+<td>The mime type.<br>&quot;image/bmp&quot; = Bitmap (.bmp)<br>&quot;image/gif&quot; = GIF (.gif)<br>&quot;image/jpeg&quot; = JPEG (.jpg)<br>&quot;image/png&quot; = PNG (.png)<br>&quot;image/tiff&quot; = TIFF (.tiff)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setpixel"><a name="SetPixel"></a>SetPixel</h1>
+<p>Sets the pixel at the specified coordinates to the specified color.</p>
+<pre><code>FUNCTION SetPixel (BYVAL x AS LONG, BYVAL y AS LONG, BYVAL crColor AS COLORREF) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>x</em></td>
+<td>The x-coordinate, in logical units, of the point to be set.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The y-coordinate, in logical units, of the point to be set.</td>
+</tr>
+<tr class="odd">
+<td><em>crColor</em></td>
+<td>The color to be used to paint the point. To create a COLORREF color value, use the BGR macro.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>If the function succeeds, the return value is the RGB value that the function sets the pixel to. This value may differ from the color specified by <strong>crColor</strong>; that occurs when an exact match for the specified color cannot be found. If the function fails, the return value is CLR_INVALID (hFFFFFFFF defined in Wingdi.bi).</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>The function fails if the pixel coordinates lie outside of the current clipping region.</p>
+</body>
+</html>
+

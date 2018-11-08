@@ -28,16 +28,15 @@ Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) as Long
            CTRL_OPTION, CTRL_FRAME
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "Click" 
-      case CTRL_TEXTBOX
+      case CTRL_TEXTBOX, CTRL_MASKEDEDIT
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "KeyPress" 
-      case CTRL_LISTBOX
+      case CTRL_LISTBOX, CTRL_COMBOBOX
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Click" 
    
    ' TODO: Set default property/event for each control.
    '   CTRL_PICTURE
-   '   CTRL_COMBOBOX
    '   CTRL_IMAGEBUTTON
    '   CTRL_HSCROLL
    '   CTRL_VSCROLL

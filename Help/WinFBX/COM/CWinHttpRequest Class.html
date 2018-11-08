@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CWinHttpRequest Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cwinhttprequest-class">CWinHttpRequest Class</h1>
+<p>Wrapper class for Microsoft WinHTTP Services, version 5.1</p>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Abort">Abort</a></td>
+<td>Aborts a WinHTTP <strong>Send</strong> method.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetAllResponseHeaders">GetAllResponseHeaders</a></td>
+<td>Gets all HTTP response headers.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetErrorInfo">GetErrorInfo</a></td>
+<td>Returns the description of the most recent error.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetLastResult">GetLastResult</a></td>
+<td>Returns the last result code.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetOption">GetOption</a></td>
+<td>Retrieves a Microsoft Windows HTTP Services (WinHTTP) option value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetResponseBody">GetResponseBody</a></td>
+<td>Retrieves the response entity body as an array of unsigned bytes.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetResponseHeader">GetResponseHeader</a></td>
+<td>Gets the specified HTTP response header.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetResponseStream">GetResponseStream</a></td>
+<td>Retrieves the response entity body as a stream.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetResponseText">GetResponseText</a></td>
+<td>Retrieves the response entity body as an string.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetStatus">GetStatus</a></td>
+<td>Retrieves the HTTP status code from the last response.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetStatusText">GetStatusText</a></td>
+<td>Retrieves the HTTP status text.</td>
+</tr>
+<tr class="even">
+<td><a href="#Open">Open</a></td>
+<td>Opens an HTTP connection to an HTTP resource.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Send">Send</a></td>
+<td>Sends an HTTP request to an HTTP server.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetAutoLogonPolicy">SetAutoLogonPolicy</a></td>
+<td>Sets the current Automatic Logon Policy.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetClientCertificate">SetClientCertificate</a></td>
+<td>Selects a client certificate to send to a Secure Hypertext Transfer Protocol (HTTPS) server.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetCredentials">SetCredentials</a></td>
+<td>Sets credentials to be used with an HTTP server, whether it is a proxy server or an originating server.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetOption">SetOption</a></td>
+<td>Sets a Microsoft Windows HTTP Services (WinHTTP) option value.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetProxy">SetProxy</a></td>
+<td>Sets proxy server information.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetRequestHeader">SetRequestHeader</a></td>
+<td>Adds, changes, or deletes an HTTP request header.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetTimeouts">SetTimeouts</a></td>
+<td>Specifies the individual time-out components of a send/receive operation, in milliseconds.</td>
+</tr>
+<tr class="odd">
+<td><a href="#WaitForResponse">WaitForResponse</a></td>
+<td>Waits for an asynchronous Send method to complete, with optional time-out value, in seconds.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="events">Events</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#OnError">OnError</a></td>
+<td>Occurs when there is a run-time error in the application.</td>
+</tr>
+<tr class="even">
+<td><a href="#OnResponseDataAvailable">OnResponseDataAvailable</a></td>
+<td>Occurs when data is available from the response.</td>
+</tr>
+<tr class="odd">
+<td><a href="#OnResponseFinished">OnResponseFinished</a></td>
+<td>Occurs when the response data is complete.</td>
+</tr>
+<tr class="even">
+<td><a href="#OnResponseStart">OnResponseStart</a></td>
+<td>Occurs when the response data starts to be received.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="enumerations">Enumerations</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#WinHttpRequestAutoLogonPolicy">WinHttpRequestAutoLogonPolicy</a></td>
+<td>Includes possible settings for the Automatic Logon Policy.</td>
+</tr>
+<tr class="even">
+<td><a href="#WinHttpRequestOption">WinHttpRequestOption</a></td>
+<td>Includes options that can be set or retrieved for the current Microsoft Windows HTTP Services (WinHTTP) session.</td>
+</tr>
+<tr class="odd">
+<td><a href="#WinHttpRequestSecureProtocols">WinHttpRequestSecureProtocols</a></td>
+<td>Type of secure protocol.</td>
+</tr>
+<tr class="even">
+<td><a href="#WinHttpRequestSslErrorFlags">WinHttpRequestSslErrorFlags</a></td>
+<td>SSL certificate errors.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="http-status-codes">HTTP Status Codes</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#HTTPStatusCodes">HTTP Status Codes</a></td>
+<td>These constants and corresponding values indicate HTTP status codes returned by servers on the Internet.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="abort"><a name="Abort"></a>Abort</h1>
+<p>Aborts a WinHTTP <strong>Send</strong> method.</p>
+<pre><code>FUNCTION Abort () AS HRESULT
+</code></pre>
+<h4 id="return-value">Return value</h4>
+<p>The return value is S_OK (0) on success or an error value otherwise.</p>
+<h4 id="remarks">Remarks</h4>
+<p>You can abort both asynchronous and synchronous <strong>Send</strong> methods. To abort a synchronous <strong>Send</strong> method, you must call <strong>Abort</strong> from within an <strong>IWinHttpRequestEvents</strong> event.</p>
+<h1 id="getallresponseheaders"><a name="GetAllResponseHeaders"></a>GetAllResponseHeaders</h1>
+<p>Gets all HTTP response headers.</p>
+<pre><code>FUNCTION GetAllResponseHeaders () AS CBSTR
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>The resulting header information.</p>
+<h4 id="getlastresult">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>This method returns all of the headers contained in the most recent server response. The individual headers are delimited by a carriage return and line feed combination (ASCII 13 and 10). The last entry is followed by two delimiters (13, 10, 13, 10). Invoke this method only after the <strong>Send</strong> method has been called.</p>
+<h4 id="example">Example</h4>
+<pre><code>#include once &quot;windows.bi&quot;
+#include once &quot;Afx/CWinHttpRequest.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttpRequest class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+' // Wait for response with a timeout of 5 seconds
+DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
+' // Get the response headers
+DIM cbsResponseHeaders AS CBSTR = pWHttp.GetAllResponseHeaders
+PRINT cbsResponseHeaders
+</code></pre>
+<h1 id="geterrorinfo"><a name="GetErrorInfo"></a>GetErrorInfo</h1>
+<p>Returns the description of the most recent OLE error in the current logical thread and clears the error state for the thread. It should be called as soon as possible after calling a method of this class. The numerical error code can obtained calling the <strong>GetLastResult</strong> method.</p>
+<pre><code>FUNCTION GetErrorInfo() AS CBSTR
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>A localized description of the error.</p>
+<h1 id="getlastresult-1"><a name="GetLastResult"></a>GetLastResult</h1>
+<p>Returns the last result code.</p>
+<pre><code>FUNCTION GetLastResult () AS HRESULT
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>The result code returned by the last executed method. The <strong>WinHttpRequest</strong> object uses the <strong>IErrorInfo</strong> interface to provide error data. A description of the error can be obtained calling the <strong>GetOleErrorInfo</strong> method.</p>
+<h1 id="getoption"><a name="GetOption"></a>GetOption</h1>
+<p>Retrieves a Microsoft Windows HTTP Services (WinHTTP) option value.</p>
+<pre><code>FUNCTION GetOption (BYVAL nOption AS WinHttpRequestOption) AS CVAR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nOption</em></td>
+<td>Value of type <strong>WinHttpRequestOption</strong> that specifies the option to retrieve.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>Variant that contains the option value.</p>
+<h4 id="getlastresult-2">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h1 id="getresponsebody"><a name="GetResponseBody"></a>GetResponseBody</h1>
+<p>Retrieves the response entity body as an array of unsigned bytes.</p>
+<pre><code>FUNCTION GetResponseBody () AS STRING
+</code></pre>
+<h4 id="return-value-5">Return value</h4>
+<p>An string containing the response entity body as an array of unsigned bytes. This array contains the raw data as received directly from the server.</p>
+<h4 id="getlastresult-3">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-2">Remarks</h4>
+<p>This method returns the response data in an array of unsigned bytes. If the response does not have a response body, an empty variant is returned. This method can only be invoked after the <strong>Send</strong> method has been called.</p>
+<h4 id="examples">Examples</h4>
+<pre><code>#include once &quot;Afx/CWinHttpRequest.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttpRequest class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+' // Wait for response with a timeout of 5 seconds
+DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
+' // Get the response body
+DIM strResponseBody AS STRING = pWHttp.GetResponseBody
+PRINT strResponseBody
+</code></pre>
+<pre><code>#include once &quot;Afx/CWinHttpRequest.inc&quot;
+#include once &quot;Afx/CStream.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttpRequest class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;https://i.ytimg.com/vi/nPUi1XNiRzQ/maxresdefault.jpg&quot;
+print pWHttp.GetErrorInfo
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+' // Wait for response with a timeout of 5 seconds
+DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
+' // Get the reponse body and sae it into a file
+DIM st AS STRING = pWHttp.GetResponseBody
+' // Open a file stream
+DIM pFileStream AS CFileStream
+IF pFileStream.Open(&quot;image.jpg&quot;, STGM_CREATE OR STGM_WRITE) = S_OK then
+   pFileStream.WriteTextA(st)
+END IF
+</code></pre>
+<h1 id="getresponseheader"><a name="GetResponseHeader"></a>GetResponseHeader</h1>
+<p>Gets the specified HTTP response header.</p>
+<pre><code>FUNCTION GetResponseHeader (BYREF cbsHeader AS CBSTR) AS CBSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsHeader</em></td>
+<td>The case-insensitive header name.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>The resulting header information.</p>
+<h4 id="getlastresult-4">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>Invoke this method only after the <strong>Send</strong> method has been called.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>#include &quot;Afx/CWinHttpRequest.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttpRequest class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+' // Wait for response with a timeout of 5 seconds
+DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
+' // Get the response headers
+DIM cbsResponseHeader AS CBSTR = pWHttp.GetResponseHeader(&quot;Date&quot;)
+PRINT cbsResponseHeader
+</code></pre>
+<h1 id="getresponsestream"><a name="GetResponseStream"></a>GetResponseStream</h1>
+<p>Retrieves the response entity body as a stream.</p>
+<pre><code>FUNCTION GetResponseStream () AS IStream PTR
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>Returns a pointer to an <strong>IStream</strong> interface if successful or NULL otherwise.</p>
+<h4 id="getlastresult-5">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>This method can only be invoked after the <strong>Send</strong> method has been called.</p>
+<h1 id="getresponsetext"><a name="GetResponseText"></a>GetResponseText</h1>
+<p>Retrieves the response entity body as a CBSTR.</p>
+<pre><code>FUNCTION GetResponseText () AS CBSTR
+</code></pre>
+<h4 id="return-value-8">Return value</h4>
+<p>A CBSTR containing the entity body of the response as text.</p>
+<h4 id="getlastresult-6">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>This method can only be invoked after the <strong>Send</strong> method has been called.</p>
+<p>When using this property in synchronous mode, the limit to the number of characters it returns is approximately 2,169,895.</p>
+<h1 id="getstatus"><a name="GetStatus"></a>GetStatus</h1>
+<p>Retrieves the HTTP status code from the last response.</p>
+<pre><code>FUNCTION GetStatus () AS LONG
+</code></pre>
+<h4 id="return-value-9">Return value</h4>
+<p>Value of type LONG that receives the returned status code.</p>
+<h4 id="getlastresult-7">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-6">Remarks</h4>
+<p>The results of this method are valid only after the <strong>Send</strong> method has successfully completed. For a list of status codes see HTTP Status Codes.</p>
+<h1 id="getstatustext"><a name="GetStatusText"></a>GetStatusText</h1>
+<p>Retrieves the HTTP status code from the last response.</p>
+<pre><code>FUNCTION GetStatusText () AS CBSTR
+</code></pre>
+<h4 id="return-value-10">Return value</h4>
+<p>A CBSTR containing the HTTP status text.</p>
+<h4 id="getlastresult-8">GetLastResult</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-7">Remarks</h4>
+<p>Retrieves the text portion of the server response line, making available the &quot;user-friendly&quot; equivalent to the numeric HTTP status code. The results of this property are valid only after the Send method has successfully completed.</p>
+<h1 id="open"><a name="Open"></a>Open</h1>
+<p>Opens an HTTP connection to an HTTP resource.</p>
+<pre><code>FUNCTION Open (BYREF cbsMethod AS CBSTR, BYREF cbsUrl AS CBSTR, BYVAL bAsync AS BOOLEAN = FALSE) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsMethod</em></td>
+<td>An unicode strring that specifies the HTTP verb used for the Open method, such as &quot;GET&quot; or &quot;PUT&quot;. Always use uppercase as some servers ignore lowercase HTTP verbs.</td>
+</tr>
+<tr class="even">
+<td><em>cbsUrl</em></td>
+<td>An unicode string that contains the name of the resource. This must be an absolute URL.</td>
+</tr>
+<tr class="odd">
+<td><em>bAsync</em></td>
+<td>Optional. A value of type Boolean that specifies whether to open in asynchronous mode.<br><strong>TRUE</strong>: Opens the HTTP connection in asynchronous mode.<br><strong>FALSE</strong>: Opens the HTTP connection in synchronous mode. A call to Send does not return until WinHTTP has completely received the response.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>The return value is S_OK (0) on success or an error value otherwise.</p>
+<h4 id="remarks-8">Remarks</h4>
+<p>This method opens a connection to the resource identified in <em>cbsUrl</em> using the HTTP verb given in <em>cbsMethod</em>.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>#include &quot;Afx/CWinHttpRequest.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttpRequest class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+' // Wait for response with a timeout of 5 seconds
+DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
+</code></pre>
+<h1 id="send"><a name="Send"></a>Send</h1>
+<p>Sends an HTTP request to an HTTP server.</p>
+<pre><code>FUNCTION Send (BYREF cvBody AS CVAR = &quot;&quot;) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cvBody</em></td>
+<td>Optional. Data to be sent to the server.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-9">Remarks</h4>
+<p>The request to be sent was defined in a prior call to the <strong>Open</strong> method. The calling application can provide data to be sent to the server through the <em>cvBody</em> parameter. If the HTTP verb of the object's Open is &quot;GET&quot;, this method sends the request without <em>cvBody</em>, even if it is provided by the calling application.</p>
+<h1 id="setautologonpolicy"><a name="SetAutoLogonPolicy"></a>SetAutoLogonPolicy</h1>
+<p>Sets the current Automatic Logon Policy.</p>
+<pre><code>FUNCTION SetAutoLogonPolicy (BYVAL AutoLogonPolicy AS WinHttpRequestAutoLogonPolicy) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>AutoLogonPolicy</em></td>
+<td>A value of type <strong>WinHttpRequestAutoLogonPolicy</strong> that specifies the current automatic logon policy.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-10">Remarks</h4>
+<p>The default policy is <strong>AutoLogonPolicy_OnlyIfBypassProxy</strong>.</p>
+<p>Call <strong>SetAutoLogonPolicy</strong> to set the automatic logon policy before calling <strong>Send</strong> to send the request.</p>
+<h1 id="setclientcertificate"><a name="SetClientCertificate"></a>SetClientCertificate</h1>
+<p>Selects a client certificate to send to a Secure Hypertext Transfer Protocol (HTTPS) server.</p>
+<pre><code>FUNCTION SetClientCertificate (BYREF cbsClientCertificate AS CBSTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsClientCertificate</em></td>
+<td>An string that specifies the location, certificate store, and subject of a client certificate.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-11">Remarks</h4>
+<p>The string specified in the <em>cbsClientCertificate</em> parameter consists of the certificate location, certificate store, and subject name delimited by backslashes. For more information about the components of the certificate string, see <a href="https://docs.microsoft.com/en-us/windows/desktop/winhttp/ssl-in-winhttp">Client Certificates</a>.</p>
+<p>The certificate store name and location are optional. However, if you specify a certificate store, you must also specify the location of that certificate store. The default location is CURRENT_USER and the default certificate store is &quot;MY&quot;. A blank subject indicates that the first certificate in the certificate store should be used.</p>
+<p>Call <strong>SetClientCertificate</strong> to select a certificate before calling <strong>Send</strong> to send the request.</p>
+<p>Microsoft Windows HTTP Services (WinHTTP) does not provide client certificates to proxy servers that request certificates for authentication.</p>
+<h1 id="setcredentials"><a name="SetCredentials"></a>SetCredentials</h1>
+<p>Sets credentials to be used with an HTTP server, whether it is a proxy server or an originating server.</p>
+<pre><code>FUNCTION SetCredentials (BYREF cbsUserName AS CBSTR, BYREF cbsPassword AS CBSTR, _
+   BYVAL Flags AS HTTPREQUEST_SETCREDENTIALS_FLAGS) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsUserName</em></td>
+<td>An string that specifies the user name for authentication.</td>
+</tr>
+<tr class="even">
+<td><em>cwsPassword</em></td>
+<td>An string specifies the password for authentication. This parameter is ignored if <em>cbsUserName</em> is NULL or missing.</td>
+</tr>
+<tr class="odd">
+<td><em>Flags</em></td>
+<td>A value that specifies when <strong>CWinHttpRequest</strong> uses credentials. Can be one of the below values.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HTTPREQUEST_SETCREDENTIALS_FOR_SERVER</td>
+<td>Credentials are passed to a server.</td>
+</tr>
+<tr class="even">
+<td>HTTPREQUEST_SETCREDENTIALS_FOR_PROXY</td>
+<td>Credentials are passed to a proxy.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-15">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-12">Remarks</h4>
+<p>This method returns an error value if a call to <strong>Open</strong> has not completed successfully. It is assumed that some measure of interaction with a proxy server or origin server must occur before users can set credentials for the session. Moreover, until users know which authentication scheme(s) are supported, they cannot format the credentials.</p>
+<p>To authenticate with both the server and the proxy, the application must call <strong>SetCredentials</strong> twice; first with the <em>Flags</em> parameter set to HTTPREQUEST_SETCREDENTIALS_FOR_SERVER, and second, with the <em>Flags</em> parameter set to HTTPREQUEST_SETCREDENTIALS_FOR_PROXY.</p>
+<h1 id="setoption"><a name="SetOption"></a>SetOption</h1>
+<p>Sets a Microsoft Windows HTTP Services (WinHTTP) option value.</p>
+<pre><code>FUNCTION SetOption (BYVAL nOption AS WinHttpRequestOption, BYREF cvValue AS CVAR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nOption</em></td>
+<td>Value of type <strong>WinHttpRequestOption</strong> that specifies the option to set.</td>
+</tr>
+<tr class="even">
+<td><em>cvValue</em></td>
+<td>CVAR. Value to set.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="example-3">Example</h4>
+<pre><code>#include &quot;Afx/CWinHttpRequest.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttpRequest class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
+' // Specify the user agent
+pWHttp.SetOption(WinHttpRequestOption_UserAgentString, &quot;A WinHttpRequest Example Program&quot;)
+
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+IF pWHttp.GetLastResult = S_OK THEN
+   ' // Get user agent string.
+   DIM cvText AS CVAR = pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
+   PRINT cvText
+   ' // We can also use:
+   ' PRINT pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
+   ' // Get URL
+   PRINT pWHttp.GetOption(WinHttpRequestOption_URL)
+   ' // Get URL Code Page.
+   PRINT pWHttp.GetOption(WinHttpRequestOption_URLCodePage)
+   ' // Convert percent symbols to escape sequences.
+   PRINT pWHttp.GetOption(WinHttpRequestOption_EscapePercentInURL)
+END IF
+</code></pre>
+<h1 id="setproxy"><a name="SetProxy"></a>SetProxy</h1>
+<p>Sets proxy server information.</p>
+<pre><code>FUNCTION SetProxy (BYVAL ProxySetting AS HTTPREQUEST_PROXY_SETTING, BYREF cvProxyServer AS CVAR = &quot;&quot;, _
+   BYVAL cvBypassList AS CVAR = &quot;&quot;) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ProxySetting</em></td>
+<td>A value of type LONG that receives the flags that control this method. Can be one of the values in the table below.</td>
+</tr>
+<tr class="even">
+<td><em>cvProxyServer</em></td>
+<td>Optional. A value of type Variant that is set to a proxy server string when <em>ProxySetting</em> equals HTTPREQUEST_PROXYSETTING_PROXY.</td>
+</tr>
+<tr class="odd">
+<td><em>cvBypassList</em></td>
+<td>Optional. A value of type Variant that is set to a domain bypass list string when <em>ProxySetting</em> equals HTTPREQUEST_PROXYSETTING_PROXY.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HTTPREQUEST_PROXYSETTING_DEFAULT</td>
+<td>Default proxy setting. Equivalent to HTTPREQUEST_PROXYSETTING_PRECONFIG.</td>
+</tr>
+<tr class="even">
+<td>HTTPREQUEST_PROXYSETTING_PRECONFIG</td>
+<td>Indicates that the proxy settings should be obtained from the registry. This assumes that Proxycfg.exe has been run. If Proxycfg.exe has not been run and HTTPREQUEST_PROXYSETTING_PRECONFIG is specified, then the behavior is equivalent to HTTPREQUEST_PROXYSETTING_DIRECT.</td>
+</tr>
+<tr class="odd">
+<td>HTTPREQUEST_PROXYSETTING_DIRECT</td>
+<td>Indicates that all HTTP and HTTPS servers should be accessed directly. Use this command if there is no proxy server.</td>
+</tr>
+<tr class="even">
+<td>HTTPREQUEST_PROXYSETTING_PROXY</td>
+<td>When HTTPREQUEST_PROXYSETTING_PROXY is specified, <em>cvProxyServer</em> should be set to a proxy server string and <em>cvBypassList</em> should be set to a domain bypass list string. This proxy configuration applies only to the current instance of the WinHttpRequest object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-13">Remarks</h4>
+<p>Enables the calling application to specify use of default proxy information (configured by the proxy configuration tool) or to override Proxycfg.exe. This method must be called before calling the Send method. If this method is called after the <strong>Send</strong> method, it has no effect.</p>
+<p><strong>CWinHttpRequest</strong> passes these parameters to Microsoft Windows HTTP Services (WinHTTP).</p>
+<h1 id="setrequestheader"><a name="SetRequestHeader"></a>SetRequestHeader</h1>
+<p>Adds, changes, or deletes an HTTP request header.</p>
+<pre><code>FUNCTION SetRequestHeader (BYREF cbsHeader AS CBSTR, BYREF cbsValue AS CBSTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsHeader</em></td>
+<td>A value of type CBSTR that specifies the name of the header to be set, for example, &quot;depth&quot;. This parameter should not contain a colon and must be the actual text of the HTTP header.</td>
+</tr>
+<tr class="even">
+<td><em>cbsValue</em></td>
+<td>An string that specifies the value of the header, for example, &quot;infinity&quot;.</td>
+</tr>
+</tbody>
+</table>
+<p>Return value</p>
+<p>Returns S_OK if successful or an error value otherwise.</p>
+<h4 id="remarks-14">Remarks</h4>
+<p>Headers are transferred across redirects. This can create a security vulnerability. To avoid having headers transferred if a redirect occurs, use the WINHTTP_STATUS_CALLBACK callback to correct the specific headers when a redirect occurs.</p>
+<p>The <strong>SetRequestHeader</strong> method enables the calling application to add or delete an HTTP request header prior to sending the request. The header name is given in <em>cbsHeader</em>, and the header token or value is given in <em>cbsValue</em>. To add a header, supply a header name and value. If another header already exists with this name, it is replaced. To delete a header, set <em>cbsHeader</em> to the name of the header to delete and set <em>cbsValue</em> to NULL.</p>
+<p>The name and value of request headers added with this method are validated. Headers must be well formed. For more information about valid HTTP headers, see RFC 2616. If an invalid header is used, an error occurs and the header is not added.</p>
+<h1 id="settimeouts"><a name="SetTimeouts"></a>SetTimeouts</h1>
+<p>Specifies the individual time-out components of a send/receive operation, in milliseconds.</p>
+<pre><code>FUNCTION SetTimeouts (BYVAL ResolveTimeout AS LONG, BYVAL ConnectTimeout AS LONG, _
+   BYVAL SendTimeout AS LONG, BYVAL ReceiveTimeout AS LONG) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ResolveTimeout</em></td>
+<td>Time-out value applied when resolving a host name (such as <a href="http://www.microsoft.com">www.microsoft.com</a>) to an IP address (such as 192.168.131.199), in milliseconds. The default value is zero, meaning no time-out (infinite). If DNS timeout is specified using NAME_RESOLUTION_TIMEOUT, there is an overhead of one thread per request.</td>
+</tr>
+<tr class="even">
+<td><em>ConnectTimeout</em></td>
+<td>Time-out value applied when establishing a communication socket with the target server, in milliseconds. The default value is 60,000 (60 seconds).</td>
+</tr>
+<tr class="odd">
+<td><em>SendTimeout</em></td>
+<td>Time-out value applied when sending an individual packet of request data on the communication socket to the target server, in milliseconds. A large request sent to an HTTP server are normally be broken up into multiple packets; the send time-out applies to sending each packet individually. The default value is 30,000 (30 seconds).</td>
+</tr>
+<tr class="even">
+<td><em>ReceiveTimeout</em></td>
+<td>Time-out value applied when receiving a packet of response data from the target server, in milliseconds. Large responses are be broken up into multiple packets; the receive time-out applies to fetching each packet of data off the socket. The default value is 30,000 (30 seconds).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-18">Return value</h4>
+<p>Returns S_OK (0) if successful or an error value otherwise.</p>
+<h4 id="remarks-15">Remarks</h4>
+<p>All parameters are required. A value of 0 or -1 sets a time-out to wait infinitely. A value greater than 0 sets the time-out value in milliseconds. For example, 30,000 would set the time-out to 30 seconds. All negative values other than -1 cause this method to fail.</p>
+<p>Time-out values are applied at the Winsock layer.</p>
+<h1 id="waitforresponse"><a name="WaitForResponse"></a>WaitForResponse</h1>
+<p>Waits for an asynchronous <strong>Send</strong> method to complete, with optional time-out value, in seconds.</p>
+<pre><code>FUNCTION WaitForResponse (BYVAL nTimeout AS LONG = 0) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTimeout</em></td>
+<td>Optional. Time-out value, in seconds. Default time-out is infinite. To explicitly set time-out to infinite, use the value -1.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h4 id="remarks-16">Remarks</h4>
+<p>This method suspends execution while waiting for a response to an asynchronous request. This method should be called after a <strong>Send</strong>. Calling applications can specify an optional Timeout value, in seconds. If this method times out, the request is not aborted. This way, the calling application can continue to wait for the request, if desired, in a subsequent call to this method.</p>
+<p>Calling this property after a synchronous <strong>Send</strong> method returns immediately and has no effect.</p>
+<h1 id="winhttprequestautologonpolicy-enumeration"><a name="WinHttpRequestAutoLogonPolicy"></a>WinHttpRequestAutoLogonPolicy Enumeration</h1>
+<p>The WinHttpRequestAutoLogonPolicy enumeration includes possible settings for the Automatic Logon Policy.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>AutoLogonPolicy_Always</strong></td>
+<td>An authenticated log on, using the default credentials, is performed for all requests.</td>
+</tr>
+<tr class="even">
+<td><strong>AutoLogonPolicy_OnlyIfBypassProxy</strong></td>
+<td>An authenticated log on, using the default credentials, is performed only for requests on the local intranet. The local intranet is considered to be any server on the proxy bypass list in the current proxy configuration.</td>
+</tr>
+<tr class="odd">
+<td><strong>AutoLogonPolicy_Never</strong></td>
+<td>Authentication is not used automatically.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-17">Remarks</h4>
+<p>To set the automatic logon policy, call the <strong>SetAutoLogonPolicy</strong> method and specify one of the preceding constants.</p>
+<h1 id="winhttprequestoption-enumeration"><a name="WinHttpRequestOption"></a>WinHttpRequestOption Enumeration</h1>
+<p>The WinHttpRequestOption enumeration includes options that can be set or retrieved for the current Microsoft Windows HTTP Services (WinHTTP) session.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_UserAgentString</strong></td>
+<td>Sets or retrieves a VARIANT that contains the user agent string.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_URL</strong></td>
+<td>Retrieves a VARIANT that contains the URL of the resource. This value is read-only; you cannot set the URL using this property. The URL cannot be read until the <strong>Open</strong> method is called. This option is useful for checking the URL after the <strong>Send</strong> method is finished to verify that any redirection occurred.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_URLCodePage</strong></td>
+<td>Sets or retrieves a VARIANT that identifies the code page for the URL string. The default value is the UTF-8 code page. The code page is used to convert the Unicode URL string, passed in the <strong>Open</strong> method, to a single-byte string representation.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_EscapePercentInURL</strong></td>
+<td>Sets or retrieves a VARIANT that indicates whether percent characters in the URL string are converted to an escape sequence. The default value of this option is VARIANT_TRUE which specifies all unsafe American National Standards Institute (ANSI) characters except the percent symbol are converted to an escape sequence.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_SslErrorIgnoreFlags</strong></td>
+<td>Sets or retrieves a VARIANT that indicates which server certificate errors should be ignored. This can be a combination of one or more of the following flags.<br><strong>&amp;H0100</strong>: Unknown certification authority (CA) or untrusted root.<br><strong>&amp;H0200</strong>: Wrong usage.<br><strong>&amp;H1000</strong>: Invalid common name (CN)<br><strong>&amp;H2000</strong>: Invalid date or certificate expired.<br>The default value of this option in Version 5.1 of WinHTTP is zero, which results in no errors being ignored. In earlier versions of WinHTTP, the default setting was 0x3300, which resulted in all server certificate errors being ignored by default.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_SelectCertificate</strong></td>
+<td>Sets a VARIANT that specifies the client certificate that is sent to a server for authentication. This option indicates the location, certificate store, and subject of a client certificate delimited with backslashes. For more information about selecting a client certificate, see <a href="https://docs.microsoft.com/en-us/windows/desktop/winhttp/ssl-in-winhttp">SSL in WinHTTP</a>.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_EnableRedirects</strong></td>
+<td>Sets or retrieves a VARIANT that indicates whether requests are automatically redirected when the server specifies a new location for the resource. The default value of this option is VARIANT_TRUE to indicate that requests are automatically redirected.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_UrlEscapeDisable</strong></td>
+<td>Sets or retrieves a VARIANT that indicates whether unsafe characters in the path and query components of a URL are converted to escape sequences. The default value of this option is VARIANT_TRUE, which specifies that characters in the path and query are converted.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_UrlEscapeDisableQuery</strong></td>
+<td>Sets or retrieves a VARIANT that indicates whether unsafe characters in the query component of the URL are converted to escape sequences. The default value of this option is VARIANT_TRUE, which specifies that characters in the query are converted.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_SecureProtocols</strong></td>
+<td>Sets or retrieves a VARIANT that indicates which secure protocols can be used. This option selects the protocols acceptable to the client. The protocol is negotiated during the Secure Sockets Layer (SSL) handshake. This can be a combination of one or more of the following flags:<br><strong>&amp;H0008</strong>: SSL 2.0.<br><strong>&amp;H0020</strong>: SSL 3.0.<br><strong>&amp;H0080</strong>:Transport Layer Security (TLS) 1.0.<br>The default value of this option is 0x0028, which indicates that SSL 2.0 or SSL 3.0 can be used. If this option is set to zero, the client and server are not able to determine an acceptable security protocol and the next <strong>Send</strong> results in an error.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_EnableTracing</strong></td>
+<td>Sets or retrieves a VARIANT that indicates whether tracing is currently enabled. For more information about the trace facility in Microsoft Windows HTTP Services (WinHTTP), see <a href="https://docs.microsoft.com/en-us/windows/desktop/winhttp/winhttptracecfg-exe--a-trace-configuration-tool">WinHTTP Trace Facility</a>.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_RevertImpersonationOverSsl</strong></td>
+<td>Controls whether the WinHttpRequest object temporarily reverts client impersonation for the duration of the SSL certificate authentication operations. The default setting for the WinHttpRequest object is TRUE. Set this option to FALSE to keep impersonation while performing certificate authentication operations.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_EnableHttpsToHttpRedirects</strong></td>
+<td>Controls whether or not WinHTTP allows redirects. By default, all redirects are automatically followed, except those that transfer from a secure (https) URL to an non-secure (http) URL. Set this option to TRUE to enable HTTPS to HTTP redirects.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_EnablePassportAuthentication</strong></td>
+<td>Enables or disables support for Passport authentication. By default, automatic support for Passport authentication is disabled; set this option to TRUE to enable Passport authentication support.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_MaxAutomaticRedirects</strong></td>
+<td>Sets or retrieves the maximum number of redirects that WinHTTP follows; the default is 10. This limit prevents unauthorized sites from making the WinHTTP client stall following a large number of redirects.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_MaxResponseHeaderSize</strong></td>
+<td>Sets or retrieves a bound set on the maximum size of the header portion of the server’s response. This bound protects the client from a malicious server attempting to stall the client by sending a response with an infinite amount of header data. The default value is 64 KB.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_MaxResponseDrainSize</strong></td>
+<td>Sets or retrieves a bound on the amount of data that will be drained from responses in order to reuse a connection. The default is 1 MB.</td>
+</tr>
+<tr class="even">
+<td><strong>WinHttpRequestOption_EnableHttp1_1</strong></td>
+<td>Sets or retrieves a boolean value that indicates whether HTTP/1.1 or HTTP/1.0 should be used. The default is TRUE, so that HTTP/1.1 is used by default.</td>
+</tr>
+<tr class="odd">
+<td><strong>WinHttpRequestOption_EnableCertificateRevocationCheck</strong></td>
+<td>Enables server certificate revocation checking during SSL negotiation. When the server presents a certificate, a check is performed to determine whether the certificate has been revoked by its issuer. If the certificate is indeed revoked, or the revocation check fails because the Certificate Revocation List (CRL) cannot be downloaded, the request fails; such revocation errors cannot be suppressed.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-18">Remarks</h4>
+<p>Set an option by specifying one of the preceding constants as the parameter of the <strong>Option</strong> property.</p>
+<h1 id="winhttprequestsecureprotocols-enumeration"><a name="WinHttpRequestSecureProtocols"></a>WinHttpRequestSecureProtocols Enumeration</h1>
+<p>Types of secure protocols.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>SecureProtocol_SSL2</strong></td>
+<td>SSL 2.0</td>
+</tr>
+<tr class="even">
+<td><strong>SecureProtocol_SSL3</strong></td>
+<td>SSL 3.0</td>
+</tr>
+<tr class="odd">
+<td><strong>SecureProtocol_TLS1</strong></td>
+<td>Transport Layer Security (TLS) 1.0.</td>
+</tr>
+<tr class="even">
+<td><strong>SecureProtocol_ALL</strong></td>
+<td>All the protocols.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="winhttprequestsslerrorflags-enumeration"><a name="WinHttpRequestSslErrorFlags"></a>WinHttpRequestSslErrorFlags Enumeration</h1>
+<p>SSL certificate errors.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>SslErrorFlag_UnknownCA</strong></td>
+<td>Unknown certification authority (CA) or untrusted root.</td>
+</tr>
+<tr class="even">
+<td><strong>SslErrorFlag_CertWrongUsage</strong></td>
+<td>Wrong usage.</td>
+</tr>
+<tr class="odd">
+<td><strong>SslErrorFlag_CertCNInvalid</strong></td>
+<td>Invalid common name (CN).</td>
+</tr>
+<tr class="even">
+<td><strong>SslErrorFlag_CertDateInvalid</strong></td>
+<td>Invalid date or certificate expired.</td>
+</tr>
+<tr class="odd">
+<td><strong>SslErrorFlag_Ignore_All</strong></td>
+<td>Ignore all.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="http-status-codes-1"><a name="HTTPStatusCodes"></a>HTTP Status Codes</h1>
+<p>These constants and corresponding values indicate HTTP status codes returned by servers on the Internet.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>HTTP_STATUS_CONTINUE</td>
+<td>100</td>
+<td>The request can be continued.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_SWITCH_PROTOCOLS</td>
+<td>101</td>
+<td>The server has switched protocols in an upgrade header.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_OK</td>
+<td>200</td>
+<td>The request completed successfully.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_CREATED</td>
+<td>201</td>
+<td>The request has been fulfilled and resulted in the creation of a new resource.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_ACCEPTED</td>
+<td>202</td>
+<td>The request has been accepted for processing, but the processing has not been completed.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_PARTIAL</td>
+<td>203</td>
+<td>The returned meta information in the entity-header is not the definitive set available from the originating server.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_NO_CONTENT</td>
+<td>204</td>
+<td>The server has fulfilled the request, but there is no new information to send back.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_RESET_CONTENT</td>
+<td>205</td>
+<td>The request has been completed, and the client program should reset the document view that caused the request to be sent to allow the user to easily initiate another input action.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_PARTIAL_CONTENT</td>
+<td>206</td>
+<td>The server has fulfilled the partial GET request for the resource.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_WEBDAV_MULTI_STATUS</td>
+<td>207</td>
+<td>During a World Wide Web Distributed Authoring and Versioning (WebDAV) operation, this indicates multiple status codes for a single response. The response body contains Extensible Markup Language (XML) that describes the status codes..</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_AMBIGUOUS</td>
+<td>300</td>
+<td>The requested resource is available at one or more locations.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_MOVED</td>
+<td>301</td>
+<td>The requested resource has been assigned to a new permanent Uniform Resource Identifier (URI), and any future references to this resource should be done using one of the returned URIs.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_REDIRECT</td>
+<td>302</td>
+<td>The requested resource resides temporarily under a different URI.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_REDIRECT_METHOD</td>
+<td>303</td>
+<td>The response to the request can be found under a different URI and should be retrieved using a GET HTTP verb on that resource.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_NOT_MODIFIED</td>
+<td>304</td>
+<td>The requested resource has not been modified.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_USE_PROXY</td>
+<td>305</td>
+<td>The requested resource must be accessed through the proxy given by the location field.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_REDIRECT_KEEP_VERB</td>
+<td>306</td>
+<td>The redirected request keeps the same HTTP verb. HTTP/1.1 behavior.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_BAD_REQUEST</td>
+<td>400</td>
+<td>The request could not be processed by the server due to invalid syntax.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_DENIED</td>
+<td>401</td>
+<td>The requested resource requires user authentication.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_PAYMENT_REQ</td>
+<td>402</td>
+<td>Not implemented in the HTTP protocol.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_FORBIDDEN</td>
+<td>403</td>
+<td>The server understood the request, but cannot fulfill it.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_NOT_FOUND</td>
+<td>404</td>
+<td>The server has not found anything that matches the requested URI.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_BAD_METHOD</td>
+<td>405</td>
+<td>The HTTP verb used is not allowed.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_NONE_ACCEPTABLE</td>
+<td>406</td>
+<td>No responses acceptable to the client were found.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_PROXY_AUTH_REQ</td>
+<td>407</td>
+<td>Proxy authentication required.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_REQUEST_TIMEOUT</td>
+<td>408</td>
+<td>The server timed out waiting for the request.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_CONFLICT</td>
+<td>409</td>
+<td>The request could not be completed due to a conflict with the current state of the resource. The user should resubmit with more information.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_GONE</td>
+<td>410</td>
+<td>The requested resource is no longer available at the server, and no forwarding address is known.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_LENGTH_REQUIRED</td>
+<td>411</td>
+<td>The server cannot accept the request without a defined content length.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_PRECOND_FAILED</td>
+<td>412</td>
+<td>The precondition given in one or more of the request header fields evaluated to false when it was tested on the server.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_REQUEST_TOO_LARGE</td>
+<td>413</td>
+<td>The server cannot process the request because the request entity is larger than the server is able to process.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_URI_TOO_LONG</td>
+<td>414</td>
+<td>The server cannot service the request because the request URI is longer than the server can interpret.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_UNSUPPORTED_MEDIA</td>
+<td>415</td>
+<td>The server cannot service the request because the entity of the request is in a format not supported by the requested resource for the requested method.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_RETRY_WITH</td>
+<td>449</td>
+<td>The request should be retried after doing the appropriate action.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_SERVER_ERROR</td>
+<td>500</td>
+<td>The server encountered an unexpected condition that prevented it from fulfilling the request.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_NOT_SUPPORTED</td>
+<td>501</td>
+<td>The server does not support the functionality required to fulfill the request.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_BAD_GATEWAY</td>
+<td>502</td>
+<td>The server, while acting as a gateway or proxy, received an invalid response from the upstream server it accessed in attempting to fulfill the request.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_SERVICE_UNAVAIL</td>
+<td>503</td>
+<td>The service is temporarily overloaded.</td>
+</tr>
+<tr class="odd">
+<td>HTTP_STATUS_GATEWAY_TIMEOUT</td>
+<td>504</td>
+<td>The request was timed out waiting for a gateway.</td>
+</tr>
+<tr class="even">
+<td>HTTP_STATUS_VERSION_NOT_SUP</td>
+<td>505</td>
+<td>The server does not support the HTTP protocol version that was used in the request message.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="onerror-event"><a name="OnError"></a>OnError Event</h1>
+<p>Occurs when there is a run-time error in the application.</p>
+<pre><code>SUB OnError (BYVAL ErrorNumber AS LONG, BYVAL ErrorDescription AS BSTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ErrorNumber</em></td>
+<td>Value of type long that receives the numerical value of the error.</td>
+</tr>
+<tr class="even">
+<td><em>ErrorDescription</em></td>
+<td>Value of type BSTR that specifies a short description of the error which occurred.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="onresponsedataavailable-event"><a name="OnResponseDataAvailable"></a>OnResponseDataAvailable Event</h1>
+<p>Occurs when data is available from the response.</p>
+<pre><code>SUB OnResponseDataAvailable (BYVAL pData AS SAFEARRAY PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pData</em></td>
+<td>A zero-based array of bytes that receives the response data received by Microsoft Windows HTTP Services (WinHTTP) up to the point that this event occurs. This is a safe array of type VT_UI1.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="onresponsefinished-event"><a name="OnResponseFinished"></a>OnResponseFinished Event</h1>
+<p>Occurs when the response data is complete.</p>
+<pre><code>SUB OnResponseFinished
+</code></pre>
+<h1 id="onresponsestart-event"><a name="OnResponseStart"></a>OnResponseStart Event</h1>
+<p>Occurs when the response data starts to be received.</p>
+<pre><code>SUB OnResponseStart (BYVAL Status AS LONG, BYVAL ContentType AS BSTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Status</em></td>
+<td>Receives the standard status code returned with the response data. Status codes are defined in RFC 2616.</td>
+</tr>
+<tr class="even">
+<td><em>ContentType</em></td>
+<td>Specifies the type of content received, such as &quot;text/html&quot; or &quot;image/gif&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-19">Remarks</h4>
+<p>For this event to occur, use <strong>Open</strong> to send an HTTP connection in asynchronous mode and use <strong>Send</strong> to send a data request to an Internet server. This is the first WinHTTP event to occur after the <strong>Send</strong>.</p>
+</body>
+</html>
+

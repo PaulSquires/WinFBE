@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CODBC Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="odbc-classes">ODBC Classes</h1>
+<p><strong>CODBC</strong> is a wrapper class on top of ODBC.</p>
+<p>The main purpose of the class if to ease the use of the ODBC API, that is notoriously difficult to use.</p>
+<p><strong>Include files</strong>: CODBC.inc, CODBCDb.inc, CODBCStmt.inc.</p>
+<p>You create an instance of the class using:</p>
+<pre><code>' // Create a connection object and connect with the database
+DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
+DIM pDbc AS CODBC = wszConStr
+</code></pre>
+<p>You create an statement object creating an instance of the CODBCStmt object passing the connection object pointer as the parameter:</p>
+<pre><code>' // Allocate an statement object
+DIM pStmt AS COdbcStmt = pDbc
+</code></pre>
+<p>When the class is destroyed, its Destructor method closes the cursor and the connection and frees the allocated connection handle. Therefore, it is not needed to explicitly close the database and free handles. The class keeps track of the number of active connections and frees the environment handle if there are no active connections.</p>
+<h4 id="example">Example</h4>
+<pre><code>#include once &quot;Afx/COdbc/COdbc.inc&quot;
+USING Afx
+
+' // Create a connection object and connect with the database
+DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
+DIM pDbc AS CODBC = wszConStr
+
+' // Allocate an statement object
+DIM pStmt AS COdbcStmt = pDbc
+
+' // Generate a result set
+pStmt.ExecDirect (&quot;SELECT * FROM Authors ORDER BY Author&quot;)
+
+' // Parse the result set
+DIM cwsOutput AS CWSTR
+DO
+   ' // Fetch the record
+   IF pStmt.Fetch = FALSE THEN EXIT DO
+   ' // Get the values of the columns and display them
+   cwsOutput = &quot;&quot;
+   cwsOutput += pStmt.GetData(1) &amp; &quot; &quot;
+   cwsOutput += pStmt.GetData(2) &amp; &quot; &quot;
+   cwsOutput += pStmt.GetData(3)
+   PRINT cwsOutput
+LOOP
+</code></pre>
+<h4 id="example-using-the-pointer-notation">Example using the pointer notation</h4>
+<pre><code>#include once &quot;Afx/COdbc/COdbc.inc&quot;
+USING Afx
+
+' // Create a connection object and connect with the database
+DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
+DIM pDbc AS CODBC PTR = NEW CODBC(wszConStr)
+IF pDbc = NULL THEN END
+
+' // Allocate an statement object
+DIM pStmt AS COdbcStmt PTR = NEW COdbcStmt(pDbc)
+IF pStmt = NULL THEN END
+
+' // Generate a result sets
+pStmt-&gt;ExecDirect (&quot;SELECT * FROM Authors ORDER BY Author&quot;)
+
+' // Parse the result set
+DIM cwsOutput AS CWSTR
+DO
+   ' // Fetch the record
+   IF pStmt-&gt;Fetch = FALSE THEN EXIT DO
+   ' // Get the values of the columns and display them
+   cwsOutput = &quot;&quot;
+   cwsOutput += pStmt-&gt;GetLongVarcharData(1) &amp; &quot; &quot;
+   cwsOutput += pStmt-&gt;GetData(2) &amp; &quot; &quot;
+   cwsOutput += pStmt-&gt;GetData(3)
+   PRINT cwsOutput
+LOOP
+
+' // Delete the statement object
+Delete pStmt
+
+' // Delete the connection object
+Delete pDbc
+</code></pre>
+<h1 id="codbcbase-class">CODBCBase Class</h1>
+<p>Base class for all the ODBC classes. Implements some common methods that all the other interfaces inherit. You don't have to instantiate this class.</p>
+<p><strong>Include file</strong>: CODBC.inc</p>
+<h3 id="methods-and-properties">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Error">Error</a></td>
+<td>Returns TRUE if there has been an error; FALSE, otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetCPMatch">GetCPMatch</a></td>
+<td>Returns a 32-bit SQLUINTEGER value that determines how a connection is chosen from a connection pool.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDataSources">GetDataSources</a></td>
+<td>Lists available DSN / Drivers installed.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDrivers">GetDrivers</a></td>
+<td>Lists driver descriptions and driver attribute keywords.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetEnvAttr">GetEnvAttr</a></td>
+<td>Returns the current setting of an environment attribute.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetErrorInfo">GetErrorInfo</a></td>
+<td>Returns a verbose description of the last error(s).</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetLastResult">GetLastResult</a></td>
+<td>Returns the last result code.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetOutputNTS">GetOutputNTS</a></td>
+<td>Returns a 32-bit integer that determines how the driver returns string data.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetSqlState">GetSqlState</a></td>
+<td>Returns the SqlState for the specified handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#ODBCVersion">ODBCVersion</a></td>
+<td>Returns a 32-bit integer that determines whether certain functionality exhibits ODBC 2.x behavior or ODBC 3.x behavior.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetCPMatch">SetCPMatch</a></td>
+<td>Returns a 32-bit SQLUINTEGER value that determines how a connection is chosen from a connection pool.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetEnvAttr">SetEnvAttr</a></td>
+<td>Sets attributes that govern aspects of environments.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetErrorProc">SetErrorProc</a></td>
+<td>Sets the address of an application defined error callback.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetOutputNTS">SetOutputNTS</a></td>
+<td>Returns a 32-bit integer that determines how the driver returns string data.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="codbc-class">CODBC Class</h1>
+<p>Implements methods to create and manage connection objects. Inherits from COdbcBase.</p>
+<p><strong>Include file</strong>: CODBCDbc.inc</p>
+<h3 id="methods-and-properties-1">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#ConstructorsDb">Constructors</a></td>
+<td>Requests a commit operation for all active operations on all statements associated with an environment.</td>
+</tr>
+<tr class="even">
+<td><a href="#CommitTran">CommitTran</a></td>
+<td>Requests a commit operation for all active operations on all statements associated with an environment.</td>
+</tr>
+<tr class="odd">
+<td><a href="#EnvHandle">EnvHandle</a></td>
+<td>Returns the environment handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#Functions">Functions</a></td>
+<td>Returns information about whether a driver supports a specific ODBC function.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetConnectAttr">GetConnectAttr</a></td>
+<td>Returns the current setting of a connection attribute.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDiagField">GetDiagField</a></td>
+<td>Returns the current value of a field of a record of the diagnostic data structure (associated with an environment handle) that contains error, warning, and status information.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDiagRec">GetDiagRec</a></td>
+<td>Returns the current values of multiple fields of a diagnostic record that contains error, warning, and status information.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetErrorInfo">GetErrorInfo</a></td>
+<td>Returns a verbose description of the last errors.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetInfo">GetInfo</a></td>
+<td>Returns general information about the driver and data source associated with a connection.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSqlState">GetSqlState</a></td>
+<td>Returns the SqlState for the connection handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Handle">Handle</a></td>
+<td>Returns the connection handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#NativeSql">NativeSql</a></td>
+<td>Returns the SQL string as modified by the driver. NativeSql does not execute the SQL statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#RollbackTran">RollbackTran</a></td>
+<td>RollbackTran requests a rollback operation for all active operations on all statements associated with an environment.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetConnectAttr">SetConnectAttr</a></td>
+<td>Sets attributes that govern aspects of connections.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Supports">Supports</a></td>
+<td>Returns information about whether a driver supports a specific ODBC function. It is an alias for <strong>Functions</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="error-(codbcbase)"><a name="Error"></a>Error (CODBCBase)</h1>
+<p>Returns TRUE if there has been an error; FALSE, otherwise.</p>
+<pre><code>FUNCTION Error () AS BOOLEAN
+</code></pre>
+<h4 id="return-value">Return value</h4>
+<p>Returns TRUE if the last result code is SQL_ERROR or SQL_INVALID_HANDLE.</p>
+<h1 id="getcpmatch-(codbcbase)"><a name="GetCPMatch"></a>GetCPMatch (CODBCBase)</h1>
+<p>Returns a 32-bit SQLUINTEGER value that determines how a connection is chosen from a connection pool.</p>
+<pre><code>FUNCTION GetCPMatch () AS SQLUINTEGER
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>The current value of the attribute.</p>
+<h4 id="result-code-(getlastresult)">Result code (GetLastResult)</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h4 id="remarks">Remarks</h4>
+<p>The Driver Manager determines which connection is reused from the pool and attempts to match the connection options in the call and the connection attributes set by the application to the keywords and connection attributes of the connections in the pool. The value of this attribute determines the level of precision of the matching criteria. The following values are used to set the value of this attribute:</p>
+<p><strong>SQL_CP_STRICT_MATCH</strong></p>
+<p>Only connections that exactly match the connection options in the call and the connection attributes set by the application are reused. This is the default.</p>
+<p><strong>SQL_CP_RELAXED_MATCH</strong></p>
+<p>Connections with matching connection string keywords can be used. Keywords must match, but not all connection attributes must match.</p>
+<h1 id="getdatasources-(codbcbase)"><a name="GetDataSources"></a>GetDataSources (CODBCBase)</h1>
+<p>Lists available DSN / Drivers installed.</p>
+<pre><code>FUNCTION GetDataSources (BYVAL Direction AS SQLUSMALLINT, BYREF cwsServerName AS CWSTR, _
+   BYREF cwsDescription AS CWSTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Direction</em></td>
+<td>Determines which data source the Driver Manager returns information on. Can be:<br>SQL_FETCH_NEXT (to fetch the next data source name in the list), SQL_FETCH_FIRST (to fetch from the beginning of the list), SQL_FETCH_FIRST_USER (to fetch the first user DSN), or SQL_FETCH_FIRST_SYSTEM (to fetch the first system DSN).<br>When <em>Direction</em> is set to SQL_FETCH_FIRST, subsequent calls to <strong>GetDataSources</strong> with <em>Direction</em> set to SQL_FETCH_NEXT return both user and system DSNs. When <em>Direction</em> is set to SQL_FETCH_FIRST_USER, all subsequent calls to <strong>GetDataSources</strong> with <em>Direction</em> set to SQL_FETCH_NEXT return only user DSNs. When <em>Direction</em> is set to SQL_FETCH_FIRST_SYSTEM, all subsequent calls to <strong>GetDataSources</strong> with <em>Direction</em> set to SQL_FETCH_NEXT return only system DSNs.</td>
+</tr>
+<tr class="even">
+<td><em>cwsServerName</em></td>
+<td>An string variable in which to return the data source name.</td>
+</tr>
+<tr class="odd">
+<td><em>cwsDescription</em></td>
+<td>An string variable in which to return the description.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h4 id="diagnostics">Diagnostics</h4>
+<p>When <strong>GetDataSources</strong> returns either SQL_ERROR or SQL_SUCCESS_WITH_INFO, an associated SQLSTATE value can be obtained by calling the <strong>SqlState</strong> property.</p>
+<h1 id="getdrivers-(codbcbase)"><a name="GetDrivers"></a>GetDrivers (CODBCBase)</h1>
+<p>Lists driver descriptions and driver attribute keywords. This function is implemented only by the Driver Manager.</p>
+<pre><code>FUNCTION GetDrivers (BYVAL Direction AS SQLUSMALLINT, BYREF cwsDriverDesc AS CWSTR, _
+   BYREF cwsDriverAttributes AS CWSTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Direction</em></td>
+<td>Determines whether the Driver Manager fetches the next driver description in the list (SQL_FETCH_NEXT) or whether the search starts from the beginning of the list (SQL_FETCH_FIRST).</td>
+</tr>
+<tr class="even">
+<td><em>cwsDriverDesc</em></td>
+<td>A CWSTR variable in which to return the driver description.</td>
+</tr>
+<tr class="odd">
+<td><em>cwsDriverAttributes</em></td>
+<td>A CWSTR variable in which to return the list of driver attribute value pairs (see &quot;Comments&quot;).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h4 id="diagnostics-1">Diagnostics</h4>
+<p>When <strong>GetDrivers</strong> returns either SQL_ERROR or SQL_SUCCESS_WITH_INFO, an associated SQLSTATE value can be obtained by calling the <strong>SqlState</strong> property.</p>
+<h4 id="comments">Comments</h4>
+<p><strong>GetDrivers</strong> returns the driver description in the <em>cwsDriverDesc</em> variable. It returns additional information about the driver in the <em>cwsDriverAttributes</em> buffer as a list of keyword-value pairs. All keywords listed in the system information for drivers will be returned for all drivers, except for <strong>CreateDSN</strong>, which is used to prompt creation of data sources and therefore is optional. Each pair is terminated with a semicolon.</p>
+<p>Driver attribute keywords are added from the system information when the driver is installed.</p>
+<p>An application can call GetDrivers multiple times to retrieve all driver descriptions. The Driver Manager retrieves this information from the system information. When there are no more driver descriptions, <strong>GetDrivers</strong> returns SQL_NO_DATA. If <strong>GetDrivers</strong> is called with SQL_FETCH_NEXT immediately after it returns SQL_NO_DATA, it returns the first driver description.</p>
+<p>If SQL_FETCH_NEXT is passed to <strong>GetDrivers</strong> the very first time it is called, <strong>GetDrivers</strong> returns the first data source name.</p>
+<p>Because <strong>GetDrivers</strong> is implemented in the Driver Manager, it is supported for all drivers regardless of a particular driver's standards compliance.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>#include once &quot;Afx/COdbc/COdbc.inc&quot;
+USING Afx
+
+' // Create a connection object and connect with the database
+' // We need to call it to create the environment handle
+DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
+DIM pDbc AS CODBC = wszConStr
+IF pDbc.Handle = NULL THEN PRINT &quot;Unable to create the connection handle&quot; : SLEEP : END
+
+DIM wDirection AS WORD
+DIM cwsDriverAttributes AS CWSTR
+DIM cwsDriverDesc AS CWSTR
+
+wDirection = SQL_FETCH_FIRST
+DO
+   cwsDriverDesc = &quot;&quot;
+   cwsDriverAttributes = &quot;&quot;
+   IF SQL_SUCCEEDED(pDbc.GetDrivers(wDirection, cwsDriverDesc, cwsDriverAttributes)) = 0 THEN EXIT DO
+   ? &quot;Driver description: &quot; &amp; cwsDriverDesc
+   ? &quot;Driver attributes: &quot; &amp; cwsDriverAttributes
+   wDirection = SQL_FETCH_NEXT
+LOOP
+</code></pre>
+<h1 id="getenvattr-(codbcbase)"><a name="GetEnvAttr"></a>GetEnvAttr (CODBCBase)</h1>
+<p>Returns the current setting of an environment attribute.</p>
+<pre><code>FUNCTION GetEnvAttr (BYVAL Attribute AS SQLINTEGER, BYVAL ValuePtr AS SQLPOINTER, _
+   BYVAL BufferLength AS SQLINTEGER, BYVAL StringLength AS SQLINTEGER PTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Attribute</em></td>
+<td>Attribute to retrieve.</td>
+</tr>
+<tr class="even">
+<td><em>ValuePtr</em></td>
+<td>Pointer to a buffer in which to return the current value of the attribute specified by <strong>Attribute</strong>.</td>
+</tr>
+<tr class="odd">
+<td><em>BufferLength</em></td>
+<td>If <em>ValuePtr</em> points to a character string, this argument should be the length of <em>ValuePtr</em>. If <em>ValuePtr</em> is an integer, <em>BufferLength</em> is ignored. If the attribute value is not a character string, <em>BufferLength</em> is unused.</td>
+</tr>
+<tr class="even">
+<td><em>StringLength</em></td>
+<td>A pointer to a buffer in which to return the total number of bytes (excluding the null-termination character) available to return in <em>ValuePtr</em>. If <em>ValuePtr</em> is a null pointer, no length is returned. If the attribute value is a character string and the number of bytes available to return is greater than or equal to <em>BufferLength</em>, the data in <em>ValuePtr</em> is truncated to <em>BufferLength</em> minus the length of a null-termination character and is null-terminated by the driver.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="geterrorinfo-(codbcbase)"><a name="GetErrorInfo"></a>GetErrorInfo (CODBCBase)</h1>
+<p>Returns a verbose description of the last error(s).</p>
+<pre><code>FUNCTION GetErrorInfo (BYVAL HandleType AS SQLSMALLINT, BYVAL Handle AS SQLHANDLE, _
+   BYVAL iErrorCode AS SQLRETURN = 0) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>HandleType</em></td>
+<td>The handle type:<br>SQL_HANDLE_DBC (connection handle)<br>SQL_HANDLE_STMT (statement handle)</td>
+</tr>
+<tr class="even">
+<td><em>Handle</em></td>
+<td>The handle value.</td>
+</tr>
+<tr class="odd">
+<td><em>iErrorCode</em></td>
+<td>Optional. The error code returned by <strong>GetLastResult</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>The description of the error or errors.</p>
+<h1 id="getlastresult-(codbcbase)"><a name="GetLastResult"></a>GetLastResult (CODBCBase)</h1>
+<p>Returns the last result code.</p>
+<pre><code>FUNCTION GetLastResult () AS SQLRETURN
+</code></pre>
+<h4 id="return-value-6">Return value</h4>
+<p>The result code returned by the last executed ODBC method.</p>
+<p>GetDiagRec or GetDiagField returns SQLSTATE values as defined by X/Open Data Management: Structured Query Language (SQL), Version 2 (March 1995). SQLSTATE values are strings that contain five characters. The following table lists SQLSTATE values that a driver can return for <strong>GetDiagRec</strong>.</p>
+<p>The character string value returned for an SQLSTATE consists of a two-character class value followed by a three-character subclass value. A class value of &quot;01&quot; indicates a warning and is accompanied by a return code of SQL_SUCCESS_WITH_INFO. Class values other than &quot;01,&quot; except for the class &quot;IM,&quot; indicate an error and are accompanied by a return value of SQL_ERROR. The class &quot;IM&quot; is specific to warnings and errors that derive from the implementation of ODBC itself. The subclass value &quot;000&quot; in any class indicates that there is no subclass for that SQLSTATE. The assignment of class and subclass values is defined by SQL-92.</p>
+<p>Note Although successful execution of a function is normally indicated by a return value of SQL_SUCCESS, the SQLSTATE 00000 also indicates success.</p>
+<h1 id="getoutputnts-(codbcbase)"><a name="GetOutputNTS"></a>GetOutputNTS (CODBCBase)</h1>
+<p>Returns a 32-bit integer that determines how the driver returns string data. If SQL_TRUE, the driver returns string data null-terminated. If SQL_FALSE, the driver does not return string data null-terminated. This attribute defaults to SQL_TRUE. A call to SetEnvAttr to set it to SQL_TRUE returns SQL_SUCCESS. A call to SetEnvAttr to set it to SQL_FALSE returns SQL_ERROR and SQLSTATE HYC00.</p>
+<p><strong>Note</strong>: Optional feature not implemented in Microsoft Access Driver.</p>
+<pre><code>FUNCTION GetOutputNTS () AS SQLUINTEGER
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>The current value of the attribute.</p>
+<h4 id="result-code-(getlaststatus)">Result code (GetLastStatus)</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="getsqlstate-(codbcbase)"><a name="GetSqlState"></a>GetSqlState (CODBCBase)</h1>
+<p>Returns the SqlState for the specified handle.</p>
+<p><strong>Note</strong>: Optional feature not implemented in Microsoft Access Driver.</p>
+<pre><code>FUNCTION GetSqlState (BYVAL HandleType AS SQLSMALLINT, BYVAL Handle AS SQLHANDLE) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>HandleType</em></td>
+<td>The handle type:<br>SQL_HANDLE_DBC (connection handle)<br>SQL_HANDLE_STMT (statement handle)</td>
+</tr>
+<tr class="even">
+<td><em>Handle</em></td>
+<td>The handle value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="result-code-(getlaststatus)-1">Result code (GetLastStatus)</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h4 id="return-value-8">Return value</h4>
+<p>The SqlState.</p>
+<h4 id="odbc-error-codes">ODBC Error Codes</h4>
+<p><strong>GetDiagRec</strong> or <strong>GetDiagField</strong> returns SQLSTATE values as defined by X/Open Data Management: Structured Query Language (SQL), Version 2 (March 1995). SQLSTATE values are strings that contain five characters. The following table lists SQLSTATE values that a driver can return for GetDiagRec.</p>
+<p>The character string value returned for an SQLSTATE consists of a two-character class value followed by a three-character subclass value. A class value of &quot;01&quot; indicates a warning and is accompanied by a return code of SQL_SUCCESS_WITH_INFO. Class values other than &quot;01,&quot; except for the class &quot;IM,&quot; indicate an error and are accompanied by a return value of SQL_ERROR. The class &quot;IM&quot; is specific to warnings and errors that derive from the implementation of ODBC itself. The subclass value &quot;000&quot; in any class indicates that there is no subclass for that SQLSTATE. The assignment of class and subclass values is defined by SQL-92.</p>
+<p><strong>Note</strong>: Although successful execution of a function is normally indicated by a return value of SQL_SUCCESS, the SQLSTATE 00000 also indicates success.</p>
+<table>
+<thead>
+<tr class="header">
+<th>SQLSTATE</th>
+<th>Error</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>01000</td>
+<td>General warning</td>
+</tr>
+<tr class="even">
+<td>01001</td>
+<td>Cursor operation conflict</td>
+</tr>
+<tr class="odd">
+<td>01002</td>
+<td>Disconnect error</td>
+</tr>
+<tr class="even">
+<td>01003</td>
+<td>NULL value eliminated in set function</td>
+</tr>
+<tr class="odd">
+<td>01004</td>
+<td>String data, right-truncated</td>
+</tr>
+<tr class="even">
+<td>01006</td>
+<td>Privilege not revoked</td>
+</tr>
+<tr class="odd">
+<td>01007</td>
+<td>Privilege not granted</td>
+</tr>
+<tr class="even">
+<td>01S00</td>
+<td>Invalid connection string attribute</td>
+</tr>
+<tr class="odd">
+<td>01S01</td>
+<td>Error in row</td>
+</tr>
+<tr class="even">
+<td>01S02</td>
+<td>Option value changed</td>
+</tr>
+<tr class="odd">
+<td>01S06</td>
+<td>Attempt to fetch before the result set returned the first rowset</td>
+</tr>
+<tr class="even">
+<td>01S08</td>
+<td>Error saving File DSN</td>
+</tr>
+<tr class="odd">
+<td>01S09</td>
+<td>Invalid keyword</td>
+</tr>
+<tr class="even">
+<td>07001</td>
+<td>Wrong number of parameters</td>
+</tr>
+<tr class="odd">
+<td>07002</td>
+<td>COUNT field incorrect</td>
+</tr>
+<tr class="even">
+<td>07005</td>
+<td>Prepared statement not a cursor-specification</td>
+</tr>
+<tr class="odd">
+<td>07006</td>
+<td>Restricted data type attribute violation</td>
+</tr>
+<tr class="even">
+<td>07009</td>
+<td>Invalid descriptor index</td>
+</tr>
+<tr class="odd">
+<td>07S01</td>
+<td>Invalid use of default parameter</td>
+</tr>
+<tr class="even">
+<td>08001</td>
+<td>Client unable to establish connection</td>
+</tr>
+<tr class="odd">
+<td>08002</td>
+<td>Connection name in use</td>
+</tr>
+<tr class="even">
+<td>08003</td>
+<td>Connection does not exist</td>
+</tr>
+<tr class="odd">
+<td>08004</td>
+<td>Server rejected the connection</td>
+</tr>
+<tr class="even">
+<td>08007</td>
+<td>Connection failure during transaction</td>
+</tr>
+<tr class="odd">
+<td>08S01</td>
+<td>Communication link failure</td>
+</tr>
+<tr class="even">
+<td>21S01</td>
+<td>Insert value list does not match column list</td>
+</tr>
+<tr class="odd">
+<td>21S02</td>
+<td>Degree of derived table does not match column list</td>
+</tr>
+<tr class="even">
+<td>22001</td>
+<td>String data, right-truncated</td>
+</tr>
+<tr class="odd">
+<td>22002</td>
+<td>Indicator variable required but not supplied</td>
+</tr>
+<tr class="even">
+<td>22003</td>
+<td>Numeric value out of range</td>
+</tr>
+<tr class="odd">
+<td>22007</td>
+<td>Invalid datetime format</td>
+</tr>
+<tr class="even">
+<td>22008</td>
+<td>Datetime field overflow</td>
+</tr>
+<tr class="odd">
+<td>22012</td>
+<td>Division by zero</td>
+</tr>
+<tr class="even">
+<td>22015</td>
+<td>Interval field overflow</td>
+</tr>
+<tr class="odd">
+<td>22018</td>
+<td>Invalid character value for cast specification</td>
+</tr>
+<tr class="even">
+<td>22019</td>
+<td>Invalid escape character</td>
+</tr>
+<tr class="odd">
+<td>22025</td>
+<td>Invalid escape sequence</td>
+</tr>
+<tr class="even">
+<td>22026</td>
+<td>String data, length mismatch</td>
+</tr>
+<tr class="odd">
+<td>23000</td>
+<td>Integrity constraint violation</td>
+</tr>
+<tr class="even">
+<td>24000</td>
+<td>Invalid cursor state</td>
+</tr>
+<tr class="odd">
+<td>25000</td>
+<td>Invalid transaction state</td>
+</tr>
+<tr class="even">
+<td>25S01</td>
+<td>Transaction state</td>
+</tr>
+<tr class="odd">
+<td>25S02</td>
+<td>Transaction is still active</td>
+</tr>
+<tr class="even">
+<td>25S03</td>
+<td>Transaction is rolled back</td>
+</tr>
+<tr class="odd">
+<td>28000</td>
+<td>Invalid authorization specification</td>
+</tr>
+<tr class="even">
+<td>34000</td>
+<td>Invalid cursor name</td>
+</tr>
+<tr class="odd">
+<td>3C000</td>
+<td>Duplicate cursor name</td>
+</tr>
+<tr class="even">
+<td>3D000</td>
+<td>Invalid catalog name</td>
+</tr>
+<tr class="odd">
+<td>3F000</td>
+<td>Invalid schema name</td>
+</tr>
+<tr class="even">
+<td>40001</td>
+<td>Serialization failure</td>
+</tr>
+<tr class="odd">
+<td>40002</td>
+<td>Integrity constraint violation</td>
+</tr>
+<tr class="even">
+<td>40003</td>
+<td>Statement completion unknown</td>
+</tr>
+<tr class="odd">
+<td>42000</td>
+<td>Syntax error or access violation</td>
+</tr>
+<tr class="even">
+<td>42S01</td>
+<td>Base table or view already exists</td>
+</tr>
+<tr class="odd">
+<td>42S02</td>
+<td>Base table or view not found</td>
+</tr>
+<tr class="even">
+<td>42S11</td>
+<td>Index already exists</td>
+</tr>
+<tr class="odd">
+<td>42S12</td>
+<td>Index not found</td>
+</tr>
+<tr class="even">
+<td>42S21</td>
+<td>Column already exists</td>
+</tr>
+<tr class="odd">
+<td>42S22</td>
+<td>Column not found</td>
+</tr>
+<tr class="even">
+<td>44000</td>
+<td>WITH CHECK OPTION violation</td>
+</tr>
+<tr class="odd">
+<td>HY000</td>
+<td>General error</td>
+</tr>
+<tr class="even">
+<td>HY001</td>
+<td>Memory allocation error</td>
+</tr>
+<tr class="odd">
+<td>HY003</td>
+<td>Invalid application buffer type</td>
+</tr>
+<tr class="even">
+<td>HY004</td>
+<td>Invalid SQL data type</td>
+</tr>
+<tr class="odd">
+<td>HY007</td>
+<td>Associated statement is not prepared</td>
+</tr>
+<tr class="even">
+<td>HY008</td>
+<td>Operation canceled</td>
+</tr>
+<tr class="odd">
+<td>HY009</td>
+<td>Invalid use of null pointer</td>
+</tr>
+<tr class="even">
+<td>HY010</td>
+<td>Function sequence error</td>
+</tr>
+<tr class="odd">
+<td>HY011</td>
+<td>Attribute cannot be set now</td>
+</tr>
+<tr class="even">
+<td>HY012</td>
+<td>Invalid transaction operation code</td>
+</tr>
+<tr class="odd">
+<td>HY013</td>
+<td>Memory management error</td>
+</tr>
+<tr class="even">
+<td>HY014</td>
+<td>Limit on the number of handles exceeded</td>
+</tr>
+<tr class="odd">
+<td>HY015</td>
+<td>No cursor name available</td>
+</tr>
+<tr class="even">
+<td>HY016</td>
+<td>Cannot modify an implementation row descriptor</td>
+</tr>
+<tr class="odd">
+<td>HY017</td>
+<td>Invalid use of an automatically allocated descriptor handle</td>
+</tr>
+<tr class="even">
+<td>HY018</td>
+<td>Server declined cancel request</td>
+</tr>
+<tr class="odd">
+<td>HY019</td>
+<td>Non-character and non-binary data sent in pieces</td>
+</tr>
+<tr class="even">
+<td>HY020</td>
+<td>Attempt to concatenate a null value</td>
+</tr>
+<tr class="odd">
+<td>HY021</td>
+<td>Inconsistent descriptor information</td>
+</tr>
+<tr class="even">
+<td>HY024</td>
+<td>Invalid attribute value</td>
+</tr>
+<tr class="odd">
+<td>HY090</td>
+<td>Invalid string or buffer length</td>
+</tr>
+<tr class="even">
+<td>HY091</td>
+<td>Invalid descriptor field identifier</td>
+</tr>
+<tr class="odd">
+<td>HY092</td>
+<td>Invalid attribute/option identifier</td>
+</tr>
+<tr class="even">
+<td>HY095</td>
+<td>Function type out of range</td>
+</tr>
+<tr class="odd">
+<td>HY096</td>
+<td>Invalid information type</td>
+</tr>
+<tr class="even">
+<td>HY097</td>
+<td>Column type out of range</td>
+</tr>
+<tr class="odd">
+<td>HY098</td>
+<td>Scope type out of range</td>
+</tr>
+<tr class="even">
+<td>HY099</td>
+<td>Nullable type out of range</td>
+</tr>
+<tr class="odd">
+<td>HY100</td>
+<td>Uniqueness option type out of range</td>
+</tr>
+<tr class="even">
+<td>HY101</td>
+<td>Accuracy option type out of range</td>
+</tr>
+<tr class="odd">
+<td>HY103</td>
+<td>Invalid retrieval code</td>
+</tr>
+<tr class="even">
+<td>HY104</td>
+<td>Invalid precision or scale value</td>
+</tr>
+<tr class="odd">
+<td>HY105</td>
+<td>Invalid parameter type</td>
+</tr>
+<tr class="even">
+<td>HY106</td>
+<td>Fetch type out of range</td>
+</tr>
+<tr class="odd">
+<td>HY107</td>
+<td>Row value out of range</td>
+</tr>
+<tr class="even">
+<td>HY109</td>
+<td>Invalid cursor position</td>
+</tr>
+<tr class="odd">
+<td>HY110</td>
+<td>Invalid driver completion</td>
+</tr>
+<tr class="even">
+<td>HY111</td>
+<td>Invalid bookmark value</td>
+</tr>
+<tr class="odd">
+<td>HYC00</td>
+<td>Optional feature not implemented</td>
+</tr>
+<tr class="even">
+<td>HYT00</td>
+<td>Timeout expired</td>
+</tr>
+<tr class="odd">
+<td>HYT01</td>
+<td>Connection timeout expired</td>
+</tr>
+<tr class="even">
+<td>IM001</td>
+<td>Driver does not support this function</td>
+</tr>
+<tr class="odd">
+<td>IM002</td>
+<td>Data source name not found and no default driver specified</td>
+</tr>
+<tr class="even">
+<td>IM003</td>
+<td>Specified driver could not be loaded</td>
+</tr>
+<tr class="odd">
+<td>IM004</td>
+<td>Driver's SQLAllocHandle on SQL_HANDLE_ENV failed</td>
+</tr>
+<tr class="even">
+<td>IM005</td>
+<td>Driver's SQLAllocHandle on SQL_HANDLE_DBC failed</td>
+</tr>
+<tr class="odd">
+<td>IM006</td>
+<td>Driver's SQLSetConnectAttr failed</td>
+</tr>
+<tr class="even">
+<td>IM007</td>
+<td>No data source or driver specified; dialog prohibited</td>
+</tr>
+<tr class="odd">
+<td>IM008</td>
+<td>Dialog failed</td>
+</tr>
+<tr class="even">
+<td>IM009</td>
+<td>Unable to load translation DLL</td>
+</tr>
+<tr class="odd">
+<td>IM010</td>
+<td>Data source name too long</td>
+</tr>
+<tr class="even">
+<td>IM011</td>
+<td>Driver name too long</td>
+</tr>
+<tr class="odd">
+<td>IM012</td>
+<td>DRIVER keyword syntax error</td>
+</tr>
+<tr class="even">
+<td>IM013</td>
+<td>Trace file error</td>
+</tr>
+<tr class="odd">
+<td>IM014</td>
+<td>Invalid name of File DSN</td>
+</tr>
+<tr class="even">
+<td>IM015</td>
+<td>Corrupt file data source</td>
+</tr>
+</tbody>
+</table>
+<h1 id="odbcversion-(codbcbase)"><a name="ODBCVersion"></a>ODBCVersion (CODBCBase)</h1>
+<p>Returns a 32-bit integer that determines whether certain functionality exhibits ODBC 2.x behavior or ODBC 3.x behavior.</p>
+<pre><code>FUNCTION ODBCVersion () AS SQLUINTEGER
+</code></pre>
+<h4 id="return-value-9">Return value</h4>
+<ul>
+<li><p><strong>SQL_OV_ODBC3_80</strong> = The Driver Manager and driver exhibit the following ODBC 3.8 behavior:</p>
+<p>The driver returns and expects ODBC 3.x codes for date, time, and timestamp. The driver returns ODBC 3.x SQLSTATE codes when Error, GetDiagField, or GetDiagRec is called. The CatalogName argument in a call to SQLTables accepts a search pattern. The Driver Manager supports C data type extensibility. For more information about C data type extensibility, see C Data Types in ODBC.</p></li>
+<li><p><strong>SQL_OV_ODBC3</strong> = The Driver Manager and driver exhibit the following ODBC 3.x behavior:</p>
+<p>The driver returns and expects ODBC 3.x codes for date, time, and timestamp. The driver returns ODBC 3.x SQLSTATE codes when Error, GetDiagField, or GetDiagRec is called. The CatalogName argument in a call to SqlTables accepts a search pattern.</p></li>
+<li><p><strong>SQL_OV_ODBC2</strong> = The Driver Manager and driver exhibit the following ODBC 2.x behavior. This is especially useful for an ODBC 2.x application working with an ODBC 3.x driver.</p>
+<p>The driver returns and expects ODBC 2.x codes for date, time, and timestamp. The driver returns ODBC 2.x SQLSTATE codes when Error, GetDiagField, or GetDiagRec is called. The CatalogName argument in a call to SqlTables does not accept a search pattern.</p></li>
+</ul>
+<p>An application must set this environment attribute before calling any function that has an SQLHENV argument, or the call will return SQLSTATE HY010 (Function sequence error). It is driver-specific whether or not additional behaviors exist for these environmental flags.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>To set the ODBC version, use the optional parameters of the <strong>CODBC</strong> class constructors.</p>
+<p><strong>Result code</strong> (GetLastResult)</p>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="setcpmatch-(codbcbase)"><a name="SetCPMatch"></a>SetCPMatch (CODBCBase)</h1>
+<p>Sets a 32-bit SQLUINTEGER value that determines how a connection is chosen from a connection pool.</p>
+<pre><code>FUNCTION SetCPMatch (BYVAL dwAttr AS SQLUINTEGER) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dwAttr</em></td>
+<td>Value of the attribute.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-2">Remarks</h4>
+<p>The Driver Manager determines which connection is reused from the pool and attempts to match the connection options in the call and the connection attributes set by the application to the keywords and connection attributes of the connections in the pool. The value of this attribute determines the level of precision of the matching criteria. The following values are used to set the value of this attribute:</p>
+<p><strong>SQL_CP_STRICT_MATCH</strong></p>
+<p>Only connections that exactly match the connection options in the call and the connection attributes set by the application are reused. This is the default.</p>
+<p><strong>SQL_CP_RELAXED_MATCH</strong></p>
+<p>Connections with matching connection string keywords can be used. Keywords must match, but not all connection attributes must match.</p>
+<h4 id="return-value-10">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="setenvattr-(codbcbase)"><a name="SetEnvAttr"></a>SetEnvAttr (CODBCBase)</h1>
+<p>Sets attributes that govern aspects of environments.</p>
+<pre><code>FUNCTION SetEnvAttr (BYVAL Attribute AS SQLINTEGER, BYVAL ValuePtr AS SQLPOINTER, _
+   BYVAL StringLength AS SQLINTEGER) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Attribute</em></td>
+<td>Attribute to set.</td>
+</tr>
+<tr class="even">
+<td><em>ValuePtr</em></td>
+<td>Pointer to the value to be associated with <em>Attribute</em>. Depending on the value of <em>Attribute</em>, <em>ValuePtr</em> will be a 32-bit integer value or point to a null-terminated character string.</td>
+</tr>
+<tr class="odd">
+<td><em>StringLength</em></td>
+<td>If <em>ValuePtr</em> points to a character string or a binary buffer, this argument should be the length of <em>ValuePtr</em>. If <em>ValuePtr</em> is an integer, <em>StringLength</em> is ignored.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="seterrorproc-(codbcbase)"><a name="SetErrorProc"></a>SetErrorProc (CODBCBase)</h1>
+<p>Sets the address of an application defined error callback.</p>
+<pre><code>SUB SetErrorProc (BYVAL pProc AS ANY PTR, BYVAL reportWarnings AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pProc</em></td>
+<td>Address of the application defined callback.</td>
+</tr>
+<tr class="even">
+<td><em>reportWarnings</em></td>
+<td>Optional. Report also warnings.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-of-an-application-defined-callback:">Example of an application defined callback:</h4>
+<pre><code>SUB ODBC_ErrorCallback (BYVAL nResult AS SQLRETURN, BYREF wszSrc AS WSTRING, BYREF wszErrorMsg AS WSTRING)
+   PRINT &quot;Error: &quot; &amp; STR(nResult) &amp; &quot; - Source: &quot; &amp; wszSrc
+   IF LEN(wszErrorMsg) THEN PRINT wszErrorMsg
+END SUB
+
+pDbc.SetErrorProc(@ODBC_ErrorCallback)    ' // Sets the error callback for the connection object
+pStmt.SetErrorProc(@ODBC_ErrorCallback)   ' // Sets the error callback for the statement object
+</code></pre>
+<h1 id="setoutputnts-(codbcbase)"><a name="SetOutputNTS"></a>SetOutputNTS (CODBCBase)</h1>
+<p>Returns a 32-bit integer that determines how the driver returns string data. If SQL_TRUE, the driver returns string data null-terminated. If SQL_FALSE, the driver does not return string data null-terminated. This attribute defaults to SQL_TRUE. A call to SetEnvAttr to set it to SQL_TRUE returns SQL_SUCCESS. A call to SetEnvAttr to set it to SQL_FALSE returns SQL_ERROR and SQLSTATE HYC00.</p>
+<p><strong>Note</strong>: Optional feature not implemented in Microsoft Access Driver.</p>
+<pre><code>FUNCTION SetOutputNTS (BYVAL dwAttr AS SQLUINTEGER) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dwAttr</em></td>
+<td>Value of the attribute. SQL_TRUE or SQL_FALSE.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="constructors-(codbc)"><a name="ConstructorsDb"></a>Constructors (CODBC)</h1>
+<p>Allocates a connection handle and, if needed, an environment handle, and opens the database.</p>
+<pre><code>CONSTRUCTOR CODBC (BYREF wszConnectionString AS WSTRING, BYVAL nODbcVersion AS SQLINTEGER = SQL_OV_ODBC3, _
+   BYVAL ConnectionPoolingAttr AS SQLUINTEGER = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszConnectionString</em></td>
+<td>The connection string.</td>
+</tr>
+<tr class="even">
+<td><em>nOdbcVersion</em></td>
+<td>Optional. ODBC version number: SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80.</td>
+</tr>
+<tr class="odd">
+<td><em>ConnectionPoolingAttr</em></td>
+<td>Optional. SQL_CP_ONE_PER_DRIVER or SQL_CP_ONE_PER_HENV.</td>
+</tr>
+</tbody>
+</table>
+<p>Establishes connections to a driver and a data source. The connection handle references storage of all information about the connection to the data source, including status, transaction state, and error information.</p>
+<pre><code>CONSTRUCTOR CODBC (BYREF wszServerName AS WSTRING, BYREF wszUserName AS WSTRING, _
+   BYREF wszAuthentication AS WSTRING, BYVAL nODbcVersion AS SQLINTEGER = SQL_OV_ODBC3, _
+   BYVAL ConnectionPoolingAttr AS SQLUINTEGER = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszServerName</em></td>
+<td>Data source name. The data might be located on the same computer as the program, or on another computer somewhere on a network.</td>
+</tr>
+<tr class="even">
+<td><em>wszUserName</em></td>
+<td>User identifier.</td>
+</tr>
+<tr class="odd">
+<td><em>wszAuthentication</em></td>
+<td>Authentication string (typically the password).</td>
+</tr>
+<tr class="even">
+<td><em>nOdbcVersion</em></td>
+<td>Optional. ODBC version number: SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80.</td>
+</tr>
+<tr class="odd">
+<td><em>ConnectionPoolingAttr</em></td>
+<td>Optional. SQL_CP_ONE_PER_DRIVER or SQL_CP_ONE_PER_HENV.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="getlastresult">GetLastResult</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, SQL_INVALID_HANDLE.</p>
+<h1 id="committran-(codbc)"><a name="CommitTran"></a>CommitTran (CODBC)</h1>
+<p>Requests a commit operation for all active operations on all statements associated with an environment.</p>
+<pre><code>FUNCTION CommitTran () AS SQLRETURN
+</code></pre>
+<h4 id="return-value-13">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>#include once &quot;Afx/COdbc/COdbc.inc&quot;
+USING Afx
+
+' // Create a connection object and connect with the database
+DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
+DIM pDbc AS CODBC = wszConStr
+IF pDbc.Handle = NULL THEN PRINT &quot;Unable to create the connection handle&quot; : SLEEP : END
+
+' // Allocate an statement object
+DIM pStmt AS COdbcStmt = @pDbc
+IF pStmt.Handle = NULL THEN PRINT &quot;Unable to create the statement handle&quot; : SLEEP : END
+
+' // Cursor type
+pStmt.SetMultiuserKeysetCursor
+' // Bind the columns
+DIM AS LONG lAuId, cbAuId
+pStmt.BindCol(1, @lAuId, @cbAuId)
+DIM wszAuthor AS WSTRING * 260, cbAuthor AS LONG
+pStmt.BindCol(2, @wszAuthor, SIZEOF(wszAuthor), @cbAuthor)
+DIM iYearBorn AS SHORT, cbYearBorn AS LONG
+pStmt.BindCol(3, @iYearBorn, @cbYearBorn)
+
+' // Generate a result set
+pStmt.ExecDirect (&quot;SELECT * FROM Authors ORDER BY Author&quot;)
+
+' // Fill the values of the bounded application variables and its sizes
+lAuId     = 998               : cbAuID     = SIZEOF(lAuId)
+wszAuthor = &quot;Edgar Allan Poe&quot; : cbAuthor   = LEN(wszAuthor)
+iYearBorn = 1809              : cbYearBorn = SIZEOF(iYearBorn)
+' // Add the record
+pStmt.AddRecord
+IF pStmt.Error = FALSE THEN PRINT &quot;Record added&quot; ELSE PRINT pStmt.GetErrorInfo
+
+' // Commit the transaction
+' pDbc.CommitTran
+' IF pDbc.Error = FALSE THEN PRINT &quot;Commit succeeded&quot;
+' or Rollbacks it because this is a test
+pDbc.RollbackTran 
+IF pDbc.Error = FALSE THEN PRINT &quot;Rollback succeeded&quot; ELSE PRINT pDbc.GetErrorInfo
+</code></pre>
+<h1 id="envhandle-(codbc)"><a name="EnvHandle"></a>EnvHandle (CODBC)</h1>
+<p>Returns the environment handle.</p>
+<pre><code>FUNCTION EnvHandle () AS SQLHANDLE
+</code></pre>
+<h1 id="functions-(codbc)"><a name="Functions"></a>Functions (CODBC)</h1>
+<p>Returns information about whether a driver supports a specific ODBC function.</p>
+<pre><code>FUNCTION Functions (BYVAL FunctionId AS SQLUSMALLINT) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>FunctionId</em></td>
+<td>A value that identifies the ODBC function of interest.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>TRUE if the function is supported, FALSE if it is not.</p>
+<p><strong>Result value</strong> (GetLastResult)</p>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<p><strong>Values to identify ODBC APIs</strong>:</p>
+<pre><code>SQL_API_SQLALLOCCONNECT
+SQL_API_SQLALLOCENV
+SQL_API_SQLALLOCHANDLE
+SQL_API_SQLALLOCSTMT
+SQL_API_SQLBINDCOL
+SQL_API_SQLBINDPARAM
+SQL_API_SQLCANCEL
+SQL_API_SQLCLOSECURSOR
+SQL_API_SQLCOLATTRIBUTE
+SQL_API_SQLCOLUMNS
+SQL_API_SQLCONNECT
+SQL_API_SQLCOPYDESC
+SQL_API_SQLDATASOURCES
+SQL_API_SQLDESCRIBECOL
+SQL_API_SQLDISCONNECT
+SQL_API_SQLENDTRAN
+SQL_API_SQLERROR
+SQL_API_SQLEXECDIRECT
+SQL_API_SQLEXECUTE
+SQL_API_SQLFETCH
+SQL_API_SQLFETCHSCROLL
+SQL_API_SQLFREECONNECT
+SQL_API_SQLFREEENV
+SQL_API_SQLFREEHANDLE
+SQL_API_SQLFREESTMT
+SQL_API_SQLGETCONNECTATTR
+SQL_API_SQLGETCONNECTOPTION
+SQL_API_SQLGETCURSORNAME
+SQL_API_SQLGETDATA
+SQL_API_SQLGETDESCFIELD
+SQL_API_SQLGETDESCREC
+SQL_API_SQLGETDIAGFIELD
+SQL_API_SQLGETDIAGREC
+SQL_API_SQLGETENVATTR
+SQL_API_SQLGETFUNCTIONS
+SQL_API_SQLGETINFO
+SQL_API_SQLGETSTMTATTR
+SQL_API_SQLGETSTMTOPTION
+SQL_API_SQLGETTYPEINFO
+SQL_API_SQLNUMRESULTCOLS
+SQL_API_SQLPARAMDATA
+SQL_API_SQLPREPARE
+SQL_API_SQLPUTDATA
+SQL_API_SQLROWCOUNT
+SQL_API_SQLSETCONNECTATTR
+SQL_API_SQLSETCONNECTOPTION
+SQL_API_SQLSETCURSORNAME
+SQL_API_SQLSETDESCFIELD
+SQL_API_SQLSETDESCREC
+SQL_API_SQLSETENVATTR
+SQL_API_SQLSETPARAM
+SQL_API_SQLSETSTMTATTR
+SQL_API_SQLSETSTMTOPTION
+SQL_API_SQLSPECIALCOLUMNS
+SQL_API_SQLSTATISTICS
+SQL_API_SQLTABLES
+SQL_API_SQLTRANSACT
+SQL_API_SQLALLOCHANDLESTD
+SQL_API_SQLBULKOPERATIONS
+SQL_API_SQLBINDPARAMETER
+SQL_API_SQLBROWSECONNECT
+SQL_API_SQLCOLATTRIBUTES
+SQL_API_SQLCOLUMNPRIVILEGES
+SQL_API_SQLDESCRIBEPARAM
+SQL_API_SQLDRIVERCONNECT
+SQL_API_SQLDRIVERS
+SQL_API_SQLEXTENDEDFETCH
+SQL_API_SQLFOREIGNKEYS
+SQL_API_SQLMORERESULTS
+SQL_API_SQLNATIVESQL
+SQL_API_SQLNUMPARAMS
+SQL_API_SQLPARAMOPTIONS
+SQL_API_SQLPRIMARYKEYS
+SQL_API_SQLPROCEDURECOLUMNS
+SQL_API_SQLPROCEDURES
+SQL_API_SQLSETPOS
+SQL_API_SQLSETSCROLLOPTIONS
+SQL_API_SQLTABLEPRIVILEGES
+</code></pre>
+<h1 id="getconnectattr-(codbc)"><a name="GetConnectAttr"></a>GetConnectAttr (CODBC)</h1>
+<p>Returns the current setting of a connection attribute.</p>
+<pre><code>FUNCTION GetConnectAttr (BYVAL Attribute AS SQLINTEGER, BYVAL ValuePtr AS SQLPOINTER, _
+   BYVAL BufferLength AS SQLINTEGER, BYVAL StringLength AS SQLINTEGER PTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Attribute</em></td>
+<td>Attribute to retrieve.</td>
+</tr>
+<tr class="even">
+<td><em>ValuePtr</em></td>
+<td>A pointer to memory in which to return the current value of the attribute specified by <em>Attribute</em>.</td>
+</tr>
+<tr class="odd">
+<td><em>BufferLength</em></td>
+<td>If <em>Attribute</em> is an ODBC-defined attribute and <em>ValuePtr</em> points to a character string or a binary buffer, this argument should be the length of <em>ValuePtr</em>. If <em>Attribute</em> is an ODBC-defined attribute and <em>ValuePtr</em> is an integer, <em>BufferLength</em> is ignored.<br>If <em>Attribute</em> is a driver-defined attribute, the application indicates the nature of the attribute to the Driver Manager by setting the <em>BufferLength</em> argument. <em>BufferLength</em> can have the following values:<br>If <em>ValuePtr</em> is a pointer to a character string, then <em>BufferLength</em> is the length of the string or SQL_NTS.<br>If <em>ValuePtr</em> is a pointer to a binary buffer, then the application places the result of the SQL_LEN_BINARY_ATTR(length) macro in <em>BufferLength</em>. This places a negative value in <em>BufferLength</em>.<br>If <em>ValuePtr</em> is a pointer to a value other than a character string or binary string, then <em>BufferLength</em> should have the value SQL_IS_POINTER.<br>If <em>ValuePtr</em> contains a fixed-length data type, then <em>BufferLength</em> is either SQL_IS_INTEGER or SQL_IS_UINTEGER, as appropriate.</td>
+</tr>
+<tr class="even">
+<td><em>StringLength</em></td>
+<td>A pointer to a buffer in which to return the total number of bytes (excluding the null-termination character) available to return in <em>ValuePtr</em>. If <em>ValuePtr</em> is a null pointer, no length is returned. If the attribute value is a character string and the number of bytes available to return is greater than <em>BufferLength</em> minus the length of the null-termination character, the data in <em>ValuePtr</em> is truncated to <em>BufferLength</em> minus the length of the null-termination character and is null-terminated by the driver.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="result-code">Result code</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<pre><code>FUNCTION GetConnectAttr (BYVAL Attribute AS SQLINTEGER, BYVAL ValuePtr AS SQLPOINTER, _
+FUNCTION GetConnectAttrStr (BYREF wszAttribute AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszAttribute</em></td>
+<td>The attribute to retrieve.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>&quot;AccessMode&quot;</strong></p>
+<p>Returns an SQLUINTEGER value. SQL_MODE_READ_ONLY is used by the driver or data source as an indicator that the connection is not required to support SQL statements that cause updates to occur. This mode can be used to optimize locking strategies, transaction management, or other areas as appropriate to the driver or data source. The driver is not required to prevent such statements from being submitted to the data source. The behavior of the driver and data source when asked to process SQL statements that are not read-only during a read-only connection is implementation-defined. SQL_MODE_READ_WRITE is the default.</p>
+<p><strong>&quot;AsyncEnable&quot;</strong></p>
+<p>SQL_ASYNC_ENABLE_OFF = Off (the default)<br> SQL_ASYNC_ENABLE_ON = On</p>
+<p><strong>&quot;AutoIPD&quot;</strong></p>
+<p>Returns a read-only SQLUINTEGER value that specifies whether automatic population of the IPD after a call to Prepare is supported. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p><strong>&quot;AutoCommit&quot;</strong></p>
+<p>SQL_AUTOCOMMIT_OFF = The driver uses manual-commit mode, and theapplication must explicitly commit or roll back transactions with OdbcEndTran.</p>
+<p>SQL_AUTOCOMMIT_ON = The driver uses autocommit mode. Each statement is committed immediately after it is executed. This is the default. Any open transactions on the connection are committed when SQL_ATTR_AUTOCOMMIT is set to SQL_AUTOCOMMIT_ON to change from manual-commit mode to autocommit mode.</p>
+<p><strong>&quot;ConnectionDead&quot;</strong></p>
+<p>SQL_TRUE (1) or SQL_FALSE (0).</p>
+<p><strong>&quot;ConnectionTimeout&quot;</strong></p>
+<p>Returns an SQLUINTEGER value corresponding to the number of seconds to wait for any request on the connection to complete before returning to the application. The driver should return SQLSTATE HYT00 (Timeout expired) anytime that it is possible to time out in a situation not associated with query execution or login. If the value is equal to 0 (the default), there is no timeout. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p><strong>&quot;CurrentCatalog&quot;</strong></p>
+<p>Returnss a character string containing the name of the catalog to be used by the data source.</p>
+<p><strong>&quot;Cursors&quot;</strong></p>
+<p>An SQLULEN value specifying how the Driver Manager uses the ODBC cursor library:</p>
+<p>SQL_CUR_USE_IF_NEEDED = The Driver Manager uses the ODBC cursor library only if it is needed. If the driver supports the SQL_FETCH_PRIOR option in SQLFetchScroll, the Driver Manager uses the scrolling capabilities of the driver. Otherwise, it uses the ODBC cursor library.</p>
+<p>SQL_CUR_USE_ODBC = The Driver Manager uses the ODBC cursor library.</p>
+<p>SQL_CUR_USE_DRIVER = The Driver Manager uses the scrolling capabilities of the driver. This is the default setting.</p>
+<p>Warning: The cursor library will be removed in a future version of Windows. Avoid using this feature in new development work and plan to modify applications that currently use this feature. Microsoft recommends using the driver's cursor functionality.</p>
+<p><strong>&quot;LoginTimeout&quot;</strong></p>
+<p>Returns an SQLUINTEGER value corresponding to the number of seconds to wait for a login request to complete before returning to the application. The default is driver-dependent. If <em>ValuePtr</em> is 0, the timeout is disabled and a connection attempt will wait indefinitely. If the specified timeout exceeds the maximum login timeout in the data source, the driver substitutes that value and returns SQLSTATE 01S02 (Option value changed).</p>
+<p><strong>&quot;MetadataID&quot;</strong></p>
+<p>Returns an SQLUINTEGER value that determines how the string arguments of catalog functions are treated. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p>If SQL_TRUE, the string argument of catalog functions are treated as identifiers. The case is not significant. For nondelimited strings, the driver removes any trailing spaces and the string is folded to uppercase. For delimited strings, the driver removes any leading or trailing spaces and takes literally whatever is between the delimiters. If one of these arguments is set to a null pointer, the function returns SQL_ERROR and SQLSTATE HY009 (Invalid use of null pointer). If SQL_FALSE, the string arguments of catalog functions are not treated as identifiers. The case is significant. They can either contain a string search pattern or not, depending on the argument. The default value is SQL_FALSE. The <em>TableType</em> argument of <strong>SQLTables</strong>, which takes a list of values, is not affected by this attribute. SQL_ATTR_METADATA_ID can also be set on the statement level. (It is the only connection attribute that is also a statement attribute.)</p>
+<p><strong>&quot;PacketSize&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the network packet size in bytes. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p>Note Many data sources either do not support this option or only can return but not set the network packet size. If the specified size exceeds the maximum packet size or is smaller than the minimum packet size, the driver substitutes that value and returns SQLSTATE 01S02 (Option value changed). If the application sets packet size after a connection has already been made, the driver will return SQLSTATE HY011 (Attribute cannot be set now).</p>
+<p><strong>&quot;QuietMode&quot;</strong></p>
+<p>Returns a 32-bit window handle.</p>
+<p>If the window handle is a null pointer, the driver does not display any dialog boxes. If the window handle is not a null pointer, it should be the parent window handle of the application. This is the default. The driver uses this handle to display dialog boxes.</p>
+<p>Note The SQL_ATTR_QUIET_MODE connection attribute does not apply to dialog boxes displayed by <strong>DriverConnect</strong>.</p>
+<p><strong>&quot;Trace&quot;</strong></p>
+<p>Returns an SQLUINTEGER value telling the Driver Manager whether to perform tracing.</p>
+<p>SQL_OPT_TRACE_OFF = Tracing off (the default)<br> SQL_OPT_TRACE_ON = Tracing on</p>
+<p>When tracing is on, the Driver Manager writes each ODBC function call to the trace file. Note When tracing is on, the Driver Manager can return SQLSTATE IM013 (Trace file error) from any function.</p>
+<p>An application specifies a trace file with the <strong>TraceFile</strong> property. If the file already exists, the Driver Manager appends to the file. Otherwise, it creates the file. If tracing is on and no trace file has been specified, the Driver Manager writes to the file SQL.LOG in the root directory.</p>
+<p><strong>&quot;TraceFile&quot;</strong></p>
+<p>A string containing the name of the trace file.</p>
+<p><strong>&quot;TranslateLib&quot;</strong></p>
+<p>A null-terminated character string containing the name of a library containing the functions <strong>SQLDriverToDataSource</strong> and <strong>SQLDataSourceToDriver</strong> that the driver accesses to perform tasks such as character set translation. This option may be specified only if the driver has connected to the data source. The setting of this attribute will persist across connections. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p><strong>&quot;TxnIsolation&quot;</strong></p>
+<p>An SQLUINTEGER bitmask.</p>
+<p>The following bitmasks are used in conjunction with the flag to determine which options are supported:</p>
+<p>SQL_TXN_READ_UNCOMMITTED<br> SQL_TXN_READ_COMMITTED<br> SQL_TXN_REPEATABLE_READ<br> SQL_TXN_SERIALIZABLE</p>
+<p>For descriptions of these isolation levels, see the description of SQL_DEFAULT_TXN_ISOLATION.</p>
+<p>To set the transaction isolation level, an application calls <strong>SetConnectAttr</strong> to set the SQL_ATTR_TXN_ISOLATION attribute.</p>
+<p>An SQL-92 Entry level-conformant driver will always return SQL_TXN_SERIALIZABLE as supported. A FIPS Transitional level-conformant driver will always return all of these options as supported.</p>
+<h2 id="return-value-15">Return value</h2>
+<p>The current value of the attribute.</p>
+<p><strong>Result code</strong> (GetLastResult)</p>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="getdiagfield-(codbc)"><a name="GetDiagField"></a>GetDiagField (CODBC)</h1>
+<p>Returns the current value of a field of a record of the diagnostic data structure (associated with an environment handle) that contains error, warning, and status information.</p>
+<pre><code>FUNCTION GetDiagField (BYVAL RecNumber AS SQLSMALLINT, BYVAL DiagIdentifier AS SQLSMALLINT, _
+   BYVAL DiagInfoPtr AS SQLPOINTER, BYVAL BufferLength AS SQLSMALLINT, _
+   BYVAL StringLength AS SQLSMALLINT PTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>RecNumber</em></td>
+<td>Indicates the status record from which the application seeks information. Status records are numbered from 1. If the <em>DiagIdentifier</em> argument indicates any field of the diagnostics header, <em>RecNumber</em> is ignored. If not, it should be greater than 0.</td>
+</tr>
+<tr class="even">
+<td><em>DiagIdentifier</em></td>
+<td>Indicates the field of the diagnostic whose value is to be returned.</td>
+</tr>
+<tr class="odd">
+<td><em>DiagInfoPtr</em></td>
+<td>Pointer to a buffer in which to return the diagnostic information. The data type depends on the value of <em>DiagIdentifier</em>.</td>
+</tr>
+<tr class="even">
+<td><em>BufferLength</em></td>
+<td>If <em>DiagIdentifier</em> is an ODBC-defined diagnostic and <em>DiagInfoPtr</em> points to a character string or a binary buffer, this argument should be the length of <em>DiagInfoPtr</em>. If <em>DiagIdentifier</em> is an ODBC-defined field and <em>DiagInfoPtr</em> is an integer, <em>BufferLength</em> is ignored.<br>If <em>DiagIdentifier</em> is a driver-defined field, the application indicates the nature of the field to the Driver Manager by setting the <em>BufferLength</em> argument. <em>BufferLength</em> can have the following values:<br>If <em>DiagInfoPtr</em> is a pointer to a character string, then <em>BufferLength</em> is the length of the string or SQL_NTS.<br>If <em>DiagInfoPtr</em> is a pointer to a binary buffer, then the application places the result of the SQL_LEN_BINARY_ATTR(length) macro in BufferLength. This places a negative value in <em>BufferLength</em>.<br>If <em>DiagInfoPtr</em> is a pointer to a value other than a character string or binary string, then <em>BufferLength</em> should have the value SQL_IS_POINTER.<br>If <em>DiagInfoPtr</em> is contains a fixed-length data type, then <em>BufferLength</em> is SQL_IS_INTEGER, SQL_IS_UINTEGER, SQL_IS_SMALLINT, or SQL_IS_USMALLINT, as appropriate.</td>
+</tr>
+<tr class="odd">
+<td><em>StringLength</em></td>
+<td>Pointer to a buffer in which to return the total number of bytes (excluding the number of bytes required for the null-termination character) available to return in <em>DiagInfoPtr</em>, for character data. If the number of bytes available to return is greater than or equal to <em>BufferLength</em>, the text in <em>DiagInfoPtr</em> is truncated to <em>BufferLength</em> minus the length of a null-termination character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, SQL_INVALID_HANDLE, or SQL_NO_DATA.</p>
+<h1 id="getdiagrec-(codbc)"><a name="GetDiagRec"></a>GetDiagRec (CODBC)</h1>
+<p>Returns the current values of multiple fields of a diagnostic record that contains error, warning, and status information. Unlike <strong>GetDiagField</strong>, which returns one diagnostic field per call, <strong>GetDiagRec</strong> returns several commonly used fields of a diagnostic record, including the SQLSTATE, the native error code, and the diagnostic message text.</p>
+<pre><code>FUNCTION GetDiagRec (BYVAL RecNumber AS SQLSMALLINT, BYVAL Sqlstate AS WSTRING PTR, _
+   BYVAL NativeError AS SQLINTEGER PTR, BYVAL MessageText AS WSTRING PTR, _
+   BYVAL BufferLength AS SQLSMALLINT, BYVAL TextLength AS SQLSMALLINT PTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>RecNumber</em></td>
+<td>Indicates the status record from which the application seeks information. Status records are numbered from 1.</td>
+</tr>
+<tr class="even">
+<td><em>SQlState</em></td>
+<td>Pointer to a buffer in which to return a five-character SQLSTATE code pertaining to the diagnostic record <em>RecNumber</em>. The first two characters indicate the class; the next three indicate the subclass. This information is contained in the SQL_DIAG_SQLSTATE diagnostic field.</td>
+</tr>
+<tr class="odd">
+<td><em>NativeError</em></td>
+<td>Pointer to a buffer in which to return the native error code, specific to the data source. This information is contained in the SQL_DIAG_NATIVE diagnostic field.</td>
+</tr>
+<tr class="even">
+<td><em>MessageText</em></td>
+<td>Pointer to a buffer in which to return the diagnostic message text string. This information is contained in the SQL_DIAG_MESSAGE_TEXT diagnostic field.</td>
+</tr>
+<tr class="odd">
+<td><em>BufferLength</em></td>
+<td>Length of the <em>MessageText</em> buffer in characters. There is no maximum length of the diagnostic message text.</td>
+</tr>
+<tr class="even">
+<td><em>TextLength</em></td>
+<td>Pointer to a buffer in which to return the total number of bytes (excluding the number of bytes required for the null-termination character) available to return in <em>MessageText</em>. If the number of bytes available to return is greater than <em>BufferLength</em>, the diagnostic message text in <em>MessageText</em> is truncated to <em>BufferLength</em> minus the length of a null-termination character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="geterrorinfo-(codbc)"><a name="GetErrorInfo"></a>GetErrorInfo (CODBC)</h1>
+<p>Returns a verbose description of the last error(s).</p>
+<pre><code>FUNCTION GetErrorInfo (BYVAL iErrorCode AS SQLRETURN = 0) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>iErrorCode</em></td>
+<td>Optional. The error code returned by <strong>GetLastResult</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="getinfo-(codbc)"><a name="GetInfo"></a>GetInfo (CODBC)</h1>
+<p>Returns general information about the driver and data source associated with a connection.</p>
+<pre><code>FUNCTION GetInfo (BYVAL InfoType AS SQLUSMALLINT, BYVAL InfoValuePtr AS SQLPOINTER, _
+   BYVAL BufferLength AS SQLSMALLINT, BYVAL StringLength AS SQLSMALLINT PTR) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>InfoType</em></td>
+<td>The type of information to retrieve.</td>
+</tr>
+<tr class="even">
+<td><em>InfoValuePtr</em></td>
+<td>Pointer to a buffer in which to return the information. Depending on the <em>InfoType</em> requested, the information returned will be one of the following: a null-terminated character string, an SQLUSMALLINT value, an SQLUINTEGER bitmask, an SQLUINTEGER flag, or a SQLUINTEGER binary value.<br>If the <em>InfoType</em> argument is SQL_DRIVER_HDESC or SQL_DRIVER_HSTMT, the <em>InfoValuePtr</em> argument is both input and output.</td>
+</tr>
+<tr class="odd">
+<td><em>BufferLength</em></td>
+<td>Length of the <em>InfoValuePtr</em> buffer. If the value in <em>InfoValuePtr</em> is not a character string or if <em>InfoValuePtr</em> is a null pointer, the <em>BufferLength</em> argument is ignored. The driver assumes that the size of <em>InfoValuePtr</em> is SQLUSMALLINT or SQLUINTEGER, based on the <em>InfoType</em>. since this method works with Unicode, the <em>BufferLength</em> argument must be an even number; if not, SQLSTATE HY090 (Invalid string or buffer length) is returned.</td>
+</tr>
+<tr class="even">
+<td><em>StringLength</em></td>
+<td>Pointer to a buffer in which to return the total number of bytes (excluding the null-termination character for character data) available to return in <em>InfoValuePtr</em>. For character data, if the number of bytes available to return is greater than or equal to <em>BufferLength</em>, the information in <em>InfoValuePtr</em> is truncated to <em>BufferLength</em> bytes minus the length of a null-termination character and is null-terminated by the driver. For all other types of data, the value of <em>BufferLength</em> is ignored and the driver assumes the size of <em>InfoValuePtr</em> is SQLUSMALLINT or SQLUINTEGER, depending on the <em>InfoType</em>.<br>Important note: With the ODBC version that comes installed with Windows 7, you have to specify 2 (SQLUSMALLINT) or 4 (SQLUINTEGER) or it will fail.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-18">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<p>Returns general information about the driver and data source associated with a connection.</p>
+<pre><code>FUNCTION GetInfo (BYREF wszInfoType AS WSTRING) AS SQLINTEGER
+FUNCTION GetInfoStr (BYREF wszInfoType AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszInfoType</em></td>
+<td>The type of information to retrieve.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>&quot;AccessibleProcedures&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the user can execute all procedures returned by Procedures; &quot;N&quot; if there may be procedures returned that the user cannot execute.</p>
+<p><strong>&quot;AccessibleTables&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the user is guaranteed SELECT privileges to all tables returned by Tables; &quot;N&quot; if there may be tables returned that the user cannot access.</p>
+<p><strong>&quot;ActiveEnvironments&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of active environments that the driver can support. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;AggregateFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating support for aggregation functions.</p>
+<p>SQL_AF_ALL<br> SQL_AF_AVG<br> SQL_AF_COUNT<br> SQL_AF_DISTINCT<br> SQL_AF_MAX<br> SQL_AF_MIN<br> SQL_AF_SUM</p>
+<p>An SQL-92 Entry level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;AlterDomain&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the ALTER DOMAIN statement, as defined in SQL-92, supported by the data source. An SQL-92 Full level-compliant driver will always return all of the bitmasks. A return value of &quot;0&quot; means that the ALTER DOMAIN statement is not supported.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p><strong>&quot;AlterTable&quot;</strong></p>
+<p>An SQLUINTEGER bitmask enumerating the clauses in the ALTER TABLE statement supported by the data source.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p>The following bitmasks are used to determine which clauses are supported:</p>
+<p>SQL_AT_ADD_COLUMN_COLLATION = <add column> clause is supported, with facility to specify column collation (Full level) (ODBC 3.0)</p>
+<p>SQL_AT_ADD_COLUMN_DEFAULT = <add column> clause is supported, with facility to specify column defaults (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_ADD_COLUMN_SINGLE = <add column> is supported (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_ADD_CONSTRAINT = <add column> clause is supported, with facility to specify column constraints (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_ADD_TABLE_CONSTRAINT = <add table constraint> clause is supported (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_CONSTRAINT_NAME_DEFINITION = <constraint name definition> is supported for naming column and table constraints (Intermediate level) (ODBC 3.0)</p>
+<p>SQL_AT_DROP_COLUMN_CASCADE = <drop column> CASCADE is supported (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_DROP_COLUMN_DEFAULT = <alter column> <drop column default clause> is supported (Intermediate level) (ODBC 3.0)</p>
+<p>SQL_AT_DROP_COLUMN_RESTRICT = <drop column> RESTRICT is supported (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_DROP_TABLE_CONSTRAINT_CASCADE (ODBC 3.0)</p>
+<p>SQL_AT_DROP_TABLE_CONSTRAINT_RESTRICT = <drop column> RESTRICT is supported (FIPS Transitional level) (ODBC 3.0)</p>
+<p>SQL_AT_SET_COLUMN_DEFAULT = <alter column> <set column default clause> is supported (Intermediate level) (ODBC 3.0)</p>
+<p>The following bits specify the support <constraint attributes> if specifying column or table constraints is supported (the SQL_AT_ADD_CONSTRAINT bit is set):</p>
+<p>SQL_AT_CONSTRAINT_INITIALLY_DEFERRED (Full level) (ODBC 3.0)</p>
+<p>SQL_AT_CONSTRAINT_INITIALLY_IMMEDIATE (Full level) (ODBC 3.0)</p>
+<p>SQL_AT_CONSTRAINT_DEFERRABLE (Full level) (ODBC 3.0)</p>
+<p>SQL_AT_CONSTRAINT_NON_DEFERRABLE (Full level) (ODBC 3.0)</p>
+<p><strong>&quot;AsyncMode&quot;</strong></p>
+<p>Returns an SQLUINTEGER value indicating the level of asynchronous support in the driver.</p>
+<p>The level of asynchronous support in the driver:</p>
+<p>SQL_AM_CONNECTION = Connection level asynchronous execution is supported. Either all statement handles associated with a given connection handle are in asynchronous mode or all are in synchronous mode. A statement handle on a connection cannot be in asynchronous mode while another statement handle on the same connection is in synchronous mode, and vice versa.</p>
+<p>SQL_AM_STATEMENT = Statement level asynchronous execution is supported. Some statement handles associated with a connection handle can be in asynchronous mode, while other statement handles on the same connection are in synchronous mode.</p>
+<p>SQL_AM_NONE = Asynchronous mode is not supported.</p>
+<p><strong>&quot;BatchRowCount&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the behavior of the driver with respect to the availability of row counts.</p>
+<p>The following bitmasks are used in conjunction with the information type:</p>
+<p>SQL_BRC_ROLLED_UP = Row counts for consecutive INSERT, DELETE, or UPDATE statements are rolled up into one. If this bit is not set, then row counts are available for each individual statement.</p>
+<p>SQL_BRC_PROCEDURES = Row counts, if any, are available when a batch is executed in a stored procedure. If row counts are available, they can be rolled up or individually available, depending on the SQL_BRC_ROLLED_UP bit.</p>
+<p>SQL_BRC_EXPLICIT = Row counts, if any, are available when a batch is executed directly by calling OdbcExecute or OdbcExecDirect. If row counts are available, they can be rolled up or individually available, depending on the SQL_BRC_ROLLED_UP bit.</p>
+<p><strong>&quot;BatchSupport&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the driver's support for batches.</p>
+<p>The following bitmasks are used to determine which level is supported:</p>
+<p>SQL_BS_SELECT_EXPLICIT = The driver supports explicit batches that can have result-set generating statements.</p>
+<p>SQL_BS_ROW_COUNT_EXPLICIT = The driver supports explicit batches that can have row-count generating statements.</p>
+<p>SQL_BS_SELECT_PROC = The driver supports explicit procedures that can have result-set generating statements.</p>
+<p>SQL_BS_ROW_COUNT_PROC = The driver supports explicit procedures that can have row-count generating statements.</p>
+<p><strong>&quot;BookmarkPersistence&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the operations through which bookmarks persist.</p>
+<p>The following bitmasks are used in conjunction with the flag to determine through which options bookmarks persist:</p>
+<p>SQL_BP_CLOSE = Bookmarks are valid after an application calls FreeStmt with the SQL_CLOSE option, or SQLCloseCursor to close the cursor associated with a statement.</p>
+<p>SQL_BP_DELETE = The bookmark for a row is valid after that row has been deleted.</p>
+<p>SQL_BP_DROP = Bookmarks are valid after an application calls OdbcFreeHandle with a HandleType of SQL_HANDLE_STMT to drop a statement.</p>
+<p>SQL_BP_TRANSACTION = Bookmarks are valid after an application commits or rolls back a transaction.</p>
+<p>SQL_BP_UPDATE = The bookmark for a row is valid after any column in that row has been updated, including key columns.</p>
+<p>SQL_BP_OTHER_HSTMT = A bookmark associated with one statement can be used with another statement. Unless SQL_BP_CLOSE or SQL_BP_DROP is specified, the cursor on the first statement must be open.</p>
+<p><strong>&quot;CatalogLocation&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value indicating the position of the catalog in a qualified table name.</p>
+<p>The position of the catalog in a qualified table name:</p>
+<p>SQL_CL_START<br> SQL_CL_END</p>
+<p>For example, an Xbase driver returns SQL_CL_START because the directory (catalog) name is at the start of the table name, as in \EMPDATA\EMP.DBF.</p>
+<p>An ORACLE Server driver returns SQL_CL_END because the catalog is at the end of the table name, as in ADMIN.EMP@EMPDATA.</p>
+<p>An SQL-92 Full level-conformant driver will always return SQL_CL_START.</p>
+<p>A value of 0 is returned if catalogs are not supported by the data source.</p>
+<p>To find out whether catalogs are supported, an application calls OdbcGetInfo with the SQL_CATALOG_NAME information type.</p>
+<p>This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_LOCATION.</p>
+<p><strong>&quot;CatalogName&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the server supports catalog names, or &quot;N&quot; if it does not.</p>
+<p>An SQL-92 Full level-conformant driver will always return &quot;Y&quot;.</p>
+<p><strong>&quot;CatalogNameSeparator&quot;</strong></p>
+<p>Returns a character string: the character or characters that the data source defines as the separator between a catalog name and the qualified name element that follows or precedes it.</p>
+<p>An empty string is returned if catalogs are not supported by the data source. To find out whether catalogs are supported, an application calls OdbcGetInfo with the SQL_CATALOG_NAME information type. An SQL-92 Full level-conformant driver will always return &quot;.&quot;.</p>
+<p>This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoTypeSQL_QUALIFIER_NAME_SEPARATOR.</p>
+<p><strong>&quot;CatalogTerm&quot;</strong></p>
+<p>Returns a character string with the data source vendor's name for a catalog; for example, &quot;database&quot; or &quot;directory&quot;. This string can be in upper, lower, or mixed case.</p>
+<p>An empty string is returned if catalogs are not supported by the data source. To find out whether catalogs are supported, an application calls GetInfo with the SQL_CATALOG_NAME information type. An SQL-92 Full level-conformant driver will always return &quot;catalog&quot;.</p>
+<p>This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_TERM.</p>
+<p><strong>&quot;CatalogUsage&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the statements in which catalogs can be used.</p>
+<p>SQL_CU_DML_STATEMENTS = Catalogs are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE, DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements.</p>
+<p>SQL_CU_PROCEDURE_INVOCATION = Catalogs are supported in the ODBC procedure invocation statement.</p>
+<p>SQL_CU_TABLE_DEFINITION = Catalogs are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE, and DROP VIEW.</p>
+<p>SQL_CU_INDEX_DEFINITION = Catalogs are supported in all index definition statements: CREATE INDEX and DROP INDEX.</p>
+<p>SQL_CU_PRIVILEGE_DEFINITION = Catalogs are supported in all privilege definition statements: GRANT and REVOKE.</p>
+<p>A value of 0 is returned if catalogs are not supported by the data source.</p>
+<p>To find out whether catalogs are supported, an application calls SQLGetInfo with the SQL_CATALOG_NAME information type. An SQL-92 Full level-conformant driver will always return a bitmask with all of these bits set.</p>
+<p>This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_QUALIFIER_USAGE.</p>
+<p><strong>&quot;CollationSeq&quot;</strong></p>
+<p>Returns the name of the collation sequence. This is a character string that indicates the name of the default collation for the default character set for this server (for example, 'ISO 8859-1' or EBCDIC). If this is unknown, an empty string will be returned. An SQL-92 Full level-conformant driver will always return a non-empty string.</p>
+<p><strong>&quot;ColumnAlias&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the data source supports column aliases; otherwise, &quot;N&quot;.</p>
+<p>A column alias is an alternate name that can be specified for a column in the select list by using an AS clause. An SQL-92 Entry level-conformant driver will always return &quot;Y&quot;.</p>
+<p><strong>&quot;ConcatNullBehavior&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value indicating how the data source handles the concatenation of NULL valued character data type columns with non-NULL valued character data type columns.</p>
+<p>SQL_CB_NULL = Result is NULL valued.</p>
+<p>SQL_CB_NON_NULL = Result is concatenation of non-NULL valued column or columns.</p>
+<p>An SQL-92 Entry level-conformant driver will always return SQL_CB_NULL.</p>
+<p><strong>&quot;ConvertBigInt&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_BIGINT data to other data type, an application calls ConvertBigInt and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertBinary&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_BINARY data to other data type, an application calls ConvertBinary and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertBit&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_BIT data to other data type, an application calls ConvertBit and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertChar&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_CHAR data to other data type, an application calls ConvertChar and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertDate&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_DATE data to other data type, an application calls ConvertDate and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertDecimal&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_DECIMAL data to other data type, an application calls ConvertDecimal and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertDouble&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_DOUBLE data to other data type, an application calls ConvertDouble and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertFloat&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_FLOAT data to other data type, an application calls ConvertFloat and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the scalar conversion functions supported by the driver and associated data source.</p>
+<p><strong>&quot;ConvertInteger&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_INTEGER data to other data type, an application calls ConvertInteger and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertIntervalDayTime&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_INTERVAL_DAY_TIME data to other data type, an application calls ConvertIntervalDayTime and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertIntervalYearMonth&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_INTERVAL_YEAR_MONTH data to other data type, an application calls ConvertIntervalTearMonth and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertLongVarBinary&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_LONGVARBINARY data to other data type, an application calls ConvertLongVarBinary and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertLongVarChar&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_LONGVARCHAR data to other data type, an application calls ConvertLongVarChar and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertNumeric&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_NUMERIC data to other data type, an application calls ConvertNumeric and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertReal&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_REAL data to other data type, an application calls ConvertReal and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertSmallInt&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_SMALLINT data to other data type, an application calls ConvertSmallInt and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertTime&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_TIME data to other data type, an application calls ConvertTime and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertTimeStamp&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_TIMESTAMP data to other data type, an application calls ConvertTimeStamp and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertTinyInt&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_TINYINT data to other data type, an application calls ConvertTinyInt and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>ConvertVarBinary&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_VARBINARY data to other data type, an application calls ConvertVarBinary and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;ConvertVarChar&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask. If the bitmask equals zero, the data source does not support any conversions from data of the named type, including conversion to the same data type.</p>
+<p>To find out if a data source supports the conversion of SQL_VARCHAR data to other data type, an application calls ConvertVarChar and then performs an AND operation with the returned bitmask and the bitmask of the type to be converted. If the resulting value is nonzero, the conversion is supported.</p>
+<p><strong>&quot;CorrelationName&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value indicating whether table correlation names are supported.</p>
+<p>SQL_CN_NONE = Correlation names are not supported.</p>
+<p>SQL_CN_DIFFERENT = Correlation names are supported but must differ from the names of the tables they represent.</p>
+<p>SQL_CN_ANY = Correlation names are supported and can be any valid user-defined name.</p>
+<p>An SQL-92 Entry level-conformant driver will always return SQL_CN_ANY.</p>
+<p><strong>&quot;CreateAssertion&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE ASSERTION statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateCharacterSet&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE CHARACTER SET statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateCollation&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE COLLATION statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateDomain&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE DOMAIN statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateSchema&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE SCHEMA statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateTable&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE TABLE statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateTranslation&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE TRANSLATION statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CreateView&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the CREATE VIEW statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;CursorCommitBehavior&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value indicating how a COMMIT operation affects cursors and prepared statements in the data source.</p>
+<p>SQL_CB_DELETE = Close cursors and delete prepared statements. To use the cursor again, the application must reprepare and reexecute the statement.</p>
+<p>SQL_CB_CLOSE = Close cursors. For prepared statements, the application can call OdbcExecute on the statement without calling Prepare again.</p>
+<p>SQL_CB_PRESERVE = Preserve cursors in the same position as before the COMMIT operation. The application can continue to fetch data, or it can close the cursor and reexecute the statement without repreparing it.</p>
+<p><strong>&quot;CursorRollbackBehavior&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value indicating how a ROLLBACK operation affects cursors and prepared statements in the data source. SQL_CB_DELETE = Close cursors and delete prepared statements. To use the cursor again, the application must reprepare and reexecute the statement.</p>
+<p>SQL_CB_CLOSE = Close cursors. For prepared statements, the application can call Execute on the statement without calling Prepare again.</p>
+<p>SQL_CB_PRESERVE = Preserve cursors in the same position as before the ROLLBACK operation. The application can continue to fetch data, or it can close the cursor and reexecute the statement without repreparing it.</p>
+<p><strong>&quot;CursorSensitivitySupport&quot;</strong></p>
+<p>Returns an SQLUINTEGER value indicating the support for cursor sensitivity.</p>
+<p>SQL_INSENSITIVE = All cursors on the statement handle show the result set without reflecting any changes made to it by any other cursor within the same transaction.</p>
+<p>SQL_UNSPECIFIED = It is unspecified whether cursors on the statement handle make visible the changes made to a result set by another cursor within the same transaction. Cursors on the statement handle may make visible none, some, or all such changes.</p>
+<p>SQL_SENSITIVE = Cursors are sensitive to changes made by other cursors within the same transaction.</p>
+<p>An SQL-92 Entry level-conformant driver will always return the SQL_UNSPECIFIED option as supported.</p>
+<p>An SQL-92 Full level-conformant driver will always return the SQL_INSENSITIVE option as supported.</p>
+<p><strong>&quot;DatabaseName&quot;</strong></p>
+<p>Returns a character string with the name of the current database in use, if the data source defines a named object called &quot;database&quot;.</p>
+<p>Note In ODBC 3.x, the value returned for this InfoType can also be returned by calling GetConnectAttr with an Attribute argument of SQL_ATTR_CURRENT_CATALOG.</p>
+<p><strong>&quot;DataExtensions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating extensions to GetData.</p>
+<p>The following bitmasks are used in conjunction with the flag to determine what common extensions the driver supports for GetData:</p>
+<p>SQL_GD_ANY_COLUMN = GetData can be called for any unbound column, including those before the last bound column. Note that the columns must be called in order of ascending column number unless SQL_GD_ANY_ORDER is also returned.</p>
+<p>SQL_GD_ANY_ORDER = GetData can be called for unbound columns in any order. Note that OdbcGetData can be called only for columns after the last bound column unless SQL_GD_ANY_COLUMN is also returned.</p>
+<p>SQL_GD_BLOCK = GetData can be called for an unbound column in any row in a block (where the rowset size is greater than 1) of data after positioning to that row with SetPos.</p>
+<p>SQL_GD_BOUND = GetData can be called for bound columns as well as unbound columns. A driver cannot return this value unless it also returns SQL_GD_ANY_COLUMN.</p>
+<p>GetData is required to return data only from unbound columns that occur after the last bound column, are called in order of increasing column number, and are not in a row in a block of rows.</p>
+<p>If a driver supports bookmarks (either fixed-length or variable-length), it must support calling GetData on column 0. This support is required regardless of what the driver returns for a call to GetInfo with the SQL_GETDATA_EXTENSIONS InfoType.</p>
+<p><strong>&quot;DataSourceName&quot;</strong></p>
+<p>Returns a character string with the data source name used during connection. If the application called Connect, this is the value of the szDSN argument. If the application called DriverConnect or BrowseConnect, this is the value of the DSN keyword in the connection string passed to the driver. If the connection string did not contain the DSN keyword (such as when it contains the DRIVER keyword), this is an empty string.</p>
+<p><strong>&quot;DataSourceReadOnly&quot;</strong></p>
+<p>Returns a character string. &quot;Y&quot; if the data source is set to READ ONLY mode, &quot;N&quot; if it is otherwise.</p>
+<p>This characteristic pertains only to the data source itself; it is not a characteristic of the driver that enables access to the data source. A driver that is read/write can be used with a data source that is read-only. If a driver is read-only, all of its data sources must be read-only and must return SQL_DATA_SOURCE_READ_ONLY.</p>
+<p><strong>&quot;DateTimeLiterals&quot;</strong></p>
+<p>An SQLUINTEGER bitmask enumerating the SQL-92 datetime literals supported by the data source. Note that these are the datetime literals listed in the SQL-92 specification and are separate from the datetime literal escape clauses defined by ODBC.</p>
+<p>A FIPS Transitional level-conformant driver will always return the &quot;1&quot; value in the bitmask for the bits listed below. A value of &quot;0&quot; means that SQL-92 datetime literals are not supported.</p>
+<p><strong>&quot;DBMSName&quot;</strong></p>
+<p>Returns a character string with the name of the DBMS product accessed by the driver.</p>
+<p><strong>&quot;DBMSVer&quot;</strong></p>
+<p>Returns a character string indicating the version of the DBMS product accessed by the driver. The version is of the form ##.##.####, where the first two digits are the major version, the next two digits are the minor version, and the last four digits are the release version. The driver must render the DBMS product version in this form but can also append the DBMS product-specific version as well. For example, &quot;04.01.0000 Rdb 4.1&quot;.</p>
+<p><strong>&quot;DDLIndex&quot;</strong></p>
+<p>Returns an SQLUINTEGER value that indicates support for creation and dropping of indexes.</p>
+<p><strong>&quot;DefaultTxnIsolation&quot;</strong></p>
+<p>Returns an SQLUINTEGER value that indicates the default transaction isolation level supported by the driver or data source, or zero if the data source does not support transactions.</p>
+<p><strong>&quot;DescribeParameter&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if parameters can be described; &quot;N&quot;, if not. An SQL-92 Full level-conformant driver will usually return &quot;Y&quot; because it will support the DESCRIBE INPUT statement. Because this does not directly specify the underlying SQL support, however, describing parameters might not be supported, even in a SQL-92 Full level-conformant driver.</p>
+<p><strong>&quot;DMVer&quot;</strong></p>
+<p>A character string with the version of the Driver Manager.</p>
+<p>The version is in the form ##.##.####.####, where:</p>
+<p>The first set of two digits is the major ODBC version, as given by theconstant SQL_SPEC_MAJOR.</p>
+<p>The second set of two digits is the minor ODBC version, as given by the constant SQL_SPEC_MINOR.</p>
+<p>The third set of four digits is the Driver Manager major build number.</p>
+<p>The last set of four digits is the Driver Manager minor build number.</p>
+<p><strong>&quot;DriverhDbc&quot;</strong></p>
+<p>Returns the driver's connection handle.</p>
+<p><strong>&quot;DriverhDesc&quot;</strong></p>
+<p>Returns the driver's descriptor handle.</p>
+<p><strong>&quot;DriverhEnv&quot;</strong></p>
+<p>Returns the driver's environment handle.</p>
+<p><strong>&quot;DriverhLib&quot;</strong></p>
+<p>Returns an SQLUINTEGER value, the hinst from the load library returned to the Driver Manager when it loaded the driver DLL (on a Microsoft® Windows® platform) or equivalent on a non-Windows platform. The handle is valid only for the connection handle specified in the call to GetInfo. This information type is implemented by the Driver Manager alone.</p>
+<p><strong>&quot;DriverhStmt&quot;</strong></p>
+<p>Returns the driver's statement handle.</p>
+<p><strong>&quot;DriverName&quot;</strong></p>
+<p>Returns a character string with the file name of the driver used to access the data source.</p>
+<p><strong>&quot;DriverOdbcVer&quot;</strong></p>
+<p>Returns a character string with the version of ODBC that the driver supports.</p>
+<p>The version is of the form ##.##, where the first two digits are the major version and the next two digits are the minor version.</p>
+<p>SQL_SPEC_MAJOR and SQL_SPEC_MINOR define the major and minor version numbers.</p>
+<p>For the version of ODBC described in this manual, these are 3 and 0, and the driver should return &quot;03.00&quot;.</p>
+<p><strong>&quot;DriverVer&quot;</strong></p>
+<p>Returns a character string with the version of the driver and optionally, a description of the driver.</p>
+<p>At a minimum, the version is of the form ##.##.####, where the first two digits are the major version, the next two digits are the minor version, and the last four digits are the release version.</p>
+<p><strong>&quot;DropAssertion&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP ASSERTION statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;DropCharacterSet&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP CHARACTER SET statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;DropCollation&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP COLLATION statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;DropDomain&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP DOMAIN statement, as defined in SQL-92, supported by the data source.</p>
+<p>The following bitmasks are used to determine which clauses are supported:</p>
+<p>SQL_DD_DROP_DOMAIN<br> SQL_DD_CASCADE<br> SQL_DD_RESTRICT</p>
+<p>An SQL-92 Intermediate level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;DropSchema&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP SCHEMA statement, as defined in SQL-92, supported by the data source.</p>
+<p>The following bitmasks are used to determine which clauses are supported:</p>
+<p>SQL_DS_DROP_SCHEMA<br> SQL_DS_CASCADE<br> SQL_DS_RESTRICT</p>
+<p>An SQL-92 Intermediate level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;DropTable&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP TABLE statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;DropTranslation&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP TRANSLATION statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;DropView&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses in the DROP VIEW statement, as defined in SQL-92, supported by the data source.</p>
+<p><strong>&quot;DynamicCursorAttributes1&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a dynamic cursor that are supported by the driver. This bitmask contains the first subset of attributes; for the second subset, see DynamicCursorAttributes2.</p>
+<p><strong>&quot;DynamicCursorAttributes2&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a dynamic cursor that are supported by the driver. This bitmask contains the second subset of attributes; for the first subset, see DynamicCursorAttributes1.</p>
+<p><strong>&quot;ExpressionsInOrderBy&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the data source supports expressions in the ORDER BY list; &quot;N&quot; if it does not.</p>
+<p><strong>&quot;FileUsage&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value indicating how a single-tier driver directly treats files in a data source:</p>
+<p>SQL_FILE_NOT_SUPPORTED = The driver is not a single-tier driver. For example, an ORACLE driver is a two-tier driver.</p>
+<p>SQL_FILE_TABLE = A single-tier driver treats files in a data source as tables. For example, an Xbase driver treats each Xbase file as a table.</p>
+<p>SQL_FILE_CATALOG = A single-tier driver treats files in a data source as a catalog. For example, a Microsoft® Access driver treats each Microsoft Access file as a complete database.</p>
+<p>An application might use this to determine how users will select data. For example, Xbase users often think of data as stored in files, while ORACLE and MicrosoftAccess users generally think of data as stored in tables. When a user selects an Xbase data source, the application could display the Windows File Open common dialog box; when the user selects a Microsoft Access or ORACLE data source, the application could display a custom Select Table dialog box.</p>
+<p><strong>&quot;ForwardOnlyCursorAttributes1&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a forward-only cursor that are supported by the driver. This bitmask contains the first subset of attributes; for the second subset, see ForwardOnlyCursorAttributes2.</p>
+<p><strong>&quot;ForwardOnlyCursorAttributes2&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a forward-only cursor that are supported by the driver. This bitmask contains the second subset of attributes; for the first subset, see ForwardOnlyCursorAttributes1.</p>
+<p><strong>&quot;GroupBy&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the relationship between the columns in the GROUP BY clause and the nonaggregated columns in the select list.</p>
+<p>SQL_GB_COLLATE = A COLLATE clause can be specified at the end of each grouping column. (ODBC 3.0)</p>
+<p>SQL_GB_NOT_SUPPORTED = GROUP BY clauses are not supported. (ODBC 2.0)</p>
+<p>SQL_GB_GROUP_BY_EQUALS_SELECT = The GROUP BY clause must contain all nonaggregated columns in the select list. It cannot contain any other columns. For example, SELECT DEPT, MAX(SALARY) FROM EMPLOYEE GROUP BY DEPT. (ODBC 2.0)</p>
+<p>SQL_GB_GROUP_BY_CONTAINS_SELECT = The GROUP BY clause must contain all nonaggregated columns in the select list. It can contain columns that are not in the select list. For example, SELECT DEPT, MAX(SALARY) FROM EMPLOYEE GROUP BY DEPT, AGE. (ODBC 2.0)</p>
+<p>SQL_GB_NO_RELATION = The columns in the GROUP BY clause and the select list are not related. The meaning of nongrouped, nonaggregated columns in the select list is data source-dependent. For example, SELECT DEPT, SALARY FROM EMPLOYEE GROUP BY DEPT, AGE. (ODBC 2.0)</p>
+<p>An SQL-92 Entry level-conformant driver will always return the SQL_GB_GROUP_BY_EQUALS_SELECT option as supported. An SQL-92 Full level-conformant driver will always return the SQL_GB_COLLATE option as supported. If none of the options is supported, the GROUP BY clause is not supported by the data source.</p>
+<p><strong>&quot;IdentifierCase&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value with the supported identifier case.</p>
+<p>SQL_IC_UPPER = Identifiers in SQL are not case-sensitive and are stored in uppercase in system catalog.</p>
+<p>SQL_IC_LOWER = Identifiers in SQL are not case-sensitive and are stored in lowercase in system catalog.</p>
+<p>SQL_IC_SENSITIVE = Identifiers in SQL are case-sensitive and are stored in mixed case in system catalog.</p>
+<p>SQL_IC_MIXED = Identifiers in SQL are not case-sensitive and are stored in mixed case in system catalog.</p>
+<p>Because identifiers in SQL-92 are never case-sensitive, a driver that conforms strictly to SQL-92 (any level) will never return the SQL_IC_SENSITIVE option as supported.</p>
+<p><strong>&quot;IdentifierQuoteChar&quot;</strong></p>
+<p>The character string used as the starting and ending delimiter of a quoted (delimited) identifier in SQL statements. (Identifiers passed as arguments to ODBC functions do not need to be quoted.) If the data source does not support quoted identifiers, a blank is returned.</p>
+<p>This character string can also be used for quoting catalog function arguments when the connection attribute SQL_ATTR_METADATA_ID is set to SQL_TRUE.</p>
+<p>Because the identifier quote character in SQL-92 is the double quotation mark (&quot;), a driver that conforms strictly to SQL-92 will always return the double quotation mark character.</p>
+<p><strong>&quot;IndexKeywords&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that enumerates keywords in the CREATE INDEX statement that are supported by the driver.</p>
+<p>SQL_IK_NONE = None of the keywords is supported.<br> SQL_IK_ASC = ASC keyword is supported.<br> SQL_IK_DESC = DESC keyword is supported.<br> SQL_IK_ALL = All keywords are supported.</p>
+<p>To see if the CREATE INDEX statement is supported, an application calls GetInfo with the SQL_DLL_INDEX information type.</p>
+<p><strong>&quot;InfoSchemaViews&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the views in the INFORMATION_SCHEMA that are supported by the driver. The views in, and the contents of, INFORMATION_SCHEMA are as defined in SQL-92. The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p><strong>&quot;InsertStatement&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that indicates support for INSERT statements.</p>
+<p>SQL_IS_INSERT_LITERALS<br> SQL_IS_INSERT_SEARCHED<br> SQL_IS_SELECT_INTO</p>
+<p>An SQL-92 Entry level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;Integrity&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the data source supports the Integrity Enhancement Facility; &quot;N&quot; if it does not.</p>
+<p><strong>&quot;KeysetCursorAttributes1&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver. This bitmask contains the first subset of attributes; for the second subset, see KeysetCursorAttributes2. The following bitmasks are used to determine which attributes are supported:</p>
+<p>SQL_CA1_NEXT = A FetchOrientation argument of SQL_FETCH_NEXT is supported in a call to FetchScroll when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_ABSOLUTE = FetchOrientation arguments of SQL_FETCH_FIRST, SQL_FETCH_LAST, and SQL_FETCH_ABSOLUTE are supported in a call to FetchScroll when the cursor is a dynamic cursor. (The rowset that will be fetched is independent of the current cursor position.)</p>
+<p>SQL_CA1_RELATIVE = FetchOrientation arguments of SQL_FETCH_PRIOR and SQL_FETCH_RELATIVE are supported in a call to FetchScroll when the cursor is a dynamic cursor. (The rowset that will be fetched is dependent on the current cursor position. Note that this is separated from SQL_FETCH_NEXT because in a forward-only cursor, only SQL_FETCH_NEXT is supported.)</p>
+<p>SQL_CA1_BOOKMARK = A FetchOrientation argument of SQL_FETCH_BOOKMARK is supported in a call to FetchScroll when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_LOCK_EXCLUSIVE = A LockType argument of SQL_LOCK_EXCLUSIVE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_LOCK_NO_CHANGE = A LockType argument of SQL_LOCK_NO_CHANGE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_LOCK_UNLOCK = A LockType argument of SQL_LOCK_UNLOCK is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_POSITION = An Operation argument of SQL_POSITION is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_UPDATE = An Operation argument of SQL_UPDATE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_DELETE = An Operation argument of SQL_DELETE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_REFRESH = An Operation argument of SQL_REFRESH is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POSITIONED_UPDATE = An UPDATE WHERE CURRENT OF SQL statement is supported when the cursor is a dynamic cursor. (An SQL-92 Entry level-conformant driver will always return this option as supported.)</p>
+<p>SQL_CA1_POSITIONED_DELETE = A DELETE WHERE CURRENT OF SQL statement is supported when the cursor is a dynamic cursor. (An SQL-92 Entry level-conformant driver will always return this option as supported.)</p>
+<p>SQL_CA1_SELECT_FOR_UPDATE = A SELECT FOR UPDATE SQL statement is supported when the cursor is a dynamic cursor. (An SQL-92 Entry level-conformant driver will always return this option as supported.)</p>
+<p>SQL_CA1_BULK_ADD = An Operation argument of SQL_ADD is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_BULK_UPDATE_BY_BOOKMARK = An Operation argument of SQL_UPDATE_BY_BOOKMARK is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_BULK_DELETE_BY_BOOKMARK = An Operation argument of SQL_DELETE_BY_BOOKMARK is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_BULK_FETCH_BY_BOOKMARK = An Operation argument of SQL_FETCH_BY_BOOKMARK is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>An SQL-92 Intermediate level-conformant driver will usually return the SQL_CA1_NEXT, SQL_CA1_ABSOLUTE, and SQL_CA1_RELATIVE options as supported, because the driver supports scrollable cursors through the embedded SQL FETCH statement. Because this does not directly determine the underlying SQL support, however, scrollable cursors may not be supported, even for an SQL-92 Intermediate level-conformant driver.</p>
+<p><strong>&quot;KeysetCursorAttributes2&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a keyset cursor that are supported by the driver. This bitmask contains the second subset of attributes; for the first subset, see KeysetCursorAttributes1.</p>
+<p>The following bitmasks are used to determine which attributes are supported:</p>
+<p>SQL_CA2_READ_ONLY_CONCURRENCY = A read-only dynamic cursor, in which no updates are allowed, is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_READ_ONLY for a dynamic cursor).</p>
+<p>SQL_CA2_LOCK_CONCURRENCY = A dynamic cursor that uses the lowest level of locking sufficient to ensure that the row can be updated is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_LOCK for a dynamic cursor.) These locks must be consistent with the transaction isolation level set by the SQL_ATTR_TXN_ISOLATION connection attribute.</p>
+<p>SQL_CA2_OPT_ROWVER_CONCURRENCY = A dynamic cursor that uses the optimistic concurrency control comparing row versions is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_ROWVER for a dynamic cursor.)</p>
+<p>SQL_CA2_OPT_VALUES_CONCURRENCY = A dynamic cursor that uses the optimistic concurrency control comparing values is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_VALUES for a dynamic cursor.)</p>
+<p>SQL_CA2_SENSITIVITY_ADDITIONS = Added rows are visible to a dynamic cursor; the cursor can scroll to those rows. (Where these rows are added to the cursor is driver-dependent.)</p>
+<p>SQL_CA2_SENSITIVITY_DELETIONS = Deleted rows are no longer available to a dynamic cursor, and do not leave a &quot;hole&quot; in the result set; after the dynamic cursor scrolls from a deleted row, it cannot return to that row.</p>
+<p>SQL_CA2_SENSITIVITY_UPDATES = Updates to rows are visible to a dynamic cursor; if the dynamic cursor scrolls from and returns to an updated row, the data returned by the cursor is the updated data, not the original data.</p>
+<p>SQL_CA2_MAX_ROWS_SELECT = The SQL_ATTR_MAX_ROWS statement attribute affects SELECT statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_INSERT = The SQL_ATTR_MAX_ROWS statement attribute affects INSERT statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_DELETE = The SQL_ATTR_MAX_ROWS statement attribute affects DELETE statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_UPDATE = The SQL_ATTR_MAX_ROWS statement attribute affects UPDATE statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_CATALOG = The SQL_ATTR_MAX_ROWS statement attribute affects CATALOG result sets when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_AFFECTS_ALL = The SQL_ATTR_MAX_ROWS statement attribute affects SELECT, INSERT, DELETE, and UPDATE statements, and CATALOG result sets, when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_CRC_EXACT = The exact row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_CRC_APPROXIMATE = An approximate row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_SIMULATE_NON_UNIQUE = The driver does not guarantee that simulated positioned update or delete statements will affect only one row when the cursor is a dynamic cursor; it is the application's responsibility to guarantee this. (If a statement affects more than one row, Execute or ExecDirect returns SQLSTATE 01001 [Cursor operation conflict].) To set this behavior, the application calls SetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute set to SQL_SC_NON_UNIQUE.</p>
+<p>SQL_CA2_SIMULATE_TRY_UNIQUE = The driver attempts to guarantee that simulated positioned update or delete statements will affect only one row when the cursor is a dynamic cursor. The driver always executes such statements, even if they might affect more than one row, such as when there is no unique key. (If a statement affects more than one row, Execute or ExecDirect returns SQLSTATE 01001 [Cursor operation conflict].) To set this behavior, the application calls SetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute set to SQL_SC_TRY_UNIQUE.</p>
+<p>SQL_CA2_SIMULATE_UNIQUE = The driver guarantees that simulated positioned update or delete statements will affect only one row when the cursor is a dynamic cursor. If the driver cannot guarantee this for a given statement, ExecDirect or Prepare return SQLSTATE 01001 (Cursor operation conflict). To set this behavior, the application calls SetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute set to SQL_SC_UNIQUE.</p>
+<p><strong>&quot;Keywords&quot;</strong></p>
+<p>Returns a character string containing a comma-separated list of all data source-specific keywords. This list does not contain keywords specific to ODBC or keywords used by both the data source and ODBC. This list represents all the reserved keywords; interoperable applications should not use these words in object names.</p>
+<p><strong>&quot;LikeEscapeClause&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the data source supports an escape character for the percent character (%) and underscore character (_) in a LIKE predicate and the driver supports the ODBC syntax for defining a LIKE predicate escape character; &quot;N&quot; otherwise.</p>
+<p><strong>&quot;MaxAsyncConcurrentStatements&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the maximum number of active concurrent statements in asynchronous mode that the driver can support on a given connection. If there is no specific limit or the limit is unknown, this value is zero.</p>
+<p><strong>&quot;MaxBinaryLiteralLen&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the maximum length (number of hexadecimal characters, excluding the literal prefix and suffix returned by GetTypeInfo) of a binary literal in an SQL statement. For example, the binary literal 0xFFAA has a length of 4. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxCatalogNameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a catalog name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxCharLiteralLen&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the maximum length (number of characters, excluding the literal prefix and suffix returned by GetTypeInfo) of a character literal in an SQL statement. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxColumnNameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a column name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxColumnsInGroupBy&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of columns allowed in a GROUP BY clause. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxColumnsInIndex&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of columns allowed in an index. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxColumnsInOrderBy&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of columns allowed in an ORDER BY clause. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxColumnsInSelect&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of columns allowed in a select list. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxColumnsInTable&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of columns allowed in a table. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxConcurrentActivities&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of active statements that the driver can support for a connection.</p>
+<p><strong>&quot;MaxCursorNameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a cursor name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxDriverConnections&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of active connections that the driver can support for an environment. This value can reflect a limitation imposed by either the driver or the data source. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxIdentifierLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT that indicates the maximum size in characters that the data source supports for user-defined names.</p>
+<p><strong>&quot;MaxIndexSize&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the maximum number of bytes allowed in the combined fields of an index. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxProcedureNameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a procedure name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxRowSize&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the maximum length of a single row in a table. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxRowSizeIncludesLong&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the maximum row size returned for the SQL_MAX_ROW_SIZE information type includes the length of all SQL_LONGVARCHAR and SQL_LONGVARBINARY columns in the row; &quot;N&quot; otherwise.</p>
+<p><strong>&quot;MaxSchemaNameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a schema name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxStatementLen&quot;</strong></p>
+<p>Returns an SQLUINTEGER value specifying the maximum length (number of characters, including white space) of an SQL statement. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxTablenameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a table name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxTablesInSelect&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum number of tables allowed in the FROM clause of a SELECT statement. If there is no specified limit or the limit is unknown, this value is set to zero.</p>
+<p><strong>&quot;MaxUserNameLen&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying the maximum length of a user name in the data source. If there is no maximum length or the length is unknown, this value is set to zero.</p>
+<p><strong>&quot;MultipleActiveTxn&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the driver supports more than one active transaction at the same time, &quot;N&quot; if only one transaction can be active at any time.</p>
+<p><strong>&quot;MultResultSets&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the data source supports multiple result sets, &quot;N&quot; if it does not.</p>
+<p><strong>&quot;NeedLongDataLen&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the data source needs the length of a long data value (the data type is SQL_LONGVARCHAR, SQL_LONGVARBINARY, or a long data source-specific data type) before that value is sent to the data source, &quot;N&quot; if it does not. For more information, see BindParameter and SetPos.</p>
+<p><strong>&quot;NonNullableColumns&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying whether the data source supports NOT NULL in columns:</p>
+<p>SQL_NNC_NULL = All columns must be nullable. SQL_NNC_NON_NULL = Columns cannot be nullable. (The data source supports the NOT NULL column constraint in CREATE TABLE statements.)</p>
+<p>An SQL-92 Entry level-conformant driver will return SQL_NNC_NON_NULL.</p>
+<p><strong>&quot;NullCollation&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value specifying where NULLs are sorted in a result set.</p>
+<p>SQL_NC_END = NULLs are sorted at the end of the result set, regardless of the ASC or DESC keywords.</p>
+<p>SQL_NC_HIGH = NULLs are sorted at the high end of the result set, depending on the ASC or DESC keywords.</p>
+<p>SQL_NC_LOW = NULLs are sorted at the low end of the result set, depending on the ASC or DESC keywords.</p>
+<p>SQL_NC_START = NULLs are sorted at the start of the result set, regardless of the ASC or DESC keywords.</p>
+<p><strong>&quot;NumericFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the scalar numeric functions supported by the driver and associated data source.</p>
+<p><strong>&quot;ODBCInterfaceConformance&quot;</strong></p>
+<p>Returns an SQLUINTEGER value indicating the level of the ODBC 3.x interface that the driver conforms to.</p>
+<p>SQL_OIC_CORE: The minimum level that all ODBC drivers are expected to conform to. This level includes basic interface elements such as connection functions, functions for preparing and executing an SQL statement, basic result set metadata functions, basic catalog functions, and so on.</p>
+<p>SQL_OIC_LEVEL1: A level including the core standards compliance level functionality, plus scrollable cursors, bookmarks, positioned updates and deletes, and so on.</p>
+<p>SQL_OIC_LEVEL2: A level including level 1 standards compliance level functionality, plus advanced features such as sensitive cursors; update, delete, and refresh by bookmarks; stored procedure support; catalog functions for primary and foreign keys; multicatalog support; and so on.</p>
+<p><strong>&quot;ODBCVer&quot;</strong></p>
+<p>Returns a character string with the version of ODBC to which the Driver Manager conforms. The version is of the form ##.##.0000, where the first two digits are the major version and the next two digits are the minor version. This is implemented solely in the Driver Manager.</p>
+<p><strong>&quot;OJCapabilities&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the types of outer joins supported by the driver and data source.</p>
+<p><strong>&quot;OrderByColumnsInSelect&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if the columns in the ORDER BY clause must be in the select list; otherwise, &quot;N&quot;.</p>
+<p><strong>&quot;OuterJoins&quot;</strong></p>
+<p>Returns a character string indicating the level of outer joins support.</p>
+<p>&quot;N&quot; = No. The data source does not support outer joins. (ODBC 1.0)</p>
+<p>&quot;Y&quot; = Yes. The data source supports two-table outer joins, and the driver supports the ODBC outer join syntax except for nested outer joins. However, columns on the left side of the comparison operator in the ON clause must come from the left-hand table in the outer join, and columns on the right side of the comparison operator must come from the right-hand table. (ODBC 1.0)</p>
+<p>&quot;P&quot; = Partial. The data source partially supports nested outer joins, and the driver supports the ODBC outer join syntax. However, columns on the left side of the comparison operator in the ON clause must come from the left-hand table in the outer join and columns on the right side of the comparison operator must come from the right-hand table. Also, the right-hand table of an outer join cannot be included in an inner join. (ODBC 2.0)</p>
+<p>&quot;F&quot; = Full. The data source fully supports nested outer joins, and the driver supports the ODBC outer join syntax. (ODBC 2.0)</p>
+<p><strong>&quot;ParamArrayRowCounts&quot;</strong></p>
+<p>Returns an SQLUINTEGER enumerating the driver's properties regarding the availability of row counts in a parameterized execution.</p>
+<p>SQL_PARC_BATCH = Individual row counts are available for each set of parameters. This is conceptually equivalent to the driver generating a batch of SQL statements, one for each parameter set in the array. Extended error information can be retrieved by using the SQL_PARAM_STATUS_PTR descriptor field.</p>
+<p>SQL_PARC_NO_BATCH = There is only one row count available, which is the cumulative row count resulting from the execution of the statement for the entire array of parameters. This is conceptually equivalent to treating the statement along with the entire parameter array as one atomic unit. Errors are handled the same as if one statement were executed.</p>
+<p><strong>&quot;ParamArraySelects&quot;</strong></p>
+<p>Returns an SQLUINTEGER enumerating the driver's properties regarding the availability of result sets in a parameterized execution.</p>
+<p>SQL_PAS_BATCH = There is one result set available per set of parameters. This is conceptually equivalent to the driver generating a batch of SQL statements, one for each parameter set in the array.</p>
+<p>SQL_PAS_NO_BATCH = There is only one result set available, which represents the cumulative result set resulting from the execution of the statement for the entire array of parameters. This is conceptually equivalent to treating the statement along with the entire parameter array as one atomic unit.</p>
+<p>SQL_PAS_NO_SELECT = A driver does not allow a result-set generating statement to be executed with an array of parameters.</p>
+<p><strong>&quot;PosOperations&quot;</strong></p>
+<p>Returns an SQLINTEGER bitmask enumerating the support operations in SetPos.</p>
+<p>The following bitmasks are used in conjunction with the flag to determine which options are supported.</p>
+<p>SQL_POS_POSITION (ODBC 2.0) SQL_POS_REFRESH (ODBC 2.0)</p>
+<p>SQL_POS_UPDATE (ODBC 2.0) SQL_POS_DELETE (ODBC 2.0) SQL_POS_ADD (ODBC 2.0)</p>
+<p><strong>&quot;Procedures&quot;</strong></p>
+<p>A character string: &quot;Y&quot; if the data source supports procedures and the driver supports the ODBC procedure invocation syntax; &quot;N&quot; otherwise.</p>
+<p><strong>&quot;ProcedureTerm&quot;</strong></p>
+<p>Returns a character string with the data source vendor's name for a procedure; for example, &quot;database procedure&quot;, &quot;stored procedure&quot;, &quot;procedure&quot;, &quot;package&quot;, or &quot;stored query&quot;.</p>
+<p><strong>&quot;QuotedIdentifierCase&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value with the supported quoted identifier case.</p>
+<p>SQL_IC_UPPER = Quoted identifiers in SQL are not case-sensitive and are stored in uppercase in the system catalog.</p>
+<p>SQL_IC_LOWER = Quoted identifiers in SQL are not case-sensitive and are stored in lowercase in the system catalog.</p>
+<p>SQL_IC_SENSITIVE = Quoted identifiers in SQL are case-sensitive and are stored in mixed case in the system catalog. (In an SQL-92-compliant database, quoted identifiers are always case-sensitive.)</p>
+<p>SQL_IC_MIXED = Quoted identifiers in SQL are not case-sensitive and are stored in mixed case in the system catalog.</p>
+<p>An SQL-92 Entry level-conformant driver will always return SQL_IC_SENSITIVE.</p>
+<p><strong>&quot;RowUpdates&quot;</strong></p>
+<p>Returns a character string: &quot;Y&quot; if a keyset-driven or mixed cursor maintains row versions or values for all fetched rows and therefore can detect any updates made to a row by any user since the row was last fetched. (This applies only to updates, not to deletions or insertions.) The driver can return the SQL_ROW_UPDATED flag to the row status array when FetchScroll is called. Otherwise, &quot;N&quot;.</p>
+<p><strong>&quot;SchemaTerm&quot;</strong></p>
+<p>Returns a character string with the data source vendor's name for an schema; for example, &quot;owner&quot;, &quot;Authorization ID&quot;, or &quot;Schema&quot;. The character string can be returned in upper, lower, or mixed case.</p>
+<p>An SQL-92 Entry level–conformant driver will always return &quot;schema&quot;. This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_TERM.</p>
+<p><strong>&quot;SchemaUsage&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the statements in which schemas can be used.</p>
+<p>SQL_SU_DML_STATEMENTS = Schemas are supported in all Data Manipulation Language statements: SELECT, INSERT, UPDATE, DELETE, and if supported, SELECT FOR UPDATE and positioned update and delete statements.</p>
+<p>SQL_SU_PROCEDURE_INVOCATION = Schemas are supported in the ODBC procedure invocation statement.</p>
+<p>SQL_SU_TABLE_DEFINITION = Schemas are supported in all table definition statements: CREATE TABLE, CREATE VIEW, ALTER TABLE, DROP TABLE, and DROP VIEW.</p>
+<p>SQL_SU_INDEX_DEFINITION = Schemas are supported in all index definition statements: CREATE INDEX and DROP INDEX.</p>
+<p>SQL_SU_PRIVILEGE_DEFINITION = Schemas are supported in all privilege definition statements: GRANT and REVOKE. An SQL-92 Entry level-conformant driver will always return the SQL_SU_DML_STATEMENTS, SQL_SU_TABLE_DEFINITION, and SQL_SU_PRIVILEGE_DEFINITION options, as supported.</p>
+<p>This InfoType has been renamed for ODBC 3.0 from the ODBC 2.0 InfoType SQL_OWNER_USAGE.</p>
+<p><strong>&quot;ScrollOptions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the scroll options supported for scrollable cursors.</p>
+<p>The following bitmasks are used to determine which options are supported:</p>
+<p>SQL_SO_FORWARD_ONLY = The cursor only scrolls forward. (ODBC 1.0)</p>
+<p>SQL_SO_STATIC = The data in the result set is static. (ODBC 2.0)</p>
+<p>SQL_SO_KEYSET_DRIVEN = The driver saves and uses the keys for every row in the result set. (ODBC 1.0)</p>
+<p>SQL_SO_DYNAMIC = The driver keeps the keys for every row in the rowset (the keyset size is the same as the rowset size). (ODBC 1.0)</p>
+<p>SQL_SO_MIXED = The driver keeps the keys for every row in the keyset, and the keyset size is greater than the rowset size. The cursor is keyset-driven inside the keyset and dynamic outside the keyset. (ODBC 1.0)</p>
+<p><strong>&quot;SearchPatternEscape&quot;</strong></p>
+<p>Returns a character string specifying what the driver supports as an escape character that permits the use of the pattern match metacharacters underscore (_) and percent sign (%) as valid characters in search patterns. This escape character applies only for those catalog function arguments that support search strings. If this string is empty, the driver does not support a search-pattern escape character. Because this information type does not indicate general support of the escape character in the LIKE predicate, SQL-92 does not include requirements for this character string.</p>
+<p>This info type is limited to catalog functions.</p>
+<p><strong>&quot;ServerName&quot;</strong></p>
+<p>Returns a character string with the actual data source-specific server name; useful when a data source name is used during Connect, DriverConnect, and BrowseConnect.</p>
+<p><strong>&quot;SpecialCharacters&quot;</strong></p>
+<p>Returns a character string containing all special characters (that is, all characters except a through z, A through Z, 0 through 9, and underscore) that can be used in an identifier name, such as a table name, column column name, or index name, on the data source. For example, &quot;#$^&quot;. If an identifier contains one or more of these characters, the identifier must be a delimited identifier.</p>
+<p><strong>&quot;SQL92DateTimeFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the datetime scalar functions that are supported by the driver and the associated data source, as defined in SQL-92.</p>
+<p>The following bitmasks are used to determine which datetime functions are supported:</p>
+<p>SQL_SDF_CURRENT_DATE<br> SQL_SDF_CURRENT_TIME<br> SQL_SDF_CURRENT_TIMESTAMP</p>
+<p><strong>&quot;SQL92ForeignKeyDeleteRule&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the rules supported for a foreign key in a DELETE statement, as defined in SQL-92.</p>
+<p>The following bitmasks are used to determine which clauses are supported by the data source:</p>
+<p>SQL_SFKD_CASCADE<br> SQL_SFKD_NO_ACTION<br> SQL_SFKD_SET_DEFAULT<br> SQL_SFKD_SET_NULL</p>
+<p>An FIPS Transitional level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;SQL92ForeignKeyUpdateRule&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the rules supported for a foreign key in an UPDATE statement, as defined in SQL-92. The following bitmasks are used to determine which clauses are supported by the data source:</p>
+<p>SQL_SFKU_CASCADE<br> SQL_SFKU_NO_ACTION<br> SQL_SFKU_SET_DEFAULT<br> SQL_SFKU_SET_NULL</p>
+<p>An SQL-92 Full level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;SQL92Grant&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses supported in the GRANT statement, as defined in SQL-92.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p>The following bitmasks are used to determine which clauses are supported by the data source:</p>
+<p>SQL_SG_DELETE_TABLE (Entry level)<br> SQL_SG_INSERT_COLUMN (Intermediate level)<br> SQL_SG_INSERT_TABLE (Entry level)<br> SQL_SG_REFERENCES_TABLE (Entry level)<br> SQL_SG_REFERENCES_COLUMN (Entry level)<br> SQL_SG_SELECT_TABLE (Entry level)<br> SQL_SG_UPDATE_COLUMN (Entry level)<br> SQL_SG_UPDATE_TABLE (Entry level)<br> SQL_SG_USAGE_ON_DOMAIN (FIPS Transitional level)<br> SQL_SG_USAGE_ON_CHARACTER_SET (FIPS Transitional level)<br> SQL_SG_USAGE_ON_COLLATION (FIPS Transitional level)<br> SQL_SG_USAGE_ON_TRANSLATION (FIPS Transitional level)<br> SQL_SG_WITH_GRANT_OPTION (Entry level)</p>
+<p><strong>&quot;SQL92NumericValueFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the numeric value scalar functions that are supported by the driver and the associated data source, as defined in SQL-92. The following bitmasks are used to determine which numeric functions are supported:</p>
+<p>SQL_SNVF_BIT_LENGTH<br> SQL_SNVF_CHAR_LENGTH<br> SQL_SNVF_CHARACTER_LENGTH<br> SQL_SNVF_EXTRACT<br> SQL_SNVF_OCTET_LENGTH<br> SQL_SNVF_POSITION</p>
+<p><strong>&quot;SQL92Predicates&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the predicates supported in a SELECT statement, as defined in SQL-92.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p>The following bitmasks are used to determine which options are supported by the data source:</p>
+<p>SQL_SP_BETWEEN (Entry level)<br> SQL_SP_COMPARISON (Entry level)<br> SQL_SP_EXISTS (Entry level)<br> SQL_SP_IN (Entry level)<br> SQL_SP_ISNOTNULL (Entry level)<br> SQL_SP_ISNULL (Entry level)<br> SQL_SP_LIKE (Entry level)<br> SQL_SP_MATCH_FULL (Full level)<br> SQL_SP_MATCH_PARTIAL(Full level)<br> SQL_SP_MATCH_UNIQUE_FULL (Full level)<br> SQL_SP_MATCH_UNIQUE_PARTIAL (Full level)<br> SQL_SP_OVERLAPS (FIPS Transitional level)<br> SQL_SP_QUANTIFIED_COMPARISON (Entry level)<br> SQL_SP_UNIQUE (Entry level)</p>
+<p><strong>&quot;SQL92RelationalJoinOperators&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the relational join operators supported in a SELECT statement, as defined in SQL-92.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p>The following bitmasks are used to determine which options are supported by the data source:</p>
+<p>SQL_SRJO_CORRESPONDING_CLAUSE (Intermediate level)<br> SQL_SRJO_CROSS_JOIN (Full level)<br> SQL_SRJO_EXCEPT_JOIN (Intermediate level)<br> SQL_SRJO_FULL_OUTER_JOIN (Intermediate level)<br> SQL_SRJO_INNER_JOIN (FIPS Transitional level)<br> SQL_SRJO_INTERSECT_JOIN (Intermediate level)<br> SQL_SRJO_LEFT_OUTER_JOIN (FIPS Transitional level)<br> SQL_SRJO_NATURAL_JOIN (FIPS Transitional level)<br> SQL_SRJO_RIGHT_OUTER_JOIN (FIPS Transitional level)<br> SQL_SRJO_UNION_JOIN (Full level)</p>
+<p>SQL_SRJO_INNER_JOIN indicates support for the INNER JOIN syntax, not for the inner join capability. Support for the INNER JOIN syntax is FIPS TRANSITIONAL, while support for the inner join capability is ENTRY.</p>
+<p><strong>&quot;SQL92Revoke&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the clauses supported in the REVOKE statement, as defined in SQL-92, supported by the data source.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p>The following bitmasks are used to determine which clauses are supported by the data source:</p>
+<p>SQL_SR_CASCADE (FIPS Transitional level)<br> SQL_SR_DELETE_TABLE (Entry level)<br> SQL_SR_GRANT_OPTION_FOR (Intermediate level)<br> SQL_SR_INSERT_COLUMN (Intermediate level)<br> SQL_SR_INSERT_TABLE (Entry level)<br> SQL_SR_REFERENCES_COLUMN (Entry level)<br> SQL_SR_REFERENCES_TABLE (Entry level)<br> SQL_SR_RESTRICT (FIPS Transitional level)<br> SQL_SR_SELECT_TABLE (Entry level)<br> SQL_SR_UPDATE_COLUMN (Entry level)<br> SQL_SR_UPDATE_TABLE (Entry level)<br> SQL_SR_USAGE_ON_DOMAIN (FIPS Transitional level)<br> SQL_SR_USAGE_ON_CHARACTER_SET (FIPS Transitional level)<br> SQL_SR_USAGE_ON_COLLATION (FIPS Transitional level)<br> SQL_SR_USAGE_ON_TRANSLATION (FIPS Transitional level)</p>
+<p><strong>&quot;SQL92RowValueConstructor&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the row value constructor expressions supported in a SELECT statement, as defined in SQL-92.</p>
+<p>The following bitmasks are used to determine which options are supported by the data source:</p>
+<p>SQL_SRVC_VALUE_EXPRESSION<br> SQL_SRVC_NULL<br> SQL_SRVC_DEFAULT<br> SQL_SRVC_ROW_SUBQUERY</p>
+<p><strong>&quot;SQL92StringFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the string scalar functions that are supported by the driver and the associated data source, as defined in SQL-92.</p>
+<p>The following bitmasks are used to determine which string functions are supported:</p>
+<p>SQL_SSF_CONVERT<br> SQL_SSF_LOWER<br> SQL_SSF_UPPER<br> SQL_SSF_SUBSTRING<br> SQL_SSF_TRANSLATE<br> SQL_SSF_TRIM_BOTH<br> SQL_SSF_TRIM_LEADING<br> SQL_SSF_TRIM_TRAILING</p>
+<p><strong>&quot;SQL92ValueExpressions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the value expressions supported, as defined in SQL-92.</p>
+<p>The SQL-92 or FIPS conformance level at which this feature needs to be supported is shown in parentheses next to each bitmask.</p>
+<p>The following bitmasks are used to determine which options are supported by the data source:</p>
+<p>SQL_SVE_CASE (Intermediate level)<br> SQL_SVE_CAST (FIPS Transitional level)<br> SQL_SVE_COALESCE (Intermediate level)<br> SQL_SVE_NULLIF (Intermediate level)</p>
+<p><strong>&quot;SqlConformance&quot;</strong></p>
+<p>Returns an SQLUINTEGER value indicating the level of SQL-92 supported by the driver.</p>
+<p>SQL_SC_SQL92_ENTRY = Entry level SQL-92 compliant.<br> SQL_SC_FIPS127_2_TRANSITIONAL = FIPS 127-2 transitional level compliant.<br> SQL_SC_SQL92_FULL = Full level SQL-92 compliant.<br> SQL_SC_ SQL92_INTERMEDIATE = Intermediate level SQL-92 compliant.</p>
+<p><strong>&quot;StandardCliConformance&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the CLI standard or standards to which the driver conforms. The following bitmasks are used to determine which levels the driver conforms to:</p>
+<p>SQL_SCC_XOPEN_CLI_VERSION1: The driver conforms to the X/Open CLI version 1.</p>
+<p>SQL_SCC_ISO92_CLI: The driver conforms to the ISO 92 CLI.</p>
+<p><strong>&quot;StaticCursorAttributes1&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver. This bitmask contains the first subset of attributes; for the second subset, see StaticCursorAttributes2.</p>
+<p>The following bitmasks are used to determine which attributes are supported:</p>
+<p>SQL_CA1_NEXT = A FetchOrientation argument of SQL_FETCH_NEXT is supported in a call to FetchScroll when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_ABSOLUTE = FetchOrientation arguments of SQL_FETCH_FIRST, SQL_FETCH_LAST, and SQL_FETCH_ABSOLUTE are supported in a call to FetchScroll when the cursor is a dynamic cursor. (The rowset that will be fetched is independent of the current cursor position.)</p>
+<p>SQL_CA1_RELATIVE = FetchOrientation arguments of SQL_FETCH_PRIOR and SQL_FETCH_RELATIVE are supported in a call to FetchScroll when the cursor is a dynamic cursor. (The rowset that will be fetched is dependent on the current cursor position. Note that this is separated from SQL_FETCH_NEXT because in a forward-only cursor, only SQL_FETCH_NEXT is supported.)</p>
+<p>SQL_CA1_BOOKMARK = A FetchOrientation argument of SQL_FETCH_BOOKMARK is supported in a call to FetchScroll when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_LOCK_EXCLUSIVE = A LockType argument of SQL_LOCK_EXCLUSIVE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_LOCK_NO_CHANGE = A LockType argument of SQL_LOCK_NO_CHANGE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_LOCK_UNLOCK = A LockType argument of SQL_LOCK_UNLOCK is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_POSITION = An Operation argument of SQL_POSITION is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_UPDATE = An Operation argument of SQL_UPDATE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_DELETE = An Operation argument of SQL_DELETE is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POS_REFRESH = An Operation argument of SQL_REFRESH is supported in a call to SetPos when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_POSITIONED_UPDATE = An UPDATE WHERE CURRENT OF SQL statement is supported when the cursor is a dynamic cursor. (An SQL-92 Entry level-conformant driver will always return this option as supported.)</p>
+<p>SQL_CA1_POSITIONED_DELETE = A DELETE WHERE CURRENT OF SQL statement is supported when the cursor is a dynamic cursor. (An SQL-92 Entry level-conformant driver will always return this option as supported.)</p>
+<p>SQL_CA1_SELECT_FOR_UPDATE = A SELECT FOR UPDATE SQL statement is supported when the cursor is a dynamic cursor. (An SQL-92 Entry level-conformant driver will always return this option as supported.)</p>
+<p>SQL_CA1_BULK_ADD = An Operation argument of SQL_ADD is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_BULK_UPDATE_BY_BOOKMARK = An Operation argument of SQL_UPDATE_BY_BOOKMARK is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_BULK_DELETE_BY_BOOKMARK = An Operation argument of SQL_DELETE_BY_BOOKMARK is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>SQL_CA1_BULK_FETCH_BY_BOOKMARK = An Operation argument of SQL_FETCH_BY_BOOKMARK is supported in a call to BulkOperations when the cursor is a dynamic cursor.</p>
+<p>An SQL-92 Intermediate level-conformant driver will usually return the SQL_CA1_NEXT, SQL_CA1_ABSOLUTE, and SQL_CA1_RELATIVE options as supported, because it supports scrollable cursors through the embedded %SQL FETCH statement. Because this does not directly determine the underlying SQL support, however, scrollable cursors may not be supported, even for an SQL-92 Intermediate level-conformant driver.</p>
+<p><strong>&quot;StaticCursorAttributes2&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask that describes the attributes of a static cursor that are supported by the driver. This bitmask contains the second subset of attributes; for the first subset, see StaticCursorAttributes1.</p>
+<p>The following bitmasks are used to determine which attributes are supported:</p>
+<p>SQL_CA2_READ_ONLY_CONCURRENCY = A read-only dynamic cursor, in which no updates are allowed, is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_READ_ONLY for a dynamic cursor).</p>
+<p>SQL_CA2_LOCK_CONCURRENCY = A dynamic cursor that uses the lowest level of locking sufficient to ensure that the row can be updated is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_LOCK for a dynamic cursor.) These locks must be consistent with the transaction isolation level set by the SQL_ATTR_TXN_ISOLATION connection attribute.</p>
+<p>SQL_CA2_OPT_ROWVER_CONCURRENCY = A dynamic cursor that uses the optimistic concurrency control comparing row versions is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_ROWVER for a dynamic cursor.)</p>
+<p>SQL_CA2_OPT_VALUES_CONCURRENCY = A dynamic cursor that uses the optimistic concurrency control comparing values is supported. (The SQL_ATTR_CONCURRENCY statement attribute can be SQL_CONCUR_VALUES for a dynamic cursor.)</p>
+<p>SQL_CA2_SENSITIVITY_ADDITIONS = Added rows are visible to a dynamic cursor; the cursor can scroll to those rows. (Where these rows are added to the cursor is driver-dependent.)</p>
+<p>SQL_CA2_SENSITIVITY_DELETIONS = Deleted rows are no longer available to a dynamic cursor, and do not leave a &quot;hole&quot; in the result set; after the dynamic cursor scrolls from a deleted row, it cannot return to that row.</p>
+<p>SQL_CA2_SENSITIVITY_UPDATES = Updates to rows are visible to a dynamic cursor; if the dynamic cursor scrolls from and returns to an updated row, the data returned by the cursor is the updated data, not the original data.</p>
+<p>SQL_CA2_MAX_ROWS_SELECT = The SQL_ATTR_MAX_ROWS statement attribute affects SELECT statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_INSERT = The SQL_ATTR_MAX_ROWS statement attribute affects INSERT statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_DELETE = The SQL_ATTR_MAX_ROWS statement attribute affects DELETE statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_UPDATE = The SQL_ATTR_MAX_ROWS statement attribute affects UPDATE statements when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_CATALOG = The SQL_ATTR_MAX_ROWS statement attribute affects CATALOG result sets when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_MAX_ROWS_AFFECTS_ALL = The SQL_ATTR_MAX_ROWS statement attribute affects SELECT, INSERT, DELETE, and UPDATE statements, and CATALOG result sets, when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_CRC_EXACT = The exact row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_CRC_APPROXIMATE = An approximate row count is available in the SQL_DIAG_CURSOR_ROW_COUNT diagnostic field when the cursor is a dynamic cursor.</p>
+<p>SQL_CA2_SIMULATE_NON_UNIQUE = The driver does not guarantee that simulated positioned update or delete statements will affect only one row when the cursor is a dynamic cursor; it is the application's responsibility to guarantee this. (If a statement affects more than one row, Execute or ExecDirect returns SQLSTATE 01001 [Cursor operation conflict].) To set this behavior, the application calls SetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute set to SQL_SC_NON_UNIQUE.</p>
+<p>SQL_CA2_SIMULATE_TRY_UNIQUE = The driver attempts to guarantee that simulated positioned update or delete statements will affect only one row when the cursor is a dynamic cursor. The driver always executes such statements, even if they might affect more than one row, such as when there is no unique key. (If a statement affects more than one row, Execute or ExecDirect returns SQLSTATE 01001 [Cursor operation conflict].) To set this behavior, the application calls SetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute set to SQL_SC_TRY_UNIQUE.</p>
+<p>SQL_CA2_SIMULATE_UNIQUE = The driver guarantees that simulated positioned update or delete statements will affect only one row when the cursor is a dynamic cursor. If the driver cannot guarantee this for a given statement, ExecDirect or Prepare return SQLSTATE 01001 (Cursor operation conflict). To set this behavior, the application calls SetStmtAttr with the SQL_ATTR_SIMULATE_CURSOR attribute set to SQL_SC_UNIQUE.</p>
+<p><strong>&quot;StringFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the scalar string functions supported by the driver and associated data source.</p>
+<p>The following bitmasks are used to determine which string functions are supported:</p>
+<p>SQL_FN_STR_ASCII (ODBC 1.0)<br> SQL_FN_STR_BIT_LENGTH (ODBC 3.0)<br> SQL_FN_STR_CHAR (ODBC 1.0)<br> SQL_FN_STR_CHAR_LENGTH (ODBC 3.0)<br> SQL_FN_STR_CHARACTER_LENGTH (ODBC 3.0)<br> SQL_FN_STR_CONCAT (ODBC 1.0)<br> SQL_FN_STR_DIFFERENCE (ODBC 2.0)<br> SQL_FN_STR_INSERT (ODBC 1.0)<br> SQL_FN_STR_LCASE (ODBC 1.0)<br> SQL_FN_STR_LEFT (ODBC 1.0)<br> SQL_FN_STR_LENGTH (ODBC 1.0)<br> SQL_FN_STR_LOCATE (ODBC 1.0)<br> SQL_FN_STR_LTRIM (ODBC 1.0)<br> SQL_FN_STR_OCTET_LENGTH (ODBC 3.0)<br> SQL_FN_STR_POSITION (ODBC 3.0)<br> SQL_FN_STR_REPEAT (ODBC 1.0)<br> SQL_FN_STR_REPLACE (ODBC 1.0)<br> SQL_FN_STR_RIGHT (ODBC 1.0)<br> SQL_FN_STR_RTRIM (ODBC 1.0)<br> SQL_FN_STR_SOUNDEX (ODBC 2.0)<br> SQL_FN_STR_SPACE (ODBC 2.0)<br> SQL_FN_STR_SUBSTRING (ODBC 1.0)<br> SQL_FN_STR_UCASE (ODBC 1.0)</p>
+<p>If an application can call the LOCATE scalar function with the string_exp1, string_exp2, and start arguments, the driver returns the SQL_FN_STR_LOCATE bitmask. If an application can call the LOCATE scalar function with only the string_exp1 and string_exp2 arguments, the driver returns the SQL_FN_STR_LOCATE_2 bitmask. Drivers that fully support the LOCATE scalar function return both bitmasks.</p>
+<p><strong>&quot;Subqueries&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the predicates that support subqueries:</p>
+<p>SQL_SQ_CORRELATED_SUBQUERIES<br> SQL_SQ_COMPARISON<br> SQL_SQ_EXISTS<br> SQL_SQ_IN<br> SQL_SQ_QUANTIFIED</p>
+<p>The SQL_SQ_CORRELATED_SUBQUERIES bitmask indicates that all predicates that support subqueries support correlated subqueries.</p>
+<p>An SQL-92 Entry level-conformant driver will always return a bitmask in which all of these bits are set.</p>
+<p><strong>&quot;SystemFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the scalar system functions supported by the driver and associated data source.</p>
+<p>The following bitmasks are used to determine which system functions are supported:</p>
+<p>SQL_FN_SYS_DBNAME<br> SQL_FN_SYS_IFNULL<br> SQL_FN_SYS_USERNAME<br></p>
+<p><strong>&quot;TableTerm&quot;</strong></p>
+<p>Returns a character string with the data source vendor's name for a table; for example, &quot;table&quot; or &quot;file&quot;.</p>
+<p>This character string can be in upper, lower, or mixed case.</p>
+<p>An SQL-92 Entry level–conformant driver will always return &quot;table&quot;.</p>
+<p><strong>&quot;TimeDateAddIntervals&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the timestamp intervals supported by the driver and associated data source for the TIMESTAMPADD scalar function.</p>
+<p>The following bitmasks are used to determine which intervals are supported:</p>
+<p>SQL_FN_TSI_FRAC_SECOND<br> SQL_FN_TSI_SECOND<br> SQL_FN_TSI_MINUTE<br> SQL_FN_TSI_HOUR<br> SQL_FN_TSI_DAY<br> SQL_FN_TSI_WEEK<br> SQL_FN_TSI_MONTH<br> SQL_FN_TSI_QUARTER<br> SQL_FN_TSI_YEAR</p>
+<p>An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.</p>
+<p><strong>&quot;TimeDateDiffIntervals&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the timestamp intervals supported by the driver and associated data source for the TIMESTAMPDIFF scalar function.</p>
+<p>The following bitmasks are used to determine which intervals are supported:</p>
+<p>SQL_FN_TSI_FRAC_SECOND<br> SQL_FN_TSI_SECOND<br> SQL_FN_TSI_MINUTE<br> SQL_FN_TSI_HOUR<br> SQL_FN_TSI_DAY<br> SQL_FN_TSI_WEEK<br> SQL_FN_TSI_MONTH<br> SQL_FN_TSI_QUARTER<br> SQL_FN_TSI_YEAR</p>
+<p>An FIPS Transitional level-conformant driver will always return a bitmask in which all of these bits are set.</p>
+<p><strong>&quot;TimeDateFunctions&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the scalar date and time functions supported by the driver and associated data source.</p>
+<p>The following bitmasks are used to determine which date and time functions are supported:</p>
+<p>SQL_FN_TD_CURRENT_DATE ODBC 3.0)<br> SQL_FN_TD_CURRENT_TIME (ODBC 3.0)<br> SQL_FN_TD_CURRENT_TIMESTAMP (ODBC 3.0)<br> SQL_FN_TD_CURDATE (ODBC 1.0)<br> SQL_FN_TD_CURTIME (ODBC 1.0)<br> SQL_FN_TD_DAYNAME (ODBC 2.0)<br> SQL_FN_TD_DAYOFMONTH (ODBC 1.0)<br> SQL_FN_TD_DAYOFWEEK (ODBC 1.0)<br> SQL_FN_TD_DAYOFYEAR (ODBC 1.0)<br> SQL_FN_TD_EXTRACT (ODBC 3.0)<br> SQL_FN_TD_HOUR (ODBC 1.0)<br> SQL_FN_TD_MINUTE (ODBC 1.0)<br> SQL_FN_TD_MONTH (ODBC 1.0)<br> SQL_FN_TD_MONTHNAME (ODBC 2.0)<br> SQL_FN_TD_NOW (ODBC 1.0)<br> SQL_FN_TD_QUARTER (ODBC 1.0)<br> SQL_FN_TD_SECOND (ODBC 1.0)<br> SQL_FN_TD_TIMESTAMPADD (ODBC 2.0)<br> SQL_FN_TD_TIMESTAMPDIFF (ODBC 2.0)<br> SQL_FN_TD_WEEK (ODBC 1.0)<br> SQL_FN_TD_YEAR (ODBC 1.0)</p>
+<p><strong>&quot;TxnCapable&quot;</strong></p>
+<p>Returns an SQLUSMALLINT value describing the transaction support in the driver or data source.</p>
+<p>SQL_TC_NONE = Transactions not supported. (ODBC 1.0)</p>
+<p>SQL_TC_DML = Transactions can contain only Data Manipulation Language (DML) statements (SELECT, INSERT, UPDATE, DELETE). Data Definition Language (DDL) statements encountered in a transaction cause an error. (ODBC 1.0)</p>
+<p>SQL_TC_DDL_COMMIT = Transactions can contain only DML statements. DDL statements (CREATE TABLE, DROP INDEX, and so on) encountered in a transaction cause the transaction to be committed. (ODBC 2.0)</p>
+<p>SQL_TC_DDL_IGNORE = Transactions can contain only DML statements. DDL statements encountered in a transaction are ignored. (ODBC 2.0)</p>
+<p>SQL_TC_ALL = Transactions can contain DDL statements and DML statements in any order. (ODBC 1.0) (Because support of transactions is mandatory in SQL-92, an SQL-92 conformant driver [any level] will never return SQL_TC_NONE.)</p>
+<p><strong>&quot;TxnIsolationOption&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the transaction isolation levels available from the driver or data source.</p>
+<p>The following bitmasks are used in conjunction with the flag to determine which options are supported:</p>
+<p>SQL_TXN_READ_UNCOMMITTED<br> SQL_TXN_READ_COMMITTED<br> SQL_TXN_REPEATABLE_READ<br> SQL_TXN_SERIALIZABLE</p>
+<p>For descriptions of these isolation levels, see the description of SQL_DEFAULT_TXN_ISOLATION.</p>
+<p>To set the transaction isolation level, an application calls SetConnectAttr to set the SQL_ATTR_TXN_ISOLATION attribute.</p>
+<p>An SQL-92 Entry level-conformant driver will always return SQL_TXN_SERIALIZABLE as supported. A FIPS Transitional level-conformant driver will always return all of these options as supported.</p>
+<p><strong>&quot;Union&quot;</strong></p>
+<p>Returns an SQLUINTEGER bitmask enumerating the support for the UNION clause.</p>
+<p>SQL_U_UNION = The data source supports the UNION clause.</p>
+<p>SQL_U_UNION_ALL = The data source supports the ALL keyword in the UNION clause. (OdbcGetInfo returns both SQL_U_UNION and SQL_U_UNION_ALL in this case.)</p>
+<p>An SQL-92 Entry level-conformant driver will always return both of these options as supported.</p>
+<p><strong>&quot;UserName&quot;</strong></p>
+<p>Returns a character string with the name used in a particular database, which can be different from the login name.</p>
+<p><strong>&quot;XOpenCliYear&quot;</strong></p>
+<p>Returns a character string that indicates the year of publication of the X/Open sepecification with which the version of the Driver Manager fully complies.</p>
+<h4 id="result-code-1">Result code</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="getsqlstate-(codbc)"><a name="GetSqlState"></a>GetSqlState (CODBC)</h1>
+<p>Lists driver descriptions and driver attribute keywords. This function is implemented only by the Driver Manager.</p>
+<pre><code>FUNCTION GetSqlState () AS CWSTR
+</code></pre>
+<h1 id="handle-(codbc)"><a name="Handle"></a>Handle (CODBC)</h1>
+<p>Returns the connection handle.</p>
+<pre><code>FUNCTION Handle () AS SQLHANDLE
+</code></pre>
+<h1 id="nativesql-(codbc)"><a name="NativeSql"></a>NativeSql (CODBC)</h1>
+<p>Returns the SQL string as modified by the driver. NativeSql does not execute the SQL statement.</p>
+<pre><code>FUNCTION NativeSql (BYREF wszInText AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszInText</em></td>
+<td>SQL text string to be translated.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>The SQL string as modified by the driver.</p>
+<p><strong>Result code</strong> (GetLastResult)</p>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="rollbacktran-(codbc)"><a name="RollbackTran"></a>RollbackTran (CODBC)</h1>
+<p>Requests a rollback operation for all active operations on all statements associated with an environment.</p>
+<pre><code>FUNCTION RollbackTran () AS SQLRETURN
+</code></pre>
+<h4 id="return-value-20">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h4 id="example-3">Example</h4>
+<pre><code>#include once &quot;Afx/COdbc/COdbc.inc&quot;
+USING Afx
+
+' // Create a connection object and connect with the database
+DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
+DIM pDbc AS CODBC = wszConStr
+IF pDbc.Handle = NULL THEN PRINT &quot;Unable to create the connection handle&quot; : SLEEP : END
+
+' // Allocate an statement object
+DIM pStmt AS COdbcStmt = @pDbc
+IF pStmt.Handle = NULL THEN PRINT &quot;Unable to create the statement handle&quot; : SLEEP : END
+
+' // Cursor type
+pStmt.SetMultiuserKeysetCursor
+' // Bind the columns
+DIM AS LONG lAuId, cbAuId
+pStmt.BindCol(1, @lAuId, @cbAuId)
+DIM wszAuthor AS WSTRING * 260, cbAuthor AS LONG
+pStmt.BindCol(2, @wszAuthor, SIZEOF(wszAuthor), @cbAuthor)
+DIM iYearBorn AS SHORT, cbYearBorn AS LONG
+pStmt.BindCol(3, @iYearBorn, @cbYearBorn)
+
+' // Generate a result set
+pStmt.ExecDirect (&quot;SELECT * FROM Authors ORDER BY Author&quot;)
+
+' // Fill the values of the bounded application variables and its sizes
+lAuId     = 998               : cbAuID     = SIZEOF(lAuId)
+wszAuthor = &quot;Edgar Allan Poe&quot; : cbAuthor   = LEN(wszAuthor)
+iYearBorn = 1809              : cbYearBorn = SIZEOF(iYearBorn)
+' // Add the record
+pStmt.AddRecord
+IF pStmt.Error = FALSE THEN PRINT &quot;Record added&quot; ELSE PRINT pStmt.GetErrorInfo
+
+' // Commit the transaction
+' pDbc.CommitTran
+' IF pDbc.Error = FALSE THEN PRINT &quot;Commit succeeded&quot;
+' or Rollbacks it because this is a test
+pDbc.RollbackTran 
+IF pDbc.Error = FALSE THEN PRINT &quot;Rollback succeeded&quot; ELSE PRINT pDbc.GetErrorInfo
+</code></pre>
+<h1 id="setconnectattr-(codbc)"><a name="SetConnectAttr"></a>SetConnectAttr (CODBC)</h1>
+<p>Sets attributes that govern aspects of connections.</p>
+<pre><code>FUNCTION SetConnectAttr (BYVAL Attribute AS SQLINTEGER, BYVAL ValuePtr AS SQLPOINTER, _
+   BYVAL StringLength AS SQLINTEGER) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Attribute</em></td>
+<td>Attribute to set, listed in &quot;Comments.&quot;</td>
+</tr>
+<tr class="even">
+<td><em>ValuePtr</em></td>
+<td>Pointer to the value to be associated with <em>Attribute</em>. Depending on the value of <em>Attribute</em>, <em>ValuePtr</em> will be a 32-bit unsigned integer value or will point to a null-terminated character string. Note that if the <em>Attribute</em> argument is a driver-specific value, the value in <em>ValuePtr</em> may be a signed integer.</td>
+</tr>
+<tr class="odd">
+<td><em>StringLength</em></td>
+<td>If <em>Attribute</em> is an ODBC-defined attribute and <em>ValuePtr</em> points to a character string or a binary buffer, this argument should be the length of <em>ValuePtr</em>. If Attribute is an ODBC-defined attribute and ValuePtr is an integer, <em>StringLength</em> is ignored.<br>If <em>Attribute</em> is a driver-defined attribute, the application indicates the nature of the attribute to the Driver Manager by setting the <em>StringLength</em> argument. <em>StringLength</em> can have the following values:<ul><li>If <em>ValuePtr</em> is a pointer to a character string, then <em>StringLength</em> is the length of the string or SQL_NTS.</li><li>If <em>ValuePtr</em> is a pointer to a binary buffer, then the application places the result of the SQL_LEN_BINARY_ATTR(length) macro in <em>StringLength</em>. This places a negative value in <em>StringLength</em>.</li><li>If <em>ValuePtr</em> is a pointer to a value other than a character string or a binary string, then <em>StringLength</em> should have the value SQL_IS_POINTER.</li><li>If <em>ValuePtr</em> contains a fixed-length value, then <em>StringLength</em> is either SQL_IS_INTEGER or SQL_IS_UINTEGER, as appropriate.</li></ul></td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, SQL_INVALID_HANDLE, or SQL_STILL_EXECUTING.</p>
+<h3 id="overloaded-functions">Overloaded Functions</h3>
+<p>Sets the current setting of the specified connection attribute.</p>
+<pre><code>FUNCTION SetConnectAttr (BYREF wszAttribute AS WSTRING, BYVAL dwAttribute AS SQLUINTEGER) AS SQLRETURN
+FUNCTION SetConnectAttr (BYREF wszAttribute AS WSTRING, BYREF wszAttrValue AS WSTRING) AS SQLRETURN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszAttribute</em></td>
+<td>Attribute to set.</td>
+</tr>
+<tr class="even">
+<td><em>dwAttribute</em></td>
+<td>The value to set.</td>
+</tr>
+<tr class="odd">
+<td><em>wszAttrValue</em></td>
+<td>The value to set.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>&quot;AccessMode&quot;</strong></p>
+<p>Sets an SQLUINTEGER value. SQL_MODE_READ_ONLY is used by the driver or data source as an indicator that the connection is not required to support SQL statements that cause updates to occur. This mode can be used to optimize locking strategies, transaction management, or other areas as appropriate to the driver or data source. The driver is not required to prevent such statements from being submitted to the data source. The behavior of the driver and data source when asked to process SQL statements that are not read-only during a read-only connection is implementation-defined. SQL_MODE_READ_WRITE is the default.</p>
+<p><strong>&quot;AsyncEnable</strong></p>
+<p>SQL_ASYNC_ENABLE_OFF = Off (the default)<br> SQL_ASYNC_ENABLE_ON = On</p>
+<p>Setting SQL_ASYNC_ENABLE_ON enables asynchronous execution for all future statement handles allocated on this connection. It is driver-defined whether this enables asynchronous execution for existing statement handles associated with this connection. An error is returned if asynchronous execution is enabled while there is an active statement on the connection.</p>
+<p>In general, applications should execute functions asynchronously only on single-thread operating systems. On multithread operating systems, applications should execute functions on separate threads rather than executing them asynchronously on the same thread. Drivers that operate only on multithread operating systems do not need to support asynchronous execution.</p>
+<p><strong>&quot;AutoCommit&quot;</strong></p>
+<p>SQL_AUTOCOMMIT_OFF = The driver uses manual-commit mode, and theapplication must explicitly commit or roll back transactions with OdbcEndTran.</p>
+<p>SQL_AUTOCOMMIT_ON = The driver uses autocommit mode. Each statement is committed immediately after it is executed. This is the default. Any open transactions on the connection are committed when SQL_ATTR_AUTOCOMMIT is set to SQL_AUTOCOMMIT_ON to change from manual-commit mode to autocommit mode.</p>
+<p>Important: Some data sources delete the access plans and close the cursors for all statements on a connection each time a statement is committed; autocommit mode can cause this to happen after each nonquery statement is executed or when the cursor is closed for a query. When a batch is executed in autocommit mode, two things are possible. The entire batch can be treated as an autocommitable unit, or each statement in a batch is treated as an autocommitable unit. Certain data sources can support both these behaviors and may provide a way of choosing one or the other. It is driver-defined whether a batch is treated as an autocommitable unit or whether each individual statement within the batch is autocommitable.</p>
+<p><strong>&quot;ConnectionTimeout&quot;</strong></p>
+<p>Sets an SQLUINTEGER value corresponding to the number of seconds to wait for any request on the connection to complete before returning to the application. The driver should return SQLSTATE HYT00 (Timeout expired) anytime that it is possible to time out in a situation not associated with query execution or login. If the value is equal to 0 (the default), there is no timeout. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p><strong>&quot;CurrentCatalog&quot;</strong></p>
+<p>Sets a character string containing the name of the catalog to be used by the data source. For example, in SQL Server, the catalog is a database, so the driver sends a USE database statement to the data source, where database is the database specified in wszAttrValue. For a single-tier driver, the catalog might be a directory, so the driver changes its current directory to the directory specified in wszAttrValue.</p>
+<p><strong>&quot;Cursors&quot;</strong></p>
+<p>An SQLULEN value specifying how the Driver Manager uses the ODBC cursor library:</p>
+<p>SQL_CUR_USE_IF_NEEDED = The Driver Manager uses the ODBC cursor library only if it is needed. If the driver supports the SQL_FETCH_PRIOR option in SQLFetchScroll, the Driver Manager uses the scrolling capabilities of the driver. Otherwise, it uses the ODBC cursor library.</p>
+<p>SQL_CUR_USE_ODBC = The Driver Manager uses the ODBC cursor library.</p>
+<p>SQL_CUR_USE_DRIVER = The Driver Manager uses the scrolling capabilities of the driver. This is the default setting.</p>
+<p>Warning: The cursor library will be removed in a future version of Windows. Avoid using this feature in new development work and plan to modify applications that currently use this feature. Microsoft recommends using the driver's cursor functionality.</p>
+<p><strong>&quot;LoginTimeout&quot;</strong></p>
+<p>Sets an SQLUINTEGER value corresponding to the number of seconds to wait for a login request to complete before returning to the application. The default is driver-dependent. If ValuePtr is 0, the timeout is disabled and a connection attempt will wait indefinitely. If the specified timeout exceeds the maximum login timeout in the data source, the driver substitutes that value and returns SQLSTATE 01S02 (Option value changed).</p>
+<p><strong>&quot;MetadataID&quot;</strong></p>
+<p>Returns an SQLUINTEGER value that determines how the string arguments of catalog functions are treated. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p>If SQL_TRUE, the string argument of catalog functions are treated as identifiers. The case is not significant. For nondelimited strings, the driver removes any trailing spaces and the string is folded to uppercase. For delimited strings, the driver removes any leading or trailing spaces and takes literally whatever is between the delimiters. If one of these arguments is set to a null pointer, the function returns SQL_ERROR and SQLSTATE HY009 (Invalid use of null pointer). If SQL_FALSE, the string arguments of catalog functions are not treated as identifiers. The case is significant. They can either contain a string search pattern or not, depending on the argument. The default value is SQL_FALSE. The TableType argument of SQLTables, which takes a list of values, is not affected by this attribute. SQL_ATTR_METADATA_ID can also be set on the statement level. (It is the only connection attribute that is also a statement attribute.)</p>
+<p><strong>&quot;PacketSize&quot;</strong></p>
+<p>Sets an SQLUINTEGER value specifying the network packet size in bytes. Optional feature not implemented by the Microsoft Access Driver.</p>
+<p>Note Many data sources either do not support this option or only can return but not set the network packet size. If the specified size exceeds the maximum packet size or is smaller than the minimum packet size, the driver substitutes that value and returns SQLSTATE 01S02 (Option value changed). If the application sets packet size after a connection has already been made, the driver will return SQLSTATE HY011 (Attribute cannot be set now).</p>
+<p><strong>&quot;QuietMode&quot;</strong></p>
+<p>Sets a 32-bit window handle.</p>
+<p>If the window handle is a null pointer, the driver does not display any dialog boxes. If the window handle is not a null pointer, it should be the parent window handle of the application. This is the default. The driver uses this handle to display dialog boxes.</p>
+<p>Note The SQL_ATTR_QUIET_MODE connection attribute does not apply to dialog boxes displayed by DriverConnect.</p>
+<p><strong>&quot;Trace&quot;</strong></p>
+<p>Sets an SQLUINTEGER value telling the Driver Manager whether to perform tracing.</p>
+<p>SQL_OPT_TRACE_OFF = Tracing off (the default)<br> SQL_OPT_TRACE_ON = Tracing on</p>
+<p>When tracing is on, the Driver Manager writes each ODBC function call to the trace file. Note When tracing is on, the Driver Manager can return SQLSTATE IM013 (Trace file error) from any function.</p>
+<p>An application specifies a trace file with the TraceFile property. If the file already exists, the Driver Manager appends to the file. Otherwise, it creates the file. If tracing is on and no trace file has been specified, the Driver Manager writes to the file SQL.LOG in the root directory.</p>
+<p><strong>&quot;TxnIsolation&quot;</strong></p>
+<p>An SQLUINTEGER bitmask.</p>
+<p>The following bitmasks are used in conjunction with the flag to determine which options are supported:</p>
+<p>SQL_TXN_READ_UNCOMMITTED<br> SQL_TXN_READ_COMMITTED<br> SQL_TXN_REPEATABLE_READ<br> SQL_TXN_SERIALIZABLE</p>
+<p>For descriptions of these isolation levels, see the description of SQL_DEFAULT_TXN_ISOLATION.</p>
+<p>To set the transaction isolation level, an application calls SetConnectAttr to set the SQL_ATTR_TXN_ISOLATION attribute.</p>
+<p>An SQL-92 Entry level-conformant driver will always return SQL_TXN_SERIALIZABLE as supported. A FIPS Transitional level-conformant driver will always return all of these options as supported.</p>
+<h4 id="return-value-22">Return value</h4>
+<p>The current value of the attribute.</p>
+<h4 id="result-code-2">Result code</h4>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_NO_DATA, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<h1 id="supports-(codbc)"><a name="Supports"></a>Supports (CODBC)</h1>
+<p>Returns information about whether a driver supports a specific ODBC function. It is an alias for <strong>Functions</strong>.</p>
+<pre><code>FUNCTION Supports (BYVAL FunctionId AS SQLUSMALLINT) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>FunctionId</em></td>
+<td>A value that identifies the ODBC function of interest.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>TRUE if the function is supported, FALSE if it is not.</p>
+<p><strong>Result value</strong> (GetLastResult)</p>
+<p>SQL_SUCCESS, SQL_SUCCESS_WITH_INFO, SQL_ERROR, or SQL_INVALID_HANDLE.</p>
+<p><strong>Values to identify ODBC APIs</strong>:</p>
+<pre><code>SQL_API_SQLALLOCCONNECT
+SQL_API_SQLALLOCENV
+SQL_API_SQLALLOCHANDLE
+SQL_API_SQLALLOCSTMT
+SQL_API_SQLBINDCOL
+SQL_API_SQLBINDPARAM
+SQL_API_SQLCANCEL
+SQL_API_SQLCLOSECURSOR
+SQL_API_SQLCOLATTRIBUTE
+SQL_API_SQLCOLUMNS
+SQL_API_SQLCONNECT
+SQL_API_SQLCOPYDESC
+SQL_API_SQLDATASOURCES
+SQL_API_SQLDESCRIBECOL
+SQL_API_SQLDISCONNECT
+SQL_API_SQLENDTRAN
+SQL_API_SQLERROR
+SQL_API_SQLEXECDIRECT
+SQL_API_SQLEXECUTE
+SQL_API_SQLFETCH
+SQL_API_SQLFETCHSCROLL
+SQL_API_SQLFREECONNECT
+SQL_API_SQLFREEENV
+SQL_API_SQLFREEHANDLE
+SQL_API_SQLFREESTMT
+SQL_API_SQLGETCONNECTATTR
+SQL_API_SQLGETCONNECTOPTION
+SQL_API_SQLGETCURSORNAME
+SQL_API_SQLGETDATA
+SQL_API_SQLGETDESCFIELD
+SQL_API_SQLGETDESCREC
+SQL_API_SQLGETDIAGFIELD
+SQL_API_SQLGETDIAGREC
+SQL_API_SQLGETENVATTR
+SQL_API_SQLGETFUNCTIONS
+SQL_API_SQLGETINFO
+SQL_API_SQLGETSTMTATTR
+SQL_API_SQLGETSTMTOPTION
+SQL_API_SQLGETTYPEINFO
+SQL_API_SQLNUMRESULTCOLS
+SQL_API_SQLPARAMDATA
+SQL_API_SQLPREPARE
+SQL_API_SQLPUTDATA
+SQL_API_SQLROWCOUNT
+SQL_API_SQLSETCONNECTATTR
+SQL_API_SQLSETCONNECTOPTION
+SQL_API_SQLSETCURSORNAME
+SQL_API_SQLSETDESCFIELD
+SQL_API_SQLSETDESCREC
+SQL_API_SQLSETENVATTR
+SQL_API_SQLSETPARAM
+SQL_API_SQLSETSTMTATTR
+SQL_API_SQLSETSTMTOPTION
+SQL_API_SQLSPECIALCOLUMNS
+SQL_API_SQLSTATISTICS
+SQL_API_SQLTABLES
+SQL_API_SQLTRANSACT
+SQL_API_SQLALLOCHANDLESTD
+SQL_API_SQLBULKOPERATIONS
+SQL_API_SQLBINDPARAMETER
+SQL_API_SQLBROWSECONNECT
+SQL_API_SQLCOLATTRIBUTES
+SQL_API_SQLCOLUMNPRIVILEGES
+SQL_API_SQLDESCRIBEPARAM
+SQL_API_SQLDRIVERCONNECT
+SQL_API_SQLDRIVERS
+SQL_API_SQLEXTENDEDFETCH
+SQL_API_SQLFOREIGNKEYS
+SQL_API_SQLMORERESULTS
+SQL_API_SQLNATIVESQL
+SQL_API_SQLNUMPARAMS
+SQL_API_SQLPARAMOPTIONS
+SQL_API_SQLPRIMARYKEYS
+SQL_API_SQLPROCEDURECOLUMNS
+SQL_API_SQLPROCEDURES
+SQL_API_SQLSETPOS
+SQL_API_SQLSETSCROLLOPTIONS
+SQL_API_SQLTABLEPRIVILEGES
+</code></pre>
+</body>
+</html>
+

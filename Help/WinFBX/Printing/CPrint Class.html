@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CPrint Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cprint-class">CPrint Class</h1>
+<p>Allows to attach/choose a printer and get/set its setting values.</p>
+<p><strong>Include file</strong>: CPrint.inc</p>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AttachPrinter">AttachPrinter</a></td>
+<td>Attaches the specified printer to the class.</td>
+</tr>
+<tr class="even">
+<td><a href="#ChoosePrinter">ChoosePrinter</a></td>
+<td>Displays the printer dialog to select a printer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#PageSetup">PageSetup</a></td>
+<td>Displays a Page Setup dialog box that enables the user to specify the attributes of a printed page.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetPrinterName">GetPrinterName</a></td>
+<td>Returns the name of the attached printer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDefaultPrinter">GetDefaultPrinter</a></td>
+<td>Returns the name of the default printer.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDefaultPrinterDriver">GetDefaultPrinterDriver</a></td>
+<td>Returns the name of the default printer driver.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDefaultPrinterPort">GetDefaultPrinterPort</a></td>
+<td>Returns the name of the default printer port.</td>
+</tr>
+<tr class="even">
+<td><a href="#EnumPrinterNames">EnumPrinterNames</a></td>
+<td>Returns a list with the available printers, print servers, domains, or print providers.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDC">GetDC</a></td>
+<td>Returns the handle of the device context of the attached printer.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetPPIX">GetPPIX</a></td>
+<td>Returns the number of pixels per inch of the page (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetPPIY">GetPPIY</a></td>
+<td>Returns the number of pixels per inch of the page (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#GetHorizontalUnits">GetHorizontalUnits</a></td>
+<td>Returns the width, in world units, of the printable area of the page.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetVerticalUnits">GetVerticalUnits</a></td>
+<td>Returns the height, in world units, of the printable area of the page.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetHorizontalResolution">GetHorizontalResolution</a></td>
+<td>Returns the width, in pixels, of the printable area of the page.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetVerticalResolution">GetVerticalResolution</a></td>
+<td>Returns the height, in pixels, of the printable area of the page.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetMarginUnits">GetMarginUnits</a></td>
+<td>Retrieves the margins (the non-printable area) of the printer page, in world units.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMarginPixels">GetMarginPixels</a></td>
+<td>Retrieves the margins (the non-printable area) of the printer page, in pixels.</td>
+</tr>
+<tr class="even">
+<td><a href="#PixelsToUnitsX">PixelsToUnitsX</a></td>
+<td>Converts pixels to world units. (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#PixelsToUnitsY">PixelsToUnitsY</a></td>
+<td>Converts pixels to world units. (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#UnitsToPixelsX">UnitsToPixelsX</a></td>
+<td>Converts word units to pixels (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#UnitsToPixelsY">UnitsToPixelsY</a></td>
+<td>Converts word units to pixels (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#PixelsToPointsX">PixelsToPointsX</a></td>
+<td>Converts pixels to point size (1/72 of an inch) (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#PixelsToPointsY">PixelsToPointsY</a></td>
+<td>Converts pixels to point size (1/72 of an inch) (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#PointsToPixelsX">PointsToPixelsX</a></td>
+<td>Converts a point size (1/72 of an inch) to pixels (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#PointsToPixelsY">PointsToPixelsY</a></td>
+<td>Converts a point size (1/72 of an inch) to pixels (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#GetPaperNames">GetPaperNames</a></td>
+<td>Returns a list of supported paper names.</td>
+</tr>
+<tr class="odd">
+<td><a href="#PrintBitmap">PrintBitmap</a></td>
+<td>Prints a Windows bitmap in the attached printer.</td>
+</tr>
+<tr class="even">
+<td><a href="#PrintBitmapToFile">PrintBitmapToFile</a></td>
+<td>Prints a Windows bitmap in the specified file.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="properties">Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Collate">Collate</a></td>
+<td>Returns true if the printer supports collating mode; False, otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#CollateMode">CollateMode</a></td>
+<td>Gets/sets the collate setting value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Color">Color</a></td>
+<td>Returns true if the printer supports color mode; False, otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColorMode">ColorMode</a></td>
+<td>Switches between color and monochrome on color printers.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Copies">Copies</a></td>
+<td>Gets/sets the number of copies to print if the device supports multiple-page copies.</td>
+</tr>
+<tr class="even">
+<td><a href="#Duplex">Duplex</a></td>
+<td>Checks if the printer supports duplex printing.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DuplexMode">DuplexMode</a></td>
+<td>Gets/sets the current duplex mode.</td>
+</tr>
+<tr class="even">
+<td><a href="#Orientation">Orientation</a></td>
+<td>Gets/sets the printer orientation.</td>
+</tr>
+<tr class="odd">
+<td><a href="#PaperLength">PaperLength</a></td>
+<td>Gets/sets the paper length in units of 1/10 of a millimeter.</td>
+</tr>
+<tr class="even">
+<td><a href="#PaperSize">PaperSize</a></td>
+<td>Gets/sets the printer paper size.</td>
+</tr>
+<tr class="odd">
+<td><a href="#PaperWidth">PaperWidth</a></td>
+<td>Gets/sets the paper width in units of 1/10 of a millimeter.</td>
+</tr>
+<tr class="even">
+<td><a href="#Quality">Quality</a></td>
+<td>Gets/sets the printer print quality mode.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Scale">Scale</a></td>
+<td>Gets/sets the factor by which the printed output is to be scaled.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetPaperSize">SetPaperSize</a></td>
+<td>Sets the paper length and width in units of 1/10 of a millimeter.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Tray">Tray</a></td>
+<td>Specifies the paper source.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="attachprinter"><a name="AttachPrinter"></a>AttachPrinter</h1>
+<p>Creates a device context (DC) for the specified printer and attaches it to the class.</p>
+<pre><code>FUNCTION AttachPrinter (BYREF wszPrinterName AS WSTRING) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszPrinterName</em></td>
+<td>The name of the printer to attach (as shown in the Devices and Printers applet of the Control Panel).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>BOOLEAN. True of false.</p>
+<h4 id="example">Example</h4>
+<p>The following console example creates an instance of the CPrint class to attach the &quot;Microsoft Print to PDF&quot; driver, retrieves an handle to its device context and uses the WinFBX GDI+ classes to draw the contents of the page.</p>
+<pre><code>'#CONSOLE ON
+#define UNICODE
+#INCLUDE ONCE &quot;Afx/CPrint.inc&quot;
+#INCLUDE ONCE &quot;Afx/CGdiplus/CGdiplus.inc&quot;
+USING Afx
+
+DIM pPrint AS CPrint
+pPrint.AttachPrinter(&quot;Microsoft Print to PDF&quot;)
+DIM hdcPrint AS HDC = pPrint.GetDC
+DIM docInfo AS DOCINFOW
+docInfo.cbSize = SIZEOF(DOCINFOW)
+DIM wszDocName AS WSTRING * 260 = &quot;GdiplusPrint&quot; 
+docInfo.lpszDocName = VARPTR(wszDocName)
+StartDocW(hdcPrint, @docInfo)
+StartPage(hdcPrint)
+SCOPE
+   DIM graphics AS CGpGraphics = hdcPrint
+   DIM pen AS CGpPen = GDIP_ARGB(255, 0, 0, 0)
+   graphics.DrawLine(@pen, 50, 50, 350, 550)
+   graphics.DrawRectangle(@pen, 50, 50, 300, 500)
+   graphics.DrawEllipse(@pen, 50, 50, 300, 500)
+END SCOPE
+EndPage(hdcPrint)
+EndDoc(hdcPrint)
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
+<h1 id="chooseprinter"><a name="ChoosePrinter"></a>ChoosePrinter</h1>
+<p>Displays a Print Dialog Box to select a printer.</p>
+<pre><code>FUNCTION ChoosePrinter (BYVAL hwndOwner AS HWND = NULL) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwndOwner</em></td>
+<td>Optional. A handle to the window that owns the dialog box. This member can be any valid window handle, or it can be NULL if the dialog box has no owner.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>BOOLEAN. If the user clicks the OK button, the return value is true. If the user canceled or closed the Print dialog box or an error occurred, the return value is false.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>DIM pPrint AS CPrint
+pPrint.ChoosePrinter
+</code></pre>
+<h1 id="pagesetup"><a name="PageSetup"></a>PageSetup</h1>
+<p>Displays a Page Setup dialog box that enables the user to specify the attributes of a printed page. These attributes include the paper size and source, the page orientation (portrait or landscape), and the width of the page margins.</p>
+<pre><code>FUNCTION PageSetup (BYVAL hwndOwner AS HWND = NULL) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwndOwner</em></td>
+<td>Optional. A handle to the window that owns the dialog box. This member can be any valid window handle, or it can be NULL if the dialog box has no owner.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>BOOLEAN. If the user clicks the OK button, the return value is true. If the user canceled or closed the Page Setup dialog box or an error occurred, the return value is false.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>DIM pPrint AS CPrint
+pPrint.PageSetup
+</code></pre>
+<h1 id="getprintername"><a name="GetPrinterName"></a>GetPrinterName</h1>
+<p>Returns the name of the attached printer.</p>
+<pre><code>FUNCTION GetPrinterName () AS CWSTR
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>CWSTR. The name of the attached printer. If there is not a printer attached, it returns an empty string.</p>
+<h1 id="getdefaultprinter"><a name="GetDefaultPrinter"></a>GetDefaultPrinter</h1>
+<p>Returns the name of the default printer.</p>
+<pre><code>FUNCTION GetDefaultPrinter () AS CWSTR
+</code></pre>
+<h1 id="getdefaultprinterdriver"><a name="GetDefaultPrinterDriver"></a>GetDefaultPrinterDriver</h1>
+<p>Returns the name of the default printer driver.</p>
+<pre><code>FUNCTION GetDefaultPrinterDriver () AS CWSTR
+</code></pre>
+<h1 id="getdefaultprinterport"><a name="GetDefaultPrinterPort"></a>GetDefaultPrinterPort</h1>
+<p>Returns the name of the default printer port.</p>
+<pre><code>FUNCTION GetDefaultPrinterPort () AS CWSTR
+</code></pre>
+<h1 id="enumprinternames"><a name="EnumPrinterNames"></a>EnumPrinterNames</h1>
+<p>Returns a list with the available printers, print servers, domains, or print providers. Names are separated with a carriage return and a line feed characters.</p>
+<pre><code>FUNCTION EnumPrinterNames () AS CWSTR
+</code></pre>
+<h1 id="getdc"><a name="GetDC"></a>GetDC</h1>
+<p>Returns the handle of the attached printer.</p>
+<pre><code>FUNCTION GetDC () AS HDC
+</code></pre>
+<h4 id="return-value-4">Return value</h4>
+<p>HDC. The handle of the device context of the attached printer. If there is not a printer attached, it returns NULL.</p>
+<h1 id="getppix"><a name="GetPPIX"></a>GetPPIX</h1>
+<p>Returns the number of pixels per inch of the specified host printer page (horizontal resolution).</p>
+<pre><code>FUNCTION GetPPIX () AS LONG
+</code></pre>
+<h4 id="return-value-5">Return value</h4>
+<p>LONG. The number of pixels per inch of the specified host printer page. If there is not a printer attached, it returns 0.</p>
+<h1 id="getppiy"><a name="GetPPIY"></a>GetPPIY</h1>
+<p>Returns the number of pixels per inch of the specified host printer page (vertical resolution).</p>
+<pre><code>FUNCTION GetPPIY () AS LONG
+</code></pre>
+<h4 id="return-value-6">Return value</h4>
+<p>LONG. The number of pixels per inch of the specified host printer page. If there is not a printer attached, it returns 0.</p>
+<h1 id="gethorizontalunits"><a name="GetHorizontalUnits"></a>GetHorizontalUnits</h1>
+<p>Returns the width, in world units, of the printable area of the page.</p>
+<pre><code>FUNCTION GetHorizontalUnits () AS LONG
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>LONG. The width, in world units, of the printable area of the page. If there is not a printer attached, it returns 0.</p>
+<h1 id="getverticalunits"><a name="GetVerticalUnits"></a>GetVerticalUnits</h1>
+<p>Returns the height, in world units, of the printable area of the page.</p>
+<pre><code>FUNCTION GetVerticalUnits () AS LONG
+</code></pre>
+<h4 id="return-value-8">Return value</h4>
+<p>LONG. The height, in world units, of the printable area of the page. If there is not a printer attached, it returns 0.</p>
+<h1 id="gethorizontalresolution"><a name="GetHorizontalResolution"></a>GetHorizontalResolution</h1>
+<p>Returns the width, in pixels, of the printable area of the page.</p>
+<pre><code>FUNCTION GetHorizontalResolution () AS LONG
+</code></pre>
+<h1 id="getverticalresolution"><a name="GetVerticalResolution"></a>GetVerticalResolution</h1>
+<p>Returns the height, in pixels, of the printable area of the page.</p>
+<pre><code>FUNCTION GetVerticalResolution () AS LONG
+</code></pre>
+<h1 id="getmarginunits"><a name="GetMarginUnits"></a>GetMarginUnits</h1>
+<p>Retrieves the margins (the non-printable area) of the printer page, in world units.</p>
+<pre><code>SUB GetMarginUnits (BYREF nLeft AS LONG, BYREF nTop AS LONG, BYREF nRight AS LONG, BYREF nBottom AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nLeft</em></td>
+<td>Left margin.</td>
+</tr>
+<tr class="even">
+<td><em>nTop</em></td>
+<td>Top margin.</td>
+</tr>
+<tr class="odd">
+<td><em>nRight</em></td>
+<td>Right margin.</td>
+</tr>
+<tr class="even">
+<td><em>nBottom</em></td>
+<td>Bottom margin.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="getmarginpixels"><a name="GetMarginPixels"></a>GetMarginPixels</h1>
+<p>Retrieves the margins (the non-printable area) of the printer page, in pixels.</p>
+<pre><code>SUB GetMarginPixels (BYREF nLeft AS LONG, BYREF nTop AS LONG, BYREF nRight AS LONG, BYREF nBottom AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nLeft</em></td>
+<td>Left margin.</td>
+</tr>
+<tr class="even">
+<td><em>nTop</em></td>
+<td>Top margin.</td>
+</tr>
+<tr class="odd">
+<td><em>nRight</em></td>
+<td>Right margin.</td>
+</tr>
+<tr class="even">
+<td><em>nBottom</em></td>
+<td>Bottom margin.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>LONG. The height, in pixels, of the printable area of the page. If there is not a printer attached, it returns 0.</p>
+<h1 id="pixelstounitsx"><a name="PixelsToUnitsX"></a>PixelsToUnitsX</h1>
+<p>Converts pixels to world units (horizontal resolution).</p>
+<pre><code>FUNCTION PixelsToUnitsX (BYVAL pix AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pix</em></td>
+<td>The number of pixels to convert.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pixelstounitsy"><a name="PixelsToUnitsY"></a>PixelsToUnitsY</h1>
+<p>Converts pixels to world units (vertical resolution).</p>
+<pre><code>FUNCTION PixelsToUnitsY (BYVAL pix AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pix</em></td>
+<td>The number of pixels to convert.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="unitstopixelsx"><a name="UnitsToPixelsX"></a>UnitsToPixelsX</h1>
+<p>Converts world units to pixels (horizontal resolution).</p>
+<pre><code>FUNCTION PixelsToUnitsX (BYVAL units AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>units</em></td>
+<td>The number of world units to convert.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="unitstopixelsy"><a name="UnitsToPixelsY"></a>UnitsToPixelsY</h1>
+<p>Converts world units to pixels (vertical resolution).</p>
+<pre><code>FUNCTION UnitsToPixelsY (BYVAL units AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>units</em></td>
+<td>The number of world units to convert.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pixelstopointsx"><a name="PixelsToPointsX"></a>PixelsToPointsX</h1>
+<p>Converts pixels to point size (1/72 of an inch) according to the PPI of the printer (horizontal resolution).</p>
+<pre><code>FUNCTION PixelsToPointsX (BYVAL pix AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pix</em></td>
+<td>The number of pixels to convert.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>LONG. The number of points. If there is not a printer attached, it returns 0.</p>
+<h1 id="pixelstopointsy"><a name="PixelsToPointsY"></a>PixelsToPointsY</h1>
+<p>Converts pixels to point size (1/72 of an inch) according to the PPI of the printer (vertical resolution).</p>
+<pre><code>FUNCTION PixelsToPointsY (BYVAL pix AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pix</em></td>
+<td>The number of pixels to convert.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>LONG. The number of points. If there is not a printer attached, it returns 0.</p>
+<h1 id="pointstopixelsx"><a name="PointsToPixelsX"></a>PointsToPixelsX</h1>
+<p>Converts a point size (1/72 of an inch) to pixels according to the PPI of the printer (horizontal resolution).</p>
+<pre><code>FUNCTION PointsToPixelsX (BYVAL pts AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pts</em></td>
+<td>The number of points to convert.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>LONG. The number of pixels. If there is not a printer attached, it returns 0.</p>
+<h1 id="pointstopixelsy"><a name="PointsToPixelsY"></a>PointsToPixelsY</h1>
+<p>Converts a point size (1/72 of an inch) to pixels according to the PPI of the printer (vertical resolution).</p>
+<pre><code>FUNCTION PointsToPixelsY (BYVAL pts AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pts</em></td>
+<td>The number of points to convert.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>LONG. The number of pixels. If there is not a printer attached, it returns 0.</p>
+<h1 id="getpapernames"><a name="GetPaperNames"></a>GetPaperNames</h1>
+<p>Returns a list of supported paper names (for example, Letter or Legal).</p>
+<pre><code>FUNCTION GetPaperNames () AS CWSTR
+</code></pre>
+<h4 id="return-value-14">Return value</h4>
+<p>CWSTR. A list of supported paper names on success, or an empty string on failure. The names are separated by a carriage return and a line feed characters.</p>
+<h1 id="printbitmap"><a name="PrintBitmap"></a>PrintBitmap</h1>
+<p>Prints a Windows bitmap to the attached printer.</p>
+<pre><code>FUNCTION PrintBitmap ( _
+   BYREF wszDocName AS WSTRING, _
+   BYVAL hbmp AS HBITMAP, _
+   BYVAL bStretch AS BOOLEAN = FALSE, _
+   BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic _
+) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszDocName</em></td>
+<td>WSTRING. The document name.</td>
+</tr>
+<tr class="even">
+<td><em>hbmp</em></td>
+<td>HBITMAP. Handle to the bitmap.</td>
+</tr>
+<tr class="odd">
+<td><em>bStretch</em></td>
+<td>BOOLEAN. Optional. True to strech the image or false. Defaults to False.</td>
+</tr>
+<tr class="even">
+<td><em>nStretchMode</em></td>
+<td>LONG. Optional. Stretching mode. Defaults to InterpolationModeHighQualityBicubic.<br>Predefined constants:<br><em>InterpolationModeLowQuality</em> = Specifies a low-quality mode.<br><em>InterpolationModeHighQuality</em> = Specifies a high-quality mode.<br><em>InterpolationModeBilinear</em> = Specifies bilinear interpolation. No prefiltering is done. This mode is not suitable for shrinking an image below 50 percent of its original size.<br><em>InterpolationModeBicubic</em> = Specifies bicubic interpolation. No prefiltering is done. This mode is not suitable for shrinking an image below 25 percent of its original size.<br><em>InterpolationModeNearestNeighbor</em> = Specifies nearest-neighbor interpolation.<br><em>InterpolationModeHighQualityBilinear</em> = Specifies high-quality, bilinear interpolation. Prefiltering is performed to ensure high-quality shrinking.<br><em>InterpolationModeHighQualityBicubic</em> = Specifies high-quality, bicubic interpolation. Prefiltering is performed to ensure high-quality shrinking. This mode produces the highest quality transformed images.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-15">Return value</h4>
+<p>BOOLEAN. Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.</p>
+<h1 id="printbitmaptofile"><a name="PrintBitmapToFile"></a>PrintBitmapToFile</h1>
+<p>Prints a Windows bitmap to the specified output file.</p>
+<pre><code>FUNCTION PrintBitmapToFile ( _
+   BYREF wszDocName AS WSTRING, _
+   BYREF wszOutputFileName AS WSTRING, _
+   BYVAL hbmp AS HBITMAP, _
+   BYVAL bStretch AS BOOLEAN = FALSE, _
+   BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic _
+) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszDocName</em></td>
+<td>WSTRING. The document name.</td>
+</tr>
+<tr class="even">
+<td><em>wszOutputFileName</em></td>
+<td>WSTRING. The output file name.</td>
+</tr>
+<tr class="odd">
+<td><em>hbmp</em></td>
+<td>HBITMAP. Handle to the bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>bStretch</em></td>
+<td>BOOLEAN. Optional. True to strech the image or false. Defaults to False.</td>
+</tr>
+<tr class="odd">
+<td><em>nStretchMode</em></td>
+<td>LONG. Optional. Stretching mode. Defaults to InterpolationModeHighQualityBicubic.<br>Predefined constants:<br><em>InterpolationModeLowQuality</em> = Specifies a low-quality mode.<br><em>InterpolationModeHighQuality</em> = Specifies a high-quality mode.<br><em>InterpolationModeBilinear</em> = Specifies bilinear interpolation. No prefiltering is done. This mode is not suitable for shrinking an image below 50 percent of its original size.<br><em>InterpolationModeBicubic</em> = Specifies bicubic interpolation. No prefiltering is done. This mode is not suitable for shrinking an image below 25 percent of its original size.<br><em>InterpolationModeNearestNeighbor</em> = Specifies nearest-neighbor interpolation.<br><em>InterpolationModeHighQualityBilinear</em> = Specifies high-quality, bilinear interpolation. Prefiltering is performed to ensure high-quality shrinking.<br><em>InterpolationModeHighQualityBicubic</em> = Specifies high-quality, bicubic interpolation. Prefiltering is performed to ensure high-quality shrinking. This mode produces the highest quality transformed images.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>BOOLEAN. Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.</p>
+<h1 id="collate"><a name="Collate"></a>Collate</h1>
+<p>If the printer supports collating, the return value is TRUE; otherwise, the return value is FALSE.</p>
+<pre><code>PROPERTY Collate () AS BOOLEAN
+</code></pre>
+<h1 id="collatemode"><a name="CollateMode"></a>CollateMode</h1>
+<p>Gets/sets the printer collating mode.</p>
+<pre><code>PROPERTY CollateMode () AS LONG
+PROPERTY CollateMode (BYVAL nMode AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMode</em></td>
+<td>LONG. The collating mode. Possible values: DMCOLLATE_TRUE, DMCOLLATE_FALSE.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>BOOLEAN. If the printer supports collating, the return value is TRUE; otherwise, the return value is FALSE. If TRUE, the pages that are printed should be collated. To collate is to print out the entire document before printing the next copy, as opposed to printing out each page of the document the required number of times.</p>
+<h1 id="color"><a name="Color"></a>Color</h1>
+<p>If the printer supports color mode, the return value is TRUE; otherwise, the return value is FALSE.</p>
+<pre><code>PROPERTY Color () AS BOOLEAN
+</code></pre>
+<h1 id="colormode"><a name="ColorMode"></a>ColorMode</h1>
+<p>Switches between color and monochrome on color printers. Some color printers have the capability to print using true black instead of a combination of cyan, magenta, and yellow (CMY). This usually creates darker and sharper text for documents. This option is only useful for color printers that support true black printing.</p>
+<pre><code>PROPERTY ColorMode () AS LONG
+PROPERTY ColorMode (BYVAL nMode AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMode</em></td>
+<td>LONG. The color mode. Possible values: DMCOLOR_MONOCHROME, DMCOLOR_COLOR.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-18">Return value</h4>
+<p>LONG. Returns the printer color mode: DMCOLOR_MONOCHROME or DMCOLOR_COLOR.</p>
+<h1 id="copies"><a name="Copies"></a>Copies</h1>
+<p>Gets/sets the number of copies to print if the device supports multiple-page copies.</p>
+<pre><code>PROPERTY Copies () AS BOOLEAN
+PROPERTY Copies (BYVAL nCopies AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCopies</em></td>
+<td>LONG. The number of copies to print if the device supports multiple-page copies.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>LONG. The number of copies</p>
+<h1 id="duplex"><a name="Duplex"></a>Duplex</h1>
+<p>Checks if the printer supports duplex printing.</p>
+<pre><code>PROPERTY Duplex () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-20">Return value</h4>
+<p>BOOLEAN. If the printer supports duplex printing, the return value is TRUE; otherwise, the return value is FALSE.</p>
+<h1 id="duplexmode"><a name="DuplexMode"></a>DuplexMode</h1>
+<p>Gets/sets the current duplex mode.</p>
+<pre><code>PROPERTY DuplexMode () AS LONG
+PROPERTY DuplexMode (BYVAL nMode AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMode</em></td>
+<td>LONG. The duplex mode.<br><em>DMDUP_SIMPLEX</em> = Single sided printing.<br><em>DMDUP_VERTICAL</em> = Page flipped on the vertical edge.<br><em>DMDUP_HORIZONTAL</em> = Page flipped on the horizontal edge.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>LONG. If the printer supports duplex printing, returns the current duplex mode</p>
+<h1 id="orientation"><a name="Orientation"></a>Orientation</h1>
+<p>Gets/sets the printer orientation.</p>
+<pre><code>PROPERTY Orientation () AS LONG
+PROPERTY Orientation (BYVAL nOrientation AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nOrientation</em></td>
+<td>LONG. The printer orientation.<br><em>DMORIENT_PORTRAIT</em> = Portrait.<br><em>DMORIENT_LANDSCAPE</em> = Landscape.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>LONG. The printer orientation.</p>
+<h1 id="paperlength"><a name="PaperLength"></a>PaperLength</h1>
+<p>Gets/sets the printer paper length in units of 1/10 of a millimeter. This value overrides the length of the paper specified by the <strong>PaperSize</strong> property, and is used if the paper is of a custom size, or if the device is a dot matrix printer, which can print a page of arbitrary length. If you use this property, you must also use the <strong>PaperWidth</strong> property to set the print paper width. Alternatively, you can use the <strong>SetPageSize</strong> function to set both the length and width with only one call.</p>
+<pre><code>PROPERTY PaperLength () AS LONG
+PROPERTY PaperLength (BYVAL nLength AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nLength</em></td>
+<td>LONG. The printer paper length.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>LONG. The printer paper length.</p>
+<h1 id="papersize"><a name="PaperSize"></a>PaperSize</h1>
+<p>Gets/sets the printer paper size.</p>
+<pre><code>PROPERTY PaperSize () AS LONG
+PROPERTY PaperSize (BYVAL nSize AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nSize</em></td>
+<td>LONG. Specifies the printer paper size, with DMPAPER_LETTER, DMPAPER_LEGAL, DMPAPER_A3, and DMPAPER_A4 being the most typical. Note that the paper size types cannot be combined with one another.<br>For a list of paper sizes see <a href="https://docs.microsoft.com/en-us/windows/desktop/intl/paper-sizes">Paper Sizes</a>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-24">Return value</h4>
+<p>LONG. The printer paper size.</p>
+<h1 id="setpapersize"><a name="SetPaperSize"></a>SetPaperSize</h1>
+<p>Sets the printer paper length and width.</p>
+<pre><code>FUNCTION SetPaperSize (BYVAL nLength AS LONG, BYVAL nWidth AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nLength</em></td>
+<td>LONG. The length of the printer paper size.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>LONG. The width of the printer paper size.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-25">Return value</h4>
+<p>BOOLEAN. Returns True on success or False on failure.</p>
+<h1 id="paperwidth"><a name="PaperWidth"></a>PaperWidth</h1>
+<p>Gets/sets the printer paper width in units of 1/10 of a millimeter. This value overrides the length of the paper specified by the <em>PaperSize</em> property, and is used if the paper is of a custom size, or if the device is a dot matrix printer, which can print a page of arbitrary length. It must be used if the <strong>PaperLength</strong> is also used. Alternatively, you can use the <strong>SetPageSize</strong> function to set both the length and width with only one call.</p>
+<pre><code>PROPERTY PaperWidth () AS LONG
+PROPERTY PaperWidth (BYVAL nWidth AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>LONG. The printer paper length.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-26">Return value</h4>
+<p>LONG. The printer paper width.</p>
+<h1 id="quality"><a name="Quality"></a>Quality</h1>
+<p>Gets/sets the printer print quality mode.</p>
+<pre><code>PROPERTY Quality () AS LONG
+PROPERTY Quality (BYVAL nMode AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMode</em></td>
+<td>LONG. The printer print quality mode.<br>There are four predefined device-independent values:<br><em>DMRES_DRAFT</em> (-1) = Draft.<br><em>DMRES_LOW</em> (-2) = Low<br><em>DMRES_MEDIUM</em> (-3) = Medium<br><em>DMRES_HIGH</em> (-4) = High<br>If a positive value is specified, it represents the number of pixels per inch (PPI) for the x resolution.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-27">Return value</h4>
+<p>LONG. The printer print quality mode.</p>
+<h1 id="scale"><a name="Scale"></a>Scale</h1>
+<p>Gets/sets the factor by which the printed output is to be scaled.</p>
+<pre><code>PROPERTY Scale () AS LONG
+PROPERTY Scale (BYVAL nScale AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nScale</em></td>
+<td>LONG. The factor by which the printed output is to be scaled. The apparent page size is scaled from the physical page size by a factor of nScale / 100. For example, a letter-sized page with a nScale value of 50 would contain as much data as a page of 17- by 22-inches because the output text and graphics would be half their original height and width.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-28">Return value</h4>
+<p>LONG. The printer scaling factor.</p>
+<h1 id="tray"><a name="Tray"></a>Tray</h1>
+<p>Gets/sets the paper source.</p>
+<pre><code>PROPERTY Tray () AS LONG
+PROPERTY Tray (BYVAL nTray AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTray</em></td>
+<td>LONG. The paper source. Can be one of the following values, or it can be a device-specific value greater than or equal to DMBIN_USER (256).<br><em>DMBIN_UPPER</em> = Select the upper paper bin. This value is also used for the paper source for printers that only have one paper bin.<br><em>DMBIN_LOWER</em> = Select the lower bin.<br><em>DMBIN_MIDDLE</em> = Select the middle paper bin.<br><em>DMBIN_MANUAL</em> = Manually select the paper bin.<br><em>DMBIN_ENVELOPE</em> = Select the auto envelope bin.<br><em>DMBIN_ENVMANUAL</em> = Select the manual envelope bin.<br><em>DMBIN_AUTO</em> = Auto-select the bin.<br><em>DMBIN_TRACTOR</em> = Select the bin with the tractor paper.<br><em>DMBIN_SMALLFMT</em> = Select the bin with the smaller paper format.<br><em>DMBIN_LARGEFMT</em> = Select the bin with the larger paper format.<br><em>DMBIN_LARGECAPACITY</em> = Select the bin with large capacity.<br><em>DMBIN_CASSETTE</em> = Select the cassette bin.<br><em>DMBIN_FORMSOURCE</em> = Select the bin with the required form.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-29">Return value</h4>
+<p>LONG. The paper source.</p>
+</body>
+</html>
+

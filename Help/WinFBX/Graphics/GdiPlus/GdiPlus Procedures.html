@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>GdiPlus Procedures</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;width: 728px;max-width: 99%;box-sizing: border-box;padding: 30px 30px 8rem 30px;margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="gdiplus-procedures">GdiPlus Procedures</h1>
+<p>Assorted GDI+ helper procedures.</p>
+<p><strong>Include File</strong>: AfxGdiPlus.inc.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxGdipAddIconFromFile">AfxGdipAddIconFromFile</a></td>
+<td>Loads an image from a file, converts it to an icon and adds it to specified image list.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipAddIconFromRes">AfxGdipAddIconFromRes</a></td>
+<td>Loads an image from a resource file, converts it to an icon and adds it to specified image list.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipBitmapFromBuffer">AfxGdipBitmapFromBuffer</a></td>
+<td>Converts an image stored in a buffer into a bitmap and returns the handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipBitmapFromFile">AfxGdipBitmapFromFile</a></td>
+<td>Loads an image from a file, converts it to a bitmap and returns the handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipBitmapFromRes">AfxGdipBitmapFromRes</a></td>
+<td>Loads an image from a resource, converts it to a bitmap and returns the handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipDllVersion">AfxGdipDllVersion</a></td>
+<td>Returns the version of Gdiplus.dll, e.g. 601 for version 6.01.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipGetEncoderClsid">AfxGdipGetEncoderClsid</a></td>
+<td>Retrieves the encoder's clsid.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipGetImageSizeFromFile">AfxGdipGetImageSizeFromFile</a></td>
+<td>Returns the size of the image.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipIconFromBuffer">AfxGdipIconFromBuffer</a></td>
+<td>Converts an image stored in a buffer into an icon and returns the handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipIconFromFile">AfxGdipIconFromFile</a></td>
+<td>Loads an image from a file, converts it to an icon and returns the handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipIconFromRes">AfxGdipIconFromRes</a></td>
+<td>Loads an image from a resource, converts it to an icon and returns the handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipImageFromBuffer">AfxGdipImageFromBuffer</a></td>
+<td>Converts an image stored in a buffer into an icon or bitmap and returns the handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipImageFromFile">AfxGdipImageFromFile</a></td>
+<td>Loads an image from a file, converts it to an icon or bitmap and returns the handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipImageFromFile2">AfxGdipImageFromFile2</a></td>
+<td>Loads an image from a file using GDI+, converts it to an icon or bitmap and returns the handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipImageFromRes">AfxGdipImageFromRes</a></td>
+<td>Loads an image from a resource, converts it to an icon or bitmap and returns the handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipInit">AfxGdipInit</a></td>
+<td>Initializes GDI+.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipLoadTexture">AfxGdipLoadTexture</a></td>
+<td>Loads an image from disk or a resource an converts it to a texture for use with OpenGL.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipPrintHBITMAP">AfxGdipPrintHBITMAP</a></td>
+<td>Prints a Windows bitmap in the default printer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipSaveHBITMAPToFile">AfxGdipSaveHBITMAPToFile</a></td>
+<td>Saves a Windows bitmap to file.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGdipSaveImageToFile">AfxGdipSaveImageToFile</a></td>
+<td>Saves a GDI+ image to file.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGdipShutdown">AfxGdipShutdown</a></td>
+<td>Cleans up resources used by Windows GDI+. Each call to <strong>GdiplusStartup</strong> should be paired with a call to <strong>GdiplusShutdown</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_ARGB">GDIP_ARGB</a></td>
+<td>Returns an ARGB color value initialized with the specified values for the alpha, red, green, and blue components.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GDIP_BGRA">GDIP_BGRA</a></td>
+<td>Returns a BGRA color value initialized with the specified values for the blue, green, red and alpha components.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_COLOR">GDIP_COLOR</a></td>
+<td>Returns an ARGB color value initialized with the specified values for the alpha, red, green, and blue components.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GDIP_GetAlpha">GDIP_GetAlpha</a></td>
+<td>Returns the alpha component of an ARGB color value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_GetBlue">GDIP_GetBlue</a></td>
+<td>Returns the blue component of an ARGB color value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GDIP_GetGreen">GDIP_GetGreen</a></td>
+<td>Returns the green component of an ARGB color value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_GetRed">GDIP_GetRed</a></td>
+<td>Returns the red component of an ARGB color value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GDIP_POINT">GDIP_POINT</a></td>
+<td>Returns a GpPoint color value initialized with the specified values for the x and y coordinates.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_POINTF">GDIP_POINTF</a></td>
+<td>Returns a GpPointF color value initialized with the specified values for the x and y coordinates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GDIP_RGBA">GDIP_RGBA</a></td>
+<td>Returns a RGBA color value initialized with the specified values for the red, green, blue and alpha components.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_RECT">GDIP_RECT</a></td>
+<td>Returns a GpRect structure initialized with the specified values for the x, y, width, and height components.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GDIP_RECTF">GDIP_RECTF</a></td>
+<td>Returns a GpRectF structrure initialized with the specified values for the x, y, width, and height components.</td>
+</tr>
+<tr class="even">
+<td><a href="#GDIP_XRGB">GDIP_XRGB</a></td>
+<td>Returns a XRGB color value initialized with the specified values for the red, green, and blue components.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgdipaddiconfromfile"><a name="AfxGdipAddIconFromFile"></a>AfxGdipAddIconFromFile</h1>
+<p>Loads an image from a file, converts it to an icon and adds it to specified image list.</p>
+<pre><code>FUNCTION AfxGdipAddIconFromFile (BYVAL hIml AS HIMAGELIST, BYREF wszFileName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hIml</em></td>
+<td>Handle to the image list.</td>
+</tr>
+<tr class="even">
+<td><em>wszFileName</em></td>
+<td>Path of the image to load and convert.</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>Returns the index of the image if successful, or -1 otherwise.</p>
+<h1 id="afxgdipaddiconfromres"><a name="AfxGdipAddIconFromRes"></a>AfxGdipAddIconFromRes</h1>
+<p>Loads an image from a resource file, converts it to an icon and adds it to specified image list.</p>
+<pre><code>FUNCTION AfxGdipAddIconFromRes (BYVAL hIml AS HIMAGELIST, BYVAL hInstance AS HINSTANCE, _
+   BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hIml</em></td>
+<td>Handle to the image list.</td>
+</tr>
+<tr class="even">
+<td><em>hInstance</em></td>
+<td>A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process.</td>
+</tr>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Path of the image to load and convert.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>Returns the index of the image if successful, or -1 otherwise.</p>
+<h1 id="afxgdipbitmapfrombuffer"><a name="AfxGdipBitmapFromBuffer"></a>AfxGdipBitmapFromBuffer</h1>
+<p>Converts an image stored in a buffer into a bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipBitmapFromBuffer (BYVAL pBuffer AS ANY PTR, BYVAL bufferSize AS SIZE_T_, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pBuffer</em></td>
+<td>Pointer to the buffer.</td>
+</tr>
+<tr class="even">
+<td><em>bufferSize</em></td>
+<td>Size of the buffer</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="odd">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon or bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipbitmapfromfile"><a name="AfxGdipBitmapFromFile"></a>AfxGdipBitmapFromFile</h1>
+<p>Loads an image from a file, converts it to a bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipBitmapFromFile (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, _
+   BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Path of the image to load and convert.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="even">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipbitmapfromres"><a name="AfxGdipBitmapFromRes"></a>AfxGdipBitmapFromRes</h1>
+<p>Loads an image from a resource, converts it to a bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipBitmapFromRes (BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hInstance</em></td>
+<td>A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process.</td>
+</tr>
+<tr class="even">
+<td><em>wszFileName</em></td>
+<td>Name of the image in the resource file (.RES). If the image resource uses an integral identifier, wszImage should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., &quot;#998&quot;. Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="odd">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipdllversion"><a name="AfxGdipDllVersion"></a>AfxGdipDllVersion</h1>
+<p>Returns the version of Gdiplus.dll, e.g. 601 for version 6.01.</p>
+<pre><code>FUNCTION AfxGdipDllVersion () AS LONG
+</code></pre>
+<h1 id="afxgdipgetencoderclsid"><a name="AfxGdipGetEncoderClsid"></a>AfxGdipGetEncoderClsid</h1>
+<p>Retrieves the encoder's clsid.</p>
+<pre><code>FUNCTION AfxGdipGetEncoderClsid (BYREF wszMimeType AS WSTRING) AS GUID
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMimeType</em></td>
+<td>The mime type.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgdipgetimagesizefromfile"><a name="AfxGdipGetImageSizeFromFile"></a>AfxGdipGetImageSizeFromFile</h1>
+<p>Returns the size of the image.</p>
+<pre><code>FUNCTION AfxGdipGetImageSizeFromFile (BYREF wszFileName AS WSTRING, BYVAL nWidth AS DWORD PTR, _
+   BYVAL nHeight AS DWORD PTR) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>The filename path.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>Pointer to a DWORD variable that will receive the width, in pixels, of the image.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>Pointer to a DWORD variable that will receive the height, in pixels, of the image.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>If the function succeeds, it returns Ok, which is an element of the Status enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the Status enumeration.</p>
+<h1 id="afxgdipiconfrombuffer"><a name="AfxGdipIconFromBuffer"></a>AfxGdipIconFromBuffer</h1>
+<p>Converts an image stored in a buffer into an icon and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipIconFromBuffer (BYVAL pBuffer AS ANY PTR, BYVAL bufferSize AS SIZE_T_, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pBuffer</em></td>
+<td>Pointer to the buffer.</td>
+</tr>
+<tr class="even">
+<td><em>bufferSize</em></td>
+<td>Size of the buffer</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipiconfromfile"><a name="AfxGdipIconFromFile"></a>AfxGdipIconFromFile</h1>
+<p>Loads an image from a file, converts it to an icon and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipIconFromFile (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, _
+   BYVAL bGrayScale AS LONG = FALSE) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Path of the image to load and convert.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipiconfromres"><a name="AfxGdipIconFromRes"></a>AfxGdipIconFromRes</h1>
+<p>Loads an image from a resource, converts it to an icon and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipIconFromRes (BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hInstance</em></td>
+<td>A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process.</td>
+</tr>
+<tr class="even">
+<td><em>wszImageName</em></td>
+<td>Name of the image in the resource file (.RES). If the image resource uses an integral identifier, wszImage should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., &quot;#998&quot;. Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipimagefrombuffer"><a name="AfxGdipImageFromBuffer"></a>AfxGdipImageFromBuffer</h1>
+<p>Converts an image stored in a buffer into an icon or bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipImageFromBuffer (BYVAL pBuffer AS ANY PTR, BYVAL bufferSize AS SIZE_T_, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, _
+   BYVAL imageType AS LONG = IMAGE_ICON, BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pBuffer</em></td>
+<td>Pointer to the buffer.</td>
+</tr>
+<tr class="even">
+<td><em>bufferSize</em></td>
+<td>Size of the buffer</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="odd">
+<td><em>imageType</em></td>
+<td>Optional. IMAGE_ICON or IMAGE_BITMAP. Default value: IMAGE_ICON.</td>
+</tr>
+<tr class="even">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image type is IMAGE_ICON or the bitmap is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon or bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h4 id="usage-example">Usage example</h4>
+<pre><code>DIM wszFileName AS WSTRING * MAX_PATH
+wszFileName = ExePath &amp; &quot;\arrow_left_256.png&quot;
+DIM bufferSize AS SIZE_T_
+DIM nFile AS LONG
+nFile = FREEFILE
+OPEN wszFileName FOR BINARY AS nFile
+IF ERR THEN EXIT FUNCTION
+bufferSize = LOF(nFile)
+DIM pBuffer AS UBYTE PTR
+pBuffer = CAllocate(1, bufferSize)
+GET #nFile, , *pBuffer, bufferSize
+CLOSE nFile
+IF pBuffer THEN
+   ImageList_ReplaceIcon(hImageList, -1, AfxGdipIconFromBuffer(pBuffer, ImageSize))
+   DeAllocate(pBuffer)
+END IF
+</code></pre>
+<h1 id="afxgdipimagefromfile"><a name="AfxGdipImageFromFile"></a>AfxGdipImageFromFile</h1>
+<p>Loads an image from a file, converts it to an icon or bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipImageFromFile (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, _
+   BYVAL bGrayScale AS LONG = FALSE, BYVAL imageType AS LONG = IMAGE_ICON, _
+   BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Path of the image to load and convert.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="even">
+<td><em>imageType</em></td>
+<td>Optional. IMAGE_ICON or IMAGE_BITMAP. Default value: IMAGE_ICON.</td>
+</tr>
+<tr class="odd">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image type is IMAGE_ICON or the bitmap is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon or bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipimagefromfile2"><a name="AfxGdipImageFromFile2"></a>AfxGdipImageFromFile2</h1>
+<p>Loads an image from a file using GDI+, converts it to an icon or bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipImageFromFile2 (BYREF wszFileName AS WSTRING, BYVAL dimPercent AS LONG = 0, _
+   BYVAL bGrayScale AS LONG = FALSE, BYVAL imageType AS LONG = IMAGE_ICON, _
+   BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Path of the image to load and convert.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="even">
+<td><em>imageType</em></td>
+<td>Optional. IMAGE_ICON or IMAGE_BITMAP. Default value: IMAGE_ICON.</td>
+</tr>
+<tr class="odd">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image type is IMAGE_ICON or the bitmap is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon or bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h4 id="remarks">Remarks</h4>
+<p>A quirk in the GDI+ <strong>GdipLoadImageFromFile</strong> function causes that dim gray images (often used for disabled icons) are converted to darker shades of gray. Therefore, is better to use <strong>AfxGdipImageFromFile</strong>.</p>
+<h1 id="afxgdipimagefromres"><a name="AfxGdipImageFromRes"></a>AfxGdipImageFromRes</h1>
+<p>Loads an image from a resource, converts it to an icon or bitmap and returns the handle.</p>
+<pre><code>FUNCTION AfxGdipImageFromRes (BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, _
+   BYVAL imageType AS LONG = IMAGE_ICON, BYVAL clrBkg AS ARGB = 0) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hInstance</em></td>
+<td>A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process.</td>
+</tr>
+<tr class="even">
+<td><em>wszImageName</em></td>
+<td>Name of the image in the resource file (.RES). If the image resource uses an integral identifier, wszImage should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., &quot;#998&quot;. Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>Optional. TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="odd">
+<td><em>imageType</em></td>
+<td>Optional. IMAGE_ICON or IMAGE_BITMAP. Default value: IMAGE_ICON.</td>
+</tr>
+<tr class="even">
+<td><em>clrBkg</em></td>
+<td>Optional. The background color. This parameter is ignored if the image type is IMAGE_ICON or the bitmap is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>If the function succeeds, the return value is the handle of the created icon or bitmap.</p>
+<p>If the function fails, the return value is NULL.</p>
+<h1 id="afxgdipinit"><a name="AfxGdipInit"></a>AfxGdipInit</h1>
+<p>Initializes GDI+.</p>
+<pre><code>FUNCTION AfxGdipInit (BYVAL version AS UINT32 = 1) AS ULONG_PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>version</em></td>
+<td>Optional. The GDI+ version number. Must be 1.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>Returns a token on success or 0 in failure. The returned token will be used in the call to GdiplusShutdown when you have finished using GDI+.</p>
+<h1 id="afxgdiploadtexture"><a name="AfxGdipLoadTexture"></a>AfxGdipLoadTexture</h1>
+<p>Loads an image from disk or a resource an converts it to a texture for use with OpenGL.</p>
+<pre><code>FUNCTION AfxGdipLoadTexture (BYREF wszFileName AS WSTRING, BYREF TextureWidth AS LONG, _
+   BYREF TextureHeight AS LONG, BYREF strTextureData AS STRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>The path of the image.</td>
+</tr>
+<tr class="even">
+<td><em>TextureWidth</em></td>
+<td>Out. Width of the texture.</td>
+</tr>
+<tr class="odd">
+<td><em>TextureHeight</em></td>
+<td>Out. Height of the texture.</td>
+</tr>
+<tr class="even">
+<td><em>strTextureData</em></td>
+<td>Out. The texture data.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>PRIVATE FUNCTION AfxGdipLoadTexture (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING, _
+   BYREF TextureWidth AS LONG, BYREF TextureHeight AS LONG, BYREF strTextureData AS STRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hInstance</em></td>
+<td>The instance handle.</td>
+</tr>
+<tr class="even">
+<td><em>wszResourceName</em></td>
+<td>The name of the resource</td>
+</tr>
+<tr class="odd">
+<td><em>TextureWidth</em></td>
+<td>Out. Width of the texture.</td>
+</tr>
+<tr class="even">
+<td><em>TextureHeight</em></td>
+<td>Out. Height of the texture.</td>
+</tr>
+<tr class="odd">
+<td><em>strTextureData</em></td>
+<td>Out. The texture data.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>ERROR_FILE_NOT_FOUND = File not found.<br> ERROR_INVALID_DATA = Bad image size..<br> A GdiPlus status value.</p>
+<h1 id="afxgdipprinthbitmap"><a name="AfxGdipPrintHBITMAP"></a>AfxGdipPrintHBITMAP</h1>
+<p>Prints a Windows bitmap in the default printer.</p>
+<pre><code>FUNCTION AfxGdipPrintHBITMAP (BYVAL hbmp AS HBITMAP, BYVAL bStretch AS BOOLEAN = FALSE, _
+   BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hbmp</em></td>
+<td>Handle to a Windows bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>bStretch</em></td>
+<td>Optional. Stretch the image.</td>
+</tr>
+<tr class="odd">
+<td><em>nStretchMode</em></td>
+<td>Optional. Stretching mode.<br>InterpolationModeLowQuality = 1<br>InterpolationModeHighQuality = 2<br>InterpolationModeBilinear = 3<br>InterpolationModeBicubic = 4<br>InterpolationModeNearestNeighbor = 5<br>InterpolationModeHighQualityBilinear = 6<br>InterpolationModeHighQualityBicubic = 7<br>Default value = InterpolationModeHighQualityBicubic.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-15">Return value</h4>
+<p>Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.</p>
+<h1 id="afxgdipsavehbitmaptofile"><a name="AfxGdipSaveHBITMAPToFile"></a>AfxGdipSaveHBITMAPToFile</h1>
+<p>Saves a Windows bitmap to file.</p>
+<pre><code>FUNCTION AfxGdipSaveHBITMAPToFile (BYVAL hbmp AS HBITMAP, BYREF wszFileName AS WSTRING, _
+   BYREF wszMimeType AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hbmp</em></td>
+<td>Handle to a Windows bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>wszFileName</em></td>
+<td>Path name for the image to be saved.</td>
+</tr>
+<tr class="odd">
+<td><em>wszMimeType</em></td>
+<td>The mime type.<br>&quot;image/bmp&quot; = Bitmap (.bmp)<br>&quot;image/gif&quot; = GIF (.gif)<br>&quot;image/jpeg&quot; = JPEG (.jpg)<br>&quot;image/png&quot; = PNG (.png)<br>&quot;image/tiff&quot; = TIFF (.tiff)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>If the method succeeds, it returns Ok, which is an element of the Status enumeration.</p>
+<p>If the method fails, it returns one of the other elements of the Status enumeration.</p>
+<h1 id="afxgdipsaveimagetofile"><a name="AfxGdipSaveImageToFile"></a>AfxGdipSaveImageToFile</h1>
+<p>Saves a GDI+ image to file.</p>
+<pre><code>FUNCTION AfxGdipSaveImageToFile (BYVAL pImage AS GpImage PTR, BYREF wszFileName AS WSTRING, _
+   BYREF wszMimeType AS WSTRING) AS LONG
+</code></pre>
+<pre><code>FUNCTION AfxGdipSaveImageToBmp (BYVAL pImage AS GpImage PTR, BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION AfxGdipSaveImageToJpeg (BYVAL pImage AS GpImage PTR, BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION AfxGdipSaveImageToPng (BYVAL pImage AS GpImage PTR, BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION AfxGdipSaveImageToGif (BYVAL pImage AS GpImage PTR, BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION AfxGdipSaveImageToTiff (BYVAL pImage AS GpImage PTR, BYREF wszFileName AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pImage</em></td>
+<td>Pointer to the GDI+ image to save.</td>
+</tr>
+<tr class="even">
+<td><em>wszFileName</em></td>
+<td>Path name for the image to be saved.</td>
+</tr>
+<tr class="odd">
+<td><em>wszMimeType</em></td>
+<td>The mime type.<br>&quot;image/bmp&quot; = Bitmap (.bmp)<br>&quot;image/gif&quot; = GIF (.gif)<br>&quot;image/jpeg&quot; = JPEG (.jpg)<br>&quot;image/png&quot; = PNG (.png)<br>&quot;image/tiff&quot; = TIFF (.tiff)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>If the method succeeds, it returns Ok, which is an element of the Status enumeration.</p>
+<p>If the method fails, it returns one of the other elements of the Status enumeration.</p>
+<h1 id="afxgdipshutdown"><a name="AfxGdipShutdown"></a>AfxGdipShutdown</h1>
+<p>Cleans up resources used by Windows GDI+. Each call to <strong>GdiplusStartup</strong> should be paired with a call to <strong>GdiplusShutdown</strong>.</p>
+<pre><code>SUB AfxGdipShutdown (BYVAL token AS ULONG_PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>token</em></td>
+<td>Token returned by a previous call to <strong>GdiplusStartup</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_argb"><a name="GDIP_ARGB"></a>GDIP_ARGB</h1>
+<p>Returns an ARGB color value initialized with the specified values for the alpha, red, green, and blue components.</p>
+<pre><code>FUNCTION GDIP_ARGB (BYVAL a AS UBYTE, BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>a</em></td>
+<td>The alpha component value.</td>
+</tr>
+<tr class="even">
+<td><em>r</em></td>
+<td>The red component value.</td>
+</tr>
+<tr class="odd">
+<td><em>g</em></td>
+<td>The green component value.</td>
+</tr>
+<tr class="even">
+<td><em>b</em></td>
+<td>The bue ponent value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-18">Return value</h4>
+<p>The ARGB value.</p>
+<h1 id="gdip_bgra"><a name="GDIP_BGRA"></a>GDIP_BGRA</h1>
+<p>Returns a BGRA color value initialized with the specified values for the blue, green, red and alpha components.</p>
+<pre><code>FUNCTION GDIP_BGRA (BYVAL b AS UBYTE, BYVAL g AS UBYTE, BYVAL r AS UBYTE, BYVAL a AS UBYTE) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>b</em></td>
+<td>The bue ponent value.</td>
+</tr>
+<tr class="even">
+<td><em>g</em></td>
+<td>The green component value.</td>
+</tr>
+<tr class="odd">
+<td><em>r</em></td>
+<td>The red component value.</td>
+</tr>
+<tr class="even">
+<td><em>a</em></td>
+<td>The alpha component value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>The BGRA value.</p>
+<h1 id="gdip_color"><a name="GDIP_COLOR"></a>GDIP_COLOR</h1>
+<p>Returns an ARGB color value initialized with the specified values for the alpha, red, green, and blue components.</p>
+<pre><code>FUNCTION GDIP_COLOR (BYVAL a AS UBYTE, BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>a</em></td>
+<td>The alpha component value.</td>
+</tr>
+<tr class="even">
+<td><em>r</em></td>
+<td>The red component value.</td>
+</tr>
+<tr class="odd">
+<td><em>g</em></td>
+<td>The green component value.</td>
+</tr>
+<tr class="even">
+<td><em>b</em></td>
+<td>The bue ponent value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-20">Return value</h4>
+<p>The ARGB value.</p>
+<h1 id="gdip_getalpha"><a name="GDIP_GetAlpha"></a>GDIP_GetAlpha</h1>
+<p>Returns the alpha component of an ARGB color value.</p>
+<pre><code>FUNCTION GDIP_GetAlpha (BYVAL argbcolor AS COLORREF) AS BYTE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>argbcolor</em></td>
+<td>The ARGB color value.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_getblue"><a name="GDIP_GetBlue"></a>GDIP_GetBlue</h1>
+<p>Returns the blue component of an ARGB color value.</p>
+<pre><code>FUNCTION GDIP_GetBlue (BYVAL argbcolor AS COLORREF) AS BYTE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>argbcolor</em></td>
+<td>The ARGB color value.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_getgreen"><a name="GDIP_GetGreen"></a>GDIP_GetGreen</h1>
+<p>Returns the green component of an ARGB color value.</p>
+<pre><code>FUNCTION GDIP_GetGreen (BYVAL argbcolor AS COLORREF) AS BYTE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>argbcolor</em></td>
+<td>The ARGB color value.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_getred"><a name="GDIP_GetRed"></a>GDIP_GetRed</h1>
+<p>Returns the red component of an ARGB color value.</p>
+<pre><code>FUNCTION GDIP_GetRed (BYVAL argbcolor AS COLORREF) AS BYTE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>argbcolor</em></td>
+<td>The ARGB color value.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_point"><a name="GDIP_POINT"></a>GDIP_POINT</h1>
+<p>Returns a GpPoint color value initialized with the specified values for the <em>x</em> and <em>y</em> coordinates.</p>
+<pre><code>FUNCTION GDIP_POINT (BYVAL x AS LONG, BYVAL y AS LONG) AS GpPoint
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>x</em></td>
+<td>The x coordinate.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The y coordinate.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_pointf"><a name="GDIP_POINTF"></a>GDIP_POINTF</h1>
+<p>Returns a GpPointF color value initialized with the specified values for the <em>x</em> and <em>y</em> coordinates.</p>
+<pre><code>FUNCTION GDIP_POINTF (BYVAL x AS SINGLE, BYVAL y AS SINGLE) AS GpPointF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>x</em></td>
+<td>The x coordinate.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The y coordinate.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gdip_rgba"><a name="GDIP_RGBA"></a>GDIP_RGBA</h1>
+<p>Returns a RGBA color value initialized with the specified values for the red, green, blue and alpha components.</p>
+<pre><code>FUNCTION GDIP_RGBA (BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE, BYVAL a AS UBYTE) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>r</em></td>
+<td>The red component value.</td>
+</tr>
+<tr class="even">
+<td><em>g</em></td>
+<td>The green component value.</td>
+</tr>
+<tr class="odd">
+<td><em>b</em></td>
+<td>The bue ponent value.</td>
+</tr>
+<tr class="even">
+<td><em>a</em></td>
+<td>The alpha component value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>The RGBA value.</p>
+<h1 id="gdip_rect"><a name="GDIP_RECT"></a>GDIP_RECT</h1>
+<p>Returns a GpRect structure initialized with the specified values for the x, y, width, and height components.</p>
+<pre><code>FUNCTION GDIP_RECT (BYVAL x AS LONG, BYVAL y AS LONG, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS GpRect
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>x</em></td>
+<td>The x coordinate.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The y coordinate.</td>
+</tr>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>The width.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>The height.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>The filled GpRect structure.</p>
+<h1 id="gdip_rectf"><a name="GDIP_RECTF"></a>GDIP_RECTF</h1>
+<p>Returns a GpRectF structure initialized with the specified values for the x, y, width, and height components.</p>
+<pre><code>FUNCTION GDIP_RECT (BYVAL x AS SINGLE, BYVAL y AS SINGLE, BYVAL nWidth AS SINGLE, _
+   BYVAL nHeight AS SINGLE) AS GpRectF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>x</em></td>
+<td>The x coordinate.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The y coordinate.</td>
+</tr>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>The width.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>The height.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>The filled GpRectF structure.</p>
+<h1 id="gdip_xrgb"><a name="GDIP_XRGB"></a>GDIP_XRGB</h1>
+<p>Returns a XRGB color value initialized with the specified values for the red, green, and blue components.</p>
+<pre><code>FUNCTION GDIP_XRGB (BYVAL r AS UBYTE, BYVAL g AS UBYTE, BYVAL b AS UBYTE) AS COLORREF
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>r</em></td>
+<td>The red component value.</td>
+</tr>
+<tr class="even">
+<td><em>g</em></td>
+<td>The green component value.</td>
+</tr>
+<tr class="odd">
+<td><em>b</em></td>
+<td>The bue ponent value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-24">Return value</h4>
+<p>The XRGB value.</p>
+<h1 id="info:-interoperability-between-gdi-and-gdi+">INFO: Interoperability Between GDI and GDI+</h1>
+<p>Microsoft article: <a href="http://support.microsoft.com/kb/311221/en-us">http://support.microsoft.com/kb/311221/en-us</a></p>
+<p>Article ID: 311221 - Last Review: February 12, 2007 - Revision: 3.4 INFO: Interoperability Between GDI and GDI+ This article was previously published under Q311221</p>
+<p>SUMMARY</p>
+<p>It is sometimes desirable to mix GDI and GDI+ drawing operations in the same code path. There are some caveats to keep in mind when you are writing code that allows GDI and GDI+ to interoperate. This article outlines those caveats and provides additional information to help you successfully write such code.</p>
+<p>MORE INFORMATION</p>
+<p>While it is permissible to mix GDI and GDI+ code, there are certain rules that must be followed. Generally, you should not interleave GDI and GDI+ calls on one target object. For example, it is okay to wrap a Graphics object around an HDC, but you should not access the HDC directly from GDI until the Graphics object is destroyed.</p>
+<p>Four primary scenarios for interoperability between GDI and GDI+ are covered in this article:</p>
+<ul>
+<li>Using GDI on a GDI+ Graphics object backed by the screen</li>
+<li>Using GDI on a GDI+ Graphics object backed by a bitmap</li>
+<li>Using GDI+ on a GDI HDC</li>
+<li>Using GDI+ on a GDI memory HBITMAP</li>
+</ul>
+<h3 id="using-gdi-on-a-gdi+-graphics-object-backed-by-the-screen">Using GDI on a GDI+ Graphics Object Backed by the Screen</h3>
+<p>One example of a need to use GDI on a GDI+ Graphics object backed by the screen would be to draw a &quot;rubber band&quot; or &quot;focus&quot; rectangle. GDI+ currently has no direct support for raster operations (ROPs), so GDI must be used directly if R2_XOR pen operations are required. In this case, you would use GdipGetDC to obtain an HDC to which the GDI output would be directed. GDI+ output should not be attempted on the Graphics object for the life of the HDC (that is, until GdipReleaseDC is called).</p>
+<h3 id="using-gdi-on-a-gdi+-graphics-object-backed-by-a-bitmap">Using GDI on a GDI+ Graphics Object Backed by a Bitmap</h3>
+<p>When GdipGetDC is called for a Graphics object that is backed by a bitmap rather than the screen, a memory HDC is created and a new HBITMAP is created and selected into the memory HDC. This new memory bitmap is not initialized with the original bitmap's image but rather with a sentinel pattern, which allows GDI+ to track changes to the bitmap. Any changes that are made to the memory bitmap through the use of GDI code become apparent in changes to the sentinel pattern. When GdipReleaseDC is called, those changes are copied back to the original bitmap. Because the memory bitmap is not initialized with the bitmap's image, an HDC that is obtained in this way should be considered &quot;write only&quot; and is therefore not suitable for use with ROPs, the use of which requires the ability to read the target, like R2_XOR. Also, there is a performance cost to this approach because GDI+ must copy the changes back to the original bitmap.</p>
+<h3 id="using-gdi+-on-a-gdi-hdc">Using GDI+ on a GDI HDC</h3>
+<p>You can facilitate the use of GDI+ on an HDC by using the Graphics constructor that takes an HDC as a parameter. The drawing members of the Graphics class can be used to draw on the HDC in this way. Once the Graphics object is attached to the HDC, no GDI operations should be performed on the HDC until the Graphics object is destroyed or goes out of scope. If GDI output is required on the HDC, either destroy the Graphics object before using the original HDC or use GdipGetDC to get a new HDC and then follow the rules described earlier in this article for interoperability while using GDI on a GDI+ object.</p>
+<p>Using GDI+ on a GDI Memory HBITMAP</p>
+<p>The GDI+ Bitmap constructor that takes an HBITMAP as a parameter does not use the actual source HBITMAP as the backing image for the bitmap. Rather, a copy of the image is made in the constructor, and changes are not written back to the original bitmap, even during execution of the destructor. The new bitmap can be thought of as &quot;copy on creation,&quot; so to get GDI+ to draw on a memory HBITMAP from GDI and have the changes apply to the HBITMAP, an approach like the following is needed instead:</p>
+<ol>
+<li>Create a DIBSection.</li>
+<li>Select the DIBSection into a memory HDC.</li>
+<li>To use GDI+ to draw to the DIBSection, wrap a Graphics object around the HDC.</li>
+<li>To use GDI to draw to/from the DIBSection, destroy the Graphics object, and use the HDC.</li>
+<li>Destroy the Graphics objects, and then clear the DIBSection selection from the HDC.</li>
+</ol>
+<p>Later, a bitmap can be constructed from the DIBSection and used as a source image in GdipDrawImage if needed.</p>
+</body>
+</html>
+

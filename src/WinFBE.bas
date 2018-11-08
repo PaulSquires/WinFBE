@@ -34,12 +34,14 @@
 #Include Once "Afx\AfxMenu.inc" 
 #Include Once "Afx\AfxCom.inc" 
 #Include Once "Afx\CXpButton.inc"
+#Include Once "Afx\CMaskedEdit.inc"
+#include once "Afx\CAxHost\CWebCtx.inc"
 
 Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.8.1") 
+#Define APPVERSION    WStr("1.8.2") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -104,6 +106,7 @@ Using Afx
 #Include Once "frmFindInFiles.inc"
 #Include Once "frmFindReplace.inc"
 #Include Once "frmProjectOptions.inc"
+#Include Once "frmHelpViewer.inc"
 #Include Once "frmMain.inc"
 
 
