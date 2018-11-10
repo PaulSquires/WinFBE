@@ -22,11 +22,15 @@ Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    GetClientRect(HWnd, @rc)
    
    dim as hwnd hTabCtrl = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TABCONTROL)
-   dim as hwnd hTree(1), hWebBrowser(1)
+   dim as hwnd hTree(1), hWebBrowser(1), hBtn(3)
    hTree(0) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TVWINFBE)
    hTree(1) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TVWINFBX)
    hWebBrowser(0) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE )
    hWebBrowser(1) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX )
+   hBtn(0) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_BACK ) 
+   hBtn(1) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_FORWARD ) 
+   hBtn(2) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_PRINT ) 
+   hBtn(3) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_FIND )
     
    dim as long nCurSel = TabCtrl_GetCurSel(hTabCtrl) 
    select case nCurSel
@@ -40,13 +44,23 @@ Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
       ShowWindow( hWebBrowser(0), SW_HIDE)
    end select
    
+   dim as long nSpace     = AfxScaleY(4)
+   dim as long nBtnHeight = AfxScaleY(28)
+   dim as long nBtnWidth  = AfxScaleY(74)
    dim as long nTabHeight = AfxScaleY(24)
    dim as long nTreeWidth = AfxScaleX(200)
    dim as long nTreeHeight = rc.Bottom-rc.top-nTabHeight-AfxScaleY(30)
    
    SetWindowPos( hTabCtrl, 0, 0, 0, rc.Right-rc.Left, nTabHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
-   SetWindowPos( hTree(nCurSel), 0, 0, nTabHeight+AfxScaleY(30), nTreeWidth, nTreeHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
-   SetWindowPos( hWebBrowser(nCurSel), 0, nTreeWidth, nTabHeight, rc.Right-rc.Left-nTreeWidth, rc.Bottom-rc.top-nTabHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
+   SetWindowPos( hTree(nCurSel), 0, 0, AfxScaleY(70), nTreeWidth, nTreeHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
+   
+   dim nLeft as long = 0
+   for i as long = 0 to 3
+      SetWindowPos( hBtn(i), 0, nTreeWidth + nLeft, nTabHeight + (nSpace * 2), nBtnWidth, nBtnHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
+      nLeft = nLeft + nBtnWidth + nSpace               
+   next
+   SetWindowPos( hWebBrowser(nCurSel), 0, nTreeWidth, AfxScaleY(70), _
+                  rc.Right-rc.Left-nTreeWidth, rc.Bottom-rc.top-nTabHeight-nBtnHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
 
    Function = 0
 End Function
@@ -56,6 +70,34 @@ End Function
 ' Process WM_COMMAND message for window/dialog: frmHelpViewer
 ' ========================================================================================
 Function frmHelpViewer_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+
+   DIM pwb AS CWebCtx PTR 
+
+   select case TabCtrl_GetCurSel( GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TABCONTROL) ) 
+      case -1:  exit function   
+      case  0:  pwb = CAST(CWebCtx PTR, GetProp(hwnd, "CWEBCTXPTR_WINFBE"))
+      case  1:  pwb = CAST(CWebCtx PTR, GetProp(hwnd, "CWEBCTXPTR_WINFBX")) 
+   end select
+   if pwb = 0 then exit function
+   
+   Select Case id
+      Case IDC_FRMHELPVIEWER_BACK
+         If codeNotify = BN_CLICKED Then
+            pwb->GoBack
+         End If
+      Case IDC_FRMHELPVIEWER_FORWARD
+         If codeNotify = BN_CLICKED Then
+            pwb->GoForward
+         End If
+      Case IDC_FRMHELPVIEWER_PRINT
+         If codeNotify = BN_CLICKED Then
+            pwb->PrintPreview
+         End If
+      Case IDC_FRMHELPVIEWER_FIND
+         If codeNotify = BN_CLICKED Then
+            pwb->Find
+         End If
+   End Select
 
    Function = 0
 End Function
@@ -237,7 +279,7 @@ Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
    ' If function list already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.
    If IsWindow(HWND_FRMHELPVIEWER) Then
-      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMHELPVIEWER), SW_HIDE, SW_SHOW)
+      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMHELPVIEWER), SW_HIDE, SW_SHOWNORMAL)
       dim as hwnd hTabCtrl = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TABCONTROL)
       select case gHelpViewerIndex 
          case IDM_HELPWINFBE: TabCtrl_SetCurSel(hTabCtrl, 0) 
@@ -260,8 +302,8 @@ Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
    Dim nWidth  As Long = (rcWork.Right - rcWork.Left) * .80
 
    HWND_FRMHELPVIEWER = _
-   pWindow->Create( hWndParent, "Help Viewer", @frmHelpViewer_WndProc, 0, 0, nWidth, nHeight, _
-        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_THICKFRAME, _
+   pWindow->Create( 0, "Help Viewer", @frmHelpViewer_WndProc, 0, 0, nWidth, nHeight, _
+        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_MAXIMIZEBOX or WS_MINIMIZEBOX or WS_THICKFRAME, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)
    pWindow->brush = GetSysColorBrush(COLOR_WINDOW)
@@ -331,6 +373,23 @@ Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
    LoadHelpTreeview(hTree, AfxGetExePath & "\Help\WinFBE\", null)
 
    
+   ' Add the naviagation and print buttons
+   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_BACK, "Back", 0, 0, 0, 0, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   
+   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_FORWARD, "Forward", 0, 0, 0, 0, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_PRINT, "Print", 0, 0, 0, 0, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_FIND, "Find", 0, 0, 0, 0, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
    ' Add a WebBrowser controls
    DIM pwb1 AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
    SetProp(pWindow->hWindow, "CWEBCTXPTR_WINFBE", CAST(HANDLE, pwb1))

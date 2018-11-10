@@ -1,9 +1,15 @@
+Version 1.8.3 (November 10, 2018)
+- Added: Back, Forward, Print, Find buttons to the Help Viewer display dialog.
+- Added: MaximizeBox, MinimizeBox to the Help Viewer display dialog.
+- Changed: The generated HTML help file code no longer imposes a fixed page width of 728 pixels.
+
 Version 1.8.2 (November 8, 2018)
 - Added: CMaskedEdit control (from the WinFBX Library framework). 
 - Added: ComboBox control.
 - Added: Code editor Calltips for the Frame control.
+- Added: New Help system for WinFBE and WinFBX.
 - Fixed: CheckBox and OptionButton now correctly test for BN_CLICKED notification.
-- Fixed: "Custom Color" label in the PropertyList color picker would not disply properly in WinFBE64.
+- Fixed: "Custom Color" label in the PropertyList color picker would not display properly in WinFBE64.
 - Fixed: Pressing TAB key in the Replace popup form (Ctrl+R) will now move keyboard input focus between the Find and Replace textboxes.
 
 Version 1.8.1 (October 7, 2018)

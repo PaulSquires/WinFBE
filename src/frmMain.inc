@@ -1895,6 +1895,7 @@ End Function
 ' ========================================================================================
 Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, ByVal dwThreadId As DWORD) As LRESULT
 
+   
    Dim pDoc As clsDocument Ptr
    
    ' If the application is losing focus then validate any currently editing peroperty
@@ -1974,7 +1975,6 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
             End If
          Next
       NEXT
-      frmMain_SetFocusToCurrentCodeWindow()
    End If
    
    Function = 0

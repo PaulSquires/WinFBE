@@ -258,7 +258,10 @@
 #Define IDC_FRMHELPVIEWER_TABCONTROL                1002
 #Define IDC_FRMHELPVIEWER_TVWINFBE                  1003
 #Define IDC_FRMHELPVIEWER_TVWINFBX                  1004
- 
+#Define IDC_FRMHELPVIEWER_BACK                      1005 
+#Define IDC_FRMHELPVIEWER_FORWARD                   1006 
+#Define IDC_FRMHELPVIEWER_PRINT                     1007 
+#Define IDC_FRMHELPVIEWER_FIND                      1008 
 
 #Define IsFalse(e) ( Not CBool(e) )
 #Define IsTrue(e) ( CBool(e) )
