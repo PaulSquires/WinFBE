@@ -12,6 +12,19 @@
 '    GNU General Public License for more details.
 
 
+''
+''
+function HighlightTreeviewNode( byref wszLocationURL as WSTRING ) as Long
+   for i as long = lbound(gHTMLHelp) to Ubound(gHTMLHelp)
+      if wszLocationURL = gHTMLHelp(i).wszLocationURL then
+         TreeView_SelectItem( gHTMLHelp(i).hTreeview, gHTMLHelp(i).TreeviewNode )
+         exit for
+      end if
+   next   
+   function = 0
+end function
+
+
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
@@ -60,7 +73,7 @@ Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
       nLeft = nLeft + nBtnWidth + nSpace               
    next
    SetWindowPos( hWebBrowser(nCurSel), 0, nTreeWidth, AfxScaleY(70), _
-                  rc.Right-rc.Left-nTreeWidth, rc.Bottom-rc.top-nTabHeight-nBtnHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
+                  rc.Right-rc.Left-nTreeWidth, rc.Bottom-rc.top-AfxScaleY(70), SWP_SHOWWINDOW Or SWP_NOZORDER)
 
    Function = 0
 End Function
@@ -84,10 +97,14 @@ Function frmHelpViewer_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwn
       Case IDC_FRMHELPVIEWER_BACK
          If codeNotify = BN_CLICKED Then
             pwb->GoBack
+            pwb->WaitForPageLoad(10)
+            HighlightTreeviewNode(pwb->LocationURL)
          End If
       Case IDC_FRMHELPVIEWER_FORWARD
          If codeNotify = BN_CLICKED Then
             pwb->GoForward
+            pwb->WaitForPageLoad(10)
+            HighlightTreeviewNode(pwb->LocationURL)
          End If
       Case IDC_FRMHELPVIEWER_PRINT
          If codeNotify = BN_CLICKED Then
@@ -108,8 +125,8 @@ End Function
 ''
 function frmHelpViewer_DisplayHTML( byval idx as long ) as Long
    
-   if idx >= lbound(gHTMLHelpFiles) andalso idx <= ubound(gHTMLHelpFiles) then
-      if AfxFileExists(gHTMLHelpFiles(idx)) then
+   if idx >= lbound(gHTMLHelp) andalso idx <= ubound(gHTMLHelp) then
+      if AfxFileExists(gHTMLHelp(idx).wszFilename) then
          dim as hwnd hTabCtrl = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TABCONTROL)
          dim as long nCurSel = TabCtrl_GetCurSel(hTabCtrl) 
 
@@ -121,12 +138,11 @@ function frmHelpViewer_DisplayHTML( byval idx as long ) as Long
          
          if pwb then
             ' Navigate to the path
-            dim wszPath as wstring * MAX_PATH = gHTMLHelpFiles(idx)
+            dim wszPath as wstring * MAX_PATH = gHTMLHelp(idx).wszFilename
             pwb->Navigate(wszPath)
-            
-            'pwb->Navigate("https://google.com")
             ' Optional: Wait for page load with a timeout of 10 seconds
             DIM lReadyState AS READYSTATE = pwb->WaitForPageLoad(10)
+            gHTMLHelp(idx).wszLocationURL = pwb->LocationURL
             ' Set the focus in the page (the page must be fully loaded)
             pwb->SetFocus
          end if
@@ -246,10 +262,11 @@ function LoadHelpTreeview( byval hTreeview as hwnd, byval sPath as CWSTR, byval 
       else
          ' Find any *.html files 
          if ucase(pFinder.FileExt) = "HTML" then
-            dim as long ub = ubound(gHTMLHelpFiles) + 1
-            redim preserve gHTMLHelpFiles(ub)
-            gHTMLHelpFiles(ub) = pFinder.FilePath
-            TreeView_AddItem(hTreeView, hParent, addMode, pFinder.Filename, ub, 0, 0)
+            dim as long ub = ubound(gHTMLHelp) + 1
+            redim preserve gHTMLHelp(ub)
+            gHTMLHelp(ub).wszFilename = pFinder.FilePath
+            gHTMLHelp(ub).TreeviewNode = TreeView_AddItem(hTreeView, hParent, addMode, pFinder.Filename, ub, 0, 0)
+            gHTMLHelp(ub).hTreeView = hTreeView
          end if
          
       end if
@@ -303,7 +320,8 @@ Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
 
    HWND_FRMHELPVIEWER = _
    pWindow->Create( 0, "Help Viewer", @frmHelpViewer_WndProc, 0, 0, nWidth, nHeight, _
-        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_MAXIMIZEBOX or WS_MINIMIZEBOX or WS_THICKFRAME, _
+        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_MAXIMIZEBOX or WS_MINIMIZEBOX or WS_THICKFRAME or _
+        WS_CLIPCHILDREN OR WS_CLIPSIBLINGS, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)
    pWindow->brush = GetSysColorBrush(COLOR_WINDOW)

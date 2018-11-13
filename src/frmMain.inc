@@ -657,7 +657,6 @@ Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 
    ' Ensure that the Project Manager window has been created (show it now as well)
    frmProjectOptions_Show( HWnd, SW_SHOW, true )
-   if gApp.IsNewProjectFlag = false then return 0  ' New project was Cancelled
       
    PositionExplorerWindows(HWND_FRMEXPLORER)
    
@@ -1040,12 +1039,21 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then Return 0
+   dim as long idx = pDoc->ProjectIndex
 
+   if pDoc->IsDesigner then
+      ' Parse the code to ensure up to date list of functions so that compiling will not
+      ' fail by generating a Declare without a body function.
+      ParseDocument(idx, pDoc, "")
+      ' Regenerate code to ensure that any missing body functions are now present
+      pDoc->bRegenerateCode = true
+      SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
+   end if
+   
    ' Do the actual saving to disk
    If pDoc->SaveFile(bSaveAs) Then
       ' Apply document properties to this file because the file extension may have
       ' changed. For example from Untitled to *.bas
-      dim as long idx = pDoc->ProjectIndex
       If gApp.IsProjectActive Then
          gApp.Projects(idx).ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
       End If
@@ -1053,12 +1061,12 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
       pDoc->DisplayStats()   
       ' Parse the code for sub/function listing and create list
       ParseDocument(idx, pDoc, "")
+      AddFunctionsToExplorerTreeview(pDoc, true)
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
    gTTabCtl.SetTabText(-1)
    frmMain_SetFocusToCurrentCodeWindow
-   AddFunctionsToExplorerTreeview(pDoc, true)
    frmFnList_UpdateListBox()
 
    Function = 0
@@ -1138,6 +1146,16 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       TB.Mask = TCIF_PARAM
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
+
+      if pDoc->IsDesigner then
+         ' Parse the code to ensure up to date list of functions so that compiling will not
+         ' fail by generating a Declare without a body function.
+         ParseDocument(pDoc->ProjectIndex, pDoc, "")
+         ' Regenerate code to ensure that any missing body functions are now present
+         pDoc->bRegenerateCode = true
+         SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
+      end if
+
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
          ' If this is a new Untitled document that is also dirty then we
          ' need to set the focus to that tab because the SaveAs dialog will be shown.
@@ -1147,6 +1165,9 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          pDoc->SaveFile()
          pDoc->DisplayStats()   
          gTTabCtl.SetTabText(i)
+         ' Parse the code for sub/function listing and create list
+         ParseDocument(pDoc->ProjectIndex, pDoc, "")
+         AddFunctionsToExplorerTreeview(pDoc, true)
       End If   
    Next
    frmMain_SetFocusToCurrentCodeWindow
@@ -1307,6 +1328,15 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       hEdit = pDoc->hWndActiveScintilla
       frmMain_ChangeToolbarButtonsState
    End If   
+
+   ' If the popup Help Viewer window has focus then exit function because we don't
+   ' want accelerator keys to act on the code editor.
+   if GetForegroundWindow() = HWND_FRMHELPVIEWER then 
+      if id = IDM_FIND then
+         frmHelpViewer_OnCommand(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_FIND, 0, BN_CLICKED)
+      end if   
+      exit function
+   end if
 
    
    Select Case id
@@ -1706,6 +1736,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          
       ''   DESIGNER MENU
       case IDM_NEWFORM:               function = OnCommand_DesignerNewForm(HWND)
+      case IDM_VIEWTOOLBOX:           function = frmVDToolbox_Show(HWND)   ' toggle show/hide
+      'case IDM_MENUEDITOR:            function = frmMenuEditor_Show( HWND, SW_NORMAL )
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
            IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            
@@ -2275,7 +2307,12 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
 
       
       case MSG_USER_GENERATECODE
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         Dim pDoc As clsDocument Ptr 
+         if lParam = 0 then
+            pDoc = gTTabCtl.GetActiveDocumentPtr()
+         else
+            pDoc = cast(clsDocument Ptr, lParam)
+         end if   
          if pDoc then
             if IsDesignerView(pDoc) = false then  ' clicked on the code window
                dim as hwnd hEdit = pDoc->hWindow(0)
@@ -2284,6 +2321,8 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
                GenerateFormCode(pDoc)
                if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
                if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+            else
+               GenerateFormCode(pDoc)
             END IF
          end if
 

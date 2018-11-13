@@ -1,3 +1,11 @@
+Version 1.8.4 (November 13, 2018)
+- Added: View ToolBox menu item is now implemented.
+- Fixed: Canceling New Project creation would not erase new project in memory object. 
+- Fixed: Help Viewer screen flickering by adding WS_CLIPCHILDREN WS_CLIPSIBLINGS window styles. 
+- Fixed: Help Viewer treeview nodes are now selected to reflect the currently loaded help page. 
+- Fixed: When Help Viewer has focus, accelerator keys no longer act on the code editor.
+- Fixed: Sizing of embedded Help Viewer web browser so it resizes correctly at bottom of the form.
+
 Version 1.8.3 (November 10, 2018)
 - Added: Back, Forward, Print, Find buttons to the Help Viewer display dialog.
 - Added: MaximizeBox, MinimizeBox to the Help Viewer display dialog.

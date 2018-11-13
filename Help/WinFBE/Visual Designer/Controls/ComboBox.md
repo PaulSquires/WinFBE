@@ -7,6 +7,7 @@
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
 | CtrlType | Gets or sets the control type value. Always **ControlType.ComboBox** and used when adding control to the application’s form collection.|
+| DropDownStyle | Gets or sets the style of the control. Refer to the [ComboBoxStyle](#ComboBoxStyle) Enum |
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
 | Focused | Gets or sets a value (true/false) indicating whether the control has input focus.|
 | Font | Gets or sets the font for the control. Refer to the Font object.|
@@ -59,7 +60,7 @@
 | MouseUp | Occurs when the mouse pointer is over the control and a mouse button is released.|
 | DropDown | Occurs when the drop-down portion of the combobox is shown.|
 | DropDownClosed | Indicates that the drop-down portion of the combobox has closed.|
-| TextChanged | Occurs when the Text property is changed by either a programmatic modification or user interaction.|
+| TextChanged | Occurs when the Text property is changed by either a programmatic modification or user interaction. Only valid for DropDownStyle equal to ComboBoxStyle.Simple |
 
 ### Items Collection (wfxComboBoxItemsCollection)
 | Name                            | Description                    |
@@ -119,8 +120,30 @@ For i as long = 0 to Form1.Combo.Items.Count – 1
 Next
 ```
 
+#####  ComboBoxStyle
+```
+Enum ComboBoxStyle
+   Simple = 1
+   DropDown
+   DropDownList
+End Enum
+```
+##### wfxSize
+```
+Type wfxSize
+   private:
+      _Width  as Long
+      _Height as long 
 
-
+   public:
+      Declare Property Width() As Long
+      Declare Property Width( ByVal nValue As Long )
+      Declare Property Height() As Long
+      Declare Property Height( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
+End Type
+```
 ##### wfxPoint
 
 ```

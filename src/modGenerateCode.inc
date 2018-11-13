@@ -130,6 +130,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                
                ' If the Event/function does not already exist in code then create it now.
                ParseDocument(pDoc->ProjectIndex, pDoc, "")
+               
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
                ' not yet been loaded.

@@ -138,7 +138,9 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
                if gApp.Projects(idx).ProjectManifest THEN
                   CreateResourceManifest(idx)
                END IF
-               SendMessage( HWnd, WM_CLOSE, 0, 0 )
+               ' Enables parent window keeping parent's zorder
+               EnableWindow( GetParent(HWnd), True )
+               DestroyWindow( HWnd )
             End If
             gProjectLoading = FALSE
             Exit Function
@@ -147,7 +149,10 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
             gApp.IsNewProjectFlag = false
-            SendMessage( HWnd, WM_CLOSE, 0, 0 )
+            gApp.Projects(gApp.ProjectOverrideIndex).InUse = false
+            ' Enables parent window keeping parent's zorder
+            EnableWindow( GetParent(HWnd), True )
+            DestroyWindow( HWnd )
             exit function
          End If
    End Select
@@ -160,9 +165,7 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmProjectOptions
 ' ========================================================================================
 Function frmProjectOptions_OnClose(HWnd As HWnd) As LRESULT
-   ' Enables parent window keeping parent's zorder
-   EnableWindow( GetParent(HWnd), True )
-   DestroyWindow( HWnd )
+   frmProjectOptions_OnCommand(HWnd, IDCANCEL, GetDlgItem(HWND, IDCANCEL), BN_CLICKED)
    Function = 0
 End Function
 
@@ -171,6 +174,7 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmProjectOptions
 ' ========================================================================================
 Function frmProjectOptions_OnDestroy(HWnd As HWnd) As LRESULT
+   gApp.ProjectOverrideIndex = 0   ' reset
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -267,7 +271,6 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
 
    wszTitle = L(214,"Project Options")
 
-   
    dim as long idx = iif(IsNewProject, gApp.GetNewProjectIndex(), gApp.GetActiveProjectIndex() )
    gApp.ProjectOverrideIndex = idx
    
@@ -277,7 +280,7 @@ Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    ' from disk and sets it up in the editor. Therefore, before exiting this dialog we
    ' will reset the InUse flag to FALSE because the open project code will assign a new one.
    gApp.IsNewProjectFlag = iif( IsNewProject, true, false )
-   
+    
    If gApp.IsNewProjectFlag Then
       ' Set the default values for a new project
       gApp.Projects(idx).InUse = true

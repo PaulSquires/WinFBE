@@ -41,7 +41,7 @@ Using Afx
 
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.8.3") 
+#Define APPVERSION    WStr("1.8.4") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -107,6 +107,7 @@ Using Afx
 #Include Once "frmFindReplace.inc"
 #Include Once "frmProjectOptions.inc"
 #Include Once "frmHelpViewer.inc"
+#Include Once "frmMenuEditor.inc"
 #Include Once "frmMain.inc"
 
 

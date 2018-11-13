@@ -644,7 +644,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDUP, "", 166, 388, 28, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_UP"), 0, false, IMAGE_BITMAP, 0)
+   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_ARROWUP"), 0, false, IMAGE_BITMAP, 0)
    SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
    IF hBitmap THEN DeleteObject(hBitmap)
 
@@ -652,7 +652,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDDOWN, "", 199, 388, 28, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_DOWN"), 0, false, IMAGE_BITMAP, 0)
+   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_ARROWDOWN"), 0, false, IMAGE_BITMAP, 0)
    SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
    IF hBitmap THEN DeleteObject(hBitmap)
 

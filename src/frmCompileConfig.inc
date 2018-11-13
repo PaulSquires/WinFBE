@@ -439,18 +439,18 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
 
    hCtrl = _
    pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, "", 243, 10, 32, 32, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   wszImage = iif(pWindow->DPI > 96, "IMAGE_UP", "IMAGE_UP16")
+   wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWUP", "IMAGE_ARROWUP16")
          hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
    hCtrl = _
    pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCOMPILECONFIG_CMDDOWN, "", 243, 159, 32, 32, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_ICON Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   wszImage = iif(pWindow->DPI > 96, "IMAGE_DOWN", "IMAGE_DOWN16")
+   wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWDOWN", "IMAGE_ARROWDOWN16")
          hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)

@@ -395,6 +395,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
    gCompile.EndTime = Timer
    gCompiling = false
+   AfxDoEvents
 
    ' If this was a QuickRun then delete the temporary code file that was created.
    if wID = IDM_QUICKRUN THEN 

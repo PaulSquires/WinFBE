@@ -1400,11 +1400,8 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       gApp.Projects(idx).ProjectBuild = GetSelectedBuildGUID()
    end if   
    
-   ' If no other Projects have been designated the as the active project then make
-   ' this project the active one.
-   if gApp.GetActiveProjectIndex = 0 THEN
-      gApp.SetActiveProject(gApp.Projects(idx).hExplorerRootNode)
-   END IF
+   ' Set this project as active   
+   gApp.SetActiveProject(gApp.Projects(idx).hExplorerRootNode)
 
    Treeview_EnsureVisible(hTV, gApp.Projects(idx).hExplorerRootNode)
    
