@@ -46,6 +46,27 @@ end function
 
 
 ''
+''  Reset all Scintilla editing cursors
+'------------------------------------------------------------------------------------------------------------------------
+function ResetScintillaCursors() as Long
+   Dim pDoc As clsDocument Ptr
+   Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+   Dim TB   As TC_ITEM 
+
+   For i as long = 0 To nCount - 1
+      ' Get the document pointer and then save file to disk
+      TB.Mask = TCIF_PARAM
+      TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
+      pDoc = Cast(clsDocument Ptr, TB.lParam)
+      if pDoc THEN 
+         SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+         SciExec( pDoc->hWindow(1), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+      end if
+   next
+   function = 0
+end function
+
+''
 ''  Main module that handles the entire compile process
 ''
 '------------------------------------------------------------------------------------------------------------------------
@@ -146,11 +167,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       
       ' If this is a FORM document then we need to create the string of controls and properties that gets
       ' saved at the start of the file before any of the code is displayed.
-      dim as CWSTR wszDesigner
-      if pDocMain->IsDesigner then
-         GenerateFormMetaData(pDocMain)
-         GenerateFormCode(pDocMain)      ' Also, regenerate visual designer code
-      END IF
+      pDocMain->bRegenerateCode = true
+      GenerateFormMetaData(pDocMain)
+      GenerateFormCode(pDocMain)      ' Also, regenerate visual designer code
 
       ' Copy the contents of the active document to the temporary source file.
       ' Save text buffer to disk by directly accessing buffer rather
@@ -344,8 +363,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                ' the error.
                if ParseLogForError(sConsoleText, false, wID) then   ' error detected
                   SetCursor( hCurSave )
-                  pDoc = gTTabCtl.GetActiveDocumentPtr()
-                  if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+                  ResetScintillaCursors()
                   return true
                end if
                sConsoleText = ""
@@ -390,9 +408,13 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    wszCommand = gCompile.CompilerPath
    RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
 
+   ' Attempt to fix the random problem whereby the spinning mouse wait cursor is not reset
+   ' to an arrow. It seems to happen in random cases whereby an error is thrown and a new 
+   ' document is loaded to position to the error line. Very hard to reproduce. We will manually
+   ' reset all Scintilla cursors here for all open documents. Maybe this will help.
    SetCursor( hCurSave )
-   pDoc = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORNORMAL, 0 )
+   ResetScintillaCursors()
+   
    gCompile.EndTime = Timer
    gCompiling = false
    AfxDoEvents

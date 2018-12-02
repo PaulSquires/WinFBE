@@ -668,6 +668,10 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       ApplyControlProperties(pDoc, pDoc->pCtrlAction)
       pDoc->pCtrlAction->SuspendLayout = false
       
+      if pDoc->pCtrlAction->ControlType = CTRL_FORM then
+         frmMenuEditor_CreateFakeMainMenu(pDoc)
+      end if   
+
       ' Indicate that the file is now dirty and will need to be saved
       pDoc->UserModified = true
       pDoc->bRegenerateCode = true
@@ -832,6 +836,21 @@ Function DesignerForm_OnDestroy(HWnd As HWnd) As LRESULT
    Function = 0
 End Function
 
+' ========================================================================================
+' Process WM_COMMAND message for Visual Designer Form
+' ========================================================================================
+Function DesignerForm_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+
+   Select Case id
+      Case IDC_LBLFAKEMAINMENU
+         If codeNotify = BN_CLICKED Then
+            frmMain_OnCommand(HWND_FRMMAIN, IDM_MENUEDITOR, hwndCtl, codeNotify) 
+         end if
+   end select
+   
+   function = 0
+end function
+
 
 ' ========================================================================================
 ' Visual Designer Form Window procedure 
@@ -844,6 +863,7 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_PAINT,       DesignerForm_OnPaint)
+      HANDLE_MSG (HWnd, WM_COMMAND,     DesignerForm_OnCommand)
       HANDLE_MSG (HWnd, WM_DESTROY,     DesignerForm_OnDestroy)
 
       case WM_RBUTTONDOWN: HandleDesignerRButtonDown(HWND)

@@ -53,44 +53,6 @@ DO
 LOOP
 ```
 
-#### Example using the pointer notation
-
-```
-#include once "Afx/COdbc/COdbc.inc"
-USING Afx
-
-' // Create a connection object and connect with the database
-DIM wszConStr AS WSTRING * 260 = "DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb"
-DIM pDbc AS CODBC PTR = NEW CODBC(wszConStr)
-IF pDbc = NULL THEN END
-
-' // Allocate an statement object
-DIM pStmt AS COdbcStmt PTR = NEW COdbcStmt(pDbc)
-IF pStmt = NULL THEN END
-
-' // Generate a result sets
-pStmt->ExecDirect ("SELECT * FROM Authors ORDER BY Author")
-
-' // Parse the result set
-DIM cwsOutput AS CWSTR
-DO
-   ' // Fetch the record
-   IF pStmt->Fetch = FALSE THEN EXIT DO
-   ' // Get the values of the columns and display them
-   cwsOutput = ""
-   cwsOutput += pStmt->GetLongVarcharData(1) & " "
-   cwsOutput += pStmt->GetData(2) & " "
-   cwsOutput += pStmt->GetData(3)
-   PRINT cwsOutput
-LOOP
-
-' // Delete the statement object
-Delete pStmt
-
-' // Delete the connection object
-Delete pDbc
-```
-
 # CODBCBase Class
 
 Base class for all the ODBC classes. Implements some common methods that all the other interfaces inherit. You don't have to instantiate this class.
@@ -133,7 +95,7 @@ Implements methods to create and manage connection objects. Inherits from COdbcB
 | [GetConnectAttr](#GetConnectAttr) | Returns the current setting of a connection attribute. |
 | [GetDiagField](#GetDiagField) | Returns the current value of a field of a record of the diagnostic data structure (associated with an environment handle) that contains error, warning, and status information. |
 | [GetDiagRec](#GetDiagRec) | Returns the current values of multiple fields of a diagnostic record that contains error, warning, and status information. |
-| [GetErrorInfo](#GetErrorInfo) | Returns a verbose description of the last errors. |
+| [GetErrorInfo](#GetErrorInfo) | Returns a verbose description of the last error. |
 | [GetInfo](#GetInfo) | Returns general information about the driver and data source associated with a connection. |
 | [GetSqlState](#GetSqlState) | Returns the SqlState for the connection handle. |
 | [Handle](#Handle) | Returns the connection handle. |

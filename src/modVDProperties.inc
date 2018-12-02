@@ -818,7 +818,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "MaximumWidth", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "MinimumHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "MinimumWidth", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "ShowInTaskBar", "True", PropertyType.TrueFalse)
+'         AddControlProperty(pCtrl, "ShowInTaskBar", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
 
       case CTRL_LABEL

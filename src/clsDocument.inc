@@ -44,6 +44,7 @@ Destructor clsDocument
       DestroyWindow(this.hWndFrame)
       DestroyWindow(this.hWndDesigner)
       DestroyWindow(this.hDesignTabCtrl)
+      DeleteObject(this.hFontFakeMenu)
    END IF
 
    ' Repaint the main area because we don't want any splitter to show
@@ -71,6 +72,12 @@ end property
 property clsDocument.hWndActiveScintilla(byval hWindow as hwnd)
    m_hWndActiveScintilla = hWindow
 end property
+
+''
+''  Returns True/False indicating that a valid top mainmenu exists for this form.
+function clsDocument.MainMenuExists() as Boolean
+   function = iif( (ubound(this.MenuItems) - lbound(this.MenuItems) + 1) > 0, true, false)
+end function
 
 ''
 ''
@@ -284,7 +291,11 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       ' Display the ToolBox/PropertyList
       frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
       DisplayPropertyList(@this)
-      ' Regenerate code for the visual designer 
+      ' If the data that was read contained anything that caused the form to have
+      ' to be code regenerated then we need to save the file back to disk with the
+      ' new meta data and code generation.
+      if this.bRegenerateCode then this.SaveFile
+      ' In any event, regenerate code for the visual designer 
       this.bRegenerateCode = true
       GenerateFormCode(@this)
    end if   
@@ -397,7 +408,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    
    ' Iterate all of the lines related to the visual designer
    dim as long iLineStart = 1
-   dim as long iLineEnd
+   dim as long iLineEnd, NextMenuItem
 
    do until iLineStart >= len(wszAllText)
       
@@ -416,6 +427,36 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       if left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
       
+      'elseif left(wst, 23) = "' WINFBE MAINMENU_START" then
+      
+      elseif left(wst, 18) = "'   MENUITEM_START" then
+         dim as long ub = ubound(this.MenuItems)
+         redim preserve this.MenuItems(ub + 1)
+         NextMenuItem = ub + 1
+      elseif left(wst, 11) = "'     NAME=" then
+         this.MenuItems(NextMenuItem).wszName = mid(**wst, 12)
+      elseif left(wst, 14) = "'     CAPTION=" then
+         this.MenuItems(NextMenuItem).wszCaption = mid(**wst, 15)
+      elseif left(wst, 13) = "'     INDENT=" then
+         this.MenuItems(NextMenuItem).nIndent = val(mid(**wst, 14))
+      elseif left(wst, 10) = "'     ALT=" then
+         this.MenuItems(NextMenuItem).chkAlt = val(mid(**wst, 11))
+      elseif left(wst, 12) = "'     SHIFT=" then
+         this.MenuItems(NextMenuItem).chkShift = val(mid(**wst, 13))
+      elseif left(wst, 11) = "'     CTRL=" then
+         this.MenuItems(NextMenuItem).chkCtrl = val(mid(**wst, 12))
+      elseif left(wst, 15) = "'     SHORTCUT=" then
+         this.MenuItems(NextMenuItem).wszShortcut = mid(**wst, 16)
+      elseif left(wst, 14) = "'     CHECKED=" then
+         this.MenuItems(NextMenuItem).chkChecked = val(mid(**wst, 15))
+      elseif left(wst, 13) = "'     GRAYED=" then
+         this.MenuItems(NextMenuItem).chkGrayed = val(mid(**wst, 14))
+      
+      'elseif left(wst, 16) = "'   MENUITEM_END" then
+      'elseif left(wst, 16) = "'   EVENTS_START" then
+      'elseif left(wst, 14) = "'   EVENTS_END" then
+      'elseif left(wst, 21) = "' WINFBE MAINMENU_END" then
+
       elseif left(wst, 20) = "' WINFBE_CODEGEN_END" then
          this.ErrorOffset = numOffsetLines 
          wszAllText = ltrim(AfxStrRemain( wszAllText, "' WINFBE_CODEGEN_END" ), vbcrlf)
@@ -742,6 +783,18 @@ Function clsDocument.GetLine( ByVal nLine As Long) As String
    buffer = Space(nLen)
    SciMsg( pSci, SCI_GETLINE, nLine, Cast(LPARAM, Strptr(buffer)))
    Function = Rtrim(buffer, Any Chr(13,10,0))
+End Function
+
+''
+''
+Function clsDocument.SetLine( ByVal nLineNum As Long, byval sText as string) As long
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   Dim nStartPos As Long = SciMsg( pSci, SCI_POSITIONFROMLINE, nLineNum, 0)
+   Dim nEndPos   As Long = SciMsg( pSci, SCI_GETLINEENDPOSITION, nLineNum, 0)
+   SciMsg( pSci, SCI_SETTARGETSTART, nStartPos, 0)
+   SciMsg( pSci, SCI_SETTARGETEND, nEndPos, 0)
+   SciMsg( pSci, SCI_REPLACETARGET, Len(sText), Cast(LPARAM, Strptr(sText))) 
+   function = 0
 End Function
 
 ''

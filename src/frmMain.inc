@@ -1737,7 +1737,10 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       ''   DESIGNER MENU
       case IDM_NEWFORM:               function = OnCommand_DesignerNewForm(HWND)
       case IDM_VIEWTOOLBOX:           function = frmVDToolbox_Show(HWND)   ' toggle show/hide
-      'case IDM_MENUEDITOR:            function = frmMenuEditor_Show( HWND, SW_NORMAL )
+      case IDM_MENUEDITOR            
+         function = frmMenuEditor_Show( HWND, SW_NORMAL )
+         if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
+         
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
            IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            

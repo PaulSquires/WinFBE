@@ -932,7 +932,7 @@ PROPERTY Pattern (BYREF cbsPattern AS CBSTR)
 </tr>
 </tbody>
 </table>
-<p>####Example</p>
+<h4 id="example-1">Example</h4>
 <pre><code>'#CONSOLE ON
 #INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 USING Afx
@@ -1556,7 +1556,7 @@ PRINT pRegExp.ReplaceStr(&quot;555-123-4567&quot;, &quot;(\d{3})-(\d{3})-(\d{4})
 <pre><code>Output:
 (555) 123-4567
 </code></pre>
-<p>Swaps to words and remover the comma.</p>
+<p>Swaps to words and removes the comma.</p>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 USING Afx
 
@@ -1726,7 +1726,7 @@ END IF
 <pre><code>Output:
 test
 </code></pre>
-<p>Case sensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t.</p>
+<p>Case sensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t or begin with d and end with g.</p>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 #INCLUDE ONCE &quot;Afx/CWSTR.inc&quot;
 USING Afx
@@ -1745,21 +1745,23 @@ dog
 cat
 dog
 </code></pre>
-<p>Case insensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t.</p>
+<p>Case insensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t or begin with d and end with g.</p>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 #include once &quot;afx/cwstr.inc&quot;
 USING Afx
 
 ' // With this constructor we set the pattern, ignore case and global
 DIM pRegExp AS CRegExp = CRegExp($&quot;\bc.t\b|\bd.g\b&quot;, TRUE, TRUE)
-pRegExp.Execute(&quot;I have cut a cat tail&quot;)
+pRegExp.Execute(&quot;I have a cat and a dog, because I love cats and dogs&quot;)
 FOR i AS LONG = 0 TO pRegExp.MatchCount - 1
    PRINT pRegExp.MatchValue(i)
 NEXT
 </code></pre>
 <pre><code>Output:
-cut
 cat
+dog
+cat
+dog
 </code></pre>
 <p>We can search for more than a word at the same time.</p>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
@@ -1841,7 +1843,7 @@ NEXT
 29
 2017
 </code></pre>
-<p>Extract text between parentheses.</p>
+<p>Extracts text between parentheses.</p>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 USING Afx
 
@@ -1860,7 +1862,7 @@ PRINT cbs
 <pre><code>Output:
 &quot;text between parentheses&quot;
 </code></pre>
-<p>Extract text between curly braces.</p>
+<p>Extracts text between curly braces.</p>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 USING Afx
 
@@ -1899,7 +1901,7 @@ True
 <p>&quot;\.?&quot; is the decimal point, zero or one time.</p>
 <p>The &quot;\d+&quot; part matches a digit one or more times.</p>
 <p>The &quot;(?:[Ee][\+\-]?\d+)?&quot; matches &quot;e+&quot;, &quot;e-&quot;, &quot;E+&quot; or &quot;E-&quot; followed by one or more digits, with the &quot;?&quot; multiplier that allows zero or one instance of it.</p>
-<p>####Checking if an url is valid</p>
+<h4 id="checking-if-an-url-is-valid">Checking if an url is valid</h4>
 <pre><code>#INCLUDE ONCE &quot;Afx/CRegExp.inc&quot;
 USING Afx
 

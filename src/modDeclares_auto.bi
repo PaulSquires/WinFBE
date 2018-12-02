@@ -1,3 +1,4 @@
+declare Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
 declare Function frmHelpViewer_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = -1) As Long
 declare function IsPropertyExists( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as boolean
 declare function GetActivePropertyPtr() as clsProperty ptr

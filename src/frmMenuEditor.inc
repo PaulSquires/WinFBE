@@ -12,6 +12,175 @@
 '    GNU General Public License for more details.
 
 
+' ========================================================================================
+' Create the "fake" topmenu to display on the Form
+' ========================================================================================
+Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
+
+   ' Rather than create a bunch of individual labels, create the one string
+   ' and then only one label. If the label is clicked, then display the Menu Editor.
+   ' Only create the mainmenu if menuitems actually exist.
+   if pDoc->MainMenuExists = false then
+      ShowWindow(pDoc->hWndFakeMenu, SW_HIDE)
+      exit function
+   end if
+   
+   dim as CWSTR wszMenu = wspace(2)
+   for i as long = 0 to ubound(pDoc->MenuItems)
+      if pDoc->MenuItems(i).nIndent = 0 then
+         wszMenu = wszMenu & pDoc->MenuItems(i).wszCaption & wspace(4)
+      end if
+   next
+   AfxSetWindowText( pDoc->hWndFakeMenu, wszMenu )
+   
+   dim ncm As NONCLIENTMETRICS
+   ncm.cbSize = SizeOf(ncm)
+   SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)
+   ' ncm.iMenuHeight  ' holds the height of the mainmenu
+
+   dim rc as RECT
+   GetClientRect( pDoc->hWndForm, @rc)
+   SetWindowPos( pDoc->hWndFakeMenu, 0, 0, 0, rc.right-rc.left, ncm.iMenuHeight, SWP_NOZORDER or SWP_SHOWWINDOW)
+   
+       
+   function = 0 
+End Function
+                  
+' ========================================================================================
+' Determine if a blank entry should be added to the end of the listbox.
+' ========================================================================================
+function frmMenuEditor_ListBoxLine( byval nCurSel as long ) as CWSTR
+   dim as long nBullet, nDash
+   IF AfxWindowsVersion >= 600 AND CLNG(AfxIsProcessDpiAware) THEN 
+      ' Segoe UI
+      nBullet = 183: nDash = 8211 
+   ELSE 
+      ' Tahoma
+      nBullet = 183: nDash = 8211 
+   end if
+
+   dim as CWSTR wszLine = wstring(gMenuItems(nCurSel).nIndent * 4, nBullet)
+   dim as long nShow = SW_SHOW
+   if trim(gMenuItems(nCurSel).wszCaption) = "-" then
+      wszLine = wszLine & " " & wstring(4, nDash)  
+      nShow = SW_HIDE
+   else   
+      wszLine = wszLine & gMenuItems(nCurSel).wszCaption
+   end if
+      
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LBLSHORTCUT), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LBLSTATE), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCTRL), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKALT), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKSHIFT), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCHECKED), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKGRAYED), nShow )
+
+   function = wszLine
+end function
+
+
+' ========================================================================================
+' Determine if a blank entry should be added to the end of the listbox.
+' ========================================================================================
+Function frmMenuEditor_EnsureLastLine() As Long
+
+   dim as HWND hListBox = GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL )
+   dim as long NumItems = Listbox_GetCount(hListBox)
+
+   If NumItems > 0 Then
+      ' Check the Caption and Name values for the last menu item. If
+      ' no value exists then no need to add a blank entry at the end.
+      If ( gMenuItems(NumItems-1).wszName = "" ) AndAlso ( gMenuItems(NumItems-1).wszCaption = "" ) Then
+         Exit Function
+      End If   
+   End If
+
+   dim wszBlankLine as wstring * 10
+   ListBox_AddString( hListBox, @wszBlankLine )
+   redim preserve gMenuItems(NumItems + 1)
+   
+   function = 0
+End Function
+
+
+' ========================================================================================
+' Display the details of this MenuItem
+' ========================================================================================
+Function frmMenuEditor_DisplayMenuItem() As Long
+
+   dim as long nCurSel 
+   dim as Boolean bEnabled = true
+   
+   nCurSel    = Listbox_GetCurSel( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL) )
+   If nCurSel = -1 Then Exit Function
+   
+   ' If this is a TopLevel Menu Item then disable the Shortcut key
+   If gMenuItems(nCurSel).nIndent = 0 Then
+      gMenuItems(nCurSel).wszShortcut = ""   ' this will display (None)
+      gMenuItems(nCurSel).chkAlt      = BST_UNCHECKED
+      gMenuItems(nCurSel).chkShift    = BST_UNCHECKED
+      gMenuItems(nCurSel).chkCtrl     = BST_UNCHECKED
+      gMenuItems(nCurSel).chkChecked  = BST_UNCHECKED
+      bEnabled = false
+   end if
+      
+   AfxSetWindowText( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_TXTCAPTION), gMenuItems(nCurSel).wszCaption)
+   AfxSetWindowText( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_TXTNAME), gMenuItems(nCurSel).wszName)
+
+   ' Shortcut
+   dim as long nIndex = ComboBox_FindStringExact( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), -1, gMenuItems(nCurSel).wszShortcut ) 
+   ComboBox_SetCurSel( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), nIndex)
+   EnableWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), bEnabled )
+   Button_SetCheck( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCTRL), gMenuItems(nCurSel).chkCtrl)
+   EnableWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCTRL), bEnabled )
+   Button_SetCheck( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKALT), gMenuItems(nCurSel).chkAlt)
+   EnableWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKALT), bEnabled )
+   Button_SetCheck( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKSHIFT), gMenuItems(nCurSel).chkShift)
+   EnableWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKSHIFT), bEnabled )
+
+   ' Checked
+   Button_SetCheck( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCHECKED), gMenuItems(nCurSel).chkChecked )
+   EnableWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCHECKED), bEnabled )
+   
+   ' Grayed
+   Button_SetCheck( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKGRAYED), gMenuItems(nCurSel).chkGrayed )
+
+   SetFocus( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_TXTCAPTION) )
+   SendMessage GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_TXTCAPTION), EM_SETSEL, 0, cast(LPARAM, -1)
+
+   function = 0
+End Function
+
+
+' ========================================================================================
+' Generate a default MenuItem Name based on the MenuItem Caption
+' ========================================================================================
+Function frmMenuEditor_GenerateMenuItemName( byval nCurSel as long ) As CWSTR
+   
+   dim as CWSTR wszCaption = gMenuItems(nCurSel).wszCaption
+   dim as CWSTR wszName
+   dim as Boolean bFound
+   dim as long nextSeperator
+      
+   If Trim(wszCaption) = "-" Then
+      ' Determine what separator number has not been used yet.
+      Do                              
+         bFound = false  ' default that it doesn't exist
+         nextSeperator = nextSeperator + 1
+         wszName = "mnuSep" & nextSeperator
+         For i as long = 0 To ubound(gMenuItems) - 1
+            If UCase(gMenuItems(i).wszName ) = UCase(wszName) Then continue do
+         Next                       
+      Loop until bFound = false
+   Else
+      wszName = "mnu" & AfxStrRemoveAny( wszCaption, " &_-.")
+   End If
+         
+   function = wszName
+end function
+
 
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmMenuEditor
@@ -34,30 +203,218 @@ End Function
 ' ========================================================================================
 Function frmMenuEditor_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
+   dim as HWND hListBox = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL)
+   dim as long nCurSel = ListBox_GetCurSel(hListBox)
+   
    Select Case id
-      Case IDOK
+      Case IDC_FRMMENUEDITOR_CMDOK
          If codeNotify = BN_CLICKED Then
-            SendMessage HWnd, WM_CLOSE, 0, 0
+            ' Do error checking to ensure that the menu structure is valid
+            for i as long = 0 to ubound(gMenuItems) - 1
+               ' If a caption exists but does not have a name then present the error.
+               If ( Len(gMenuItems(i).wszCaption) > 0 ) andalso ( Len(Trim(gMenuItems(i).wszName)) = 0 ) Then
+                  ListBox_SetCurSel(hListBox, i)
+                  frmMenuEditor_DisplayMenuItem
+                  MessageBox( HWND, L(357,"A Name must exist for menu items with a Caption."), _
+                              L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+                  exit function
+               End If
+            next
+
+            ' Make sure the indent levels are consistent.
+            for i as long = 1 to ubound(gMenuItems) - 1
+               if gMenuItems(i).nIndent > gMenuItems(i-1).nIndent + 1 then
+                  ListBox_SetCurSel(hListBox, i)
+                  frmMenuEditor_DisplayMenuItem
+                  MessageBox( HWND, L(358,"Menu item has skipped a level."), _
+                              L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+                  exit function
+               end if
+            next
+
+            ' Copy the temporary array back to the form's menu items 
+            Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+            If pDoc Then 
+               ' Copy all menuitems except for the last one because that is
+               ' the last blank line in the listbox.
+               dim as long numItems = ubound(gMenuItems) - 1
+               if numItems > -1 then
+                  redim pDoc->MenuItems(numItems)
+                  for i as long = 0 to numItems
+                     pDoc->MenuItems(i) = gMenuItems(i) 
+                  next
+               end if
+               pDoc->UserModified = true
+            end if
+            SendMessage(HWnd, WM_CLOSE, 0, 0)
             Exit Function
          End If
-      Case IDCANCEL
+         
+      Case IDC_FRMMENUEDITOR_CMDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessage HWnd, WM_CLOSE, 0, 0
+            SendMessage(HWnd, WM_CLOSE, 0, 0)
             Exit Function
          End If
+   
+      case IDC_FRMMENUEDITOR_LSTDETAIL
+         If codeNotify = LBN_SELCHANGE Then
+            frmMenuEditor_DisplayMenuItem
+         end if
+
+      case IDC_FRMMENUEDITOR_TXTCAPTION
+         If codeNotify = EN_CHANGE Then
+            if nCurSel = -1 then exit function
+            ' Update the listbox with the new caption
+            gMenuItems(nCurSel).wszCaption = AfxGetWindowText(hwndCtl)
+            dim as CWSTR wszCaption = frmMenuEditor_ListBoxLine(nCurSel)
+            ListBox_ReplaceString( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL), nCurSel, wszCaption) 
+            frmMenuEditor_EnsureLastLine
+         end if
+         
+      case IDC_FRMMENUEDITOR_TXTNAME
+         if nCurSel = -1 then exit function
+         If codeNotify = EN_CHANGE Then
+            gMenuItems(nCurSel).wszName = AfxGetWindowText(hwndCtl)
+            frmMenuEditor_EnsureLastLine
+         elseIf codeNotify = EN_SETFOCUS Then
+            if len(gMenuItems(nCurSel).wszName) = 0 then
+               gMenuItems(nCurSel).wszName = frmMenuEditor_GenerateMenuItemName(nCurSel)
+               AfxSetWindowText(hwndCtl, gMenuItems(nCurSel).wszName)
+               SendMessage( hwndCtl, EM_SETSEL, 0, cast(LPARAM, -1) )
+            end if
+         end if
+         
+      Case IDC_FRMMENUEDITOR_CMDNEXT
+         If codeNotify = BN_CLICKED Then
+            frmMenuEditor_EnsureLastLine
+            ' move down one selection or wrap to start
+            nCurSel = nCurSel + 1
+            If nCurSel > Listbox_GetCount(hListBox) - 1 then nCurSel = 0
+            Listbox_SetCurSel(hListBox, nCurSel )
+            frmMenuEditor_DisplayMenuItem
+         End If
+
+      Case IDC_FRMMENUEDITOR_CHKALT
+         if nCurSel = -1 then exit function
+         If codeNotify = BN_CLICKED Then
+            gMenuItems(nCurSel).chkAlt = Button_GetCheck(hwndCtl)
+         End If
+
+      Case IDC_FRMMENUEDITOR_CHKSHIFT
+         if nCurSel = -1 then exit function
+         If codeNotify = BN_CLICKED Then
+            gMenuItems(nCurSel).chkShift = Button_GetCheck(hwndCtl)
+         End If
+
+      Case IDC_FRMMENUEDITOR_CHKCTRL
+         if nCurSel = -1 then exit function
+         If codeNotify = BN_CLICKED Then
+            gMenuItems(nCurSel).chkCtrl = Button_GetCheck(hwndCtl)
+         End If
+
+      Case IDC_FRMMENUEDITOR_CHKCHECKED
+         if nCurSel = -1 then exit function
+         If codeNotify = BN_CLICKED Then
+            gMenuItems(nCurSel).chkChecked = Button_GetCheck(hwndCtl)
+         End If
+
+      Case IDC_FRMMENUEDITOR_CHKGRAYED
+         if nCurSel = -1 then exit function
+         If codeNotify = BN_CLICKED Then
+            gMenuItems(nCurSel).chkGrayed = Button_GetCheck(hwndCtl)
+         End If
+
+      Case IDC_FRMMENUEDITOR_CMBOSHORTCUT
+         if nCurSel = -1 then exit function
+         If codeNotify = CBN_SELCHANGE Then
+            gMenuItems(nCurSel).wszShortcut = AfxGetWindowText(hwndCtl)
+         End If
+
+      Case IDC_FRMMENUEDITOR_CMDLEFT
+         If codeNotify = BN_CLICKED Then
+            if nCurSel = -1 then exit function  
+            ' Can not move less than 0 position
+            if gMenuItems(nCurSel).nIndent - 1 < 0 then exit function
+            gMenuItems(nCurSel).nIndent = gMenuItems(nCurSel).nIndent - 1
+            frmMenuEditor_DisplayMenuItem
+         End If
+
+      Case IDC_FRMMENUEDITOR_CMDRIGHT
+         If codeNotify = BN_CLICKED Then
+            ' You can only move the item one place to the right of the item's parent
+            if nCurSel <= 0 then exit function   ' can not move the first item in the list
+            dim as long nPrevIndent = gMenuItems(nCurSel-1).nIndent
+            dim as long nCurIndent = gMenuItems(nCurSel).nIndent
+            if nCurIndent + 1 > nPrevIndent + 1 then exit function
+            gMenuItems(nCurSel).nIndent = nCurIndent + 1
+            frmMenuEditor_DisplayMenuItem
+         End If
+
+      Case IDC_FRMMENUEDITOR_CMDUP
+         If codeNotify = BN_CLICKED Then
+            ' You can only move the item one place to the right of the item's parent
+            if nCurSel <= 0 then exit function   ' can not move the first item in the list
+            ' If the MenuItem was moved to position 0 then ensure that the indent is 0.
+            if nCurSel = 1 then gMenuItems(nCurSel).nIndent = 0
+            swap gMenuItems(nCurSel), gMenuItems(nCurSel-1)
+            ' Display the two lines
+            ListBox_ReplaceString(hListBox, nCurSel-1, frmMenuEditor_ListBoxLine(nCurSel-1))
+            ListBox_ReplaceString(hListBox, nCurSel, frmMenuEditor_ListBoxLine(nCurSel))
+            Listbox_SetCurSel( hListBox, nCurSel - 1)
+            frmMenuEditor_DisplayMenuItem
+         End If
+         
+      Case IDC_FRMMENUEDITOR_CMDDOWN
+         If codeNotify = BN_CLICKED Then
+            ' You can only move the item one place to the right of the item's parent
+            if nCurSel = -1 then exit function 
+            ' If the MenuItem was moved from position 0 then ensure that the indent is 0.
+            if nCurSel = 0 then gMenuItems(nCurSel+1).nIndent = 0
+            swap gMenuItems(nCurSel), gMenuItems(nCurSel+1)
+            ' Display the two lines
+            ListBox_ReplaceString(hListBox, nCurSel, frmMenuEditor_ListBoxLine(nCurSel))
+            ListBox_ReplaceString(hListBox, nCurSel+1, frmMenuEditor_ListBoxLine(nCurSel+1))
+            Listbox_SetCurSel( hListBox, nCurSel + 1)
+            frmMenuEditor_DisplayMenuItem
+         End If
+
+      Case IDC_FRMMENUEDITOR_CMDDELETE
+         If codeNotify = BN_CLICKED Then
+            if nCurSel = -1 then exit function 
+            for i as long = nCurSel to ubound(gMenuItems) - 1
+               gMenuItems(i) = gMenuItems(i+1) 
+            next
+            Redim Preserve gMenuItems(Ubound(gMenuItems)-1)
+            Listbox_DeleteString(hListBox, nCurSel)
+            ' If position 0 is deleted then ensure the item replacing it is indent 0.
+            if nCurSel = 0 then 
+               gMenuItems(0).nIndent = 0
+               ListBox_ReplaceString(hListBox, 0, frmMenuEditor_ListBoxLine(0))
+            end if
+            frmMenuEditor_EnsureLastLine
+            dim as long NumItems = Listbox_GetCount(hListBox)
+            Listbox_SetCurSel( hListBox, Min(nCurSel, NumItems-1) )
+            frmMenuEditor_DisplayMenuItem
+         end if
+
+      Case IDC_FRMMENUEDITOR_CMDINSERT
+         If codeNotify = BN_CLICKED Then
+            if nCurSel = -1 then exit function 
+            Redim Preserve gMenuItems(Ubound(gMenuItems)+1)
+            For i as long = Ubound(gMenuItems) To nCurSel Step -1
+               gMenuItems(i) = gMenuItems(i-1) 
+            Next
+            dim newMenuItem as clsMenuItem
+            gMenuItems(nCurSel) = newMenuItem
+            Listbox_InsertString(hListBox, nCurSel, gMenuItems(nCurSel).wszCaption)
+            frmMenuEditor_EnsureLastLine
+            dim as long NumItems = Listbox_GetCount(hListBox)
+            Listbox_SetCurSel( hListBox, nCurSel )
+            frmMenuEditor_DisplayMenuItem
+         end if
+
    End Select
 
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Process WM_NOTIFY message for window/dialog: frmMenuEditor
-' ========================================================================================
-Function frmMenuEditor_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-
-    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-    
    Function = 0
 End Function
 
@@ -66,6 +423,8 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmMenuEditor
 ' ========================================================================================
 Function frmMenuEditor_OnClose(HWnd As HWnd) As LRESULT
+   ' Reset the global MenuItems array
+   erase gMenuItems
    ' Enables parent window keeping parent's zorder
    EnableWindow GetParent(HWnd), True 
    DestroyWindow HWnd
@@ -96,7 +455,6 @@ Function frmMenuEditor_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_CLOSE,    frmMenuEditor_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmMenuEditor_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmMenuEditor_OnCommand)
-      HANDLE_MSG (HWnd, WM_NOTIFY,   frmMenuEditor_OnNotify)
    End Select
 
    ' for messages that we don't deal with
@@ -127,7 +485,7 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)
 
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL3, "Caption:", 10, 16, 49, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL3, "Text:", 10, 16, 49, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL1, "Name:", 10, 40, 49, 16, _
@@ -139,11 +497,8 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("TEXTBOX", , IDC_FRMMENUEDITOR_TXTNAME, "", 74, 37, 233, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   'pWindow->AddControl("COMBOBOX", , IDC_FRMMENUEDITOR_CMBOSHORTCUT, "", 74, 62, 120, 21, _
-   '     WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
-   '     WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL2, "Shortcut:", 10, 65, 54, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LBLSHORTCUT, "Shortcut:", 10, 65, 54, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKCTRL, "Ctrl", 74, 65, 48, 19, _
@@ -155,14 +510,11 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKSHIFT, "Shift", 168, 65, 48, 19, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL2, "Key", 273, 66, 38, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMMENUEDITOR_TXTKEY, "", 218, 65, 52, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMMENUEDITOR_CMBOSHORTCUT, "", 240, 65, 67, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
+        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL2, "State:", 10, 90, 54, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LBLSTATE, "State:", 10, 90, 54, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKCHECKED, "Checked", 74, 91, 113, 16, _
@@ -171,27 +523,6 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKGRAYED, "Grayed", 74, 110, 115, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDDELETE, "&Delete", 317, 141, 70, 24, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDINSERT, "&Insert", 237, 141, 70, 24, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDNEXT, "&Next", 157, 141, 70, 24, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDCANCEL, "&Cancel", 317, 42, 80, 24, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDOK, "&OK", 317, 13, 80, 24, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL4, "", 13, 133, 384, 2, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LISTBOX", , IDC_FRMMENUEDITOR_LSTDETAIL, "", 13, 173, 384, 200, _
-        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    hCtrl = _
    pWindow->AddControl("BITMAPBUTTON", , IDC_FRMMENUEDITOR_CMDLEFT, "", 17, 141, 24, 24, _
@@ -229,41 +560,80 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDNEXT, "&Next", 157, 141, 70, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDINSERT, "&Insert", 237, 141, 70, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDDELETE, "&Delete", 317, 141, 70, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LISTBOX", , IDC_FRMMENUEDITOR_LSTDETAIL, "", 13, 173, 384, 200, _
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDOK, "&OK", 317, 13, 80, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDCANCEL, "&Cancel", 317, 42, 80, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
-'   hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT)
+
+   hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT)
     
-'   ComboBox_ResetContent(hCtrl)
-'   ComboBox_AddString(hCtrl, @wstr("(None)"))
+   ComboBox_ResetContent(hCtrl)
 
-'   For i as long = 1 To 26
-'      wszString = "Ctrl+" & wchr(i + 64)
-'      ComboBox_AddString(hCtrl, @wszString)
-'   Next 
-'   For i as long = 1 To 12
-'      wszString = "F" & i
-'      ComboBox_AddString(hCtrl, @wszString)
-'   Next 
-'   For i as long = 1 To 12
-'      wszString = "Ctrl+F" & i
-'      ComboBox_AddString(hCtrl, @wszString)
-'   Next 
-'   For i as long = 1 To 12
-'      wszString = "Shift+F" & i
-'      ComboBox_AddString(hCtrl, @wszString)
-'   Next 
-'   For i as long = 1 To 12
-'      wszString = "Ctrl+Shift+F" & i
-'      ComboBox_AddString(hCtrl, @wszString)
-'   Next 
+   For i as long = 1 To 26  ' A-Z
+      wszString = wchr(i + 64)
+      ComboBox_AddString(hCtrl, @wszString)
+   Next 
+   For i as long = 0 To 9   ' 0-9
+      wszString = wchr(i + 48)
+      ComboBox_AddString(hCtrl, @wszString)
+   Next 
+   For i as long = 1 To 12  ' F1 to F12
+      wszString = "F" & i
+      ComboBox_AddString(hCtrl, @wszString)
+   Next 
 
-'   ComboBox_AddString(hCtrl, @wstr("Ctrl+Insert"))
-'   ComboBox_AddString(hCtrl, @wstr("Shift+Insert"))
-'   ComboBox_AddString(hCtrl, @wstr("Delete"))
-'   ComboBox_AddString(hCtrl, @wstr("Shift+Delete"))
-'   ComboBox_AddString(hCtrl, @wstr("Alt+Back"))
+   ComboBox_AddString(hCtrl, @wstr("Ins"))
+   ComboBox_AddString(hCtrl, @wstr("Del"))
+   ComboBox_AddString(hCtrl, @wstr("TAB"))
+   ComboBox_AddString(hCtrl, @wstr("Left"))
+   ComboBox_AddString(hCtrl, @wstr("Right"))
+   ComboBox_AddString(hCtrl, @wstr("Up"))
+   ComboBox_AddString(hCtrl, @wstr("Down"))
+   ComboBox_AddString(hCtrl, @wstr("Home"))
+   ComboBox_AddString(hCtrl, @wstr("End"))
+   ComboBox_AddString(hCtrl, @wstr("PgUp"))
+   ComboBox_AddString(hCtrl, @wstr("PgDn"))
+   ComboBox_AddString(hCtrl, @wstr("Space"))
     
-'   ComboBox_SetCurSel(hCtrl, 0)
+   ComboBox_SetCurSel(hCtrl, 0)
 
+
+   ' Copy the form's menu items to the temporary array for editing
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then 
+      dim as long numItems = ubound(pDoc->MenuItems)
+      if numItems > -1 then
+         redim gMenuItems(numItems)
+         for i as long = 0 to numItems
+            gMenuItems(i) = pDoc->MenuItems(i)
+         next
+      end if
+   end if
+   
+   ' Display the menuitems in the listbox
+   hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL)
+   for i as long = 0 to ubound(gMenuItems)
+      ListBox_AddString(hCtrl, frmMenuEditor_ListBoxLine(i))
+   next
+   frmMenuEditor_EnsureLastLine
+   ListBox_SetCurSel(hCtrl, 0)
+   frmMenuEditor_DisplayMenuItem
+   
    ' Process Windows messages
    Function = pWindow->DoEvents(nCmdShow)
    

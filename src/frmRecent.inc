@@ -292,7 +292,7 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    SendMessage( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(24), 0 )
    SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
-   
+
    LoadRecentFilesTreeview(HWND_FRMRECENT)
    PositionRecentWindows(HWND_FRMRECENT)
 

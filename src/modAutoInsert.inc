@@ -122,12 +122,13 @@ end function
 ''
 function AttemptAutoInsert() as Long
    ' Attempts to Autocomplete a FOR/DO/SELECT, etc block. This function also deals
-   ' with AutoIndentation so need to handle both separation depending on the user
+   ' with AutoIndentation so need to handle both separately depending on the user
    ' chosen settings.
    
    Dim as HWND hEdit
-   Dim as long nLine, curPos, LineLen, nFoldLevel, TabSize, nSpaces, IndentSize, i
+   Dim as long nLine, nCurLine, curPos, LineLen, nFoldLevel, TabSize, nSpaces, IndentSize, i
    Dim as string strFill, strTemp, strCurLine, strPrevLine
+      
 
    Dim pDoc As clsDocument Ptr 
 
@@ -161,10 +162,69 @@ function AttemptAutoInsert() as Long
    Next
    strPrevLine = Trim(Ucase(strPrevLine), Any Chr(32, 9))
    
-   If gConfig.AutoIndentation = false Then
+   If gConfig.AutoIndentation = 0 Then
       nSpaces = 0: IndentSize = 0: TabSize = 0
    END IF
 
+
+   ''''''''''
+   ' ELSE
+   '   Search backwards in the most recent IF/THEN line and use the 
+   '   indentation of that line for the ELSE or ELSEIF statement.
+   If gConfig.AutoIndentation Then
+      If (strPrevLine = "ELSE") or (strPrevLine = "ELSEIF") then
+         nCurLine = pDoc->GetCurrentLineNumber
+         for i = nCurLine to 0 step -1
+            strTemp = pDoc->GetLine(i)
+            if left(ltrim(ucase(strTemp), any chr(32,9)), 3) = "IF " then
+               ' Reposition the ELSE line to line up with the IF line
+               nSpaces = instr(ucase(strTemp), "IF ") - 1
+               strPrevLine = space(nSpaces) & ltrim(strPrevLine, chr(32,9))
+               pDoc->SetLine(nLine-1, strPrevLine)
+               strFill = Space(nSpaces + IndentSize)  
+               pDoc->SetLine(nLine, strFill)
+               ' Add the current editing position
+               curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + nSpaces + IndentSize
+               SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+               exit function
+            end if
+         next
+      end if
+   end if
+
+
+   ''''''''''
+   ' CASE
+   '   Search backwards in the most recent CASE line and use the 
+   '   indentation of that line for the CASE or CASE ELSE statement.
+   If gConfig.AutoIndentation Then
+      If left(strPrevLine, 5) = "CASE " then  ' this will catch CASE ELSE as well
+         strPrevLine = Trim(pDoc->GetLine(nLine-1), Any Chr(32, 9))  ' need it to be original case
+         nSpaces = instr(ucase(pDoc->GetLine(nLine-1)), "CASE ") - 1
+         nCurLine = pDoc->GetCurrentLineNumber - 2  ' skip the current CASE and look for previous
+         for i = nCurLine to 0 step -1
+            strTemp = pDoc->GetLine(i)
+            dim as string strTempTrim = ltrim(ucase(strTemp), any chr(32,9))
+            if left(strTempTrim, 12) = "SELECT CASE " then
+               exit for   ' no need to keep searching
+            elseif left(strTempTrim, 5) = "CASE " then
+               nSpaces = instr(ucase(strTemp), "CASE ") - 1
+               exit for
+            end if
+         next
+         ' Reposition the CASE line to line up with the previous CASE line 
+         strPrevLine = space(nSpaces) & strPrevLine
+         pDoc->SetLine(nLine-1, strPrevLine)
+         strFill = Space(nSpaces + IndentSize) & strCurLine  
+         pDoc->SetLine(nLine, strFill)
+         ' Add the current editing position
+         curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + nSpaces + IndentSize
+         SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+         exit function
+      end if
+   end if
+
+         
    ''''''''''
    ' IF/THEN
    '   Before autoindenting an IF statement make sure that this
@@ -365,16 +425,8 @@ function AttemptAutoInsert() as Long
    end if
 
    '''''''''''''
-   ' ELSE/CASE
-   If Left(strPrevLine, 4) = "ELSE" Or _
-      Left(strPrevLine, 5) = "CASE " then
-      ' Add spaces to indent the line
-      strFill = Space(nSpaces + IndentSize)
-   Else
-       ' Add the same spaces on the left that the line above
-       strFill = Space(nSpaces)
-   End If
-   ' Indents the line
+   ' Add the same spaces on the left that the line above
+   strFill = Space(nSpaces)
    SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
 
    function = 0

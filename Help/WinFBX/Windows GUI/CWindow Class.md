@@ -2456,8 +2456,6 @@ SUB AddAccelerator (BYVAL fvirt AS UBYTE, BYVAL wKey AS WORD, BYVAL cmd AS WORD)
 
 #### Remarks
 
-#### Remarks
-
 To create an accelerator table, first add all the keys using this method and then call the **CreateAcceleratorTable** method.
 
 #### Example

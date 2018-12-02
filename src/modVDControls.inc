@@ -389,6 +389,17 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       ' We will set our own mouse pointer as needed
       SetClassLongPtr(pDoc->hWndForm, GCLP_HCURSOR, 0)   
       pCtrl->hWindow = pDoc->hWndForm
+   
+      pDoc->hWndFakeMenu = _
+      pForm->AddControl("LABEL", pDoc->hWndForm, IDC_LBLFAKEMAINMENU, "", 0, 0, 0, 0, _
+           WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+      dim ncm As NONCLIENTMETRICS
+      ncm.cbSize = SizeOf(ncm)
+      SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)
+      pDoc->hFontFakeMenu = CreateFontIndirect(@ncm.lfMenuFont)
+      SendMessage( pDoc->hWndFakeMenu, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, TRUE))
+   
    else
       if pWindow = 0 THEN exit function
       wszDefaultControlName = GenerateDefaultControlName(pDoc, ControlType)
@@ -446,6 +457,8 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    SetControlProperty(pCtrl, "WIDTH", str(rcDraw.right-rcDraw.left))
    SetControlProperty(pCtrl, "HEIGHT", str(rcDraw.bottom-rcDraw.top))
    
+   frmMenuEditor_CreateFakeMainMenu(pDoc)
+
    ' If this form/control is being created from reading an existing source file then 
    ' then we would wait until the all of the control's properties have been loaded. 
    ' See clsDocument.ParseDesignerString

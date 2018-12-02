@@ -41,6 +41,30 @@ function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    dim pCtrl as clsControl ptr
    dim wszControls as CWSTR
    
+   ' Save MainMenu (if applicable)
+   dim as long numMenuItems = Ubound(pDoc->MenuItems) - lbound(pDoc->MenuItems) + 1
+   if numMenuItems > 0 then
+      wszControls = wszControls & "' WINFBE MAINMENU_START" & vbcrlf 
+      for ii as long = lbound(pDoc->MenuItems) to ubound(pDoc->MenuItems)
+         wszControls = wszControls & _
+              "'   MENUITEM_START" & vbcrlf & _
+              "'     NAME="     & pDoc->MenuItems(ii).wszName     & vbcrlf & _
+              "'     CAPTION="  & pDoc->MenuItems(ii).wszCaption  & vbcrlf & _
+              "'     INDENT="   & pDoc->MenuItems(ii).nIndent     & vbcrlf & _
+              "'     ALT="      & pDoc->MenuItems(ii).chkAlt      & vbcrlf & _
+              "'     SHIFT="    & pDoc->MenuItems(ii).chkShift    & vbcrlf & _
+              "'     CTRL="     & pDoc->MenuItems(ii).chkCtrl     & vbcrlf & _
+              "'     SHORTCUT=" & pDoc->MenuItems(ii).wszShortcut & vbcrlf & _
+              "'     CHECKED="  & pDoc->MenuItems(ii).chkChecked  & vbcrlf & _
+              "'     GRAYED="   & pDoc->MenuItems(ii).chkGrayed   & vbcrlf & _
+              "'   MENUITEM_END" & vbcrlf 
+      next
+      wszControls = wszControls & "'   EVENTS_START" & vbcrlf
+      wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
+                                  "' WINFBE MAINMENU_END" & vbcrlf
+   end if
+   
+   
    ' Iterate all of the controls on the form
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
@@ -77,6 +101,120 @@ function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    function = 0
 end function
 
+
+' ========================================================================================
+' Generate code for any existing Form MainMenu.
+' ========================================================================================
+function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
+   dim as clsMenuItem iMenu
+   dim as CWSTR wszText, wszShortcut, wszFormName
+   dim as CWSTR DQ = chr(34)
+   dim as long nIndentParent, idxInsert 
+   
+   dim as string sp(5) 
+   for i as long = 1 to ubound(sp)
+      sp(i) = space(val(gConfig.TabSize) * i)
+   NEXT
+
+   wszText = _
+   sp(1) & "dim ncm As NONCLIENTMETRICS" & vbcrlf & _
+   sp(1) & "ncm.cbSize = SizeOf(ncm)" & vbcrlf & _
+   sp(1) & "SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)" & vbcrlf & _
+   sp(1) & "nClientOffset = AfxUnScaleY(ncm.iMenuHeight)  ' holds the height of the mainmenu" & vbcrlf & vbcrlf & _
+   sp(1) & "this.MainMenu.Parent = @this" & vbcrlf 
+
+   ' Every level of indent is a parent menu item
+   ' First, create all of the menuitems. Once created, then we can add them 
+   ' to their parent menuitem collections.
+   for i as long = 0 to ubound(pDoc->MenuItems)
+      iMenu = pDoc->MenuItems(i)
+      if len(rtrim(iMenu.wszName)) = 0 then continue for
+      
+      wszShortcut = ""
+      if iMenu.chkCtrl  then wszShortcut = wszShortcut & "Ctrl+"
+      if iMenu.chkAlt   then wszShortcut = wszShortcut & "Alt+"
+      if iMenu.chkShift then wszShortcut = wszShortcut & "Shift+"
+      wszShortcut = wszShortcut & iMenu.wszShortcut
+      
+      wszText = wszText & sp(1) & _
+         "dim " & iMenu.wszName & " as wfxMenuItem = wfxMenuItem(" & _
+                  DQ & iMenu.wszCaption & DQ & ", " & _
+                  DQ & iMenu.wszName & DQ & ", " & _
+                  DQ & wszShortcut & DQ & ", " & _
+                  iMenu.chkChecked & ", " & _
+                  iMenu.chkGrayed & _
+                  ")" & vbcrlf
+   next
+      
+   dim as CWSTR wszNodes(ubound(pDoc->MenuItems))
+   dim as CWSTR wszParentName
+   dim as long NextFreeNode = 0
+   
+   ' Copy all of the root mainmenu items into the array first.
+   for i as long = 0 to ubound(pDoc->MenuItems) 
+      iMenu = pDoc->MenuItems(i)
+      if len(rtrim(iMenu.wszName)) = 0 then continue for
+      if iMenu.nIndent = 0 then
+         wszNodes(NextFreeNode) = sp(1) & "this.MainMenu.MenuItems.Add(" & iMenu.wszName & ")" 
+         NextFreeNode = NextFreeNode + 1
+      end if
+   next
+   
+   ' Add the child menuitems to their parents 
+   for i as long = 0 to ubound(pDoc->MenuItems) 
+      iMenu = pDoc->MenuItems(i)
+      if iMenu.nIndent = 0 then continue for
+      if len(rtrim(iMenu.wszName)) = 0 then continue for
+
+      ' Determine where to insert the string into the array by first determining the
+      ' parent node of this menuitem and then insert the menuitem immediately before it.
+      ' If not found then insert at the end of the array (these would be the mainmenu
+      ' root items).
+      
+      ' This is a child popup menuitem so we need to find the parent
+      ' menutitem and add this item to that collection
+      nIndentParent = iMenu.nIndent - 1 
+      for ii as long = i to 0 step -1
+         if pDoc->MenuItems(ii).nIndent = nIndentParent then
+            wszParentName = pDoc->MenuItems(ii).wszName
+            exit for
+         end if       
+      next    
+      ' Search the array for the line that adds the parent node to determine the
+      ' insertion point.
+      for ii as long = 0 to ubound(wszNodes)
+         if instr(wszNodes(ii), "MenuItems.Add(" & wszParentName & ")" ) then
+            ' Do the actual inserting into the array
+            idxInsert = ii
+            for yy as long = ubound(wszNodes) to idxInsert + 1 step - 1
+                wszNodes(yy) = wszNodes(yy-1)
+            next
+            wszNodes(idxInsert) = sp(1) & wszParentName & ".MenuItems.Add(" & iMenu.wszName & ")" 
+            exit for
+         end if   
+      next
+
+   next
+
+
+   ' Join all of the node strings together
+   for i as long = 0 to ubound(wszNodes) 
+      wszText = wszText & wszNodes(i) & vbcrlf
+   next   
+
+
+   wszFormName = GetFormName(pDoc)
+   wszText = wszText & _
+      sp(1) & "this.MainMenu.OnPopup = @" & wszFormName & "_MainMenu_Popup" & vbcrlf & _
+      sp(1) & "this.MainMenu.OnClick = @" & wszFormName & "_MainMenu_Click" & vbcrlf & _
+      sp(1) & "this.Controls.Add(ControlType.MainMenu, @this.MainMenu)" & vbcrlf & vbcrlf
+
+   return wszText
+end function
+
+
+
+
 ' ========================================================================================
 ' Generate (or regenerate) visual designer code and insert it into the code editor.
 ' ========================================================================================
@@ -107,6 +245,44 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 
    wszText = "#include once " & DQ & "WinFormsX\WinFormsX.bi" & DQ & vbcrlf 
 
+   ''
+   ''  Generate the Declares for all of the Events for any MainMenu for the Form 
+   ''
+   if pDoc->MainMenuExists then
+      dim as CWSTR wszMenuEvents(1)
+      wszMenuEvents(0) = "Click"
+      wszMenuEvents(1) = "Popup"
+      
+      for i as long = lbound(wszMenuEvents) to ubound(wszMenuEvents)
+         ' Determine the name of the event function
+         wszFunction = wszFormName & "_MainMenu_" & wszMenuEvents(i)
+         
+         ' Define the function prototype/declaration
+         wszPrototype = "Function " & wszFunction & "( ByRef sender As wfxMenuItem" & _
+                           ", ByRef e As EventArgs ) As LRESULT" & vbcrlf
+
+         ' Add the event/function to the list of declares
+         wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
+         
+         ' If the Event/function does not already exist in code then create it now.
+         ParseDocument(pDoc->ProjectIndex, pDoc, "")
+         
+         ' Only check if we are not loading the project because the event handling
+         ' could already exist but just be in another source code file that has
+         ' not yet been loaded.
+         if (gProjectLoading = false) orelse (gFileLoading = false) then
+            pData = gdb2.dbFindFunction(wszFunction)
+            if pData = 0 THEN
+               wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
+                              wszPrototype & _
+                              sp(1) & "Function = 0" & vbcrlf & _
+                              "End Function" & vbcrlf & vbcrlf
+            end if
+         end if
+      next
+   end if
+
+   
    ''
    ''  Generate the Declares for all of the Events for the Form & Controls
    ''
@@ -174,7 +350,14 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ''  Generate the Constructor that defines the properties for the form and controls
    ''
    wszText = wszText & _
-   "constructor " & wszFormName & "Type" & vbcrlf 
+   "constructor " & wszFormName & "Type" & vbcrlf & _
+   sp(1) & "dim as long nClientOffset" & vbcrlf & vbcrlf 
+
+   ' If a menu exists for the Form then add the code generation
+   if pDoc->MainMenuExists then
+      wszText = wszText & GenerateMainMenuCode(pDoc)
+   end if
+   
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
 
@@ -242,7 +425,12 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszText = wszText & sp(1) & wszCombinedName & "." & wszPropName & " = " & wszPropValue & vbcrlf
             end if
          NEXT
-         wszText = wszText & sp(1) & wszCombinedName & ".SetBounds(" & nLeft & "," & nTop & "," & nWidth & "," & nHeight & ")" & vbcrlf
+         if pCtrl->ControlType = CTRL_FORM then 
+            wszText = wszText & sp(1) & wszCombinedName & ".SetBounds(" & nLeft & "," & nTop & "," & nWidth & "," & nHeight & ")" & vbcrlf
+         else
+            wszText = wszText & sp(1) & wszCombinedName & ".SetBounds(" & nLeft & "," & nTop & "-nClientOffset," & nWidth & "," & nHeight & ")" & vbcrlf
+         end if
+
 
          for ii as long = lbound(pCtrl->Events) to ubound(pCtrl->Events)
             if pCtrl->Events(ii).bIsSelected then
@@ -364,7 +552,6 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
   
    ' Save the generated codegen code because we will output it to a disk file
    pDoc->wszFormCodeGen = wszCodeGen
-   
    pDoc->bRegenerateCode = false
    
    function = 0

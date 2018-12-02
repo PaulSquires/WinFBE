@@ -62,7 +62,7 @@ Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    dim as long nBtnWidth  = AfxScaleY(74)
    dim as long nTabHeight = AfxScaleY(24)
    dim as long nTreeWidth = AfxScaleX(200)
-   dim as long nTreeHeight = rc.Bottom-rc.top-nTabHeight-AfxScaleY(30)
+   dim as long nTreeHeight = rc.Bottom-rc.top-AfxScaleY(70)
    
    SetWindowPos( hTabCtrl, 0, 0, 0, rc.Right-rc.Left, nTabHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
    SetWindowPos( hTree(nCurSel), 0, 0, AfxScaleY(70), nTreeWidth, nTreeHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
@@ -73,7 +73,7 @@ Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
       nLeft = nLeft + nBtnWidth + nSpace               
    next
    SetWindowPos( hWebBrowser(nCurSel), 0, nTreeWidth, AfxScaleY(70), _
-                  rc.Right-rc.Left-nTreeWidth, rc.Bottom-rc.top-AfxScaleY(70), SWP_SHOWWINDOW Or SWP_NOZORDER)
+                  rc.Right-rc.Left-nTreeWidth, nTreeHeight, SWP_SHOWWINDOW Or SWP_NOZORDER)
 
    Function = 0
 End Function
@@ -267,6 +267,7 @@ function LoadHelpTreeview( byval hTreeview as hwnd, byval sPath as CWSTR, byval 
             gHTMLHelp(ub).wszFilename = pFinder.FilePath
             gHTMLHelp(ub).TreeviewNode = TreeView_AddItem(hTreeView, hParent, addMode, pFinder.Filename, ub, 0, 0)
             gHTMLHelp(ub).hTreeView = hTreeView
+            Treeview_SortChildren( hTreeView, hParent, 0 )
          end if
          
       end if

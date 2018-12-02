@@ -61,41 +61,6 @@ DO
    PRINT cwsOutput
 LOOP
 </code></pre>
-<h4 id="example-using-the-pointer-notation">Example using the pointer notation</h4>
-<pre><code>#include once &quot;Afx/COdbc/COdbc.inc&quot;
-USING Afx
-
-' // Create a connection object and connect with the database
-DIM wszConStr AS WSTRING * 260 = &quot;DRIVER={Microsoft Access Driver (*.mdb)};DBQ=biblio.mdb&quot;
-DIM pDbc AS CODBC PTR = NEW CODBC(wszConStr)
-IF pDbc = NULL THEN END
-
-' // Allocate an statement object
-DIM pStmt AS COdbcStmt PTR = NEW COdbcStmt(pDbc)
-IF pStmt = NULL THEN END
-
-' // Generate a result sets
-pStmt-&gt;ExecDirect (&quot;SELECT * FROM Authors ORDER BY Author&quot;)
-
-' // Parse the result set
-DIM cwsOutput AS CWSTR
-DO
-   ' // Fetch the record
-   IF pStmt-&gt;Fetch = FALSE THEN EXIT DO
-   ' // Get the values of the columns and display them
-   cwsOutput = &quot;&quot;
-   cwsOutput += pStmt-&gt;GetLongVarcharData(1) &amp; &quot; &quot;
-   cwsOutput += pStmt-&gt;GetData(2) &amp; &quot; &quot;
-   cwsOutput += pStmt-&gt;GetData(3)
-   PRINT cwsOutput
-LOOP
-
-' // Delete the statement object
-Delete pStmt
-
-' // Delete the connection object
-Delete pDbc
-</code></pre>
 <h1 id="codbcbase-class">CODBCBase Class</h1>
 <p>Base class for all the ODBC classes. Implements some common methods that all the other interfaces inherit. You don't have to instantiate this class.</p>
 <p><strong>Include file</strong>: CODBC.inc</p>
@@ -208,7 +173,7 @@ Delete pDbc
 </tr>
 <tr class="even">
 <td><a href="#GetErrorInfo">GetErrorInfo</a></td>
-<td>Returns a verbose description of the last errors.</td>
+<td>Returns a verbose description of the last error.</td>
 </tr>
 <tr class="odd">
 <td><a href="#GetInfo">GetInfo</a></td>

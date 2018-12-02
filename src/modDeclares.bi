@@ -285,7 +285,10 @@
 #Define IDC_FRMMENUEDITOR_CHKCTRL                   1019
 #Define IDC_FRMMENUEDITOR_CHKALT                    1020
 #Define IDC_FRMMENUEDITOR_CHKSHIFT                  1021
-#Define IDC_FRMMENUEDITOR_TXTKEY                    1022
+#Define IDC_FRMMENUEDITOR_LBLSHORTCUT               1022
+#Define IDC_FRMMENUEDITOR_LBLSTATE                  1023
+
+#Define IDC_LBLFAKEMAINMENU                         1000
 
 #Define IsFalse(e) ( Not CBool(e) )
 #Define IsTrue(e) ( CBool(e) )
@@ -520,7 +523,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 
 ' Define a macro that allows the user to specify the LL array subscript and
 ' also a descriptive label (that is ignored), and return the LL array value.
-#Define L(e,s)  LL(e)
+#Define L(e,s) LL(e)
 
 #Define SetFocusScintilla  PostMessage HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
 #Define ResizeExplorerWindow  PostMessage HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
@@ -772,6 +775,26 @@ Type clsCollection
 End Type
 
 
+type clsMenuItem
+   private:
+   
+   public:
+      wszName     as CWSTR
+      wszCaption  as CWSTR
+      nIndent     as Long
+      chkAlt      as Long
+      chkShift    as Long
+      chkCtrl     as Long
+      wszShortcut as CWSTR
+      chkChecked  as Long
+      chkGrayed   as long
+end type
+
+' Temporary MenuItem array to hold items while they are being
+' edited in the Menu Editor. 
+dim shared gMenuItems(any) as clsMenuItem
+
+
 Type clsDocument
    Private:
       ' 2 Scintilla direct pointers to accommodate split editing
@@ -789,11 +812,14 @@ Type clsDocument
       hWindow(1)       As HWnd   ' Scintilla split edit windows 
       
       ' Visual designer related
+      MenuItems(any)   as clsMenuItem
       Controls         as clsCollection
       hWndDesigner     as HWnd      ' DesignMain window (switch to this window when in design mode (versus code mode)
       hDesignTabCtrl   as HWnd      ' TabCtrl to switch between Design/Code
       hWndFrame        as hwnd      ' DesignFrame for visual designer windows
       hWndForm         as hwnd      ' DesignForm for visual designer windows
+      hWndFakeMenu     as HWND      ' Fake top menu to display when using Menu Editor
+      hFontFakeMenu    as HFONT     ' System font used for menus
       ErrorOffset      as long      ' Number of lines to account for when error thrown for visual designer code files.
       GrabHit          as long      ' Which grab handle is currently active for sizing action
       ptPrev           as point     ' Used for sizing action
@@ -838,6 +864,7 @@ Type clsDocument
       declare property hWndActiveScintilla() as hwnd
       declare property hWndActiveScintilla(byval hWindow as hwnd)
       
+      declare function MainMenuExists() as Boolean
       declare function GetActiveScintillaPtr() as any ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   
@@ -854,6 +881,7 @@ Type clsDocument
       Declare Function GetSelText() As String
       Declare Function GetText() As String
       Declare Function SetText( ByRef sText As Const String ) As Long 
+      declare Function SetLine( ByVal nLineNum As Long, byval sNewText as string) As long
       declare Function AppendText( ByRef sText As Const String ) As Long 
       Declare Function GetSelectedLineRange( ByRef startLine As Long, ByRef endLine As Long, ByRef startPos As Long, ByRef endPos As Long ) As Long 
       Declare Function BlockComment( ByVal flagBlock As BOOLEAN ) As Long

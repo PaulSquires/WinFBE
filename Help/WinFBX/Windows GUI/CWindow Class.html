@@ -2555,7 +2555,6 @@ PROPERTY AccelHandle (BYVAL hAccel AS HACCEL)
 </tbody>
 </table>
 <h4 id="remarks-2">Remarks</h4>
-<h4 id="remarks-3">Remarks</h4>
 <p>To create an accelerator table, first add all the keys using this method and then call the <strong>CreateAcceleratorTable</strong> method.</p>
 <h4 id="example-5">Example</h4>
 <pre><code>' // Create a keyboard accelerator table
@@ -2822,7 +2821,7 @@ pWindow.CreateAcceleratorTable
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-4">Remarks</h4>
+<h4 id="remarks-3">Remarks</h4>
 <p>For the &quot;BITMAPBUTTON&quot;, &quot;BITMAPLABEL&quot;, &quot;ICONBUTTON&quot; and &quot;ICONLABEL&quot; controls you must pass in the <em>wszTitle</em> parameter the name of the bitmap in the resource file (.RES). If the image resource uses an integral identifier, the name should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., &quot;#998&quot;. Otherwise, use the text identifier name for the image.</p>
 <h4 id="subclassing">Subclassing</h4>
 <p>This method supports two ways of subclassing:</p>
@@ -3930,7 +3929,7 @@ PROPERTY DefaultFontSize (BYVAL nPointSize AS LONG)
 </table>
 <h4 id="return-value-7">Return value</h4>
 <p>The application exit code. This is the value sent when calling the <strong>PostQuitMessage</strong> API function.</p>
-<h4 id="remarks-5">Remarks</h4>
+<h4 id="remarks-4">Remarks</h4>
 <p>This is the default message pump and should be enough for most applications, but you can replace it with your own.</p>
 <p>By default, it uses <strong>IsDialogMessage</strong> in the message pump.</p>
 <p>To process arrow keys, characters, enter, insert, backspace or delete keys, you can #define USEDLGMSG 0, or you can leave it as is and process the WM_GETDLGCODE message:</p>
@@ -3964,7 +3963,7 @@ PROPERTY DPI (BYVAL nDPI AS SINGLE)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-6">Remarks</h4>
+<h4 id="remarks-5">Remarks</h4>
 <p>To make the application DPI aware with Windows Vista/Windows 7 it's needed a call to the API function <strong>SetProcessDPIAware</strong> or set it through the application manifest.</p>
 <p><strong>Note</strong>: <strong>SetProcessDPIAware</strong> is subject to a possible race condition if a DLL caches dpi settings during initialization. For this reason, it is recommended that dpi-aware be set through the application (.exe) manifest rather than by calling <strong>SetProcessDPIAware</strong>.</p>
 <p>DLLs should accept the dpi setting of the host process rather than call <strong>SetProcessDPIAware</strong> themselves. To be set properly, <em>dpiAware</em> should be specified as part of the application (.exe) manifest. (<em>dpiAware</em> defined in an embedded DLL manifest has no affect.) The following markup shows how to set dpiAware as part of an application (.exe) manifest.</p>
@@ -4027,7 +4026,7 @@ FUNCTION GetClientRect () AS RECT
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-7">Remarks</h4>
+<h4 id="remarks-6">Remarks</h4>
 <p>In conformance with conventions for the <strong>RECT</strong> structure, the bottom-right coordinates of the returned rectangle are exclusive. In other words, the pixel at (right, bottom) lies immediately outside the rectangle.</p>
 <h4 id="usage-examples-7">Usage examples</h4>
 <pre><code>DIM rc AS RECT
@@ -4059,7 +4058,7 @@ pWindow.GetClientRect(@rc)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-8">Remarks</h4>
+<h4 id="remarks-7">Remarks</h4>
 <p>In conformance with conventions for the <strong>RECT</strong> structure, the bottom-right coordinates of the returned rectangle are exclusive. In other words, the pixel at (right, bottom) lies immediately outside the rectangle.</p>
 <h4 id="usage-examples-8">Usage examples</h4>
 <pre><code>DIM rc AS RECT
@@ -4091,7 +4090,7 @@ pWindow.GetControlClientRect(hCtl, @rc)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-9">Remarks</h4>
+<h4 id="remarks-8">Remarks</h4>
 <p>In conformance with conventions for the <strong>RECT</strong> structure, the bottom-right coordinates of the returned rectangle are exclusive. In other words, the pixel at (right, bottom) lies immediately outside the rectangle.</p>
 <h4 id="usage-examples-9">Usage examples</h4>
 <pre><code>DIM rc AS RECT
@@ -4123,7 +4122,7 @@ pWindow.GetControlWindowRect(hCtl, @rc)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-10">Remarks</h4>
+<h4 id="remarks-9">Remarks</h4>
 <p>In conformance with conventions for the <strong>RECT</strong> structure, the bottom-right coordinates of the returned rectangle are exclusive. In other words, the pixel at (right, bottom) lies immediately outside the rectangle.</p>
 <h4 id="usage-examples-10">Usage examples</h4>
 <pre><code>DIM rc AS RECT
@@ -4155,7 +4154,7 @@ pWindow.GetWindowRect(@rc)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-11">Remarks</h4>
+<h4 id="remarks-10">Remarks</h4>
 <p>In conformance with conventions for the <strong>RECT</strong> structure, the bottom-right coordinates of the returned rectangle are exclusive. In other words, the pixel at (right, bottom) lies immediately outside the rectangle.</p>
 <h4 id="usage-examples-11">Usage examples</h4>
 <pre><code>DIM rc AS RECT
@@ -4299,7 +4298,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 <h4 id="return-value-10">Return value</h4>
 <p>If the function succeeds, the return value is nonzero.</p>
 <p>If the function fails, the return value is zero. To get extended error information, call <strong>GetLastError</strong>.</p>
-<h4 id="remarks-12">Remarks</h4>
+<h4 id="remarks-11">Remarks</h4>
 <p>If the <em>bRepaint</em> parameter is CTRUE, the system sends the WM_PAINT message to the window procedure immediately after moving the window (that is, the <strong>MoveWindow</strong> method calls the UpdateWindow function). If <em>bRepaint</em> is FALSE, the application must explicitly invalidate or redraw any parts of the window and parent window that need redrawing.</p>
 <p><strong>MoveWindow</strong> sends the WM_WINDOWPOSCHANGING, WM_WINDOWPOSCHANGED, WM_MOVE, WM_SIZE, and WM_NCCALCSIZE messages to the window.</p>
 <h4 id="usage-example-15">Usage example</h4>
@@ -4348,7 +4347,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 <h4 id="usage-example-19">Usage example</h4>
 <pre><code>DIM cx AS LONG = pWindow.ScaleX
 </code></pre>
-<h4 id="remarks-13">Remarks</h4>
+<h4 id="remarks-12">Remarks</h4>
 <p>A SINGLE datatype is used instead of a long to avoid rounding errors in the calculation.</p>
 <h1 id="scaley"><a name="ScaleY"></a>ScaleY</h1>
 <p>Scales an vertical coordinate according the DPI setting.</p>
@@ -4371,7 +4370,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 <h4 id="usage-example-20">Usage example</h4>
 <pre><code>DIM cy AS LONG = pWindow.ScaleY
 </code></pre>
-<h4 id="remarks-14">Remarks</h4>
+<h4 id="remarks-13">Remarks</h4>
 <p>A SINGLE datatype is used instead of a long to avoid rounding errors in the calculation.</p>
 <h1 id="scrollwindowptr"><a name="ScrollWindowPtr"></a>ScrollWindowPtr</h1>
 <p>Gets/sets a pointer to the scroll window class.</p>
@@ -4591,7 +4590,7 @@ pWindow.SetFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 <h4 id="return-value-12">Return value</h4>
 <p>If the function succeeds, the return value is nonzero.</p>
 <p>If the function fails, the return value is zero. To get extended error information, call <strong>GetLastError</strong>.</p>
-<h4 id="remarks-15">Remarks</h4>
+<h4 id="remarks-14">Remarks</h4>
 <p>As part of the Vista re-architecture, all services were moved off the interactive desktop into Session 0. <em>hwnd</em> and window manager operations are only effective inside a session and cross-session attempts to manipulate the hwnd will fail.</p>
 <p>If you have changed certain window data using <strong>SetWindowLongPtrW</strong>, you must call <strong>SetWindowPos</strong> for the changes to take effect. Use the following combination for uFlags: SWP_NOMOVE OR SWP_NOSIZE OR SWP_NOZORDER OR SWP_FRAMECHANGED.</p>
 <p>A window can be made a topmost window either by setting the <em>hwndInsertAfter</em> parameter to HWND_TOPMOST and ensuring that the SWP_NOZORDER flag is not set, or by setting a window's position in the Z order so that it is above any existing topmost windows. When a non-topmost window is made topmost, its owned windows are also made topmost. Its owners, however, are not changed.</p>
@@ -4627,7 +4626,7 @@ pWindow.SetFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-16">Remarks</h4>
+<h4 id="remarks-15">Remarks</h4>
 <p>A SINGLE datatype is used instead of a long to avoid rounding errors in the calculation.</p>
 <h4 id="usage-example-24">Usage example</h4>
 <p>DIM cx AS SINGLE = pWindow.UnScaleX(250)</p>
@@ -4649,7 +4648,7 @@ pWindow.SetFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-17">Remarks</h4>
+<h4 id="remarks-16">Remarks</h4>
 <p>A SINGLE datatype is used instead of a long to avoid rounding errors in the calculation.</p>
 <h4 id="usage-example-25">Usage example</h4>
 <p>DIM cy AS SINGLE = pWindow.UnScaleY(250)</p>

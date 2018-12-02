@@ -1,3 +1,11 @@
+Version 1.8.5 (December 2, 2018)
+- Added: Main Menu Editor and menu code generation for the visual designer.
+- Added: Sort alphabetically the filenames in the Help Viewer treeview nodes.
+- Changed: Removed Form property "ShowInTaskbar" as I could not implement reliable code to support it.
+- Fixed: With AutoIndentation enabled, all entered ELSE/ELSEIF and CASE/CASE ELSE lines now line up correctly to their parent IF/THEN or SELECT CASE headers.
+- Fixed: Help Viewer treeview height now matches the height of the embedded web browser.
+- Fixed: Code introduced to help fix random situation whereby the screen cursor remains as a spinning wait icon after a failed compile attempt.
+
 Version 1.8.4 (November 13, 2018)
 - Added: View ToolBox menu item is now implemented.
 - Fixed: Canceling New Project creation would not erase new project in memory object. 

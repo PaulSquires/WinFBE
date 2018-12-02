@@ -618,7 +618,7 @@ Special characters and sequences are used in writing patterns for regular expres
 | \\n | Matches n, where n is an octal escape value. Octal escape values must be 1, 2, or 3 digits long. For example, "\11" and "\011" both match a tab character. "\0011" is the equivalent of "\001" & "1". Octal escape values must not exceed 256. If they do, only the first two digits comprise the expression. Allows ASCII codes to be used in regular expressions. |
 | \\xn | Matches n, where n is a hexadecimal escape value. Hexadecimal escape values must be exactly two digits long. For example, "\x41" matches "A". "\x041" is equivalent to "\x04" & "1". Allows ASCII codes to be used in regular expressions. |
 
-####Example
+#### Example
 
 ```
 '#CONSOLE ON
@@ -1192,7 +1192,7 @@ Output:
 (555) 123-4567
 ```
 
-Swaps to words and remover the comma.
+Swaps to words and removes the comma.
 
 ```
 #INCLUDE ONCE "Afx/CRegExp.inc"
@@ -1429,7 +1429,7 @@ Output:
 test
 ```
 
-Case sensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t.
+Case sensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t or begin with d and end with g.
 
 ```
 #INCLUDE ONCE "Afx/CRegExp.inc"
@@ -1453,7 +1453,7 @@ cat
 dog
 ```
 
-Case insensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t.
+Case insensitive, double search (c.t and d.g), whole words. Retrieves cut, cat, i.e. whole words with three letters that begin with c and end with t or begin with d and end with g.
 
 ```
 #INCLUDE ONCE "Afx/CRegExp.inc"
@@ -1462,7 +1462,7 @@ USING Afx
 
 ' // With this constructor we set the pattern, ignore case and global
 DIM pRegExp AS CRegExp = CRegExp($"\bc.t\b|\bd.g\b", TRUE, TRUE)
-pRegExp.Execute("I have cut a cat tail")
+pRegExp.Execute("I have a cat and a dog, because I love cats and dogs")
 FOR i AS LONG = 0 TO pRegExp.MatchCount - 1
    PRINT pRegExp.MatchValue(i)
 NEXT
@@ -1470,8 +1470,10 @@ NEXT
 
 ```
 Output:
-cut
 cat
+dog
+cat
+dog
 ```
 
 We can search for more than a word at the same time.
@@ -1579,7 +1581,7 @@ Output:
 2017
 ```
 
-Extract text between parentheses.
+Extracts text between parentheses.
 
 ```
 #INCLUDE ONCE "Afx/CRegExp.inc"
@@ -1603,7 +1605,7 @@ Output:
 "text between parentheses"
 ```
 
-Extract text between curly braces.
+Extracts text between curly braces.
 
 ```
 #INCLUDE ONCE "Afx/CRegExp.inc"
@@ -1660,7 +1662,7 @@ The "\\d+" part matches a digit one or more times.
 
 The "(?:\[Ee]\[\\+\\-]?\\d+)?" matches "e+", "e-", "E+" or "E-" followed by one or more digits, with the "?" multiplier that allows zero or one instance of it.
 
-####Checking if an url is valid
+#### Checking if an url is valid
 
 ```
 #INCLUDE ONCE "Afx/CRegExp.inc"
