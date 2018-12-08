@@ -50,15 +50,18 @@ Sub SaveEditorOptions()
    gConfig.TabSize = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE) )
    gConfig.KeywordCase = ComboBox_GetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE))
    
+   ' If a localization file is currently being edited then save it now.
+   frmOptionsLocal_LocalEditCheck
+
    ' If the localization has changed then display a message indicating that the changes
    ' will not be seen until the application is restarted.
    HWnd = HWND_FRMOPTIONSLOCAL
-   wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION) )
-   If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
-      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
-                  L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
-   End If
-   gConfig.LocalizationFile = wText
+'   wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
+'   If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
+'      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
+'                  L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+'   End If
+'   gConfig.LocalizationFile = wText
    
    
    ' COLOR/FONT OPTIONS
@@ -133,7 +136,7 @@ End Function
 Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
    Select Case id
-      Case IDOK
+      Case IDC_FRMOPTIONS_CMDOK
          If codeNotify = BN_CLICKED Then
             SaveEditorOptions()
             ' Reposition main windows in case hide toolbar/statusbar selected
@@ -321,7 +324,7 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 450, 417, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONS_CMDOK, L(0,"&OK"), 450, 417, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    

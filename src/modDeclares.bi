@@ -109,9 +109,18 @@
 #Define IDC_FRMOPTIONSCOMPILER_LBLWINFBXHELP        1016
 #Define IDC_FRMOPTIONSCOMPILER_TXTWINFBXHELPPATH    1017
 
-#Define IDC_FRMOPTIONSLOCAL_LBLLOCALIZATION         1000
-#Define IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION         1001
-#Define IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION       1002
+#Define IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION       1001
+#Define IDC_FRMOPTIONSLOCAL_CMDNEW                  1002
+#Define IDC_FRMOPTIONSLOCAL_CMDEDIT                 1003
+#Define IDC_FRMOPTIONSLOCAL_CMDDELETE               1004
+#Define IDC_FRMOPTIONSLOCAL_FRAMEEDITAREA           1005
+#Define IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION         1006
+#Define IDC_FRMOPTIONSLOCAL_LBLPHRASES              1007
+#Define IDC_FRMOPTIONSLOCAL_LVWPHRASES              1008
+#Define IDC_FRMOPTIONSLOCAL_LBLENGLISH              1009
+#Define IDC_FRMOPTIONSLOCAL_TXTENGLISH              1010
+#Define IDC_FRMOPTIONSLOCAL_LBLTRANSLATE            1011
+#Define IDC_FRMOPTIONSLOCAL_TXTTRANSLATE            1012
 
 #Define IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS          1000
 
@@ -516,6 +525,12 @@ dim shared as CWSTR gwszPreviousPropName, gwszPreviousEventName
 ' PropertyList divider globals
 dim shared as long gPropDivPos
 dim shared as boolean gPropDivTracking
+
+' Create a dynamic array that will hold all localization words/phrases while
+' a language is being edited in frmOptionsLocal.
+ReDim Shared gLocalPhrases(Any) As WString * MAX_PATH
+dim shared gLocalPhrasesEdit as boolean   ' a localization language is being edited. 
+
 
 ' Create a dynamic array that will hold all localization words/phrases. This
 ' array is resized and loaded using the LoadLocalizationFile function.

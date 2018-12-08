@@ -677,7 +677,7 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
    Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
 
    Select Case idButton
-      case IDC_FRMUSERTOOLS_CMDBROWSEEXE
+      case IDC_FRMUSERTOOLS_CMDBROWSEEXE   '1012
          rgFileTypes(1).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 1, @rgFileTypes(1))
@@ -708,7 +708,7 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
 
-      Case IDC_FRMOPTIONSCOMPILER_CMDFBWIN32, IDC_FRMOPTIONSCOMPILER_CMDFBWIN64
+      Case IDC_FRMOPTIONSCOMPILER_CMDFBWIN32, IDC_FRMOPTIONSCOMPILER_CMDFBWIN64  '1003,1008
          rgFileTypes(1).pszName = @L(100,"FB Compiler")
          rgFileTypes(1).pszSpec = @WSTR("fbc*.exe")
          rgFileTypes(2).pszName = @L(230,"Executable")
@@ -719,7 +719,7 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(101,"Find FreeBASIC Compiler"))
    
-      Case IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION
+      Case IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION  '1012
          rgFileTypes(1).pszName = @L(102,"Localization files")
          rgFileTypes(1).pszSpec = @WSTR("*.lang")
          rgFileTypes(2).pszName = @L(79,"All files")
@@ -728,7 +728,7 @@ Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) A
          ' Set the title of the dialog
          hr = pofd->lpVtbl->SetTitle(pofd, L(103,"Open Localization File"))
 
-      Case IDC_FRMOPTIONSCOMPILER_CMDFBHELPFILE, IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH
+      Case IDC_FRMOPTIONSCOMPILER_CMDFBHELPFILE, IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH '1007,1011
          rgFileTypes(1).pszName = @L(104,"Help file")
          rgFileTypes(1).pszSpec = @WSTR("*.chm")
          rgFileTypes(2).pszName = @L(79,"All files")
@@ -852,6 +852,14 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
          psfd->lpVtbl->SetTitle(psfd, L(265,"Save Declares File"))
 
+      Case IDC_FRMOPTIONSLOCAL_CMDNEW
+         rgFileTypes(1).pszName = @L(102,"Localization files")
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.lang")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         psfd->lpVtbl->SetFileTypes(psfd, 2, @rgFileTypes(1))
+         psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
+
       Case Else
          rgFileTypes(1).pszName = @L(77,"FB code files")
          rgFileTypes(2).pszName = @L(78,"FB Include files")
@@ -863,7 +871,6 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          rgFileTypes(4).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 4, @rgFileTypes(1))
          psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
-     
    End Select
    
    ' // Set the file name
@@ -891,7 +898,6 @@ Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          Function = pwszName
       End If
    End If
-
    ' // Cleanup
    If pItem Then pItem->lpVtbl->Release(pItem)
    If psfd Then psfd->lpVtbl->Release(psfd)

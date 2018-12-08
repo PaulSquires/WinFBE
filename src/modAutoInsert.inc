@@ -168,20 +168,20 @@ function AttemptAutoInsert() as Long
 
 
    ''''''''''
-   ' ELSE
+   ' ELSE / ELSEIF
    '   Search backwards in the most recent IF/THEN line and use the 
    '   indentation of that line for the ELSE or ELSEIF statement.
    If gConfig.AutoIndentation Then
-      If (strPrevLine = "ELSE") or (strPrevLine = "ELSEIF") then
+      If (left(strPrevLine, 4) = "ELSE") or (left(strPrevLine, 7) = "ELSEIF ") then
          nCurLine = pDoc->GetCurrentLineNumber
          for i = nCurLine to 0 step -1
             strTemp = pDoc->GetLine(i)
             if left(ltrim(ucase(strTemp), any chr(32,9)), 3) = "IF " then
-               ' Reposition the ELSE line to line up with the IF line
+               ' Reposition the ELSE/ELSEIF line to line up with the IF line
                nSpaces = instr(ucase(strTemp), "IF ") - 1
-               strPrevLine = space(nSpaces) & ltrim(strPrevLine, chr(32,9))
+               strPrevLine = space(nSpaces) & Trim(pDoc->GetLine(nLine-1), Any Chr(32, 9))  ' need it to be original case
                pDoc->SetLine(nLine-1, strPrevLine)
-               strFill = Space(nSpaces + IndentSize)  
+               strFill = Space(nSpaces + IndentSize) & strCurLine  
                pDoc->SetLine(nLine, strFill)
                ' Add the current editing position
                curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + nSpaces + IndentSize
@@ -191,7 +191,6 @@ function AttemptAutoInsert() as Long
          next
       end if
    end if
-
 
    ''''''''''
    ' CASE

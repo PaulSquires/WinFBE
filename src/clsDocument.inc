@@ -294,7 +294,9 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       ' If the data that was read contained anything that caused the form to have
       ' to be code regenerated then we need to save the file back to disk with the
       ' new meta data and code generation.
-      if this.bRegenerateCode then this.SaveFile
+      if this.bRegenerateCode then 
+         If this.IsNewFlag = false then this.SaveFile
+      end if   
       ' In any event, regenerate code for the visual designer 
       this.bRegenerateCode = true
       GenerateFormCode(@this)
@@ -547,7 +549,6 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    End If
 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-
    ' If this is a FORM document then we need to create the string of controls and properties that gets
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
@@ -557,7 +558,6 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormMetaData, vbcrlf) 
       this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormCodegen, vbcrlf) 
    END IF
-   
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
    Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )

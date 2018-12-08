@@ -221,6 +221,21 @@ Function frmMenuEditor_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwn
                End If
             next
 
+            ' Do error checking for duplicate menu names
+            for i as long = 0 to ubound(gMenuItems) - 1
+               ' If a caption exists but does not have a name then present the error.
+               for ii as long = 0 to ubound(gMenuItems) - 1
+                  if ii = i then continue for
+                  If ucase(trim(gMenuItems(ii).wszName)) = ucase(trim(gMenuItems(i).wszName))  Then
+                     ListBox_SetCurSel(hListBox, ii)
+                     frmMenuEditor_DisplayMenuItem
+                     MessageBox( HWND, L(367,"Duplicate menu name.") & vbcrlf & gMenuItems(i).wszName, _
+                                 L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+                     exit function
+                  end if
+               next
+            next
+
             ' Make sure the indent levels are consistent.
             for i as long = 1 to ubound(gMenuItems) - 1
                if gMenuItems(i).nIndent > gMenuItems(i-1).nIndent + 1 then
@@ -480,15 +495,15 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    dim wszString  as WSTRING * 100
    
    HWND_FRMMENUEDITOR = _
-   pWindow->Create(hWndParent, "Menu Editor", @frmMenuEditor_WndProc, 0, 0, 411, 418, _
+   pWindow->Create(hWndParent, L(365,"Menu Editor"), @frmMenuEditor_WndProc, 0, 0, 411, 418, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)
 
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL3, "Text:", 10, 16, 49, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL3, L(150,"Text") & ":", 10, 16, 49, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL1, "Name:", 10, 40, 49, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LABEL1, L(364,"Name") & ":", 10, 40, 49, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMMENUEDITOR_TXTCAPTION, "", 74, 13, 233, 20, _
@@ -498,7 +513,7 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LBLSHORTCUT, "Shortcut:", 10, 65, 54, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LBLSHORTCUT, L(363,"Shortcut") & ":", 10, 65, 54, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKCTRL, "Ctrl", 74, 65, 48, 19, _
@@ -514,13 +529,13 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LBLSTATE, "State:", 10, 90, 54, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMMENUEDITOR_LBLSTATE, L(360,"State") & ":", 10, 90, 54, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKCHECKED, "Checked", 74, 91, 113, 16, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKCHECKED, L(361,"Checked"), 74, 91, 113, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKGRAYED, "Grayed", 74, 110, 115, 16, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKGRAYED, L(362,"Grayed"), 74, 110, 115, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -560,22 +575,22 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDNEXT, "&Next", 157, 141, 70, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDNEXT, L(359,"&Next"), 157, 141, 70, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDINSERT, "&Insert", 237, 141, 70, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDINSERT, L(281,"&Insert"), 237, 141, 70, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDDELETE, "&Delete", 317, 141, 70, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDDELETE, L(282,"&Delete"), 317, 141, 70, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("LISTBOX", , IDC_FRMMENUEDITOR_LSTDETAIL, "", 13, 173, 384, 200, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDOK, "&OK", 317, 13, 80, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDOK, L(0,"&OK"), 317, 13, 80, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDCANCEL, "&Cancel", 317, 42, 80, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMMENUEDITOR_CMDCANCEL, L(1,"&Cancel"), 317, 42, 80, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
