@@ -1,3 +1,11 @@
+Version 1.8.6 (December 7, 2018)
+- Added: Localization file creation and editing. "Options" / "Environment Options" / "Localization".
+- Added: Check to prevent duplicate menu names that would result in a compile time error.
+- Changed: Removed the Environment option to specify the WinFBX chm help file. WinFBX help is now displayed using the markdown help browser.
+- Fixed: With AutoIndentation enabled, ELSEIF will now line up correctly to the parent IF/THEN headers.
+- Fixed: Background transparency of several Up/Down png graphics used within the editor.
+- Fixed: GPF for new Forms created since version 1.8.5. This was a regression in 1.8.5.
+
 Version 1.8.5 (December 2, 2018)
 - Added: Main Menu Editor and menu code generation for the visual designer.
 - Added: Sort alphabetically the filenames in the Help Viewer treeview nodes.

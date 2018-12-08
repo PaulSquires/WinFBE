@@ -56,12 +56,12 @@ Sub SaveEditorOptions()
    ' If the localization has changed then display a message indicating that the changes
    ' will not be seen until the application is restarted.
    HWnd = HWND_FRMOPTIONSLOCAL
-'   wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
-'   If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
-'      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
-'                  L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
-'   End If
-'   gConfig.LocalizationFile = wText
+   wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
+   If Ucase(wText) <> Ucase(gConfig.LocalizationFile) Then
+      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
+                  L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+   End If
+   gConfig.LocalizationFile = wText
    
    
    ' COLOR/FONT OPTIONS

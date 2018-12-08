@@ -5,7 +5,6 @@ NOTE: Code may fail, GPF’s may occur in the editor. Do not rely on this versio
 
 The following areas of the visual designer are not working:
 
-- Menu Editor
 - Toolbar Editor
 - Statusbar Editor
 - Images/Pictures/Icons. Any control property that relies on these types has not been implemented yet. Need to create an interface between the editor and resource file.
@@ -23,7 +22,7 @@ There are a few controls that have been implemented. More to come as the core st
 - ListBox
 - ComboBox 
 - OptionButton
-- Frame
+- Main Menu
 - StatusBar (only through code at this time)
 
 The forms and controls are being implemented via the WinFormsX library that I am writing and maintaining on GitHub.
