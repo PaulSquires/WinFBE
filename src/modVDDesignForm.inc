@@ -388,6 +388,18 @@ function DrawGrabHandles( byval hDC as HDC, _
 end function
 
 
+' ========================================================================================
+' Handle WM_LBUTTONDBLCLK  messages for the Form (displays the code editor)
+' ========================================================================================
+function HandleDesignerLButtonDoubleClick( ByVal HWnd As HWnd ) as LRESULT
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   if pDoc then
+      TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, 1)
+      frmMain_PositionWindows(HWND_FRMMAIN)
+      PostMessage(HWND_FRMMAIN, MSG_USER_GENERATECODE, 0, 0)
+   END IF
+   function = 0
+end function
 
 ' ========================================================================================
 ' Handle WM_LBUTTONDOWN messages for the Form and Frame windows
@@ -866,10 +878,11 @@ Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND,     DesignerForm_OnCommand)
       HANDLE_MSG (HWnd, WM_DESTROY,     DesignerForm_OnDestroy)
 
-      case WM_RBUTTONDOWN: HandleDesignerRButtonDown(HWND)
-      case WM_LBUTTONDOWN: HandleDesignerLButtonDown(HWND)
-      case WM_LBUTTONUP:   HandleDesignerLButtonUp(HWND)
-      case WM_MOUSEMOVE:   HandleDesignerMouseMove(HWND)
+      case WM_LBUTTONDBLCLK: HandleDesignerLButtonDoubleClick(HWND)
+      case WM_RBUTTONDOWN:   HandleDesignerRButtonDown(HWND)
+      case WM_LBUTTONDOWN:   HandleDesignerLButtonDown(HWND)
+      case WM_LBUTTONUP:     HandleDesignerLButtonUp(HWND)
+      case WM_MOUSEMOVE:     HandleDesignerMouseMove(HWND)
 
       Case WM_NCLBUTTONDOWN, WM_NCRBUTTONDOWN, WM_NCLBUTTONDBLCLK  
          ' Will only fire when the Caption bar, Min/Max/Close buttons are clicked.

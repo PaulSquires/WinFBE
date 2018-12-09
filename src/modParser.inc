@@ -97,7 +97,8 @@ ParseAgain:
    end if
    
    if gFileLoading then
-      SetCompileStatusBarMessage( "Parsing: " & wszFilename, 0 )
+      dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+      StatusBar_SetText(hStatusBar, 4, wszFilename)
    END IF
 
    ' Create a parse TYPE that handles the state information throughout parsing this document.
@@ -206,7 +207,7 @@ ParseAgain:
    ' Update the TODO listview in the frmOutput form
    UpdateToDoListview
    
-   SetCompileStatusBarMessage( "", 0 )
+   'SetCompileStatusBarMessage( "", 0 )
    Function = 0
 
 End Function

@@ -226,7 +226,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    dim pCtrl as clsControl ptr
    dim as CWSTR wszText, wszFormName, wszCtrlName, wszPropName, wszPropValue, wszPropDefault
    dim as CWSTR wszFunction, wszAllEvents, wszPrototype, wszAllDeclares
-   dim as CWSTR wszCombinedName, wszCodeGen
+   dim as CWSTR wszCombinedName, wszCodeGen, wszMenuSelect
    dim as CWSTR wszStartTag, wszEndTag
    dim as CWSTR DQ = chr(34)
    dim as long nStartTag, nEndTag, nPropType
@@ -273,8 +273,27 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          if (gProjectLoading = false) orelse (gFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
             if pData = 0 THEN
+               wszMenuSelect = sp(1) & "Select Case UCase(sender.Name)" & vbcrlf 
+               for ii as long = 0 to ubound(pDoc->MenuItems) 
+                  if len(rtrim(pDoc->MenuItems(ii).wszName)) = 0 then continue for
+                  ' Popups only needed for menuitems with IsParent. If the indent level
+                  ' of the next menuitem is greater, then this is a Parent menuitem.
+                  if i = 1 then
+                     if ii = ubound(pDoc->MenuItems) then continue for
+                     if pDoc->MenuItems(ii+1).nIndent <= pDoc->MenuItems(ii).nIndent then continue for
+                  end if   
+                  wszMenuSelect = wszMenuSelect & _
+                        sp(2) & "Case " & chr(34) & ucase(pDoc->MenuItems(ii).wszName) & chr(34) & vbcrlf
+               next
+               ' Must add a CASE ELSE because if no child menu items then SELECT CASE will be 
+               ' empty causing a compile time error.   
+               wszMenuSelect = wszMenuSelect & _
+                     sp(2) & "Case Else" & vbcrlf & _
+                     sp(1) & "End Select" & vbcrlf 
+               
                wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
                               wszPrototype & _
+                              wszMenuSelect & _
                               sp(1) & "Function = 0" & vbcrlf & _
                               "End Function" & vbcrlf & vbcrlf
             end if

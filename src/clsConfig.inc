@@ -1238,10 +1238,14 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    dim as long idx    ' project index
 
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    
    If AfxFileExists(wzFile) = 0 Then Exit Function
 
-   SetCompileStatusBarMessage( "", 0 )
+   StatusBar_SetText(hStatusBar, 3, "Parsing:")
+   StatusBar_SetText(hStatusBar, 4, "")
+
+   'SetCompileStatusBarMessage( "", 0 )
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
    AfxDoEvents()
@@ -1381,6 +1385,9 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    
    LockWindowUpdate(0)
    
+   StatusBar_SetText(hStatusBar, 3, "")
+   StatusBar_SetText(hStatusBar, 4, "")
+
    ' Display all of the tabs
    For i = LBound(nTabs) To UBound(nTabs)
       iTab = gTTabCtl.GetTabIndexFromFilename(nTabs(i)->DiskFilename)

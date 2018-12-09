@@ -488,6 +488,8 @@ dim shared as BOOLEAN gPreparsingChanges  ' T/F preparsing had changes. Flag to 
 dim shared as BOOLEAN gFileLoading     ' T/F only parse Includes during initial file load.
 dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
 dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
+dim shared as Boolean gAppShutdown     ' T/F allows bypassing of treeview removal, etc
+
 ' Create a global bold font that is used in the PropertyList controls combobox and also for
 ' the label that describes the property name/description.
 dim shared as HFONT ghNormalFont, ghBoldFont

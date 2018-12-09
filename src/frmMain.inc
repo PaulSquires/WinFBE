@@ -70,6 +70,8 @@ End Function
 ' ========================================================================================
 Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
 
+   if gProjectLoading then exit function  ' to prevent flickering during a project load
+
    ' Update the statusbar with the current Line/Col position
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
 
@@ -614,6 +616,14 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
       
    NEXT
    
+   ' If the entire app is closing down then we do not have to process the
+   ' remaining project cleanup commands. Those cleanups are only needed when
+   ' multiple projects exist and we're not exiting the application altogether.
+   if gAppShutdown then 
+      gApp.Projects(idx).InUse = false   ' needed b/c gApp.IsProjectActive is checked on shutdown
+      return true
+   end if
+      
    ' Reset the gdb database but reload the FB keywords (need valid pDocs)
    gdb2.dbDeleteByProject(idx)
 
@@ -992,10 +1002,11 @@ Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
       If pItem Then
          pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
          If pwszName Then 
+            dim as Boolean bShowInTab = iif(gApp.IsProjectActive, false, true)
             frmMain_OpenFileSafely(HWnd, _
                                     False, _    ' bIsNewFile
                                     False, _    ' bIsTemplate
-                                    True,  _    ' bShowInTab
+                                    bShowInTab,  _    ' bShowInTab
                                     false, _    ' bIsInclude
                                     pwszName, _ ' pwszName
                                     0 )         ' pDocIn
@@ -1699,7 +1710,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          frmMain_OpenFileSafely(HWnd, _
                                  False, _    ' bIsNewFile
                                  False, _    ' bIsTemplate
-                                 True,  _    ' bShowInTab
+                                 true,  _    ' bShowInTab
                                  false, _    ' bIsInclude
                                  0, _        ' pwszName
                                  pDoc )      ' pDocIn
@@ -2107,6 +2118,10 @@ Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
       end if            
    END IF
    
+   ' Set global shutdown flag that will bypass removing nodes from project
+   ' treeview, etc. Those tasks simply slow down the exiting of the program.
+   gAppShutdown = true
+
    ' Save whether the Explorer should be shown the next time the program is run.
    ' Also save the Explorer panel width. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
