@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -261,39 +261,37 @@ function InitiatePropertyValueChange() as Long
                
                ' If the form or control name has changed then update all source code
                dim pDocParse as clsDocument ptr
-               dim as long idx = gApp.GetActiveProjectIndex
                dim as hwnd hEdit 
                dim as Boolean bReparse 
 
                for i as long = 1 to 3
                   if len(txtReplace(i)) = 0 then continue for
                   
-                  For ii As Long = 0 To gApp.Projects(idx).GetDocumentCount - 1
-                     pDocParse = gApp.Projects(idx).GetDocumentPtr(ii)
-                     if pDocParse THEN
-                        bReparse = false
-                        hEdit = pDocParse->hWndActiveScintilla
-                        if i = 1 then 
-                           SendMessage( hEdit, SCI_SETSEARCHFLAGS, SCFIND_WHOLEWORD, 0)
-                        else   
-                           SendMessage( hEdit, SCI_SETSEARCHFLAGS, 0, 0)
-                        end if
-                        SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-                        startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
-                        endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
-                        do 
-                           r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind(i)), Strptr(txtFind(i)))
-                           if r = -1 THEN exit do
-                           bReparse = true
-                           SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace(i)), Strptr(txtReplace(i)) )
-                           startPos = r + len(txtFind(i))
-                           ' Adjust the searching positions
-                           SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-                           SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-                        loop
+                  pDocParse = gApp.pDocList
+                  do until pDocParse = 0
+                     bReparse = false
+                     hEdit = pDocParse->hWndActiveScintilla
+                     if i = 1 then 
+                        SendMessage( hEdit, SCI_SETSEARCHFLAGS, SCFIND_WHOLEWORD, 0)
+                     else   
+                        SendMessage( hEdit, SCI_SETSEARCHFLAGS, 0, 0)
                      end if
-                     if bReparse then ParseDocument(idx, pDocParse, "")
-                  next
+                     SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+                     startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+                     endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
+                     do 
+                        r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind(i)), Strptr(txtFind(i)))
+                        if r = -1 THEN exit do
+                        bReparse = true
+                        SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace(i)), Strptr(txtReplace(i)) )
+                        startPos = r + len(txtFind(i))
+                        ' Adjust the searching positions
+                        SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+                        SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+                     loop
+                     if bReparse then ParseDocument(pDocParse, "")
+                     pDocParse = pDocParse->pDocNext
+                  loop
                next   
          end select
          

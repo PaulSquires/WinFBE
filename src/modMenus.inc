@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -11,7 +11,6 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-    
 
 ' ========================================================================================
 ' Build the frmMain topmenu
@@ -228,8 +227,8 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_A,  IDM_SELECTALL )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_L,  IDM_SELECTLINE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F,  IDM_FIND )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F3,  IDM_FINDNEXT )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F3,  IDM_FINDPREV )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F3,  IDM_FINDNEXTACCEL )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F3,  IDM_FINDPREVACCEL )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F, IDM_FINDINFILES)
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,  IDM_REPLACE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F6,  IDM_DEFINITION )
@@ -280,7 +279,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    For idMenu = IDM_FILE To IDM_ABOUT
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
-   For idMenu = IDM_ADDFILETOPROJECT To IDM_PROJECTOPTIONS
+   For idMenu = IDM_PROJECTNEW To IDM_PROJECTOPTIONS
       EnableMenuItem hMenu, idMenu, MF_BYCOMMAND Or MF_GRAYED
    Next
    For idMenu = IDM_BUILDEXECUTE To IDM_LOCKCONTROLS
@@ -296,7 +295,6 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_VIEWOUTPUT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_RESTOREMAIN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_OPTIONS, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_COMPILECONFIG, MF_BYCOMMAND Or MF_ENABLED
@@ -377,6 +375,7 @@ Function frmMain_ChangeTopMenuStates() As Long
             EnableMenuItem hMenu, IDM_ANSI, MF_BYCOMMAND Or MF_ENABLED
             EnableMenuItem hMenu, IDM_UTF8BOM, MF_BYCOMMAND Or MF_ENABLED
             EnableMenuItem hMenu, IDM_UTF16BOM, MF_BYCOMMAND Or MF_ENABLED
+            EnableMenuItem hMenu, IDM_FUNCTIONLIST, MF_BYCOMMAND Or MF_ENABLED
          end if
          
       End If
@@ -384,7 +383,6 @@ Function frmMain_ChangeTopMenuStates() As Long
    
    ' Check if a Project is open and active
    Dim As Long fEnabled = Iif( gApp.IsProjectActive, MF_ENABLED, MF_GRAYED )
-   EnableMenuItem hMenu, IDM_ADDFILETOPROJECT, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTCLOSE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTSAVE, MF_BYCOMMAND Or fEnabled
    EnableMenuItem hMenu, IDM_PROJECTSAVEAS, MF_BYCOMMAND Or fEnabled
@@ -447,8 +445,6 @@ End Function
 ''
 Function CreateStatusBarFileTypeContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
-   Dim wszText As WString * MAX_PATH
-   
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
       If gApp.IsProjectActive Then
@@ -456,7 +452,6 @@ Function CreateStatusBarFileTypeContextMenu() As HMENU
          AddProjectFileTypesToMenu( hPopUpMenu, pDoc, true ) 
       End If
    End If
-
    Function = hPopupMenu
 End Function
 
@@ -494,24 +489,24 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Dim hPopUpMenu As HMENU
    Dim hPopUpSubMenu As HMENU
    Dim wszText As WString * MAX_PATH
-   Dim As Long CuriTab=TabCtrl_GetCurSel(gTTabCtl.hWindow)
-   Dim As Long MaxiTab=TabCtrl_GetItemCount(gTTabCtl.hWindow)-1
+   Dim As Long CuriTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+   Dim As Long MaxiTab = TabCtrl_GetItemCount(gTTabCtl.hWindow) - 1
 
    hPopUpMenu = CreatePopupMenu
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
    AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-   AppendMenu hPopUpMenu, iif(MaxiTab>0,MF_ENABLED,MF_DISABLED), IDM_FILECLOSEALL, L(6,"Close All")
-   AppendMenu hPopUpMenu, iif(MaxiTab>0,MF_ENABLED,MF_DISABLED), IDM_FILECLOSEALLOTHERS, L(354,"Close Others")
-   AppendMenu hPopUpMenu, iif(CuriTab>0,MF_ENABLED,MF_DISABLED), IDM_CLOSEALLFORWARD, L(355,"Close Tabs on the Left")
-   AppendMenu hPopUpMenu, iif(MaxiTab>CuriTab,MF_ENABLED,MF_DISABLED), IDM_CLOSEALLBACKWARD, L(356,"Close Tabs on the Right") 
+   AppendMenu hPopUpMenu, iif(MaxiTab > 0, MF_ENABLED,MF_DISABLED), IDM_FILECLOSEALL, L(6,"Close All")
+   AppendMenu hPopUpMenu, iif(MaxiTab > 0, MF_ENABLED,MF_DISABLED), IDM_FILECLOSEALLOTHERS, L(354,"Close Others")
+   AppendMenu hPopUpMenu, iif(CuriTab > 0, MF_ENABLED,MF_DISABLED), IDM_CLOSEALLBACKWARD, L(355,"Close Tabs on the Left")
+   AppendMenu hPopUpMenu, iif(MaxiTab > CuriTab, MF_ENABLED,MF_DISABLED), IDM_CLOSEALLFORWARD, L(356,"Close Tabs on the Right") 
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetDocumentPtr(idx)
    If pDoc Then
       If gApp.IsProjectActive = True Then
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         wszText = L(190,"&Remove from project")
+         wszText = L(190, "&Remove from project")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
          AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
       End If
@@ -533,13 +528,10 @@ Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
       If gApp.IsProjectActive = True Then
          dim as hwnd hTree = GetDlgItem( hWnd_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
          dim as HTREEITEM hNode = Treeview_GetSelection(hTree)
-         for i as long = 1 to ubound(gApp.Projects)
-            if gApp.Projects(i).hExplorerRootNode = hNode THEN
-               wszText = L(207,"&Add Files to Project...")
-               AppendMenu( hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADDTONODE, wszText )
-               exit for
-            END IF
-         NEXT
+         if gApp.hExplorerRootNode = hNode THEN
+            wszText = L(207,"&Add Files to Project...")
+            AppendMenu( hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, wszText )
+         END IF
       END IF
    else
       If gApp.IsProjectActive Then
@@ -587,15 +579,18 @@ Function CreateScintillaContextMenu() As HMENU
 
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> hEdit Then Exit Function
    
-   ' Determine the compiler path in case it needs to be prepended to the filename
-   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-   gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   Select Case gApp.Projects(gApp.GetActiveProjectIndex).GetProjectCompiler
-      Case IDM_32BIT:   wCompilerPath = gConfig.FBWINcompiler32
-      Case IDM_64BIT:   wCompilerPath = gConfig.FBWINcompiler64
-   End Select
-   wCompilerPath = AfxStrPathname( "PATH", wCompilerPath )
-   wCompilerPath = wCompilerPath & "inc"
+
+   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   if idxBuild = -1 then idxBuild = 0
+   if gConfig.Builds(idxBuild).Is32bit then wCompilerPath = gConfig.FBWINcompiler32
+   if gConfig.Builds(idxBuild).Is64bit then wCompilerPath = gConfig.FBWINcompiler64
+   wCompilerPath = ProcessFromCurdrive(wCompilerPath)
+   wCompilerPath = AfxStrPathname( "PATH", wCompilerPath ) & "inc"
+
+   ' Convert relative path to absolute path if needed.
+   if AfxPathIsRelative(wCompilerPath) then
+      wCompilerPath = AfxPathCombine(AfxGetExePathName, wCompilerPath)
+   END IF
 
 
    hPopupMenu = CreatePopupMenu
@@ -603,6 +598,7 @@ Function CreateScintillaContextMenu() As HMENU
    If Left(Ucase(sLine), 9) = "#INCLUDE " Then sFilename = Mid(sLine, 10)
    If Left(Ucase(sLine), 14) = "#INCLUDE ONCE " Then sFilename = Mid(sLine, 15)
 
+   gApp.IncludeFilename = ""   
    If Len(sFilename) Then
       ' remove any comments at the end of the line
       i = Instr(sFilename, "'")
@@ -622,6 +618,7 @@ Function CreateScintillaContextMenu() As HMENU
          gApp.IncludeFilename = Str(wCompilerPath) & "\" & sFilename
       End If
       gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "/", "\")
+      gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "\\", "\")
       
       If AfxFileExists(gApp.IncludeFilename) Then        
          AppendMenu hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") + Chr(32, 34) + gApp.IncludeFilename + Chr(34)
@@ -654,11 +651,5 @@ Function CreateScintillaContextMenu() As HMENU
    Function = hPopupMenu
 
 End Function
-    
-
-
-
-
-
 
 

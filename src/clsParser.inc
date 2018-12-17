@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -29,9 +29,13 @@ end function
 function clsParser.IsMultilineComment(byval sLine as String) as boolean
    ' If we are already in a comment then test to see if we have now reached the end of it.
    if action = ACTION_PARSECOMMENT THEN 
-      if right(sLine, 2) = "'/" THEN action = ACTION_NONE
+      if right(sLine, 2) = "'/" THEN 
+         action = ACTION_NONE
+      end if
    else   
-      if left(sLine, 2) = "/'" THEN 
+      ' It is possible that the start and end comment markers may appear on 
+      ' the same line. Do a test for this.
+      if (left(sLine, 2) = "/'") andalso (right(sLine, 2) <> "'/") THEN 
          action = ACTION_PARSECOMMENT
       else
          ' Not in a multiline comment. Just a normal line.
@@ -288,8 +292,6 @@ function clsParser.parseVariableDefinitions() as boolean
    ' Remove all Pointer references (we don't need them)
    sTemp = AfxStrRemoveI(sTemp, " ptr")
    sTemp = AfxStrRemoveI(sTemp, " pointer")
-   
-   
              
    sTemp_ucase = ucase(sTemp)
     

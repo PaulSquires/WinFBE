@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -11,6 +11,8 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
  
+DIM shared pBtnOpenFile AS CXpButton ptr
+DIM shared pBtnOpenProject AS CXpButton ptr
 
 ' ========================================================================================
 ' Load the Recent Files/Projects Treeview
@@ -151,6 +153,9 @@ End Function
 Function frmRecent_OnDestroy(HWnd As HWnd) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
 
+   if pBtnOpenFile then delete pBtnOpenFile
+   if pBtnOpenProject then delete pBtnOpenProject
+   
    Dim As HFONT hFont
    Dim As HWnd hTree
    hTree = GetDlgItem( hWnd, IDC_FRMRECENT_TREEVIEW)
@@ -190,7 +195,7 @@ Function frmRecent_Tree_SubclassProc ( _
             TreeView_GetItemText( hTree, hItem, wzStr, MAX_PATH )
             If AfxFileExists(wzStr) Then
                If Treeview_GetParent(hTree, hItem) = gApp.hRecentProjectsRootNode then 
-                  OpenMRUProjectFile( HWND_FRMMAIN, 0, wzStr)
+                  frmMain_OpenProjectSafely(HWND_FRMMAIN, wzStr) 
                Elseif Treeview_GetParent(hTree, hItem) = gApp.hRecentFilesRootNode then 
                   frmMain_OpenFileSafely(HWND_FRMMAIN, _
                                           False, _    ' bIsNewFile
@@ -266,19 +271,19 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->SetFont( "Segoe UI Semibold", 9)
    pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
-   Dim as HWND hBtn = _
-      frmHotTxtBtn( HWND_FRMRECENT, IDC_FRMRECENT_BTNOPENFILE, L(248, "Open File"), "", _
-                       BGR(255,255,250), BGR(9,71,113), _
-                       BGR(255,255,250), BGR(63,63,70), _
-                       1 )            ' 0 Left, 1 Center, 2 Right
-      AfxSetWindowFont( hBtn, pWindow->Font, True )
-
-   hBtn = _   
-      frmHotTxtBtn( HWND_FRMRECENT, IDC_FRMRECENT_BTNOPENPROJECT, L(249, "Open Project"), "", _
-                       BGR(255,255,250), BGR(9,71,113), _
-                       BGR(255,255,250), BGR(63,63,70), _
-                       1 )            ' 0 Left, 1 Center, 2 Right
-      AfxSetWindowFont( hBtn, pWindow->Font, True )
+   pBtnOpenFile = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENFILE, L(248, "Open File"), 0, 0, 0, 0)
+   pBtnOpenFile->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
+   pBtnOpenFile->DisableTheming
+   pBtnOpenFile->SetTextForeColor(BGR(255,255,250))
+   pBtnOpenFile->SetButtonBkColor(BGR(9,71,113))
+   pBtnOpenFile->SetButtonBkColorHot(BGR(63,63,70))
+    
+   pBtnOpenProject = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENPROJECT, L(249, "Open Project"), 0, 0, 0, 0)
+   pBtnOpenProject->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
+   pBtnOpenProject->DisableTheming
+   pBtnOpenProject->SetTextForeColor(BGR(255,255,250))
+   pBtnOpenProject->SetButtonBkColor(BGR(9,71,113))
+   pBtnOpenProject->SetButtonBkColorHot(BGR(63,63,70))
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEVIEW, "", 0, 0, 0, 0, _

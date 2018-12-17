@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -76,73 +76,18 @@ constructor clsDB2
    dim parser as clsParser
    with parser
      .lineNum    = -1
-     .idxProject = -1
      .Filename   = ""
    end with
-   parser.typeName = "Boolean"
-   parser.Description = !"Data type that holds the value of True or False.\n"
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-               
-   parser.typeName = "Byte"      
-   parser.Description = !"8-bit signed whole-number data type.\nValue range of -128 to 127."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
 
-   parser.typeName = "UByte"
-   parser.Description = !"8-bit signed whole-number data type.\nValue range of 0 to 255."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
+   dim as CWSTR wszMainStr
+   dim as long nCount = AfxStrParseCount(wszMainStr, "|")
    
-   parser.typeName = "Short"
-   parser.Description = !"16-bit signed whole-number data type.\nValue range of -32768 to 32767."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-   
-   parser.typeName = "UShort"
-   parser.Description = !"16-bit signed whole-number data type.\nValue range of 0 to 65535."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
-   parser.typeName = "Integer"
-   parser.Description = !"32-bit or 64-bit signed whole-number data type depending on the platform.\n"
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-   
-   parser.typeName = "UInteger"
-   parser.Description = !"32-bit or 64-bit unsigned whole-number data type depending on the platform.\n"
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-   
-   parser.typeName = "Long"
-   parser.Description = !"32-bit signed whole-number data type.\nValue range of -2147483648 to 2147483647."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
-   parser.typeName = "ULong"
-   parser.Description = !"32-bit unsigned whole-number data type.\nValue range of 0 to 4294967295."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-   
-   parser.typeName = "LongInt"
-   parser.Description = !"A 64-bit signed whole-number data type.\nValues range of -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807"
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
-   parser.typeName = "ULongInt"
-   parser.Description = !"A 64-bit unsigned whole-number data type.\nValues range of 0 to 18,446,744,073,709,551,615"
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
-   parser.typeName = "Single"
-   parser.Description = !"32-bit floating-point data type.\nContains at most 24 bits of precision, or about 6 decimal digits."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
-   parser.typeName = "Double"
-   parser.Description = !"64-bit floating-point data type.\nContains at most 53 bits of precision, or about 15 decimal digits."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
-   parser.typeName = "String"
-   parser.Description = "A String is an array of characters."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-   
-   parser.typeName = "WString"
-   parser.Description = !"A fixed-size array of wide-chars that never overflows if the size is known at compile-time.\n"
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-   
-   parser.typeName = "ZString"
-   parser.Description = "A C-style fixed-size array of chars."
-   this.dbAdd(parser, DB2_STANDARDDATATYPE)  
-
+   wszMainStr = "Boolean|Byte|UByte|Short|UShort|Integer|UInteger|Long|ULong|LongInt|ULongInt|Single|" & _
+                "Double|String|WString|ZString"
+   for i as long = 1 to nCount
+      parser.typeName = AfxStrParse(wszMainStr, i, "|")
+      this.dbAdd(parser, DB2_STANDARDDATATYPE)  
+   next
    this.dbRewind
 end constructor    
 
@@ -160,7 +105,6 @@ function clsDB2.dbAdd( byref parser as clsParser, _
       .deleted      = false
       .id           = id                ' the type of database record that we are storing
       .nLineNum     = parser.lineNum
-      .projectIndex = parser.idxProject
       .fileName     = parser.fileName
       
       select CASE id
@@ -245,12 +189,10 @@ end function
 
 ''
 ''
-function clsDB2.dbDeleteByProject( byval idx as long ) as boolean
+function clsDB2.dbDeleteAll() as boolean
    for i as long = lbound(m_arrData) to ubound(m_arrData)
-      if m_arrData(i).projectIndex = idx THEN
-         m_arrData(i).deleted = true
-         function = true
-      END IF
+      m_arrData(i).deleted = true
+      function = true
    NEXT
 end function
 

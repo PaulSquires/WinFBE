@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -29,11 +29,9 @@ End Function
 
 ''
 ''
-Function ParseDocument( byval idx as long, _     ' project index
-                        byval pDoc as clsDocument ptr, _
+Function ParseDocument( byval pDoc as clsDocument ptr, _
                         byval wszFilename as CWSTR _    
                         ) As Long
-
    dim as long nLineCount, nLineNum, nPos
    Dim As String st, st_ucase, sLine
    redim as string sLineArray(5000)   ' dynamic array 
@@ -48,7 +46,6 @@ ParseAgain:
       ' Load the codegen lines into the sLineArray
       if pDoc THEN
          wszFilename = pDoc->DiskFilename
-         idx = pDoc->ProjectIndex
          dim as CWSTR wst
          dim as long iLineStart = 1
          dim as long iLineEnd
@@ -70,7 +67,6 @@ ParseAgain:
       if pDoc THEN
          nLineCount = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0)
          wszFilename = pDoc->DiskFilename
-         idx = pDoc->ProjectIndex
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
          gdb2.dbDelete(wszFilename)
@@ -98,6 +94,8 @@ ParseAgain:
    
    if gFileLoading then
       dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+      dim wszText as wstring * MAX_PATH: StatusBar_GetText(hStatusbar, 0, @wszText)
+      if wszText <> "Parsing:" then StatusBar_SetText(hStatusBar, 3, "Parsing:")
       StatusBar_SetText(hStatusBar, 4, wszFilename)
    END IF
 
@@ -105,9 +103,8 @@ ParseAgain:
    dim parser as clsParser
    
    with parser
-      .action     = ACTION_NONE
-      .idxProject = idx
-      .fileName   = wszFilename
+      .action   = ACTION_NONE
+      .fileName = wszFilename
    end with
 
 

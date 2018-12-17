@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -40,6 +40,33 @@ End Function
 
 
 ' ========================================================================================
+' Search child nodes to see if search text exists. Needed to allow output of parent node.
+' ========================================================================================
+function frmFnList_SearchChildNodes( byval hParent as HTREEITEM, _
+                                     byval hChild as HTREEITEM, _
+                                     byref wszSearch as wstring _
+                                     ) as Boolean
+   dim as Boolean bFound = true
+   
+   ' If a search term exists then only add the header if a valid found
+   ' sub/function matches in one of the child nodes.
+   if len(wszSearch) then
+      Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+      dim wszText as wstring * MAX_PATH
+      hChild = Treeview_GetChild( hTree, hParent)
+      bFound = false
+      do until hChild = 0 
+         Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+         if instr(ucase(wszText), ucase(wszSearch)) then 
+            bFound = true: exit do
+         end if
+         hChild = Treeview_GetNextSibling(hTree, hChild)
+      loop
+   end if
+   function = bFound
+end function
+
+' ========================================================================================
 ' Update the Listbox with the list of functions from all loaded documents
 ' ========================================================================================
 Function frmFnList_UpdateListBox() As Long
@@ -50,40 +77,46 @@ Function frmFnList_UpdateListBox() As Long
    Listbox_ResetContent(hList)
    
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   Dim As HTREEITEM hChild, hParent
-   dim as long p, pDoc, idx
+   Dim As HTREEITEM hChild, hChildSearch, hParent
+   dim as long p, pDoc
+   dim as Boolean bFound
    dim wszText as wstring * MAX_PATH
+   dim as CWSTR wszSearch = AfxGetWindowText(GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_TXTSEARCH))
    
-   dim as long nFirstProject = iif(gApp.IsProjectActive, 1, 0)
-   Dim As Long nProjectCount = gApp.GetProjectCount()
-   
-   For idx = nFirstProject To nProjectCount 
-      if gApp.Projects(idx).InUse = false THEN continue for
+   LockWindowUpdate(hList)
+   hParent = Treeview_GetChild( hTree, gApp.hExplorerRootNode)
+   do until hParent = 0 
+      ' Filename
+      Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
+      pDoc = FF_TreeView_GetlParam(hTree, hParent)
+      wszText = ucase(wszText)
 
-      hParent = Treeview_GetChild( hTree, gApp.Projects(gApp.GetActiveProjectIndex).hExplorerRootNode)
-      do until hParent = 0 
-         ' Filename
-         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
-         pDoc = FF_TreeView_GetlParam(hTree, hParent)
-         wszText = ucase(wszText)
+      bFound = frmFnList_SearchChildNodes(hParent, hChild, wszSearch) 
+      if bFound then   
          p = Listbox_AddString( hList, strptr(wszText) )
          ListBox_SetItemData( hList, p, pDoc )    ' pDoc is stored for a header
-         
-         ' Get all functions in the file
-         hChild = Treeview_GetChild( hTree, hParent)
-         do until hChild = 0 
-            Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+      end if
+      
+      ' Get all functions in the file
+      hChild = Treeview_GetChild( hTree, hParent)
+      do until hChild = 0 
+         bFound = true
+         Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+         if len(wszSearch) then
+            bFound = instr(ucase(wszText), ucase(wszSearch))
+         end if   
+         if bFound then      
             p = Listbox_AddString( hList, strptr(wszText) )
             ListBox_SetItemData( hList, p, 0 )
-            hChild = Treeview_GetNextSibling(hTree, hChild)
-         loop
-         
-         ' Get the next filename
-         hParent = Treeview_GetNextSibling(hTree, hParent)
-      loop 
+         end if
+         hChild = Treeview_GetNextSibling(hTree, hChild)
+      loop
+      
+      ' Get the next filename
+      hParent = Treeview_GetNextSibling(hTree, hParent)
+   loop 
+   LockWindowUpdate(null)
 
-   Next
-   
    Function = 0
 End Function
 
@@ -105,8 +138,15 @@ Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
             dim wszText as wstring * MAX_PATH
             ListBox_GetText( hwndCtl, nCurSel, @wszText )
             pDoc = cast(clsDocument ptr, Listbox_GetItemData(hWndCtl, nCurSel))
+            If gConfig.CloseFuncList Then 
+               PostMessage( hWnd, WM_CLOSE, 0, 0 ) 
+            end if
             OpenSelectedDocument(pDoc, wszText)
-            If gConfig.CloseFuncList Then ShowWindow( HWND_FRMFNLIST, SW_HIDE )
+         end if
+         
+      Case IDC_FRMFNLIST_TXTSEARCH
+         If codeNotify = EN_CHANGE Then
+            frmFnList_UpdateListBox
          end if      
    End Select
    
@@ -123,8 +163,12 @@ Function frmFnList_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    Dim As Rect rc
    GetClientRect(HWnd, @rc)
    
-   Dim As HWnd hList = GetDlgItem(HWnd, IDC_FRMFNLIST_LISTBOX )
-   SetWindowPos hList, 0, 0, 0, rc.Right-rc.Left, rc.Bottom-rc.top, SWP_SHOWWINDOW Or SWP_NOZORDER
+   dim as long nHeight = AfxGetWindowHeight(GetDlgItem(HWnd, IDC_FRMFNLIST_TXTSEARCH))
+   SetWindowPos GetDlgItem(HWnd, IDC_FRMFNLIST_TXTSEARCH ), 0, _
+                  0, 0, rc.Right-rc.Left, nHeight, SWP_NOZORDER
+
+   SetWindowPos GetDlgItem(HWnd, IDC_FRMFNLIST_LISTBOX ), 0, _
+                  0, nHeight, rc.Right-rc.Left, rc.Bottom-rc.top-nHeight, SWP_NOZORDER
 
    Function = 0
 End Function
@@ -134,11 +178,9 @@ End Function
 ' Process WM_SIZE message for window/dialog: FnList
 ' ========================================================================================
 Function frmFnList_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
-
    If state <> SIZE_MINIMIZED Then 
       frmFnList_PositionWindows(HWnd)
    End If   
-
    Function = 0
 End Function
 
@@ -147,8 +189,7 @@ End Function
 ' Process WM_CLOSE message for window/dialog: FnList
 ' ========================================================================================
 Function frmFnList_OnClose( ByVal HWnd As HWnd ) As LRESULT
-   ' Never close the window; simply hide it.
-   ShowWindow( HWnd, SW_HIDE )
+   DestroyWindow(HWnd)
    Function = 0
 End Function
 
@@ -248,7 +289,7 @@ Function frmFnList_ListBox_SubclassProc ( _
                   ) As LRESULT
 
    Select Case uMsg
-
+                        
       Case WM_GETDLGCODE
          ' All keyboard input
          Function = DLGC_WANTALLKEYS
@@ -300,24 +341,20 @@ Function frmFnList_WndProc( ByVal HWnd   As HWnd, _
 End Function
 
 
-''
-''  Need to re-parse any dirty files. This is especially important for QuickRun scenarios
-''  where the file is never physically saved.
-''
+' ========================================================================================
+' Reparse any dirty files
+' ========================================================================================
 function frmFnList_ReparseFiles() as Long
-   dim as long idx = gApp.GetActiveProjectIndex()
-   Dim pDoc As clsDocument Ptr
-   Dim As Long i, nCount
-   nCount = gApp.Projects(idx).GetDocumentCount 
-   For i = 0 To nCount - 1
-      pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-      If pDoc Then 
-         If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-            ParseDocument(idx, pDoc, "")
-            AddFunctionsToExplorerTreeview(pDoc, true)
-         end if
+   '  Need to re-parse any dirty files. This is especially important for QuickRun scenarios
+   '  where the file is never physically saved.
+   Dim pDoc As clsDocument Ptr = gApp.pDocList
+   do until pDoc = 0
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+         ParseDocument(pDoc, "")
+         AddFunctionsToExplorerTreeview(pDoc, true)
       end if
-   next      
+      pDoc = pDoc->pDocNext
+   loop   
    function = 0
 end function
 
@@ -328,26 +365,12 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
                          ByVal nCmdShow   As Long = 0 _
                          ) As Long
 
-   ' If function list already exists then toggle its visibility
-   ' unless nCmdShow is explicitly set to show it.
-   If IsWindow(HWND_FRMFNLIST) Then
-      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMFNLIST), SW_HIDE, SW_SHOW)
-      ShowWindow HWND_FRMFNLIST, nCmdShow
-      If nCmdShow = SW_SHOW Then
-         ' Need to re-parse any dirty files. This is especially important for QuickRun scenarios
-         ' where the file is never physically saved.
-         frmFnList_ReparseFiles
-         frmFnList_UpdateListBox()
-         frmFnList_SetListBoxPosition()
-         SetFocus GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
-      End If
-      Exit Function 
-   Else 
-      ' If the window does not exist yet then ensure that it becomes visible after creation.
-      nCmdShow = SW_SHOW
-   End If
-      
-
+   ' Calling this function works as a toggle to display/close the popup form.
+   if IsWindowVisible(HWND_FRMFNLIST) then
+      DestroyWindow(HWND_FRMFNLIST)
+      exit function
+   end if
+   
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
@@ -367,7 +390,15 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
-   Dim As HWnd hList = _ 
+   Dim As HWnd hTextBox = _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMFNLIST_TXTSEARCH, "", 0, 0, 0, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+   dim wszText as wstring * MAX_PATH 
+   wszText = L(42,"Search"): wszText = AfxStrRemove(wszText, "&") + "..."
+   SendMessage hTextBox, EM_SETCUEBANNER, 1, CAST(LPARAM, @wszText)
+
+   dim as hwnd hList = _ 
         pWindow->AddControl("LISTBOX", , IDC_FRMFNLIST_LISTBOX, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_HSCROLL Or LBS_MULTICOLUMN Or LBS_NOINTEGRALHEIGHT Or _
         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
@@ -379,13 +410,16 @@ Function frmFnList_Show( ByVal hWndParent As HWnd, _
 
    SendMessageW( hList, LB_SETCOLUMNWIDTH, 250 * pWindow->rxRatio, 0 )
    
+   frmFnList_PositionWindows(HWND_FRMFNLIST)
+
+   LockWindowUpdate(hList)
    frmFnList_ReparseFiles
    frmFnList_UpdateListBox()
    frmFnList_SetListBoxPosition()
+   LockWindowUpdate(null)
+   AfxRedrawWindow(hList)
 
-   frmFnList_PositionWindows(HWND_FRMFNLIST)
-
-   ShowWindow HWND_FRMFNLIST, nCmdShow
+   ShowWindow HWND_FRMFNLIST, SW_SHOW
    SetFocus hList
    
    Function = 0

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -49,10 +49,9 @@
 #Define IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE    1001
 #Define IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST      1002
 #Define IDC_FRMOPTIONSGENERAL_CHKCLOSEPROJMGR       1003
-#Define IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE        1004
-#Define IDC_FRMOPTIONSGENERAL_CHKASKEXIT            1005
-#Define IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR        1006
-#Define IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR      1007
+#Define IDC_FRMOPTIONSGENERAL_CHKASKEXIT            1004
+#Define IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR        1005
+#Define IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR      1006
 
 #Define IDC_FRMOPTIONSEDITOR_LBLTABSIZE             1000
 #Define IDC_FRMOPTIONSEDITOR_TXTTABSIZE             1001
@@ -135,18 +134,18 @@
 #Define IDC_FRMPROJECTOPTIONS_TXTOPTIONS64          1008
 #Define IDC_FRMPROJECTOPTIONS_CHKMANIFEST           1009
 
-#DEFINE IDC_FRMCOMPILECONFIG_LIST1                  1000
-#DEFINE IDC_FRMCOMPILECONFIG_LABEL1                 1001
-#DEFINE IDC_FRMCOMPILECONFIG_TXTDESCRIPTION         1002
-#DEFINE IDC_FRMCOMPILECONFIG_LABEL2                 1003
-#DEFINE IDC_FRMCOMPILECONFIG_TXTOPTIONS             1004
-#DEFINE IDC_FRMCOMPILECONFIG_CHKISDEFAULT           1005
-#DEFINE IDC_FRMCOMPILECONFIG_CMDUP                  1006
-#DEFINE IDC_FRMCOMPILECONFIG_CMDDOWN                1007
-#DEFINE IDC_FRMCOMPILECONFIG_CMDINSERT              1008
-#DEFINE IDC_FRMCOMPILECONFIG_CMDDELETE              1009
-#DEFINE IDC_FRMCOMPILECONFIG_OPT32                  1010
-#DEFINE IDC_FRMCOMPILECONFIG_OPT64                  1011
+#DEFINE IDC_FRMBUILDCONFIG_LIST1                  1000
+#DEFINE IDC_FRMBUILDCONFIG_LABEL1                 1001
+#DEFINE IDC_FRMBUILDCONFIG_TXTDESCRIPTION         1002
+#DEFINE IDC_FRMBUILDCONFIG_LABEL2                 1003
+#DEFINE IDC_FRMBUILDCONFIG_TXTOPTIONS             1004
+#DEFINE IDC_FRMBUILDCONFIG_CHKISDEFAULT           1005
+#DEFINE IDC_FRMBUILDCONFIG_CMDUP                  1006
+#DEFINE IDC_FRMBUILDCONFIG_CMDDOWN                1007
+#DEFINE IDC_FRMBUILDCONFIG_CMDINSERT              1008
+#DEFINE IDC_FRMBUILDCONFIG_CMDDELETE              1009
+#DEFINE IDC_FRMBUILDCONFIG_OPT32                  1010
+#DEFINE IDC_FRMBUILDCONFIG_OPT64                  1011
 
 #Define IDC_FRMTEMPLATES_LISTBOX                    1000
 
@@ -214,6 +213,7 @@
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1                 1001
 
 #Define IDC_FRMFNLIST_LISTBOX                       1000
+#Define IDC_FRMFNLIST_TXTSEARCH                     1001
 
 #Define IDC_FRMVDTOOLBOX_LSTTOOLBOX                 1000
 #Define IDC_FRMVDTOOLBOX_LSTPROPERTIES              1001
@@ -306,7 +306,6 @@
 Const DELIM = "|"                    ' character used as delimiter for function names in data1 of gFunctionLists hash
 Const IDC_MRUBASE = 5000             ' Windows id of MRU items 1 to 10 (located under File menu)
 Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
-CONST IDM_ADDFILETOPROJECT = 6100    ' 6100 to 6199 Popup menu will show list of open projects to choose from. 
 
 dim shared as long SPLITSIZE 
 SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
@@ -342,6 +341,13 @@ enum
    AUTOCOMPLETE_TYPE
 end enum   
    
+enum eFileClose
+   EFC_CLOSECURRENT
+   EFC_CLOSEALL
+   EFC_CLOSEALLFORWARD
+   EFC_CLOSEALLOTHERS
+   EFC_CLOSEALLBACKWARD 
+end enum
    
 ' Directions when determining next closest control pointer
 ENUM
@@ -433,7 +439,6 @@ Enum
    MSG_USER_SETCOLORCUSTOM
    MSG_USER_GETCOLORCUSTOM
    MSG_USER_PROCESS_COMMANDLINE 
-   MSG_USER_TOGGLE_TVCHECKBOXES
    MSG_USER_SHOWAUTOCOMPLETE
    MSG_USER_APPENDEQUALSSIGN
    MSG_USER_GENERATECODE
@@ -451,14 +456,14 @@ Enum
    IDM_TOMIXEDCASE, IDM_EOLTOCRLF, IDM_EOLTOCR, IDM_EOLTOLF, IDM_SELECTALL, IDM_SELECTLINE
    IDM_SPACESTOTABS, IDM_TABSTOSPACES
    IDM_SEARCH
-   IDM_FIND, IDM_FINDNEXT, IDM_FINDPREV, IDM_FINDINFILES, IDM_REPLACE, IDM_DEFINITION
-   IDM_LASTPOSITION
+   IDM_FIND, IDM_FINDNEXT, IDM_FINDPREV, IDM_FINDNEXTACCEL, IDM_FINDPREVACCEL 
+   IDM_FINDINFILES, IDM_REPLACE, IDM_DEFINITION,IDM_LASTPOSITION
    IDM_GOTO, IDM_BOOKMARKTOGGLE, IDM_BOOKMARKNEXT, IDM_BOOKMARKPREV, IDM_BOOKMARKCLEARALL
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT
    IDM_FUNCTIONLIST, IDM_VIEWEXPLORER, IDM_VIEWOUTPUT, IDM_RESTOREMAIN
    IDM_PROJECTNEW, IDM_PROJECTMANAGER, IDM_PROJECTOPEN, IDM_MRUPROJECT
-   IDM_PROJECTFILESADDTONODE, IDM_REMOVEFILEFROMPROJECT 
+   IDM_REMOVEFILEFROMPROJECT 
    IDM_PROJECTCLOSE, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS  
    IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_QUICKRUN, IDM_COMMANDLINE
    IDM_NEWFORM, IDM_VIEWTOOLBOX, IDM_MENUEDITOR
@@ -486,9 +491,7 @@ Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCo
 dim shared as BOOLEAN gPreparsing      ' T/F we are preparsing one or more \inc files (idx = -2).
 dim shared as BOOLEAN gPreparsingChanges  ' T/F preparsing had changes. Flag to save new databases.
 dim shared as BOOLEAN gFileLoading     ' T/F only parse Includes during initial file load.
-dim shared as BOOLEAN gProjectLoading  ' T/F to prevent screen flickering/updates during loading of many files.
 dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
-dim shared as Boolean gAppShutdown     ' T/F allows bypassing of treeview removal, etc
 
 ' Create a global bold font that is used in the PropertyList controls combobox and also for
 ' the label that describes the property name/description.
@@ -499,7 +502,7 @@ dim shared as long gHelpViewerIndex
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX, HWND_FRMVDCOLORS
-Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMCOMPILECONFIG, HWND_FRMUSERTOOLS, HWND_FRMMENUEDITOR
+Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMBUILDCONFIG, HWND_FRMUSERTOOLS, HWND_FRMMENUEDITOR
 Dim Shared As HWnd HWND_PROPLIST_EDIT, HWND_PROPLIST_COMBO, HWND_PROPLIST_COMBOLIST, HWND_FRMHELPVIEWER
 
 '  Global handle to hhctrl.ocx for context sensitive help
@@ -515,7 +518,6 @@ end type
 dim shared as HTMLHELPNODES gHTMLHelp(any)
 
 dim shared as HICON ghIconGood, ghIconBad, ghIconTick, ghIconNoTick
-dim shared as BOOLEAN gReplaceOpen     ' replace dialog is open
 
 dim shared as HACCEL ghAccelUserTools
 dim shared as HCURSOR ghCursorNS
@@ -529,7 +531,10 @@ dim shared as long gPropDivPos
 dim shared as boolean gPropDivTracking
 
 ' Create a dynamic array that will hold all localization words/phrases while
-' a language is being edited in frmOptionsLocal.
+' a language is being edited in frmOptionsLocal. Also create a global array
+' that holds the english phrases. When a localization is loaded, any missing
+' translations are replaced with the english version.
+ReDim Shared gLangEnglish(Any) As WString * MAX_PATH
 ReDim Shared gLocalPhrases(Any) As WString * MAX_PATH
 dim shared gLocalPhrasesEdit as boolean   ' a localization language is being edited. 
 
@@ -592,9 +597,11 @@ Type FINDREPLACE_TYPE
    txtLastFind         As String
    txtFiles            As String        ' *.*, *.bas, etc (FindInFolder)
    txtFolder           As String        ' start search from this folder (FindInFolder)
-   nWholeWord          As Long          ' checkmark for find/replace whole word search
-   nMatchCase          As Long          ' match case when searching
    nSearchSubFolders   As Long          ' search sub folders as well (FindInFolder)
+   nWholeWord          As long          ' find/replace whole word search
+   nMatchCase          As long          ' match case when searching
+   nSelection          As long          ' search only selected text
+   bShowReplace        as Boolean
 End Type
 Dim Shared gFind As FINDREPLACE_TYPE
 Dim Shared gFindInFiles As FINDREPLACE_TYPE
@@ -776,7 +783,6 @@ Type clsCollection
       Declare Property ItemFirst() As Long
       Declare Property ItemLast() As Long
       Declare Function ItemAt( ByVal nIndex As Long ) As clsControl Ptr 
-      'declare function ItemByName( byref wszName as wstring ) as clsControl ptr
       declare function DeselectAllControls() as long
       declare function SelectAllControls() as long
       declare function SelectControl( byval hWndCtrl as hwnd) as long
@@ -819,6 +825,7 @@ Type clsDocument
       m_hWndActiveScintilla as hwnd
       
    Public:
+      pDocNext         as clsDocument_ ptr = 0  ' pointer to next document in linked list 
       IsDesigner       As BOOLEAN
       IsNewFlag        As BOOLEAN
       LoadingFromFile  as Boolean
@@ -857,7 +864,6 @@ Type clsDocument
       wszFormMetaData  as CWSTR     ' Form metadata that defines the form
       
       ' Code document related
-      ProjectIndex     as long      ' array index into gApp.Projects
       ProjectFileType  As Long = FILETYPE_UNDEFINED
       DiskFilename     As WString * MAX_PATH
       DateFileTime     As FILETIME  
@@ -1035,7 +1041,6 @@ Type clsConfig
       HighlightCurrentLine As Long = True
       IndentGuides         As Long = True
       TabIndentSpaces      As Long = True
-      HideCompile          As Long = False
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
       UnicodeEncoding      As Long = False
@@ -1078,53 +1083,26 @@ Type clsConfig
 End Type
 
 
-type clsProject
-   private:
-      m_arrDocuments(Any) As clsDocument Ptr
-   
-   public:
-      InUse                as boolean     ' this spot in the Projects array is in use
-      ProjectName          As CWSTR
-      ProjectFilename      As CWSTR
-      ProjectBuild         As string      ' default build configuration for the project (GUID)
-      ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
-      ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
-      ProjectManifest      as long        ' T/F create a generic resource and manifest file
-      hExplorerRootNode    As HTREEITEM
-      ProjectNotes         as CWSTR       ' Save/Load from project file
-      ProjectCommandLine   as CWSTR
-      
-      Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
-      declare Function RemoveDocumentFromArray( ByVal idx As Long) As Long
-      Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
-      declare Function RemoveAllDocuments() As Long
-      Declare Function GetDocumentCount() As Long
-      Declare Function GetDocumentPtr( ByVal idx As Long ) As clsDocument Ptr
-      Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
-      Declare Function GetMainDocumentPtr() As clsDocument Ptr
-      Declare Function GetResourceDocumentPtr() As clsDocument Ptr
-      Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
-      Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
-      declare Function GetProjectCompiler() As long
-      Declare Function Debug() As Long
-END TYPE
-
 Type clsApp
    Private: 
       m_arrQuickRun(Any) As WSTRING * MAX_PATH
       
    Public:
+      pDocList                As clsDocument Ptr  ' Single linked list of loaded files
       IsWindowIncludes        as Boolean     ' T/F that Windows includes have already been loaded
       SuppressNotify          As BOOLEAN     ' temporarily suppress Scintilla notifications
       hRecentFilesRootNode    As HTREEITEM
       hRecentProjectsRootNode As HTREEITEM
+      hExplorerRootNode       As HTREEITEM
       bDragTabActive          as BOOLEAN     ' A tab in the top tabcontrol is being dragged
       bDragActive             As BOOLEAN     ' splitter drag is currently active 
       hWndPanel               As HWND        ' the panel being split left/right or up/down
       IncludeFilename         As CWSTR
       NonProjectNotes         as CWSTR       ' Save/load from config file
       IsNewProjectFlag        As BOOLEAN
-      ProjectOverrideIndex    as long        ' Do action to specific project rather than the active project
+      IsProjectLoading        as Boolean     ' Project loading. Disable some screen updating.
+      IsShutDown              as boolean     ' App is currently closing
+      wszCommandLine          as CWSTR       ' non-project commandline (not saved to file)
       
       ' Handles for images used in scintilla popup autocomplete
       pImageAutocompleteBaseType as any ptr
@@ -1132,22 +1110,33 @@ Type clsApp
       pImageAutocompleteMethod   as any ptr
       pImageAutocompleteProperty as any ptr
       hWndAutoCListBox           as hwnd          ' handle of popup autocomplete ListBox window
-      
-      Projects(any) as clsProject 
-      
-      declare function GetProjectCount() as LONG
-      declare Function GetActiveProjectIndex() As long
-      declare Function SetActiveProject( byval hNode As HTREEITEM ) As long
-      declare Function EnsureDefaultActiveProject(byval hNode as HTREEITEM = 0) As long
-      declare Function RemoveAllSelectionAttributes() As long
-      declare Function GetProjectIndexByFilename( byref sFilename as wstring ) As long
-      declare Function GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
-         
-      Declare Function IsProjectActive() As boolean
-      declare function GetNewProjectIndex() As Long
-      
+            
+      ' Project related info
+      IsProjectActive      As boolean
+      ProjectName          As CWSTR
+      ProjectFilename      As CWSTR
+      ProjectBuild         As string      ' default build configuration for the project (GUID)
+      ProjectOther32       As CWSTR       ' compile flags 32 bit compiler
+      ProjectOther64       As CWSTR       ' compile flags 64 bit compiler
+      ProjectManifest      as long        ' T/F create a generic resource and manifest file
+      ProjectNotes         as CWSTR       ' Save/Load from project file
+      ProjectCommandLine   as CWSTR
+
       declare function AddQuickRunEXE( byref sFilename as wstring ) as Long
       declare function CheckQuickRunEXE() as Long
+      declare Function RemoveAllSelectionAttributes() As long
+
+      Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
+      Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
+      declare Function RemoveAllDocuments() As Long
+      Declare Function GetDocumentCount() As Long
+      declare Function GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
+      Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
+      Declare Function GetMainDocumentPtr() As clsDocument Ptr
+      Declare Function GetResourceDocumentPtr() As clsDocument Ptr
+      Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+      Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
+      declare Function GetProjectCompiler() As long
       
       Declare Constructor()
       Declare Destructor()
@@ -1171,7 +1160,6 @@ type clsParser
       fileName      as CWSTR
       action        as Long        ' current active action
       lineNum       as long
-      idxProject    as Long
       st            as String      ' full line, comments and double spaces removed
       st_ucase      as String      ' full line (UCASE), comments and double spaces removed
       funcName      as string      ' Name of function being parsed
@@ -1208,7 +1196,7 @@ TYPE clsDB2
    public:  
       declare function dbAdd( byref parser as clsParser, byref id as long) as DB2_DATA ptr
       declare function dbDelete( byref wszFilename as WString) as long
-      declare function dbDeleteByProject( byval idx as long ) as boolean
+      declare function dbDeleteAll() as boolean
       declare function dbDeleteWinAPI() as boolean
       declare function dbRewind() as LONG
       declare function dbGetNext() as DB2_DATA ptr
@@ -1228,13 +1216,5 @@ Dim Shared gApp As clsApp
 Dim Shared gConfig As clsConfig
 Dim Shared gTTabCtl As clsTopTabCtl
 
-'  Internal flags for the parser routines
-enum  eFileClose
-   EFC_CLOSECURRENT
-   EFC_CLOSEALL
-   EFC_CLOSEALLFORWARD
-   EFC_CLOSEALLOTHERS
-   EFC_CLOSEALLBACKWARD 
-end enum
 
 

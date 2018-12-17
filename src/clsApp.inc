@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -15,11 +15,7 @@
 ''
 ''
 Constructor clsApp()
-   ' Array index 0 is "Project0" that always contains the FILES that
-   ' are not actually related to any open project. If no projects are open
-   ' then we always refer to Project0 for the file list.
-   redim preserve this.Projects(0) as clsProject 
-   this.Projects(0).InUse = true
+'
 End Constructor
 
 ''
@@ -28,18 +24,227 @@ Destructor clsApp()
 '
 End Destructor 
 
+''
+''
+Function clsApp.GetDocumentCount() As Long
+   dim pDoc as clsDocument ptr = this.pDocList
+   dim nCount as Long = 0
+   do until pDoc = 0
+      nCount = nCount + 1
+      pDoc = pDoc->pDocNext
+   loop
+   function = nCount
+end function
 
 ''
 ''
-Function clsApp.GetProjectIndexByFilename( byref sFilename as wstring ) As long
-   for idx as long = 0 to ubound(this.Projects)
-      if this.Projects(idx).InUse = true THEN
-         if ucase(this.Projects(idx).ProjectFilename) = ucase(sFilename) then
-            return idx
+Function clsApp.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
+   ' Add it to the start of the linked list
+   pDoc->pDocNext = this.pDocList
+   this.pDocList = pDoc
+   Function = 0
+End Function
+
+''
+''
+Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
+   
+   ' Remove from pDocList. Find the node that points to the incoming pDoc
+   ' and then point that node to pDoc->pDocNext
+   dim pDocSearch as clsDocument ptr = this.pDocList
+   if pDocSearch = pDoc then
+      this.pDocList = pDoc->pDocNext
+   else
+      do until pDocSearch = 0
+         if pDocSearch->pDocNext = pDoc then
+            pDocSearch->pDocNext = pDoc->pDocNext
+            exit do
          end if
-      end if
-   next   
+         pDocSearch = pDocSearch->pDocNext
+      loop
+   end if
+   ' Release memory associated with this pDoc
+   Delete pDoc
+
+   Function = 0
+End Function
+
+''
+''
+Function clsApp.RemoveAllDocuments() As Long
+   ' Remove from pDocList
+   dim pDoc as clsDocument ptr = this.pDocList
+   dim pDocNext as clsDocument ptr = this.pDocList
+
+   do until pDoc = 0
+      pDocNext = pDoc->pDocNext
+      ' Release memory associated with this pDoc
+      Delete pDoc
+      pDoc = pDocNext
+   loop
+   this.pDocList = 0
+   
+   Function = 0
+End Function
+
+''
+''
+Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
+   If pswzName = 0 Then Return 0
+   dim pDoc as clsDocument ptr = this.pDocList
+   do until pDoc = 0
+      If Ucase(pDoc->DiskFilename) = Ucase(*pswzName) Then return pDoc
+      pDoc = pDoc->pDocNext
+   loop
    function = 0
+End Function
+
+
+''
+''
+Function clsApp.GetMainDocumentPtr() As clsDocument Ptr
+   ' Get the Main document for the project
+   dim pDoc as clsDocument ptr = this.pDocList
+   do until pDoc = 0
+      If pDoc->ProjectFileType = FILETYPE_MAIN Then return pDoc
+      pDoc = pDoc->pDocNext
+   loop
+   function = 0
+End Function
+
+''
+''
+Function clsApp.GetResourceDocumentPtr() As clsDocument Ptr
+   ' Get the Resource document for the active project
+   dim pDoc as clsDocument ptr = this.pDocList
+   do until pDoc = 0
+      If pDoc->ProjectFileType = FILETYPE_RESOURCE Then return pDoc
+      pDoc = pDoc->pDocNext
+   loop
+   function = 0
+End Function
+
+''
+''
+Function clsApp.GetProjectCompiler() As long
+   ' Get the compiler associated with this project
+   for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+      if gConfig.Builds(i).Id = this.ProjectBuild then
+         if gConfig.Builds(i).Is32Bit THEN return IDM_32BIT
+         if gConfig.Builds(i).Is64Bit THEN return IDM_64BIT
+      end if   
+   NEXT
+   function = 0
+End Function
+
+''
+''
+Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
+
+   Dim wFilename As WString * MAX_PATH
+   Dim wText     As WString * MAX_PATH  
+   
+   wFilename = this.ProjectFilename
+   
+   If bSaveAs Then
+      ' Display the Save File Dialog
+      wText = AfxStrPathname( "NAMEX", wFilename )
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, @WStr("wfbe"), IDM_PROJECTSAVE)
+      If pwszName Then
+         wFilename = *pwszName
+         CoTaskMemFree(pwszName)
+      Else
+         Return False
+      End If
+   End If
+
+   ' Delete any existing file
+   If AfxFileExists(wFilename) Then Kill wFilename
+   this.ProjectFilename = wFilename
+   this.ProjectName = AfxStrPathname( "NAMEX", wFilename )
+   gConfig.ProjectSaveToFile()
+   
+   ' Also need to add this new project name to the MRU list.
+   UpdateMRUProjectList(wFilename)
+   
+   ' Ensure that the caption bar and Explorer root node is updated with the name
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   frmMain_UpdateLineCol(HWND_FRMMAIN)    ' this will update the caption
+   wFilename = ucase(this.ProjectName)
+   TreeView_SetItemText( hTree, this.hExplorerRootNode, @wFilename)
+   
+   frmMain_PositionWindows(HWND_FRMMAIN)
+
+   Function = True
+End Function
+      
+
+''
+''
+Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
+                                    ByVal nFileType As Long _       ' new filetype 
+                                    ) As LRESULT
+   If pDoc = 0 Then Exit Function
+   
+   Dim wzFileExt As WString * MAX_PATH 
+
+   wzFileExt = AfxStrPathname( "EXTN",  pDoc->DiskFilename )
+ 
+   ' Determine if the document already exists in the project. If it does not then
+   ' make a determination of a default file type for this new file being added to the project.
+   Dim bFound As BOOLEAN = False
+   dim pDocSearch as clsDocument ptr 
+   pDocSearch = this.pDocList
+   do until pDocSearch = 0
+      If (pDocSearch = pDoc) andalso (pDoc->ProjectFileType <> FILETYPE_UNDEFINED ) Then
+         bFound = True: Exit do
+      End If
+      pDocSearch = pDocSearch->pDocNext
+   loop
+   If bFound = False Then
+      If pDoc->ProjectFileType = FILETYPE_UNDEFINED Then
+         Select Case Ucase(wzFileExt)
+            Case ".BAS":  nFileType = FILETYPE_MODULE
+            Case ".RC":   nFileType = FILETYPE_RESOURCE
+            Case ".BI":   nFileType = FILETYPE_NORMAL
+            Case ".INC":  nFileType = FILETYPE_NORMAL
+            Case Else:    nFileType = FILETYPE_NORMAL
+         End Select   
+      End If
+   End If
+   
+   ' Do check to make sure that no other MAIN or RESOURCE exist because
+   ' there can only be one unique MAIN and one unique RESOURCE per project.
+
+   ' If we are setting a "Main" project file then we need to toggle any other Main 
+   ' file to "Normal". There can only be one Main file. Likewise, there can only be 
+   ' one "Resource" file.
+
+   If nFileType = FILETYPE_MAIN Then
+      pDocSearch = this.pDocList
+      do until pDocSearch = 0
+         If pDocSearch->ProjectFileType = FILETYPE_MAIN Then 
+            pDocSearch->ProjectFileType = FILETYPE_NORMAL
+         END IF
+         pDocSearch = pDocSearch->pDocNext
+      loop
+   End If      
+   If nFileType = FILETYPE_RESOURCE Then
+      pDocSearch = this.pDocList
+      do until pDocSearch = 0
+         If pDocSearch->ProjectFileType = FILETYPE_RESOURCE Then 
+            pDocSearch->ProjectFileType = FILETYPE_NORMAL
+         END IF
+         pDocSearch = pDocSearch->pDocNext
+      loop
+   End If      
+
+   pDoc->ProjectFileType = nFileType
+
+   ' Refresh the statusbar to ensure that the file's type is displayed properly
+   pDoc->DisplayStats
+
+   Function = 0
 End Function
 
 
@@ -49,24 +254,18 @@ Function clsApp.RemoveAllSelectionAttributes() As long
    ' Remove all Attribute #8 selection highlights from the documents. This 
    ' occurs when the FindReplace dialog is closed. Therefore we need to apply
    ' it to all documents in all projects.
-   dim pDoc as clsDocument ptr
+   dim pDoc as clsDocument ptr = this.pDocList
    dim as long startPos, endPos
    
-   for idx as long = 0 to ubound(this.Projects)
-      if this.Projects(idx).InUse = true THEN
-         For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
-            pDoc = this.Projects(idx).GetDocumentPtr(i)
-            if pDoc THEN
-               SendMessage( pDoc->hWindow(0), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
-               SendMessage( pDoc->hWindow(0), SCI_SETINDICATORCURRENT, 8, 0)
-               SendMessage( pDoc->hWindow(0), SCI_TARGETWHOLEDOCUMENT, 0, 0)
-               startPos = SendMessage( pDoc->hWindow(0), SCI_GETTARGETSTART, 0, 0)
-               endPos =  SendMessage( pDoc->hWindow(0), SCI_GETTARGETEND, 0, 0)
-               SendMessage( pDoc->hWindow(0), SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
-            END IF
-         Next
-      end if
-   next   
+   do until pDoc = 0
+      SendMessage( pDoc->hWindow(0), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX)
+      SendMessage( pDoc->hWindow(0), SCI_SETINDICATORCURRENT, 8, 0)
+      SendMessage( pDoc->hWindow(0), SCI_TARGETWHOLEDOCUMENT, 0, 0)
+      startPos = SendMessage( pDoc->hWindow(0), SCI_GETTARGETSTART, 0, 0)
+      endPos =  SendMessage( pDoc->hWindow(0), SCI_GETTARGETEND, 0, 0)
+      SendMessage( pDoc->hWindow(0), SCI_INDICATORCLEARRANGE, startPos, Cast(LPARAM, endPos))
+      pDoc = pDoc->pDocNext
+   loop   
    function = 0
 End Function
 
@@ -75,137 +274,22 @@ End Function
 Function clsApp.GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
    ' Find the pDoc pointer based on all the available hWindow for the any loaded
    ' document or visual designer.
-   dim pDoc as clsDocument ptr
+   dim pDoc as clsDocument ptr = this.pDocList
    IF hWindow = NULL THEN EXIT FUNCTION
    
-   for idx as long = 0 to ubound(this.Projects)
-      if this.Projects(idx).InUse = true THEN
-         For i As Long = 0 To this.Projects(idx).GetDocumentCount - 1
-            pDoc = this.Projects(idx).GetDocumentPtr(i)
-            if pDoc THEN
-               ' Determine if the incoming hWindow matches the clsDocument hWindow or
-               ' is the Frame or Form windows.
-               if (hWindow = pDoc->hWindow(0)) orelse _
-                  (hWindow = pDoc->hWindow(1)) orelse _
-                  (hWindow = pDoc->hWndFrame)  orelse _
-                  (hWindow = pDoc->hWndForm) THEN
-                  return pDoc
-               end if   
-            END IF
-         Next
-      end if
-   next   
+   do until pDoc = 0
+      ' Determine if the incoming hWindow matches the clsDocument hWindow or
+      ' is the Frame or Form windows.
+      if (hWindow = pDoc->hWindow(0)) orelse _
+         (hWindow = pDoc->hWindow(1)) orelse _
+         (hWindow = pDoc->hWndFrame)  orelse _
+         (hWindow = pDoc->hWndForm) THEN
+         return pDoc
+      end if   
+      pDoc = pDoc->pDocNext
+   loop   
    function = 0
 End Function
-
-''
-''
-Function clsApp.GetProjectCount() As long
-   dim as long nCount = 0
-   for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         nCount = nCount + 1
-      END IF
-   NEXT
-   function = nCount
-end function
-
-''
-''
-Function clsApp.GetActiveProjectIndex() As long
-   ' First check to see if the index override has been set. This occurs if we want
-   ' to do an action to a specific project rather than the active project.
-   if gApp.ProjectOverrideIndex > 0 THEN return gApp.ProjectOverrideIndex
-      
-   ' Return the index of the project that has it's checkbox set
-   dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         if TreeView_IsItemChecked(hTree, this.Projects(i).hExplorerRootNode) then
-            return i
-         end if   
-      END IF
-   NEXT
-   function = 0    ' Use Project0 "FILES" by default
-end function
-
-''
-''
-Function clsApp.SetActiveProject( byval hNode As HTREEITEM) As long
-   ' Set the treeview checkbox making it the active project
-   dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         if hNode = gApp.Projects(i).hExplorerRootNode THEN
-            Treeview_SetCheckState(hTree, gApp.Projects(i).hExplorerRootNode, TRUE)      
-         else   
-            Treeview_SetCheckState(hTree, gApp.Projects(i).hExplorerRootNode, false)      
-         END IF
-      end if
-   NEXT
-   function = 0
-end function
-
-''
-''
-Function clsApp.EnsureDefaultActiveProject(byval hNodeBypass as HTREEITEM = 0) As long
-   ' Ensure that at least one of the treeview checkboxes are the active project
-   ' If incoming hNodePass is set then exclude that node from our searches. This is
-   ' the case where the node has just been clicked off so we don't want to set it 
-   ' active immediately again.
-   dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   dim as HTREEITEM hNodeActive = 0
-   
-   for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         if gApp.Projects(i).hExplorerRootNode = hNodeBypass THEN continue for
-         if TreeView_IsItemChecked(hTree, gApp.Projects(i).hExplorerRootNode) then
-            hNodeActive = gApp.Projects(i).hExplorerRootNode
-            exit for
-         else
-            if hNodeActive = 0 then hNodeActive = gApp.Projects(i).hExplorerRootNode
-         end if
-      end if
-   next
-   Treeview_SetCheckState(hTree, hNodeActive, TRUE)      
-   function = 0
-end function
-
-
-''
-''
-Function clsApp.IsProjectActive() As BOOLEAN
-   ' Determine is any projects are active. We cycle through the Projects to
-   ' see if any of the slots are in use. Slot 0 is reserved for when no project
-   ' is open so bypass that slot when searching.
-   for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = true THEN
-         return true
-      END IF
-   NEXT
-   return false
-End Function
-
-
-''
-''
-Function clsApp.GetNewProjectIndex() As Long
-   ' Get a new project index 
-   dim idx as long = -1
-
-   for i as long = 1 to ubound(this.Projects)
-      if this.Projects(i).InUse = false THEN
-         this.Projects(i).InUse = true
-         return i
-      END IF
-   NEXT
-   idx = ubound(this.Projects) + 1
-   redim preserve this.Projects(idx) as clsProject 
-
-   return idx
-
-end function
-
 
 ''
 ''

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -14,18 +14,16 @@
 
 ''  CONFIGURATION MODULE
 
-
-
 ''
 ''  CONSTRUCTOR
 ''
 Constructor clsConfig
-   _ConfigFilename     = AfxGetExePathName & "Settings\WinFBE.ini" 
-   _FBKeywordsFilename = AfxGetExePathName & "Settings\freebasic_keywords.txt" 
-   _FBCodetipsFilename = AfxGetExePathName & "Settings\codetips.ini" 
-   _WinAPICodetipsFilename = AfxGetExePathName & "Settings\codetips_winapi.ini" 
+   _ConfigFilename            = AfxGetExePathName & "Settings\WinFBE.ini" 
+   _FBKeywordsFilename        = AfxGetExePathName & "Settings\freebasic_keywords.txt" 
+   _FBCodetipsFilename        = AfxGetExePathName & "Settings\codetips.ini" 
+   _WinAPICodetipsFilename    = AfxGetExePathName & "Settings\codetips_winapi.ini" 
    _WinFormsXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winformsx.ini" 
-   _WinFBXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winfbx.ini" 
+   _WinFBXCodetipsFilename    = AfxGetExePathName & "Settings\codetips_winfbx.ini" 
 End Constructor
 
 ''
@@ -60,7 +58,6 @@ Function clsConfig.LoadCodetipsFB() as boolean
    dim parser as clsParser
 
    parser.fileName = ""     ' no need to store this sFilename
-   parser.idxProject = -1   ' do not associate it with any project
    
    dim pStream AS CTextStream
    if pStream.Open(_FBCodetipsFilename) <> S_OK then return true  ' error
@@ -92,7 +89,6 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
    dim parser as clsParser
 
    parser.fileName = ""     ' no need to store this sFilename
-   parser.idxProject = -1   ' do not associate it with any project
    parser.IsWinApi = IsWinAPI
 
    ''
@@ -179,7 +175,6 @@ Function clsConfig.LoadCodetipsWinFormsX() as boolean
    function = this.LoadCodetipsGeneric(_WinFormsXCodetipsFilename, false)
    dim parser as clsParser
    parser.fileName = ""     ' no need to store this sFilename
-   parser.idxProject = -1   ' do not associate it with any project
    parser.IsWinApi = false
    parser.typeName = "Application"
    parser.typeAlias = "wfxApplication"
@@ -596,7 +591,6 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "MultipleInstances="     & this.MultipleInstances    
    pStream.WriteLine "CompileAutosave="       & this.CompileAutosave      
    pStream.WriteLine "CloseFuncList="         & this.CloseFuncList        
-   pStream.WriteLine "HideCompile="           & this.HideCompile          
    pStream.WriteLine "SyntaxHighlighting="    & this.SyntaxHighlighting   
    pStream.WriteLine "Codetips="              & this.Codetips             
    pStream.WriteLine "AutoComplete="          & this.AutoComplete
@@ -904,7 +898,6 @@ Function clsConfig.LoadConfigFile() as Long
          Case "MultipleInstances":    this.MultipleInstances    = nData
          Case "CompileAutosave":      this.CompileAutosave      = nData
          Case "CloseFuncList":        this.CloseFuncList        = nData
-         Case "HideCompile":          this.HideCompile          = nData
          Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
          Case "Codetips":             this.Codetips             = nData
          Case "AutoComplete":         this.AutoComplete         = nData
@@ -935,9 +928,7 @@ Function clsConfig.LoadConfigFile() as Long
          Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
          Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
          case "WinFBXPath":           this.WinFBXPath           = wData
-
-         Case "CompilerSwitches":     
-            this.CompilerSwitches     = wData
+         Case "CompilerSwitches":     this.CompilerSwitches     = wData
          Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
          Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
          Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData
@@ -1136,77 +1127,72 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
    Dim As Long i, nActiveTab
 
    Dim pDoc As clsDocument Ptr
-   dim as long idx = gApp.GetActiveProjectIndex()
 
    dim pStream as CTextStream  ' (utf16)
-   if pStream.Create(gApp.Projects(idx).ProjectFilename, true, true) <> S_OK then return false
+   if pStream.Create(gApp.ProjectFilename, true, true) <> S_OK then return false
    
    pStream.WriteLine "' WINFBE PROJECT FILE"
-   pStream.WriteLine "ProjectBuild=" &       gApp.Projects(idx).ProjectBuild
-   pStream.WriteLine "ProjectOther32=" &     gApp.Projects(idx).ProjectOther32
-   pStream.WriteLine "ProjectOther64=" &     gApp.Projects(idx).ProjectOther64
-   pStream.WriteLine "ProjectCommandLine=" & gApp.Projects(idx).ProjectCommandLine
+   pStream.WriteLine "ProjectBuild=" &       gApp.ProjectBuild
+   pStream.WriteLine "ProjectOther32=" &     gApp.ProjectOther32
+   pStream.WriteLine "ProjectOther64=" &     gApp.ProjectOther64
+   pStream.WriteLine "ProjectCommandLine=" & gApp.ProjectCommandLine
 
    ' Save all of the loaded tabs first
-   nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    nActiveTab = TabCtrl_GetCurSel( gTTabCtl.hWindow )
-
    pStream.WriteLine "ActiveTab=" & nActiveTab
 
    Dim TB As TC_ITEM 
    TB.Mask = TCIF_PARAM
 
-   
+   nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+
    For i = 0 To nCount - 1
       TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
       ' Only deal with files that are no longer "new"
       if pDoc->IsNewFlag = false then 
-         if pDoc->ProjectIndex = idx THEN
-            wszText = pDoc->DiskFilename
-            cwzRelative = AfxPathRelativePathTo( gApp.Projects(idx).ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
-            if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
-            wszText = ProcessToCurdrive(wszText)
-            pStream.WriteLine "File=" & wszText
-            pStream.WriteLine "FileType=" & pDoc->ProjectFileType
-            pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than True
-            pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
-            pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
-            pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
-            pStream.WriteLine "Position1=" & SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
-            pStream.WriteLine "SplitPosition=" & pDoc->SplitY
-            pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
-            pStream.WriteLine "FileEnd=[-]" 
-         END IF
+         wszText = pDoc->DiskFilename
+         cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
+         if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
+         wszText = ProcessToCurdrive(wszText)
+         pStream.WriteLine "File=" & wszText
+         pStream.WriteLine "FileType=" & pDoc->ProjectFileType
+         pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than True
+         pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+         pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+         pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
+         pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
+         pStream.WriteLine "Position1=" & SendMessage( pDoc->hWindow(1), SCI_GETCURRENTPOS, 0, 0)  
+         pStream.WriteLine "SplitPosition=" & pDoc->SplitY
+         pStream.WriteLine "FocusEdit=" & iif(pDoc->hWndActiveScintilla = pDoc->hWindow(0), 0, 1)
+         pStream.WriteLine "FileEnd=[-]" 
       end if
    Next
          
    ' Save all other non-displayed documents for the project
-   nCount = gApp.Projects(idx).GetDocumentCount 
-   For i = 0 To nCount - 1
-      pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-      If pDoc Then 
-         ' Only deal with files that are no longer "new"
-         if pDoc->IsNewFlag = false then 
-            If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
-               wszText = pDoc->DiskFilename
-               cwzRelative = AfxPathRelativePathTo( gApp.Projects(idx).ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
-               if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
-               wszText = ProcessToCurdrive(wszText)
-               pStream.WriteLine "File=" & wszText
-               pStream.WriteLine "FileType=" & pDoc->ProjectFileType
-               pStream.WriteLine "TabIndex=" & 0    
-               pStream.WriteLine "FileEnd=[-]"
-            End If
-         end if
-      End If
-   Next
 
-   ' If no project is active then save NOTES to config file.
+   pDoc = gApp.pDocList
+   do until pDoc = 0
+      ' Only deal with files that are no longer "new"
+      if pDoc->IsNewFlag = false then 
+         If gTTabCtl.GetTabIndexByDocumentPtr(pDoc) = -1 Then
+            wszText = pDoc->DiskFilename
+            cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
+            if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
+            wszText = ProcessToCurdrive(wszText)
+            pStream.WriteLine "File=" & wszText
+            pStream.WriteLine "FileType=" & pDoc->ProjectFileType
+            pStream.WriteLine "TabIndex=" & 0    
+            pStream.WriteLine "FileEnd=[-]"
+         End If
+      end if
+      pDoc = pDoc->pDocNext
+   loop
+
+   ' If project is active then save NOTES to config file.
    if gApp.IsProjectActive THEN
       dim wszText as CWSTR = wstr("NOTES-START") + vbcrlf + _
-                             gApp.Projects(idx).ProjectNotes + vbcrlf + _
+                             gApp.ProjectNotes + vbcrlf + _
                              wstr("NOTES-END") + vbcrlf
       pStream.WriteLine ""
       pStream.WriteLine "[Notes]"
@@ -1235,7 +1221,6 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
    dim as Boolean bReadingNote
-   dim as long idx    ' project index
 
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
@@ -1245,25 +1230,16 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    StatusBar_SetText(hStatusBar, 3, "Parsing:")
    StatusBar_SetText(hStatusBar, 4, "")
 
-   'SetCompileStatusBarMessage( "", 0 )
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
    AfxDoEvents()
 
-   ' Determine the ProjectIndex for where to store this project
-   idx = gApp.GetNewProjectIndex()
+   gApp.ProjectFilename = wzFile
+   gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
+   gApp.ProjectNotes = ""
 
-   with gApp.Projects(idx)
-      .ProjectFilename = wzFile
-      .ProjectName = AfxStrPathname( "NAMEX", gApp.Projects(idx).ProjectFilename )
-      .hExplorerRootNode = FF_TreeView_InsertItem (hTV, TVI_ROOT, UCase(gApp.Projects(idx).ProjectName) )
-      .ProjectNotes = ""
-   end with
-   Treeview_SetBold(hTV, gApp.Projects(idx).hExplorerRootNode, TRUE)
-   
-    
    dim pStream as CTextStream  ' (utf16)
-   if pStream.OpenUnicode(gApp.Projects(idx).ProjectFilename) <> S_OK then return false
+   if pStream.OpenUnicode(gApp.ProjectFilename) <> S_OK then return false
 
    ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
    ' here and open them only after all over documents have been loaded. This will look
@@ -1272,16 +1248,16 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
 
   
    ' Prevent the constant updating of the app caption bar with filename, (pDoc->DisplayStats)
-   gProjectLoading = true 
-   gApp.ProjectOverrideIndex = idx
+   gApp.IsProjectLoading = true 
    gApp.IsWindowIncludes = false
    gdb2.dbDeleteWinAPI
          
-   ' Set InUse here prior to parsing the files of the project
-   gApp.Projects(idx).InUse = true
-
    ' Prevent Treeview flickering during adding
    LockWindowUpdate(hTV)
+
+   Treeview_DeleteAllItems(hTV)
+   gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTV, TVI_ROOT, "" )
+   Treeview_SetBold(hTV, gApp.hExplorerRootNode, TRUE)
 
    Do Until pStream.EOS
       AfxDoEvents()
@@ -1300,7 +1276,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
          continue do
       end if
       if bReadingNote THEN
-         gApp.Projects(idx).ProjectNotes = gApp.Projects(idx).ProjectNotes + wst + vbcrlf
+         gApp.ProjectNotes = gApp.ProjectNotes + wst + vbcrlf
          continue do
       END IF
 
@@ -1319,10 +1295,10 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       wData = ProcessFromCurdrive(wData)
 
       Select Case **wKey
-         Case "ProjectBuild":        gApp.Projects(idx).ProjectBuild       = wData
-         Case "ProjectOther32":      gApp.Projects(idx).ProjectOther32     = wData
-         Case "ProjectOther64":      gApp.Projects(idx).ProjectOther64     = wData
-         Case "ProjectCommandLine":  gApp.Projects(idx).ProjectCommandLine = wData
+         Case "ProjectBuild":        gApp.ProjectBuild       = wData
+         Case "ProjectOther32":      gApp.ProjectOther32     = wData
+         Case "ProjectOther64":      gApp.ProjectOther64     = wData
+         Case "ProjectCommandLine":  gApp.ProjectCommandLine = wData
          Case "ActiveTab":           nActiveTab = nData
          
          Case "File":                wszFilename = wData
@@ -1340,7 +1316,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
          Case "FileEnd":
             ' If this is a relative filename then convert it back.
             if AfxPathIsRelative(wszFilename) then 
-               wszFilename = AfxPathCombine( AfxStrPathName("PATH", gApp.Projects(idx).ProjectFilename), wszFilename)
+               wszFilename = AfxPathCombine( AfxStrPathName("PATH", gApp.ProjectFilename), wszFilename)
             end if
             If AfxFileExists(wszFilename) Then
                pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
@@ -1351,7 +1327,12 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
                                        wszFilename, _  ' pwszName
                                        0 )  ' pDocIn
                pDoc->ProjectFileType = nFileType
-               pDoc->ProjectIndex = idx
+               ' If opening a project file that does not yet have a file type designation
+               ' then assign it as a NORMAL file rather than leaving it empty.
+               if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+                  pDoc->ProjectFileType = FILETYPE_NORMAL
+               end if   
+
                pDoc->SplitY = nSplitPosition
                
                If bLoadInTab Then
@@ -1399,18 +1380,16 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
       Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
    end if
    
-   gProjectLoading = false
-   gApp.ProjectOverrideIndex = 0
-
+   gApp.IsProjectLoading = false
+   gApp.IsProjectActive = true
+   
    ' If no active build configuration then assign the currently active selection
-   if gApp.Projects(idx).ProjectBuild = "" then 
-      gApp.Projects(idx).ProjectBuild = GetSelectedBuildGUID()
+   if gApp.ProjectBuild = "" then 
+      gApp.ProjectBuild = GetSelectedBuildGUID()
    end if   
    
-   ' Set this project as active   
-   gApp.SetActiveProject(gApp.Projects(idx).hExplorerRootNode)
-
-   Treeview_EnsureVisible(hTV, gApp.Projects(idx).hExplorerRootNode)
+   TreeView_SetItemText(hTV, gApp.hExplorerRootNode, ucase(gApp.ProjectName) )
+   Treeview_EnsureVisible(hTV, gApp.hExplorerRootNode)
    
    ' Show the correct notes for this project
    frmOutput_ShowNotes

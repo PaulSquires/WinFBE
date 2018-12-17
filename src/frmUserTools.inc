@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -54,9 +54,8 @@ Function ExecuteUserTool( ByVal nToolNum As Long ) As Long
       
       ' Do the substitutions for the command line parameters
       If gApp.IsProjectActive Then 
-         dim as long idx = gApp.GetActiveProjectIndex()
-         wszProjectName = AfxStrPathname("NAMEX", gApp.Projects(idx).ProjectFilename)
-         pDocMain = gApp.Projects(idx).GetMainDocumentPtr()
+         wszProjectName = AfxStrPathname("NAMEX", gApp.ProjectFilename)
+         pDocMain = gApp.GetMainDocumentPtr()
       else
          pDocMain = pDocCurrent
       END IF 
@@ -754,7 +753,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    dim hList as hwnd = GetDlgItem(hForm, IDC_FRMUSERTOOLS_LSTTOOLS)
    ListBox_SetCurSel(hList, 0)
    SetUserToolsTextboxes()
-   SetFocus GetDlgItem(hForm, IDC_FRMCOMPILECONFIG_LIST1)
+   SetFocus GetDlgItem(hForm, IDC_FRMUSERTOOLS_LSTTOOLS)
 
    ' Process Windows messages
    Function = pWindow->DoEvents(nCmdShow)

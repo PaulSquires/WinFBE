@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Overview</title>
+  <title>09_Frame</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,43 +20,213 @@
   
 </head>
 <body>
-<h1 id="overview">Overview</h1>
-<p>The visual designer is still a major work in progress so please do not assume that all functionality is available and/or working correctly. The purpose of this release to show the progress of the visual designer to date and to allow input from users regarding its direction and whether changes in basic design philosophy should occur at this point.</p>
-<p>NOTE: Code may fail, GPF’s may occur in the editor. Do not rely on this version of the designer for any production quality code. Treat this mainly as a demo.</p>
-<p>The following areas of the visual designer are not working:</p>
-<ul>
-<li>Toolbar Editor</li>
-<li>Statusbar Editor</li>
-<li>Images/Pictures/Icons. Any control property that relies on these types has not been implemented yet. Need to create an interface between the editor and resource file.</li>
-<li>Guidelines and snap to lines on the design form</li>
-</ul>
-<p>There are a few controls that have been implemented. More to come as the core structure of the designer itself matures.</p>
-<ul>
-<li>Forms</li>
-<li>Label</li>
-<li>Button (Jose Roca’s CXpButton class)</li>
-<li>MaskedEdit (Jose Roca’s CMaskedEdit class)</li>
-<li>TextBox</li>
-<li>CheckBox</li>
-<li>Frame</li>
-<li>ListBox</li>
-<li>ComboBox</li>
-<li>OptionButton</li>
-<li>Main Menu</li>
-<li>StatusBar (only through code at this time)</li>
-</ul>
-<p>The forms and controls are being implemented via the WinFormsX library that I am writing and maintaining on GitHub.</p>
-<p>The rest of this document will give you a bare bones introduction to the use of the visual designer and code to perform various tasks.</p>
-<p>The visual designer will automatically generate code whenever something changes related to a form or control. The generated code is based on the syntax of the <strong>WinFormsX library</strong>.</p>
-<p>When the code is first generated, the visual designer will output an additional line:</p>
-<pre><code>Application.Run(Form1)
+<h1 id="frame-(wfxframe)">Frame (wfxFrame)</h1>
+<h3 id="properties">Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AllowDrop</td>
+<td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
+</tr>
+<tr class="even">
+<td>BackColor</td>
+<td>Gets or sets the background color of the form. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="odd">
+<td>CtrlId</td>
+<td>Gets or sets a value indicating the control ID of the control.</td>
+</tr>
+<tr class="even">
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.Frame</strong> and used when adding form to the application’s form collection.</td>
+</tr>
+<tr class="odd">
+<td>Enabled</td>
+<td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
+</tr>
+<tr class="even">
+<td>Font</td>
+<td>Gets or sets the font for the control. Refer to the Font object.</td>
+</tr>
+<tr class="odd">
+<td>Height</td>
+<td>Gets or sets the height of the control.</td>
+</tr>
+<tr class="even">
+<td>hWindow</td>
+<td>Gets the Windows handle (hwnd) of the control.</td>
+</tr>
+<tr class="odd">
+<td>hWindowParent</td>
+<td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
+</tr>
+<tr class="even">
+<td>Left</td>
+<td>Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="odd">
+<td>Location</td>
+<td>Gets or sets the top and left position of the control. Get: returns <a href="#wfxPoint">wfxPoint</a> object. Set: (left, top).</td>
+</tr>
+<tr class="even">
+<td>Locked</td>
+<td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
+</tr>
+<tr class="odd">
+<td>Parent</td>
+<td>Gets or sets the parent container of the control.</td>
+</tr>
+<tr class="even">
+<td>Size</td>
+<td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
+</tr>
+<tr class="odd">
+<td>Tag</td>
+<td>Gets or sets user defined text associated with the form.</td>
+</tr>
+<tr class="even">
+<td>Text</td>
+<td>Gets or sets the text (caption) associated with this form.</td>
+</tr>
+<tr class="odd">
+<td>Top</td>
+<td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="even">
+<td>UseMnemonic</td>
+<td>Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&amp;) character will be used as the control’s accelerator key.</td>
+</tr>
+<tr class="odd">
+<td>Visible</td>
+<td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
+</tr>
+<tr class="even">
+<td>Width</td>
+<td>Gets or sets the width of the control.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hide</td>
+<td>Conceals the control from the user.</td>
+</tr>
+<tr class="even">
+<td>Refresh</td>
+<td>Forces the form to invalidate its client area and immediately redraw itself and any child controls.</td>
+</tr>
+<tr class="odd">
+<td>SelectNextControl</td>
+<td>Moves the input control to the next (True) or previous (False) control in the tab order.</td>
+</tr>
+<tr class="even">
+<td>SetBounds</td>
+<td>Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).</td>
+</tr>
+<tr class="odd">
+<td>Show</td>
+<td>Creates and displays the control to the user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="events">Events</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AllEvents</td>
+<td>Special handler where all events are routed through. Use this handler if you prefer to use the Win32 api style messages and wParam and lParam parameters. Set the Handled element of EventArgs to true if you handle a message and do not want Windows to perform any further processing on the message.</td>
+</tr>
+<tr class="even">
+<td>Click</td>
+<td>Occurs when the client area of the control is clicked.</td>
+</tr>
+<tr class="odd">
+<td>Destroy</td>
+<td>Occurs immediately before the control is about to be destroyed and all resources associated with it released.</td>
+</tr>
+<tr class="even">
+<td>DropFiles</td>
+<td>Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.</td>
+</tr>
+<tr class="odd">
+<td>MouseDoubleClick</td>
+<td>Occurs when the control is double clicked by the mouse.</td>
+</tr>
+<tr class="even">
+<td>MouseDown</td>
+<td>Occurs when the mouse pointer is over the control and a mouse button is pressed.</td>
+</tr>
+<tr class="odd">
+<td>MouseEnter</td>
+<td>Occurs when the mouse pointer enters the control.</td>
+</tr>
+<tr class="even">
+<td>MouseHover</td>
+<td>Occurs when the mouse pointer rests on the control.</td>
+</tr>
+<tr class="odd">
+<td>MouseLeave</td>
+<td>Occurs when the mouse pointer leaves the control.</td>
+</tr>
+<tr class="even">
+<td>MouseMove</td>
+<td>Occurs when the mouse pointer is moved over the control.</td>
+</tr>
+<tr class="odd">
+<td>MouseUp</td>
+<td>Occurs when the mouse pointer is over the control and a mouse button is released.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="wfxsize">wfxSize</h5>
+<pre><code>Type wfxSize
+   private:
+      _Width  as Long
+      _Height as long 
+
+   public:
+      Declare Property Width() As Long
+      Declare Property Width( ByVal nValue As Long )
+      Declare Property Height() As Long
+      Declare Property Height( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
+End Type
 </code></pre>
-<p>That line essentially bootstraps the form so that it will display. Obviously you don’t need a line like this for every form that is generated. You can safely move that line to a main source file so that it only runs once at program startup. Any subsequent similar generated lines for other forms can be safely deleted.</p>
-<p>WinFBE generates a <strong>TYPE</strong> structure for every form in the application. That TYPE extends a bass class called <strong>wfxForm</strong> which contains the core functionality of a form. You can find the wfxForm source code and all other source code for other controls such as <strong>wfxLabel, wfxTextBox</strong> in the WinFormsX include folder. A global shared variable is generated for each form TYPE. For example, if your form is named Form1 then the shared variable is also named Form1.</p>
-<pre><code>Dim Shared Form1 as Form1Type
-</code></pre>
-<p>If you have controls on your form then you access them via dot syntax. For example, if you have a button called Button1 located on the form called Form1 then you access the button via <strong>Form1.Button1</strong></p>
-<pre><code>Form1.Button1.Text = &quot;Cancel&quot;
+<h5 id="wfxpoint">wfxPoint</h5>
+<pre><code>Type wfxPoint
+   private:
+      _x as Long
+      _y as long 
+
+   public:
+      Declare Property x() As Long
+      Declare Property x( ByVal nValue As Long )
+      Declare Property y() As Long
+      Declare Property y( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
+End Type
 </code></pre>
 </body>
 </html>

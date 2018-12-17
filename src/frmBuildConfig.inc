@@ -16,7 +16,7 @@
 ' Load all of the build descriptions into the listbox
 ' ========================================================================================
 function LoadBuildListBox( byval hParent as hwnd ) as Long
-   dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMCOMPILECONFIG_LIST1)
+   dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMBUILDCONFIG_LIST1)
 
    ListBox_ResetContent(hList1)
    for i as long = lbound(gConfig.BuildsTemp) to ubound(gConfig.BuildsTemp)
@@ -92,7 +92,7 @@ end function
 ' Swap two entries in the build Listbox
 ' ========================================================================================
 function SwapBuildListBoxItems( byval Item1 as long, Byval Item2 as long) as Long
-   dim as hwnd hList1 = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_LIST1)
+   dim as hwnd hList1 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LIST1)
    
    ' Swap the array values
    swap gConfig.BuildsTemp(Item1), gConfig.BuildsTemp(Item2)
@@ -108,19 +108,19 @@ end function
 ' Set the build description and compiler options depending on what listbox entry is selected
 ' ========================================================================================
 function SetCompilerConfigTextboxes() as long
-   dim as hwnd hList1 = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_LIST1)
-   dim as hwnd hText1 = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_TXTDESCRIPTION)
-   dim as hwnd hText2 = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_TXTOPTIONS)
-   dim as hwnd hCheck = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_CHKISDEFAULT)
-   dim as hwnd hOpt32 = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT32)
-   dim as hwnd hOpt64 = GetDlgItem( HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT64)
+   dim as hwnd hList1 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LIST1)
+   dim as hwnd hText1 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_TXTDESCRIPTION)
+   dim as hwnd hText2 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_TXTOPTIONS)
+   dim as hwnd hCheck = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_CHKISDEFAULT)
+   dim as hwnd hOpt32 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_OPT32)
+   dim as hwnd hOpt64 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_OPT64)
    
    dim as long nCurSel = ListBox_GetCurSel(hList1)
    if nCurSel < 0 THEN 
       AfxSetWindowText( hText1, "")
       AfxSetWindowText( hText2, "")
       Button_SetCheck( hCheck, 0)
-      CheckRadioButton(HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT32, IDC_FRMCOMPILECONFIG_OPT64, IDC_FRMCOMPILECONFIG_OPT32)
+      CheckRadioButton(HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_OPT32, IDC_FRMBUILDCONFIG_OPT64, IDC_FRMBUILDCONFIG_OPT32)
       EnableWindow(hText1, false)
       EnableWindow(hText2, false)
       EnableWindow(hCheck, false)
@@ -131,9 +131,9 @@ function SetCompilerConfigTextboxes() as long
       AfxSetWindowText( hText2, gConfig.BuildsTemp(nCurSel).wszOptions)
       Button_SetCheck( hCheck, gConfig.BuildsTemp(nCurSel).IsDefault)
       if gConfig.BuildsTemp(nCurSel).Is32bit THEN
-         CheckRadioButton(HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT32, IDC_FRMCOMPILECONFIG_OPT64, IDC_FRMCOMPILECONFIG_OPT32)
+         CheckRadioButton(HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_OPT32, IDC_FRMBUILDCONFIG_OPT64, IDC_FRMBUILDCONFIG_OPT32)
       else   
-         CheckRadioButton(HWND_FRMCOMPILECONFIG, IDC_FRMCOMPILECONFIG_OPT32, IDC_FRMCOMPILECONFIG_OPT64, IDC_FRMCOMPILECONFIG_OPT64)
+         CheckRadioButton(HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_OPT32, IDC_FRMBUILDCONFIG_OPT64, IDC_FRMBUILDCONFIG_OPT64)
       END IF
       EnableWindow(hText1, true)
       EnableWindow(hText2, true)
@@ -171,21 +171,21 @@ End Function
 ' ========================================================================================
 Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
-   dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMCOMPILECONFIG_LIST1)
+   dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMBUILDCONFIG_LIST1)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
 
    ' Convert a ListBox DoubleClick into pressing OK button action
-   if (id = IDC_FRMCOMPILECONFIG_LIST1) AndAlso (codeNotify = LBN_DBLCLK) THEN
+   if (id = IDC_FRMBUILDCONFIG_LIST1) AndAlso (codeNotify = LBN_DBLCLK) THEN
       id = IDOK: codeNotify = BN_CLICKED
    END IF
    
    Select Case id
-      case IDC_FRMCOMPILECONFIG_LIST1
+      case IDC_FRMBUILDCONFIG_LIST1
          if codeNotify = LBN_SELCHANGE THEN
             SetCompilerConfigTextboxes()
          END IF
           
-      case IDC_FRMCOMPILECONFIG_TXTDESCRIPTION
+      case IDC_FRMBUILDCONFIG_TXTDESCRIPTION
          if codeNotify = EN_CHANGE THEN
             ' Update the temp array and the Listbox
             if nCurSel > -1 THEN
@@ -194,7 +194,7 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             END IF
          end if
          
-      CASE IDC_FRMCOMPILECONFIG_TXTOPTIONS
+      CASE IDC_FRMBUILDCONFIG_TXTOPTIONS
          if codeNotify = EN_CHANGE THEN
             ' Update the temp array 
             if nCurSel > -1 THEN
@@ -202,7 +202,7 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             END IF
          end if
          
-      case IDC_FRMCOMPILECONFIG_CHKISDEFAULT
+      case IDC_FRMBUILDCONFIG_CHKISDEFAULT
          if codeNotify = BN_CLICKED THEN
             ' Update the temp array 
             if nCurSel > -1 THEN
@@ -216,7 +216,7 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             END IF
          end if
                   
-      case IDC_FRMCOMPILECONFIG_OPT32
+      case IDC_FRMBUILDCONFIG_OPT32
          if codeNotify = BN_CLICKED THEN
             ' Update the temp array 
             if nCurSel > -1 THEN
@@ -230,7 +230,7 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             END IF
          end if
 
-      case IDC_FRMCOMPILECONFIG_OPT64
+      case IDC_FRMBUILDCONFIG_OPT64
          if codeNotify = BN_CLICKED THEN
             ' Update the temp array 
             if nCurSel > -1 THEN
@@ -244,21 +244,21 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             END IF
          end if
 
-      case IDC_FRMCOMPILECONFIG_CMDUP
+      case IDC_FRMBUILDCONFIG_CMDUP
          if codeNotify = BN_CLICKED THEN
             if nCurSel > 0 THEN
                SwapBuildListboxItems(nCurSel, nCurSel-1)
             END IF
          end if
 
-      case IDC_FRMCOMPILECONFIG_CMDDOWN
+      case IDC_FRMBUILDCONFIG_CMDDOWN
          if codeNotify = BN_CLICKED THEN
             if nCurSel < ListBox_GetCount(hList1)-1 THEN
                SwapBuildListboxItems(nCurSel, nCurSel+1)
             END IF
          end if
 
-      case IDC_FRMCOMPILECONFIG_CMDINSERT
+      case IDC_FRMBUILDCONFIG_CMDINSERT
          if codeNotify = BN_CLICKED THEN
             if ubound(gConfig.BuildsTemp) = -1 THEN
                redim gConfig.BuildsTemp(0)
@@ -285,7 +285,7 @@ Function frmCompileConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             SetFocus hList1
          end if
 
-      case IDC_FRMCOMPILECONFIG_CMDDELETE
+      case IDC_FRMBUILDCONFIG_CMDDELETE
          if codeNotify = BN_CLICKED THEN
             if nCurSel > -1  THEN
                if MessageBox( HWND, L(287, "Are you sure you want to delete this build configuration?"), L(276,"Confirm"), _
@@ -410,33 +410,33 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->SetClientSize(393, 315)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
-   pWindow->AddControl("LISTBOX", , IDC_FRMCOMPILECONFIG_LIST1, "", 10, 10, 223, 181, _
+   pWindow->AddControl("LISTBOX", , IDC_FRMBUILDCONFIG_LIST1, "", 10, 10, 223, 181, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMCOMPILECONFIG_LABEL1, L(278,"Description:"), 10, 196, 91, 17, _
+   pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL1, L(278,"Description:"), 10, 196, 91, 17, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMCOMPILECONFIG_TXTDESCRIPTION, "", 10, 215, 224, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMBUILDCONFIG_TXTDESCRIPTION, "", 10, 215, 224, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMCOMPILECONFIG_CHKISDEFAULT, L(280,"Set as default"), 243, 216, 172, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMBUILDCONFIG_CHKISDEFAULT, L(280,"Set as default"), 243, 216, 172, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMCOMPILECONFIG_LABEL2, L(279,"Compiler Options:"), 10, 240, 136, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL2, L(279,"Compiler Options:"), 10, 240, 136, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMCOMPILECONFIG_TXTOPTIONS, "", 10, 258, 372, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMBUILDCONFIG_TXTOPTIONS, "", 10, 258, 372, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("RADIOBUTTON", , IDC_FRMCOMPILECONFIG_OPT32, "FBC 32-bit", 10, 285, 100, 20, _
+   pWindow->AddControl("RADIOBUTTON", , IDC_FRMBUILDCONFIG_OPT32, "FBC 32-bit", 10, 285, 100, 20, _
         WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER or WS_GROUP, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("RADIOBUTTON", , IDC_FRMCOMPILECONFIG_OPT64, "FBC 64-bit", 115, 285, 100, 20, _
+   pWindow->AddControl("RADIOBUTTON", , IDC_FRMBUILDCONFIG_OPT64, "FBC 64-bit", 115, 285, 100, 20, _
         WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    hCtrl = _
-   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCOMPILECONFIG_CMDUP, "", 243, 10, 32, 32, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMBUILDCONFIG_CMDUP, "", 243, 10, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWUP", "IMAGE_ARROWUP16")
@@ -445,7 +445,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
          IF hBitmap THEN DeleteObject(hBitmap)
 
    hCtrl = _
-   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMCOMPILECONFIG_CMDDOWN, "", 243, 159, 32, 32, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMBUILDCONFIG_CMDDOWN, "", 243, 159, 32, 32, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWDOWN", "IMAGE_ARROWDOWN16")
@@ -459,14 +459,14 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 300, 48, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMCOMPILECONFIG_CMDINSERT, L(281,"Insert"), 300, 120, 81, 33, _
+   pWindow->AddControl("BUTTON", , IDC_FRMBUILDCONFIG_CMDINSERT, L(281,"Insert"), 300, 120, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMCOMPILECONFIG_CMDDELETE, L(282,"Delete"), 300, 158, 81, 33, _
+   pWindow->AddControl("BUTTON", , IDC_FRMBUILDCONFIG_CMDDELETE, L(282,"Delete"), 300, 158, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   HWND_FRMCOMPILECONFIG = hForm
+   HWND_FRMBUILDCONFIG = hForm
    
    ' Copy all of the Builds to the BuildsTemp array because we will work with 
    ' temporary copies until the user hits OK.
@@ -478,13 +478,13 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    
    ' Set the current selection to the same selection as the combobox builds in the toolbar
    dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
-   dim hList as hwnd = GetDlgItem(hForm, IDC_FRMCOMPILECONFIG_LIST1)
+   dim hList as hwnd = GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    if nCurSel = -1 then nCurSel = 0 
    ListBox_SetCurSel(hList, nCurSel)
    SetCompilerConfigTextboxes()
    
 
-   SetFocus GetDlgItem(hForm, IDC_FRMCOMPILECONFIG_LIST1)
+   SetFocus GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    
    ' Process Windows messages(modal)
    Function = pWindow->DoEvents(nCmdShow)

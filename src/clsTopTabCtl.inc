@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ End Function
 ''
 ''
 Function clsTopTabCtl.GetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
-   ' Returns the tav index that holds the incoming pDocIn ptr.
+   ' Returns the index that holds the incoming pDocIn ptr.
    If TabCtrl_GetItemCount(this.hWindow) = 0 Then Return -1 
    If pDocIn = 0 Then Return -1
    
@@ -103,7 +103,6 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
       Function = TabCtrl_SetCurFocus(this.hWindow, idx)
       if IsWindowVisible(HWND_FRMFINDREPLACE) THEN
          frmFindReplace_HighlightSearches
-         frmFindReplace_SetButtonStates
       END IF
       SetFocusScintilla
    End If
@@ -187,13 +186,9 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
    If pDocShow = 0 Then exit function
    
    ' Hide all documents and their associated scrollbars
-   Dim pDoc As clsDocument Ptr 
-   dim as long idxProject = gApp.GetActiveProjectIndex()
+   Dim pDoc As clsDocument Ptr = gApp.pDocList
    
-   for i as long = 0 to gApp.Projects(idxProject).GetDocumentCount - 1
-      pDoc = gApp.Projects(idxProject).GetDocumentPtr(i)
-      if pDoc = 0 THEN continue for
-      if pDoc->ProjectIndex <> idxProject THEN continue for
+   do until pDoc = 0
       ' Scintilla windows and scrollbars
       ShowWindow(pDoc->hWindow(0), SW_HIDE)
       ShowWindow(pDoc->hWindow(1), SW_HIDE)
@@ -202,7 +197,8 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
          ShowWindow(pDoc->hWndDesigner, SW_HIDE)
          ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
       END IF
-   next
+      pDoc = pDoc->pDocNext
+   loop
    
    if (pDocShow->IsDesigner) andalso (IsDesignerView(pDocShow)) THEN
       ShowWindow(pDocShow->hWndDesigner, Iif(bShow, SW_SHOWNORMAL, SW_HIDE))

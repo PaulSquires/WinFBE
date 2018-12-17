@@ -1,3 +1,16 @@
+'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+'
+'    This program is free software: you can redistribute it and/or modify
+'    it under the terms of the GNU General Public License as published by
+'    the Free Software Foundation, either version 3 of the License, or
+'    (at your option) any later version.
+'
+'    This program is distributed in the hope that it will be useful,
+'    but WITHOUT any WARRANTY; without even the implied warranty of
+'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+'    GNU General Public License for more details.
+
 declare Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
 declare Function frmHelpViewer_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = -1) As Long
 declare function IsPropertyExists( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as boolean
@@ -64,7 +77,7 @@ Declare Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, ByVal iRow A
 Declare Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As BOOLEAN
 Declare Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, ByVal iRow As Long, ByVal iColumn As Long, ByVal pwszText As WString Ptr, ByVal nTextMax As Long ) As Long
 Declare Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, ByVal iRow As Long ) As LPARAM
-Declare Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
+Declare Function LoadLocalizationFile( Byref wszFileName As CWSTR, byval IsEnglish as boolean = false ) As BOOLEAN
 Declare Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, ByVal pwszExeName As WString Ptr ) As Long
 Declare Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 Declare Function GetRunExecutableFilename() as CWSTR
@@ -74,7 +87,7 @@ Declare Function Splitter_OnMouseMove() As BOOLEAN
 Declare Function IsPreparsedFile( byref sFilename as string ) as boolean
 Declare Function GetIncludeFilename( byref sFilename as CWSTR, byref sLine as string ) as CWSTR
 Declare Function ScintillaGetLine( byval pDoc as clsDocument ptr, ByVal nLine As Long ) As String
-Declare Function ParseDocument( byval idx as long, byval pDoc as clsDocument ptr, byval sFilename as CWSTR) As Long
+Declare Function ParseDocument( byval pDoc as clsDocument ptr, byval sFilename as CWSTR) As Long
 Declare Function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
 Declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
 Declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
@@ -95,30 +108,14 @@ Declare Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
 Declare Function ClearMRUlist( ByVal wID As Long ) As Long
 Declare Function CreateMRUpopup() As HMENU
 Declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
-Declare Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
+Declare Function UpdateMRUList( Byref wzFilename As WString ) As Long
 Declare Function GetMRUProjectMenuHandle() As HMENU
-Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFilename As WString Ptr = 0 ) As Long
+Declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
 Declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
-Declare Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
+Declare Function UpdateMRUProjectList( Byref wzFilename As WString ) As Long
 Declare Function FormatCodetip( byval strCodeTip as string ) as STRING
 declare function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 Declare Function ShowAutocompleteList(byval Notification as long = 0) as BOOLEAN
-Declare Function frmHotImgBtn_IsEnabled( ByVal HWnd As HWnd ) As boolean
-Declare Function frmHotImgBtn_Enabled( ByVal HWnd As HWnd, ByVal fEnabled as BOOLEAN ) As Long
-Declare Function frmHotImgBtn_SetBackColors( ByVal HWnd As HWnd, ByVal clrNormal As COLORREF, byval clrHot as COLORREF ) As Long
-Declare Function frmHotImgBtn_SetImages( ByVal HWnd As HWnd, ByRef wszImgNormal As WString = "", ByRef wszImgHot As WString = "", byval bIsGDI as Boolean = false ) As Long
-Declare Function frmHotImgBtn_SetSelected( ByVal HWnd As HWnd, ByVal fSelected As BOOLEAN) As Long
-Declare Function frmHotImgBtn_GetSelected( ByVal HWnd As HWnd ) As BOOLEAN
-Declare Function frmHotImgBtn_OnLButtonUp(ByVal HWnd As HWnd, ByVal x As Long, ByVal y As Long, ByVal keyFlags As Long ) As LRESULT
-Declare Function frmHotImgBtn_OnDestroy(HWnd As HWnd) As LRESULT
-Declare Function frmHotImgBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
-Declare Function frmHotImgBtn_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
-Declare Function frmHotImgBtn( ByVal hWndParent As HWnd, ByVal cID As Long = 0, ByRef wszImgNormal As WString = "", ByRef wszImgHot As WString = "", ByRef wszTooltip As WString = "", ByVal nImgWidth As Long = 24, ByVal nImgHeight As Long = 24, ByVal clrBg As COLORREF = 0, ByVal clrBgHot As COLORREF = 0, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, byval fSelectedFrame as BOOLEAN = true, byval fEnabled as BOOLEAN = true, byval fIsGDI as Boolean = false ) As HWND
-Declare Function frmHotTxtBtn_OnLButtonUp(ByVal HWnd As HWnd, ByVal x As Long, ByVal y As Long, ByVal keyFlags As Long ) As LRESULT
-Declare Function frmHotTxtBtn_OnDestroy(HWnd As HWnd) As LRESULT
-Declare Function frmHotTxtBtn_OnPaint( ByVal HWnd As HWnd) As LRESULT
-Declare Function frmHotTxtBtn_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
-Declare Function frmHotTxtBtn( ByVal hWndParent As HWnd, ByVal cID As Long = 0, ByRef wszText As WString = "", ByRef wszTooltip As WString = "", ByVal clrFg As COLORREF = 0, ByVal clrBg As COLORREF = 0, ByVal clrFgHot As COLORREF = 0, ByVal clrBgHot As COLORREF = 0, ByVal nOrientation As Long = 1, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0 ) As HWND
 Declare Function LoadRecentFilesTreeview( ByVal HWnd As HWnd ) As LRESULT
 Declare Function PositionRecentWindows( ByVal HWnd As HWnd ) As LRESULT
 Declare Function frmRecent_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
@@ -235,7 +232,6 @@ Declare Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
 Declare Function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false ) as long
 Declare Function frmFindReplace_NextSelection( byval StartPos as long, byval bGetNext as boolean ) as long
 Declare Function frmFindReplace_HighlightSearches() as long
-Declare Function frmFindReplace_SetButtonStates() as LONG
 Declare Function frmFindReplace_ShowControls() as long
 Declare Function frmFindReplace_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
@@ -243,7 +239,7 @@ Declare Function frmFindReplace_OnClose(HWnd As HWnd) As LRESULT
 Declare Function frmFindReplace_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmFindReplace_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BOOLEAN ) As Long
-Declare Function CreateResourceManifest( byval idx as long ) as Long
+Declare Function CreateResourceManifest() as Long
 Declare Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
 Declare Function frmProjectOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
@@ -262,11 +258,12 @@ Declare Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOO
 Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
+declare Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, byref wszProjectFileName as WString ) as Boolean
 Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, _
                            ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, _
                            ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false ) As clsDocument Ptr
-Declare Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
-Declare Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
+Declare Function OnCommand_FileNew( ByVal HWnd As HWnd ) As clsDocument ptr
+declare Function OnCommand_FileOpen( ByVal HWnd As HWnd, byval bShowInTab as Boolean = true ) As LRESULT
 Declare Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
 Declare Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT

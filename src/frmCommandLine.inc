@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -16,10 +16,6 @@
 ' Process WM_CREATE message for window/dialog: frmCommandLine
 ' ========================================================================================
 Function frmCommandLine_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
-
-   ' Retrieve a reference to the CWindow class from the CREATESTRUCT structure
-   'Dim pCreateStruct As CREATESTRUCT Ptr = lpCreateStructPtr
-   'Dim pWindow As CWindow Ptr = Cast(CWindow Ptr, pCreateStruct->lpCreateParams)
 
    ' This is a modal popup window so disable the parent window
    EnableWindow GetParent(HWnd), False
@@ -40,13 +36,20 @@ Function frmCommandLine_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
    Select Case id
       Case IDOK
          If codeNotify = BN_CLICKED Then
-            gApp.Projects(gApp.GetActiveProjectIndex).ProjectCommandLine = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMCOMMANDLINE_TEXTBOX1) )
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            ' A commandline parameter is not saved for non-project files. These are
+            ' set at the time when the user opens the file. For project related files the
+            ' command line is saved to the project file.
+            if gApp.IsProjectActive then
+               gApp.ProjectCommandLine = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMCOMMANDLINE_TEXTBOX1) )
+            else
+               gApp.wszCommandLine = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMCOMMANDLINE_TEXTBOX1) )
+            end if
+            SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
    End Select
@@ -130,7 +133,11 @@ Function frmCommandLine_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   SetWindowText( hTextBox, gApp.Projects(gApp.GetActiveProjectIndex).ProjectCommandLine )
+   if gApp.IsProjectActive then
+      AfxSetWindowText( hTextBox, gApp.ProjectCommandLine )
+   else   
+      AfxSetWindowText( hTextBox, gApp.wszCommandLine )
+   end if
    
    SetFocus hTextBox
    

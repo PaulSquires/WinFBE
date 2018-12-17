@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ Sub SaveEditorOptions()
    gConfig.MultipleInstances    = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKMULTIPLEINSTANCES) )
    gConfig.CompileAutosave      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCOMPILEAUTOSAVE) )
    gConfig.CloseFuncList        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKCLOSEFUNCLIST) )
-   gConfig.HideCompile          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDECOMPILE) )
    gConfig.AskExit              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT) )
    gConfig.HideToolbar          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR) )
    gConfig.HideStatusbar        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR) )
@@ -142,15 +141,11 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             ' Reposition main windows in case hide toolbar/statusbar selected
             frmMain_PositionWindows(HWND_FRMMAIN)
             ' Apply the newly saved options to all open Scintilla windows
-            Dim pDoc As clsDocument Ptr
-            for i as long = lbound(gApp.Projects) to ubound(gApp.Projects)
-               if gApp.Projects(i).InUse THEN
-                  For y as long = 0 To gApp.Projects(i).GetDocumentCount - 1
-                     pDoc = gApp.Projects(i).GetDocumentPtr(y)
-                     If pDoc Then pDoc->ApplyProperties
-                  Next
-               end if
-            next   
+            Dim pDoc As clsDocument Ptr = gApp.pDocList
+            do until pDoc = 0
+               pDoc->ApplyProperties
+               pDoc = pDoc->pDocNext
+            loop   
             SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
@@ -261,7 +256,6 @@ End Function
 Function frmOptions_OnDestroy(HWnd As HWnd) As LRESULT
    Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOPTIONS_LBLCATEGORY))
    DeleteFont(hFont)
-
    PostQuitMessage(0)
    Function = 0
 End Function

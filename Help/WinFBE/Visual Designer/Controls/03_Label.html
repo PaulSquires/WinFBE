@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>MainMenu</title>
+  <title>03_Label</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,7 @@
   
 </head>
 <body>
-<h1 id="mainmenu-(wfxmainmenu)">MainMenu (wfxMainMenu)</h1>
+<h1 id="label-(wfxlabel)">Label (wfxLabel)</h1>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -31,24 +31,96 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td>AllowDrop</td>
+<td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
+</tr>
+<tr class="even">
+<td>BackColor</td>
+<td>Gets or sets the background color of the form. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="odd">
+<td>BorderStyle</td>
+<td>Gets or sets the border style of the control. Refer to the <a href="#ControlBorderStyle">ControlBorderStyle</a> enum.</td>
+</tr>
+<tr class="even">
+<td>CtrlId</td>
+<td>Gets or sets a value indicating the control ID of the control.</td>
+</tr>
+<tr class="odd">
 <td>CtrlType</td>
-<td>Gets or sets the control type value. Always <strong>ControlType.MainMenu</strong> and used when adding control to the application’s form collection.</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.Label</strong> and used when adding form to the application’s form collection.</td>
 </tr>
 <tr class="even">
-<td>Handle</td>
-<td>Gets or sets a value indicating the HMENU handle of the control.</td>
+<td>Enabled</td>
+<td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
 </tr>
 <tr class="odd">
-<td>IsLoading</td>
-<td>Gets or sets a value (true/false) indicating whether the control is currently being created.</td>
+<td>Font</td>
+<td>Gets or sets the font for the control. Refer to the Font object.</td>
 </tr>
 <tr class="even">
-<td>MenuItem</td>
-<td>Gets or sets values for a specific MenuItem belonging to the MainMenu (refer to <a href="#wfxMenuItem">wfxMenuItem</a>).</td>
+<td>ForeColor</td>
+<td>Gets or sets the foreground color of the control. Refer to the <strong>Colors</strong> object.</td>
 </tr>
 <tr class="odd">
-<td>MenuItems</td>
-<td>Gets or sets values for the collection of MenuItems that belong to the MainMenu (refer to <a href="#wfxMenuItemsCollection">wfxMenuItemsCollection</a>).</td>
+<td>Height</td>
+<td>Gets or sets the height of the control.</td>
+</tr>
+<tr class="even">
+<td>hWindow</td>
+<td>Gets the Windows handle (hwnd) of the control.</td>
+</tr>
+<tr class="odd">
+<td>hWindowParent</td>
+<td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
+</tr>
+<tr class="even">
+<td>Left</td>
+<td>Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="odd">
+<td>Location</td>
+<td>Gets or sets the top and left position of the control. Get: returns <a href="#wfxPoint">wfxPoint</a> object. Set: (left, top).</td>
+</tr>
+<tr class="even">
+<td>Locked</td>
+<td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
+</tr>
+<tr class="odd">
+<td>Parent</td>
+<td>Gets or sets the parent container of the control.</td>
+</tr>
+<tr class="even">
+<td>Size</td>
+<td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
+</tr>
+<tr class="odd">
+<td>Tag</td>
+<td>Gets or sets user defined text associated with the form.</td>
+</tr>
+<tr class="even">
+<td>Text</td>
+<td>Gets or sets the text (caption) associated with this form.</td>
+</tr>
+<tr class="odd">
+<td>TextAlign</td>
+<td>Gets or sets a value indicating the alignment of the text on a control. Refer to <a href="#LabelAlignment">LabelAlignment</a> enum.</td>
+</tr>
+<tr class="even">
+<td>Top</td>
+<td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="odd">
+<td>UseMnemonic</td>
+<td>Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&amp;) character will be used as the control’s accelerator key.</td>
+</tr>
+<tr class="even">
+<td>Visible</td>
+<td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
+</tr>
+<tr class="odd">
+<td>Width</td>
+<td>Gets or sets the width of the control.</td>
 </tr>
 </tbody>
 </table>
@@ -62,20 +134,20 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>ByMenuID</td>
-<td>Get a reference to a MenuItem <a href="#wfxMenuItem">wfxMenuItem</a> belonging to the MainMenu based on a MenuItem menu ID.</td>
-</tr>
-<tr class="even">
-<td>ByMenuName</td>
-<td>Get a reference to a MenuItem <a href="#wfxMenuItem">wfxMenuItem</a> belonging to the MainMenu based on a MenuItem name.</td>
-</tr>
-<tr class="odd">
-<td>ByPopupMenuHandle</td>
-<td>Get a reference to a MenuItem <a href="#wfxMenuItem">wfxMenuItem</a> belonging to the MainMenu based on a MenuItem popup menu handle.</td>
+<td>Hide</td>
+<td>Conceals the control from the user.</td>
 </tr>
 <tr class="even">
 <td>Refresh</td>
 <td>Forces the form to invalidate its client area and immediately redraw itself and any child controls.</td>
+</tr>
+<tr class="odd">
+<td>SelectNextControl</td>
+<td>Moves the input control to the next (True) or previous (False) control in the tab order.</td>
+</tr>
+<tr class="even">
+<td>SetBounds</td>
+<td>Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).</td>
 </tr>
 <tr class="odd">
 <td>Show</td>
@@ -98,239 +170,92 @@
 </tr>
 <tr class="even">
 <td>Click</td>
-<td>Occurs when a menu item is clicked.</td>
+<td>Occurs when the client area of the control is clicked.</td>
 </tr>
 <tr class="odd">
-<td>Popup</td>
-<td>Occurs when a drop-down menu or submenu is about to become active. This allows an application to modify the menu before it is displayed without changing the entire menu.</td>
+<td>Destroy</td>
+<td>Occurs immediately before the control is about to be destroyed and all resources associated with it released.</td>
+</tr>
+<tr class="even">
+<td>DropFiles</td>
+<td>Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.</td>
+</tr>
+<tr class="odd">
+<td>MouseDoubleClick</td>
+<td>Occurs when the control is double clicked by the mouse.</td>
+</tr>
+<tr class="even">
+<td>MouseDown</td>
+<td>Occurs when the mouse pointer is over the control and a mouse button is pressed.</td>
+</tr>
+<tr class="odd">
+<td>MouseEnter</td>
+<td>Occurs when the mouse pointer enters the control.</td>
+</tr>
+<tr class="even">
+<td>MouseHover</td>
+<td>Occurs when the mouse pointer rests on the control.</td>
+</tr>
+<tr class="odd">
+<td>MouseLeave</td>
+<td>Occurs when the mouse pointer leaves the control.</td>
+</tr>
+<tr class="even">
+<td>MouseMove</td>
+<td>Occurs when the mouse pointer is moved over the control.</td>
+</tr>
+<tr class="odd">
+<td>MouseUp</td>
+<td>Occurs when the mouse pointer is over the control and a mouse button is released.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="menuitems-collection-(wfxmenuitemscollection)">MenuItems Collection (wfxMenuItemsCollection)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Add</td>
-<td>Add a new MenuItem to the MainMenu.</td>
-</tr>
-<tr class="even">
-<td>ByIndex</td>
-<td>Return the wfxMenuItem object related to the specified MainMenu menu item index.</td>
-</tr>
-<tr class="odd">
-<td>Clear</td>
-<td>Removes all items from the MainMenu.</td>
-</tr>
-<tr class="even">
-<td>Count</td>
-<td>Returns the total number of items in the MainMenu.</td>
-</tr>
-<tr class="odd">
-<td>Remove</td>
-<td>Remove/delete the item identified by the index value.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="item-(wfxmenuitem)">Item (wfxMenuItem)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Checked</td>
-<td>Gets or sets a value (true/false) indicating whether to display a check mark next to the MenuItem.</td>
-</tr>
-<tr class="even">
-<td>Grayed</td>
-<td>Gets or sets a value (true/false) indicating whether to display the MenuItem as enabled or disabled.</td>
-</tr>
-<tr class="odd">
-<td>MenuItem</td>
-<td>Gets or sets values for a specific MenuItem belonging to the MainMenu (refer to <a href="#wfxMenuItem">wfxMenuItem</a>).</td>
-</tr>
-<tr class="even">
-<td>MenuItems</td>
-<td>Gets or sets values for the collection of MenuItems that belong to the MainMenu (refer to <a href="#wfxMenuItemsCollection">wfxMenuItemsCollection</a>).</td>
-</tr>
-<tr class="odd">
-<td>Handle</td>
-<td>Gets or sets a value indicating the HMENU handle of the control.</td>
-</tr>
-<tr class="even">
-<td>Index</td>
-<td>Gets or sets the index value related to the MenuItem.</td>
-</tr>
-<tr class="odd">
-<td>IsParent</td>
-<td>Gets or sets a value (true/false) indicating that this MenuItem has child popup MenuItems.</td>
-</tr>
-<tr class="even">
-<td>MenuID</td>
-<td>Gets or sets the menu ID related to the MenuItem.</td>
-</tr>
-<tr class="odd">
-<td>Name</td>
-<td>Gets or sets the name related to the MenuItem.</td>
-</tr>
-<tr class="even">
-<td>Shortcut</td>
-<td>Gets or sets the shortcut accelerator text associated with this MenuItem.</td>
-</tr>
-<tr class="odd">
-<td>Text</td>
-<td>Gets or sets the text associated with this MenuItem.</td>
-</tr>
-<tr class="even">
-<td>PopupMenuHandle</td>
-<td>Gets or sets the handle to the child popup menu of this MenuItem</td>
-</tr>
-<tr class="odd">
-<td>MenuParent</td>
-<td>Gets or sets a <em>wfxMainMenu ptr</em> to the MainMenu object that this MenuItem belongs to.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="working-with-a-mainmenu">Working with a MainMenu</h2>
-<h3 id="creating-the-mainmenu">Creating the MainMenu</h3>
-<pre><code>   this.MainMenu.Parent = @this
-
-   dim mnuFile   as wfxMenuItem = wfxMenuItem(&quot;File&quot;, &quot;mnuFile&quot;)
-   dim mnuNew    as wfxMenuItem = wfxMenuItem(&quot;New&quot;,  &quot;mnuNew&quot;, &quot;Ctrl+DEL&quot;)
-   DIM mnuOpen   as wfxMenuItem = wfxMenuItem(&quot;Open&quot;, &quot;mnuOpen&quot;)
-   DIM mnuSave   as wfxMenuItem = wfxMenuItem(&quot;Save&quot;, &quot;mnuSave&quot;, &quot;Ctrl+S&quot;)
-   DIM mnuSaveAs as wfxMenuItem = wfxMenuItem(&quot;Save As&quot;, &quot;mnuSaveAs&quot;, &quot;F12&quot;)
-   DIM mnuSep1   as wfxMenuItem = wfxMenuItem(&quot;-&quot;,    &quot;mnuSep1&quot;)
-   DIM mnuExit   as wfxMenuItem = wfxMenuItem(&quot;Exit&quot;, &quot;mnuExit&quot;)
-   mnuFile.MenuItems.Add(mnuNew)
-   mnuFile.MenuItems.Add(mnuOpen)
-   mnuFile.MenuItems.Add(mnuSave)
-   mnuFile.MenuItems.Add(mnuSaveAs)
-   mnuFile.MenuItems.Add(mnuSep1)
-   mnuFile.MenuItems.Add(mnuExit)
-   this.MainMenu.MenuItems.Add(mnuFile)
-   
-   DIM mnuEdit  as wfxMenuItem = wfxMenuItem(&quot;Edit&quot;, &quot;mnuEdit&quot;)
-   DIM mnuCut   as wfxMenuItem = wfxMenuItem(&quot;Cut&quot;,  &quot;mnuCut&quot;)
-   DIM mnuCopy  as wfxMenuItem = wfxMenuItem(&quot;Copy&quot;, &quot;mnuCopy&quot;)
-   DIM mnuPaste as wfxMenuItem = wfxMenuItem(&quot;Paste&quot;, &quot;mnuPaste&quot;)
-   mnuEdit.MenuItems.Add(mnuCut)
-   mnuEdit.MenuItems.Add(mnuCopy)
-   mnuEdit.MenuItems.Add(mnuPaste)
-   this.MainMenu.MenuItems.Add(mnuEdit)
-   
-   this.MainMenu.OnPopup = @Form1_MainMenu_Popup
-   this.MainMenu.OnClick = @Form1_MainMenu_Click
-
-   this.Controls.Add(ControlType.MainMenu, @this.MainMenu)
+<h5 id="controlborderstyle">ControlBorderStyle</h5>
+<pre><code>Enum ControlBorderStyle
+   None = 1
+   FixedSingle  
+   Fixed3D 
+End Enum
 </code></pre>
-<p>As you can see from the example above, you must create each individual MenuItem and then assign them to the parent MenuItem that is the parent for the specific MenuItem. Every MenuItem can have children MenuItems - these are the submenus that popup when a MenuItem is clicked.</p>
-<p>In the example, the <em>this</em> identifier was used because the example was created in the constructor fo the Form that contained the MainMenu. If created elsewhere, you would use the specifically declared variable (eg. Form1, Form2, frmMain, etc).</p>
-<p>Also, notice that the MenuItem constructor can be called using one or more values.</p>
-<pre><code>declare constructor( ByRef wszText     As WString = &quot;&quot;, _
-                     ByRef wszName     As WString = &quot;&quot;, _ 
-                     Byref wszShortcut As WString = &quot;&quot;, _
-                     ByVal bChecked    As boolean = false, _
-                     ByVal bGrayed     As boolean = false )
+<h5 id="labelalignment">LabelAlignment</h5>
+<pre><code>Enum LabelAlignment
+   MiddleCenter = 1
+   MiddleLeft   
+   MiddleRight  
+   TopCenter    
+   TopLeft      
+   TopRight     
+End Enum
 </code></pre>
-<h3 id="shortcuts">Shortcuts</h3>
-<p>A shortcut is a keyboard accelerator key combination that will activate a specific menu entry. It can be any combination of the Ctrl, Alt, Shift keys and another key. The text of the shortcut key is displayed to the right of the menu text.</p>
-<h3 id="retrieving-reference-to-a-specific-menuitem">Retrieving Reference to a specific MenuItem</h3>
-<p>You can search for a specific MenuItem using several built in methods of the MainMenu class. The key is that you should declare your variable as <em>ByRef</em> so that the returned reference is assigned to it and points to the original MenuItem (much like a <em>pointer</em> does).</p>
-<pre><code>Dim ByRef iMenuItem = Form1.MainMenu.ByMenuName(&quot;mnuSave&quot;)
-Dim ByRef iMenuItem = Form1.MainMenu.ByMenuID(110)
-Dim ByRef iMenuItem = Form1.MainMenu.ByMenuID( GetMenuItemID(Form1.MainMenu.Handle, 5) )
-Dim ByRef iMenuItem = Form1.MainMenu.ByPopupMenuHandle( GetSubMenu(Form1.MainMenu.Handle, 5) )
+<h5 id="wfxsize">wfxSize</h5>
+<pre><code>Type wfxSize
+   private:
+      _Width  as Long
+      _Height as long 
 
-' Retrieve info on all top level MenuItems that show on the menu bar
-Dim ByRef iMenuItem 
-For i as long = 0 to Form1.MainMenu.MenuItems.Count – 1
-   iMenuItem = Form1.MainMenu.Menutem(i)
-   ? iMenuItem.Text, iMenuItem.Name
-Next
-
-' Rename all of the items in the File menu
-Dim byref mnuFile as wfxMenuItem = Form1.MainMenu.ByMenuName(&quot;mnuFile&quot;)
-for i as long = 0 to mnuFile.MenuItems.Count - 1
-   mnuFile.MenuItem(i).Text = &quot;Paul&quot;
-next
+   public:
+      Declare Property Width() As Long
+      Declare Property Width( ByVal nValue As Long )
+      Declare Property Height() As Long
+      Declare Property Height( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
+End Type
 </code></pre>
-<h3 id="iterate-all-menuitems-in-the-entire-mainmenu">Iterate all MenuItems in the entire MainMenu</h3>
-<p>This is not as straightforward as you might expect because every MenuItem can itself have many children MenuItems. There is no one single collection that contains all of the MenuItem objects for the entire MainMenu. You need to look at each MenuItem and process that object individually. The best way to perform this type of operation is through the use of recursion.</p>
-<p>The following example iterates over all MenuItems and disables every MenuItems that is not a root item that displays directly on the MainMenu's menu bar.</p>
-<pre><code>function IterateMenuItems( byref tMenuItem as wfxMenuItem ) as long
-   
-   ' Internal function that recursive processes all of the menu items. 
-   ' It takes into account that submenus can exist for each MenuItem.
+<h5 id="wfxpoint">wfxPoint</h5>
+<pre><code>Type wfxPoint
+   private:
+      _x as Long
+      _y as long 
 
-   select case ucase(tMenuItem.Name)
-      CASE &quot;MNUFILE&quot;, &quot;MNUEDIT&quot;, &quot;MNUVIEW&quot;, &quot;MNUHELP&quot;
-         ' Do not modify these. These are on the MainMenu menu bar.
-      CASE ELSE
-         tMenuItem.Grayed = True
-   end select
-
-   ' Process any children MenuItems recursively
-   For i As Long = 0 To tMenuItem.MenuItems.Count - 1
-      if tMenuItem.MenuItem(i).IsParent then
-         IterateMenuItems( tMenuItem.MenuItem(i) )
-      end if   
-   Next
-   
-   function = 0
-end function
-
-
-function Form1_Button1_Click( byref sender as wfxButton, byref e as EventArgs ) as LRESULT
-   ' Iterate all MenuItems in the MainMenu and set each one to Grayed.
-   ' We start at the root MenuItem that is dsplayed on the MainMenu's menu bar
-   ' (eg. File, Edit, View, Help) and use recursion to visit every sub-MenuItem. 
-   For i As Long = 0 To Form1.MainMenu.MenuItems.Count - 1
-      IterateMenuItems( Form1.MainMenu.MenuItem(i) )
-   Next
-
-   function = 0
-end function
-</code></pre>
-<h3 id="responding-to-a-menu-click">Responding to a Menu Click</h3>
-<p>When a user clicks on a menu item in the main menu then a <em>Click</em> event is fired that the user can respond to.</p>
-<pre><code>function Form1_MainMenu_Click( byref sender as wfxMenuItem, byref e as EventArgs ) as LRESULT
-
-   select case ucase(sender.Name)
-      CASE &quot;MNUFILE&quot;
-      CASE &quot;MNUEDIT&quot;
-      CASE &quot;MNUVIEW&quot;
-      CASE &quot;MNUHELP&quot;
-   end select
-   
-   function = 0
-end function
-</code></pre>
-<h3 id="initializing-menu-items-before-they-are-shown">Initializing Menu Items before they are shown</h3>
-<p>Immediately prior to a popup menu being shown on the screen, a <em>Popup</em> event is fired that the user can respond to. This allows the user and opportunity to initialize MenuItems based on any state information for the application. For example, in a text editor application you may gray out items such as Cut, Copy, Paste if such operations are not valid at the time the menu is displayed.</p>
-<pre><code>function Form1_MainMenu_Popup( byref sender as wfxMenuItem, byref e as EventArgs ) as LRESULT
-
-   select case ucase(sender.Name)
-      CASE &quot;MNUFILE&quot;
-      CASE &quot;MNUEDIT&quot;
-         Form1.MainMenu.ByMenuName(&quot;mnuCut&quot;).Grayed = bCanCut
-         Form1.MainMenu.ByMenuName(&quot;mnuCopy&quot;).Grayed = bCanCopy
-         Form1.MainMenu.ByMenuName(&quot;mnuPaste&quot;).Grayed = bCanPaste
-      CASE &quot;MNUVIEW&quot;
-      CASE &quot;MNUHELP&quot;
-   end select
-   
-   function = 0
-end function
+   public:
+      Declare Property x() As Long
+      Declare Property x( ByVal nValue As Long )
+      Declare Property y() As Long
+      Declare Property y( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
+End Type
 </code></pre>
 </body>
 </html>

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -265,12 +265,12 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
          ' If the Event/function does not already exist in code then create it now.
-         ParseDocument(pDoc->ProjectIndex, pDoc, "")
+         ParseDocument(pDoc, "")
          
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
-         if (gProjectLoading = false) orelse (gFileLoading = false) then
+         if (gApp.IsProjectLoading = false) orelse (gFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
             if pData = 0 THEN
                wszMenuSelect = sp(1) & "Select Case UCase(sender.Name)" & vbcrlf 
@@ -324,12 +324,12 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
                
                ' If the Event/function does not already exist in code then create it now.
-               ParseDocument(pDoc->ProjectIndex, pDoc, "")
+               ParseDocument(pDoc, "")
                
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
                ' not yet been loaded.
-               if (gProjectLoading = false) orelse (gFileLoading = false) then
+               if (gApp.IsProjectLoading = false) orelse (gFileLoading = false) then
                   pData = gdb2.dbFindFunction(wszFunction)
                   if pData = 0 THEN
                      wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
@@ -566,7 +566,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ' If any new Events were discovered then append them to the code editor
    if len(wszAllEvents) then
       pDoc->AppendText(wszAllEvents)
-      ParseDocument(gApp.GetActiveProjectIndex(), pDoc, "")
+      ParseDocument(pDoc, "")
    END IF
   
    ' Save the generated codegen code because we will output it to a disk file

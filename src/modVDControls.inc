@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -231,26 +231,23 @@ end function
 ' ========================================================================================
 function IsFormNameExists( byref wszFormName as wstring ) as boolean
 
-   dim pDoc as clsDocument ptr 
+   dim pDoc as clsDocument ptr = gApp.pDocList
    dim pCtrl as clsControl ptr 
    dim as Boolean bExists = false
-   dim as long idx = gApp.GetActiveProjectIndex
    
-   For i As Long = 0 To gApp.Projects(idx).GetDocumentCount - 1
-      pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-      if pDoc THEN
-         for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-            pCtrl = pDoc->Controls.ItemAt(ii)
-            if pCtrl->ControlType = CTRL_FORM THEN
-               if ucase(GetControlProperty(pCtrl, "NAME")) = ucase(wszFormName) THEN
-                  bExists = true
-               END IF
-               exit for
+   do until pDoc = 0
+      for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+         pCtrl = pDoc->Controls.ItemAt(ii)
+         if pCtrl->ControlType = CTRL_FORM THEN
+            if ucase(GetControlProperty(pCtrl, "NAME")) = ucase(wszFormName) THEN
+               bExists = true
             END IF
-         NEXT
-      END IF
-      if bExists THEN exit for
-   Next
+            exit for
+         END IF
+      NEXT
+      if bExists THEN exit do
+      pDoc = pDoc->pDocNext
+   loop
    
    return bExists
 end function

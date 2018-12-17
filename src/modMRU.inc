@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -14,8 +14,8 @@
 ''
 ''
 Function GetMRUMenuHandle() as HMENU
-   Dim hFileMenu as HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, 0 ) 
-   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, 11 )
+   Dim hFileMenu as HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, FILES_MENU_POSITION ) 
+   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, MRUFILES_MENU_POSITION )
    Function = hSubMenu
 End Function
 
@@ -136,20 +136,20 @@ End Function
    
 ''
 ''
-Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
+Function UpdateMRUList( Byref wzFilename As WString ) As Long
 
    Dim idxExistsAt as Long = -1   ' index of where filename already exists 
    Dim i           as Long
    Dim wzFile      As WString * MAX_PATH
    
-   if gProjectLoading then exit function
+   if gApp.IsProjectLoading then exit function
 
    ' Search the 10 MRU items to see if the filename already exists and
    ' also for an available entry to put the filename in.
    For i = 0 To 9
       wzFile = gConfig.MRU(i)
       wzFile = ProcessFromCurdrive(wzFile)
-      If Ucase(wzFile) = Ucase(*wzFilename) Then
+      If Ucase(wzFile) = Ucase(wzFilename) Then
          idxExistsAt = i:  Exit For
       End If   
    Next
@@ -162,7 +162,7 @@ Function UpdateMRUList( ByVal wzFilename As WString Ptr ) As Long
    For i = idxExistsAt To 1 Step -1
       gConfig.MRU(i) = gConfig.MRU(i-1)
    Next
-   gConfig.MRU(0) = *wzFilename 
+   gConfig.MRU(0) = wzFilename 
    
    ' Save the configuration file
    gConfig.SaveConfigFile
@@ -177,65 +177,18 @@ End Function
 ''
 ''
 Function GetMRUProjectMenuHandle() As HMENU
-   Dim hFileMenu As HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, 4 ) 
-   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, 3 )
+   Dim hFileMenu As HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, PROJECT_MENU_POSITION ) 
+   Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, MRUPROJECTS_MENU_POSITION )
    Function = hSubMenu
 End Function
 
 
 ''
 ''
-Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long, ByVal pwszFilename As WString Ptr = 0 ) As Long
+Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long) As Long
    Dim wzFile As WString * MAX_PATH
-   Dim idx As Long
-   
-   If pwszFilename Then
-      wzFile = *pwszFilename
-   Else   
-      wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
-   End If
-   
-   ' If the project is already open then simply set the project as active
-   ' rather than opening an additional copy of the project.
-   idx = gApp.GetProjectIndexByFilename(wzFile)
-   if idx > 0 THEN 
-      gApp.SetActiveProject( gApp.Projects(idx).hExplorerRootNode )
-      exit function
-   END IF
-   
-   ' If a project is not yet open then close any files that may be open in the editor.
-   If gApp.IsProjectActive = false Then 
-      ' If the Find/Replace window is open then close it.
-      DestroyWindow(HWND_FRMFINDREPLACE)
-      if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = 0 then
-         ' save was cancelled
-         exit function
-      end if   
-      gApp.NonProjectNotes = AfxGetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES))
-      ' Clear the FILES explorer node
-      if gApp.Projects(0).hExplorerRootNode THEN
-         dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         Treeview_DeleteItem( hTree, gApp.Projects(0).hExplorerRootNode )
-         gApp.Projects(0).hExplorerRootNode = 0
-      END IF
-   end if
-         
-   ' Clear any previous info from the Output windows
-   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
-   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
-   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO) )
-   AfxSetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), "")
-   
-   ' Open the project
-   If gConfig.ProjectLoadFromFile(wzFile) Then
-      ' Update the most recently used project list 
-      UpdateMRUProjectList(@wzFile)
-   End If
-
-   ' Position all of the controls into place
-   PositionExplorerWindows(HWND_FRMEXPLORER)
-   frmMain_PositionWindows(HWnd)
-
+   wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
+   frmMain_OpenProjectSafely(HWnd, wzFile) 
    Function = 0
 End Function
 
@@ -276,7 +229,7 @@ End Function
    
 ''
 ''
-Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
+Function UpdateMRUProjectList( Byref wzFilename As WString ) As Long
 
    Dim idxExistsAt As Long = -1   ' index of where filename already exists 
    Dim i           As Long
@@ -285,7 +238,7 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
    ' also for an available entry to put the filename in.
    For i = 0 To 9
       gConfig.MRUProject(i) = ProcessFromCurdrive(gConfig.MRUProject(i))
-      If Ucase(gConfig.MRUProject(i)) = Ucase(*wzFilename) Then
+      If Ucase(gConfig.MRUProject(i)) = Ucase(wzFilename) Then
          idxExistsAt = i:  Exit For
       End If   
    Next
@@ -298,7 +251,7 @@ Function UpdateMRUProjectList( ByVal wzFilename As WString Ptr ) As Long
    For i = idxExistsAt To 1 Step -1
       gConfig.MRUProject(i) = gConfig.MRUProject(i-1)
    Next
-   gConfig.MRUProject(0) = *wzFilename 
+   gConfig.MRUProject(0) = wzFilename 
 
    ' Save the configuration file
    gConfig.SaveConfigFile

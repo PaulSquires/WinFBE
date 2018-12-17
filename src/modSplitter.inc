@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -33,10 +33,12 @@ Function Splitter_OnLButtonDown() As BOOLEAN
    ' Now test to see if the cursor is within this rect (screen coordinates)
    GetCursorPos(@pt)
    If PtInRect( @rc, pt ) Then
-      SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
-      gApp.bDragActive = True 
-      gApp.hWndPanel   = HWND_FRMEXPLORER
-      SetCapture( HWND_FRMMAIN )
+      if WindowFromPoint(pt) = HWND_FRMEXPLORER then
+         SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         gApp.bDragActive = True 
+         gApp.hWndPanel   = HWND_FRMEXPLORER
+         SetCapture( HWND_FRMMAIN )
+      end if
       Exit Function
    End If
    
@@ -50,10 +52,12 @@ Function Splitter_OnLButtonDown() As BOOLEAN
    ' Now test to see if the cursor is within this rect (screen coordinates)
    GetCursorPos(@pt)
    If PtInRect( @rc, pt ) Then
-      SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
-      gApp.bDragActive = True 
-      gApp.hWndPanel   = HWND_FRMOUTPUT
-      SetCapture( HWND_FRMMAIN )
+      if WindowFromPoint(pt) = HWND_FRMOUTPUT then
+         SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         gApp.bDragActive = True 
+         gApp.hWndPanel   = HWND_FRMOUTPUT
+         SetCapture( HWND_FRMMAIN )
+      end if
       Exit Function
    End If
    
@@ -103,7 +107,9 @@ Function Splitter_OnMouseMove() As BOOLEAN
    GetCursorPos(@pt)
    
    If PtInRect( @rc, pt ) Then
-      SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+      if WindowFromPoint(pt) = HWND_FRMEXPLORER then
+         SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+      end if
    End If
    If gApp.bDragActive Then
       If gApp.hWndPanel = HWND_FRMEXPLORER Then
@@ -119,7 +125,6 @@ Function Splitter_OnMouseMove() As BOOLEAN
       End If
    End If
 
-
    ' TEST #2 (TOP/BOTTOM SPLITTER)
    ' Get the windowrect of the frmOutput.
    GetWindowRect HWND_FRMOUTPUT, @rc
@@ -131,7 +136,9 @@ Function Splitter_OnMouseMove() As BOOLEAN
    GetCursorPos(@pt)
    
    If PtInRect( @rc, pt ) Then
-      SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+      if WindowFromPoint(pt) = HWND_FRMOUTPUT then
+         SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+      end if
    End If
    If gApp.bDragActive Then
       If gApp.hWndPanel = HWND_FRMOUTPUT Then
@@ -144,7 +151,7 @@ Function Splitter_OnMouseMove() As BOOLEAN
          Exit Function
       End If
    End If
-
+   
    Function = 0
 End Function
 

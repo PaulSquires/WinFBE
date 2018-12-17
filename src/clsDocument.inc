@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -278,7 +278,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' Update the most recently used file list (only for non-IsNewFlag files)
             ' Only add file to MRU list if it is not part of an active Project.
             If gApp.IsProjectActive = false Then 
-               UpdateMRUList(pwszFile)
+               UpdateMRUList(*pwszFile)
             end if
          End If
       End If   
@@ -621,7 +621,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' If this was a new document then it needs to be saved to Recent File list.
    If this.IsNewFlag Then 
       If gApp.IsProjectActive = false Then 
-         UpdateMRUList(@wFilename)
+         UpdateMRUList(wFilename)
       end if
    end if
    this.IsNewFlag = False
@@ -1271,7 +1271,7 @@ Function clsDocument.DisplayStats() As Long
    ' If a project is loading then we don't want to be constantly updating the 
    ' application caption to the filename names, etc. Only do so once the project
    ' has been finally loaded.
-   if gProjectLoading THEN exit function
+   if gApp.IsProjectLoading THEN exit function
       
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
@@ -1292,8 +1292,8 @@ Function clsDocument.DisplayStats() As Long
    ' do the update if the text has changed in order to prevent flicker.
    wTemp = AfxGetWindowText( HWND_FRMMAIN )
    wText = APPNAMESHORT 
-   If this.ProjectIndex > 0 Then  ' belongs to a regular project
-      wText = wText + " - [" + gApp.Projects(this.ProjectIndex).ProjectName + "]"
+   If gApp.IsProjectActive Then  ' belongs to a regular project
+      wText = wText + " - [" + gApp.ProjectName + "]"
    end if   
    wText = wText + " - [" + this.DiskFilename + wTag + "]"
    If wText <> wTemp Then AfxSetWindowText( HWND_FRMMAIN, wText )
@@ -1317,9 +1317,6 @@ Function clsDocument.DisplayStats() As Long
       wText = " Ln " & Str(nLine+1) & ", Col " & Str(nCol+1) 
       If endPos - startPos Then  ' there is selected text
          wText = wText + " (" + Str(endPos - startPos) + " selected)"
-         ' If this is a multiline selection then update the selected button
-         ' on the FindReplace window.
-         frmFindReplace_SetButtonStates
       else
          wText = wText + ", Lines " + Str(nLines)
       End If 
@@ -1351,7 +1348,10 @@ Function clsDocument.DisplayStats() As Long
          ' UTF8 or UTF16 would have been converted to UTF8 in order to display in the editor.
          SciMsg( pSci, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
       end if
-      if IsWindowVisible(HWND_FRMFINDREPLACE) THEN frmFindReplace_SetButtonStates
+      if IsWindowVisible(HWND_FRMFINDREPLACE) then
+         ' Update whether Selection icon should be highlighted
+         frmFindReplace_ShowControls()
+      end if   
    end if
    
    Function = 0

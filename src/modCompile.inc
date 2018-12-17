@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -85,7 +85,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
          
    Dim As BOOLEAN fCompile32, fCompile64
    
-   dim as long idx = gApp.GetActiveProjectIndex()
    dim as long idxBuild, f, i, n, nCount
    
    wDQ = wchr(34) ' unicode double quotes
@@ -142,7 +141,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    Dim pDocMain As clsDocument Ptr 
    If gApp.IsProjectActive Then
-      pDocMain = gApp.Projects(idx).GetMainDocumentPtr()
+      pDocMain = gApp.GetMainDocumentPtr()
       If pDocMain = 0 Then
          MessageBox( HWND_FRMMAIN, L(208,"No Main file specified for the project."), L(201,"Error"), _
                            MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
@@ -242,7 +241,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    end if
    
    If gApp.IsProjectActive Then
-      Dim pDocResource As clsDocument Ptr = gApp.Projects(idx).GetResourceDocumentPtr()
+      Dim pDocResource As clsDocument Ptr = gApp.GetResourceDocumentPtr()
       if pDocResource then gCompile.ResourceFile = pDocResource->DiskFilename
 
       gCompile.ObjFolder = gCompile.MainFolder & wstr(".wfbe\")
@@ -250,11 +249,11 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
       If fCompile32 Then 
          gCompile.ObjID = wstr("32.o")
-         gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.Projects(idx).ProjectOther32           
+         gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.ProjectOther32           
       End If
       If fCompile64 Then 
          gCompile.ObjID = wstr("64.o")
-         gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.Projects(idx).ProjectOther64           
+         gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.ProjectOther64           
       End If   
       
       ' Make sure the folders exist
@@ -333,9 +332,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
-      nCount = gApp.Projects(idx).GetDocumentCount 
-      For i = 0 To nCount - 1
-         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+      pDoc = gApp.pDocList
+      do until pDoc = 0
          If pDoc->ProjectFileType = FILETYPE_MODULE Then
             ' Get the base name of the file for constructing the object filename
             wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
@@ -370,7 +368,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             End If
             
          End If
-      Next
+         pDoc = pDoc->pDocNext
+      loop
    End If
 
 
@@ -383,15 +382,15 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    wszParams = wszParams + " -v " + gCompile.CompileFlags 
    
    If gApp.IsProjectActive Then
-      nCount = gApp.Projects(idx).GetDocumentCount 
-      For i = 0 To nCount - 1
-         pDoc = gApp.Projects(idx).GetDocumentPtr(i)
+      pDoc = gApp.pDocList
+      do until pDoc = 0
          If pDoc->ProjectFileType = FILETYPE_MODULE Then
             ' Get the base name of the file for constructing the object filename
             wszTemp = AfxStrPathname("NAME", pDoc->DiskFilename)
             wszParams = wszParams + " " + gCompile.ObjFolderShort + wszTemp + gCompile.ObjID
          End If
-      Next
+         pDoc = pDoc->pDocNext
+      loop
    End If
 
    ' Attempt to delete any existing output file so it will not exist
@@ -434,7 +433,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    NEXT
 
    If gCompile.RunAfterCompile Then 
-      RunEXE( gCompile.OutputFilename, gApp.Projects(idx).ProjectCommandLine)
+      RunEXE( gCompile.OutputFilename, gApp.ProjectCommandLine)
    End If
       
    Function = True   ' successful
@@ -786,8 +785,7 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
   
             ' If this is a visual designer form file then we need to modify the line
             ' number based on the error offset number.
-            dim as long idx = gApp.GetActiveProjectIndex()
-            dim pDoc as clsDocument ptr = gApp.Projects(idx).GetDocumentPtrByFilename(wst1)
+            dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
             if pDoc then
                if pDoc->IsDesigner then
                   if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
@@ -883,17 +881,18 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
                          FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & _
                          "]"
          SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
-         If gConfig.HideCompile = False Then
-            wst = wszOutputMsg & vbCrLf & _
-                  L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
-                  L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
-                  L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
-                  L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-            MessageBox( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
-         else
+         ' 2018-12-13: No longer offer the option to show the popup successful dialog.
+'         If gConfig.HideCompile = False Then
+'            wst = wszOutputMsg & vbCrLf & _
+'                  L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
+'                  L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
+'                  L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
+'                  L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
+'            MessageBox( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
+'         else
             ' Simply sound a success
             MessageBeep(MB_OK)
-         End If
+'         End If
       end if
    End if 
 

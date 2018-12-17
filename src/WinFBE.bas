@@ -1,11 +1,11 @@
 ' ========================================================================================
 ' WinFBE
 ' Windows FreeBASIC Editor (Windows 32/64 bit)
-' Paul Squires (2016-2018)
+' Paul Squires (2016-2019)
 ' ========================================================================================
 
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -35,13 +35,15 @@
 #Include Once "Afx\AfxCom.inc" 
 #Include Once "Afx\CXpButton.inc"
 #Include Once "Afx\CMaskedEdit.inc"
-#include once "Afx\CAxHost\CWebCtx.inc"
+#Include Once "Afx\CImageCtx.inc"
+#Include Once "Afx\CAxHost\CWebCtx.inc"
 
 Using Afx
 
+
 #Define APPNAME       WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT  WStr("WinFBE")
-#Define APPVERSION    WStr("1.8.7") 
+#Define APPVERSION    WStr("1.8.8") 
 
 #ifdef __FB_64BIT__
    #Define APPBITS WStr(" (64-bit)")
@@ -49,7 +51,11 @@ Using Afx
    #Define APPBITS WStr(" (32-bit)")
 #endif
 
-#Define TOOLS_MENU_POSITION 8
+#Define FILES_MENU_POSITION        0
+#Define PROJECT_MENU_POSITION      4
+#Define TOOLS_MENU_POSITION        8
+#Define MRUFILES_MENU_POSITION    11
+#Define MRUPROJECTS_MENU_POSITION  3
 
 #Include Once "modScintilla.bi"
 #Include Once "modDeclares.bi"         ' TYPES, DEFINES, etc
@@ -62,7 +68,6 @@ Using Afx
 #Include Once "modCBColor.inc"
 #Include Once "clsCollection.inc"
 #Include Once "clsDocument.inc"
-#Include Once "clsProject.inc"
 #Include Once "clsApp.inc"
 #Include Once "clsTopTabCtl.inc"
 #Include Once "clsLasso.inc"
@@ -85,12 +90,10 @@ Using Afx
 #Include Once "modCodetips.inc"
 #Include Once "modGenerateCode.inc"
 
-#Include Once "frmHotImgBtn.inc"
-#Include Once "frmHotTxtBtn.inc"
 #Include Once "frmRecent.inc" 
 #Include Once "frmExplorer.inc" 
 #Include Once "frmUserTools.inc" 
-#Include Once "frmCompileConfig.inc" 
+#Include Once "frmBuildConfig.inc" 
 #Include Once "frmOutput.inc" 
 #Include Once "frmOptionsGeneral.inc"
 #Include Once "frmOptionsEditor.inc"
@@ -108,6 +111,7 @@ Using Afx
 #Include Once "frmProjectOptions.inc"
 #Include Once "frmHelpViewer.inc"
 #Include Once "frmMenuEditor.inc"
+#Include Once "frmMainOnCommand.inc"
 #Include Once "frmMain.inc"
 
 
@@ -124,10 +128,21 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    gConfig.LoadConfigFile()
    gConfig.LoadKeywords()
 
-   ' Load the selected localization file
    dim as CWSTR wszLocalizationFile
+   ' Attempt to load the english localization file. This is necessary because
+   ' any non-english localization file will have missing entries filled by the
+   ' english version.
+   wszLocalizationFile = AfxGetExePathName + wstr("Languages\english.lang")
+   If LoadLocalizationFile(wszLocalizationFile, true) = False Then
+      MessageBox( 0, WStr("English Localization file could not be loaded. Aborting application.") + vbcrlf + _
+                   wszLocalizationFile, _
+                   WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      Return 1
+   End If
+   
+   ' Load the selected localization file
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\") + gConfig.LocalizationFile
-   If LoadLocalizationFile(wszLocalizationFile) = False Then
+   If LoadLocalizationFile(wszLocalizationFile, false) = False Then
       MessageBox( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
                    wszLocalizationFile, _
                    WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )

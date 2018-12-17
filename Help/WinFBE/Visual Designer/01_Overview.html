@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Fonts</title>
+  <title>01_Overview</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,16 +20,44 @@
   
 </head>
 <body>
-<h1 id="fonts">Fonts</h1>
-<p>Internally, the visual designer handles creating and assigning fonts tot he various controls being used in your application. However, there may come a time when you need to create and assign fonts via your code. WinFBE creates fonts that are high dpi aware meaning that they scale correctly even on monitors that have very high resolutions.</p>
-<h4 id="creating-and-assigning-a-new-font">Creating and assigning a new font</h4>
-<pre><code>Form1.CheckBox1.Font = New wfxFont(&quot;Segoe UI&quot;, 9, FontStyles.Bold, FontCharset.Ansi)
+<h1 id="overview">Overview</h1>
+<p>The visual designer is still a major work in progress so please do not assume that all functionality is available and/or working correctly. The purpose of this release to show the progress of the visual designer to date and to allow input from users regarding its direction and whether changes in basic design philosophy should occur at this point.</p>
+<p>NOTE: Code may fail, GPF’s may occur in the editor. Do not rely on this version of the designer for any production quality code. Treat this mainly as a demo.</p>
+<p>The following areas of the visual designer are not working:</p>
+<ul>
+<li>Toolbar Editor</li>
+<li>Statusbar Editor</li>
+<li>Images/Pictures/Icons. Any control property that relies on these types has not been implemented yet. Need to create an interface between the editor and resource file.</li>
+<li>Guidelines and snap to lines on the design form</li>
+</ul>
+<p>There are a few controls that have been implemented. More to come as the core structure of the designer itself matures.</p>
+<ul>
+<li>Forms</li>
+<li>Label</li>
+<li>Button (Jose Roca’s CXpButton class)</li>
+<li>MaskedEdit (Jose Roca’s CMaskedEdit class)</li>
+<li>TextBox</li>
+<li>CheckBox</li>
+<li>Frame</li>
+<li>ListBox</li>
+<li>ComboBox</li>
+<li>OptionButton</li>
+<li>Main Menu</li>
+<li>StatusBar (only through code at this time)</li>
+</ul>
+<p>The forms and controls are being implemented via the WinFormsX library that I am writing and maintaining on GitHub.</p>
+<p>The rest of this document will give you a bare bones introduction to the use of the visual designer and code to perform various tasks.</p>
+<p>The visual designer will automatically generate code whenever something changes related to a form or control. The generated code is based on the syntax of the <strong>WinFormsX library</strong>.</p>
+<p>When the code is first generated, the visual designer will output an additional line:</p>
+<pre><code>Application.Run(Form1)
 </code></pre>
-<h4 id="parameters">Parameters</h4>
-<p><strong>FontName</strong></p>
-<p><strong>FontSize</strong></p>
-<p><strong>FontStyle</strong> (use <strong>OR</strong> to combine multiple styles) ​ FontStyles.Normal ​ FontStyles.Bold ​ FontStyles.Italic ​ FontStyles.Strikeout ​ FontStyles.Underline</p>
-<p><strong>CharacterSet</strong> ​ FontCharset.Default ​ FontCharset.Ansi ​ FontCharset.Arabic ​ FontCharset.Baltic ​ FontCharset.ChineseBig5 ​ FontCharset.EastEurope ​ FontCharset.GB2312 ​ FontCharset.Greek ​ FontCharset.Hangul ​ FontCharset.Hebrew ​ FontCharset.Johab ​ FontCharset.Mac ​ FontCharset.OEM ​ FontCharset.Russian ​ FontCharset.Shiftjis ​ FontCharset.Symbol ​ FontCharset.Thai ​ FontCharset.Turkish ​ FontCharset.Vietnamese</p>
+<p>That line essentially bootstraps the form so that it will display. Obviously you don’t need a line like this for every form that is generated. You can safely move that line to a main source file so that it only runs once at program startup. Any subsequent similar generated lines for other forms can be safely deleted.</p>
+<p>WinFBE generates a <strong>TYPE</strong> structure for every form in the application. That TYPE extends a bass class called <strong>wfxForm</strong> which contains the core functionality of a form. You can find the wfxForm source code and all other source code for other controls such as <strong>wfxLabel, wfxTextBox</strong> in the WinFormsX include folder. A global shared variable is generated for each form TYPE. For example, if your form is named Form1 then the shared variable is also named Form1.</p>
+<pre><code>Dim Shared Form1 as Form1Type
+</code></pre>
+<p>If you have controls on your form then you access them via dot syntax. For example, if you have a button called Button1 located on the form called Form1 then you access the button via <strong>Form1.Button1</strong></p>
+<pre><code>Form1.Button1.Text = &quot;Cancel&quot;
+</code></pre>
 </body>
 </html>
 

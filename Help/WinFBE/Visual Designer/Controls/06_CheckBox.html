@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Frame</title>
+  <title>06_CheckBox</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,7 @@
   
 </head>
 <body>
-<h1 id="frame-(wfxframe)">Frame (wfxFrame)</h1>
+<h1 id="checkbox-(wfxcheckbox)">CheckBox (wfxCheckBox)</h1>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -39,16 +39,24 @@
 <td>Gets or sets the background color of the form. Refer to the <strong>Colors</strong> object.</td>
 </tr>
 <tr class="odd">
+<td>CheckState</td>
+<td>Gets or sets the state of the control. Refer to the <a href="#CheckBoxState">CheckBoxState</a> enum.</td>
+</tr>
+<tr class="even">
 <td>CtrlId</td>
 <td>Gets or sets a value indicating the control ID of the control.</td>
 </tr>
-<tr class="even">
-<td>CtrlType</td>
-<td>Gets or sets the control type value. Always <strong>ControlType.Frame</strong> and used when adding form to the application’s form collection.</td>
-</tr>
 <tr class="odd">
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.CheckBox</strong> and used when adding control to the application’s form collection.</td>
+</tr>
+<tr class="even">
 <td>Enabled</td>
 <td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
+</tr>
+<tr class="odd">
+<td>Focused</td>
+<td>Gets or sets a value (true/false) indicating whether the control has input focus.</td>
 </tr>
 <tr class="even">
 <td>Font</td>
@@ -87,12 +95,28 @@
 <td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
 </tr>
 <tr class="odd">
+<td>TabIndex</td>
+<td>Gets or sets the position that the control occupies in the TAB position.</td>
+</tr>
+<tr class="even">
+<td>TabStop</td>
+<td>Gets or sets a value (true/false) indicating whether the user can use the TAB key to give focus to the control.</td>
+</tr>
+<tr class="odd">
 <td>Tag</td>
 <td>Gets or sets user defined text associated with the form.</td>
 </tr>
 <tr class="even">
 <td>Text</td>
 <td>Gets or sets the text (caption) associated with this form.</td>
+</tr>
+<tr class="odd">
+<td>TextAlign</td>
+<td>Gets or sets a value indicating the alignment of the text on a control. Refer to <a href="#ButtonAlignment">ButtonAlignment</a> enum.</td>
+</tr>
+<tr class="even">
+<td>ThreeState</td>
+<td>Gets or sets a value (true/false) indicating whether the control will allow three check states rather than two.</td>
 </tr>
 <tr class="odd">
 <td>Top</td>
@@ -169,35 +193,82 @@
 <td>Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.</td>
 </tr>
 <tr class="odd">
+<td>GotFocus</td>
+<td>Occurs when the control receives focus.</td>
+</tr>
+<tr class="even">
+<td>LostFocus</td>
+<td>Occurs when the control loses focus.</td>
+</tr>
+<tr class="odd">
+<td>KeyDown</td>
+<td>Occurs when a key is pressed while the control has focus.</td>
+</tr>
+<tr class="even">
+<td>KeyPress</td>
+<td>Occurs when a character, space or backspace key is pressed while the control has focus.</td>
+</tr>
+<tr class="odd">
+<td>KeyUp</td>
+<td>Occurs when a key is released while the control has focus.</td>
+</tr>
+<tr class="even">
 <td>MouseDoubleClick</td>
 <td>Occurs when the control is double clicked by the mouse.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseDown</td>
 <td>Occurs when the mouse pointer is over the control and a mouse button is pressed.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MouseEnter</td>
 <td>Occurs when the mouse pointer enters the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseHover</td>
 <td>Occurs when the mouse pointer rests on the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MouseLeave</td>
 <td>Occurs when the mouse pointer leaves the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseMove</td>
 <td>Occurs when the mouse pointer is moved over the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MouseUp</td>
 <td>Occurs when the mouse pointer is over the control and a mouse button is released.</td>
 </tr>
 </tbody>
 </table>
+<h5 id="checkboxstate">CheckBoxState</h5>
+<pre><code>Enum CheckBoxState      
+   Checked = 1
+   Unchecked
+   Indeterminate
+End Enum
+</code></pre>
+<h5 id="controlborderstyle">ControlBorderStyle</h5>
+<pre><code>Enum ControlBorderStyle
+   None = 1
+   FixedSingle  
+   Fixed3D 
+End Enum
+</code></pre>
+<h5 id="buttonalignment">ButtonAlignment</h5>
+<pre><code>Enum ButtonAlignment
+   BottomCenter = 1
+   BottomLeft   
+   BottomRight  
+   MiddleCenter 
+   MiddleLeft   
+   MiddleRight  
+   TopCenter    
+   TopLeft      
+   TopRight     
+End Enum
+</code></pre>
 <h5 id="wfxsize">wfxSize</h5>
 <pre><code>Type wfxSize
    private:

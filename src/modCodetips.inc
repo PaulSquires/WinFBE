@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -263,7 +263,7 @@ function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 
    ' If the file is dirty then reparse it before attempting the codetip
    If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-      ParseDocument(gApp.GetActiveProjectIndex, pDoc, "")
+      ParseDocument(pDoc, "")
    End If   
    
    pData = DereferenceLine(pDoc, "(")
@@ -406,7 +406,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
          If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-            ParseDocument(gApp.GetActiveProjectIndex, pDoc, "")
+            ParseDocument(pDoc, "")
          End If   
       end if
    END IF

@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ End Function
 ' ========================================================================================
 Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
 
-   if gProjectLoading then exit function  ' to prevent flickering during a project load
+   if gApp.IsProjectLoading then exit function  ' to prevent flickering during a project load
 
    ' Update the statusbar with the current Line/Col position
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -102,8 +102,7 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
       Dim wzText As WString * MAX_PATH
       wzText = APPNAME            
       If gApp.IsProjectActive Then
-         dim idx as long = gApp.GetActiveProjectIndex
-         if idx then wzText = APPNAMESHORT + " - [" + gApp.Projects(idx).ProjectName + "]"
+         wzText = APPNAMESHORT + " - [" + gApp.ProjectName + "]"
       end if
       SetWindowText( HWnd, wzText )
    Else
@@ -549,151 +548,39 @@ Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 End Function
 
 
-' ========================================================================================
-' Save project file to disk
-' ========================================================================================
-Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
-   ' Save all dirty files
-   OnCommand_FileSaveAll( HWnd )
-   
-   ' Do the actual saving to disk of the Project file
-   dim idx as long = gApp.GetActiveProjectIndex() 
-   gApp.Projects(idx).SaveProject(bSaveAs)
-
-   frmMain_SetFocusToCurrentCodeWindow
-
-   Function = 0
-End Function
-
 
 ' ========================================================================================
-' Close currently active project
+' Attempt to open specified project. 
 ' ========================================================================================
-Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
+Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, byref wszProjectFileName as WString ) as Boolean
 
-   Dim wText As WString * MAX_PATH  
-   dim idx as long = gApp.GetActiveProjectIndex()
-   dim as long r, iTab
-   dim pDoc as clsDocument ptr
-
-   ' Save the project configuration to disk
-   OnCommand_ProjectSave( HWnd, False )
-
-   ' Cycle all files in the Project and ask to save any dirty ones. If a 
-   ' save is cancelled then do not proceed to finalize closing the project.
-   for i as long = 0 to gApp.Projects(idx).GetDocumentCount - 1
-      pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-      if pDoc = 0 THEN continue for
-      if pDoc->ProjectIndex <> idx THEN continue for
-         
-      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         OpenSelectedDocument(pDoc, "")
-         wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
-         r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
-                           MB_YESNOCANCEL Or MB_ICONQUESTION)
-         If r = IDCANCEL Then Exit Function
-         If r = IDYES Then 
-            r = pDoc->SaveFile()
-            If r = False Then Exit Function   ' save was cancelled
-         End If
-      End If
-      
-      ' Remove from top tab control
-      iTab = gTTabCtl.GetTabIndexByDocumentPtr( pDoc)
-      if iTab > -1 THEN
-         TabCtrl_DeleteItem(gTTabCtl.hWindow, iTab)
-         gTTabCtl.SetFocusTab(iTab-1)
-      END IF
-      ' Hide Scintilla windows
-      for ii as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
-         ShowWindow pDoc->hWindow(ii), SW_HIDE
-      NEXT
-      ' Hide visual designer window
-      if pDoc->IsDesigner THEN 
-         ShowWindow(pDoc->hWndDesigner, SW_HIDE)
-         ShowWindow(pDoc->hDesignTabCtrl, SW_HIDE)
-      END IF
-      
-   NEXT
-   
-   ' If the entire app is closing down then we do not have to process the
-   ' remaining project cleanup commands. Those cleanups are only needed when
-   ' multiple projects exist and we're not exiting the application altogether.
-   if gAppShutdown then 
-      gApp.Projects(idx).InUse = false   ' needed b/c gApp.IsProjectActive is checked on shutdown
-      return true
+   ' If a project is open then close any files that may be open in the editor. No need to
+   ' do this if a new project is being created/opened because that function has already
+   ' performed this operation. Doing so again will cause the Recent Files/Projects panel
+   ' to flash on the screen.
+   if gApp.IsNewProjectFlag = false then
+      If gApp.IsProjectActive Then 
+         if OnCommand_ProjectClose(hwnd) = false then exit function
+      else   
+         if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = false then exit function
+      end if
+      ' Clear any previous info from the Output windows
+      frmOutput_ResetAllControls()
    end if
-      
-   ' Reset the gdb database but reload the FB keywords (need valid pDocs)
-   gdb2.dbDeleteByProject(idx)
-
-   ' If we get this far then we can safely remove all of the pDocs for
-   ' this project from the global array
-   gApp.Projects(idx).RemoveAllDocuments
-
-   DestroyWindow( HWND_FRMFNLIST )
-   DestroyWindow(HWND_FRMVDTOOLBOX)
-
-   ' Remove the Explorer node for this project
-   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   TreeView_DeleteItem(hTree, gApp.Projects(idx).hExplorerRootNode)
-   gApp.Projects(idx).hExplorerRootNode = 0
-   gApp.Projects(idx).ProjectNotes = ""
-   gApp.Projects(idx).InUse = false
+         
+   ' Open the project
+   If gConfig.ProjectLoadFromFile(wszProjectFileName) Then
+      ' Update the most recently used project list 
+      UpdateMRUProjectList(wszProjectFileName)
+   End If
+   gApp.IsProjectActive = true
    
-   dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
-   AfxSetWindowText(hCtl, gApp.NonProjectNotes)
-
-   ' Make sure the next (if applicable) project is set as active so it can then be closed.
-   gApp.EnsureDefaultActiveProject
-
-   gApp.IsWindowIncludes = false
-   gdb2.dbDeleteWinAPI
-
+   ' Position all of the controls into place
    PositionExplorerWindows(HWND_FRMEXPLORER)
    frmMain_PositionWindows(HWND_FRMMAIN)
-   
-   frmMain_UpdateLineCol(HWND_FRMMAIN)
-   frmMain_SetFocusToCurrentCodeWindow
 
-   Function = true
-End Function
-
-
-' ========================================================================================
-' Create a new project
-' ========================================================================================
-Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
-
-   ' Ensure that the Project Manager window has been created (show it now as well)
-   frmProjectOptions_Show( HWnd, SW_SHOW, true )
-      
-   PositionExplorerWindows(HWND_FRMEXPLORER)
-   
-   ' This will update the main window to show the project name in the window caption
-   frmMain_SetFocusToCurrentCodeWindow
-   
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Open a Project
-' ========================================================================================
-Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
-
-   ' Display the Open File Dialog
-   Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, IDM_PROJECTOPEN)
-   If pwszName Then 
-      ' Pass the info to our generic project open function to handle everything.
-      OpenMRUProjectFile( HWnd, 0, pwszName )
-      CoTaskMemFree(pwszName)
-   End If
-   frmMain_SetFocusToCurrentCodeWindow
-
-   Function = 0
-End Function
-
+   function = true
+end function
 
 ' ========================================================================================
 ' Attempt to open specified file. If it exists then position to Tab if applicable
@@ -705,89 +592,55 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                  byval bIsInclude  as BOOLEAN, _
                                  ByVal pwszName    As WString Ptr, _
                                  ByVal pDocIn      As clsDocument Ptr, _
-                                 byval bIsDesigner as Boolean _
+                                 byval bIsDesigner as Boolean = false _
                                  ) As clsDocument Ptr
    
    Dim As Long iTab = -1
-   dim as long idx
-   dim as HTREEITEM hRootNode
    Dim pDoc As clsDocument Ptr 
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   dim as boolean bAttachToProject = true
    
-   ' Check to see if the document is already loaded and part of the
-   ' project it is being added to.
-   idx = gApp.GetActiveProjectIndex()
-
-   ' Need to determine if the document is already part of an open project
-   ' because if it is then we don't want to add the file to the current
-   ' project thus making a dual link.
-   for i as long = lbound(gApp.Projects) to ubound(gApp.Projects)
-      if gApp.Projects(i).InUse = true THEN
-         pDoc = gApp.Projects(i).GetDocumentPtrByFilename(pwszName)
-         if pDoc then
-            bAttachToProject = false
-            exit for
-         end if   
-      END IF
-   NEXT
-   
-   if pDoc then pDocIn = pDoc
-   
-   if bAttachToProject then
-      If pDocIn = 0 Then   ' Create a new pDoc 
-         gFileLoading = true  ' allows parsing of newly loading file
-         pDoc = New clsDocument
-         pDoc->IsDesigner = bIsDesigner 
-         ' All pDoc's will have an associated Scintilla window for code.
-         If bIsNewFile Then
-            pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
-         Else
-            pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
-         End If   
-         gApp.Projects(idx).AddDocument(pDoc) 
-         ParseDocument(idx, pDoc, "")
-         gFileLoading = false
+   If pDocIn = 0 Then   ' Create a new pDoc 
+      gFileLoading = true  ' allows parsing of newly loading file
+      pDoc = New clsDocument
+      pDoc->IsDesigner = bIsDesigner 
+      ' All pDoc's will have an associated Scintilla window for code.
+      If bIsNewFile Then
+         pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
       Else
-         pDoc = pDocIn     ' deal with the existing pDoc
+         pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
       End If   
-      pwszName = @pDoc->DiskFilename
+      gApp.AddDocument(pDoc) 
+      ParseDocument(pDoc, "")
+      gFileLoading = false
+   Else
+      ' deal with the existing pDoc
+      pDoc = pDocIn     
+   End If   
+   pwszName = @pDoc->DiskFilename
 
-      if idx = 0 THEN   ' Project0 "FILES"
-         If gApp.Projects(0).hExplorerRootNode = 0 Then
-            gApp.Projects(0).hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, "FILES" )
-            Treeview_RemoveCheckBox(hTree, gApp.Projects(0).hExplorerRootNode )
-            Treeview_SetBold(hTree, gApp.Projects(0).hExplorerRootNode, TRUE)
-         End If
-         hRootNode = gApp.Projects(0).hExplorerRootNode 
-         ' no project is active so add the file to the FILES Explorer list.
-         AddFunctionsToExplorerTreeview( pDoc, False )
-      else
-         hRootNode = gApp.Projects(idx).hExplorerRootNode
-         ' If a project is active then do not add any Include files to it and don't
-         ' show it in the Explorer's project list.
-         if bIsInclude = false then
-            AddFunctionsToExplorerTreeview( pDoc, False )
-            ' Give this document a default project type depending on its file extension
-            gApp.Projects(idx).ProjectSetFileType(pDoc, pDoc->ProjectFileType)
-         end if
-      END IF
-                       
-      ' Relate this pDoc to the correct project even if it is Project0
-      pDoc->ProjectIndex = idx
-      
-      ' Set the default build configuration for this document. If no IsDefault option
-      ' has been checked then we simply use whatever the current selected build is.
-      if pDoc->DocumentBuild = "" THEN 
-         pDoc->DocumentBuild = GetDefaultBuildGUID()
-         if pDoc->DocumentBuild = "" THEN 
-            pDoc->DocumentBuild = GetSelectedBuildGUID()
-         end if
-      end if      
+   AddFunctionsToExplorerTreeview( pDoc, False )
+
+   if gApp.IsProjectActive then 
+      ' Give this document a default project type depending on its file extension
+      gApp.ProjectSetFileType(pDoc, pDoc->ProjectFileType)
+      ' If opening a project file that does not yet have a file type designation
+      ' then assign it as a NORMAL file rather than leaving it empty.
+      if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+         pDoc->ProjectFileType = FILETYPE_NORMAL
+      end if   
    end if
+
+   ' Set the default build configuration for this document. If no IsDefault option
+   ' has been checked then we simply use whatever the current selected build is.
+   if pDoc->DocumentBuild = "" THEN 
+      pDoc->DocumentBuild = GetDefaultBuildGUID()
+      if pDoc->DocumentBuild = "" THEN 
+         pDoc->DocumentBuild = GetSelectedBuildGUID()
+      end if
+   end if      
    
-   Treeview_SortChildren( hTree, hRootNode, 0 )
-   TreeView_Expand( hTree, hRootNode, TVE_EXPAND)
+   Treeview_SortChildren( hTree, gApp.hExplorerRootNode, 0 )
+   TreeView_Expand( hTree, gApp.hExplorerRootNode, TVE_EXPAND)
 
    If bShowInTab Then
       ' If the document is already open and loaded then simply switch to
@@ -804,486 +657,6 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = pDoc
-End Function
-
-
-' ========================================================================================
-' Create a new visual designer window
-' ========================================================================================
-Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
-   frmMain_OpenFileSafely(HWnd, _
-                           True,  _   ' bIsNewFile
-                           False, _   ' bIsTemplate
-                           True,  _   ' bShowInTab
-                           false, _   ' bIsInclude
-                           0, _       ' pwszName
-                           0, _       ' pDocIn
-                           true )     ' Create a visual designer   
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Align controls on the form
-' ========================================================================================
-function OnCommand_DesignerAlign( byval HWND as HWND, byval id as long) as LRESULT
-
-   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-   if pDoc = 0 THEN exit function
-
-   dim pCtrlActive as clsControl ptr = pDoc->Controls.GetActiveControl()
-   dim pCtrl as clsControl ptr
-   dim as RECT rcCtrl, rcActive
-
-   dim as long nWidth, nHeight
-   dim as long nWidthActive, nHeightActive
-   
-   if pCtrlActive = 0 THEN exit function
-   rcActive = GetControlRECT(pCtrlActive)
-   nWidthActive  = rcActive.Right  - rcActive.Left
-   nHeightActive = rcActive.Bottom - rcActive.Top 
-   
-   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-      pCtrl = pDoc->Controls.ItemAt(i)
-      if pCtrl->IsSelected THEN
-         if IsControlLocked(pDoc, pCtrl) then continue for
-         ' Skip processing the active control because that is unnecessary.
-         if pCtrl = pCtrlActive THEN continue for
-         rcCtrl = GetControlRECT(pCtrl)
-         nWidth  = rcCtrl.Right  - rcCtrl.Left
-         nHeight = rcCtrl.Bottom - rcCtrl.Top 
-         select CASE id
-            case IDM_ALIGNLEFTS
-               SetControlProperty(pCtrl, "LEFT", str(rcActive.left))
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_ALIGNTOPS
-               SetControlProperty(pCtrl, "TOP", str(rcActive.top))
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_ALIGNRIGHTS
-               SetControlProperty(pCtrl, "LEFT", str(rcctrl.left + (rcActive.right-rcCtrl.right)) )
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_ALIGNBOTTOMS 
-               SetControlProperty(pCtrl, "TOP", str(rcCtrl.top + (rcActive.bottom-rcCtrl.bottom)) )
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_ALIGNCENTERS  
-               SetControlProperty(pCtrl, "LEFT", _
-                  str(rcActive.Left + (nWidthActive / 2) - ( nWidth / 2 )) )
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_ALIGNMIDDLES  
-               SetControlProperty(pCtrl, "TOP", _
-                  str(rcActive.Top + (nHeightActive / 2) - ( nHeight / 2 )) )
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_SAMEWIDTHS  
-               SetControlProperty(pCtrl, "WIDTH", str(nWidthActive))
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_SAMEHEIGHTS
-               SetControlProperty(pCtrl, "HEIGHT", str(nHeightActive))
-               ApplyControlProperties(pDoc, pCtrl)
-            case IDM_SAMEBOTH
-               pCtrl->SuspendLayout = true
-               SetControlProperty(pCtrl, "WIDTH", str(nWidthActive))
-               SetControlProperty(pCtrl, "HEIGHT", str(nHeightActive))
-               ApplyControlProperties(pDoc, pCtrl)
-               pCtrl->SuspendLayout = false
-         END SELECT
-      END IF
-   next
-
-   ' Ensure the grab handles are redrawn
-   AfxRedrawWindow(pDoc->hWndForm)
-
-   function = 0
-end function
-
-
-' ========================================================================================
-' Center controls on the form
-' ========================================================================================
-function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRESULT
-
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
-   If pWindow = 0 Then Exit Function
-
-   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-   if pDoc = 0 THEN exit function
-
-   dim pCtrl as clsControl ptr
-
-   dim as RECT rcCtrl, rcForm
-   dim as long nLeft, nTop, nMaxRight, nMaxBottom
-   dim as long nHorizSpacing, nVertSpacing, nFormWidth, nFormHeight
-   dim as long nMinLeft = 999999999
-   dim as long nMinTop  = 999999999
-   
-   ' Calculate the total distance from the far left (or top) control to the far
-   ' right (or bottom) control and subtract the widths of each control. This will
-   ' give us the amount of 'white' space. Divide that white space by
-   ' half to determine the amount to put on the left/top and right/bottom of the
-   ' group of controls.
-   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-      pCtrl = pDoc->Controls.ItemAt(i)
-      if pCtrl->ControlType = CTRL_FORM THEN continue for
-      if pCtrl->IsSelected = false THEN continue for
-      rcCtrl     = GetControlRECT(pCtrl)
-      nMinLeft   = Min( nMinLeft, rcCtrl.left )
-      nMaxRight  = Max( nMaxRight, rcCtrl.right )
-      nMinTop    = Min( nMinTop, rcCtrl.top )
-      nMaxBottom = Max( nMaxBottom, rcCtrl.bottom )
-   next
-
-   ' Get the client area of the design form
-   GetClientRect(pDoc->hWndForm, @rcForm)
-   nFormWidth  = (rcForm.right - rcForm.left) / pWindow->rxRatio
-   nFormHeight = (rcForm.bottom - rcForm.top) / pWindow->ryRatio
-   
-   ' Determine the value by which the group of controls needs to be shifted by.  
-   nHorizSpacing = nMinLeft - ( (nFormWidth - (nMaxRight - nMinLeft)) / 2) 
-   nVertSpacing  = nMinTop - ( (nFormHeight - (nMaxBottom - nMinTop) ) / 2) 
-
-   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-      pCtrl = pDoc->Controls.ItemAt(i)
-      if pCtrl->ControlType = CTRL_FORM THEN continue for
-      if pCtrl->IsSelected = false THEN continue for
-      if IsControlLocked(pDoc, pCtrl) then continue for
-      select CASE id
-         case IDM_CENTERHORIZ
-            nLeft = val(GetControlProperty(pCtrl, "LEFT"))
-            SetControlProperty(pCtrl, "LEFT", str(nLeft-nHorizSpacing))
-            ApplyControlProperties(pDoc, pCtrl)
-         case IDM_CENTERVERT
-            nTop  = val(GetControlProperty(pCtrl, "TOP"))
-            SetControlProperty(pCtrl, "TOP", str(nTop-nVertSpacing))
-            ApplyControlProperties(pDoc, pCtrl)
-         case IDM_CENTERBOTH   
-            nLeft = val(GetControlProperty(pCtrl, "LEFT"))
-            nTop  = val(GetControlProperty(pCtrl, "TOP"))
-            pCtrl->SuspendLayout = true
-            SetControlProperty(pCtrl, "LEFT", str(nLeft-nHorizSpacing))
-            SetControlProperty(pCtrl, "TOP", str(nTop-nVertSpacing))
-            ApplyControlProperties(pDoc, pCtrl)
-            pCtrl->SuspendLayout = false
-      END SELECT
-   next
-
-   ' Ensure the grab handles are redrawn
-   AfxRedrawWindow(pDoc->hWndForm)
-
-   function = 0
-end function
-
-' ========================================================================================
-' Create a new editing window
-' ========================================================================================
-Function OnCommand_FileNew( ByVal HWnd As HWnd ) As LRESULT
-   frmMain_OpenFileSafely(HWnd, _
-                           True,  _   ' bIsNewFile
-                           False, _   ' bIsTemplate
-                           True,  _   ' bShowInTab
-                           false, _   ' bIsInclude
-                           0, _       ' pwszName
-                           0 )        ' pDocIn
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Open one or more files for editing
-' ========================================================================================
-Function OnCommand_FileOpen( ByVal HWnd As HWnd ) As LRESULT
-
-   ' Display the Open File Dialog
-   Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd)
-   If pItems = Null Then Exit Function
-   Dim dwItemCount As Long, i As Long, pItem As IShellItem Ptr, pwszName As WString Ptr
-   pItems->lpVtbl->GetCount(pItems, @dwItemCount)
-   
-   For i = 0 To dwItemCount - 1
-      pItems->lpVtbl->GetItemAt(pItems, i, @pItem)
-      If pItem Then
-         pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
-         If pwszName Then 
-            dim as Boolean bShowInTab = iif(gApp.IsProjectActive, false, true)
-            frmMain_OpenFileSafely(HWnd, _
-                                    False, _    ' bIsNewFile
-                                    False, _    ' bIsTemplate
-                                    bShowInTab,  _    ' bShowInTab
-                                    false, _    ' bIsInclude
-                                    pwszName, _ ' pwszName
-                                    0 )         ' pDocIn
-            CoTaskMemFree(pwszName)
-            pwszName = Null
-         End If
-         pItem->lpVtbl->Release(pItem)
-         pItem = Null
-      End If
-   Next
-   pItems->lpVtbl->Release(pItems)
-   
-   frmMain_PositionWindows(HWnd)
-   frmMain_SetFocusToCurrentCodeWindow
-
-   Function = 0
-
-End Function
-
-
-' ========================================================================================
-' Open #Include file that was selected from the right click popup menu
-' ========================================================================================
-Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
-   frmMain_OpenFileSafely(HWnd, _
-                           False, _    ' bIsNewFile
-                           False, _    ' bIsTemplate
-                           True,  _    ' bShowInTab
-                           true, _     ' bIsInclude
-                           gApp.IncludeFilename, _ ' pwszName
-                           0 )         ' pDocIn
-   gApp.IncludeFilename = ""
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Save current active file to disk
-' ========================================================================================
-Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
-
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc = 0 Then Return 0
-   dim as long idx = pDoc->ProjectIndex
-
-   if pDoc->IsDesigner then
-      ' Parse the code to ensure up to date list of functions so that compiling will not
-      ' fail by generating a Declare without a body function.
-      ParseDocument(idx, pDoc, "")
-      ' Regenerate code to ensure that any missing body functions are now present
-      pDoc->bRegenerateCode = true
-      SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-   end if
-   
-   ' Do the actual saving to disk
-   If pDoc->SaveFile(bSaveAs) Then
-      ' Apply document properties to this file because the file extension may have
-      ' changed. For example from Untitled to *.bas
-      If gApp.IsProjectActive Then
-         gApp.Projects(idx).ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
-      End If
-      pDoc->ApplyProperties
-      pDoc->DisplayStats()   
-      ' Parse the code for sub/function listing and create list
-      ParseDocument(idx, pDoc, "")
-      AddFunctionsToExplorerTreeview(pDoc, true)
-   EndIf   
-
-   ' Ensure that the Tab displays the correct filename in case it was changed
-   gTTabCtl.SetTabText(-1)
-   frmMain_SetFocusToCurrentCodeWindow
-   frmFnList_UpdateListBox()
-
-   Function = 0
-End Function
-
-' ========================================================================================
-' Save Sub/Function Declares to disk
-' ========================================================================================
-Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
-
-   dim as CWSTR wszFilename 
-   
-   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, wszFilename, "bi", IDM_FILESAVEDECLARES)
-   If pwszName Then
-      wszFilename = *pwszName
-      CoTaskMemFree(pwszName)
-   Else
-      Return False
-   End If
- 
-   dim pDoc as clsDocument ptr
-   dim pData as DB2_DATA ptr
-   dim as long idx = gApp.GetActiveProjectIndex()
-
-   dim pStream AS CTextStream
-   if pStream.Create(wszFileName) <> S_OK then exit function
-
-   gdb2.dbRewind()
-   do 
-      pData = gdb2.dbGetNext()
-      if pData = 0 THEN exit do
-      if (pData->id <> DB2_SUB) andalso (pData->id <> DB2_FUNCTION) THEN continue do
-
-      ' Bypass any declares for Class subs/functions
-      if instr(pData->ElementName, ".") = 0 THEN
-         if gApp.Projects(idx).GetDocumentPtrByFilename(pData->fileName) THEN 
-            if pData->id = DB2_SUB then
-               pStream.WriteLine "Declare Sub " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
-            end if
-            if pData->id = DB2_FUNCTION then
-               pStream.WriteLine "Declare Function " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
-            end if
-         end if
-      END IF
-   loop
-   pStream.Close
-   
-   ' If the declares file is loaded in the project then we need to reload
-   ' it in order to ensure most current document data.
-   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(wszFilename)
-   if pDoc THEN 
-      dim sText as string
-      if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
-         pDoc->SetText( sText ) 
-         pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
-         SciExec(pDoc->hWindow(0), SCI_SETSAVEPOINT, 0, 0)
-      End If
-   end if
-  
-   Function = 0
-End Function
-
-' ========================================================================================
-' Save all open files to disk
-' ========================================================================================
-Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
-
-   Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
-   If nCount = 0 Then Exit Function
-   
-   Dim pDoc As clsDocument Ptr 
-   Dim i    As Long               
-   Dim TB   As TC_ITEM 
-   
-   For i = 0 To nCount - 1
-      ' Get the document pointer and then save file to disk
-      TB.Mask = TCIF_PARAM
-      TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
-      pDoc = Cast(clsDocument Ptr, TB.lParam)
-
-      if pDoc->IsDesigner then
-         ' Parse the code to ensure up to date list of functions so that compiling will not
-         ' fail by generating a Declare without a body function.
-         ParseDocument(pDoc->ProjectIndex, pDoc, "")
-         ' Regenerate code to ensure that any missing body functions are now present
-         pDoc->bRegenerateCode = true
-         SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-      end if
-
-      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         ' If this is a new Untitled document that is also dirty then we
-         ' need to set the focus to that tab because the SaveAs dialog will be shown.
-         If pDoc->IsNewFlag Then
-            gTTabCtl.SetFocusTab(i)
-         End If
-         pDoc->SaveFile()
-         pDoc->DisplayStats()   
-         gTTabCtl.SetTabText(i)
-         ' Parse the code for sub/function listing and create list
-         ParseDocument(pDoc->ProjectIndex, pDoc, "")
-         AddFunctionsToExplorerTreeview(pDoc, true)
-      End If   
-   Next
-   frmMain_SetFocusToCurrentCodeWindow
-   frmFnList_UpdateListBox()
-
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Close current (or all) open file(s)
-' ========================================================================================
-Function OnCommand_FileClose( ByVal HWnd As HWnd, _
-                              ByVal veFileClose As eFileClose = EFC_CLOSECURRENT _
-                              ) As LRESULT
-
-   Dim wText As WString * MAX_PATH  
-   Dim pDoc As clsDocument Ptr
-   Dim As Long r, iTab ,iTab4other = 0
-   
-   SELECT CASE veFileClose
-      case EFC_CLOSEALLOTHERS
-         If TabCtrl_GetItemCount(gTTabCtl.hWindow) > 1 Then  
-            OnCommand_FileClose(HWnd,EFC_CLOSEALLFORWARD) 
-            OnCommand_FileClose(HWnd,EFC_CLOSEALLBACKWARD)  
-         end if 
-         return true
-         
-      case EFC_CLOSEALLFORWARD 
-         iTab4other=0
-         FOR iTab=TabCtrl_GetCurSel(gTTabCtl.hWindow)-1 TO iTab4other step -1
-            TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab)
-            gTTabCtl.SetFocusTab(iTab)
-            OnCommand_FileClose(HWnd,EFC_CLOSECURRENT)
-         next
-         TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab4other)
-         gTTabCtl.SetFocusTab(iTab4other)
-         return true 
-           
-      case EFC_CLOSEALLBACKWARD
-         iTab4other=TabCtrl_GetCurSel(gTTabCtl.hWindow)
-         FOR iTab=TabCtrl_GetItemCount(gTTabCtl.hWindow)-1 TO iTab4other+1 step -1
-            TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab)
-            gTTabCtl.SetFocusTab(iTab)
-            OnCommand_FileClose(HWnd,EFC_CLOSECURRENT)
-         next
-         TabCtrl_SetCurSel(gTTabCtl.hWindow,iTab4other)
-         gTTabCtl.SetFocusTab(iTab4other)
-         return true
-         
-   end select
-
-   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-
-   Do
-      pDoc = gTTabCtl.GetActiveDocumentPtr()
-      If pDoc = 0 Then Return true
-   
-      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         wText = AfxStrPathname( "NAMEX", pDoc->Diskfilename )
-         r = MessageBox( HWnd, L(76,"Save current changes?") & WStr(" ") & wText, @WStr(APPNAME), _
-                           MB_YESNOCANCEL Or MB_ICONQUESTION)
-         If r = IDCANCEL Then Exit Function
-         If r = IDYES Then 
-            r = pDoc->SaveFile()
-            If r = False Then Exit Function   ' save was cancelled
-         End If
-      End If
-      
-      ' Remove from top tab control
-      iTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
-      TabCtrl_DeleteItem(gTTabCtl.hWindow, iTab)
-      ' Set the active tab to the closest tab to the one just removed
-      iTab = TabCtrl_GetCurSel(gTTabCtl.hWindow)
-      gTTabCtl.SetFocusTab(iTab)
-      
-      for i as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
-         ShowWindow( pDoc->hWindow(i), SW_HIDE)
-      NEXT
-      ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE)
-
-      ' Only remove this document from the global collection if it is not
-      ' part of any active Project or if it is new/unsaved file. Files that are part of a project are
-      ' all closed (tabs/nodes) automatically in one shot rather than individually.
-      if (gApp.IsProjectActive = false) or (pDoc->IsNewFlag = true) then 
-         ' Remove it from the Explorer
-         Treeview_DeleteItem( hTree, pDoc->hNodeExplorer)
-      end if   
-      if pDoc->ProjectIndex = 0 then
-         gApp.Projects(pDoc->ProjectIndex).RemoveDocument(pDoc)
-      end if   
-      
-      frmMain_PositionWindows(HWnd)
-   
-      SELECT CASE veFileClose 
-         case EFC_CLOSECURRENT
-            Exit Do
-         case EFC_CLOSEALL   
-            If TabCtrl_GetItemCount(gTTabCtl.hWindow) = 0 Then Exit Do
-      end select
-   Loop
-    
-   PositionExplorerWindows(HWND_FRMEXPLORER)
-   
-   Function = true
 End Function
 
 
@@ -1355,10 +728,9 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       case IDC_FRMMAIN_COMBOBUILDS
          if codeNotify = CBN_SELCHANGE THEN
             dim as long nCurSel = ComboBox_GetCurSel(hwndCtl)
-            dim as long idx = gApp.GetActiveProjectIndex()
             if nCurSel = -1 THEN exit function
             If gApp.IsProjectActive Then
-               gApp.Projects(idx).ProjectBuild = gConfig.Builds(nCurSel).Id
+               gApp.ProjectBuild = gConfig.Builds(nCurSel).Id
             Else
                Dim pDocMain As clsDocument Ptr 
                pDocMain = gTTabCtl.GetActiveDocumentPtr()
@@ -1367,43 +739,38 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             frmMain_UpdateLineCol(HWND)
          END IF  
       
-      Case IDM_NEXTTAB:            Function = gTTabCtl.NextTab()
-      Case IDM_PREVTAB:            Function = gTTabCtl.PrevTab()
-      Case IDM_CLOSETAB:           Function = gTTabCtl.CloseTab()
+      Case IDM_NEXTTAB:            gTTabCtl.NextTab()
+      Case IDM_PREVTAB:            gTTabCtl.PrevTab()
+      Case IDM_CLOSETAB:           gTTabCtl.CloseTab()
 
       ''  FILE MENU
-      Case IDM_FILENEW:            Function = OnCommand_FileNew( HWnd )
-      Case IDM_FILEOPEN:           Function = OnCommand_FileOpen( HWnd )
-      Case IDM_FILESAVE:           Function = OnCommand_FileSave( HWnd )
-      Case IDM_FILESAVEAS:         Function = OnCommand_FileSave( HWnd, True )
-      Case IDM_FILESAVEDECLARES:   Function = OnCommand_FileSaveDeclares( HWnd )
-      Case IDM_FILESAVEALL:        Function = OnCommand_FileSaveAll( HWnd ) 
-      Case IDM_FILECLOSE:          Function = OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
-      Case IDM_FILECLOSEALL:       Function = OnCommand_FileClose( HWnd, EFC_CLOSEALL )
-      Case IDM_FILECLOSEALLOTHERS: Function = OnCommand_FileClose( HWnd, EFC_CLOSEALLOTHERS )
-      Case IDM_CLOSEALLFORWARD:    Function = OnCommand_FileClose( HWnd, EFC_CLOSEALLFORWARD )
-      Case IDM_CLOSEALLBACKWARD:   Function = OnCommand_FileClose( HWnd, EFC_CLOSEALLBACKWARD )
-      
-      Case IDC_MRUBASE To (IDC_MRUBASE + 10)
-         Function = OpenMRUFile( HWnd, id )
-
-      Case IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
-         Function = ClearMRUlist( id )
-         
-      Case IDM_OPENINCLUDE:        Function = OnCommand_OpenIncludeFile( HWnd )
+      Case IDM_FILENEW:            OnCommand_FileNew( HWnd )
+      Case IDM_FILEOPEN:           OnCommand_FileOpen( HWnd, true )
+      Case IDM_FILESAVE:           OnCommand_FileSave( HWnd )
+      Case IDM_FILESAVEAS:         OnCommand_FileSave( HWnd, True )
+      Case IDM_FILESAVEDECLARES:   OnCommand_FileSaveDeclares( HWnd )
+      Case IDM_FILESAVEALL:        OnCommand_FileSaveAll( HWnd ) 
+      Case IDM_FILECLOSE:          OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
+      Case IDM_FILECLOSEALL:       OnCommand_FileClose( HWnd, EFC_CLOSEALL )
+      Case IDM_FILECLOSEALLOTHERS: OnCommand_FileClose( HWnd, EFC_CLOSEALLOTHERS )
+      Case IDM_CLOSEALLFORWARD:    OnCommand_FileClose( HWnd, EFC_CLOSEALLFORWARD )
+      Case IDM_CLOSEALLBACKWARD:   OnCommand_FileClose( HWnd, EFC_CLOSEALLBACKWARD )
+      Case IDC_MRUBASE To (IDC_MRUBASE + 10): OpenMRUFile( HWnd, id )
+      Case IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR: ClearMRUlist( id )
+      Case IDM_OPENINCLUDE:        OnCommand_OpenIncludeFile( HWnd )
       Case IDM_COMMAND:            Shell(Environ("COMSPEC"))
       Case IDM_EXIT:               SendMessage( HWnd, WM_CLOSE, 0, 0 )
 
       ''  EDIT MENU
-      Case IDM_REDO:               Function = SciExec( hEdit, SCI_REDO, 0, 0)
-      Case IDM_UNDO, WM_UNDO:      Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
+      Case IDM_REDO:               SciExec( hEdit, SCI_REDO, 0, 0)
+      Case IDM_UNDO, WM_UNDO:      SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
       
       Case IDM_CUT, WM_CUT
          if IsDesignerView(pDoc) then
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
             SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
          else
-            Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+            SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
          end if   
       
       Case IDM_COPY, WM_COPY
@@ -1422,7 +789,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                END IF
             NEXT
          else
-            Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
+            SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
          end if
 
             
@@ -1454,15 +821,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                      case "GROUPNAME"
                         ' Copy the GroupName and then increment the Index property
                         pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
-                     '   SetControlProperty(pCtrl, "INDEX", GenerateOptionButtonIndex(pDoc, pCtrl))
                         continue for
-                     'case "INDEX"
-                     '   ' Do not set the Index to the copy control Index because we are assigned
-                     '   ' a new Index value when the GroupName property is set.
-                     '   continue for   
-                     ' Bypass setting the TabIndex because creating the
-                     ' new control will set the values to the next highest valid values. We
-                     ' do not want to now overwrite those values.
                      CASE "TABINDEX"
                         continue for    
                   END select
@@ -1496,7 +855,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             frmMain_UpdateLineCol(HWND_FRMMAIN)
             DisplayPropertyList(pDoc)
          else
-            Function = SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
+            SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
          end if   
       
       case IDM_DELETE
@@ -1534,17 +893,17 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          frmMain_UpdateLineCol(HWND_FRMMAIN)
          DisplayPropertyList(pDoc)
         
-      Case IDM_DELETELINE:         Function = SciExec(hEdit, SCI_LINECUT, 0, 0)
-      Case IDM_INSERTFILE:         Function = pDoc->InsertFile()
+      Case IDM_DELETELINE:  SciExec(hEdit, SCI_LINECUT, 0, 0)
+      Case IDM_INSERTFILE:  pDoc->InsertFile()
       
       Case IDM_INDENTBLOCK
          ' If a TAB was pressed then manually terminate any active autocomplete.
          if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
             SciExec(hEdit, SCI_AUTOCCOMPLETE, 0, 0) 
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
-            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
+            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
-            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
          else
             ' Do a block indent
             gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_TAB, 0, 0)
@@ -1553,27 +912,27 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       Case IDM_UNINDENTBLOCK
          if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
-            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
+            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
-            if gReplaceOpen then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+            if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
          else
             gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
             gApp.SuppressNotify = false
          end if
          
-      Case IDM_COMMENTBLOCK:       Function = pDoc->BlockComment(True) 
-      Case IDM_UNCOMMENTBLOCK:     Function = pDoc->BlockComment(False) 
-      Case IDM_DUPLICATELINE:      Function = pDoc->LineDuplicate()
-      Case IDM_MOVELINEUP:         Function = pDoc->MoveCurrentLines(False) 
-      Case IDM_MOVELINEDOWN:       Function = pDoc->MoveCurrentLines(True)  
-      Case IDM_TOUPPERCASE:        Function = pDoc->ChangeSelectionCase(1)
-      Case IDM_TOLOWERCASE:        Function = pDoc->ChangeSelectionCase(2)
-      Case IDM_TOMIXEDCASE:        Function = pDoc->ChangeSelectionCase(3)
-      Case IDM_EOLTOCRLF:          Function = pDoc->ConvertEOL(SC_EOL_CRLF)
-      Case IDM_EOLTOCR:            Function = pDoc->ConvertEOL(SC_EOL_CR)
-      Case IDM_EOLTOLF:            Function = pDoc->ConvertEOL(SC_EOL_LF)
-      'Case IDM_SPACESTOTABS:
-      Case IDM_TABSTOSPACES:       Function = pDoc->TabsToSpaces()
+      Case IDM_COMMENTBLOCK:       pDoc->BlockComment(True) 
+      Case IDM_UNCOMMENTBLOCK:     pDoc->BlockComment(False) 
+      Case IDM_DUPLICATELINE:      pDoc->LineDuplicate()
+      Case IDM_MOVELINEUP:         pDoc->MoveCurrentLines(False) 
+      Case IDM_MOVELINEDOWN:       pDoc->MoveCurrentLines(True)  
+      Case IDM_TOUPPERCASE:        pDoc->ChangeSelectionCase(1)
+      Case IDM_TOLOWERCASE:        pDoc->ChangeSelectionCase(2)
+      Case IDM_TOMIXEDCASE:        pDoc->ChangeSelectionCase(3)
+      Case IDM_EOLTOCRLF:          pDoc->ConvertEOL(SC_EOL_CRLF)
+      Case IDM_EOLTOCR:            pDoc->ConvertEOL(SC_EOL_CR)
+      Case IDM_EOLTOLF:            pDoc->ConvertEOL(SC_EOL_LF)
+      Case IDM_TABSTOSPACES:       pDoc->TabsToSpaces()
+      Case IDM_SELECTLINE:         pDoc->SelectLine(-1)
       Case IDM_SELECTALL
             if IsDesignerView(pDoc) THEN
                pDoc->Controls.SelectAllControls
@@ -1581,9 +940,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                AfxRedrawWindow(pDoc->hWndFrame)
                AfxRedrawWindow(pDoc->hWndForm)
             else
-               Function = SciExec(hEdit, SCI_SELECTALL, 0, 0)
+               SciExec(hEdit, SCI_SELECTALL, 0, 0)
             END IF
-      Case IDM_SELECTLINE:         Function = pDoc->SelectLine(-1)
                                    
       case IDM_ANSI
          if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN 
@@ -1611,53 +969,56 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
 
       ''  SEARCH MENU              
-      Case IDM_FIND:               Function = frmFindReplace_Show(hEdit, false)
-      Case IDM_REPLACE:            Function = frmFindReplace_Show(hEdit, true)
-      Case IDM_FINDINFILES:        Function = frmFindInFiles_Show(hEdit)
+      Case IDM_FIND:               frmFindReplace_Show(hEdit, false)
+      Case IDM_REPLACE:            frmFindReplace_Show(hEdit, true)
+      Case IDM_FINDINFILES:        frmFindInFiles_Show(hEdit)
 
       Case IDM_FINDNEXT, IDM_FINDPREV
-         if pDoc = 0 then exit function
-
-         dim as long startPos, endPos, curPos, mainSel
-         Dim As String sFindText 
-         mainSel  = SciExec(hEdit, SCI_GETMAINSELECTION, 0, 0)
-         startPos = SciExec(hEdit, SCI_GETSELECTIONSTART, mainSel, 0)
-         endPos   = SciExec(hEdit, SCI_GETSELECTIONEND, mainSel, 0)
-         sFindText = pDoc->GetTextRange(startPos, endPos)
-
+         Dim As String sFindText = pDoc->GetSelText()
          if (GetForeGroundWindow = HWND_FRMFINDREPLACE) or (Len(sFindText) = 0) then
             id = iif(id = IDM_FINDNEXT, IDC_FRMFINDREPLACE_BTNRIGHT, IDC_FRMFINDREPLACE_BTNLEFT)
             SendMessage( HWND_FRMFINDREPLACE, WM_COMMAND, MAKELONG(id, 0), Cast(LPARAM, GetDlgItem(HWND_FRMFINDREPLACE, id)) )
-            exit function
+         end if
+         
+      Case IDM_FINDNEXTACCEL, IDM_FINDPREVACCEL   ' F3/Shift+F3
+         if pDoc = 0 then exit function
+
+         dim as long startPos, endPos, curPos, mainSel
+         Dim As String sFindText = pDoc->GetSelText()
+         
+         ' Use a static string variable to keep track of the F3/Shift F3 information
+         ' We use the static value if there is no currently selected word/phrase.
+         static as string sFindTextStatic
+         if len(sFindText) = 0 then sFindText = sFindTextStatic
+         sFindTextStatic = sFindText
+         
+         if len(sFindText) then
+            curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
+            startPos = iif( id = IDM_FINDNEXTACCEL, curPos + 1, curPos - 1 )
+            endPos = iif( id = IDM_FINDNEXTACCEL, SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0), 0)
+            SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+            SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+            ' Search for the text to find
+            dim as long r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+            If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
          end if
 
-         curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-         startPos = iif( id = IDM_FINDNEXT, curPos + 1, curPos - 1 )
-         endPos = iif( id = IDM_FINDNEXT, SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0), 0)
-         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-         ' Search for the text to find
-         dim as long r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-         If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
-
-
-      Case IDM_DEFINITION:         Function = frmMain_GotoDefinition( pDoc )
-      Case IDM_LASTPOSITION:       Function = frmMain_GotoLastPosition()
-      
-      Case IDM_GOTO:               Function = frmGoto_Show(hEdit)
-      Case IDM_FUNCTIONLIST:       Function = frmFnList_Show( HWnd )    ' this will also toggle visibility 
-      Case IDM_BOOKMARKTOGGLE:     Function = pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
-      Case IDM_BOOKMARKNEXT:       Function = pDoc->NextBookmark()
-      Case IDM_BOOKMARKPREV:       Function = pDoc->PrevBookmark()
-      Case IDM_BOOKMARKCLEARALL:   Function = SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
+      Case IDM_DEFINITION:         frmMain_GotoDefinition( pDoc )
+      Case IDM_LASTPOSITION:       frmMain_GotoLastPosition()
+      Case IDM_GOTO:               frmGoto_Show(hEdit)
+      Case IDM_FUNCTIONLIST:       frmFnList_Show( HWnd )    ' this will also toggle visibility 
+      Case IDM_BOOKMARKTOGGLE:     pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
+      Case IDM_BOOKMARKNEXT:       pDoc->NextBookmark()
+      Case IDM_BOOKMARKPREV:       pDoc->PrevBookmark()
+      Case IDM_BOOKMARKCLEARALL:   SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
       
       ''  VIEW MENU
-      Case IDM_FOLDTOGGLE:         Function = pDoc->FoldToggle( pDoc->GetCurrentLineNumber() )
-      Case IDM_FOLDBELOW:          Function = pDoc->FoldToggleOnwards( pDoc->GetCurrentLineNumber() )
-      Case IDM_FOLDALL:            Function = pDoc->FoldAll()
-      Case IDM_UNFOLDALL:          Function = pDoc->UnFoldAll()
-      Case IDM_ZOOMIN:             Function = SciExec(hEdit, SCI_ZOOMIN, 0, 0)
-      Case IDM_ZOOMOUT:            Function = SciExec(hEdit, SCI_ZOOMOUT, 0, 0)
+      Case IDM_FOLDTOGGLE:         pDoc->FoldToggle( pDoc->GetCurrentLineNumber() )
+      Case IDM_FOLDBELOW:          pDoc->FoldToggleOnwards( pDoc->GetCurrentLineNumber() )
+      Case IDM_FOLDALL:            pDoc->FoldAll()
+      Case IDM_UNFOLDALL:          pDoc->UnFoldAll()
+      Case IDM_ZOOMIN:             SciExec(hEdit, SCI_ZOOMIN, 0, 0)
+      Case IDM_ZOOMOUT:            SciExec(hEdit, SCI_ZOOMOUT, 0, 0)
 
       Case IDM_VIEWEXPLORER
          ShowWindow HWND_FRMEXPLORER, Iif(IsWindowVisible(HWND_FRMEXPLORER), SW_HIDE, SW_SHOW)
@@ -1672,92 +1033,58 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                
       
       ''  PROJECT MENU
-      Case IDM_PROJECTNEW:            Function = OnCommand_ProjectNew( HWnd )
-      Case IDM_PROJECTSAVE:           Function = OnCommand_ProjectSave( HWnd, False )
-      Case IDM_PROJECTSAVEAS:         Function = OnCommand_ProjectSave( HWnd, True )
-      Case IDM_PROJECTOPEN:           Function = OnCommand_ProjectOpen( HWnd )
-      Case IDM_PROJECTFILESADD:       Function = OnCommand_FileOpen( HWnd )
+      Case IDM_PROJECTNEW:            OnCommand_ProjectNew( HWnd )
+      Case IDM_PROJECTSAVE:           OnCommand_ProjectSave( HWnd, False )
+      Case IDM_PROJECTSAVEAS:         OnCommand_ProjectSave( HWnd, True )
+      Case IDM_PROJECTOPEN:           OnCommand_ProjectOpen( HWnd )
+      Case IDM_PROJECTFILESADD:       OnCommand_FileOpen( HWnd, false )
+      Case IDM_PROJECTCLOSE:          OnCommand_ProjectClose( HWnd )
+      Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd ) 
+      Case IDM_SETFILENORMAL:         gApp.ProjectSetFileType( pDoc, FILETYPE_NORMAL )
+      Case IDM_SETFILEMODULE:         gApp.ProjectSetFileType( pDoc, FILETYPE_MODULE )
+      Case IDM_SETFILEMAIN:           gApp.ProjectSetFileType( pDoc, FILETYPE_MAIN )
+      Case IDM_SETFILERESOURCE:       gApp.ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
       
-      Case IDM_PROJECTFILESADDTONODE
-         ' Normally files are added to whatever project currently has a displayed
-         ' file open. If a Project root node was right clicked on and displayed the
-         ' menu then we want to add to the project that the node refers to rather than
-         ' the currently opened document's project. We do this by simulating a project
-         ' load and manually specifiying the project index to use.
-         dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         dim as HTREEITEM hNode = TreeView_GetSelection(hTree)
-         for i as long = 1 to ubound(gApp.Projects)
-            if gApp.Projects(i).hExplorerRootNode = hNode THEN
-               gApp.ProjectOverrideIndex = i
-               Function = OnCommand_FileOpen( HWnd )
-               gApp.ProjectOverrideIndex = 0
-               exit for
-            END IF
-         NEXT
-
       Case IDC_MRUPROJECTBASE To (IDC_MRUPROJECTBASE + 10)
-         Function = OpenMRUProjectFile( HWnd, id )
-
-      Case IDM_PROJECTCLOSE:   Function = OnCommand_ProjectClose( HWnd )
-      Case IDM_PROJECTOPTIONS: Function = frmProjectOptions_Show( HWnd ) 
-    
-      Case IDM_ADDFILETOPROJECT to IDM_ADDFILETOPROJECT + 99
-         ' Invoked from popup menu. If more than one project was open then the popup
-         ' menu would have displayed a list of projects to choose from. We need to 
-         ' normalize the project index here.
-         gApp.ProjectOverrideIndex = (id - IDM_ADDFILETOPROJECT)
-         ' Add the currently displayed document to the project.
-         frmMain_OpenFileSafely(HWnd, _
-                                 False, _    ' bIsNewFile
-                                 False, _    ' bIsTemplate
-                                 true,  _    ' bShowInTab
-                                 false, _    ' bIsInclude
-                                 0, _        ' pwszName
-                                 pDoc )      ' pDocIn
-         gApp.ProjectOverrideIndex = 0
+         OpenMRUProjectFile( HWnd, id )
 
       Case IDM_REMOVEFILEFROMPROJECT
-         Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         dim as long idx = pDoc->ProjectIndex
+         Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
          dim as HTREEITEM hNode = pDoc->hNodeExplorer
          if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) then
             ' File close succeeded. Remove this document from the project collection and remove treeview node 
+            gdb2.dbDelete(pDoc->DiskFilename)
             Treeview_DeleteItem( hTree, hNode)
-            gApp.Projects(idx).RemoveDocument(pDoc)
+            gApp.RemoveDocument(pDoc)
          end if   
-      
-      Case IDM_SETFILENORMAL:         Function = gApp.Projects(pDoc->ProjectIndex).ProjectSetFileType( pDoc, FILETYPE_NORMAL )
-      Case IDM_SETFILEMODULE:         Function = gApp.Projects(pDoc->ProjectIndex).ProjectSetFileType( pDoc, FILETYPE_MODULE )
-      Case IDM_SETFILEMAIN:           Function = gApp.Projects(pDoc->ProjectIndex).ProjectSetFileType( pDoc, FILETYPE_MAIN )
-      Case IDM_SETFILERESOURCE:       Function = gApp.Projects(pDoc->ProjectIndex).ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
          
            
       ''  COMPILE MENU          
       Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
-         Function = code_Compile(id)
+         code_Compile(id)
       Case IDM_RUNEXE
-         RunExe( GetRunExecutableFilename, gApp.Projects(pDoc->ProjectIndex).ProjectCommandLine )
-      Case IDM_COMMANDLINE:           Function = frmCommandLine_Show( HWnd )
+         RunExe( GetRunExecutableFilename, gApp.ProjectCommandLine )
+      Case IDM_COMMANDLINE:           frmCommandLine_Show( HWnd )
 
 
       ''  OPTIONS MENU
-      Case IDM_OPTIONS:               Function = frmOptions_Show( HWnd, SW_NORMAL )
-      case IDM_COMPILECONFIG:         function = frmCompileConfig_Show( HWND ) 
-      case IDM_USERTOOLSDIALOG:       function = frmUserTools_Show( HWND ) 
+      Case IDM_OPTIONS:               frmOptions_Show( HWnd, SW_NORMAL )
+      case IDM_COMPILECONFIG:         frmCompileConfig_Show( HWND ) 
+      case IDM_USERTOOLSDIALOG:       frmUserTools_Show( HWND ) 
          
       ''   DESIGNER MENU
-      case IDM_NEWFORM:               function = OnCommand_DesignerNewForm(HWND)
-      case IDM_VIEWTOOLBOX:           function = frmVDToolbox_Show(HWND)   ' toggle show/hide
+      case IDM_NEWFORM:               OnCommand_DesignerNewForm(HWND)
+      case IDM_VIEWTOOLBOX:           frmVDToolbox_Show(HWND)   ' toggle show/hide
       case IDM_MENUEDITOR            
-         function = frmMenuEditor_Show( HWND, SW_NORMAL )
+         frmMenuEditor_Show( HWND, SW_NORMAL )
          if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
          
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
            IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            
-         function = OnCommand_DesignerAlign(HWND, id)
+         OnCommand_DesignerAlign(HWND, id)
       case IDM_CENTERHORIZ, IDM_CENTERVERT, IDM_CENTERBOTH
-         function = OnCommand_DesignerCenter(HWND, id)
+         OnCommand_DesignerCenter(HWND, id)
          
       case IDM_LOCKCONTROLS
          if pDoc then 
@@ -1773,10 +1100,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          ExecuteUserTool( id - IDM_USERTOOL )
 
       Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
- ' TODO: Remove debug call in IDM_HELP
- 'gdb2.dbDebug
          ShowContextHelp(id) 
-     
 
       Case IDM_ABOUT
          MessageBox( HWnd, APPNAME & vbcrlf & _
@@ -1944,7 +1268,7 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
    
    Dim pDoc As clsDocument Ptr
    
-   ' If the application is losing focus then validate any currently editing peroperty
+   ' If the application is losing focus then validate any currently editing property
    ' in the ToolBox PropertyList.
    If fActivate = false Then
       pDoc = gTTabCtl.GetActiveDocumentPtr()
@@ -1952,6 +1276,9 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
       exit function
    end if
       
+   static bInActivateApp as Boolean
+   if bInActivateApp then exit function
+   
    ' If the application is gaining focus then determine if any of the loaded
    ' documents have been modified by an external application. If yes, then ask
    ' the user if wish to reload.
@@ -1962,67 +1289,90 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
       Dim As Double nSerial
       Dim As String sText
       
-      for idx = 0 to gApp.GetProjectCount
+      bInActivateApp = true
+      
+      ' Load all pDoc into array and then process. For each pDoc if the user chooses
+      ' not to reload or wants to bypass, then set the pDoc to zero until eventually
+      ' all pDocs are processed.
+      dim pDocs( gApp.GetDocumentCount - 1) as clsDocument ptr
+      idx = 0
+      pDoc = gApp.pDocList
+      do until pDoc = 0
+         if AfxFileExists(pDoc->DiskFilename) THEN
+            pDoc->DeletedButKeep = false
+         end if
+         pDocs(idx) = pDoc
+         idx = idx + 1
+         pDoc = pDoc->pDocNext
+      loop
+      
+      do
+         idx = -1
+         for i as long = 0 to ubound(pDocs)
+            if pDocs(i) then 
+               idx = i: exit for
+            end if
+         next
+         if idx = -1 then exit do
+         pDoc = pDocs(idx)
          
-         nDocumentCount = gApp.Projects(idx).GetDocumentCount
-         For i = 0 To nDocumentCount - 1
-            pDoc = gApp.Projects(idx).GetDocumentPtr(i)
-            If pDoc Then
-               ' Bypass any 'new' untitled files.
-               If pDoc->IsNewFlag Then Continue For
-               
-               ' Has the external file been deleted or is now not available?
-               if AfxFileExists(pDoc->DiskFilename) = false THEN
-                  if pDoc->DeletedButKeep = false then
-                     ' Ensure that the file is open and displayed
-                     frmMain_OpenFileSafely(HWnd, _
-                                             False, _    ' bIsNewFile
-                                             False, _    ' bIsTemplate
-                                             True,  _    ' bShowInTab
-                                             false, _    ' bIsInclude
-                                             0, _        ' pwszName
-                                             pDoc )      ' pDocIn
-                     If MessageBox( HWND_FRMMAIN, _
-                                     pDoc->DiskFilename & vbCrLf & _ 
-                                     L(286, "This document has been deleted...?"), _
-                                     L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                        ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
-                        pDoc->UserModified = true                
-                        pDoc->DeletedButKeep = true
-                     else
-                        ' No. Close the file.
-                        frmMain_OnCommand(HWnd, IDM_REMOVEFILEFROMPROJECT, 0, 0)
-                     end if
-                  end if
+         ' Bypass any 'new' untitled files.
+         If pDoc->IsNewFlag Then 
+            pDocs(idx) = 0: continue do
+         end if
+
+         ' Has the external file been deleted or is now not available?
+         if AfxFileExists(pDoc->DiskFilename) = false THEN
+            if pDoc->DeletedButKeep = false then
+               ' Ensure that the file is open and displayed
+               frmMain_OpenFileSafely(HWnd, _
+                                       False, _    ' bIsNewFile
+                                       False, _    ' bIsTemplate
+                                       True,  _    ' bShowInTab
+                                       false, _    ' bIsInclude
+                                       0, _        ' pwszName
+                                       pDoc )      ' pDocIn
+               If MessageBox( HWND_FRMMAIN, _
+                               pDoc->DiskFilename & vbCrLf & _ 
+                               L(286, "This document has been deleted...?"), _
+                               L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                  ' Keep the file open and simply mark it as dirty so it can be prompted to be saved.
+                  pDoc->UserModified = true                
                else
-                  pDoc->DeletedButKeep = false
-                  ' Compare the disk file date time to the value currently
-                  ' stored in document class.
-                  ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
-
-                  If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
-                     OpenSelectedDocument( pDoc, "" )
-
-                     If MessageBox( HWND_FRMMAIN, _
-                                     pDoc->DiskFilename & vbCrLf & _ 
-                                     L(266, "File was changed by another application. Reload it?"), _
-                                     L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                        dim sText as string
-                        if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
-                           pDoc->SetText( sText ) 
-                           pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
-                        else
-                           print "Error opening: "; pDoc->DiskFilename
-                        End If
-                     End If                
-                  End If
+                  ' No. Close the file.
+                  frmMain_OnCommand(HWnd, IDM_REMOVEFILEFROMPROJECT, 0, 0)
                end if
-            
+            end if
+            pDoc->DeletedButKeep = true
+
+         else
+                  
+            ' Compare the disk file date time to the value currently
+            ' stored in document class.
+            ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
+            If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
+               OpenSelectedDocument( pDoc, "" )
+               If MessageBox( HWND_FRMMAIN, _
+                               pDoc->DiskFilename & vbCrLf & _ 
+                               L(266, "File was changed by another application. Reload it?"), _
+                               L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
+                  dim sText as string
+                  if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
+                     pDoc->SetText( sText ) 
+                  else
+                     print "Error opening: "; pDoc->DiskFilename
+                  End If
+               End If                
             End If
-         Next
-      NEXT
-   End If
-   
+            pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
+         end if
+
+         pDocs(idx) = 0
+      loop      
+             
+      bInActivateApp = false
+            
+   end if
    Function = 0
 End Function
 
@@ -2085,7 +1435,7 @@ Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRES
             wFileExt = AfxStrPathname( "EXTN", wszPath)
             wFileExt = Ucase(wFileExt)
             if wFileExt = ".WFBE" then
-               OpenMRUProjectFile( HWnd, 0, @wszPath )
+               frmMain_OpenProjectSafely(HWND_FRMMAIN, wszPath) 
             Else   
                frmMain_OpenFileSafely(HWnd, _
                                        False, _    ' bIsNewFile
@@ -2120,7 +1470,7 @@ Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
    
    ' Set global shutdown flag that will bypass removing nodes from project
    ' treeview, etc. Those tasks simply slow down the exiting of the program.
-   gAppShutdown = true
+   gApp.IsShutdown = true
 
    ' Save whether the Explorer should be shown the next time the program is run.
    ' Also save the Explorer panel width. 
@@ -2128,25 +1478,13 @@ Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
    gConfig.ShowExplorer = IsWindowVisible(HWND_FRMEXPLORER)
    gConfig.ShowExplorerWidth = pWindow->UnScaleX(AfxGetWindowWidth( HWND_FRMEXPLORER ))
    
-   ' Prevent Treeview flickering during closing
-   dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   LockWindowUpdate(hTV)
-   
    ' If a project(s) is already open then save/close it.
-   do
-      If gApp.IsProjectActive Then 
-         if OnCommand_ProjectClose(HWnd) = 0 then 
-            LockWindowUpdate(0): return 0
-         end if 
-      ELSE
-         EXIT DO
-      END IF
-   LOOP   
+   If gApp.IsProjectActive Then 
+      if OnCommand_ProjectClose(HWnd) = 0 then return 0
+   end if
    
    ' Close any open files asking to save any that are dirty 
-   if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = 0 then 
-      LockWindowUpdate(0): return 0
-   end if   
+   if OnCommand_FileClose(HWnd, EFC_CLOSEALL) = 0 then return 0
    
    DestroyWindow(HWnd)
    
@@ -2233,7 +1571,7 @@ Function frmMain_TabCtl_SubclassProc ( _
          Return True   ' prevent further processing that leads to WM_CONTEXTMENU
 
       Case WM_LBUTTONDOWN
-         ' Get the position of the hit and determine if the close icon was clicked.
+         ' Get the position of the hit and determine if the CLOSE icon was clicked.
          GetCursorPos( @pInfo.pt )
          ScreenToClient gTTabCtl.hWindow, @pInfo.pt
          nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
@@ -2469,7 +1807,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          Select Case wszExt
             Case ".WFBE"    ' project file
                ' Pass the info to our generic project open function to handle everything.
-               OpenMRUProjectFile( HWnd, 0, pwszArg )
+               frmMain_OpenProjectSafely(HWND_FRMMAIN, *pwszArg) 
              
             Case Else   ' .bas, .bi, .rc, etc...
                frmMain_OpenFileSafely( HWND, _
@@ -2486,9 +1824,9 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       Case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
          ' display such as Line#, Col#, Filename, etc.
+         frmMain_UpdateLineCol(HWnd)
          Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
          if pDoc THEN
-            frmMain_UpdateLineCol(HWnd)
             if pDoc->IsDesigner THEN
                SendMessage pDoc->hWndForm, WM_NCACTIVATE, true, 0
             END IF
@@ -2611,10 +1949,9 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
     
    ' Create the imagelist for the TopTabControl tabs
    cx = 16 * (pWindow->DPI \ 96)
-   Dim As HICON hIcon = LoadIcon(pWindow->InstanceHandle, "IMAGE_TABCLOSE")
    Dim As HANDLE hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
+   Dim As HICON hIcon = LoadIcon(pWindow->InstanceHandle, "IMAGE_TABCLOSE")
    ImageList_AddIcon(hImageList, hIcon)
-   DestroyIcon( hIcon )
    TabCtrl_SetImageList(gTTabCtl.hWindow, hImageList)
                                                         
    ' Create the ImageLists that will hold the images for the Explorer and Recent treeviews
@@ -2803,7 +2140,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
 
                If IsDialogMessage(pWindow->hWindow, @uMsg) = 0 Then
                   TranslateMessage @uMsg    ' Translates virtual-key messages into character messages.
-                  DispatchMessage @uMsg    ' Dispatches a message to a window procedure.
+                  DispatchMessage @uMsg     ' Dispatches a message to a window procedure.
                end if
             End If
          end if
@@ -2816,11 +2153,11 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ' Destroy the Explorer and Recent treeview imagelist
    ImageList_Destroy(ghImageListNormal)
 
-   If ghIconGood Then DestroyIcon(ghIconGood) 
-   If ghIconBad  Then DestroyIcon(ghIconBad)
+   If ghIconGood       Then DestroyIcon(ghIconGood) 
+   If ghIconBad        Then DestroyIcon(ghIconBad)
+   if ghNormalFont     then DeleteFont(ghNormalFont)
+   if ghBoldFont       then DeleteFont(ghBoldFont)
    if ghAccelUserTools THEN DestroyAcceleratorTable(ghAccelUserTools)
-   if ghNormalFont then DeleteFont(ghNormalFont)
-   if ghBoldFont   then DeleteFont(ghBoldFont)
    
    if gApp.pImageAutocompleteBaseType then deallocate(gApp.pImageAutocompleteBaseType)
    if gApp.pImageAutocompleteClass    then deallocate(gApp.pImageAutocompleteClass)

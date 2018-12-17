@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -438,13 +438,13 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    ' then simply open the document and point to the first line. If a function 
    ' is clicked then search the gFunctionDeclares hash to get the filename
    ' and line number position within the file.
+   dim pData as DB2_DATA ptr    
    dim wszText as wstring * MAX_PATH
    dim nLineNumber as LONG
    if pDoc THEN  ' Header node
       wszText = pDoc->DiskFilename
       nLineNumber = 0
    else 
-      dim pData as DB2_DATA ptr
       pData = gdb2.dbFindFunction( wszFunctionName ) 
       if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName ) 
       if pData then
@@ -457,8 +457,7 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
    ' the editor but may never have a disk footprint. We need to search the project to
    ' determine if the filename has a pDoc already associated with it. If it does, then
    ' pass that pDoc rather than looking for a disk filename.
-   dim as long idx = gApp.GetActiveProjectIndex()
-   pDoc = gApp.Projects(idx).GetDocumentPtrByFilename(wszText)
+   pDoc = gApp.GetDocumentPtrByFilename(wszText)
    
    if pDoc then
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
@@ -502,9 +501,8 @@ Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
    dim zText as CWSTR 
-   dim idx as long = gApp.GetActiveProjectIndex
-   if AfxFileExists(gApp.Projects(idx).ProjectFilename) Then
-      zText = gApp.Projects(idx).ProjectFilename
+   if AfxFileExists(gApp.ProjectFilename) Then
+      zText = gApp.ProjectFilename
    else
       zText = AfxGetExePathName
    end if      
@@ -527,9 +525,8 @@ Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
    dim zText as CWSTR 
-   dim idx as long = gApp.GetActiveProjectIndex
-   if AfxFileExists(gApp.Projects(idx).ProjectFilename) Then
-      zText = gApp.Projects(idx).ProjectFilename
+   if AfxFileExists(gApp.ProjectFilename) Then
+      zText = gApp.ProjectFilename
    else
       zText = AfxGetExePathName
    end if      
@@ -1041,7 +1038,7 @@ End Function
 ' ========================================================================================
 ' Load a .lang localization file from disk and populate the localization array
 ' ========================================================================================
-Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
+Function LoadLocalizationFile( Byref wszFileName As CWSTR, byval IsEnglish as boolean = false ) As BOOLEAN
 
    ' default that the file failed to load
    Function = False
@@ -1074,17 +1071,33 @@ Function LoadLocalizationFile( Byref wszFileName As CWSTR ) As BOOLEAN
 
       If Ucase(wKey) = "MAXIMUM" Then
          ' resize the global dynamic array
-         ReDim LL(nData) As WString * MAX_PATH
+         if IsEnglish then
+            ReDim gLangEnglish(nData) As WString * MAX_PATH
+         else   
+            ReDim LL(nData) As WString * MAX_PATH
+         end if
       Else
          ' this should be a key/value pair line in the format:
          ' 00001:value
          ' Ensure that we add the value to the array within the valid
          ' boundaries of the array.
-         If (nKey >= LBound(LL)) AndAlso (nKey <= Ubound(LL)) Then
-            ' Remove any comments from end of the line. Comments begin with
-            ' a semicolon character.
-            LL(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
-         End If
+         if IsEnglish then
+            If (nKey >= LBound(gLangEnglish)) AndAlso (nKey <= Ubound(gLangEnglish)) Then
+               gLangEnglish(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
+            end if
+         else
+            If (nKey >= LBound(LL)) AndAlso (nKey <= Ubound(LL)) Then
+               ' Remove any comments from end of the line. Comments begin with
+               ' a semicolon character.
+               LL(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
+               ' If the local phrase is empty then fill it using the English version.
+               if len(LL(nKey)) = 0 then 
+                  If (nKey >= LBound(gLangEnglish)) AndAlso (nKey <= Ubound(gLangEnglish)) Then
+                     LL(nKey) = gLangEnglish(nKey)
+                  end if
+               end if   
+            End If
+         end if
       End If   
          
    Loop
@@ -1172,11 +1185,10 @@ function GetRunExecutableFilename() as CWSTR
    dim wszOptions as CWSTR
    Dim pDocMain As clsDocument Ptr 
 
-   dim as long idx = gApp.GetActiveProjectIndex()
    dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
    dim as Boolean bInString = false
    
-   pDocMain = iIf( gApp.IsProjectActive, gApp.Projects(idx).GetMainDocumentPtr, gTTabCtl.GetActiveDocumentPtr)
+   pDocMain = iIf( gApp.IsProjectActive, gApp.GetMainDocumentPtr, gTTabCtl.GetActiveDocumentPtr)
    If pDocMain = 0 Then return ""
    
    if idxBuild > -1 then 
@@ -1184,10 +1196,10 @@ function GetRunExecutableFilename() as CWSTR
 
       if gApp.IsProjectActive THEN
          if gConfig.Builds(idxBuild).Is32bit then
-            wszOptions = wszOptions + " " + gApp.Projects(idx).ProjectOther32
+            wszOptions = wszOptions + " " + gApp.ProjectOther32
          end if   
          if gConfig.Builds(idxBuild).Is64bit then
-            wszOptions = wszOptions + " " + gApp.Projects(idx).ProjectOther64
+            wszOptions = wszOptions + " " + gApp.ProjectOther64
          end if   
       else
          wszOptions = wszOptions + " " + gConfig.CompilerSwitches

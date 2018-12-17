@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -406,52 +406,16 @@ Function frmOptionsLocal_Show( ByVal hWndParent As HWnd, _
    ListView_AddColumn( hwndLV, 0, @wstr("Index"), pWindow->ScaleX(50) )
    ListView_AddColumn( hwndLV, 1, @wstr("English Phrase"), pWindow->ScaleX(280))
 
-   dim as CWSTR wszFileName = AfxGetExePathName + wstr("Languages\english.lang")
-   If AfxFileExists(wszFileName) = 0 Then 
-      ' error message that English language file is missing.
-   else
-      Dim as CBSTR wst, wKey, wData
-      Dim as long nKey, nData, i, nRow
-       
-      dim pStream AS CTextStream
-      if pStream.OpenUnicode(wszFileName) <> S_OK then exit function
-      
-      do until pStream.EOS
-         wst = pStream.ReadLine
-         
-         If Len(wst) = 0 Then Continue Do
-         If Left(wst, 1) = "'" Then Continue Do
-         
-         i = Instr(wst, ":")
-         If i = 0 Then Continue Do
-         
-         wKey = "": wData = "": nData = 0
-
-         wKey  = Left(wst, i-1)
-         wData = Mid(**wst, i+1)    ' MID causes problems with Chinese data so ** is used.
-         
-         nKey  = Val(wKey)
-         nData = Val(wData)
-
-         If Ucase(wKey) = "MAXIMUM" Then
-            ' resize the global dynamic array
-            ReDim gLocalPhrases(nData) As WString * MAX_PATH
-         Else
-            ' this should be a key/value pair line in the format:
-            ' 00001:value
-            ' Remove any comments from end of the line. Comments begin with
-            ' a semicolon character.
-            wData = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
-            ' Add to the English phrase Listview
-            FF_ListView_InsertItem(hwndLV, nRow, 0, wKey, 0 )
-            FF_ListView_InsertItem(hwndLV, nRow, 1, wData, 0 )
-            nRow = nRow + 1
-         End If   
-            
-      Loop
-      pStream.Close
+   ReDim gLocalPhrases(Ubound(gLangEnglish)) As WString * MAX_PATH
    
-   end if
+   dim as long nRow = 0
+   for i as long = LBound(gLangEnglish) to Ubound(gLangEnglish)
+      ' Add to the English phrase Listview
+      dim as CWSTR wKey = AfxStrRset(str(i), 5, "0")
+      FF_ListView_InsertItem(hwndLV, nRow, 0, wKey, 0 )
+      FF_ListView_InsertItem(hwndLV, nRow, 1, gLangEnglish(i), 0 )
+      nRow = nRow + 1
+   next
    
    Function = 0
    

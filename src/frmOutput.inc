@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -11,18 +11,33 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+DIM shared pBtnOutputClose AS CImageCtx ptr
+
+' ========================================================================================
+' Clear data from all of the controls in the frmOutput windows. This is needed
+' when Projects are loaded and closed.
+' ========================================================================================
+function frmOutput_ResetAllControls() as long 
+
+   ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
+   AfxSetWindowText( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
+   ListBox_ResetContent( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH) )
+   ListView_DeleteAllItems( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO) )
+   AfxSetWindowText( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), "" )
+
+   function = 0
+END FUNCTION
+
 
 ' ========================================================================================
 ' Ensure that the correct notes are shown
 ' ========================================================================================
 function frmOutput_ShowNotes() as long 
 
-   dim idx as long 
    dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
 
    if gApp.IsProjectActive THEN
-      idx = gApp.GetActiveProjectIndex()
-      AfxSetWindowText(hCtl, gApp.Projects(idx).ProjectNotes)
+      AfxSetWindowText(hCtl, gApp.ProjectNotes)
    else   
       AfxSetWindowText(hCtl, gApp.NonProjectNotes)
    END IF
@@ -192,11 +207,6 @@ End Function
 Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
    Select case codeNotify
-      case BN_CLICKED
-         If id = IDC_FRMOUTPUT_BTNCLOSE Then
-            ShowWindow HWND_FRMOUTPUT, SW_HIDE
-            frmMain_PositionWindows(HWND_FRMMAIN)
-         end if
 
       case LBN_DBLCLK 
          if (id = IDC_FRMOUTPUT_LISTSEARCH) orelse _
@@ -211,8 +221,7 @@ Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
          ' are switched.
          if id = IDC_FRMOUTPUT_TXTNOTES THEN
             if gApp.IsProjectActive THEN
-               dim as long idx = gApp.GetActiveProjectIndex()
-               gApp.Projects(idx).ProjectNotes = AfxGetWindowText(hwndCtl)
+               gApp.ProjectNotes = AfxGetWindowText(hwndCtl)
             else
                gApp.NonProjectNotes = AfxGetWindowText(hwndCtl)
             end if   
@@ -235,6 +244,11 @@ Function frmOutput_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR A
          If id = IDC_FRMOUTPUT_TABCONTROL Then
             PositionOutputWindows(HWND)
          End If
+      case NM_CLICK
+         If id = IDC_FRMOUTPUT_BTNCLOSE Then
+            ShowWindow HWND_FRMOUTPUT, SW_HIDE
+            frmMain_PositionWindows(HWND_FRMMAIN)
+         end if
    End Select
             
    Function = 0
@@ -346,6 +360,7 @@ Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
   
       CASE WM_DESTROY
          DeleteFont( AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOUTPUT_TXTLOGFILE)) )
+         if pBtnOutputClose then delete pBtnOutputClose
          
    End Select
 
@@ -369,8 +384,6 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    Dim As HWnd hCtl, hLV, hLB
-   Dim As Long nWidth  = 24
-   Dim As Long nHeight = 24
    
    ' Add the top tabcontrol (initially not visible)
    hCtl = pWindow->AddControl("TABCONTROL", , _
@@ -385,10 +398,12 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    TabCtrl_AddTab( hCtl, -1, L(264, "Notes") )
    TabCtrl_SetCurSel( hCtl, 0 )
    
-   frmHotImgBtn( HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE, "IMAGE_CLOSE", "IMAGE_CLOSE",  _
-                  L(161, "Close"), nWidth, nHeight, GetSysColor(COLOR_BTNFACE), GetSysColor(COLOR_BTNHIGHLIGHT), _
-                  0, 0, nWidth, nHeight, true, true, true )
-                  
+   pBtnOutputClose = new CImageCtx(pWindow, IDC_FRMOUTPUT_BTNCLOSE, "", 0, 0, 24, 24)
+   pBtnOutputClose->SetBkColor(GetSysColor(COLOR_BTNFACE))
+   pBtnOutputClose->SetBkColorHot(GetSysColor(COLOR_BTNHIGHLIGHT))
+   pBtnOutputClose->LoadImageFromResource (pWindow->InstanceHandle, wstr("IMAGE_CLOSE"))
+   AfxAddTooltip(pBtnOutputClose->hWindow, L(161, "Close"))
+
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _
       WS_VISIBLE OR WS_TABSTOP OR WS_VSCROLL or ES_LEFT OR ES_AUTOVSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN, _
