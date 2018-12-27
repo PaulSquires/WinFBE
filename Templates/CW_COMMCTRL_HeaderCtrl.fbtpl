@@ -1,0 +1,131 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Header control
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_HeaderCtrl.fbtpl
+' Contents: Demonstrates the use of the Header control.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_HEADER = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Header control", @WndProc)
+   pWindow.Center
+
+   ' // Add the header control.
+   DIM hHeader AS HWND = pWindow.AddControl("Header", , IDC_HEADER, "", 0, 0, pWindow.ClientWidth, 23)
+
+   ' // Insert items
+   DIM thdi AS HDITEMW
+   DIM wszItem AS WSTRING * 260
+   wszItem   = "Item 1"
+   thdi.Mask = HDI_WIDTH OR HDI_FORMAT OR HDI_TEXT
+   thdi.fmt  = HDF_LEFT OR HDF_STRING
+   thdi.cxy  = pWindow.ScaleX(80)
+   thdi.pszText  = @wszItem
+   Header_InsertItem(hHeader, 1, @thdi)
+   wszItem   = "Item 2"
+   Header_InsertItem(hHeader, 2, @thdi)
+   wszItem   = "Item 3"
+   Header_InsertItem(hHeader, 3, @thdi)
+   wszItem   = "Item 4"
+   Header_InsertItem(hHeader, 4, @thdi)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' // Retrieve the header item clicked
+         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_HEADER
+               SELECT CASE ptnmhdr->code
+                  CASE HDN_ITEMCLICKW
+                     DIM ptnmh AS NMHEADERW PTR = CAST(NMHEADERW PTR, lParam)
+                     MessageBoxW hwnd, "You have clicked item " & WSTR(ptnmh->iItem + 1), "", MB_OK
+                     EXIT FUNCTION
+'                  CASE HDN_ITEMDBLCLICK
+'                     DIM ptnmh AS NMHEADERW PTR = CAST(NMHEADERW PTR, lParam)
+'                     MessageBoxW hwnd, "You have clicked item " & WSTR(ptnmh->iItem + 1), "", MB_OK
+'                     EXIT FUNCTION
+               END SELECT
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Resize the header control
+         DIM hHeader AS HWND = GetDlgItem(hwnd, IDC_HEADER)
+         DIM thdl AS HDLAYOUT, twp AS WINDOWPOS, trc AS RECT
+         GetClientRect hwnd, @trc
+         thdl.prc = @trc
+         thdl.pwpos = @twp
+         Header_Layout(hHeader, @thdl)
+         SetWindowPos hHeader, NULL, twp.x, twp.y, twp.cx, twp.cy, SWP_NOZORDER OR SWP_NOACTIVATE
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

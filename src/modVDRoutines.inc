@@ -13,6 +13,27 @@
 
 
 ' ========================================================================================
+' Retrieve the IMAGES_TYPE pointer for the IMAGE name.
+' ========================================================================================
+Function GetImagesTypePtr( byref wszImageName as wstring ) As IMAGES_TYPE ptr
+   dim pDoc as clsDocument ptr = gApp.pDocList
+   do until pDoc = 0
+      if (gApp.IsProjectActive = false) andalso (pDoc <> gTTabCtl.GetActiveDocumentPtr) then 
+         ' For non-projects only output images related to the active form.
+      else
+         for i as long = lbound(pDoc->AllImages) to ubound(pDoc->AllImages)
+            if pDoc->AllImages(i).wszImageName = wszImageName then
+               return @pDoc->AllImages(i)
+            end if   
+         next   
+      end if
+      pDoc = pDoc->pDocNext
+   loop
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Retrieve the control/toolbox name that is currently actively selected in the Toolbox
 ' ========================================================================================
 function GetActiveToolboxControlName() as CWSTR

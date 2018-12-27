@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>COleDateTime Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="coledatetime-class">COleDateTime Class</h1>
+<p>Encapsulates the <strong>DATE</strong> data type that is used in OLE automation.</p>
+<p>It is one of the possible types for the VARIANT data type of OLE automation. A <strong>COleDateTime</strong> value represents an absolute date and time value. The <strong>DATE</strong> type is implemented as a floating-point value. Days are measured from December 30, 1899, at midnight. The <strong>COleDateTime</strong> class handles dates from January 1, 100, through December 31, 9999. The <strong>COleDateTime</strong> class uses the Gregorian calendar; it does not support Julian dates. <strong>COleDateTime</strong> ignores Daylight Saving Time. This type is also used to represent date-only or time-only values. By convention, the date 0 (December 30, 1899) is used for time-only values and the time 00:00 (midnight) is used for date-only values.</p>
+<p><strong>Caution</strong>: Note that although day values become negative before midnight on December 30, 1899, time-of-day values do not. For example, 6:00 AM is always represented by a fractional value 0.25 regardless of whether the integer representing the day is positive (after December 30, 1899) or negative (before December 30, 1899). This means that a simple floating point comparison would erroneously sort a <strong>COleDateTime</strong> representing 6:00 AM on 12/29/1899 as later than one representing 7:00 AM on the same day.</p>
+<p><strong>Include file</strong>: COleDateTime.inc</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors1">Constructors</a></td>
+<td>Create new <strong>COleDateTime</strong> objects initialized to the specified value.</td>
+</tr>
+<tr class="even">
+<td><a href="#CastOp1">CAST Operator</a></td>
+<td>Returns the <strong>COleDateTime</strong> value as a long integer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LetOp1">LET Operator</a></td>
+<td>Assigns a value to a <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operators1">Operators</a></td>
+<td>Adds, subtracts or compares <strong>COleDateTime</strong> objects.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Format">Format</a></td>
+<td>Converts a <strong>COleDateTime</strong> object to a string.</td>
+</tr>
+<tr class="even">
+<td><a href="#Format2">Format (Overload)</a></td>
+<td>Converts a <strong>COleDateTime</strong> object to a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetAsDBTIMESTAMP">GetAsDBTIMESTAMP</a></td>
+<td>Returns the date/time the of this <strong>COleDateTime</strong> object as a <strong>DBTIMESTAMP</strong> data structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetAsSystemTime">GetAsSystemTime</a></td>
+<td>Returns the date/time the of this <strong>COleDateTime</strong> object as a <strong>SYSTEMTIME</strong> data structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetAsUdate">GetAsUdate</a></td>
+<td>Returns the date/time the of this <strong>COleDateTime</strong> object as a UDATE structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetCurrentTime">GetCurrentTime</a></td>
+<td>Returns the current date/time value in local time.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDay">GetDay</a></td>
+<td>Gets the day represented by this date/time value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDayOfWeek">GetDayOfWeek</a></td>
+<td>Gets the day of the week represented by this date/time value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDayOfYear">GetDayOfYear</a></td>
+<td>Gets the day of the year represented by this date/time value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetHour">GetHour</a></td>
+<td>Gets the hour represented by this date/time value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetLocalTime">GetLocalTime</a></td>
+<td>Returns the current date/time value in local time.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetMinute">GetMinute</a></td>
+<td>Gets the minute represented by this date/time value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMonth">GetMonth</a></td>
+<td>Gets the month represented by this date/time value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSecond">GetSecond</a></td>
+<td>Gets the second represented by this date/time value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetStatus">GetStatus</a></td>
+<td>Gets the status (validity) of a given <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSystemTime">GetSystemTime</a></td>
+<td>Returns the current date/time value in Coordinated Universal Time (UTC).</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetYear">GetYear</a></td>
+<td>Gets the year represented by this date/time value.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetDate">SetDate</a></td>
+<td>Sets the date of this <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetDateTime">SetDateTime</a></td>
+<td>Sets the date and time of this <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetStatus">SetStatus</a></td>
+<td>Sets the status (validity) of a given <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetTime">SetTime</a></td>
+<td>Sets the time of this <strong>COleDateTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="coledatetimespan-class">COleDateTimeSpan Class</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors2">Constructors</a></td>
+<td>Create new <strong>COleDateTimeSpan</strong> objects initialized to the specified value.</td>
+</tr>
+<tr class="even">
+<td><a href="#CastOp2">CAST Operator</a></td>
+<td>Returns the <strong>COleDateTimeSpan</strong> value as a long integer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LetOp2">LET Operator</a></td>
+<td>Assigns a value to a <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operators2">Operators</a></td>
+<td>Adds, subtracts or compares <strong>COleDateTimeSpan</strong> objects.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDays">GetDays</a></td>
+<td>Retrieves the day portion of this date/time-span value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetHours">GetHours</a></td>
+<td>Retrieves the hour portion of this date/time-span value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMinutes">GetMinutes</a></td>
+<td>Retrieves the minutes portion of this date/time-span value.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSeconds">GetSeconds</a></td>
+<td>Retrieves the seconds portion of this date/time-span value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetStatusSpan">GetStatus</a></td>
+<td>Gets the status (validity) of a given <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTotalDays">GetTotalDays</a></td>
+<td>Retrieves this date/time-span value expressed in days.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetTotalHours">GetTotalHours</a></td>
+<td>Retrieves this date/time-span value expressed in hours.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTotalMinutes">GetTotalMinutes</a></td>
+<td>Retrieves this date/time-span value expressed in minutes.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetTotalSeconds">GetTotalSeconds</a></td>
+<td>Retrieves this date/time-span value expressed in seconds.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetDateTimeSpan">SetDateTimeSpan</a></td>
+<td>Sets the date and time of this <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetStatusSpan">SetStatus</a></td>
+<td>Sets the status (validity) of a given <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors-(coledatetime)"><a name="Constructors1"></a>Constructors (COleDateTime)</h1>
+<p>Create new <strong>COleDateTime</strong> objects initialized to the specified value.</p>
+<pre><code>CONSTRUCTOR COleDateTime
+CONSTRUCTOR COleDateTime (BYREF dateSrc AS COleDateTime)
+CONSTRUCTOR COleDateTime (BYREF varSrc AS VARIANT)
+CONSTRUCTOR COleDateTime (BYVAL dtSrc AS DATE_)
+CONSTRUCTOR COleDateTime (BYVAL timeSrc AS LONGLONG)
+CONSTRUCTOR COleDateTime (BYREF systimeSrc AS SYSTEMTIME)
+CONSTRUCTOR COleDateTime (BYREF filetimeSrc AS FILETIME)
+CONSTRUCTOR COleDateTime (BYVAL wDosDate AS DWORD, BYVAL wDosTime AS WORD)
+CONSTRUCTOR COleDateTime (BYREF dbts AS DBTIMESTAMP)
+CONSTRUCTOR COleDateTime (BYREF ud AS UDATE)
+CONSTRUCTOR COleDateTime (BYVAL nYear AS WORD, BYVAL nMonth AS WORD, BYVAL nDay AS WORD, _
+   BYVAL nHour AS WORD, BYVAL nMin AS WORD, BYVAL nSec AS WORD)
+CONSTRUCTOR COleDateTime (BYREF wsz AS WSTRING, BYVAL dwFlags AS DWORD = 0, _
+   BYVAL lcid AS LCID = LANG_USER_DEFAULT)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dateSrc</em></td>
+<td>An existing <strong>COleDateTime</strong> object to be copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>varSrc</em></td>
+<td>An existing VARIANT data structure to be converted to a date/time value (VT_DATE) and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>dtSrc</em></td>
+<td>A date/time ( DATE) value to be copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>timeSrc</em></td>
+<td>A LongInt value to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>systimeSrc</em></td>
+<td>A <strong>SYSTEMTIME</strong> structure to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>filetimeSrc</em></td>
+<td>A <strong>FILETIME</strong> structure to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object. Note that <strong>FILETIME</strong> uses Universal Coordinated Time (UTC), so if you pass a local time in the structure, your results will be incorrect. See File Times in the Windows SDK for more information.</td>
+</tr>
+<tr class="odd">
+<td><em>nYear / nMonth / nDay / nHour / nMin / nSec</em></td>
+<td>Indicate the date and time values to be copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>wDosDate / wDosTime</em></td>
+<td>MS-DOS date and time values to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>dbts</em></td>
+<td>A reference to a <strong>DBTimeStamp</strong> structure containing the current local time.</td>
+</tr>
+<tr class="even">
+<td><em>ud</em></td>
+<td>The <strong>UDATE</strong> value is converted and copied into this <strong>COleDateTime</strong> object. If the conversion is successful, the status of this object is set to valid; if unsuccessful, it is set to invalid. A <strong>UDATE</strong> structure represents an &quot;unpacked&quot; date. See the function <strong>VarDateFromUdate</strong> for more details.</td>
+</tr>
+<tr class="odd">
+<td><em>wsz</em></td>
+<td>A null-terminated unicode string which is to be parsed. This parameter can take a variety of formats. For example, the following strings contain acceptable date/time formats:<br>&quot;25 January 1996&quot;<br>&quot;8:30:00&quot;<br>&quot;20:30:00&quot;<br>&quot;January 25, 1996 8:30:00&quot;<br>&quot;8:30:00 Jan. 25, 1996&quot;<br>&quot;1/25/1996 8:30:00&quot; // always specify the full year, even in a 'short date' format.<br>Note that the locale ID will also affect whether the string format is acceptable for conversion to a date/time value. In the case of VAR_DATEVALUEONLY, the time value is set to time 0, or midnight. In the case of VAR_TIMEVALUEONLY, the date value is set to date 0, meaning 30 December 1899.</td>
+</tr>
+<tr class="even">
+<td><em>dwFlags</em></td>
+<td>Indicates flags for locale settings and parsing.<br>LOCALE_NOUSEROVERRIDE Use the system default locale settings, rather than custom user settings.<br>VAR_TIMEVALUEONLY Ignore the date portion during parsing.<br>VAR_DATEVALUEONLY Ignore the time portion during parsing.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Indicates locale ID to use for the conversion. Default value: LANG_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>The status of the new <strong>COleDateTime</strong> object is set to valid.</p>
+<h1 id="cast-operator-(coledatetime)"><a name="CastOp1"></a>CAST Operator (COleDateTime)</h1>
+<p>Returns the underlying <strong>DATE</strong> value from this <strong>COleDateTime</strong> object.</p>
+<pre><code>OPERATOR CAST () AS DATE_
+</code></pre>
+<h1 id="let-operator-(=)-(coledatetime)"><a name="LetOp1"></a>LET Operator (=) (COleDateTime)</h1>
+<p>Assigns a value to a <strong>COleDateTime</strong> object.</p>
+<pre><code>OPERATOR LET (BYREF dateSrc AS COleDateTime)
+OPERATOR LET (BYREF varSrc AS VARIANT)
+OPERATOR LET (BYVAL dtSrc AS DATE_)
+OPERATOR LET (BYVAL timeSrc AS LONGLONG)
+OPERATOR LET (BYREF systimeSrc AS SYSTEMTIME)
+OPERATOR LET (BYREF filetimeSrc AS FILETIME)
+OPERATOR LET (BYREF dbts AS DBTIMESTAMP)
+OPERATOR LET (BYREF ud AS UDATE)
+OPERATOR LET (BYREF wsz AS WSTRING)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dateSrc</em></td>
+<td>An existing <strong>COleDateTime</strong> object to be copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>varSrc</em></td>
+<td>An existing VARIANT data structure to be converted to a date/time value (VT_DATE) and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>dtSrc</em></td>
+<td>A date/time ( DATE) value to be copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>timeSrc</em></td>
+<td>A LongInt value to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>systimeSrc</em></td>
+<td>A <strong>SYSTEMTIME</strong> structure to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>filetimeSrc</em></td>
+<td>A <strong>FILETIME</strong> structure to be converted to a date/time value and copied into the new <strong>COleDateTime</strong> object. Note that <strong>FILETIME</strong> uses Universal Coordinated Time (UTC), so if you pass a local time in the structure, your results will be incorrect. See File Times in the Windows SDK for more information.</td>
+</tr>
+<tr class="odd">
+<td><em>dbts</em></td>
+<td>A reference to a <strong>DBTimeStamp</strong> structure containing the current local time.</td>
+</tr>
+<tr class="even">
+<td><em>ud</em></td>
+<td>The <strong>UDATE</strong> value is converted and copied into this <strong>COleDateTime</strong> object. If the conversion is successful, the status of this object is set to valid; if unsuccessful, it is set to invalid. A <strong>UDATE</strong> structure represents an &quot;unpacked&quot; date. See the function <strong>VarDateFromUdate</strong> for more details.</td>
+</tr>
+<tr class="odd">
+<td><em>wsz</em></td>
+<td>A null-terminated unicode string which is to be parsed. This parameter can take a variety of formats. For example, the following strings contain acceptable date/time formats:<br>&quot;25 January 1996&quot;<br>&quot;8:30:00&quot;<br>&quot;20:30:00&quot;<br>&quot;January 25, 1996 8:30:00&quot;<br>&quot;8:30:00 Jan. 25, 1996&quot;<br>&quot;1/25/1996 8:30:00&quot; // always specify the full year, even in a 'short date' format.<br>Note that the locale ID will also affect whether the string format is acceptable for conversion to a date/time value. In the case of VAR_DATEVALUEONLY, the time value is set to time 0, or midnight. In the case of VAR_TIMEVALUEONLY, the date value is set to date 0, meaning 30 December 1899.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operators-(coledatetime)"><a name="Operators1"></a>Operators (COleDateTime)</h1>
+<p>Adds, subtracts or compares <strong>COleDateTime</strong> objects.</p>
+<pre><code>OPERATOR + (BYREF dt AS COleDateTime, BYREF dateSpan AS COleDateTimeSpan) AS COleDateTime
+OPERATOR - (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS COleDateTimeSpan
+OPERATOR - (BYREF dt AS COleDateTime, BYREF dateSpan AS COleDateTimeSpan) AS COleDateTime
+OPERATOR += (BYREF dateSpan AS COleDateTimeSpan)
+OPERATOR -= (BYREF dateSpan AS COleDateTimeSpan)
+OPERATOR = (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS BOOLEAN
+OPERATOR &lt;&gt; (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS BOOLEAN
+OPERATOR &lt; (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS BOOLEAN
+OPERATOR &gt; (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS BOOLEAN
+OPERATOR &lt;= (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS BOOLEAN
+OPERATOR &gt;= (BYREF dt1 AS COleDateTime, BYREF dt2 AS COleDateTime) AS BOOLEAN
+</code></pre>
+<h1 id="format-(coledatetime)"><a name="Format"></a>Format (COleDateTime)</h1>
+<p>Converts a <strong>COleDateTime</strong> to a formatted string.</p>
+<pre><code>FUNCTION Format (BYREF wszFmt AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFmt</em></td>
+<td>A format string which contains special formatting codes that are preceded by a percent sign (%).</td>
+</tr>
+</tbody>
+</table>
+<p>Formatting codes:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>%a</td>
+<td>Abbreviated weekday name</td>
+</tr>
+<tr class="even">
+<td>%A</td>
+<td>Full weekday name</td>
+</tr>
+<tr class="odd">
+<td>%b</td>
+<td>Abbreviated month name</td>
+</tr>
+<tr class="even">
+<td>%B</td>
+<td>Full month name</td>
+</tr>
+<tr class="odd">
+<td>%c</td>
+<td>Date and time representation appropriate for locale</td>
+</tr>
+<tr class="even">
+<td>%d</td>
+<td>Day of month as decimal number (01 – 31)</td>
+</tr>
+<tr class="odd">
+<td>%H</td>
+<td>Hour in 24-hour format (00 – 23)</td>
+</tr>
+<tr class="even">
+<td>%I</td>
+<td>Hour in 12-hour format (01 – 12)</td>
+</tr>
+<tr class="odd">
+<td>%j</td>
+<td>Day of year as decimal number (001 – 366)</td>
+</tr>
+<tr class="even">
+<td>%m</td>
+<td>Month as decimal number (01 – 12)</td>
+</tr>
+<tr class="odd">
+<td>%M</td>
+<td>Minute as decimal number (00 – 59)</td>
+</tr>
+<tr class="even">
+<td>%p</td>
+<td>Current locale's A.M./P.M. indicator for 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>%S</td>
+<td>Second as decimal number (00 – 59)</td>
+</tr>
+<tr class="even">
+<td>%U</td>
+<td>Week of year as decimal number, with Sunday as first day of week (00 – 53)</td>
+</tr>
+<tr class="odd">
+<td>%w</td>
+<td>Weekday as decimal number (0 – 6; Sunday is 0)</td>
+</tr>
+<tr class="even">
+<td>%W</td>
+<td>Week of year as decimal number, with Monday as first day of week (00 – 53)</td>
+</tr>
+<tr class="odd">
+<td>%x</td>
+<td>Date representation for current locale</td>
+</tr>
+<tr class="even">
+<td>%X</td>
+<td>Time representation for current locale</td>
+</tr>
+<tr class="odd">
+<td>%y</td>
+<td>Year without century, as decimal number (00 – 99)</td>
+</tr>
+<tr class="even">
+<td>%Y</td>
+<td>Year with century, as decimal number</td>
+</tr>
+<tr class="odd">
+<td>%z, %Z</td>
+<td>Either the time-zone name or time zone abbreviation, depending on registry settings; no characters if time zone is unknown</td>
+</tr>
+<tr class="even">
+<td>%%</td>
+<td>Percent sign</td>
+</tr>
+</tbody>
+</table>
+<p>The # flag may prefix any formatting code. In that case, the meaning of the format code is changed as follows.</p>
+<ul>
+<li>%#a, %#A, %#b, %#B, %#p, %#X, %#z, %#Z, %#%: # flag is ignored.</li>
+<li>%#c: Long date and time representation, appropriate for current locale. For example: &quot;Tuesday, March 14, 1995, 12:41:29&quot;.</li>
+<li>%#x* Long date representation, appropriate to current locale. For example: &quot;Tuesday, March 14, 1995&quot;.</li>
+<li>%#d, %#H, %#I, %#j, %#m, %#M, %#S, %#U, %#w, %#W, %#y, %#Y: Remove leading zeros (if any).</li>
+</ul>
+<h1 id="format-(overload)-(coledatetime)"><a name="Format2"></a>Format (Overload) (COleDateTime)</h1>
+<p>Converts a <strong>COleDateTime</strong> to a formatted string.</p>
+<pre><code>FUNCTION Format (BYVAL dwFlags AS DWORD = 0, BYVAL lcid AS LCID = LANG_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dwFlags</em></td>
+<td>One or more of the following flags.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>The locale identifier. Default value: LANG_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LOCALE_NOUSEROVERRIDE</td>
+<td>Uses the system default locale settings, rather than custom locale settings.</td>
+</tr>
+<tr class="even">
+<td>VAR_CALENDAR_HIJRI</td>
+<td>If set then the Hijri calendar is used. Otherwise the calendar set in the control panel is used.</td>
+</tr>
+<tr class="odd">
+<td>VAR_CALENDAR_THAI</td>
+<td>If set then the Buddhist year is used.</td>
+</tr>
+<tr class="even">
+<td>VAR_CALENDAR_GREGORIAN</td>
+<td>If set the Gregorian year is used.</td>
+</tr>
+<tr class="odd">
+<td>VAR_FOURDIGITYEARS</td>
+<td>Use 4-digit years instead of 2-digit years.</td>
+</tr>
+<tr class="even">
+<td>VAR_TIMEVALUEONLY</td>
+<td>Omits the date portion of a VT_DATE and returns only the time. Applies to conversions to or from dates.</td>
+</tr>
+<tr class="odd">
+<td>VAR_DATEVALUEONLY</td>
+<td>Omits the time portion of a VT_DATE and returns only the date. Applies to conversions to or from dates.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>The <strong>COleDateTime</strong> as a formatted string.</p>
+<h1 id="getasdbtimestamp-(coledatetime)"><a name="GetAsDBTIMESTAMP"></a>GetAsDBTIMESTAMP (COleDateTime)</h1>
+<p>Returns the date/time the of this <strong>COleDateTime</strong> object as a <strong>DBTIMESTAMP</strong> data structure.</p>
+<pre><code>FUNCTION GetAsDBTIMESTAMP (BYREF dbts AS DBTIMESTAMP) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dbts</em></td>
+<td>A reference to a <strong>DBTIMESTAMP</strong> structure to receive the converted date/time value from the <strong>COleDateTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="getassystemtime-(coledatetime)"><a name="GetAsSystemTime"></a>GetAsSystemTime (COleDateTime)</h1>
+<p>Returns the date/time the of this <strong>COleDateTime</strong> object as a <strong>SYSTEMTIME</strong> data structure.</p>
+<pre><code>FUNCTION GetAsSystemTime (BYREF sysTime AS SYSTEMTIME) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>sysTime</em></td>
+<td>A reference to a <strong>SYSTEMTIME</strong> structure to receive the converted date/time value from the <strong>COleDateTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="getasudate-(coledatetime)"><a name="GetAsUdate"></a>GetAsUdate (COleDateTime)</h1>
+<p>Returns the date/time the of this <strong>COleDateTime</strong> object as a <strong>UDATE</strong> structure.</p>
+<pre><code>FUNCTION GetAsUdate (BYREF ud AS UDATE) AS BOOLEAN
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="getcurrenttime-(coledatetime)"><a name="GetCurrentTime"></a>GetCurrentTime (COleDateTime)</h1>
+<p>Returns the current date/time value in local time.</p>
+<pre><code>FUNCTION GetCurrentTime () AS COleDateTime
+</code></pre>
+<h4 id="return-value-4">Return value</h4>
+<p>The current date/time as a <strong>COleDateTime</strong>.</p>
+<h4 id="example">Example</h4>
+<pre><code>DIM ct AS COleDateTime = COleDateTime().GetCurrentTime()
+</code></pre>
+<p>--or--</p>
+<pre><code>DIM ct AS COleDateTime
+ct = ct.GetCurrentTime()
+</code></pre>
+<h1 id="getday-(coledatetime)"><a name="GetDay"></a>GetDay (COleDateTime)</h1>
+<p>Returns the day represented by this date/time value. Valid return values range between 1 and 31.</p>
+<pre><code>FUNCTION GetDay () AS WORD
+</code></pre>
+<h1 id="getdayofweek-(coledatetime)"><a name="GetDayOfWeek"></a>GetDayOfWeek (COleDateTime)</h1>
+<p>Returns the day of the week represented by this date/time value. Valid return values range between 1 and 7, where 1=Sunday, 2=Monday, and so on.</p>
+<pre><code>FUNCTION GetDayOfWeek () AS WORD
+</code></pre>
+<h1 id="getdayofyear-(coledatetime)"><a name="GetDayOfYear"></a>GetDayOfYear (COleDateTime)</h1>
+<p>Returns the day of the year represented by this date/time value. Valid return values range between 1 and 366, where January 1 = 1.</p>
+<pre><code>FUNCTION GetDayOfYear () AS WORD
+</code></pre>
+<h1 id="gethour-(coledatetime)"><a name="GetHour"></a>GetHour (COleDateTime)</h1>
+<p>Returns the hour represented by this date/time value. Valid return values range between 0 and 23.</p>
+<pre><code>FUNCTION GetHour () AS WORD
+</code></pre>
+<h1 id="getlocaltime-(coledatetime)"><a name="GetLocalTime"></a>GetLocalTime (COleDateTime)</h1>
+<p>Returns the current date/time value in local time.</p>
+<pre><code>FUNCTION GetLocalTime () AS COleDateTime
+</code></pre>
+<h1 id="getminute-(coledatetime)"><a name="GetMinute"></a>GetMinute (COleDateTime)</h1>
+<p>Returns the minute represented by this date/time value. Valid return values range between 0 and 59.</p>
+<pre><code>FUNCTION GetMinute () AS WORD
+</code></pre>
+<h1 id="getmonth-(coledatetime)"><a name="GetMonth"></a>GetMonth (COleDateTime)</h1>
+<p>Returns the month represented by this date/time value. Valid return values range between 1 and 12.</p>
+<pre><code>FUNCTION GetMonth () AS WORD
+</code></pre>
+<h1 id="getsecond-(coledatetime)"><a name="GetSecond"></a>GetSecond (COleDateTime)</h1>
+<p>Returns the second represented by this date/time value. Valid return values range between 0 and 59.</p>
+<pre><code>FUNCTION GetSecond () AS WORD
+</code></pre>
+<h1 id="getstatus-(coledatetime)"><a name="GetStatus"></a>GetStatus (COleDateTime)</h1>
+<p>Gets the status (validity) of a given <strong>COleDateTime</strong> object.</p>
+<pre><code>FUNCTION GetStatus () AS BOOLEAN
+</code></pre>
+<h1 id="getsystemtime-(coledatetime)"><a name="GetSystemTime"></a>GetSystemTime (COleDateTime)</h1>
+<p>Returns the current date/time value in Coordinated Universal Time (UTC).</p>
+<pre><code>FUNCTION GetSystemTime () AS COleDateTime
+</code></pre>
+<h1 id="getyear-(coledatetime)"><a name="GetYear"></a>GetYear (COleDateTime)</h1>
+<p>Returns the year represented by this date/time value. Valid return values range between 100 and 9999, which includes the century.</p>
+<pre><code>FUNCTION GetYear () AS WORD
+</code></pre>
+<h1 id="setdate-(coledatetime)"><a name="SetDate"></a>SetDate (COleDateTime)</h1>
+<p>Sets the date of this <strong>COleDateTime</strong> object.</p>
+<pre><code>FUNCTION SetDate (BYVAL nYear AS WORD, BYVAL nMonth AS WORD, BYVAL nDay AS WORD)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear / nMonth / nDay</em></td>
+<td>Indicates the date values to be copied into the <strong>COleDateTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setdatetime-(coledatetime)"><a name="SetDateTime"></a>SetDateTime (COleDateTime)</h1>
+<p>Sets the date and time of this <strong>COleDateTime</strong> object.</p>
+<pre><code>FUNCTION SetDateTime (BYVAL nYear AS WORD, BYVAL nMonth AS WORD, BYVAL nDay AS WORD, _
+   BYVAL nHour AS WORD, BYVAL nMin AS WORD, BYVAL nSec AS WORD)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear / nMonth / nDay / nHour / nMin / nSec</em></td>
+<td>Indicates the date and time values to be copied into the <strong>COleDateTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setstatus-(coledatetime)"><a name="SetStatus"></a>SetStatus (COleDateTime)</h1>
+<p>Sets the status (validity) of a given <strong>COleDateTime</strong> object.</p>
+<pre><code>FUNCTION SetStatus (BYVAL nStatus AS BOOLEAN)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStatus</em></td>
+<td>TRUE or FALSE.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="settime-(coledatetime)"><a name="SetTime"></a>SetTime (COleDateTime)</h1>
+<p>Sets the time of this <strong>COleDateTime</strong> object.</p>
+<pre><code>FUNCTION SetTime (BYVAL nHour AS WORD, BYVAL nMin AS WORD, BYVAL nSec AS WORD)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nHour / nMin / nSec</em></td>
+<td>Indicates the time values to be copied into the <strong>COleDateTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors-(coledatetimespan)"><a name="Constructors2"></a>Constructors (COleDateTimeSpan)</h1>
+<p>All these constructors create new <strong>COleDateTimeSpan</strong> objects initialized to the specified value.</p>
+<pre><code>CONSTRUCTOR COleDateTimeSpan
+CONSTRUCTOR COleDateTimeSpan (dblSpanSrc AS DOUBLE)
+CONSTRUCTOR COleDateTimeSpan (BYVAL lDays AS LONG, BYVAL nHours AS LONG, BYVAL nMins AS LONG, BYVAL nSecs AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dblSpanSrc</em></td>
+<td>The number of days to be copied into the new <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>lDays / nHours / nMins / nSecs</em></td>
+<td>Indicates the day and time values to be copied into the new <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-1">Remarks</h4>
+<p>The status of the new <strong>COleDateTimeSpan</strong> object is set to valid.</p>
+<h1 id="cast-operator-(coledatetimespan)"><a name="CastOp2"></a>CAST Operator (COleDateTimeSpan)</h1>
+<p>Returns the underlying <strong>DATE</strong> value from this <strong>COleDateTimeSpan</strong> object.</p>
+<pre><code>OPERATOR CAST () AS DOUBLE
+</code></pre>
+<h1 id="let-operator-(=)-(coledatetimespan)"><a name="LetOp2"></a>LET Operator (=) (COleDateTimeSpan)</h1>
+<p>Assigns a value to a <strong>COleDateTimeSpan</strong> object.</p>
+<pre><code>OPERATOR LET (BYVAL dblSpanSrc AS DOUBLE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dblSpanSrc</em></td>
+<td>The number of days to be copied into the <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operators-(coledatetimespan)"><a name="Operators2"></a>Operators (COleDateTimeSpan)</h1>
+<p>Adds, subtracts or compares <strong>COleDateTimeSpan</strong> objects.</p>
+<pre><code>OPERATOR + (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS COleDateTimeSpan
+OPERATOR - (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS COleDateTimeSpan
+OPERATOR - (BYREF dateSpan AS COleDateTimeSpan) AS COleDateTimeSpan
+OPERATOR += (BYREF dateSpan AS COleDateTimeSpan)
+OPERATOR -= (BYREF dateSpan AS COleDateTimeSpan)
+OPERATOR = (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS BOOLEAN
+OPERATOR &lt;&gt; (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSPan2 AS COleDateTimeSpan) AS BOOLEAN
+OPERATOR &lt; (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS BOOLEAN
+OPERATOR &gt; (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS BOOLEAN
+OPERATOR &lt;= (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS BOOLEAN
+OPERATOR &gt;= (BYREF dateSpan1 AS COleDateTimeSpan, BYREF dateSpan2 AS COleDateTimeSpan) AS BOOLEAN
+</code></pre>
+<h1 id="getdays-(coledatetimespan)"><a name="GetDays"></a>GetDays (COleDateTimeSpan)</h1>
+<p>Retrieves the day portion of this date/time-span value. The return values from this function range between approximately – 3,615,000 and 3,615,000.</p>
+<pre><code>FUNCTION GetDays () AS LONGINT
+</code></pre>
+<h1 id="gethours-(coledatetimespan)"><a name="GetHours"></a>GetHours (COleDateTimeSpan)</h1>
+<p>Retrieves the hour portion of this date/time-span value. The return values from this function range between – 23 and 23.</p>
+<pre><code>FUNCTION GetHours () AS LONGINT
+</code></pre>
+<h1 id="getminutes-(coledatetimespan)"><a name="GetMinutes"></a>GetMinutes (COleDateTimeSpan)</h1>
+<p>Retrieves the minutes portion of this date/time-span value. The return values from this function range between – 59 and 59.</p>
+<pre><code>FUNCTION GetMinutes () AS LONGINT
+</code></pre>
+<h1 id="getseconds-(coledatetimespan)"><a name="GetSeconds"></a>GetSeconds (COleDateTimeSpan)</h1>
+<p>Retrieves the seconds portion of this date/time-span value. The return values from this function range between – 59 and 59.</p>
+<pre><code>FUNCTION GetSeconds () AS LONGINT
+</code></pre>
+<h1 id="getstatus-(coledatetimespan)"><a name="GetStatusSpan"></a>GetStatus (COleDateTimeSpan)</h1>
+<p>Gets the status (validity) of a given <strong>COleDateTimeSpan</strong> object.</p>
+<pre><code>FUNCTION GetStatus () AS BOOLEAN
+</code></pre>
+<h1 id="gettotaldays-(coledatetimespan)"><a name="GetTotalDays"></a>GetTotalDays (COleDateTimeSpan)</h1>
+<p>Retrieves this date/time-span value expressed in days.</p>
+<pre><code>FUNCTION GetTotalDays () AS LONGINT
+</code></pre>
+<h1 id="gettotalhours-(coledatetimespan)"><a name="GetTotalHours"></a>GetTotalHours (COleDateTimeSpan)</h1>
+<p>Retrieves this date/time-span value expressed in hours.</p>
+<pre><code>FUNCTION GetTotalHours () AS LONGINT
+</code></pre>
+<h1 id="gettotalminutes-(coledatetimespan)"><a name="GetTotalMinutes"></a>GetTotalMinutes (COleDateTimeSpan)</h1>
+<p>Retrieves this date/time-span value expressed in minutes.</p>
+<pre><code>FUNCTION GetTotalMinutes () AS LONGINT
+</code></pre>
+<h1 id="gettotalseconds-(coledatetimespan)"><a name="GetTotalSeconds"></a>GetTotalSeconds (COleDateTimeSpan)</h1>
+<p>Retrieves this date/time-span value expressed in seconds.</p>
+<pre><code>FUNCTION GetTotalSeconds () AS LONGINT
+</code></pre>
+<h1 id="setdatetimespan-(coledatetimespan)"><a name="SetDateTimeSpan"></a>SetDateTimeSpan (COleDateTimeSpan)</h1>
+<p>Sets the date and time of this <strong>COleDateTimeSpan</strong> object.</p>
+<pre><code>FUNCTION SetDateTimeSpan (BYVAL lDays AS LONG, BYVAL nHours AS LONG, BYVAL nMins AS LONG, BYVAL nSecs AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lDays / nHours / nMins / nSecs</em></td>
+<td>Indicates the day and time values to be copied into the <strong>COleDateTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-2">Remarks</h4>
+<p>The status of the new <strong>COleDateTimeSpan</strong> object is set to valid.</p>
+<h1 id="setstatus-(coledatetimespan)"><a name="SetStatusSpan"></a>SetStatus (COleDateTimeSpan)</h1>
+<p>Sets the status (validity) of a given <strong>COleDateTimeSpan</strong> object.</p>
+<pre><code>FUNCTION SetStatus (BYVAL nStatus AS BOOLEAN)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStatus</em></td>
+<td>TRUE or FALSE.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
+

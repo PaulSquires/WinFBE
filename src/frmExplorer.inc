@@ -247,6 +247,45 @@ End Function
 
 
 ' ========================================================================================
+' Retrieve the filename and function name of the specified Treeview node
+' ========================================================================================
+function frmExplorer_GetFileNameFunctionName( byval hItem as HTREEITEM, _
+                                              byref wszFilename as CWSTR, _
+                                              byref wszFunctionName as CWSTR _
+                                              ) as long
+
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   Dim pDoc As clsDocument Ptr
+   dim as LPARAM lParam 
+   dim zFilename as wstring * MAX_PATH
+   dim zFunctionName as wstring * MAX_PATH
+            
+   lParam = FF_TreeView_GetlParam(hTree, hItem)
+   pDoc = Cast(clsDocument Ptr, lParam)
+   if pDoc then
+      ' This is a header node. Open the document based on the pDoc info
+      ' and position to first line in the file.
+      zFilename = pDoc->DiskFilename
+      zFunctionName = ""
+   else
+      ' pDoc is null so the node text contains the name of the sub/function. We
+      ' need to get the parent node to retrieve the pDoc in order to get the 
+      ' correct filename.
+      TreeView_GetItemText(hTree, hItem, @zFunctionName, MAX_PATH)
+      hItem = TreeView_GetNextItem(hTree, hItem, TVGN_PARENT)   
+      lParam = FF_TreeView_GetlParam(hTree, hItem)
+      pDoc = Cast(clsDocument Ptr, lParam)
+      if pDoc then zFilename = pDoc->DiskFilename
+   end if
+
+   wszFilename = zFilename
+   wszFunctionName = zFunctionName
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Processes messages for the subclassed frmExplorer treeview control.
 ' ========================================================================================
 Function frmExplorer_Tree_SubclassProc ( _
@@ -278,13 +317,9 @@ Function frmExplorer_Tree_SubclassProc ( _
       Case WM_LBUTTONDBLCLK
          hTree = hWnd
          hItem = Treeview_GetSelection(hTree)
-         lParam = FF_TreeView_GetlParam(hTree, hItem)
-
-         dim wszText as wstring * MAX_PATH
-         Dim pDoc As clsDocument Ptr
-         pDoc = Cast(clsDocument Ptr, lParam)
-         TreeView_GetItemText(hTree, hItem, @wszText, MAX_PATH)
-         OpenSelectedDocument(pDoc, wszText)
+         dim as CWSTR wszFilename, wszFunctionName
+         frmExplorer_GetFileNameFunctionName(hItem, wszFilename, wszFunctionName)
+         OpenSelectedDocument(wszFilename, wszFunctionName)
          TreeView_SelectItem(hTree, hItem)
          Exit Function
          

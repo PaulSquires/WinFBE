@@ -301,7 +301,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
    If IsProcessRunning(@gCompile.OutputFilename) Then
-      MessageBox( HWND_FRMMAIN, L(200,"Program running..."), L(201,"Error"), _
+      MessageBox( HWND_FRMMAIN, L(200,"Program running") & "...", L(201,"Error"), _
                         MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 )
       Function = False: Exit Function
    End If
@@ -317,7 +317,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ChDir gCompile.MainFolder
    
    ' Indicate in the StatusBar that we have started to compile
-   SetCompileStatusBarMessage( L(203, "Compiling..."), 0 )
+   SetCompileStatusBarMessage( L(203, "Compiling") & "...", 0 )
    AfxDoEvents
    
    gCompile.StartTime = Timer
@@ -348,7 +348,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If (AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2)) or _
                (wID = IDM_REBUILDALL)  Then
 
-               wst = L(203, "Compiling...") + " " + AfxStrPathname("NAMEX", pDoc->DiskFilename) 
+               wst = L(203, "Compiling") + "... " + AfxStrPathname("NAMEX", pDoc->DiskFilename) 
                SetCompileStatusBarMessage( wst, 0 )
                AfxDoEvents
  
@@ -359,7 +359,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
                ' Need to check to see if any errors occurred while compiling this
                ' object file. If yes, then stop processing object files and display
                ' the error.
-               if ParseLogForError(sConsoleText, false, wID) then   ' error detected
+               if ParseLogForError(sConsoleText, false, wID, fCompile64) then   ' error detected
                   SetCursor( hCurSave )
                   ResetScintillaCursors()
                   return true
@@ -399,14 +399,14 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       kill gCompile.OutputFilename
    end if
 
-   wst = L(203, "Compiling...") + " " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
+   wst = L(203, "Compiling") + "... " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
    SetCompileStatusBarMessage( wst, 0 )
    AfxDoEvents
 
    sConsoleText = ""
    wszCommand = gCompile.CompilerPath
    RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
-
+               
    ' Attempt to fix the random problem whereby the spinning mouse wait cursor is not reset
    ' to an arrow. It seems to happen in random cases whereby an error is thrown and a new 
    ' document is loaded to position to the error line. Very hard to reproduce. We will manually
@@ -423,7 +423,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       kill gCompile.MainFilename
    end if   
    
-   if ParseLogForError(sConsoleText, true, wID) = true then return false
+   if ParseLogForError(sConsoleText, true, wID, fCompile64) = true then return false
    
    ' Run any postcompile tools
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
@@ -500,11 +500,11 @@ SUB RedirConsoleToFile( byref szExe AS wstring, _
 
    ' Create a pipe for the child process's STDOUT.
    IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
-'      ? "error creating pipe"
+      '? "error creating pipe"
    ELSE
       ' Ensure the read handle to the pipe for STDOUT is not inherited.
       IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
-'         ? "error SetHandleInformation"
+         '? "error SetHandleInformation"
       ELSE
          ' Create the child process and read from its standard output
          IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
@@ -516,11 +516,13 @@ SUB RedirConsoleToFile( byref szExe AS wstring, _
                   EXIT DO
                end if  
                '? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
-'               ? LEFT(sBuffer, dwReadBytes)
+               '? LEFT(sBuffer, dwReadBytes)
                sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
                '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
                ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
             LOOP
+         else
+            '? "CreateChildProcess failed"      
          END IF
       END IF
    END IF
@@ -653,7 +655,8 @@ End Function
 ''
 function ParseLogForError( byref wsLogSt as CWSTR, _
                            byval bAllowSuccessMessage as Boolean, _
-                           Byval wID as long _
+                           Byval wID as long, _
+                           byval fCompile64 as Boolean _
                            ) as Boolean
    ' Returns TRUE if error has been detected. This signals to the calling code
    ' that we can break out of performing any further compiles (eg. modules).
@@ -675,6 +678,20 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
    hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW)
    ListView_DeleteAllItems( hLV )
    
+   ' On some Windows systems with tight security policies, the CreateChildProcess used
+   ' by the sub RedirConsoleToFile will fail. This seems to happen mostly when trying
+   ' to compile using the FB 64 bit compiler on a 32-bit version of Windows. For this
+   ' reason we will do a manual check here rather than relying on detecting the error
+   ' through the log file string.
+   if fCompile64 then   ' trying to compile a 64-bit program
+      if AfxWindowsBitness() <> 64 then  ' Windows is not 64 bit
+         wsLogSt = "This version of the FreeBASIC compiler is not compatible with the version " & _
+                   "of Windows you're running. Check your computer's system information to see " & _
+                   "whether you need a x86 (32-bit) or x64 (64-bit) version of the program, and " & _
+                   "then contact the software publisher."   
+      end if
+   end if
+
    ' Parse the log string.
    NumLines = AfxStrParseCount( wsLogSt, vbCrLf)
  
@@ -686,14 +703,12 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       ' Deal with the situation where we might be trying to compile a 64-bit application
       ' from a 32-bit operating system.
       If Left(**wst_ucase, 16) = WSTR("THIS VERSION OF ") Then
-         ' Simply set the log file text and show the compiler log file window rather
-         ' than the default compiler results window.
-         SetCompileStatusBarMessage( "", 0 )
-         TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 1 )
+         fGoodCompile = false
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Windows not 64-bit (refer to log file)") ) 
          AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
-         ShowWindow HWND_FRMOUTPUT, SW_SHOW
-         frmMain_PositionWindows(HWND_FRMMAIN)
-         return true
+         exit for
       End If   
 
       ' Save the FB version and copyright information. 
@@ -833,8 +848,8 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
    
    ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
    If (NumWarnings > 0) orelse (NumErrors > 0) then
-      cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
-                      L(192, "Warnings:") & " " & NumWarnings & _
+      cwsCompileMsg = L(193, "Errors") & ": " & NumErrors & "  " & _
+                      L(192, "Warnings") & ": " & NumWarnings & _
                       "  [" & Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
@@ -875,24 +890,15 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       ' or errors to show in the listview. Only close if the listview is active. Do not
       ' close if the user is looking at the logfile textbox.
       if bAllowSuccessMessage then  ' we are not compiling modules
-         cwsCompileMsg = L(193, "Errors:") & " " & NumErrors & "  " & _
-                         L(192, "Warnings:") & " " & NumWarnings & _
+         cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
+                         L(192, "Warnings") & " " & NumWarnings & _
                          "  [ " & gCompile.OutputFilename & "  " & _
                          FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & _
                          "]"
          SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
-'         If gConfig.HideCompile = False Then
-'            wst = wszOutputMsg & vbCrLf & _
-'                  L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
-'                  L(195,"Target Compilation:") & " " & gCompile.OutputFilename & vbCrLf & _
-'                  L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & " " & L(198,"seconds") & "." & vbCrLf & _
-'                  L(197,"File Size:")          & " " & FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & "."
-'            MessageBox( HWND_FRMMAIN, wst, L(191,"Compiler Results"), MB_ICONINFORMATION Or MB_OK) 
-'         else
-            ' Simply sound a success
-            MessageBeep(MB_OK)
-'         End If
+         ' Simply sound a success
+         MessageBeep(MB_OK)
       end if
    End if 
 

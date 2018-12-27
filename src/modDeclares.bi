@@ -212,8 +212,8 @@
 #Define IDC_FRMCOMMANDLINE_LABEL1                   1000
 #Define IDC_FRMCOMMANDLINE_TEXTBOX1                 1001
 
-#Define IDC_FRMFNLIST_LISTBOX                       1000
-#Define IDC_FRMFNLIST_TXTSEARCH                     1001
+#Define IDC_FRMFUNCTIONLIST_LISTBOX                 1000
+#Define IDC_FRMFUNCTIONLIST_TXTSEARCH               1001
 
 #Define IDC_FRMVDTOOLBOX_LSTTOOLBOX                 1000
 #Define IDC_FRMVDTOOLBOX_LSTPROPERTIES              1001
@@ -296,6 +296,14 @@
 #Define IDC_FRMMENUEDITOR_CHKSHIFT                  1021
 #Define IDC_FRMMENUEDITOR_LBLSHORTCUT               1022
 #Define IDC_FRMMENUEDITOR_LBLSTATE                  1023
+
+#Define IDC_FRMIMAGES_TOOLBAR                       1000
+#Define IDC_FRMIMAGES_LISTVIEW                      1001 
+#Define IDC_FRMIMAGES_AUTOSIZE                      1002
+#Define IDC_FRMIMAGES_ACTUALSIZE                    1003
+#Define IDC_FRMIMAGES_IMAGECTX                      1004
+#Define IDC_FRMIMAGES_FRAMEPREVIEW                  1005
+#Define IDC_FRMIMAGES_LBLFILENAME                   1006
 
 #Define IDC_LBLFAKEMAINMENU                         1000
 
@@ -467,7 +475,7 @@ Enum
    IDM_PROJECTCLOSE, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS, IDM_PROJECTFILESADD, IDM_PROJECTOPTIONS  
    IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_RUNEXE, IDM_QUICKRUN, IDM_COMMANDLINE
    IDM_NEWFORM, IDM_VIEWTOOLBOX, IDM_MENUEDITOR
-   IDM_TOOLBAREDITOR, IDM_STATUSBAREDITOR, IDM_ALIGNLEFTS
+   IDM_TOOLBAREDITOR, IDM_STATUSBAREDITOR, IDM_IMAGEMANAGER, IDM_ALIGNLEFTS
    IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, IDM_ALIGNTOPS, IDM_ALIGNMIDDLES
    IDM_ALIGNBOTTOMS, IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH 
    IDM_VSPACEDECREASE, IDM_VSPACEREMOVE, IDM_CENTERHORIZ
@@ -477,14 +485,10 @@ Enum
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
    IDM_CONSOLE, IDM_GUI, IDM_RESOURCE   ' used for compiler directives in code
+   IDM_ADDIMAGE, IDM_REMOVEIMAGE, IDM_FORMATIMAGE, IDM_ATTACHIMAGE, IDM_DETACHIMAGE
    IDM_32BIT, IDM_64BIT   ' mainly used for identifying compiler associated with a project
    IDM_USERTOOL   ' + n number of user tools
 End Enum
-
-'  Global window handle for the main form
-Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR, HWND_FRMEXPLORER, HWND_FRMRECENT, HWND_FRMOUTPUT
-Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
-dim shared as hwnd HWND_FRMMAIN_COMBOBUILDS 
 
 Dim Shared As HIMAGELIST ghImageListNormal
 Dim Shared As Long gidxImageOpened, gidxImageClosed, gidxImageBlank, gidxImageCode
@@ -498,11 +502,16 @@ dim shared as BOOLEAN gCompiling       ' T/F to show spinning mouse cursor.
 dim shared as HFONT ghNormalFont, ghBoldFont
 dim shared as long gHelpViewerIndex
 
+'  Global window handle for the main form
+Dim Shared As HWnd HWND_FRMMAIN, HWND_FRMMAIN_TOOLBAR, HWND_FRMEXPLORER, HWND_FRMRECENT, HWND_FRMOUTPUT
+Dim Shared As HMENU HWND_FRMMAIN_TOPMENU   
+dim shared as hwnd HWND_FRMMAIN_COMBOBUILDS 
+
 '  Global window handles for some forms 
 Dim Shared As HWnd HWND_FRMOPTIONS, HWND_FRMOPTIONSGENERAL, HWND_FRMOPTIONSEDITOR, HWND_FRMOPTIONSCOLORS
 Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTIONSKEYWORDS
 Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX, HWND_FRMVDCOLORS
-Dim Shared As HWnd HWND_FRMFNLIST, HWND_FRMBUILDCONFIG, HWND_FRMUSERTOOLS, HWND_FRMMENUEDITOR
+Dim Shared As HWnd HWND_FRMFUNCTIONLIST, HWND_FRMBUILDCONFIG, HWND_FRMUSERTOOLS, HWND_FRMMENUEDITOR
 Dim Shared As HWnd HWND_PROPLIST_EDIT, HWND_PROPLIST_COMBO, HWND_PROPLIST_COMBOLIST, HWND_FRMHELPVIEWER
 
 '  Global handle to hhctrl.ocx for context sensitive help
@@ -625,7 +634,7 @@ type TOOLBOX_TYPE
    wszCursor       as CWSTR
    wszClassName    as CWSTR    ' eg. RADIOBUTTON
 END TYPE
-dim shared gToolBox() as TOOLBOX_TYPE
+dim shared gToolBox(any) as TOOLBOX_TYPE
 
 
 ' Forward reference
@@ -664,6 +673,14 @@ type clsLasso
 END TYPE
 
 
+' Structure that holds all Images found for an individual file.
+type IMAGES_TYPE
+   wszImageName as CWSTR              ' Based on filename. IMAGE_OPEN, IMAGE_CLOSE, etc
+   wszFileName  as CWSTR
+   wszFormat    as CWSTR              ' BITMAP, ICON, RCDATA, CURSOR
+   pDoc         as clsDocument_ ptr   ' backpointer to pDoc in case search on wszImageName performed.
+end type
+
 enum PropertyType
    EditEnter = 1
    EditEnterNumericOnly
@@ -682,6 +699,7 @@ type clsProperty
       wszPropDefault as CWSTR
       PropType       as PropertyType 
 END TYPE
+
 
 type clsEvent
    private:
@@ -862,6 +880,7 @@ Type clsDocument
       SnapUpWait       as long      ' #pixels of movement to wait until snap operation ends
       wszFormCodeGen   as CWSTR     ' Form code generated  
       wszFormMetaData  as CWSTR     ' Form metadata that defines the form
+      AllImages(any)   as IMAGES_TYPE ' All Images belonging to the Form
       
       ' Code document related
       ProjectFileType  As Long = FILETYPE_UNDEFINED
@@ -1200,10 +1219,10 @@ TYPE clsDB2
       declare function dbDeleteWinAPI() as boolean
       declare function dbRewind() as LONG
       declare function dbGetNext() as DB2_DATA ptr
-      declare function dbSeek( byval sLookFor as string, byval Action as long ) as DB2_DATA ptr
-      declare function dbFindFunction( byref sFunctionName as string ) as DB2_DATA ptr
-      declare function dbFindSub( byref sFunctionName as string ) as DB2_DATA ptr
-      declare function dbFindProperty( byref sFunctionName as string ) as DB2_DATA ptr
+      declare function dbSeek( byval sLookFor as string, byval Action as long, byval sFilename as string = "" ) as DB2_DATA ptr
+      declare function dbFindFunction( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
+      declare function dbFindSub( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
+      declare function dbFindProperty( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
       declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
       declare function dbFilenameExists( byref sFilename as CWSTR ) as boolean

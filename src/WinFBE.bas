@@ -90,6 +90,7 @@ Using Afx
 #Include Once "modCodetips.inc"
 #Include Once "modGenerateCode.inc"
 
+#Include Once "frmImages.inc" 
 #Include Once "frmRecent.inc" 
 #Include Once "frmExplorer.inc" 
 #Include Once "frmUserTools.inc" 
@@ -103,7 +104,7 @@ Using Afx
 #Include Once "frmOptionsKeywords.inc"
 #Include Once "frmOptions.inc"
 #Include Once "frmTemplates.inc"
-#Include Once "frmFnList.inc"
+#Include Once "frmFunctionList.inc"
 #Include Once "frmGoto.inc"
 #Include Once "frmCommandLine.inc"
 #Include Once "frmFindInFiles.inc"

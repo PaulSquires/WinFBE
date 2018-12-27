@@ -43,6 +43,14 @@ function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
       end if
       SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
       
+   case "ICON"
+      dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszPropValue)
+      dim hIcon as HICON
+      if pImageType then hIcon = AfxGdipIconFromFile(pImageType->wszFilename)
+      SendMessage( pCtrl->hWindow, WM_SETICON, CAST(WPARAM, ICON_BIG), CAST(LPARAM, hIcon))
+      SendMessage( pCtrl->hWindow, WM_SETICON, CAST(WPARAM, ICON_SMALL), CAST(LPARAM, hIcon))
+      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      
    case "MAXIMIZEBOX"
       if wszPropValue = "True" then
          AfxAddWindowStyle(pCtrl->hWindow, WS_MAXIMIZEBOX)

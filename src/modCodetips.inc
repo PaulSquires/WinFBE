@@ -173,15 +173,9 @@ function DereferenceLine( byval pDoc as clsDocument ptr, _
    ' eg.   MyFunctionName              ' standalone function
    sCurrentFunction = pDoc->GetCurrentFunctionName     
 
-'?
-'? "LINE = "; sLine
-
    do until nCurElement > nTotalElements
       sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
 
-'?                         
-'? "nCurElement: "; nCurElement, sElement
-     
       ' SEARCH FOR MATCHING VARIABLE NAME
       ' If the special keyword "THIS" is used then convert it to the function name
       if nCurElement = 1 then
@@ -209,8 +203,8 @@ function DereferenceLine( byval pDoc as clsDocument ptr, _
       ' <TYPEname>.<FunctionName>.<Element>
       sLocal = sCurrentFunction & "." & sVarName
       if AfxStrTally(sLocal, ".") = 1 then sLocal = "." & sLocal
+
       pData = gdb2.dbFindVariable(sLocal)
-'? "sLocal: ", sLocal, "pData: "; pData
       if pData = 0 THEN 
          '' ATTEMPT TO MATCH ON A TYPE ELEMENT
          if pLastData then
@@ -235,14 +229,11 @@ function DereferenceLine( byval pDoc as clsDocument ptr, _
       END IF
       pDataTYPE = gdb2.dbFindTYPE(sTypeName)
       if pDataTYPE then pLastData = pDataTYPE
-'? "sTypeName: "; sTypeName
-'? "pDataTYPE: "; pDataTYPE
       
       sVarName = sTypeName & "."
       nCurElement = nCurElement + 1
    loop
    
-'? "bIsTHIS: "; bIsTHIS
    if pLastData then pLastData->IsTHIS = bIsThis
    return pLastData
       
@@ -336,7 +327,7 @@ function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
    
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then exit function
-
+   
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
              
    ' Retrieve the position

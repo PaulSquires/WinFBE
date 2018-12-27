@@ -1,0 +1,117 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: UpDown control
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_UpDown.fbtpl
+' Contents: Demonstrates the use of the UpDown control.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_UPDOWN = 1001
+CONST IDC_EDIT = 1002
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "UpDown control", @WndProc)
+   pWindow.Center
+
+   ' // Add a label control
+   pWindow.AddControl("Label", , -1, "How many lines?", 80, 55, 100, 23)
+   ' // Add an edit control
+   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT, "", 200, 55, 50, 23)
+   ' // Add an UpDown control (the size and position will be automatically adjusted to the buddy control)
+   DIM hUpDown AS HWND = pWindow.AddControl("UpDown", , IDC_UPDOWN)
+   ' // Set the edit control as budy of the updown control
+   UpDown_SetBuddy(hUpDown, hEdit)
+   ' // Set the base
+   UpDown_SetBase(hUpDown, 10)
+   ' // Set the range
+   UpDown_SetRange32(hUpDown, 0, 100)
+   ' // Set the default initial value
+   UpDown_SetPos32(hUpDown, 1)
+   ' // Set the focus
+   SetFocus hEdit
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' // Process notification messages
+         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_UPDOWN
+               IF ptnmhdr->code = UDN_DELTAPOS THEN
+                  ' Put your code here, e.g.
+                  ' DIM ptnmud AS NMUPDOWN PTR = CAST(NMUPDOWN PTR, lParam)
+                  ' ptnmud->iPos : Up-down control's current position.
+                  ' ptnmud->iDelta : proposed change in the up-down control's position.
+                  ' Return nonzero to prevent the change in the control's position, or zero to allow the change.
+               END IF
+               EXIT FUNCTION
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

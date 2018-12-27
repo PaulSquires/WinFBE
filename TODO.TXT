@@ -1,0 +1,14 @@
+[ ] Print option.
+
+[ ] Integrated visual designer.
+
+[ ] Integrated debugger (most likely based on FBDebugger code (if that license permits))
+
+
+
+
+ 
+
+
+
+

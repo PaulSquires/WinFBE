@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>MainMenu</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="mainmenu-(wfxmainmenu)">MainMenu (wfxMainMenu)</h1>
+<h3 id="properties">Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.MainMenu</strong> and used when adding control to the application’s form collection.</td>
+</tr>
+<tr class="even">
+<td>Handle</td>
+<td>Gets or sets a value indicating the HMENU handle of the control.</td>
+</tr>
+<tr class="odd">
+<td>IsLoading</td>
+<td>Gets or sets a value (true/false) indicating whether the control is currently being created.</td>
+</tr>
+<tr class="even">
+<td>MenuItem</td>
+<td>Gets or sets values for a specific MenuItem belonging to the MainMenu (refer to <a href="#wfxMenuItem">wfxMenuItem</a>).</td>
+</tr>
+<tr class="odd">
+<td>MenuItems</td>
+<td>Gets or sets values for the collection of MenuItems that belong to the MainMenu (refer to <a href="#wfxMenuItemsCollection">wfxMenuItemsCollection</a>).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ByMenuID</td>
+<td>Get a reference to a MenuItem <a href="#wfxMenuItem">wfxMenuItem</a> belonging to the MainMenu based on a MenuItem menu ID.</td>
+</tr>
+<tr class="even">
+<td>ByMenuName</td>
+<td>Get a reference to a MenuItem <a href="#wfxMenuItem">wfxMenuItem</a> belonging to the MainMenu based on a MenuItem name.</td>
+</tr>
+<tr class="odd">
+<td>ByPopupMenuHandle</td>
+<td>Get a reference to a MenuItem <a href="#wfxMenuItem">wfxMenuItem</a> belonging to the MainMenu based on a MenuItem popup menu handle.</td>
+</tr>
+<tr class="even">
+<td>Refresh</td>
+<td>Forces the form to invalidate its client area and immediately redraw itself and any child controls.</td>
+</tr>
+<tr class="odd">
+<td>Show</td>
+<td>Creates and displays the control to the user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="events">Events</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AllEvents</td>
+<td>Special handler where all events are routed through. Use this handler if you prefer to use the Win32 api style messages and wParam and lParam parameters. Set the Handled element of EventArgs to true if you handle a message and do not want Windows to perform any further processing on the message.</td>
+</tr>
+<tr class="even">
+<td>Click</td>
+<td>Occurs when a menu item is clicked.</td>
+</tr>
+<tr class="odd">
+<td>Popup</td>
+<td>Occurs when a drop-down menu or submenu is about to become active. This allows an application to modify the menu before it is displayed without changing the entire menu.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="menuitems-collection-(wfxmenuitemscollection)">MenuItems Collection (wfxMenuItemsCollection)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Add</td>
+<td>Add a new MenuItem to the MainMenu.</td>
+</tr>
+<tr class="even">
+<td>ByIndex</td>
+<td>Return the wfxMenuItem object related to the specified MainMenu menu item index.</td>
+</tr>
+<tr class="odd">
+<td>Clear</td>
+<td>Removes all items from the MainMenu.</td>
+</tr>
+<tr class="even">
+<td>Count</td>
+<td>Returns the total number of items in the MainMenu.</td>
+</tr>
+<tr class="odd">
+<td>Remove</td>
+<td>Remove/delete the item identified by the index value.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="item-(wfxmenuitem)">Item (wfxMenuItem)</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Checked</td>
+<td>Gets or sets a value (true/false) indicating whether to display a check mark next to the MenuItem.</td>
+</tr>
+<tr class="even">
+<td>Grayed</td>
+<td>Gets or sets a value (true/false) indicating whether to display the MenuItem as enabled or disabled.</td>
+</tr>
+<tr class="odd">
+<td>MenuItem</td>
+<td>Gets or sets values for a specific MenuItem belonging to the MainMenu (refer to <a href="#wfxMenuItem">wfxMenuItem</a>).</td>
+</tr>
+<tr class="even">
+<td>MenuItems</td>
+<td>Gets or sets values for the collection of MenuItems that belong to the MainMenu (refer to <a href="#wfxMenuItemsCollection">wfxMenuItemsCollection</a>).</td>
+</tr>
+<tr class="odd">
+<td>Handle</td>
+<td>Gets or sets a value indicating the HMENU handle of the control.</td>
+</tr>
+<tr class="even">
+<td>Index</td>
+<td>Gets or sets the index value related to the MenuItem.</td>
+</tr>
+<tr class="odd">
+<td>IsParent</td>
+<td>Gets or sets a value (true/false) indicating that this MenuItem has child popup MenuItems.</td>
+</tr>
+<tr class="even">
+<td>MenuID</td>
+<td>Gets or sets the menu ID related to the MenuItem.</td>
+</tr>
+<tr class="odd">
+<td>Name</td>
+<td>Gets or sets the name related to the MenuItem.</td>
+</tr>
+<tr class="even">
+<td>Shortcut</td>
+<td>Gets or sets the shortcut accelerator text associated with this MenuItem.</td>
+</tr>
+<tr class="odd">
+<td>Text</td>
+<td>Gets or sets the text associated with this MenuItem.</td>
+</tr>
+<tr class="even">
+<td>PopupMenuHandle</td>
+<td>Gets or sets the handle to the child popup menu of this MenuItem</td>
+</tr>
+<tr class="odd">
+<td>MenuParent</td>
+<td>Gets or sets a <em>wfxMainMenu ptr</em> to the MainMenu object that this MenuItem belongs to.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="working-with-a-mainmenu">Working with a MainMenu</h2>
+<h3 id="creating-the-mainmenu">Creating the MainMenu</h3>
+<pre><code>   this.MainMenu.Parent = @this
+
+   dim mnuFile   as wfxMenuItem = wfxMenuItem(&quot;File&quot;, &quot;mnuFile&quot;)
+   dim mnuNew    as wfxMenuItem = wfxMenuItem(&quot;New&quot;,  &quot;mnuNew&quot;, &quot;Ctrl+DEL&quot;)
+   DIM mnuOpen   as wfxMenuItem = wfxMenuItem(&quot;Open&quot;, &quot;mnuOpen&quot;)
+   DIM mnuSave   as wfxMenuItem = wfxMenuItem(&quot;Save&quot;, &quot;mnuSave&quot;, &quot;Ctrl+S&quot;)
+   DIM mnuSaveAs as wfxMenuItem = wfxMenuItem(&quot;Save As&quot;, &quot;mnuSaveAs&quot;, &quot;F12&quot;)
+   DIM mnuSep1   as wfxMenuItem = wfxMenuItem(&quot;-&quot;,    &quot;mnuSep1&quot;)
+   DIM mnuExit   as wfxMenuItem = wfxMenuItem(&quot;Exit&quot;, &quot;mnuExit&quot;)
+   mnuFile.MenuItems.Add(mnuNew)
+   mnuFile.MenuItems.Add(mnuOpen)
+   mnuFile.MenuItems.Add(mnuSave)
+   mnuFile.MenuItems.Add(mnuSaveAs)
+   mnuFile.MenuItems.Add(mnuSep1)
+   mnuFile.MenuItems.Add(mnuExit)
+   this.MainMenu.MenuItems.Add(mnuFile)
+   
+   DIM mnuEdit  as wfxMenuItem = wfxMenuItem(&quot;Edit&quot;, &quot;mnuEdit&quot;)
+   DIM mnuCut   as wfxMenuItem = wfxMenuItem(&quot;Cut&quot;,  &quot;mnuCut&quot;)
+   DIM mnuCopy  as wfxMenuItem = wfxMenuItem(&quot;Copy&quot;, &quot;mnuCopy&quot;)
+   DIM mnuPaste as wfxMenuItem = wfxMenuItem(&quot;Paste&quot;, &quot;mnuPaste&quot;)
+   mnuEdit.MenuItems.Add(mnuCut)
+   mnuEdit.MenuItems.Add(mnuCopy)
+   mnuEdit.MenuItems.Add(mnuPaste)
+   this.MainMenu.MenuItems.Add(mnuEdit)
+   
+   this.MainMenu.OnPopup = @Form1_MainMenu_Popup
+   this.MainMenu.OnClick = @Form1_MainMenu_Click
+
+   this.Controls.Add(ControlType.MainMenu, @this.MainMenu)
+</code></pre>
+<p>As you can see from the example above, you must create each individual MenuItem and then assign them to the parent MenuItem that is the parent for the specific MenuItem. Every MenuItem can have children MenuItems - these are the submenus that popup when a MenuItem is clicked.</p>
+<p>In the example, the <em>this</em> identifier was used because the example was created in the constructor fo the Form that contained the MainMenu. If created elsewhere, you would use the specifically declared variable (eg. Form1, Form2, frmMain, etc).</p>
+<p>Also, notice that the MenuItem constructor can be called using one or more values.</p>
+<pre><code>declare constructor( ByRef wszText     As WString = &quot;&quot;, _
+                     ByRef wszName     As WString = &quot;&quot;, _ 
+                     Byref wszShortcut As WString = &quot;&quot;, _
+                     ByVal bChecked    As boolean = false, _
+                     ByVal bGrayed     As boolean = false )
+</code></pre>
+<h3 id="shortcuts">Shortcuts</h3>
+<p>A shortcut is a keyboard accelerator key combination that will activate a specific menu entry. It can be any combination of the Ctrl, Alt, Shift keys and another key. The text of the shortcut key is displayed to the right of the menu text.</p>
+<h3 id="retrieving-reference-to-a-specific-menuitem">Retrieving Reference to a specific MenuItem</h3>
+<p>You can search for a specific MenuItem using several built in methods of the MainMenu class. The key is that you should declare your variable as <em>ByRef</em> so that the returned reference is assigned to it and points to the original MenuItem (much like a <em>pointer</em> does).</p>
+<pre><code>Dim ByRef iMenuItem = Form1.MainMenu.ByMenuName(&quot;mnuSave&quot;)
+Dim ByRef iMenuItem = Form1.MainMenu.ByMenuID(110)
+Dim ByRef iMenuItem = Form1.MainMenu.ByMenuID( GetMenuItemID(Form1.MainMenu.Handle, 5) )
+Dim ByRef iMenuItem = Form1.MainMenu.ByPopupMenuHandle( GetSubMenu(Form1.MainMenu.Handle, 5) )
+
+' Retrieve info on all top level MenuItems that show on the menu bar
+Dim ByRef iMenuItem 
+For i as long = 0 to Form1.MainMenu.MenuItems.Count – 1
+   iMenuItem = Form1.MainMenu.Menutem(i)
+   ? iMenuItem.Text, iMenuItem.Name
+Next
+
+' Rename all of the items in the File menu
+Dim byref mnuFile as wfxMenuItem = Form1.MainMenu.ByMenuName(&quot;mnuFile&quot;)
+for i as long = 0 to mnuFile.MenuItems.Count - 1
+   mnuFile.MenuItem(i).Text = &quot;Paul&quot;
+next
+</code></pre>
+<h3 id="iterate-all-menuitems-in-the-entire-mainmenu">Iterate all MenuItems in the entire MainMenu</h3>
+<p>This is not as straightforward as you might expect because every MenuItem can itself have many children MenuItems. There is no one single collection that contains all of the MenuItem objects for the entire MainMenu. You need to look at each MenuItem and process that object individually. The best way to perform this type of operation is through the use of recursion.</p>
+<p>The following example iterates over all MenuItems and disables every MenuItems that is not a root item that displays directly on the MainMenu's menu bar.</p>
+<pre><code>function IterateMenuItems( byref tMenuItem as wfxMenuItem ) as long
+   
+   ' Internal function that recursive processes all of the menu items. 
+   ' It takes into account that submenus can exist for each MenuItem.
+
+   select case ucase(tMenuItem.Name)
+      CASE &quot;MNUFILE&quot;, &quot;MNUEDIT&quot;, &quot;MNUVIEW&quot;, &quot;MNUHELP&quot;
+         ' Do not modify these. These are on the MainMenu menu bar.
+      CASE ELSE
+         tMenuItem.Grayed = True
+   end select
+
+   ' Process any children MenuItems recursively
+   For i As Long = 0 To tMenuItem.MenuItems.Count - 1
+      if tMenuItem.MenuItem(i).IsParent then
+         IterateMenuItems( tMenuItem.MenuItem(i) )
+      end if   
+   Next
+   
+   function = 0
+end function
+
+
+function Form1_Button1_Click( byref sender as wfxButton, byref e as EventArgs ) as LRESULT
+   ' Iterate all MenuItems in the MainMenu and set each one to Grayed.
+   ' We start at the root MenuItem that is dsplayed on the MainMenu's menu bar
+   ' (eg. File, Edit, View, Help) and use recursion to visit every sub-MenuItem. 
+   For i As Long = 0 To Form1.MainMenu.MenuItems.Count - 1
+      IterateMenuItems( Form1.MainMenu.MenuItem(i) )
+   Next
+
+   function = 0
+end function
+</code></pre>
+<h3 id="responding-to-a-menu-click">Responding to a Menu Click</h3>
+<p>When a user clicks on a menu item in the main menu then a <em>Click</em> event is fired that the user can respond to.</p>
+<pre><code>function Form1_MainMenu_Click( byref sender as wfxMenuItem, byref e as EventArgs ) as LRESULT
+
+   select case ucase(sender.Name)
+      CASE &quot;MNUFILE&quot;
+      CASE &quot;MNUEDIT&quot;
+      CASE &quot;MNUVIEW&quot;
+      CASE &quot;MNUHELP&quot;
+   end select
+   
+   function = 0
+end function
+</code></pre>
+<h3 id="initializing-menu-items-before-they-are-shown">Initializing Menu Items before they are shown</h3>
+<p>Immediately prior to a popup menu being shown on the screen, a <em>Popup</em> event is fired that the user can respond to. This allows the user and opportunity to initialize MenuItems based on any state information for the application. For example, in a text editor application you may gray out items such as Cut, Copy, Paste if such operations are not valid at the time the menu is displayed.</p>
+<pre><code>function Form1_MainMenu_Popup( byref sender as wfxMenuItem, byref e as EventArgs ) as LRESULT
+
+   select case ucase(sender.Name)
+      CASE &quot;MNUFILE&quot;
+      CASE &quot;MNUEDIT&quot;
+         Form1.MainMenu.ByMenuName(&quot;mnuCut&quot;).Grayed = bCanCut
+         Form1.MainMenu.ByMenuName(&quot;mnuCopy&quot;).Grayed = bCanCopy
+         Form1.MainMenu.ByMenuName(&quot;mnuPaste&quot;).Grayed = bCanPaste
+      CASE &quot;MNUVIEW&quot;
+      CASE &quot;MNUHELP&quot;
+   end select
+   
+   function = 0
+end function
+</code></pre>
+</body>
+</html>
+

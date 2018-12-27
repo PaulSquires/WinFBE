@@ -25,18 +25,22 @@ Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
    ' Determine the word at the current caret position.
    Dim As String sWord = pDoc->GetWord
-    
+
    ' Search the list of Function names
    pData = gdb2.dbFindFunction(sWord)
-   if pData THEN
-      ' Save our current position in case user invokes "Last Position" option,   
-      gLastPosition.pDoc = pDoc
-      gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-      gLastPosition.nPosition = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-      OpenSelectedDocument(0, sWord)
-   else
-      MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+   if pData = 0 then
+      pData = gdb2.dbFindSub(sWord)
+      IF pData = 0 then
+         MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+         exit function
+      end if
    END IF
+      
+   ' Save our current position in case user invokes "Last Position" option,   
+   gLastPosition.pDoc = pDoc
+   gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+   gLastPosition.nPosition = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
+   OpenSelectedDocument(pData->filename, sWord)
    
    Function = 0
 End Function
@@ -1006,7 +1010,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_DEFINITION:         frmMain_GotoDefinition( pDoc )
       Case IDM_LASTPOSITION:       frmMain_GotoLastPosition()
       Case IDM_GOTO:               frmGoto_Show(hEdit)
-      Case IDM_FUNCTIONLIST:       frmFnList_Show( HWnd )    ' this will also toggle visibility 
+      Case IDM_FUNCTIONLIST:       frmFunctionList_Show( HWnd )    ' this will also toggle visibility 
       Case IDM_BOOKMARKTOGGLE:     pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
       Case IDM_BOOKMARKNEXT:       pDoc->NextBookmark()
       Case IDM_BOOKMARKPREV:       pDoc->PrevBookmark()
@@ -1062,22 +1066,32 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       ''  COMPILE MENU          
       Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
          code_Compile(id)
+      
       Case IDM_RUNEXE
          RunExe( GetRunExecutableFilename, gApp.ProjectCommandLine )
-      Case IDM_COMMANDLINE:           frmCommandLine_Show( HWnd )
+      
+      Case IDM_COMMANDLINE
+         frmCommandLine_Show( HWnd )
 
 
       ''  OPTIONS MENU
-      Case IDM_OPTIONS:               frmOptions_Show( HWnd, SW_NORMAL )
-      case IDM_COMPILECONFIG:         frmCompileConfig_Show( HWND ) 
-      case IDM_USERTOOLSDIALOG:       frmUserTools_Show( HWND ) 
+      Case IDM_OPTIONS
+         frmOptions_Show( HWnd, SW_NORMAL )
+      case IDM_COMPILECONFIG
+         frmCompileConfig_Show( HWND ) 
+      case IDM_USERTOOLSDIALOG
+         frmUserTools_Show( HWND ) 
          
       ''   DESIGNER MENU
-      case IDM_NEWFORM:               OnCommand_DesignerNewForm(HWND)
-      case IDM_VIEWTOOLBOX:           frmVDToolbox_Show(HWND)   ' toggle show/hide
+      case IDM_NEWFORM
+         OnCommand_DesignerNewForm(HWND)
+      case IDM_VIEWTOOLBOX
+         frmVDToolbox_Show(HWND)   ' toggle show/hide
       case IDM_MENUEDITOR            
          frmMenuEditor_Show( HWND, SW_NORMAL )
          if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
+      case IDM_IMAGEMANAGER
+         frmImages_Show( HWND, 0 )
          
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
@@ -1103,6 +1117,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          ShowContextHelp(id) 
 
       Case IDM_ABOUT
+         DisableAllModeless()
          MessageBox( HWnd, APPNAME & vbcrlf & _
                        "Version " & APPVERSION & APPBITS & _
                        vbcrlf & vbcrlf & _
@@ -1112,6 +1127,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                        "José Roca (WinFBX Framework)", _
                        @WStr("About"), _
                        MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
+         EnableAllModeless()
  
          frmMain_SetFocusToCurrentCodeWindow()
         
@@ -1231,26 +1247,26 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
          Select Case ptttdi->hdr.hwndFrom
             Case SendMessage(GetDlgItem(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), IDC_FRMMAIN_TOOLBAR), TB_GETTOOLTIPS, 0, 0)
                Select Case ptttdi->hdr.idFrom
-                  Case IDM_FILENEW         : wszText = L(81,"New (Ctrl+N)")
-                  Case IDM_FILEOPEN        : wszText = L(82,"Open (Ctrl+O)")
-                  Case IDM_FILESAVE        : wszText = L(83,"Save (Ctrl+S)")
-                  Case IDM_CUT             : wszText = L(84,"Cut (Ctrl+X)")
-                  Case IDM_COPY            : wszText = L(85,"Copy (Ctrl+C)")
-                  Case IDM_PASTE           : wszText = L(86,"Paste (Ctrl+V)")
-                  Case IDM_FIND            : wszText = L(87,"Find (Ctrl+F)")
-                  Case IDM_REPLACE         : wszText = L(88,"Replace (Ctrl+R)")
-                  Case IDM_UNDO            : wszText = L(89,"Undo (Ctrl+Z)")
-                  Case IDM_REDO            : wszText = L(90,"Redo (Ctrl+E)")
-                  Case IDM_INDENTBLOCK     : wszText = L(91,"Indent (TAB)")
-                  Case IDM_UNINDENTBLOCK   : wszText = L(92,"UnIndent (Shift+TAB)")
-                  Case IDM_COMMENTBLOCK    : wszText = L(93,"Comment Block (Ctrl+B)")
-                  Case IDM_UNCOMMENTBLOCK  : wszText = L(94,"UnComment Block (Ctrl+Shift+B)")
-                  Case IDM_FUNCTIONLIST    : wszText = L(222,"Function List (F4)")
-                  Case IDM_COMPILE         : wszText = L(96,"Compile (Ctrl+F5)")
-                  Case IDM_BUILDEXECUTE    : wszText = L(97,"Compile and Execute (F5)")
-                  Case IDM_QUICKRUN        : wszText = L(284,"Quick Run (Ctrl+Shift+F5)")
-                  Case IDM_RUNEXE          : wszText = L(98,"Run Executable (Shift+F5)")
-                  Case IDM_HELP            : wszText = L(99,"Help (F1)")
+                  Case IDM_FILENEW         : wszText = L(03,"New")     & " (Ctrl+N)"
+                  Case IDM_FILEOPEN        : wszText = L(04,"Open")    & " (Ctrl+O)"
+                  Case IDM_FILESAVE        : wszText = L(07,"Save")    & " (Ctrl+S)"
+                  Case IDM_CUT             : wszText = L(17,"Cut")     & " (Ctrl+X)"
+                  Case IDM_COPY            : wszText = L(18,"Copy")    & " (Ctrl+C)"
+                  Case IDM_PASTE           : wszText = L(19,"Paste")   & " (Ctrl+V)"
+                  Case IDM_FIND            : wszText = L(43,"Find")    & " (Ctrl+F)"
+                  Case IDM_REPLACE         : wszText = L(46,"Replace") & " (Ctrl+R)"
+                  Case IDM_UNDO            : wszText = L(15,"Undo")    & " (Ctrl+Z)"
+                  Case IDM_REDO            : wszText = L(16,"Redo")    & " (Ctrl+E)"
+                  Case IDM_INDENTBLOCK     : wszText = L(23,"Indent Block")      & " (TAB)"
+                  Case IDM_UNINDENTBLOCK   : wszText = L(24,"UnIndent Block")    & " (Shift+TAB)"
+                  Case IDM_COMMENTBLOCK    : wszText = L(25,"Comment Block")     & " (Ctrl+B)"
+                  Case IDM_UNCOMMENTBLOCK  : wszText = L(26,"UnComment Block")   & " (Ctrl+Shift+B)"
+                  Case IDM_FUNCTIONLIST    : wszText = L(223,"Function List")    & " (F4)"
+                  Case IDM_COMPILE         : wszText = L(64,"Compile")           & " (Ctrl+F5)"
+                  Case IDM_BUILDEXECUTE    : wszText = L(65,"Build and Execute") & " (F5)"
+                  Case IDM_QUICKRUN        : wszText = L(285,"Quick Run")        & " (Ctrl+Shift+F5)"
+                  Case IDM_RUNEXE          : wszText = L(67,"Run Executable")    & " (Shift+F5)"
+                  Case IDM_HELP            : wszText = L(73,"Help")              & " (F1)"
                End Select
                If Len(wszText) Then ptttdi->lpszText = @wszText
          End Select
@@ -1351,7 +1367,7 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
             ' stored in document class.
             ft = AfxGetFileLastWriteTime(pDoc->DiskFilename)
             If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(pDoc->DateFileTime) Then
-               OpenSelectedDocument( pDoc, "" )
+               OpenSelectedDocument( pDoc->DiskFilename, "" )
                If MessageBox( HWND_FRMMAIN, _
                                pDoc->DiskFilename & vbCrLf & _ 
                                L(266, "File was changed by another application. Reload it?"), _

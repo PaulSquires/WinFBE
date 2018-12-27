@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CMaskedEdit Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cmaskededit-class">CMaskedEdit Class</h1>
+<p>The <code>CMaskedEdit</code> class supports a masked edit control, which validates user input against a mask and displays the validated results according to a template.</p>
+<p><strong>Include file</strong>: CMaskedEdit.inc</p>
+<h3 id="constructors">Constructors</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors">Constructors</a></td>
+<td>Creates an instance of the class and the control.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="public-methods">Public Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#create">Create</a></td>
+<td>Creates an instance of the control</td>
+</tr>
+<tr class="even">
+<td><a href="#enablemask">EnableMask</a></td>
+<td>Initializes the masked edit control.</td>
+</tr>
+<tr class="odd">
+<td><a href="#gettext">GetText</a></td>
+<td>Retrieves validated text from the masked edit control.</td>
+</tr>
+<tr class="even">
+<td><a href="#gettextlength">GetTextLength</a></td>
+<td>Retrieves the length of the text.</td>
+</tr>
+<tr class="odd">
+<td><a href="#hWindow">hWindow</a></td>
+<td>Gets the control window handle.</td>
+</tr>
+<tr class="even">
+<td><a href="#setpos">SetPos</a></td>
+<td>Sets the position of the cursor.</td>
+</tr>
+<tr class="odd">
+<td><a href="#setvalidchars">SetValidChars</a></td>
+<td>Specifies a string of valid characters that the user can enter.</td>
+</tr>
+<tr class="even">
+<td><a href="#settext">SetText</a></td>
+<td>Displays a prompt in the masked edit control.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors-1"><a name="Constructors"></a>Constructors</h1>
+<pre><code>CONSTRUCTOR CMaskedEdit
+CONSTRUCTOR CMaskedEdit (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR,  _
+   BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
+   BYVAL dwStyle AS DWORD = -1, BYVAL dwExStyle AS DWORD = -1)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pWindow</em></td>
+<td>Pointer to the parent <code>CWindow</code>class.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>The control identifier, an integer value used to notify its parent about events. The application determines the control identifier; it must be unique for all controls with the same parent window.</td>
+</tr>
+<tr class="odd">
+<td><em>X</em></td>
+<td>The x-coordinate of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="even">
+<td><em>y</em></td>
+<td>The initial y-coordinate of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>The width of the control.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>The height of the control.</td>
+</tr>
+<tr class="odd">
+<td><em>dwStyle</em></td>
+<td>The window styles of the control being created.<br>Default styles: WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL.</td>
+</tr>
+<tr class="even">
+<td><em>dwExStyle</em></td>
+<td>The extended window styles of the control being created.<br> Default extended style: WS_EX_CLIENTEDGE</td>
+</tr>
+</tbody>
+</table>
+<h3 id="remarks">Remarks</h3>
+<p>Perform the following steps to use the <code>CMaskedEdit</code> control in your application:</p>
+<ol>
+<li><p>Embed a <code>CMaskedEdit</code> object into your window class.</p></li>
+<li><p>Call the <a href="#enablemask">EnableMask</a> method to specify the mask.</p></li>
+<li><p>Call the <a href="#setvalidchars">SetValidChars</a> method to specify the list of valid characters.</p></li>
+<li><p>Call the <a href="#settext">SetText</a> method to specify the default text for the masked edit control.</p></li>
+<li><p>Call the <a href="#gettext">GetText</a> method to retrieve the validated text.</p></li>
+</ol>
+<h3 id="example">Example</h3>
+<p>The following example demonstrates how to set up a mask (for example a phone number) by using the <code>EnableMask</code> method to create the mask for the masked edit control, and <code>SetText</code> method to display a prompt in the masked edit control.</p>
+<pre><code>DIM pMakedEdit AS CMaskedEdit = CMaskedEdit(@pWindow, IDC_MASKED, 10, 30, 280, 23)
+pMakedEdit.EnableMask(&quot; ddd  ddd dddd&quot;, &quot;(___) ___-____&quot;, &quot;_&quot;)
+pMakedEdit.SetText(&quot;(123) 123-1212&quot;), TRUE
+</code></pre>
+<h3 id="full-example">Full example</h3>
+<pre><code>' ########################################################################################
+' Microsoft Windows
+' Contents: CWindow masked edit control example
+' Compiler: FreeBasic 32 &amp; 64 bit
+' Copyright (c) 2018 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE &quot;Afx/CWindow.inc&quot;
+#INCLUDE ONCE &quot;Afx/CMaskedEdit.inc&quot;
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+CONST IDC_MASKED = 1001
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recommended way is to use a manifest file
+   AfxSetProcessDPIAware
+
+   ' // Creates the main window
+   DIM pWindow AS CWindow
+   ' -or- DIM pWindow AS CWindow = &quot;MyClassName&quot; (use the name that you wish)
+   pWindow.Create(NULL, &quot;Masked edit control&quot;, @WndProc)
+   ' // Sizes it by setting the wanted width and height of its client area
+   pWindow.SetClientSize(300, 150)
+   ' // Centers the window
+   pWindow.Center
+
+   ' // Adds a button
+   pWindow.AddControl(&quot;Button&quot;, , IDCANCEL, &quot;&amp;Close&quot;, 350, 250, 75, 23)
+
+   ' // Add a masked edit control
+   DIM pMaskedEdit AS CMaskedEdit = CMaskedEdit(@pWindow, IDC_MASKED, 10, 30, 280, 23)
+   SetFocus pMaskedEdit.hWindow
+   pMaskedEdit.EnableMask(&quot; ddd  ddd dddd&quot;, &quot;(___) ___-____&quot;, &quot;_&quot;)
+   pMaskedEdit.SetText(&quot;(123) 123-1212&quot;), TRUE
+
+   ' // Displays the window and dispatches the Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // If you want to create controls in WM_CREATE instead of in WinMain, you can
+         ' // retrieve a pointer of the class with AfxCWindowPtr(lParam). Use hwnd as the
+         ' // handle of the window instead of pWindow-&gt;hWindow or omitting this parameter
+         ' // because CWindow doesn't know the value of this handle until the WM_CREATE
+         ' // message has been processed.
+         ' DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
+         ' IF pWindow THEN pWindow-&gt;AddControl(&quot;Button&quot;, hwnd, IDCANCEL, &quot;&amp;Close&quot;, 350, 250, 75, 23)
+         ' // An alternative is to pass the value of the main window handle to CWindow with
+         ' DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
+         ' pWindow-&gt;hWindow = hwnd
+         ' IF pWindow THEN pWindow-&gt;AddControl(&quot;Button&quot;, , IDCANCEL, &quot;&amp;Close&quot;, 350, 250, 75, 23)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Optional resizing code
+         IF wParam &lt;&gt; SIZE_MINIMIZED THEN
+            ' // Retrieve a pointer to the CWindow class
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            ' // Move the position of the button
+            IF pWindow THEN pWindow-&gt;MoveWindow GetDlgItem(hwnd, IDCANCEL), _
+               pWindow-&gt;ClientWidth - 120, pWindow-&gt;ClientHeight - 50, 75, 23, CTRUE
+         END IF
+
+        CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+</code></pre>
+<h1 id="create"><a name="create"></a>Create</h1>
+<pre><code>FUNCTION CMaskedEdit.Create (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR,  _
+   BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, _
+   BYVAL dwStyle AS DWORD = -1, BYVAL dwExStyle AS DWORD = -1) AS HWND
+</code></pre>
+<h3 id="parameters">Parameters</h3>
+<p>Same parameters that the <code>Constructor</code>.</p>
+<pre><code>DIM pMakedEdit AS CMaskedEdit
+pMaskEdit.Create(CMaskedEdit(@pWindow, IDC_MASKED, 10, 30, 280, 23)
+pMakedEdit.EnableMask(&quot; ddd  ddd dddd&quot;, &quot;(___) ___-____&quot;, &quot;_&quot;)
+pMakedEdit.SetText(&quot;(123) 123-1212&quot;), TRUE
+</code></pre>
+<h1 id="enablemask"><a name="enablemask"></a>EnableMask</h1>
+<p>Initializes the masked edit control.</p>
+<pre><code>SUB EnableMask (BYVAL lpszMask AS WSTRING PTR, BYVAL lpszInputTemplate AS WSTRING PTR, _
+   BYREF chMaskInputTemplate AS CWSTR = &quot;_&quot;, BYVAL lpszValid AS WSTRING PTR = NULL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lpszMask</em></td>
+<td>A mask string that specifies the type of character that can appear at each position in the user input. The length of the <em>lpszInputTemplate</em> and <em>lpszMask</em> parameter strings must be the same. See the Remarks section for more detail about mask characters.</td>
+</tr>
+<tr class="even">
+<td><em>lpszInputTemplate</em></td>
+<td>A mask template string that specifies the literal characters that can appear at each position in the user input. Use the underscore character (&quot;_&quot;) as a character placeholder. The length of the <em>lpszInputTemplate</em> and <em>lpszMask</em> parameter strings must be the same.</td>
+</tr>
+<tr class="odd">
+<td><em>chMaskInputTemplate</em></td>
+<td>A default character that the framework substitutes for each invalid character in the user input. The default value of this parameter is underscore (&quot;_&quot;).</td>
+</tr>
+<tr class="even">
+<td><em>lpszValid</em></td>
+<td>A string that contains a set of valid characters. NULL indicates that all characters are valid. The default value of this parameter is NULL.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="remarks-1">Remarks</h3>
+<p>Use this method to create the mask for the masked edit control.</p>
+<p>The following table list the default mask characters:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Mask Character</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>D</td>
+<td>Digit.</td>
+</tr>
+<tr class="even">
+<td>d</td>
+<td>Digit or space.</td>
+</tr>
+<tr class="odd">
+<td>+</td>
+<td>Plus ('+'), minus ('-'), or space.</td>
+</tr>
+<tr class="even">
+<td>C</td>
+<td>Alphabetic character.</td>
+</tr>
+<tr class="odd">
+<td>c</td>
+<td>Alphabetic character or space.</td>
+</tr>
+<tr class="even">
+<td>A</td>
+<td>Alphanumeric character.</td>
+</tr>
+<tr class="odd">
+<td>a</td>
+<td>Alphanumeric character or space.</td>
+</tr>
+<tr class="even">
+<td>*</td>
+<td>A printable character.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="gettext"><a name="gettext"></a>GetText</h1>
+<p>Retrieves validated text from the masked edit control.</p>
+<pre><code>FUNCTION GetText () AS CWSTR
+FUNCTION GetText (BYVAL bGetMaskedCharsOnly AS BOOLEAN) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bGetMaskedCharsOnly</em></td>
+<td>IF TRUE, returns the text with the input mask removed; if FALSE, returns the text with the mask, as displayed in the control.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="return-value">Return Value</h3>
+<p>The text from the masked edit control.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>pMskEd.EnableMask(&quot;       cc       ddddd-dddd&quot;, &quot;State: __, Zip: _____-____&quot;, &quot;_&quot;)
+pMskEd.SetText &quot;State: NY, Zip: 12345-6789&quot;, TRUE
+print pMskEd.GetText(FALSE)   ' // Returns &quot;State: NY, Zip: 12345-6789&quot;
+print pMskEd.GetText(TRUE)   ' // Returns NY123456789
+</code></pre>
+<h1 id="gettextlength"><a name="gettextlength"></a>GetTextLength</h1>
+<p>Retrieves the length of the text.</p>
+<pre><code>FUNCTION GetTextLength (BYVAL bGetMaskedCharsOnly AS BOOLEAN = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bGetMaskedCharsOnly</em></td>
+<td>IF TRUE, returns the length of text with the input mask removed; if FALSE, returns the ñength text with the mask, as displayed in the control.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="return-value-1">Return Value</h3>
+<p>The length text from the masked edit control.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>pMskEd.EnableMask(&quot;       cc       ddddd-dddd&quot;, &quot;State: __, Zip: _____-____&quot;, &quot;_&quot;)
+pMskEd.SetText &quot;State: NY, Zip: 12345-6789&quot;, TRUE
+print pMskEd.GetTextLength   ' // Returns 14
+print pMskEd.GetTextLength(TRUE)   ' // Returns 10
+</code></pre>
+<h1 id="hwindow"><a name="hWindow"></a>hWindow</h1>
+<p>Gets the control window handle.</p>
+<pre><code>PROPERTY hWindow () AS HWND
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>The window handle.</p>
+<h1 id="setpos"><a name="setpos"></a>SetPos</h1>
+<p>Sets the position of the cursor.</p>
+<pre><code>SUB SetPos (BYVAL nPos AS LONG = -1)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPos</em></td>
+<td>0-based index.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="settext"><a name="settext"></a>SetText</h1>
+<p>Displays a prompt in the masked edit control.</p>
+<pre><code>FUNCTION SetText (BYREF cwsText AS CWSTR) AS BOOLEAN
+FUNCTION SetText (BYREF cwsText AS CWSTR, BYVAL bSetMaskedCharsOnly AS BOOLEAN) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cwsText</em></td>
+<td>Points to a string that will be used as a prompt.</td>
+</tr>
+<tr class="even">
+<td><em>bSetMaskedCharsOnly</em></td>
+<td>Set the masked characters only, without the input mask.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-3">Example</h4>
+<pre><code>pMskEd.EnableMask(&quot; ddd  ddd dddd&quot;, &quot;(___) ___-____&quot;, &quot;_&quot;)
+pMskEd.SetText(&quot;1231231212&quot;)
+</code></pre>
+<pre><code>pMskEd.EnableMask(&quot; ddd  ddd dddd&quot;, &quot;(___) ___-____&quot;, &quot;_&quot;)
+pMskEd.SetText(&quot;(123) 123-1212&quot;), TRUE
+</code></pre>
+<h1 id="setvalidchars"><a name="setvalidchars"></a>SetValidChars</h1>
+<p>Specifies a string of valid characters that the user can enter.</p>
+<pre><code>SUB SetValidChars (BYVAL lpszValid AS WSTRING PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lpszValid</em></td>
+<td>A string that contains the set of valid input characters. NULL means that all characters are valid. The default value of this parameter is NULL.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="remarks-2">Remarks</h3>
+<p>Use this method to define a list of valid characters. If an input character is not in this list, masked edit control will not accept it.</p>
+<p>The following code example accepts only hexadecimal numbers.</p>
+<pre><code>pMskEd.EnableMask(&quot;  AAAA&quot;), _   ' // Mask string
+(&quot;0x____&quot;), _   ' // Template string
+(&quot;_&quot;)   ' // The default character that replaces the backspace character
+pMskEd.SetValidChars(&quot;1234567890ABCDEFabcdef&quot;)   ' // Valid string characters
+pMskEd.SetText(&quot;0x01AF&quot;), TRUE
+</code></pre>
+</body>
+</html>
+

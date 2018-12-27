@@ -1,0 +1,182 @@
+2
+FBGUI
+.bas
+CWindow: CUSTOMCTRL: PGBAR3D control (triple bar) (SendMessageW version)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_PG3D.fbtpl
+' Contents: CWindow with a PGBAR3D control
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CPgBar3D.inc"
+USING Afx
+
+enum
+   IDC_START = 1001
+   IDC_REVERSE
+   IDC_OPTFAST
+   IDC_OPTSLOW
+   IDC_PGBAR1
+   IDC_PGBAR2
+   IDC_PGBAR3
+end enum
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with PGBAR3D control", @WndProc)
+   pWindow.SetClientSize(300, 155)
+   pWindow.Center
+
+   ' // Add the buttons
+   DIM hbtReverse AS HWND = pWindow.AddControl("Button", , IDC_REVERSE, "&Reverse", 30, 115, 100, 23)
+   DIM hbtStart AS HWND = pWindow.AddControl("Button", , IDC_START, "&Start", 168, 115, 100, 23)
+   EnableWindow(hbtReverse, FALSE)   ' // Disable the reverse button
+
+   ' // Add the check boxes
+   pWindow.AddControl("Option", , IDC_OPTFAST, "Fast", 30, 60, 75, 23)
+   pWindow.AddControl("Option", , IDC_OPTSLOW, "Slow", 30, 80, 75, 23)
+   SendMessageW GetDlgItem(pWindow.hWindow, IDC_OPTFAST), BM_SETCHECK, BST_CHECKED, 0
+
+   ' // Add the first progress bar
+   DIM pPgBar1 AS CPgBar3D = CPgBar3D(@pWindow, IDC_PGBAR1, "", 30, 15, 80, 23)
+   SendMessageW pPgBar1.hWindow, PGB_SETMAX, 33, 0                           ' Max number of teps
+   SendMessageW pPgBar1.hWindow, PGB_SETBARCOL, PGB_RED, 0                   ' Bar color scheme
+
+   ' // Add the second progress bar
+   DIM pPgBar2 AS CPgBar3D = CPgBar3D(@pWindow, IDC_PGBAR2, "", 110, 15, 80, 23)
+   SendMessageW pPgBar2.hWindow, PGB_SETMAX, 33, 0                           ' Max number of teps
+   SendMessageW pPgBar2.hWindow, PGB_SETBARCOL, PGB_GOLD, 0                  ' Bar color scheme
+   SendMessageW pPgBar2.hWindow, PGB_SETTXTON, 0, PGB_TEXTCUSTOM             ' Show own text
+   SendMessageW pPgBar2.hWindow, PGB_SETTXTCOLBKG, BGR(255, 255, 0), 0       ' Backgound text color yellow
+   SendMessageW pPgBar2.hWindow, PGB_SETTXTCOLBAR, BGR(0, 0, 0), 0           ' Bar text color black
+
+   ' // Add the third progress bar
+   DIM pPgBar3 AS CPgBar3D = CPgBar3D(@pWindow, IDC_PGBAR3, "", 190, 15, 80, 23)
+   SendMessageW pPgBar3.hWindow, PGB_SETMAX, 33, 0                           ' Max number of teps
+   SendMessageW pPgBar3.hWindow, PGB_SETBARCOL, PGB_GREEN, 0                 ' Bar color scheme
+
+   ' // Required: Build the bars
+   SendMessageW pPgBar1.hWindow, PGB_BUILDBARS, 0, 0
+   SendMessageW pPgBar2.hWindow, PGB_BUILDBARS, 0, 0
+   SendMessageW pPgBar3.hWindow, PGB_BUILDBARS, 0, 0
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC slow AS BOOLEAN
+
+   SELECT CASE uMsg
+
+'      CASE WM_SYSCOMMAND
+'         ' // Ignore the red X (close) button
+'         IF (wParam AND &HFFF0) = SC_CLOSE THEN EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+
+            CASE IDC_OPTFAST
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN slow = FALSE
+
+            CASE IDC_OPTSLOW
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN slow = TRUE
+
+            CASE IDC_START
+               EnableWindow(GetDlgItem(hwnd, IDC_START), FALSE)   ' // Disable the start button
+               DIM i AS LONG, hCtl AS HWND, wszText AS WSTRING * 260
+               FOR i = 1 TO 100
+                  IF i < 34 THEN
+                     hCtl = GetDlgItem(hwnd, IDC_PGBAR1)
+                  ELSEIF i < 67 THEN
+                     hCtl = GetDlgItem(hwnd, IDC_PGBAR2)
+                  ELSE
+                     hCtl = GetDlgItem(hwnd, IDC_PGBAR3)
+                  END IF
+                  SendMessageW hCtl, PGB_STEPUP, 0, 0
+                  wszText = WSTR(i) & "%"
+                  SendMessageW GetDlgItem(hwnd, IDC_PGBAR2), PGB_SETTXTBKG, CAST(WPARAM, @wszText), CTRUE
+                  SendMessageW GetDlgItem(hwnd, IDC_PGBAR2), PGB_SETTXTBAR, CAST(WPARAM, @wszText), CTRUE
+                  IF i MOD 2 = 0 THEN AfxDoEvents(hwnd)
+                  IF slow THEN SLEEP 40
+               NEXT
+               EnableWindow(GetDlgItem(hwnd, IDC_REVERSE), CTRUE)   ' // Enable the reverse button
+               EXIT FUNCTION
+
+            CASE IDC_REVERSE
+               EnableWindow(GetDlgItem(hwnd, IDC_REVERSE), FALSE)   ' // Disable the reverse button
+               DIM i AS LONG, hCtl AS HWND, wszText AS WSTRING * 260
+               FOR i = 99 TO 0 STEP -1
+                  IF i > 66 THEN
+                     hCtl = GetDlgItem(hwnd, IDC_PGBAR3)
+                  ELSEIF i > 33 THEN
+                     hCtl = GetDlgItem(hwnd, IDC_PGBAR2)
+                  ELSE
+                     hCtl = GetDlgItem(hwnd, IDC_PGBAR1)
+                  END IF
+                  SendMessageW hCtl, PGB_STEPDN, 0, 0
+                  wszText = WSTR(i) & "%"
+                  SendMessageW GetDlgItem(hwnd, IDC_PGBAR2), PGB_SETTXTBKG, CAST(WPARAM, @wszText), CTRUE
+                  SendMessageW GetDlgItem(hwnd, IDC_PGBAR2), PGB_SETTXTBAR, CAST(WPARAM, @wszText), CTRUE
+                  IF i MOD 2 = 0 THEN AfxDoEvents(hwnd)
+                  IF slow THEN SLEEP 40
+               NEXT
+               EnableWindow(GetDlgItem(hwnd, IDC_START), CTRUE)   ' // Enable the start button
+               EXIT FUNCTION
+
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

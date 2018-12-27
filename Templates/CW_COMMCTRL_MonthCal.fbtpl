@@ -1,0 +1,110 @@
+2
+PBWIN
+.bas
+CWindow: COMMCTRL: Month Calendar
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_MonthCal.fbtpl
+' Contents: Demonstrates the use of the Month Calendar control.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_MONTHCAL = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a month calendar", @WndProc)
+   pWindow.SetClientSize(400, 220)
+   pWindow.Center
+
+   ' // Add the control
+   pWindow.AddControl("SysMonthCal32", , IDC_MONTHCAL, "", _
+      10, 10, pWindow.ClientWidth - 20, pWindow.CLientHeight - 20)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+        CASE WM_NOTIFY
+            ' // Process notification messages
+            DIM ptnmsc AS NMSELCHANGE PTR = CAST(NMSELCHANGE PTR, lParam)
+            ' // Get selected date
+            IF ptnmsc->nmhdr.code = MCN_SELCHANGE THEN
+               DIM wszDate AS WSTRING * 260
+               wszDate = "Day: " & WSTR$(ptnmsc->stSelStart.wDay) & " " & _
+                         "Month: " & WSTR$(ptnmsc->stSelStart.wMonth) & " " & _
+                         "Year: " & WSTR$(ptnmsc->stSelStart.wYear)
+               SendMessageW hwnd, WM_SETTEXT, 0, CAST(LPARAM, @wszDate)
+               ' Note: Don't use MessageBox here or you will get non-stop messages!
+               EXIT FUNCTION
+            END IF
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the control
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_MONTHCAL), 10, 10, pWindow->ClientWidth - 20, pWindow->ClientHeight - 20, CTRUE
+         END IF
+
+    	CASE WM_DESTROY
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

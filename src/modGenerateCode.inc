@@ -41,6 +41,21 @@ function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    dim pCtrl as clsControl ptr
    dim wszControls as CWSTR
    
+   ' Save Images(if applicable)
+   dim as long numImageItems = Ubound(pDoc->AllImages) - lbound(pDoc->AllImages) + 1
+   if numImageItems > 0 then
+      wszControls = wszControls & "' WINFBE IMAGES_START" & vbcrlf 
+      for ii as long = lbound(pDoc->AllImages) to ubound(pDoc->AllImages)
+         wszControls = wszControls & _
+              "'   IMAGE_START" & vbcrlf & _
+              "'     IMAGENAME="     & pDoc->AllImages(ii).wszImageName & vbcrlf & _
+              "'     FILENAME="      & ProcessToCurdrive(pDoc->AllImages(ii).wszFilename) & vbcrlf & _
+              "'     RESOURCETYPE="  & pDoc->AllImages(ii).wszFormat & vbcrlf & _
+              "'   IMAGE_END" & vbcrlf 
+      next
+      wszControls = wszControls & "' WINFBE IMAGES_END" & vbcrlf
+   end if
+
    ' Save MainMenu (if applicable)
    dim as long numMenuItems = Ubound(pDoc->MenuItems) - lbound(pDoc->MenuItems) + 1
    if numMenuItems > 0 then

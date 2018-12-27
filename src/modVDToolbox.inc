@@ -212,6 +212,10 @@ function InitiatePropertyValueChange() as Long
             wszValue = AfxGetWindowText(HWND_PROPLIST_EDIT)
          case PropertyType.ComboPicker, PropertyType.TrueFalse
             wszValue = AfxGetListBoxText(HWND_PROPLIST_COMBOLIST, ListBox_GetCurSel(HWND_PROPLIST_COMBOLIST) )
+         case PropertyType.ImagePicker
+            ' Image changes are never handled here. They are dealt with when the popup Image Manager dialog
+            ' closes. Exit out of this function now otherwise the property value will be deleted.
+            exit function
          case PropertyType.FontPicker
             ' Font changes are never handled here. They are dealt with when the popup Font dialog
             ' closes. Exit out of this function now otherwise the property value will be deleted.
@@ -451,7 +455,7 @@ function ShowPropertyListControl() as Long
          MapWindowPoints(0, hList, cast(POINT ptr, @pt), 1)                    
          If PtInRect(@rcLine, pt) then ShowWindow(HWND_PROPLIST_COMBOLIST, SW_SHOW)
 
-      CASE PropertyType.FontPicker
+      CASE PropertyType.FontPicker, PropertyType.ImagePicker
          rc.left = rc.right - (rc.bottom-rc.top)
          SetWindowPos(HWND_PROPLIST_COMBO, HWND_TOP, rc.left, rc.top, _
                              rc.right-rc.left, rc.bottom-rc.top, SWP_SHOWWINDOW)
@@ -963,6 +967,8 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
                      pDoc->bRegenerateCode = true
                      frmMain_UpdateLineCol(HWND_FRMMAIN)
                      PostMessage(HWND_FRMVDCOLORS, WM_ACTIVATE, WA_INACTIVE, 0)  ' to apply properties
+                  elseif pProp->PropType = PropertyType.ImagePicker then
+                     frmImages_Show(HWND_FRMMAIN, pProp)
                   elseif pProp->PropType = PropertyType.ColorPicker then
                      dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
                      dim as long nCurSel = ListBox_GetCurSel(hList)
@@ -995,7 +1001,7 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
          Select Case Loword(wParam)
             Case VK_RETURN
                ' Simulate the sending of a LBN_DBLCLK to the control.
-               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFNLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFUNCTIONLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
                Exit Function
          End Select
 
@@ -1193,7 +1199,7 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMVDTOOLBOX), SW_HIDE, SW_SHOW)
       ShowWindow HWND_FRMVDTOOLBOX, nCmdShow
       If nCmdShow = SW_SHOW Then
-         SetFocus GetDlgItem(HWND_FRMFNLIST, IDC_FRMFNLIST_LISTBOX)
+         SetFocus GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX)
       End If
       Exit Function 
    Else 
@@ -1230,53 +1236,53 @@ Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    TabCtrl_AddTab(hTabCtl, 0, L(353,"Events"))
    
    Dim As HWnd hCombo = _ 
-        pWindow->AddControl("COMBOBOX", , IDC_FRMVDTOOLBOX_COMBOCONTROLS, "", 0, 0, 0, 0, _
-        WS_CHILD or WS_TABSTOP Or CBS_DROPDOWNLIST or CBS_SORT or CBS_OWNERDRAWFIXED or CBS_HASSTRINGS Or WS_VSCROLL, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
+         pWindow->AddControl("COMBOBOX", , IDC_FRMVDTOOLBOX_COMBOCONTROLS, "", 0, 0, 0, 0, _
+         WS_CHILD or WS_TABSTOP Or CBS_DROPDOWNLIST or CBS_SORT or CBS_OWNERDRAWFIXED or CBS_HASSTRINGS Or WS_VSCROLL, _
+         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
 
    Dim As HWnd hList1 = _ 
-        pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTTOOLBOX, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or  _
-        LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTTOOLBOX, Cast(DWORD_PTR, @pWindow))
+         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTTOOLBOX, "", 0, 0, 0, 0, _
+         WS_CHILD Or WS_VISIBLE or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or  _
+         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+         Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTTOOLBOX, Cast(DWORD_PTR, @pWindow))
 
    Dim As HWnd hList2 = _ 
-        pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTPROPERTIES, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
-        LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_SORT or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTPROPERTIES, Cast(DWORD_PTR, @pWindow))
+         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTPROPERTIES, "", 0, 0, 0, 0, _
+         WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
+         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_SORT or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+         Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTPROPERTIES, Cast(DWORD_PTR, @pWindow))
 
    Dim As HWnd hLabel = _ 
-   pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPNAME, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
-   AfxSetWindowFont(hLabel, ghBoldFont)     
-        
-   pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+         pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPNAME, "", 0, 0, 0, 0, _
+         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+         AfxSetWindowFont(hLabel, ghBoldFont)     
+              
+         pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE, "", 0, 0, 0, 0, _
+         WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As HWnd hList3 = _ 
-        pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTEVENTS, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
-        LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTEVENTS, Cast(DWORD_PTR, @pWindow))
+         pWindow->AddControl("LISTBOX", , IDC_FRMVDTOOLBOX_LSTEVENTS, "", 0, 0, 0, 0, _
+         WS_CHILD Or WS_TABSTOP Or LBS_NOINTEGRALHEIGHT Or WS_VSCROLL or _
+         LBS_OWNERDRAWFIXED Or LBS_HASSTRINGS Or LBS_NOTIFY, WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+         Cast(SUBCLASSPROC, @frmVDToolbox_ListBox_SubclassProc), IDC_FRMVDTOOLBOX_LSTEVENTS, Cast(DWORD_PTR, @pWindow))
    
    HWND_PROPLIST_EDIT = _
-        pWindow->AddControl("TEXTBOX", hList2, IDC_FRMVDTOOLBOX_TEXTEDIT, "", 0, 0, 0, 0, _
-            WS_CHILD Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
-            0, , _
-            Cast(SUBCLASSPROC, @frmVDToolbox_TextEdit_SubclassProc), IDC_FRMVDTOOLBOX_TEXTEDIT, Cast(DWORD_PTR, @pWindow))
+         pWindow->AddControl("TEXTBOX", hList2, IDC_FRMVDTOOLBOX_TEXTEDIT, "", 0, 0, 0, 0, _
+         WS_CHILD Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+         0, , _
+         Cast(SUBCLASSPROC, @frmVDToolbox_TextEdit_SubclassProc), IDC_FRMVDTOOLBOX_TEXTEDIT, Cast(DWORD_PTR, @pWindow))
 
    DIM hBitmap AS HBITMAP
    HWND_PROPLIST_COMBO = _
          pWindow->AddControl("BITMAPBUTTON", hList2, IDC_FRMVDTOOLBOX_COMBO, "", 0, 0, 0, 0, _
-              WS_CHILD Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
-              WS_EX_LEFT Or WS_EX_LTRREADING)
+            WS_CHILD Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
+            WS_EX_LEFT Or WS_EX_LTRREADING)
+      dim wszImage as wstring * 100
+      wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWDOWN", "IMAGE_ARROWDOWN16")
+            hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
+            SendMessage(HWND_PROPLIST_COMBO, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+            IF hBitmap THEN DeleteObject(hBitmap)
 
-   dim wszImage as wstring * 100
-   wszImage = iif(pWindow->DPI > 96, "IMAGE_DOWN", "IMAGE_DOWN16")
-         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
-         SendMessage(HWND_PROPLIST_COMBO, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-         IF hBitmap THEN DeleteObject(hBitmap)
 
    HWND_PROPLIST_COMBOLIST = _ 
         pWindow->AddControl("LISTBOX", hList2, IDC_FRMVDTOOLBOX_COMBOLIST, "", 0, 0, 0, 120, _

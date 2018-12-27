@@ -1,0 +1,177 @@
+2
+FGUI
+.bas
+CWindow: COMMCTRL: ListView Custom Draw
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ListView_CustomDraw.fbtpl - Template
+' Contents: CWindow with a custom draw ListView
+' Compiler: Free Basic
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+#define IDC_LISTVIEW 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Custom Draw ListView (High DPI)", @WndProc)
+   pWindow.ClassStyle = CS_DBLCLKS   ' // Change the window style to avoid flicker
+   pWindow.SetClientSize(565, 320)
+   pWindow.Center
+
+   ' // Adds a listview
+   DIM hListView AS HWND
+   hListView = pWindow.AddControl("ListView", , IDC_LISTVIEW, "")
+
+   ' // Add some extended styles
+   DIM dwExStyle AS DWORD
+   dwExStyle = ListView_GetExtendedListViewStyle(hListView)
+   dwExStyle = dwExStyle OR LVS_EX_FULLROWSELECT OR LVS_EX_GRIDLINES
+   ListView_SetExtendedListViewStyle(hListView, dwExStyle)
+
+   ' // Add the header's column names
+   DIM lvc AS LVCOLUMNW, wszText AS WSTRING * 260
+   lvc.mask = LVCF_FMT OR LVCF_WIDTH OR LVCF_TEXT OR LVCF_SUBITEM
+   FOR i AS LONG = 0 TO 4
+      wszText = "Column " & STR(i)
+      lvc.pszText = @wszText
+      lvc.cx = pWindow.ScaleX(110)
+      lvc.iSubItem = i
+      ListView_InsertColumn(hListView, i, @lvc)
+   NEXT
+
+   ' // Populate the ListView with some data
+   DIM lvi AS LVITEMW
+   lvi.mask = LVIF_TEXT
+   FOR i AS LONG = 0 to 29
+      lvi.iItem = i
+      lvi.iSubItem = 0
+      wszText = "Column 0 Row" + WSTR(i)
+      lvi.pszText = @wszText
+      ListView_InsertItem(hListView, @lvi)
+      FOR x AS LONG = 1 TO 4
+         wszText = "Column " & WSTR(x) & " Row" + WSTR(i)
+         ListView_SetItemText(hListView, i, x, @wszText)
+      NEXT
+   NEXT
+
+   ' // Select the fist item
+   ListView_SetItemState(hListView, 0, LVIS_FOCUSED OR LVIS_SELECTED, &H000F)
+   ' // Set the focus in the ListView
+   SetFocus hListView
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ================================================================e========================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM pNmh  AS NMHDR PTR            ' // Pointer to a NMHDR structure
+   DIM pLvNm AS NMLISTVIEW PTR       ' // Pointer to a NMLISTVIEW structure
+   DIM pLvCd AS NMLVCUSTOMDRAW PTR   ' // Pointer to a NMLVCUSTOMDRAW structure
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Resize the ListView control and its header
+         IF wParam <> SIZE_MINIMIZED THEN
+            DIM hListView AS HWND, pWindow AS CWindow PTR
+            pWindow = AfxCWindowPtr(hwnd)
+            hListView = GetDlgItem(hwnd, IDC_LISTVIEW)
+            IF pWindow THEN pWindow->MoveWindow hListView, 5, 5, pWindow->ClientWidth - 10, pWindow->ClientHeight - 10, CTRUE
+         END IF
+
+      CASE WM_NOTIFY
+         ' // Processs notify messages sent by the list view control
+         pNmh = CAST(NMHDR PTR, lParam)
+         SELECT CASE pNmh->idFrom
+            CASE IDC_LISTVIEW
+               pLvNm = CAST(NMLISTVIEW PTR, lParam)
+               SELECT CASE pLvNm->hdr.code
+                  CASE NM_CUSTOMDRAW
+                     pLvCd = CAST(NMLVCUSTOMDRAW PTR, lParam)
+                     SELECT CASE pLvCd->nmcd.dwDrawStage
+                        CASE CDDS_PREPAINT, CDDS_ITEMPREPAINT
+                           ' // Tell the list view to send the %CDDS_ITEMPREPAINT OR %CDDS_SUBITEM notification message
+                           FUNCTION = CDRF_NOTIFYSUBITEMDRAW
+                           EXIT FUNCTION
+                        CASE CDDS_ITEMPREPAINT OR CDDS_SUBITEM
+                           IF pLvCd->iSubItem = 0 THEN
+                              ' // Paint the first column with a gray background
+                              pLvCd->clrTextBk = BGR(&HD3, &HD3, &HD3)
+                              pLvCd->clrText = BGR(&H00, &H00, &H00)
+                           ELSE
+                              IF (pLvCd->nmcd.dwItemSpec MOD 2) = 0 THEN
+                                 ' // Paint the columns of odd rows with a white background
+                                 pLvCd->clrTextBk = BGR(&HFF, &HFF, &HFF)
+                                 pLvCd->clrText = BGR(&H00, &H00, &H00)
+                              ELSE
+                                 ' // Paint the columns of even rows with a pale turquoise background
+                                 pLvCd->clrTextBk = BGR(&HAF, &HEE, &HEE)
+                                 pLvCd->clrText = BGR(&H00, &H00, &H00)
+                              END IF
+                           END IF
+                           ' // Tell the list view to draw itself
+                           FUNCTION = CDRF_DODEFAULT
+                           EXIT FUNCTION
+                     END SELECT
+               END SELECT
+          END SELECT
+
+    	CASE WM_DESTROY
+          ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Pass unprocessed messages to DefWindowProc
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

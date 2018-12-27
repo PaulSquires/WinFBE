@@ -1,0 +1,358 @@
+2
+FBGUI
+.bas
+CWindow: Scrollable tab pages
+' ########################################################################################
+' Microsoft Windows
+' File: CW_ScrollTabPage.fbtpl
+' Contents: Tab control with scrollable pages
+' Compiler: Free Basic
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+CONST IDC_TAB       = 1001
+CONST IDC_EDIT1     = 1002
+CONST IDC_EDIT2     = 1003
+CONST IDC_BTNSUBMIT = 1004
+CONST IDC_COMBO     = 1005
+CONST IDC_LISTBOX   = 1006
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TabPage1_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TabPage2_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TabPage3_WndProc(BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a Tab Control", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add a tab control
+   DIM hTab AS HWND = pWindow.AddControl("Tab", , IDC_TAB, "", 10, 10, pWindow.ClientWidth - 20, pWindow.ClientHeight - 42)
+
+   ' // Create the first tab page
+   DIM pTabPage1 AS CTabPage PTR = NEW CTabPage
+   pTabPage1->DPI = pWindow.DPI   ' --> for testing purposes; not usully needed
+   pTabPage1->InsertPage(hTab, 0, "Tab 1", -1, @TabPage1_WndProc)
+   ' // Add controls to the first page
+   pTabPage1->AddControl("Label", pTabPage1->hTabPage, -1, "First name", 15, 15, 121, 21)
+   pTabPage1->AddControl("Label", pTabPage1->hTabPage, -1, "Last name", 15, 50, 121, 21)
+   pTabPage1->AddControl("Edit", pTabPage1->hTabPage, IDC_EDIT1, "", 165, 15, 186, 21)
+   pTabPage1->AddControl("Edit", pTabPage1->hTabPage, IDC_EDIT2, "", 165, 50, 186, 21)
+   pTabPage1->AddControl("Button", pTabPage1->hTabPage, IDC_BTNSUBMIT, "Submit", 340, 185, 76, 26, BS_DEFPUSHBUTTON)
+
+   ' // Create the second tab page
+   DIM pTabPage2 AS CTabPage PTR = NEW CTabPage
+   pTabPage2->DPI = pWindow.DPI   ' --> for testing purposes; not usully needed
+   pTabPage2->InsertPage(hTab, 1, "Tab 2", -1, @TabPage2_WndProc)
+   ' // Add controls to the second page
+   DIM hComboBox AS HWND = pTabPage2->AddControl("ComboBox", pTabPage2->hTabPage, IDC_COMBO, "", 20, 20, 191, 105)
+
+   ' // Create the third tab page
+   DIM pTabPage3 AS CTabPage PTR = NEW CTabPage
+   pTabPage3->DPI = pWindow.DPI   ' --> for testing purposes; not usully needed
+   pTabPage3->InsertPage(hTab, 2, "Tab 3", -1, @TabPage3_WndProc)
+   ' // Add controls to the third page
+'   DIM hListBox AS HWND = pTabPage3->AddControl("ListBox", pTabPage3->hTabPage, IDC_LISTBOX, "", 15, 20, 161, 120)
+   DIM hListBox AS HWND = pTabPage3->AddControl("ListBox", pTabPage3->hTabPage, IDC_LISTBOX)
+   pTabPage3->SetWindowPos hListBox, NULL, 15, 20, 161, 120, SWP_NOZORDER
+
+   ' // Fill the controls with some data
+   DIM i AS LONG = 1, wszText AS WSTRING * 260
+   FOR i = 1 TO 9
+      wszText = "Item " & RIGHT("00" & STR(i), 2)
+      SendMessageW(hComboBox, CB_ADDSTRING, 0, CAST(LPARAM, @wszText))
+      SendMessageW(hListBox, LB_ADDSTRING, 0, CAST(LPARAM, @wszText))
+   NEXT
+   ' // Select the first item in the combo box and the list box
+   SendMessageW(hComboBox, CB_SETCURSEL, 0, 0)
+   SendMessageW(hListBox, LB_SETCURSEL, 0, 0)
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDCANCEL, "&Close", 415, 292, 75, 23)
+
+   ' // Get the client size of the first page and make it greater
+   DIM nWidth AS LONG = pTabPage1->ClientWidth
+   DIM nHeight AS LONG = pTabPage1->ClientHeight
+   pTabPage1->SetClientSize(nWidth + 150, nHeight + 150)
+   ' // Create an instance of the CScrollWindow class and attach the tab page handle to it
+   DIM pScrollWindow AS CScrollWindow PTR = NEW CScrollWindow(pTabPage1->hTabPage)
+   ' // Store the pointer in the tab page for later deletion
+   pTabPage1->ScrollWindowPtr = pScrollWindow
+   ' // Shrink the client size back to original
+   pTabPage1->SetClientSize(nWidth, nHeight)
+
+   ' // Get the client size of the second page and make it greater
+   nWidth = pTabPage2->ClientWidth
+   nHeight = pTabPage2->ClientHeight
+   pTabPage2->SetClientSize(nWidth + 150, nHeight + 150)
+   ' // Create an instance of the CScrollWindow class and attach the tab page handle to it
+   pScrollWindow = NEW CScrollWindow(pTabPage2->hTabPage)
+   ' // Store the pointer in the tab page for later deletion
+   pTabPage2->ScrollWindowPtr = pScrollWindow
+   ' // Shrink the client size back to original
+   pTabPage2->SetClientSize(nWidth, nHeight)
+
+   ' // Get the client size of the second page and make it greater
+   nWidth = pTabPage3->ClientWidth
+   nHeight = pTabPage3->ClientHeight
+   pTabPage3->SetClientSize(nWidth + 150, nHeight + 150)
+   ' // Create an instance of the CScrollWindow class and attach the tab page handle to it
+   pScrollWindow = NEW CScrollWindow(pTabPage3->hTabPage)
+   ' // Store the pointer in the tab page for later deletion
+   pTabPage3->ScrollWindowPtr = pScrollWindow
+   ' // Shrink the client size back to original
+   pTabPage3->SetClientSize(nWidth, nHeight)
+
+   ' // Display the first tab page
+   ShowWindow pTabPage1->hTabPage, SW_SHOW
+
+   ' // Set the focus to the first tab
+   SendMessageW hTab, TCM_SETCURFOCUS, 0, 0
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_GETMINMAXINFO
+         ' Set the pointer to the address of the MINMAXINFO structure
+         DIM ptmmi AS MINMAXINFO PTR = CAST(MINMAXINFO PTR, lParam)
+         ' Set the minimum and maximum sizes that can be produced by dragging the borders of the window
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         IF pWindow THEN
+            ptmmi->ptMinTrackSize.x = 460 * pWindow->rxRatio
+            ptmmi->ptMinTrackSize.y = 320 * pWindow->ryRatio
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         DIM hTab AS HWND = GetDlgItem(hwnd, IDC_TAB)
+         ' / Move the close button
+         IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 85, pWindow->ClientHeight - 28, 75, 23, CTRUE
+         ' // Resize the tab control
+         IF pWindow THEN pWindow->MoveWindow(hTab, 10, 10, pWindow->ClientWidth - 20, pWindow->ClientHeight - 42, CTRUE)
+         ' // Resize the tab pages
+         AfxResizeTabPages hTab
+         EXIT FUNCTION
+
+      CASE WM_NOTIFY
+
+         DIM nPage AS DWORD              ' // Page number
+         DIM pTabPage AS CTabPage PTR    ' // Tab page object reference
+         DIM tci AS TCITEMW              ' // TCITEMW structure
+
+         DIM ptnmhdr AS NMHDR PTR   ' // Information about a notification message
+         ptnmhdr = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_TAB
+               SELECT CASE ptnmhdr->code
+                  CASE TCN_SELCHANGE
+                     ' // Show the selected page
+                     pTabPage = AfxCTabPagePtr(ptnmhdr->hwndFrom, -1)
+                     IF pTabPage THEN ShowWindow pTabPage->hTabPage, SW_SHOW
+                  CASE TCN_SELCHANGING
+                     ' // Hide the current page
+                     pTabPage = AfxCTabPagePtr(ptnmhdr->hwndFrom, -1)
+                     IF pTabPage THEN ShowWindow pTabPage->hTabPage, SW_HIDE
+               END SELECT
+
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // Destroy the tab pages
+         AfxDestroyAllTabPages(GetDlgItem(hwnd, IDC_TAB))
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Tab page 1 window procedure
+' To get a pointer to the CTabPage interface:
+' DIM pTabPage AS CTabPage PTR = CAST(CTabPage PTR, GetWindowLongPtr(hwnd, 0))
+' ========================================================================================
+FUNCTION TabPage1_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDC_BTNSUBMIT
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  MessageBoxW(hWnd, "Submit", "Tab 1", MB_OK)
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 0)
+         IF pScrollWindow THEN pScrollWindow->OnSize(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_VSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 0)
+         IF pScrollWindow THEN pScrollWindow->OnVScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_HSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 0)
+         IF pScrollWindow THEN pScrollWindow->OnHScroll(wParam, lParam)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Tab page 2 window procedure
+' To get a pointer to the CTabPage interface:
+' DIM pTabPage AS CTabPage PTR = CAST(CTabPage PTR, GetWindowLongPtr(hwnd, 0))
+' ========================================================================================
+FUNCTION TabPage2_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM hBrush AS HBRUSH, rc AS RECT, tlb AS LOGBRUSH
+
+   SELECT CASE uMsg
+
+      CASE WM_ERASEBKGND
+         GetClientRect hWnd, @rc
+         ' Create custom brush
+         tlb.lbStyle = BS_SOLID
+         tlb.lbColor = &H00CB8734
+         tlb.lbHatch = 0
+         hBrush = CreateBrushIndirect(@tlb)
+         ' Erase background
+         FillRect CAST(HDC, wParam), @rc, hBrush
+         DeleteObject hBrush
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 1)
+         IF pScrollWindow THEN pScrollWindow->OnSize(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_VSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 1)
+         IF pScrollWindow THEN pScrollWindow->OnVScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_HSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 1)
+         IF pScrollWindow THEN pScrollWindow->OnHScroll(wParam, lParam)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Tab page 3 window procedure
+' To get a pointer to the CTabPage interface:
+' DIM pTabPage AS CTabPage PTR = CAST(CTabPage PTR, GetWindowLongPtr(hwnd, 0))
+' ========================================================================================
+FUNCTION TabPage3_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM hBrush AS HBRUSH, rc AS RECT, tlb AS LOGBRUSH
+
+   SELECT CASE uMsg
+
+      CASE WM_ERASEBKGND
+         GetClientRect hWnd, @rc
+         ' Create custom brush
+         tlb.lbStyle = BS_SOLID
+         tlb.lbColor = &H0000FF00
+         tlb.lbHatch = 0
+         hBrush = CreateBrushIndirect(@tlb)
+         ' Erase background
+         FillRect CAST(HDC, wParam), @rc, hBrush
+         DeleteObject hBrush
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 2)
+         IF pScrollWindow THEN pScrollWindow->OnSize(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_VSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 2)
+         IF pScrollWindow THEN pScrollWindow->OnVScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_HSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(GetParent(hwnd), 2)
+         IF pScrollWindow THEN pScrollWindow->OnHScroll(wParam, lParam)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

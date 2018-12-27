@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>String Procedures</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="string-procedures">String Procedures</h1>
+<p><strong>Include file</strong>: AfxStr.inc</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxStrLCase">AfxStrLCase</a></td>
+<td>Returns a lowercased version of a string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrUCase">AfxStrUCase</a></td>
+<td>Returns an uppercased version of a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrDelete">AfxStrDelete</a></td>
+<td>Deletes a specified number of characters from a string expression.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrExtract">AfxStrExtract</a></td>
+<td>Extracts characters from a string up to (but not including) the specified matching. Case sensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrExtractI">AfxStrExtractI</a></td>
+<td>Extracts characters from a string up to (but not including) the specified matching string. Case insensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrExtractAny">AfxStrExtractAny</a></td>
+<td>Extracts characters from a string up to (but not including) any character in the matching string. Case sensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrExtractAnyI">AfxStrExtractAnyI</a></td>
+<td>Extracts characters from a string up to (but not including) any character in the matching string. Case insensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrInsert">AfxStrInsert</a></td>
+<td>Inserts a string at a specified position within another string expression.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrJoin">AfxStrJoin</a></td>
+<td>Returns a string consisting of all of the strings in an array, each separated by a delimiter.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrParse">AfxStrParse</a></td>
+<td>Returns a delimited field from a string expression.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrParseAny">AfxStrParseAny</a></td>
+<td>Returns a delimited field from a string expression. Supports more than one character for the delimiter.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrParseCount">AfxStrParseCount</a></td>
+<td>Returns the count of delimited fields from a string expression.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrParseCountAny">AfxStrParseCountAny</a></td>
+<td>Returns the count of delimited fields from a string expression. Supports more than one character for the delimiter.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRemain">AfxStrRemain</a></td>
+<td>Returns the portion of a string following the first occurrence of a string. Case sensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRemainI">AfxStrRemainI</a></td>
+<td>Returns the portion of a string following the first occurrence of a string. Case insensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRemainAny">AfxStrRemainAny</a></td>
+<td>Returns the portion of a string following the first occurrence of a group of characters. Case sensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRemainAnyI">AfxStrRemainAnyI</a></td>
+<td>Returns the portion of a string following the first occurrence of a group of characters. Case insensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRemove">AfxStrRemove</a></td>
+<td>Returns a new string with substrings removed. Case sesnsitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRemoveI">AfxStrRemoveI</a></td>
+<td>Returns a new string with substrings removed. Case insensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRemoveAny">AfxStrRemoveAny</a></td>
+<td>Returns a new string with characters removed. Case sesnsitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRemoveAnyI">AfxStrRemoveAnyI</a></td>
+<td>Returns a new string with characters removed. Case insesnsitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRepeat">AfxStrRepeat</a></td>
+<td>Returns a string consisting of multiple copies of the specified string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrReplace">AfxStrReplace</a></td>
+<td>Replaces all the occurrences of a string with another string. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrReplaceI">AfxStrReplaceI</a></td>
+<td>Replaces all the occurrences of a string with another string. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrReplaceAny">AfxStrReplaceAny</a></td>
+<td>Replaces all the occurrences of a group of characters with another character. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrReplaceAnyI">AfxStrReplaceAnyI</a></td>
+<td>Replaces all the occurrences of a group of characters with another character. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRetain">AfxStrRetain</a></td>
+<td>Returns a string containing only the characters contained in a specified match string. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRetainI">AfxStrRetainI</a></td>
+<td>Returns a string containing only the characters contained in a specified match string. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRetainAny">AfxStrRetainAny</a></td>
+<td>Returns a string containing only the characters contained in a specified group of characters. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrRetainAnyI">AfxStrRetainAnyI</a></td>
+<td>Returns a string containing only the characters contained in a specified group of characters. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrReverse">AfxStrReverse</a></td>
+<td>Reverses the contents of a string expression.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrShrink">AfxStrShrink</a></td>
+<td>Shrinks a string to use a consistent single character delimiter.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrSplit">AfxStrSplit</a></td>
+<td>Splits a string into tokens, which are sequences of contiguous characters separated by any of the characters that are part of delimiters.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrSpn">AfxStrSpn</a></td>
+<td>Returns the length of the initial portion of a string which consists only of characters that are part of a specified set of characters.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrTally">AfxStrTally</a></td>
+<td>Count the number of occurrences of a string within a string. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrTallyI">AfxStrTallyI</a></td>
+<td>Count the number of occurrences of a string within a string. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrTallyAny">AfxStrTallyAny</a></td>
+<td>Count the number of occurrences of a list of characters within a string. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrTallyAnyI">AfxStrTallyAnyI</a></td>
+<td>Count the number of occurrences of a list of characters within a string. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrVerify">AfxStrVerify</a></td>
+<td>Determine whether each character of a string is present in another string. Case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrVerifyI">AfxStrVerifyI</a></td>
+<td>Determine whether each character of a string is present in another string. Case insensitive.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrWrap">AfxStrWrap</a></td>
+<td>Adds paired characters to the beginning and end of a string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrUnWrap">AfxStrUnWrap</a></td>
+<td>Removes paired characters to the beginning and end of a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrCSet">AfxStrCSet</a></td>
+<td>Returns a string containing a centered string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrLSet">AfxStrLSet</a></td>
+<td>Returns a string containing a left justified string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrRSet">AfxStrRSet</a></td>
+<td>Returns a string containing a right justified string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrClipLeft">AfxStrClipLeft</a></td>
+<td>Returns a string with the specified number of characters removed from the left side of the string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrClipMid">AfxStrClipMid</a></td>
+<td>Returns a string with the specified number of characters removed starting at the specified position.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrClipRight">AfxStrClipRight</a></td>
+<td>Returns a string with the specified number of characters removed from the right side of the string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrPathName">AfxStrPathName</a></td>
+<td>Parses a path to extract component parts.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrFormatByteSize">AfxStrFormatByteSize</a></td>
+<td>Converts a numeric value into a string that represents the number expressed as a size value in bytes, kilobytes, megabytes, or gigabytes, depending on the size.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxStrFormatKBSize">AfxStrFormatKBSize</a></td>
+<td>Converts a numeric value into a string that represents the number expressed as a size value in kilobytes.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxStrFromTimeInterval">AfxStrFromTimeInterval</a></td>
+<td>Converts a time interval, specified in milliseconds, to a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxBase64Decode">AfxBase64Decode</a></td>
+<td>Converts the contents of a Base64 mime encoded string to an ascii string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxBase64Encode">AfxBase64Encode</a></td>
+<td>Converts the contents of a string to Base64 mime encoding.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxXmlBase64Decode">AfxXmlBase64Decode</a></td>
+<td>Converts the contents of a Base64 mime encoded string to an ascii string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxXmlBase64Encode">AfxXmlBase64Encode</a></td>
+<td>Converts the contents of a string to Base64 mime encoding.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxCryptBinaryToString">AfxCryptBinaryToString</a></td>
+<td>Converts an array of bytes into a formatted string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCryptStringToBinary">AfxCryptStringToBinary</a></td>
+<td>Converts a formatted string into an array of bytes.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxbase64decode"><a name="AfxBase64Decode"></a>AfxBase64Decode</h1>
+<p>Converts the contents of a Base64 mime encoded string to an ascii string.</p>
+<pre><code>FUNCTION AfxBase64Decode (BYREF strData AS STRING) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strData</em></td>
+<td>The string to decode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>The decoded string on success, or a null string on failure.</p>
+<h4 id="remaks">Remaks</h4>
+<p>Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.</p>
+<p>Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.</p>
+<p>If we want to encode a unicode string, we must convert it to utf8 before calling AfxBase64Encode, e.g.</p>
+<pre><code>DIM cws AS CWSTR = &quot;おはようございます – Good morning!&quot;
+DIM s AS STRING = AfxBase64Encode(cws.Utf8)
+</code></pre>
+<p>To decode it, we can use</p>
+<pre><code>DIM cwsOut AS CWSTR = CWSTR(AfxBase64Decode(s), CP_UTF8)
+</code></pre>
+<p>or</p>
+<pre><code>DIM cwsOut AS CWSTR
+cws.utf8 = AfxBase64Decode(s)
+</code></pre>
+<h1 id="afxbase64encode"><a name="AfxBase64Encode"></a>AfxBase64Encode</h1>
+<p>Converts the contents of a string to Base64 mime encoding.</p>
+<pre><code>FUNCTION AfxBase64Encode (BYREF strData AS STRING) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strData</em></td>
+<td>The string to encode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>The encoded string on succeess, or a null string on failure.</p>
+<h4 id="remarks">Remarks</h4>
+<p>Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.</p>
+<p>Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.</p>
+<p>If we want to encode a unicode string, we must convert it to utf8 before calling AfxBase64Encode, e.g.</p>
+<pre><code>DIM cws AS CWSTR = &quot;おはようございます – Good morning!&quot;
+DIM s AS STRING = AfxBase64Encode(cws.Utf8)
+</code></pre>
+<p>To decode it, we can use</p>
+<pre><code>DIM cwsOut AS CWSTR = CWSTR(AfxBase64Decode(s), CP_UTF8)
+</code></pre>
+<p>or</p>
+<pre><code>DIM cwsOut AS CWSTR
+cws.utf8 = AfxBase64Decode(s)
+</code></pre>
+<h1 id="afxcryptbinarytostring"><a name="AfxCryptBinaryToString"></a>AfxCryptBinaryToString</h1>
+<p>Converts an array of bytes into a formatted string.</p>
+<pre><code>FUNCTION FUNCTION AfxCryptBinaryToStringA ( _
+   BYVAL pbBinary AS CONST UBYTE PTR, _
+   BYVAL cbBinary AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pszString AS LPSTR, _
+   BYVAL pcchString AS DWORD PTR _
+) AS WINBOOL
+</code></pre>
+<pre><code>FUNCTION AfxCryptBinaryToStringW ( _
+   BYVAL pbBinary AS CONST UBYTE PTR, _
+   BYVAL cbBinary AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pszString AS LPWSTR, _
+   BYVAL pcchString AS DWORD PTR _
+) AS WINBOOL
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pbBinary</em></td>
+<td>A pointer to the array of bytes to be converted into a string.</td>
+</tr>
+<tr class="even">
+<td><em>cbBinary</em></td>
+<td>The number of elements in the <em>pbBinary</em> array.</td>
+</tr>
+<tr class="odd">
+<td><em>dwFlags</em></td>
+<td>Specifies the format of the resulting formatted string.</td>
+</tr>
+<tr class="even">
+<td><em>pszString</em></td>
+<td>A pointer to a buffer that receives the converted string. To calculate the number of characters that must be allocated to hold the returned string, set this parameter to NULL. The function will place the required number of characters, including the terminating NULL character, in the value pointed to by <em>pcchString</em>.</td>
+</tr>
+<tr class="odd">
+<td><em>pcchString</em></td>
+<td>A pointer to a DWORD variable that contains the size, in characters, of the <em>pszString</em> buffer. If <em>pszString</em> is NULL, the function calculates the length of the return string (including the terminating null character) in characters and returns it in this parameter. If <em>pszString</em> is not NULL and big enough, the function converts the binary data into a specified string format including the terminating null character, but <em>pcchString</em> receives the length in characters, not including the terminating null character.</td>
+</tr>
+</tbody>
+</table>
+<p>Values available for the <em>dwFlags</em> parameter:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CRYPT_STRING_BASE64HEADER</td>
+<td>Base64, with certificate beginning and ending headers.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64</td>
+<td>Base64, without headers.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_BINARY</td>
+<td>Pure binary copy.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64REQUESTHEADER</td>
+<td>Base64, with request beginning and ending headers.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEX</td>
+<td>Hexadecimal only.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_HEXASCII</td>
+<td>Hexadecimal, with ASCII character display.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_BASE64X509CRLHEADER</td>
+<td>Base64, with X.509 CRL beginning and ending headers.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_HEXADDR</td>
+<td>Hexadecimal, with address display.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEXASCIIADDR</td>
+<td>Hexadecimal, with ASCII character and address display.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_HEXRAW</td>
+<td>A raw hexadecimal string. Not supported in Windows Server 2003 and Windows XP.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_STRICT</td>
+<td>Enforce strict decoding of ASN.1 text formats. Some ASN.1 binary BLOBS can have the first few bytes of the BLOB incorrectly interpreted as Base64 text. In this case, the rest of the text is ignored. Use this flag to enforce complete decoding of the BLOB. Not suported in Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP.</td>
+</tr>
+</tbody>
+</table>
+<p>In addition to the values above, one or more of the following values can be specified to modify the behavior of the function.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CRYPT_STRING_NOCRLF</td>
+<td>Do not append any new line characters to the encoded string. The default behavior is to use a carriage return/line feed (CR/LF) pair (0x0D/0x0A) to represent a new line. Not supported in Windows Server 2003 and Windows XP.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_NOCR</td>
+<td>Only use the line feed (LF) character (0x0A) for a new line. The default behavior is to use a CR/LF pair (0x0D/0x0A) to represent a new line.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>If the function succeeds, the function returns nonzero (CTRUE). If the function fails, it returns zero (FALSE).</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>With the exception of when <strong>CRYPT_STRING_BINARY</strong> encoding is used, all strings are appended with a new line sequence. By default, the new line sequence is a CR/LF pair (0x0D/0x0A). If the <em>dwFlags</em> parameter contains the <strong>CRYPT_STRING_NOCR</strong> flag, then the new line sequence is a LF character (0x0A). If the <em>dwFlags</em> parameter contains the <strong>CRYPT_STRING_NOCRLF</strong> flag, then no new line sequence is appended to the string.</p>
+<h1 id="afxcryptstringtobinary"><a name="AfxCryptStringToBinary"></a>AfxCryptStringToBinary</h1>
+<p>Converts a formatted string into an array of bytes.</p>
+<pre><code>FUNCTION AfxCryptStringToBinaryA ( _
+   BYVAL pszString AS LPCSTR, _
+   BYVAL cchString AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pbBinary AS UBYTE PTR, _
+   BYVAL pcbBinary AS DWORD PTR, _
+   BYVAL pdwSkip AS DWORD PTR, _
+   BYVAL pdwFlags AS DWORD PTR _
+) AS WINBOOL
+</code></pre>
+<pre><code>FUNCTION AfxCryptStringToBinaryW ( _
+   BYVAL pszString AS LPCWSTR, _
+   BYVAL cchString AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pbBinary AS UBYTE PTR, _
+   BYVAL pcbBinary AS DWORD PTR, _
+   BYVAL pdwSkip AS DWORD PTR, _
+   BYVAL pdwFlags AS DWORD PTR _
+) AS WINBOOL
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pszString</em></td>
+<td>A pointer to a string that contains the formatted string to be converted.</td>
+</tr>
+<tr class="even">
+<td><em>cchString</em></td>
+<td>The number of characters of the formatted string to be converted, not including the terminating NULL character. If this parameter is zero, pszString is considered to be a null-terminated string.</td>
+</tr>
+<tr class="odd">
+<td><em>dwFlags</em></td>
+<td>Indicates the format of the string to be converted.</td>
+</tr>
+<tr class="even">
+<td><em>pbBinary</em></td>
+<td>A pointer to a buffer that receives the returned sequence of bytes. If this parameter is NULL, the function calculates the length of the buffer needed and returns the size, in bytes, of required memory in the DWORD pointed to by <em>pcbBinary</em>.</td>
+</tr>
+<tr class="odd">
+<td><em>pcbBinary</em></td>
+<td>A pointer to a DWORD variable that, on entry, contains the size, in bytes, of the <em>pbBinary</em> buffer. After the function returns, this variable contains the number of bytes copied to the buffer. If this value is not large enough to contain all of the data, the function fails and GetLastError returns <strong>ERROR_MORE_DATA</strong>. If <em>pbBinary</em> is NULL, the DWORD pointed to by <em>pcbBinary</em> is ignored.</td>
+</tr>
+<tr class="even">
+<td><em>pdwSkip</em></td>
+<td>A pointer to a DWORD value that receives the number of characters skipped to reach the beginning of the actual base64 or hexadecimal strings. This parameter is optional and can be NULL if it is not needed.</td>
+</tr>
+<tr class="odd">
+<td><em>pdwFlags</em></td>
+<td>A pointer to a DWORD value that receives the flags actually used in the conversion. These are the same flags used for the <em>dwFlags</em> parameter. In many cases, these will be the same flags that were passed in the <em>dwFlags</em> parameter. If <em>dwFlags</em> contains one of the flags inicated below, this value will receive a flag that indicates the actual format of the string. This parameter is optional and can be NULL if it is not needed.</td>
+</tr>
+</tbody>
+</table>
+<p>Values available for the <em>dwFlags</em> parameter:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CRYPT_STRING_BASE64HEADER</td>
+<td>Base64, with certificate beginning and ending headers.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64</td>
+<td>Base64, without headers.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_BINARY</td>
+<td>Pure binary copy.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64REQUESTHEADER</td>
+<td>Base64, with request beginning and ending headers.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_BASE64</td>
+<td>Base64, without headers.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_HEX</td>
+<td>Hexadecimal only.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEXASCII</td>
+<td>Hexadecimal, with ASCII character display.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64_ANY</td>
+<td>Tries the following, in order: CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_ANY</td>
+<td>Tries the following, in order: CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64, CRYPT_STRING_BINARY.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_HEX_ANY</td>
+<td>Tries the following, in order: CRYPT_STRING_HEXADDR, CRYPT_STRING_HEXASCIIADDR, CRYPT_STRING_HEX, CRYPT_STRING_HEXRAW, CRYPT_STRING_HEXASCII.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEX</td>
+<td>Hexadecimal only.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64X509CRLHEADER</td>
+<td>Base64, with X.509 CRL beginning and ending headers.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEXADDR</td>
+<td>Hexadecimal, with address display.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_HEXASCIIADDR</td>
+<td>Hexadecimal, with ASCII character and address display.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEXRAW</td>
+<td>A raw hexadecimal string. Not supported in Windows Server 2003 and Windows XP.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_STRICT</td>
+<td>Enforce strict decoding of ASN.1 text formats. Some ASN.1 binary BLOBS can have the first few bytes of the BLOB incorrectly interpreted as Base64 text. In this case, the rest of the text is ignored. Use this flag to enforce complete decoding of the BLOB. Not suported in Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP.</td>
+</tr>
+</tbody>
+</table>
+<p>Values available for the <em>pdwFlags</em> parameter:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CRYPT_STRING_ANY</td>
+<td>This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64, CRYPT_STRING_BINARY.</td>
+</tr>
+<tr class="even">
+<td>CRYPT_STRING_BASE64_ANY</td>
+<td>This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64.</td>
+</tr>
+<tr class="odd">
+<td>CRYPT_STRING_HEX_ANY</td>
+<td>This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_HEXADDR, CRYPT_STRING_HEXASCIIADDR, CRYPT_STRING_HEX, CRYPT_STRING_HEXRAW, CRYPT_STRING_HEXASCII.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrclipleft"><a name="AfxStrClipLeft"></a>AfxStrClipLeft</h1>
+<p>Returns a string with <em>nCount</em> characters removed from the left side of the string.</p>
+<pre><code>FUNCTION AfxStrClipLeft (BYREF wszMainStr AS CONST WSTRING, BYVAL nCount AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>nCount</em></td>
+<td>The number of characters to be removed.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrclipmid"><a name="AfxStrClipMid"></a>AfxStrClipMid</h1>
+<p>Returns a string with <em>nCount</em> characters removed from the left side of the string.</p>
+<pre><code>FUNCTION AfxStrClipMid (BYREF wszMainStr AS CONST WSTRING, BYVAL nStart AS LONG, BYVAL nCount AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="odd">
+<td><em>nCount</em></td>
+<td>The number of characters to be removed.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrclipright"><a name="AfxStrClipRight"></a>AfxStrClipRight</h1>
+<p>Returns a string with <em>nCount</em> characters removed from the right side of the string.</p>
+<pre><code>FUNCTION AfxStrClipRight  (BYREF wszMainStr AS CONST WSTRING, BYVAL nCount AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>nCount</em></td>
+<td>The number of characters to be removed.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrcset"><a name="AfxStrCSet"></a>AfxStrCSet</h1>
+<p>Returns a string containing a centered string.</p>
+<pre><code>FUNCTION AfxStrCSet (BYREF wszMainStr AS CONST WSTRING, _
+   BYVAL nStringLength AS LONG, BYREF wszPadCharacter AS CONST WSTRING = &quot; &quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The string to be justified.</td>
+</tr>
+<tr class="even">
+<td><em>nStringLength</em></td>
+<td>The length of the new string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszPadCharacter</em></td>
+<td>The character to be used for padding. If it is not specified, the string will be padded with spaces.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrCSet(&quot;FreeBasic&quot;, 20, &quot;*&quot;)
+</code></pre>
+<h1 id="afxstrdelete"><a name="AfxStrDelete"></a>AfxStrDelete</h1>
+<p>Deletes a specified number of characters from a string expression.</p>
+<pre><code>FUNCTION AfxStrDelete (BYREF wszMainStr AS CONST WSTRING, _
+   BYVAL nStart AS LONG, BYVAL nCount AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="odd">
+<td><em>nCount</em></td>
+<td>The number of characters to be removed.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-1">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrDelete(&quot;1234567890&quot;, 4, 3)   ' Returns 1234890&quot;
+</code></pre>
+<h1 id="afxstrextract"><a name="AfxStrExtract"></a>AfxStrExtract</h1>
+<p>Extracts characters from a string up to (but not including) a string. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrExtract (BYVAL nStart AS LONG, _
+   BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="even">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszMatchStr</em></td>
+<td>The string to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-2">Usage example</h4>
+<pre><code>The following line returns &quot;aba&quot; (match on &quot;cad&quot;)
+DIM cws AS CWSTR = AfxStrExtract(1, &quot;abacadabra&quot;,&quot;cad&quot;)
+</code></pre>
+<h1 id="afxstrextract-(overload)">AfxStrExtract (Overload)</h1>
+<pre><code>FUNCTION AfxStrExtract (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszDelim1 AS WSTRING, BYREF wszDelim2 AS WSTRING) AS CWSTR
+</code></pre>
+<p>Extracts the portion of a string following the occurrence of a specified delimiter up to the second delimiter. If one or both of the delimiters aren't found, it returns an empty string.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelim1</em></td>
+<td>The first delimiter.</td>
+</tr>
+<tr class="odd">
+<td><em>wszDelim2</em></td>
+<td>The second delimiter.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-3">Usage example</h4>
+<pre><code>The following lines return &quot;text between parentheses&quot; (text delimited by &quot;(&quot; and &quot;)&quot;)
+DIM cws AS CWSTR = &quot;blah blah (text beween parentheses) blah blah&quot;
+PRINT AfxStrExtract(cws, &quot;(&quot;, &quot;)&quot;)
+</code></pre>
+<h1 id="afxstrextract-(overload)-1">AfxStrExtract (Overload)</h1>
+<pre><code>FUNCTION AfxStrExtract (BYVAL nStart AS LONG, BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszDelim1 AS WSTRING, BYREF wszDelim2 AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="even">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszDelim1</em></td>
+<td>The first delimiter.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelim2</em></td>
+<td>The second delimiter.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrextracti"><a name="AfxStrExtractI"></a>AfxStrExtractI</h1>
+<p>Extracts characters from a string up to (but not including) a string. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrExtractI (BYVAL nStart AS LONG, _
+   BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="even">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszMatchStr</em></td>
+<td>The string to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-4">Usage example</h4>
+<pre><code>The following line returns &quot;aba&quot; (match on &quot;CaD&quot;)
+DIM cws AS CWSTR = AfxStrExtractI(1, &quot;abacadabra&quot;,&quot;CaD&quot;)
+</code></pre>
+<h1 id="afxstrextractany"><a name="AfxStrExtractAny"></a>AfxStrExtractAny</h1>
+<p>Extracts characters from a string up to (but not including) a group of characters. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrExtractAny (BYVAL nStart AS LONG, _
+   BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="even">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszMatchStr</em></td>
+<td>The characters to be searched individually. A match on any one of which will cause the extract operation to be performed up to that character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-5">Usage example</h4>
+<pre><code>The following line returns &quot;aba&quot; (match on &quot;c&quot;)
+DIM cws AS CWSTR = AfxStrExtractAny(1, &quot;abacadabra&quot;,&quot;cd&quot;)
+</code></pre>
+<h1 id="afxstrextractanyi"><a name="AfxStrExtractAnyI"></a>AfxStrExtractAnyI</h1>
+<p>Extracts characters from a string up to (but not including) a group of characters. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrExtractAnyI (BYVAL nStart AS LONG, _
+   BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>The one-based starting position.</td>
+</tr>
+<tr class="even">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszMatchStr</em></td>
+<td>The characters to be searched individually. A match on any one of which will cause the extract operation to be performed up to that character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-6">Usage example</h4>
+<pre><code>The following line returns &quot;aba&quot; (match on &quot;c&quot;)
+DIM cws AS CWSTR = AfxStrExtractAnyI(1, &quot;abacadabra&quot;,&quot;Cd&quot;)
+</code></pre>
+<h1 id="afxstrformatbytesize"><a name="AfxStrFormatByteSize"></a>AfxStrFormatByteSize</h1>
+<p>Converts a numeric value into a string that represents the number expressed as a size value in bytes, kilobytes, megabytes, or gigabytes, depending on the size.</p>
+<pre><code>FUNCTION AfxStrFormatByteSize (BYVAL ull AS ULONGLONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ull</em></td>
+<td>The numeric value to be converted.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrformatkbsize"><a name="AfxStrFormatKBSize"></a>AfxStrFormatKBSize</h1>
+<p>Converts a numeric value into a string that represents the number expressed as a size value in kilobytes.</p>
+<pre><code>FUNCTION AfxStrFormatKBSize (BYVAL ull AS ULONGLONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ull</em></td>
+<td>The numeric value to be converted.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrfromtimeinterval"><a name="AfxStrFromTimeInterval"></a>AfxStrFromTimeInterval</h1>
+<p>Converts a time interval, specified in milliseconds, to a string.</p>
+<pre><code>FUNCTION AfxStrFromTimeInterval (BYVAL dwTimeMS AS DWORD, BYVAL digits AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dwTimeMS</em></td>
+<td>The time interval, in milliseconds.</td>
+</tr>
+<tr class="even">
+<td><em>digits</em></td>
+<td>The maximum number of significant digits to be represented in the output string.</td>
+</tr>
+</tbody>
+</table>
+<p>Some examples for <em>digits</em>:</p>
+<table>
+<thead>
+<tr class="header">
+<th>dwTimeMS</th>
+<th>digits</th>
+<th>cwsOut</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>34000</td>
+<td>3</td>
+<td>34 sec</td>
+</tr>
+<tr class="even">
+<td>34000</td>
+<td>2</td>
+<td>34 sec</td>
+</tr>
+<tr class="odd">
+<td>34000</td>
+<td>1</td>
+<td>30 sec</td>
+</tr>
+<tr class="even">
+<td>74000</td>
+<td>3</td>
+<td>1 min 14 sec</td>
+</tr>
+<tr class="odd">
+<td>74000</td>
+<td>2</td>
+<td>1 min 10 sec</td>
+</tr>
+<tr class="even">
+<td>74000</td>
+<td>2</td>
+<td>1 min</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrinsert"><a name="AfxStrInsert"></a>AfxStrInsert</h1>
+<p>Inserts a string at a specified position within another string expression.</p>
+<pre><code>FUNCTION AfxStrInsert (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszInsertString AS CONST WSTRING, BYVAL nPosition AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszInsertString</em></td>
+<td>The string to be inserted.</td>
+</tr>
+<tr class="odd">
+<td><em>nPosition</em></td>
+<td>The one-based starting position. If <em>nPosition</em> is greater than the length of <em>wszMainStr</em> or &lt;= zero then <em>wszInsertString</em> is appended to <em>wszMainStr</em>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-7">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrInsert(&quot;1234567890&quot;, &quot;--&quot;, 6)   ' Returns &quot;123456--7890&quot;
+</code></pre>
+<h1 id="afxstrjoin"><a name="AfxStrJoin"></a>AfxStrJoin</h1>
+<p>Returns a string consisting of all of the strings in an array, each separated by a delimiter. If the delimiter is a null (zero-length) string then no separators are inserted between the string sections. If the delimiter expression is the 3-byte value of &quot;,&quot; which may be expressed in your source code as the string literal &quot;&quot;&quot;,&quot;&quot;&quot; or as Chr(34,44,34) then a leading and trailing double-quote is added to each string section. This ensures that the returned string contains standard comma-delimited quoted fields that can be easily parsed.</p>
+<pre><code>FUNCTION AfxStrJoin (BYREF cwsa AS CSafeArray, BYREF wszDelimiter AS WSTRING = &quot; &quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cwsa</em></td>
+<td>The one-dimensional VT_BSTR CSafeArray to join.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelimiter</em></td>
+<td>The delimiter character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>A CWSTR containing the joined string.</p>
+<h4 id="usage-example-8">Usage example</h4>
+<pre><code>DIM csa AS CSafeArray = CSafeArray(&quot;STRING&quot;, 3, 1)
+csa.PutStr(1, &quot;One&quot;)
+csa.PutStr(2, &quot;Two&quot;)
+csa.PutStr(3, &quot;Three&quot;)
+DIM cws AS CWSTR = AfxStrJoin(csa, &quot;,&quot;)
+PRINT cws   ' ouput: One,Two,Three
+</code></pre>
+<p><strong>Include file</strong>: CSafeArray.inc</p>
+<h1 id="afxstrlcase"><a name="AfxStrLCase"></a>AfxStrLCase</h1>
+<p>Returns a lowercased version of a string.</p>
+<pre><code>FUNCTION AfxStrLCase (BYVAL pwszStr AS WSTRING PTR, _
+   BYVAL pwszLocaleName AS WSTRING PTR = LOCALE_NAME_USER_DEFAULT, _
+   BYVAL dwMapFlags AS DWORD = 0) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszStr</em></td>
+<td>The string.</td>
+</tr>
+<tr class="even">
+<td><em>pwszLocaleName</em></td>
+<td>Optional. Pointer to a locale name or one of these pre-defined values: LOCALE_NAME_INVARIANT, LOCALE_NAME_SYSTEM_DEFAULT, LOCALE_NAME_USER_DEFAULT</td>
+</tr>
+<tr class="odd">
+<td><em>dwMapFlags</em></td>
+<td>Optional. Flag specifying the type of transformation to use during string mapping or the type of sort key to generate.</td>
+</tr>
+</tbody>
+</table>
+<p>For a table of language culture names see: <a href="https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee825488(v=cs.20)">Table of Language Culture Names, Codes, and ISO Values</a></p>
+<p>For a complete list see: <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winnls/nf-winnls-lcmapstringex">LCMapStringEx function</a></p>
+<h4 id="remarks-2">Remarks</h4>
+<p>The string conversion functions available in FreeBasic are not fully suitable for some languages. For example, the Turkish word &quot;karışıklığı&quot; is uppercased as &quot;KARıŞıKLıĞı&quot; instead of &quot;KARIŞIKLIĞI&quot;, and &quot;KARIŞIKLIĞI&quot; is lowercased to &quot;karişikliği&quot; instead of &quot;karışıklığı&quot;. Notice the &quot;ı&quot;, that is not an &quot;i&quot;.</p>
+<h4 id="return-value-4">Return value</h4>
+<p>The lowercased string.</p>
+<h1 id="afxstrlset"><a name="AfxStrLSet"></a>AfxStrLSet</h1>
+<p>Returns a string containing a left justified string.</p>
+<pre><code>FUNCTION AfxStrLSet (BYREF wszMainStr AS CONST WSTRING, _
+   BYVAL nStringLength AS LONG, BYREF wszPadCharacter AS CONST WSTRING = &quot; &quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The string to be justified.</td>
+</tr>
+<tr class="even">
+<td><em>nStringLength</em></td>
+<td>The length of the new string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszPadCharacter</em></td>
+<td>The character to be used for padding. If it is not specified, the string will be padded with spaces.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-9">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrLSet(&quot;FreeBasic&quot;, 20, &quot;*&quot;)
+</code></pre>
+<h1 id="afxstrparse"><a name="AfxStrParse"></a>AfxStrParse</h1>
+<p>Returns a delimited field from a string expression.</p>
+<pre><code>FUNCTION AfxStrParse (BYREF wszMainStr AS CONST WSTRING, _
+   BYVAL nPosition AS LONG = 1, BYREF wszDelimiter AS CONST WSTRING = &quot;,&quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The string to be parsed.</td>
+</tr>
+<tr class="even">
+<td><em>nPosition</em></td>
+<td>Starting position. If <em>nPosition</em> is zero or is outside of the actual field count, an empty string is returned. If <em>nPosition</em> is negative, fields are searched from the right to left of the <em>wszMainStr</em>.</td>
+</tr>
+<tr class="odd">
+<td><em>wszDelimiter</em></td>
+<td>A string of one or more characters that must be fully matched to be successful.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-10">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrParse(&quot;one,two,three&quot;, 2)   ' Returns &quot;two&quot;
+DIM cws AS CWSTR = AfxStrParse(&quot;one;two,three&quot;, 1, &quot;;&quot;)   ' Returns &quot;one&quot;
+</code></pre>
+<h1 id="afxstrparseany"><a name="AfxStrParseAny"></a>AfxStrParseAny</h1>
+<p>Returns a delimited field from a string expression.</p>
+<pre><code>FUNCTION AfxStrParse (BYREF wszMainStr AS CONST WSTRING, _
+   BYVAL nPosition AS LONG = 1, BYREF wszDelimiter AS CONST WSTRING = &quot;,&quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The string to be parsed.</td>
+</tr>
+<tr class="even">
+<td><em>nPosition</em></td>
+<td>Starting position. If <em>nPosition</em> is zero or is outside of the actual field count, an empty string is returned. If <em>nPosition</em> is negative, fields are searched from the right to left of the <em>wszMainStr</em>.</td>
+</tr>
+<tr class="odd">
+<td><em>wszDelimiter</em></td>
+<td>A string of one or more characters any of which may act as a delimiter character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-11">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrParseAny(&quot;1;2,3&quot;, 2, &quot;,;&quot;)   ' Returns &quot;2&quot;
+</code></pre>
+<h1 id="afxstrparsecount"><a name="AfxStrParseCount"></a>AfxStrParseCount</h1>
+<p>Returns the count of delimited fields from a string expression.</p>
+<pre><code>FUNCTION AfxStrParseCount (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszDelimiter AS CONST WSTRING = &quot;,&quot;) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string. If <em>wszMainStr</em> is empty (a null string) or contains no delimiter character(s), the string is considered to contain exactly one subfield.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelimiter</em></td>
+<td>One or more character delimiters that must be fully matched. Delimiters are case-sensitive.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-12">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrParseCount(&quot;one,two,three&quot;, &quot;,&quot;)   ' Returns 3
+</code></pre>
+<h1 id="afxstrparsecountany"><a name="AfxStrParseCountAny"></a>AfxStrParseCountAny</h1>
+<p>Returns the count of delimited fields from a string expression.</p>
+<pre><code>FUNCTION AfxStrParseCountAny (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszDelimiter AS CONST WSTRING = &quot;,&quot;) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string. If wszMainStr is empty (a null string) or contains no delimiter character(s), the string is considered to contain exactly one sub-field.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelimiter</em></td>
+<td>A set of characters (one or more), any of which may act as a delimiter character. Delimiters are case-sensitive.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-13">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrParseCountAny(&quot;1;2,3&quot;, &quot;,;&quot;)   ' Returns 3
+</code></pre>
+<h1 id="afxstrpathname"><a name="AfxStrPathName"></a>AfxStrPathName</h1>
+<p>Parses a path to extract component parts.</p>
+<pre><code>FUNCTION AfxStrPathName (BYREF wszOption AS CONST WSTRING, BYREF wszFileSpec AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszOption</em></td>
+<td>One of the following words which is used to specify the requested part: PATH, NAME, EXTN, NAMEX.</td>
+</tr>
+<tr class="even">
+<td><em>wszFileSpec</em></td>
+<td>The path to be scanned.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Keyword</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>PATH</strong></td>
+<td>Returns the path portion of the path/file Name. That is the text up to and including the last backslash () or colon (:).</td>
+</tr>
+<tr class="even">
+<td><strong>NAME</strong></td>
+<td>Returns the name portion of the path/file Name. That is the text to the right of the last backslash () or colon (:), ending just before the last period (.).</td>
+</tr>
+<tr class="odd">
+<td><strong>EXTN</strong></td>
+<td>Returns the extension portion of the path/file name. That is the last period (.) in the string plus the text to the right of it.</td>
+</tr>
+<tr class="even">
+<td><strong>NAMEX</strong></td>
+<td>Returns the name and the extension parts combined.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxstrremain"><a name="AfxStrRemain"></a>AfxStrRemain</h1>
+<p>Returns the portion of a string following the first occurrence of a string. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRemain (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string to search for.</td>
+</tr>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>Optional. Starting position to begin the search. If <em>nStart</em> is not specified, the search will begin at position 1. If nStart is zero, a nul string is returned. If <em>nStart</em> is negative, the starting position is counted from right to left: -1 for the last character, -2 for the second to last, etc.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-14">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemain(&quot;Brevity is the soul of wit&quot;, &quot;is &quot;)   ' Returns &quot;the soul of wit&quot;
+</code></pre>
+<h1 id="afxstrremaini"><a name="AfxStrRemainI"></a>AfxStrRemainI</h1>
+<p>Returns the portion of a string following the first occurrence of a string. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrRemainI (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string to search for.</td>
+</tr>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>Optional. starting position to begin the search. If <em>nStart</em> is not specified, the search will begin at position 1. If nStart is zero, a nul string is returned. If <em>nStart</em> is negative, the starting position is counted from right to left: -1 for the last character, -2 for the second to last, etc.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-15">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemain(&quot;Brevity is the soul of wit&quot;, &quot;Is &quot;)   ' Returns &quot;the soul of wit&quot;
+</code></pre>
+<h1 id="afxstrremainany"><a name="AfxStrRemainAny"></a>AfxStrRemainAny</h1>
+<p>Returns the portion of a string following the first occurrence of a list of characters. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRemainAny (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The characters to search for.</td>
+</tr>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>Optional. starting position to begin the search. If <em>nStart</em> is not specified, the search will begin at position 1. If nStart is zero, a nul string is returned. If <em>nStart</em> is negative, the starting position is counted from right to left: -1 for the last character, -2 for the second to last, etc.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-16">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemainAny(&quot;I think, therefore I am&quot;, &quot;,&quot;)   ' Returns &quot;therefore I am&quot;
+</code></pre>
+<h1 id="afxstrremainanyi"><a name="AfxStrRemainAnyI"></a>AfxStrRemainAnyI</h1>
+<p>Returns the portion of a string following the first occurrence of a list of characters. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrRemainAnyI (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYVAL nStart AS LONG = 1) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The characters to search for.</td>
+</tr>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>Optional. starting position to begin the search. If <em>nStart</em> is not specified, the search will begin at position 1. If nStart is zero, a nul string is returned. If <em>nStart</em> is negative, the starting position is counted from right to left: -1 for the last character, -2 for the second to last, etc.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-17">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemainAnyI(&quot;I think, therefore I am&quot;, &quot;E&quot;)   ' -&gt; &quot;refore I am&quot;
+</code></pre>
+<h1 id="afxstrremove"><a name="AfxStrRemove"></a>AfxStrRemove</h1>
+<p>Returns a new string with strings removed. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRemove (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be removed. If <em>wszMatchStr</em> is not present in <em>wszMainStr</em>, all of <em>wszMainStr</em> is returned intact.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-18">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemove(&quot;Hello World. Welcome to the Freebasic World&quot;, &quot;World&quot;)
+</code></pre>
+<h1 id="afxstrremove-(overload)">AfxStrRemove (Overload)</h1>
+<p>Returns a copy of a string with a substring enclosed between the specified delimiters removed. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRemove (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, _
+   BYVAL fRemoveAll AS BOOLEAN = FALSE) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelim1</em></td>
+<td>The first delimiter</td>
+</tr>
+<tr class="odd">
+<td><em>wszDelim2</em></td>
+<td>The second delimiter</td>
+</tr>
+<tr class="even">
+<td><em>fRemoveAll</em></td>
+<td>Recursively remove all the occurrences.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-examples">Usage examples</h4>
+<pre><code>DIM cwsText AS CWSTR = &quot;blah blah (text beween parentheses) blah blah&quot;
+DIM cws AS CWSTR = AfxStrRemove(cwsText, &quot;(&quot;, &quot;)&quot;)   ' Returns &quot;blah blah  blah blah&quot;
+</code></pre>
+<pre><code>DIM cwsText AS CWSTR = &quot;As Long var1(34), var2(  73 ), var3(any)&quot;
+DIM cws AS CWSTR = AfxStrRemove(cwsText, &quot;(&quot;, &quot;)&quot;, TRUE)   ' Returns &quot;As Long var1, var2, var3&quot;
+</code></pre>
+<h1 id="afxstrremove-(overload)-1">AfxStrRemove (Overload)</h1>
+<p>Returns a copy of a string with a substring enclosed between the specified delimiters removed. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRemove (BYVAL nSart AS LONG = 1, BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, _
+   BYVAL fRemoveAll AS BOOLEAN = FALSE) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nSart</em></td>
+<td>Optional. The one-based starting position where to start the search.</td>
+</tr>
+<tr class="even">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszDelim1</em></td>
+<td>The first delimiter</td>
+</tr>
+<tr class="even">
+<td><em>wszDelim2</em></td>
+<td>The second delimiter</td>
+</tr>
+<tr class="odd">
+<td><em>fRemoveAll</em></td>
+<td>Recursively remove all the occurrences.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-examples-1">Usage examples</h4>
+<pre><code>DIM cwsText AS CWSTR = &quot;blah blah (text beween parentheses) blah blah&quot;
+DIM cws AS CWSTR = AfxStrRemove(cwsText, &quot;(&quot;, &quot;)&quot;)   ' Returns &quot;blah blah  blah blah&quot;
+</code></pre>
+<h1 id="afxstrremovei"><a name="AfxStrRemoveI"></a>AfxStrRemoveI</h1>
+<p>Returns a new string with strings removed. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrRemoveI (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be removed. If <em>wszMatchStr</em> is not present in <em>wszMainStr</em>, all of <em>wszMainStr</em> is returned intact.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-19">Usage example</h4>
+<pre><code>AfxStrRemoveI(&quot;Hello World. Welcome to the Freebasic World&quot;, &quot;world&quot;)
+</code></pre>
+<h1 id="afxstrremoveany"><a name="AfxStrRemoveAny"></a>AfxStrRemoveAny</h1>
+<p>Returns a new string with characters removed. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRemoveAny (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be removed. If <em>wszMatchStr</em> is not present in <em>wszMainStr</em>, all of <em>wszMainStr</em> is returned intact.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-20">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemoveAny(&quot;abacadabra&quot;, &quot;bac&quot;)   ' -&gt; &quot;dr&quot;
+</code></pre>
+<h1 id="afxstrremoveanyi"><a name="AfxStrRemoveAnyI"></a>AfxStrRemoveAnyI</h1>
+<p>Returns a new string with characters removed. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrRemoveAnyI (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be removed. If <em>wszMatchStr</em> is not present in <em>wszMainStr</em>, all of <em>wszMainStr</em> is returned intact.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-21">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRemoveAnyI(&quot;abacadabra&quot;, &quot;BaC&quot;)   ' -&gt; &quot;dr&quot;
+</code></pre>
+<h1 id="afxstrrepeat"><a name="AfxStrRepeat"></a>AfxStrRepeat</h1>
+<p>Returns a string consisting of multiple copies of the specified string. This function is similar to STRING, but STRING only makes multiple copies of a single character.</p>
+<pre><code>FUNCTION AfxStrRepeat (BYVAL nCount AS LONG, BYREF wszStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCount</em></td>
+<td>The number of copies.</td>
+</tr>
+<tr class="even">
+<td><em>wszStr</em></td>
+<td>The string to be copied.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-22">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRepeat(5, &quot;Paul&quot;)
+</code></pre>
+<h1 id="afxstrreplace"><a name="AfxStrReplace"></a>AfxStrReplace</h1>
+<p>Replaces all the occurrences of <em>wszMatchStr</em> in <em>wszMainstr</em> with the contents of <em>wszReplaceWith</em>. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrReplace (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYREF wszReplaceWith AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be replaced.</td>
+</tr>
+<tr class="odd">
+<td><em>wszReplaceWith</em></td>
+<td>The replacement string.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-23">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrReplace(&quot;Hello World&quot;, &quot;World&quot;, &quot;Earth&quot;)   ' Returns &quot;Hello Earth&quot;
+</code></pre>
+<h1 id="afxstrreplacei"><a name="AfxStrReplaceI"></a>AfxStrReplaceI</h1>
+<p>Replaces all the occurrences of <em>wszMatchStr</em> in <em>wszMainstr</em> with the contents of <em>wszReplaceWith</em>. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrReplaceI (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYREF wszReplaceWith AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be replaced.</td>
+</tr>
+<tr class="odd">
+<td><em>wszReplaceWith</em></td>
+<td>The replacement string.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-24">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrReplaceI(&quot;Hello world&quot;, &quot;World&quot;, &quot;Earth&quot;)   ' -&gt; &quot;Hello Earth&quot;
+</code></pre>
+<h1 id="afxstrreplaceany"><a name="AfxStrReplaceAny"></a>AfxStrReplaceAny</h1>
+<p>Replaces all the occurrences of any of the individual characters <em>wszMatchStr</em> in <em>wszMainstr</em> with the contents of <em>wszReplaceWith</em>. <em>wszReplaceWith</em> must be a single character (this function does not replace words; therefore, <em>wszMatchStr</em> will not shrink or grow). Case sensitive.</p>
+<pre><code>FUNCTION AfxStrReplaceAny  (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYREF wszReplaceWith AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified characters.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The characters to be replaced.</td>
+</tr>
+<tr class="odd">
+<td><em>wszReplaceWith</em></td>
+<td>The replacement character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-25">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrReplaceAny(&quot;abacadabra&quot;, &quot;bac&quot;, &quot;*&quot;)   ' -&gt; *****d**r*
+</code></pre>
+<h1 id="afxstrreplaceanyi"><a name="AfxStrReplaceAnyI"></a>AfxStrReplaceAnyI</h1>
+<p>Replaces all the occurrences of any of the individual characters <em>wszMatchStr</em> in <em>wszMainstr</em> with the contents of <em>wszReplaceWith</em>. <em>wszReplaceWith</em> must be a single character (this function does not replace words; therefore, <em>wszMatchStr</em> will not shrink or grow). Case insensitive.</p>
+<pre><code>FUNCTION AfxStrReplaceAnyI  (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszMatchStr AS CONST WSTRING, BYREF wszReplaceWith AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified characters.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The characters to be replaced.</td>
+</tr>
+<tr class="odd">
+<td><em>wszReplaceWith</em></td>
+<td>The replacement character.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-26">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrReplaceAnyI(&quot;abacadabra&quot;, &quot;BaC&quot;, &quot;*&quot;)   ' -&gt; *****d**r*
+</code></pre>
+<h1 id="afxstrretain"><a name="AfxStrRetain"></a>AfxStrRetain</h1>
+<p>Returns a string containing only the characters contained in a specified match string. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRetain (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-27">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRetain(&quot;abacadabra&quot;,&quot;b&quot;)   ' -&gt; &quot;bb&quot;
+</code></pre>
+<h1 id="afxstrretaini"><a name="AfxStrRetainI"></a>AfxStrRetainI</h1>
+<p>Returns a string containing only the characters contained in a specified match string. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrRetainI (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-28">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRetainI(&quot;abacadabra&quot;,&quot;B&quot;)   ' -&gt; &quot;bb&quot;
+</code></pre>
+<h1 id="afxstrretainany"><a name="AfxStrRetainAny"></a>AfxStrRetainAny</h1>
+<p>Returns a string containing only the characters contained in a specified group of characters. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrRetainAny (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>A list of single characters to be searched for individually. A match on any one of which will cause that character to be removed from the result.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-29">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRetainAny(&quot;&lt;p&gt;1234567890&lt;ak;lk;l&gt;1234567890&lt;/p&gt;&quot;, &quot;&lt;;/p&gt;&quot;)
+</code></pre>
+<h1 id="afxstrretainanyi"><a name="AfxStrRetainAnyI"></a>AfxStrRetainAnyI</h1>
+<p>Returns a string containing only the characters contained in a specified group of characters. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrRetainAnyI (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string from which you want to replace the specified string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>A list of single characters to be searched for individually. A match on any one of which will cause that character to be removed from the result.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-30">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRetainAnyI(&quot;&lt;p&gt;1234567890&lt;ak;lk;l&gt;1234567890&lt;/p&gt;&quot;, &quot;&lt;;/P&gt;&quot;)
+</code></pre>
+<h1 id="afxstrreverse"><a name="AfxStrReverse"></a>AfxStrReverse</h1>
+<p>Reverses the contents of a string expression.</p>
+<pre><code>FUNCTION AfxStrReverse (BYREF wszMainStr AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The string to be reversed.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-31">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrReverse(&quot;garden&quot;)   ' Returns &quot;nedrag&quot;
+</code></pre>
+<h1 id="afxstrrset"><a name="AfxStrRSet"></a>AfxStrRSet</h1>
+<p>Returns a string containing a right justified string.</p>
+<pre><code>FUNCTION AfxStrRSet (BYREF wszMainStr AS CONST WSTRING, _
+   BYVAL nStringLength AS LONG, BYREF wszPadCharacter AS CONST WSTRING = &quot; &quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The string to be justified.</td>
+</tr>
+<tr class="even">
+<td><em>nStringLength</em></td>
+<td>The length of the new string.</td>
+</tr>
+<tr class="odd">
+<td><em>wszPadCharacter</em></td>
+<td>The character to be used for padding. If it is not specified, the string will be padded with spaces.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-32">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrRSet(&quot;FreeBasic&quot;, 20, &quot;*&quot;)
+</code></pre>
+<h1 id="afxstrshrink"><a name="AfxStrShrink"></a>AfxStrShrink</h1>
+<p>Shrinks a string to use a consistent single character delimiter.</p>
+<pre><code>FUNCTION AfxStrShrink (BYREF wszMainStr AS CONST WSTRING, BYREF wszMask AS CONST WSTRING = &quot; &quot;) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>One or more character delimiters to shrink.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-3">Remarks</h4>
+<p>This function creates a string with consecutive words separated by a consistent single character, making it easier to parse. If <em>wszMask</em> is not specified, all leading and trailing spaces are removed and all occurrences of two or more spaces are changed to a single space. If <em>wszMask</em> contains one or more characters to shrink, all the leading and trailing occurences of them are removes and all occurrences of one or more characters of the mask are replaced with the first character of the mask.</p>
+<h4 id="usage-example-33">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxStrShrink(&quot;,,, one , two     three, four,&quot;, &quot; ,&quot;)  ' Returns &quot;one two three four&quot;
+</code></pre>
+<h1 id="afxstrsplit"><a name="AfxStrSplit"></a>AfxStrSplit</h1>
+<p>Splits a string into tokens, which are sequences of contiguous characters separated by any of the characters that are part of delimiters.</p>
+<pre><code>FUNCTION AfxStrSplit (BYREF wszStr AS CONST WSTRING, BYREF wszDelimiters AS WSTRING = &quot; &quot;) AS CSafeArray
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszStr</em></td>
+<td>The string to split.</td>
+</tr>
+<tr class="even">
+<td><em>wszDelimiters</em></td>
+<td>The delimiter characters.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>A CSafeArray containing a token in each element.</p>
+<h4 id="usage-example-34">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = &quot;- This, a sample string.&quot;
+DIM cwsa AS CSafeArray = AfxStrSplit(cws, &quot; ,.-&quot;)
+FOR i AS LONG = cwsa.LBound TO cwsa.UBound
+  PRINT cwsa.GetStr(i)
+NEXT
+</code></pre>
+<p><strong>Include file</strong>: CSafeArray.inc</p>
+<h1 id="afxstrspn"><a name="AfxStrSpn"></a>AfxStrSpn</h1>
+<p>Returns the length of the initial portion of a string which consists only of characters that are part of a specified set of characters.</p>
+<pre><code>FUNCTION AfxStrSpn (BYREF wszText AS CONST WSTRING, BYREF wszSet AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszText</em></td>
+<td>The string to be scanned.</td>
+</tr>
+<tr class="even">
+<td><em>wszSet</em></td>
+<td>The set of characters for which to search.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-35">Usage example</h4>
+<pre><code>DIM wszText AS WSTRING * 260 = &quot;129th&quot;
+DIM wszSet AS WSTRING * 260 = &quot;1234567890&quot;
+DIM n AS LONG = StrSpnW(@wszText, @wszSet)
+printf(!&quot;The initial number has %d digits.\n&quot;, n)
+</code></pre>
+<h1 id="afxstrtally"><a name="AfxStrTally"></a>AfxStrTally</h1>
+<p>Count the number of occurrences of a string or a list of characters within a string. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrTally (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>The number of occurrences of <em>wszMatchStr</em> in <em>wszMainStr</em>.</p>
+<h4 id="usage-example-36">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrTally(&quot;abacadabra&quot;, &quot;ab&quot;)   ' Returns 2
+</code></pre>
+<h1 id="afxstrtallyi"><a name="AfxStrTallyI"></a>AfxStrTallyI</h1>
+<p>Count the number of occurrences of a string or a list of characters within a string. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrTallyI (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>The number of occurrences of <em>wszMatchStr</em> in <em>wszMainStr</em>.</p>
+<h4 id="usage-example-37">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrTallyI(&quot;abacadabra&quot;, &quot;Ab&quot;)   ' -&gt; 2
+</code></pre>
+<h1 id="afxstrtallyany"><a name="AfxStrTallyAny"></a>AfxStrTallyAny</h1>
+<p>Count the number of occurrences of a string or a list of characters within a string. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrTallyAny (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>A list of single characters to be searched for individually. A match on any one of which will cause the count to be incremented for each occurrence of that character. Note that repeated characters in <em>wszMatchStr</em> will not increase the count.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>The number of occurrences of <em>wszMatchStr</em> in <em>wszMainStr</em>.</p>
+<h4 id="usage-example-38">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrTallyAny(&quot;abacadabra&quot;, &quot;bac&quot;)   ' -&gt; 8
+</code></pre>
+<h1 id="afxstrtallyanyi"><a name="AfxStrTallyAnyI"></a>AfxStrTallyAnyI</h1>
+<p>Count the number of occurrences of a string or a list of characters within a string. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrTallyAnyI (BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>A list of single characters to be searched for individually. A match on any one of which will cause the count to be incremented for each occurrence of that character. Note that repeated characters in <em>wszMatchStr</em> will not increase the count.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>The number of occurrences of <em>wszMatchStr</em> in <em>wszMainStr</em>.</p>
+<h4 id="usage-example-39">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrTallyAnyI(&quot;abacadabra&quot;, &quot;bAc&quot;)   ' -&gt; 8
+</code></pre>
+<h1 id="afxstrucase"><a name="AfxStrUCase"></a>AfxStrUCase</h1>
+<p>Returns an uppercased version of a string.</p>
+<pre><code>FUNCTION AfxStrUCase (BYVAL pwszStr AS WSTRING PTR, _
+   BYVAL pwszLocaleName AS WSTRING PTR = LOCALE_NAME_USER_DEFAULT, _
+   BYVAL dwMapFlags AS DWORD = 0) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>pwszLocaleName</em></td>
+<td>Optional. Pointer to a locale name or one of these pre-defined values: LOCALE_NAME_INVARIANT, LOCALE_NAME_SYSTEM_DEFAULT, LOCALE_NAME_USER_DEFAULT</td>
+</tr>
+<tr class="odd">
+<td><em>dwMapFlags</em></td>
+<td>Optional. Flag specifying the type of transformation to use during string mapping or the type of sort key to generate.</td>
+</tr>
+</tbody>
+</table>
+<p>For a table of language culture names see: <a href="https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee825488(v=cs.20)">Table of Language Culture Names, Codes, and ISO Values</a></p>
+<p>For a complete list see: <a href="https://docs.microsoft.com/en-us/windows/desktop/api/winnls/nf-winnls-lcmapstringex">LCMapStringEx function</a></p>
+<h4 id="remarks-4">Remarks</h4>
+<p>The string conversion functions available in FreeBasic are not fully suitable for some languages. For example, the Turkish word &quot;karışıklığı&quot; is uppercased as &quot;KARıŞıKLıĞı&quot; instead of &quot;KARIŞIKLIĞI&quot;, and &quot;KARIŞIKLIĞI&quot; is lowercased to &quot;karişikliği&quot; instead of &quot;karışıklığı&quot;. Notice the &quot;ı&quot;, that is not an &quot;i&quot;.</p>
+<h4 id="return-value-10">Return value</h4>
+<p>The uppercased string.</p>
+<h1 id="afxstrunwrap"><a name="AfxStrUnWrap"></a>AfxStrUnWrap</h1>
+<p>Removes paired characters to the beginning and end of a string.</p>
+<pre><code>FUNCTION AfxStrUnWrap (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszLeftChar AS CONST WSTRING, BYREF wszRightChar AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszLeftChar</em></td>
+<td>The left character.</td>
+</tr>
+<tr class="odd">
+<td><em>wszRightChar</em></td>
+<td>The right character.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>FUNCTION AfxStrUnWrap (BYREF wszMainStr AS CONST WSTRING, BYREF wszChar AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszChar</em></td>
+<td>The same character for both the left and right sides.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-5">Remarks</h4>
+<p>If only one wrap character/string is specified then that character or string is used for both sides. If no wrap character/string is specified then double quotes are used.</p>
+<h4 id="usage-examples-2">Usage examples</h4>
+<pre><code>AfxStrUnWrap(&quot;&lt;Paul&gt;&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;) results in Paul
+AfxStrUnWrap(&quot;'Paul'&quot;, &quot;'&quot;) results in Paul
+AfxStrUnWrap(&quot;&quot;&quot;Paul&quot;&quot;&quot;) results in Paul
+</code></pre>
+<h1 id="afxstrverify"><a name="AfxStrVerify"></a>AfxStrVerify</h1>
+<p>Determine whether each character of a string is present in another string. Case sensitive.</p>
+<pre><code>FUNCTION AfxStrVerify (BYVAL nStart AS LONG, _
+   BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>Returns zero if each character in wszMainStr is present in <em>wszMatchStr</em>; otherwise, it returns the position of the first non-matching character in <em>wszMainStr</em>. If <em>nStart</em> is zero, a negative number of a value greater that the length of wszMainstr, zero is returned.</p>
+<h4 id="usage-example-40">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrVerify(5, &quot;123.65,22.5&quot;, &quot;0123456789&quot;)   ' Returns 7
+</code></pre>
+<h4 id="remark">Remark</h4>
+<p>Returns 7 since 5 starts it past the first non-digit &quot;.&quot; at position 4.</p>
+<h1 id="afxstrverifyi"><a name="AfxStrVerifyI"></a>AfxStrVerifyI</h1>
+<p>Determine whether each character of a string is present in another string. Case insensitive.</p>
+<pre><code>FUNCTION AfxStrVerifyI (BYVAL nStart AS LONG, _
+   BYREF wszMainStr AS CONST WSTRING, BYREF wszMatchStr AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszMatchStr</em></td>
+<td>The string expression to be searched.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>Returns zero if each character in wszMainStr is present in <em>wszMatchStr</em>; otherwise, it returns the position of the first non-matching character in <em>wszMainStr</em>. If <em>nStart</em> is zero, a negative number of a value greater that the length of wszMainstr, zero is returned.</p>
+<h4 id="usage-example-41">Usage example</h4>
+<pre><code>DIM nCount AS LONG = AfxStrVerifyI(5, &quot;123.65abcx22.5&quot;, &quot;0123456789ABC&quot;)   ' -&gt; 10
+</code></pre>
+<h1 id="afxstrwrap"><a name="AfxStrWrap"></a>AfxStrWrap</h1>
+<p>Adds paired characters to the beginning and end of a string.</p>
+<pre><code>FUNCTION AfxStrWrap (BYREF wszMainStr AS CONST WSTRING, _
+   BYREF wszLeftChar AS CONST WSTRING, BYREF wszRightChar AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszLeftChar</em></td>
+<td>The left character.</td>
+</tr>
+<tr class="odd">
+<td><em>wszRightChar</em></td>
+<td>The right character.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>FUNCTION AfxStrWrap (BYREF wszMainStr AS CONST WSTRING, BYREF wszChar AS CONST WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMainStr</em></td>
+<td>The main string.</td>
+</tr>
+<tr class="even">
+<td><em>wszChar</em></td>
+<td>The same character for both the left and right sides.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-6">Remarks</h4>
+<p>If only one wrap character/string is specified then that character or string is used for both sides. If no wrap character/string is specified then double quotes are used.</p>
+<h4 id="usage-examples-3">Usage examples</h4>
+<pre><code>AfxStrWrap(&quot;Paul&quot;, &quot;&lt;&quot;, &quot;&gt;&quot;) results in &lt;Paul&gt;
+AfxStrWrap(&quot;Paul&quot;, &quot;'&quot;) results in 'Paul'
+AfxStrWrap(&quot;Paul&quot;) results in &quot;Paul&quot;
+</code></pre>
+<h1 id="afxxmlbase64decode"><a name="AfxXmlBase64Decode"></a>AfxXmlBase64Decode</h1>
+<p>Converts the contents of a Base64 mime encoded string to an ascii string.</p>
+<pre><code>FUNCTION AfxXmlBase64Decode (BYREF strData AS STRING) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strData</em></td>
+<td>The string to decode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>The decoded string on success, or a null string on failure.</p>
+<p>Remaks</p>
+<p>Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.</p>
+<p>Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.</p>
+<h4 id="important-note">Important note</h4>
+<p>Because it uses COM, you must initialize the COM library before calling this function.</p>
+<p><strong>Include file</strong>: CSafeArray.inc</p>
+<h1 id="afxxmlbase64encode"><a name="AfxXmlBase64Encode"></a>AfxXmlBase64Encode</h1>
+<p>Converts the contents of a string to Base64 mime encoding.</p>
+<pre><code>FUNCTION AfxXmlBase64Encode (BYREF strData AS STRING) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>strData</em></td>
+<td>The string to encode.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>The encoded string on succeess, or a null string on failure.</p>
+<p>Remaks</p>
+<p>Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.</p>
+<p>Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.</p>
+<p><strong>Include file</strong>: CSafeArray.inc</p>
+</body>
+</html>
+

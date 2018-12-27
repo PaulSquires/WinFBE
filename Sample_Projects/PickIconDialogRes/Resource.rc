@@ -1,0 +1,19 @@
+//=============================================================================
+// Manifest
+//=============================================================================
+
+1 24 ".\Resources\Manifest.xml"
+
+//=============================================================================
+// Icons
+//=============================================================================
+
+ARROWLEFT   ICON DISCARDABLE ".\Resources\arrow_left_32.ico"
+ARROWRIGHT  ICON DISCARDABLE ".\Resources\arrow_right_32.ico"
+DELETE      ICON DISCARDABLE ".\Resources\delete_32.ico"
+FAVORITES   ICON DISCARDABLE ".\Resources\favorites_32.ico"
+HISTORY     ICON DISCARDABLE ".\Resources\history_1_32.ico"
+HOME        ICON DISCARDABLE ".\Resources\home_32.ico"
+MAIL        ICON DISCARDABLE ".\Resources\mail_32.ico"
+SAVE        ICON DISCARDABLE ".\Resources\save_32.ico"
+VIEW        ICON DISCARDABLE ".\Resources\view_32.ico"

@@ -1,0 +1,112 @@
+2
+FBGUI
+.bas
+CWindow: CUSTOMCTRL: XpButton
+' ########################################################################################
+' Microsoft Windows
+' File: CW_XpButton.fbtpl
+' Contents: CWindow XpButton example
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CXpButton.inc"
+USING Afx
+
+CONST IDC_BUTTON1 = 1001
+CONST IDC_BUTTON2 = 1002
+CONST IDC_BUTTON3 = 1003
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "XpButton example", @WndProc)
+   pWindow.SetClientSize(215, 142)
+   pWindow.Center
+
+   ' // Create the first button
+   DIM pXpButton1 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON1, "&Ok", 50, 20, 114, 26)
+'   pXpButton1.SetIconFromFile ExePath & "\16_OK.ICO", XPBI_NORMAL
+'   pXpButton1.SetIconFromFile ExePath & "\16_OKHOT.ICO", XPBI_HOT
+   pXpButton1.SetIcon LoadIcon(NULL, IDI_SHIELD), XPBI_NORMAL
+   pXpButton1.SetIcon LoadIcon(NULL, IDI_QUESTION), XPBI_HOT
+   pXpButton1.SetToggle CTRUE
+   pXpButton1.SetCursor LoadCursor(NULL, IDC_CROSS)
+   pXpButton1.SetImageMargin 10
+
+   ' // Create the second button
+   DIM pXpButton2 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON2, "&Cancel", 50, 55, 114, 26)
+'   pXpButton2.SetIconFromFile ExePath & "\16_CANCEL.ICO", XPBI_NORMAL
+'   pXpButton2.SetIconFromFile ExePath & "\16_CANCELDISABLED.ICO", XPBI_DISABLED
+   pXpButton2.SetIcon LoadIcon(NULL, IDI_ERROR), XPBI_NORMAL
+   pXpButton2.SetImagePos XPBI_RIGHT OR XPBI_VCENTER
+   pXpButton2.SetTextFormat DT_RIGHT OR DT_VCENTER OR DT_SINGLELINE
+   EnableWindow pXpButton2.hWindow, FALSE   ' Disable the button
+
+   ' // Create the third button
+   DIM pXpButton3 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON3, "&Classic Button", 50, 90, 114, 26)
+   SetFocus pXpButton1.hWindow
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

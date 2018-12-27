@@ -1,0 +1,115 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Date Time Picker
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_DTPicker.fbtpl
+' Contents: Demonstrates the use of the Date Time Picker control.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_LABEL = 1001
+CONST IDC_DTPICKER = 1002
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+
+   END WinMain(GetModuleHandle(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Date time picker", @WndProc)
+   pWindow.Center
+
+   ' // Add controls
+   pWindow.AddControl("Label", , IDC_LABEL, "", 50, 20, 300, 23)
+   DIM htDTP AS HWND = pWindow.AddControl("SysDateTimePick32", , IDC_DTPICKER, "", 100, 50, 150, 23)
+
+   ' // Set the date
+   DIM st AS SYSTEMTIME
+   st.wDay = 15
+   st.wMonth = 8
+   st.wYear = 2016
+   DateTime_SetSystemTime(htDTP, GDT_VALID, @st)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ================================================================e========================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE AS CONST uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' // Notification messages
+         DIM ptNMHDR AS NMHDR PTR
+         DIM ptNMDTC AS NMDATETIMECHANGE PTR
+         ptNMHDR = cast(NMHDR PTR, lParam)
+         SELECT CASE ptNMHDR->idFrom
+            CASE IDC_DTPICKER
+               SELECT CASE ptNMHDR->code
+                  CASE DTN_DATETIMECHANGE
+                     ' // Get the selected date
+                     ptNMDTC = cast(NMDATETIMECHANGE PTR, lParam)
+                     DIM wszDate AS WSTRING * 260
+                     GetDateFormatW LOCALE_USER_DEFAULT, DATE_LONGDATE, @ptNMDTC->st, NULL, wszDate, SIZEOF(wszDate)
+                     SetWindowTextW GetDlgItem(hwnd, IDC_LABEL), "Selected date: " & wszDate
+               END SELECT
+         END SELECT
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

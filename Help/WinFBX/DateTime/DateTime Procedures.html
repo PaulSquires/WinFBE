@@ -1,0 +1,2268 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DateTime Procedures</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="date-and-time-procedures">Date and Time Procedures</h1>
+<p>Assorted date and time procedures.</p>
+<p><strong>Include File</strong>: AfxTime.inc.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxAstroDay">AfxAstroDay</a></td>
+<td>Returns the Astronomical Day for any given date.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxAstroDayOfWeek">AfxAstroDayOfWeek</a></td>
+<td>Calculates the day of the week, Sunday through Monday, of a given date.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxDateAddDays">AfxDateAddDays</a></td>
+<td>Adds the specified number of days to a given date.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxDateDiff">AfxDateDiff</a></td>
+<td>Calculates the days of difference between two dates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxDayOfYear">AfxDayOfYear</a></td>
+<td>Returns the day of the year, where Jan 1 is the first day of the year.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxDaysBetween">AfxDaysBetween</a></td>
+<td>Returns the number of days between two given dates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxDaysInMonth">AfxDaysInMonth</a></td>
+<td>Returns the number of days in the specified month/year.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxDaysInYear">AfxDaysInYear</a></td>
+<td>Returns the number of days in the specified year.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxFileTimeToDateStr">AfxFileTimeToDateStr</a></td>
+<td>Converts a FILETIME type to a string containing the date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxFileTimeToTime64">AfxFileTimeToTime64</a></td>
+<td>Converts a FILETIME to a __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxFileTimeToTimeStr">AfxFileTimeToTimeStr</a></td>
+<td>Converts a FILETIME type to a string containing the time based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGmtTime64">AfxGmtTime64</a></td>
+<td>Converts a FILETIME to a __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGregorianToJulian">AfxGregorianToJulian</a></td>
+<td>Converts a Gregorian date to a Julian date. The year must be a 4 digit year.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxIsFirstDayOfMonth">AfxIsFirstDayOfMonth</a></td>
+<td>Returns TRUE if today is the first day of the month; False, otherwise.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxIsLastDayOfMonth">AfxIsLastDayOfMonth</a></td>
+<td>Returns TRUE if today is the last day of the month; False, otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxIsLeapYear">AfxIsLeapYear</a></td>
+<td>Determines if a given year is a leap year or not.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxIsValidFILETIME">AfxIsValidFILETIME</a></td>
+<td>Checks if a FILETIME is valid.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxJulianDayOfWeek">AfxJulianDayOfWeek</a></td>
+<td>Given a Julian date, returns the day of week.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxJulianToGregorian">AfxJulianToGregorian</a></td>
+<td>Converts a Julian date to a Gregorian date.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxJulianToGregorianStr">AfxJulianToGregorianStr</a></td>
+<td>Converts a Julian date to a Gregorian date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalDateStr">AfxLocalDateStr</a></td>
+<td>Retuns the current local date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalDay">AfxLocalDay</a></td>
+<td>Returns the current local day. The valid values are 1 through 31.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalDayName">AfxLocalDayName</a></td>
+<td>Returns the localized name of today.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalDayOfWeek">AfxLocalDayOfWeek</a></td>
+<td>Returns the current day of week. It is a numeric value in the range of 0-6 representing Sunday through Saturday: 0 = Sunday, 1 = Monday, etc.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalDayOfWeekName">AfxLocalDayOfWeekName</a></td>
+<td>Returns the localized name of the day of the week.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalDayOfWeekShortName">AfxLocalDayOfWeekShortName</a></td>
+<td>Returns the localized short name of the day of the week.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalDayShortName">AfxLocalDayShortName</a></td>
+<td>Returns the localized short name of today.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalFileTime">AfxLocalFileTime</a></td>
+<td>Returns the current local time as a FILETIME structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalHour">AfxLocalHour</a></td>
+<td>Returns the current local hour. The valid values are 0 through 23.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalMonth">AfxLocalMonth</a></td>
+<td>Returns the current local month. The valid values are 1 thorugh 12 (1 = January, etc.).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalMonthName">AfxLocalMonthName</a></td>
+<td>Returns the localized name of today's local month.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalShortMonthName">AfxLocalShortMonthName</a></td>
+<td>Returns the localized short name of today's local month.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalSystemTime">AfxLocalSystemTime</a></td>
+<td>Returns the current local time as a SYSTEMTIME structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalTime64">AfxLocalTime64</a></td>
+<td>Converts a FILETIME to a __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalTimeStr">AfxLocalTimeStr</a></td>
+<td>Retuns the current local time based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLocalVariantTime">AfxLocalVariantTime</a></td>
+<td>Returns the local date and time as a DATE_ (double).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLocalYear">AfxLocalYear</a></td>
+<td>Returns the current local year. The valid values are 1601 through 30827.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLongDate">AfxLongDate</a></td>
+<td>Returns the current date in long format.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxMakeTime64">AfxMakeTime64</a></td>
+<td>Converts the local time to a calendar value.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxMonthName">AfxMonthName</a></td>
+<td>Returns the localized name of the specified month.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxQuadDateTime">AfxQuadDateTime</a></td>
+<td>Returns the current date and time as a QUAD (8 bytes). In Free Basic, a QUAD is an ULONGLONG.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxQuadDateToStr">AfxQuadDateToStr</a></td>
+<td>Converts a date stored in a QUAD into a formatted date string. For example, to get the date string &quot;Wed, Aug 31 94&quot; use the following picture string: &quot;ddd',' MMM dd yy&quot;. In Free Basic, a QUAD is an ULONGLONG.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxQuadTimeToStr">AfxQuadTimeToStr</a></td>
+<td>Converts a time stored in a QUAD into a formatted time string. For example, get the time string &quot;11:29:40 PM&quot; use the following picture string: &quot;hh':'mm':'ss tt&quot;. In Free Basic, a QUAD is an ULONGLONG.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxShortDate">AfxShortDate</a></td>
+<td>Returns the current date in short format.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxShortMonthName">AfxShortMonthName</a></td>
+<td>Returns the localized short name of the specified month.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemDay">AfxSystemDay</a></td>
+<td>Returns the current system day. The valid values are 1 through 31.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemDayName">AfxSystemDayName</a></td>
+<td>Returns the localized name of today.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemDayOfWeek">AfxSystemDayOfWeek</a></td>
+<td>Returns the current day of week. It is a numeric value in the range of 0-6 representing Sunday through Saturday: 0 = Sunday, 1 = Monday, etc.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemDayShortName">AfxSystemDayShortName</a></td>
+<td>Returns the localized short name of today.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemFileTime">AfxSystemFileTime</a></td>
+<td>Returns the current system time as a FILETIME structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemHour">AfxSystemHour</a></td>
+<td>Returns the current system hour. The valid values are 0 through 23.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemMonth">AfxSystemMonth</a></td>
+<td>Returns the current system month. The valid values are 1 thorugh 12 (1 = January, etc.).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemMonthName">AfxSystemMonthName</a></td>
+<td>Returns the localized name of today's system month.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemShortMonthName">AfxSystemShortMonthName</a></td>
+<td>Returns the localized short name of today's system month.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemSystemTime">AfxSystemSystemTime</a></td>
+<td>Returns the current system time as a SYSTEMTIME structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemTimeToTime64">AfxSystemTimeToTime64</a></td>
+<td>Converts a system time to a __time64_t (LONGLONG).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemTimeToDateStr">AfxSystemTimeToDateStr</a></td>
+<td>Converts a SYSTEMTIME type to a string containing the date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemTimeToTimeStr">AfxSystemTimeToTimeStr</a></td>
+<td>Converts a SYSTEMTIME type to a string containing the time based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSystemTimeToVariantTime">AfxSystemTimeToVariantTime</a></td>
+<td>Converts a SYSTEMTIME to a DATE_ (double).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSystemYear">AfxSystemYear</a></td>
+<td>Returns the current system year. The valid values are 1601 through 30827.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTime64">AfxTime64</a></td>
+<td>Returns the time as seconds elapsed since midnight, January 1, 1970.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTime64ToFileTime">AfxTime64ToFileTime</a></td>
+<td>Converts a __time64_t (LONGLONG) value to a FILETIME structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTime64ToSystemTime">AfxTime64ToSystemTime</a></td>
+<td>Converts a __time64_t (LONGLONG) to a SYSTEMTIME structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneBias">AfxTimeZoneBias</a></td>
+<td>Current bias for local time translation. The bias is the difference between Coordinated Universal Time (UTC) and local time. All translations between UTC and local time are based on the following formula: UTC = local time + bias. Units = minutes.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneDaylightBias">AfxTimeZoneDaylightBias</a></td>
+<td>Bias value to be used during local time translations that occur during daylight saving time. This property is ignored if a value for the <strong>DaylightDay</strong> property is not supplied. The value of this property is added to the Bias property to form the bias used during daylight time. In most time zones, the value of this property is -60. Units = minutes.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneDaylightDay">AfxTimeZoneDaylightDay</a></td>
+<td><strong>DaylightDayOfWeek</strong> of the <strong>DaylightMonth</strong> when the transition from standard time to daylight saving time occurs on this operating system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneDaylightDayOfWeek">AfxTimeZoneDaylightDayOfWeek</a></td>
+<td>Day of the week when the transition from standard time to daylight saving time occurs on an operating system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneDaylightHour">AfxTimeZoneDaylightHour</a></td>
+<td>Hour of the day when the transition from standard time to daylight saving time occurs on an operating system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneDaylightMonth">AfxTimeZoneDaylightMonth</a></td>
+<td>Month when the transition from standard time to daylight saving time occurs on an operating system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneDaylightName">AfxTimeZoneDaylightName</a></td>
+<td>A description for daylight saving time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneIsDaylightSavingTime">AfxTimeZoneIsDaylightSavingTime</a></td>
+<td>Indicates whether the the system is operating in the range of daylight saving time for the current time zone.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneStandardName">AfxTimeZoneStandardName</a></td>
+<td>A description for standard time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxVariantDateTimeToStr">AfxVariantDateTimeToStr</a></td>
+<td>Converts a DATE_ type to a string.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxVariantDateToStr">AfxVariantDateToStr</a></td>
+<td>Converts a DATE_ type to a string containing only the date.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxVariantTimeToStr">AfxVariantTimeToStr</a></td>
+<td>Converts a DATE_ type to a string containing only the time.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxVariantTimeToSystemTime">AfxVariantTimeToSystemTime</a></td>
+<td>Converts a DATE_ (double) to a SYSTEMTIME.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxWeekNumber">AfxWeekNumber</a></td>
+<td>Returns the week number for a given date. The year must be a 4 digit year.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxWeekOne">AfxWeekOne</a></td>
+<td>Returns the first day of the first week of a year. The year must be a 4 digit year.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxWeeksInMonth">AfxWeeksInMonth</a></td>
+<td>Returns the number of weeks in the specified month. Will be 4 or 5.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxWeeksInYear">AfxWeeksInYear</a></td>
+<td>Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxastroday"><a name="AfxAstroDay"></a>AfxAstroDay</h1>
+<p>Returns the Astronomical Day for any given date.</p>
+<pre><code>FUNCTION AfxAstroDay (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>The astronomical day.</p>
+<h4 id="remarks">Remarks</h4>
+<p>Among other things, can be used to find the number of days between any two dates, e.g.:</p>
+<pre><code>PRINT AfxAstroDay(1, 3, -12400) - AfxAstroDay(28, 2, -12400)  ' Prints 2
+PRINT AfxAstroDay(1, 3, 12000) - AfxAstroDay(28, 2, -12000)  ' Prints 8765822
+PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
+</code></pre>
+<h1 id="afxastrodayofweek"><a name="AfxAstroDayOfWeek"></a>AfxAstroDayOfWeek</h1>
+<p>Calculates the day of the week, Sunday through Monday, of a given date.</p>
+<pre><code>FUNCTION AfxAstroDayOfWeek (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>A number between 0-6, where 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday.</p>
+<h1 id="afxdateadddays"><a name="AfxDateAddDays"></a>AfxDateAddDays</h1>
+<p>Adds the specified number of days to a given date.</p>
+<pre><code>FUNCTION AfxDateAddDays (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG, _
+   BYVAL nDays AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nDays</em></td>
+<td>The number of days to add (or subtract, if it is negative).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>The new date in Julian format. To convert it to Gregorian, call functions such <strong>AfxJulianToGregorian</strong> or <strong>AfxJulianToGregorianStr</strong>.</p>
+<h1 id="afxdatediff"><a name="AfxDateDiff"></a>AfxDateDiff</h1>
+<p>Calculates the days of difference between two dates.</p>
+<pre><code>FUNCTION AfxDateDiff (BYVAL nDay1 AS LONG, BYVAL nMonth1 AS LONG, BYVAL nYear1 AS LONG, _
+   BYVAL nDay2 AS LONG, BYVAL nMonth2 AS LONG, BYVAL nYear2 AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay1</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth1</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear1</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nDay2</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="odd">
+<td><em>nMonth2</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear2</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>The days of difference between the two dates.</p>
+<h1 id="afxdayofyear"><a name="AfxDayOfYear"></a>AfxDayOfYear</h1>
+<p>Returns the day of the year, where Jan 1 is the first day of the year.</p>
+<pre><code>FUNCTION AfxDayOfYear (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>The day of the year.</p>
+<h1 id="afxdaysbetween"><a name="AfxDaysBetween"></a>AfxDaysBetween</h1>
+<p>Returns the number of days between two given dates.</p>
+<pre><code>FUNCTION AfxDaysBetween (BYVAL nDay1 AS LONG, BYVAL nMonth1 AS LONG, BYVAL nYear1 AS LONG, _
+   BYVAL nDay2 AS LONG, BYVAL nMonth2 AS LONG, BYVAL nYear2 AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay1</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth1</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear1</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nDay2</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="odd">
+<td><em>nMonth2</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear2</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>The number of days.</p>
+<h1 id="afxdaysinmonth"><a name="AfxDaysInMonth"></a>AfxDaysInMonth</h1>
+<p>Returns the number of days in the specified month/year.</p>
+<pre><code>FUNCTION AfxDaysInMonth (BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMonth</em></td>
+<td>A month ordinal number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>The number of days in the specified month/year.</p>
+<h1 id="afxdaysinyear"><a name="AfxDaysInYear"></a>AfxDaysInYear</h1>
+<p>Returns the number of days in the specified year.</p>
+<pre><code>FUNCTION AfxDaysInYear (BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>The number of days: 365 (not leap year) or 366 (leap year).</p>
+<h1 id="afxfiletimetodatestr"><a name="AfxFileTimeToDateStr"></a>AfxFileTimeToDateStr</h1>
+<p>Converts a FILETIME type to a string containing the date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</p>
+<pre><code>FUNCTION AfxFileTimeToDateStr (BYREF ft AS FILETIME, BYREF wszMask AS WSTRING, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ft</em></td>
+<td>A FILETIME structure.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.<br>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.<br>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd',' MMM dd yy&quot;.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent days.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d</td>
+<td>Day of the month as digits without leading zeros for single-digit days.</td>
+</tr>
+<tr class="even">
+<td>dd</td>
+<td>Day of the month as digits with leading zeros for single-digit days.</td>
+</tr>
+<tr class="odd">
+<td>ddd</td>
+<td>Abbreviated day of the week, for example, &quot;Mon&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>dddd</td>
+<td>Day of the week.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent months.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Month as digits without leading zeros for single-digit months.</td>
+</tr>
+<tr class="even">
+<td>MM</td>
+<td>Month as digits with leading zeros for single-digit months.</td>
+</tr>
+<tr class="odd">
+<td>MMM</td>
+<td>Abbreviated month, for example, &quot;Nov&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>MMMM</td>
+<td>Month value, for example, &quot;November&quot; for English (United States), and &quot;Noviembre&quot; for Spanish (Spain).</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent years.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>y</td>
+<td>Year represented only by the last digit.</td>
+</tr>
+<tr class="even">
+<td>yy</td>
+<td>Year represented only by the last two digits. A leading zero is added for single-digit years.</td>
+</tr>
+<tr class="odd">
+<td>yyyy</td>
+<td>Year represented by a full four or five digits, depending on the calendar used. Thai Buddhist and Korean calendars have five-digit years. The &quot;yyyy&quot; pattern shows five digits for these two calendars, and four digits for all other supported calendars. Calendars that have single-digit or two-digit years, such as for the Japanese Emperor era, are represented differently. A single-digit year is represented with a leading zero, for example, &quot;03&quot;. A two-digit year is represented with two digits, for example, &quot;13&quot;. No additional leading zeros are displayed.</td>
+</tr>
+<tr class="even">
+<td>yyyyy</td>
+<td>Behaves identically to &quot;yyyy&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>The formatted date.</p>
+<h1 id="afxfiletimetotime64"><a name="AfxFileTimeToTime64"></a>AfxFileTimeToTime64</h1>
+<p>Converts a FILETIME to a __time64_t (LONGLONG) value.</p>
+<pre><code>FUNCTION AfxFileTimeToTime64 (BYREF ft AS FILETIME) AS LONGLONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ft</em></td>
+<td>A FILETIME structure.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>The converted time.</p>
+<h1 id="afxfiletimetotimestr"><a name="AfxFileTimeToTimeStr"></a>AfxFileTimeToTimeStr</h1>
+<p>Converts a FILETIME type to a string containing the time based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</p>
+<pre><code>FUNCTION AfxFileTimeToTimeStr (BYREF ft AS FILETIME, BYREF wszMask AS WSTRING, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ft</em></td>
+<td>A FILETIME structure.</td>
+</tr>
+</tbody>
+</table>
+<p>A picture string that is used to form the time.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Picture</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>h</td>
+<td>Hours with no leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="even">
+<td>hh</td>
+<td>Hours with leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hours with no leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>HH</td>
+<td>Hours with leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes with no leading zero for single-digit minutes</td>
+</tr>
+<tr class="even">
+<td>mm</td>
+<td>Minutes with leading zero for single-digit minutes</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Seconds with no leading zero for single-digit seconds</td>
+</tr>
+<tr class="even">
+<td>ss</td>
+<td>Seconds with leading zero for single-digit seconds</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>One character time marker string, such as A or P</td>
+</tr>
+<tr class="even">
+<td>tt</td>
+<td>Multi-character time marker string, such as AM or PM</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>The formatted time.</p>
+<h1 id="afxgmttime64"><a name="AfxGmtTime64"></a>AfxGmtTime64</h1>
+<p>Converts a FILETIME to a __time64_t (LONGLONG) value.</p>
+<pre><code>FUNCTION AfxGmtTime64 (BYVAL t64 AS LONGLONG) AS tm
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>t64</em></td>
+<td>A __time64_t (LONGLONG) value. The time is represented as seconds elapsed since midnight (00:00:00), January 1, 1970, coordinated universal time (UTC).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>Returns a tm structure. The fields of the returned structure hold the evaluated value of the time argument in UTC rather than in local time.</p>
+<p>The fields of the structure type tm store the following values, each of which is an int:</p>
+<p>tm_sec : Seconds after minute (0 – 59).<br> tm_min : Minutes after hour (0 – 59).<br> tm_hour : Hours after midnight (0 – 23).<br> tm_mday : Day of month (1 – 31).<br> tm_mon : Month (0 – 11; January = 0).<br> tm_year : Year (current year minus 1900).<br> tm_wday : Day of week (0 – 6; Sunday = 0).<br> tm_yday : Day of year (0 – 365; January 1 = 0).<br> tm_isdst : Positive value if daylight saving time is in effect; 0 if daylight saving time is not in effect; negative value if status of daylight saving time is unknown.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>Replacement for <strong>_gmtime64</strong>, not available in msvcrt.dll.</p>
+<h1 id="afxgregoriantojulian"><a name="AfxGregorianToJulian"></a>AfxGregorianToJulian</h1>
+<p>Converts a Gregorian date to a Julian date. The year must be a 4 digit year.</p>
+<pre><code>FUNCTION AfxGregorianToJulian (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>The converted date.</p>
+<h1 id="afxisfirstdayofmonth"><a name="AfxIsFirstDayOfMonth"></a>AfxIsFirstDayOfMonth</h1>
+<p>Returns TRUE if today is the first day of the month; False, otherwise.</p>
+<pre><code>FUNCTION AfxIsFirstDayOfMonth () AS BOOLEAN
+</code></pre>
+<h1 id="afxislastdayofmonth"><a name="AfxIsLastDayOfMonth"></a>AfxIsLastDayOfMonth</h1>
+<p>Returns TRUE if today is the last day of the month; False, otherwise.</p>
+<pre><code>FUNCTION AfxIsLastDayOfMonth () AS BOOLEAN
+</code></pre>
+<h1 id="afxisleapyear"><a name="AfxIsLeapYear"></a>AfxIsLeapYear</h1>
+<p>Determines if a given year is a leap year or not.</p>
+<pre><code>FUNCTION AfxIsLeapYear (BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxisvalidfiletime"><a name="AfxIsValidFILETIME"></a>AfxIsValidFILETIME</h1>
+<p>Checks if a FILETIME is valid.</p>
+<pre><code>FUNCTION AfxIsValidFILETIME (BYREF ft AS FILETIME) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ft</em></td>
+<td>The FILETIME structure to check.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxjuliandayofweek"><a name="AfxJulianDayOfWeek"></a>AfxJulianDayOfWeek</h1>
+<p>Given a Julian date, returns the day of week.</p>
+<pre><code>FUNCTION AfxJulianDayOfWeek (BYVAL nJulian AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nJulian</em></td>
+<td>The Julian date.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>A number between 0-6, where 0 = Sunday, 1 = Monday, 2 = Tuesday, 3 = Wednesday, 4 = Thursday, 5 = Friday, 6 = Saturday.</p>
+<h1 id="afxjuliantogregorian"><a name="AfxJulianToGregorian"></a>AfxJulianToGregorian</h1>
+<p>Converts a Julian date to a Gregorian date.</p>
+<pre><code>FUNCTION AfxJulianToGregorian (BYVAL nJulian AS LONG, BYVAL nDay AS LONG, _
+   BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nJulian</em></td>
+<td>The Julian date.</td>
+</tr>
+<tr class="even">
+<td><em>nDay</em></td>
+<td>Out. The day (1-31).</td>
+</tr>
+<tr class="odd">
+<td><em>nMonth</em></td>
+<td>Out. The month (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear</em></td>
+<td>Out. The four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxjuliantogregorianstr"><a name="AfxJulianToGregorianStr"></a>AfxJulianToGregorianStr</h1>
+<p>Converts a Julian date to a Gregorian date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</p>
+<pre><code>FUNCTION AfxJulianToGregorianStr (BYREF wszMask AS WSTRING, BYVAL nJulian AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.<br>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.<br>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd',' MMM dd yy&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>nJulian</em></td>
+<td>The Julian date.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent days.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d</td>
+<td>Day of the month as digits without leading zeros for single-digit days.</td>
+</tr>
+<tr class="even">
+<td>dd</td>
+<td>Day of the month as digits with leading zeros for single-digit days.</td>
+</tr>
+<tr class="odd">
+<td>ddd</td>
+<td>Abbreviated day of the week, for example, &quot;Mon&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>dddd</td>
+<td>Day of the week.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent months.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Month as digits without leading zeros for single-digit months.</td>
+</tr>
+<tr class="even">
+<td>MM</td>
+<td>Month as digits with leading zeros for single-digit months.</td>
+</tr>
+<tr class="odd">
+<td>MMM</td>
+<td>Abbreviated month, for example, &quot;Nov&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>MMMM</td>
+<td>Month value, for example, &quot;November&quot; for English (United States), and &quot;Noviembre&quot; for Spanish (Spain).</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent years.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>y</td>
+<td>Year represented only by the last digit.</td>
+</tr>
+<tr class="even">
+<td>yy</td>
+<td>Year represented only by the last two digits. A leading zero is added for single-digit years.</td>
+</tr>
+<tr class="odd">
+<td>yyyy</td>
+<td>Year represented by a full four or five digits, depending on the calendar used. Thai Buddhist and Korean calendars have five-digit years. The &quot;yyyy&quot; pattern shows five digits for these two calendars, and four digits for all other supported calendars. Calendars that have single-digit or two-digit years, such as for the Japanese Emperor era, are represented differently. A single-digit year is represented with a leading zero, for example, &quot;03&quot;. A two-digit year is represented with two digits, for example, &quot;13&quot;. No additional leading zeros are displayed.</td>
+</tr>
+<tr class="even">
+<td>yyyyy</td>
+<td>Behaves identically to &quot;yyyy&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>The formatted date.</p>
+<h1 id="afxlocaldatestr"><a name="AfxLocalDateStr"></a>AfxLocalDateStr</h1>
+<p>Retuns the current local date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</p>
+<pre><code>FUNCTION AfxLocalDateStr (BYREF wszMask AS WSTRING, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.<br>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.<br>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd',' MMM dd yy&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent days.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d</td>
+<td>Day of the month as digits without leading zeros for single-digit days.</td>
+</tr>
+<tr class="even">
+<td>dd</td>
+<td>Day of the month as digits with leading zeros for single-digit days.</td>
+</tr>
+<tr class="odd">
+<td>ddd</td>
+<td>Abbreviated day of the week, for example, &quot;Mon&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>dddd</td>
+<td>Day of the week.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent months.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Month as digits without leading zeros for single-digit months.</td>
+</tr>
+<tr class="even">
+<td>MM</td>
+<td>Month as digits with leading zeros for single-digit months.</td>
+</tr>
+<tr class="odd">
+<td>MMM</td>
+<td>Abbreviated month, for example, &quot;Nov&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>MMMM</td>
+<td>Month value, for example, &quot;November&quot; for English (United States), and &quot;Noviembre&quot; for Spanish (Spain).</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent years.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>y</td>
+<td>Year represented only by the last digit.</td>
+</tr>
+<tr class="even">
+<td>yy</td>
+<td>Year represented only by the last two digits. A leading zero is added for single-digit years.</td>
+</tr>
+<tr class="odd">
+<td>yyyy</td>
+<td>Year represented by a full four or five digits, depending on the calendar used. Thai Buddhist and Korean calendars have five-digit years. The &quot;yyyy&quot; pattern shows five digits for these two calendars, and four digits for all other supported calendars. Calendars that have single-digit or two-digit years, such as for the Japanese Emperor era, are represented differently. A single-digit year is represented with a leading zero, for example, &quot;03&quot;. A two-digit year is represented with two digits, for example, &quot;13&quot;. No additional leading zeros are displayed.</td>
+</tr>
+<tr class="even">
+<td>yyyyy</td>
+<td>Behaves identically to &quot;yyyy&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-15">Return value</h4>
+<p>The current local date in string format.</p>
+<h1 id="afxlocalday"><a name="AfxLocalDay"></a>AfxLocalDay</h1>
+<p>Returns the current local day. The valid values are 1 through 31.</p>
+<pre><code>FUNCTION AfxLocalDay () AS WORD
+</code></pre>
+<h1 id="afxlocaldayname"><a name="AfxLocalDayName"></a>AfxLocalDayName</h1>
+<p>Returns the current local day. The valid values are 1 through 31.</p>
+<pre><code>FUNCTION AfxLocalDayName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxlocaldayofweek"><a name="AfxLocalDayOfWeek"></a>AfxLocalDayOfWeek</h1>
+<p>Returns the current day of week. It is a numeric value in the range of 0-6 representing Sunday through Saturday: 0 = Sunday, 1 = Monday, etc.</p>
+<pre><code>FUNCTION AfxLocalDayOfWeek () AS WORD
+</code></pre>
+<h1 id="afxlocaldayofweekname"><a name="AfxLocalDayOfWeekName"></a>AfxLocalDayOfWeekName</h1>
+<p>Returns the localized name of the day of the week.</p>
+<pre><code>FUNCTION AfxLocalDayOfWeekName (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A number between 1-31.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A number between 1-12.</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year, e.g. 2011.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxlocaldayofweekshortname"><a name="AfxLocalDayOfWeekShortName"></a>AfxLocalDayOfWeekShortName</h1>
+<p>Returns the localized short name of the day of the week.</p>
+<pre><code>FUNCTION AfxLocalDayOfWeekShortName (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, _
+   BYVAL nYear AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A number between 1-31.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A number between 1-12.</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year, e.g. 2011.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxlocaldayshortname"><a name="AfxLocalDayShortName"></a>AfxLocalDayShortName</h1>
+<p>Returns the localized short name of today.</p>
+<pre><code>FUNCTION AfxLocalDayShortName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<h1 id="afxlocalfiletime"><a name="AfxLocalFileTime"></a>AfxLocalFileTime</h1>
+<p>Returns the current local time as a FILETIME structure.</p>
+<pre><code>FUNCTION AfxLocalFileTime () AS FILETIME
+</code></pre>
+<h1 id="afxlocalhour"><a name="AfxLocalHour"></a>AfxLocalHour</h1>
+<p>Returns the current local hour. The valid values are 0 through 23.</p>
+<pre><code>FUNCTION AfxLocalHour () AS WORD
+</code></pre>
+<h1 id="afxlocalmonth"><a name="AfxLocalMonth"></a>AfxLocalMonth</h1>
+<p>Returns the current local month. The valid values are 1 thorugh 12 (1 = January, etc.).</p>
+<pre><code>FUNCTION AfxLocalMonth () AS WORD
+</code></pre>
+<h1 id="afxlocalmonthname"><a name="AfxLocalMonthName"></a>AfxLocalMonthName</h1>
+<p>Returns the localized name of today's local month.</p>
+<pre><code>FUNCTION AfxLocalMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxlocalshortmonthname"><a name="AfxLocalShortMonthName"></a>AfxLocalShortMonthName</h1>
+<p>Returns the localized short name of today's local month.</p>
+<pre><code>FUNCTION AfxLocalShortMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxlocalsystemtime"><a name="AfxLocalSystemTime"></a>AfxLocalSystemTime</h1>
+<p>Returns the current local time as a SYSTEMTIME structure.</p>
+<pre><code>FUNCTION AfxLocalSystemTime () AS SYSTEMTIME
+</code></pre>
+<h1 id="afxlocaltime64"><a name="AfxLocalTime64"></a>AfxLocalTime64</h1>
+<p>Converts a FILETIME to a __time64_t (LONGLONG) value.</p>
+<pre><code>FUNCTION AfxLocalTime64 (BYVAL t64 AS LONGLONG) AS tm
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>t64</em></td>
+<td>A __time64_t (LONGLONG) value. The time is represented as seconds elapsed since midnight (00:00:00), January 1, 1970, coordinated universal time (UTC).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>Returns a tm structure. The fields of the returned structure hold the evaluated value of the time argument in UTC rather than in local time.</p>
+<h1 id="afxlocaltimestr"><a name="AfxLocalTimeStr"></a>AfxLocalTimeStr</h1>
+<p>Retuns the current local time based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</p>
+<pre><code>FUNCTION AfxLocalTimeStr (BYREF wszMask AS WSTRING, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the time.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>Picture string used to form the time.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Picture</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>h</td>
+<td>Hours with no leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="even">
+<td>hh</td>
+<td>Hours with leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hours with no leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>HH</td>
+<td>Hours with leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes with no leading zero for single-digit minutes</td>
+</tr>
+<tr class="even">
+<td>mm</td>
+<td>Minutes with leading zero for single-digit minutes</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Seconds with no leading zero for single-digit seconds</td>
+</tr>
+<tr class="even">
+<td>ss</td>
+<td>Seconds with leading zero for single-digit seconds</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>One character time marker string, such as A or P</td>
+</tr>
+<tr class="even">
+<td>tt</td>
+<td>Multi-character time marker string, such as AM or PM</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>The formatted time.</p>
+<h1 id="afxlocalvarianttime"><a name="AfxLocalVariantTime"></a>AfxLocalVariantTime</h1>
+<p>Returns the local date and time as a DATE_ (double).</p>
+<pre><code>FUNCTION AfxLocalVariantTime () AS DATE_
+</code></pre>
+<h1 id="afxlocalyear"><a name="AfxLocalYear"></a>AfxLocalYear</h1>
+<p>Returns the current local year. The valid values are 1601 through 30827.</p>
+<pre><code>FUNCTION AfxLocalYear () AS WORD
+</code></pre>
+<h1 id="afxlongdate"><a name="AfxLongDate"></a>AfxLongDate</h1>
+<p>Returns the current date in long format.</p>
+<pre><code>FUNCTION AfxLongDate (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxmaketime64"><a name="AfxMakeTime64"></a>AfxMakeTime64</h1>
+<p>Converts the local time to a calendar value.</p>
+<pre><code>FUNCTION AfxMakeTime64 (BYREF _tm AS tm) AS LONGLONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>tm</em></td>
+<td>A tm structure.</td>
+</tr>
+</tbody>
+</table>
+<p>The fields of the structure type tm store the following values, each of which is an int:</p>
+<p>tm_sec : Seconds after minute (0 – 59).<br> tm_min : Minutes after hour (0 – 59).<br> tm_hour : Hours after midnight (0 – 23).<br> tm_mday : Day of month (1 – 31).<br> tm_mon : Month (0 – 11; January = 0).<br> tm_year : Year (current year minus 1900).<br> tm_wday : Day of week (0 – 6; Sunday = 0).<br> tm_yday : Day of year (0 – 365; January 1 = 0).<br> tm_isdst : Positive value if daylight saving time is in effect; 0 if daylight saving time is not in effect; negative value if status of daylight saving time is unknown.</p>
+<h4 id="return-value-18">Return value</h4>
+<p>The converted time.</p>
+<h1 id="afxmonthname"><a name="AfxMonthName"></a>AfxMonthName</h1>
+<p>Returns the localized name of the specified month.</p>
+<pre><code>FUNCTION AfxMonthName (BYVAL nMonth AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMonth</em></td>
+<td>Valid values are between 1 and 12.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxquaddatetime"><a name="AfxQuadDateTime"></a>AfxQuadDateTime</h1>
+<p>Returns the current date and time as a QUAD (8 bytes). In Free Basic, a QUAD is an ULONGLONG.</p>
+<pre><code>FUNCTION AfxQuadDateTime () AS ULONGLONG
+</code></pre>
+<h1 id="afxquaddatetostr"><a name="AfxQuadDateToStr"></a>AfxQuadDateToStr</h1>
+<p>Converts a date stored in a QUAD into a formatted date string. For example, to get the date string &quot;Wed, Aug 31 94&quot; use the following picture string: &quot;ddd',' MMM dd yy&quot;. In Free Basic, a QUAD is an ULONGLONG.</p>
+<pre><code>FUNCTION AfxQuadDateToStr (BYREF wszMask AS WSTRING, BYVAL ullTime AS ULONGLONG, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.<br>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.<br>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd',' MMM dd yy&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>ullTime</em></td>
+<td>The datetime variable.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>The formatted date.</p>
+<h1 id="afxquadtimetostr"><a name="AfxQuadTimeToStr"></a>AfxQuadTimeToStr</h1>
+<p>Converts a time stored in a QUAD into a formatted time string. For example, get the time string &quot;11:29:40 PM&quot; use the following picture string: &quot;hh':'mm':'ss tt&quot;. In Free Basic, a QUAD is an ULONGLONG.</p>
+<pre><code>FUNCTION AfxQuadTimeToStr (BYREF wszMask AS WSTRING, BYVAL ullTime AS ULONGLONG, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the time.</td>
+</tr>
+<tr class="even">
+<td><em>ullTime</em></td>
+<td>The datetime variable.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>Picture string used to form the time.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Picture</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>h</td>
+<td>Hours with no leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="even">
+<td>hh</td>
+<td>Hours with leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hours with no leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>HH</td>
+<td>Hours with leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes with no leading zero for single-digit minutes</td>
+</tr>
+<tr class="even">
+<td>mm</td>
+<td>Minutes with leading zero for single-digit minutes</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Seconds with no leading zero for single-digit seconds</td>
+</tr>
+<tr class="even">
+<td>ss</td>
+<td>Seconds with leading zero for single-digit seconds</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>One character time marker string, such as A or P</td>
+</tr>
+<tr class="even">
+<td>tt</td>
+<td>Multi-character time marker string, such as AM or PM</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-20">Return value</h4>
+<p>The formatted time.</p>
+<h1 id="afxshortdate"><a name="AfxShortDate"></a>AfxShortDate</h1>
+<p>Returns the current date in short format.</p>
+<pre><code>FUNCTION AfxShortDate (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxshortmonthname"><a name="AfxShortMonthName"></a>AfxShortMonthName</h1>
+<p>Returns the localized short name of the specified month.</p>
+<pre><code>FUNCTION AfxShortMonthName (BYVAL nMonth AS LONG, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMonth</em></td>
+<td>Valid values are between 1 and 12.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsystemday"><a name="AfxSystemDay"></a>AfxSystemDay</h1>
+<p>Returns the current system day. The valid values are 1 through 31.</p>
+<pre><code>FUNCTION AfxSystemDay () AS WORD
+</code></pre>
+<h4 id="remarks-2">Remarks</h4>
+<p>The system time is expressed in Coordinated Universal Time (UTC).</p>
+<h1 id="afxsystemdayname"><a name="AfxSystemDayName"></a>AfxSystemDayName</h1>
+<p>Returns the localized name of today.</p>
+<pre><code>FUNCTION AfxSystemDayName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsystemdayofweek"><a name="AfxSystemDayOfWeek"></a>AfxSystemDayOfWeek</h1>
+<p>Returns the current day of week. It is a numeric value in the range of 0-6 representing Sunday through Saturday: 0 = Sunday, 1 = Monday, etc.</p>
+<pre><code>FUNCTION AfxSystemDayOfWeek () AS WORD
+</code></pre>
+<h1 id="afxsystemdayshortname"><a name="AfxSystemDayShortName"></a>AfxSystemDayShortName</h1>
+<p>Returns the localized short name of today.</p>
+<pre><code>FUNCTION AfxSystemDayShortName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsystemfiletime"><a name="AfxSystemFileTime"></a>AfxSystemFileTime</h1>
+<p>Returns the current system time as a FILETIME structure.</p>
+<pre><code>FUNCTION AfxSystemFileTime () AS FILETIME
+</code></pre>
+<h4 id="remarks-3">Remarks</h4>
+<p>The system time is expressed in Coordinated Universal Time (UTC).</p>
+<h1 id="afxsystemhour"><a name="AfxSystemHour"></a>AfxSystemHour</h1>
+<p>Returns the current system hour. The valid values are 0 through 23.</p>
+<pre><code>FUNCTION AfxSystemHour () AS WORD
+</code></pre>
+<h4 id="remarks-4">Remarks</h4>
+<p>The system time is expressed in Coordinated Universal Time (UTC).</p>
+<h1 id="afxsystemmonth"><a name="AfxSystemMonth"></a>AfxSystemMonth</h1>
+<p>Returns the current system month. The valid values are 1 thorugh 12 (1 = January, etc.).</p>
+<pre><code>FUNCTION AfxSystemMonth () AS WORD
+</code></pre>
+<h4 id="remarks-5">Remarks</h4>
+<p>The system time is expressed in Coordinated Universal Time (UTC).</p>
+<h1 id="afxsystemmonthname"><a name="AfxSystemMonthName"></a>AfxSystemMonthName</h1>
+<p>Returns the localized name of today's system month.</p>
+<pre><code>FUNCTION AfxSystemMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsystemshortmonthname"><a name="AfxSystemShortMonthName"></a>AfxSystemShortMonthName</h1>
+<p>Returns the localized short name of today's system month.</p>
+<pre><code>FUNCTION AfxSystemShortMonthName (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsystemsystemtime"><a name="AfxSystemSystemTime"></a>AfxSystemSystemTime</h1>
+<p>Returns the current system time as a SYSTEMTIME structure.</p>
+<pre><code>FUNCTION AfxSystemSystemTime () AS SYSTEMTIME
+</code></pre>
+<h4 id="remarks-6">Remarks</h4>
+<p>The system time is expressed in Coordinated Universal Time (UTC).</p>
+<h1 id="afxsystemtimetotime64"><a name="AfxSystemTimeToTime64"></a>AfxSystemTimeToTime64</h1>
+<p>Converts a system time to a __time64_t (LONGLONG).</p>
+<pre><code>FUNCTION AfxSystemTimeToTime64 (BYREF st AS SYSTEMTIME) AS LONGLONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>st</em></td>
+<td>A SYSTEMTIME structure.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-7">Remarks</h4>
+<p>The converted time.</p>
+<h1 id="afxsystemtimetodatestr"><a name="AfxSystemTimeToDateStr"></a>AfxSystemTimeToDateStr</h1>
+<p>Converts a SYSTEMTIME type to a string containing the date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</p>
+<pre><code>FUNCTION AfxSystemTimeToDateStr (BYREF st AS SYSTEMTIME, BYREF wszMask AS WSTRING, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>st</em></td>
+<td>A SYSTEMTIME structure.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.<br>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.<br>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd', ' MMM dd yy&quot;.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent days.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d</td>
+<td>Day of the month as digits without leading zeros for single-digit days.</td>
+</tr>
+<tr class="even">
+<td>dd</td>
+<td>Day of the month as digits with leading zeros for single-digit days.</td>
+</tr>
+<tr class="odd">
+<td>ddd</td>
+<td>Abbreviated day of the week, for example, &quot;Mon&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>dddd</td>
+<td>Day of the week.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent months.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Month as digits without leading zeros for single-digit months.</td>
+</tr>
+<tr class="even">
+<td>MM</td>
+<td>Month as digits with leading zeros for single-digit months.</td>
+</tr>
+<tr class="odd">
+<td>MMM</td>
+<td>Abbreviated month, for example, &quot;Nov&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>MMMM</td>
+<td>Month value, for example, &quot;November&quot; for English (United States), and &quot;Noviembre&quot; for Spanish (Spain).</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent years.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>y</td>
+<td>Year represented only by the last digit.</td>
+</tr>
+<tr class="even">
+<td>yy</td>
+<td>Year represented only by the last two digits. A leading zero is added for single-digit years.</td>
+</tr>
+<tr class="odd">
+<td>yyyy</td>
+<td>Year represented by a full four or five digits, depending on the calendar used. Thai Buddhist and Korean calendars have five-digit years. The &quot;yyyy&quot; pattern shows five digits for these two calendars, and four digits for all other supported calendars. Calendars that have single-digit or two-digit years, such as for the Japanese Emperor era, are represented differently. A single-digit year is represented with a leading zero, for example, &quot;03&quot;. A two-digit year is represented with two digits, for example, &quot;13&quot;. No additional leading zeros are displayed.</td>
+</tr>
+<tr class="even">
+<td>yyyyy</td>
+<td>Behaves identically to &quot;yyyy&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-8">Remarks</h4>
+<p>The formatted date.</p>
+<h1 id="afxsystemtimetotimestr"><a name="AfxSystemTimeToTimeStr"></a>AfxSystemTimeToTimeStr</h1>
+<p>Converts a SYSTEMTIME type to a string containing the time based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</p>
+<pre><code>FUNCTION AfxSystemTimeToTimeStr (BYREF st AS SYSTEMTIME, BYREF wszMask AS WSTRING, _
+   BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>st</em></td>
+<td>A SYSTEMTIME structure.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the time.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>Picture string used to form the time.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Picture</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>h</td>
+<td>Hours with no leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="even">
+<td>hh</td>
+<td>Hours with leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hours with no leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>HH</td>
+<td>Hours with leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes with no leading zero for single-digit minutes</td>
+</tr>
+<tr class="even">
+<td>mm</td>
+<td>Minutes with leading zero for single-digit minutes</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Seconds with no leading zero for single-digit seconds</td>
+</tr>
+<tr class="even">
+<td>ss</td>
+<td>Seconds with leading zero for single-digit seconds</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>One character time marker string, such as A or P</td>
+</tr>
+<tr class="even">
+<td>tt</td>
+<td>Multi-character time marker string, such as AM or PM</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>The formatted time.</p>
+<h1 id="afxsystemtimetovarianttime"><a name="AfxSystemTimeToVariantTime"></a>AfxSystemTimeToVariantTime</h1>
+<p>Converts a SYSTEMTIME to a DATE_ (double).</p>
+<pre><code>FUNCTION AfxSystemTimeToVariantTime (BYREF ST AS SYSTEMTIME) AS DATE_
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>st</em></td>
+<td>A SYSTEMTIME structure.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>The date and time in DATE_ format.</p>
+<h1 id="afxsystemyear"><a name="AfxSystemYear"></a>AfxSystemYear</h1>
+<p>Returns the current system year. The valid values are 1601 through 30827.</p>
+<pre><code>FUNCTION AfxSystemYear () AS WORD
+</code></pre>
+<h4 id="remarks-9">Remarks</h4>
+<p>The system time is expressed in Coordinated Universal Time (UTC).</p>
+<h1 id="afxtime64"><a name="AfxTime64"></a>AfxTime64</h1>
+<p>Returns the time as seconds elapsed since midnight, January 1, 1970.</p>
+<pre><code>FUNCTION AfxTime64 () AS LONGLONG
+</code></pre>
+<h4 id="return-value-23">Return value</h4>
+<p>The current system time as a __time64_t (LONGLONG) value.</p>
+<h4 id="remarks-10">Remarks</h4>
+<p>Replacement for _time64, not available in msvcrt.dll.</p>
+<h1 id="afxtime64tofiletime"><a name="AfxTime64ToFileTime"></a>AfxTime64ToFileTime</h1>
+<p>Converts a __time64_t (LONGLONG) value to a FILETIME structure.</p>
+<pre><code>FUNCTION AfxTime64ToFileTime (BYVAL t64 AS LONGLONG) AS FILETIME
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>t64</em></td>
+<td>A __time64_t (LONGLONG) value. The time is represented as seconds elapsed since midnight (00:00:00), January 1, 1970, coordinated universal time (UTC).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-24">Return value</h4>
+<p>The converted time value as FILETIME structure.</p>
+<h1 id="afxtime64tosystemtime"><a name="AfxTime64ToSystemTime"></a>AfxTime64ToSystemTime</h1>
+<p>Converts a __time64_t (LONGLONG) value to a SYSTEMTIME structure.</p>
+<pre><code>FUNCTION AfxTime64ToSystemTime (BYVAL t64 AS LONGLONG) AS SYSTEMTIME
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>t64</em></td>
+<td>A __time64_t (LONGLONG) value. The time is represented as seconds elapsed since midnight (00:00:00), January 1, 1970, coordinated universal time (UTC).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-25">Return value</h4>
+<p>The converted time value as SYSTEMTIME structure.</p>
+<h1 id="afxtimezonebias"><a name="AfxTimeZoneBias"></a>AfxTimeZoneBias</h1>
+<p>Returns the current bias for local time translation. The bias is the difference between Coordinated Universal Time (UTC) and local time. All translations between UTC and local time are based on the following formula: UTC = local time + bias. Units = minutes.</p>
+<pre><code>FUNCTION AfxTimeZoneBias () AS DWORD
+</code></pre>
+<h1 id="afxtimezonedaylightbias"><a name="AfxTimeZoneDaylightBias"></a>AfxTimeZoneDaylightBias</h1>
+<p>Returns the bias value to be used during local time translations that occur during daylight saving time. This property is ignored if a value for the DaylightDay property is not supplied. The value of this property is added to the Bias property to form the bias used during daylight time. In most time zones, the value of this property is -60. Units = minutes.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightBias () AS LONG
+</code></pre>
+<h1 id="afxtimezonedaylightday"><a name="AfxTimeZoneDaylightDay"></a>AfxTimeZoneDaylightDay</h1>
+<p>Returns the <strong>DaylightDayOfWeek</strong> of the <strong>DaylightMonth</strong> when the transition from standard time to daylight saving time occurs on this operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightDay () AS DWORD
+</code></pre>
+<p><strong>Example</strong>: If the transition day (<strong>DaylightDayOfWeek</strong>) occurs on a Sunday, then the value &quot;1&quot; indicates the first Sunday of the <strong>DaylightMonth</strong>, &quot;2&quot; indicates the second Sunday, and so on. The value &quot;5&quot; indicates the last <strong>DaylightDayOfWeek</strong> in the month.</p>
+<h1 id="afxtimezonedaylightdayofweek"><a name="AfxTimeZoneDaylightDayOfWeek"></a>AfxTimeZoneDaylightDayOfWeek</h1>
+<p>Day of the week when the transition from standard time to daylight saving time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightDayOfWeek () AS DWORD
+</code></pre>
+<h4 id="return-value-26">Return value</h4>
+<p>The day of the week when the transition from standard time to daylight saving time occurs on an operating system. 0 = Sunday, 1 = Monday, and so on.</p>
+<h1 id="afxtimezonedaylighthour"><a name="AfxTimeZoneDaylightHour"></a>AfxTimeZoneDaylightHour</h1>
+<p>Hour of the day when the transition from standard time to daylight saving time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightHour () AS DWORD
+</code></pre>
+<h1 id="afxtimezonedaylightmonth"><a name="AfxTimeZoneDaylightMonth"></a>AfxTimeZoneDaylightMonth</h1>
+<p>Month when the transition from standard time to daylight saving time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightMonth () AS DWORD
+</code></pre>
+<h4 id="return-value-27">Return value</h4>
+<p>The month when the transition from standard time to daylight saving time occurs on an operating system. 1 = January, 2 = February, and so on.</p>
+<h1 id="afxtimezonedaylightname"><a name="AfxTimeZoneDaylightName"></a>AfxTimeZoneDaylightName</h1>
+<p>Returns a description for daylight saving time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightName () AS CWSTR
+</code></pre>
+<h1 id="afxtimezoneisdaylightsavingtime"><a name="AfxTimeZoneIsDaylightSavingTime"></a>AfxTimeZoneIsDaylightSavingTime</h1>
+<p>Indicates whether the the system is operating in the range of daylight saving time for the current time zone.</p>
+<pre><code>FUNCTION AfxTimeZoneIsDaylightSavingTime () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-28">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="afxtimezonestandardname"><a name="AfxTimeZoneStandardName"></a>AfxTimeZoneStandardName</h1>
+<p>Returns a description for standard time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</p>
+<pre><code>FUNCTION AfxTimeZoneStandardName () AS CWSTR
+</code></pre>
+<h1 id="afxvariantdatetimetostr"><a name="AfxVariantDateTimeToStr"></a>AfxVariantDateTimeToStr</h1>
+<p>Converts a DATE_ type to a string.</p>
+<pre><code>FUNCTION AfxVariantDateTimeToStr (BYVAL vbDate AS DATE_, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT, _
+   BYVAL dwFlags AS DWORD = 0) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vbDate</em></td>
+<td>A variant representation of time.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+<tr class="odd">
+<td><em>dwFlags</em></td>
+<td>Optional. A value made from one or more flags. The following table shows the flags that can be set for this parameter.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>LOCALE_NOUSEROVERRIDE</td>
+<td>Uses the system default locale settings, rather than custom locale settings.</td>
+</tr>
+<tr class="even">
+<td>VAR_CALENDAR_HJRI</td>
+<td>If set then the Hijri calendar is used. Otherwise the calendar sent in Control Panel is used.</td>
+</tr>
+<tr class="odd">
+<td>VAR_DATEVALUEONLY</td>
+<td>Omits the time portion of a <strong>VT_DATE</strong> and retrieves only the date.<br>Applies to conversions to or from dates.<br>Not used for <strong>ChangeType</strong> and <strong>ChangeTypeEx</strong>.</td>
+</tr>
+<tr class="even">
+<td>VAR_TIMEVALUEONLY</td>
+<td>Omits the date portion of a <strong>VT_DATE</strong> and returns only the time. Applies to conversions to or from dates. Not used for <strong>ChangeType</strong> and <strong>ChangeTypeEx</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-29">Return value</h4>
+<p>The formatted date and time.</p>
+<h1 id="afxvariantdatetostr"><a name="AfxVariantDateToStr"></a>AfxVariantDateToStr</h1>
+<p>Converts a DATE_ type to a string containing only the date</p>
+<pre><code>FUNCTION AfxVariantDateToStr (BYVAL vbDate AS DATE_, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vbDate</em></td>
+<td>A variant representation of time.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-30">Return value</h4>
+<p>The formatted date.</p>
+<h1 id="afxvarianttimetostr"><a name="AfxVariantTimeToStr"></a>AfxVariantTimeToStr</h1>
+<p>Converts a DATE_ type to a string containing only the time.</p>
+<pre><code>FUNCTION AfxVariantTimeToStr (BYVAL vbDate AS DATE_, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>vbDate</em></td>
+<td>A variant representation of time.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-31">Return value</h4>
+<p>The formatted time.</p>
+<h1 id="afxvarianttimetosystemtime"><a name="AfxVariantTimeToSystemTime"></a>AfxVariantTimeToSystemTime</h1>
+<p>Converts a DATE_ (double) to a SYSTEMTIME.</p>
+<pre><code>FUNCTION AfxVariantTimeToSystemTime (BYVAL dt AS DATE_) AS SYSTEMTIME
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dt</em></td>
+<td>The DATE_ value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-32">Return value</h4>
+<p>The date and time in SYSTEMTIME format.</p>
+<h1 id="afxweeknumber"><a name="AfxWeekNumber"></a>AfxWeekNumber</h1>
+<p>Returns the week number for a given date. The year must be a 4 digit year.</p>
+<pre><code>FUNCTION AfxWeekNumber (BYVAL nDay AS LONG, BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxweekone"><a name="AfxWeekOne"></a>AfxWeekOne</h1>
+<p>Returns the first day of the first week of a year. The year must be a 4 digit year.</p>
+<pre><code>FUNCTION AfxWeekOne (BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxweeksinmonth"><a name="AfxWeeksInMonth"></a>AfxWeeksInMonth</h1>
+<p>Returns the number of weeks in the specified month. Will be 4 or 5.</p>
+<pre><code>FUNCTION AfxWeeksInMonth (BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYenMonthar</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxweeksinyear"><a name="AfxWeeksInYear"></a>AfxWeeksInYear</h1>
+<p>Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53.</p>
+<pre><code>FUNCTION AfxWeeksInYear (BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
+

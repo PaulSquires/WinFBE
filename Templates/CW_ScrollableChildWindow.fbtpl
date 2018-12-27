@@ -1,0 +1,208 @@
+2
+FBGUI
+.bas
+CWindow: Scrollable child window
+' ########################################################################################
+' Microsoft Windows
+' File: CW_ScrollableChildWindow.fbtpl
+' Contents: Demonstrates the use of an scrollable child CWindow as container of child controls.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CLayout.inc"
+USING Afx
+
+ENUM AFX_USERDATA
+   AFX_LAYOUTPTRIDX = 0
+END ENUM
+
+ENUM
+   IDC_EDIT1 = 1001
+   IDC_EDIT2
+   IDC_GROUPBOX
+   IDC_COMBOBOX
+   IDC_OPTION1
+   IDC_OPTION2
+   IDC_OPTION3
+   IDC_DTPICKER
+END ENUM
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION ChildDlg_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Scrollable Child CWindow Example", @WndProc)
+   pWindow.SetClientSize 455, 180
+   pWindow.Center
+
+   ' // Add controls
+   pWindow.AddControl("GroupBox", , IDC_GROUPBOX, "GroupBox", 340, 8, 100, 155)
+   pWindow.AddControl("Button", , IDCANCEL, "&Close", 250, 140, 76, 23)
+   ' // Add a combobox control
+   DIM hCombobox AS HWND = pWindow.AddControl("ComboBox", , IDC_COMBOBOX, "", 350, 30, 80, 100)
+   ' // Fill the control with some data
+   DIM i AS LONG = 1, wszText AS WSTRING * 260
+   FOR i = 1 TO 9
+      wszText = "Item " & RIGHT("00" & STR(i), 2)
+      SendMessageW(hComboBox, CB_ADDSTRING, 0, CAST(LPARAM, @wszText))
+   NEXT
+
+   ' ***************************************************************************************
+   ' // Child dialog
+   DIM pChildDlg AS CWindow
+   pChildDlg.Create(pWindow.hWindow, "", @ChildDlg_WndProc, 15, 15, , , _
+      WS_VISIBLE OR WS_CHILD OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_BORDER, WS_EX_CONTROLPARENT)
+   pChildDlg.ClassStyle = CS_DBLCLKS
+   ' // Set a client size big enough to display all the controls
+   pChildDlg.SetClientSize(310, 180)
+   ' // Add an Edit control
+   DIM hEdit AS HWND = pChildDlg.AddControl("Edit", , IDC_EDIT1, "", 10, 15, 275, 23)
+   ' // Add three radio buttons (the first one should have the WS_GROUP style)
+   pChildDlg.AddControl("RadioButton", , IDC_OPTION1, "Option 1", 10, 50, 75, 23, WS_GROUP)
+   pChildDlg.AddControl("RadioButton", , IDC_OPTION2, "Option 2", 10, 70, 75, 23)
+   pChildDlg.AddControl("RadioButton", , IDC_OPTION3, "Option 3", 10, 90, 75, 23)
+   ' // Add a date time picker control
+   pChilddlg.AddControl("SysDateTimePick32", , IDC_DTPICKER, "", 135, 55, 150, 23)
+   ' // Add a button
+   pChildDlg.AddControl("Button", , IDOK, "&Ok", 205, 140, 76, 23)
+   ' // Create an instance of the CScrollWindow class and attach the child dialog to it
+   DIM pScrollChildDlg AS CScrollWindow PTR = NEW CScrollWindow(pChildDlg.hWindow)
+   ' // Store the pointer in the class of the child dialog for later deletion
+   pChildDlg.ScrollWindowPtr = pScrollChildDlg
+   ' // Shrink the client size
+   pChildDlg.SetClientSize(310, 110)
+   ' // Set the focus in the first edit control
+   SetFocus hEdit
+   ' ***************************************************************************************
+
+   ' // Anchor the controls
+   DIM pLayout AS CLayout = pWindow.hWindow
+   pWindow.UserData(AFX_LAYOUTPTRIDX) = CAST(LONG_PTR, @pLayout)
+   pLayout.AnchorControl(IDCANCEL, AFX_ANCHOR_BOTTOM_RIGHT)
+   pLayout.AnchorControl(IDC_GROUPBOX, AFX_ANCHOR_HEIGHT_RIGHT)
+   pLayout.AnchorControl(IDC_COMBOBOX, AFX_ANCHOR_RIGHT)
+
+   ' // Anchor the child CWindow
+   pLayout.AnchorControl(pChildDlg.hWindow, AFX_ANCHOR_HEIGHT_WIDTH)
+   ' // We could also anchor the child controls of this window with
+   ' // DIM pChildLayout AS CLayout = pChildDlg.hWindow
+   ' // pChildLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
+   ' // etc.
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_GETMINMAXINFO
+         ' Set the pointer to the address of the MINMAXINFO structure
+         DIM ptmmi AS MINMAXINFO PTR = CAST(MINMAXINFO PTR, lParam)
+         ' Set the minimum and maximum sizes that can be produced by dragging the borders of the window
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         IF pWindow THEN
+            ptmmi->ptMinTrackSize.x = 300 * pWindow->rxRatio
+            ptmmi->ptMinTrackSize.y = 180 * pWindow->ryRatio
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         ' // Adjusts the controls
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         IF pWindow THEN
+            DIM pLayout AS CLayout PTR = CAST(CLayout PTR, pWindow->UserData(AFX_LAYOUTPTRIDX))
+            IF pLayout THEN pLayout->AdjustControls
+         END IF
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+          ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Child dialog window procedure
+' ========================================================================================
+FUNCTION ChildDlg_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_SIZE
+         ' // In the WM_SIZE message we need to check the validity of the pointers
+         ' // because this message is sent before we have had time to store them.
+         DIM pWindow AS CWindow PTR = cast(CWindow PTR, GetWindowLongPtr(hwnd, 0))
+         DIM pScrollWindow AS CScrollWindow PTR
+         IF pWindow THEN pScrollWindow = pWindow->ScrollWindowPtr
+         IF pScrollWindow THEN pScrollWindow->OnSize(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_VSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnVScroll(wParam, lParam)
+         EXIT FUNCTION
+
+      CASE WM_HSCROLL
+         DIM pScrollWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
+         IF pScrollWindow THEN pScrollWindow->OnHScroll(wParam, lParam)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

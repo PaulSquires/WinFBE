@@ -1,0 +1,256 @@
+2
+FBGUI
+.bas
+CWindow: CUSTOMCTRL: PGBAR3D control (OOP version)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_PG3D.fbtpl
+' Contents: CWindow with a PGBAR3D control
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CPgBar3D.inc"
+USING Afx
+
+enum
+   IDC_START = 1001
+   IDC_REVERSE
+   IDC_OPTFAST
+   IDC_OPTSLOW
+   IDC_CHKTXT
+   IDC_BARLEFT
+   IDC_BARRIGHT
+   IDC_BARTOP
+   IDC_BARBOTTOM
+   IDC_BARMIDDLE
+end enum
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with PGBAR3D controls", @WndProc)
+   pWindow.SetClientSize(300, 230)
+   pWindow.Center
+
+   ' // Add the buttons
+   DIM hbtReverse AS HWND = pWindow.AddControl("Button", , IDC_REVERSE, "&Reverse", 40, 95, 100, 23)
+   DIM hbtStart AS HWND = pWindow.AddControl("Button", , IDC_START, "&Start", 158, 95, 100, 23)
+   EnableWindow(hbtReverse, FALSE)   ' // Disable the reverse button
+
+   ' // Add the check boxes
+   pWindow.AddControl("Option", , IDC_OPTFAST, "Fast", 40, 40, 75, 23)
+   pWindow.AddControl("Option", , IDC_OPTSLOW, "Slow", 40, 60, 75, 23)
+   pWindow.AddControl("Checkbox", , IDC_CHKTXT, "Text on/off", 158, 60, 75, 23)
+   SendMessageW GetDlgItem(pWindow.hWindow, IDC_OPTFAST), BM_SETCHECK, BST_CHECKED, 0
+
+   ' // Add the top progress bar
+   DIM pPgBarTop AS CPgBar3D = CPgBar3D(@pWindow, IDC_BARTOP, "", 10, 10, 280, 23)
+   pPgBarTop.SetMaxSteps 100                             ' Max number of teps
+   pPgBarTop.SetBarColor PGB_CYAN                        ' Bar color scheme
+   pPgBarTop.SetBarDirection PGB_BD_LEFTTORIGHT          ' Bar direction, left to right
+   pPgBarTop.SetGradientDirection PGB_GD_HORIZONTAL      ' Horizontal gradient
+   pPgBarTop.SetTextBackColor BGR(0, 255, 255)           ' Backgound text color
+   pPgBarTop.SetBarTextColor BGR(0, 0, 0)                ' Bar text color
+
+   ' // Add the left progress bar
+   DIM pPgBarLeft AS CPgBar3D = CPgBar3D(@pWindow, IDC_BARLEFT, "", 10, 40, 23, 150)
+   pPgBarLeft.SetMaxSteps 100                            ' Max number of teps
+   pPgBarLeft.SetBarColor PGB_GOLD                       ' Bar color scheme
+   pPgBarLeft.SetBarDirection PGB_BD_BOTTOMTOTOP         ' Bar direction, bottom to top
+   pPgBarLeft.SetGradientDirection PGB_GD_VERTICAL       ' Vertical gradient
+   pPgBarLeft.SetTextBackColor BGR(255, 255, 0)          ' Backgound text color
+   pPgBarLeft.SetBarTextColor BGR(0, 0, 255)             ' Bar text color
+   pPgBarLeft.SetTextAngle 90                            ' Text angle, vertical up
+
+   ' // Add the right progress bar
+   DIM pPgBarRight AS CPgBar3D = CPgBar3D(@pWindow, IDC_BARRIGHT, "", 267, 40, 23, 150)
+   pPgBarRight.SetMaxSteps 100                           ' Max number of teps
+   pPgBarRight.SetBarColor PGB_RED                       ' Bar color scheme
+   pPgBarRight.SetBarDirection PGB_BD_TOPTOBOTTOM        ' Bar direction, top to bottom
+   pPgBarRight.SetGradientDirection PGB_GD_VERTICAL      ' Vertical gradient
+   pPgBarRight.SetBackColor BGR(191, 191, 191), 0        ' Background color
+   pPgBarRight.SetTextBackColor BGR(255, 0, 0), 0        ' Backgound text color
+   pPgBarRight.SetBarTextColor BGR(255, 255, 0)          ' Bar text color
+   pPgBarRight.SetTextAngle 270                          ' Text angle, vertical down
+
+   ' // Add the bottom progress bar
+   DIM pPgBarBottom AS CPgBar3D = CPgBar3D(@pWindow, IDC_BARBOTTOM, "", 10, 200, 280, 23)
+   pPgBarBottom.SetMaxSteps 100                          ' Max number of teps
+   pPgBarBottom.SetBarColor PGB_BLUE                     ' Bar color scheme
+   pPgBarBottom.SetBarDirection PGB_BD_RIGHTTOLEFT, 0    ' Bar direction, right to left
+   pPgBarBottom.SetGradientDirection PGB_GD_HORIZONTAL   ' Horizontal gradient
+   pPgBarBottom.SetBackColor BGR(191, 191, 191)          ' Background color
+   pPgBarBottom.SetTextBackColor BGR(0, 0, 196)          ' Backgound text color
+   pPgBarBottom.SetBarTextColor BGR(255, 255, 255)       ' Bar text color
+   pPgBarBottom.SetTextAngle 180                         ' Text angle, vertical down
+
+   ' // Add the middle progress bar
+   DIM pPgBarMiddle AS CPgBar3D = CPgBar3D(@pWindow, IDC_BARMIDDLE, "", 40, 130, 218, 60)
+   pPgBarMiddle.SetMaxSteps 100                          ' Max number of teps
+   pPgBarMiddle.SetBarColor PGB_SILVER                   ' Bar color scheme
+   pPgBarMiddle.SetBarDirection PGB_BD_BOTTOMTOTOP       ' Bar direction, bottom to top
+   pPgBarMiddle.SetGradientDirection PGB_GD_HORIZONTAL   ' Horizontal gradient
+   pPgBarMiddle.SetBackColor BGR(0, 0, 0), 0             ' Background color
+   pPgBarMiddle.SetTextBackColor BGR(0, 255, 255)        ' Backgound text color
+
+   ' // Set background text in middle progressbar
+   DIM wszText AS WSTRING * 260
+   wszText = "Click Start to see action"
+   pPgBarMiddle.SetBackText wszText
+   ' // Set bar text in middle progressbar
+   wszText = "Hope you'll find it useful!"
+   pPgBarMiddle.SetBarText wszText
+   ' // Tell control to use custom text
+   pPgBarMiddle.SetTextOn PGB_TEXTCUSTOM
+
+   ' // Required: Build the bars
+   pPgBarTop.BuildBar
+   pPgBarLeft.BuildBar
+   pPgBarRight.BuildBar
+   pPgBarBottom.BuildBar
+   pPgBarMiddle.BuildBar
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC slow AS BOOLEAN
+
+   SELECT CASE uMsg
+
+'      CASE WM_SYSCOMMAND
+'         ' // Ignore the red X (close) button
+'         IF (wParam AND &HFFF0) = SC_CLOSE THEN EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+
+            CASE IDC_CHKTXT
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  DIM nCheck AS LRESULT = SendMessageW(GetDlgItem(hwnd, IDC_CHKTXT), BM_GETCHECK, 0, 0)
+                  SendMessageW GetDlgItem(hwnd, IDC_BARLEFT), PGB_SETTXTON, 0, nCheck
+                  SendMessageW GetDlgItem(hwnd, IDC_BARLEFT), PGB_REFRESH, 0, 0
+                  SendMessageW GetDlgItem(hwnd, IDC_BARRIGHT), PGB_SETTXTON, 0, nCheck
+                  SendMessageW GetDlgItem(hwnd, IDC_BARRIGHT), PGB_REFRESH, 0, 0
+                  SendMessageW GetDlgItem(hwnd, IDC_BARTOP), PGB_SETTXTON, 0, nCheck
+                  SendMessageW GetDlgItem(hwnd, IDC_BARTOP), PGB_REFRESH, 0, 0
+                  SendMessageW GetDlgItem(hwnd, IDC_BARBOTTOM), PGB_SETTXTON, 0, nCheck
+                  SendMessageW GetDlgItem(hwnd, IDC_BARBOTTOM), PGB_REFRESH, 0, 0
+                  EXIT FUNCTION
+               END IF
+
+            CASE IDC_OPTFAST
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN slow = FALSE
+
+            CASE IDC_OPTSLOW
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN slow = CTRUE
+
+            CASE IDC_START
+               EnableWindow(GetDlgItem(hwnd, IDC_START), FALSE)   ' // Disable the start button
+               DIM i AS LONG, x AS LONG, wszText AS WSTRING * 260
+               DIM pPgBarLeft AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARLEFT), 0))
+               DIM pPgBarRight AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARRIGHT), 0))
+               DIM pPgBarTop AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARTOP), 0))
+               DIM pPgBarBottom AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARBOTTOM), 0))
+               DIM pPgBarMiddle AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARMIDDLE), 0))
+               wszText = "Please wait..."
+               pPgBarMiddle->SetBackText wszText, CTRUE
+               FOR x = 0 TO 4
+                  FOR i = 1 TO 100
+                     SELECT CASE x
+                        CASE 0: pPgBarLeft->StepUp
+                        CASE 1: pPgBarTop->StepUp
+                        CASE 2: pPgBarRight->StepUp
+                        CASE 3: pPgBarBottom->StepUp
+                        CASE 4: pPgBarMiddle->StepUp
+                     END SELECT
+                     IF i MOD 2 = 0 THEN AfxDoEvents(hwnd)
+                     IF slow THEN SLEEP 40
+                  NEXT
+               NEXT
+               EnableWindow(GetDlgItem(hwnd, IDC_REVERSE), CTRUE)   ' // Enable the reverse button
+               EXIT FUNCTION
+
+            CASE IDC_REVERSE
+               EnableWindow(GetDlgItem(hwnd, IDC_REVERSE), FALSE)   ' // Disable the reverse button
+               DIM i AS LONG, x AS LONG, wszText AS WSTRING * 260
+               DIM pPgBarLeft AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARLEFT), 0))
+               DIM pPgBarRight AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARRIGHT), 0))
+               DIM pPgBarTop AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARTOP), 0))
+               DIM pPgBarBottom AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARBOTTOM), 0))
+               DIM pPgBarMiddle AS CPgBar3D PTR = CAST(CPgBar3D PTR, GetWindowLongPtr(GetDlgItem(hwnd, IDC_BARMIDDLE), 0))
+               wszText = "Please wait..."
+               pPgBarMiddle->SetBackText wszText, CTRUE
+               FOR x = 0 TO 4
+                  FOR i = 1 TO 100
+                     SELECT CASE x
+                        CASE 0: pPgBarMiddle->StepDown
+                        CASE 1: pPgBarBottom->StepDown
+                        CASE 2: pPgBarRight->StepDown
+                        CASE 3: pPgBarTop->StepDown
+                        CASE 4: pPgBarLeft->StepDown
+                     END SELECT
+                     IF i MOD 2 = 0 THEN AfxDoEvents(hwnd)
+                     IF slow THEN SLEEP 40
+                  NEXT
+               NEXT
+               wszText = "Click Start to see action"
+               pPgBarMiddle->SetBackText wszText, CTRUE
+               EnableWindow(GetDlgItem(hwnd, IDC_START), CTRUE)   ' // Enable the start button
+               EXIT FUNCTION
+
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

@@ -22,36 +22,36 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    hMenu = CreateMenu
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(2,"&File")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILENEW, L(3,"&New") & Chr(9) & "Ctrl+N"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN, L(4,"&Open...") & Chr(9) & "Ctrl+O"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILENEW, L(3,"New") & Chr(9) & "Ctrl+N"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN, L(4,"Open") & "..." & Chr(9) & "Ctrl+O"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE, L(5,"&Close") & Chr(9) & "Ctrl+Q"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"C&lose All")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE, L(5,"Close") & Chr(9) & "Ctrl+Q"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE, L(7,"&Save") & Chr(9) & "Ctrl+S"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save &As") & Chr(9) & "F12"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEALL, L(9,"Sa&ve All") & Chr(9) & "Ctrl+Shift+S"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEDECLARES, L(265,"Save &Declares File") & Chr(9) & "Ctrl+Shift+D"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE, L(7,"Save") & Chr(9) & "Ctrl+S"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") & "..." & Chr(9) & "F12"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEALL, L(9,"Save All") & Chr(9) & "Ctrl+Shift+S"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEDECLARES, L(265,"Save Declares File") & Chr(9) & "Ctrl+Shift+D"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(10,"&Recent Files")
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(10,"Recent Files")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MRU, L(11,"(Empty)")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMAND, L(12,"Co&mmand Prompt...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMAND, L(12,"Command Prompt" & "...")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXIT, L(13,"E&xit") & Chr(9) & "Alt+F4"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_EXIT, L(13,"Exit") & Chr(9) & "Alt+F4"
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(14,"&Edit")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_UNDO, L(15,"&Undo") & Chr(9) & "Ctrl+Z"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REDO, L(16,"&Redo") & Chr(9) & "Ctrl+E"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(14,"Edit")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_UNDO, L(15,"Undo") & Chr(9) & "Ctrl+Z"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REDO, L(16,"Redo") & Chr(9) & "Ctrl+E"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CUT, L(17,"Cu&t") & Chr(9) & "Ctrl+X"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COPY, L(18,"&Copy") & Chr(9) & "Ctrl+C"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"&Paste") & Chr(9) & "Ctrl+V"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_DELETELINE, L(20,"&Delete Line") & Chr(9) & "Ctrl+Y"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CUT, L(17,"Cut") & Chr(9) & "Ctrl+X"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COPY, L(18,"Copy") & Chr(9) & "Ctrl+C"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"Paste") & Chr(9) & "Ctrl+V"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_DELETELINE, L(20,"Delete Line") & Chr(9) & "Ctrl+Y"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_INSERTFILE, L(21,"Insert &File...") & Chr(9) & "Ctrl+I"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_INSERTFILE, L(21,"Insert File") & "..." & Chr(9) & "Ctrl+I"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(271,"File Encoding")
@@ -59,110 +59,111 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
               AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF8BOM, "UTF-8 (BOM)"
               AppendMenu hPopUpSubMenu, MF_ENABLED or MFT_RADIOCHECK, IDM_UTF16BOM, "UTF-16 (BOM)"
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(22,"&Block Operations")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_INDENTBLOCK, L(23,"&Indent Block") & Chr(9) & "TAB"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNINDENTBLOCK, L(24,"U&nIndent Block") & Chr(9) & "Shift+TAB"
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(22,"Block Operations")
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_INDENTBLOCK, L(23,"Indent Block") & Chr(9) & "TAB"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNINDENTBLOCK, L(24,"UnIndent Block") & Chr(9) & "Shift+TAB"
               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_COMMENTBLOCK, L(25,"Co&mment Block") & Chr(9) & "Ctrl+B"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"UnComment &Block") & Chr(9) & "Ctrl+Shift+B"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_COMMENTBLOCK, L(25,"Comment Block") & Chr(9) & "Ctrl+B"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"UnComment Block") & Chr(9) & "Ctrl+Shift+B"
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(27,"&Line Operations")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_DUPLICATELINE, L(28,"&Duplicate Current Line") & Chr(9) & "Ctrl+D"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEUP, L(29,"Move &Up Current Line") & Chr(9) & "Ctrl+Shift+Up"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEDOWN, L(30,"Move &Down Current Line") & Chr(9) & "Ctrl+Shift+Down"
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(27,"Line Operations")
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_DUPLICATELINE, L(28,"Duplicate Current Line") & Chr(9) & "Ctrl+D"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEUP, L(29,"Move Up Current Line") & Chr(9) & "Ctrl+Shift+Up"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEDOWN, L(30,"Move Down Current Line") & Chr(9) & "Ctrl+Shift+Down"
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(31,"&Case Conversions")
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOUPPERCASE, L(32,"Selection to Upp&er Case") & Chr(9) & "Ctrl+Alt+U"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOLOWERCASE, L(33,"Selection to &Lower Case") & Chr(9) & "Ctrl+Alt+L"
-              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOMIXEDCASE, L(34,"Selection to Mi&xed Case") & Chr(9) & "Ctrl+Alt+M"
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(31,"Case Conversions")
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOUPPERCASE, L(32,"Selection to Upper Case") & Chr(9) & "Ctrl+Alt+U"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOLOWERCASE, L(33,"Selection to Lower Case") & Chr(9) & "Ctrl+Alt+L"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOMIXEDCASE, L(34,"Selection to Mixed Case") & Chr(9) & "Ctrl+Alt+M"
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(35,"&End of Line Character Conversions")
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(35,"End of Line Character Conversions")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_EOLTOCRLF, L(36,"Convert to CRLF")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_EOLTOCR, L(37,"Convert to CR")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_EOLTOLF, L(38,"Convert to LF")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TABSTOSPACES, L(39,"Replace Tabs &with Spaces")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TABSTOSPACES, L(39,"Replace Tabs with Spaces")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All") & Chr(9) & "Ctrl+A"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SELECTLINE, L(41,"&Select Line") & Chr(9) & "Ctrl+L"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select All") & Chr(9) & "Ctrl+A"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SELECTLINE, L(41,"Select Line") & Chr(9) & "Ctrl+L"
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(42,"&Search")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FIND, L(43,"&Find...") & Chr(9) & "Ctrl+F"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDNEXT, L(44,"Find &Next") & Chr(9) & "F3"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDPREV, L(45,"Find &Previous") & Chr(9) & "Shift+F3"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDINFILES, L(257,"Find &In Files...") & Chr(9) & "Ctrl+Shift+F"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REPLACE, L(46,"&Replace...") & Chr(9) & "Ctrl+R"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(42,"Search")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FIND, L(43,"Find") & "..." & Chr(9) & "Ctrl+F"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDNEXT, L(44,"Find Next") & Chr(9) & "F3"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDPREV, L(45,"Find Previous") & Chr(9) & "Shift+F3"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDINFILES, L(257,"Find In Files...") & Chr(9) & "Ctrl+Shift+F"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REPLACE, L(46,"Replace") & "..." & Chr(9) & "Ctrl+R"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function &Definition") & Chr(9) & "F6"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"&Last Position") & Chr(9) & "Shift+F6"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function Definition") & Chr(9) & "F6"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"Last Position") & Chr(9) & "Shift+F6"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"&Goto Line...") & Chr(9) & "Ctrl+G"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"Goto Line") & "..." & Chr(9) & "Ctrl+G"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKTOGGLE, L(50,"&Toggle Bookmark") & Chr(9) & "Ctrl+F2"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKNEXT, L(51,"Next &Bookmark") & Chr(9) & "F2"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKPREV, L(52,"Pre&vious Bookmark") & Chr(9) & "Shift+F2"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKCLEARALL, L(53,"&Clear Bookmarks") & Chr(9) & "Ctrl+Shift+F2"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKTOGGLE, L(50,"Toggle Bookmark") & Chr(9) & "Ctrl+F2"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKNEXT, L(51,"Next Bookmark") & Chr(9) & "F2"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKPREV, L(52,"Previous Bookmark") & Chr(9) & "Shift+F2"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKCLEARALL, L(53,"Clear Bookmarks") & Chr(9) & "Ctrl+Shift+F2"
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(54,"&View")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDTOGGLE, L(55,"Toggle &Current Fold Point") & Chr(9) & "F8"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDBELOW, L(56,"Toggle Current And All &Below") & Chr(9) & "Ctrl+F8"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDALL, L(57,"Fold &All") & Chr(9) & "Alt+F8"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_UNFOLDALL, L(58,"&Unfold All") & Chr(9) & "Shift+F8"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(54,"View")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDTOGGLE, L(55,"Toggle Current Fold Point") & Chr(9) & "F8"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDBELOW, L(56,"Toggle Current And All Below") & Chr(9) & "Ctrl+F8"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FOLDALL, L(57,"Fold All") & Chr(9) & "Alt+F8"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_UNFOLDALL, L(58,"Unfold All") & Chr(9) & "Shift+F8"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ZOOMIN, L(59,"Zoom &In") & Chr(9) & "Ctrl++"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ZOOMOUT, L(60,"Zoom &Out") & Chr(9) & "Ctrl+-"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ZOOMIN, L(59,"Zoom In") & Chr(9) & "Ctrl++"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ZOOMOUT, L(60,"Zoom Out") & Chr(9) & "Ctrl+-"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONLIST, L(221,"View &Function List") & Chr(9) & "F4"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWEXPLORER, L(250,"View &Explorer Window") & Chr(9) & "F9"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWOUTPUT, L(251,"View Ou&tput Window") & Chr(9) & "Ctrl+F9"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FUNCTIONLIST, L(221,"View Function List") & Chr(9) & "F4"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWEXPLORER, L(250,"View Explorer Window") & Chr(9) & "F9"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWOUTPUT, L(251,"View Output Window") & Chr(9) & "Ctrl+F9"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RESTOREMAIN, L(61,"&Restore Main Window Size")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RESTOREMAIN, L(61,"Restore Main Window Size")
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"&Project")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"&New Project")
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(63,"Project")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTNEW, L(180,"New Project")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"&Open Project...") 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPEN, L(182,"Open Project") & "..." 
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(219,"&Recent Projects")
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(219,"Recent Projects")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MRUPROJECT, L(11,"(Empty)")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"&Close Project")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTCLOSE, L(183,"Close Project")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"&Save Project")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project &As...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVE, L(184,"Save Project")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTSAVEAS, L(185,"Save Project As") & "..."
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, L(207,"&Add Files to Project...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, L(207,"Add Files to Project") & "..."
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project O&ptions...")      
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_PROJECTOPTIONS, L(186,"Project Options") & "..."      
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"&Compile")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And E&xecute") & Chr(9) & "F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(66,"&Compile") & Chr(9) & "Ctrl+F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"&Rebuild All") & Chr(9) & "Ctrl+Alt+F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_QUICKRUN, L(285,"&Quick Run") & Chr(9) & "Ctrl+Shift+F5"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"&Run Executable") & Chr(9) & "Shift+F5"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(64,"Compile")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDEXECUTE, L(65,"Build And Execute") & Chr(9) & "F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILE, L(64,"Compile") & Chr(9) & "Ctrl+F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_REBUILDALL, L(268,"Rebuild All") & Chr(9) & "Ctrl+Alt+F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_QUICKRUN, L(285,"Quick Run") & Chr(9) & "Ctrl+Shift+F5"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_RUNEXE, L(67,"Run Executable") & Chr(9) & "Shift+F5"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command &Line...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMMANDLINE, L(68,"Command Line") & "..."
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"&Options")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"En&vironment Options...")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"&Build Configurations...") & Chr(9) & "F7"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"&User Tools...") & Chr(9) & "Ctrl+F7"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"Options")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(309,"&Designer")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_NEWFORM, L(310,"&New Form")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWTOOLBOX, L(311,"View &Toolbox")
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(309,"Designer")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_NEWFORM, L(310,"New Form")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWTOOLBOX, L(311,"View Toolbox")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"&Menu Editor...")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Tool&bar Editor...")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"&Statusbar Editor...")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"Menu Editor") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Toolbar Editor") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"Statusbar Editor") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_IMAGEMANAGER, L(368,"Image Manager") & "..."
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(315,"&Align")
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(315,"Align")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNLEFTS, L(316,"Lefts")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNCENTERS, L(317,"Centers")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNRIGHTS, L(318,"Rights")
@@ -171,31 +172,31 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNMIDDLES, L(320,"Middles")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNBOTTOMS, L(321,"Bottoms")
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same &Size")
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same Size")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEWIDTHS, L(323,"Widths")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEHEIGHTS, L(324,"Heights")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEBOTH, L(325,"Both")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(332,"&Center in Form")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERHORIZ, L(333,"&Horizontally")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERVERT, L(334,"&Vertically")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERBOTH, L(325,"&Both")
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(332,"Center in Form")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERHORIZ, L(333,"Horizontally")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERVERT, L(334,"Vertically")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERBOTH, L(325,"Both")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LOCKCONTROLS, L(335,"&Lock Controls")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LOCKCONTROLS, L(335,"Lock Controls")
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(305,"&Tools")
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(305,"Tools")
 
    hPopUpMenu = CreatePopupMenu
-      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"&Help")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELP, "FreeBASIC " + L(73,"&Help") & Chr(9) & "F1"
+      AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"Help")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELP, "FreeBASIC " + L(73,"Help") & Chr(9) & "F1"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBE, "WinFBE Editor Help"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Framework Help"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINAPI, "WinAPI Help"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"&About")
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"About")
 
    Function = hMenu
 
@@ -506,7 +507,7 @@ Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    If pDoc Then
       If gApp.IsProjectActive = True Then
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         wszText = L(190, "&Remove from project")
+         wszText = L(190, "Remove from project")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
          AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
       End If
@@ -529,7 +530,7 @@ Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
          dim as hwnd hTree = GetDlgItem( hWnd_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
          dim as HTREEITEM hNode = Treeview_GetSelection(hTree)
          if gApp.hExplorerRootNode = hNode THEN
-            wszText = L(207,"&Add Files to Project...")
+            wszText = L(207,"Add Files to Project")
             AppendMenu( hPopUpMenu, MF_ENABLED, IDM_PROJECTFILESADD, wszText )
          END IF
       END IF
@@ -538,7 +539,7 @@ Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-         wszText = L(190,"&Remove from project") 
+         wszText = L(190,"Remove from project") 
          AppendMenu( hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText )
          AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
       Else
@@ -626,24 +627,24 @@ Function CreateScintillaContextMenu() As HMENU
       End If
    End If
 
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_UNDO, L(15,"&Undo")
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_REDO, L(16,"Red&o")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_UNDO, L(15,"Undo")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_REDO, L(16,"Redo")
    AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_CUT, L(17,"Cu&t")
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_COPY, L(18,"&Copy")
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_PASTE, L(19,"&Paste")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_CUT, L(17,"Cut")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_COPY, L(18,"Copy")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_PASTE, L(19,"Paste")
    AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_INDENTBLOCK, L(23,"Block &Indent") 
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_UNINDENTBLOCK, L(24,"Block &Unindent")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_INDENTBLOCK, L(23,"Block Indent") 
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_UNINDENTBLOCK, L(24,"Block Unindent")
    AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_COMMENTBLOCK, L(25,"&Block Comment") 
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"Bloc&k Uncomment")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_COMMENTBLOCK, L(25,"Block Comment") 
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_UNCOMMENTBLOCK, L(26,"Block Uncomment")
    AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-   AppendMenu hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select &All")
+   AppendMenu hPopupMenu, MF_ENABLED, IDM_SELECTALL, L(40,"Select All")
    
    If (gApp.IsProjectActive = True) Then
       AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-      wzText = L(190,"&Remove from project")
+      wzText = L(190,"Remove from project")
       AppendMenu hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
       AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
    End If

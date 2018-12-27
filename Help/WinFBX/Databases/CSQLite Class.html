@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CSQLite Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="csqlite-class">CSQLite Class</h1>
+<p>SQLite is an embedded SQL database engine. Unlike most other SQL databases, SQLite does not have a separate server process. SQLite reads and writes directly to ordinary disk files. A complete SQL database with multiple tables, indices, triggers, and views, is contained in a single disk file. The database file format is cross-platform - you can freely copy a database between 32-bit and 64-bit systems or between big-endian and little-endian architectures. These features make SQLite a popular choice as an Application File Format.</p>
+<p><strong>Include file</strong>: CSQLite.inc</p>
+<h3 id="constructor">Constructor</h3>
+<p>Creates a new instance of the <strong>CSQlite</strong> base class and loads the SQLite3 DLL.</p>
+<pre><code>CONSTRUCTOR CSQLite (BYREF wszDllPath AS WSTRING = &quot;sqlite3.dll&quot;)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszDllPath</em></td>
+<td>The path of the SQLite3 DLL.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#CompileOptionUsed">CompileOptionUsed</a></td>
+<td>Determines whether the specified option was defined at compile time.</td>
+</tr>
+<tr class="even">
+<td><a href="#Complete">Complete</a></td>
+<td>Determines if the currently entered text seems to form a complete SQL statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#EnableSharedCache">EnableSharedCache</a></td>
+<td>Enables or disables the sharing of the database cache and schema data structures between connections to the same database.</td>
+</tr>
+<tr class="even">
+<td><a href="#ErrStr">ErrStr</a></td>
+<td>Returns English-language text that describes the result code.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Free">Free</a></td>
+<td>Releases memory previously allocated by <strong>Malloc</strong> or <strong>Realloc</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetCompileOption">GetCompileOption</a></td>
+<td>Allows iterating over the list of options that were defined at compile time by returning the N-th compile time option string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetLastResult">GetLastResult</a></td>
+<td>Returns the last result code.</td>
+</tr>
+<tr class="even">
+<td><a href="#Malloc">Malloc</a></td>
+<td>Returns a pointer to a block of memory at least N bytes in length, where N is the parameter.</td>
+</tr>
+<tr class="odd">
+<td><a href="#MemoryHighwater">MemoryHighwater</a></td>
+<td>Returns the maximum value of <strong>MemoryUsed</strong> since the high-water mark was last reset.</td>
+</tr>
+<tr class="even">
+<td><a href="#MemorySize">MemorySize</a></td>
+<td>Returns the size of that memory allocation in bytes.</td>
+</tr>
+<tr class="odd">
+<td><a href="#MemoryUsed">MemoryUsed</a></td>
+<td>Returns the number of bytes of memory currently outstanding (malloced but not freed).</td>
+</tr>
+<tr class="even">
+<td><a href="#Randomness">Randomness</a></td>
+<td>Pseudo-random number generator.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Realloc">Realloc</a></td>
+<td>Attempts to resize a prior memory allocation to be at least the specfified number of bytes.</td>
+</tr>
+<tr class="even">
+<td><a href="#ReleaseMemory">ReleaseMemory</a></td>
+<td>Attempts to free the specified number of bytes of heap memory by deallocating non-essential memory allocations held by the database library.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Sleep">Sleep</a></td>
+<td>Causes the current thread to suspend execution for at least a number of milliseconds specified in its parameter.</td>
+</tr>
+<tr class="even">
+<td><a href="#SoftHeapLimit64">SoftHeapLimit64</a></td>
+<td>Sets and/or queries the soft limit on the amount of heap memory that may be allocated by SQLite.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SourceID">SourceID</a></td>
+<td>Returns the SQLite3 source identifier.</td>
+</tr>
+<tr class="even">
+<td><a href="#Status">Status</a></td>
+<td>Retrieves runtime status information about the performance of SQLite, and optionally to reset various highwater marks.</td>
+</tr>
+<tr class="odd">
+<td><a href="#StrGlob">StrGlob</a></td>
+<td>The <strong>StrGlob</strong> method returns zero if string <em>szStr</em> matches the glob pattern <em>szGlob</em>, and it returns non-zero if string <em>szStr</em> does not match the glob pattern <em>szGlob</em>. This function is case sensitive.</td>
+</tr>
+<tr class="even">
+<td><a href="#ThreadSafe">ThreadSafe</a></td>
+<td>Returns zero if and only if SQLite was compiled with mutexing code omitted due to the SQLITE_THREADSAFE compile-time option being set to 0.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Version">Version</a></td>
+<td>Returns the SQLite3 version.</td>
+</tr>
+<tr class="even">
+<td><a href="#VersionNumber">VersionNumber</a></td>
+<td>Returns the SQLite3 version number.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="csqlitedb-class">CSQLiteDb Class</h1>
+<p>Inherits from CSQLite.</p>
+<h3 id="constructor-1">Constructor</h3>
+<p>Opens an SQLite database file as specified by the filename argument.</p>
+<pre><code>CONSTRUCTOR CSQLiteDb (BYREF wszPath AS WSTRING)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszPath</em></td>
+<td>The name of the database.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>The database is opened for reading and writing, and is created if it does not already exist. If the filename is &quot;:memory:&quot;, then a private, temporary in-memory database is created for the connection. This in-memory database will vanish when the database connection is closed. If the filename is an empty string, then a private, temporary on-disk database will be created. This private database will be automatically deleted as soon as the database connection is closed. If URI filename interpretation is enabled, and the filename argument begins with &quot;file:&quot;, then the filename is interpreted as a URI.</p>
+<h3 id="methods-1">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Changes">Changes</a></td>
+<td>Returns the number of database rows that were changed or inserted or deleted by the most recently completed SQL statement on the current database connection.</td>
+</tr>
+<tr class="even">
+<td><a href="#CloseDb">CloseDb</a></td>
+<td>Closes the database.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ErrCode">ErrCode</a></td>
+<td>Returns the numeric result code for the most recent failed sqlite3 call associated with a database connection.</td>
+</tr>
+<tr class="even">
+<td><a href="#ErrMsg">ErrMsg</a></td>
+<td>Returns English-language text that describes the error.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Exec">Exec</a></td>
+<td>Convenience wrapper for <strong>Prepare</strong> and <strong>Step_</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#ExtendedErrCode">ExtendedErrCode</a></td>
+<td>Gets the extended error code associated with this dabatase connection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ExtendedResultCodes">ExtendedResultCodes</a></td>
+<td>Enables or disables the extended result codes feature of SQLite.</td>
+</tr>
+<tr class="even">
+<td><a href="#hDbc">hDbc</a></td>
+<td>Gets/sets the database handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Interrupt">Interrupt</a></td>
+<td>This function causes any pending database operation to abort and return at its earliest opportunity.</td>
+</tr>
+<tr class="even">
+<td><a href="#LastInsertRowId">LastInsertRowId</a></td>
+<td>Returns the rowid of the most recent successful INSERT into the database from the database connection in the first argument.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Limit">Limit</a></td>
+<td>This function allows the size of various constructs to be limited on a connection by connection basis.</td>
+</tr>
+<tr class="even">
+<td><a href="#OpenBlob">OpenBlob</a></td>
+<td>Opens a handle to a BLOB.</td>
+</tr>
+<tr class="odd">
+<td><a href="#OpenDb">OpenDb</a></td>
+<td>Opens an SQLite database file as specified by the filename argument.</td>
+</tr>
+<tr class="even">
+<td><a href="#Prepare">Prepare</a></td>
+<td>Creates a new prepared statement object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ProgressHandler">ProgressHandler</a></td>
+<td>The <strong>ProgressHandler</strong> method causes a callback function to be invoked periodically during long running calls to <strong>Step_</strong> and <strong>GetRow</strong> for a database connection.</td>
+</tr>
+<tr class="even">
+<td><a href="#ReleaseMemory2">ReleaseMemory</a></td>
+<td>Attempts to free as much heap memory as possible from the specified database connection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Status2">Status</a></td>
+<td>Retrieves runtime status information about a single database connection.</td>
+</tr>
+<tr class="even">
+<td><a href="#TotalChanges">TotalChanges</a></td>
+<td>This function returns the number of row changes caused by INSERT, UPDATE or DELETE statements since the database connection was opened.</td>
+</tr>
+<tr class="odd">
+<td><a href="#UnlockNotify">UnlockNotify</a></td>
+<td>Registers a callback that SQLite will invoke when the connection currently holding the required lock relinquishes it.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="csqlitestmt-class">CSQLiteStmt Class</h1>
+<p>Wraps a sqlite3_stmt pointer returned by the Prepare method of the CSQLite class.</p>
+<p>Inherits from CSQLite.</p>
+<pre><code>CONSTRUCTOR CSQLiteStmt (BYVAL pStmt AS sqlite3_stmt PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pStmt</em></td>
+<td>The sqlite3_stmt pointer.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods-and-properties">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#BindBlob">BindBlob</a></td>
+<td>Binds a blob with the statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#BindDouble">BindDouble</a></td>
+<td>Binds a double value with the statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#BindLong">BindLong</a></td>
+<td>Binds a long value with the statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#BindLongInt">BindLongInt</a></td>
+<td>Binds a longint value with the statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#BindNull">BindNull</a></td>
+<td>Binds a null value with the statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#BindParameterCount">BindParameterCount</a></td>
+<td>This method can be used to find the number of SQL parameters in a prepared statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#BindParameterIndex">BindParameterIndex</a></td>
+<td>Returns the index of an SQL parameter given its name.</td>
+</tr>
+<tr class="even">
+<td><a href="#BindParameterName">BindParameterName</a></td>
+<td>Returns the name of the N-th SQL parameter in the prepared statement P.</td>
+</tr>
+<tr class="odd">
+<td><a href="#BindText">BindText</a></td>
+<td>Binds a text value with the statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#BindZeroBlob">BindZeroBlob</a></td>
+<td>Binds a BLOB that is filled with zeroes.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Busy">Busy</a></td>
+<td>Returns true if the prepared statement has been stepped at least once using <strong>Step_</strong> but has not run to completion and/or has not been reset using <strong>Reset</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#ClearBindings">ClearBindings</a></td>
+<td>Sets all the parameters in the compiled SQL statement to NULL.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnBlob">ColumnBlob</a></td>
+<td>Returns information about a single column of the current result row of a query.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColumnBytes">ColumnBytes</a></td>
+<td>Returns the number of bytes of the column value.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnCount">ColumnCount</a></td>
+<td>Returns the number of columns in the result set returned by the prepared statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColumnDatabaseName">ColumnDatabaseName</a></td>
+<td>Returns the database name that is the origin of a particular result column in SELECT statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnDeclaredType">ColumnDeclaredType</a></td>
+<td>Returns the declared data type of a query result.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColumnDouble">ColumnDouble</a></td>
+<td>Returns the column value as a double.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnLong">ColumnLong</a></td>
+<td>Returns the column value as a long.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColumnLongInt">ColumnLongInt</a></td>
+<td>Returns the column value as a quad.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnName">ColumnName</a></td>
+<td>Returns the name assigned to a particular column in the result set of a SELECT statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColumnOriginName">ColumnOriginName</a></td>
+<td>Returns the column name that is the origin of a particular result column in SELECT statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnTableName">ColumnTableName</a></td>
+<td>Returns the table name that is the origin of a particular result column in SELECT statement.</td>
+</tr>
+<tr class="even">
+<td><a href="#ColumnText">ColumnText</a></td>
+<td>Returns the column value as a UTF-16 string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ColumnType">ColumnType</a></td>
+<td>Returns the column type.</td>
+</tr>
+<tr class="even">
+<td><a href="#DataCount">DataCount</a></td>
+<td>Returns the number of columns in the result set returned by the prepared statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DbHandle">DbHandle</a></td>
+<td>Returns the database connection handle to which a prepared statement belongs.</td>
+</tr>
+<tr class="even">
+<td><a href="#Finalize">Finalize</a></td>
+<td>Deletes a prepared statement.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetRow">GetRow</a></td>
+<td>After a prepared statement has been prepared using either Prepare this method must be called one or more times to evaluate the statement. <strong>GetRow</strong> is an alias for <strong>Step_</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#hStmt">hStmt</a></td>
+<td>Gets/sets the connection handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#IsColumnNull">IsColumnNull</a></td>
+<td>Returns true is the column value is null or false otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#ReadOnly">ReadOnly</a></td>
+<td>Rreturns true if and only if the prepared statement makes no direct changes to the content of the database file.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Reset">Reset</a></td>
+<td>Resets a prepared statement object back to its initial state, ready to be re-executed.</td>
+</tr>
+<tr class="even">
+<td><a href="#Sql">Sql</a></td>
+<td>Retrieve a saved copy of the original SQL text used to create a prepared statement if that statement was compiled using <strong>Prepare</strong>.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Step_">Step_</a></td>
+<td>After a prepared statement has been prepared using <strong>Prepare</strong> this method must be called one or more times to evaluate the statement.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="compileoptionused"><a name="CompileOptionUsed"></a>CompileOptionUsed</h1>
+<p>Returns FALSE or TRUE indicating whether the specified option was defined at compile time. The SQLITE_ prefix may be omitted from the option name passed to <strong>CompileOptionUsed</strong>.</p>
+<pre><code>FUNCTION CompileOptionUsed (BYREF szOptName AS ZSTRING) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>szOptName</em></td>
+<td>The option name.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage-example">Usage example</h3>
+<pre><code>pSql.CompileOptionUsed(&quot;SQLITE_ENABLE_DBSTAT_VTAB&quot;)
+</code></pre>
+<h1 id="complete"><a name="Complete"></a>Complete</h1>
+<p>Determines if the currently entered text seems to form a complete SQL statement or if additional input is needed before sending the text into SQLite for parsing.</p>
+<pre><code>FUNCTION Complete (BYREF wszSql AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszSql</em></td>
+<td>The SQL string to check.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>Returns 0 if the statement is incomplete or 1 if the input string appears to be a complete SQL statement. If a memory allocation fails, then SQLITE_NOMEM is returned.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>This method is useful during command-line input to determine if the currently entered text seems to form a complete SQL statement or if additional input is needed before sending the text into SQLite for parsing. This method returns 1 if the input string appears to be a complete SQL statement. A statement is judged to be complete if it ends with a semicolon token and is not a prefix of a well-formed CREATE TRIGGER statement. Semicolons that are embedded within string literals or quoted identifier names or comments are not independent tokens (they are part of the token in which they are embedded) and thus do not count as a statement terminator. Whitespace and comments that follow the final semicolon are ignored.</p>
+<p>This method does not parse the SQL statements thus will not detect syntactically incorrect SQL.</p>
+<h1 id="enablesharedcache"><a name="EnableSharedCache"></a>EnableSharedCache</h1>
+<p>Enables or disables the sharing of the database cache and schema data structures between connections to the same database. Sharing is enabled if the argument is true and disabled if the argument is false..</p>
+<pre><code>FUNCTION EnableSharedCache (BYVAL bSharing AS BOOLEAN) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bSharing</em></td>
+<td>TRUE or FALSE.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>Returns SQLITE_OK if shared cache was enabled or disabled successfully. An error code is returned otherwise.</p>
+<h1 id="errstr"><a name="ErrStr"></a>ErrStr</h1>
+<p>Returns English-language text that describes the result code.</p>
+<pre><code>FUNCTION ErrStr (BYVAL nErrorCode AS LONG) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nErrorCode</em></td>
+<td>The result code.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>A string containing a description of the error.</p>
+<h1 id="free"><a name="Free"></a>Free</h1>
+<p>Releases memory previously allocated by Malloc or Realloc.</p>
+<pre><code>SUB Free (BYVAL pMem AS ANY PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pMem</em></td>
+<td>The pointer returned by Malloc or Realloc.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="getcompileoption"><a name="GetCompileOption"></a>GetCompileOption</h1>
+<p>Allows iterating over the list of options that were defined at compile time by returning the N-th compile time option string. If nOption is out of range, <strong>GetCompileOption</strong> returns a NULL pointer. The SQLITE_ prefix is omitted from any strings returned by <strong>GetCompileOption</strong>.</p>
+<pre><code>FUNCTION GetCompileOption (BYVAL nOption AS LONG) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nOption</em></td>
+<td>The option number.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="uage-example">Uage example</h4>
+<pre><code>pSql.GetCompileOption(0)
+</code></pre>
+<h1 id="getlastresult"><a name="GetLastResult"></a>GetLastResult</h1>
+<p>Returns the last result code.</p>
+<pre><code>FUNCTION GetLastResult () AS LONG
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>The result code returned by the last executed method.</p>
+<h4 id="remarks-2">Remarks</h4>
+<p>The last result code is not global, but bound to each object, and its purpose is to check the failure or success of the last SQLite operation. To get descriptive information about SQLite errors call <strong>ErrStr</strong>.</p>
+<h1 id="malloc"><a name="Malloc"></a>Malloc</h1>
+<p>Returns a pointer to a block of memory at least N bytes in length, where N is the parameter. If Malloc is unable to obtain sufficient free memory, it returns a NULL pointer. If the parameter <em>nBytes</em> to Malloc is zero or negative then returns a NULL pointer.</p>
+<pre><code>FUNCTION Malloc (BYVAL nBytes AS LONG) AS ANY PTR
+FUNCTION Malloc64 (BYVAL nBytes AS sqlite3_uint64) AS ANY PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nBytes</em></td>
+<td>The number of bytes to allocate.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>Pointer to the allocated memory.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>The memory returned by <strong>Malloc</strong> and <strong>Realloc</strong> is always aligned to at least an 8 byte boundary, or to a 4 byte boundary if the SQLITE_4_BYTE_ALIGNED_MALLOC compile-time option is used.</p>
+<p>In SQLite version 3.5.0 and 3.5.1, it was possible to define the SQLITE_OMIT_MEMORY_ALLOCATION which would cause the built-in implementation of these functions to be omitted. That capability is no longer provided. Only built-in memory allocators can be used.</p>
+<p>Prior to SQLite version 3.7.10, the Windows OS interface layer called the system <strong>malloc</strong> and <strong>free</strong> directly when converting filenames between the UTF-8 encoding used by SQLite and whatever filename encoding is used by the particular Windows installation. Memory allocation errors were detected, but they were reported back as SQLITE_CANTOPEN or SQLITE_IOERR rather than SQLITE_NOMEM.</p>
+<p>The pointer arguments to <strong>Free</strong> and <strong>Realloc</strong> must be either NULL or else pointers obtained from a prior invocation of Malloc or <strong>Realloc</strong> that have not yet been released.</p>
+<p>The application must not read or write any part of a block of memory after it has been released using <strong>Free</strong> or <strong>Realloc</strong>.</p>
+<h1 id="memoryhighwater"><a name="MemoryHighwater"></a>MemoryHighwater</h1>
+<p>Returns the maximum value of <strong>MemoryUsed</strong> since the high-water mark was last reset.</p>
+<pre><code>FUNCTION MemoryHighwater (BYVAL resetFlag AS BOOLEAN) AS sqlite3_uint64
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>resetFlag</em></td>
+<td>TRUE or FALSE. Reset the high-water mark.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>The number of bytes of memory currently outstanding (malloced but not freed) since the high-water mark was last reset.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>The value returned by <strong>MemoryHighwater</strong> include any overhead added by SQLite in its implementation of <strong>Malloc</strong>, but not overhead added by the any underlying system library functions that <strong>Malloc</strong> may call.</p>
+<h1 id="memorysize"><a name="MemorySize"></a>MemorySize</h1>
+<p>Returns the size of that memory allocation in bytes.</p>
+<pre><code>FUNCTION MemorySize (BYVAL pMem AS ANY PTR) AS sqlite3_uint64
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pMem</em></td>
+<td>Pointer to the memory allocation.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>If <em>pMem</em> is a memory allocation previously obtained from <strong>Malloc</strong>, <strong>Malloc64</strong>, <strong>Realloc</strong> or <strong>Realloc64</strong>, then <strong>MemorySize</strong> returns the size of that memory allocation in bytes. The value returned by <strong>MemorySize</strong> might be larger than the number of bytes requested when pMem was allocated. If <em>pMem</em> is a NULL pointer then <strong>MemorySize</strong> returns zero. If <em>pMem</em> points to something that is not the beginning of memory allocation, or if it points to a formerly valid memory allocation that has now been freed, then the behavior of <strong>MemorySize</strong> is undefined and possibly harmful.</p>
+<h1 id="memoryused"><a name="MemoryUsed"></a>MemoryUsed</h1>
+<p>Returns the number of bytes of memory currently outstanding (malloced but not freed).</p>
+<pre><code>FUNCTION MemoryUsed () AS sqlite3_uint64
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>The number of bytes of memory currently outstanding (malloced but not freed).</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>The value returned by <strong>MemoryUsed</strong> include any overhead added by SQLite in its implementation of <strong>Malloc</strong>, but not overhead added by the any underlying system library functions that <strong>Malloc</strong> may call.</p>
+<h1 id="randomness"><a name="Randomness"></a>Randomness</h1>
+<p>Pseudo-random number generator.</p>
+<pre><code>SUB Randomness (BYVAL nBytes AS LONG, BYVAL pbuffer AS ANY PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nBytes</em></td>
+<td>The number of bytes of randomness to return.</td>
+</tr>
+<tr class="even">
+<td><em>pbuffer</em></td>
+<td>Pointer where to store the random bytes. It can be null.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-6">Remarks</h4>
+<p>SQLite contains a high-quality pseudo-random number generator (PRNG) used to select random ROWIDs when inserting new records into a table that already uses the largest possible ROWID. The PRNG is also used for the build-in random() and randomblob() SQL functions. This method allows applications to access the same PRNG for other purposes.</p>
+<h1 id="realloc"><a name="Realloc"></a>Realloc</h1>
+<p>Attempts to resize a prior memory allocation to be at least <em>nBytes</em> bytes. <em>pMem</em> is the memory allocation to be resized.</p>
+<pre><code>FUNCTION Realloc (BYVAL pMem AS ANY PTR, BYVAL nBytes AS LONG) AS ANY PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pMem</em></td>
+<td>Pointer to memory allocated by <strong>Malloc</strong>.</td>
+</tr>
+<tr class="even">
+<td><em>nBytes</em></td>
+<td>The number of bytes to reallocate.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>Pointer to the reallocated memory.</p>
+<h4 id="remarks-7">Remarks</h4>
+<p>The memory returned by <strong>Malloc</strong> and <strong>Realloc</strong> is always aligned to at least an 8 byte boundary, or to a 4 byte boundary if the SQLITE_4_BYTE_ALIGNED_MALLOC compile-time option is used.</p>
+<p>In SQLite version 3.5.0 and 3.5.1, it was possible to define the SQLITE_OMIT_MEMORY_ALLOCATION which would cause the built-in implementation of these functions to be omitted. That capability is no longer provided. Only built-in memory allocators can be used.</p>
+<p>Prior to SQLite version 3.7.10, the Windows OS interface layer called the system <strong>malloc</strong> and <strong>free</strong> directly when converting filenames between the UTF-8 encoding used by SQLite and whatever filename encoding is used by the particular Windows installation. Memory allocation errors were detected, but they were reported back as SQLITE_CANTOPEN or SQLITE_IOERR rather than SQLITE_NOMEM.</p>
+<p>The pointer arguments to <strong>Free</strong> and <strong>Realloc</strong> must be either NULL or else pointers obtained from a prior invocation of <strong>Malloc</strong> or <strong>Realloc</strong> that have not yet been released.</p>
+<p>The application must not read or write any part of a block of memory after it has been released using <strong>Free</strong> or <strong>Realloc</strong>.</p>
+<h1 id="releasememory"><a name="ReleaseMemory"></a>ReleaseMemory</h1>
+<p>Attempts to free the specified number of bytes of heap memory by deallocating non-essential memory allocations held by the database library. Memory used to cache database pages to improve performance is an example of non-essential memory. <strong>ReleaseMemory</strong> returns the number of bytes actually freed, which might be more or less than the amount requested. The <strong>ReleaseMemory</strong> method is a no-op returning zero if SQLite is not compiled with SQLITE_ENABLE_MEMORY_MANAGEMENT.</p>
+<pre><code>FUNCTION ReleaseMemory (BYVAL nBytes AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nBytes</em></td>
+<td>The number of bytes to free.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>The number of bytes freed.</p>
+<h1 id="sleep"><a name="Sleep"></a>Sleep</h1>
+<p>Causes the current thread to suspend execution for at least a number of milliseconds specified in its parameter.</p>
+<pre><code>FUNCTION Sleep (BYVAL ms AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ms</em></td>
+<td>The number of milliseconds to sleep.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>The number of milliseconds of sleep actually requested from the operating system is returned.</p>
+<h4 id="remarks-8">Remarks</h4>
+<p>If the operating system does not support sleep requests with millisecond time resolution, then the time will be rounded up to the nearest second. The number of milliseconds of sleep actually requested from the operating system is returned.</p>
+<h1 id="softheaplimit64"><a name="SoftHeapLimit64"></a>SoftHeapLimit64</h1>
+<p>Sets and/or queries the soft limit on the amount of heap memory that may be allocated by SQLite.</p>
+<pre><code>FUNCTION SoftHeapLimit64 (BYVAL nBytes AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nBytes</em></td>
+<td>The number of bytes. If <em>nBytes</em> is negative then no change is made to the soft heap limit. Hence, the current size of the soft heap limit can be determined by invoking <strong>SoftHeapLimit64</strong> with a negative argument. If <em>nBytes</em> is zero then the soft heap limit is disabled.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>The size of the soft heap limit prior to the call, or negative in the case of an error.</p>
+<h4 id="remarks-9">Remarks</h4>
+<p>SQLite strives to keep heap memory utilization below the soft heap limit by reducing the number of pages held in the page cache as heap memory usages approaches the limit. The soft heap limit is &quot;soft&quot; because even though SQLite strives to stay below the limit, it will exceed the limit rather than generate an SQLITE_NOMEM error. In other words, the soft heap limit is advisory only.</p>
+<p>The circumstances under which SQLite will enforce the soft heap limit may change in future releases of SQLite.</p>
+<h1 id="sourceid"><a name="SourceID"></a>SourceID</h1>
+<p>Returns the SQLite3 source identifier.</p>
+<pre><code>FUNCTION SourceID () AS STRING
+</code></pre>
+<h4 id="return-value-12">Return value</h4>
+<p>A string containing the SQLite3 identifier, e.g. &quot;2012-06-11 02:05:22 f5b5a13f7394dc143aa136f1d4faba6839eaa6dc&quot;.</p>
+<h1 id="status"><a name="Status"></a>Status</h1>
+<p>Retrieves runtime status information about the performance of SQLite, and optionally to reset various highwater marks.</p>
+<pre><code>FUNCTION Status (BYVAL op AS LONG, BYREF pCurrent AS LONG, BYREF pHighwater AS LONG, _
+   BYVAL resetFlag AS BOOLEAN = FALSE) AS LONG
+FUNCTION Status64 (BYVAL op AS LONG, BYREF pCurrent AS sqlite3_int64, BYREF pHighwater AS sqlite3_int64, _
+   BYVAL resetFlag AS BOOLEAN = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>op</em></td>
+<td>An integer code for a specific satus parameter.</td>
+</tr>
+<tr class="even">
+<td><em>pCurrent</em></td>
+<td>Pointer to a variable that receives the current value of the parameter.</td>
+</tr>
+<tr class="odd">
+<td><em>pHighWater</em></td>
+<td>Pointer to a variable that receives the highest recorded value of the parameter.</td>
+</tr>
+<tr class="even">
+<td><em>resetFlag</em></td>
+<td>TRUE or FALSE. If true, then the counter is reset to zero after this interface call returns.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>Returns SQLITE_OK (0) on success and a non-zero error code on failure.</p>
+<h4 id="remarks-10">Remarks</h4>
+<p>This method is used to retrieve runtime status information about the performance of SQLite, and optionally to reset various highwater marks. The first argument is an integer code for the specific parameter to measure. Recognized integer codes are of the form SQLITE_STATUS_.... The current value of the parameter is returned into <em>pCurrent</em>. The highest recorded value is returned in <em>pHighwater</em>. If the <em>resetFlag</em> is true, then the highest record value is reset after <em>pHighwater</em> is written. Some parameters do not record the highest value. For those parameters nothing is written into <em>pHighwater</em> and the <em>resetFlag</em> is ignored. Other parameters record only the highwater mark and not the current value. For these latter parameters nothing is written into <em>pCurrent</em>.</p>
+<p>This function is threadsafe but is not atomic. This function can be called while other threads are running the same or different SQLite interfaces. However the values returned in pCurrent and pHighwater reflect the status of SQLite at different points in time and it is possible that another thread might change the parameter in between the times when <em>pCurrent</em> and <em>pHighwater</em> are written.</p>
+<h1 id="strglob"><a name="StrGlob"></a>StrGlob</h1>
+<p>The <em>StrGlob</em> method returns zero if string <em>szStr</em> matches the glob pattern <em>szGlob</em>, and it returns non-zero if string <em>szStr</em> does not match the glob pattern <em>szGlob</em>. This function is case sensitive.</p>
+<pre><code>FUNCTION StrGlob (BYREF szGlob AS ZSTRING, BYREF szStr AS ZSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>szGlob</em></td>
+<td>The glob pattern to compare.</td>
+</tr>
+<tr class="even">
+<td><em>szStr</em></td>
+<td>The string to compare.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="threadsafe"><a name="ThreadSafe"></a>ThreadSafe</h1>
+<p>Returns zero if and only if SQLite was compiled with mutexing code omitted due to the SQLITE_THREADSAFE compile-time option being set to 0.</p>
+<pre><code>FUNCTION ThreadSafe () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-14">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h4 id="remarks-11">Remarks</h4>
+<p>SQLite can be compiled with or without mutexes. When the SQLITE_THREADSAFE C preprocessor macro is 1 or 2, mutexes are enabled and SQLite is threadsafe. When the SQLITE_THREADSAFE macro is 0, the mutexes are omitted. Without the mutexes, it is not safe to use SQLite concurrently from more than one thread.</p>
+<p>Enabling mutexes incurs a measurable performance penalty. So if speed is of utmost importance, it makes sense to disable the mutexes. But for maximum safety, mutexes should be enabled. The default behavior is for mutexes to be enabled.</p>
+<p>This interface can be used by an application to make sure that the version of SQLite that it is linking against was compiled with the desired setting of the SQLITE_THREADSAFE macro.</p>
+<h1 id="version"><a name="Version"></a>Version</h1>
+<p>Returns the SQLite3 version.</p>
+<pre><code>FUNCTION Version () AS STRING
+</code></pre>
+<h4 id="return-value-15">Return value</h4>
+<p>A string containing the SQLite3 version, e.g. &quot;3.7.13&quot;.</p>
+<h1 id="versionnumber"><a name="VersionNumber"></a>VersionNumber</h1>
+<p>Returns the SQLite3 version number.</p>
+<pre><code>FUNCTION VersionNumber () AS LONG
+</code></pre>
+<h4 id="return-value-16">Return value</h4>
+<p>A long integer containing the SQLite3 version number, e.g. 3007013.</p>
+<h1 id="changes"><a name="Changes"></a>Changes</h1>
+<p>This method returns the number of database rows that were changed or inserted or deleted by the most recently completed SQL statement on the current database connection.</p>
+<pre><code>FUNCTION Changes () AS LONG
+</code></pre>
+<h4 id="return-value-17">Return value</h4>
+<p>The number of changes.</p>
+<h4 id="ks">ks</h4>
+<p>Only changes that are directly specified by the INSERT, UPDATE, or DELETE statement are counted. Auxiliary changes caused by triggers or foreign key actions are not counted. Use the <strong>Changes</strong> method to find the total number of changes including changes caused by triggers and foreign key actions.</p>
+<p>Changes to a view that are simulated by an INSTEAD OF trigger are not counted. Only real table changes are counted.</p>
+<p>A &quot;row change&quot; is a change to a single row of a single table caused by an INSERT, DELETE, or UPDATE statement. Rows that are changed as side effects of REPLACE constraint resolution, rollback, ABORT processing, DROP TABLE, or by any other mechanisms do not count as direct row changes.</p>
+<p>A &quot;trigger context&quot; is a scope of execution that begins and ends with the script of a trigger. Most SQL statements are evaluated outside of any trigger. This is the &quot;top level&quot; trigger context. If a trigger fires from the top level, a new trigger context is entered for the duration of that one trigger. Subtriggers create subcontexts for their duration.</p>
+<p>Calling <strong>Exec</strong> or <strong>Step_</strong> recursively does not create a new trigger context.</p>
+<p>This method returns the number of direct row changes in the most recent INSERT, UPDATE, or DELETE statement within the same trigger context.</p>
+<p>Thus, when called from the top level, this function returns the number of changes in the most recent INSERT, UPDATE, or DELETE that also occurred at the top level. Within the body of a trigger, the <strong>Changes</strong> method can be called to find the number of changes in the most recently completed INSERT, UPDATE, or DELETE statement within the body of the same trigger. However, the number returned does not include changes caused by subtriggers since those have their own context.</p>
+<p>If a separate thread makes changes on the same database connection while <strong>Changes</strong> is running then the value returned is unpredictable and not meaningful.</p>
+<h1 id="closedb"><a name="CloseDb"></a>CloseDb</h1>
+<p>Closes the database.</p>
+<pre><code>FUNCTION CloseDb () AS LONG
+</code></pre>
+<h4 id="return-value-18">Return value</h4>
+<p>SQLITE_OK if the sqlite3 object is successfully destroyed and all associated resources are deallocated.</p>
+<h4 id="remarks-12">Remarks</h4>
+<p>Applications must finalize all prepared statements and close all BLOB handles associated with the sqlite3 object prior to attempting to close the object. If <strong>CloseDb</strong> is called on a database connection that still has outstanding prepared statements or BLOB handles, then it returns SQLITE_BUSY.</p>
+<p>If <strong>CloseDb</strong> is invoked while a transaction is open, the transaction is automatically rolled back.</p>
+<h1 id="errcode"><a name="ErrCode"></a>ErrCode</h1>
+<p>Returns the numeric result code for the most recent failed sqlite3 call associated with a database connection. If a prior API call failed but the most recent API call succeeded, the return value from <strong>ErrCode</strong> is undefined.</p>
+<pre><code>FUNCTION ErrCode () AS LONG
+</code></pre>
+<h4 id="return-value-19">Return value</h4>
+<p>The error code.</p>
+<h4 id="remarks-13">Remarks</h4>
+<p>When the serialized threading mode is in use, it might be the case that a second error occurs on a separate thread in between the time of the first error and the call to these functions. When that happens, the second error will be reported since these functions always report the most recent result. To avoid this, each thread can obtain exclusive use of the database connection by invoking <strong>sqlite3_mutex_enter</strong>(<em>sqlite3_db_mutex(D)</em>) before beginning to use D and invoking <strong>sqlite3_mutex_leave</strong>(<em>sqlite3_db_mutex(D)</em>) after all calls to the functions listed here are completed.</p>
+<p>If a function fails with SQLITE_MISUSE, that means the function was invoked incorrectly by the application. In that case, the error code and message may or may not be set.</p>
+<h1 id="errmsg"><a name="ErrMsg"></a>ErrMsg</h1>
+<p>Returns English-language text that describes the error.</p>
+<pre><code>FUNCTION ErrMsg () AS STRING
+</code></pre>
+<h4 id="return-value-20">Return value</h4>
+<p>A string containing a description of the error.</p>
+<h4 id="remarks-14">Remarks</h4>
+<p>When the serialized threading mode is in use, it might be the case that a second error occurs on a separate thread in between the time of the first error and the call to these functions. When that happens, the second error will be reported since these functions always report the most recent result. To avoid this, each thread can obtain exclusive use of the database connection by invoking <strong>sqlite3_mutex_enter</strong>(<em>sqlite3_db_mutex(D)</em>) before beginning to use D and invoking <strong>sqlite3_mutex_leave</strong>(<em>sqlite3_db_mutex(D)</em>) after all calls to the functions listed here are completed.</p>
+<p>If a function fails with SQLITE_MISUSE, that means the function was invoked incorrectly by the application. In that case, the error code and message may or may not be set.</p>
+<h1 id="exec"><a name="Exec"></a>Exec</h1>
+<p>Convenience wrapper for <strong>Prepare</strong> and <strong>Step_</strong>. To be used with queries that don't return result sets, such CREATE, UPDATE and INSERT.</p>
+<pre><code>FUNCTION Exec (BYREF wszSql AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszSql</em></td>
+<td>The SQL statement.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>SQLITE_BUSY means that the database engine was unable to acquire the database locks it needs to do its job. If the statement is a COMMIT or occurs outside of an explicit transaction, then you can retry the statement. If the statement is not a COMMIT and occurs within an explicit transaction then you should rollback the transaction before continuing.</p>
+<p>SQLITE_DONE means that the statement has finished executing successfully. <strong>Step_</strong> should not be called again on this virtual machine without first calling Reset to reset the virtual machine back to its initial state.</p>
+<p>SQLITE_ERROR means that a run-time error (such as a constraint violation) has occurred. Step should not be called again on the cirtual machine. More information may be found by calling <strong>ErrMsg</strong>.</p>
+<h1 id="extendederrcode"><a name="ExtendedErrCode"></a>ExtendedErrCode</h1>
+<p>Gets the extended error code associated with this dabatase connection.</p>
+<pre><code>FUNCTION ExtendedErrCode () AS LONG
+</code></pre>
+<h1 id="extendedresultcodes"><a name="ExtendedResultCodes"></a>ExtendedResultCodes</h1>
+<p>Enables or disables the extended result codes feature of SQLite. The extended result codes are disabled by default for historical compatibility.</p>
+<pre><code>FUNCTION ExtendedResultCodes (BYVAL onoff AS BOOLEAN) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>onoff</em></td>
+<td>TRUE to enable; FALSE to disable.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>SQLITE_OK (0) or an error code.</p>
+<h1 id="hdbc"><a name="hDbc"></a>hDbc</h1>
+<p>Gets/sets the database handle.</p>
+<pre><code>PROPERTY hDbc () AS sqlite3 PTR
+PROPERTY hDbc (pDbc AS sqlite3 PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hDbc</em></td>
+<td>The database handle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>The database handle.</p>
+<h1 id="interrupt"><a name="Interrupt"></a>Interrupt</h1>
+<p>This function causes any pending database operation to abort and return at its earliest opportunity. This function is typically called in response to a user action such as pressing &quot;Cancel&quot; or Ctrl-C where the user wants a long query operation to halt immediately.</p>
+<pre><code>SUB Interrupt
+</code></pre>
+<h4 id="remarks-15">Remarks</h4>
+<p>It is safe to call this function from a thread different from the thread that is currently running the database operation. But it is not safe to call this function with a database connection that is closed or might close before <strong>Interrupt</strong> returns.</p>
+<p>If an SQL operation is very nearly finished at the time when <strong>Interrupt</strong> is called, then it might not have an opportunity to be interrupted and might continue to completion.</p>
+<p>An SQL operation that is interrupted will return SQLITE_INTERRUPT. If the interrupted SQL operation is an INSERT, UPDATE, or DELETE that is inside an explicit transaction, then the entire transaction will be rolled back automatically.</p>
+<p>The <strong>Interrupt</strong> call is in effect until all currently running SQL statements on database connection complete. Any new SQL statements that are started after the <strong>Interrupt</strong> call and before the running statements reaches zero are interrupted as if they had been running prior to the <strong>Interrupt</strong> call. New SQL statements that are started after the running statement count reaches zero are not effected by the <strong>Interrupt</strong>. A call to <strong>Interrupt</strong> that occurs when there are no running SQL statements is a no-op and has no effect on SQL statements that are started after the <strong>Interrupt</strong> call returns.</p>
+<p>If the database connection closes while <strong>Interrupt</strong> is running then bad things will likely happen.</p>
+<h1 id="lastinsertrowid"><a name="LastInsertRowId"></a>LastInsertRowId</h1>
+<p>Returns the rowid of the most recent successful INSERT into the database from the database connection in the first argument.</p>
+<pre><code>FUNCTION LastInsertRowId () AS sqlite3_int64
+</code></pre>
+<h4 id="return-value-24">Return value</h4>
+<p>The rowid of the most recent successful INSERT into the database from the database connection in the first argument.</p>
+<h4 id="remarks-16">Remarks</h4>
+<p>Each entry in an SQLite table has a unique 64-bit signed integer key called the &quot;rowid&quot;. The rowid is always available as an undeclared column named ROWID, OID, or <em>ROWID</em> as long as those names are not also used by explicitly declared columns. If the table has a column of type INTEGER PRIMARY KEY then that column is another alias for the rowid.</p>
+<p>This function returns the rowid of the most recent successful INSERT into the database from the database connection in the first argument. As of SQLite version 3.7.7, this functions records the last insert rowid of both ordinary tables and virtual tables. If no successful INSERTs have ever occurred on that database connection, zero is returned.</p>
+<p>If an INSERT occurs within a trigger or within a virtual table method, then this function will return the rowid of the inserted row as long as the trigger or virtual table method is running. But once the trigger or virtual table method ends, the value returned by this function reverts to what it was before the trigger or virtual table method began.</p>
+<p>An INSERT that fails due to a constraint violation is not a successful INSERT and does not change the value returned by this function. Thus INSERT OR FAIL, INSERT OR IGNORE, INSERT OR ROLLBACK, and INSERT OR ABORT make no changes to the return value of this function when their insertion fails. When INSERT OR REPLACE encounters a constraint violation, it does not fail. The INSERT continues to completion after deleting rows that caused the constraint problem so INSERT OR REPLACE will always change the return value of this interface.</p>
+<p>For the purposes of this function, an INSERT is considered to be successful even if it is subsequently rolled back.</p>
+<p>This function is accessible to SQL statements via the <strong>last_insert_rowid</strong> SQL function.</p>
+<p>If a separate thread performs a new INSERT on the same database connection while the <strong>LastInsertRowid</strong> function is running and thus changes the last insert rowid, then the value returned by <strong>LastInsertRowid</strong> is unpredictable and might not equal either the old or the new last insert rowid.</p>
+<h1 id="limit"><a name="Limit"></a>Limit</h1>
+<p>This function allows the size of various constructs to be limited on a connection by connection basis.</p>
+<pre><code>FUNCTION Limit (BYVAL id AS LONG, BYVAL newVal AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>id</em></td>
+<td>One of the limit categories that define a class of constructs to be size limited.</td>
+</tr>
+<tr class="even">
+<td><em>newVal</em></td>
+<td>The the new limit for that construct.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-25">Return value</h4>
+<p>The prior value of the limit.</p>
+<h4 id="remarks-17">Remarks</h4>
+<p>If the new limit is a negative number, the limit is unchanged. For each limit category SQLITE_LIMIT_NAME there is a hard upper bound set at compile-time by a C preprocessor macro called SQLITE_MAX_NAME. (The &quot;<em>LIMIT</em>&quot; in the name is changed to &quot;<em>MAX</em>&quot;.) Attempts to increase a limit above its hard upper bound are silently truncated to the hard upper bound.</p>
+<p>Regardless of whether or not the limit was changed, the <strong>Limit</strong> interface returns the prior value of the limit. Hence, to find the current value of a limit without changing it, simply invoke this interface with the third parameter set to -1.</p>
+<p>Run-time limits are intended for use in applications that manage both their own internal database and also databases that are controlled by untrusted external sources. An example application might be a web browser that has its own databases for storing history and separate databases controlled by JavaScript applications downloaded off the Internet. The internal databases can be given the large, default limits. Databases managed by external sources can be given much smaller limits designed to prevent a denial of service attack.</p>
+<p>New run-time limit categories may be added in future releases.</p>
+<h1 id="openblob"><a name="OpenBlob"></a>OpenBlob</h1>
+<p>This function opens a handle to the BLOB located in row <em>iRow</em>, column <em>szColumnName</em>, table <em>szTableName</em> in database <em>szDbName</em>; in other words, the same BLOB that would be selected by:</p>
+<pre><code>SELECT szColumn FROM szDb.szTable WHERE rowid = qRow;
+</code></pre>
+<pre><code>FUNCTION OpenBlob (BYREF szDbName AS ZSTRING, BYREF szTableName AS ZSTRING, _
+   BYREF szColumnName AS ZSTRING, BYVAL iRow AS sqlite3_int64, _
+   BYVAL flags AS LONG = 0) AS sqlite3_blob PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>szDbName</em></td>
+<td>The database name. Note that the database name is not the filename that contains the database but rather the symbolic name of the database that appears after the AS keyword when the database is connected using ATTACH. For the main database file, the database name is &quot;main&quot;. For TEMP tables, the database name is &quot;temp&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>szTableName</em></td>
+<td>The table name.</td>
+</tr>
+<tr class="odd">
+<td><em>szColumnName</em></td>
+<td>The column name.</td>
+</tr>
+<tr class="even">
+<td><em>iRow</em></td>
+<td>The row number. If the row that a BLOB handle points to is modified by an UPDATE, DELETE, or by ON CONFLICT side-effects then the BLOB handle is marked as &quot;expired&quot;. This is true if any column of the row is changed, even a column other than the one the BLOB handle is open on. Calls to <strong>BlobRead</strong> and <strong>BlobWrite</strong> for an expired BLOB handle fail with a return code of SQLITE_ABORT. Changes written into a BLOB prior to the BLOB expiring are not rolled back by the expiration of the BLOB. Such changes will eventually commit if the transaction continues to completion.</td>
+</tr>
+<tr class="odd">
+<td><em>flags</em></td>
+<td>If the flags parameter is non-zero, then the BLOB is opened for read and write access. If it is zero, the BLOB is opened for read access. It is not possible to open a column that is part of an index or primary key for writing. If foreign key constraints are enabled, it is not possible to open a column that is part of a child key for writing.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-26">Return value</h4>
+<p>On success, the new BLOB handle is returned. On failure, the returned pointer will be null. To get the error code, call <strong>GetLastResult</strong>.</p>
+<h4 id="remarks-18">Remarks</h4>
+<p>Use the <strong>BlobBytes</strong> function to determine the size of the opened blob. The size of a blob may not be changed by this function. Use the UPDATE SQL command to change the size of a blob.</p>
+<p>The <strong>BindZeroblob</strong> and <strong>ResultZeroblob</strong> functions and the built-in zeroblob SQL function can be used, if desired, to create an empty, zero-filled blob in which to read or write using this function.</p>
+<p>To avoid a resource leak, every open BLOB handle should eventually be released by a call to *<em>CloseBlob</em>.</p>
+<h1 id="opendb"><a name="OpenDb"></a>OpenDb</h1>
+<p>Opens an SQLite database file as specified by the filename argument.</p>
+<pre><code>FUNCTION OpenDb (BYREF wszFileName AS CONST WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>The database filename.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-27">Return value</h4>
+<p>Returns SQLITE_OK if successful or an error code otherwise. The <strong>ErrMsg</strong> methods can be used to obtain an English language description of the error following a failure of the <strong>OpenDb</strong> method.</p>
+<h4 id="remarks-19">Remarks</h4>
+<p>If the filename is &quot;:memory:&quot;, then a private, temporary in-memory database is created for the connection. This in-memory database will vanish when the database connection is closed. Future versions of SQLite might make use of additional special filenames that begin with the &quot;:&quot; character. It is recommended that when a database filename actually does begin with a &quot;:&quot; character you should prefix the filename with a pathname such as &quot;./&quot; to avoid ambiguity.</p>
+<p>If the filename is an empty string, then a private, temporary on-disk database will be created. This private database will be automatically deleted as soon as the database connection is closed.</p>
+<h1 id="prepare"><a name="Prepare"></a>Prepare</h1>
+<p>Creates a new prepared statement object.</p>
+<pre><code>FUNCTION Prepare (BYREF wszSql AS WSTRING) AS sqlite3_stmt PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszSql</em></td>
+<td>The SQL statement to be compiled.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-28">Return value</h4>
+<p>An sqlite3_stmt pointer.</p>
+<h1 id="progresshandler"><a name="ProgressHandler"></a>ProgressHandler</h1>
+<p>The <strong>ProgressHandler</strong> method causes a callback function to be invoked periodically during long running calls to <strong>Step_</strong> and <strong>GetRow</strong> for a database connection. An example use for this interface is to keep a GUI updated during a large query.</p>
+<pre><code>SUB ProgressHandler (BYVAL nOps AS LONG, BYVAL pCallback AS ANY PTR, BYVAL pArg AS ANY PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nOps</em></td>
+<td>Number of virtual machine instructions that are evaluated between successive invocations of the callback.</td>
+</tr>
+<tr class="even">
+<td><em>pCallback</em></td>
+<td>Pointer to the callback function.</td>
+</tr>
+<tr class="odd">
+<td><em>pArg</em></td>
+<td>Data that is passed through as the only parameter to the callback function.</td>
+</tr>
+</tbody>
+</table>
+<p>Callback function prototype:</p>
+<pre><code>FUNCTION sqlite3_progress_handler_callback CDECL (BYVAL pArg AS ANY PTR) AS LONG
+</code></pre>
+<h4 id="remarks-20">Remarks</h4>
+<p>Only a single progress handler may be defined at one time per database connection; setting a new progress handler cancels the old one. Setting parameter pCallBack to NULL disables the progress handler. The progress handler is also disabled by setting pCallBack to a value less than 1.</p>
+<p>If the progress callback returns non-zero, the operation is interrupted. This feature can be used to implement a &quot;Cancel&quot; button on a GUI progress dialog box.</p>
+<p>The progress handler callback must not do anything that will modify the database connection that invoked the progress handler. Note that <strong>Prepare</strong> and <strong>Step_</strong> both modify their database connections for the meaning of &quot;modify&quot; in this paragraph.</p>
+<h1 id="releasememory-1"><a name="ReleaseMemory2"></a>ReleaseMemory</h1>
+<p>Attempts to free as much heap memory as possible from the specified database connection. Unlike <strong>ReleaseMemory</strong>, this function is effect even when then SQLITE_ENABLE_MEMORY_MANAGEMENT compile-time option is omitted.</p>
+<pre><code>FUNCTION ReleaseMemory () AS LONG
+</code></pre>
+<h4 id="return-value-29">Return value</h4>
+<p>The number of bytes freed.</p>
+<h1 id="status-1"><a name="Status2"></a>Status</h1>
+<p>Retrieves runtime status information about a single database connection.</p>
+<pre><code>FUNCTION Status (BYVAL op AS LONG, BYREF pCurrent AS LONG, BYREF pHighwater AS LONG, _
+   BYVAL resetFlag AS BOOLEAN = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>op</em></td>
+<td>An integer constant, taken from the set of SQLITE_DBSTATUS options, that determines the parameter to interrogate.</td>
+</tr>
+<tr class="even">
+<td><em>pCurrent</em></td>
+<td>The current value of the requested parameter.</td>
+</tr>
+<tr class="odd">
+<td><em>pHighwater</em></td>
+<td>The highest instantaneous value.</td>
+</tr>
+<tr class="even">
+<td><em>resetFlag</em></td>
+<td>TRUE or FALSE. If true, then the highest instantaneous value is reset back down to the current value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="sqlite_dbstatus-options">SQLITE_DBSTATUS options</h4>
+<pre><code>SQLITE_DBSTATUS_LOOKASIDE_USED      = 0
+SQLITE_DBSTATUS_CACHE_USED          = 1
+SQLITE_DBSTATUS_SCHEMA_USED         = 2
+SQLITE_DBSTATUS_STMT_USED           = 3
+SQLITE_DBSTATUS_LOOKASIDE_HIT       = 4
+SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE = 5
+SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL = 6
+SQLITE_DBSTATUS_CACHE_HIT           = 7
+SQLITE_DBSTATUS_CACHE_MISS          = 8
+SQLITE_DBSTATUS_CACHE_WRITE         = 9
+</code></pre>
+<h4 id="return-value-30">Return value</h4>
+<p>SQLITE_OK (0) on success and a non-zero error code on failure.</p>
+<h1 id="totalchanges"><a name="TotalChanges"></a>TotalChanges</h1>
+<p>This function returns the number of row changes caused by INSERT, UPDATE or DELETE statements since the database connection was opened.</p>
+<pre><code>FUNCTION TotalChanges () AS LONG
+</code></pre>
+<h4 id="return-value-31">Return value</h4>
+<p>The number of changes.</p>
+<h4 id="remarks-21">Remarks</h4>
+<p>The count returned by <strong>TotalChanges</strong> includes all changes from all trigger contexts and changes made by foreign key actions. However, the count does not include changes used to implement REPLACE constraints, do rollbacks or ABORT processing, or DROP TABLE processing. The count does not include rows of views that fire an INSTEAD OF trigger, though if the INSTEAD OF trigger makes changes of its own, those changes are counted. The <strong>TotalChanges</strong> function counts the changes as soon as the statement that makes them is completed (when the statement handle is passed to <strong>Reset</strong> or <strong>Finalize</strong>).</p>
+<p>See also the <strong>Changes</strong> interface, the <strong>count_changes pragma</strong>, and the <strong>Changes</strong> SQL function.</p>
+<p>If a separate thread makes changes on the same database connection while <strong>Changes</strong> is running then the value returned is unpredictable and not meaningful.</p>
+<h1 id="unlocknotify"><a name="UnlockNotify"></a>UnlockNotify</h1>
+<p>When running in shared-cache mode, a database operation may fail with an SQLITE_LOCKED error if the required locks on the shared-cache or individual tables within the shared-cache cannot be obtained. This API may be used to register a callback that SQLite will invoke when the connection currently holding the required lock relinquishes it. This API is only available if the library was compiled with the SQLITE_ENABLE_UNLOCK_NOTIFY C-preprocessor symbol defined.</p>
+<pre><code>FUNCTION UnlockNotify (BYVAL pNotifyCallback AS ANY PTR, BYVAL pNotifyArg AS ANY PTR) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pNotifyCallback</em></td>
+<td>Pointer to the callback function.</td>
+</tr>
+<tr class="even">
+<td><em>pNotifyArg</em></td>
+<td>Data that is passed through the second parameter to the callback function.</td>
+</tr>
+</tbody>
+</table>
+<p>Return value</p>
+<p>Unless deadlock is detected (see below), UnlockNotify always returns SQLITE_OK.</p>
+<h4 id="remarks-22">Remarks</h4>
+<p>Shared-cache locks are released when a database connection concludes its current transaction, either by committing it or rolling it back.</p>
+<p>When a connection (known as the blocked connection) fails to obtain a shared-cache lock and SQLITE_LOCKED is returned to the caller, the identity of the database connection (the blocking connection) that has locked the required resource is stored internally. After an application receives an SQLITE_LOCKED error, it may call the <strong>UnlockNotify</strong> method with the blocked connection handle as the first argument to register for a callback that will be invoked when the blocking connections current transaction is concluded. The callback is invoked from within the <strong>Step_</strong> or <strong>Close</strong> call that concludes the blocking connections transaction.</p>
+<p>If <strong>UnlockNotify</strong> is called in a multi-threaded application, there is a chance that the blocking connection will have already concluded its transaction by the time <strong>UnlockNotify</strong> is invoked. If this happens, then the specified callback is invoked immediately, from within the call to <strong>UnlockNotify</strong>.</p>
+<p>If the blocked connection is attempting to obtain a write-lock on a shared-cache table, and more than one other connection currently holds a read-lock on the same table, then SQLite arbitrarily selects one of the other connections to use as the blocking connection.</p>
+<p>There may be at most one unlock-notify callback registered by a blocked connection. If <strong>UnlockNotify</strong> is called when the blocked connection already has a registered unlock-notify callback, then the new callback replaces the old. If <strong>UnlockNotify</strong> is called with a NULL pointer as its second argument, then any existing unlock-notify callback is canceled. The blocked connections unlock-notify callback may also be canceled by closing the blocked connection using <strong>Close</strong>.</p>
+<p>The unlock-notify callback is not reentrant. If an application invokes any <strong>sqlite3_xxx</strong> API functions from within an unlock-notify callback, a crash or deadlock may be the result.</p>
+<h4 id="callback-invocation-details">Callback Invocation Details</h4>
+<p>When an unlock-notify callback is registered, the application provides a single void* pointer that is passed to the callback when it is invoked. However, the signature of the callback function allows SQLite to pass it an array of void* context pointers. The first argument passed to an unlock-notify callback is a pointer to an array of void* pointers, and the second is the number of entries in the array.</p>
+<p>When a blocking connections transaction is concluded, there may be more than one blocked connection that has registered for an unlock-notify callback. If two or more such blocked connections have specified the same callback function, then instead of invoking the callback function multiple times, it is invoked once with the set of void* context pointers specified by the blocked connections bundled together into an array. This gives the application an opportunity to prioritize any actions related to the set of unblocked database connections.</p>
+<h4 id="deadlock-detection">Deadlock Detection</h4>
+<p>Assuming that after registering for an unlock-notify callback a database waits for the callback to be issued before taking any further action (a reasonable assumption), then using this API may cause the application to deadlock. For example, if connection X is waiting for connection Y's transaction to be concluded, and similarly connection Y is waiting on connection X's transaction, then neither connection will proceed and the system may remain deadlocked indefinitely.</p>
+<p>To avoid this scenario, the <strong>UnlockNotify</strong> performs deadlock detection. If a given call to <strong>UnlockNotify</strong> would put the system in a deadlocked state, then SQLITE_LOCKED is returned and no unlock-notify callback is registered. The system is said to be in a deadlocked state if connection A has registered for an unlock-notify callback on the conclusion of connection B's transaction, and connection B has itself registered for an unlock-notify callback when connection A's transaction is concluded. Indirect deadlock is also detected, so the system is also considered to be deadlocked if connection B has registered for an unlock-notify callback on the conclusion of connection C's transaction, where connection C is waiting on connection A. Any number of levels of indirection are allowed.</p>
+<h4 id="the-&quot;drop-table&quot;-exception">The &quot;DROP TABLE&quot; Exception</h4>
+<p>When a call to <strong>Step_</strong> returns SQLITE_LOCKED, it is almost always appropriate to call <strong>UnlockNotify</strong>. There is however, one exception. When executing a &quot;DROP TABLE&quot; or &quot;DROP INDEX&quot; statement, SQLite checks if there are any currently executing SELECT statements that belong to the same connection. If there are, SQLITE_LOCKED is returned. In this case there is no &quot;blocking connection&quot;, so invoking <strong>UnlockNotify</strong> results in the unlock-notify callback being invoked immediately. If the application then re-attempts the &quot;DROP TABLE&quot; or &quot;DROP INDEX&quot; query, an infinite loop might be the result.</p>
+<p>One way around this problem is to check the extended error code returned by an <strong>Step_</strong> call. If there is a blocking connection, then the extended error code is set to SQLITE_LOCKED_SHAREDCACHE. Otherwise, in the special &quot;DROP TABLE/INDEX&quot; case, the extended error code is just SQLITE_LOCKED.</p>
+<h1 id="bindblob"><a name="BindBlob"></a>BindBlob</h1>
+<p>Binds a blob with the statement.</p>
+<pre><code>FUNCTION BindBlob (BYVAL idx AS LONG, BYVAL pValue AS ANY PTR, BYVAL numBytes AS LONG, _
+   BYVAL pDestructor AS ANY PTR = NULL) AS LONG
+FUNCTION BindBlob64 (BYVAL idx AS LONG, BYVAL pValue AS ANY PTR, BYVAL numBytes AS sqlite3_uint64, _
+   BYVAL pDestructor AS ANY PTR = NULL) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+<tr class="even">
+<td><em>pValue</em></td>
+<td>The value to bind to the parameter.</td>
+</tr>
+<tr class="odd">
+<td><em>numBytes</em></td>
+<td>The number of bytes in the parameter. To be clear: the value is the number of bytes in the value, not the number of characters.</td>
+</tr>
+<tr class="even">
+<td><em>pDestructor</em></td>
+<td>A destructor used to dispose of the BLOB after SQLite has finished with it. The destructor is called to dispose of the BLOB even if the call to <strong>BindBlob</strong> fails. If this argument is the special value <strong>SQLITE_STATIC</strong>, then SQLite assumes that the information is in static, unmanaged space and does not need to be freed. If this argument has the value <strong>SQLITE_TRANSIENT</strong>, then SQLite makes its own private copy of the data immediately, before the <strong>BindBlob</strong> function returns.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-32">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if malloc fails.</p>
+<h4 id="remarks-23">Remarks</h4>
+<p>If <strong>BindBlob</strong> is called with a NULL pointer for the prepared statement or with a prepared statement for which <strong>Step_</strong> has been called more recently than <strong>Reset</strong>, then the call will return SQLITE_MISUSE. If <strong>BindBlob</strong> is passed a prepared statement that has been finalized, the result is undefined and probably harmful.</p>
+<p>Bindings are not cleared by the <strong>Reset</strong> function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="binddouble"><a name="BindDouble"></a>BindDouble</h1>
+<p>Binds a double value with the statement.</p>
+<pre><code>FUNCTION BindDouble (BYVAL idx AS LONG, BYVAL dblValue AS DOUBLE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>îdx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+<tr class="even">
+<td><em>dblValue</em></td>
+<td>The value to bind to the parameter.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-33">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if <strong>malloc</strong> fails.</p>
+<h4 id="remarks-24">Remarks</h4>
+<p>Bindings are not cleared by the <strong>Reset</strong> function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="bindlong"><a name="BindLong"></a>BindLong</h1>
+<p>Binds a long integer value with the statement.</p>
+<pre><code>FUNCTION BindLong (BYVAL idx AS LONG, BYVAL longValue AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>îdx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+<tr class="even">
+<td><em>longValue</em></td>
+<td>The value to bind to the parameter.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-34">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if <strong>malloc</strong> fails.</p>
+<h4 id="remarks-25">Remarks</h4>
+<p>Bindings are not cleared by the <strong>Reset</strong> function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="bindlongint"><a name="BindLongInt"></a>BindLongInt</h1>
+<p>Binds a longint value with the statement.</p>
+<pre><code>FUNCTION BindLongInt (BYVAL idx AS LONG, BYVAL longintValue AS sqlite3_int64) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>îdx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+<tr class="even">
+<td><em>longintValue</em></td>
+<td>The value to bind to the parameter.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-35">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if <strong>malloc</strong> fails.</p>
+<h4 id="remarks-26">Remarks</h4>
+<p>Bindings are not cleared by the <strong>Reset</strong> function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="bindnull"><a name="BindNull"></a>BindNull</h1>
+<p>Binds a null value with the statement.</p>
+<pre><code>FUNCTION BindNull (BYVAL idx AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>îdx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-36">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if <strong>malloc</strong> fails.</p>
+<h4 id="remarks-27">Remarks</h4>
+<p>Bindings are not cleared by the <strong>Reset</strong> function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="bindparametercount"><a name="BindParameterCount"></a>BindParameterCount</h1>
+<p>This method can be used to find the number of SQL parameters in a prepared statement. SQL parameters are tokens of the form &quot;?&quot;, &quot;?NNN&quot;, &quot;:AAA&quot;, &quot;$AAA&quot;, or &quot;@AAA&quot; that serve as placeholders for values that are bound to the parameters at a later time.</p>
+<pre><code>FUNCTION BindParameterCount () AS LONG
+</code></pre>
+<h4 id="return-value-37">Return value</h4>
+<p>The number of SQL parameters in a prepared statement.</p>
+<h4 id="remarks-28">Remarks</h4>
+<p>This function actually returns the index of the largest (rightmost) parameter. For all forms except ?NNN, this will correspond to the number of unique parameters. If parameters of the ?NNN form are used, there may be gaps in the list.</p>
+<h1 id="bindparameterindex"><a name="BindParameterIndex"></a>BindParameterIndex</h1>
+<p>Returns the index of an SQL parameter given its name. The index value returned is suitable for use as the second parameter to the <strong>Bind_*</strong> methods. A zero is returned if no matching parameter is found.</p>
+<pre><code>FUNCTION BindParameterIndex (BYREF szName AS ZSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>szName</em></td>
+<td>The parameter name. Must be given in UTF-8 even if the original statement was prepared from UTF-16 text using <strong>Prepare</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-38">Return value</h4>
+<p>The index of the parameter.</p>
+<h1 id="bindparametername"><a name="BindParameterName"></a>BindParameterName</h1>
+<p>Returns the name of the N-th SQL parameter in the prepared statement P. SQL parameters of the form &quot;?NNN&quot; or &quot;:AAA&quot; or &quot;@AAA&quot; or &quot;$AAA&quot; have a name which is the string &quot;?NNN&quot; or &quot;:AAA&quot; or &quot;@AAA&quot; or &quot;$AAA&quot; respectively. In other words, the initial &quot;:&quot; or &quot;$&quot; or &quot;@&quot; or &quot;?&quot; is included as part of the name. Parameters of the form &quot;?&quot; without a following integer have no name and are referred to as &quot;nameless&quot; or &quot;anonymous parameters&quot;.</p>
+<pre><code>FUNCTION BindParameterName (BYVAL idx AS LONG) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>The parameter index. The first host parameter has an index of 1, not 0.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-39">Return value</h4>
+<p>If the value <em>idx</em> is out of range or if the idx-th parameter is nameless, then NULL is returned. The returned string is always in UTF-8 encoding even if the named parameter was originally specified as UTF-16 in Prepare.</p>
+<h1 id="bindtext"><a name="BindText"></a>BindText</h1>
+<p>Binds a text value with the statement.</p>
+<pre><code>FUNCTION BindText (BYVAL idx AS LONG, BYREF wszValue AS WSTRING, _
+   BYVAL pDestructor AS ANY PTR = NULL) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>îdx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+<tr class="even">
+<td><em>wszValue</em></td>
+<td>The value to bind to the parameter.</td>
+</tr>
+<tr class="odd">
+<td><em>pDestructor</em></td>
+<td>A destructor used to dispose of the BLOB after SQLite has finished with it. The destructor is called to dispose of the BLOB even if the call to <strong>BindBlob</strong> fails. If this argument is the special value <strong>SQLITE_STATIC</strong>, then SQLite assumes that the information is in static, unmanaged space and does not need to be freed. If this argument has the value <strong>SQLITE_TRANSIENT</strong>, then SQLite makes its own private copy of the data immediately, before the <strong>BindBlob</strong> function returns.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-40">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if malloc fails.</p>
+<h4 id="remarks-29">Remarks</h4>
+<p>If <strong>BindText</strong> is called with a NULL pointer for the prepared statement or with a prepared statement for which <strong>Step_</strong> has been called more recently than <strong>Reset</strong>, then the call will return SQLITE_MISUSE. If <strong>BindText</strong> is passed a prepared statement that has been finalized, the result is undefined and probably harmful.</p>
+<p>Bindings are not cleared by the Reset function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="bindzeroblob"><a name="BindZeroBlob"></a>BindZeroBlob</h1>
+<p>Binds a BLOB of length <em>numBytes</em> that is filled with zeroes.</p>
+<pre><code>FUNCTION BindZeroBlob (BYVAL idx AS LONG, BYVAL numBytes AS LONG) AS LONG
+FUNCTION BindZeroBlob64 (BYVAL idx AS LONG, BYVAL numBytes AS sqlite3_uint64) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>îdx</em></td>
+<td>Index of the SQL parameter to be set. The leftmost SQL parameter has an index of 1. When the same named SQL parameter is used more than once, second and subsequent occurrences have the same index as the first occurrence. The index for named parameters can be looked up using the <strong>BindParameterIndex</strong> method if desired. The index for &quot;?NNN&quot; parameters is the value of NNN. The NNN value must be between 1 and the <strong>Limit</strong> parameter SQLITE_LIMIT_VARIABLE_NUMBER (default value: 999).</td>
+</tr>
+<tr class="even">
+<td><em>numBytes</em></td>
+<td>The number of bytes.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-41">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong. SQLITE_RANGE is returned if the parameter index is out of range. SQLITE_NOMEM is returned if <strong>malloc</strong> fails.</p>
+<h4 id="remarks-30">Remarks</h4>
+<p>The <strong>BindZeroblob</strong> function binds a BLOB of length <em>numBytes</em> that is filled with zeroes. A zeroblob uses a fixed amount of memory (just an integer to hold its size) while it is being processed. Zeroblobs are intended to serve as placeholders for BLOBs whose content is later written using incremental BLOB I/O functions. A negative value for the zeroblob results in a zero-length BLOB.</p>
+<p>Bindings are not cleared by the <strong>Reset</strong> function. Unbound parameters are interpreted as NULL.</p>
+<h1 id="busy"><a name="Busy"></a>Busy</h1>
+<p>Returns true if the prepared statement has been stepped at least once using <strong>Step_</strong> but has not run to completion and/or has not been reset using <strong>Reset</strong>.</p>
+<pre><code>FUNCTION Busy () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-42">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="clearbindings"><a name="ClearBindings"></a>ClearBindings</h1>
+<p>Sets all the parameters in the compiled SQL statement to NULL. Contrary to the intuition of many, <strong>Reset</strong> does not reset the bindings on a prepared statement. Use this function to reset all host parameters to NULL.</p>
+<pre><code>FUNCTION ClearBindings () AS LONG
+</code></pre>
+<h4 id="return-value-43">Return value</h4>
+<p>SQLITE_OK on success or an error code if anything goes wrong.</p>
+<h1 id="columnblob"><a name="ColumnBlob"></a>ColumnBlob</h1>
+<p>Returns information about a single column of the current result row of a query.</p>
+<pre><code>FUNCTION ColumnBlob (BYVAL nCol AS LONG) AS ANY PTR
+FUNCTION ColumnBlob (BYREF wszColName AS WSTRING) AS ANY PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or the name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-44">Return value</h4>
+<p>The column value as a pointer to a blob.</p>
+<h4 id="remarks-31">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. <strong>ColumnLong</strong> may only be called when the most recent call to Step_ has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while <strong>ColumnBlob</strong> is pending, then the result is undefined.</p>
+<p>The return value from <strong>ColumnBlob</strong> for a zero-length BLOB is a NULL pointer.</p>
+<p><strong>ColumnBlob</strong> attempts to convert the value where appropriate. The following table details the conversions that are applied:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Internal Type</th>
+<th>Requested Type</th>
+<th>Conversion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>BLOB</td>
+<td>Result is NULL pointer</td>
+</tr>
+<tr class="even">
+<td>INTEGER</td>
+<td>BLOB</td>
+<td>Use atoi()</td>
+</tr>
+<tr class="odd">
+<td>FLOAT</td>
+<td>BLOB</td>
+<td>Use atof()</td>
+</tr>
+<tr class="even">
+<td>TEXT</td>
+<td>BLOB</td>
+<td>No change</td>
+</tr>
+</tbody>
+</table>
+<p>The table above makes reference to standard C library functions atoi() and atof(). SQLite does not really use these functions. It has its own equivalent internal functions. The atoi() and atof() names are used in the table for brevity and because they are familiar to most C programmers.</p>
+<p>The pointer returned is valid until <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> is called. The memory space used to hold BLOBs is freed automatically. Do not pass the pointers returned by <strong>ColumnBlob</strong> into <strong>Free</strong>.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is a NULL pointer. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="columnbytes"><a name="ColumnBytes"></a>ColumnBytes</h1>
+<p>Returns the number of bytes of the column value.</p>
+<pre><code>FUNCTION ColumnBytes (BYVAL nCol AS LONG) AS LONG
+FUNCTION ColumnBytes (BYREF wszColName AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or the name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-45">Return value</h4>
+<p>The number of bytes of the column value.</p>
+<h4 id="remarks-32">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. These functions may only be called when the most recent call to <strong>Step_</strong> has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while <strong>ColumnBytes</strong> is pending, then the result is undefined.</p>
+<p>If the result is a BLOB or UTF-8 string then the <strong>ColumnBytes</strong> function returns the number of bytes in that BLOB or string. If the result is a UTF-16 string, then <strong>ColumnBytes</strong> converts the string to UTF-8 and then returns the number of bytes. If the result is a numeric value then <strong>ColumnBytes</strong> uses <strong>snprintf</strong> to convert that value to a UTF-8 string and returns the number of bytes in that string. If the result is NULL, then <strong>ColumnBytes</strong> returns zero.</p>
+<p>The values returned by <strong>ColumnBytes</strong> do not include the zero terminators at the end of the string. For clarity: the values returned by <strong>ColumnBytes</strong> are the number of bytes in the string, not the number of characters.</p>
+<p>Note that when type conversions occur, pointers returned by prior calls to <strong>ColumnBlob</strong> and/or, <strong>ColumnText</strong> may be invalidated.</p>
+<p>The safest and easiest to remember policy is to invoke these functions in one of the following ways:</p>
+<p><strong>ColumnText</strong> followed by <strong>ColumnBytes</strong><br> <strong>ColumnBlob</strong> followed by <strong>ColumnBytes</strong></p>
+<p>In other words, you should call <strong>ColumnText</strong> or <strong>ColumnBlob</strong> first to force the result into the desired format, then invoke <strong>ColumnBytes</strong> to find the size of the result.</p>
+<p>The pointers returned are valid until a type conversion occurs as described above, or until <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> is called. The memory space used to hold strings and BLOBs is freed automatically. Do not pass the pointers returned <strong>ColumnBlob</strong>, <strong>ColumnText</strong>, etc. into <strong>Free</strong>.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is 0. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="columncount"><a name="ColumnCount"></a>ColumnCount</h1>
+<p>Returns the number of columns in the result set returned by the prepared statement. This function returns 0 if pStmt is an SQL statement that does not return data (for example an UPDATE).</p>
+<pre><code>FUNCTION ColumnCount () AS LONG
+</code></pre>
+<h1 id="columndatabasename"><a name="ColumnDatabaseName"></a>ColumnDatabaseName</h1>
+<p>Returns the database name that is the origin of a particular result column in SELECT statement.</p>
+<pre><code>FUNCTION ColumnDatabaseName (BYVAL nCol AS LONG) AS CWSTR
+FUNCTION ColumnDatabaseName (BYREF wszColName AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The column number or name of the result set. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-46">Return value</h4>
+<p>The original un-aliased name of the database. If the column returned by the statement is an expression or subquery and is not a column value, then this functions returns an empty string.</p>
+<h4 id="remarks-33">Remarks</h4>
+<p>This function is only available if the library was compiled with the SQLITE_ENABLE_COLUMN_METADATA C-preprocessor symbol.</p>
+<p>If two or more threads call this function against the same prepared statement and column at the same time then the results are undefined.</p>
+<p>If two or more threads call one or more column metadata interfaces for the same prepared statement and result column at the same time then the results are undefined.</p>
+<h1 id="columndeclaredtype"><a name="ColumnDeclaredType"></a>ColumnDeclaredType</h1>
+<p>Returns the declared data type of a query result.</p>
+<pre><code>FUNCTION ColumnDeclaredType (BYVAL nCol AS LONG) AS CWSTR
+FUNCTION ColumnDeclaredType (BYREF wszColName AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The column number or name of the result set. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-47">Return value</h4>
+<p>The original un-aliased name of the database. If the column returned by the statement is an expression or subquery and is not a column value, then this functions returns an empty string.</p>
+<h4 id="remarks-34">Remarks</h4>
+<p>This function is only available if the library was compiled with the SQLITE_ENABLE_COLUMN_METADATA C-preprocessor symbol.</p>
+<p>If two or more threads call this function against the same prepared statement and column at the same time then the results are undefined.</p>
+<p>If two or more threads call one or more column metadata interfaces for the same prepared statement and result column at the same time then the results are undefined.</p>
+<h1 id="columndouble"><a name="ColumnDouble"></a>ColumnDouble</h1>
+<p>Returns the column value as a double.</p>
+<pre><code>FUNCTION ColumnDouble (BYVAL nCol AS LONG) AS DOUBLE
+FUNCTION ColumnDouble (BYREF wszColName AS WSTRING) AS DOUBLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-48">Return value</h4>
+<p>The column value as a double.</p>
+<h4 id="remarks-35">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. <strong>ColumnDouble</strong> may only be called when the most recent call to <strong>Step_</strong> has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while ColumnBytes is pending, then the result is undefined.</p>
+<p><strong>ColumnDouble</strong> attempts to convert the value where appropriate. The following table details the conversions that are applied:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Internal Type</th>
+<th>Requested Type</th>
+<th>Conversion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>FLOAT</td>
+<td>Result is 0.0</td>
+</tr>
+<tr class="even">
+<td>INTEGER</td>
+<td>FLOAT</td>
+<td>Convert from integer to float</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>FLOAT</td>
+<td>Use atof()</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>FLOAT</td>
+<td>Convert to TEXT then use atof()</td>
+</tr>
+</tbody>
+</table>
+<p>The table above makes reference to standard C library functions <strong>atoi</strong>() and <strong>atof</strong>(). SQLite does not really use these functions. It has its own equivalent internal functions. The <strong>atoi</strong>() and <strong>atof</strong>() names are used in the table for brevity and because they are familiar to most C programmers.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is the floating point number 0.0. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="columnlong"><a name="ColumnLong"></a>ColumnLong</h1>
+<p>Returns the column value as a long.</p>
+<pre><code>FUNCTION ColumnLong (BYVAL nCol AS LONG) AS LONG
+FUNCTION ColumnLong (BYREF wszColName AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-49">Return value</h4>
+<p>The column value as a long.</p>
+<h4 id="remarks-36">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. <strong>ColumnLong</strong> may only be called when the most recent call to <strong>Step_</strong> has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while ColumnBytes is pending, then the result is undefined.</p>
+<p><strong>ColumnLong</strong> attempts to convert the value where appropriate. The following table details the conversions that are applied:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Internal Type</th>
+<th>Requested Type</th>
+<th>Conversion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>INTEGER</td>
+<td>Result is 0</td>
+</tr>
+<tr class="even">
+<td>FLOAT</td>
+<td>INTEGER</td>
+<td>Convert from float to integer</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>INTEGER</td>
+<td>Use atoi()</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>INTEGER</td>
+<td>Convert to TEXT then use atoi()</td>
+</tr>
+</tbody>
+</table>
+<p>The table above makes reference to standard C library function <strong>atoi</strong>(). SQLite does not really use these functions. It has its own equivalent internal functions. The <strong>atoi</strong>() name are used in the table for brevity and because they are familiar to most C programmers.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is the floating point number 0.0. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="columnlongint"><a name="ColumnLongInt"></a>ColumnLongInt</h1>
+<p>Returns the column value as a longint.</p>
+<pre><code>FUNCTION ColumnLongInt (BYVAL nCol AS LONG) AS LONGINT
+FUNCTION ColumnLongInt (BYREF wszColName AS WSTRING) AS LONGINT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-50">Return value</h4>
+<p>The column value as a longint.</p>
+<h4 id="remarks-37">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. <strong>ColumnLongInt</strong> may only be called when the most recent call to <strong>Step_</strong> has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while ColumnBytes is pending, then the result is undefined.</p>
+<p><strong>ColumnLongInt</strong> attempts to convert the value where appropriate. The following table details the conversions that are applied:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Internal Type</th>
+<th>Requested Type</th>
+<th>Conversion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>INTEGER</td>
+<td>Result is 0</td>
+</tr>
+<tr class="even">
+<td>FLOAT</td>
+<td>INTEGER</td>
+<td>Convert from float to integer</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>INTEGER</td>
+<td>Use atoi()</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>INTEGER</td>
+<td>Convert to TEXT then use atoi()</td>
+</tr>
+</tbody>
+</table>
+<p>The table above makes reference to standard C library function <strong>atoi</strong>(). SQLite does not really use these functions. It has its own equivalent internal functions. The <strong>atoi</strong>() name are used in the table for brevity and because they are familiar to most C programmers.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is the floating point number 0.0. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="columnname"><a name="ColumnName"></a>ColumnName</h1>
+<p>Returns the name assigned to a particular column in the result set of a SELECT statement.</p>
+<pre><code>FUNCTION ColumnName (BYVAL nCol AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol</em></td>
+<td>The column number of the result set. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-51">Return value</h4>
+<p>The name assigned to the specified column. The name of a result column is the value of the &quot;AS&quot; clause for that column, if there is an AS clause. If there is no AS clause then the name of the column is unspecified and may change from one release of SQLite to the next.</p>
+<h1 id="columnoriginname"><a name="ColumnOriginName"></a>ColumnOriginName</h1>
+<p>Returns the column name that is the origin of a particular result column in SELECT statement.</p>
+<pre><code>FUNCTION ColumnOriginName (BYVAL nCol AS LONG) AS CWSTR
+FUNCTION ColumnOriginName (BYREF wszColName AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The column number or name of the result set. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-52">Return value</h4>
+<p>The original un-aliased name of the column. If the column returned by the statement is an expression or subquery and is not a column value, then this functions returns an empty string.</p>
+<h4 id="remarks-38">Remarks</h4>
+<p>This function is only available if the library was compiled with the SQLITE_ENABLE_COLUMN_METADATA C-preprocessor symbol.</p>
+<p>If two or more threads call this function against the same prepared statement and column at the same time then the results are undefined.</p>
+<p>If two or more threads call one or more column metadata interfaces for the same prepared statement and result column at the same time then the results are undefined.</p>
+<h1 id="columntablename"><a name="ColumnTableName"></a>ColumnTableName</h1>
+<p>Returns the table name that is the origin of a particular result column in SELECT statement.</p>
+<pre><code>FUNCTION ColumnTableName (BYVAL nCol AS LONG) AS CWSTR
+FUNCTION ColumnTableName (BYREF wszColName AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The column number or name of the result set. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-53">Return value</h4>
+<p>The original un-aliased name of the table. If the column returned by the statement is an expression or subquery and is not a column value, then this functions returns an empty string.</p>
+<h4 id="remarks-39">Remarks</h4>
+<p>This function is only available if the library was compiled with the SQLITE_ENABLE_COLUMN_METADATA C-preprocessor symbol.</p>
+<p>If two or more threads call this function against the same prepared statement and column at the same time then the results are undefined.</p>
+<p>If two or more threads call one or more column metadata interfaces for the same prepared statement and result column at the same time then the results are undefined.</p>
+<h1 id="columntext"><a name="ColumnText"></a>ColumnText</h1>
+<p>Returns the column value as a UTF-16 string.</p>
+<pre><code>FUNCTION ColumnText (BYVAL nCol AS LONG) AS CWSTR
+FUNCTION ColumnText (BYREF wszColName AS WSTRING) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCcount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-54">Return value</h4>
+<p>The column value.</p>
+<h4 id="remarks-40">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. <strong>ColumnText</strong> may only be called when the most recent call to <strong>Step_</strong> has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while ColumnBytes is pending, then the result is undefined.</p>
+<p>Strings returned by <strong>ColumnText</strong>, even empty strings, are always zero-terminated.</p>
+<p><strong>ColumnText</strong> attempts to convert the value where appropriate. The following table details the conversions that are applied:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Internal Type</th>
+<th>Requested Type</th>
+<th>Conversion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>TEXT</td>
+<td>Result is NULL pointer</td>
+</tr>
+<tr class="even">
+<td>INTEGER</td>
+<td>TEXT</td>
+<td>ASCII rendering of the integer</td>
+</tr>
+<tr class="odd">
+<td>FLOAT</td>
+<td>TEXT</td>
+<td>ASCII rendering of the float</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>TEXT</td>
+<td>Add a zero terminator if needed</td>
+</tr>
+</tbody>
+</table>
+<p>Note that when type conversions occur, pointers returned by prior calls to <strong>ColumnBlob</strong> and/or <strong>ColumnText</strong> may be invalidated. Type conversions and pointer invalidations might occur in the following cases:</p>
+<p>The initial content is a BLOB and <strong>ColumnText</strong> is called. A zero-terminator might need to be added to the string.</p>
+<p>The safest and easiest to remember policy is to invoke these functions in one of the following ways:</p>
+<p><strong>ColumnText</strong> followed by <strong>ColumnBytes</strong><br> <strong>ColumnBlob</strong> followed by <strong>ColumnBytes</strong></p>
+<p>In other words, you should call <strong>ColumnText</strong> or <strong>ColumnBlob</strong> first to force the result into the desired format, then invoke <strong>ColumnBytes</strong> to find the size of the result.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is either the integer 0, the floating point number 0.0, or a NULL pointer. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="columntype"><a name="ColumnType"></a>ColumnType</h1>
+<p>Returns the column type.</p>
+<pre><code>FUNCTION ColumnType (BYVAL nCol AS LONG) AS LONG
+FUNCTION ColumnType (BYREF wszColName AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nCol / wszColName</em></td>
+<td>The index or name of the column for which information should be returned. The leftmost column of the result set has the index 0. The number of columns in the result can be determined using <strong>ColumnCcount</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-55">Return value</h4>
+<p>The column type.</p>
+<h4 id="remarks-41">Remarks</h4>
+<p>If the SQL statement does not currently point to a valid row, or if the column index is out of range, the result is undefined. <strong>ColumnType</strong> may only be called when the most recent call to <strong>Step_</strong> has returned SQLITE_ROW and neither <strong>Reset</strong> nor <strong>Finalize</strong> have been called subsequently. If any of these functions are called after <strong>Reset</strong> or <strong>Finalize</strong> or after <strong>Step_</strong> has returned something other than SQLITE_ROW, the results are undefined. If <strong>Step_</strong> or <strong>Reset</strong> or <strong>Finalize</strong> are called from a different thread while ColumnBytes is pending, then the result is undefined.</p>
+<p>The <strong>ColumnType</strong> function returns the datatype code for the initial data type of the result column. The returned value is one of SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL. The value returned by <strong>ColumnType</strong> is only meaningful if no type conversions have occurred as described below. After a type conversion, the value returned by <strong>ColumnType</strong> is undefined. Future versions of SQLite may change the behavior of <strong>ColumnType</strong> following a type conversion.</p>
+<p>If the result is a BLOB or UTF-8 string then the <strong>ColumnBytes</strong> function returns the number of bytes in that BLOB or string. If the result is a UTF-16 string, then <strong>ColumnBytes</strong> converts the string to UTF-8 and then returns the number of bytes. If the result is a numeric value then <strong>ColumnBytes</strong> uses <strong>snprintf</strong> to convert that value to a UTF-8 string and returns the number of bytes in that string. If the result is NULL, then <strong>ColumnBytes</strong> returns zero.</p>
+<p>If the result is a BLOB or UTF-16 string then the <strong>ColumnBytes</strong> function returns the number of bytes in that BLOB or string. If the result is a numeric value then <strong>ColumnBytes</strong> uses <strong>snprintf</strong> to convert that value to a UTF-16 string and returns the number of bytes in that string. If the result is NULL, then <strong>ColumnBytes</strong> returns zero.</p>
+<p>The values returned by <strong>ColumnBytes</strong> do not include the zero terminators at the end of the string. For clarity: the values returned by <strong>ColumnBytes</strong> are the number of bytes in the string, not the number of characters.</p>
+<p>Strings returned by <strong>ColumnText</strong>, even empty strings, are always zero-terminated. The return value from <strong>ColumnBlob</strong> for a zero-length BLOB is a NULL pointer.</p>
+<p>These functions attempt to convert the value where appropriate. For example, if the internal representation is FLOAT and a text result is requested, snprintf is used internally to perform the conversion automatically. The following table details the conversions that are applied:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Internal Type</th>
+<th>Requested Type</th>
+<th>Conversion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NULL</td>
+<td>INTEGER</td>
+<td>Result is 0</td>
+</tr>
+<tr class="even">
+<td>NULL</td>
+<td>FLOAT</td>
+<td>Result is 0.0</td>
+</tr>
+<tr class="odd">
+<td>NULL</td>
+<td>TEXT</td>
+<td>Result is NULL pointer</td>
+</tr>
+<tr class="even">
+<td>NULL</td>
+<td>BLOB</td>
+<td>Result is NULL pointer</td>
+</tr>
+<tr class="odd">
+<td>INTEGER</td>
+<td>FLOAT</td>
+<td>Convert from integer to float</td>
+</tr>
+<tr class="even">
+<td>INTEGER</td>
+<td>TEXT</td>
+<td>ASCII rendering of the integer</td>
+</tr>
+<tr class="odd">
+<td>INTEGER</td>
+<td>BLOB</td>
+<td>Same as INTEGER-&gt;TEXT</td>
+</tr>
+<tr class="even">
+<td>FLOAT</td>
+<td>INTEGER</td>
+<td>Convert from float to integer</td>
+</tr>
+<tr class="odd">
+<td>FLOAT</td>
+<td>TEXT</td>
+<td>ASCII rendering of the float</td>
+</tr>
+<tr class="even">
+<td>FLOAT</td>
+<td>BLOB</td>
+<td>Same as FLOAT-&gt;TEXT</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>INTEGER</td>
+<td>Use atoi()</td>
+</tr>
+<tr class="even">
+<td>TEXT</td>
+<td>FLOAT</td>
+<td>Use atof()</td>
+</tr>
+<tr class="odd">
+<td>TEXT</td>
+<td>BLOB</td>
+<td>No change</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>INTEGER</td>
+<td>Convert to TEXT then use atoi()</td>
+</tr>
+<tr class="odd">
+<td>BLOB</td>
+<td>FLOAT</td>
+<td>Convert to TEXT then use atof()</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>TEXT</td>
+<td>Add a zero terminator if needed</td>
+</tr>
+</tbody>
+</table>
+<p>The table above makes reference to standard C library functions <strong>atoi</strong>() and <strong>atof</strong>(). SQLite does not really use these functions. It has its own equivalent internal functions. The <strong>atoi</strong>() and <strong>atof</strong>() names are used in the table for brevity and because they are familiar to most C programmers.</p>
+<p>Note that when type conversions occur, pointers returned by prior calls to <strong>ColumnBlob</strong> and/or <strong>ColumnText</strong> may be invalidated. Type conversions and pointer invalidations might occur in the following cases:</p>
+<p>The initial content is a BLOB and <strong>ColumnText</strong> is called. A zero-terminator might need to be added to the string.</p>
+<p>The initial content is UTF-8 text and <strong>ColumnBytes</strong> or <strong>ColumnText</strong> is called. The content must be converted to UTF-16.</p>
+<p>The safest and easiest to remember policy is to invoke these functions in one of the following ways:</p>
+<p><strong>ColumnText</strong> followed by <strong>ColumnBytes</strong><br> <strong>ColumnBlob</strong> followed by <strong>ColumnBytes</strong></p>
+<p>In other words, you should call <strong>ColumnText</strong> or <strong>ColumnBlob</strong> first to force the result into the desired format, then invoke <strong>ColumnBytes</strong> to find the size of the result.</p>
+<p>If a memory allocation error occurs during the evaluation of any of these functions, a default value is returned. The default value is either the integer 0, the floating point number 0.0, or a NULL pointer. Subsequent calls to <strong>ErrCode</strong> will return SQLITE_NOMEM.</p>
+<h1 id="datacount"><a name="DataCount"></a>DataCount</h1>
+<p>Returns the number of columns in the result set returned by the prepared statement. This function returns 0 if pStmt is an SQL statement that does not return data (for example an UPDATE).</p>
+<pre><code>FUNCTION DataCount () AS LONG
+</code></pre>
+<h4 id="return-value-56">Return value</h4>
+<p>The number of columns in the result set returned by the prepared statement.</p>
+<h1 id="dbhandle"><a name="DbHandle"></a>DbHandle</h1>
+<p>Returns the database connection handle to which a prepared statement belongs. The database connection returned by <strong>DbHandle</strong> is the same database connection that was the first argument to the <strong>Prepare</strong> call that was used to create the statement in the first place.</p>
+<pre><code>FUNCTION DbHandle () AS sqlite3 PTR
+</code></pre>
+<h4 id="return-value-57">Return value</h4>
+<p>The database connection handle to which a prepared statement belongs.</p>
+<h1 id="finalize"><a name="Finalize"></a>Finalize</h1>
+<p>Deletes a prepared statement.</p>
+<pre><code>FUNCTION Finalize () AS LONG
+</code></pre>
+<h4 id="return-value-58">Return value</h4>
+<p>If the most recent evaluation of the statement encountered no errors or if the statement is never been evaluated, then Finalize returns SQLITE_OK. If the most recent evaluation of a statement failed, then <strong>Finalize</strong> returns the appropriate error code or extended error code.</p>
+<h4 id="remarks-42">Remarks</h4>
+<p>The <strong>Finalize</strong> method can be called at any point during the life cycle of prepared statement: before statement is ever evaluated, after one or more calls to <strong>Reset</strong>, or after any call to <strong>Step_</strong> regardless of whether or not the statement has completed execution.</p>
+<p>Invoking <strong>Finalize</strong> on a NULL pointer is a harmless no-op.</p>
+<p>The application must finalize every prepared statement in order to avoid resource leaks. It is a grievous error for the application to try to use a prepared statement after it has been finalized. Any use of a prepared statement after it has been finalized can result in undefined and undesirable behavior such as segfaults and heap corruption.</p>
+<h1 id="getrow"><a name="GetRow"></a>GetRow</h1>
+<p>After a prepared statement has been prepared using either <strong>Prepare</strong> this method must be called one or more times to evaluate the statement. <strong>GetRow</strong> is an alias for <strong>Step_</strong>.</p>
+<pre><code>FUNCTION GetRow () AS LONG
+</code></pre>
+<h4 id="return-value-59">Return value</h4>
+<p><strong>SQLITE_BUSY</strong> means that the database engine was unable to acquire the database locks it needs to do its job. If the statement is a COMMIT or occurs outside of an explicit transaction, then you can retry the statement. If the statement is not a COMMIT and occurs within an explicit transaction then you should rollback the transaction before continuing.</p>
+<p><strong>SQLITE_DONE</strong> means that the statement has finished executing successfully. <strong>Step_</strong> should not be called again on this virtual machine without first calling <strong>Reset</strong> to reset the virtual machine back to its initial state.</p>
+<p>If the SQL statement being executed returns any data, then <strong>SQLITE_ROW</strong> is returned each time a new row of data is ready for processing by the caller. The values may be accessed using the column access functions. <strong>Step_</strong> is called again to retrieve the next row of data.</p>
+<p><strong>SQLITE_ERROR</strong> means that a run-time error (such as a constraint violation) has occurred. <strong>GetRow</strong> should not be called again on the Virtual Machine. More information may be found by calling <strong>ErrMsg</strong>.</p>
+<p><strong>SQLITE_MISUSE</strong> means that the this function was called inappropriately. Perhaps it was called on a prepared statement that has already been finalized or on one that had previously returned SQLITE_ERROR or SQLITE_DONE. Or it could be the case that the same database connection is being used by two or more threads at the same moment in time.</p>
+<h4 id="remarks-43">Remarks</h4>
+<p>For all versions of SQLite up to and including 3.6.23.1, a call to <strong>Reset</strong> was required after <strong>Step_</strong> returned anything other than SQLITE_ROW before any subsequent invocation of Step_. Failure to reset the prepared statement using <strong>Reset</strong> would result in an SQLITE_MISUSE return from <strong>Step_</strong>. But after version 3.6.23.1, <strong>Step_</strong> began calling <strong>Reset</strong> automatically in this circumstance rather than returning SQLITE_MISUSE. This is not considered a compatibility break because any application that ever receives an SQLITE_MISUSE error is broken by definition. The SQLITE_OMIT_AUTORESET compile-time option can be used to restore the legacy behavior.</p>
+<h1 id="hstmt"><a name="hStmt"></a>hStmt</h1>
+<p>Gets/sets the connection handle.</p>
+<pre><code>PROPERTY hStmt () AS sqlite3_stmt PTR
+PROPERTY hStmt (BYVAL pStmt AS sqlite3_stmt PTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pStmt</em></td>
+<td>The statement handle.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="iscolumnnull"><a name="IsColumnNull"></a>IsColumnNull</h1>
+<p>Returns true is the column value is null or false otherwise.</p>
+<pre><code>FUNCTION IsColumnNull () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-60">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="readonly"><a name="ReadOnly"></a>ReadOnly</h1>
+<p>Returns true if and only if the prepared statement makes no direct changes to the content of the database file.</p>
+<pre><code>FUNCTION ReadOnly () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-61">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="readonly-1"><a name="ReadOnly"></a>ReadOnly</h1>
+<p>Resets a prepared statement object back to its initial state, ready to be re-executed. Any SQL statement variables that had values bound to them using the <strong>Bind_*</strong>() methods retain their values. Use <strong>ClearBindings</strong> to reset the bindings.</p>
+<pre><code>FUNCTION ReadOnly () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-62">Return value</h4>
+<p>If the most recent call to <strong>Step_</strong> for the prepared statement returned SQLITE_ROW or SQLITE_DONE, or if <strong>Step_</strong> has never before been called on the statement, then Reset returns SQLITE_OK.</p>
+<p>If the most recent call to <strong>Step_</strong> for the prepared statement indicated an error, then <strong>Reset</strong> returns an appropriate error code.</p>
+<h1 id="sql"><a name="Sql"></a>Sql</h1>
+<p>Retrieves a saved copy of the original SQL text used to create a prepared statement if that statement was compiled using <strong>Prepare</strong>.</p>
+<pre><code>FUNCTIOn Sql () AS STRING
+</code></pre>
+<h4 id="return-value-63">Return value</h4>
+<p>The SQL string associated with a prepared statement.</p>
+<h1 id="step_"><a name="Step_"></a>Step_</h1>
+<p>After a prepared statement has been prepared using either <strong>Prepare</strong> this method must be called one or more times to evaluate the statement. <strong>GetRow</strong> is an alias for <strong>Step_</strong>.</p>
+<pre><code>FUNCTION Step_ () AS LONG
+</code></pre>
+<h4 id="return-value-64">Return value</h4>
+<p><strong>SQLITE_BUSY</strong> means that the database engine was unable to acquire the database locks it needs to do its job. If the statement is a COMMIT or occurs outside of an explicit transaction, then you can retry the statement. If the statement is not a COMMIT and occurs within an explicit transaction then you should rollback the transaction before continuing.</p>
+<p><strong>SQLITE_DONE</strong> means that the statement has finished executing successfully. <strong>Step_</strong> should not be called again on this virtual machine without first calling <strong>Reset</strong> to reset the virtual machine back to its initial state.</p>
+<p>If the SQL statement being executed returns any data, then <strong>SQLITE_ROW</strong> is returned each time a new row of data is ready for processing by the caller. The values may be accessed using the column access functions. <strong>Step_</strong> is called again to retrieve the next row of data.</p>
+<p><strong>SQLITE_ERROR</strong> means that a run-time error (such as a constraint violation) has occurred. <strong>Step_</strong> should not be called again on the Virtual Machine. More information may be found by calling <strong>ErrMsg</strong>.</p>
+<p><strong>SQLITE_MISUSE</strong> means that the this function was called inappropriately. Perhaps it was called on a prepared statement that has already been finalized or on one that had previously returned SQLITE_ERROR or SQLITE_DONE. Or it could be the case that the same database connection is being used by two or more threads at the same moment in time.</p>
+<h4 id="remarks-44">Remarks</h4>
+<p>For all versions of SQLite up to and including 3.6.23.1, a call to <strong>Reset</strong> was required after <strong>Step_</strong> returned anything other than SQLITE_ROW before any subsequent invocation of Step_. Failure to reset the prepared statement using <strong>Reset</strong> would result in an SQLITE_MISUSE return from <strong>Step_</strong>. But after version 3.6.23.1, <strong>Step_</strong> began calling <strong>Reset</strong> automatically in this circumstance rather than returning SQLITE_MISUSE. This is not considered a compatibility break because any application that ever receives an SQLITE_MISUSE error is broken by definition. The SQLITE_OMIT_AUTORESET compile-time option can be used to restore the legacy behavior.</p>
+</body>
+</html>
+

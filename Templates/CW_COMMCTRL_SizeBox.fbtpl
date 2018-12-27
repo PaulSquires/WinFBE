@@ -1,0 +1,102 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Size box control
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_SizeBox.fbtpl - Template
+' Contents: Demonstrates the use of the SizeBox control.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_SIZEBOX = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window with default coordinates
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Size box", @WndProc)
+   pWindow.Center
+
+   ' // Add a size box control (it will be positioned and displayed in the WM_SIZE message)
+   pWindow.AddControl("SizeBox", , IDC_SIZEBOX)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            DIM hSizeBox AS HWND = GetDlgItem(hWnd, IDC_SIZEBOX)
+            ' // Reposition the sizebox
+            ' Hide the sizebox if the window is maximized
+            IF wParam = SIZE_MAXIMIZED THEN
+               ShowWindow hSizeBox, SW_HIDE
+            ' Reposition and show the sizebox
+            ELSE
+               DIM cx AS LONG = GetSystemMetrics(SM_CXVSCROLL)
+               DIM cy AS LONG = GetSystemMetrics(SM_CYHSCROLL)
+               SetWindowPos hSizeBox, NULL, LOWORD(lParam) - cx, HIWORD(lParam) - cy, cx, cy, SWP_NOZORDER OR SWP_SHOWWINDOW
+            END IF
+         END IF
+
+    	CASE WM_DESTROY
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

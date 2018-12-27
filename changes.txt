@@ -1,14 +1,13 @@
-Version 1.8.8 (not released yet)
+Version 1.8.8
 - Added: Search textbox added to Function List (filters the function list based on the search term).
 - Changed: Lots of internal code refractoring. Many efficiencies found with regards to loading files/projects, saving, and displaying files. More internal code cleanup to occur in the next few future releases.
 - Changed: Removed loading of multiple projects into WinFBE at the same time.
 - Changed: When project is active, "Open File" will add file to project open it. "Add Files to Project" will only add the files to the Project but not display it.
 - Changed: Removed the option to display the successful compile results dialog. Result will now only show in the statusbar.
-- Changed: Any missing non-English translation phrases will now use the English phrase rather than nothing at all.
 - Fixed: Some issues with right-click menu on #Include line to display "Open <include filename>" when a project is open.
 - Fixed: F3/Shift+F3 Find/Find Next accelerator tweaked slightly to ensure previously selected text gets searched.
 - Fixed: Parsing of multiline characters where both /' and '/ appear on the same line.
-- Fixed: Infinite loop when responding "No" to reload a currently loaded file that has been modified outside of WinFBE. 
+- Fixed: Infitie loop when responding "No" to reload a currently loaded file that has been modified outside of WinFBE. 
 
 Version 1.8.7 (December 9, 2018)
 - Added: Click and Popup menu handlers are now created with a pre-populated SELECT CASE of menu item names.

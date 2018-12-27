@@ -1,0 +1,154 @@
+2
+FBGUI
+.bas
+CWindow: GDI: Hello World Gradient
+' ########################################################################################
+' Microsoft Windows
+' File: CW_GDI_HelloWordGradient_HDPI.fbtpl
+' Contents: CWindow Hello Word with gradient example (High DPI)
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Gradient fill procedure
+' ========================================================================================
+SUB DrawGradient (BYVAL hDC AS HDC)
+
+   DIM rcFill   AS RECT
+   DIM rcClient AS RECT
+   DIM fStep    AS SINGLE
+   DIM hBrush   AS HBRUSH
+   DIM lOnBand  AS LONG
+
+   GetClientRect WindowFromDC(hDC), @rcClient
+   fStep = rcClient.Bottom / 200
+
+   FOR lOnBand = 0 TO 199
+      SetRect @rcFill, 0, lOnBand * fStep, rcClient.Right + 1, (lOnBand + 1) * fStep
+      ' // Note: The C macro RGB has been renamed as BGR to avoid conflicts with the Free Basic RGB intrinsic function
+      hBrush = CreateSolidBrush(BGR(0, 0, (255 - lOnBand)))
+      FillRect hDC, @rcFill, hBrush
+      DeleteObject hBrush
+   NEXT
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow Hello World with gradient", @WndProc)
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add two buttons without position or size (they will be resized in the WM_SIZE message).
+   pWindow.AddControl("Button", pWindow.hWindow, IDOK,     "&Ok")
+   pWindow.AddControl("Button", pWindow.hWindow, IDCANCEL, "&Quit")
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hNewFont AS HFONT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the CWindow class from the CREATESTRUCT structure
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
+         ' // Create a new font scaled according the DPI ratio
+         IF pWindow->DPI <> 96 THEN hNewFont = pWindow->CreateFont("Tahoma", 9)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_PAINT
+         ' // Draw the text
+         DIM ps AS PAINTSTRUCT, hOldFont AS HFONT
+         DIM hDC AS HDC = BeginPaint(hwnd, @ps)
+         IF hNewFont THEN hOldFont = CAST(HFONT, SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
+         DIM rc AS RECT
+         GetClientRect hwnd, @rc
+         SetBkMode hDC, TRANSPARENT
+         SetTextColor hDC, &HFFFFFF
+         DrawTextW hDC, "Hello, World!", -1, @rc, DT_SINGLELINE OR DT_CENTER OR DT_VCENTER
+         IF hNewFont THEN SelectObject(hDC, CAST(HGDIOBJ, CAST(HFONT, hOldFont)))
+         EndPaint hwnd, @ps
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+      CASE WM_ERASEBKGND
+         ' // Draw the gradient
+         DIM hDC AS HDC = CAST(HDC, wParam)
+         DrawGradient hDC
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the buttons
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            pWindow->MoveWindow GetDlgItem(hwnd, IDOK), pWindow->ClientWidth - 185, pWindow->ClientHeight - 35, 75, 23, CTRUE
+            pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 95, pWindow->ClientHeight - 35, 75, 23, CTRUE
+         END IF
+
+    	CASE WM_DESTROY
+         ' // Destroy the new font
+         IF hNewFont THEN DeleteObject(CAST(HGDIOBJ, hNewFont))
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

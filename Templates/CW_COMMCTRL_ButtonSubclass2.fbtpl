@@ -1,0 +1,140 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Button subclass (SetWindowSubclass)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ButtonSubclass2.fbtpl
+' Contents: CWindow with a subclassed button
+' Subclasses the control using SetWindowSubclass.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_BUTTON = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION Button_SubclassProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM, BYVAL uIdSubclass AS UINT_PTR, BYVAL dwRefData AS DWORD_PTR) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a subclassed button", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add a subclassed button without position or size (it will be resized in the WM_SIZE message).
+   pWindow.AddControl("Button", , IDC_BUTTON, "Click me", , , , , , , , _
+      CAST(WNDPROC, @Button_SubclassProc), IDC_BUTTON, CAST(DWORD_PTR, @pWindow))
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the buttons
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_BUTTON), pWindow->ClientWidth - 120, pWindow->ClientHeight - 50, 75, 23, CTRUE
+         END IF
+
+    	CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Processes messages for the subclassed Button window.
+' ========================================================================================
+FUNCTION Button_SubclassProc ( _
+   BYVAL hwnd   AS HWND, _                 ' // Control window handle
+   BYVAL uMsg   AS UINT, _                 ' // Type of message
+   BYVAL wParam AS WPARAM, _               ' // First message parameter
+   BYVAL lParam AS LPARAM, _               ' // Second message parameter
+   BYVAL uIdSubclass AS UINT_PTR, _        ' // The subclass ID
+   BYVAL dwRefData AS DWORD_PTR _          ' // Pointer to reference data
+   ) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_GETDLGCODE
+         ' // All keyboard input
+         FUNCTION = DLGC_WANTALLKEYS
+         EXIT FUNCTION
+
+      CASE WM_LBUTTONDOWN
+         MessageBoxW(GetParent(hwnd), "Click", "FreeBasic", MB_OK)
+         EXIT FUNCTION
+
+      CASE WM_KEYDOWN
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE VK_ESCAPE
+               SendMessageW(GetParent(hwnd), WM_CLOSE, 0, 0)
+               EXIT FUNCTION
+         END SELECT
+
+      CASE WM_DESTROY
+         ' // REQUIRED: Remove control subclassing
+         RemoveWindowSubclass hwnd, @Button_SubclassProc, uIdSubclass
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefSubclassProc(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

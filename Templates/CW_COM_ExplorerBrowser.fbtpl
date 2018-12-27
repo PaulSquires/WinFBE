@@ -1,0 +1,327 @@
+2
+FBGUI
+.bas
+CWindow: COM: Explorer Browser in a tab page
+' ########################################################################################
+' Microsoft Windows
+' File: CW_ExplorerBrowser.fbtpl
+' Contents: Resizable CWindow with an Explorer Browser control embedded in a tab page.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "win/shlobj.bi"
+USING Afx
+
+' // Main window user data zero-based indices
+ENUM AFX_USERDATA
+   AFX_EXPLORER_BROWSER_PTR = 0
+END ENUM
+
+' // Control identifiers
+ENUM
+   IDC_TAB = 1001
+   IDC_BTNSUBMIT
+   IDC_LISTBOX
+   IDC_SELECTION
+END ENUM
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TabPage1_WndProc(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION TabPage2_WndProc(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Initialize the COM library
+   OleInitialize(NULL)
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow: Explorer Browser in a Tab Control", @WndProc)
+   pWindow.SetClientSize(550, 370)
+   pWindow.Center
+
+   ' // Add a tab control
+   DIM hTab AS HWND = pWindow.AddControl("Tab", , IDC_TAB, "", 10, 10, pWindow.ClientWidth - 20, pWindow.ClientHeight - 42)
+
+   ' // Create the first tab page
+   DIM pTabPage1 AS CTabPage PTR = NEW CTabPage
+   pTabPage1->InsertPage(hTab, 0, "Explorer Browser", -1, @TabPage1_WndProc)
+   ' // Create the second tab page
+   DIM pTabPage2 AS CTabPage PTR = NEW CTabPage
+   pTabPage2->InsertPage(hTab, 1, "Selected Items", -1, @TabPage2_WndProc)
+
+   ' // Add buttons
+   pWindow.AddControl("Button", , IDC_SELECTION, "&Selection")
+   pWindow.AddControl("Button", , IDCANCEL, "&Close")
+
+   ' // Display the first tab page
+   ShowWindow pTabPage1->hTabPage, SW_SHOW
+   ' // Set the focus to the first tab (tab numbers are zero-based)
+   TabCtrl_SetCurFocus(hTab, 0)
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Uninitialize the COM library
+   CoUninitialize
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_SELECTION
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  ' // Get a reference to the 2nd tab page
+                  DIM pTabPage AS CTabPage PTR = AfxCTabPagePtr(GetDlgItem(hwnd, IDC_TAB), 1)
+                  ' // Get the handle of the listbox control
+                  DIM hListBox AS HWND = GetDlgItem(pTabPage->hTabPage, IDC_LISTBOX)
+                  ' // Get the number of items in the listbox
+                  DIM nItems AS LONG = ListBox_GetCount(hListBox)
+                  ' // Delete all items
+                  FOR i AS LONG = 0 TO nItems - 1
+                     ListBox_DeleteString(hListBox, 0)
+                  NEXT
+                  ' // Get a reference to the CWindow class
+                  DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+                  IF pWindow = NULL THEN EXIT FUNCTION
+                  ' // Get the pointer to IExplorerBrowser previously stored in the user data
+                  DIM peb AS IExplorerBrowser PTR = cast(IExplorerBrowser PTR, pWindow->UserData(AFX_EXPLORER_BROWSER_PTR))
+                  IF peb = NULL THEN EXIT FUNCTION
+                  ' // Get a reference to the IShellView interface for the current view
+                  DIM psv AS IShellView PTR
+                  DIM hr AS HRESULT = peb->lpvtbl->GetCurrentView(peb, @IID_IShellView, @psv)
+                  IF psv THEN
+                     ' // Get a reference to the IDataObject interface
+                     DIM pDataObject AS IDataObject PTR
+                     psv->lpvtbl->GetItemObject(psv, SVGIO_SELECTION, @IID_IDataObject, @pDataObject)
+                     If pDataObject = NULL THEN MessageBox hwnd, "No files selected", "", MB_OK
+                     IF pDataObject THEN
+                        ' // Get filenames from the clipboard
+                        DIM fmt AS FORMATETC = (CF_HDROP, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL)
+                        DIM stg AS STGMEDIUM
+                        stg.tymed = TYMED_HGLOBAL
+                        IF SUCCEEDED(pDataObject->lpvtbl->GetData(pDataObject, @fmt, @stg)) THEN
+                           ' // Lock the global memory handle
+                           DIM hDrop AS HDROP = GlobalLock(stg.hGlobal)
+                           ' // Get the number of selected files
+                           DIM uNumFiles AS UINT = DragQueryFile(hDrop, &hFFFFFFFF, NULL, 0)
+                           DIM hr AS HRESULT, i AS LONG
+                           DIM wszPath AS WSTRING * MAX_PATH
+                           FOR i AS LONG = 0 TO uNumFiles - 1
+                              wszPath = ""
+                              ' // Get the path of the file
+                              DragQueryFile(hDrop, i, @wszPath, MAX_PATH)
+                              ' // Add it to the listbox
+                              ListBox_AddString(hListbox, @wszPath)
+                           NEXT
+                           ' // Unlock the global memry handle
+                           GlobalUnlock(stg.hGlobal)
+                           ' // Release the STGMEDIUM structure
+                           ReleaseStgMedium(@stg)
+                           ' // Set the focus in the Items tab
+                           DIM hTab AS HWND = GetDlgItem(hwnd, IDC_TAB)
+                           TabCtrl_SetCurFocus(hTab, 1)
+                           ' // Set the focus in the first item of the listbox
+                           ListBox_SetCursel(hListBox, 0)
+                        END IF
+                        ' // Release the IDataObject interface
+                        pDataObject->lpVtbl->Release(pDataObject)
+                     END IF
+                  END IF
+                  ' // Release the IShellView interface
+                  IF psv THEN psv->lpVtbl->Release(psv)
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_GETMINMAXINFO
+         ' // Set the pointer to the address of the MINMAXINFO structure
+         DIM ptmmi AS MINMAXINFO PTR = CAST(MINMAXINFO PTR, lParam)
+         ' // Set the minimum and maximum sizes that can be produced by dragging the borders of the window
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         IF pWindow THEN
+            ptmmi->ptMinTrackSize.x = 460 * pWindow->rxRatio
+            ptmmi->ptMinTrackSize.y = 320 * pWindow->ryRatio
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         DIM hTab AS HWND = GetDlgItem(hwnd, IDC_TAB)
+         ' // Move the buttons
+         IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_SELECTION), pWindow->ClientWidth - 172, pWindow->ClientHeight - 28, 75, 23, CTRUE
+         IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 86, pWindow->ClientHeight - 28, 75, 23, CTRUE
+         ' // Resize the tab control
+         IF pWindow THEN pWindow->MoveWindow(hTab, 10, 10, pWindow->ClientWidth - 20, pWindow->ClientHeight - 42, CTRUE)
+         ' // Resize the tab pages
+         AfxResizeTabPages hTab
+         EXIT FUNCTION
+
+      CASE WM_NOTIFY
+         DIM nPage AS DWORD              ' // Page number
+         DIM pTabPage AS CTabPage PTR    ' // Tab page object reference
+         DIM tci AS TCITEMW              ' // TCITEMW structure
+         DIM ptnmhdr AS NMHDR PTR        ' // Information about a notification message
+         ptnmhdr = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_TAB
+               SELECT CASE ptnmhdr->code
+                  CASE TCN_SELCHANGE
+                     ' // Show the selected page
+                     pTabPage = AfxCTabPagePtr(ptnmhdr->hwndFrom, -1)
+                     IF pTabPage THEN ShowWindow pTabPage->hTabPage, SW_SHOW
+                  CASE TCN_SELCHANGING
+                     ' // Hide the current page
+                     pTabPage = AfxCTabPagePtr(ptnmhdr->hwndFrom, -1)
+                     IF pTabPage THEN ShowWindow pTabPage->hTabPage, SW_HIDE
+               END SELECT
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // Destroy the tab pages
+         AfxDestroyAllTabPages(GetDlgItem(hwnd, IDC_TAB))
+         ' // Quit the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Tab page 1 window procedure
+' ========================================================================================
+FUNCTION TabPage1_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC peb AS IExplorerBrowser PTR
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the TabPage class
+         DIM pTabPage AS CTabPage PTR = AfxCTabPagePtr(GetParent(hwnd), 0)
+         ' // Create an instance of IExplorerBrowser
+         CoCreateInstance(@CLSID_ExplorerBrowser, NULL, CLSCTX_INPROC_SERVER, @IID_IExplorerBrowser, @peb)
+         IF peb = NULL THEN EXIT FUNCTION
+         peb->lpVtbl->SetOptions(peb, EBO_SHOWFRAMES)
+         DIM fs AS FOLDERSETTINGS
+         fs.ViewMode = FVM_DETAILS
+         DIM rc AS RECT
+         GetClientRect hwnd, @rc
+         peb->lpVtbl->Initialize(peb, hwnd, @rc, @fs)
+         ' // Navigate to the Profile folder
+         DIM pidlBrowse AS LPITEMIDLIST
+'         IF SUCCEEDED(SHGetFolderLocation(NULL, CSIDL_PROFILE, NULL, 0, @pidlBrowse)) THEN
+'            peb->lpVtbl->BrowseToIDList(peb, pidlBrowse, 0)
+'            ILFree(pidlBrowse)
+'         END IF
+         DIM wszPath AS WSTRING * MAX_PATH
+         wszPath = "C:\Users"   ' --> change me
+         IF SUCCEEDED(SHParseDisplayName(wszPath, NULL, @pidlBrowse, 0, NULL)) THEN
+            peb->lpVtbl->BrowseToIDList(peb, pidlBrowse, 0)
+            ILFree(pidlBrowse)
+         END IF
+         ' // Store the IExplorerBrowser pointer in the user data of the main window
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(GetAncestor(hwnd, GA_ROOTOWNER))
+         pWindow->UserData(AFX_EXPLORER_BROWSER_PTR) = cast(LONG_PTR, peb)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            CASE IDC_BTNSUBMIT
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  MessageBoxW(hWnd, "Submit", "Tab 1", MB_OK)
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // Resize the Explorer control
+         DIM rc AS RECT
+         GetClientRect hwnd, @rc
+         IF peb THEN peb->lpVtbl->SetRect(peb, NULL, rc)
+         EXIT FUNCTION
+
+      CASE WM_DESTROY
+         ' // Destroy the browser and release the interface
+         IF peb THEN
+            peb->lpVtbl->Destroy(peb)
+            peb->lpVtbl->Release(peb)
+         END IF
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Tab page 2 window procedure
+' ========================================================================================
+FUNCTION TabPage2_WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM hBrush AS HBRUSH, rc AS RECT, tlb AS LOGBRUSH
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the TabPage class
+         DIM pTabPage AS CTabPage PTR = AfxCTabPagePtr(GetParent(hwnd), 1)
+         ' // Add a combobox to the second page
+         DIM hListBox AS HWND = pTabPage->AddControl("ListBox", hwnd, IDC_LISTBOX, "", 20, 20, 485, 270)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

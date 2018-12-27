@@ -435,7 +435,7 @@ Function frmFindInFiles_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
       Case IDC_FRMFINDINFILES_CMDFILES
          If codeNotify = BN_CLICKED Then
             ' Display the Open File Dialog
-            Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd)
+            Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd, IDM_FILEOPEN)
             If pItems = Null Then Exit Function
             Dim dwItemCount As Long, i As Long, idx As Long, pItem As IShellItem Ptr, pwszName As WString Ptr
             pItems->lpVtbl->GetCount(pItems, @dwItemCount)
@@ -506,6 +506,7 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmFindInFiles
 ' ========================================================================================
 Function frmFindInFiles_OnClose(HWnd As HWnd) As LRESULT
+   EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
 End Function
@@ -525,9 +526,25 @@ Function frmFindInFiles_OnDestroy(HWnd As HWnd) As LRESULT
    gFindInFiles.txtFolder = str(AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER)))
 
    HWND_FRMFINDINFILES = 0
+   PostQuitMessage(0)
    Function = 0
 End Function
 
+
+' ========================================================================================
+' Process WM_CREATE message for window/dialog: frmFindInFiles
+' ========================================================================================
+Function frmFindInFiles_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+
+   ' This is a modal popup window so disable the parent window
+   DisableAllModeless()
+
+   '  Message cracker macro expects a True to be returned for a successful
+   '  OnCreate handler even though returning -1 from a standard WM_CREATE
+   '  call would stop creating the window. This is just one of those Windows
+   '  inconsistencies.
+   Return True
+End Function
 
 ' ========================================================================================
 ' frmFindInFiles Window procedure
@@ -539,6 +556,7 @@ Function frmFindInFiles_WndProc( ByVal HWnd   As HWnd, _
                                  ) As LRESULT
 
    Select Case uMsg
+      HANDLE_MSG (HWnd, WM_CREATE,   frmFindInFiles_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmFindInFiles_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmFindInFiles_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmFindInFiles_OnCommand)
@@ -573,13 +591,13 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->SetClientSize(510, 205)
    pWindow->Center
    
-   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LBLFINDWHAT, L(159,"Find What:"), 7, 20, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LBLFINDWHAT, L(159,"Find What") & ":", 7, 20, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(259,"In Files:"), 7, 50, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(259,"In Files") & ":", 7, 50, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(260,"In Folder:"), 7, 80, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(260,"In Folder") & ":", 7, 80, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("COMBOBOX", , IDC_FRMFINDINFILES_COMBOFIND, "", 85, 17, 317, 22, _
@@ -659,6 +677,12 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    
    ShowWindow HWND_FRMFINDINFILES, SW_SHOW
    SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFIND_COMBOFIND) )
+
+   ' Process Windows messages
+   Function = pWindow->DoEvents(0)
+   
+   ' Delete the frmFindInFiles CWindow class manually allocated memory 
+   Delete pWindow
 
    Function = 0
 End Function

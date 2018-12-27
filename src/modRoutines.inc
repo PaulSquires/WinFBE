@@ -13,6 +13,31 @@
 
 
 ' ========================================================================================
+' Disable all modeless windows belonging to frmMain so that the popup modal is truly modal.
+' ========================================================================================
+function DisableAllModeless() as long
+   ' No need to enable/disable the modeless Help form.
+   if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, false)
+   if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, false)
+   if IsWindowVisible(HWND_FRMVDTOOLBOX)    then EnableWindow(HWND_FRMVDTOOLBOX, false)
+   EnableWindow(HWND_FRMMAIN, false)
+   function = 0
+end function
+
+' ========================================================================================
+' Enable all modeless windows belonging to frmMain.
+' ========================================================================================
+function EnableAllModeless() as long
+   ' No need to enable/disable the modeless Help form.
+   if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, true)
+   if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, true)
+   if IsWindowVisible(HWND_FRMVDTOOLBOX)    then EnableWindow(HWND_FRMVDTOOLBOX, true)
+   EnableWindow(HWND_FRMMAIN, true)
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Return temporary file name
 ' ========================================================================================
 FUNCTION GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
@@ -430,34 +455,34 @@ end function
 ' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
 ' ========================================================================================
-function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
-                               byref wszFunctionName as WSTRING _
+function OpenSelectedDocument( byref wszFilename as wstring, _
+                               byref wszFunctionName as WSTRING, _
+                               byval nLineNumber as long = 0 _
                                ) as long
 
-   ' Open the document based on the filename. If the Header line is clicked
-   ' then simply open the document and point to the first line. If a function 
-   ' is clicked then search the gFunctionDeclares hash to get the filename
-   ' and line number position within the file.
+   ' This function is called in the following situations:
+   '   1. When a selection is made in the Function List.
+   '   2. When a selection is made through the Explorer treeview.
+   '   3. When a Find In Files line is selected.
+   '   4. When a Goto Definition word is clicked on.
+   '   5. When OnActivateApp needs to reload a document.
+   
    dim pData as DB2_DATA ptr    
-   dim wszText as wstring * MAX_PATH
-   dim nLineNumber as LONG
-   if pDoc THEN  ' Header node
-      wszText = pDoc->DiskFilename
-      nLineNumber = 0
-   else 
-      pData = gdb2.dbFindFunction( wszFunctionName ) 
-      if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName ) 
+   if len(wszFunctionName) then
+      pData = gdb2.dbFindFunction( wszFunctionName, wszFilename) 
+      if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName, wszFilename) 
       if pData then
-         wszText = pData->fileName
+         wszFilename = pData->fileName
          nLineNumber = pData->nLineNum
       end if
-   end if   
-
+   end if
+   
    ' Not all documents exist on disk file. For example, a QuickRun file will exist in
    ' the editor but may never have a disk footprint. We need to search the project to
    ' determine if the filename has a pDoc already associated with it. If it does, then
    ' pass that pDoc rather than looking for a disk filename.
-   pDoc = gApp.GetDocumentPtrByFilename(wszText)
+   dim pDoc as clsDocument ptr
+   pDoc = gApp.GetDocumentPtrByFilename(wszFilename)
    
    if pDoc then
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
@@ -468,14 +493,14 @@ function OpenSelectedDocument( byval pDoc as clsDocument ptr, _
                               "", _       ' pwszName
                               pDoc )      ' pDocIn
    else   
-      if AfxFileExists(wszText) = 0 THEN exit function
+      if AfxFileExists(wszFilename) = 0 THEN exit function
       ' Display the document containing the selected sub/function       
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
                               False, _    ' bIsNewFile
                               False, _    ' bIsTemplate
                               true, _     ' bShowInTab
                               false, _    ' bIsInclude
-                              wszText, _  ' pwszName
+                              wszFilename, _  ' pwszName
                               0 )         ' pDocIn
    end if
 
@@ -761,7 +786,7 @@ End Function
 ' Displays the FileOpenDialog (multiple selection)
 ' Returns a pointer to the IShellItemArray collection.
 ' ========================================================================================
-Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) As IShellItemArray Ptr
+Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal idButton As Long) As IShellItemArray Ptr
 
    ' Create an instance of the FileOpenDialog interface
    Dim hr As Long
@@ -771,20 +796,32 @@ Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As
 
    ' Set the file types
    Dim rgFileTypes(1 To 5) As COMDLG_FILTERSPEC
-   rgFileTypes(1).pszName = @L(106,"Open source file")
-   rgFileTypes(2).pszName = @L(77,"FB code files")
-   rgFileTypes(3).pszName = @L(78,"FB Include files")
-   rgFileTypes(4).pszName = @L(209,"Resource files")
-   rgFileTypes(5).pszName = @L(79,"All files")
-   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
-   rgFileTypes(2).pszSpec = @WSTR("*.bas")
-   rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
-   rgFileTypes(4).pszSpec = @WSTR("*.rc")
-   rgFileTypes(5).pszSpec = @WSTR("*.*")
-   pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
+
+   select case idButton
+      case IDM_FILEOPEN
+         rgFileTypes(1).pszName = @L(106,"Open source file")
+         rgFileTypes(2).pszName = @L(77,"FB code files")
+         rgFileTypes(3).pszName = @L(78,"FB Include files")
+         rgFileTypes(4).pszName = @L(209,"Resource files")
+         rgFileTypes(5).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas")
+         rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(4).pszSpec = @WSTR("*.rc")
+         rgFileTypes(5).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
+      
+      case IDM_ADDIMAGE
+         rgFileTypes(1).pszName = @L(378,"Images")
+         rgFileTypes(2).pszName = @L(79,"All files")
+         rgFileTypes(1).pszSpec = @WSTR("*.ico;*.bmp;*.jpg;*.gif;*.wmf;*.png;*.tiff;*.cur")
+         rgFileTypes(2).pszSpec = @WSTR("*.*")
+         pofd->lpVtbl->SetFileTypes(pofd, 2, @rgFileTypes(1))
+         
+   end select
 
    ' Set the title of the dialog
-   hr = pofd->lpVtbl->SetTitle(pofd, L(106,"Open source file"))
+   hr = pofd->lpVtbl->SetTitle(pofd, L(248,"Open file"))
    ' Set the default folder
    Dim pFolder As IShellItem Ptr
    SHCreateItemFromParsingName (AfxGetExePathName, Null, @IID_IShellItem, @pFolder)
@@ -1017,7 +1054,7 @@ End Function
 
 
 ' ========================================================================================
-' Retrieve the lParam value from a Listview
+' Retrieve the lParam value from a Listview line
 ' ========================================================================================
 Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
                                 ByVal iRow As Long _
@@ -1032,6 +1069,24 @@ Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
       Function = li.lParam
    End If   
    
+End Function
+
+
+' ========================================================================================
+' Set the lParam value for a Listview line
+' ========================================================================================
+Function FF_ListView_SetlParam( ByVal hWndControl As HWnd, _
+                                ByVal iRow As Long, _
+                                ByVal ilParam As LPARAM _
+                                ) As long
+   Dim li As LV_ITEM
+
+   li.mask       = LVIF_PARAM
+   li.iItem      = iRow
+   li.iSubItem   = 0
+   li.lParam     = ilParam
+   
+   function = SendMessage( hWndControl, LVM_SETITEM, 0, Cast(LPARAM, @li) ) 
 End Function
 
 

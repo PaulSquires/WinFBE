@@ -1,0 +1,109 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Group box as a container
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_GroupBox.fbtpl
+' Contents: Demonstrates the use of the GroupBox control as a container of other controls.
+' Comments: Drawn around several controls to indicate a visual association between them.
+' Often used around related radio buttons.
+' Remarks: In PowerBASIC it is mistakenly called "Frame" instead of "Group Box".
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+ENUM
+   IDC_GROUPBOX = 1001
+   IDC_LABEL
+   IDC_CHECK3STATE
+   IDC_EDIT
+   IDC_BUTTON
+END ENUM
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.Create(NULL, "GroupBox example", @WndProc)
+   pWindow.Center
+
+   ' // Add the controls
+   DIM hGroupBox AS HWND = pWindow.AddControl("GroupBox", , IDC_GROUPBOX, "GroupBox", 20, 20, 305, 100, , WS_EX_TRANSPARENT OR WS_EX_CONTROLPARENT)
+   pWindow.AddControl("Label", hGroupBox, IDC_LABEL, "Label", 40, 30, 75, 23)
+   pWindow.AddControl("Check3State", hGroupBox, IDC_CHECK3STATE, "Click me", 40, 60, 75, 23)
+   pWindow.AddControl("Edit", hGroupBox, IDC_EDIT, "", 190, 30, 75, 23)
+   pWindow.AddControl("Button", hGroupBox, IDC_BUTTON, "&Close", 190, 60, 75, 23)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_CTLCOLORSTATIC
+         ' // Draw the GroupBox using the main window background color
+         IF GetWindowID(CAST(HWND, lParam)) = IDC_GROUPBOX THEN
+            ' Return handle of brush used to paint background
+            FUNCTION = CAST(LRESULT, GetClassLongPtr(GetParent(hwnd), GCLP_HBRBACKGROUND))
+            EXIT FUNCTION
+         END IF
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

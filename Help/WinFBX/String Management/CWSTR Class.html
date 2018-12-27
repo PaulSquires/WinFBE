@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CWSTR Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cwstr-class">CWSTR Class</h1>
+<p>The <code>CWSTR</code> class implements a dynamic unicode null terminated string. Free Basic has a dynamic string data type (STRING) and a fixed length unicode data type (WSTRING), but it lacks a dynamic unicode string. <code>CWSTR</code> behaves as if it was a native data type, working directly with the intrinsic Free Basic string functions and operators.</p>
+<p><strong>Include file</strong>: CWSTR.INC.</p>
+<p>Quirks:</p>
+<ul>
+<li>MID as a function: Something like MID(cws, 2) doesn't work with languages such Russian and Chinese. Using MID(**cws, 2), MID(cws.wstr, 2) or cws.MidChars(2) works.</li>
+<li>MID as a statement: Something like MID(cws, 2, 1) = &quot;x&quot; compiles but does not change the contents of the dynamic unicode string. MID(cws.wstr, 2, 1) = &quot;x&quot; or MID(**cws, 2, 1) = &quot;x&quot; works.</li>
+<li>SELECT CASE: Something like SELECT CASE LEFT(cws, 2) does not compile; we have to use SELECT CASE LEFT(**cws, 2).</li>
+<li>Operator []: cwsText[0] = ASC(&quot;x&quot;) does not compile; we have to use (*cwsText)[0] = ASC(&quot;x&quot;).</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors">Constructors</a></td>
+<td>Initialize the class with the specified value.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operator*">Operator *</a></td>
+<td>One * returns the address of the CWSTR buffer.<br> Two ** returns the address of the start of the string data.</td>
+</tr>
+<tr class="odd">
+<td><a href="#sptr">sptr</a></td>
+<td>Returns the address of the string data. Same as *.</td>
+</tr>
+<tr class="even">
+<td><a href="#vptr">vptr</a></td>
+<td>Returns the address of the CWSTR buffer. Same as *</td>
+</tr>
+<tr class="odd">
+<td><a href="#wstr">wstr</a></td>
+<td>Returns the string data. Same as **.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operator&amp;">Operator &amp;</a></td>
+<td>Concatenates strings.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Operator+=">Operator +=</a></td>
+<td>Appends a string to the CWSTR.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operator&amp;=">Operator &amp;=</a></td>
+<td>Appends a string to the CWSTR.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Operator[]">Operator []</a></td>
+<td>Gets the corresponding unicode integer representation of the character at the specified position.</td>
+</tr>
+<tr class="even">
+<td><a href="#OperatorLet">Operator Let</a></td>
+<td>Assigns a string to the CWSTR. It implements the = operator.</td>
+</tr>
+<tr class="odd">
+<td><a href="#OperatorCast">Operator Cast</a></td>
+<td>Returns a pointer to the CWSTR buffer or the string data.<br>Casting is automatic. You don't have to call this operator.</td>
+</tr>
+<tr class="even">
+<td><a href="#bstr">bstr</a></td>
+<td>Returns the contents of the CWSTR as a BSTR.</td>
+</tr>
+<tr class="odd">
+<td><a href="#cbstr">cbstr</a></td>
+<td>Returns the contents of the CWSTR as a CBSTR.</td>
+</tr>
+<tr class="even">
+<td><a href="#wchar">wchar</a></td>
+<td>Returns the string data as a new unicode string allocated with CoTaskMemAlloc.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Utf8">Utf8</a></td>
+<td>Converts from UTF8 to Unicode and from Unicode to UTF8.</td>
+</tr>
+<tr class="even">
+<td><a href="#Capacity">Capacity</a></td>
+<td>Gets/sets the size of the internal buffer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GrowSize">GrowSize</a></td>
+<td>Gets/sets the grow size value, in characters.</td>
+</tr>
+<tr class="even">
+<td><a href="#Add">Add</a></td>
+<td>The passed string parameter is appended to the string starting at the specified position.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Char">Char</a></td>
+<td>Gets or sets the corresponding unicode integer representation of the character at the specified position.</td>
+</tr>
+<tr class="even">
+<td><a href="#Clear">Clear</a></td>
+<td>Erases all the data in the class object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DelChars">DelChars</a></td>
+<td>Deletes the specified number of characters starting at the specified position.</td>
+</tr>
+<tr class="even">
+<td><a href="#Insert">Insert</a></td>
+<td>The passed string parameter is inserted in the string starting at the specified position.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Left">Left</a></td>
+<td>Returns the leftmost substring of the string.</td>
+</tr>
+<tr class="even">
+<td><a href="#Right">Right</a></td>
+<td>Returns the rightmost substring of the string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LeftChars">LeftChars</a></td>
+<td>Returns the leftmost substring of the string. Same as Left.</td>
+</tr>
+<tr class="even">
+<td><a href="#MidChars">MidChars</a></td>
+<td>Returns a substring of the string. Same as Mid.</td>
+</tr>
+<tr class="odd">
+<td><a href="#RightChars">RightChars</a></td>
+<td>Returns the rightmost substring of the string. Same as Right.</td>
+</tr>
+<tr class="even">
+<td><a href="#Resize">Resize</a></td>
+<td>Resizes the string to a length of the specified number of characters.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SizeAlloc">SizeAlloc</a></td>
+<td>Sets the capacity of the buffer in characters.</td>
+</tr>
+<tr class="even">
+<td><a href="#SizeOf">SizeOf</a></td>
+<td>Returns the capacity of the buffer in characters.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Val">Val</a></td>
+<td>Converts the string to a floating point number (DOUBLE).</td>
+</tr>
+<tr class="even">
+<td><a href="#ValDouble">ValDouble</a></td>
+<td>Converts the string to a floating point number (DOUBLE).</td>
+</tr>
+<tr class="odd">
+<td><a href="#ValInt">ValInt</a></td>
+<td>Converts the string to a signed 32-bit integer (LONG).</td>
+</tr>
+<tr class="even">
+<td><a href="#ValLong">ValLong</a></td>
+<td>Converts the string to a signed 32-bit integer (LONG).</td>
+</tr>
+<tr class="odd">
+<td><a href="#ValLongInt">ValLongInt</a></td>
+<td>Converts the string to a signed 64-bit integer (LONGINT).</td>
+</tr>
+<tr class="even">
+<td><a href="#Value">Value</a></td>
+<td>Converts the string to a floating point number (DOUBLE).</td>
+</tr>
+<tr class="odd">
+<td><a href="#ValUInt">ValUInt</a></td>
+<td>Converts the string to a 32.bit unsigned integer (ULONG).</td>
+</tr>
+<tr class="even">
+<td><a href="#ValULong">ValULong</a></td>
+<td>Converts the string to a 32-bit unsigned integer (ULONG).</td>
+</tr>
+<tr class="odd">
+<td><a href="#ValULongInt">ValULongInt</a></td>
+<td>Converts the string to a 64-bit unsigned integer (ULONGINT).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCWstrArrayAppend">AfxCWstrArrayAppend</a></td>
+<td>Appends a CWSTR at the end of a not fixed one-dimensional CWSTR array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxCWstrArrayInsert">AfxCWstrArrayInsert</a></td>
+<td>Inserts a new CWSTR element before the specified position in a not fixed one-dimensional CWSTR array.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCWstrArrayRemove">AfxCWstrArrayRemove</a></td>
+<td>Removes the specified element of a not fixed one-dimensional CWSTR array.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxCWstrArraySort">AfxCWstrArraySort</a></td>
+<td>Sorts a one-dimensional CWSTR array calling the C qsort function.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCWstrArrayLogicalSort">AfxCWstrArrayLogicalSort</a></td>
+<td>Sorts a one-dimensional CWSTR array calling the C qsort function.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxCWstrLogicalSort">AfxCWstrLogicalSort</a></td>
+<td>Sorts a one-dimensional CWSTR array calling the C qsort function.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxCWstrSort">AfxCWstrSort</a></td>
+<td>Sorts a one-dimensional CWSTR array calling the C qsort function.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors"><a name="Constructors"></a>Constructors</h1>
+<p>Initialize the class with the specified value.</p>
+<pre><code>CONSTRUCTOR CWStr
+CONSTRUCTOR CWStr (BYVAL nChars AS UINT, BYVAL bClear AS BOOLEAN)
+CONSTRUCTOR CWStr (BYVAL pwszStr AS WSTRING PTR)
+CONSTRUCTOR CWStr (BYREF cws AS CWSTR)
+CONSTRUCTOR CWstr (BYREF cbs AS CBSTR)
+CONSTRUCTOR CWStr (BYREF ansiStr AS STRING, BYVAL nCodePage AS UINT = 0)
+CONSTRUCTOR CWstr (BYREF n AS LONGINT)
+CONSTRUCTOR CWstr (BYREF n AS DOUBLE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nChars</em></td>
+<td>The number of characters to be pre-allocated.</td>
+</tr>
+<tr class="even">
+<td><em>bClear</em></td>
+<td>The newly allocated memory is initialized (TRUE) or not (FALSE).</td>
+</tr>
+<tr class="odd">
+<td><em>pwszStr</em></td>
+<td>A WSTRING.</td>
+</tr>
+<tr class="even">
+<td><em>cws</em></td>
+<td>A CWSTR.</td>
+</tr>
+<tr class="odd">
+<td><em>cbs</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="even">
+<td><em>ansiStr</em></td>
+<td>An ansi string or string literal.</td>
+</tr>
+<tr class="odd">
+<td><em>nCodePage</em></td>
+<td>The code page to be used for ansi to unicode conversions.</td>
+</tr>
+<tr class="even">
+<td><em>n</em></td>
+<td>A number.</td>
+</tr>
+</tbody>
+</table>
+<p>For a list of code pages see: <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx">Code Page Identifiers</a></p>
+<p><code>CWSTR</code> works transparently with literals and Free Basic native strings, e.g.</p>
+<pre><code>DIM cws AS CWSTR = &quot;One&quot;
+DIM s AS STRING = &quot;Three&quot;
+cws = cws + &quot; Two &quot; + s
+PRINT cws
+</code></pre>
+<p>It can be used with Windows API functions, e.g.</p>
+<pre><code>DIM nLen AS LONG = SendMessageW(hwnd, WM_GETTEXTLENGTH, 0, 0)
+DIM cwsText AS CWSTR = CWSTR(nLen + 1, 0)
+SendMessageW(hwnd, WM_GETTEXT, nLen + 1, cast(LPARAM, *cwsText))
+</code></pre>
+<p>We can use arrays of <code>CWSTR</code> strings transparently, e.g.</p>
+<pre><code>DIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+
+FOR i AS LONG = 1 TO 10
+   print rg(i)
+NEXT
+</code></pre>
+<p>A two-dimensional array</p>
+<pre><code>DIM rg2 (1 TO 2, 1 TO 2) AS CWSTR
+rg2(1, 1) = &quot;string 1 1&quot;
+rg2(1, 2) = &quot;string 1 2&quot;
+rg2(2, 1) = &quot;string 2 1&quot;
+rg2(2, 2) = &quot;string 2 2&quot;
+print rg2(2, 1)
+</code></pre>
+<p>REDIM PRESERVE / ERASE</p>
+<pre><code>REDIM rg(0) AS CWSTR
+rg(0) = &quot;string 0&quot;
+REDIM PRESERVE rg(0 TO 2) AS CWSTR
+rg(1) = &quot;string 1&quot;
+rg(2) = &quot;string 2&quot;
+print rg(0)
+print rg(1)
+print rg(2)
+ERASE rg
+</code></pre>
+<p>And we can also sort one-dimensional arrays calling the <strong>AfxCWstrSort</strong> procedure:</p>
+<pre><code>DIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+FOR i AS LONG = 1 TO 10
+  print rg(i)
+NEXT
+print &quot;---- after sorting ----&quot;
+AfxCWstrSort @rg(1), 10
+FOR i AS LONG = 1 TO 10
+   print rg(i)
+NEXT
+</code></pre>
+<p>You can also use it with files:</p>
+<p>Using FreeBasic intrinsic statements:</p>
+<pre><code>DIM cws AS CWSTR = &quot;Дмитрий Дмитриевич Шостакович&quot;
+DIM f AS LONG = FREEFILE
+OPEN &quot;test.txt&quot; FOR OUTPUT ENCODING &quot;utf16&quot; AS #f
+PRINT #f, cws
+CLOSE #f
+</code></pre>
+<p>Using the Windows API:</p>
+<pre><code>' // Writing to a file
+DIM cwsFilename AS CWSTR = &quot;тест.txt&quot;
+DIM cwsText AS CWSTR = &quot;Дмитрий Дмитриевич Шостакович&quot;
+DIM hFile AS HANDLE = CreateFileW(cwsFilename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)
+IF hFile THEN
+   DIM dwBytesWritten AS DWORD
+   DIM bSuccess AS LONG = WriteFile(hFile, cwsText, LEN(cwsText) * 2, @dwBytesWritten, NULL)
+   CloseHandle(hFile)
+END IF
+</code></pre>
+<p>' // Read the file</p>
+<pre><code>hFile = CreateFileW(cwsFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+IF hFile THEN
+   DIM dwFileSize AS DWORD = GetFileSize(hFile, NULL)
+   IF dwFileSize THEN
+      DIM cwsOut AS CWSTR = WSPACE(dwFileSize \ 2)
+      DIM bSuccess AS LONG = ReadFile(hFile, *cwsOut, dwFileSize, NULL, NULL)
+      CloseHandle(hFile)
+      PRINT cwsOut
+   END IF
+END IF
+</code></pre>
+<p>Notice that, contrarily to <strong>CreateFileW</strong>, FreeBasic's OPEN statement doesn't allow to use unicode for the file name.</p>
+<h1 id="operators">Operators</h1>
+<h2 id="operator-*"><a name="Operator*"></a>Operator *</h2>
+<p>Deferences the CWSTR.<br>One * returns the address of the CWSTR buffer.<br>Two ** returns the address of the start of the string data.</p>
+<pre><code>OPERATOR * (BYREF cws AS CWSTR) AS WSTRING PTR
+</code></pre>
+<h2 id="sptr"><a name="sptr"></a>sptr</h2>
+<p>Returns the address of the string data. Same as *.</p>
+<pre><code>FUNCTION sptr () AS WSTRING PTR
+</code></pre>
+<h2 id="vptr"><a name="vptr"></a>vptr</h2>
+<p>Returns the address of the string buffer. Same as *.</p>
+<pre><code>FUNCTION vptr () AS WSTRING PTR
+</code></pre>
+<h2 id="wstr"><a name="wstr"></a>wstr</h2>
+<p>Returns the string data. Same as **.</p>
+<pre><code>FUNCTION wstr () BYREF AS WSTRING
+</code></pre>
+<h2 id="operator-&amp;"><a name="Operator&amp;"></a>Operator &amp;</h2>
+<p>Concatenates strings.</p>
+<pre><code>OPERATOR &amp; (BYREF cws1 AS CWSTR, BYREF cws2 AS CWSTR) AS CWSTR
+</code></pre>
+<h2 id="operator-+="><a name="Operator+="></a>Operator +=</h2>
+<p>Appends a string to the CWSTR.</p>
+<pre><code>OPERATOR += (BYREF wszStr AS CONST WSTRING)
+OPERATOR += (BYREF cws AS CWStr)
+OPERATOR += (BYREF cbs AS CBStr)
+OPERATOR += (BYREF ansiStr AS STRING)
+</code></pre>
+<h2 id="operator-&amp;="><a name="Operator&amp;="></a>Operator &amp;=</h2>
+<p>Appends a string to the CWSTR.</p>
+<pre><code>OPERATOR &amp;= (BYREF wszStr AS CONST WSTRING)
+OPERATOR &amp;= (BYREF cws AS CWStr)
+OPERATOR &amp;= (BYREF cbs AS CBStr)
+OPERATOR &amp;= (BYREF ansiStr AS STRING)
+</code></pre>
+<h2 id="operator-[]"><a name="Operator[]"></a>Operator []</h2>
+<p>Appends a string to the CWSTR.</p>
+<pre><code>OPERATOR [] (BYVAL nIndex AS LONG) AS USHORT
+</code></pre>
+<h2 id="operator-let"><a name="OperatorLet"></a>Operator Let</h2>
+<p>Assigns a string to the CWSTR.</p>
+<pre><code>OPERATOR LET (BYREF wszStr AS CONST WSTRING)
+OPERATOR LET (BYVAL pwszStr AS WSTRING PTR)
+OPERATOR LET (BYREF cws AS CWStr)
+OPERATOR LET (BYREF cbs AS CBStr)
+OPERATOR LET (BYREF ansiStr AS STRING)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszStr</em></td>
+<td>A WSTRING.</td>
+</tr>
+<tr class="even">
+<td><em>pwszStr</em></td>
+<td>A pointer to a WSTRING.</td>
+</tr>
+<tr class="odd">
+<td><em>cws</em></td>
+<td>A CWSTR.</td>
+</tr>
+<tr class="even">
+<td><em>cbs</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="odd">
+<td><em>ansiStr</em></td>
+<td>An ansi string or string literal.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="casting-and-conversions">Casting and Conversions</h1>
+<h2 id="operator-cast"><a name="OperatorCast"></a>Operator Cast</h2>
+<pre><code>OPERATOR CAST () BYREF AS CONST WSTRING
+OPERATOR CAST () AS ANY PTR
+</code></pre>
+<p>Returns a pointer to the CWSTR buffer or the string data. These operators aren't called directly.</p>
+<h2 id="bstr"><a name="bstr"></a>bstr</h2>
+<p>Returns the contents of the CWSTR as a BSTR.</p>
+<pre><code>FUNCTION bstr () AS AFX_BSTR
+</code></pre>
+<h2 id="cbstr"><a name="cbstr"></a>cbstr</h2>
+<p>Returns the contents of the CWSTR as a CBSTR.</p>
+<pre><code>FUNCTION cbstr () AS CBStr
+</code></pre>
+<h2 id="wchar"><a name="wchar"></a>wchar</h2>
+<p>Returns the string data as a new unicode string allocated with CoTaskMemAlloc.</p>
+<pre><code>FUNCTION wchar () AS WSTRING PTR
+</code></pre>
+<p>Useful when we need to pass a pointer to a null terminated wide string to a function or method that will release it. If we pass a WSTRING it will GPF. If the length of the input string is 0, CoTaskMemAlloc allocates a zero-length item and returns a valid pointer to that item. If there is insufficient memory available, CoTaskMemAlloc returns NULL.</p>
+<h2 id="utf8"><a name="Utf8"></a>Utf8</h2>
+<p>Converts from UTF8 to Unicode and from Unicode to UTF8.</p>
+<pre><code>PROPERTY Utf8() AS STRING
+PROPERTY Utf8 (BYREF utf8String AS STRING)
+</code></pre>
+<h1 id="methods">Methods</h1>
+<h2 id="capacity"><a name="Capacity"></a>Capacity</h2>
+<p>Gets/sets the size of the internal buffer. The size is the number of bytes which can be stored without further expansion.</p>
+<pre><code>PROPERTY Capacity() AS UINT
+PROPERTY Capacity (BYVAL nValue AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nValue</em></td>
+<td>The new capacity value, in bytes. If the new capacity is equal to the current capacity, no operation is performed; is it is smaller, the buffer is shortened and the contents that exceed the new capacity are lost. If you pass an odd number, 1 is added to the value to make it even.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="growsize"><a name="GrowSize"></a>GrowSize</h2>
+<p>Gets/sets the size of the internal buffer. The size is the number of bytes which can be stored without further expansion.</p>
+<pre><code>PROPERTY GrowSize () AS LONG
+PROPERTY GrowSize (BYVAL nChars AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nChars</em></td>
+<td>The new grow size value, in characters. A value of less than 0 indicates that it must double the capacity each time that the buffer needs to be resized.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="add"><a name="Add"></a>Add</h2>
+<p>The passed string parameter is appended to the string starting at the specified position.</p>
+<pre><code>SUB Add (BYREF cws AS CWSTR, BYVAL nIndex AS UINT)
+SUB Add (BYREF cbs AS CBSTR, BYVAL nIndex AS UINT)
+SUB Add (BYVAL pwszStr AS WSTRING PTR, BYVAL nIndex AS UINT)
+SUB Add (BYREF ansiStr AS STRING, BYVAL nIndex AS UINT, BYVAL nCodePage AS UINT = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszStr</em></td>
+<td>A WSTRING.</td>
+</tr>
+<tr class="even">
+<td><em>cws</em></td>
+<td>A CWSTR.</td>
+</tr>
+<tr class="odd">
+<td><em>cbs</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="even">
+<td><em>ansiStr</em></td>
+<td>An ansi string or string literal.</td>
+</tr>
+<tr class="odd">
+<td><em>nIndex</em></td>
+<td>The starting position (1 for the first character, 2 for the second, etc.).</td>
+</tr>
+<tr class="even">
+<td><em>nCodePage</em></td>
+<td>The code page to be used for ansi to unicode conversions.</td>
+</tr>
+</tbody>
+</table>
+<p>For a list of code pages see: <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx">Code Page Identifiers</a></p>
+<h2 id="char"><a name="Char"></a>Char</h2>
+<p>Gets or sets the corresponding unicode integer representation of the character at the position specified by the <em>nIndex</em> parameter.</p>
+<pre><code>PROPERTY Char (BYVAL nIndex AS UINT) AS USHORT
+PROPERTY Char (BYVAL nIndex AS UINT, BYVAL nValue AS USHORT)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nIndex</em></td>
+<td>The one based index of the character in the string (1 for the first character, 2 for the second, etc.). If nIndex is beyond the current length of the string, a 0 is returned.</td>
+</tr>
+<tr class="even">
+<td><em>nValue</em></td>
+<td>The unicode integer representation of the character.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="clear"><a name="Clear"></a>Clear</h2>
+<p>Erases all the data in the class object.</p>
+<pre><code>SUB Clear
+</code></pre>
+<p>Actually, this method only sets the buffer length to zero, indicating no string in the buffer. The allocated memory for the buffer is deallocated when the class is destroyed.</p>
+<h2 id="delchars"><a name="DelChars"></a>DelChars</h2>
+<p>Deletes the specified number of characters starting at the specified position.</p>
+<pre><code>FUNCTION DelChars (BYVAL nIndex AS UINT, BYVAL nCount AS UINT) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nIndex</em></td>
+<td>The starting position (1 for the first character, 2 for the second, etc.).</td>
+</tr>
+<tr class="even">
+<td><em>nCount</em></td>
+<td>The number of characters to delete.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="insert"><a name="Insert"></a>Insert</h2>
+<p>The passed string parameter is inserted in the string starting at the specified position.</p>
+<pre><code>FUNCTION Insert (BYVAL pwszStr AS WSTRING PTR, BYVAL nIndex AS UINT) AS BOOLEAN
+FUNCTION Insert (BYREF cws AS CWSTR, BYVAL nIndex AS UINT) AS BOOLEAN
+FUNCTION Insert (BYREF cbs AS CBSTR, BYVAL nIndex AS UINT) AS BOOLEAN
+FUNCTION Insert (BYREF ansiStr AS STRING, BYVAL nIndex AS UINT, BYVAL nCodePage AS UINT = 0) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszStr</em></td>
+<td>A WSTRING.</td>
+</tr>
+<tr class="even">
+<td><em>cws</em></td>
+<td>A CWSTR.</td>
+</tr>
+<tr class="odd">
+<td><em>cbs</em></td>
+<td>A CBSTR.</td>
+</tr>
+<tr class="even">
+<td><em>ansiStr</em></td>
+<td>An ansi string or string literal.</td>
+</tr>
+<tr class="odd">
+<td><em>nIndex</em></td>
+<td>The starting position (1 for the first character, 2 for the second, etc.).</td>
+</tr>
+<tr class="even">
+<td><em>nCodePage</em></td>
+<td>The code page to be used for ansi to unicode conversions.</td>
+</tr>
+</tbody>
+</table>
+<p>For a list of code pages see: <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx">Code Page Identifiers</a></p>
+<h2 id="left"><a name="Left"></a>Left</h2>
+<p>Returns the leftmost substring of the string.</p>
+<pre><code>FUNCTION Left OVERLOAD (BYREF cws AS CWSTR, BYVAL nChars AS INTEGER) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cws</em></td>
+<td>The source CWSTR.</td>
+</tr>
+<tr class="even">
+<td><em>nChars</em></td>
+<td>The number of characters to return from the source string.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="right"><a name="Right"></a>Right</h2>
+<p>Returns the rightmost substring of the string.</p>
+<pre><code>FUNCTION Right OVERLOAD (BYREF cws AS CWSTR, BYVAL nChars AS INTEGER) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cws</em></td>
+<td>The source CWSTR.</td>
+</tr>
+<tr class="even">
+<td><em>nChars</em></td>
+<td>The substring length, in characters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="leftchars"><a name="LeftChars"></a>LeftChars</h2>
+<p>Returns the leftmost substring of the string.</p>
+<pre><code>FUNCTION LeftChars (BYVAL nChars AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nChars</em></td>
+<td>The number of characters to return from the source string.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="midchars"><a name="MidChars"></a>MidChars</h2>
+<p>Returns a substring of the string.</p>
+<pre><code>MidChars (BYVAL nStart AS LONG, BYVAL nChars AS LONG = 0) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStart</em></td>
+<td>The start position in CWSTR of the substring. The first character starts at position 1.</td>
+</tr>
+<tr class="even">
+<td><em>nChars</em></td>
+<td>The substring length, in characters. If nChars &lt; 0 or nChars &gt;= length of the CWSTR then all of the remaining characters are returned.</td>
+</tr>
+</tbody>
+</table>
+<p>If CWSTR is empty then the null string (&quot;&quot;) is returned. If <em>nStart</em> &lt;= 0 then the null string (&quot;&quot;) is returned.</p>
+<h2 id="rightchars"><a name="RightChars"></a>RightChars</h2>
+<p>Returns the rightmost substring of the string.</p>
+<pre><code>FUNCTION RightChars (BYVAL nChars AS LONG) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nChars</em></td>
+<td>The substring length, in characters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="resize"><a name="Resize"></a>Resize</h2>
+<p>Resizes the string to a length of <em>nSize</em> characters.</p>
+<pre><code>FUNCTION Resize (BYVAL nSize AS UINT, BYREF ch AS WSTRING = &quot;&quot;)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nSize</em></td>
+<td>New string length, expressed in number of characters.</td>
+</tr>
+<tr class="even">
+<td><em>ch</em></td>
+<td>Character used to fill the new character space added to the string (in case the string is expanded).</td>
+</tr>
+</tbody>
+</table>
+<p>If <em>nSize</em> is smaller than the current string length, the current value is shortened to its first <em>nSize</em> characters. If <em>nSize</em> is greater than the current string length, the current content is extended by inserting at the end as many characters as needed to reach a size of <em>nSize</em>. If <em>ch</em> is specified, the new elements are initialized as copies of <em>ch</em>, otherwise, spaces are added.</p>
+<h2 id="sizealloc"><a name="SizeAlloc"></a>SizeAlloc</h2>
+<p>Resizes the string to a length of <em>nSize</em> characters.Sets the capacity of the buffer in characters.</p>
+<pre><code>PROPERTY SizeAlloc (BYVAL nChars AS UINT)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nChars</em></td>
+<td>The new capacity value, in characters. If the new capacity is equal to the current capacity, no operation is performed; is it is smaller, the buffer is shortened and the contents that exceed the new capacity are lost.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sizeof"><a name="SizeOf"></a>SizeOf</h2>
+<p>Returns the capacity of the buffer in characters.</p>
+<pre><code>PROPERTY SizeOf() AS UINT
+</code></pre>
+<h2 id="val"><a name="Val"></a>Val</h2>
+<p>Converts the string to a floating point number (DOUBLE).</p>
+<pre><code>FUNCTION Val OVERLOAD (BYREF cws AS CWSTR) AS DOUBLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cws</em></td>
+<td>The source CWSTR.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="valdouble"><a name="ValDouble"></a>ValDouble</h2>
+<p>Converts the string to a floating point number (DOUBLE).</p>
+<pre><code>FUNCTION ValDouble () AS DOUBLE
+</code></pre>
+<h2 id="valint"><a name="ValInt"></a>ValInt</h2>
+<p>Converts the string to a signed 32-bit integer (LONG).</p>
+<pre><code>FUNCTION ValInt () AS LONG
+</code></pre>
+<h2 id="vallong"><a name="ValLong"></a>ValLong</h2>
+<p>Converts the string to a signed 32-bit integer (LONG).</p>
+<pre><code>FUNCTION ValLong () AS LONG
+</code></pre>
+<h2 id="vallongint"><a name="ValLongInt"></a>ValLongInt</h2>
+<p>Converts the string to a signed 64-bit integer (LONGINT).</p>
+<pre><code>FUNCTION ValLongInt () AS LONGINT
+</code></pre>
+<h2 id="value"><a name="Value"></a>Value</h2>
+<p>Converts the string to a floating point number (DOUBLE).</p>
+<pre><code>FUNCTION Value () AS DOUBLE
+</code></pre>
+<h2 id="valuint"><a name="ValUInt"></a>ValUInt</h2>
+<p>Converts the string to a 32.bit unsigned integer (ULONG).</p>
+<pre><code>FUNCTION ValUInt () AS ULONG
+</code></pre>
+<h2 id="valulong"><a name="ValULong"></a>ValULong</h2>
+<p>Converts the string to a 32-bit unsigned integer (ULONG).</p>
+<pre><code>FUNCTION ValULong () AS ULONG
+</code></pre>
+<h2 id="valulongint"><a name="ValULongInt"></a>ValULongInt</h2>
+<p>Converts the string to a 64-bit unsigned integer (ULONGINT).</p>
+<pre><code>FUNCTION ValULongInt () AS ULONGINT
+</code></pre>
+<h1 id="helper-functions">Helper Functions</h1>
+<h2 id="afxcwstrarrayappend"><a name="AfxCWstrArrayAppend"></a>AfxCWstrArrayAppend</h2>
+<p>Appends a CWSTR at the end of a not fixed one-dimensional CWSTR array.</p>
+<pre><code>FUNCTION AfxCWstrArrayAppend (rgwstr() AS CWSTR, BYREF cws AS CWSTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr()</em></td>
+<td>The array.</td>
+</tr>
+<tr class="even">
+<td><em>cws</em></td>
+<td>The string to append.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example">Example</h2>
+<pre><code>REDIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+AfxCwstrArrayAppend(rg(), &quot;string 11&quot;)
+FOR i AS LONG = LBOUND(rg) TO UBOUND(rg)
+   print rg(i)
+NEXT
+</code></pre>
+<h2 id="afxcwstrarrayinsert"><a name="AfxCWstrArrayInsert"></a>AfxCWstrArrayInsert</h2>
+<p>Inserts a new CWSTR element before the specified position in a not fixed one-dimensional CWSTR array.</p>
+<pre><code>FUNCTION AfxCWstrArrayInsert (rgwstr() AS CWSTR, BYVAL nPos AS LONG, BYREF cws AS CWSTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr()</em></td>
+<td>The array.</td>
+</tr>
+<tr class="even">
+<td><em>nPos</em></td>
+<td>The position in the array where the new element will be added. This position is relative to the lower bound of the array.</td>
+</tr>
+<tr class="odd">
+<td><em>cws</em></td>
+<td>The string to append.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-1">Example</h4>
+<pre><code>REDIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+AfxCwstrArrayInsert(rg(), 3, &quot;Inserted element&quot;)
+FOR i AS LONG = LBOUND(rg) TO UBOUND(rg)
+   print rg(i)
+NEXT
+</code></pre>
+<h2 id="afxcwstrarrayremove"><a name="AfxCWstrArrayRemove"></a>AfxCWstrArrayRemove</h2>
+<p>Removes the specified element of a not fixed one-dimensional CWSTR array.</p>
+<pre><code>FUNCTION AfxCWstrArrayRemove (rgwstr() AS CWSTR, BYVAL nPos AS LONG) AS BOOLEAN
+FUNCTION AfxCWstrArrayRemoveFirst (rgwstr() AS CWSTR) AS BOOLEAN
+FUNCTION AfxCWstrArrayRemoveLast (rgwstr() AS CWSTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr()</em></td>
+<td>The array.</td>
+</tr>
+<tr class="even">
+<td><em>nPos</em></td>
+<td>The position in the array of the element to remove. This position is relative to the lower bound of the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p><strong>AfxCWstrArrayRemoveFirst</strong> removes the first element of the array <strong>AfxCWstrArrayRemoveLast</strong> removes the last element of the array</p>
+<h4 id="example-2">Example</h4>
+<pre><code>REDIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+AfxCwstrArrayRemove(rg(), 3)
+FOR i AS LONG = LBOUND(rg) TO UBOUND(rg)
+   print rg(i)
+NEXT
+</code></pre>
+<h2 id="afxcwstrarraysort"><a name="AfxCWstrArraySort"></a>AfxCWstrArraySort</h2>
+<p>Sorts a one-dimensional CWSTR array calling the C qsort function.</p>
+<pre><code>SUB AfxCWstrArraySort (rgwstr() AS CWSTR, BYVAL bAscend AS BOOLEAN = TRUE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr()</em></td>
+<td>The array to sort.</td>
+</tr>
+<tr class="even">
+<td><em>bAscend</em></td>
+<td>TRUE for sorting in ascending order; FALSE for sorting in descending order.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-3">Example</h4>
+<pre><code>DIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+FOR i AS LONG = 1 TO 10
+  print rg(i)
+NEXT
+print &quot;---- after sorting ----&quot;
+AfxCWstrArraySort rg()
+FOR i AS LONG = 1 TO 10
+   print rg(i)
+NEXT
+</code></pre>
+<h2 id="afxcwstrarraylogicalsort"><a name="AfxCWstrArrayLogicalSort"></a>AfxCWstrArrayLogicalSort</h2>
+<p>Sorts a one-dimensional CWSTR array calling the C qsort function. Digits in the strings are considered as numerical content rather than text. This test is not case-sensitive.</p>
+<pre><code>SUB AfxCWstrArrayLogicalSort (rgwstr() AS CWSTR, BYVAL bAscend AS BOOLEAN = TRUE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr()</em></td>
+<td>The array to sort.</td>
+</tr>
+<tr class="even">
+<td><em>bAscend</em></td>
+<td>TRUE for sorting in ascending order; FALSE for sorting in descending order.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>DIM rg(1 TO 9) AS CWSTR
+rg(1) = &quot;20string&quot;
+rg(2) = &quot;2string&quot;
+rg(3) = &quot;3string&quot;
+rg(4) = &quot;st20ring&quot;
+rg(5) = &quot;st2ring&quot;
+rg(6) = &quot;st3ring&quot;
+rg(7) = &quot;string2&quot;
+rg(8) = &quot;string20&quot;
+rg(9) = &quot;string3&quot;
+
+print &quot;---- after sorting ----&quot;
+
+AfxCWstrArrayLogicalSort rg()
+FOR i AS LONG = 1 TO 9
+  print rg(i)
+NEXT
+
+' -- Output:
+---- after sorting ----
+2string
+3string
+20string
+st2ring
+st3ring
+st20ring
+string2
+string3
+string20
+</code></pre>
+<h2 id="afxcwstrlogicalsort"><a name="AfxCWstrLogicalSort"></a>AfxCWstrLogicalSort</h2>
+<p>Sorts a one-dimensional CWSTR array calling the C qsort function. Digits in the strings are considered as numerical content rather than text. This test is not case-sensitive.</p>
+<pre><code>SUB AfxCWstrLogicalSort (BYVAL rgwstr AS ANY PTR, BYVAL numElm AS LONG, BYVAL bAscend AS BOOLEAN = TRUE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr</em></td>
+<td>Pointer to the start of target array.</td>
+</tr>
+<tr class="even">
+<td><em>numElm</em></td>
+<td>Number of elements in the array.</td>
+</tr>
+<tr class="odd">
+<td><em>bAscend</em></td>
+<td>TRUE for sorting in ascending order; FALSE for sorting in descending order.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-4">Example</h4>
+<pre><code>DIM rg(1 TO 9) AS CWSTR
+rg(1) = &quot;20string&quot;
+rg(2) = &quot;2string&quot;
+rg(3) = &quot;3string&quot;
+rg(4) = &quot;st20ring&quot;
+rg(5) = &quot;st2ring&quot;
+rg(6) = &quot;st3ring&quot;
+rg(7) = &quot;string2&quot;
+rg(8) = &quot;string20&quot;
+rg(9) = &quot;string3&quot;
+
+print &quot;---- after sorting ----&quot;
+
+AfxCWstrLogicalSort @rg(1), 9
+FOR i AS LONG = 1 TO 9
+  print rg(i)
+NEXT
+
+' -- Output:
+---- after sorting ----
+2string
+3string
+20string
+st2ring
+st3ring
+st20ring
+string2
+string3
+string20
+</code></pre>
+<h2 id="afxcwstrsort"><a name="AfxCWstrSort"></a>AfxCWstrSort</h2>
+<p>Sorts a one-dimensional CWSTR array calling the C qsort function.</p>
+<pre><code>SUB AfxCWstrSort (BYVAL rgwstr AS ANY PTR, BYVAL numElm AS LONG, BYVAL bAscend AS BOOLEAN = TRUE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>rgwstr</em></td>
+<td>Pointer to the start of target array.</td>
+</tr>
+<tr class="even">
+<td><em>numElm</em></td>
+<td>Number of elements in the array.</td>
+</tr>
+<tr class="odd">
+<td><em>bAscend</em></td>
+<td>TRUE for sorting in ascending order; FALSE for sorting in descending order.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-5">Example</h4>
+<pre><code>DIM rg(1 TO 10) AS CWSTR
+FOR i AS LONG = 1 TO 10
+   rg(i) = &quot;string &quot; &amp; i
+NEXT
+FOR i AS LONG = 1 TO 10
+  print rg(i)
+NEXT
+print &quot;---- after sorting ----&quot;
+AfxCWstrSort @rg(1), 10
+FOR i AS LONG = 1 TO 10
+   print rg(i)
+NEXT
+</code></pre>
+</body>
+</html>
+

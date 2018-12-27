@@ -151,12 +151,8 @@ end function
 ' ========================================================================================
 Function frmCompileConfig_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 
-   ' Retrieve a reference to the CWindow class from the CREATESTRUCT structure
-   'Dim pCreateStruct As CREATESTRUCT Ptr = lpCreateStructPtr
-   'Dim pWindow As CWindow Ptr = Cast(CWindow Ptr, pCreateStruct->lpCreateParams)
-
    ' This is a modal popup window so disable the parent window
-   EnableWindow GetParent(HWnd), False
+   DisableAllModeless()
 
    '  Message cracker macro expects a True to be returned for a successful
    '  OnCreate handler even though returning -1 from a standard WM_CREATE
@@ -350,7 +346,7 @@ End Function
 ' ========================================================================================
 Function frmCompileConfig_OnClose(HWnd As HWnd) As LRESULT
    ' Enables parent window keeping parent's zorder
-   EnableWindow( GetParent(HWnd), True )
+   EnableAllModeless()
    DestroyWindow( HWnd )
    Function = 0
 End Function
@@ -403,7 +399,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    Dim As HWnd hForm = _
-   pWindow->Create(hWndParent, rtrim(L(277,"Build Configurations..."),"."), _
+   pWindow->Create(hWndParent, L(277,"Build Configurations"), _
         @frmCompileConfig_WndProc, 0, 0, 396, 323, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT )
@@ -413,7 +409,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LISTBOX", , IDC_FRMBUILDCONFIG_LIST1, "", 10, 10, 223, 181, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL1, L(278,"Description:"), 10, 196, 91, 17, _
+   pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL1, L(278,"Description") & ":", 10, 196, 91, 17, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMBUILDCONFIG_TXTDESCRIPTION, "", 10, 215, 224, 20, _
@@ -422,7 +418,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMBUILDCONFIG_CHKISDEFAULT, L(280,"Set as default"), 243, 216, 172, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL2, L(279,"Compiler Options:"), 10, 240, 136, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL2, L(279,"Compiler Options") & ":", 10, 240, 136, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMBUILDCONFIG_TXTOPTIONS, "", 10, 258, 372, 20, _
@@ -453,10 +449,10 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
-   pWindow->AddControl("BUTTON", , IDOK,  L(0,"&OK"), 300, 10, 81, 33, _
+   pWindow->AddControl("BUTTON", , IDOK,  L(0,"OK"), 300, 10, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 300, 48, 81, 33, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 300, 48, 81, 33, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("BUTTON", , IDC_FRMBUILDCONFIG_CMDINSERT, L(281,"Insert"), 300, 120, 81, 33, _
@@ -489,7 +485,7 @@ Function frmCompileConfig_Show( ByVal hWndParent As HWnd, _
    ' Process Windows messages(modal)
    Function = pWindow->DoEvents(nCmdShow)
    
-   ' Delete the frmCompileConfig CWindow class manually allocated memory 
+   ' Delete the frmBuildConfig CWindow class manually allocated memory 
    Delete pWindow
 
 End Function

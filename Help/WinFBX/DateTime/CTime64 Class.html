@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CTime64 Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="ctime64-class">CTime64 Class</h1>
+<p>Represents an absolute time and date.</p>
+<ul>
+<li><strong>CTime64</strong> values are based on coordinated universal time (UTC), which is equivalent to Coordinated Universal time (Greenwich Mean Time, GMT).</li>
+<li>A companion class, <strong>CTimeSpan</strong>, represents a time interval.</li>
+<li>The upper date limit is 12/31/3000. The lower limit is 1/1/1970 12:00:00 AM GMT.</li>
+</ul>
+<p><strong>Include file</strong>: CTime64.inc</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors1">Constructors</a></td>
+<td>Create new <strong>CTime64</strong> objects initialized to the specified value.</td>
+</tr>
+<tr class="even">
+<td><a href="#CastOp1">CAST Operator</a></td>
+<td>Returns the <strong>CTime64</strong> value as a long integer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LetOp1">LET Operator</a></td>
+<td>Assigns a value to a <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operators1">Operators</a></td>
+<td>Adds, subtracts or compares <strong>CTime64</strong> objects.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Format">Format</a></td>
+<td>Converts a <strong>CTime64</strong> object to a string.</td>
+</tr>
+<tr class="even">
+<td><a href="#Format">FormatGmt</a></td>
+<td>Converts a <strong>CTime64</strong> object to a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetAsFileTime">GetAsFileTime</a></td>
+<td>Returns the time as a <strong>FILETIME</strong> structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetAsSystemTime">GetAsSystemTime</a></td>
+<td>Returns the time as a <strong>SYSTEMTIME</strong> structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetCurrentTime">GetCurrentTime</a></td>
+<td>Returns a <strong>CTime64</strong> object that represents the current system date and time.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDay">GetDay</a></td>
+<td>Returns the day represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDayOfWeek">GetDayOfWeek</a></td>
+<td>Returns the day of the week represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetGmtTime">GetGmtTime</a></td>
+<td>Gets a <strong>tm</strong> structure that contains a decomposition of the time contained in this <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetHour">GetHour</a></td>
+<td>Returns the hour represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetLocalTime">GetLocalTime</a></td>
+<td>Gets a <strong>tm</strong> structure that contains a decomposition of the time contained in this <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMinute">GetMinute</a></td>
+<td>Returns the minute represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetMonth">GetMonth</a></td>
+<td>Returns the month represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetSecond">GetSecond</a></td>
+<td>Returns the second represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTime">GetTime</a></td>
+<td>Returns a <strong>__time64_t</strong> (LONGLONG) value for the given <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetYear">GetYear</a></td>
+<td>Returns the year represented by the <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetDateTime">SetDateTime</a></td>
+<td>Sets the date and time of this <strong>CTime64</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="ctimespan-class">CTimeSpan Class</h1>
+<p>An amount of time, which is internally stored as the number of seconds in the time span.</p>
+<ul>
+<li>The <strong>CTimeSpan</strong> methods convert seconds to various combinations of days, hours, minutes, and seconds.</li>
+<li>The <strong>CTimeSpan</strong> object is stored in a __time64_t structure, which is 8 bytes.</li>
+<li>A companion class, <strong>CTime64</strong>, represents an absolute time.</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors2">Constructors</a></td>
+<td>Create new <strong>CTimeSpan</strong> objects initialized to the specified value.</td>
+</tr>
+<tr class="even">
+<td><a href="#CastOp2">CAST Operator</a></td>
+<td>Returns the <strong>CTimeSpan</strong> value as a long integer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LetOp2">LET Operator</a></td>
+<td>Assigns a value to a <strong>CTimeSpan</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operators2">Operators</a></td>
+<td>Adds, subtracts or compares <strong>CTimeSpan</strong> objects.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDays">GetDays</a></td>
+<td>Returns a value that represents the number of days in this <strong>CTimeSpan</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetHours">GetHours</a></td>
+<td>Returns a value that represents the number of hours in the current day (–23 through 23).</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMinutes">GetMinutes</a></td>
+<td>Returns a value that represents the number of minutes in the current hour (–59 through 59).</td>
+</tr>
+<tr class="even">
+<td><a href="#GetSeconds">GetSeconds</a></td>
+<td>Returns a value that represents the number of seconds in the current hour (–59 through 59).</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetTimeSpan">GetTimeSpan</a></td>
+<td>Returns the underlying time value from this <strong>CTimeSpan</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTotalHours">GetTotalHours</a></td>
+<td>Returns a value that represents the total number of complete hours in this <strong>CTimeSpan</strong>.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetTotalMinutes">GetTotalMinutes</a></td>
+<td>Returns a value that represents the total number of complete minutes in this <strong>CTimeSpan</strong>.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTotalSeconds">GetTotalSeconds</a></td>
+<td>Retrieves this date/time-span value expressed in seconds.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetTimeSpan">SetTimeSpan</a></td>
+<td>Sets the value of this date/time-span value.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors-(ctime64)"><a name="Constructors1"></a>Constructors (CTime64)</h1>
+<p>Create new <strong>CTime64</strong> objects initialized to the specified value.</p>
+<pre><code>CONSTRUCTOR CTime64
+CONSTRUCTOR CTime64 (BYVAL timeSrc AS LONGLONG)
+CONSTRUCTOR CTime64 (BYREF systimeSrc AS SYSTEMTIME)
+CONSTRUCTOR CTime64 (BYREF filetimeSrc AS FILETIME)
+CONSTRUCTOR CTime64 (BYVAL nYear AS LONG, BYVAL nMonth AS LONG, BYVAL nDay AS LONG, _
+   BYVAL nHour AS LONG, BYVAL nMin AS LONG, BYVAL nSec AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>timeSrc</em></td>
+<td>A __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="even">
+<td><em>systimeSrc</em></td>
+<td>A <strong>SYSTEMTIME</strong> structure to be converted to a <strong>__time64_t</strong> (LONGLONG) value and copied into the new <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>filetimeSrc</em></td>
+<td>A <strong>FILETIME</strong> structure to be converted to a <strong>__time64_t</strong> (LONGLONG) value and copied into the new <strong>CTime64</strong> object. Note that <strong>FILETIME</strong> uses Universal Coordinated Time (UTC), so if you pass a local time in the structure, your results will be incorrect.</td>
+</tr>
+<tr class="even">
+<td><em>nYear / nMonth / nDay / nHour / nMin / nSec</em></td>
+<td>Indicates the date and time values to be copied into the new <strong>CTime64</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples">Examples</h4>
+<p>Initializes a <strong>CTime64</strong> object from an existing <strong>__time64_t</strong> value.</p>
+<pre><code>DIM ct1 AS CTime64 = CTime64().GetCurrentTime()
+DIM ct2 AS CTime64 = ct1.GetTime
+</code></pre>
+<p><strong>Note</strong>: You can also use DIM ct2 AS CTime64 = ct1</p>
+<p>Initializes a <strong>CTime64</strong> object from individual date/time values.</p>
+<pre><code>' // Year = 2017, Month = 10 (October), Day = 9, Hour = 11, Minutes = 32, Seconds = 45
+DIM ct AS CTime64 = CTime64(2017, 10, 9, 11, 32, 45)
+</code></pre>
+<p>Initializes a <strong>CTime64</strong> object from a <strong>SYSTEMTIME</strong> structure.</p>
+<pre><code>' // Year = 2017, Month = 10 (October), Day = 9, Hour = 11, Minutes = 32, Seconds = 45
+DIM st AS SYSTEMTIME 
+st.wYear = 2017
+st.wMonth = 10
+st.wDayOfWeek = 0
+st.wDay = 9
+st.wHour = 11
+st.wMinute = 32
+st.wSecond = 45
+st.wMilliseconds = 0
+' --or--
+DIM st AS SYSTEMTIME = (2017, 10, 0, 9, 11, 32, 45, 0)
+DIM ct AS CTime64 = st
+' --or--
+DIM ct AS CTime64
+ct.SetDateTime(2017, 10, 9, 11, 32, 45)
+DIM st AS SYSTEMTIME = ct.GetAsSystemtime
+DIM ct2 AS CTime64 = st
+' --or--
+DIM ct AS CTime64
+ct.SetDateTime(2017, 10, 9, 11, 32, 45)
+DIM ct2 AS CTime64 = ct.GetAsSystemtime
+</code></pre>
+<h1 id="cast-operator-(ctime64)"><a name="CastOp1"></a>CAST Operator (CTime64)</h1>
+<p>Returns the underlying value from this <strong>CTime64</strong> object.</p>
+<pre><code>OPERATOR CAST () AS LONGLONG
+</code></pre>
+<h1 id="let-operator-(=)-(ctime64)"><a name="LetOp1"></a>LET Operator (=) (CTime64)</h1>
+<p>Assigns a value to a <strong>CTime64</strong> object.</p>
+<pre><code>OPERATOR LET (BYVAL timeSrc AS LONGLONG)
+OPERATOR LET (BYREF st AS SYSTEMTIME)
+OPERATOR LET (BYREF ft AS FILETIME)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>timeSrc</em></td>
+<td>A __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="even">
+<td><em>st</em></td>
+<td>A <strong>SYSTEMTIME</strong> structure to be converted to a <strong>__time64_t</strong> (LONGLONG) value and copied into the new <strong>CTime64</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><em>ft</em></td>
+<td>A <strong>FILETIME</strong> structure to be converted to a <strong>__time64_t</strong> (LONGLONG) value and copied into the new <strong>CTime64</strong> object. Note that <strong>FILETIME</strong> uses Universal Coordinated Time (UTC), so if you pass a local time in the structure, your results will be incorrect.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operators-(ctime64)"><a name="Operators1"></a>Operators (CTime64)</h1>
+<p>Adds, subtracts or compares <strong>CTime64</strong> objects.</p>
+<pre><code>OPERATOR + (BYREF dt AS CTime64, BYREF dateSpan AS CTimeSpan) AS CTime64
+OPERATOR - (BYREF dt AS CTime64, BYREF dateSpan AS CTimeSpan) AS CTime64
+OPERATOR - (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS CTimeSpan
+OPERATOR += (BYREF dateSpan AS CTimeSpan)
+OPERATOR -= (BYREF dateSpan AS CTimeSpan)
+OPERATOR = (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS BOOLEAN
+OPERATOR &lt;&gt; (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS BOOLEAN
+OPERATOR &lt; (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS BOOLEAN
+OPERATOR &gt; (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS BOOLEAN
+OPERATOR &lt;= (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS BOOLEAN
+OPERATOR &gt;= (BYREF dt1 AS CTime64, BYREF dt2 AS CTime64) AS BOOLEAN
+</code></pre>
+<h4 id="remarks">Remarks</h4>
+<pre><code>+ Adds a CTimeSpan object to a CTime64 object.
+- Subtracts a CTimeSpan object from a CTime64 object.
+- Subtracts a CTime64 object from another CTime64 object.
++= Adds a CTimeSpan object to this CTime64 object.
+-= Subtracts a CTimeSpan object from this CTime64 object.
+</code></pre>
+<h1 id="format-/-formatgmt-(ctime64)"><a name="Format"></a>Format / FormatGmt (CTime64)</h1>
+<p>Converts a <strong>CTime64</strong> object to a string.</p>
+<pre><code>FUNCTION Format (BYREF wszFmt AS WSTRING) AS CWSTR
+FUNCTION FormatGmt (BYREF wszFmt AS WSTRING) AS CWSTR
+</code></pre>
+<p>Formatting codes:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>%a</td>
+<td>Abbreviated weekday name</td>
+</tr>
+<tr class="even">
+<td>%A</td>
+<td>Full weekday name</td>
+</tr>
+<tr class="odd">
+<td>%b</td>
+<td>Abbreviated month name</td>
+</tr>
+<tr class="even">
+<td>%B</td>
+<td>Full month name</td>
+</tr>
+<tr class="odd">
+<td>%c</td>
+<td>Date and time representation appropriate for locale</td>
+</tr>
+<tr class="even">
+<td>%d</td>
+<td>Day of month as decimal number (01 – 31)</td>
+</tr>
+<tr class="odd">
+<td>%H</td>
+<td>Hour in 24-hour format (00 – 23)</td>
+</tr>
+<tr class="even">
+<td>%I</td>
+<td>Hour in 12-hour format (01 – 12)</td>
+</tr>
+<tr class="odd">
+<td>%j</td>
+<td>Day of year as decimal number (001 – 366)</td>
+</tr>
+<tr class="even">
+<td>%m</td>
+<td>Month as decimal number (01 – 12)</td>
+</tr>
+<tr class="odd">
+<td>%M</td>
+<td>Minute as decimal number (00 – 59)</td>
+</tr>
+<tr class="even">
+<td>%p</td>
+<td>Current locale's A.M./P.M. indicator for 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>%S</td>
+<td>Second as decimal number (00 – 59)</td>
+</tr>
+<tr class="even">
+<td>%U</td>
+<td>Week of year as decimal number, with Sunday as first day of week (00 – 53)</td>
+</tr>
+<tr class="odd">
+<td>%w</td>
+<td>Weekday as decimal number (0 – 6; Sunday is 0)</td>
+</tr>
+<tr class="even">
+<td>%W</td>
+<td>Week of year as decimal number, with Monday as first day of week (00 – 53)</td>
+</tr>
+<tr class="odd">
+<td>%x</td>
+<td>Date representation for current locale</td>
+</tr>
+<tr class="even">
+<td>%X</td>
+<td>Time representation for current locale</td>
+</tr>
+<tr class="odd">
+<td>%y</td>
+<td>Year without century, as decimal number (00 – 99)</td>
+</tr>
+<tr class="even">
+<td>%Y</td>
+<td>Year with century, as decimal number</td>
+</tr>
+<tr class="odd">
+<td>%z, %Z</td>
+<td>Either the time-zone name or time zone abbreviation, depending on registry settings; no characters if time zone is unknown</td>
+</tr>
+<tr class="even">
+<td>%%</td>
+<td>Percent sign</td>
+</tr>
+</tbody>
+</table>
+<p>The # flag may prefix any formatting code. In that case, the meaning of the format code is changed as follows.</p>
+<ul>
+<li>%#a, %#A, %#b, %#B, %#p, %#X, %#z, %#Z, %#%: # flag is ignored.</li>
+<li>%#c: Long date and time representation, appropriate for current locale. For example: &quot;Tuesday, March 14, 1995, 12:41:29&quot;.</li>
+<li>%#x* Long date representation, appropriate to current locale. For example: &quot;Tuesday, March 14, 1995&quot;.</li>
+<li>%#d, %#H, %#I, %#j, %#m, %#M, %#S, %#U, %#w, %#W, %#y, %#Y: Remove leading zeros (if any).</li>
+</ul>
+<h4 id="remarks-1">Remarks</h4>
+<p>Formats the value by using the format string which contains special formatting codes that are preceded by a percent sign (%).</p>
+<p><strong>Format</strong> uses the local time and <strong>FormatGmt</strong> the <strong>Gmt</strong> time.</p>
+<h4 id="examples-1">Examples</h4>
+<pre><code>print ct.Format(&quot;%A, %B %d, %Y %H:%M:%S&quot;)
+print ct.FormatGmt(&quot;%A, %B %d, %Y %H:%M:%S&quot;)
+</code></pre>
+<h1 id="getasfiletime-(ctime64)"><a name="GetAsFileTime"></a>GetAsFileTime (CTime64)</h1>
+<p>Converts the time information stored in the <strong>CTime64</strong> object to a Win32–compatible FILETIME structure. A <strong>FILETIME</strong> structure contains a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601 (UTC).</p>
+<pre><code>FUNCTION GetAsFileTime () AS FILETIME
+</code></pre>
+<h1 id="getassystemtime-(ctime64)"><a name="GetAsSystemTime"></a>GetAsSystemTime (CTime64)</h1>
+<p>Converts the time information stored in the <strong>CTime64</strong> object to a Win32–compatible <strong>SYSTEMTIME</strong> structure.</p>
+<pre><code>FUNCTION GetAsSystemTime () AS SYSTEMTIME
+</code></pre>
+<h1 id="getcurrenttime-(ctime64)"><a name="GetCurrentTime"></a>GetCurrentTime (CTime64)</h1>
+<p>Returns a <strong>CTime64</strong> object that represents the current time.</p>
+<pre><code>FUNCTION GetCurrentTime () AS CTime64
+</code></pre>
+<h1 id="getday-(ctime64)"><a name="GetDay"></a>GetDay (CTime64)</h1>
+<p>Returns the day represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetDay () AS LONG
+</code></pre>
+<h4 id="example">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetDay
+</code></pre>
+<h1 id="getdayofweek-(ctime64)"><a name="GetDayOfWeek"></a>GetDayOfWeek (CTime64)</h1>
+<p>Returns the day of the week represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetDayOfWeek () AS LONG
+</code></pre>
+<h4 id="example-1">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetDayOfWeek
+</code></pre>
+<h1 id="getgmttime-(ctime64)"><a name="GetGmtTime"></a>GetGmtTime (CTime64)</h1>
+<p>Gets a <strong>tm</strong> structure that contains a decomposition of the time contained in this <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetGmtTime () AS tm
+</code></pre>
+<h4 id="remarks-2">Remarks</h4>
+<p>The fields of the structure type tm store the following values, each of which is an int:</p>
+<p>tm_sec : Seconds after minute (0 – 59).<br> tm_min : Minutes after hour (0 – 59).<br> tm_hour : Hours after midnight (0 – 23).<br> tm_mday : Day of month (1 – 31).<br> tm_mon : Month (0 – 11; January = 0).<br> tm_year : Year (current year minus 1900).<br> tm_wday : Day of week (0 – 6; Sunday = 0).<br> tm_yday : Day of year (0 – 365; January 1 = 0).<br> tm_isdst : Positive value if daylight saving time is in effect; 0 if daylight saving time is not in effect; negative value if status of daylight saving time is unknown.</p>
+<h1 id="gethour-(ctime64)"><a name="GetHour"></a>GetHour (CTime64)</h1>
+<p>Returns the hour represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetHour () AS LONG
+</code></pre>
+<h4 id="example-2">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetHour
+</code></pre>
+<h1 id="getlocaltime-(ctime64)"><a name="GetLocalTime"></a>GetLocalTime (CTime64)</h1>
+<p>Gets a <strong>tm</strong> structure that contains a decomposition of the time contained in this <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetLocalTime () AS tm
+</code></pre>
+<h4 id="remarks-3">Remarks</h4>
+<p>The fields of the structure type tm store the following values, each of which is an int:</p>
+<p>tm_sec : Seconds after minute (0 – 59).<br> tm_min : Minutes after hour (0 – 59).<br> tm_hour : Hours after midnight (0 – 23).<br> tm_mday : Day of month (1 – 31).<br> tm_mon : Month (0 – 11; January = 0).<br> tm_year : Year (current year minus 1900).<br> tm_wday : Day of week (0 – 6; Sunday = 0).<br> tm_yday : Day of year (0 – 365; January 1 = 0).<br> tm_isdst : Positive value if daylight saving time is in effect; 0 if daylight saving time is not in effect; negative value if status of daylight saving time is unknown.</p>
+<h1 id="getminute-(ctime64)"><a name="GetMinute"></a>GetMinute (CTime64)</h1>
+<p>Returns the minute represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetMinute () AS LONG
+</code></pre>
+<h4 id="example-3">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetMinute
+</code></pre>
+<h1 id="getmonth-(ctime64)"><a name="GetMonth"></a>GetMonth (CTime64)</h1>
+<p>Returns the month represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetMonth () AS LONG
+</code></pre>
+<h4 id="example-4">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetMonth
+</code></pre>
+<h1 id="getsecond-(ctime64)"><a name="GetSecond"></a>GetSecond (CTime64)</h1>
+<p>Returns the second represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetSecond () AS LONG
+</code></pre>
+<h4 id="example-5">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetSecond
+</code></pre>
+<h1 id="gettime-(ctime64)"><a name="GetTime"></a>GetTime (CTime64)</h1>
+<p>Returns a <strong>__time64_t</strong> (LONGLONG) value for the given <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetTime () AS LONGLONG
+</code></pre>
+<h4 id="example-6">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+</code></pre>
+<h1 id="getyear-(ctime64)"><a name="GetYear"></a>GetYear (CTime64)</h1>
+<p>Returns the year represented by the <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION GetYear () AS LONG
+</code></pre>
+<h4 id="example-7">Example</h4>
+<pre><code>DIM ct AS CTime64
+ct = ct.GetTime
+PRINT ct.GetYear
+</code></pre>
+<h1 id="setdatetime-(ctime64)"><a name="SetDateTime"></a>SetDateTime (CTime64)</h1>
+<p>Sets the date and time of this <strong>CTime64</strong> object.</p>
+<pre><code>FUNCTION SetDateTime (BYVAL nYear AS WORD, BYVAL nMonth AS WORD, BYVAL nDay AS WORD, _
+   BYVAL nHour AS WORD = 0, BYVAL nMin AS WORD = 0, BYVAL nSec AS WORD = 0) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>The year (1970-3000).</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>The month (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>The day (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nHour</em></td>
+<td>The hour (0-23).</td>
+</tr>
+<tr class="odd">
+<td><em>nMinute</em></td>
+<td>The minutes (0-59).</td>
+</tr>
+<tr class="even">
+<td><em>nHour</em></td>
+<td>The seconds (0-59).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example-8">Example</h4>
+<pre><code>' // Year = 2017, Month = 10 (October), Day = 9, Hour = 11, Minutes = 32, Seconds = 45
+DIM ct AS CTime64 = CTime64(2017, 10, 9, 11, 32, 45)
+</code></pre>
+<h1 id="constructors-(ctimespan)"><a name="Constructors2"></a>Constructors (CTimeSpan)</h1>
+<p>Create new <strong>CTimespan</strong> objects initialized to the specified value.</p>
+<pre><code>CONSTRUCTOR CTimeSpan
+CONSTRUCTOR CTimeSpan (BYVAL lltime AS LONGLONG)
+CONSTRUCTOR CTimeSpan (BYVAL lDays AS LONG, BYVAL nHours AS LONG, BYVAL nMins AS LONG, BYVAL nSecs AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lltime</em></td>
+<td>A <strong>__time64_t</strong> (LONGLONG) value.</td>
+</tr>
+<tr class="even">
+<td><em>lDays / nHours / nMins / nSecs</em></td>
+<td>Indicates the day and time values to be copied into the new <strong>CTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cast-operator-(ctimespan)"><a name="CastOp2"></a>CAST Operator (CTimeSpan)</h1>
+<p>Returns the underlying value from this <strong>CTimeSpan</strong> object.</p>
+<pre><code>OPERATOR CAST () AS LONGLONG
+</code></pre>
+<h1 id="let-operator-(=)-(ctimespan)"><a name="LetOp2"></a>LET Operator (=) (CTimeSpan)</h1>
+<p>Assigns a value to a <strong>CTimeSpan</strong> object.</p>
+<pre><code>OPERATOR LET (BYVAL nSpan AS LONGLONG)
+OPERATOR LET (BYREF cSpan AS CTimeSpan)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nSpan</em></td>
+<td>A __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="even">
+<td><em>cSpan</em></td>
+<td>A <strong>CTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operators-(ctimespan)"><a name="Operators2"></a>Operators (CTimeSpan)</h1>
+<p>Adds, subtracts or compares <strong>CTimeSpan</strong> objects.</p>
+<pre><code>OPERATOR + (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS CTime64
+OPERATOR - (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS CTime64
+OPERATOR - (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS CTimeSpan
+OPERATOR += (BYREF cSpan AS CTimeSpan)
+OPERATOR -= (BYREF cSpan AS CTimeSpan)
+OPERATOR = (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS BOOLEAN
+OPERATOR &lt;&gt; (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS BOOLEAN
+OPERATOR &lt; (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS BOOLEAN
+OPERATOR &gt; (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS BOOLEAN
+OPERATOR &lt;= (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS BOOLEAN
+OPERATOR &gt;= (BYREF cSpan1 AS CTimeSpan, BYREF cSpan2 AS CTimeSpan) AS BOOLEAN
+</code></pre>
+<h4 id="remarks-4">Remarks</h4>
+<pre><code>+ Adds a CTimeSpan value to another CTimeSpan object.
+- Subtracts a CTimeSpan value from another CTimeSpan object.
++= Adds a CTimeSpan value to this CTimeSpan object.
+-= Subtracts a CTimeSpan value from this CTimeSpan object.
+</code></pre>
+<h1 id="getdays-(ctimespan)"><a name="GetDays"></a>GetDays (CTimeSpan)</h1>
+<p>Returns a value that represents the number of days in this <strong>CTimeSpan</strong>.</p>
+<pre><code>FUNCTION GetDays () AS LONG
+</code></pre>
+<h1 id="gethours-(ctimespan)"><a name="GetHours"></a>GetHours (CTimeSpan)</h1>
+<p>Returns a value that represents the number of hours in the current day (–23 through 23).</p>
+<pre><code>FUNCTION GetHours () AS LONG
+</code></pre>
+<h1 id="getminutes-(ctimespan)"><a name="GetMinutes"></a>GetMinutes (CTimeSpan)</h1>
+<p>Returns a value that represents the number of minutes in the current hour (–59 through 59).</p>
+<pre><code>FUNCTION GetMinutes () AS LONG
+</code></pre>
+<h1 id="getseconds-(ctimespan)"><a name="GetSeconds"></a>GetSeconds (CTimeSpan)</h1>
+<p>Returns a value that represents the number of seconds in the current hour (–59 through 59).</p>
+<pre><code>FUNCTION GetSeconds () AS LONG
+</code></pre>
+<h1 id="gettimespan-(ctimespan)"><a name="GetTimeSpan"></a>GetTimeSpan (CTimeSpan)</h1>
+<p>Returns the underlying time value from this <strong>CTimeSpan</strong> object.</p>
+<pre><code>FUNCTION GetTimespan () AS LONG
+</code></pre>
+<h1 id="gettotalhours-(ctimespan)"><a name="GetTotalHours"></a>GetTotalHours (CTimeSpan)</h1>
+<p>Returns a value that represents the total number of complete hours in this <strong>CTimeSpan</strong>.</p>
+<pre><code>FUNCTION GetTotalHours () AS LONG
+</code></pre>
+<h1 id="gettotalminutes-(ctimespan)"><a name="GetTotalMinutes"></a>GetTotalMinutes (CTimeSpan)</h1>
+<p>Returns a value that represents the total number of complete minutes in this <strong>CTimeSpan</strong>.</p>
+<pre><code>FUNCTION GetTotalMinutes () AS LONG
+</code></pre>
+<h1 id="gettotalseconds-(ctimespan)"><a name="GetTotalSeconds"></a>GetTotalSeconds (CTimeSpan)</h1>
+<p>Retrieves this date/time-span value expressed in seconds.</p>
+<pre><code>FUNCTION GetTotalSeconds () AS LONG
+</code></pre>
+<h1 id="settimespan-(ctimespan)"><a name="SetTimeSpan"></a>SetTimeSpan (CTimeSpan)</h1>
+<p>Sets the value of this date/time-span value.</p>
+<pre><code>SUB SetTimeSpan (BYVAL lltime AS LONGLONG)
+SUB SetTimeSpan (BYVAL lDays AS LONG, BYVAL nHours AS LONG, BYVAL nMins AS LONG, BYVAL nSecs AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lltime</em></td>
+<td>A __time64_t (LONGLONG) value.</td>
+</tr>
+<tr class="even">
+<td><em>lDays / nHours / nMins / nSecs</em></td>
+<td>Indicates the day and time values to be copied into the <strong>CTimeSpan</strong> object.</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
+

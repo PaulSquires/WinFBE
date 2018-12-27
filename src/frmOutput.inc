@@ -94,25 +94,11 @@ function DoSearchFileSelected() as LONG
       f2 = instr(wzText, ")")
       if f2 THEN
          wzText = left(wzText, f2-1) 
-         nLineNum = val(wzText)
+         nLineNum = val(wzText) - 1
       end if
    END IF
 
-   if AfxFileExists(wzFilename) = 0 THEN exit function
-      
-   Dim pDoc As clsDocument Ptr 
-   pDoc = frmMain_OpenFileSafely(HWnd_FRMMAIN, _
-                           False, _    ' bIsNewFile
-                           False, _    ' bIsTemplate
-                           True,  _    ' bShowInTab
-                           true, _     ' bIsInclude
-                           wzFilename, _ ' pwszName
-                           0 )         ' pDocIn
-
-   if pDoc THEN
-      dim as hwnd hEdit = pDoc->hWndActiveScintilla
-      SciExec( hEdit, SCI_GOTOLINE, nLineNum-1, 0)
-   END IF
+   OpenSelectedDocument( wzFilename, "", nLineNum )
 
    function = 0
 end function

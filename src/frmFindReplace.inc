@@ -368,6 +368,7 @@ Function frmFindReplace_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNM
                else   
                   pDoc->RemoveMarkerHighlight
                end if
+               frmFindReplace_HighlightSearches
                AfxRedrawWindow(HWND_FRMFINDREPLACE)
                exit function
 
@@ -530,7 +531,6 @@ Function frmFindReplace_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_NOTIFY,   frmFindReplace_OnNotify)
       HANDLE_MSG (HWnd, WM_PAINT,    frmFindReplace_OnPaint)
    End Select
-
    ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 

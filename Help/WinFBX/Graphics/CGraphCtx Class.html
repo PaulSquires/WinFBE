@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CGraphCtx Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cgraphctx-class">CGraphCtx Class</h1>
+<p><code>CGraphCtx</code> is a graphic control for pictures, text and graphics. You can use both GDI and GDI+ to draw graphics and text and to load and manipulate images. Optionally, you can add support for OpenGL by passing &quot;OPENGL&quot; in the caption.</p>
+<p>This control features persistence and uses a virtual buffer (set initially equal to the size of the control when it is created) to allow to display images bigger than the size of the control. Scrollbars are automatically added when the size of the virtual buffer is bigger than the size of the control and removed when unneeded. It also features keyboard navigation and sends command messages to the parent window or dialog when the return or Escape keys are pressed, and notification messages for mouse clicks.</p>
+<p>To use the control, include the CGraphCtx.inc file in your program and use the namespace <strong>Afx</strong>.</p>
+<p><strong>Include file</strong>: CGraphCtx.inc</p>
+<h3 id="constructor">Constructor</h3>
+<p>Registers the class name and creates an instance of the control.</p>
+<pre><code>CONSTRUCTOR CGraphCtx (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, _
+   BYREF wszTitle AS WSTRING = &quot;&quot;, BYVAL x AS LONG = 0, BYVAL y AS LONG = 0, _
+   BYVAL nWidth AS LONG = 0, BYVAL nHeight AS LONG = 0, BYVAL dwStyle AS DWORD = 0, _
+   BYVAL dwExStyle AS DWORD = 0, BYVAL lpParam AS LONG_PTR = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pWindow</em></td>
+<td>Pointer to the <strong>CWindow</strong> class of the parent window.</td>
+</tr>
+<tr class="even">
+<td><em>cID</em></td>
+<td>Control identifier.</td>
+</tr>
+<tr class="odd">
+<td><em>wszTitle</em></td>
+<td>The window caption. If &quot;OPENGL&quot; is used as the caption, support for OpenGL is added to the control.</td>
+</tr>
+<tr class="even">
+<td><em>x</em></td>
+<td>The x-coordinate of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="odd">
+<td><em>y</em></td>
+<td>The initial y-coordinate of the upper-left corner of the window relative to the upper-left corner of the parent window's client area.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The width of the control.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The height of the control.</td>
+</tr>
+<tr class="even">
+<td><em>dwStyle</em></td>
+<td>The style of the window being created. Pass -1 to use the default styles.<br>Default styles: WS_VISIBLE OR WS_CHILD OR WS_TABSTOP.</td>
+</tr>
+<tr class="odd">
+<td><em>dwExStyle</em></td>
+<td>The extended window style of the control being created. Pass -1 to use the default styles.</td>
+</tr>
+<tr class="even">
+<td><em>lpParam</em></td>
+<td>Pointer to custom data.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Skeleton">Example 1</a></td>
+<td>CWindow Graphic Control Skeleton.</td>
+</tr>
+<tr class="even">
+<td><a href="#OpenGLSkeleton">Example 2</a></td>
+<td>CWindow OpenGL Graphic Control Skeleton.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="helper-procedure:-afxcgraphptr">Helper Procedure: AfxCGraphPtr</h3>
+<p>Returns a pointer to the CGraphCtx class given the handle of its associated window.</p>
+<pre><code>FUNCTION AfxCGraphPtr (BYVAL hwnd AS HWND) AS CGraphCtx PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle of the window associated with the graphic control. Call the <strong>hWindow</strong> method of the <strong>CGraphCtx</strong> class to retrieve it.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods-and-properties">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Clear">Clear</a></td>
+<td>Clears the graphic control with the specified RGB color.</td>
+</tr>
+<tr class="even">
+<td><a href="#CreateBitmapFromFile">CreateBitmapFromFile</a></td>
+<td>Loads and displays the specified image in the Graphic Control. It also allows to convert the image to gray scale and/or dim the image.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DrawBitmap">DrawBitmap</a></td>
+<td>Draws a bitmap in the Graphic Control.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetBits">GetBits</a></td>
+<td>Returns the location of the DIB bit values.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GethBmp">GethBmp</a></td>
+<td>Returns the handle of the compatible bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#GethRC">GethRC</a></td>
+<td>If OpenGL is enabled, it returns the handle of the rendering context of the control.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMemDC">GetMemDC</a></td>
+<td>Handle to the memory device context of the control.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetVirtualBufferHeight">GetVirtualBufferHeight</a></td>
+<td>Returns the height of the virtual buffer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetVirtualBufferWidth">GetVirtualBufferWidth</a></td>
+<td>Returns the width of the virtual buffer.</td>
+</tr>
+<tr class="even">
+<td><a href="#hWindow">hWindow</a></td>
+<td>Returns the handle of the control.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LoadImageFromFile">LoadImageFromFile</a></td>
+<td>Loads and displays the specified image in the Graphic Control.</td>
+</tr>
+<tr class="even">
+<td><a href="#LoadImageFromRes">LoadImageFromRes</a></td>
+<td>Loads the specified image from a resource file in the Graphic Control. It also allows to convert the image to gray scale and/or dim the image.</td>
+</tr>
+<tr class="odd">
+<td><a href="#MakeCurrent">MakeCurrent</a></td>
+<td>Redirects OpenGL calls are directed to the correct rendering context.</td>
+</tr>
+<tr class="even">
+<td><a href="#PrintImage">PrintImage</a></td>
+<td>Prints the image in the default printer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Resizable">Resizable</a></td>
+<td>Gets/sets the value of the Resizable property.</td>
+</tr>
+<tr class="even">
+<td><a href="#SaveImage">SaveImage</a></td>
+<td>Saves the image to a file.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetVirtualBufferSize">SetVirtualBufferSize</a></td>
+<td>Sets the size of the virtual buffer.</td>
+</tr>
+<tr class="even">
+<td><a href="#Stretchable">Stretchable</a></td>
+<td>Gets/sets the value of the Stretchable property.</td>
+</tr>
+<tr class="odd">
+<td><a href="#StretchMode">StretchMode</a></td>
+<td>Gets/sets the value of the StretchMode property.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="notification-messages">Notification Messages</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#NM_CLICK">NM_CLICK</a></td>
+<td>Sent by the control when the user clicks it with the left mouse button.</td>
+</tr>
+<tr class="even">
+<td><a href="#NM_DBLCLK">NM_DBLCLK</a></td>
+<td>Sent by the control when the user double clicks it with the left mouse button.</td>
+</tr>
+<tr class="odd">
+<td><a href="#NM_KILLFOCUS">NM_KILLFOCUS</a></td>
+<td>Notifies a control's parent window that the control has lost the input focus.</td>
+</tr>
+<tr class="even">
+<td><a href="#NM_RCLICK">NM_RCLICK</a></td>
+<td>Sent by the control when the user clicks it with the right mouse button.</td>
+</tr>
+<tr class="odd">
+<td><a href="#NM_RDBLCLK">NM_RDBLCLK</a></td>
+<td>Sent by the control when the user double clicks it with the right mouse button.</td>
+</tr>
+<tr class="even">
+<td><a href="#NM_SETFOCUS">NM_SETFOCUS</a></td>
+<td>Notifies a control's parent window that the control has received the input focus.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="nm_click-notification-message"><a name="NM_CLICK"></a>NM_CLICK Notification Message</h3>
+<p>Sent by the control when the user clicks it with the left mouse button. This notification code is sent in the form of a WM_NOTIFY message.</p>
+<pre><code>CASE WM_NOTIFY
+   DIM phdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+   IF wParam = IDC_GRCTX THEN
+      SELECT CASE phdr-&gt;code
+         CASE NM_CLICK
+            ' Left button clicked
+      END SELECT
+   END IF
+END IF
+</code></pre>
+<h4 id="remarks">Remarks</h4>
+<p>IDC_GRCTX is the constant value used as identifier of the control. Change it if needed.</p>
+<h3 id="nm_dblclk-notification-message"><a name="NM_DBLCLK"></a>NM_DBLCLK Notification Message</h3>
+<p>Sent by the control when the user double clicks it with the left mouse button. This notification code is sent in the form of a WM_NOTIFY message.</p>
+<pre><code>CASE WM_NOTIFY
+   DIM phdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+   IF wParam = IDC_GRCTX THEN
+      SELECT CASE phdr-&gt;code
+         CASE NM_DBLCLK
+            ' Left button double clicked
+      END SELECT
+   END IF
+END IF
+</code></pre>
+<h4 id="remarks-1">Remarks</h4>
+<p>IDC_GRCTX is the constant value used as identifier of the control. Change it if needed.</p>
+<h3 id="nm_killfocus-notification-message"><a name="NM_KILLFOCUS"></a>NM_KILLFOCUS Notification Message</h3>
+<p>Notifies a control's parent window that the control has lost the input focus. This notification code is sent in the form of a WM_NOTIFY message.</p>
+<pre><code>CASE WM_NOTIFY
+   DIM phdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+   IF wParam = IDC_GRCTX THEN
+      SELECT CASE phdr-&gt;code
+         CASE NM_KILLFOCUS
+            ' The control has lost focus
+      END SELECT
+   END IF
+END IF
+</code></pre>
+<h4 id="remarks-2">Remarks</h4>
+<p>IDC_GRCTX is the constant value used as identifier of the control. Change it if needed.</p>
+<h3 id="nm_rclick-notification-message"><a name="NM_RCLICK"></a>NM_RCLICK Notification Message</h3>
+<p>Notifies a control's parent window that the control has lost the input focus. This notification code is sent in the form of a WM_NOTIFY message.</p>
+<pre><code>CASE WM_NOTIFY
+   DIM phdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+   IF wParam = IDC_GRCTX THEN
+      SELECT CASE phdr-&gt;code
+         CASE NM_RCLICK
+            ' Right button clicked
+      END SELECT
+   END IF
+END IF
+</code></pre>
+<h4 id="remarks-3">Remarks</h4>
+<p>IDC_GRCTX is the constant value used as identifier of the control. Change it if needed.</p>
+<h3 id="nm_rdblclk-notification-message"><a name="NM_RDBLCLK"></a>NM_RDBLCLK Notification Message</h3>
+<p>Sent by the control when the user double clicks it with the right mouse button. This notification code is sent in the form of a WM_NOTIFY message.</p>
+<pre><code>CASE WM_NOTIFY
+   DIM phdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+   IF wParam = IDC_GRCTX THEN
+      SELECT CASE phdr-&gt;code
+         CASE NM_RDBLCLK
+            ' Right button double clicked
+      END SELECT
+   END IF
+END IF
+</code></pre>
+<h4 id="remarks-4">Remarks</h4>
+<p>IDC_GRCTX is the constant value used as identifier of the control. Change it if needed.</p>
+<h3 id="nm_setfocus-notification-message"><a name="NM_SETFOCUS"></a>NM_SETFOCUS Notification Message</h3>
+<p>Notifies a control's parent window that the control has received the input focus. This notification code is sent in the form of a WM_NOTIFY message.</p>
+<pre><code>CASE WM_NOTIFY
+   DIM phdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+   IF wParam = IDC_GRCTX THEN
+      SELECT CASE phdr-&gt;code
+         CASE NM_SETFOCUS
+            ' The control has gained focus
+      END SELECT
+   END IF
+END IF
+</code></pre>
+<h4 id="remarks-5">Remarks</h4>
+<p>IDC_GRCTX is the constant value used as identifier of the control. Change it if needed.</p>
+<h3 id="clear"><a name="Clear"></a>Clear</h3>
+<p>Clears the graphic control with the specified RGB color.</p>
+<pre><code>FUNCTION Clear (BYVAL RGBColor AS COLORREF) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>RGBColor</em></td>
+<td>RGB color used to fill the control.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h3 id="createbitmapfromfile"><a name="CreateBitmapFromFile"></a>CreateBitmapFromFile</h3>
+<p>Loads and displays the specified image in the Graphic Control. It also allows to convert the image to gray scale and/or dim the image.</p>
+<pre><code>SUB CreateBitmapFromFile (BYREF wszFileName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Absolute path to the file.</td>
+</tr>
+<tr class="even">
+<td><em>dimPercent</em></td>
+<td>Optional. Percent of dimming (1-99).</td>
+</tr>
+<tr class="odd">
+<td><em>bGrayScale</em></td>
+<td>TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h3 id="drawbitmap"><a name="DrawBitmap"></a>DrawBitmap</h3>
+<p>Draws a bitmap in the Graphic Control.</p>
+<pre><code>SUB DrawBitmap (BYVAL hbmp AS HBITMAP, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+</code></pre>
+<pre><code>SUB DrawBitmap (BYVAL pBitmap AS GpBitmap PTR, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+</code></pre>
+<pre><code>SUB DrawBitmap (BYREF pMemBmp AS CMemBmp, BYVAL x AS SINGLE = 0, BYVAL y AS SINGLE = 0, _
+   BYVAL nRight AS SINGLE = 0, BYVAL nBottom AS SINGLE = 0) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hbmp</em></td>
+<td>A handle to the bitmap.</td>
+</tr>
+<tr class="even">
+<td><em>pBitmap</em></td>
+<td>Pointer to a GDI+ bitmap.</td>
+</tr>
+<tr class="odd">
+<td><em>pMemBmp</em></td>
+<td>Reference to a memory bitmap (CMemBmp class).</td>
+</tr>
+<tr class="even">
+<td><em>x</em></td>
+<td>Optional. Left position.</td>
+</tr>
+<tr class="odd">
+<td><em>y</em></td>
+<td>Optional. Top position.</td>
+</tr>
+<tr class="even">
+<td><em>nRight</em></td>
+<td>Optional. Right position..</td>
+</tr>
+<tr class="odd">
+<td><em>nBottom</em></td>
+<td>Optional. Bottom position..</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>Returns OK (0) on success or a GdiPlus status code on failure.</p>
+<h4 id="remarks-6">Remarks</h4>
+<p>If both <em>x</em> and <em>y</em> are ommited, the image is draw starting at position 0, 0.</p>
+<p>If <em>nRight</em> and <em>nBottom</em> are specified, the image is draw stretched in the bounding rectangle formed by <em>x</em>, <em>y</em>, <em>nRight</em> and <em>nBottom</em>.</p>
+<h4 id="sample-code">Sample code</h4>
+<pre><code>DIM pMemBmp AS CMemBmp = CMemBmp($&quot;C:\Users\Pepe\Pictures\Cole_Kyla_01.jpg&quot;)
+Rectangle pMemBmp.GetMemDC, 10, 10, 150, 150
+LineTo pMemBmp.GetMemDC, 30, 180
+pGraphCtx.DrawBitmap pMemBmp
+</code></pre>
+<h3 id="getbits"><a name="GetBits"></a>GetBits</h3>
+<p>Returns the location of the DIB bit values.</p>
+<pre><code>FUNCTION GetBits () AS ANY PTR
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>Pointer to the location of the DIB bit values.</p>
+<h3 id="gethbmp"><a name="GethBmp"></a>GethBmp</h3>
+<p>Returns the handle of the compatible bitmap.</p>
+<pre><code>FUNCTION GethBmp () AS HBITMAP
+</code></pre>
+<h3 id="gethrc"><a name="GethRC"></a>GethRC</h3>
+<p>If OpenGL is enabled, it returns the handle of the rendering context of the control.</p>
+<pre><code>FUNCTION GethRC () AS HGLRC
+</code></pre>
+<h3 id="getmemdc"><a name="GetMemDC"></a>GetMemDC</h3>
+<p>Returns the handle of the memory device context of the control.</p>
+<pre><code>FUNCTION GetMemDC () AS HDC
+</code></pre>
+<h3 id="getvirtualbufferheight"><a name="GetVirtualBufferHeight"></a>GetVirtualBufferHeight</h3>
+<p>Returns the height of the virtual buffer.</p>
+<pre><code>FUNCTION GetVirtualBufferHeight () AS LONG
+</code></pre>
+<h3 id="getvirtualbufferwidth"><a name="GetVirtualBufferWidth"></a>GetVirtualBufferWidth</h3>
+<p>Returns the width of the virtual buffer.</p>
+<pre><code>FUNCTION GetVirtualBufferWidth () AS LONG
+</code></pre>
+<h3 id="hwindow"><a name="hWindow"></a>hWindow</h3>
+<p>Returns the handle of the control.</p>
+<pre><code>FUNCTION hWindow () AS HWND
+</code></pre>
+<h3 id="loadimagefromfile"><a name="LoadImageFromFile"></a>LoadImageFromFile</h3>
+<p>Loads and displays the specified image in the Graphic Control.</p>
+<pre><code>SUB LoadImageFromFile (BYREF wszFileName AS WSTRING)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Absolute path to the file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-7">Remarks</h4>
+<p>A quirk in the GDI+ <strong>GdipCreateBitmapFromFile</strong> function causes that black and white images are loaded with increased contrast. Therefore, it's better to use the <strong>CreateBitmapFromFile</strong> for black and white images.</p>
+<h3 id="loadimagefromres"><a name="LoadImageFromRes"></a>LoadImageFromRes</h3>
+<p>Loads the specified image from a resource file in the Graphic Control. It also allows to convert the image to gray scale and/or dim the image.</p>
+<pre><code>SUB LoadImageFromRes (BYVAL hInst AS HINSTANCE, BYREF wszImageName AS WSTRING, _
+   BYVAL dimPercent AS LONG = 0, BYVAL bGrayScale AS LONG = FALSE, _
+   BYVAL clrBackground AS ARGB = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hInst</em></td>
+<td>A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process.</td>
+</tr>
+<tr class="even">
+<td><em>wszImageName</em></td>
+<td>Name of the image in the resource file (.RES). If the image resource uses an integral identifier, wszImage should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., &quot;#998&quot;. Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be icons in format .png, .jpg, .gif, .tiff.</td>
+</tr>
+<tr class="odd">
+<td><em>dimPercent</em></td>
+<td>Percent of dimming (1-99).</td>
+</tr>
+<tr class="even">
+<td><em>bGrayScale</em></td>
+<td>TRUE or FALSE. Convert to gray scale.</td>
+</tr>
+<tr class="odd">
+<td><em>clrBackground</em></td>
+<td>The background color. This parameter is ignored if the bitmap is totally opaque.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="makecurrent"><a name="MakeCurrent"></a>MakeCurrent</h3>
+<p>As more than one instance of this control can be used on a form, we need to make sure that OpenGL calls are directed to the correct rendering context. This is achieved by calling the <strong>MakeCurrent</strong> method.</p>
+<pre><code>FUNCTION MakeCurrent () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-4">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h3 id="printimage"><a name="PrintImage"></a>PrintImage</h3>
+<p>Prints the image in the default printer.</p>
+<pre><code>FUNCTION PrintImage (BYVAL bStretch AS BOOLEAN = FALSE, _
+   BYVAL nStretchMode AS LONG = InterpolationModeHighQualityBicubic) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bStretch</em></td>
+<td>Optional. Stretch the image.</td>
+</tr>
+<tr class="even">
+<td><em>nStretchMode</em></td>
+<td>Optional. Stretching mode.<br>Default value = InterpolationModeHighQualityBicubic.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interpolationmode-enumeration">InterpolationMode Enumeration</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>InterpolationModeDefault</strong></td>
+<td>Specifies the default interpolation mode.</td>
+</tr>
+<tr class="even">
+<td><strong>InterpolationModeLowQuality</strong></td>
+<td>Specifies a low-quality mode.</td>
+</tr>
+<tr class="odd">
+<td><strong>InterpolationModeHighQuality</strong></td>
+<td>Specifies a high-quality mode.</td>
+</tr>
+<tr class="even">
+<td><strong>InterpolationModeBilinear</strong></td>
+<td>Specifies bilinear interpolation. No prefiltering is done. This mode is not suitable for shrinking an image below 50 percent of its original size.</td>
+</tr>
+<tr class="odd">
+<td><strong>InterpolationModeBicubic</strong></td>
+<td>Specifies bicubic interpolation. No prefiltering is done. This mode is not suitable for shrinking an image below 25 percent of its original size.</td>
+</tr>
+<tr class="even">
+<td><strong>InterpolationModeNearestNeighbor</strong></td>
+<td>Specifies nearest-neighbor interpolation.</td>
+</tr>
+<tr class="odd">
+<td><strong>InterpolationModeHighQualityBilinear</strong></td>
+<td>Specifies high-quality, bilinear interpolation. Prefiltering is performed to ensure high-quality shrinking.</td>
+</tr>
+<tr class="even">
+<td><strong>InterpolationModeHighQualityBicubic</strong></td>
+<td>Specifies high-quality, bicubic interpolation. Prefiltering is performed to ensure high-quality shrinking. This mode produces the highest quality transformed images.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>Returns TRUE if the bitmap has been printed successfully, or FALSE otherwise.</p>
+<h3 id="resizable"><a name="Resizable"></a>Resizable</h3>
+<p>Gets/sets the value of the <strong>Resizable</strong> property.</p>
+<pre><code>PROPERTY Resizable () AS BOOLEAN
+PROPERTY Resizable (BYVAL bResizable AS BOOLEAN)
+</code></pre>
+<h4 id="return-value-6">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h5 id="remarks-8">Remarks</h5>
+<p>Resizable and stretchable are mutually exclusive.</p>
+<h3 id="saveimage"><a name="SaveImage"></a>SaveImage</h3>
+<p>Saves the image to a file.</p>
+<pre><code>FUNCTION SaveImage (BYREF wszFileName AS WSTRING, BYREF wszMimeType AS WSTRING) AS LONG
+</code></pre>
+<pre><code>FUNCTION SaveImageAsBmp (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveImageAsJpeg (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveImageAsPng (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveImageAsGif (BYREF wszFileName AS WSTRING) AS LONG
+FUNCTION SaveImageAsTiff (BYREF wszFileName AS WSTRING) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFileName</em></td>
+<td>Absolute path name of the file.</td>
+</tr>
+<tr class="even">
+<td><em>wszMimeType</em></td>
+<td>The mime type.<br>&quot;image/bmp&quot; = Bitmap (.bmp)<br>&quot;image/gif&quot; = GIF (.gif)<br>&quot;image/jpeg&quot; = JPEG (.jpg)<br>&quot;image/png&quot; = PNG (.png)<br>&quot;image/tiff&quot; = TIFF (.tiff)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>If the method succeeds, it returns Ok, which is an element of the GDI+ Status enumeration.</p>
+<p>If the method fails, it returns one of the other elements of the GDI+ Status enumeration.</p>
+<h3 id="setvirtualbuffersize"><a name="SetVirtualBufferSize"></a>SetVirtualBufferSize</h3>
+<p>Sets the size of the virtual buffer.</p>
+<pre><code>FUNCTION SetVirtualBufferSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>Width, in pixels, of the virtual buffer.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>Height, in pixels, of the virtual buffer.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>If the function succeeds, the return value is S_OK (0).</p>
+<h3 id="stretchable"><a name="Stretchable"></a>Stretchable</h3>
+<p>Gets/sets the value of the <strong>Stretchable</strong> property.</p>
+<pre><code>PROPERTY Stretchable () AS BOOLEAN
+PROPERTY Stretchable (BYVAL bStretchable AS BOOLEAN)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>bStretchable</em></td>
+<td>TRUE or FALSE.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h3 id="stretchmode"><a name="StretchMode"></a>StretchMode</h3>
+<p>Gets/sets the value of the <strong>StretchMode</strong> property.</p>
+<pre><code>PROPERTY StretchMode () AS LONG
+PROPERTY StretchMode (BYVAL nStretchMode AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nStretchMode</em></td>
+<td>The stretching mode.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Mode</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>BLACKONWHITE</strong></td>
+<td>Performs a Boolean AND operation using the color values for the eliminated and existing pixels. If the bitmap is a monochrome bitmap, this mode preserves black pixels at the expense of white pixels.</td>
+</tr>
+<tr class="even">
+<td><strong>COLORONCOLOR</strong></td>
+<td>Deletes the pixels. This mode deletes all eliminated lines of pixels without trying to preserve their information.</td>
+</tr>
+<tr class="odd">
+<td><strong>HALFTONE</strong></td>
+<td>Maps pixels from the source rectangle into blocks of pixels in the destination rectangle. The average color over the destination block of pixels approximates the color of the source pixels. After setting the HALFTONE stretching mode, an application must call the <strong>SetBrushOrgEx</strong> function to set the brush origin. If it fails to do so, brush misalignment occurs.</td>
+</tr>
+<tr class="even">
+<td><strong>STRETCH_ANDSCANS</strong></td>
+<td>Same as BLACKONWHITE.</td>
+</tr>
+<tr class="odd">
+<td><strong>STRETCH_DELETESCANS</strong></td>
+<td>Same as COLORONCOLOR.</td>
+</tr>
+<tr class="even">
+<td><strong>STRETCH_HALFTONE</strong></td>
+<td>Same as HALFTONE.</td>
+</tr>
+<tr class="odd">
+<td><strong>STRETCH_ORSCANS</strong></td>
+<td>Same as WHITEONBLACK.</td>
+</tr>
+<tr class="even">
+<td><strong>WHITEONBLACK</strong></td>
+<td>Performs a Boolean OR operation using the color values for the eliminated and existing pixels. If the bitmap is a monochrome bitmap, this mode preserves white pixels at the expense of black pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>The previous value of the property.</p>
+<h3 id="cwindow-graphic-control-skeleton"><a name="Skeleton"></a>CWindow Graphic Control Skeleton</h3>
+<pre><code>' ########################################################################################
+' Microsoft Windows
+' Contents: CWindow Graphic Control Skeleton
+' Compiler: FreeBasic 32 &amp; 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#INCLUDE ONCE &quot;windows.bi&quot;
+#INCLUDE ONCE &quot;Afx/CWindow.inc&quot;
+#INCLUDE ONCE &quot;Afx/CGraphCtx.inc&quot;
+USING Afx
+
+CONST IDC_GRCTX = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // If the window isn't minimized, resize it
+         IF wParam &lt;&gt; SIZE_MINIMIZED THEN
+            DIM pWindow AS CWindow PTR = CAST(CWindow PTR, GetWindowLongPtrW(hwnd, 0))
+            pWindow-&gt;MoveWindow GetDlgItem(hwnd, IDC_GRCTX), 0, 0, pWindow-&gt;ClientWidth, pWindow-&gt;ClientHeight, CTRUE
+         END IF
+
+        CASE WM_DESTROY
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, &quot;CWindow Graphic Control Skeleton&quot;, @WndProc)
+   pWindow.SetClientSize(600, 350)
+   pWindow.Center
+
+   ' // Add a graphic control
+   DIM pGraphCtx AS CGraphCtx = CGraphCtx(@pWindow, IDC_GRCTX, &quot;&quot;, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
+   pGraphCtx.Clear BGR(255, 255, 255)
+
+   ' // Capture the desktop window and display it in the control
+   DIM hBitmap AS HBITMAP = AfxCaptureDisplay
+   pGraphCtx.SetVirtualBufferSize(AfxGetBitmapWidth(hBitmap), AfxGetBitmapHeight(hBitmap))
+   AfxDrawBitmap(pGraphCtx.GetMemDC, 0, 0, hBitmap)
+   DeleteObject hBitmap
+
+   ' // Process Windows events
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+</code></pre>
+<h3 id="cwindow-opengl-graphic-control-skeleton"><a name="OpenGLSkeleton"></a>CWindow OpenGL Graphic Control Skeleton</h3>
+<p>The following example demonstrates the use of OpenGL and GDI+ together.</p>
+<pre><code>' ########################################################################################
+' Microsoft Windows
+' Contents: CWindow OpenGL Graphic Control Skeleton
+' Compiler: FreeBasic 32 &amp; 64 bit
+' Copyright (c) 2017 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE &quot;Afx/CWindow.inc&quot;
+#INCLUDE ONCE &quot;Afx/AfxGdiPlus.inc&quot;
+#INCLUDE ONCE &quot;Afx/CGraphCtx.inc&quot;
+USING Afx
+
+CONST IDC_GRCTX = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' The following sample code draws a line.
+' Change it with your own code.
+' ========================================================================================
+SUB GDIP_Render (BYVAL hDC AS HDC)
+
+   DIM hStatus AS GpStatus
+   DIM pGraphics AS GpGraphics PTR
+   DIM pPen AS GpPen PTR
+
+   ' // Create a graphics object
+   hStatus = GdipCreateFromHDC(hDC, @pGraphics)
+   ' // Create a Pen
+   hStatus = GdipCreatePen1(GDIP_ARGB(255, 255, 0, 0), AfxScaleX(1), UnitPixel, @pPen)
+   ' // Draw the line
+   GdipDrawLineI pGraphics, pPen, 0, 0, AfxScaleX(200), AfxScaleY(100)
+
+   ' // Cleanup
+   IF pPen THEN GdipDeletePen(pPen)
+   IF pGraphics THEN GdipDeleteGraphics(pGraphics)
+
+END SUB
+' ========================================================================================
+
+' =======================================================================================
+' All the setup goes here
+' =======================================================================================
+SUB RenderScene (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
+
+   ' // Specify clear values for the color buffers
+   glClearColor 0.0, 0.0, 0.0, 0.0
+   ' // Specify the clear value for the depth buffer
+   glClearDepth 1.0
+   ' // Specify the value used for depth-buffer comparisons
+   glDepthFunc GL_LESS
+   ' // Enable depth comparisons and update the depth buffer
+   glEnable GL_DEPTH_TEST
+   ' // Select smooth shading
+   glShadeModel GL_SMOOTH
+
+   ' // Prevent divide by zero making height equal one
+   IF nHeight = 0 THEN nHeight = 1
+   ' // Reset the current viewport
+   glViewport 0, 0, nWidth, nHeight
+   ' // Select the projection matrix
+   glMatrixMode GL_PROJECTION
+   ' // Reset the projection matrix
+   glLoadIdentity
+   ' // Calculate the aspect ratio of the window
+   gluPerspective 45.0!, nWidth / nHeight, 0.1!, 100.0!
+   ' // Select the model view matrix
+   glMatrixMode GL_MODELVIEW
+   ' // Reset the model view matrix
+   glLoadIdentity
+
+   ' // Clear the screen buffer
+   glClear GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT
+   ' // Reset the view
+   glLoadIdentity
+
+   glTranslatef -1.5!, 0.0!, -6.0!       ' Move left 1.5 units and into the screen 6.0
+
+   glBegin GL_TRIANGLES                 ' Drawing using triangles
+      glColor3f   1.0!, 0.0!, 0.0!       ' Set the color to red
+      glVertex3f  0.0!, 1.0!, 0.0!       ' Top
+      glColor3f   0.0!, 1.0!, 0.0!       ' Set the color to green
+      glVertex3f  1.0!,-1.0!, 0.0!       ' Bottom right
+      glColor3f   0.0!, 0.0!, 1.0!       ' Set the color to blue
+      glVertex3f -1.0!,-1.0!, 0.0!       ' Bottom left
+   glEnd                                 ' Finished drawing the triangle
+
+   glTranslatef 3.0!,0.0!,0.0!           ' Move right 3 units
+
+   glColor3f 0.5!, 0.5!, 1.0!            ' Set the color to blue one time only
+   glBegin GL_QUADS                     ' Draw a quad
+      glVertex3f -1.0!, 1.0!, 0.0!       ' Top left
+      glVertex3f  1.0!, 1.0!, 0.0!       ' Top right
+      glVertex3f  1.0!,-1.0!, 0.0!       ' Bottom right
+      glVertex3f -1.0!,-1.0!, 0.0!       ' Bottom left
+   glEnd                                 ' Done drawing the quad
+
+   ' // Required: force execution of GL commands in finite time
+   glFlush
+
+END SUB
+' =======================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, &quot;CWindow OpenGL Graphic Control Skeleton&quot;, @WndProc)
+   pWindow.Brush = CAST(HBRUSH, COLOR_WINDOW + 1)
+   pWindow.SetClientSize(400, 250)
+   pWindow.Center
+
+   ' // Initialize GDI+
+   DIM token AS UINT_PTR = AfxGdipInit
+
+   ' // Add a graphic control with OPENGL enabled
+   DIM pGraphCtx AS CGraphCtx = CGraphCtx(@pWindow, IDC_GRCTX, &quot;OPENGL&quot;, 0, 0, pWindow.ClientWidth, pWindow.ClientHeight)
+   ' // Make the control stretchable
+   pGraphCtx.Stretchable = TRUE
+   ' // Make current the rendering context
+   pGraphCtx.MakeCurrent
+   ' // Render the OpenGL scene
+   RenderScene pGraphCtx.GetVirtualBufferWidth, pGraphCtx.GetVirtualBufferHeight
+   ' // Draw the GDI+ graphics
+   GDIP_Render pGraphCtx.GetMemDC
+
+   ' // Dispatch Windows events
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Shutdown GDI+
+   IF token THEN GdiPlusShutdown token
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         ' // If the window isn't minimized, resize it
+         IF wParam &lt;&gt; SIZE_MINIMIZED THEN
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN pWindow-&gt;MoveWindow GetDlgItem(hwnd, IDC_GRCTX), 0, 0, pWindow-&gt;ClientWidth, pWindow-&gt;ClientHeight, CTRUE
+         END IF
+
+        CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+</code></pre>
+</body>
+</html>
+

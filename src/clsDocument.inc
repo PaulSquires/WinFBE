@@ -410,7 +410,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    
    ' Iterate all of the lines related to the visual designer
    dim as long iLineStart = 1
-   dim as long iLineEnd, NextMenuItem
+   dim as long iLineEnd, NextMenuItem, NextImageItem
 
    do until iLineStart >= len(wszAllText)
       
@@ -430,6 +430,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          this.ErrorOffset = numOffsetLines 
       
       'elseif left(wst, 23) = "' WINFBE MAINMENU_START" then
+      'elseif left(wst, 21) = "' WINFBE IMAGES_START" then
       
       elseif left(wst, 18) = "'   MENUITEM_START" then
          dim as long ub = ubound(this.MenuItems)
@@ -454,9 +455,23 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       elseif left(wst, 13) = "'     GRAYED=" then
          this.MenuItems(NextMenuItem).chkGrayed = val(mid(**wst, 14))
       
+      elseif left(wst, 15) = "'   IMAGE_START" then
+         dim as long ub = ubound(this.AllImages)
+         redim preserve this.AllImages(ub + 1)
+         NextImageItem = ub + 1
+         this.AllImages(NextImageItem).pDoc = @this
+      elseif left(wst, 16) = "'     IMAGENAME=" then
+         this.AllImages(NextImageItem).wszImageName = mid(**wst, 17)
+      elseif left(wst, 15) = "'     FILENAME=" then
+         this.AllImages(NextImageItem).wszFileName = ProcessFromCurdrive(mid(**wst, 16))
+      elseif left(wst, 19) = "'     RESOURCETYPE=" then
+         this.AllImages(NextImageItem).wszFormat = mid(**wst, 20)
+
+      'elseif left(wst, 13) = "'   IMAGE_END" then
       'elseif left(wst, 16) = "'   MENUITEM_END" then
       'elseif left(wst, 16) = "'   EVENTS_START" then
       'elseif left(wst, 14) = "'   EVENTS_END" then
+      'elseif left(wst, 19) = "' WINFBE IMAGES_END" then
       'elseif left(wst, 21) = "' WINFBE MAINMENU_END" then
 
       elseif left(wst, 20) = "' WINFBE_CODEGEN_END" then

@@ -1,0 +1,123 @@
+2
+FBGUI
+.bas
+CWindow: CUSTOMCTRL: Combobox color list (SetWindowSubClass)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_CbColorEx.fbtpl
+' Contents: Demonstrates the use of the Combobox color list control
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CCbColorEx.inc"
+USING Afx
+
+CONST IDC_CBCOLOR = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "ComboBox color list", @WndProc)
+   pWindow.Center
+
+   DIM rgNames (17) AS WSTRING * 20 = {"Auto", "Negro", "Azul", "Verde", "Cian", "Rojo", _
+      "Magenta", "Marrón", "Gris claro", "Gris", "Azul claro", "Verde claro", "Cian claro", _
+      "Rojo claro", "Magenta claro", "Amarillo", "Blanco", "Selección libre..."}
+
+   ' // Add a color combobox control
+   DIM pCbColorEx AS CCbColorEx =  CCbColorEx(@pWindow, IDC_CBCOLOR, 80, 30, 190, 100, _
+      GetSysColor(COLOR_WINDOWTEXT), GetSysColor(COLOR_WINDOWTEXT), @rgNames(0), 18 * 20 * 2)
+
+   ' // Select a color
+   SendMessageW pCbColorEx.hWindow, CB_SETCURSEL, 5, 0
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_CBCOLOR
+               ' // Get selected color
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = CBN_SELENDOK THEN
+                  DIM dwColor AS COLORREF
+                  dwColor = SendMessageW(CAST(HWND, lParam), CBCOL_GETSELCOLOR, 0, 0)
+                  ' Alternate way
+'                  DIM pCbColor AS CCbColorEx PTR = CAST(CCbColorEx PTR, SendMessageW(CAST(HWND, lParam), CBCOL_GETCLASSPTR, 0, 0))
+'                  IF pCbColor <> NULL THEN dwColor = pCbColor->SelColor
+               END IF
+         END SELECT
+
+     ' // Can't pass this message to the control because at the time
+     ' // it is sent, the control has not yet been subclassed.
+     CASE WM_MEASUREITEM
+         IF wParam = IDC_CBCOLOR THEN
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            DIM pMeasureItem AS MEASUREITEMSTRUCT PTR = CAST(MEASUREITEMSTRUCT PTR, lParam)
+            pMeasureItem->itemHeight = pMeasureItem->itemHeight * (pWindow->ryRatio * 0.72)
+            FUNCTION = CTRUE
+            EXIT FUNCTION
+         END IF
+
+     ' // Must pass this one to the ownerdrawn combobox
+     CASE WM_DRAWITEM
+         IF wParam = IDC_CBCOLOR THEN
+            SendMessageW GetDlgItem(hwnd, wParam), uMsg, wParam, lParam
+            FUNCTION = CTRUE
+            EXIT FUNCTION
+         END IF
+
+    	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

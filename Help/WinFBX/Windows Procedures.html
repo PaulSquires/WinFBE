@@ -1,0 +1,3388 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Windows Procedures</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="windows-procedures">Windows Procedures</h1>
+<p>Assorted Windows procedures.</p>
+<p><strong>Include File</strong>: AfxWin.inc.</p>
+<h1 id="window">Window</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxCenterWindow">AfxCenterWindow</a></td>
+<td>Centers a window on the screen or over another window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxForceSetForegroundWindow">AfxForceSetForegroundWindow</a></td>
+<td>Brings the thread that created the specified window into the foreground and activates the window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetTopEnabledWindow">AfxGetTopEnabledWindow</a></td>
+<td>Retrieves the handle of the enabled and visible window at the top of the z-order in an application.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetTopLevelParent">AfxGetTopLevelParent</a></td>
+<td>Retrieves the window's top-level parent window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetTopLevelWindow">AfxGetTopLevelWindow</a></td>
+<td>Retrieves the window's top-level parent or owner window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowClassName">AfxGetWindowClassName</a></td>
+<td>Retrieves the name of the class to which the specified window belongs.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowClientHeight">AfxGetWindowClientHeight</a></td>
+<td>Returns the height of the client area of window, in pixels.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowClientRect">AfxGetWindowClientRect</a></td>
+<td>Retrieves the coordinates of a window's client area.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowClientWidth">AfxGetWindowClientWidth</a></td>
+<td>Returns the width of the client area of a window, in pixels.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowHeight">AfxGetWindowHeight</a></td>
+<td>Returns the height of a window, in pixels.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowLocation">AfxGetWindowLocation</a></td>
+<td>Returns the location of the top left corner of the window, in pixels.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowRect">AfxGetWindowRect</a></td>
+<td>Retrieves the dimensions of the bounding rectangle of the specified window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowText">AfxGetWindowText</a></td>
+<td>Gets the text of a window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowTextLength">AfxGetWindowTextLength</a></td>
+<td>Gets the length of the text of a window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowWidth">AfxGetWindowWidth</a></td>
+<td>Returns the width of a window, in pixels.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWorkAreaHeight">AfxGetWorkAreaHeight</a></td>
+<td>Retrieves the height of the work area on the primary display monitor expressed in virtual screen coordinates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWorkAreaRect">AfxGetWorkAreaRect</a></td>
+<td>Retrieves the coordinates of the work area on the primary display monitor expressed in virtual screen coordinates</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWorkAreaWidth">AfxGetWorkAreaWidth</a></td>
+<td>Retrieves the width of the work area on the primary display monitor expressed in virtual screen coordinates.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxRedrawNonClientArea">AfxRedrawNonClientArea</a></td>
+<td>Redraws the non-client area of the specified window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxRedrawWindow">AfxRedrawWindow</a></td>
+<td>Redraws the specified window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSetWindowClientSize">AfxSetWindowClientSize</a></td>
+<td>Adjusts the bounding rectangle of a window based on the desired size of the client area.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetWindowIcon">AfxSetWindowIcon</a></td>
+<td>Associates a new large icon with a window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSetWindowLocation">AfxSetWindowLocation</a></td>
+<td>Sets the location of the top left corner of the window, in pixels.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetWindowSize">AfxSetWindowSize</a></td>
+<td>Sets the size of the specified window, in pixels.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSetWindowText">AfxSetWindowText</a></td>
+<td>Sets the text of a window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxShowWindowState">AfxShowWindowState</a></td>
+<td>Sets the specified window's show state.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="messages">Messages</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxDoEvents">AfxDoEvents</a></td>
+<td>Processes pending Windows messages.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxForwardSizeMessage">AfxForwardSizeMessage</a></td>
+<td>Sends a WM_SIZE message to the specified window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxPumpMessages">AfxPumpMessages</a></td>
+<td>Processes pending Windows messages.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="handles">Handles</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxGetControlHandle">AfxGetControlHandle</a></td>
+<td>Returns the handle of the control with the specified identifier.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetFormHandle">AfxGetFormHandle</a></td>
+<td>Finds the handle of the top-level window or MDI child window that is the ancestor of the specified window handle.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetHwndFromPID">AfxGetHwndFromPID</a></td>
+<td>Retrieves a window handle given it's process identifier.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetPathFromWindowHandle">AfxGetPathFromWindowHandle</a></td>
+<td>Retrieves the path of the executable file that created the specified window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="window-styles">Window styles</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxAddWindowExStyle">AfxAddWindowExStyle</a></td>
+<td>Adds a new extended style to the specified window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxAddWindowStyle">AfxAddWindowStyle</a></td>
+<td>Adds a new style to the specified window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowExStyle">AfxGetWindowExStyle</a></td>
+<td>Retrieves the extended window styles.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowStyle">AfxGetWindowStyle</a></td>
+<td>Retrieves the window styles.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxRemoveWindowExStyle">AfxRemoveWindowExStyle</a></td>
+<td>Removes an extended style from the specified window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxRemoveWindowStyle">AfxRemoveWindowStyle</a></td>
+<td>Removes a style from the specified window.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSetWindowExStyle">AfxSetWindowExStyle</a></td>
+<td>Sets the extended style(s) of the specified window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetWindowStyle">AfxSetWindowStyle</a></td>
+<td>Sets the style(s) of the specified window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="display">Display</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxForceVisibleDisplay">AfxForceVisibleDisplay</a></td>
+<td>Force visibility of an off-screen window.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetDisplayBitsPerPixel">AfxGetDisplayBitsPerPixel</a></td>
+<td>Returns the color resolution, in bits per pixel, of the display device.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetDisplayFrequency">AfxGetDisplayFrequency</a></td>
+<td>Returns the frequency, in hertz (cycles per second), of the display device in a particular mode.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetDisplayPixelsHeight">AfxGetDisplayPixelsHeight</a></td>
+<td>Returns the height, in pixels, of the current display device on the computer on which the calling thread is running.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetDisplayPixelsWidth">AfxGetDisplayPixelsWidth</a></td>
+<td>Returns the width, in pixels, of the current display device on the computer on which the calling thread is running.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="dialogs">Dialogs</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxChooseColorDialog">AfxChooseColorDialog</a></td>
+<td>Displays the Windows choose color dialog.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxControlRunDLL">AfxControlRunDLL</a></td>
+<td>Launches control panel applications.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxShowSysInfo">AfxShowSysInfo</a></td>
+<td>Displays the Windows Information System dialog.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="high-dpi">High DPI</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxLogPixelsX">AfxGetDpi</a></td>
+<td>Retrieves the number of pixels per logical inch.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLogPixelsX">AfxGetDpiX</a></td>
+<td>Retrieves the number of pixels per logical inch along the screen width.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLogPixelsY">AfxGetDpiY</a></td>
+<td>Retrieves the number of pixels per logical inch along the screen height.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetMonitorHorizontalScaling">AfxGetMonitorHorizontalScaling</a></td>
+<td>Returns the horizontal scaling of the monitor that the window is currently displayed on.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetMonitorVerticalScaling">AfxGetMonitorVerticalScaling</a></td>
+<td>Returns the vertical scaling of the monitor that the window is currently displayed on.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetMonitorLogicalHeight">AfxGetMonitorLogicalHeight</a></td>
+<td>Returns the logical height of the monitor that the window is currently displayed on.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetMonitorLogicalWidth">AfxGetMonitorLogicalWidth</a></td>
+<td>Returns the logical width of the monitor that the window is currently displayed on.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxIsDPIResolutionAtLeast">AfxIsDPIResolutionAtLeast</a></td>
+<td>Determines if screen resolution meets minimum requirements in relative pixels.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxIsProcessDPIAware">AfxIsProcessDPIAware</a></td>
+<td>Determines whether the current process is dots per inch (dpi) aware.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxIsResolutionAtLeast">AfxIsResolutionAtLeast</a></td>
+<td>Determines if screen resolution meets minimum requirements.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLoadIconMetric">AfxLoadIconMetric</a></td>
+<td>Loads a specified icon resource with a client-specified system metric.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxLogPixelsX">AfxLogPixelsX</a></td>
+<td>Retrieves the number of pixels per logical inch along the screen width.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxLogPixelsY">AfxLogPixelsY</a></td>
+<td>Retrieves the number of pixels per logical inch along the screen height.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxScaleRatioX">AfxScaleRatioX</a></td>
+<td>Retrieves the desktop horizontal scaling ratio.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxScaleRatioY">AfxScaleRatioY</a></td>
+<td>Retrieves the desktop vertical scaling ratio.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxScaleX">AfxScaleX</a></td>
+<td>Scales an horizontal coordinate according the DPI (dots per pixel) being used by the operating system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxScaleY">AfxScaleY</a></td>
+<td>Scales an vertical coordinate according the DPI (dots per pixel) being used by the operating system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetProcessDPIAware">AfxSetProcessDPIAware</a></td>
+<td>Sets the current process as dots per inch (dpi) aware.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxUnscaleX">AfxUnscaleX</a></td>
+<td>Unscales an horizontal coordinate according the DPI (dots per pixel) being used by the operating system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxUnscaleY">AfxUnscaleY</a></td>
+<td>Unscales a vertical coordinate according the DPI (dots per pixel) being used by the operating system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxUseDpiScaling">AfxUseDpiScaling</a></td>
+<td>Returns TRUE if the Windows Platform is NT; FALSE, otherwise.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="fonts">Fonts</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxCreateFont">AfxCreateFont</a></td>
+<td>Creates a logical font.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetFontHeight">AfxGetFontHeight</a></td>
+<td>Returns the logical height of a font given its point size.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetFontPointSize">AfxGetFontPointSize</a></td>
+<td>Returns the point size of a font given its logical height.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowFont">AfxGetWindowFont</a></td>
+<td>Retrieves the font with which the control is currently drawing its text.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetWindowsFontInfo">AfxGetWindowsFontInfo</a></td>
+<td>Retrieves information about the fonts used by Windows.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWindowsFontPointSize">AfxGetWindowsFontPointSize</a></td>
+<td>Retrieves the point size of the fonts used by Windows.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxModifyFontFaceName">AfxModifyFontFaceName</a></td>
+<td>Modifies the face name of the font of a window or control.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxModifyFontHeight">AfxModifyFontHeight</a></td>
+<td>Modifies the height of the font used by a window of control.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxModifyFontSettings">AfxModifyFontSettings</a></td>
+<td>Modifies settings of the font used by a window of control.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetWindowFont">AfxSetWindowFont</a></td>
+<td>Sets the font that a control is to use when drawing text.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="clipboard">Clipboard</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxClearClipboard">AfxClearClipboard</a></td>
+<td>Clears the contents of the clipboard.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetClipboardData">AfxGetClipboardData</a></td>
+<td>Retrieves data from the clipboard in the specified format.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetClipboardText">AfxGetClipboardText</a></td>
+<td>Returns a text string from the clipboard.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetClipboardData">AfxSetClipboardData</a></td>
+<td>Places data on the clipboard in a specified clipboard format.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSetClipboardText">AfxSetClipboardText</a></td>
+<td>Places a text string into the clipboard.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="bitmap">Bitmap</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxCaptureDisplay">AfxCaptureDisplay</a></td>
+<td>Captures the display and returns an handle to a bitmap.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetBitmapHeight">AfxGetBitmapHeight</a></td>
+<td>Retrieves the height of the specified bitmap.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetBitmapWidth">AfxGetBitmapWidth</a></td>
+<td>Retrieves the width of the specified bitmap.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="device-independent-bitmap-(dib)">Device Independent Bitmap (DIB)</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxCreateDIBSection">AfxCreateDIBSection</a></td>
+<td>Creates a DIB section.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxDibLoadImage">AfxDibLoadImage</a></td>
+<td>Loads a DIB in memory and returns a pointer to it.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxDibSaveImage">AfxDibSaveImage</a></td>
+<td>Saves a DIB to a file.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="metric-conversions">Metric conversions</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxHiMetricToPixelsX">AfxHiMetricToPixelsX</a></td>
+<td>Converts from HiMetric to Pixels (horizontal resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxHiMetricToPixelsY">AfxHiMetricToPixelsY</a></td>
+<td>Converts from HiMetric to Pixels (vertical resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxPixelsToHiMetricX">AfxPixelsToHiMetricX</a></td>
+<td>Converts from Pixels to HiMetric (horizontal resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxPixelsToHiMetricY">AfxPixelsToHiMetricY</a></td>
+<td>Converts from Pixels to HiMetric (vertical resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxPixelsToPointsX">AfxPixelsToPointsX</a></td>
+<td>Converts pixels to points size (1/72 of an inch) (horizontal resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxPixelsToPointsY">AfxPixelsToPointsY</a></td>
+<td>Converts pixels to points size (1/72 of an inch) (vertical resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxPixelsToTwipsX">AfxPixelsToTwipsX</a></td>
+<td>Converts pixels to twips (horizontal resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxPixelsToTwipsY">AfxPixelsToTwipsY</a></td>
+<td>Converts pixels to twips (vertical resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxPointSizeToDip">AfxPointSizeToDip</a></td>
+<td>Converts point size to DIP (device independent pixel).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxPointsToPixelsX">AfxPointsToPixelsX</a></td>
+<td>Converts a point size (1/72 of an inch) to pixels (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxPointsToPixelsY">AfxPointsToPixelsY</a></td>
+<td>Converts a point size (1/72 of an inch) to pixels (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTwipsPerPixelX">AfxTwipsPerPixelX</a></td>
+<td>Returns the width of a pixel in twips (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTwipsPerPixelY">AfxTwipsPerPixelY</a></td>
+<td>Returns the width of a pixel in twips (vertical resolution).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTwipsToPixelsX">AfxTwipsToPixelsX</a></td>
+<td>Converts twips to pixels (horizontal resolution).</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTwipsToPixelsY">AfxTwipsToPixelsY</a></td>
+<td>Converts twips to pixels (vertical resolution).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="mail-and-internet">Mail and Internet</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxGetBrowserHandle">AfxGetBrowserHandle</a></td>
+<td>Retrieves the handle of the top level window of the web browser.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetDefaultBrowserName">AfxGetDefaultBrowserName</a></td>
+<td>Retrieves the name of the default browser.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetDefaultBrowserPath">AfxGetDefaultBrowserPath</a></td>
+<td>Retrieves the path of the default browser.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetDefaultMailClientName">AfxGetDefaultMailClientName</a></td>
+<td>Retrieves the name of the default client mail application.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetDefaultMailClientPath">AfxGetDefaultMailClientPath</a></td>
+<td>Retrieves the path of the default mail client application.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetInternetExplorerVersion">AfxGetInternetExplorerVersion</a></td>
+<td>Returns the Internet Explorer version installed.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="miscellaneous-procedures">Miscellaneous procedures</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxCommand">AfxCommand</a></td>
+<td>Returns command line parameters used to call the program.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxEnviron">AfxEnviron</a></td>
+<td>Retrieves the contents of the specified variable from the environment block of the calling process.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetComputerName">AfxGetComputerName</a></td>
+<td>Retrieves the NetBIOS name of the local computer.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetMACAddress">AfxGetMACAddress</a></td>
+<td>Retrieves the MAC address of a machine's Ethernet card.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGetUserName">AfxGetUserName</a></td>
+<td>Retrieves the name of the user associated with the current thread.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGetWinErrMsg">AfxGetWinErrMsg</a></td>
+<td>Retrieves the localized description of the specified Windows error code.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxMsg">AfxMsg</a></td>
+<td>Displays an application modal message box.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxSetDlgMsgResult">AfxSetDlgMsgResult</a></td>
+<td>Sets the return value of a message processed in the dialog box procedure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxSetEnviron">AfxSetEnviron</a></td>
+<td>Sets the contents of the specified environment variable for the current process.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="versioning">Versioning</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxComCtlVersion">AfxComCtlVersion</a></td>
+<td>Returns the version of CommCtl32.dll.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxIsPlatformNT">AfxIsPlatformNT</a></td>
+<td>Returns TRUE if the Windows Platform is NT; FALSE, otherwise.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxWindowsBitness">AfxWindowsBitness</a></td>
+<td>Returns the bitness of the operating system (32 or 64 bit).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxWindowsBuild">AfxWindowsBuild</a></td>
+<td>Returns the Windows build number.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxWindowsPlatform">AfxWindowsPlatform</a></td>
+<td>Returns the Windows platform.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxWindowsVersion">AfxWindowsVersion</a></td>
+<td>Returns the Windows version.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxwindowsversion"><a name="AfxWindowsVersion"></a>AfxWindowsVersion</h1>
+<p>Returns the Windows version.</p>
+<pre><code>FUNCTION AfxWindowsVersion () AS LONG
+</code></pre>
+<h4 id="return-value">Return value</h4>
+<p>Platform 1:</p>
+<pre><code>  400 Windows 95
+  410 Windows 98
+  490 Windows ME
+</code></pre>
+<p>Platform 2:</p>
+<pre><code>  400 Windows NT
+  500 Windows 2000
+  501 Windows XP
+  502 Windows Server 2003
+  600 Windows Vista and Windows Server 2008
+  601 Windows 7
+  602 Windows 8
+  603 Windows 8.1
+ 1000 Windows 10
+</code></pre>
+<p><strong>Note</strong>: As Windows 95 and Windows NT return the same version number, we also need to call GetWindowsPlatform to differentiate them.</p>
+<h1 id="afxwindowsbuild"><a name="AfxWindowsBuild"></a>AfxWindowsBuild</h1>
+<p>Returns the Windows build number.</p>
+<pre><code>FUNCTION AfxWindowsBuild () AS LONG
+</code></pre>
+<h1 id="afxwindowsplatform"><a name="AfxWindowsPlatform"></a>AfxWindowsPlatform</h1>
+<p>Returns the Windows platform.</p>
+<pre><code>FUNCTION AfxWindowsPlatform () AS LONG
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Windows 95/98/ME</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Windows NT/2000/XP/Server/Vista/Windows 7</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxwindowsbitness"><a name="AfxWindowsBitness"></a>AfxWindowsBitness</h1>
+<p>Returns the Windows bitness (32 or 64 bit).</p>
+<pre><code>FUNCTION AfxWindowsBitness () AS LONG
+</code></pre>
+<h1 id="afxisplatformnt"><a name="AfxIsPlatformNT"></a>AfxIsPlatformNT</h1>
+<p>Returns TRUE if the Windows Platform is NT; FALSE, otherwise.</p>
+<pre><code>FUNCTION AfxIsPlatformNT () AS BOOLEAN
+</code></pre>
+<h1 id="afxcomctlversion"><a name="AfxComCtlVersion"></a>AfxComCtlVersion</h1>
+<p>Returns the version of CommCtl32.dll</p>
+<pre><code>FUNCTION AfxComCtlVersion () AS LONG
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>The version of CommCtl32.dll multiplied by 100, e.g. 582 for version 5.82.</p>
+<h1 id="afxmsg"><a name="AfxMsg"></a>AfxMsg</h1>
+<p>Displays an application modal message box. Helper proceudre to display feedback and errors.</p>
+<pre><code>FUNCTION AfxMsg (BYVAL pwszText AS WSTRING PTR, BYREF wszCaption AS WSTRING = &quot;Message&quot;, _
+   BYVAL uType AS DWORD = 0) AS LONG
+FUNCTION AfxMsg (BYREF cws AS CWSTR, BYREF wszCaption AS WSTRING = &quot;Message&quot;, _
+   BYVAL uType AS DWORD = 0) AS LONG
+FUNCTION AfxMsg (BYREF cbs AS CBSTR, BYREF wszCaption AS WSTRING = &quot;Message&quot;, _
+   BYVAL uType AS DWORD = 0) AS LONG
+FUNCTION AfxMsg (BYREF cv AS CVAR, BYREF wszCaption AS WSTRING = &quot;Message&quot;, _
+   BYVAL uType AS DWORD = 0) AS LONG
+FUNCTION AfxMsg (BYVAL nValue AS DOUBLE, BYREF wszCaption AS WSTRING = &quot;Message&quot;, _
+   BYVAL uType AS DWORD = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszText</em></td>
+<td>Pointer to a WSTRING.</td>
+</tr>
+<tr class="even">
+<td><em>cws</em></td>
+<td>A CWSTR variable.</td>
+</tr>
+<tr class="odd">
+<td><em>cws</em></td>
+<td>A CBSTR variable.</td>
+</tr>
+<tr class="even">
+<td><em>cv</em></td>
+<td>A CVAR variable.</td>
+</tr>
+<tr class="odd">
+<td><em>nValue</em></td>
+<td>A numeric variable.</td>
+</tr>
+<tr class="even">
+<td><em>wszCaption</em></td>
+<td>Optional. The message box caption. Default title is &quot;Message&quot;.</td>
+</tr>
+<tr class="odd">
+<td><em>uType</em></td>
+<td>Optional. For a list of available types, see the Microsoft documentation for the MessageBoxW function. The MB_APPLMODAL type is always added.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>The version of CommCtl32.dll multiplied by 100, e.g. 582 for version 5.82.</p>
+<h1 id="afxgetwinerrmsg"><a name="AfxGetWinErrMsg"></a>AfxGetWinErrMsg</h1>
+<p>Retrieves the localized description of the specified Windows error code.</p>
+<pre><code>FUNCTION AfxGetWinErrMsg (BYVAL dwError AS DWORD) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dwError</em></td>
+<td>The Windows error code.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>The localized description of the error code.</p>
+<h1 id="afxcommand"><a name="AfxCommand"></a>AfxCommand</h1>
+<p>Returns command line parameters used to call the program.</p>
+<pre><code>FUNCTION AfxCommand (BYVAL nIndex AS LONG = -1) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nIndex</em></td>
+<td>Zero-based index for a particular command-line argument.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>Returns the command-line arguments(s).</p>
+<h4 id="remarks">Remarks</h4>
+<p><strong>AfxCommand</strong> returns command-line arguments passed to the program upon execution.</p>
+<p>If index is less than zero (&lt; 0), a space-separated list of all command-line arguments is returned, otherwise, a single argument is returned. A value of zero (0) returns the name of the executable; and values of one (1) and greater return each command-line argument.</p>
+<p>If index is greater than the number of arguments passed to the program, a null string (&quot;&quot;) is returned.</p>
+<h1 id="afxenviron"><a name="AfxEnviron"></a>AfxEnviron</h1>
+<p>Retrieves the contents of the specified variable from the environment block of the calling process.</p>
+<pre><code>FUNCTION AfxEnviron (BYVAL pwszName AS LPCWSTR) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszName</em></td>
+<td>The name of the environment variable.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Include file</strong>: AfxStr.inc</p>
+<h4 id="usage-example">Usage example</h4>
+<pre><code>DIM cws AS CWSTR = AfxEnviron(&quot;path&quot;)
+</code></pre>
+<h1 id="afxsetenviron"><a name="AfxSetEnviron"></a>AfxSetEnviron</h1>
+<p>Sets the contents of the specified environment variable for the current process.</p>
+<pre><code>FUNCTION AfxSetEnviron (BYVAL pwszName AS LPCWSTR, BYVAL pwszValue AS LPCWSTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszName</em></td>
+<td>The name of the environment variable. The operating system creates the environment variable if it does not exist and <em>pwszValue</em> is not NULL.</td>
+</tr>
+<tr class="even">
+<td><em>pwszValue</em></td>
+<td>The name of the environment variable. The maximum size of a user-defined environment variable is 32,767 characters.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Include file</strong>: AfxStr.inc</p>
+<h4 id="return-value-6">Return value</h4>
+<p>If the function succeeds, the return value is TRUE.<br> If the function fails, the return value is FALSE.<br> To get extended error information, call <strong>GetLastError</strong>.</p>
+<h4 id="usage-example-1">Usage example</h4>
+<pre><code>AfxSetEnviron(&quot;path&quot;, &quot;c:&quot;)
+</code></pre>
+<h1 id="afxsetenviron-(overload)">AfxSetEnviron (Overload)</h1>
+<p>Sets the contents of the specified environment variable for the current process.<br> Unicode replacement for Free Basic's <strong>SetEnviron</strong> function.</p>
+<pre><code>FUNCTION AfxSetEnviron (BYVAL pwszName AS LPCWSTR, BYVAL pwszValue AS LPCWSTR) AS BOOLEAN
+FUNCTION AfxSetEnviron (BYREF varexp AS WSTRING) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszName</em></td>
+<td>The name of the environment variable. The operating system creates the environment variable if it does not exist and <em>pwszValue</em> is not NULL.</td>
+</tr>
+<tr class="even">
+<td><em>varexp</em></td>
+<td>Name and setting of an environment variable in the following (or equivalent) form: varname=varstring (<em>varname</em> being the name of the environment variable, and <em>varstring</em> being its text value to set).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Include file</strong>: AfxStr.inc</p>
+<h4 id="return-value-7">Return value</h4>
+<p>Returns 0 on success, or -1 on failure.</p>
+<h1 id="afxsetdlgmsgresult"><a name="AfxSetDlgMsgResult"></a>AfxSetDlgMsgResult</h1>
+<p>Sets the return value of a message processed in the dialog box procedure.</p>
+<pre><code>FUNCTION AfxSetDlgMsgResult (BYVAL hDlg AS HWND, BYVAL msg AS UINT, BYVAL result AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hDlg</em></td>
+<td>A handle to a dialog box.</td>
+</tr>
+<tr class="even">
+<td><em>msg</em></td>
+<td>The message type.</td>
+</tr>
+<tr class="odd">
+<td><em>result</em></td>
+<td>The return value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>If the function succeeds, the return value is TRUE. If the function fails, the return value is FALSE.</p>
+<h1 id="afxgetcomputername"><a name="AfxGetComputerName"></a>AfxGetComputerName</h1>
+<p>Retrieves the NetBIOS name of the local computer. This name is established at system startup, when the system reads it from the registry.</p>
+<pre><code>FUNCTION AfxGetComputerName () AS CWSTR
+</code></pre>
+<h4 id="return-value-9">Return value</h4>
+<p>The NetBIOS name of the local computer.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>The behavior of this function can be affected if the local computer is a node in a cluster. For more information, see <strong>ResUtilGetEnvironmentWithNetName</strong> and <strong>UseNetworkName</strong>.</p>
+<h1 id="afxgetusername"><a name="AfxGetUserName"></a>AfxGetUserName</h1>
+<p>Retrieves the name of the user associated with the current thread.</p>
+<pre><code>FUNCTION AfxGetUserName () AS CWSTR
+</code></pre>
+<h4 id="return-value-10">Return value</h4>
+<p>The name of the current user associated with the current thread.</p>
+<h4 id="remarks-2">Remarks</h4>
+<p>If the current thread is impersonating another client, the <strong>AfxGetUserName</strong> function returns the user name of the client that the thread is impersonating.</p>
+<h1 id="afxgetmacaddress"><a name="AfxGetMACAddress"></a>AfxGetMACAddress</h1>
+<p>Retrieves the MAC address of a machine's Ethernet card.</p>
+<pre><code>FUNCTION AfxGetMACAddress () AS STRING
+</code></pre>
+<h4 id="return-value-11">Return value</h4>
+<p>The MAC address in the following format: MM-MM-MM-SS-SS-SS. The leftmost 6 digits, called a &quot;prefix&quot;, is associated with the adapter manufacturer. The rightmost digits of a MAC address represent an identification number for the specific device.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>This function only supports one NIC card on your PC.</p>
+<h1 id="afxdoevents"><a name="AfxDoEvents"></a>AfxDoEvents</h1>
+<p>Processes pending Windows messages. Call this procedure if you are performing a tight FOR/NEXT or DO/LOOP and need to allow your application to be responsive to user input.</p>
+<pre><code>SUB AfxDoEvents (BYVAL hwnd AS HWND = NULL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Optional. Handle of the window or dialog. If NULL, the window handle to the active window attached to the calling thread's message queue is used.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxpumpmessages"><a name="AfxPumpMessages"></a>AfxPumpMessages</h1>
+<p>Processes pending Windows messages. Call this procedure if you are performing a tight FOR/NEXT or DO/LOOP and need to allow your application to be responsive to user input.</p>
+<pre><code>SUB AfxPumpMessages
+</code></pre>
+<h1 id="afxforwardsizemessage"><a name="AfxForwardSizeMessage"></a>AfxForwardSizeMessage</h1>
+<p>Sends a WM_SIZE message to the specified window.</p>
+<pre><code>FUNCTION AfxForwardSizeMessage (BYVAL hwnd AS HWND, BYVAL nResizeType AS DWORD, _
+   BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS LRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>A handle to a window.</td>
+</tr>
+<tr class="even">
+<td><em>nResizeType</em></td>
+<td>Type of resizing requested.</td>
+</tr>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>The new width of the client area.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>The new height of the client ara.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Resizing type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SIZE_MAXHIDE</td>
+<td>Message is sent to all pop-up windows when some other window is maximized.</td>
+</tr>
+<tr class="even">
+<td>SIZE_MAXIMIZED</td>
+<td>Maximize the window.</td>
+</tr>
+<tr class="odd">
+<td>SIZE_MAXSHOW</td>
+<td>Message is sent to all pop-up windows when some other window has been restored to its former size.</td>
+</tr>
+<tr class="even">
+<td>SIZE_MINIMIZED</td>
+<td>Minimize the window.</td>
+</tr>
+<tr class="odd">
+<td>SIZE_RESTORED</td>
+<td>The window has been resized, but neither the SIZE_MINIMIZED nor SIZE_MAXIMIZED value applies.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remark">Remark</h4>
+<p>If an application processes this message, it should return zero.</p>
+<h1 id="afxchoosecolordialog"><a name="AfxChooseColorDialog"></a>AfxChooseColorDialog</h1>
+<p>Displays the Windows choose color dialog.</p>
+<pre><code>FUNCTION AfxChooseColorDialog (BYVAL hwnd AS HWND, BYVAL rgbDefaultColor AS COLORREF = 0, _
+   BYVAL lpCustColors AS COLORREF PTR = NULL) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>A handle to the parent window or NULL.</td>
+</tr>
+<tr class="even">
+<td><em>rgbDefaultColor</em></td>
+<td>The color initially selected when the dialog box is created. If the specified color value is not among the available colors, the system selects the nearest solid color available. If <em>rgbDefaultColor</em> is zero, the initially selected color is black.</td>
+</tr>
+<tr class="odd">
+<td><em>lpCustColors</em></td>
+<td>Out. A pointer to an array of 16 values that contain red, green, blue (RGB) values for the custom color boxes in the dialog box. If the user modifies these colors, the system updates the array with the new RGB values. To preserve new custom colors between calls to the <strong>AfxChooseColorDialog</strong> function, you should allocate static memory for the array. To create a COLORREF color value, use the BGR macro.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>The selected color, or -1 if the user has canceled the dialog.</p>
+<h1 id="afxcontrolrundll"><a name="AfxControlRunDLL"></a>AfxControlRunDLL</h1>
+<p>Control_RunDLL is an undocumented procedure in the Shell32.dll which can be used to launch control panel applications. You’ve to pass the name of the control panel file (.cpl) and the tool represented by it will be launched. For launching some control panel applications, you’ve to provide a valid windows handle (hwnd parameter) and program instance (<em>hInst</em>) parameter).</p>
+<pre><code>FUNCTION AfxControlRunDLL (BYVAL hwnd AS HWND, BYVAL hInst AS HINSTANCE, _
+   BYVAL cmd AS WSTRING PTR, BYVAL nCmdShow AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to a window. This parameter can be NULL.</td>
+</tr>
+<tr class="even">
+<td><em>hInst</em></td>
+<td>Instance handle. This parameter can be NULL.</td>
+</tr>
+<tr class="odd">
+<td><em>cmd</em></td>
+<td>The command and parameters.</td>
+</tr>
+<tr class="even">
+<td><em>nCmdShow</em></td>
+<td>Controls how the window is to be shown, e.g. SW_SHOWNORMAL.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>nCmdShow value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SW_FORCEMINIMIZE</td>
+<td>Minimizes a window, even if the thread that owns the window is not responding. This flag should only be used when minimizing windows from a different thread.</td>
+</tr>
+<tr class="even">
+<td>SW_HIDE</td>
+<td>Hides the window and activates another window.</td>
+</tr>
+<tr class="odd">
+<td>SW_MAXIMIZE</td>
+<td>Maximizes the specified window.</td>
+</tr>
+<tr class="even">
+<td>SW_MINIMIZE</td>
+<td>Minimizes the specified window and activates the next top-level window in the Z order.</td>
+</tr>
+<tr class="odd">
+<td>SW_RESTORE</td>
+<td>Activates and displays the window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when restoring a minimized window.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOW</td>
+<td>Activates the window and displays it in its current size and position.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWDEFAULT</td>
+<td>Sets the show state based on the SW_ value specified in the STARTUPINFO structure passed to the <strong>CreateProcess</strong> function by the program that started the application.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOWMAXIMIZED</td>
+<td>Activates the window and displays it as a maximized window.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWMINIMIZED</td>
+<td>Activates the window and displays it as a minimized window.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOWMINNOACTIVE</td>
+<td>Displays the window as a minimized window. This value is similar to SW_SHOWMINIMIZED, except the window is not activated.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWNA</td>
+<td>Displays the window in its current size and position. This value is similar to SW_SHOW, except that the window is not activated.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOWNOACTIVATE</td>
+<td>Displays a window in its most recent size and position. This value is similar to SW_SHOWNORMAL, except that the window is not activated.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWNORMAL</td>
+<td>Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-examples">Usage examples</h4>
+<pre><code>AfxControlRunDLL(0, 0, &quot;&quot;, SW_SHOWNORMAL)   ' Opens the control panel
+AfxControlRunDLL(0, 0, &quot;appwiz.cpl&quot;, SW_SHOWNORMAL)   ' Opens the applications wizard
+</code></pre>
+<h1 id="afxshowsysinfo"><a name="AfxShowSysInfo"></a>AfxShowSysInfo</h1>
+<p>Displays the Windows Information System dialog.</p>
+<pre><code>FUNCTION AfxShowSysInfo (BYVAL hwnd AS HWND) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>A handle to the parent window or NULL.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>If the function succeeds, the return value is TRUE. If the function fails, the return value is FALSE.</p>
+<h1 id="afxgetbrowserhandle"><a name="AfxGetBrowserHandle"></a>AfxGetBrowserHandle</h1>
+<p>Retrieves the handle of the top level window of the web browser.</p>
+<pre><code>FUNCTION AfxGetBrowserHandle (BYVAL pwszClassName AS WSTRING PTR) AS HWND
+FUNCTION AfxGetInternetExplorerHandle () AS HWND
+FUNCTION AfxGetFireFoxHandle () AS HWND
+FUNCTION AfxGetGoogleChromeHandle () AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszClassName</em></td>
+<td>Class name of the browser.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>The handle of the top level window of the browser. If there is not any instance of the browser running, it will return NULL.</p>
+<h4 id="examples">Examples</h4>
+<pre><code>DIM hwndBrowser AS HWND = AfxGetBrowserHandle(&quot;IEFrame&quot;)              ' // Internet Explorer
+DIM hwndBrowser AS HWND = AfxGetBrowserHandle(&quot;MozillaWindowClass&quot;)   ' // Firefox
+DIM hwndBrowser AS HWND = AfxGetBrowserHandle(&quot;Chrome_WidgetWin_1&quot;)   ' // Chrome
+</code></pre>
+<h4 id="remarks-4">Remarks</h4>
+<p><strong>AfxGetInternetExplorerHandle</strong>, <strong>AfxGetFireFoxHandle</strong> and <strong>AfxGetGoogleChromeHandle</strong> are wrappers functions that call AfxGetBrowserHandle passing the appropriate class name (&quot;IEFrame&quot;, &quot;MozillaWindowClass&quot; and &quot;Chrome_WidgetWin_1&quot;).</p>
+<h1 id="afxgetdefaultbrowsername"><a name="AfxGetDefaultBrowserName"></a>AfxGetDefaultBrowserName</h1>
+<p>Retrieves the name of the default browser.</p>
+<pre><code>FUNCTION AfxGetDefaultBrowserName () AS CWSTR
+</code></pre>
+<h4 id="return-value-15">Return value</h4>
+<p>The retrieved name or an empty string.</p>
+<h1 id="afxgetdefaultbrowserpath"><a name="AfxGetDefaultBrowserPath"></a>AfxGetDefaultBrowserPath</h1>
+<p>Retrieves the path of the default browser.</p>
+<pre><code>FUNCTION AfxGetDefaultBrowserPath () AS CWSTR
+</code></pre>
+<h4 id="return-value-16">Return value</h4>
+<p>The retrieved path or an empty string.</p>
+<h1 id="afxgetdefaultmailclientname"><a name="AfxGetDefaultMailClientName"></a>AfxGetDefaultMailClientName</h1>
+<p>Retrieves the name of the default client mail application.</p>
+<pre><code>FUNCTION AfxGetDefaultMailClientName () AS CWSTR
+</code></pre>
+<h4 id="return-value-17">Return value</h4>
+<p>The retrieved name or an empty string.</p>
+<h1 id="afxgetdefaultmailclientpath"><a name="AfxGetDefaultMailClientPath"></a>AfxGetDefaultMailClientPath</h1>
+<p>Retrieves the path of the default client mail application.</p>
+<pre><code>FUNCTION AfxGetDefaultMailClientPath () AS CWSTR
+</code></pre>
+<h4 id="return-value-18">Return value</h4>
+<p>The retrieved path or an empty string.</p>
+<h1 id="afxgetinternetexplorerversion"><a name="AfxGetInternetExplorerVersion"></a>AfxGetInternetExplorerVersion</h1>
+<p>Returns the Internet Explorer version installed.</p>
+<pre><code>FUNCTION AfxGetInternetExplorerVersion () AS SINGLE
+</code></pre>
+<h4 id="return-value-19">Return value</h4>
+<p>The Internet Explorer version (major.minor).</p>
+<h1 id="afxhimetrictopixelsx"><a name="AfxHiMetricToPixelsX"></a>AfxHiMetricToPixelsX</h1>
+<p>Converts from HiMetric to Pixels (horizontal resolution). Himetric is a scaling unit similar to twips used in computing. It is one thousandth of a centimeter and is independent of the screen resolution. HiMetric per inch = 2540; 1 inch = 2.54 mm.</p>
+<pre><code>SUB AfxHiMetricToPixelsX (BYVAL hm AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hm</em></td>
+<td>The size in HiMetric units.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-20">Return value</h4>
+<p>The size in pixels.</p>
+<h1 id="afxhimetrictopixelsy"><a name="AfxHiMetricToPixelsY"></a>AfxHiMetricToPixelsY</h1>
+<p>Converts from HiMetric to Pixels (vertical resolution). Himetric is a scaling unit similar to twips used in computing. It is one thousandth of a centimeter and is independent of the screen resolution. HiMetric per inch = 2540; 1 inch = 2.54 mm.</p>
+<pre><code>SUB AfxHiMetricToPixelsY (BYVAL hm AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hm</em></td>
+<td>The size in HiMetric units.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>The size in pixels.</p>
+<h1 id="afxpixelstohimetricx"><a name="AfxPixelsToHiMetricX"></a>AfxPixelsToHiMetricX</h1>
+<p>Converts from Pixels to HiMetric (horizontal resolution). Himetric is a scaling unit similar to twips used in computing. It is one thousandth of a centimeter and is independent of the screen resolution. HiMetric per inch = 2540; 1 inch = 2.54 mm.</p>
+<pre><code>SUB AfxPixelsToHiMetricX (BYVAL cx AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cx</em></td>
+<td>The size in pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>The size in HiMetric units.</p>
+<h1 id="afxpixelstohimetricy"><a name="AfxPixelsToHiMetricY"></a>AfxPixelsToHiMetricY</h1>
+<p>Converts from Pixels to HiMetric (vertical resolution). Himetric is a scaling unit similar to twips used in computing. It is one thousandth of a centimeter and is independent of the screen resolution. HiMetric per inch = 2540; 1 inch = 2.54 mm.</p>
+<pre><code>SUB AfxPixelsToHiMetricY (BYVAL cx AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cy</em></td>
+<td>The size in pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>The size in HiMetric units.</p>
+<h1 id="afxpixelstopointsx"><a name="AfxPixelsToPointsX"></a>AfxPixelsToPointsX</h1>
+<p>Converts pixels to points size (1/72 of an inch). Horizontal resolution.</p>
+<pre><code>SUB AfxPixelsToPointsX (BYVAL pix AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pix</em></td>
+<td>The number of pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-24">Return value</h4>
+<p>The number of points.</p>
+<h1 id="afxpixelstopointsy"><a name="AfxPixelsToPointsY"></a>AfxPixelsToPointsY</h1>
+<p>Converts pixels to points size (1/72 of an inch). Vertical resolution.</p>
+<pre><code>SUB AfxPixelsToPointsY (BYVAL pix AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pix</em></td>
+<td>The number of pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-25">Return value</h4>
+<p>The number of points.</p>
+<h1 id="afxpixelstotwipsx"><a name="AfxPixelsToTwipsX"></a>AfxPixelsToTwipsX</h1>
+<p>Converts pixels to twips. Horizontal resolution.</p>
+<pre><code>FUNCTION AfxPixelsToTwipsX (BYVAL nPixels AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPixels</em></td>
+<td>The number of pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-26">Return value</h4>
+<p>The number of twips.</p>
+<h1 id="afxpixelstotwipsy"><a name="AfxPixelsToTwipsY"></a>AfxPixelsToTwipsY</h1>
+<p>Converts pixels to twips. Vertical resolution.</p>
+<pre><code>FUNCTION AfxPixelsToTwipsY (BYVAL nPixels AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPixels</em></td>
+<td>The number of pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-27">Return value</h4>
+<p>The number of twips.</p>
+<h1 id="afxpointsizetodip"><a name="AfxPointSizeToDip"></a>AfxPointSizeToDip</h1>
+<p>Converts point size to DIP (device independent pixel). DIP is defined as 1/96 of an inch and a point is 1/72 of an inch.</p>
+<pre><code>FUNCTION AfxPointSizeToDip (BYVAL ptsize AS SINGLE) AS SINGLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ptsize</em></td>
+<td>The point size to convert.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-28">Return value</h4>
+<p>The number of DIP pixels.</p>
+<h1 id="afxpointstopixelsx"><a name="AfxPointsToPixelsX"></a>AfxPointsToPixelsX</h1>
+<p>Converts a point size (1/72 of an inch) to pixels. Horizontal resolution.</p>
+<pre><code>FUNCTION AfxPointsToPixelsX (BYVAL pts AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pts</em></td>
+<td>The number of points.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-29">Return value</h4>
+<p>The number of pixels.</p>
+<h1 id="afxpointstopixelsy"><a name="AfxPointsToPixelsY"></a>AfxPointsToPixelsY</h1>
+<p>Converts a point size (1/72 of an inch) to pixels. Vertical resolution.</p>
+<pre><code>FUNCTION AfxPointsToPixelsY (BYVAL pts AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pts</em></td>
+<td>The number of points.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-30">Return value</h4>
+<p>The number of pixels.</p>
+<h1 id="afxtwipsperpixelx"><a name="AfxTwipsPerPixelX"></a>AfxTwipsPerPixelX</h1>
+<p>Returns the width of a pixel in twips (horizontal resolution). Pixel dimensions can vary between systems and may not always be square, so separate functions for pixel width and height are required.</p>
+<pre><code>FUNCTION AfxTwipsPerPixelX () AS LONG
+</code></pre>
+<h4 id="return-value-31">Return value</h4>
+<p>The number of twips per pixel.</p>
+<h1 id="afxtwipsperpixely"><a name="AfxTwipsPerPixelY"></a>AfxTwipsPerPixelY</h1>
+<p>Returns the width of a pixel in twips (vertical resolution). Pixel dimensions can vary between systems and may not always be square, so separate functions for pixel width and height are required.</p>
+<pre><code>FUNCTION AfxTwipsPerPixelY () AS LONG
+</code></pre>
+<h4 id="return-value-32">Return value</h4>
+<p>The number of twips per pixel.</p>
+<h1 id="afxtwipstopixelsx"><a name="AfxTwipsToPixelsX"></a>AfxTwipsToPixelsX</h1>
+<p>Converts twips to pixels. Horizontal resolution.</p>
+<pre><code>FUNCTION AfxTwipsToPixelsX (BYVAL nTwips AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTwips</em></td>
+<td>The number of twips.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-33">Return value</h4>
+<p>The number of pixels.</p>
+<h1 id="afxtwipstopixelsy"><a name="AfxTwipsToPixelsY"></a>AfxTwipsToPixelsY</h1>
+<p>Converts twips to pixels. Vertical resolution.</p>
+<pre><code>FUNCTION AfxTwipsToPixelsY (BYVAL nTwips AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTwips</em></td>
+<td>The number of twips.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-34">Return value</h4>
+<p>The number of pixels.</p>
+<h1 id="afxcapturedisplay"><a name="AfxCaptureDisplay"></a>AfxCaptureDisplay</h1>
+<p>Captures the display and returns an handle to a bitmap.</p>
+<pre><code>FUNCTION AfxCaptureDisplay () AS HBITMAP
+</code></pre>
+<h4 id="return-value-35">Return value</h4>
+<p>The handle of a bitmap.</p>
+<h4 id="usage-example-2">Usage example</h4>
+<pre><code>DIM hBitmap AS HBITMAP = AfxCaptureDisplay
+</code></pre>
+<h1 id="afxgetbitmapheight"><a name="AfxGetBitmapHeight"></a>AfxGetBitmapHeight</h1>
+<p>Retrieves the height of the specified bitmap.</p>
+<pre><code>FUNCTION AfxGetBitmapHeight (BYVAL hBitmap AS HBITMAP) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hBitmap</em></td>
+<td>Handle to the bitmap.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-36">Return value</h4>
+<p>The height of the bitmap on success or 0 on failure.</p>
+<h1 id="afxgetbitmapwidth"><a name="AfxGetBitmapWidth"></a>AfxGetBitmapWidth</h1>
+<p>Retrieves the width of the specified bitmap.</p>
+<pre><code>FUNCTION AfxGetBitmapWidth (BYVAL hBitmap AS HBITMAP) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hBitmap</em></td>
+<td>Handle to the bitmap.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-37">Return value</h4>
+<p>The width of the bitmap on success or 0 on failure.</p>
+<h1 id="afxcreatedibsection"><a name="AfxCreateDIBSection"></a>AfxCreateDIBSection</h1>
+<p>Creates a DIB section.</p>
+<pre><code>FUNCTION AfxCreateDIBSection (BYVAL hdc AS HDC, BYVAL nWidth AS DWORD, BYVAL nHeight AS DWORD, _
+   BYVAL bpp AS LONG = 0, BYVAL ppvBits AS ANY PTR PTR = NULL) AS HBITMAP
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hdc</em></td>
+<td>A handle to the device context.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The width of the bitmap, in pixels.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The height of the bitmap, in pixels.</td>
+</tr>
+<tr class="even">
+<td><em>bpp</em></td>
+<td>The number of bits-per-pixel. If this parameter is 0, the function will use the value returned by GetDeviceCaps(hDC, BITSPIXEL_).</td>
+</tr>
+<tr class="odd">
+<td><em>ppvBits</em></td>
+<td>Out, optional. A pointer to a variable that receives a pointer to the location of the DIB bit values. Can be NULL.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-38">Return value</h4>
+<p>If the function succeeds, the return value is a handle to the newly created DIB, and <em>ppvBits</em> points to the bitmap bit values.</p>
+<p>If the function fails, the return value is NULL, and <em>ppvBits</em> is NULL. The function can fail if one or more of the input parameters is invalid.</p>
+<p>This function can return the following value: ERROR_INVALID_PARAMETER (One or more of the input parameters is invalid).</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>You must delete the returned bitmap handle with <strong>DeleteObject</strong> when no longer needed to avoid memory leaks.</p>
+<p>You cannot paste a DIB section from one application into another application.</p>
+<p><strong>AfxCreateDIBSection</strong> does not use the <strong>BITMAPINFOHEADER</strong> parameters <em>biXPelsPerMeter</em> or <em>biYPelsPerMeter</em> and will not provide resolution information in the <strong>BITMAPINFO</strong> structure.</p>
+<h4 id="usage-example-3">Usage example</h4>
+<pre><code>DIM hdcWindow AS HDC, hbmp AS HBITMAP, pvBits AS ANY PTR
+hdcWindow = GetWindowDC(hwnd)   ' where hwnd is the handle of the wanted window or control
+hbmp = AfxCreateDIBSection(hdcWindow, 10, 10, @pvBits)
+ReleaseDC(hwnd, hdcWindow)
+</code></pre>
+<h1 id="afxdibloadimage"><a name="AfxDibLoadImage"></a>AfxDibLoadImage</h1>
+<p>Loads a DIB in memory and returns a pointer to it.</p>
+<pre><code>FUNCTION AfxDibLoadImage (BYVAL pwszFileName AS WSTRING PTR) AS BITMAPFILEHEADER PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszFileName</em></td>
+<td>Path of the bitmap file.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-39">Return value</h4>
+<p>A pointer to the bitmap file header. You must release it with <strong>CoTaskMemFree</strong> when no longer needed.</p>
+<h1 id="afxdibsaveimage"><a name="AfxDibSaveImage"></a>AfxDibSaveImage</h1>
+<p>Saves a DIB to a file.</p>
+<pre><code>FUNCTION AfxDibSaveImage (BYVAL pwszFileName AS WSTRING PTR, BYVAL pbmfh AS BITMAPFILEHEADER PTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszFileName</em></td>
+<td>Path of the bitmap file.</td>
+</tr>
+<tr class="even">
+<td><em>pbmfh</em></td>
+<td>Pointer to the bitmap file header.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-40">Return value</h4>
+<p>TRUE if the DIB has been saved successfully; FALSE otherwise.</p>
+<h1 id="afxclearclipboard"><a name="AfxClearClipboard"></a>AfxClearClipboard</h1>
+<p>Clears the contents of the clipboard.</p>
+<pre><code>FUNCTION AfxClearClipboard () AS LONG
+</code></pre>
+<h4 id="return-value-41">Return value</h4>
+<p>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</p>
+<h1 id="afxgetclipboarddata"><a name="AfxGetClipboardData"></a>AfxGetClipboardData</h1>
+<p>Retrieves data from the clipboard in the specified format.</p>
+<pre><code>FUNCTION AfxGetClipboardData (BYVAL cfFormat AS DWORD) AS HGLOBAL
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cfFormat</em></td>
+<td>The clipboard format. This parameter can be a registered format or any of the standard clipboard formats.</td>
+</tr>
+</tbody>
+</table>
+<p>Standard clipboard formats:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant/Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CF_BITMAP</td>
+<td>A handle to a bitmap.</td>
+</tr>
+<tr class="even">
+<td>CF_DIB</td>
+<td>A memory object containing a BITMAPINFO structure followed by the bitmap bits.</td>
+</tr>
+<tr class="odd">
+<td>CF_DIBV5</td>
+<td>A memory object containing a BITMAPV5HEADER structure followed by the bitmap color space information and the bitmap bits.</td>
+</tr>
+<tr class="even">
+<td>CF_DIF</td>
+<td>Software Arts' Data Interchange Format.</td>
+</tr>
+<tr class="odd">
+<td>CF_DSPBITMAP</td>
+<td>Bitmap display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in bitmap format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="even">
+<td>CF_DSPENHMETAFILE</td>
+<td>Enhanced metafile display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in enhanced metafile format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="odd">
+<td>CF_DSPMETAFILEPICT</td>
+<td>Metafile-picture display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in metafile-picture format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="even">
+<td>CF_DSPTEXT</td>
+<td>Text display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in text format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="odd">
+<td>CF_ENHMETAFILE</td>
+<td>A handle to an enhanced metafile.</td>
+</tr>
+<tr class="even">
+<td>CF_GDIOBJFIRST</td>
+<td>Start of a range of integer values for application-defined GDI object clipboard formats. The end of the range is CF_GDIOBJLAST. Handles associated with clipboard formats in this range are not automatically deleted using the <strong>GlobalFree</strong> function when the clipboard is emptied. Also, when using values in this range, the hMem parameter is not a handle to a GDI object, but is a handle allocated by the <strong>GlobalAlloc</strong> function with the GMEM_MOVEABLE flag.</td>
+</tr>
+<tr class="odd">
+<td>CF_GDIOBJLAST</td>
+<td>See CF_GDIOBJFIRST.</td>
+</tr>
+<tr class="even">
+<td>CF_HDROP</td>
+<td>A handle that identifies a list of files. An application can retrieve information about the files by passing the handle to the <strong>DragQueryFile</strong> function.</td>
+</tr>
+<tr class="odd">
+<td>CF_LOCALE</td>
+<td>The data is a handle to the locale identifier associated with text in the clipboard. When you close the clipboard, if it contains CF_TEXT data but no CF_LOCALE data, the system automatically sets the CF_LOCALE format to the current input language. You can use the CF_LOCALE format to associate a different locale with the clipboard text.<br>An application that pastes text from the clipboard can retrieve this format to determine which character set was used to generate the text.<br>Note that the clipboard does not support plain text in multiple character sets. To achieve this, use a formatted text data type such as RTF instead.<br>The system uses the code page associated with CF_LOCALE to implicitly convert from CF_TEXT to CF_UNICODETEXT. Therefore, the correct code page table is used for the conversion.</td>
+</tr>
+<tr class="even">
+<td>CF_METAFILEPICT</td>
+<td>Handle to a metafile picture format as defined by the <strong>METAFILEPICT</strong> structure. When passing a CF_METAFILEPICT handle by means of DDE, the application responsible for deleting hMem should also free the metafile referred to by the CF_METAFILEPICT handle.</td>
+</tr>
+<tr class="odd">
+<td>CF_OEMTEXT</td>
+<td>Text format containing characters in the OEM character set. Each line ends with a carriage return/linefeed (CR-LF) combination. A null character signals the end of the data.</td>
+</tr>
+<tr class="even">
+<td>CF_OWNERDISPLAY</td>
+<td>Owner-display format. The clipboard owner must display and update the clipboard viewer window, and receive the WM_ASKCBFORMATNAME, WM_HSCROLLCLIPBOARD, WM_PAINTCLIPBOARD, WM_SIZECLIPBOARD, and WM_VSCROLLCLIPBOARD messages. The <em>hMem</em> parameter must be NULL.</td>
+</tr>
+<tr class="odd">
+<td>CF_PALETTE</td>
+<td>Handle to a color palette. Whenever an application places data in the clipboard that depends on or assumes a color palette, it should place the palette on the clipboard as well.<br>If the clipboard contains data in the CF_PALETTE (logical color palette) format, the application should use the** SelectPalette** and <strong>RealizePalette</strong> functions to realize (compare) any other data in the clipboard against that logical palette.<br>When displaying clipboard data, the clipboard always uses as its current palette any object on the clipboard that is in the CF_PALETTE format.</td>
+</tr>
+<tr class="even">
+<td>CF_PENDATA</td>
+<td>Data for the pen extensions to the Microsoft Windows for Pen Computing.</td>
+</tr>
+<tr class="odd">
+<td>CF_PRIVATEFIRST</td>
+<td>Start of a range of integer values for private clipboard formats. The range ends with CF_PRIVATELAST. Handles associated with private clipboard formats are not freed automatically; the clipboard owner must free such handles, typically in response to the WM_DESTROYCLIPBOARD message.</td>
+</tr>
+<tr class="even">
+<td>CF_PRIVATELAST</td>
+<td>See CF_PRIVATEFIRST.</td>
+</tr>
+<tr class="odd">
+<td>CF_RIFF</td>
+<td>Represents audio data more complex than can be represented in a CF_WAVE standard wave format.</td>
+</tr>
+<tr class="even">
+<td>CF_SYLK</td>
+<td>Microsoft Symbolic Link (SYLK) format.</td>
+</tr>
+<tr class="odd">
+<td>CF_TEXT</td>
+<td>Text format. Each line ends with a carriage return/linefeed (CR-LF) combination. A null character signals the end of the data. Use this format for ANSI text.</td>
+</tr>
+<tr class="even">
+<td>CF_TIFF</td>
+<td>Tagged-image file format.</td>
+</tr>
+<tr class="odd">
+<td>CF_UNICODETEXT</td>
+<td>Unicode text format. Each line ends with a carriage return/linefeed (CR-LF) combination. A null character signals the end of the data.</td>
+</tr>
+<tr class="even">
+<td>CF_WAVE</td>
+<td>Represents audio data in one of the standard wave formats, such as 11 kHz or 22 kHz PCM.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-42">Return value</h4>
+<p>If the function succeeds, the return value is the handle to the data. If the function fails, the return value is NULL.</p>
+<h1 id="afxgetclipboardtext"><a name="AfxGetClipboardText"></a>AfxGetClipboardText</h1>
+<p>Returns a text string from the clipboard.</p>
+<pre><code>FUNCTION AfxGetClipboardText () AS CWSTR
+</code></pre>
+<h4 id="return-value-43">Return value</h4>
+<p>The retrieved text string.</p>
+<h1 id="afxsetclipboarddata"><a name="AfxSetClipboardData"></a>AfxSetClipboardData</h1>
+<p>Places data on the clipboard in a specified clipboard format.</p>
+<pre><code>FUNCTION AfxSetClipboardData (BYVAL cfFormat AS DWORD, BYVAL hData AS HANDLE) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cfFormat</em></td>
+<td>The clipboard format. This parameter can be a registered format or any of the standard clipboard formats.</td>
+</tr>
+<tr class="even">
+<td><em>hData</em></td>
+<td>Handle to the data in the specified format.</td>
+</tr>
+</tbody>
+</table>
+<p>Standard clipboard formats:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant/Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CF_BITMAP</td>
+<td>A handle to a bitmap.</td>
+</tr>
+<tr class="even">
+<td>CF_DIB</td>
+<td>A memory object containing a BITMAPINFO structure followed by the bitmap bits.</td>
+</tr>
+<tr class="odd">
+<td>CF_DIBV5</td>
+<td>A memory object containing a BITMAPV5HEADER structure followed by the bitmap color space information and the bitmap bits.</td>
+</tr>
+<tr class="even">
+<td>CF_DIF</td>
+<td>Software Arts' Data Interchange Format.</td>
+</tr>
+<tr class="odd">
+<td>CF_DSPBITMAP</td>
+<td>Bitmap display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in bitmap format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="even">
+<td>CF_DSPENHMETAFILE</td>
+<td>Enhanced metafile display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in enhanced metafile format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="odd">
+<td>CF_DSPMETAFILEPICT</td>
+<td>Metafile-picture display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in metafile-picture format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="even">
+<td>CF_DSPTEXT</td>
+<td>Text display format associated with a private format. The <em>hMem</em> parameter must be a handle to data that can be displayed in text format in lieu of the privately formatted data.</td>
+</tr>
+<tr class="odd">
+<td>CF_ENHMETAFILE</td>
+<td>A handle to an enhanced metafile.</td>
+</tr>
+<tr class="even">
+<td>CF_GDIOBJFIRST</td>
+<td>Start of a range of integer values for application-defined GDI object clipboard formats. The end of the range is CF_GDIOBJLAST. Handles associated with clipboard formats in this range are not automatically deleted using the <strong>GlobalFree</strong> function when the clipboard is emptied. Also, when using values in this range, the hMem parameter is not a handle to a GDI object, but is a handle allocated by the <strong>GlobalAlloc</strong> function with the GMEM_MOVEABLE flag.</td>
+</tr>
+<tr class="odd">
+<td>CF_GDIOBJLAST</td>
+<td>See CF_GDIOBJFIRST.</td>
+</tr>
+<tr class="even">
+<td>CF_HDROP</td>
+<td>A handle that identifies a list of files. An application can retrieve information about the files by passing the handle to the <strong>DragQueryFile</strong> function.</td>
+</tr>
+<tr class="odd">
+<td>CF_LOCALE</td>
+<td>The data is a handle to the locale identifier associated with text in the clipboard. When you close the clipboard, if it contains CF_TEXT data but no CF_LOCALE data, the system automatically sets the CF_LOCALE format to the current input language. You can use the CF_LOCALE format to associate a different locale with the clipboard text.<br>An application that pastes text from the clipboard can retrieve this format to determine which character set was used to generate the text.<br>Note that the clipboard does not support plain text in multiple character sets. To achieve this, use a formatted text data type such as RTF instead.<br>The system uses the code page associated with CF_LOCALE to implicitly convert from CF_TEXT to CF_UNICODETEXT. Therefore, the correct code page table is used for the conversion.</td>
+</tr>
+<tr class="even">
+<td>CF_METAFILEPICT</td>
+<td>Handle to a metafile picture format as defined by the <strong>METAFILEPICT</strong> structure. When passing a CF_METAFILEPICT handle by means of DDE, the application responsible for deleting hMem should also free the metafile referred to by the CF_METAFILEPICT handle.</td>
+</tr>
+<tr class="odd">
+<td>CF_OEMTEXT</td>
+<td>Text format containing characters in the OEM character set. Each line ends with a carriage return/linefeed (CR-LF) combination. A null character signals the end of the data.</td>
+</tr>
+<tr class="even">
+<td>CF_OWNERDISPLAY</td>
+<td>Owner-display format. The clipboard owner must display and update the clipboard viewer window, and receive the WM_ASKCBFORMATNAME, WM_HSCROLLCLIPBOARD, WM_PAINTCLIPBOARD, WM_SIZECLIPBOARD, and WM_VSCROLLCLIPBOARD messages. The <em>hMem</em> parameter must be NULL.</td>
+</tr>
+<tr class="odd">
+<td>CF_PALETTE</td>
+<td>Handle to a color palette. Whenever an application places data in the clipboard that depends on or assumes a color palette, it should place the palette on the clipboard as well.<br>If the clipboard contains data in the CF_PALETTE (logical color palette) format, the application should use the** SelectPalette** and <strong>RealizePalette</strong> functions to realize (compare) any other data in the clipboard against that logical palette.<br>When displaying clipboard data, the clipboard always uses as its current palette any object on the clipboard that is in the CF_PALETTE format.</td>
+</tr>
+<tr class="even">
+<td>CF_PENDATA</td>
+<td>Data for the pen extensions to the Microsoft Windows for Pen Computing.</td>
+</tr>
+<tr class="odd">
+<td>CF_PRIVATEFIRST</td>
+<td>Start of a range of integer values for private clipboard formats. The range ends with CF_PRIVATELAST. Handles associated with private clipboard formats are not freed automatically; the clipboard owner must free such handles, typically in response to the WM_DESTROYCLIPBOARD message.</td>
+</tr>
+<tr class="even">
+<td>CF_PRIVATELAST</td>
+<td>See CF_PRIVATEFIRST.</td>
+</tr>
+<tr class="odd">
+<td>CF_RIFF</td>
+<td>Represents audio data more complex than can be represented in a CF_WAVE standard wave format.</td>
+</tr>
+<tr class="even">
+<td>CF_SYLK</td>
+<td>Microsoft Symbolic Link (SYLK) format.</td>
+</tr>
+<tr class="odd">
+<td>CF_TEXT</td>
+<td>Text format. Each line ends with a carriage return/linefeed (CR-LF) combination. A null character signals the end of the data. Use this format for ANSI text.</td>
+</tr>
+<tr class="even">
+<td>CF_TIFF</td>
+<td>Tagged-image file format.</td>
+</tr>
+<tr class="odd">
+<td>CF_UNICODETEXT</td>
+<td>Unicode text format. Each line ends with a carriage return/linefeed (CR-LF) combination. A null character signals the end of the data.</td>
+</tr>
+<tr class="even">
+<td>CF_WAVE</td>
+<td>Represents audio data in one of the standard wave formats, such as 11 kHz or 22 kHz PCM.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-44">Return value</h4>
+<p>If the function succeeds, the return value is the handle to the data. If the function fails, the return value is NULL.</p>
+<h4 id="remarks-6">Remarks</h4>
+<p>If <strong>AfxSetClipboardData</strong> succeeds, the system owns the object identified by the <em>hData</em> parameter. The application may not write to or free the data once ownership has been transferred to the system.</p>
+<h1 id="afxsetclipboardtext"><a name="AfxSetClipboardText"></a>AfxSetClipboardText</h1>
+<p>Places a text string into the clipboard.</p>
+<pre><code>FUNCTION AfxSetClipboardText (BYREF wszText AS WSTRING) AS HANDLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszText</em></td>
+<td>The text to be placed in the clipboard.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-45">Return value</h4>
+<p>If the function succeeds, the return value is the handle to the data. If the function fails, the return value is NULL.</p>
+<h1 id="afxcreatefont"><a name="AfxCreateFont"></a>AfxCreateFont</h1>
+<p>Creates a logical font.</p>
+<pre><code>FUNCTION AfxCreateFont (BYREF wszFaceName AS WSTRING, BYVAL lPointSize AS LONG, BYVAL DPI AS LONG = 96, _
+   BYVAL lWeight AS LONG = 0, BYVAL bItalic AS UBYTE = FALSE, BYVAL bUnderline AS UBYTE = FALSE, _
+   BYVAL bStrikeOut AS UBYTE = FALSE, BYVAL bCharSet AS UBYTE = DEFAULT_CHARSET) AS HFONT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszFaceName</em></td>
+<td>The typeface name.</td>
+</tr>
+<tr class="even">
+<td><em>lPointSize</em></td>
+<td>The point size.</td>
+</tr>
+<tr class="odd">
+<td><em>DPI</em></td>
+<td>Dots per inch to calculate scaling. Default value = 96 (no scaling). If you pass -1 and the application is DPI aware, the DPI value used by the operating system will be used.</td>
+</tr>
+<tr class="even">
+<td><em>lWeight</em></td>
+<td>Initial weight of the font. If the weight is below 550 (the average of FW_NORMAL, 400, and FW_BOLD, 700), then the Bold property is also initialized to FALSE. If the weight is above 550, the Bold property is set to TRUE.<br>The following values are defined for convenience: FW_DONTCARE (0), FW_THIN (100), FW_EXTRALIGHT (200), FW_ULTRALIGHT (200), FW_LIGHT (300), FW_NORMAL (400), FW_REGULAR (400), FW_MEDIUM (500), FW_SEMIBOLD (600), FW_DEMIBOLD (600), FW_BOLD (700), FW_EXTRABOLD (800), FW_ULTRABOLD (800), FW_HEAVY (900), FW_BLACK (900)</td>
+</tr>
+<tr class="odd">
+<td><em>bItalic</em></td>
+<td>Italic flag. CTRUE or FALSE.</td>
+</tr>
+<tr class="even">
+<td><em>bUnderline</em></td>
+<td>Underline flag. CTRUE or FALSE.</td>
+</tr>
+<tr class="odd">
+<td><em>bStrikeOut</em></td>
+<td>StrikeOut flag. CTRUE or FALSE</td>
+</tr>
+<tr class="even">
+<td><em>bCharSet</em></td>
+<td>Specifies the character set. The following values are predefined:<br>ANSI_CHARSET, BALTIC_CHARSET, CHINESEBIG5_CHARSET, DEFAULT_CHARSET, EASTEUROPE_CHARSET, GB2312_CHARSET, GREEK_CHARSET, HANGUL_CHARSET, MAC_CHARSET, OEM_CHARSET, RUSSIAN_CHARSET, SHIFTJIS_CHARSET, SYMBOL_CHARSET, TURKISH_CHARSET.<br>Korean Windows: JOHAB_CHARSET.<br>Middle-Eastern Windows: HEBREW_CHARSET, ARABIC_CHARSET.<br>Thai Windows: THAI_CHARSET.<br>The OEM_CHARSET value specifies a character set that is operating-system dependent. DEFAULT_CHARSET is set to a value based on the current system locale. For example, when the system locale is English (United States), it is set as ANSI_CHARSET. Fonts with other character sets may exist in the operating system. If an application uses a font with an unknown character set, it should not attempt to translate or interpret strings that are rendered with that font. This parameter is important in the font mapping process. To ensure consistent results, specify a specific character set. If you specify a typeface name in the <em>wszFaceName</em> parameter, make sure that the <em>bCharSet</em> value matches the character set of the typeface specified in <em>wszFaceName</em>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-46">Return value</h4>
+<p>The handle of the font or NULL on failure.</p>
+<h4 id="remarks-7">Remarks</h4>
+<p>The returned font must be destroyed with <strong>DeleteObject</strong> or the macro <strong>DeleteFont</strong> when no longer needed to prevent memory leaks.</p>
+<h4 id="usage-examples-1">Usage examples</h4>
+<pre><code>hFont = AfxCreateFont(&quot;MS Sans Serif&quot;, 8, , FW_NORMAL, , , , DEFAULT_CHARSET)
+hFont = AfxCreateFont(&quot;Courier New&quot;, 10, 96 , FW_BOLD, , , , DEFAULT_CHARSET)
+hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSET)
+</code></pre>
+<h1 id="afxgetfontheight"><a name="AfxGetFontHeight"></a>AfxGetFontHeight</h1>
+<p>Returns the logical height of a font given its point size.</p>
+<pre><code>FUNCTION AfxGetFontHeight (BYVAL nPointSize AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPointSize</em></td>
+<td>The point size of the font.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetfontpointsize"><a name="AfxGetFontPointSize"></a>AfxGetFontPointSize</h1>
+<p>Returns the point size of a font given its logical height.</p>
+<pre><code>FUNCTION AfxGetFontPointSize (BYVAL nHeight AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The logical height of the font.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowfont"><a name="AfxGetWindowFont"></a>AfxGetWindowFont</h1>
+<p>Retrieves the font with which the control is currently drawing its text.</p>
+<pre><code>FUNCTION AfxGetWindowFont (BYVAL hwnd AS HWND) AS HFONT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>A handle to a window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowsfontinfo"><a name="AfxGetWindowsFontInfo"></a>AfxGetWindowsFontInfo</h1>
+<p>Retrieves information about the fonts used by Windows.</p>
+<pre><code>FUNCTION AfxGetWindowsFontInfo (BYVAL nType AS LONG, BYVAL plfw AS LOGFONTW PTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nType</em></td>
+<td>The type of the font: AFX_FONT_CAPTION, AFX_FONT_SMALLCAPTION, AFX_FONT_MENU, AFX_FONT_STATUS, AFX_FONT_MESSAGE.</td>
+</tr>
+<tr class="even">
+<td><em>plfw</em></td>
+<td>Pointer to a LOGFONTW structure that receives the font information.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-47">Return value</h4>
+<p>TRUE on succes or FALSE on failure. To get extended error information, call <strong>GetLastError</strong>.</p>
+<h1 id="afxgetwindowsfontpointsize"><a name="AfxGetWindowsFontPointSize"></a>AfxGetWindowsFontPointSize</h1>
+<p>Retrieves the point size of the fonts used by Windows.</p>
+<pre><code>FUNCTION AfxGetWindowsFontPointSize (BYVAL nType AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nType</em></td>
+<td>The type of the font: AFX_FONT_CAPTION, AFX_FONT_SMALLCAPTION, AFX_FONT_MENU, AFX_FONT_STATUS, AFX_FONT_MESSAGE.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxmodifyfontfacename"><a name="AfxModifyFontFaceName"></a>AfxModifyFontFaceName</h1>
+<p>Modifies the face name of the font of a window or control.</p>
+<pre><code>FUNCTION AfxModifyFontFaceName (BYVAL hwnd AS HWND, BYREF wszNewFaceName AS WSTRING) AS HFONT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window or control.</td>
+</tr>
+<tr class="even">
+<td><em>wszNewFaceName</em></td>
+<td>The new face name of the font.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-48">Return value</h4>
+<p>The handle of the new font on success, or NULL on failure.</p>
+<p>To get extended error information call <strong>GetLastError</strong>.</p>
+<h4 id="remarks-8">Remarks</h4>
+<p>The returned font must be destroyed with <strong>DeleteObject</strong> or the macro <strong>DeleteFont</strong> when no longer needed to prevent memory leaks.</p>
+<h1 id="afxmodifyfontheight"><a name="AfxModifyFontHeight"></a>AfxModifyFontHeight</h1>
+<p>Modifies the height of the font used by a window of control.</p>
+<pre><code>FUNCTION AfxModifyFontHeight (BYVAL hwnd AS HWND, BYVAL nValue AS LONG) AS HFONT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window or control.</td>
+</tr>
+<tr class="even">
+<td><em>nValue</em></td>
+<td>The base is 100. To increase the font a 20% pass 120; to reduce it a 20% pass 80%.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-49">Return value</h4>
+<p>The handle of the new font on success, or NULL on failure.</p>
+<p>To get extended error information call <strong>GetLastError</strong>.</p>
+<h4 id="remarks-9">Remarks</h4>
+<p>The returned font must be destroyed with <strong>DeleteObject</strong> or the macro <strong>DeleteFont</strong> when no longer needed to prevent memory leaks.</p>
+<h1 id="afxmodifyfontsettings"><a name="AfxModifyFontSettings"></a>AfxModifyFontSettings</h1>
+<p>Modifies settings of the font used by a window of control.</p>
+<pre><code>FUNCTION AfxModifyFontSettings (BYVAL hwnd AS HWND, BYVAL nSetting AS LONG, BYVAL nValue AS LONG) AS HFONT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window or control.</td>
+</tr>
+<tr class="even">
+<td><em>nSetting</em></td>
+<td>One of the AFX_FONT_xxx constants (see below).</td>
+</tr>
+<tr class="odd">
+<td><em>nValue</em></td>
+<td>Depends of the nSetting value. <strong>AFX_FONT_HEIGHT</strong> : The base is 100. To increase the font a 20% pass 120; to reduce it a 20% pass 80%.<br><strong>AFX_FONT_WEIGHT</strong> : The weight of the font in the range 0 through 1000. For example, 400 is normal and 700 is bold. If this value is zero, a default weight is used. The following values are defined for convenience. FW_DONTCARE (0), FW_THIN (100), FW_EXTRALIGHT (200), FW_ULTRALIGHT (200), FW_LIGHT (300), FW_NORMAL (400), FW_REGULAR (400), FW_MEDIUM (500), FW_SEMIBOLD (600), FW_DEMIBOLD (600), FW_BOLD (700), FW_EXTRABOLD (800), FW_ULTRABOLD (800), FW_HEAVY (900), FW_BLACK (900)<br><strong>AFX_FONT_ITALIC</strong> : TRUE or FALSE.<br><strong>AFX_FONT_UNDERLINE</strong> : TRUE or FALSE.<br><strong>AFX_FONT_STRIKEOUT</strong> : TRUE or FALSE.<br><strong>AFX_FONT_CHARSET</strong>: The following values are predefined: ANSI_CHARSET, BALTIC_CHARSET, CHINESEBIG5_CHARSET, DEFAULT_CHARSET, EASTEUROPE_CHARSET, GB2312_CHARSET, GREEK_CHARSET, HANGUL_CHARSET, MAC_CHARSET, OEM_CHARSET, RUSSIAN_CHARSET, SHIFTJIS_CHARSET, SYMBOL_CHARSET, TURKISH_CHARSET, VIETNAMESE_CHARSET, JOHAB_CHARSET (Korean language edition of Windows), ARABIC_CHARSET and HEBREW_CHARSET (Middle East language edition of Windows), THAI_CHARSET (Thai language edition of Windows). The OEM_CHARSET value specifies a character set that is operating-system dependent. DEFAULT_CHARSET is set to a value based on the current system locale. For example, when the system locale is English (United States), it is set as ANSI_CHARSET.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-50">Return value</h4>
+<p>The handle of the new font on success, or NULL on failure.</p>
+<p>To get extended error information call <strong>GetLastError</strong>.</p>
+<h4 id="remarks-10">Remarks</h4>
+<p>The returned font must be destroyed with <strong>DeleteObject</strong> or the macro <strong>DeleteFont</strong> when no longer needed to prevent memory leaks.</p>
+<h1 id="afxsetwindowfont"><a name="AfxSetWindowFont"></a>AfxSetWindowFont</h1>
+<p>Sets the font that a control is to use when drawing text.</p>
+<pre><code>SUB AfxSetWindowFont (BYVAL hwnd AS HWND, BYVAL hFont AS HFONT, BYVAL fRedraw AS LONG = CTRUE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window or control.</td>
+</tr>
+<tr class="even">
+<td><em>hFont</em></td>
+<td>A handle to the font. If this parameter is NULL, the control uses the default system font to draw text.</td>
+</tr>
+<tr class="odd">
+<td><em>fRedraw</em></td>
+<td>Optional. Specifies whether the control should be redrawn immediately upon setting the font. If this parameter is CTRUE, the control redraws itself.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-51">Return value</h4>
+<p>The handle of the new font on success, or NULL on failure.</p>
+<p>To get extended error information call <strong>GetLastError</strong>.</p>
+<h4 id="remarks-11">Remarks</h4>
+<p>The application should call the <strong>DeleteObject</strong> function to delete the font when it is no longer needed; for example, after it destroys the control.</p>
+<p>The size of the control does not change as a result of receiving this message. To avoid clipping text that does not fit within the boundaries of the control, the application should correct the size of the control window before it sets the font.</p>
+<h1 id="afxforcevisibledisplay"><a name="AfxForceVisibleDisplay"></a>AfxForceVisibleDisplay</h1>
+<p>If you use dual (or even triple/quad) displays then you have undoubtedly encountered the following situation: You change the physical order of your displays, or otherwise reconfigure the logical ordering using your display software. This sometimes has the side-effect of changing your desktop coordinates from zero-based to negative starting coordinates (i.e. the top-left coordinate of your desktop changes from 0,0 to -1024,-768).</p>
+<p>This effects many Windows programs which restore their last on-screen position whenever they are started. Should the user reorder their display configuration this can sometimes result in a Windows program subsequently starting in an off-screen position (i.e. at a location that used to be visible) - and is now effectively invisible, preventing the user from closing it down or otherwise moving it back on-screen.</p>
+<p>The <strong>AfxForceVisibleDisplay</strong> function can be called at program start-time right after the main window has been created and positioned 'on-screen'. Should the window be positioned in an off-screen position, it is forced back onto the nearest display to its last position. The user will be unaware this is happening and won't even realize to thank you for keeping their user-interface visible, even though they changed their display settings.</p>
+<p>Source: Catch-22 web site.</p>
+<pre><code>SUB AfxForceVisibleDisplay (BYVAL hwnd AS HWND)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetdisplaybitsperpixel"><a name="AfxGetDisplayBitsPerPixel"></a>AfxGetDisplayBitsPerPixel</h1>
+<p>Returns the color resolution, in bits per pixel, of the display device.</p>
+<pre><code>FUNCTION AfxGetDisplayBitsPerPixel () AS DWORD
+</code></pre>
+<h1 id="afxgetdisplayfrequency"><a name="AfxGetDisplayFrequency"></a>AfxGetDisplayFrequency</h1>
+<p>Returns the frequency, in hertz (cycles per second), of the display device in a particular mode. This value is also known as the display device's vertical refresh rate.</p>
+<pre><code>FUNCTION AfxGetDisplayBitsPerPixel () AS DWORD
+</code></pre>
+<h1 id="afxgetdisplaypixelsheight"><a name="AfxGetDisplayPixelsHeight"></a>AfxGetDisplayPixelsHeight</h1>
+<p>Returns the height, in pixels, of the current display device on the computer on which the calling thread is running.</p>
+<pre><code>FUNCTION AfxGetDisplayPixelsHeight () AS DWORD
+</code></pre>
+<h1 id="afxgetdisplaypixelswidth"><a name="AfxGetDisplayPixelsWidth"></a>AfxGetDisplayPixelsWidth</h1>
+<p>Returns the width, in pixels, of the current display device on the computer on which the calling thread is running.</p>
+<pre><code>FUNCTION AfxGetDisplayPixelsWidth () AS DWORD
+</code></pre>
+<h4 id="remarks-12">Remarks</h4>
+<p>Contrarily to <strong>GetSystemMetrics</strong> or <strong>GetDeviceCaps</strong>, it returns the real width even when it is called from an application that is not DPI aware, e.g. an application running virtualized in a monitor 1920 pixels width and a DPI of 192, will return 960 pixels if it calls <strong>GetSystemMetrics</strong> or <strong>GetDeviceCaps</strong>, but will return 1920 pixels calling <strong>AfxGetDisplayPixelsWidth</strong>.</p>
+<h1 id="afxlogpixelsx-/-afxgetdpi-/-afxgetdpix"><a name="AfxLogPixelsX"></a>AfxLogPixelsX / AfxGetDpi / AfxGetDpiX</h1>
+<p>Retrieves the number of pixels per logical inch along the screen width. In a system with multiple display monitors, this value is the same for all monitors.</p>
+<pre><code>FUNCTION AfxLogPixelsX () AS LONG
+FUNCTION AfxGetDpi () AS LONG
+FUNCTION AfxGetDpiX () AS LONG
+</code></pre>
+<h1 id="afxlogpixelsx-/-afxgetdpiy"><a name="AfxLogPixelsY"></a>AfxLogPixelsX / AfxGetDpiY</h1>
+<p>Retrieves the number of pixels per logical inch along the screen height. In a system with multiple display monitors, this value is the same for all monitors.</p>
+<pre><code>FUNCTION AfxLogPixelsY () AS LONG
+FUNCTION AfxGetDpiY () AS LONG
+</code></pre>
+<h1 id="afxgetmonitorhorizontalscaling"><a name="AfxGetMonitorHorizontalScaling"></a>AfxGetMonitorHorizontalScaling</h1>
+<p>Returns the horizontal scaling of the monitor that the window is currently displayed on.</p>
+<pre><code>FUNCTION AfxGetMonitorHorizontalScaling (BYVAL hwnd AS HWND = NULL) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Optional. A handle to the window. If NULL, the desktop window handle will be used.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-13">Remarks</h4>
+<p>If the application to which the window belongs is not DPI aware, a computer using 192 DPI, will return an scaling ratio of 2.</p>
+<h1 id="afxgetmonitorverticalscaling"><a name="AfxGetMonitorVerticalScaling"></a>AfxGetMonitorVerticalScaling</h1>
+<p>Returns the vertical scaling of the monitor that the window is currently displayed on.</p>
+<pre><code>FUNCTION AfxGetMonitorVerticalScaling (BYVAL hwnd AS HWND = NULL) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Optional. A handle to the window. If NULL, the desktop window handle will be used.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-14">Remarks</h4>
+<p>If the application to which the window belongs is not DPI aware, a computer using 192 DPI, will return an scaling ratio of 2.</p>
+<h1 id="afxgetmonitorlogicalheight"><a name="AfxGetMonitorLogicalHeight"></a>AfxGetMonitorLogicalHeight</h1>
+<p>Returns the logical height of the monitor that the window is currently displayed on.</p>
+<pre><code>FUNCTION AfxGetMonitorLogicalHeight (BYVAL hwnd AS HWND = NULL) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Optional. A handle to the window. If NULL, the desktop window handle will be used.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-15">Remarks</h4>
+<p>If the application to which the window belongs is not DPI aware, a monitor with an height resolution of 1080 pixels in a computer using 192 DPI, will return 540 pixels.</p>
+<h1 id="afxgetmonitorlogicalwidth"><a name="AfxGetMonitorLogicalWidth"></a>AfxGetMonitorLogicalWidth</h1>
+<p>Returns the logical width of the monitor that the window is currently displayed on.</p>
+<pre><code>FUNCTION AfxGetMonitorLogicalWidth (BYVAL hwnd AS HWND = NULL) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Optional. A handle to the window. If NULL, the desktop window handle will be used.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-16">Remarks</h4>
+<p>If the application to which the window belongs is not DPI aware, a monitor with a width resolution of 1920 pixels in a computer using 192 DPI, will return 960 pixels.</p>
+<h1 id="afxisdpiresolutionatleast"><a name="AfxIsDPIResolutionAtLeast"></a>AfxIsDPIResolutionAtLeast</h1>
+<p>Determines if screen resolution meets minimum requirements in relative pixels, e.g. for a screen resolution of 1920x1080 pixels and a DPI of 192 (scaling ratio = 2), the maximum relative pixels for a DPI aware application is 960x540.</p>
+<pre><code>FUNCTION AfxIsDPIResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cxMin</em></td>
+<td>Minimum screen resolution width in relative pixels.</td>
+</tr>
+<tr class="even">
+<td><em>cyMin</em></td>
+<td>Minimum screen resolution height in relative pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-52">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="afxisresolutionatleast"><a name="AfxIsResolutionAtLeast"></a>AfxIsResolutionAtLeast</h1>
+<p>Determines if screen resolution meets minimum requirements.</p>
+<pre><code>FUNCTION AfxIsResolutionAtLeast (BYVAL cxMin AS LONG, BYVAL cyMin AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cxMin</em></td>
+<td>Minimum screen resolution width in relative pixels.</td>
+</tr>
+<tr class="even">
+<td><em>cyMin</em></td>
+<td>Minimum screen resolution height in relative pixels.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-53">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="afxsetprocessdpiaware"><a name="AfxSetProcessDPIAware"></a>AfxSetProcessDPIAware</h1>
+<p>Sets the current process as dots per inch (dpi) aware.</p>
+<p>Note: <strong>AfxSetProcessDPIAware</strong> is subject to a possible race condition if a DLL caches dpi settings during initialization. For this reason, it is recommended that dpi-aware be set through the application (.exe) manifest rather than by calling <strong>AfxSetProcessDPIAware</strong>.</p>
+<pre><code>FUNCTION AfxSetProcessDPIAware () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-54">Return value</h4>
+<p>If the function succeeds, the return value is TRUE. Otherwise, the return value is FALSE.</p>
+<h4 id="remarks-17">Remarks</h4>
+<p>DLLs should accept the dpi setting of the host process rather than call <strong>AfxSetProcessDPIAware</strong> themselves. To be set properly, <em>dpiAware</em> should be specified as part of the application (.exe) manifest. (<em>dpiAware</em> defined in an embedded DLL manifest has no affect.) The following markup shows how to set <em>dpiAware</em> as part of an application (.exe) manifest.</p>
+<pre><code>&lt;assembly xmlns=&quot;urn:schemas-microsoft-com:asm.v1&quot; manifestVersion=&quot;1.0&quot; xmlns:asmv3=&quot;urn:schemas-microsoft-com:asm.v3&quot; &gt;
+ ...
+  &lt;asmv3:application&gt;
+    &lt;asmv3:windowsSettings xmlns=&quot;http://schemas.microsoft.com/SMI/2005/WindowsSettings&quot;&gt;
+      &lt;dpiAware&gt;true&lt;/dpiAware&gt;
+    &lt;/asmv3:windowsSettings&gt;
+  &lt;/asmv3:application&gt;
+ ...
+&lt;/assembly&gt;
+</code></pre>
+<h1 id="afxisprocessdpiaware"><a name="AfxIsProcessDPIAware"></a>AfxIsProcessDPIAware</h1>
+<p>Determines whether the current process is dots per inch (dpi) aware such that it adjusts the sizes of UI elements to compensate for the dpi setting.</p>
+<pre><code>FUNCTION AfxIsProcessDPIAware () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-55">Return value</h4>
+<p>TRUE if the process is dpi aware; otherwise, FALSE.</p>
+<h1 id="afxloadiconmetric"><a name="AfxLoadIconMetric"></a>AfxLoadIconMetric</h1>
+<p>Loads a specified icon resource with a client-specified system metric.</p>
+<pre><code>FUNCTION AfxLoadIconMetric (BYVAL hinst AS HINSTANCE, BYVAL pwszName AS WSTRING PTR, _
+   BYVAL lims AS LONG, BYVAL phico AS HICON PTR) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hinst</em></td>
+<td>A handle to the module of either a DLL or executable (.exe) file that contains the icon to be loaded. For more information, see <strong>GetModuleHandle</strong>. To load a predefined icon or a standalone icon file, set this parameter to NULL.</td>
+</tr>
+<tr class="even">
+<td><em>pwszName</em></td>
+<td>A pointer to a null-terminated, Unicode buffer that contains location information about the icon to load. It is interpreted as follows: If <em>hinst</em> is NULL, <em>pwszName</em> can specify one of two things.<br>1) The identifier of a predefined icon to load. These identifiers are recognized: IDI_APPLICATION, IDI_INFORMATION, IDI_ERROR, IDI_WARNING, IDI_SHIELD, IDI_QUESTION.<br>To pass these constants to the <strong>AfxLoadIconMetric</strong> function, use the MAKEINTRESOURCE macro. For example, to load the IDI_ERROR icon, pass MAKEINTRESOURCE(IDI_ERROR) as the <em>pwszName</em> parameter and NULL as the <em>hinst</em> parameter.<br>2) The name of a standalone icon (.ico) file.<br>If hinst is non-null, <em>pwszName</em> can specify one of two things.<br>1) The name of the icon resource, if the icon resource is to be loaded by name from the module.<br>2) The icon ordinal, if the icon resource is to be loaded by ordinal from the module. This ordinal must be packaged by using the MAKEINTRESOURCE macro.</td>
+</tr>
+<tr class="odd">
+<td><em>lims</em></td>
+<td>The desired metric. One of the following values:<br><strong>LIM_SMALL</strong> : Corresponds to SM_CXSMICON, the recommended pixel width of a small icon.<br><strong>LIM_LARGE</strong> : Corresponds to SM_CXICON, the default pixel width of an icon.</td>
+</tr>
+<tr class="even">
+<td><em>phico</em></td>
+<td>When this function returns, contains a pointer to the handle of the loaded icon.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-56">Return value</h4>
+<p>Returns S_OK if successful, otherwise an error, including the following value: <em>E_INVALIDARG</em> : The contents of the buffer pointed to by pszName do not fit any of the expected interpretations.</p>
+<h4 id="remarks-18">Remarks</h4>
+<p><strong>LoadIconMetric</strong> is similar to <strong>LoadIcon</strong>, but with the capability to specify the icon metric. It is used in place of <strong>LoadIcon</strong> when the calling application wants to ensure a high quality icon. This is particularly useful in high dots per inch (dpi) situations.</p>
+<p>Icons are extracted or created as follows.</p>
+<ol>
+<li>If an exact size match is found in the resource, that icon is used.<br></li>
+<li>If an exact size match cannot be found and a larger icon is available, a new icon is created by scaling the larger version down to the desired size.<br></li>
+<li>If an exact size match cannot be found and no larger icon is available, a new icon is created by scaling a smaller icon up to the desired size.</li>
+</ol>
+<h1 id="afxscaleratiox"><a name="AfxScaleRatioX"></a>AfxScaleRatioX</h1>
+<p>Retrieves the desktop horizontal scaling ratio.</p>
+<pre><code>FUNCTION AfxScaleRatioX () AS LONG
+</code></pre>
+<h1 id="afxscaleratioy"><a name="AfxScaleRatioY"></a>AfxScaleRatioY</h1>
+<p>Retrieves the desktop vertical scaling ratio.</p>
+<pre><code>FUNCTION AfxScaleRatioY () AS LONG
+</code></pre>
+<h1 id="afxscalex"><a name="AfxScaleX"></a>AfxScaleX</h1>
+<p>Scales an horizontal coordinate according the DPI (dots per pixel) being used by the operating system.</p>
+<pre><code>FUNCTION AfxScaleX (BYVAL cx AS SINGLE) AS SINGLE
+</code></pre>
+<p>Return value</p>
+<p>The scaled coordinate.</p>
+<h1 id="afxscaley"><a name="AfxScaleY"></a>AfxScaleY</h1>
+<p>Scales a vertical coordinate according the DPI (dots per pixel) being used by the operating system.</p>
+<pre><code>FUNCTION AfxScaleY (BYVAL cx AS SINGLE) AS SINGLE
+</code></pre>
+<p>Return value</p>
+<p>The scaled coordinate.</p>
+<h1 id="afxunscalex"><a name="AfxUnscaleX"></a>AfxUnscaleX</h1>
+<p>Unscales an horizontal coordinate according the DPI (dots per pixel) being used by the operating system.</p>
+<pre><code>FUNCTION AfxUnscaleX (BYVAL cx AS SINGLE) AS SINGLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cx</em></td>
+<td>The value of the horizontal coordinate, in pixels.</td>
+</tr>
+</tbody>
+</table>
+<p>Return value</p>
+<p>The unscaled coordinate.</p>
+<h1 id="afxunscaley"><a name="AfxUnscaleY"></a>AfxUnscaleY</h1>
+<p>Unscales a vertical coordinate according the DPI (dots per pixel) being used by the operating system.</p>
+<pre><code>FUNCTION AfxUnscaleY (BYVAL cx AS SINGLE) AS SINGLE
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cy</em></td>
+<td>The value of the vertical coordinate, in pixels.</td>
+</tr>
+</tbody>
+</table>
+<p>Return value</p>
+<p>The unscaled coordinate.</p>
+<h1 id="afxusedpiscaling"><a name="AfxUseDpiScaling"></a>AfxUseDpiScaling</h1>
+<p>Returns TRUE if the OS uses DPI scaling; FALSE otherwise.</p>
+<pre><code>FUNCTION AfxUseDpiScaling () AS BOOLEAN
+</code></pre>
+<h1 id="afxaddwindowexstyle"><a name="AfxAddWindowExStyle"></a>AfxAddWindowExStyle</h1>
+<p>Adds a new extended style to the specified window.</p>
+<pre><code>FUNCTION AfxAddWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwExStyle</em></td>
+<td>Extended style to add.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-57">Return value</h4>
+<p>The previous window extended styles.</p>
+<h4 id="usage-example-4">Usage example</h4>
+<pre><code>AfxAddWindowExStyle(hwnd, WS_EX_COMPOSITED)
+</code></pre>
+<h4 id="remarks-19">Remarks</h4>
+<p>If the window has a class style of CS_CLASSDC or CS_OWNDC, do not set the extended window styles WS_EX_COMPOSITED or WS_EX_LAYERED.</p>
+<h1 id="afxaddwindowstyle"><a name="AfxAddWindowStyle"></a>AfxAddWindowStyle</h1>
+<p>Adds a new style to the specified window.</p>
+<pre><code>FUNCTION AfxAddWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwStyle</em></td>
+<td>Style to add.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-58">Return value</h4>
+<p>The previous window styles.</p>
+<h4 id="usage-example-5">Usage example</h4>
+<pre><code>AfxAddWindowStyle(hwnd, WS_HSCROLL)
+</code></pre>
+<h1 id="afxgetwindowexstyle"><a name="AfxGetWindowExStyle"></a>AfxGetWindowExStyle</h1>
+<p>Retrieves the extended window styles.</p>
+<pre><code>FUNCTION AfxGetWindowExStyle (BYVAL hwnd AS HWND) AS DWORD
+
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowstyle"><a name="AfxGetWindowStyle"></a>AfxGetWindowStyle</h1>
+<p>Retrieves the window styles.</p>
+<pre><code>FUNCTION AfxGetWindowStyle (BYVAL hwnd AS HWND) AS DWORD
+
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxremovewindowexstyle"><a name="AfxRemoveWindowExStyle"></a>AfxRemoveWindowExStyle</h1>
+<p>Removes an extended style from the specified window.</p>
+<pre><code>FUNCTION AfxRemoveWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwExStyle</em></td>
+<td>The extended style to remove.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-59">Return value</h4>
+<p>The previous extended window styles.</p>
+<h1 id="afxremovewindowstyle"><a name="AfxRemoveWindowStyle"></a>AfxRemoveWindowStyle</h1>
+<p>Removes a style from the specified window.</p>
+<pre><code>FUNCTION AfxRemoveWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwStyle</em></td>
+<td>The style to remove.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-60">Return value</h4>
+<p>The previous window styles.</p>
+<h1 id="afxsetwindowexstyle"><a name="AfxSetWindowExStyle"></a>AfxSetWindowExStyle</h1>
+<p>Sets the extended style(s) of the specified window.</p>
+<pre><code>FUNCTION AfxSetWindowExStyle (BYVAL hwnd AS HWND, BYVAL dwExStyle AS DWORD) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwExStyle</em></td>
+<td>The extended style(s) to set.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-61">Return value</h4>
+<p>The previous extended window styles.</p>
+<h1 id="afxsetwindowstyle"><a name="AfxSetWindowStyle"></a>AfxSetWindowStyle</h1>
+<p>Sets the style(s) of the specified window.</p>
+<pre><code>FUNCTION AfxSetWindowStyle (BYVAL hwnd AS HWND, BYVAL dwStyle AS DWORD) AS DWORD
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>dwStyle</em></td>
+<td>The style(s) to set.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-62">Return value</h4>
+<p>The previous window styles.</p>
+<h1 id="afxgetcontrolhandle"><a name="AfxGetControlHandle"></a>AfxGetControlHandle</h1>
+<p>Returns the handle of the control with the specified identifier. The reference handle can be the handle of the form or the handle of any other control on the form.</p>
+<pre><code>FUNCTION AfxGetControlHandle (BYVAL hwnd AS HWND, BYVAL wCtrlID AS WORD) AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>wCtrlID</em></td>
+<td>Control identifier.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-63">Return value</h4>
+<p>Returns the handle of the control or NULL.</p>
+<h1 id="afxgetformhandle"><a name="AfxGetFormHandle"></a>AfxGetFormHandle</h1>
+<p>Finds the handle of the top-level window or MDI child window that is the ancestor of the specified window handle. The reference handle is the handle of any control on the form.</p>
+<pre><code>FUNCTION AfxGetFormHandle (BYVAL hwnd AS HWND) AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>A handle to the control.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-64">Return value</h4>
+<p>Handle of the ancestor window.</p>
+<h1 id="afxgethwndfrompid"><a name="AfxGetHwndFromPID"></a>AfxGetHwndFromPID</h1>
+<p>Retrieves a window handle given it's process identifier.</p>
+<pre><code>FUNCTION AfxGetHwndFromPID (BYVAL PID AS DWORD) AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>PID</em></td>
+<td>The process identifier.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-65">Return value</h4>
+<p>The window handle or NULL.</p>
+<h1 id="afxgetpathfromwindowhandle"><a name="AfxGetPathFromWindowHandle"></a>AfxGetPathFromWindowHandle</h1>
+<p>Retrieves the path of the executable file that created the specified window.</p>
+<pre><code>FUNCTION AfxGetPathFromWindowHandle (BYVAL hwnd AS HWND) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>The window handle.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-66">Return value</h4>
+<p>The path of the executable file.</p>
+<h1 id="afxcenterwindow"><a name="AfxCenterWindow"></a>AfxCenterWindow</h1>
+<p>Centers a window on the screen or over another window. It also ensures that the placement is done within the work area.</p>
+<pre><code>SUB AfxCenterWindow (BYVAL hwnd AS HWND = NULL, BYVAL hwndParent AS HWND = NULL)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Optional. Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>hwndParent</em></td>
+<td>Optional. Handle to the parent window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxforcesetforegroundwindow"><a name="AfxForceSetForegroundWindow"></a>AfxForceSetForegroundWindow</h1>
+<p>Brings the thread that created the specified window into the foreground and activates the window. Keyboard input is directed to the window, and various visual cues are changed for the user. The system assigns a slightly higher priority to the thread that created the foreground window than it does to other threads.</p>
+<pre><code>SUB AfxForceSetForegroundWindow (BYVAL hwnd AS HWND)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-20">Remarks</h4>
+<p>Replacement for the <strong>SetForegroundWindow</strong> API function, that sometimes fails.</p>
+<h4 id="warning">Warning</h4>
+<p>Don't use it. Apparently, <strong>AttachThreadInput</strong> can lead to a deadlock. See: <a href="https://blogs.msdn.microsoft.com/oldnewthing/20080801-00/?p=21393">The dangers of attaching input queues</a></p>
+<h1 id="afxgettopenabledwindow"><a name="AfxGetTopEnabledWindow"></a>AfxGetTopEnabledWindow</h1>
+<p>Retrieves the handle of the enabled and visible window at the top of the z-order in an application.</p>
+<pre><code>FUNCTION AfxGetTopEnabledWindow () AS HWND
+</code></pre>
+<h4 id="return-value-67">Return value</h4>
+<p>Handle of the window at top of z-order or NULL.</p>
+<h1 id="afxgettoplevelparent"><a name="AfxGetTopLevelParent"></a>AfxGetTopLevelParent</h1>
+<p>Retrieves the window's top-level parent window.</p>
+<pre><code>FUNCTION AfxGetTopEnabledWindow () AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-68">Return value</h4>
+<p>Handle of the top-level parent window.</p>
+<h1 id="afxgettoplevelwindow"><a name="AfxGetTopLevelWindow"></a>AfxGetTopLevelWindow</h1>
+<p>Retrieves the window's top-level parent or owner window.</p>
+<pre><code>FUNCTION AfxGetTopLevelWindow (BYVAL hwnd AS HWND) AS HWND
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-69">Return value</h4>
+<p>Handle of the top-level parent or owner window.</p>
+<h1 id="afxgetwindowclassname"><a name="AfxGetWindowClassName"></a>AfxGetWindowClassName</h1>
+<p>Retrieves the name of the class to which the specified window belongs.</p>
+<pre><code>FUNCTION AfxGetWindowClassName (BYVAL hwnd AS HWND) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-70">Return value</h4>
+<p>The name of the class.</p>
+<h1 id="afxgetwindowclientheight"><a name="AfxGetWindowClientHeight"></a>AfxGetWindowClientHeight</h1>
+<p>Returns the height of the client area of window, in pixels.</p>
+<pre><code>FUNCTION AfxGetWindowClientHeight (BYVAL hwnd AS HWND) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowclientrect"><a name="AfxGetWindowClientRect"></a>AfxGetWindowClientRect</h1>
+<p>Retrieves the coordinates of a window's client area. The client coordinates specify the upper-left and lower-right corners of the client area. Because client coordinates are relative to the upper-left corner of a window's client area, the coordinates of the upper-left corner are (0,0).</p>
+<pre><code>FUNCTION AfxGetWindowClientRect (BYVAL hwnd AS HWND) AS RECT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-71">Return value</h4>
+<p>A RECT structure with the retrieved coordinates of the window's client area.</p>
+<h1 id="afxgetwindowclientwidth"><a name="AfxGetWindowClientWidth"></a>AfxGetWindowClientWidth</h1>
+<p>Returns the width of the client area of a window, in pixels.</p>
+<pre><code>FUNCTION AfxGetWindowClientWidth (BYVAL hwnd AS HWND) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowheight"><a name="AfxGetWindowHeight"></a>AfxGetWindowHeight</h1>
+<p>Returns the height of a window, in pixels.</p>
+<pre><code>FUNCTION AfxGetWindowHeight (BYVAL hwnd AS HWND) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowwidth"><a name="AfxGetWindowWidth"></a>AfxGetWindowWidth</h1>
+<p>Returns the width of a window, in pixels.</p>
+<pre><code>FUNCTION AfxGetWindowWidth (BYVAL hwnd AS HWND) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowlocation"><a name="AfxGetWindowLocation"></a>AfxGetWindowLocation</h1>
+<p>Returns the location of the top left corner of the window, in pixels. The location is relative to the upper-left corner of the client area in the parent window.</p>
+<pre><code>SUB AfxGetWindowLocation (BYVAL hwnd AS HWND, BYREF nLeft AS LONG, BYREF nTop AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>nLeft</em></td>
+<td>Out. The horizontal location.</td>
+</tr>
+<tr class="odd">
+<td><em>nTop</em></td>
+<td>Out. The vertical location.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxgetwindowrect"><a name="AfxGetWindowRect"></a>AfxGetWindowRect</h1>
+<p>Retrieves the dimensions of the bounding rectangle of the specified window. The dimensions are given in screen coordinates that are relative to the upper-left corner of the screen.</p>
+<pre><code>FUNCTION AfxGetWindowRect (BYVAL hwnd AS HWND) AS RECT
+</code></pre>
+<h4 id="return-value-72">Return value</h4>
+<p>A RECT structure with the retrieved dimensions.</p>
+<h1 id="afxgetwindowtext"><a name="AfxGetWindowText"></a>AfxGetWindowText</h1>
+<p>Gets the text of a window. This function can also be used to retrieve the text of buttons, edit and static controls.</p>
+<pre><code>FUNCTION AfxGetWindowText (BYVAL hwnd AS HWND) AS CWSTR
+</code></pre>
+<h4 id="return-value-73">Return value</h4>
+<p>The text of the window.</p>
+<p>For an edit control, the text returned is the content of the edit control. For a combo box, the text is the content of the edit control (or static-text) portion of the combo box. For a button, the text is the button name. For other windows, the text is the window title. To retrieve the text of an item in a list box, an application can use the <strong>ListBox_GetText</strong> function.</p>
+<p>Rich Edit: If the text to be copied exceeds 64K, use either the EM_STREAMOUT or EM_GETSELTEXT message.</p>
+<h4 id="remarks-21">Remarks</h4>
+<p>This function uses the WM_GETTEXT message because <strong>GetWindowText</strong> cannot retrieve the text of a window in another application.</p>
+<h4 id="usage-examples-2">Usage examples</h4>
+<p>DIM cwsText AS CWSTR = AfxGetWindowText(hwnd) MessageBoxW 0, cwsText, &quot;&quot;, MB_OK</p>
+<h1 id="afxgetwindowtextlength"><a name="AfxGetWindowTextLength"></a>AfxGetWindowTextLength</h1>
+<p>Retrieves the length of the text of a window. This function can also be used to retrieve the length of the text of buttons, edit and static controls.</p>
+<pre><code>FUNCTION AfxGetWindowTextLength (BYVAL hwnd AS HWND) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-74">Return value</h4>
+<p>If the function succeeds, the return value is the length of the text in characters, not including the terminating null character.</p>
+<p>If the function fails, the return value is zero.</p>
+<p>For an edit control, the text returned is the content of the edit control. For a combo box, the text is the content of the edit control (or static-text) portion of the combo box. For a button, the text is the button name. For other windows, the text is the window title. To retrieve the text of an item in a list box, an application can use the <strong>ListBox_GetTextLength</strong> function.</p>
+<p><strong>AfxGetWindowTextLength</strong> sends a WM_GETTEXTLENGTH message. When the WM_GETTEXTLENGTH message is sent, the <strong>DefWindowProc</strong> function returns the length, in characters, of the text. Under certain conditions, the <strong>DefWindowProc</strong> function returns a value that is larger than the actual length of the text. This occurs with certain mixtures of ANSI and Unicode, and is due to the system allowing for the possible existence of double-byte character set (DBCS) characters within the text. The return value, however, will always be at least as large as the actual length of the text; you can thus always use it to guide buffer allocation. This behavior can occur when an application uses both ANSI functions and common dialogs, which use Unicode.</p>
+<p>To obtain the exact length of the text, use the WM_GETTEXT, LB_GETTEXT, or CB_GETLBTEXT messages, or the <strong>GetWindowText</strong> function.</p>
+<p>Sending a WM_GETTEXTLENGTH message to a non-text static control, such as a static bitmap or static icon control, does not return a string value. Instead, it returns zero.</p>
+<h1 id="afxgetworkareaheight"><a name="AfxGetWorkAreaHeight"></a>AfxGetWorkAreaHeight</h1>
+<p>Retrieves the height of the work area on the primary display monitor expressed in virtual screen coordinates. The work area is the portion of the screen not obscured by the system taskbar or by application desktop toolbars. To get the work area of a monitor other than the primary display monitor, call the <strong>GetMonitorInfo</strong> function.</p>
+<pre><code>FUNCTION AfxGetWorkAreaHeight () AS LONG
+</code></pre>
+<h1 id="afxgetworkarearect"><a name="AfxGetWorkAreaRect"></a>AfxGetWorkAreaRect</h1>
+<p>Retrieves the coordinates of the work area on the primary display monitor expressed in virtual screen coordinates. The work area is the portion of the screen not obscured by the system taskbar or by application desktop toolbars. To get the work area of a monitor other than the primary display monitor, call the <strong>GetMonitorInfo</strong> function.</p>
+<pre><code>FUNCTION AfxGetWorkAreaRect () AS RECT
+</code></pre>
+<h4 id="return-value-75">Return value</h4>
+<p>A RECT structure with the retrieved coordinates.</p>
+<h1 id="afxgetworkareawidth"><a name="AfxGetWorkAreaWidth"></a>AfxGetWorkAreaWidth</h1>
+<p>Retrieves the width of the work area on the primary display monitor expressed in virtual screen coordinates. The work area is the portion of the screen not obscured by the system taskbar or by application desktop toolbars. To get the work area of a monitor other than the primary display monitor, call the <strong>GetMonitorInfo</strong> function.</p>
+<pre><code>FUNCTION AfxGetWorkAreaWidth () AS LONG
+</code></pre>
+<h1 id="afxredrawnonclientarea"><a name="AfxRedrawNonClientArea"></a>AfxRedrawNonClientArea</h1>
+<p>Redraws the non-client area of the specified window.</p>
+<pre><code>FUNCTION AfxRedrawNonClientArea (BYVAL hwnd AS HWND) AS BOOLEAN
+</code></pre>
+<h4 id="return-value-76">Return value</h4>
+<p>If the function succeeds, the return value is TRUE.</p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <strong>GetLastError</strong>.</p>
+<h1 id="afxredrawwindow"><a name="AfxRedrawWindow"></a>AfxRedrawWindow</h1>
+<p>Redraws the specified window.</p>
+<pre><code>SUB AfxRedrawWindow (BYVAL hwnd AS HWND)
+</code></pre>
+<h1 id="afxsetwindowclientsize"><a name="AfxSetWindowClientSize"></a>AfxSetWindowClientSize</h1>
+<p>Adjusts the bounding rectangle of a window based on the desired size of the client area.</p>
+<pre><code>SUB AfxSetWindowClientSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, _
+   BYVAL rxRatio AS SINGLE = 1, BYVAL ryRatio AS SINGLE = 1)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The new width of the client area of the window.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The new height of the client area of the window.</td>
+</tr>
+<tr class="even">
+<td><em>rxRatio</em></td>
+<td>Horizontal scaling ratio.</td>
+</tr>
+<tr class="odd">
+<td><em>ryRatio</em></td>
+<td>Vertical scaling ratio.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsetwindowicon"><a name="AfxSetWindowIcon"></a>AfxSetWindowIcon</h1>
+<p>Associates a new large icon with a window. The system displays the large icon in the ALT+TAB dialog box, and the small icon in the window caption.</p>
+<pre><code>FUNCTION AfxSetWindowIcon (BYVAL hwnd AS HWND, BYVAL nIconType AS LONG, BYVAL hIcon AS HICON) AS HICON
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>nIconType</em></td>
+<td>The type of icon to be set. This parameter can be one of the following values.<br><strong>ICON_BIG</strong> : Set the large icon for the window.<br><strong>ICON_SMALL</strong> : Set the small icon for the window.</td>
+</tr>
+<tr class="odd">
+<td><em>hIcon</em></td>
+<td>A handle to the new large icon. If this parameter is NULL, the icon is removed.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-77">Return value</h4>
+<p>The return value is a handle to the previous large or small icon, depending on the value of <em>nIconType</em>. It is NULL if the window previously had no icon of the type indicated by <em>nIconType</em>.</p>
+<h1 id="afxsetwindowlocation"><a name="AfxSetWindowLocation"></a>AfxSetWindowLocation</h1>
+<p>Sets the location of the top left corner of the window, in pixels.The location is relative to the upper-left corner of the client area in the parent window.</p>
+<pre><code>FUNCTION AfxSetWindowLocation (BYVAL hwnd AS HWND, BYVAL nLeft AS LONG, BYVAL nTop AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>nLeft</em></td>
+<td>The new position of the left side of the window, in client coordinates.</td>
+</tr>
+<tr class="odd">
+<td><em>nTop</em></td>
+<td>The new position of the top side of the window, in client coordinates.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-78">Return value</h4>
+<p>If the function succeeds, the return value is TRUE.</p>
+<p>If the function fails, the return value is FALSE. To get extended error information, call <strong>GetLastError</strong>.</p>
+<h1 id="afxsetwindowsize"><a name="AfxSetWindowSize"></a>AfxSetWindowSize</h1>
+<p>Sets the size of the specified window, in pixels.</p>
+<pre><code>FUNCTION AfxSetWindowSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The new width of the window.</td>
+</tr>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>The new height of the window.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxsetwindowtext"><a name="AfxSetWindowText"></a>AfxSetWindowText</h1>
+<p>Sets the text of a window. This function can also be used to set the text of buttons, edit and static controls.</p>
+<pre><code>FUNCTION AfxSetWindowText (BYVAL hwnd AS HWND, BYVAL pwszText AS WSTRING PTR) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>pwszText</em></td>
+<td>The text to set.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-79">Return value</h4>
+<p>If the function succeeds, the return value is TRUE.</p>
+<p>If the function fails, the return value is FALSE.</p>
+<h1 id="afxshowwindowstate"><a name="AfxShowWindowState"></a>AfxShowWindowState</h1>
+<p>Sets the specified window's show state.</p>
+<pre><code>FUNCTION AfxShowWindowState (BYVAL hwnd AS HWND, BYVAL nShowState AS LONG) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>Handle to the window.</td>
+</tr>
+<tr class="even">
+<td><em>nShowState</em></td>
+<td>Controls how the window is to be shown. This parameter is ignored the first time an application calls <strong>AfxShowWindowState</strong>, if the program that launched the application provides a <strong>STARTUPINFO</strong> structure. Otherwise, the first time <strong>AfxShowWindowState</strong> is called, the value should be the value obtained by the <strong>WinMain</strong> function in its <em>nCmdShow</em> parameter. In subsequent calls, this parameter can be one of the values listed below.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Maning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SW_FORCEMINIMIZE</td>
+<td>Minimizes a window, even if the thread that owns the window is not responding. This flag should only be used when minimizing windows from a different thread.</td>
+</tr>
+<tr class="even">
+<td>SW_HIDE</td>
+<td>Hides the window and activates another window.</td>
+</tr>
+<tr class="odd">
+<td>SW_MAXIMIZE</td>
+<td>Maximizes the specified window.</td>
+</tr>
+<tr class="even">
+<td>SW_MINIMIZE</td>
+<td>Minimizes the specified window and activates the next top-level window in the Z order.</td>
+</tr>
+<tr class="odd">
+<td>SW_RESTORE</td>
+<td>Activates and displays the window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when restoring a minimized window.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOW</td>
+<td>Activates the window and displays it in its current size and position.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWDEFAULT</td>
+<td>Sets the show state based on the SW_ value specified in the <strong>STARTUPINFO</strong> structure passed to the <strong>CreateProcess</strong> function by the program that started the application.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOWMAXIMIZED</td>
+<td>Activates the window and displays it as a maximized window.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWMINIMIZED</td>
+<td>Activates the window and displays it as a minimized window.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOWMINNOACTIVE</td>
+<td>Displays the window as a minimized window. This value is similar to SW_SHOWMINIMIZED, except the window is not activated.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWNA</td>
+<td>Displays the window in its current size and position. This value is similar to SW_SHOW, except that the window is not activated.</td>
+</tr>
+<tr class="even">
+<td>SW_SHOWNOACTIVATE</td>
+<td>Displays a window in its most recent size and position. This value is similar to SW_SHOWNORMAL, except that the window is not activated.</td>
+</tr>
+<tr class="odd">
+<td>SW_SHOWNORMAL</td>
+<td>Activates and displays a window. If the window is minimized or maximized, the system restores it to its original size and position. An application should specify this flag when displaying the window for the first time.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-80">Return value</h4>
+<p>If the window was previously visible, the return value is TRUE.</p>
+<p>If the window was previously hidden, the return value is FALSE.</p>
+<h4 id="remarks-22">Remarks</h4>
+<p>To perform certain special effects when showing or hiding a window, use <strong>AnimateWindow</strong>.</p>
+<p>The first time an application calls <strong>AfxShowWindowState</strong>, it should use the <strong>WinMain</strong> function's <em>nCmdShow</em> parameter as its <em>nCmdShow</em> parameter. Subsequent calls to <strong>AfxShowWindowState</strong> must use one of the values in the given list, instead of the one specified by the <strong>WinMain</strong> function's <em>nCmdShow</em> parameter.</p>
+<p>As noted in the discussion of the <em>nCmdShow</em> parameter, the <em>nCmdShow</em> value is ignored in the first call to <strong>AfxShowWindowState</strong> if the program that launched the application specifies startup information in the structure. In this case, <strong>AfxShowWindowState</strong> uses the information specified in the <strong>STARTUPINFO</strong> structure to show the window. On subsequent calls, the application must call <strong>AfxShowWindowState</strong> with <em>nCmdShow</em> set to SW_SHOWDEFAULT to use the startup information provided by the program that launched the application. This behavior is designed for the following situations:</p>
+<ul>
+<li>Applications create their main window by calling <strong>CreateWindow</strong> with the WS_VISIBLE flag set.</li>
+<li>Applications create their main window by calling <strong>CreateWindow</strong> with the WS_VISIBLE flag cleared, and later call <strong>AfxShowWindowState</strong> with the SW_SHOW flag set to make it visible.</li>
+</ul>
+</body>
+</html>
+

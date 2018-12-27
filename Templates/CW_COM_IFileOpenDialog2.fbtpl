@@ -1,0 +1,173 @@
+2
+FBGUI
+.bas
+CWindow: COM: IFileOpenDialog interface (multiple selection)
+' ########################################################################################
+' Microsoft Windows
+' File: COM_IFileOpenDialog.fbtpl (multiple selection)
+' Contents: Demonstrates the use of the IFileOpenDialog interface.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "win/shobjidl.bi"
+USING Afx
+
+CONST IDC_OFD = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION AfxIFileOpenDialog (BYVAL hwndOwner AS HWND, BYVAL sigdnName AS SIGDN = SIGDN_FILESYSPATH) AS IShellItemArray PTR
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Initialize the COM library
+   CoInitialize(NULL)
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "IFileOpenDialog example", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDC_OFD, "&Open File Dialog", 350, 250, 110, 23)
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Uninitialize the COM library
+   CoUninitialize
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            ' // Display the Open File Dialog
+            CASE IDC_OFD
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  DIM pItems AS IShellItemArray PTR = AfxIFileOpenDialog(hwnd)
+                  IF pItems = NULL THEN EXIT FUNCTION
+                  DIM dwItemCount AS LONG
+                  pItems->lpVtbl->GetCount(pItems, @dwItemCount)
+                  FOR idx AS LONG = 0 TO dwItemCount - 1
+                     DIM pItem AS IShellItem PTR
+                     pItems->lpVtbl->GetItemAt(pItems, idx, @pItem)
+                     IF pItem THEN
+                        DIM pwszName AS WSTRING PTR
+                        pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
+                        IF pwszName THEN
+                           MessageBoxW(hwnd, *pwszName, "IFileOpenDialog", MB_OK)
+                           CoTaskMemFree(pwszName)
+                           pwszName = NULL
+                        END IF
+                        pItem->lpVtbl->Release(pItem)
+                        pItem = NULL
+                     END IF
+                  NEXT
+                  pItems->lpVtbl->Release(pItems)
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // Quit the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Displays the File Open Dialog (multiple selection)
+' Returns a pointer to the IShellItemArray collection.
+' ========================================================================================
+FUNCTION AfxIFileOpenDialog (BYVAL hwndOwner AS HWND, BYVAL sigdnName AS SIGDN = SIGDN_FILESYSPATH) AS IShellItemArray PTR
+
+   ' // Create an instance of the FileOpenDialog interface
+   DIM hr AS LONG
+   DIM pofd AS IFileOpenDialog PTR
+   hr = CoCreateInstance(@CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, @IID_IFileOpenDialog, @pofd)
+   IF pofd = NULL THEN RETURN NULL
+
+   ' // Set the file types
+   DIM rgFileTypes(1 TO 3) AS COMDLG_FILTERSPEC
+   rgFileTypes(1).pszName = @WSTR("FB code files")
+   rgFileTypes(2).pszName = @WSTR("Executable files")
+   rgFileTypes(3).pszName = @WSTR("All files")
+   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
+   rgFileTypes(2).pszSpec = @WSTR("*.exe;*.dll")
+   rgFileTypes(3).pszSpec = @WSTR("*.*")
+   pofd->lpVtbl->SetFileTypes(pofd, 3, @rgFileTypes(1))
+
+   ' // Set the title of the dialog
+   hr = pofd->lpVtbl->SetTitle(pofd, "A Single-Selection Dialog")
+   ' // Allow multiselection
+   hr = pofd->lpVtbl->SetOptions(pofd, FOS_ALLOWMULTISELECT)
+
+   ' // Set the default folder
+   DIM pFolder AS IShellItem PTR
+   SHCreateItemFromParsingName (CURDIR, NULL, @IID_IShellItem, @pFolder)
+   IF pFolder THEN
+      pofd->lpVtbl->SetDefaultFolder(pofd, pFolder)
+      pFolder->lpVtbl->Release(pFolder)
+   END IF
+
+   ' // Display the dialog
+   hr = pofd->lpVtbl->Show(pofd, hwndOwner)
+
+   ' // Get the result
+   DIM pItemArray AS IShellItemArray PTR
+   IF SUCCEEDED(hr) THEN
+      hr = pofd->lpVtbl->GetResults(pofd, @pItemArray)
+      FUNCTION = pItemArray
+   END IF
+
+   ' // Release the
+   IF pofd THEN pofd->lpVtbl->Release(pofd)
+
+END FUNCTION
+' ========================================================================================

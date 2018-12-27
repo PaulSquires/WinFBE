@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>OpenGL Procedures</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="opengl-procedures">OpenGL Procedures</h1>
+<p>Assorted helper OpenGL procedures.</p>
+<p>Freeglut 2.8.1 includes twenty two routines for generating easily-recognizable 3-d geometric objects. These routines are effectively the same ones that are included in the GLUT library, and reflect the functionality available in the aux toolkit described in the OpenGL Programmer's Guide. They are included to allow programmers to create with a single line of code a three-dimensional object which can be used to test a variety of OpenGL functionality. None of the routines generates a display list for the object which it draws. The functions generate normals appropriate for lighting but, except for the teapot functions, do not generate texture coordinates. Do note that depth testing (GL_LESS) should be enabled for the correct drawing of the nonconvex objects, i.e., the glutTorus and glutTeapot.</p>
+<p>I have adapted these routines to FreeBasic and grouped them in the include file AfxGlut.inc</p>
+<p>To load textures for use with OpenGL, both from disk or a resource file, you can use the overloaded wrapper function <strong>AfxGdipLoadTexture</strong>, included in the file AfxGdiPlus.inc.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#AfxGlutCone">AfxGlutSolidCone</a></td>
+<td>Draws a solid cone.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutCone">AfxGlutWireCone</a></td>
+<td>Draws a wireframe cone.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutCube">AfxGlutSolidCube</a></td>
+<td>Draws a solid cube.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutCube">AfxGlutWireCube</a></td>
+<td>Draws a wireframe cube.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutCylinder">AfxGlutSolidCylinder</a></td>
+<td>Draws a solid cylinder.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutCylinder">AfxGlutWireCylinder</a></td>
+<td>Draws a wireframe cylinder.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutDodecahedron">AfxGlutSolidDodecahedron</a></td>
+<td>Draws a solid dodecahedron.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutDodecahedron">AfxGlutWireDodecahedron</a></td>
+<td>Draws a wireframe dodecahedron.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutIcosahedron">AfxGlutSolidIcosahedron</a></td>
+<td>Draws a solid icosahedron.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutIcosahedron">AfxGlutWireIcosahedron</a></td>
+<td>Draws a wireframe icosahedron.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutOctahedron">AfxGlutSolidOctahedron</a></td>
+<td>Draws a solid octahedron.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutOctahedron">AfxGlutWireOctahedron</a></td>
+<td>Draws a wireframe octahedron.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutRhombicDodecahedron">AfxGlutSolidRhombicDodecahedron</a></td>
+<td>Draws a solid rhombic dodecahedron.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutRhombicDodecahedron">AfxGlutWireRhombicDodecahedron</a></td>
+<td>Draws a wireframe rhombic dodecahedron.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutSphere">AfxGlutSolidSphere</a></td>
+<td>Renders a solid sphere centered at the origin of the modeling coordinate system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutSphere">AfxGlutWireSphere</a></td>
+<td>Renders a wireframe sphere centered at the origin of the modeling coordinate system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutTeapot">AfxGlutSolidTeapot</a></td>
+<td>Renders a solid teapot of the desired size, centered at the origin.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutTeapot">AfxGlutWireTeapot</a></td>
+<td>Renders a wireframe teapot of the desired size, centered at the origin.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutTetrahedron">AfxGlutSolidTetrahedron</a></td>
+<td>Renders a solid tetrahedron.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutTetrahedron">AfxGlutWireTetrahedron</a></td>
+<td>Renders a wireframe tetrahedron.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxGlutTorus">AfxGlutSolidTorus</a></td>
+<td>Renders a solid torus (doughnut shape).</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxGlutTorus">AfxGlutWireTorus</a></td>
+<td>Renders a wireframe torus (doughnut shape).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxglutsolidcone-/-afxglutwirecone"><a name="AfxGlutCone"></a>AfxGlutSolidCone / AfxGlutWireCone</h1>
+<p>Renders a right circular cone with a base centered at the origin and in the X-Y plane and its tip on the positive Z-axis. The wire cone is rendered with triangular elements.</p>
+<pre><code>SUB AfxGlutSolidCone (BYVAL dbase AS DOUBLE, BYVAL height AS DOUBLE, _
+   BYVAL slices AS LONG, BYVAL stacks AS LONG)
+</code></pre>
+<pre><code>SUB AfxGlutWireCone (BYVAL dbase AS DOUBLE, BYVAL height AS DOUBLE, _
+   BYVAL slices AS LONG, BYVAL stacks AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dbase</em></td>
+<td>The desired radius of the base of the cone.</td>
+</tr>
+<tr class="even">
+<td><em>height</em></td>
+<td>The desired height of the cone.</td>
+</tr>
+<tr class="odd">
+<td><em>slices</em></td>
+<td>The desired number of slices around the cone.</td>
+</tr>
+<tr class="even">
+<td><em>stacks</em></td>
+<td>The desired number of segments between the base and the tip of the cone (the number of points, including the tip, is stacks + 1).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxglutsolidcube-/-afxglutwirecube"><a name="AfxGlutCube"></a>AfxGlutSolidCube / AfxGlutWireCube</h1>
+<p>Renders a cube of the desired size, centered at the origin. Its faces are normal to the coordinate directions.</p>
+<pre><code>SUB AfxGlutSolidCube (BYVAL dbSize AS DOUBLE)
+SUB AfxGlutWireCube (BYVAL dbSize AS DOUBLE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dbSize</em></td>
+<td>The desired length of an edge of the cube.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxglutsolidcylinder-/-afxglutwirecylinder"><a name="AfxGlutCylinder"></a>AfxGlutSolidCylinder / AfxGlutWireCylinder</h1>
+<p>Draws a cylinder.</p>
+<pre><code>SUB AfxGlutSolidCylinder (BYVAL radius AS DOUBLE, BYVAL height AS DOUBLE, _
+   BYVAL slices AS LONG, BYVAL stacks AS LONG)
+</code></pre>
+<pre><code>SUB AfxGlutWireCylinder (BYVAL radius AS DOUBLE, BYVAL height AS DOUBLE, _
+   BYVAL slices AS LONG, BYVAL stacks AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>radius</em></td>
+<td>The desired radius of the cylinder.</td>
+</tr>
+<tr class="even">
+<td><em>height</em></td>
+<td>The desired height of the cylinder.</td>
+</tr>
+<tr class="odd">
+<td><em>slices</em></td>
+<td>The desired number of slices around the cylinder.</td>
+</tr>
+<tr class="even">
+<td><em>stacks</em></td>
+<td>The desired number of segments between the base and the top of the cylinder (the number of points, including the tip, is stacks + 1).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxglutsoliddodecahedron-/-afxglutwiredodecahedron"><a name="AfxGlutDodecahedron"></a>AfxGlutSolidDodecahedron / AfxGlutWireDodecahedron</h1>
+<p>Renders a dodecahedron whose corners are each a distance of sqrt(3) from the origin. The length of each side is sqrt(5)-1. There are twenty corners; interestingly enough, eight of them coincide with the corners of a cube with sizes of length 2.</p>
+<pre><code>SUB AfxGlutSolidDodecahedron
+SUB AfxGlutWireDodecahedron
+</code></pre>
+<h1 id="afxglutsolidicosahedron-/-afxglutwireicosahedron"><a name="AfxGlutIcosahedron"></a>AfxGlutSolidIcosahedron / AfxGlutWireIcosahedron</h1>
+<p>Renders an icosahedron whose corners are each a unit distance from the origin. The length of each side is slightly greater than one. Two of the corners lie on the positive and negative X-axes.</p>
+<pre><code>SUB AfxGlutSolidIcosahedron
+SUB AfxGlutWireIcosahedron
+</code></pre>
+<h1 id="afxglutsolidoctahedron-/-afxglutwireoctahedron"><a name="AfxGlutOctahedron"></a>AfxGlutSolidOctahedron / AfxGlutWireOctahedron</h1>
+<p>Renders an octahedron whose corners are each a distance of one from the origin. The length of each side is sqrt(2). The corners are on the positive and negative coordinate axes.</p>
+<pre><code>SUB AfxGlutSolidOctahedron
+SUB AfxGlutWireOctahedron
+</code></pre>
+<h1 id="afxglutsolidrhombicdodecahedron-/-afxglutwirerhombicdodecahedron"><a name="AfxGlutRhombicDodecahedron"></a>AfxGlutSolidRhombicDodecahedron / AfxGlutWireRhombicDodecahedron</h1>
+<p>Renders a rhombic dodecahedron whose corners are at most a distance of one from the origin. The rhombic dodecahedron has faces which are identical rhombuses (rhombi?) but which have some vertices at which three faces meet and some vertices at which four faces meet. The length of each side is sqrt(3)/2. Vertices at which four faces meet are found at (0, 0, +/- 1) and (+/- sqrt(2)/2, +/- sqrt(2)/2, 0).</p>
+<pre><code>SUB AfxGlutSolidRhombicDodecahedron
+SUB AfxGlutWireRhombicDodecahedron
+</code></pre>
+<h1 id="afxglutsolidsphere-/-afxglutwiresphere"><a name="AfxGlutSphere"></a>AfxGlutSolidSphere / AfxGlutWireSphere</h1>
+<p>Renders a sphere centered at the origin of the modeling coordinate system. The north and south poles of the sphere are on the positive and negative Z-axes respectively and the prime meridian crosses the positive X-axis.</p>
+<pre><code>SUB AfxGlutSolidSphere (BYVAL radius AS DOUBLE, BYVAL slices AS LONG, BYVAL stacks AS LONG)
+SUB AfxGlutWireSphere (BYVAL radius AS DOUBLE, BYVAL slices AS LONG, BYVAL stacks AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>radius</em></td>
+<td>The desired radius of the sphere.</td>
+</tr>
+<tr class="even">
+<td><em>slices</em></td>
+<td>The desired number of slices (divisions in the longitudinal direction) in the sphere.</td>
+</tr>
+<tr class="odd">
+<td><em>stacks</em></td>
+<td>The desired number of stacks (divisions in the latitudinal direction) in the sphere. The number of points in this direction, including the north and south poles, is stacks+1.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="afxglutsolidteapot-/-afxglutwireteapot"><a name="AfxGlutTeapot"></a>AfxGlutSolidTeapot / AfxGlutWireTeapot</h1>
+<p>Renders a solid teapot of the desired size, centered at the origin.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dbSize</em></td>
+<td>The desired size of the teapot.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>SUB AfxGlutSolidTeapot
+SUB AfxGlutWireTeapot
+</code></pre>
+<h1 id="afxglutsolidtetrahedron-/-afxglutwiretetrahedron"><a name="AfxGlutTetrahedron"></a>AfxGlutSolidTetrahedron / AfxGlutWireTetrahedron</h1>
+<p>Renders a tetrahedron whose corners are each a distance of one from the origin. The length of each side is 2/3 sqrt(6). One corner is on the positive X-axis and another is in the X-Y plane with a positive Y-coordinate.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dbSize</em></td>
+<td>The desired size of the teapot.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>SUB AfxGlutSolidTetrahedron
+SUB AfxGlutWireTetrahedron
+</code></pre>
+<h1 id="afxglutsolidtorus-/-afxglutwiretorus"><a name="AfxGlutTorus"></a>AfxGlutSolidTorus / AfxGlutWireTorus</h1>
+<p>Renders a torus centered at the origin of the modeling coordinate system. The torus is circularly symmetric about the Z-axis and starts at the positive X-axis.</p>
+<pre><code>SUB AfxGlutSolidTorus (BYVAL innerRadius AS DOUBLE, BYVAL outerRadius AS DOUBLE, _
+   BYVAL nsides AS LONG, BYVAL rings AS LONG)
+</code></pre>
+<pre><code>SUB AfxGlutWireTorus (BYVAL innerRadius AS DOUBLE, BYVAL outerRadius AS DOUBLE, _
+   BYVAL nsides AS LONG, BYVAL rings AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>innerRadius</em></td>
+<td>Inner radius of the torus.</td>
+</tr>
+<tr class="even">
+<td><em>outerRadius</em></td>
+<td>Outer radius of the torus.</td>
+</tr>
+<tr class="odd">
+<td><em>nsides</em></td>
+<td>Number of sides for each radial section.</td>
+</tr>
+<tr class="even">
+<td><em>rings</em></td>
+<td>Number of radial divisions for the torus.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="example">Example</h1>
+<p>The following example draws a teapot:</p>
+<pre><code>' ########################################################################################
+' Microsoft Windows
+' File: CW_GL_Teapot.bas
+' Compiler: FreeBasic 32 &amp; 64 bit
+' Copyright (c) 2017 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE &quot;Afx/CWindow.inc&quot;
+#INCLUDE ONCE &quot;Afx/AfxGlut.inc&quot;
+USING Afx
+
+CONST GL_WINDOWWIDTH   = 600                 ' Window width
+CONST GL_WINDOWHEIGHT  = 400                 ' Window height
+CONST GL_WindowCaption = &quot;OpenGL - Teapot&quot;   ' Window caption
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' =======================================================================================
+' OpenGL class
+' =======================================================================================
+TYPE COGL
+
+   Public:
+      m_hDC AS HDC      ' // Device context handle
+      m_hRC AS HGLRC    ' // Rendering context handle
+      m_hwnd AS HWND    ' // Window handle
+
+   Private:
+      DIM teapotList AS GLUint
+      DIM ambient(3) AS SINGLE = { 0.0, 0.0, 0.0, 1.0 }
+      DIM diffuse(3) AS SINGLE = { 1.0, 1.0, 1.0, 1.0 }
+      DIM specular(3) AS SINGLE = { 1.0, 1.0, 1.0, 1.0 }
+      DIM position(3) AS SINGLE = { 0.0, 3.0, 3.0, 0.0 }
+      DIM lmodel_ambient(3) AS SINGLE = { 0.2, 0.2, 0.2, 1.0 }
+      DIM local_view(0) AS SINGLE = { 0.0 }
+
+   Public:
+      DECLARE CONSTRUCTOR (BYVAL hwnd AS HWND, BYVAL nBitsPerPel AS LONG = 32, BYVAL cDepthBits AS LONG = 24)
+      DECLARE DESTRUCTOR
+      DECLARE SUB SetupScene (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
+      DECLARE SUB ResizeScene (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
+      DECLARE SUB RenderScene
+      DECLARE SUB ProcessKeystrokes (BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+      DECLARE SUB ProcessMouse (BYVAL uMsg AS UINT, BYVAL wKeyState AS DWORD, BYVAL x AS LONG, BYVAL y AS LONG)
+      DECLARE SUB renderTeapot (BYVAL x AS SINGLE, BYVAL y AS SINGLE, _
+         BYVAL ambr AS SINGLE, BYVAL ambg AS SINGLE, BYVAL ambb AS SINGLE, _
+         BYVAL difr AS SINGLE, BYVAL difg AS SINGLE, BYVAL difb AS SINGLE, _
+         BYVAL specr AS SINGLE, BYVAL specg AS SINGLE, BYVAL specb AS SINGLE, BYVAL shine AS SINGLE)
+
+END TYPE
+' =======================================================================================
+
+' ========================================================================================
+' COGL constructor
+' ========================================================================================
+CONSTRUCTOR COGL (BYVAL hwnd AS HWND, BYVAL nBitsPerPel AS LONG = 32, BYVAL cDepthBits AS LONG = 24)
+
+   DO   ' // Using a fake loop to avoid the use of GOTO or nested IFs/END IFs
+
+      ' // Get the device context
+      IF hwnd = NULL THEN EXIT DO
+      m_hwnd = hwnd
+      m_hDC = GetDC(m_hwnd)
+      IF m_hDC = NULL THEN EXIT DO
+
+      ' // Pixel format
+      DIM pfd AS PIXELFORMATDESCRIPTOR
+      pfd.nSize      = SIZEOF(PIXELFORMATDESCRIPTOR)
+      pfd.nVersion   = 1
+      pfd.dwFlags    = PFD_DRAW_TO_WINDOW OR PFD_SUPPORT_OPENGL OR PFD_DOUBLEBUFFER
+      pfd.iPixelType = PFD_TYPE_RGBA
+      pfd.cColorBits = nBitsPerPel
+      pfd.cDepthBits = cDepthBits
+
+      ' // Find a matching pixel format
+      DIM pf AS LONG = ChoosePixelFormat(m_hDC, @pfd)
+      IF pf = 0 THEN
+         MessageBoxW hwnd, &quot;Can't find a suitable pixel format&quot;, _
+                     &quot;Error&quot;, MB_OK OR MB_ICONEXCLAMATION
+         EXIT DO
+      END IF
+
+      ' // Set the pixel format
+      IF SetPixelFormat(m_hDC, pf, @pfd) = FALSE THEN
+         MessageBoxW hwnd, &quot;Can't set the pixel format&quot;, _
+                     &quot;Error&quot;, MB_OK OR MB_ICONEXCLAMATION
+         EXIT DO
+      END IF
+
+      ' // Create a new OpenGL rendering context
+      m_hRC = wglCreateContext(m_hDC)
+      IF m_hRC = NULL THEN
+         MessageBoxW hwnd, &quot;Can't create an OpenGL rendering context&quot;, _
+                     &quot;Error&quot;, MB_OK OR MB_ICONEXCLAMATION
+         EXIT DO
+      END IF
+
+      ' // Make it current
+      IF wglMakeCurrent(m_hDC, m_hRC) = FALSE THEN
+         MessageBoxW hwnd, &quot;Can't activate the OpenGL rendering context&quot;, _
+                     &quot;Error&quot;, MB_OK OR MB_ICONEXCLAMATION
+         EXIT DO
+      END IF
+
+      ' // Exit the fake loop
+      EXIT DO
+   LOOP
+
+END CONSTRUCTOR
+' ========================================================================================
+
+' ========================================================================================
+' COGL Destructor
+' ========================================================================================
+DESTRUCTOR COGL
+   ' // Release the device and rendering contexts
+   wglMakeCurrent m_hDC, NULL
+   ' // Make the rendering context no longer current
+   wglDeleteContext m_hRC
+   ' // Release the device context
+   ReleaseDC m_hwnd, m_hDC
+END DESTRUCTOR
+' ========================================================================================
+
+' =======================================================================================
+' All the setup goes here
+' =======================================================================================
+SUB COGL.SetupScene (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
+
+   glEnable(GL_LIGHTING)
+   glEnable(GL_LIGHT0)
+   glEnable(GL_DEPTH_TEST)
+
+END SUB
+' =======================================================================================
+
+' =======================================================================================
+' Resize the scene
+' =======================================================================================
+SUB COGL.ResizeScene (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG)
+
+   ' // Prevent divide by zero making height equal one
+   IF nHeight = 0 THEN nHeight = 1
+   ' // Reset the current viewport
+   glViewport 0, 0, nWidth, nHeight
+   ' // Select the projection matrix
+   glMatrixMode GL_PROJECTION
+   ' // Reset the projection matrix
+   glLoadIdentity
+   ' // Calculate the aspect ratio of the window
+   gluPerspective 45.0, nWidth / nHeight, 0.1, 100.0
+   ' // Select the model view matrix
+   glMatrixMode GL_MODELVIEW
+   ' // Reset the projection matrix
+   glLoadIdentity
+
+END SUB
+' =======================================================================================
+
+' =======================================================================================
+' Draw the scene
+' =======================================================================================
+SUB COGL.RenderScene
+
+   ' // Clear the screen buffer
+   glClear GL_COLOR_BUFFER_BIT OR GL_DEPTH_BUFFER_BIT
+   glPushMatrix
+   gluLookAt(0,2.5,-7, 0,0,0, 0,1,0)
+   AfxGlutSolidTeapot(2.5)
+   glPopMatrix
+   glFlush
+
+   ' // Exchange the front and back buffers
+   SwapBuffers m_hdc
+
+END SUB
+' =======================================================================================
+
+' =======================================================================================
+' Processes keystrokes
+' Parameters:
+' * uMsg = The Windows message
+' * wParam = Additional message information.
+' * lParam = Additional message information.
+' The contents of the wParam and lParam parameters depend on the value of the uMsg parameter.
+' =======================================================================================
+SUB COGL.ProcessKeystrokes (BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM)
+
+   SELECT CASE uMsg
+      CASE WM_KEYDOWN   ' // A nonsystem key has been pressed
+         SELECT CASE LOWORD(wParam)
+            CASE VK_ESCAPE
+               ' // Send a message to close the application
+               SendMessageW m_hwnd, WM_CLOSE, 0, 0
+         END SELECT
+   END SELECT
+
+END SUB
+' =======================================================================================
+
+' =======================================================================================
+' Processes mouse clicks and movement
+' Parameters:
+' * wMsg      = Windows message
+' * wKeyState = Indicates whether various virtual keys are down.
+'               MK_CONTROL    The CTRL key is down.
+'               MK_LBUTTON    The left mouse button is down.
+'               MK_MBUTTON    The middle mouse button is down.
+'               MK_RBUTTON    The right mouse button is down.
+'               MK_SHIFT      The SHIFT key is down.
+'               MK_XBUTTON1   Windows 2000/XP: The first X button is down.
+'               MK_XBUTTON2   Windows 2000/XP: The second X button is down.
+' * x         = x-coordinate of the cursor
+' * y         = y-coordinate of the cursor
+' =======================================================================================
+SUB COGL.ProcessMouse (BYVAL uMsg AS UINT, BYVAL wKeyState AS DWORD, BYVAL x AS LONG, BYVAL y AS LONG)
+
+   SELECT CASE uMsg
+
+      CASE WM_LBUTTONDOWN   ' // Left mouse button pressed
+         ' // Put your code here
+
+      CASE WM_LBUTTONUP   ' // Left mouse button releases
+         ' // Put your code here
+
+      CASE WM_MOUSEMOVE   ' // Mouse has been moved
+         ' // Put your code here
+
+      END SELECT
+
+END SUB
+' =======================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recommended way is to use a manifest file
+   AfxSetProcessDPIAware
+
+   ' // Creates the main window
+   DIM pWindow AS CWindow
+   ' -or- DIM pWindow AS CWindow = &quot;MyClassName&quot; (use the name that you wish)
+   ' // Create the window
+   DIM hwndMain AS HWND = pWindow.Create(NULL, GL_WindowCaption, @WndProc)
+   ' // Don't erase the background
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Use a black brush
+   pWindow.Brush = CreateSolidBrush(BGR(0, 0, 0))
+   ' // Sizes the window by setting the wanted width and height of its client area
+   pWindow.SetClientSize(GL_WINDOWWIDTH, GL_WINDOWHEIGHT)
+   ' // Centers the window
+   pWindow.Center
+
+   ' // Show the window
+   ShowWindow hwndMain, nCmdShow
+   UpdateWindow hwndMain
+
+   ' // Message loop
+   DIM uMsg AS tagMsg
+   WHILE GetMessageW(@uMsg, NULL, 0, 0)
+      TranslateMessage @uMsg
+      DispatchMessageW @uMsg
+   WEND
+
+   FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC pCOGL AS COGL PTR   ' // Pointer to the COGL class
+
+   SELECT CASE uMsg
+
+      CASE WM_SYSCOMMAND
+         ' // Disable the Windows screensaver
+         IF (wParam AND &amp;hFFF0) = SC_SCREENSAVE THEN EXIT FUNCTION
+         ' // Close the window
+         IF (wParam AND &amp;hFFF0) = SC_CLOSE THEN
+            SendMessageW hwnd, WM_CLOSE, 0, 0
+            EXIT FUNCTION
+         END IF
+
+      CASE WM_CREATE
+         ' // Initialize the new OpenGL window
+         pCOGL = NEW COGL(hwnd)
+         ' // Retrieve the coordinates of the window's client area
+         DIM rc AS RECT
+         GetClientRect hwnd, @rc
+         ' // Set up the scene
+         pCOGL-&gt;SetupScene rc.Right - rc.Left, rc.Bottom - rc.Top
+         ' // Set the timer (using a timer to trigger redrawing allows a smoother rendering)
+         SetTimer(hwnd, 1, 0, NULL)
+         EXIT FUNCTION
+
+        CASE WM_DESTROY
+         ' // Kill the timer
+         KillTimer(hwnd, 1)
+         ' // Delete the COGL class
+         Delete pCOGL
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+      CASE WM_TIMER
+         ' // Render the scene
+         pCOGL-&gt;RenderScene
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         pCOGL-&gt;ResizeScene LOWORD(lParam), HIWORD(lParam)
+         EXIT FUNCTION
+
+      CASE WM_KEYDOWN
+         ' // Process keystrokes
+         pCOGL-&gt;ProcessKeystrokes uMsg, wParam, lParam
+         EXIT FUNCTION
+
+      CASE WM_LBUTTONDOWN, WM_LBUTTONUP, WM_MOUSEMOVE
+         ' // Process mouse movements
+         pCOGL-&gt;ProcessMouse uMsg, wParam, LOWORD(lParam), HIWORD(lParam)
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+</code></pre>
+<p>The above example can also be used as a template for OpenGL programming with Windows. You simply have to change the code in the SetupScene, ResizeScene, RenderScene, ProcessKeystrokes and ProcessMouse methods, and the private instance variables.</p>
+</body>
+</html>
+

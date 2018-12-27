@@ -68,7 +68,7 @@ Sub GetColorInfo( ByVal nIndex      As Long, _
       Case 38: *wColorName = "Powder Blue":    nColorValue = BGR(148,202,240)
       Case 39: *wColorName = "Bright Cyan":    nColorValue = BGR(000,255,255)
       Case 40: *wColorName = "Pale Blue":      nColorValue = BGR(230,245,255)
-      Case 41: *wColorName = L(341, "User selected..."): nColorValue = BGR(255,255,255)
+      Case 41: *wColorName = L(341, "User selected") & "...": nColorValue = BGR(255,255,255)
     
    End Select
    

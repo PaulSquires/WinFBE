@@ -1,0 +1,167 @@
+2
+FBGUI
+.bas
+CWindow: COM: IFileSaveDialog interface
+' ########################################################################################
+' Microsoft Windows
+' File: COM_IFileSaveDialog.fbtpl
+' Contents: Demonstrates the use of the IFileSaveDialog interface.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "win/shobjidl.bi"
+USING Afx
+
+CONST IDC_OFD = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION AfxIFileSaveDialog (BYVAL hwndOwner AS HWND, BYVAL pwszFileName AS WSTRING PTR, _
+   BYVAL pwszDefExt AS WSTRING PTR, BYVAL sigdnName AS SIGDN = SIGDN_FILESYSPATH) AS WSTRING PTR
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Initialize the COM library
+   CoInitialize(NULL)
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "IFileOpenDialog example", @WndProc)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDC_OFD, "File &Save Dialog", 350, 250, 110, 23)
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Uninitialize the COM library
+   CoUninitialize
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_OFD
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  ' // Display the Save File Dialog
+                  DIM pwszName AS WSTRING PTR = AfxIFileSaveDialog(hwnd, "test", "bas")
+                  ' // Display the selected name
+                  IF pwszName THEN
+                     MessageBoxW(hwnd, *pwszName, "IFileSaveDialog", MB_OK)
+                     CoTaskMemFree(pwszName)
+                  END IF
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // Quit the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Displays the File Save Dialog
+' The returned pointer must be freed with CoTaskMemFree
+' ========================================================================================
+FUNCTION AfxIFileSaveDialog (BYVAL hwndOwner AS HWND, BYVAL pwszFileName AS WSTRING PTR, _
+   BYVAL pwszDefExt AS WSTRING PTR, BYVAL sigdnName AS SIGDN = SIGDN_FILESYSPATH) AS WSTRING PTR
+
+   ' // Create an instance of the IFileSaveDialog interface
+   DIM hr AS LONG
+   DIM psfd AS IFileSaveDialog PTR
+   hr = CoCreateInstance(@CLSID_FileSaveDialog, NULL, CLSCTX_INPROC_SERVER, @IID_IFileSaveDialog, @psfd)
+   IF psfd = NULL THEN RETURN NULL
+
+   ' // Set the file types
+   DIM rgFileTypes(1 TO 3) AS COMDLG_FILTERSPEC
+   rgFileTypes(1).pszName = @WSTR("FB code files")
+   rgFileTypes(2).pszName = @WSTR("Text files")
+   rgFileTypes(3).pszName = @WSTR("All files")
+   rgFileTypes(1).pszSpec = @WSTR("*.bas;*.inc;*.bi")
+   rgFileTypes(2).pszSpec = @WSTR("*.txt")
+   rgFileTypes(3).pszSpec = @WSTR("*.*")
+   psfd->lpVtbl->SetFileTypes(psfd, 3, @rgFileTypes(1))
+
+   ' // Set the title of the dialog
+   hr = psfd->lpVtbl->SetTitle(psfd, "File Save Dialog")
+   ' // Set the file name
+   hr = psfd->lpVtbl->SetFileName(psfd, pwszFileName)
+   ' // Set the extension
+   hr = psfd->lpVtbl->SetDefaultExtension(psfd, pwszDefExt)
+   ' // Display the dialog
+   hr = psfd->lpVtbl->Show(psfd, hwndOwner)
+
+   ' // Set the default folder
+   DIM pFolder AS IShellItem PTR
+   SHCreateItemFromParsingName (CURDIR, NULL, @IID_IShellItem, @pFolder)
+   IF pFolder THEN
+      psfd->lpVtbl->SetDefaultFolder(psfd, pFolder)
+      pFolder->lpVtbl->Release(pFolder)
+   END IF
+
+   ' // Get the result
+   DIM pItem AS IShellItem PTR
+   DIM pwszName AS WSTRING PTR
+   IF SUCCEEDED(hr) THEN
+      hr = psfd->lpVtbl->GetResult(psfd, @pItem)
+      IF SUCCEEDED(hr) THEN
+         hr = pItem->lpVtbl->GetDisplayName(pItem, sigdnName, @pwszName)
+         FUNCTION = pwszName
+      END IF
+   END IF
+
+   ' // Cleanup
+   IF pItem THEN pItem->lpVtbl->Release(pItem)
+   IF psfd THEN psfd->lpVtbl->Release(psfd)
+
+END FUNCTION
+' ========================================================================================

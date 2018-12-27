@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CADOConnection Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cadoconnection-class">CADOConnection Class</h1>
+<p>Represents an open connection to a data source.</p>
+<p><strong>Include file</strong>: CADOConnection.inc (include CADODB.inc)</p>
+<p>A <strong>Connection</strong> object represents a unique session with a data source. In the case of a client/server database system, it may be equivalent to an actual network connection to the server. Depending on the functionality supported by the provider, some collections, methods, or properties of a <strong>Connection</strong> object may not be available.</p>
+<p>With the collections, methods, and properties of a <strong>Connection</strong> object, you can do the following:</p>
+<ul>
+<li>Configure the connection before opening it with the <strong>ConnectionString</strong>, <strong>ConnectionTimeout</strong>, and <strong>Mode</strong> properties. <strong>ConnectionString</strong> is the default property of the <strong>Connection</strong> object.</li>
+<li>Set the <strong>CursorLocation</strong> property to client to invoke the Microsoft Cursor Service for OLE DB, which supports batch updates.</li>
+<li>Set the default database for the connection with the <strong>DefaultDatabase</strong> property.</li>
+<li>Set the level of isolation for the transactions opened on the connection with the <strong>IsolationLevel</strong> property.</li>
+<li>Specify an OLE DB provider with the <strong>Provider</strong> property.</li>
+<li>Establish, and later break, the physical connection to the data source with the <strong>Open</strong> and <strong>Close</strong> methods.</li>
+<li>Execute a command on the connection with the <strong>Execute</strong> method and configure the execution with the <strong>CommandTimeout</strong> property.</li>
+<li>Manage transactions on the open connection, including nested transactions if the provider supports them, with the <strong>BeginTrans</strong>, <strong>CommitTrans</strong>, and <strong>RollbackTrans</strong> methods and the <strong>Attributes</strong> property.</li>
+<li>Examine errors returned from the data source with the <strong>Errors</strong> collection.</li>
+<li>Read the version from the ADO implementation used with the <strong>Version</strong> property.</li>
+<li>Obtain schema information about your database with the <strong>OpenSchema</strong> method.</li>
+</ul>
+<p>You can create <strong>Connection</strong> objects independently of any other previously defined object.</p>
+<p>To execute a query without using a <strong>Command</strong> object, pass a query string to the <strong>Execute</strong> method of a <strong>Connection</strong> object. However, a <strong>Command</strong> object is required when you want to persist the command text and re-execute it, or use query parameters.</p>
+<h3 id="methods-and-properties">Methods and Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Attributes">Attributes</a></td>
+<td>Indicates one or more characteristics of an object.</td>
+</tr>
+<tr class="even">
+<td><a href="#BeginTrans">BeginTrans</a></td>
+<td>Begins a new transaction.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Cancel">Cancel</a></td>
+<td>Cancels execution of a pending, asynchronous method call.</td>
+</tr>
+<tr class="even">
+<td><a href="#Close">Close</a></td>
+<td>Closes a <strong>Connection</strong> object and any dependent objects.</td>
+</tr>
+<tr class="odd">
+<td><a href="#CommandTimeout">CommandTimeout</a></td>
+<td>Sets or returns a Long value that indicates, in seconds, how long to wait for a command to execute. Default is 30.</td>
+</tr>
+<tr class="even">
+<td><a href="#CommitTrans">CommitTrans</a></td>
+<td>Saves any changes and ends the current transaction. It may also start a new transaction.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ConnectionString">ConnectionString</a></td>
+<td>Indicates the information used to establish a connection to a data source.</td>
+</tr>
+<tr class="even">
+<td><a href="#ConnectionTimeout">ConnectionTimeout</a></td>
+<td>Indicates how long to wait while establishing a connection before terminating the attempt and generating an error.</td>
+</tr>
+<tr class="odd">
+<td><a href="#CursorLocation">CursorLocation</a></td>
+<td>Indicates the location of the cursor service.</td>
+</tr>
+<tr class="even">
+<td><a href="#DefaultDatabase">DefaultDatabase</a></td>
+<td>Indicates the default database for a <strong>Connection</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Execute">Execute</a></td>
+<td>Executes the specified query, SQL statement, stored procedure, or provider-specific text.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetErrorInfo">GetErrorInfo</a></td>
+<td>Returns information about ADO errors.</td>
+</tr>
+<tr class="odd">
+<td><a href="#IsolationLevel">IsolationLevel</a></td>
+<td>Indicates the level of isolation for a <strong>Connection</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Mode">Mode</a></td>
+<td>Indicates the available permissions for modifying data in a <strong>Connection</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Open">Open</a></td>
+<td>Opens a connection to a data source.</td>
+</tr>
+<tr class="even">
+<td><a href="#OpenSchema">OpenSchema</a></td>
+<td>Obtains database schema information from the provider.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Properties">Properties</a></td>
+<td>Returns a reference to the <strong>Properties</strong> collection.</td>
+</tr>
+<tr class="even">
+<td><a href="#Provider">Provider</a></td>
+<td>Indicates the name of the provider for a <strong>Connection</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#RollbackTrans">RollbackTrans</a></td>
+<td>Saves any changes and ends the current transaction. It may also start a new transaction.</td>
+</tr>
+<tr class="even">
+<td><a href="#State">State</a></td>
+<td>Indicates if a <strong>Connection</strong> is open or closed.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Version">Version</a></td>
+<td>Indicates the ADO version number.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="connection-dynamic-properties">Connection Dynamic Properties</h3>
+<p>The table below is a cross-index of the ADO and OLE DB names for each standard OLE DB provider dynamic property. Your providers may add more properties than listed here. For the specific information about provider-specific dynamic properties, see your provider documentation.</p>
+<table>
+<thead>
+<tr class="header">
+<th>ADO Property Name</th>
+<th>OLE DB Property Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Active Sessions</td>
+<td>DBPROP_ACTIVESESSIONS</td>
+</tr>
+<tr class="even">
+<td>Autocommit Isolation Levels</td>
+<td>DBPROP_SESS_AUTOCOMMITISOLEVELS</td>
+</tr>
+<tr class="odd">
+<td>Catalog Location</td>
+<td>DBPROP_CATALOGLOCATION</td>
+</tr>
+<tr class="even">
+<td>Catalog Term</td>
+<td>DBPROP_CATALOGTERM</td>
+</tr>
+<tr class="odd">
+<td>Column Definition</td>
+<td>DBPROP_COLUMNDEFINITION</td>
+</tr>
+<tr class="even">
+<td>Connect Timeout</td>
+<td>DBPROP_INIT_TIMEOUT</td>
+</tr>
+<tr class="odd">
+<td>Current Catalog</td>
+<td>DBPROP_CURRENTCATALOG</td>
+</tr>
+<tr class="even">
+<td>Data Source</td>
+<td>DBPROP_INIT_DATASOURCE</td>
+</tr>
+<tr class="odd">
+<td>Data Source Name</td>
+<td>DBPROP_DATASOURCENAME</td>
+</tr>
+<tr class="even">
+<td>Data Source Object Threading Model</td>
+<td>DBPROP_DSOTHREADMODEL</td>
+</tr>
+<tr class="odd">
+<td>DBMS Name</td>
+<td>DBPROP_DBMSNAME</td>
+</tr>
+<tr class="even">
+<td>DBMS Version</td>
+<td>DBPROP_DBMSVER</td>
+</tr>
+<tr class="odd">
+<td>Extended Properties</td>
+<td>DBPROP_INIT_PROVIDERSTRING</td>
+</tr>
+<tr class="even">
+<td>GROUP BY Support</td>
+<td>DBPROP_GROUPBY</td>
+</tr>
+<tr class="odd">
+<td>Heterogeneous Table Support</td>
+<td>DBPROP_HETEROGENEOUSTABLES</td>
+</tr>
+<tr class="even">
+<td>Identifier Case Sensitivity</td>
+<td>DBPROP_IDENTIFIERCASE</td>
+</tr>
+<tr class="odd">
+<td>Initial Catalog</td>
+<td>DBPROP_INIT_CATALOG</td>
+</tr>
+<tr class="even">
+<td>Isolation Levels</td>
+<td>DBPROP_SUPPORTEDTXNISOLEVELS</td>
+</tr>
+<tr class="odd">
+<td>Isolation Retention</td>
+<td>DBPROP_SUPPORTEDTXNISORETAIN</td>
+</tr>
+<tr class="even">
+<td>Locale Identifier</td>
+<td>DBPROP_INIT_LCID</td>
+</tr>
+<tr class="odd">
+<td>Location</td>
+<td>DBPROP_INIT_LOCATION</td>
+</tr>
+<tr class="even">
+<td>Maximum Index Size</td>
+<td>DBPROP_MAXINDEXSIZE</td>
+</tr>
+<tr class="odd">
+<td>Maximum Row Size</td>
+<td>DBPROP_MAXROWSIZE</td>
+</tr>
+<tr class="even">
+<td>Maximum Row Size Includes BLOB</td>
+<td>BPROP_MAXROWSIZEINCLUDESBLOB</td>
+</tr>
+<tr class="odd">
+<td>Maximum Tables in SELECT</td>
+<td>DBPROP_MAXTABLESINSELECT</td>
+</tr>
+<tr class="even">
+<td>Mode</td>
+<td>DBPROP_INIT_MODE</td>
+</tr>
+<tr class="odd">
+<td>Multiple Parameter Sets</td>
+<td>DBPROP_MULTIPLEPARAMSETS</td>
+</tr>
+<tr class="even">
+<td>Multiple Results</td>
+<td>DBPROP_MULTIPLERESULTS</td>
+</tr>
+<tr class="odd">
+<td>Multiple Storage Objects</td>
+<td>DBPROP_MULTIPLESTORAGEOBJECTS</td>
+</tr>
+<tr class="even">
+<td>Multi-Table Update</td>
+<td>DBPROP_MULTITABLEUPDATE</td>
+</tr>
+<tr class="odd">
+<td>NULL Collation Order</td>
+<td>DBPROP_NULLCOLLATION</td>
+</tr>
+<tr class="even">
+<td>NULL Concatenation Behavior</td>
+<td>DBPROP_CONCATNULLBEHAVIOR</td>
+</tr>
+<tr class="odd">
+<td>OLE DB Services</td>
+<td>DBPROP_INIT_OLEDBSERVICES</td>
+</tr>
+<tr class="even">
+<td>OLE DB Version</td>
+<td>DBPROP_PROVIDEROLEDBVER</td>
+</tr>
+<tr class="odd">
+<td>OLE Object Support</td>
+<td>DBPROP_OLEOBJECTS</td>
+</tr>
+<tr class="even">
+<td>Open Rowset Support</td>
+<td>DBPROP_OPENROWSETSUPPORT</td>
+</tr>
+<tr class="odd">
+<td>ORDER BY Columns in Select List</td>
+<td>DBPROP_ORDERBYCOLUMNSINSELECT</td>
+</tr>
+<tr class="even">
+<td>Output Parameter Availability</td>
+<td>DBPROP_OUTPUTPARAMETERAVAILABILITY</td>
+</tr>
+<tr class="odd">
+<td>Pass By Ref Accessors</td>
+<td>DBPROP_BYREFACCESSORS</td>
+</tr>
+<tr class="even">
+<td>Password</td>
+<td>DBPROP_AUTH_PASSWORD</td>
+</tr>
+<tr class="odd">
+<td>Persist Security Info</td>
+<td>DBPROP_AUTH_PERSIST_SENSITIVE_AUTHINFO</td>
+</tr>
+<tr class="even">
+<td>Persistent ID Type</td>
+<td>DBPROP_PERSISTENTIDTYPE</td>
+</tr>
+<tr class="odd">
+<td>Prepare Abort Behavior</td>
+<td>DBPROP_PREPAREABORTBEHAVIOR</td>
+</tr>
+<tr class="even">
+<td>Prepare Commit Behavior</td>
+<td>DBPROP_PREPARECOMMITBEHAVIOR</td>
+</tr>
+<tr class="odd">
+<td>Procedure Term</td>
+<td>DBPROP_PROCEDURETERM</td>
+</tr>
+<tr class="even">
+<td>Prompt</td>
+<td>DBPROP_INIT_PROMPT</td>
+</tr>
+<tr class="odd">
+<td>Provider Friendly Name</td>
+<td>DBPROP_PROVIDERFRIENDLYNAME</td>
+</tr>
+<tr class="even">
+<td>Provider Name</td>
+<td>DBPROP_PROVIDERFILENAME</td>
+</tr>
+<tr class="odd">
+<td>Provider Version</td>
+<td>DBPROP_PROVIDERVER</td>
+</tr>
+<tr class="even">
+<td>Read-Only Data Source</td>
+<td>DBPROP_DATASOURCEREADONLY</td>
+</tr>
+<tr class="odd">
+<td>Rowset Conversions on Command</td>
+<td>DBPROP_ROWSETCONVERSIONSONCOMMAND</td>
+</tr>
+<tr class="even">
+<td>Schema Term</td>
+<td>DBPROP_SCHEMATERM</td>
+</tr>
+<tr class="odd">
+<td>Schema Usage</td>
+<td>DBPROP_SCHEMAUSAGE</td>
+</tr>
+<tr class="even">
+<td>SQL Support</td>
+<td>DBPROP_SQLSUPPORT</td>
+</tr>
+<tr class="odd">
+<td>Structured Storage</td>
+<td>DBPROP_STRUCTUREDSTORAGE</td>
+</tr>
+<tr class="even">
+<td>Subquery Support</td>
+<td>DBPROP_SUBQUERIES</td>
+</tr>
+<tr class="odd">
+<td>Table Term</td>
+<td>DBPROP_TABLETERM</td>
+</tr>
+<tr class="even">
+<td>Transaction DDL</td>
+<td>DBPROP_SUPPORTEDTXNDDL</td>
+</tr>
+<tr class="odd">
+<td>User ID</td>
+<td>DBPROP_AUTH_USERID</td>
+</tr>
+<tr class="even">
+<td>User Name</td>
+<td>DBPROP_USERNAME</td>
+</tr>
+<tr class="odd">
+<td>Window Handle</td>
+<td>DBPROP_INIT_HWND</td>
+</tr>
+</tbody>
+</table>
+<h1 id="attributes"><a name="Attributes"></a>Attributes</h1>
+<p>Indicates one or more characteristics of an object.</p>
+<pre><code>PROPERTY Attributes () AS LONG
+PROPERTY Attributes (BYVAL lAttr AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lAttr</em></td>
+<td>The value can be the sum of one or more <strong>XactAttributeEnum</strong> values. The default is zero (0).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<h4 id="xactattributeenum">XactAttributeEnum</h4>
+<p>Specifies the transaction attributes of a Connection object.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adXactAbortRetaining</strong></td>
+<td>Performs retaining aborts—that is, calling <strong>RollbackTrans</strong> automatically starts a new transaction. Not all providers support this.</td>
+</tr>
+<tr class="even">
+<td><strong>adXactCommitRetaining</strong></td>
+<td>Performs retaining commits—that is, calling <strong>CommitTrans</strong> automatically starts a new transaction. Not all providers support this.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>Use the <strong>Attributes</strong> property to set or return characteristics of <strong>Connection</strong> objects.</p>
+<p>When you set multiple attributes, you can sum the appropriate constants. If you set the property value to a sum including incompatible constants, an error occurs.</p>
+<h4 id="remote-data-service-usage">Remote Data Service Usage</h4>
+<p>This property is not available on a client-side <strong>Connection</strong> object.</p>
+<h1 id="begintrans"><a name="BeginTrans"></a>BeginTrans</h1>
+<p>Begins a new transaction.</p>
+<pre><code>FUNCTION BeginTrans () AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lAttr</em></td>
+<td>The value can be the sum of one or more <strong>XactAttributeEnum</strong> values. The default is zero (0).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>The nesting level of the transaction.</p>
+<h4 id="remarks-1">Remarks</h4>
+<p>Use <strong>BeginTrans</strong>, <strong>CommitTrans</strong> and <strong>RollbackTrans</strong> with a <strong>Connection</strong> object when you want to save or cancel a series of changes made to the source data as a single unit. For example, to transfer money between accounts, you subtract an amount from one and add the same amount to the other. If either update fails, the accounts no longer balance. Making these changes within an open transaction ensures that either all or none of the changes go through.</p>
+<p>Not all providers support transactions. Verify that the provider-defined property &quot;Transaction DDL&quot; appears in the <strong>Connectio</strong> object's <strong>Properties</strong> collection, indicating that the provider supports transactions. If the provider does not support transactions, calling one of these methods will return an error.</p>
+<p>After you call the <strong>BeginTrans</strong> method, the provider will no longer instantaneously commit changes you make until you call <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> to end the transaction.</p>
+<p>For providers that support nested transactions, calling the <strong>BeginTrans</strong> method within an open transaction starts a new, nested transaction. The return value indicates the level of nesting: a return value of &quot;1&quot; indicates you have opened a top-level transaction (that is, the transaction is not nested within another transaction), &quot;2&quot; indicates that you have opened a second-level transaction (a transaction nested within a top-level transaction), and so forth. Calling <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> affects only the most recently opened transaction; you must close or roll back the current transaction before you can resolve any higher-level transactions.</p>
+<p>Calling the <strong>CommitTrans</strong> method saves changes made within an open transaction on the connection and ends the transaction. Calling the <strong>RollbackTrans</strong> method reverses any changes made within an open transaction and ends the transaction. Calling either method when there is no open transaction generates an error.</p>
+<p>Depending on the <strong>Connection</strong> object's <strong>Attributes</strong> property, calling either the <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> methods may automatically start a new transaction. If the <strong>Attributes</strong> property is set to <strong>adXactCommitRetaining</strong>, the provider automatically starts a new transaction after a <strong>CommitTrans</strong> call. If the <strong>Attributes</strong> property is set to <strong>adXactAbortRetaining</strong>, the provider automatically starts a new transaction after a <strong>RollbackTrans</strong> call.</p>
+<h4 id="remote-data-service">Remote Data Service</h4>
+<p>The <strong>BeginTrans</strong>, <strong>CommitTrans</strong>, and <strong>RollbackTrans</strong> methods are not available on a client-side <strong>Connection</strong> object.</p>
+<h4 id="example">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Open the recordset
+DIM pRecordset AS CAdoRecordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Authors&quot;
+pRecordset.Open(cvSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Begin a transaction
+pConnection.BeginTrans
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the content of the &quot;Author&quot; column
+   DIM cvRes AS CVAR = pRecordset.Collect(&quot;Year Born&quot;)
+   IF cvRes.ValInt = 1947 THEN pRecordset.Collect(&quot;Year Born&quot;) = 1900
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+' // Commit the transaction
+'pConnection.CommitTrans
+' // Rollback the transaction because this is a demo
+pConnection.RollbackTrans
+</code></pre>
+<h1 id="cancel"><a name="Cancel"></a>Cancel</h1>
+<p>Cancels execution of a pending, asynchronous method call.</p>
+<pre><code>FUNCTION Cancel () AS HRESULT
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-2">Remarks</h4>
+<p>Use the <strong>Cancel</strong> method to terminate execution of an asynchronous method call (that is, a method invoked with the <strong>adAsyncConnect</strong>, <strong>adAsyncExecute</strong>, or <strong>adAsyncFetch</strong> option).</p>
+<p>For a <strong>Connection</strong> object, the last asynchronous call to the <strong>Execute</strong> or <strong>Open</strong> methods is terminated.</p>
+<h1 id="close"><a name="Close"></a>Close</h1>
+<p>Closes a <strong>Connection</strong> object and any dependent objects.</p>
+<pre><code>FUNCTION Close () AS HRESULT
+</code></pre>
+<h4 id="return-value-3">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>Use the <strong>Close</strong> method to close a <strong>Connection</strong> to free any associated system resources. Closing an object does not remove it from memory; you can change its property settings and open it again later. To completely eliminate an object from memory, release the connection calling the <strong>Release</strong> method of the interface.</p>
+<h4 id="usage-example">Usage example</h4>
+<pre><code>IF pConnection.State = adStateOpen THEN pConnection.Close
+</code></pre>
+<h1 id="commandtimeout"><a name="CommandTimeout"></a>CommandTimeout</h1>
+<p>Sets or returns a Long value that indicates, in seconds, how long to wait for a command to execute. Default is 30.</p>
+<pre><code>PROPERTY CommandTimeout () AS LONG
+PROPERTY CommandTimeout (BYVAL lTimeout AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lTimeout</em></td>
+<td>Time to wait for a command to execute.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>The timeout value.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>Use the <strong>CommandTimeout</strong> property on a <strong>Connection</strong> object to allow the cancellation of an <strong>Execute</strong> method call, due to delays from network traffic or heavy server use. If the interval set in the <strong>CommandTimeout</strong> property elapses before the command completes execution, an error occurs and ADO cancels the command. If you set the property to zero, ADO will wait indefinitely until the execution is complete. Make sure the provider and data source to which you are writing code support the <strong>CommandTimeout</strong> functionality.</p>
+<p>The <strong>CommandTimeout</strong> setting on a <strong>Connection</strong> object has no effect on the <strong>CommandTimeout</strong> setting on a <strong>Command</strong> object on the same <strong>Connection</strong>; that is, the <strong>Command</strong> object's <strong>CommandTimeout</strong> property does not inherit the value of the <strong>Connection</strong> object's <strong>CommandTimeout</strong> value.</p>
+<p>On a <strong>Connection</strong> object, the <strong>CommandTimeout</strong> property remains read/write after the <strong>Connection</strong> is opened.</p>
+<h4 id="examples">Examples</h4>
+<pre><code>' // Sets the timeout to 35 seconds
+pConnection.CommandTimeout = 35
+</code></pre>
+<pre><code>' // Gets the timeout value
+DIM lTimeout AS LONG = pConnection.CommandTimeout
+</code></pre>
+<h1 id="committrans"><a name="CommitTrans"></a>CommitTrans</h1>
+<p>Saves any changes and ends the current transaction. It may also start a new transaction.</p>
+<pre><code>FUNCTION CommitTrans () AS HRESULT
+</code></pre>
+<h4 id="return-value-5">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>Use <strong>BeginTrans</strong>, <strong>CommitTrans</strong> and <strong>RollbackTrans</strong> with a <strong>Connection</strong> object when you want to save or cancel a series of changes made to the source data as a single unit. For example, to transfer money between accounts, you subtract an amount from one and add the same amount to the other. If either update fails, the accounts no longer balance. Making these changes within an open transaction ensures that either all or none of the changes go through.</p>
+<p>Not all providers support transactions. Verify that the provider-defined property &quot;Transaction DDL&quot; appears in the <strong>Connection</strong> object's <strong>Properties</strong> collection, indicating that the provider supports transactions. If the provider does not support transactions, calling one of these methods will return an error.</p>
+<p>After you call the <strong>BeginTrans method</strong>, the provider will no longer instantaneously commit changes you make until you call <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> to end the transaction.</p>
+<p>For providers that support nested transactions, calling the <strong>BeginTrans</strong> method within an open transaction starts a new, nested transaction. The return value indicates the level of nesting: a return value of &quot;1&quot; indicates you have opened a top-level transaction (that is, the transaction is not nested within another transaction), &quot;2&quot; indicates that you have opened a second-level transaction (a transaction nested within a top-level transaction), and so forth. Calling <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> affects only the most recently opened transaction; you must close or roll back the current transaction before you can resolve any higher-level transactions.</p>
+<p>Calling the <strong>CommitTrans</strong> method saves changes made within an open transaction on the connection and ends the transaction. Calling the <strong>RollbackTrans</strong> method reverses any changes made within an open transaction and ends the transaction. Calling either method when there is no open transaction generates an error.</p>
+<p>Depending on the <strong>Connection</strong> object's <strong>Attributes</strong> property, calling either the <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> methods may automatically start a new transaction. If the <strong>Attributes</strong> property is set to <strong>adXactCommitRetaining</strong>, the provider automatically starts a new transaction after a <strong>CommitTrans</strong> call. If the <strong>Attributes</strong> property is set to <strong>adXactAbortRetaining</strong>, the provider automatically starts a new transaction after a <strong>RollbackTrans</strong> call.</p>
+<h4 id="remote-data-service-1">Remote Data Service</h4>
+<p>The <strong>BeginTrans</strong>, <strong>CommitTrans</strong>, and <strong>RollbackTrans</strong> methods are not available on a client-side <strong>Connection</strong> object.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Open the recordset
+DIM pRecordset AS CAdoRecordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Authors&quot;
+pRecordset.Open(cvSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Begin a transaction
+pConnection.BeginTrans
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the content of the &quot;Author&quot; column
+   DIM cvRes AS CVAR = pRecordset.Collect(&quot;Year Born&quot;)
+   IF cvRes.ValInr = 1947 THEN pRecordset.Collect(&quot;Year Born&quot;) = 1900
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+' // Commit the transaction
+'pConnection.CommitTrans
+' // Rollback the transaction because this is a demo
+pConnection.RollbackTrans
+</code></pre>
+<h1 id="connectionstring"><a name="ConnectionString"></a>ConnectionString</h1>
+<p>Indicates the information used to establish a connection to a data source.</p>
+<pre><code>PROPERTY ConnectionString () AS CBSTR
+PROPERTY ConnectionString (BYREF cbsConConStr AS CBSTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsConConStr</em></td>
+<td>The connection string.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>The connection string.</p>
+<h4 id="remarks-6">Remarks</h4>
+<p>Use the <strong>ConnectionString</strong> property to specify a data source by passing a detailed connection string containing a series of argument = value statements separated by semicolons.</p>
+<p>ADO supports five arguments for the <strong>ConnectionString</strong> property; any other arguments pass directly to the provider without any processing by ADO. The arguments ADO supports are as follows.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Provider=</strong></td>
+<td>Specifies the name of a provider to use for the connection.</td>
+</tr>
+<tr class="even">
+<td><strong>File Name=</strong></td>
+<td>Specifies the name of a provider-specific file (for example, a persisted data source object) containing preset connection information.</td>
+</tr>
+<tr class="odd">
+<td><strong>Remote Provider=</strong></td>
+<td>Specifies the name of a provider to use when opening a client-side connection. (Remote Data Service only.)</td>
+</tr>
+<tr class="even">
+<td><strong>Remote Server=</strong></td>
+<td>Specifies the path name of the server to use when opening a client-side connection. (Remote Data Service only.)</td>
+</tr>
+<tr class="odd">
+<td><strong>URL=</strong></td>
+<td>Specifies the connection string as an absolute URL identifying a resource, such as a file or directory.</td>
+</tr>
+</tbody>
+</table>
+<p>After you set the <strong>ConnectionString</strong> property and open the <strong>Connection</strong> object, the provider may alter the contents of the property, for example, by mapping the ADO-defined argument names to their provider equivalents.</p>
+<p>The <strong>ConnectionString</strong> property automatically inherits the value used for the <strong>ConnectionString</strong> argument of the Open method, so you can override the current <strong>ConnectionString</strong> property during the <strong>Open</strong> method call.</p>
+<p>Because the <strong>File Name</strong> argument causes ADO to load the associated provider, you cannot pass both the <strong>Provider</strong> and <strong>File Name</strong> arguments.</p>
+<p>The <strong>ConnectionString</strong> property is read/write when the connection is closed and read-only when it is open.</p>
+<p>Duplicates of an argument in the <strong>ConnectionString</strong> property are ignored. The last instance of any argument is used.</p>
+<h4 id="remote-data-service-usage-1">Remote Data Service Usage</h4>
+<p>When used on a client-side <strong>Connection</strong> object, the <strong>ConnectionString</strong> property can include only the <strong>Remote Provider</strong> and <strong>Remote Server</strong> parameters.</p>
+<h4 id="usage-examples">Usage examples</h4>
+<pre><code>pConnection.ConnectionString = &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+pConnection.Open
+</code></pre>
+<pre><code>DIM cbsConStr AS CBSTR = pConnection.ConnectionString
+</code></pre>
+<h4 id="example-2">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.ConnectionString = &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+pConnection.Open
+
+' // Open the recordset
+DIM pRecordset AS CAdoRecordset
+DIM cbsSource AS CBSTR = &quot;SELECT * FROM Authors&quot;
+pRecordset.Open(cbsSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the content of the &quot;Author&quot; column
+   DIM cvRes AS CVAR = pRecordset.Collect(&quot;Author&quot;)
+   PRINT cvRes
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+</code></pre>
+<h1 id="connectiontimeout"><a name="ConnectionTimeout"></a>ConnectionTimeout</h1>
+<p>Indicates how long to wait while establishing a connection before terminating the attempt and generating an error.</p>
+<pre><code>PROPERTY ConnectionTimeout () AS LONG
+PROPERTY ConnectionTimeout (BYVAL lTimeout AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lTimeout</em></td>
+<td>Time to wait for a command to execute.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-7">Return value</h4>
+<p>The timeout value.</p>
+<h4 id="remarks-7">Remarks</h4>
+<p>Use the <strong>ConnectionTimeout</strong> property on a <strong>Connection</strong> object if delays from network traffic or heavy server use make it necessary to abandon a connection attempt. If the time from the <strong>ConnectionTimeout</strong> property setting elapses prior to the opening of the connection, an error occurs and ADO cancels the attempt. If you set the property to zero, ADO will wait indefinitely until the connection is opened. Make sure the provider to which you are writing code supports the <strong>ConnectionTimeout</strong> functionality.</p>
+<p>The <strong>ConnectionTimeout</strong> property is read/write when the connection is closed and read-only when it is open.</p>
+<p>On a <strong>Connection</strong> object, the <strong>ConnectionTimeout</strong> property remains read/write after the <strong>Connection</strong> is opened.</p>
+<h1 id="cursorlocation"><a name="CursorLocation"></a>CursorLocation</h1>
+<p>Indicates the location of the cursor service.</p>
+<pre><code>PROPERTY CursorLocation () AS CursorLocationEnum
+PROPERTY CursorLocation (BYVAL lCursorLoc AS CursorLocationEnum)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lCursorLoc</em></td>
+<td>One of the <strong>CursorLocationEnum</strong> values.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-8">Return value</h4>
+<p>One of the <strong>CursorLocationEnum</strong> values.</p>
+<h4 id="cursorlocationenum">CursorLocationEnum</h4>
+<p>Specifies the location of the cursor service.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adUseClient</strong></td>
+<td>Uses client-side cursors supplied by a local cursor library. Local cursor services often will allow many features that driver-supplied cursors may not, so using this setting may provide an advantage with respect to features that will be enabled. For backward compatibility, the synonym <strong>adUseClientBatch</strong> is also supported.</td>
+</tr>
+<tr class="even">
+<td><strong>adUseNone</strong></td>
+<td>Does not use cursor services. (This constant is obsolete and appears solely for the sake of backward compatibility.)</td>
+</tr>
+<tr class="odd">
+<td><strong>adUseServer</strong></td>
+<td>Default. Uses data-provider or driver-supplied cursors. These cursors are sometimes very flexible and allow for additional sensitivity to changes others make to the data source. However, some features of the Microsoft Cursor Service for OLE DB (such as disassociated Recordset objects) cannot be simulated with server-side cursors and these features will be unavailable with this setting.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-8">Remarks</h4>
+<p>This property allows you to choose between various cursor libraries accessible to the provider. Usually, you can choose between using a client-side cursor library or one that is located on the server.</p>
+<p>This property setting affects connections established only after the property has been set. Changing the <strong>CursorLocation</strong> property has no effect on existing connections.</p>
+<p>Cursors returned by the <strong>Execute</strong> method inherit this setting. <strong>Recordset</strong> objects will automatically inherit this setting from their associated connections.</p>
+<p>This property is read/write on a <strong>Connection</strong> or a closed <strong>Recordset</strong>, and read-only on an open <strong>Recordset</strong>.</p>
+<h4 id="remote-data-service-usage-2">Remote Data Service Usage</h4>
+<p>When used on a client-side <strong>Recordset</strong> or <strong>Connection</strong> object, the <strong>CursorLocation</strong> property can only be set to <strong>adUseClient</strong>.</p>
+<h4 id="examples-1">Examples</h4>
+<pre><code>' // Sets the cursor location
+pConnection.CursorLocation = adUseClient
+</code></pre>
+<pre><code>' // Gets the timeout value
+DIM lCursorLoc AS LONG = pConnection.CursorLocation
+</code></pre>
+<h1 id="defaultdatabase"><a name="DefaultDatabase"></a>DefaultDatabase</h1>
+<p>Indicates the default database for a <strong>Connection</strong> object.</p>
+<pre><code>PROPERTY DefaultDatabase () AS CBSTR
+PROPERTY DefaultDatabase (BYREF cbsDatabase AS CBSTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsDatabase</em></td>
+<td>Name of the database available from the provider.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>The name of the database.</p>
+<h4 id="remarks-9">Remarks</h4>
+<p>Use the <strong>DefaultDatabase</strong> property to set or return the name of the default database on a specific <strong>Connection</strong> object.</p>
+<p>If there is a default database, SQL strings may use an unqualified syntax to access objects in that database. To access objects in a database other than the one specified in the <strong>DefaultDatabase</strong> property, you must qualify object names with the desired database name. Upon connection, the provider will write default database information to the <strong>DefaultDatabase</strong> property. Some providers allow only one database per connection, in which case you cannot change the <strong>DefaultDatabase</strong> property.</p>
+<p>Some data sources and providers may not support this feature, and may return an error or an empty string.</p>
+<h4 id="remote-data-service-usage-3">Remote Data Service Usage</h4>
+<p>This property is not available on a client-side <strong>Connection</strong> object.</p>
+<h1 id="execute"><a name="Execute"></a>Execute</h1>
+<p>Executes the specified query, SQL statement, stored procedure, or provider-specific text.</p>
+<pre><code>FUNCTION Execute (BYREF cbsCommandText AS CBSTR, BYVAL RecordsAffected AS LONG PTR = NULL, _
+   BYVAL Options AS LONG = -1) AS Afx_ADORecordset PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsCommandText</em></td>
+<td>A string value that contains the SQL statement, stored procedure, a URL, or provider-specific text to execute. Optionally, table names can be used but only if the provider is SQL aware. For example if a table name of &quot;Customers&quot; is used, ADO will automatically prepend the standard SQL Select syntax to form and pass &quot;SELECT * FROM Customers&quot; as a T-SQL statement to the provider.</td>
+</tr>
+<tr class="even">
+<td><em>RecordsAffected</em></td>
+<td>Optional. Pointer to a LONG to which the provider returns the number of records that the operation affected.</td>
+</tr>
+<tr class="odd">
+<td><em>Options</em></td>
+<td>Optional. A Long value that indicates how the provider should evaluate the <strong>CommandText</strong> argument. Can be a bitmask of one or more <strong>CommandTypeENum</strong> or <strong>ExecuteOptionEnum</strong> values.</td>
+</tr>
+</tbody>
+</table>
+<p>Use the <strong>ExecuteOptionEnum</strong> value <strong>adExecuteNoRecords</strong> to improve performance by minimizing internal processing.</p>
+<p>Do not use <strong>adExecuteStream</strong> with the <strong>Execute</strong> method of a <strong>Connection</strong> object.</p>
+<p>Do not use the <strong>CommandTypeEnum</strong> values of <strong>adCmdFile</strong> or <strong>adCmdTableDirect</strong> with <strong>Execute</strong>. These values can only be used as options with the <strong>Open</strong> and <strong>Requery</strong> methods of a <strong>Recordset</strong>.</p>
+<h4 id="commandtypeenum">CommandTypeEnum</h4>
+<p>Specifies how a command argument should be interpreted.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adCmdUnspecified</strong></td>
+<td>Does not specify the command type argument.</td>
+</tr>
+<tr class="even">
+<td><strong>adCmdText</strong></td>
+<td>Evaluates <strong>CommandText</strong> as a textual definition of a command or stored procedure call.</td>
+</tr>
+<tr class="odd">
+<td><strong>adCmdTable</strong></td>
+<td>Evaluates <strong>CommandText</strong> as a table name whose columns are all returned by an internally generated SQL query.</td>
+</tr>
+<tr class="even">
+<td><strong>adCmdStoredProc</strong></td>
+<td>Evaluates <strong>CommandText</strong> as a stored procedure name.</td>
+</tr>
+<tr class="odd">
+<td><strong>adCmdUnknown</strong></td>
+<td>Default. Indicates that the type of command in the <strong>CommandText</strong> property is not known.</td>
+</tr>
+<tr class="even">
+<td><strong>adCmdFile</strong></td>
+<td>Evaluates <strong>CommandText</strong> as the file name of a persistently stored <strong>Recordset</strong>. Used with <strong>Recordset</strong> <strong>Open</strong> or <strong>Requery</strong> only.</td>
+</tr>
+<tr class="odd">
+<td><strong>adCmdTableDirect</strong></td>
+<td>Evaluates <strong>CommandText</strong> as a table name whose columns are all returned. Used with <strong>Recordset</strong> <strong>Open</strong> or <strong>Requery</strong> only. To use the <strong>Seek</strong> method, the <strong>Recordset</strong> must be opened with <strong>adCmdTableDirect</strong>. This value cannot be combined with the <strong>ExecuteOptionEnum</strong> value <strong>adAsyncExecute</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="executeoptionenum">ExecuteOptionEnum</h4>
+<p>Specifies how a provider should execute a command.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adAsyncExecute</strong></td>
+<td>Indicates that the command should execute asynchronously. This value cannot be combined with the <strong>CommandTypeEnum</strong> value <strong>adCmdTableDirect</strong>.</td>
+</tr>
+<tr class="even">
+<td><strong>adAsyncFetch</strong></td>
+<td>Indicates that the remaining rows after the initial quantity specified in the CacheSize property should be retrieved asynchronously.</td>
+</tr>
+<tr class="odd">
+<td><strong>adAsyncFetchNonBlocking</strong></td>
+<td>Indicates that the main thread never blocks while retrieving. If the requested row has not been retrieved, the current row automatically moves to the end of the file. If you open a <strong>Recordset</strong> from a <strong>Stream</strong> containing a persistently stored <strong>Recordset</strong>, <strong>adAsyncFetchNonBlocking</strong> will not have an effect; the operation will be synchronous and blocking. <strong>adAsynchFetchNonBlocking</strong> has no effect when the <strong>adCmdTableDirect</strong> option is used to open the <strong>Recordset</strong>.</td>
+</tr>
+<tr class="even">
+<td><strong>adExecuteNoRecords</strong></td>
+<td>Indicates that the command text is a command or stored procedure that does not return rows (for example, a command that only inserts data). If any rows are retrieved, they are discarded and not returned. <strong>adExecuteNoRecords</strong> can only be passed as an optional parameter to the <strong>Command</strong> or <strong>Connection</strong> <strong>Execute</strong> method.</td>
+</tr>
+<tr class="odd">
+<td><strong>adExecuteStream</strong></td>
+<td>Indicates that the results of a command execution should be returned as a stream.</td>
+</tr>
+<tr class="even">
+<td><strong>adExecuteStream</strong></td>
+<td>Indicates that the results of a command execution should be returned as a stream. <strong>adExecuteStream</strong> can only be passed as an optional parameter to the <strong>Command</strong> <strong>Execute</strong> method.</td>
+</tr>
+<tr class="odd">
+<td><strong>adExecuteRecord</strong></td>
+<td>Indicates that the <strong>CommandText</strong> is a command or stored procedure that returns a single row which should be returned as a <strong>Record</strong> object.</td>
+</tr>
+<tr class="even">
+<td><strong>adOptionUnspecified</strong></td>
+<td>Indicates that the command is unspecified.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-10">Return value</h4>
+<p>An <strong>Afx_ADORecordset</strong> object reference on success, or NULL on failure.</p>
+<h4 id="remarks-10">Remarks</h4>
+<p>Using the <strong>Execute</strong> method on a <strong>Connection</strong> object executes whatever query you pass to the method in the <strong>CommandText</strong> argument on the specified connection. If the <strong>CommandText</strong> argument specifies a row-returning query, any results that the execution generates are stored in a new <strong>Recordset</strong> object. If the command is not intended to return results (for example, an SQL UPDATE query) the provider returns Nothing as long as the option <strong>adExecuteNoRecords</strong> is specified; otherwise <strong>Execute</strong> returns a closed <strong>Recordset</strong>.</p>
+<p>The returned <strong>Recordset</strong> object is always a read-only, forward-only cursor. If you need a <strong>Recordset</strong> object with more functionality, first create a <strong>Recordset</strong> object with the desired property settings, then use the <strong>Recordset</strong> object's <strong>Open</strong> method to execute the query and return the desired cursor type.</p>
+<p>The contents of the <strong>CommandText</strong> argument are specific to the provider and can be standard SQL syntax or any special command format that the provider supports.</p>
+<p>An <strong>ExecuteComplete</strong> event will be issued when this operation concludes.</p>
+<p><strong>Note</strong>: URLs using the http scheme will automatically invoke the Microsoft OLE DB Provider for Internet Publishing.</p>
+<h4 id="example-3">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Create the recordset by executing a query
+DIM pRecordset AS CAdoRecordset
+pRecordset.Attach(pConnection.Execute(&quot;SELECT TOP 20 * FROM Authors ORDER BY Author&quot;))
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the content of the &quot;Author&quot; column
+   DIM cvRes AS CVAR = pRecordset.Collect(&quot;Author&quot;)
+   PRINT cvRes
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+</code></pre>
+<h1 id="geterrorinfo"><a name="GetErrorInfo"></a>GetErrorInfo</h1>
+<p>Returns information about ADO errors.</p>
+<pre><code>FUNCTION GetErrorInfo (BYVAL nError AS HRESULT = 0) AS CBSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nError</em></td>
+<td>Optional. The error code.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>A description of the error(s).</p>
+<h1 id="isolationlevel"><a name="IsolationLevel"></a>IsolationLevel</h1>
+<p>Indicates the level of isolation for a <strong>Connection</strong> object.</p>
+<pre><code>PROPERTY IsolationLevel () AS IsolationLevelEnum
+PROPERTY IsolationLevel (BYVAL Level AS IsolationLevelEnum)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nError</em></td>
+<td>Optional. The error code.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>An <strong>IsolationLevelEnum</strong> value.</p>
+<h4 id="isolationlevelenum">IsolationLevelEnum</h4>
+<p>Specifies the level of transaction isolation for a Connection object.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adXactUnspecified</strong></td>
+<td>Indicates that the provider is using a different isolation level than specified, but that the level cannot be determined.</td>
+</tr>
+<tr class="even">
+<td><strong>adXactChaos</strong></td>
+<td>Indicates that pending changes from more highly isolated transactions cannot be overwritten.</td>
+</tr>
+<tr class="odd">
+<td><strong>adXactBrowse</strong></td>
+<td>Indicates that from one transaction you can view uncommitted changes in other transactions.</td>
+</tr>
+<tr class="even">
+<td><strong>adXactReadUncommitted</strong></td>
+<td>Same as <strong>adXactBrowse</strong>.</td>
+</tr>
+<tr class="odd">
+<td><strong>adXactCursorStability</strong></td>
+<td>Indicates that from one transaction you can view changes in other transactions only after they have been committed.</td>
+</tr>
+<tr class="even">
+<td><strong>adXactReadCommitted</strong></td>
+<td>Same as <strong>adXactCursorStability</strong>.</td>
+</tr>
+<tr class="odd">
+<td><strong>adXactRepeatableRead</strong></td>
+<td>Indicates that from one transaction you cannot see changes made in other transactions, but that requerying can retrieve new Recordset objects.</td>
+</tr>
+<tr class="even">
+<td><strong>adXactIsolated</strong></td>
+<td>Indicates that transactions are conducted in isolation of other transactions.</td>
+</tr>
+<tr class="odd">
+<td><strong>adXactSerializable</strong></td>
+<td>Same as <strong>adXactIsolated</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks-11">Remarks</h4>
+<p>Use the <strong>IsolationLevel</strong> property to set the isolation level of a <strong>Connection</strong> object. The setting does not take effect until the next time you call the <strong>BeginTrans</strong> method. If the level of isolation you request is unavailable, the provider may return the next greater level of isolation without updating the <strong>IsolationLevel</strong> property.</p>
+<h4 id="remote-data-service-usage-4">Remote Data Service Usage</h4>
+<p>When used on a client-side <strong>Connection</strong> object, the <strong>IsolationLevel</strong> property can be set only to <strong>adXactUnspecified</strong>.</p>
+<p>Because users are working with disconnected <strong>Recordset</strong> objects on a client-side cache, there may be multiuser issues. For instance, when two different users try to update the same record, Remote Data Service simply allows the user who updates the record first to &quot;win.&quot; The second user's update request will fail with an error.</p>
+<h4 id="examples-2">Examples</h4>
+<pre><code>' // Sets the isolation level
+pConnection.IsolationLevel = adXactUnspecified
+</code></pre>
+<pre><code>' // Gets the isolation level
+DIM level AS LONG = pConnection.IsolationLevel
+</code></pre>
+<h1 id="mode"><a name="Mode"></a>Mode</h1>
+<p>Indicates the available permissions for modifying data in a <strong>Connection</strong> object.</p>
+<pre><code>PROPERTY Mode () AS ConnectModeEnum
+PROPERTY Mode (BYVAL lMode AS ConnectModeEnum)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>lMode</em></td>
+<td>ConnectModeEnum value. The default value for a <strong>Connection</strong> is <strong>adModeUnknown</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>A <strong>ConnectModeEnum</strong> value.</p>
+<h4 id="connectmodeenum">ConnectModeEnum</h4>
+<p>Specifies the available permissions for modifying data in a <strong>Connection</strong>, opening a <strong>Record</strong>, or specifying values for the Mode property of the <strong>Record</strong> and <strong>Stream</strong> objects.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adModeRead</strong></td>
+<td>Indicates read-only permissions.</td>
+</tr>
+<tr class="even">
+<td><strong>adModeReadWrite</strong></td>
+<td>Indicates read/write permissions.</td>
+</tr>
+<tr class="odd">
+<td><strong>adModeRecursive</strong></td>
+<td>Used in conjunction with the other <em>ShareDeny</em> values (<strong>adModeShareDenyNone</strong>, <strong>adModeShareDenyWrite</strong>, or <strong>adModeShareDenyRead</strong>) to propagate sharing restrictions to all sub-records of the current <strong>Record</strong>. It has no affect if the <strong>Record</strong> does not have any children. A run-time error is generated if it is used with <strong>adModeShareDenyNone</strong> only. However, it can be used with <strong>adModeShareDenyNone</strong> when combined with other values. For example, you can use &quot;<strong>adModeRead OR adModeShareDenyNone OR adModeRecursive</strong>&quot;.</td>
+</tr>
+<tr class="even">
+<td><strong>adModeShareDenyNone</strong></td>
+<td>Allows others to open a connection with any permissions. Neither read nor write access can be denied to others.</td>
+</tr>
+<tr class="odd">
+<td><strong>adModeShareDenyRead</strong></td>
+<td>Prevents others from opening a connection with read permissions.</td>
+</tr>
+<tr class="even">
+<td><strong>adModeShareDenyWrite</strong></td>
+<td>Prevents others from opening a connection with write permissions.</td>
+</tr>
+<tr class="odd">
+<td><strong>adModeShareExclusive</strong></td>
+<td>Prevents others from opening a connection.</td>
+</tr>
+<tr class="even">
+<td><strong>adModeUnknown</strong></td>
+<td>Default. Indicates that the permissions have not yet been set or cannot be determined.</td>
+</tr>
+<tr class="odd">
+<td><strong>adModeWrite</strong></td>
+<td>Indicates write-only permissions.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="open"><a name="Open"></a>Open</h1>
+<p>Opens a connection to a data source.</p>
+<pre><code>FUNCTION Open (BYREF cbsConStr AS CBSTR = &quot;&quot;, BYREF cbsUserID AS CBSTR = &quot;&quot;, _
+   BYREF cbsPassword AS CBSTR = &quot;&quot;, BYVAL Options AS LONG = adOptionUnspecified) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsConStr</em></td>
+<td>Optional. An string value that contains connection information.</td>
+</tr>
+<tr class="even">
+<td><em>cbsUserID</em></td>
+<td>Optional. An string value that contains a user name to use when establishing the connection.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsPassword</em></td>
+<td>Optional. An string value that contains a password to use when establishing the connection.</td>
+</tr>
+<tr class="even">
+<td><em>Options</em></td>
+<td>Optional. A <strong>ConnectOptionEnum</strong> value that determines whether this method should return after (synchronously) or before (asynchronously) the connection is established.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="connectoptionenum">ConnectOptionEnum</h4>
+<p>Specifies whether the <strong>Open</strong> method of a <strong>Connection</strong> object should return after (synchronously) or before (asynchronously) the connection is established.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adAsyncConnect</strong></td>
+<td>Opens the connection asynchronously. The <strong>ConnectComplete</strong> event may be used to determine when the connection is available.</td>
+</tr>
+<tr class="even">
+<td><strong>adConnectUnspecified</strong></td>
+<td>Default. Opens the connection synchronously.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-14">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<h4 id="remarks-12">Remarks</h4>
+<p>Using the <strong>Open</strong> method on a <strong>Connection</strong> object establishes the physical connection to a data source. After this method successfully completes, the connection is live and you can issue commands against it and process the results.</p>
+<p>Use the optional <strong>ConnectionString</strong> argument to specify either a connection string containing a series of argument = value statements separated by semicolons, or a file or directory resource identified with a URL. The <strong>ConnectionString</strong> property automatically inherits the value used for the <strong>ConnectionString</strong> argument. Therefore, you can either set the <strong>ConnectionString</strong> property of the <strong>Connection</strong> object before opening it, or use the <strong>ConnectionString</strong> argument to set or override the current connection parameters during the <strong>Open</strong> method call.</p>
+<p>If you pass user and password information both in the <strong>ConnectionString</strong> argument and in the optional UserID and Password arguments, the UserID and <strong>Password</strong> arguments will override the values specified in <strong>ConnectionString</strong>.</p>
+<p>When you have concluded your operations over an open <strong>Connection</strong>, use the <strong>Close</strong> method to free any associated system resources. Closing an object does not remove it from memory; you can change its property settings and use the <strong>Open</strong> method to open it again later. To completely eliminate an object from memory, release the object variable.</p>
+<h4 id="remote-data-service-usage-5">Remote Data Service Usage</h4>
+<p>When used on a client-side <strong>Connection</strong> object, the <strong>Open</strong> method doesn't actually establish a connection to the server until a Recordset is opened on the <strong>Connection</strong> object.</p>
+<p><strong>Note</strong>: URLs using the http scheme will automatically invoke the Microsoft OLE DB Provider for Internet Publishing.</p>
+<h4 id="example-4">Example</h4>
+<pre><code>' // Set the connection string
+pConnection.ConnectionString = &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+' // Open the connection
+pConnection.Open
+</code></pre>
+<p>' --&gt; Alternate way &lt;--</p>
+<pre><code>DIM cbsConStr AS CBSTR = &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+pConnection.Open cbsConStr
+</code></pre>
+<p>' --&gt; Alternate way &lt;--</p>
+<pre><code>pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+</code></pre>
+<h4 id="example-5">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Create a Connection object
+DIM pConnection AS CAdoConnection
+' // Create a Recordset object
+DIM pRecordset AS CAdoRecordset
+
+' // Open the connection
+DIM cbsConStr AS CBSTR = &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+pConnection.Open cbsConStr
+
+' // Open the recordset
+DIM cvSource AS CVAR = &quot;SELECT TOP 20 * FROM Authors ORDER BY Author&quot;
+DIM hr AS HRESULT = pRecordset.Open(cvource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the content of the &quot;Author&quot; column
+   SCOPE
+      DIM cvRes AS CVAR = pRecordset.Collect(&quot;Author&quot;)
+      PRINT cvRes
+   END SCOPE
+   ' // Fetch the next row
+   pRecordset.MoveNext
+LOOP
+</code></pre>
+<h1 id="openschema"><a name="OpenSchema"></a>OpenSchema</h1>
+<p>Obtains database schema information from the provider.</p>
+<pre><code>FUNCTION OpenSchema (BYVAL Schema AS SchemaEnum, _
+   BYVAL Restrictions AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND), _
+   BYVAL SchemaID AS VARIANT = TYPE(VT_ERROR,0,0,0,DISP_E_PARAMNOTFOUND)) AS Afx_ADORecordset PTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>Schema</em></td>
+<td>Any <strong>SchemaEnum</strong> value that represents the type of schema query to run.</td>
+</tr>
+<tr class="even">
+<td><em>Restrictions</em></td>
+<td>Optional. An array of query constraints for each <em>QueryType</em> option, as listed in <strong>SchemaEnum</strong>.</td>
+</tr>
+<tr class="odd">
+<td><em>SchemaID</em></td>
+<td>Optional. The GUID for a provider-schema query not defined by the OLE DB specification. This parameter is required if <em>QueryType</em> is set to <strong>adSchemaProviderSpecific</strong>; otherwise, it is not used.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-15">Return value</h4>
+<p>An ADO <strong>Recordset</strong> object reference.</p>
+<h4 id="remarks-13">Remarks</h4>
+<p>The <strong>OpenSchema</strong> method returns self-descriptive information about the data source, such as what tables are in the data source, the columns in the tables, and the data types supported.</p>
+<p>The <em>QueryType</em> argument is a GUID that indicates the columns (schemas) returned. The OLE DB specification has a full list of schemas.</p>
+<p>The <strong>Criteria</strong> argument limits the results of a schema query. <strong>Criteria</strong> specifies an array of values that must occur in a corresponding subset of columns, called constraint columns, in the resulting <strong>Recordset</strong>.</p>
+<p>The constant <strong>adSchemaProviderSpecific</strong> is used for the <em>QueryType</em> argument if the provider defines its own nonstandard schema queries outside those listed above. When this constant is used, the <strong>SchemaID</strong> argument is required to pass the GUID of the schema query to execute. If <em>QueryType</em> is set to <strong>adSchemaProviderSpecific</strong> but <em>SchemaID</em> is not provided, an error will result.</p>
+<p>Providers are not required to support all of the OLE DB standard schema queries. Specifically, only <strong>adSchemaTables</strong>, <strong>adSchemaColumns</strong>, and <strong>adSchemaProviderTypes</strong> are required by the OLE DB specification. However, the provider is not required to support the <strong>Criteria</strong> constraints listed above for those schema queries.</p>
+<h4 id="remote-data-service-usage-6">Remote Data Service Usage</h4>
+<p>The <strong>OpenSchema</strong> method is not available on a client-side <strong>Connection</strong> object.</p>
+<p>When not using client side cursors, retrieving the &quot;ORDINAL_POSITION&quot; of a column schema in ADO returns a variant of type VT_R8 in MDAC 2.7 and later while the type of used in MDAC 2.6 was VT_I4. Programs written for MDAC 2.6 that only look for a variant returned of type VT_I4 would get a zero for every ordinal if run under MDAC 2.7 and later without modification. This change was made because the data type that OLE DB returns is DBTYPE_UI4, and in the signed VT_I4 type there is not enough room to contain all possible values without possibly truncation occurring and thereby causing a loss of data.</p>
+<h1 id="properties"><a name="Properties"></a>Properties</h1>
+<p>Returns a reference to the <strong>Properties</strong> collection.</p>
+<pre><code>PROPERTY Properties () AS Afx_ADOProperties PTR
+</code></pre>
+<h4 id="return-value-16">Return value</h4>
+<p>An Afx_ADOProperties object reference.</p>
+<h4 id="usage-example-1">Usage example</h4>
+<pre><code>DIM pProperties AS Afx_ADOProperties
+pProperties = pConnection.Properties
+</code></pre>
+<h1 id="provider"><a name="Provider"></a>Provider</h1>
+<p>Indicates the name of the provider for a Connection object.</p>
+<pre><code>PROPERTY Provider () AS CBSTR
+PROPERTY Provider (BYREF cbsProvider AS CBSTR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsProvider</em></td>
+<td>The provider name.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>The provider name.</p>
+<h4 id="remarks-14">Remarks</h4>
+<p>Use the <strong>Provider</strong> property to set or return the name of the provider for a connection. This property can also be set by the contents of the <strong>ConnectionString</strong> property or the <strong>ConnectionString</strong> argument of the Open method; however, specifying a provider in more than one place while calling the <strong>Open</strong> method can have unpredictable results. If no provider is specified, the property will default to MSDASQL (Microsoft OLE DB Provider for ODBC).</p>
+<p>The <strong>Provider</strong> property is read/write when the connection is closed and read-only when it is open. The setting does not take effect until you either open the <strong>Connection</strong> object or access the <strong>Properties</strong> collection of the <strong>Connection</strong> object. If the setting is not valid, an error occurs.</p>
+<h4 id="usage-example-2">Usage example</h4>
+<pre><code>DIM cbsProvider AS CBSTR = pConnection.Provider
+</code></pre>
+<h1 id="rollbacktrans"><a name="RollbackTrans"></a>RollbackTrans</h1>
+<p>Saves any changes and ends the current transaction. It may also start a new transaction.</p>
+<pre><code>FUNCTION RollbackTrans () AS HRESULT
+</code></pre>
+<h4 id="return-value-18">Return value</h4>
+<p>S_OK (0) or an HRESULT code.</p>
+<p>Use <strong>BeginTrans</strong>, <strong>CommitTrans</strong> and <strong>RollbackTrans</strong> with a <strong>Connection</strong> object when you want to save or cancel a series of changes made to the source data as a single unit. For example, to transfer money between accounts, you subtract an amount from one and add the same amount to the other. If either update fails, the accounts no longer balance. Making these changes within an open transaction ensures that either all or none of the changes go through.</p>
+<p>Not all providers support transactions. Verify that the provider-defined property &quot;Transaction DDL&quot; appears in the <strong>Connection</strong> object's <strong>Properties</strong> collection, indicating that the provider supports transactions. If the provider does not support transactions, calling one of these methods will return an error.</p>
+<p>After you call the <strong>BeginTrans method</strong>, the provider will no longer instantaneously commit changes you make until you call <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> to end the transaction.</p>
+<p>For providers that support nested transactions, calling the <strong>BeginTrans</strong> method within an open transaction starts a new, nested transaction. The return value indicates the level of nesting: a return value of &quot;1&quot; indicates you have opened a top-level transaction (that is, the transaction is not nested within another transaction), &quot;2&quot; indicates that you have opened a second-level transaction (a transaction nested within a top-level transaction), and so forth. Calling <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> affects only the most recently opened transaction; you must close or roll back the current transaction before you can resolve any higher-level transactions.</p>
+<p>Calling the <strong>CommitTrans</strong> method saves changes made within an open transaction on the connection and ends the transaction. Calling the <strong>RollbackTrans</strong> method reverses any changes made within an open transaction and ends the transaction. Calling either method when there is no open transaction generates an error.</p>
+<p>Depending on the <strong>Connection</strong> object's <strong>Attributes</strong> property, calling either the <strong>CommitTrans</strong> or <strong>RollbackTrans</strong> methods may automatically start a new transaction. If the <strong>Attributes</strong> property is set to <strong>adXactCommitRetaining</strong>, the provider automatically starts a new transaction after a <strong>CommitTrans</strong> call. If the <strong>Attributes</strong> property is set to <strong>adXactAbortRetaining</strong>, the provider automatically starts a new transaction after a <strong>RollbackTrans</strong> call.</p>
+<h4 id="remote-data-service-2">Remote Data Service</h4>
+<p>The <strong>BeginTrans</strong>, <strong>CommitTrans</strong>, and <strong>RollbackTrans</strong> methods are not available on a client-side <strong>Connection</strong> object.</p>
+<h4 id="example-6">Example</h4>
+<pre><code>#include &quot;Afx/CADODB/CADODB.inc&quot;
+using Afx
+
+' // Open the connection
+DIM pConnection AS CAdoConnection
+pConnection.Open &quot;Provider=Microsoft.Jet.OLEDB.4.0;Data Source=biblio.mdb&quot;
+
+' // Open the recordset
+DIM pRecordset AS CAdoRecordset
+DIM cvSource AS CVAR = &quot;SELECT * FROM Authors&quot;
+pRecordset.Open(cvSource, pConnection, adOpenKeyset, adLockOptimistic, adCmdText)
+
+' // Begin a transaction
+pConnection.BeginTrans
+
+' // Parse the recordset
+DO
+   ' // While not at the end of the recordset...
+   IF pRecordset.EOF THEN EXIT DO
+   ' // Get the content of the &quot;Author&quot; column
+   DIM cvRes AS CVAR = pRecordset.Collect(&quot;Year Born&quot;)
+   IF cvRes.ValInt = 1947 THEN pRecordset.Collect(&quot;Year Born&quot;) = 1900
+   ' // Fetch the next row
+   IF pRecordset.MoveNext &lt;&gt; S_OK THEN EXIT DO
+LOOP
+' // Commit the transaction
+'pConnection.CommitTrans
+' // Rollback the transaction because this is a demo
+pConnection.RollbackTrans
+</code></pre>
+<h1 id="state"><a name="State"></a>State</h1>
+<p>Indicates if a <strong>Connection</strong> is open or closed.</p>
+<pre><code>PROPERTY State () AS LONG
+</code></pre>
+<h4 id="return-value-19">Return value</h4>
+<p>The current connection state.</p>
+<h4 id="remarks-15">Remarks</h4>
+<p>You can use the <strong>State</strong> property to determine the current state of a given object at any time.</p>
+<p>The object's <strong>State</strong> property can have a combination of values. For example, if a statement is executing, this property will have a combined value of <strong>adStateOpen</strong> and <strong>adStateExecuting</strong>.</p>
+<h4 id="objectstateenum">ObjectStateEnum</h4>
+<p>Specifies whether the Open method of a Connection object should return after (synchronously) or before (asynchronously) the connection is established.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Constant</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>adStateClosed</strong></td>
+<td>Indicates that the object is closed.</td>
+</tr>
+<tr class="even">
+<td><strong>adStateOpen</strong></td>
+<td>Indicates that the object is open.</td>
+</tr>
+<tr class="odd">
+<td><strong>adStateConnecting</strong></td>
+<td>Indicates that the object is connecting.</td>
+</tr>
+<tr class="even">
+<td><strong>adStateExecuting</strong></td>
+<td>Indicates that the object is executing a command.</td>
+</tr>
+<tr class="odd">
+<td>adStateFetching</td>
+<td>Indicates that the rows of the object are being retrieved.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="usage-example-3">Usage example</h4>
+<pre><code>IF pConnection.State = adStateOpen THEN pConnection.Close
+</code></pre>
+<h1 id="version"><a name="Version"></a>Version</h1>
+<p>Indicates the ADO version number.</p>
+<pre><code>PROPERTY Version () AS CBSTR
+</code></pre>
+<h4 id="return-value-20">Return value</h4>
+<p>The ADO version number.</p>
+<h4 id="remarks-16">Remarks</h4>
+<p>Use the <strong>Version</strong> property to return the version number of the ADO implementation.</p>
+<p>The version of the provider will be available as a dynamic property in the <strong>Properties</strong> collection.</p>
+<h4 id="example-7">Example</h4>
+<pre><code>DIM cbsVersion AS CBSTR = pConnection.Version
+</code></pre>
+</body>
+</html>
+

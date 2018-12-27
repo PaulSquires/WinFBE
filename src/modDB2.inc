@@ -234,7 +234,10 @@ END FUNCTION
 
 ''
 ''
-function clsDB2.dbSeek( byval sLookFor as string, byval Action as long ) as DB2_DATA ptr
+function clsDB2.dbSeek( byval sLookFor as string, _
+                        byval Action as long, _
+                        byval sFilename as string = "" _
+                        ) as DB2_DATA ptr
    ' GENERIC SEEK FUNCTION THAT OTHER FUNCTIONS CALL TO DO THE HARD WORK
    ' Find the array element that contains the function name beng searched for
    dim pData as DB2_DATA ptr
@@ -246,7 +249,13 @@ function clsDB2.dbSeek( byval sLookFor as string, byval Action as long ) as DB2_
       if pData = 0 THEN exit do
       if pData->id = Action THEN
          if sLookFor = ucase(pData->ElementName) THEN
-            return pData
+            if len(sFilename) then
+               if ucase(pData->fileName) = ucase(sFilename) then 
+                  return pData
+               end if    
+            else
+               return pData
+            end if      
          end if
       END IF
    loop
@@ -257,20 +266,20 @@ end function
 
 ''
 ''
-function clsDB2.dbFindFunction( byref sFunctionName as string ) as DB2_DATA ptr
-   return this.dbSeek(sFunctionName, DB2_FUNCTION) 
+function clsDB2.dbFindFunction( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
+   return this.dbSeek(sFunctionName, DB2_FUNCTION, sFilename) 
 end function
 
 ''
 ''
-function clsDB2.dbFindSub( byref sFunctionName as string ) as DB2_DATA ptr
-   return this.dbSeek(sFunctionName, DB2_SUB) 
+function clsDB2.dbFindSub( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
+   return this.dbSeek(sFunctionName, DB2_SUB, sFilename) 
 end function
 
 ''
 ''
-function clsDB2.dbFindProperty( byref sFunctionName as string ) as DB2_DATA ptr
-   return this.dbSeek(sFunctionName, DB2_PROPERTY) 
+function clsDB2.dbFindProperty( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
+   return this.dbSeek(sFunctionName, DB2_PROPERTY, sFilename) 
 end function
 
 ''

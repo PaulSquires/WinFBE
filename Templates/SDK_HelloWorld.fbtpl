@@ -1,0 +1,160 @@
+2
+FBGUI
+.bas
+SDK: Hello World
+' ########################################################################################
+' Microsoft Windows
+' File: SDK_HelloWord.fbtpl
+' Contents: SDK Hello Word example
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "windows.bi"
+#INCLUDE ONCE "Afx/AfxWin.inc"
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM wcexw AS WNDCLASSEXW
+   DIM hWndMain AS HWND
+   DIM wszClassName AS WSTRING * 20 = "HelloWin"
+
+   FUNCTION = 0
+
+   WITH wcexw
+      .cbSize        = SIZEOF(wcexw)
+      .style         = CS_HREDRAW OR CS_VREDRAW
+      .lpfnWndProc   = @WndProc
+      .cbClsExtra    = 0
+      .cbWndExtra    = 0
+      .hInstance     = hInstance
+      .hCursor       = LoadCursor(NULL, BYVAL IDC_ARROW)
+      .hbrBackground = GetStockObject(WHITE_BRUSH)
+      .lpszMenuName  = NULL
+      .lpszClassName = @wszClassName
+      .hIcon         = LoadIcon(NULL, IDI_APPLICATION)
+      .hIconSm       = LoadIcon(NULL, IDI_APPLICATION)
+   END WITH
+
+   IF (RegisterClassExW(@wcexw) = FALSE) THEN
+      MessageBoxW(NULL, "Failed to register the class", "Error", MB_ICONERROR)
+      EXIT FUNCTION
+   END IF
+
+   ' // Create a window using the registered class
+   hwndMain = CreateWindowExW(WS_EX_CONTROLPARENT, _            ' extended style
+                              wszClassName, _                  ' window class name
+                              "The Hello Program", _            ' window caption
+                              WS_OVERLAPPEDWINDOW OR _
+                              WS_CLIPCHILDREN, _                ' window style
+                              CW_USEDEFAULT, _                  ' initial x position
+                              CW_USEDEFAULT, _                  ' initial y position
+                              CW_USEDEFAULT, _                  ' initial x nSize
+                              CW_USEDEFAULT, _                  ' initial y nSize
+                              NULL, _                           ' parent window handle
+                              0, _                              ' window menu handle
+                              hInstance, _                      ' program instance handle
+                              NULL)                             ' creation parameters
+
+   IF hWndMain = NULL THEN
+      MessageBoxW(NULL, "Failure in CreateWindowEx", "Error", MB_ICONERROR)
+      EXIT FUNCTION
+   END IF
+
+   ' // Set the client size of the window
+   AfxSetWindowClientSize(hWndMain, AfxScaleX(500), AfxScaleY(320))
+   ' // Center the window
+   AfxCenterWindow(hWndMain)
+
+   |
+
+   ' // Display the window
+   ShowWindow(hWndMain, nCmdShow)
+   UpdateWindow(hWndMain)
+
+   ' // Dispatch Windows messages
+   DIM uMsg AS MSG
+   WHILE (GetMessageW(@uMsg, NULL, 0, 0) <> FALSE)
+      IF IsDialogMessageW(hWndMain, @uMsg) = 0 THEN
+         TranslateMessage(@uMsg)
+         DispatchMessageW(@uMsg)
+      END IF
+   WEND
+
+   FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hNewFont AS HFONT
+
+    SELECT CASE uMsg
+
+       CASE WM_CREATE
+         ' // Create a new font scaled according the DPI ratio
+         IF AfxGetDpi <> 96 THEN hNewFont = AfxCreateFont("Tahoma", 9, AfxGetDpi)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE LOWORD(wParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF HIWORD(wParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+       CASE WM_PAINT
+    		DIM rc AS RECT, ps AS PAINTSTRUCT, hDC AS HANDLE, hOldFont AS HFONT
+         hDC = BeginPaint(hWnd, @ps)
+         IF hNewFont THEN hOldFont = CAST(HFONT, SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
+         GetClientRect(hWnd, @rc)
+         DrawTextW(hDC, "Hello, World!", -1, @rc, DT_SINGLELINE or DT_CENTER or DT_VCENTER)
+         IF hNewFont THEN SelectObject(hDC, CAST(HGDIOBJ, CAST(HFONT, hOldFont)))
+         EndPaint(hWnd, @ps)
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Destroy the new font
+         IF hNewFont THEN DeleteObject(CAST(HGDIOBJ, hNewFont))
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

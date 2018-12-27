@@ -11,6 +11,7 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+declare Function frmImages_Show( ByVal hWndParent As HWnd, Byval pProp as clsProperty ptr = 0 ) As Long
 declare Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
 declare Function frmHelpViewer_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = -1) As Long
 declare function IsPropertyExists( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as boolean
@@ -46,7 +47,7 @@ declare Function DesignerMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, B
 declare Function DesignerFrame_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare Function DesignerForm_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 declare Function Lasso_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
-declare function ParseLogForError( byref wsLogSt as CWSTR, byval bAllowSuccessMessage as Boolean, Byval wID as long) as Boolean
+declare function ParseLogForError( byref wsLogSt as CWSTR, byval bAllowSuccessMessage as Boolean, Byval wID as long, byval fCompile64 as Boolean) as Boolean
 declare SUB RedirConsoleToFile( byref szExe AS wstring, byref szCmdLine AS wstring, byref sConsoleText AS string)
 Declare Function GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
 Declare Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
@@ -59,7 +60,7 @@ Declare Function UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
 Declare Function FileEncodingTextDescription(byval FileEncoding as long) as CWSTR
 Declare Function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
 Declare Function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long
-Declare Function OpenSelectedDocument( byval pDoc as clsDocument ptr, byref wszFunctionName as WSTRING ) as long
+Declare Function OpenSelectedDocument( byref wszFilename as wstring, byref wszFunctionName as WSTRING, byval nLineNumber as long = 0 ) as long
 Declare Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
 Declare Function Treeview_RemoveCheckBox( byval hTree as hwnd, byval hNode as HTREEITEM) as long
@@ -69,7 +70,7 @@ Declare Function FF_TreeView_SetCheckState( ByVal hWndControl As HWnd, ByVal hIt
 Declare Function FF_TreeView_GetCheckState( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As BOOLEAN
 Declare Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, ByVal hItem as HANDLE, ByVal lParam as Long) as Long
 Declare Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) As WString Ptr
-Declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH) As IShellItemArray Ptr
+Declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal idButton as long) As IShellItemArray Ptr
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr
 Declare Function FF_Toolbar_EnableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
 Declare Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
@@ -201,18 +202,18 @@ Declare Function frmTemplates_OnClose(HWnd As HWnd) As LRESULT
 Declare Function frmTemplates_OnDestroy(HWnd As HWnd) As LRESULT
 Declare Function frmTemplates_WndProc (ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
 Declare Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As Long) As Long
-Declare Function frmFnList_SetListBoxPosition() As Long
-Declare Function frmFnList_UpdateListBox() As Long
-Declare Function frmFnList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-Declare Function frmFnList_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmFnList_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
-Declare Function frmFnList_OnClose( ByVal HWnd As HWnd ) As LRESULT
-Declare Function frmFnList_OnMeasureItem( ByVal HWnd As HWnd, ByVal lpmis As MEASUREITEMSTRUCT Ptr ) As Long
-Declare Function frmFnList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEMSTRUCT Ptr ) As Long
-Declare Function frmFnList_OnDestroy(HWnd As HWnd) As LRESULT
-Declare Function frmFnList_ListBox_SubclassProc ( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM, ByVal uIdSubclass As UINT_PTR, ByVal dwRefData As DWORD_PTR ) As LRESULT
-Declare Function frmFnList_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
-Declare Function frmFnList_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
+Declare Function frmFunctionList_SetListBoxPosition() As Long
+Declare Function frmFunctionList_UpdateListBox() As Long
+Declare Function frmFunctionList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+Declare Function frmFunctionList_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+Declare Function frmFunctionList_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+Declare Function frmFunctionList_OnClose( ByVal HWnd As HWnd ) As LRESULT
+Declare Function frmFunctionList_OnMeasureItem( ByVal HWnd As HWnd, ByVal lpmis As MEASUREITEMSTRUCT Ptr ) As Long
+Declare Function frmFunctionList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEMSTRUCT Ptr ) As Long
+Declare Function frmFunctionList_OnDestroy(HWnd As HWnd) As LRESULT
+Declare Function frmFunctionList_ListBox_SubclassProc ( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM, ByVal uIdSubclass As UINT_PTR, ByVal dwRefData As DWORD_PTR ) As LRESULT
+Declare Function frmFunctionList_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
+Declare Function frmFunctionList_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
 Declare Function frmGoto_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 Declare Function frmGoto_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 Declare Function frmGoto_OnClose(HWnd As HWnd) As LRESULT

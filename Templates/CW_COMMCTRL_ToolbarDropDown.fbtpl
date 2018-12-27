@@ -1,0 +1,213 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Toolbar with tooltips and dropdown menu
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ToolbarDropDown.fbtpl
+' Contents: CWindow - Toolbar with a dropdown arrow
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+CONST IDC_TOOLBAR = 1001
+enum
+   IDM_CUT = 28000
+   IDM_COPY, IDM_PASTE, IDM_UNDO, IDM_REDOW, IDM_DELETE, IDM_FILENEW, IDM_FILEOPEN
+   IDM_FILESAVE, IDM_PRINTPRE, IDM_PROPERTIES, IDM_HELP, IDM_FIND, IDM_REPLACE, IDM_PRINT
+end enum
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Create a tool bar
+' ========================================================================================
+SUB AddToolbarButtons (BYVAL hToolBar AS HWND)
+
+   ' // Add a bitmap with the button images
+   DIM ttbab AS TBADDBITMAP
+   ttbab.hInst = HINST_COMMCTRL
+   IF AfxIsProcessDPIAware THEN
+      ttbab.nId = IDB_STD_LARGE_COLOR
+   ELSE
+      ttbab.nId = IDB_STD_SMALL_COLOR
+   END IF
+   SendMessageW(hToolBar, TB_ADDBITMAP, 0, CAST(LPARAM, @ttbab))
+   ' // Add buttons to the toolbar
+   Toolbar_AddButton hToolBar, STD_CUT, IDM_CUT
+   Toolbar_AddButton hToolBar, STD_COPY, IDM_COPY
+   Toolbar_AddButton hToolBar, STD_PASTE, IDM_PASTE
+   Toolbar_AddButton hToolBar, STD_DELETE, IDM_DELETE
+   Toolbar_AddSeparator hToolBar
+   Toolbar_AddButton hToolBar, STD_UNDO, IDM_UNDO
+   Toolbar_AddButton hToolBar, STD_REDOW, IDM_REDOW
+   Toolbar_AddSeparator hToolBar
+   Toolbar_AddButton hToolBar, STD_FILENEW, IDM_FILENEW, 0, BTNS_DROPDOWN
+   Toolbar_AddButton hToolBar, STD_FILEOPEN, IDM_FILEOPEN
+   Toolbar_AddButton hToolBar, STD_FILESAVE, IDM_FILESAVE
+   Toolbar_AddButton hToolBar, STD_PRINTPRE, IDM_PRINTPRE
+   Toolbar_AddSeparator hToolBar
+   Toolbar_AddButton hToolBar, STD_FIND, IDM_FIND
+   Toolbar_AddButton hToolBar, STD_REPLACE, IDM_REPLACE
+   Toolbar_AddSeparator hToolBar
+   Toolbar_AddButton hToolBar, STD_PROPERTIES, IDM_PROPERTIES
+   Toolbar_AddButton hToolBar, STD_PRINT, IDM_PRINT
+   Toolbar_AddSeparator hToolBar
+   Toolbar_AddButton hToolBar, STD_HELP, IDM_HELP
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a toolbar", @WndProc)
+   ' // Disable background erasing
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Set the client size
+   pWindow.SetClientSize(300, 150)
+   ' // Center the window
+   pWindow.Center
+
+   ' // Add a button
+   pWindow.AddControl("Button", , IDCANCEL, "&Close")
+
+   ' // Add a tooolbar
+   DIM hToolBar AS HWND = pWindow.AddControl("Toolbar", , IDC_TOOLBAR)
+   ' // Allow drop down arrows
+   SendMessageW hToolBar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS
+   ' // Add the toolbar buttons
+   AddToolbarButtons hToolBar
+   ' // Size the toolbar
+   SendMessageW hToolBar, TB_AUTOSIZE, 0, 0
+
+   |
+
+   ' // Process event messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+'            CASE IDM_CUT   ' etc.
+'               MessageBoxW hwnd, "You have clicked the Cut button", "Toolbar", MB_OK
+'               EXIT FUNCTION
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' -------------------------------------------------------
+         ' Notification messages are handled here.
+         ' The TTN_GETDISPINFO message is sent by a ToolTip control
+         ' to retrieve information needed to display a ToolTip window.
+         ' ------------------------------------------------------
+         DIM ptnmhdr AS NMHDR PTR              ' // Information about a notification message
+         DIM ptttdi AS NMTTDISPINFOW PTR       ' // Tooltip notification message information
+         DIM wszTooltipText AS WSTRING * 260   ' // Tooltip text
+
+         ptnmhdr = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->code
+            CASE TTN_GETDISPINFOW
+               ptttdi = CAST(NMTTDISPINFOW PTR, lParam)
+               ptttdi->hinst = NULL
+               wszTooltipText = ""
+               SELECT CASE ptttdi->hdr.hwndFrom
+                  CASE SendMessageW(GetDlgItem(hwnd, IDC_TOOLBAR), TB_GETTOOLTIPS, 0, 0)
+                     SELECT CASE ptttdi->hdr.idFrom
+                        CASE IDM_CUT        : wszTooltipText = "Cut"
+                        CASE IDM_COPY       : wszTooltipText = "Copy"
+                        CASE IDM_PASTE      : wszTooltipText = "Paste"
+                        CASE IDM_UNDO       : wszTooltipText = "Undo"
+                        CASE IDM_REDOW      : wszTooltipText = "Redo"
+                        CASE IDM_DELETE     : wszTooltipText = "Delete"
+                        CASE IDM_FILENEW    : wszTooltipText = "File New"
+                        CASE IDM_FILEOPEN   : wszTooltipText = "File Open"
+                        CASE IDM_FILESAVE   : wszTooltipText = "File Save"
+                        CASE IDM_PRINTPRE   : wszTooltipText = "Print Preview"
+                        CASE IDM_PROPERTIES : wszTooltipText = "Properties"
+                        CASE IDM_HELP       : wszTooltipText = "Help"
+                        CASE IDM_FIND       : wszTooltipText = "Find"
+                        CASE IDM_REPLACE    : wszTooltipText = "Replace"
+                        CASE IDM_PRINT      : wszTooltipText = "Print"
+                     END SELECT
+                     IF LEN(wszTooltipText) THEN ptttdi->lpszText = @wszTooltipText
+               END SELECT
+
+         CASE TBN_DROPDOWN
+            DIM ptbn AS TBNOTIFY PTR = CAST(TBNOTIFY PTR, lParam)
+            SELECT CASE ptbn->iItem
+               CASE IDM_FILENEW
+                  DIM rc AS RECT
+                  SendMessageW(ptbn->hdr.hwndFrom, TB_GETRECT, ptbn->iItem, CAST(LPARAM, @rc))
+                  MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, CAsT(LPPOINT, @rc), 2)
+                  DIM hPopupMenu AS HMENU = CreatePopUpMenu
+                  AppendMenuW hPopupMenu, MF_ENABLED, 10001, "Option 1"
+                  AppendMenuW hPopupMenu, MF_ENABLED, 10002, "Option 2"
+                  AppendMenuW hPopupMenu, MF_ENABLED, 10003, "Option 3"
+                  AppendMenuW hPopupMenu, MF_ENABLED, 10004, "Option 4"
+                  AppendMenuW hPopupMenu, MF_ENABLED, 10005, "Option 5"
+                  TrackPopupMenu(hPopupMenu, 0, rc.Left, rc.Bottom, 0, hwnd, NULL)
+                  DestroyMenu hPopupMenu
+            END SELECT
+
+         END SELECT
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Update the size and position of the Toolbar control
+            Toolbar_Autosize(GetDlgItem(hWnd, IDC_TOOLBAR))
+            ' // Resize the buttons
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow->ClientWidth - 95, pWindow->ClientHeight - 35, 75, 23, CTRUE
+         END IF
+
+    	CASE WM_DESTROY
+          ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

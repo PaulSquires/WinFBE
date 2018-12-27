@@ -1,0 +1,174 @@
+2
+FBGUI
+.bas
+CWindow: Visual Styles: Buffered animation
+' ########################################################################################
+' Microsoft Windows
+' File: CW_VS_BufferedAnimation.fbtpl
+' Contents: Demonstrates the use of BeginBufferedAnimation.
+' Note: Click the left mouse button of the mouse to start the animation.
+' Remarks: Minimum operating systems: Windows Vista, Windows 7
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define _WIN32_WINNT &h0602
+#INCLUDE ONCE "windows.bi"
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+#define ANIMATION_DURATION 500
+#define IDC_LABEL 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Required: Initialize buffered painting for the current thread.
+   IF FAILED(BufferedPaintInit) THEN EXIT FUNCTION
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Buffered animation", @WndProc)
+   pWindow.Center
+
+   ' // Add a label
+   pWindow.AddControl("Label", , IDC_LABEL, "  Click the icon with the mouse left button", 70, 10, 235, 23)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Required: Closes down buffered painting for the current thread.
+   BufferedPaintUnInit
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Paints the icon
+' ========================================================================================
+SUB PaintIcon (BYVAL hwnd AS HWND, BYVAL hdc AS HDC, BYVAL nState AS LONG)
+
+   DIM rc AS RECT
+   GetClientRect(hwnd, @rc)
+   FillRect(hdc, @rc, GetStockObject(WHITE_BRUSH))
+   DIM hIcon AS HICON = LoadIcon(NULL, IIF(nState = 1, IDI_APPLICATION, IDI_ERROR))
+   IF hIcon THEN DrawIcon(hdc, 10, 10, hIcon)
+   ' // Note: No need to call DestroyIcon with icons loaded with LoadIcon
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM hdc AS HDC                              ' // Device context handle
+   DIM ps AS PAINTSTRUCT                       ' // PAINTSTRUCT structure
+   DIM animParams AS BP_ANIMATIONPARAMS        ' // Animation parameters
+   DIM hbpAnimation AS HANIMATIONBUFFER        ' // Handle to the buffered paint animation
+   DIM hdcFrom AS HDC                          ' // Handle of the DC where the application should paint the initial state of the animation
+   DIM hdcTo AS HDC                            ' // Handle of the DC where the application should paint the final state of the animation
+   DIM rc AS RECT                              ' // Coordinates of the window's client area
+   STATIC fCurrentState AS LONG                ' // Boolean flag
+   STATIC fNewState AS LONG                    ' // Boolean flag
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         fCurrentState = CTRUE
+         fNewState = CTRUE
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_LBUTTONDOWN
+         ' // Start animation
+         fNewState = NOT fCurrentState
+         InvalidateRect(hwnd, NULL, CTRUE)
+         EXIT FUNCTION
+
+      CASE WM_PAINT
+         hdc = BeginPaint(hwnd, @ps)
+         IF hdc THEN
+            ' // See if this paint was generated by a soft-fade animation
+            IF BufferedPaintRenderAnimation(hwnd, hdc) = 0 THEN
+               animParams.cbSize = SIZEOF(BP_ANIMATIONPARAMS)
+               animParams.style = BPAS_LINEAR
+               ' // Check if animation is needed. If not set dwDuration to 0
+               animParams.dwDuration = IIF(fCurrentState <> fNewState, ANIMATION_DURATION, 0)
+               GetClientRect(hwnd, @rc)
+               hbpAnimation = BeginBufferedAnimation(hwnd, hdc, @rc, _
+                  BPBF_COMPATIBLEBITMAP, NULL, @animParams, @hdcFrom, @hdcTo)
+               IF hbpAnimation THEN
+                  IF hdcFrom THEN
+                     PaintIcon(hwnd, hdcFrom, fCurrentState)
+                  END IF
+                  IF hdcTo THEN
+                     PaintIcon(hwnd, hdcTo, fNewState)
+                  END IF
+                  fCurrentState = fNewState
+                  EndBufferedAnimation(hbpAnimation, CTRUE)
+               ELSE
+                  PaintIcon(hwnd, hdc, fCurrentState)
+               END IF
+            END IF
+            EndPaint hwnd, @ps
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_CTLCOLORSTATIC
+         ' // Return the handle of the brush used to paint background
+         IF GetDlgCtrlID(CAST(HWND, lParam)) = IDC_LABEL THEN
+            FUNCTION = CAST(LRESULT, GetStockObject(WHITE_BRUSH))
+            EXIT FUNCTION
+         END IF
+
+      CASE WM_SIZE
+         ' // Stops the buffered animation
+         BufferedPaintStopAllAnimations hwnd
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

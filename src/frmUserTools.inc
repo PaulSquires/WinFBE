@@ -179,7 +179,7 @@ Function CreateUserTools_AcceleratorTable() As Long
       end if   
    NEXT
    InsertMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION or MF_POPUP Or nEnabled, _
-               Cast(UINT_PTR, hPopUpMenu), L(305,"&Tools"))
+               Cast(UINT_PTR, hPopUpMenu), L(305,"Tools"))
    
    dim as HMENU hToolsMenu = GetSubMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION)
 
@@ -353,12 +353,8 @@ end function
 ' ========================================================================================
 Function frmUserTools_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 
-   ' Retrieve a reference to the CWindow class from the CREATESTRUCT structure
-   'Dim pCreateStruct As CREATESTRUCT Ptr = lpCreateStructPtr
-   'Dim pWindow As CWindow Ptr = Cast(CWindow Ptr, pCreateStruct->lpCreateParams)
-
    ' This is a modal popup window so disable the parent window
-   EnableWindow GetParent(HWnd), False
+   DisableAllModeless()
 
    '  Message cracker macro expects a True to be returned for a successful
    '  OnCreate handler even though returning -1 from a standard WM_CREATE
@@ -570,7 +566,7 @@ End Function
 ' ========================================================================================
 Function frmUserTools_OnClose(HWnd As HWnd) As LRESULT
    ' Enables parent window keeping parent's zorder
-   EnableWindow( GetParent(HWnd), True )
+   EnableAllModeless()
    DestroyWindow( HWnd )
    Function = 0
 End Function
@@ -616,13 +612,14 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
 
    DIM hBitmap AS HBITMAP
    dim hCtrl as HWnd
+   dim wszImage as wstring * 100
    
    '  Create the main window and child controls
    Dim pWindow as CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
    Dim As HWnd hForm = _
-   pWindow->Create(hWndParent, trim(L(289,"&User Tools..."), any "&."), _
+   pWindow->Create(hWndParent, L(289,"User Tools"), _
         @frmUserTools_WndProc, 0, 0, 683, 465, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
@@ -640,28 +637,31 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    
    hCtrl = _
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDUP, "", 166, 388, 28, 28, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMUSERTOOLS_CMDUP, "", 166, 388, 28, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_ARROWUP"), 0, false, IMAGE_BITMAP, 0)
-   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-   IF hBitmap THEN DeleteObject(hBitmap)
+   wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWUP", "IMAGE_ARROWUP16")
+         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
+         SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+         IF hBitmap THEN DeleteObject(hBitmap)
 
    hCtrl = _
-   pWindow->AddControl("ICONBUTTON", , IDC_FRMUSERTOOLS_CMDDOWN, "", 199, 388, 28, 28, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMUSERTOOLS_CMDDOWN, "", 199, 388, 28, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, WSTR("IMAGE_ARROWDOWN"), 0, false, IMAGE_BITMAP, 0)
-   SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
-   IF hBitmap THEN DeleteObject(hBitmap)
+   wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWDOWN", "IMAGE_ARROWDOWN16")
+         hBitmap = AfxGdipImageFromRes(pWindow->InstanceHandle, wszImage, 0, false, IMAGE_BITMAP, 0)
+         SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
+         IF hBitmap THEN DeleteObject(hBitmap)
 
-   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL1, L(290,"Tool Name:"), 230, 25, 95, 18, _
+
+   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL1, L(290,"Tool Name") & ":", 230, 25, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMUSERTOOLS_TXTTOOLNAME, "", 334, 22, 305, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL2, L(291,"Command:"), 230, 50, 95, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL2, L(291,"Command") & ":", 230, 50, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMUSERTOOLS_TXTCOMMAND, "", 334, 47, 267, 20, _
@@ -670,7 +670,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDC_FRMUSERTOOLS_CMDBROWSEEXE, "...", 610, 46, 30, 23, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL3, L(292,"Parameters:"), 230, 75, 95, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL3, L(292,"Parameters") & ":", 230, 75, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMUSERTOOLS_TXTPARAMETERS, "", 334, 72, 305, 20, _
@@ -679,7 +679,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL4, "<P> Project Name  <S> Main Source File  <W> Current Word  <E> Exe/DLL Name", 334, 101, 302, 36, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL5, L(293,"Working Folder:"), 230, 177, 95, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL5, L(293,"Working Folder") & ":", 230, 177, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMUSERTOOLS_TXTWORKINGFOLDER, "", 334, 174, 267, 20, _
@@ -688,7 +688,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDC_FRMUSERTOOLS_CMDBROWSEFOLDER, "...", 610, 173, 30, 23, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL6, L(294,"Accelerator:"), 230, 205, 95, 18, _
+   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL6, L(294,"Accelerator") & ":", 230, 205, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("CHECKBOX", , IDC_FRMUSERTOOLS_CHKCTRL, "Ctrl", 335, 202, 48, 19, _
@@ -758,7 +758,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    ' Process Windows messages
    Function = pWindow->DoEvents(nCmdShow)
    
-   ' Delete the frmOptions CWindow class manually allocated memory 
+   ' Delete the frmUserTools CWindow class manually allocated memory 
    Delete pWindow
 
    function = 0

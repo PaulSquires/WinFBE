@@ -51,7 +51,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 
    ' If the Find/Replace window is open then close it.
    DestroyWindow(HWND_FRMFINDREPLACE)
-   DestroyWindow( HWND_FRMFNLIST )
+   DestroyWindow( HWND_FRMFUNCTIONLIST )
    DestroyWindow(HWND_FRMVDTOOLBOX)
 
    ' Reset the Project variables
@@ -64,7 +64,7 @@ Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.ProjectManifest      = false
    gApp.ProjectNotes         = ""
    gApp.ProjectCommandLine   = ""
-    
+       
    ' Clear any previous info from the Output windows
    frmOutput_ResetAllControls()
    
@@ -302,7 +302,7 @@ Function OnCommand_FileOpen( ByVal HWnd As HWnd, byval bShowInTab as Boolean = t
    dim pDoc as clsDocument ptr
    
    ' Display the Open File Dialog
-   Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd)
+   Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd, IDM_FILEOPEN)
    If pItems = Null Then Exit Function
    Dim dwItemCount As Long, i As Long, pItem As IShellItem Ptr, pwszName As WString Ptr
    pItems->lpVtbl->GetCount(pItems, @dwItemCount)
@@ -428,7 +428,7 @@ Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = Fals
    ' Ensure that the Tab displays the correct filename in case it was changed
    gTTabCtl.SetTabText(-1)
    frmMain_SetFocusToCurrentCodeWindow
-   frmFnList_UpdateListBox()
+   frmFunctionList_UpdateListBox()
 
    Function = 0
 End Function
@@ -531,7 +531,7 @@ Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       End If   
    Next
    frmMain_SetFocusToCurrentCodeWindow
-   frmFnList_UpdateListBox()
+   frmFunctionList_UpdateListBox()
 
    Function = 0
 End Function

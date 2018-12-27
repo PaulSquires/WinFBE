@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CWmiDisp Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="windows-management-instrumentation-(wmi)">Windows Management Instrumentation (WMI)</h1>
+<p>Windows Management Instrumentation (WMI) is the infrastructure for management data and operations on Windows-based operating systems.</p>
+<p><strong>CWmiServices</strong> is a wrapper class on top of the WMI scripting interfaces.</p>
+<p><strong>CWmiServices</strong> supports three ways of retrieving information.</p>
+<ul>
+<li>The first one uses an enumerator (the standard <strong>IEnumVARIANT</strong> interface).</li>
+<li>The second way is to call the <strong>GetNamedProperties</strong> method after executing the query. <strong>GetNamedProperties</strong> generates a named collection of properties. This has the advantage of not having to use <strong>CDispInvoke</strong>.</li>
+<li>The third way is to use the <strong>Get</strong> method. It retrieves an object, that is either a class definition or an instance, based on the specified object path. Using this object, it generates a named collection of properties. The disadvantage over <strong>EcexuteQuery</strong> is that you can't choose the properties to return: it returns all the properties of the specified WMI class.</li>
+</ul>
+<p><strong>Include file</strong>: CWmiDisp.inc.</p>
+<h1 id="constructors">Constructors</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructor1">Constructor(Moniker)</a></td>
+<td>Connects to WMI using a moniker.</td>
+</tr>
+<tr class="even">
+<td><a href="#Constructor2">Constructor(Server)</a></td>
+<td>Connects to the namespace that is specified on the <em>cbsNamespace</em> parameter on the computer that is specified in the <em>cbsServer</em> parameter. The target computer can be either local or remote, but it must have WMI installed.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="methods">Methods</h1>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#ExecQuery">ExecQuery</a></td>
+<td>Executes a query to retrieve objects.</td>
+</tr>
+<tr class="even">
+<td><a href="#Get">Get</a></td>
+<td>Retrieves an object, that is either a class definition or an instance, based on the object path.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetErrorCodeText">GetErrorCodeText</a></td>
+<td>Returns the text string description associated with the WMI error code.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetFacilityCodeText">GetFacilityCodeText</a></td>
+<td>Returns the name of the subsystem where the error occurred, such as &quot;Windows&quot;, &quot;WBEM&quot;, &quot;SSPI&quot;, or &quot;RPC&quot;.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetLastResult">GetLastResult</a></td>
+<td>Returns the last result code.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetNamedProperties">GetNamedProperties</a></td>
+<td>Retrieves a named collection of the properties for the current class or instance.</td>
+</tr>
+<tr class="odd">
+<td><a href="#InstancesOf">InstancesOf</a></td>
+<td>Creates an enumerator that returns the instances of a specified class according to the user-specified selection criteria.</td>
+</tr>
+<tr class="even">
+<td><a href="#NewEnum">NewEnum</a></td>
+<td>Retrieves an enumerator for the collection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#NextObject">NextObject</a></td>
+<td>Retrieves the next item in the enumeration sequence.</td>
+</tr>
+<tr class="even">
+<td><a href="#ObjectsCount">ObjectsCount</a></td>
+<td>Returns the number of objects in the collection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ObjectSetPtr">ObjectSetPtr</a></td>
+<td>Returns a pointer to the <strong>ISWbemObjectSet</strong> interface. Don't call <strong>IUnknown_Release</strong> on it.</td>
+</tr>
+<tr class="even">
+<td><a href="#PropertySetPtr">PropertySetPtr</a></td>
+<td>Returns a pointer to the <strong>ISWbemPropertySet</strong> interface. Don't call <strong>IUnknown_Release</strong> on it.</td>
+</tr>
+<tr class="odd">
+<td><a href="#PropsCount">PropsCount</a></td>
+<td>Returns the number of objects in the property set collection.</td>
+</tr>
+<tr class="even">
+<td><a href="#PropValue">PropValue</a></td>
+<td>Retrieves de variant value of the WMI property.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ResetEnum">ResetEnum</a></td>
+<td>Resets the enumeration sequence to the beginning.</td>
+</tr>
+<tr class="even">
+<td><a href="#ServicesObj">ServicesObj</a></td>
+<td>Returns a counted reference of the underlying dispatch pointer. You must release it, e.g. calling call <strong>IUnknown_Release</strong> or the function <strong>AfxSafeRelease</strong> when no longer need it.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ServicesPtr">ServicesPtr</a></td>
+<td>Returns a pointer to the ISWbemServices interface. Don't call <strong>IUnknown_Release</strong> on it.</td>
+</tr>
+<tr class="even">
+<td><a href="#WmiDateToStr">WmiDateToStr</a></td>
+<td>Converts a date and time value in the CIM DATETIME format to a string containing the date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="odd">
+<td><a href="#WmiTimeToFileTime">WmiTimeToFileTime</a></td>
+<td>Converts a date and time value in the CIM DATETIME format to the FILETIME format.</td>
+</tr>
+<tr class="even">
+<td><a href="#WmiTimeToStr">WmiTimeToStr</a></td>
+<td>Converts a date and time value in the CIM DATETIME format to a string containing the date based on the specified mask, e.g. &quot;hh':'mm':'ss tt&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructor(moniker)"><a name="Constructor1"></a>Constructor(Moniker)</h1>
+<p>Connects to WMI using a moniker.</p>
+<pre><code>CONSTRUCTOR CWmiServices (BYREF wszDisplayName AS WSTRING)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszDisplayName</em></td>
+<td>The display name of the object to be created.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples">Examples</h4>
+<pre><code>' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+</code></pre>
+<p>This example uses <strong>CWmiServices</strong> and <strong>CDispInvoke</strong> to easily set the specified printer as the default printer:</p>
+<pre><code>' // Connect with WMI in the local computer and get the properties of the specified printer
+DIM pDisp AS CDispInvoke = CWmiServices( _
+   $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2:&quot; &amp; _
+   &quot;Win32_Printer.DeviceID='OKI B410'&quot;).ServicesObj
+
+' // Set the printer as the default printer
+DIM cvRes AS CVAR = pDisp.Invoke(&quot;SetDefaultPrinter&quot;)
+print &quot;Result: &quot;, cvRes.ValLong
+</code></pre>
+<h1 id="constructor(server)"><a name="Constructor2"></a>Constructor(Server)</h1>
+<p>Connects to the namespace that is specified on the <em>cbsNamespace</em> parameter on the computer that is specified in the <em>cbsServer</em> parameter. The target computer can be either local or remote, but it must have WMI installed.</p>
+<pre><code>CONSTRUCTOR CWmiServices (BYREF cbsServer AS CBSTR, BYREF cbsNamespace AS CBSTR, BYREF cbsUser AS CBSTR = &quot;&quot;, _
+   BYREF cbsPassword AS CBSTR = &quot;&quot;, BYREF cbsLocale AS CBSTR = &quot;&quot;, BYREF cbsAuthority AS CBSTR = &quot;&quot;, _
+   BYVAL iSecurityFlags AS LONG = wbemConnectFlagUseMaxWait)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsServer</em></td>
+<td>Computer name to which you are connecting. If the remote computer is in a different domain than the user account under which you log in, then use the fully qualified computer name. If you do not provide this parameter, the call defaults to the local computer.<br>Example: server1.network.fabrikam<br>You also can use an IP address in this parameter. If the IP address is in IPv6 format, the target computer must be running IPv6. An address in IPv4 looks like 111.222.333.444. An IP address in IPv6 format looks like 2010:836B:4179::836B:4179</td>
+</tr>
+<tr class="even">
+<td><em>cbsNamespace</em></td>
+<td>String that specifies the namespace to which you log on. For example, to log on to the root\default namespace, use root\default. If you do not specify this parameter, it defaults to the namespace that is configured as the default namespace for scripting.<br>Example: DIM pServices AS CWmiServices = CWmiServices(&quot;.&quot;, &quot;root\cimv2&quot;)<br>where &quot;.&quot; is a shortcut for the local computer.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsPassword</em></td>
+<td>String that specifies the password to use when attempting to connect. Leave the parameter blank to use the current security context. The <em>cbsPassword</em> parameter should only be used with connections to remote WMI servers. If you attempt to specify <em>cbsPassword</em> for a local WMI connection, the connection attempt fails. If Kerberos authentication is in use then the username and password that is specified in <em>cbsUser</em> and <em>cbsPassword</em> cannot be intercepted on the network.</td>
+</tr>
+<tr class="even">
+<td><em>cbsLocale</em></td>
+<td>String that specifies the localization code. If you want to use the current locale, leave it blank. If not blank, this parameter must be a string that indicates the desired locale where information must be retrieved. For Microsoft locale identifiers, the format of the string is &quot;MS_xxxx&quot;, where xxxx is a string in the hexadecimal form that indicates the LCID. For example, American English would appear as &quot;MS_409&quot;.</td>
+</tr>
+<tr class="odd">
+<td><em>cbsAuthority</em></td>
+<td>Optional.<br>&quot;&quot;: This parameter is optional. However, if it is specified, only Kerberos or NTLMDomain can be used.<br> &quot;Kerberos&quot;: If the <em>cbsAuthority</em> parameter begins with the string &quot;Kerberos:&quot;, then Kerberos authentication is used and this parameter should contain a Kerberos principal name. The Kerberos principal name is specified as Kerberos:domain, such as Kerberos:fabrikam where fabrikam is the server to which you are attempting to connect. Example: &quot;Kerberos:DOMAIN&quot;<br>&quot;NTLMDomain&quot;: To use NT Lan Manager (NTLM) authentication, you must specify it as NTLMDomain:domain, such as NTLMDomain:fabrikam where fabrikam is the name of the domain. Example: &quot;NTLMDomain:DOMAIN&quot;<br>If you leave this parameter blank, the operating system negotiates with COM to determine whether NTLM or Kerberos authentication is used. This parameter should only be used with connections to remote WMI servers. If you attempt to set the authority for a local WMI connection, the connection attempt fails.<br>Note: If the domain is specified in <em>cbsUser</em>, which is the preferred location, then it must not be specified here. Specifying the domain in both parameters results in an Invalid Parameter error.</td>
+</tr>
+<tr class="even">
+<td><em>iSecurityFlags</em></td>
+<td>Optional. Used to pass flag values to the <em>ConnectServer</em> method of the <strong>ISWbemLocator</strong> interface.<br><em>0 (&amp;h0)</em>: A value of 0 for this parameter causes the call to <em>ConnectServer</em> to return only after the connection to the server is established. This could cause your program to stop responding indefinitely if the connection cannot be established.<br><em>wbemConnectFlagUseMaxWait (128 (&amp;H80))</em>&lt;&gt; The <em>ConnectServer</em> call is guaranteed to return in 2 minutes or less. Use this flag to prevent your program from ceasing to respond indefinitely if the connection cannot be established.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>If successful, WMI returns an <strong>SWbemServices</strong> object that is bound to the namespace that is specified in <em>cbsNamespace</em> on the computer that is specified in <em>cbsServer</em>.</p>
+<p><strong>Usage example</strong> (with the local computer):</p>
+<pre><code>DIM pServices AS CWmiServices = CWmiServices(&quot;.&quot;, &quot;root\\cimv2&quot;)
+</code></pre>
+<h3 id="remarks">Remarks</h3>
+<p>The <em>ConnectServer</em> method is often used when connecting to an account with a different username and password—credentials—on a remote computer because you cannot specify a different password in a moniker string.</p>
+<p>Using an IPv4 address to connect to a remote server may result in unexpected behavior. The likely cause is stale DNS entries in your environment. In these circumstances, the stale PTR entry for the machine will be used, with unpredictable results. To avoid this behavior, you can append a period (&quot;.&quot;) to the IP address before calling <em>ConnectServer</em>. This causes the reverse DNS lookup to fail, but may allow the <em>ConnectServer</em> call to succeed on the correct machine.</p>
+<h1 id="execquery"><a name="ExecQuery"></a>ExecQuery</h1>
+<p>Executes a query to retrieve objects. These objects are available through the retrieved <strong>SWbemObjectSet</strong> collection.</p>
+<pre><code>FUNCTION ExecQuery (BYREF cbsQuery AS CBSTR, BYVAL iFlags AS LONG = wbemFlagReturnWhenComplete) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsQuery</em></td>
+<td>Required. String that contains the text of the query. This parameter cannot be blank.</td>
+</tr>
+<tr class="even">
+<td><em>iFlags</em></td>
+<td>Optional. Integer that determines the behavior of the query and determines whether this call returns immediately. The default value for this parameter is <em>wbemFlagReturnWhenComplete</em>. This parameter can accept the following values.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wbemFlagForwardOnly</em></td>
+<td>Causes a forward-only enumerator to be returned. Forward-only enumerators are generally much faster and use less memory than conventional enumerators, but they do not allow calls to <strong>SWbemObject.Clone_</strong>.</td>
+</tr>
+<tr class="even">
+<td><em>wbemFlagReturnWhenComplete</em></td>
+<td>Causes this call to block until the query is complete. This flag calls the method in the synchronous mode.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemFlagBidirectional</em></td>
+<td>Causes WMI to retain pointers to objects of the enumeration until the client releases the enumerator.</td>
+</tr>
+<tr class="even">
+<td><em>wbemFlagReturnImmediately</em></td>
+<td>Causes the call to return immediately.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemQueryFlagPrototype</em></td>
+<td>Used for prototyping. This flag stops the query from happening and returns an object that looks like a typical result object.</td>
+</tr>
+<tr class="even">
+<td><em>wbemFlagUseAmendedQualifiers</em></td>
+<td>Causes WMI to return class amendment data with the base class definition.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>Returns S_OK (0) on success, or an HRESULT code on failure.</p>
+<h4 id="examples-1">Examples</h4>
+<p>Using an enumerator (the standard <strong>IEnumVARIANT</strong> interface) to retrieve the information:</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT Caption, SerialNumber FROM Win32_BIOS&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Count: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+' // Enumerate the objects using the standard IEnumVARIANT enumerator (NextObject method)
+' // and retrieve the properties using the CDispInvoke class.
+DIM pDispServ AS CDispInvoke = pServices.NextObject
+IF pDispServ.DispPtr THEN
+   PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;)
+   PRINT &quot;Serial number: &quot;; pDispServ.Get(&quot;SerialNumber&quot;)
+END IF
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>If the query returns more than one object, then we will use a loop:</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT * FROM Win32_Printer&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Count: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+
+' // Enumerate the objects
+FOR i AS LONG = 0 TO nCount - 1
+   PRINT &quot;--- Index &quot; &amp; STR(i) &amp; &quot; ---&quot;
+   DIM pDispServ AS CDispInvoke = pServices.NextObject
+   IF pDispServ.DispPtr THEN
+      PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;)
+      PRINT &quot;Capabilities &quot;; pDispServ.Get(&quot;Capabilities&quot;)
+   END IF
+NEXT
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>To improve enumeration performance set the <em>iFlags</em> parameter if the <strong>ExecQuery</strong> method to <em>WbemFlagReturnImmediately</em> and <em>WbemFlagForwardOnly</em> (the combined value of these flags is 48) to allow semisynchronous return of the data with an enumerator that discards each item from WMI as it is delivered. In this case don't call the <strong>ObjectsCount</strong> method because it will return 0, since the operation has not been completed.</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT Caption, SerialNumber FROM Win32_BIOS&quot;, 48)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Enumerate the objects using the standard IEnumVARIANT enumerator (NextObject method)
+' // and retrieve the properties using the CDispInvoke class.
+DIM pDispServ AS CDispInvoke = pServices.NextObject
+IF pDispServ.DispPtr THEN
+   PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;).ToStr
+   PRINT &quot;Serial number: &quot;; pDispServ.Get(&quot;SerialNumber&quot;).ToStr
+END IF
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>If there are several objects in the collection, we can use a loop:</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT * FROM Win32_Printer&quot;, 48)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Enumerate the objects using the standard IEnumVARIANT enumerator (NextObject method)
+' // and retrieve the properties using the CDispInvoke class.
+DIM pDispServ AS CDispInvoke
+DO
+   pDispServ = pServices.NextObject
+   IF pDispServ.DispPtr = NULL THEN EXIT DO
+   PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;).ToStr
+   PRINT &quot;Capabilities &quot;; pDispServ.Get(&quot;Capabilities&quot;).ToStr
+LOOP
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>Calling the <strong>GetNamedProperties</strong> method after executing the query. <strong>GetNamedProperties</strong> generates a named collection of properties. This has the advantage of not having to use <strong>CDispInvoke</strong>.</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT Caption, SerialNumber FROM Win32_BIOS&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Number of objects: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+
+' // Get a collection of named properties
+IF pServices.GetNamedProperties &lt;&gt; S_OK THEN PRINT &quot;Failed to get the named properties&quot; : SLEEP : END
+
+' // Retrieve the value of the properties
+'DIM cv AS CVAR = pServices.PropValue(&quot;Caption&quot;)
+'PRINT cv.ToStr
+PRINT pServices.PropValue(&quot;Caption&quot;).ToStr
+PRINT pServices.PropValue(&quot;SerialNumber&quot;).ToStr
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>Using a loop:</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT * FROM Win32_Printer&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Number of objects: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+
+' // Enumerate the objects
+FOR i AS LONG = 0 TO nCount - 1
+   PRINT &quot;--- Index &quot; &amp; STR(i) &amp; &quot; ---&quot;
+   ' // Get a collection of named properties
+   IF pServices.GetNamedProperties(i) = S_OK THEN
+      PRINT pServices.PropValue(&quot;Caption&quot;).ToStr
+      PRINT pServices.PropValue(&quot;Capabilities&quot;).ToStr
+   END IF
+NEXT
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<h1 id="get"><a name="Get"></a>Get</h1>
+<p>Retrieves an object, that is either a class definition or an instance, based on the object path. This method retrieves only objects from the namespace that is associated with the current <strong>SWbemServices</strong> object.</p>
+<pre><code>FUNCTION Get (BYREF cbsObjectPath AS CBSTR, BYVAL iFlags AS LONG = 0, _
+   BYVAL objWbemNamedValueSet AS Afx_IDispatch PTR = NULL) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsObjectPath</em></td>
+<td>String that contains the object path of the object to retrieve. If this value is empty, the empty object that is returned can become a new class.</td>
+</tr>
+<tr class="even">
+<td><em>iFlags</em></td>
+<td>Optional. Integer value that determines the behavior of the query. This parameter can accept the following value: <em>wbemFlagUseAmendedQualifiers</em>: Causes WMI to return class amendment data with the base class definition.</td>
+</tr>
+<tr class="odd">
+<td><em>objWbemNamedValueSet</em></td>
+<td>Optional. Typically, this is undefined. Otherwise, this is an <strong>SWbemNamedValueSet</strong> object whose elements represent the context information that can be used by the provider that is servicing the request. A provider that supports or requires such information must document the recognized value names, data type of the value, allowed values, and semantics.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>S_OK on success or an error code.</p>
+<p>May return one of the error codes in the following list:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Error</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wbemErrAccessDenied</em></td>
+<td>-2147749891 (&amp;h80041003)</td>
+<td>Current user does not have the permission to access the object.</td>
+</tr>
+<tr class="even">
+<td><em>wbemErrFailed</em></td>
+<td>-2147749889 (&amp;h80041001)</td>
+<td>Unspecified error.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemErrInvalidParameter</em></td>
+<td>-2147749896 (&amp;h80041008)</td>
+<td>A specified parameter is not valid.</td>
+</tr>
+<tr class="even">
+<td><em>wbemErrInvalidObjectPath</em></td>
+<td>-2147749946 (&amp;h8004103A)</td>
+<td>Specified path was not valid.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemErrNotFound</em></td>
+<td>-2147749890 (&amp;h80041002)</td>
+<td>Requested object could not be found.</td>
+</tr>
+<tr class="even">
+<td><em>wbemErrOutOfMemory</em></td>
+<td>-2147749894 (&amp;h80041006)</td>
+<td>Not enough memory to complete the operation.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example">Example</h4>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+ 
+' // Get an instance of the printer &quot;OKI B410&quot; --&gt; change me
+DIM hr AS HRESULT = pServices.Get(&quot;Win32_Printer.DeviceID='OKI B410'&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Number of properties
+PRINT &quot;Number of properties: &quot;, pServices.PropsCount
+PRINT
+
+' // Display some properties
+PRINT &quot;Port name: &quot;; pServices.PropValue(&quot;PortName&quot;)
+PRINT &quot;Attributes: &quot;; pServices.PropValue(&quot;Attributes&quot;)
+PRINT &quot;Paper sizes supported: &quot;; pServices.PropValue(&quot;PaperSizesSupported&quot;)
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>Example</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+'DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+' Use the constructor for server connection, just for trying...
+DIM pServices AS CWmiServices = CWmiServices(&quot;.&quot;, &quot;root\cimv2&quot;)
+IF pServices.ServicesPtr = NULL THEN END
+ 
+ '// Get an instance of a file --&gt; change me
+DIM cbsPath AS CBSTR = ExePath &amp; &quot;\EX_CWMI_Get_02.bas&quot;   ' --&gt; change me
+DIM hr AS HRESULT = pServices.Get(&quot;CIM_DataFile.Name='&quot; &amp; cbsPath &amp; &quot;'&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Number of properties
+PRINT &quot;Number of properties: &quot;, pServices.PropsCount
+PRINT
+
+' // Display some properties
+PRINT &quot;Relative path: &quot;; pServices.PropValue(&quot;Path&quot;)
+PRINT &quot;FileName: &quot;; pServices.PropValue(&quot;FileName&quot;)
+PRINT &quot;Extension: &quot;; pServices.PropValue(&quot;Extension&quot;)
+PRINT &quot;Size: &quot;; pServices.PropValue(&quot;Filesize&quot;)
+'PRINT pServices.PropValue(&quot;LastModified&quot;)
+PRINT &quot;Date last modified: &quot;; pServices.WmiDateToStr(pServices.PropValue(&quot;LastModified&quot;), &quot;dd-MM-yyyy&quot;)   ' // change the mask if needed
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<h1 id="geterrorcodetext"><a name="GetErrorCodeText"></a>GetErrorCodeText</h1>
+<p>Returns the text string description associated with the WMI error code.</p>
+<pre><code>FUNCTION GetErrorCodeText (BYVAL hRes AS HRESULT) AS CBSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hRes</em></td>
+<td>The WMI error code.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>The localized text string description associated with the WMI error code.</p>
+<h1 id="getfacilitycodetext"><a name="GetFacilityCodeText"></a>GetFacilityCodeText</h1>
+<p>Returns the name of the subsystem where the error occurred, such as &quot;Windows&quot;, &quot;WBEM&quot;, &quot;SSPI&quot;, or &quot;RPC&quot;.</p>
+<pre><code>FUNCTION GetFacilityCodeText (BYVAL hRes AS HRESULT) AS CBSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hRes</em></td>
+<td>The WMI error code.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>The name of the subsystem where the error occurred.</p>
+<h1 id="getlastresult"><a name="GetLastResult"></a>GetLastResult</h1>
+<p>Returns the result code returned by the last executed method.</p>
+<pre><code>FUNCTION GetLastResult () AS HRESULT
+</code></pre>
+<h1 id="getnamedproperties"><a name="GetNamedProperties"></a>GetNamedProperties</h1>
+<p>Retrieves a named collection of the properties for the current class or instance.</p>
+<pre><code>FUNCTION GetNamedProperties (BYVAL idx AS LONG = 0) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>idx</em></td>
+<td>The zero-based index of the member of the collection.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>S_OK on success or an error code.</p>
+<p>May return one of the error codes in the following list:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Error</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wbemErrFailed</em></td>
+<td>-2147749889 (&amp;h80041001)</td>
+<td>Unspecified error.</td>
+</tr>
+<tr class="even">
+<td><em>wbemErrInvalidParameter</em></td>
+<td>-2147749896 (&amp;h80041008)</td>
+<td>A specified parameter is not valid.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemErrOutOfMemory</em></td>
+<td>-2147749894 (&amp;h80041006)</td>
+<td>Not enough memory to complete the operation.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples-2">Examples</h4>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT Caption, SerialNumber FROM Win32_BIOS&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Number of objects: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+
+' // Get a collection of named properties
+IF pServices.GetNamedProperties &lt;&gt; S_OK THEN PRINT &quot;Failed to get the named properties&quot; : SLEEP : END
+
+' // Retrieve the value of the properties
+'DIM cv AS CVAR = pServices.PropValue(&quot;Caption&quot;)
+'PRINT cv
+PRINT pServices.PropValue(&quot;Caption&quot;)
+PRINT pServices.PropValue(&quot;SerialNumber&quot;)
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>Using a loop:</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT * FROM Win32_Printer&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Number of objects: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+
+' // Enumerate the objects
+FOR i AS LONG = 0 TO nCount - 1
+   PRINT &quot;--- Index &quot; &amp; STR(i) &amp; &quot; ---&quot;
+   ' // Get a collection of named properties
+   IF pServices.GetNamedProperties(i) = S_OK THEN
+      PRINT pServices.PropValue(&quot;Caption&quot;)
+      PRINT pServices.PropValue(&quot;Capabilities&quot;)
+   END IF
+NEXT
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<h1 id="instancesof"><a name="InstancesOf"></a>InstancesOf</h1>
+<p>Creates an enumerator that returns the instances of a specified class according to the user-specified selection criteria. This method implements a simple query. More complex queries may require the use of the <strong>ExecQuery</strong> method. By default, the method is called in the semisynchronous mode.</p>
+<pre><code>FUNCTION InstancesOf (BYREF cbsClass AS CBSTR, BYVAL iFlags AS LONG = wbemFlagReturnImmediately) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsClass</em></td>
+<td>Required. String that contains the name of the class for which instances are desired. This parameter cannot be blank.</td>
+</tr>
+<tr class="even">
+<td><em>iFlags</em></td>
+<td>Optional. This parameter determines how detailed the call enumerates and if this call returns immediately. The default value for this parameter is <em>wbemFlagReturnImmediately</em>. This parameter can accept the following values.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Flag</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wbemFlagForwardOnly</em></td>
+<td>Causes a forward-only enumerator to be returned. Forward-only enumerators are generally much faster and use less memory than conventional enumerators, but they do not allow calls to <strong>SWbemObject.Clone_</strong>.</td>
+</tr>
+<tr class="even">
+<td><em>wbemFlagReturnWhenComplete</em></td>
+<td>Causes this call to block until the query is complete. This flag calls the method in the synchronous mode.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemFlagBidirectional</em></td>
+<td>Causes WMI to retain pointers to objects of the enumeration until the client releases the enumerator.</td>
+</tr>
+<tr class="even">
+<td><em>wbemFlagReturnImmediately</em></td>
+<td>Causes the call to return immediately.</td>
+</tr>
+<tr class="odd">
+<td><em>wbemQueryFlagPrototype</em></td>
+<td>Used for prototyping. This flag stops the query from happening and returns an object that looks like a typical result object.</td>
+</tr>
+<tr class="even">
+<td><em>wbemFlagUseAmendedQualifiers</em></td>
+<td>Causes WMI to return class amendment data with the base class definition.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>S_OK on success or an error code.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Retrieve the instances of
+DIM hr AS HRESULT = pServices.InstancesOf(&quot;Win32_Printer&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Enumerate the objects using the standard IEnumVARIANT enumerator (NextObject method)
+' // and retrieve the properties using the CDispInvoke class.
+DIM pDispServ AS CDispInvoke
+DO
+   pDispServ = pServices.NextObject
+   IF pDispServ.DispPtr = NULL THEN EXIT DO
+   PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;)
+   PRINT &quot;Capabilities &quot;; pDispServ.Get(&quot;Capabilities&quot;)
+LOOP
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<h1 id="newenum"><a name="NewEnum"></a>NewEnum</h1>
+<p>Retrieves an enumerator for the collection.</p>
+<p>Note: If <strong>ExecQuery</strong> has been called using the <em>wbemFlagReturnImmediately</em> flag, the enumerator won't be available until the operation has completed.</p>
+<pre><code>FUNCTION NewEnum () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>TRUE if the enumerator has been retrieved or FALSE otherwise.</p>
+<h1 id="nextobject"><a name="NextObject"></a>NextObject</h1>
+<p>Retrieves the next item in the enumeration sequence.</p>
+<p>Note: The first time that you call this method, it retrieves the first item.</p>
+<pre><code>FUNCTION NextObject () AS CVAR
+</code></pre>
+<h4 id="return-value-8">Return value</h4>
+<p>Te retrieved object.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT Caption, SerialNumber FROM Win32_BIOS&quot;)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+' // Get the number of objects retrieved
+DIM nCount AS LONG = pServices.ObjectsCount
+print &quot;Count: &quot;, nCount
+IF nCount = 0 THEN PRINT &quot;No objects found&quot; : SLEEP : END
+' // Enumerate the objects using the standard IEnumVARIANT enumerator (NextObject method)
+' // and retrieve the properties using the CDispInvoke class.
+DIM pDispServ AS CDispInvoke = pServices.NextObject
+IF pDispServ.DispPtr THEN
+   PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;)
+   PRINT &quot;Serial number: &quot;; pDispServ.Get(&quot;SerialNumber&quot;)
+END IF
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<p>To improve enumeration performance set the iFlags parameter if the <strong>ExecQuery</strong> method to <em>WbemFlagReturnImmediately</em> and <em>WbemFlagForwardOnly</em> (the combined value of these flags is 48) to allow semisynchronous return of the data with an enumerator that discards each item from WMI as it is delivered. In this case don't call the <strong>ObjectsCount</strong> method because it will return 0, since the operation has not been completed.</p>
+<pre><code>#include &quot;windows.bi&quot;
+#include &quot;Afx/CWmiDisp.inc&quot;
+using Afx
+
+' // Connect to WMI using a moniker
+' // Note: $ is used to avoid the pedantic warning of the compiler about escape characters
+DIM pServices AS CWmiServices = $&quot;winmgmts:{impersonationLevel=impersonate}!\\.\root\cimv2&quot;
+IF pServices.ServicesPtr = NULL THEN END
+
+' // Execute a query
+DIM hr AS HRESULT = pServices.ExecQuery(&quot;SELECT Caption, SerialNumber FROM Win32_BIOS&quot;, 48)
+IF hr &lt;&gt; S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
+
+' // Enumerate the objects using the standard IEnumVARIANT enumerator (NextObject method)
+' // and retrieve the properties using the CDispInvoke class.
+DIM pDispServ AS CDispInvoke = pServices.NextObject
+IF pDispServ.DispPtr THEN
+   PRINT &quot;Caption: &quot;; pDispServ.Get(&quot;Caption&quot;)
+   PRINT &quot;Serial number: &quot;; pDispServ.Get(&quot;SerialNumber&quot;)
+END IF
+
+PRINT
+PRINT &quot;Press any key...&quot;
+SLEEP
+</code></pre>
+<h1 id="objectscount"><a name="ObjectsCount"></a>ObjectsCount</h1>
+<p>Returns the number of objects in the collection.</p>
+<pre><code>FUNCTION ObjectsCount () AS LONG
+</code></pre>
+<h4 id="remarks-1">Remarks</h4>
+<p>If <strong>ExecQuery</strong> has been called without the <em>wbemFlagReturnWhenComplete</em> flag, this method will return 0 because the operation has not been completed.</p>
+<h1 id="objectsetptr"><a name="ObjectSetPtr"></a>ObjectSetPtr</h1>
+<p>Returns a pointer to the <strong>ISWbemObjectSet</strong> interface. Don't call <strong>IUnknown_Release</strong> on it.</p>
+<pre><code>FUNCTION ObjectSetPtr () AS ANY PTR
+</code></pre>
+<h1 id="propertysetptr"><a name="PropertySetPtr"></a>PropertySetPtr</h1>
+<p>Returns a pointer to the <strong>ISWbemPropertySet</strong> interface. Don't call <strong>IUnknown_Release</strong> on it.</p>
+<pre><code>FUNCTION PropertySetPtr () AS ANY PTR
+</code></pre>
+<h1 id="propscount"><a name="PropsCount"></a>PropsCount</h1>
+<p>Returns the number of objects in the property set collection.</p>
+<pre><code>FUNCTION PropsCount () AS LONG
+</code></pre>
+<h1 id="propvalue"><a name="PropValue"></a>PropValue</h1>
+<p>Gets/sets the variant value of the WMI property.</p>
+<pre><code>PROPERTY PropValue (BYREF cbsName AS CBSTR) AS CVAR
+PROPERTY PropValue (BYREF cbsName AS CBSTR, BYREF cvValue AS CVAR)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cbsName</em></td>
+<td>Name of the property to retrieve.</td>
+</tr>
+<tr class="even">
+<td><em>cvValue</em></td>
+<td>The variant value to set.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="resetenum"><a name="ResetEnum"></a>ResetEnum</h1>
+<p>Resets the enumeration sequence to the beginning.</p>
+<pre><code>FUNCTION ResetEnum () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-9">Return value</h4>
+<p>TRUE if the enumerator has been reset or FALSE otherwise.</p>
+<h1 id="servicesobj"><a name="ServicesObj"></a>ServicesObj</h1>
+<p>Returns a counted reference of the underlying dispatch pointer. You must release it, e.g. calling call <strong>IUnknown_Release</strong> or the function <strong>AfxSafeRelease</strong> when no longer need it.</p>
+<pre><code>FUNCTION ServicesObj () AS ANY PTR
+</code></pre>
+<h4 id="return-value-10">Return value</h4>
+<p>A counted reference to the <strong>ISWbemServices</strong> interface. Because it is a an addrefed pointer, you must release it when no longer needed.</p>
+<h1 id="servicesptr"><a name="ServicesPtr"></a>ServicesPtr</h1>
+<p>Returns a pointer to the <strong>ISWbemServices</strong> interface. Don't call IUnknown_Release on it.</p>
+<pre><code>FUNCTION ServicesPtr () AS ANY PTR
+</code></pre>
+<h1 id="wmidatetostr"><a name="WmiDateToStr"></a>WmiDateToStr</h1>
+<p>Converts a date and time value in the CIM DATETIME format to a string containing the date based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</p>
+<pre><code>FUNCTION WmiDateToStr (BYVAL pwszDateTime AS WSTRING PTR, BYREF wszMask AS WSTRING, _
+   BYVAL bIsLocal AS BOOLEAN = TRUE) AS CBSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszDateTime</em></td>
+<td>The date and time value in the CIM DATETIME format.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.</td>
+</tr>
+<tr class="odd">
+<td><em>bIsLocal</em></td>
+<td>Indicates whether the returned value is interpreted as local time. The UTC property then contains the local time converted to the correct Coordinated Universal Times (UTC) offset. If the value is FALSE, then the value is interpreted as UTC with a zero (0) offset.</td>
+</tr>
+</tbody>
+</table>
+<p>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.</p>
+<p>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd',' MMM dd yy&quot;.</p>
+<p>The following table defines the format types used to represent days:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d</td>
+<td>Day of the month as digits without leading zeros for single-digit days.</td>
+</tr>
+<tr class="even">
+<td>dd</td>
+<td>Day of the month as digits with leading zeros for single-digit days.</td>
+</tr>
+<tr class="odd">
+<td>ddd</td>
+<td>Abbreviated day of the week, for example, &quot;Mon&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>dddd</td>
+<td>Day of the week.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent months:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Month as digits without leading zeros for single-digit months.</td>
+</tr>
+<tr class="even">
+<td>MM</td>
+<td>Month as digits with leading zeros for single-digit months.</td>
+</tr>
+<tr class="odd">
+<td>MMM</td>
+<td>Abbreviated month, for example, &quot;Nov&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>MMMM</td>
+<td>Month value, for example, &quot;November&quot; for English (United States), and &quot;Noviembre&quot; for Spanish (Spain).</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent years:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>y</td>
+<td>Year represented only by the last digit.</td>
+</tr>
+<tr class="even">
+<td>yy</td>
+<td>Year represented only by the last two digits. A leading zero is added for single-digit years.</td>
+</tr>
+<tr class="odd">
+<td>yyyy</td>
+<td>Year represented by a full four or five digits, depending on the calendar used. Thai Buddhist and Korean calendars have five-digit years. The &quot;yyyy&quot; pattern shows five digits for these two calendars, and four digits for all other supported calendars. Calendars that have single-digit or two-digit years, such as for the Japanese Emperor era, are represented differently. A single-digit year is represented with a leading zero, for example, &quot;03&quot;. A two-digit year is represented with two digits, for example, &quot;13&quot;. No additional leading zeros are displayed.</td>
+</tr>
+<tr class="even">
+<td>yyyyy</td>
+<td>Behaves identically to &quot;yyyy&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-11">Return value</h4>
+<p>The formatted date as a string.</p>
+<h1 id="wmitimetofiletime"><a name="WmiTimeToFileTime"></a>WmiTimeToFileTime</h1>
+<p>Converts a date and time value in the CIM DATETIME format to the FILETIME format.</p>
+<pre><code>FUNCTION WmiTimeToFileTime (BYVAL pwszDateTime AS WSTRING PTR, BYVAL bIsLocal AS BOOLEAN = TRUE) AS FILETIME
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszDateTime</em></td>
+<td>The date and time value in the CIM DATETIME format.</td>
+</tr>
+<tr class="even">
+<td><em>bIsLocal</em></td>
+<td>Indicates whether the returned value is interpreted as local time. The UTC property then contains the local time converted to the correct Coordinated Universal Times (UTC) offset. If the value is FALSE, then the value is interpreted as UTC with a zero (0) offset.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-12">Return value</h4>
+<p>The date and time value as a <strong>FILETIME</strong> structure.</p>
+<h1 id="wmitimetostr"><a name="WmiTimeToStr"></a>WmiTimeToStr</h1>
+<p>Converts a date and time value in the CIM DATETIME format to a string containing the date based on the specified mask, e.g. &quot;hh':'mm':'ss tt&quot;.</p>
+<pre><code>FUNCTION WmiTimeToStr (BYVAL pwszDateTime AS WSTRING PTR, BYREF wszMask AS WSTRING, _
+   BYVAL bIsLocal AS BOOLEAN = TRUE) AS CBSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pwszDateTime</em></td>
+<td>The date and time value in the CIM DATETIME format.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the time.</td>
+</tr>
+<tr class="odd">
+<td><em>bIsLocal</em></td>
+<td>Indicates whether the returned value is interpreted as local time. The UTC property then contains the local time converted to the correct Coordinated Universal Times (UTC) offset. If the value is FALSE, then the value is interpreted as UTC with a zero (0) offset.</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th>Picture</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>h</td>
+<td>Hours with no leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="even">
+<td>hh</td>
+<td>Hours with leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hours with no leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>HH</td>
+<td>Hours with leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes with no leading zero for single-digit minutes</td>
+</tr>
+<tr class="even">
+<td>mm</td>
+<td>Minutes with leading zero for single-digit minutes</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Seconds with no leading zero for single-digit seconds</td>
+</tr>
+<tr class="even">
+<td>ss</td>
+<td>Seconds with leading zero for single-digit seconds</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>One character time marker string, such as A or P</td>
+</tr>
+<tr class="even">
+<td>tt</td>
+<td>Multi-character time marker string, such as AM or PM</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-13">Return value</h4>
+<p>The formatted date as a string.</p>
+</body>
+</html>
+

@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CGpPen Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cgppen-class">CGpPen Class</h1>
+<p>Encapsulates a <strong>Pen</strong> object. A <strong>Pen</strong> object is a Windows GDI+ object used to draw lines and curves.</p>
+<p><strong>Inherits from</strong>: CGpBase.<br> <strong>Include file</strong>: CGpPen.inc.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors">Constructors</a></td>
+<td>Creates a <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Clone">Clone</a></td>
+<td>Copies the contents of the existing <strong>Pen</strong> object into a new <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetAlignment">GetAlignment</a></td>
+<td>Gets the alignment currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetBrush">GetBrush</a></td>
+<td>Gets the the <strong>Brush</strong> object that is currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetColor">GetColor</a></td>
+<td>Gets the color currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetCompoundArray">GetCompoundArray</a></td>
+<td>Gets the the compound array currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetCompoundArrayCount">GetCompoundArrayCount</a></td>
+<td>Gets the number of elements in a compound array.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetCustomEndCap">GetCustomEndCap</a></td>
+<td>Gets the custom end cap currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetCustomStartCap">GetCustomStartCap</a></td>
+<td>Gets the custom end cap currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDashCap">GetDashCap</a></td>
+<td>Gets the dash cap style currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDashOffset">GetDashOffset</a></td>
+<td>Gets the distance from the start of the line to the start of the first space in a dashed line.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDashPattern">GetDashPattern</a></td>
+<td>Gets an array of custom dashes and spaces currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetDashPatternCount">GetDashPatternCount</a></td>
+<td>Gets the number of elements in a dash pattern array.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetDashStyle">GetDashStyle</a></td>
+<td>Gets the dash style currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetEndCap">GetEndCap</a></td>
+<td>Gets the end cap currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetLineJoin">GetLineJoin</a></td>
+<td>Gets the line join style currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetMiterLimit">GetMiterLimit</a></td>
+<td>Gets the miter length currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetPenType">GetPenType</a></td>
+<td>Gets the type currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetStartCap">GetStartCap</a></td>
+<td>Gets the start cap currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetTransform">GetTransform</a></td>
+<td>Gets the world transformation matrix currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetWidth">GetWidth</a></td>
+<td>Gets the width currently set for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#MultiplyTransform">MultiplyTransform</a></td>
+<td>Updates the world transformation matrix of this <strong>Pen</strong> object with the product of itself and another matrix.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ResetTransform">ResetTransform</a></td>
+<td>Sets the world transformation matrix of this <strong>Pen</strong> object to the identity matrix.</td>
+</tr>
+<tr class="even">
+<td><a href="#RotateTransform">RotateTransform</a></td>
+<td>Updates the world transformation matrix of this <strong>Pen</strong> object with the product of itself and a rotation matrix.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ScaleTransform">ScaleTransform</a></td>
+<td>Sets the <strong>Pen</strong> object's world transformation matrix equal to the product of itself and a scaling matrix.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetAlignment">SetAlignment</a></td>
+<td>Sets the alignment for this <strong>Pen</strong> object relative to the line.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetBrush">SetBrush</a></td>
+<td>Sets the <strong>Brush</strong> object that a pen uses to fill a line.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetColor">SetColor</a></td>
+<td>Sets the color for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetCompoundArray">SetCompoundArray</a></td>
+<td>Sets the compound array for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetCustomEndCap">SetCustomEndCap</a></td>
+<td>Sets the custom end cap for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetCustomStartCap">SetCustomStartCap</a></td>
+<td>Sets the custom start cap for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetDashCap">SetDashCap</a></td>
+<td>Sets the dash cap style for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetDashOffset">SetDashOffset</a></td>
+<td>Sets the distance from the start of the line to the start of the first dash in a dashed line.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetDashPattern">SetDashPattern</a></td>
+<td>Sets an array of custom dashes and spaces for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetDashStyle">SetDashStyle</a></td>
+<td>Sets the dash style for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetEndCap">SetEndCap</a></td>
+<td>Sets the end cap for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetLineCap">SetLineCap</a></td>
+<td>Sets the cap styles for the start, end, and dashes in a line drawn with this pen.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetLineJoin">SetLineJoin</a></td>
+<td>Sets the line join for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetMiterLimit">SetMiterLimit</a></td>
+<td>Sets the miter limit of this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetStartCap">SetStartCap</a></td>
+<td>Sets the start cap for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetTransform">SetTransform</a></td>
+<td>Sets the world transformation of this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetWidth">SetWidth</a></td>
+<td>Sets the width for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#TranslateTransform">TranslateTransform</a></td>
+<td>Updates this brush's current transformation matrix with the product of itself and a translation matrix.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors"><a name="Constructors"></a>Constructors</h1>
+<p>Creates a <strong>Pen</strong> object that uses a specified color and width.</p>
+<pre><code>CONSTRUCTOR CGpPen
+CONSTRUCTOR CGpPen (BYVAL pPen AS CGpPen PTR)
+CONSTRUCTOR CGpPen (BYVAL pBrush AS CGpBrush PTR, BYVAL nWidth AS SINGLE = 1.0)
+CONSTRUCTOR CGpPen (BYVAL colour AS ARGB, BYVAL nWidth AS SINGLE = 1.0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pPen</em></td>
+<td>Pointer to a <strong>Pen</strong> object to be cloned.</td>
+</tr>
+<tr class="even">
+<td><em>pBrush</em></td>
+<td>Pointer to a brush to base this pen on.</td>
+</tr>
+<tr class="odd">
+<td><em>colour</em></td>
+<td>An ARGB color that specifies the color for this <strong>Pen</strong> object.</td>
+</tr>
+<tr class="even">
+<td><em>nWidth</em></td>
+<td>The width of this pen's stroke. The default value is 1.0.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="remarks">Remarks</h4>
+<p>If you pass the address of a pen to one of the draw methods of a <strong>Graphics</strong> object, the width of the pen's stroke is dependent on the unit of measure specified in the <strong>Graphics</strong> object. The default unit of measure is <strong>UnitPixel</strong>, which is an element of the <strong>GpUnit</strong> enumeration.</p>
+<h1 id="clone"><a name="Clone"></a>Clone</h1>
+<p>Copies the contents of the existing <strong>Pen</strong> object into a new <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION Clone (BYVAL pClonePen AS CGpPen PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pClonePen</em></td>
+<td>Pointer to the <strong>Pen</strong> object where to copy the contents of the existing object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, creates a copy of the Pen object, and then
+' draws an ellipse using the copied Pen object.
+' ========================================================================================
+SUB Example_ClonePen (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create and clone a Pen object.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 4)
+   DIM clonedPen AS CGpPen
+   pen.Clone(@clonedPen)
+   ' // You can also use:
+   ' DIM clonedPen AS CGpPen = @pen
+
+   ' // Draw a rectangle using the cloned Pen object.
+   graphics.DrawRectangle(@clonedPen, 10, 10, 100, 50)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getalignment"><a name="GetAlignment"></a>GetAlignment</h1>
+<p>Gets the alignment currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetAlignment () AS PenAlignment
+</code></pre>
+<h4 id="return-value-1">Return value</h4>
+<p>This method returns an element of the <strong>PenAlignment</strong> enumeration that indicates the current alignment setting for this <strong>Pen</strong> object. The default value of <strong>PenAlignment</strong> is <strong>PenAlignmentCenter</strong>.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the alignment, draws a line, and then
+' gets the pen alignment settings.
+' ========================================================================================
+SUB Example_GetAlignment (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object and set its alignment.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 15)
+   pen.SetAlignment(PenAlignmentCenter)
+   
+   ' // Draw a line.
+   graphics.DrawLine(@pen, 0, 0, 100, 50)
+
+   ' // Obtain information about the Pen object.
+   DIM nPenAlignment AS PenAlignment = pen.GetAlignment
+
+   IF nPenAlignment = PenAlignmentCenter THEN
+      ' // The pixels will be centered on the theoretical line.
+   ELSEIF nPenAlignment = PenAlignmentInset THEN
+      '  // The pixels will lie inside the filled area  of the theoretical line.
+   END IF
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getbrush"><a name="GetBrush"></a>GetBrush</h1>
+<p>Gets the the <strong>Brush</strong> object that is currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetBrush (BYVAL pBrush AS CGpBrush PTR) AS GpStatus
+</code></pre>
+<h4 id="return-value-2">Return value</h4>
+<p>This method returns a pointer to a <strong>Brush</strong> object that is currently used to fill a line.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Brush object, creates a Pen object based on the Brush
+' object, draws a line with the pen, gets the Brush from the pen, and then uses the Brush
+' to fill a rectangle.
+' ========================================================================================
+SUB Example_GetBrush (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a HatchBrush object
+   DIM hatchBrush AS CGpHatchBrush = CGpHatchBrush(HatchStyleVertical, GDIP_ARGB(255, 255, 0, 0), GDIP_ARGB(255, 0, 0, 255))
+
+   ' // Create a pen, and set the brush for the pen
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0), 10)
+   pen.SetBrush(@hatchBrush)
+
+   ' // Draw a line with the pen
+   graphics.DrawLine(@pen, 0, 0, 200, 100)
+
+   ' // Get the pen's brush, and use that brush to fill a rectangle.
+   DIM pBrush AS CGpBrush
+   pen.GetBrush(@pBrush)
+   graphics.FillRectangle(@pBrush, 0, 100, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getcolor"><a name="GetColor"></a>GetColor</h1>
+<p>Gets the color currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetColor (BYVAL colour AS ARGB PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>colour</em></td>
+<td>Pointer to a variable that receives the color of this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-3">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object and draws a line. The code then gets the color
+' of the pen and creates a Brush object based on that color. Finally, the code uses the
+' Brush object to fill a rectangle.
+' ========================================================================================
+SUB Example_GetColor (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a pen, and use it to draw a line.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 200, 150, 100), 5)
+   graphics.DrawLine(@pen, 0, 0, 200, 100)
+
+   ' // Get the pen's color, and use that color to create a brush.
+   DIM colour AS ARGB
+   pen.GetColor(@colour)
+   DIM solidBrush AS CGpSolidBrush = colour
+
+   ' // Use the brush to fill a rectangle.
+   graphics.FillRectangle(@solidBrush, 0, 100, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getcompoundarray"><a name="GetCompoundArray"></a>GetCompoundArray</h1>
+<p>Gets the the compound array currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetCompoundArray (BYVAL compoundArray AS SINGLE PTR, BYVAL count AS INT_) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>compoundArray</em></td>
+<td>Pointer to an array that receives the compound array.</td>
+</tr>
+<tr class="even">
+<td><em>count</em></td>
+<td>Integer that specifies the number of elements in the <em>compoundArray</em> array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-4">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-4">Example</h4>
+<pre><code>' ========================================================================================
+' The following example declares an array, sets the compound array, draws a line, and gets
+' the number of elements in the compound array.
+' ========================================================================================
+SUB Example_GetCompoundArray (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create an array of real numbers and a Pen object.
+   DIM compVals(0 TO 5) AS SINGLE = {0.0, 0.2, 0.5, 0.7, 0.9, 1.0}
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 30)
+
+   ' // Set the compound array of the pen.
+   pen.SetCompoundArray(@compVals(0), 6)
+
+   ' // Draw a line with the pen.
+   graphics.DrawLine(@pen, 5, 20, 405, 200)
+
+   ' // Obtain information about the pen
+   DIM compValues(ANY) AS SINGLE
+   DIM nCount AS LONG = pen.GetCompoundArrayCount
+   REDIM compValues(nCount -1)
+   pen.GetCompoundArray(@compValues(0), nCount)
+
+   FOR j AS LONG = 0 TO nCount - 1
+      ' // Inspect or use the value in compValues(j)
+      PRINT compValues(j)
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getcompoundarraycount"><a name="GetCompoundArrayCount"></a>GetCompoundArrayCount</h1>
+<p>Gets the number of elements in a compound array.</p>
+<pre><code>FUNCTION GetCompoundArrayCount () AS GpStatus
+</code></pre>
+<h4 id="example-5">Example</h4>
+<pre><code>' ========================================================================================
+' The following example declares an array, sets the compound array, draws a line, and gets
+' the number of elements in the compound array.
+' ========================================================================================
+SUB Example_GetCompoundArray (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create an array of real numbers and a Pen object.
+   DIM compVals(0 TO 5) AS SINGLE = {0.0, 0.2, 0.5, 0.7, 0.9, 1.0}
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 30)
+
+   ' // Set the compound array of the pen.
+   pen.SetCompoundArray(@compVals(0), 6)
+
+   ' // Draw a line with the pen.
+   graphics.DrawLine(@pen, 5, 20, 405, 200)
+
+   ' // Obtain information about the pen
+   DIM compValues(ANY) AS SINGLE
+   DIM nCount AS LONG = pen.GetCompoundArrayCount
+   REDIM compValues(nCount -1)
+   pen.GetCompoundArray(@compValues(0), nCount)
+
+   FOR j AS LONG = 0 TO nCount - 1
+      ' // Inspect or use the value in compValues(j)
+      PRINT compValues(j)
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getcustomendcap"><a name="GetCustomEndCap"></a>GetCustomEndCap</h1>
+<p>Gets the custom end cap currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetCustomEndCap (BYVAL pCustomLineCap AS CGpCustomLineCap PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pCustomLineCap</em></td>
+<td>Pointer to a <strong>CustomLineCap</strong> object that receives the custom end cap of this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-5">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-6">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a GraphicsPath object and adds a rectangle to it. The code
+' then creates a Pen object, sets the custom end cap using the GraphicsPath object, and
+' draws a line. Finally, the code gets the custom end cap of the pen and creates another
+' Pen object using the same custom end cap. It then draws a second line.
+' ========================================================================================
+SUB Example_GetCustomEndCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a GraphicsPath object, and add a rectangle to it.
+   DIM pStrokePath AS CGpGraphicsPath
+   pStrokePath.AddRectangle(-10, -5, 20, 10)
+
+   ' // Create a pen, and set the custom end cap based on the GraphicsPath object.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255))
+   DIM custCap AS CGpCustomLineCap = CGpCustomLineCap(NULL, @pStrokePath)
+   pen.SetCustomEndCap(@custCap)
+
+   ' // Draw a line with the custom end cap.
+   graphics.DrawLine(@pen, 0, 0, 200, 100)
+
+   ' // Obtain the custom end cap for the pen.
+   DIM customLineCap AS CGpCustomLineCap = CGpCustomLineCap(NULL, NULL)
+   pen.GetCustomEndCap(@customLineCap)
+
+   ' // Create another pen, and use the same custom end cap.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 3)
+   pen2.SetCustomEndCap(@customLineCap)
+
+   ' // Draw a line using the second pen.
+   graphics.DrawLine(@pen2, 0, 100, 200, 150)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getcustomstartcap"><a name="GetCustomStartCap"></a>GetCustomStartCap</h1>
+<p>Gets the custom end cap currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetCustomStartCap (BYVAL pCustomLineCap AS CGpCustomLineCap PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pCustomLineCap</em></td>
+<td>Pointer to a <strong>CustomLineCap</strong> object that receives the custom start cap of this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-6">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-7">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a GraphicsPath object and adds a rectangle to it. The code
+' then creates a Pen object, sets the custom start cap using the GraphicsPath object, and
+' draws a line. Finally, the code gets the custom start cap of the pen and creates another
+' Pen object using the same custom end cap. It then draws a second line.
+' ========================================================================================
+SUB Example_GetCustomStartCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a GraphicsPath object, and add a rectangle to it.
+   DIM pStrokePath AS CGpGraphicsPath
+   pStrokePath.AddRectangle(-10, -5, 20, 10)
+
+   ' // Create a pen, and set the custom start cap based on the GraphicsPath object.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255))
+   DIM custCap AS CGpCustomLineCap = CGpCustomLineCap(NULL, @pStrokePath)
+   pen.SetCustomStartCap(@custCap)
+
+   ' // Draw a line with the custom start cap.
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+   ' // Obtain the custom start cap for the pen.
+   DIM customLineCap AS CGpCustomLineCap = CGpCustomLineCap(NULL, NULL)
+   pen.GetCustomStartCap(@customLineCap)
+
+   ' // Create another pen, and use the same custom end cap.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 3)
+   pen2.SetCustomStartCap(@customLineCap)
+
+   ' // Draw a line using the second pen.
+   graphics.DrawLine(@pen2, 50, 100, 200, 150)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getdashcap"><a name="GetDashCap"></a>GetDashCap</h1>
+<p>Gets the dash cap style currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetDashCap () AS DashCap
+</code></pre>
+<h4 id="return-value-7">Return value</h4>
+<p>This method returns an element of the <strong>DashCap</strong> enumeration that indicates the dash cap style currently set for this Pen object.</p>
+<h4 id="example-8">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash cap style, and draws a line.
+' The code then gets the dash cap style of the pen and creates a second Pen object with
+' the same dash cap style. Finally, the code draws a second line using the second pen.
+' ========================================================================================
+SUB Example_GetDashCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 20)
+
+   ' // Set the dash style for the pen
+   pen.SetDashStyle(DashStyleDash)
+
+   ' // Set a rounded dash cap for the pen
+   pen.SetDashCap(DashCapRound)
+
+   ' // Draw a line using the pen
+   graphics.DrawLine(@pen, 50, 50, 400, 200)
+
+   ' // Obtain the dash cap for the pen
+   DIM nDashCap AS DashCap = pen.GetDashCap
+
+   ' // Create another pen, and use the same dash cap.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 15)
+   pen2.SetDashStyle(DashStyleDash)
+   pen2.SetDashCap(nDashCap)
+
+   ' // Draw a second line.
+   graphics.DrawLine(@pen2, 50, 100, 400, 300)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getdashoffset"><a name="GetDashOffset"></a>GetDashOffset</h1>
+<p>Gets the distance from the start of the line to the start of the first space in a dashed line.</p>
+<pre><code>FUNCTION GetDashOffset () AS SINGLE
+</code></pre>
+<h4 id="return-value-8">Return value</h4>
+<p>This method returns a real number that indicates the distance from the start of the line to the start of the dashes.</p>
+<h1 id="getdashpattern"><a name="GetDashPattern"></a>GetDashPattern</h1>
+<p>Gets an array of custom dashes and spaces currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetDashPattern (BYVAL dashArray AS SINGLE PTR, BYVAL nCount AS INT_) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dashArray</em></td>
+<td>Pointer to an array that receives the length of the dashes and spaces in a custom dashed line.</td>
+</tr>
+<tr class="even">
+<td><em>nCount</em></td>
+<td>Integer that specifies the number of elements in the <em>dashArray</em> array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-9">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="return-value-10">Return value</h4>
+<p>This method returns a real number that indicates the distance from the start of the line to the start of the dashes.</p>
+<h4 id="example-9">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash pattern array, and draws a
+' custom dashed line. The code then gets the number of elements in the custom dashed array.
+' ========================================================================================
+SUB Example_GetDashPattern (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create and set an array of real numbers.
+   DIM dashVals(0 TO 3) AS SINGLE = {5.0, 2.0, 15.0, 4.0}
+
+   ' // Create a Pen
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 0), 5)
+
+   ' // Set the dash pattern for the custom dashed line.
+   pen.SetDashPattern(@dashVals(0), 4)
+
+   ' // Draw a line using the pen.
+   graphics.DrawLine(@pen, 5, 20, 405, 200)
+
+   ' // Obtain information about the pen.
+   DIM nCount AS INT_
+   nCount = pen.GetDashPatternCount
+   DIM dashValues(nCount - 1) AS SINGLE
+   pen.GetDashPattern(@dashValues(0), nCount)
+
+   FOR j AS LONG = 0 TO nCount - 1
+      OutputDebugStringW WSTR(dashValues(j))
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getdashpatterncount"><a name="GetDashPatternCount"></a>GetDashPatternCount</h1>
+<p>Gets the number of elements in a dash pattern array.</p>
+<pre><code>FUNCTION GetDashPatternCount () AS INT_
+</code></pre>
+<h4 id="example-10">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash pattern array, and draws a
+' custom dashed line. The code then gets the number of elements in the custom dashed array.
+' ========================================================================================
+SUB Example_GetDashPattern (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create and set an array of real numbers.
+   DIM dashVals(0 TO 3) AS SINGLE = {5.0, 2.0, 15.0, 4.0}
+
+   ' // Create a Pen
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 0), 5)
+
+   ' // Set the dash pattern for the custom dashed line.
+   pen.SetDashPattern(@dashVals(0), 4)
+
+   ' // Draw a line using the pen.
+   graphics.DrawLine(@pen, 5, 20, 405, 200)
+
+   ' // Obtain information about the pen.
+   DIM nCount AS INT_
+   nCount = pen.GetDashPatternCount
+   DIM dashValues(nCount - 1) AS SINGLE
+   pen.GetDashPattern(@dashValues(0), nCount)
+
+   FOR j AS LONG = 0 TO nCount - 1
+      OutputDebugStringW WSTR(dashValues(j))
+   NEXT
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getdashstyle"><a name="GetDashStyle"></a>GetDashStyle</h1>
+<p>Gets the dash style currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetDashStyle () AS DashStyle
+</code></pre>
+<h4 id="return-value-11">Return value</h4>
+<p>This method returns an element of the DashStyle enumeration that indicates the dash style for this <strong>Pen</strong> object.</p>
+<h4 id="example-11">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash style, and draws a dashed line.
+' The code then gets the dash style, creates a second pen with the dash style of the first
+' pen, and draws a second dashed line.
+' ========================================================================================
+SUB Example_GetDashStyle (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0), 9)
+
+   ' // Set the dash style for the pen
+   pen.SetDashStyle(DashStyleDashDot)
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+   ' // Obtain the dash style for the pen.
+   DIM nDashStyle AS DashStyle
+   nDashStyle = pen.GetDashStyle
+
+   ' // Create another pen, and use the same dash style.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 9)
+   pen2.SetDashStyle(nDashStyle)
+
+   ' // Draw a second dashed line.
+   graphics.DrawLine(@pen2, 20, 60, 200, 140)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getendcap"><a name="GetEndCap"></a>GetEndCap</h1>
+<p>Gets the end cap currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetEndCap () AS LineCap
+</code></pre>
+<h4 id="return-value-12">Return value</h4>
+<p>This method returns an element of the <strong>LineCap</strong> enumeration that indicates the end cap for this <strong>Pen</strong> object.</p>
+<h4 id="example-12">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the end cap, and draws a line. The code
+' then resets the end cap, draws a second line, resets the end cap again, and draws a third line.
+' ========================================================================================
+SUB Example_GetEndCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set the end cap of the pen, and draw a line.
+   pen.SetEndCap(LineCapArrowAnchor)
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+   ' // Obtain the end cap for the pen.
+   DIM nLineCap AS LineCap
+   nLineCap = pen.GetEndCap
+
+   ' // Create another pen, and use the same end cap.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0), 9)
+   pen2.SetEndCap(nLineCap)
+
+   ' // Draw a second line.
+   graphics.DrawLine(@pen2, 20, 60, 200, 140)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getlinejoin"><a name="GetLineJoin"></a>GetLineJoin</h1>
+<p>Gets the line join style currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetLineJoin () AS LineJoin
+</code></pre>
+<h4 id="return-value-13">Return value</h4>
+<p>This method returns an element of the LineJoin enumeration that indicates the style used at the point where line segments join.</p>
+<h4 id="example-13">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the end cap, and draws a line. The code
+' then resets the end cap, draws a second line, resets the end cap again, and draws a third line.
+' ========================================================================================
+SUB Example_GetLineJoin (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0), 15)
+
+   ' // Set the join style, and draw a rectangle.
+   pen.SetLineJoin(LineJoinRound)
+   graphics.DrawRectangle(@pen, 20, 20, 200, 100)
+
+   ' // Get the line join for the pen.
+'   LineJoin lineJoin = pen.GetLineJoin();
+   DIM nLineJoin AS LineJoin = pen.GetLineJoin
+
+   ' // Create another pen, and use the same line join.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 15)
+   pen2.SetLineJoin(nLineJoin)
+
+   ' // Draw a second rectangle.
+   graphics.DrawRectangle(@pen2, 250, 20, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getmiterlimit"><a name="GetMiterLimit"></a>GetMiterLimit</h1>
+<p>Gets the miter length currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetMiterLimit () AS SINGLE
+</code></pre>
+<h4 id="remarks-1">Remarks</h4>
+<p>The miter length is the distance from the intersection of the line walls on the inside of the join to the intersection of the line walls outside of the join. The miter length can be large when the angle between two lines is small. The miter limit is the maximum allowed ratio of miter length to line width. The default value is 10.</p>
+<h1 id="getpentype"><a name="GetPenType"></a>GetPenType</h1>
+<p>Gets the type currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetPenType () AS PenType
+</code></pre>
+<h4 id="return-value-14">Return value</h4>
+<p>This method returns an element of the <strong>PenType</strong> enumeration that indicates the style of pen currently set for this <strong>Pen</strong> object.</p>
+<h4 id="example-14">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a HatchBrush object and then passes the address of that
+' HatchBrush object to a Pen constructor. The code uses the pen, which has a width of 15,
+' to draw a line. The code calls the Pen::GetPenType method to determine the pen's type,
+' and then checks to see whether the type is PenTypeHatchFill.
+' ========================================================================================
+SUB Example_GetPenType (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a HatchBrush object.
+   DIM hatchBrush AS CGpHatchBrush = CGpHatchBrush(HatchStyleVertical, _
+      GDIP_ARGB(255, 255, 0, 0), GDIP_ARGB(255, 0, 0, 255))
+
+   ' // Create a pen based on a hatch brush, and use that pen to draw a line.
+   DIM pen AS CgpPen = CgpPen(@hatchBrush, 15)
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+   
+   ' // Obtain information about the pen.
+   DIM nPenType AS PenType = pen.GetPenType
+
+   IF nPenType = PenTypeHatchFill THEN
+      ' // The pen will draw with a hatch pattern.
+      PRINT &quot;Pen type&quot;, nPenType
+   END IF
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getstartcap"><a name="GetStartCap"></a>GetStartCap</h1>
+<p>Gets the start cap currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetStartCap () AS LineCap
+</code></pre>
+<h4 id="return-value-15">Return value</h4>
+<p>This method returns an element of the <strong>LineCap</strong> enumeration that specifies the start cap for this <strong>Pen</strong> object.</p>
+<h4 id="example-15">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the start cap, and draws a line. The
+' code then gets the start cap, creates a second pen based on the first pen, and draws a
+' second line.
+' ========================================================================================
+SUB Example_GetStartCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set the start cap of the pen, and draw a line.
+   pen.SetStartCap(LineCapArrowAnchor)
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+   ' // Obtain the end cap for the pen.
+   DIM nLineCap AS LineCap
+   nLineCap = pen.GetStartCap
+
+   ' // Create another pen, and use the same end cap.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+   pen2.SetStartCap(nLineCap)
+
+   ' // Draw a second line.
+   graphics.DrawLine(@pen2, 20, 60, 200, 140)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="gettransform"><a name="GetTransform"></a>GetTransform</h1>
+<p>Gets the world transformation matrix currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetTransform (BYVAL pMatrix AS CGpMatrix PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pMatrix</em></td>
+<td>Pointer to a <strong>Matrix</strong> object that receives the transformation matrix.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-16">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-16">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object and sets its transformation. The code then
+' gets the transformation of the pen.
+' ========================================================================================
+SUB Example_GetTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a pen and set its transformation.
+   DIM pen AS CGpPen = GDIP_ARGB(255, 255, 0, 0)
+   pen.RotateTransform(45)
+
+   ' // Obtain information about the pen.
+   DIM matrix AS CGpMatrix
+   DIM elements(0 TO 5) AS SINGLE
+
+   pen.GetTransform(@matrix)
+   matrix.GetElements(@elements(0))
+
+   FOR j AS LONG = 0 TO 5
+      ' // Inspect or use the value in elements(js)
+      PRINT elements(j)
+   NEXT
+   
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="getwidth"><a name="GetWidth"></a>GetWidth</h1>
+<p>Gets the width currently set for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION GetWidth () AS SINGLE
+</code></pre>
+<h4 id="remarks-2">Remarks</h4>
+<p>If you pass the address of a pen to one of the draw methods of a <strong>Graphics</strong> object, the width of the pen's stroke is dependent on the unit of measure specified in the <strong>Graphics</strong> object. The default unit of measure is <strong>UnitPixel</strong>, which is an element of the <strong>GpUnit</strong> enumeration.</p>
+<h4 id="example-17">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object with a specified width and draws a line. The
+' code then gets the width of the pen, creates a second pen based on the width of the
+' first pen, and draws a second line.
+' ========================================================================================
+SUB Example_GetWidth (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a pen and use it to draw a rectangle
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+   graphics.DrawRectangle(@pen, 20, 20, 200, 100)
+
+   ' // Get the width of the pen.
+   DIM nWidth AS SINGLE = pen.GetWidth
+
+   ' // Create another pen that has the same width
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), nWidth)
+
+   ' // Draw a second line.
+   graphics.DrawLine(@pen2, 20, 60, 200, 140)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="multiplytransform"><a name="MultiplyTransform"></a>MultiplyTransform</h1>
+<p>Updates the world transformation matrix of this <strong>Pen</strong> object with the product of itself and another matrix.</p>
+<pre><code>FUNCTION MultiplyTransform (BYVAL pMatrix AS CGpMatrix PTR, _
+   BYVAL order AS MatrixOrder = MatrixOrderPrepend) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pMatrix</em></td>
+<td>Pointer to the matrix to be multiplied by this brush's current transformation matrix.</td>
+</tr>
+<tr class="even">
+<td><em>order</em></td>
+<td>Optional. Element of the <strong>MatrixOrder</strong> enumeration that specifies the order of multiplication. <strong>MatrixOrderPrepend</strong> specifies that the passed matrix is on the left, and <strong>MatrixOrderAppend</strong> specifies that the passed matrix is on the right. The default value is <strong>MatrixOrderPrepend</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-17">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-18">Example</h4>
+<pre><code>' ========================================================================================
+' The following example sets a matrix and creates a Pen object. The code then sets the
+' width of the pen, applies a rotation matrix and a stretch matrix to the pen, and then
+' draws an ellipse.
+' ========================================================================================
+SUB Example_MultiplyTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Vertical stretch
+   DIM matrix AS CGpMatrix = CGpMatrix(1, 0, 0, 4, 0, 0)
+
+   ' // Create a pen, and use it to draw a rectangle.
+   DIM pen AS CGpPen = GDIP_ARGB(255, 0, 0, 255)
+
+   pen.SetWidth(5)
+   pen.RotateTransform(30)   ' // first rorate
+   pen.MultiplyTransform(@matrix, MatrixOrderPrepend)   ' // then strecth
+
+   graphics.DrawEllipse(@pen, 90, 30, 200, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="resettransform"><a name="ResetTransform"></a>ResetTransform</h1>
+<p>Sets the world transformation matrix of this <strong>Pen</strong> object to the identity matrix.</p>
+<pre><code>FUNCTION ResetTransform () AS GpStatus
+</code></pre>
+<h4 id="return-value-18">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>The identity matrix represents a transformation that does nothing. If the world transformation matrix of a <strong>Pen</strong> object is the identity matrix, then no world transformation is applied to items drawn using that Pen object.</p>
+<h4 id="example-19">Example</h4>
+<pre><code>' ========================================================================================
+' The following example sets a matrix and creates a Pen object. The code then sets the
+' width of the pen, applies a rotation matrix and a stretch matrix to the pen, and then
+' draws an ellipse.
+' ========================================================================================
+SUB Example_ResetTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a pen, and set its transformation
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 2)
+   pen.ScaleTransform(8, 4)
+
+   ' // Draw a rectangle with the transformed pen
+   graphics.DrawRectangle(@pen, 50, 50, 150, 100)
+
+   ' // Reset the transformation
+   pen.ResetTransform
+
+   ' // Draw a rectangle with no pen transformation
+   graphics.DrawRectangle(@pen, 250, 50, 150, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="rotatetransform"><a name="RotateTransform"></a>RotateTransform</h1>
+<p>Updates the world transformation matrix of this <strong>Pen</strong> object with the product of itself and a rotation matrix.</p>
+<pre><code>FUNCTION RotateTransform (BYVAL angle AS SINGLE, BYVAL order AS MatrixOrder = MatrixOrderPrepend) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>angle</em></td>
+<td>The angle, in degrees, of rotation.</td>
+</tr>
+<tr class="even">
+<td><em>order</em></td>
+<td>Optional. Element of the <strong>MatrixOrder</strong> enumeration that specifies the order of multiplication. <strong>MatrixOrderPrepend</strong> specifies that the passed matrix is on the left, and <strong>MatrixOrderAppend</strong> specifies that the passed matrix is on the right. The default value is <strong>MatrixOrderPrepend</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-19">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-20">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets a scaling matrix to the pen, and draws
+' a rectangle. The code then resets the transformation of the pen and draws a second rectangle.
+' ========================================================================================
+SUB Example_RotateTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   DIM pen AS CGpPen = CGpPen(&amp;hFF0000FF, 5)   ' // Blue
+   pen.ScaleTransform(1, 4)   ' // first stretch
+   pen.RotateTransform(30, MatrixOrderAppend)   ' // then rotate
+   graphics.DrawEllipse(@pen, 50, 30, 200, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="scaletransform"><a name="ScaleTransform"></a>ScaleTransform</h1>
+<p>Sets the <strong>Pen</strong> object's world transformation matrix equal to the product of itself and a scaling matrix.</p>
+<pre><code>FUNCTION ScaleTransform (BYVAL sx AS SINGLE, BYVAL sy AS SINGLE, _
+   BYVAL order AS MatrixOrder = MatrixOrderPrepend) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>sx</em></td>
+<td>The amount to scale in the x direction.</td>
+</tr>
+<tr class="even">
+<td><em>sy</em></td>
+<td>The amount to scale in the y direction.</td>
+</tr>
+<tr class="odd">
+<td><em>order</em></td>
+<td>Optional. Element of the <strong>MatrixOrder</strong> enumeration that specifies the order of multiplication. <strong>MatrixOrderPrepend</strong> specifies that the passed matrix is on the left, and <strong>MatrixOrderAppend</strong> specifies that the passed matrix is on the right. The default value is <strong>MatrixOrderPrepend</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-20">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-21">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object and draws a rectangle. The code then applies
+' a scaling transformation to the pen and draws a second rectangle.
+' ========================================================================================
+SUB Example_ScaleTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a pen, and use it to draw a rectangle
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 2)
+   graphics.DrawRectangle(@pen, 50, 50, 150, 100)
+
+   ' // Apply a scaling transformation to the pen
+   pen.ScaleTransform(8, 4)
+
+   ' // Draw a rectangle with the transformed pen.
+   graphics.DrawRectangle(@pen, 250, 50, 150, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setalignment"><a name="SetAlignment"></a>SetAlignment</h1>
+<p>Sets the alignment for this <strong>Pen</strong> object relative to the line.</p>
+<pre><code>FUNCTION SetAlignment (BYVAL nPenAlignment AS PenAlignment) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nPenAlignment</em></td>
+<td>Element of the <strong>PenAlignment</strong> enumeration that specifies the alignment setting of the pen relative to the line that is drawn. The default value is <strong>PenAlignmentCenter</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-21">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>If you set the alignment of a <strong>Pen</strong> object to <strong>PenAlignmentInset</strong>, you cannot use that pen to draw compound lines or triangular dash caps.</p>
+<h4 id="example-22">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates two Pen objects and sets the alignment for one of the pens.
+' The code then draws two lines using each of the pens.
+' ========================================================================================
+SUB Example_SetAlignment (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a black and a green pen.
+   DIM blackPen AS CgpPen = CGpPen(GDIP_ARGB(255, 0, 0, 0), 1)
+   DIM greenPen AS CgpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 15)
+
+   ' // Set the alignment of the green pen.
+   greenPen.SetAlignment(PenAlignmentInset)
+
+   ' // Draw two lines using each pen.
+   graphics.DrawEllipse(@greenPen, 0, 0, 100, 200)
+   graphics.DrawEllipse(@blackPen, 0, 0, 100, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setbrush"><a name="SetBrush"></a>SetBrush</h1>
+<p>Sets the <strong>Brush</strong> object that a pen uses to fill a line.</p>
+<pre><code>FUNCTION SetBrush (BYVAL pBrush AS CGpBrush PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pBrush</em></td>
+<td>Pointer to a <strong>Brush</strong> object for the pen to use to fill a line.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-23">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a HatchBrush object and then passes the address of that
+' HatchBrush object to a Pen constructor. The code then sets the brush for the pen and
+' draws a line.
+' ========================================================================================
+SUB Example_SetBrush (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a HatchBrush object
+   DIM hatchBrush AS CGpHatchBrush = CGpHatchBrush(HatchStyleVertical, GDIP_ARGB(255, 255, 0, 0), GDIP_ARGB(255, 0, 0, 255))
+
+   ' // Create a pen, and set the brush for the pen
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0), 10)
+   pen.SetBrush(@hatchBrush)
+
+   ' // Draw a line with the pen
+   graphics.DrawLine(@pen, 0, 0, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setcolor"><a name="SetColor"></a>SetColor</h1>
+<p>Sets the color for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetColor (BYVAL colour AS ARGB) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>colour</em></td>
+<td>ARGB color that specifies the color for this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-23">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-24">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a red pen and draws a line. The code then sets the pen's
+' color to blue and draws a second line.
+' ========================================================================================
+SUB Example_SetColor (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a red pen, and use it to draw a line.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 255, 0, 0), 5)
+   graphics.DrawLine(@pen, 0, 0, 200, 100)
+
+   ' // Change the pen's color to blue, and draw a second line.
+   pen.SetColor(GDIP_ARGB(255, 0, 0, 255))
+   graphics.DrawLine(@pen, 0, 40, 200, 140)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setcompoundarray"><a name="SetCompoundArray"></a>SetCompoundArray</h1>
+<p>Sets the compound array for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetCompoundArray (BYVAL compoundArray AS SINGLE PTR, BYVAL count AS INT_) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>compoundArray</em></td>
+<td>Pointer to an array of real numbers that specifies the compound array. The elements in the array must be in increasing order, not less than 0, and not greater than 1.</td>
+</tr>
+<tr class="even">
+<td><em>count</em></td>
+<td>Positive even integer that specifies the number of elements in the compoundArray array. The integer must not be greater than the number of elements in the compound array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-24">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-25">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object and sets the compound array for the pen. The
+' code then draws a line using the Pen object.
+' ========================================================================================
+SUB Example_SetCompoundArray (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create an array of real numbers and a Pen object.
+   DIM compVals(0 TO 5) AS SINGLE = {0.0, 0.2, 0.5, 0.7, 0.9, 1.0}
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 30)
+
+   ' // Set the compound array of the pen.
+   pen.SetCompoundArray(@compVals(0), 6)
+
+   ' // Draw a line with the pen.
+   graphics.DrawLine(@pen, 5, 20, 405, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setcustomendcap"><a name="SetCustomEndCap"></a>SetCustomEndCap</h1>
+<p>Sets the custom end cap for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetCustomEndCap (BYVAL pCustomLineCap AS CGpCustomLineCap PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pCustomLineCap</em></td>
+<td>Pointer to a <strong>CustomLineCap</strong> object that specifies the custom end cap for this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-25">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-26">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a GraphicsPath object and adds a rectangle to it. The code
+' then creates a Pen object, sets the custom end cap based on the GraphicsPath object, and
+' draws a line.
+' ========================================================================================
+SUB Example_SetCustomEndCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a GraphicsPath object, and add a rectangle to it.
+   DIM pStrokePath AS CGpGraphicsPath
+   pStrokePath.AddRectangle(-10, -5, 20, 10)
+
+   ' // Create a pen, and set the custom end cap based on the GraphicsPath object.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255))
+   DIM custCap AS CGpCustomLineCap = CGpCustomLineCap(NULL, @pStrokePath)
+   pen.SetCustomEndCap(@custCap)
+
+   ' // Draw a line with the custom end cap.
+   graphics.DrawLine(@pen, 0, 0, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setcustomstartcap"><a name="SetCustomStartCap"></a>SetCustomStartCap</h1>
+<p>Sets the custom start cap for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetCustomStartCap (BYVAL pCustomLineCap AS CGpCustomLineCap PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pCustomLineCap</em></td>
+<td>Pointer to a <strong>CustomLineCap</strong> object that specifies the custom end cap for this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-26">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-27">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a GraphicsPath object and adds a rectangle to it. The code
+' then creates a Pen object, sets the custom end cap based on the GraphicsPath object, and
+' draws a line.
+' ========================================================================================
+SUB Example_SetCustomStartCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a GraphicsPath object, and add a rectangle to it.
+   DIM pStrokePath AS CGpGraphicsPath
+   pStrokePath.AddRectangle(-10, -5, 20, 10)
+
+   ' // Create a pen, and set the custom start cap based on the GraphicsPath object.
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255))
+   DIM custCap AS CGpCustomLineCap = CGpCustomLineCap(NULL, @pStrokePath)
+   pen.SetCustomStartCap(@custCap)
+
+   ' // Draw a line with the custom end cap.
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setdashcap"><a name="SetDashCap"></a>SetDashCap</h1>
+<p>Sets the dash cap style for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetDashCap (BYVAL nDashCap AS DashCap) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDashCap</em></td>
+<td>Element of the <strong>DashCap</strong> enumeration that specifies the dash cap for this <strong>Pen</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-27">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-28">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash style and the dash cap, and
+' draws a dashed line.
+' ========================================================================================
+SUB Example_SetDashCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 20)
+
+   ' // Set the dash style for the pen
+   pen.SetDashStyle(DashStyleDash)
+
+   ' // Set a triangular dash cap for the pen
+   pen.SetDashCap(DashCapTriangle)
+
+   ' // Draw a line using the pen
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setdashoffset"><a name="SetDashOffset"></a>SetDashOffset</h1>
+<p>Sets the distance from the start of the line to the start of the first dash in a dashed line.</p>
+<pre><code>FUNCTION SetDashOffset (BYVAL dashOffset AS SINGLE) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dashOffset</em></td>
+<td>The number of times to shift the spaces in a dashed line. Each shift is equal to the length of a space in the dashed line.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-28">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-29">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash style and the dash cap, and
+' draws a dashed line.
+' ========================================================================================
+SUB Example_SetDashOffset (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set the dash style for the pen
+   pen.SetDashStyle(DashStyleDash)
+
+   ' // Draw a line using the pen
+   graphics.DrawLine(@pen, 0, 50, 400, 50)
+
+   ' // Set the dash offset value for the pen, and draw a second line.
+   pen.SetDashOffset(10)
+   graphics.DrawLine(@pen, 0, 80, 400, 80)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setdashpattern"><a name="SetDashPattern"></a>SetDashPattern</h1>
+<p>Sets an array of custom dashes and spaces for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetDashPattern (BYVAL dashArray AS SINGLE PTR, BYVAL nCount AS INT_) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dashArray</em></td>
+<td>Pointer to an array of real numbers that specifies the length of the custom dashes and spaces. All elements in the array must be positive real numbers.</td>
+</tr>
+<tr class="even">
+<td><em>nCount</em></td>
+<td>Integer that specifies the number of elements in the dashArray array. The integer must be greater than 0 and not greater than the total number of elements in the array.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-29">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-30">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates an array of real numbers. The code then creates a Pen
+' object, sets the dash pattern based on the array, and then draws the custom dashed line.
+' ========================================================================================
+SUB Example_SetDashPattern (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create and set an array of real numbers.
+   DIM dashVals(0 TO 3) AS SINGLE = {5.0, 2.0, 15.0, 4.0}
+
+   ' // Create a Pen
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 0), 5)
+
+   ' // Set the dash pattern for the custom dashed line.
+   pen.SetDashPattern(@dashVals(0), 4)
+
+   ' // Draw a line using the pen.
+   graphics.DrawLine(@pen, 5, 20, 405, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setdashstyle"><a name="SetDashStyle"></a>SetDashStyle</h1>
+<p>Sets the dash style for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetDashStyle (BYVAL nDashStyle AS DashStyle) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDashStyle</em></td>
+<td>Element of the <strong>DashStyle</strong> enumeration that specifies the dash style for this Pen object.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-30">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-31">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the dash style, and draws a dashed line.
+' The code then gets the dash style, creates a second pen with the dash style of the first
+' pen, and draws a second dashed line.
+' ========================================================================================
+SUB Example_SetDashStyle (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 20)
+
+   ' // Set the dash style for the pen
+   pen.SetDashStyle(DashStyleDashDot)
+
+   ' // Set a triangular dash cap for the pen
+   pen.SetDashCap(DashCapTriangle)
+
+   ' // Draw a line using the pen
+   graphics.DrawLine(@pen, 20, 20, 200, 100)
+
+   ' // Obtain the dash style for the pen.
+   DIM nDashStyle AS DashStyle
+
+   ' // Create another pen, and use the same dash style.
+   DIM pen2 AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 255, 0), 9)
+
+   ' // Draw a second dashed line.
+   graphics.DrawLine(@pen2, 20, 60, 200, 140)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setendcap"><a name="SetEndCap"></a>SetEndCap</h1>
+<p>Sets the end cap for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetEndCap (BYVAL endCap AS LineCap) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>endCap</em></td>
+<td>Element of the <strong>LineCap</strong> enumeration that specifies the end cap of a line.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-31">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-32">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the end cap, and draws a line. The code
+' then resets the end cap, draws a second line, resets the end cap again, and draws a third line.
+' ========================================================================================
+SUB Example_SetEndCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set the end cap of the pen, and draw a line.
+   pen.SetEndCap(LineCapArrowAnchor)
+   graphics.DrawLine(@pen, 0, 50, 400, 150)
+
+  ' // Reset the end cap, and draw a second line.
+   pen.SetEndCap(LineCapTriangle)
+   graphics.DrawLine(@pen, 0, 80, 400, 180)
+
+   ' // Reset the end cap, and draw a third line.
+   pen.SetEndCap(LineCapRound)
+   graphics.DrawLine(@pen, 0, 110, 400, 210)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setlinecap"><a name="SetLineCap"></a>SetLineCap</h1>
+<p>Sets the cap styles for the start, end, and dashes in a line drawn with this pen.</p>
+<pre><code>FUNCTION SetLineCap (BYVAL startCap AS LineCap, BYVAL endCap AS LineCap, _
+   BYVAL nDashCap AS DashCap) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>startCap</em></td>
+<td>Element of the <strong>LineCap</strong> enumeration that specifies the start cap of a line.</td>
+</tr>
+<tr class="even">
+<td><em>endCap</em></td>
+<td>Element of the <strong>LineCap</strong> enumeration that specifies the end cap of a line.</td>
+</tr>
+<tr class="odd">
+<td><em>nDashCap</em></td>
+<td>Element of the <strong>DashCap</strong> enumeration that specifies the start and end caps of the dashes in a dashed line.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-32">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-33">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object and sets the line caps. The code then sets
+' the dash style for the pen and draws a line.
+' ========================================================================================
+SUB Example_SetLineCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set line caps for the pen.
+   pen.SetLineCap(LineCapArrowAnchor, LineCapTriangle, DashCapRound)
+
+   ' // Set the dash style for the pen.
+   pen.SetDashStyle(DashStyleDash)
+
+   ' // Draw a line.
+   graphics.DrawLine(@pen, 50, 50, 420, 200)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setlinejoin"><a name="SetLineJoin"></a>SetLineJoin</h1>
+<p>Sets the line join for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetLineJoin (BYVAL nLineJoin AS LineJoin) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nLineJoin</em></td>
+<td>Element of the <strong>LineJoin</strong> enumeration that specifies the join style used at the end of a line segment that meets another line segment.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-33">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-34">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the line join style, and draws a rectangle.
+' The code then resets the line join style and draws a second rectangle.
+' ========================================================================================
+SUB Example_SetLineJoin (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set the join style, and draw a rectangle.
+   pen.SetLineJoin(LineJoinRound)
+   graphics.DrawRectangle(@pen, 20, 20, 150, 100)
+
+   ' // Reset the join style, and draw a second rectangle.
+   pen.SetLineJoin(LineJoinBevel)
+   graphics.DrawRectangle(@pen, 200, 20, 150, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setmiterlimit"><a name="SetMiterLimit"></a>SetMiterLimit</h1>
+<p>Sets the miter limit of this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetMiterLimit (BYVAL miterLimit AS SINGLE) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>miterLimit</em></td>
+<td>Simple precision number that specifies the miter limit of this <strong>Pen</strong> object. A Simple precision number value that is less than 1.0! will be replaced with 1.0!.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-34">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h1 id="setstartcap"><a name="SetStartCap"></a>SetStartCap</h1>
+<p>Sets the start cap for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetStartCap (BYVAL startCap AS LineCap) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>startCap</em></td>
+<td>Element of the <strong>LineCap</strong> enumeration that specifies the start cap of a line.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-35">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-35">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a Pen object, sets the start cap, and draws a line. The
+' code then resets the start cap, draws a second line, resets the start cap again, and
+' draws a third line.
+' ========================================================================================
+SUB Example_SetStartCap (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a Pen object
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 15)
+
+   ' // Set the start cap of the pen, and draw a line.
+   pen.SetStartCap(LineCapArrowAnchor)
+   graphics.DrawLine(@pen, 50, 50, 400, 150)
+
+  ' // Reset the start cap, and draw a second line.
+   pen.SetStartCap(LineCapTriangle)
+   graphics.DrawLine(@pen, 50, 80, 400, 180)
+
+   ' // Reset the start cap, and draw a third line.
+   pen.SetStartCap(LineCapRound)
+   graphics.DrawLine(@pen, 50, 110, 400, 210)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="settransform"><a name="SetTransform"></a>SetTransform</h1>
+<p>Sets the world transformation of this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetTransform (BYVAL pMatrix AS CGpMatrix PTR) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pMatrix</em></td>
+<td>Pointer to a <strong>Matrix</strong> object that specifies the world transformation.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-36">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-36">Example</h4>
+<pre><code>' ========================================================================================
+' The following example creates a scale matrix and a Pen object, and then draws a rectangle.
+' The code then scales the pen by the matrix and draws a second rectangle.
+' ========================================================================================
+SUB Example_SetTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Create a pen, and use it to draw a rectangle
+   DIM pen AS CGpPen = CGpPen(GDIP_ARGB(255, 0, 0, 255), 2)
+   graphics.DrawRectangle(@pen, 10, 50, 150, 100)
+
+   ' // Scale the pen width by a factor of 20 in the horizontal
+   ' // direction and a factor of 10 in the vertical direction.
+   DIM matrix AS CGpMatrix = CGpMatrix(20, 0, 0, 10, 0, 0)
+   pen.SetTransform(@matrix)
+
+   ' // Draw a rectangle with the transformed pen.
+   graphics.DrawRectangle(@pen, 200, 50, 150, 100)
+
+END SUB
+' ========================================================================================
+</code></pre>
+<h1 id="setwidth"><a name="SetWidth"></a>SetWidth</h1>
+<p>Sets the width for this <strong>Pen</strong> object.</p>
+<pre><code>FUNCTION SetWidth ((BYVAL nWidth AS SINGLE) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>Real number that specifies the width of the pen.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-37">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h1 id="translatetransform"><a name="TranslateTransform"></a>TranslateTransform</h1>
+<p>Updates this brush's current transformation matrix with the product of itself and a translation matrix.</p>
+<pre><code>FUNCTION TranslateTransform (BYVAL dx AS SINGLE, BYVAL dy AS SINGLE, _
+   BYVAL order AS MatrixOrder = MatrixOrderPrepend) AS GpStatus
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>dx</em></td>
+<td>Simple precision number that specifies the horizontal component of the translation.</td>
+</tr>
+<tr class="even">
+<td><em>dy</em></td>
+<td>Simple precision number that specifies the vertical component of the translation.</td>
+</tr>
+<tr class="odd">
+<td><em>order</em></td>
+<td>Optional. Element of the <strong>MatrixOrder</strong> enumeration that specifies the order of multiplication. <strong>MatrixOrderPrepend</strong> specifies that the passed matrix is on the left, and <strong>MatrixOrderAppend</strong> specifies that the passed matrix is on the right. The default value is <strong>MatrixOrderPrepend</strong>.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-38">Return value</h4>
+<p>If the function succeeds, it returns <strong>Ok</strong>, which is an element of the <strong>Status</strong> enumeration.</p>
+<p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
+<h4 id="example-37">Example</h4>
+<pre><code>' ========================================================================================
+' The following example sets the world transformation of a Graphics object to a rotation.
+' The call to Graphics::TranslateTransform multiplies the Graphics object's existing world
+' transformation matrix (rotation) by a translation matrix. The MatrixOrderAppend argument
+' specifies that the multiplication is done with the translation matrix on the right. At
+' that point, the world transformation matrix of the Graphics object represents a composite
+' transformation: first rotate, then translate. The call to DrawEllipse draws a rotated and
+' translated ellipse.
+' ========================================================================================
+SUB Example_TranslateTransform (BYVAL hdc AS HDC)
+
+   ' // Create a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+   ' // Get the DPI scaling ratio
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+   ' // Set the scale transform
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   DIM pen AS CGpPen = GDIP_ARGB(255, 0, 0, 255)
+   pen.RotateTransform(30.0, MatrixOrderAppend)
+   graphics.TranslateTransform(100.0, 50.0, MatrixOrderAppend)
+   graphics.DrawEllipse(@pen, 0, 0, 200, 80)
+
+END SUB
+' ========================================================================================
+</code></pre>
+</body>
+</html>
+

@@ -812,7 +812,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
 '         AddControlProperty(pCtrl, "BackgroundImage", "", PropertyType.ImagePicker)
 '         AddControlProperty(pCtrl, "BackgroundImageLayout", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "CancelButton", "", PropertyType.ComboPicker)
-'         AddControlProperty(pCtrl, "Icon", "", PropertyType.ImagePicker)
+         AddControlProperty(pCtrl, "Icon", "", PropertyType.ImagePicker)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MaximumHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "MaximumWidth", "0", PropertyType.EditEnterNumericOnly)

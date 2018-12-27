@@ -159,11 +159,11 @@ Function DisplayFormPopupMenu( byval hwnd as hwnd, byval xpos as long, byval ypo
    If hPopupMenu Then DestroyMenu(hPopupMenu)
     
    hPopupMenu = CreatePopupMenu()
-      AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"&Paste")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_PASTE, L(19,"Paste")
       AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-      AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"&Menu Editor...")
-      AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Tool&bar Editor...")
-      AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"&Statusbar Editor...")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"Menu Editor") & "..."
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Toolbar Editor") & "..."
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"Statusbar Editor") & "..."
    TrackPopupMenu(hPopupMenu, TPM_LEFTALIGN Or TPM_LEFTBUTTON, xpos, ypos, 0, hWnd, 0)
 
    function = 0

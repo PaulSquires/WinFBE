@@ -119,7 +119,7 @@ End Sub
 Function frmOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
-   EnableWindow GetParent(HWnd), False
+   DisableAllModeless()
 
    '  Message cracker macro expects a True to be returned for a successful
    '  OnCreate handler even though returning -1 from a standard WM_CREATE
@@ -244,7 +244,7 @@ End Function
 ' ========================================================================================
 Function frmOptions_OnClose(HWnd As HWnd) As LRESULT
    ' Enables parent window keeping parent's zorder
-   EnableWindow GetParent(HWnd), True 
+   EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
 End Function

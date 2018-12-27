@@ -188,7 +188,7 @@ end function
 Function frmMenuEditor_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
-   EnableWindow GetParent(HWnd), False
+   DisableAllModeless()
 
    '  Message cracker macro expects a True to be returned for a successful
    '  OnCreate handler even though returning -1 from a standard WM_CREATE
@@ -441,7 +441,7 @@ Function frmMenuEditor_OnClose(HWnd As HWnd) As LRESULT
    ' Reset the global MenuItems array
    erase gMenuItems
    ' Enables parent window keeping parent's zorder
-   EnableWindow GetParent(HWnd), True 
+   EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
 End Function
@@ -495,7 +495,7 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    dim wszString  as WSTRING * 100
    
    HWND_FRMMENUEDITOR = _
-   pWindow->Create(hWndParent, L(365,"Menu Editor"), @frmMenuEditor_WndProc, 0, 0, 411, 418, _
+   pWindow->Create(hWndParent, L(312,"Menu Editor"), @frmMenuEditor_WndProc, 0, 0, 411, 418, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)

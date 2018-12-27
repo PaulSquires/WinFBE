@@ -306,7 +306,7 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
          dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
          gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
          dim cwsText as CWSTR
-         cwsText = AfxInputBox( hwnd, 0, 0, L(336,"New Theme"), L(337,"Theme Name"), "")
+         cwsText = AfxInputBox( hwnd, 0, 0, L(336,"New Theme"), L(337,"Theme Name") & ":", "")
          if len(cwsText) THEN
             dim as long ub = ubound(gConfig.ThemesTemp) + 1
             redim preserve gConfig.ThemesTemp(ub) as TYPE_THEMES
@@ -547,7 +547,7 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("COMBOBOX", , IDC_FRMOPTIONSCOLORS_COMBOTHEMES, "", 11, 22, 200, 23, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWN, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)   
-   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOLORS_BTNACTIONS, L(345,"&Actions"), 224, 21, 146, 25, _
+   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOLORS_BTNACTIONS, L(345,"Actions"), 224, 21, 146, 25, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_SPLITBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HWnd hList = _
@@ -557,10 +557,10 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("GROUPBOX",, IDC_FRMOPTIONSCOLORS_FRMCOLORS, L(133,"Colors"), 0, 0, 385, 285, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLFOREGROUND, L(134,"Color:"), 224, 71, 140, 18, _
+   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLFOREGROUND, L(134,"Color") & ":", 224, 71, 140, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND, L(135,"Background:"), 224, 130, 140, 18, _
+   pWindow->AddControl("LABEL",, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND, L(135,"Background") & ":", 224, 130, 140, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
         

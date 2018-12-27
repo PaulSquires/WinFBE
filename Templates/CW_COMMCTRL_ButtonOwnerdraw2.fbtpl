@@ -1,0 +1,113 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Button (ownerdraw) with an image
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ButtonOwnerdraw2.fbtpl - Template
+' Contents: Ownerdraw button with an image.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_BUTTON = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with ownerdraw button", @WndProc)
+   pWindow.Center
+
+   ' // Add and ownerdraw button
+   DIM hButton AS HWND = pWindow.AddControl("CUSTOMBUTTON", , IDC_BUTTON, "", 150, 50, 50, 50)
+'  Alternate way:
+'   DIM hButton AS HWND = pWindow.AddControl("Button", , IDC_BUTTON, "", 150, 50, 50, 50, BS_OWNERDRAW)
+   SetFocus hButton
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_BUTTON
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  MessageBoxW hwnd, "Button clicked", "", MB_OK
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_DRAWITEM
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         DIM pDis AS DRAWITEMSTRUCT PTR = CAST(DRAWITEMSTRUCT PTR, lParam)
+         IF pDis->CtlId <> IDC_BUTTON THEN EXIT FUNCTION
+         ' Icon identifiers in User32.dll. Hacked with ResourceHacker.
+         ' IDI_APPLICATION = 100, IDI_WARNING = 101, IDI_QUESTION = 102, IDI_ERROR = 103
+         ' IDI_INFORMATION = 104, IDI_WINLOGO = 105, IDI_SHIELD = 106
+         ' Used here to make the example simpler.
+         ' Normally, you will load an icon or bitmap from a file or resource.
+         DIM hIcon AS HICON = LoadImageW(GetModuleHandle("User32"), MAKEINTRESOURCEW(103), IMAGE_ICON, _
+            pWindow->ScaleX(50), pWindow->ScaleY(50), LR_DEFAULTCOLOR)
+         IF hIcon THEN
+            DrawStateW pDis->hDC, NULL, NULL, CAST(LPARAM, hIcon), 0, 0, 0, 0, 0, DST_ICON
+            DestroyIcon hIcon
+         END IF
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Quit the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
