@@ -124,7 +124,7 @@ function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as
    If AfxFileExists(wszFileName) = 0 Then exit function
 
    Dim as CBSTR wst, wKey, wData
-   Dim as long nKey, nData, i, nRow
+   Dim as long nKey, nData, i, nRow, maxKey
     
    dim pStream AS CTextStream
    if pStream.OpenUnicode(wszFileName) <> S_OK then exit function
@@ -151,11 +151,23 @@ function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as
       If Ucase(wKey) <> "MAXIMUM" Then
          if (nKey >= lbound(gLocalPhrases)) and (nKey <= ubound(gLocalPhrases)) then
             gLocalPhrases(nKey) = wData
+            ' If the English phrase is blank then blank the translation phrase
+            if gLangEnglish(nKey) = "" then gLocalPhrases(nKey) = ""
+            ' If the Translated phrase is blank then replace it with the English version
+            if gLocalPhrases(nKey) = "" then gLocalPhrases(nKey) = gLangEnglish(nKey)
+            if nKey > maxKey then maxKey = nKey
          end if
       End If   
          
    Loop
    pStream.Close
+   
+   ' It is possible that the number of keys in the local file is less than the number
+   ' of keys in the full english file. In that case we need process the remaining 
+   ' missing keys by copying the english version over to the local array.
+   for i as long = maxKey + 1 to ubound(gLangEnglish)
+      gLocalPhrases(i) = gLangEnglish(i)
+   next
    
    function = 0
 end function
@@ -406,7 +418,7 @@ Function frmOptionsLocal_Show( ByVal hWndParent As HWnd, _
    ListView_AddColumn( hwndLV, 0, @wstr("Index"), pWindow->ScaleX(50) )
    ListView_AddColumn( hwndLV, 1, @wstr("English Phrase"), pWindow->ScaleX(280))
 
-   ReDim gLocalPhrases(Ubound(gLangEnglish)) As WString * MAX_PATH
+   ReDim gLocalPhrases(Ubound(gLangEnglish)) '
    
    dim as long nRow = 0
    for i as long = LBound(gLangEnglish) to Ubound(gLangEnglish)
