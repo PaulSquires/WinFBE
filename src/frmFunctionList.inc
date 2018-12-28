@@ -26,11 +26,13 @@ Function frmFunctionList_SetListBoxPosition() As Long
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    Dim As HWnd hList  = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX)
    Dim As Long nCount = Listbox_GetCount(hList)
+   dim as integer nParam
    
    ' Search for a match
    For i As Long = 0 To nCount - 1
       hItem = cast(HTREEITEM, ListBox_GetItemData(hList, i))
-      pDoc = Cast(clsDocument ptr, FF_TreeView_GetlParam(hTree, hItem))
+      nParam = FF_TreeView_GetlParam(hTree, hItem)
+      pDoc = Cast(clsDocument ptr, nParam)
       if pDoc = pDocActive THEN
          nCurSel = i: Exit For
       END IF
