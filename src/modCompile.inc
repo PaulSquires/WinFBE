@@ -890,11 +890,12 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       ' or errors to show in the listview. Only close if the listview is active. Do not
       ' close if the user is looking at the logfile textbox.
       if bAllowSuccessMessage then  ' we are not compiling modules
+         dim as long nFileSize = AfxGetFileSize(gCompile.OutputFilename)
          cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
                          L(192, "Warnings") & " " & NumWarnings & _
                          "  [ " & gCompile.OutputFilename & "  " & _
-                         FileLen(gCompile.OutputFilename) & " " & L(199,"bytes") & _
-                         "]"
+                         (fix(nFileSize / 1024)+1) & "K  (" & _
+                         nFileSize & " " & L(199,"bytes") & ")]"
          SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
          ' Simply sound a success

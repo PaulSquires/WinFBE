@@ -13,7 +13,7 @@
 
 
 ''  CONFIGURATION MODULE
-
+               
 ''
 ''  CONSTRUCTOR
 ''
@@ -672,7 +672,7 @@ Function clsConfig.SaveConfigFile() as Long
       pStream.Write this.Builds(i).wszOptions & "|-|" 
       pStream.Write this.Builds(i).IsDefault & "|-|"  
       pStream.Write this.Builds(i).Is32bit & "|-|"  
-      pStream.WriteLine this.Builds(i).Is64bit  
+      pStream.WriteLine this.Builds(i).Is64bit
    NEXT
 
    pStream.WriteLine ""

@@ -145,7 +145,8 @@
 #DEFINE IDC_FRMBUILDCONFIG_CMDDELETE                1008
 #DEFINE IDC_FRMBUILDCONFIG_OPT32                    1009
 #DEFINE IDC_FRMBUILDCONFIG_OPT64                    1010
-#Define IDC_FRMBUILDCONFIG_LABEL9                   1011
+#Define IDC_FRMBUILDCONFIG_LSTOPTIONS               1011
+#Define IDC_FRMBUILDCONFIG_CHKISDEFAULT             1012
 
 #Define IDC_FRMTEMPLATES_LISTBOX                    1000
 
@@ -322,7 +323,7 @@ Const IDC_MRUPROJECTBASE = 6000      ' Windows id of MRUPROJECT items 1 to 10 (l
 dim shared as long SPLITSIZE 
 SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
 
-const LISTBOX_LINEHEIGHT = 20  ' used for ownerdrawn listboxes in the PropertyList
+const LISTBOX_LINEHEIGHT = 20  ' used for ownerdrawn listboxes in the PropertyList and Build config
 
 const IDC_DESIGNFRAME   = 100
 const IDC_DESIGNFORM    = 101
@@ -1003,11 +1004,33 @@ END TYPE
 type TYPE_BUILDS
    id             as string    ' GUID
    wszDescription as CWSTR
-   wszOptions     as CWSTR
    IsDefault      as Long      ' 0:False, 1:True
    Is32bit        as Long      ' 0:False, 1:True
    Is64bit        as Long      ' 0:False, 1:True
+   wszOptions     as CWSTR     ' Compiler options (manual and selected from listbox)
 END TYPE
+
+' Create an array that holds all options in the Build compiler options listbox. The
+' description contains a parenthesis enclosed action.
+Dim shared gBuildOptions(...) as CWSTR => _
+   {  "Language compatibility FreeBasic (-lang fb)", _
+      "Language compatibility FreeBasic Lite (-lang fblite)", _
+      "Language compatibility QuickBasic (-lang qb)", _
+      "Subsystem to console (-s console)", _
+      "Subsystem to GUI (-s gui)", _
+      "Compiler assembler backend (-gen gas)", _
+      "Compiler GCC backend (-gen gcc)", _
+      "Compiler LLVM backend (-gen llvm)", _
+      "Create DLL and import library (-dll)", _
+      "Create static library (-lib)", _
+      "Add error checking (-e)", _
+      "Add error checking with RESUME support (-ex)", _
+      "Same as -ex with array bounds and null pointer (-exx)", _
+      "Add debug information (-g)", _
+      "Compile only, do not link (-c)", _
+      "Do not delete the object files (-C)", _
+      "Emit preprocessed output, do not compile (-pp)" _
+   }
 
 ' Used for Themes.
 Type TYPE_COLORS

@@ -946,9 +946,8 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
          ' Only erase the bottom portion of the listbox that extends from the last item
          ' to the bottom edge of the listbox. All other lines are already drawn. This helps
          ' reduce screen flicker.
-         ' Determine the number of items in the listbox and multiply by the item height
          dim as RECT rc: GetClientRect(hwnd, @rc)
-         rc.top = rc.top + (ListBox_GetCount(hwnd) * ListBox_GetItemHeight(hwnd, 0))
+         rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
             FillRect(hDC, @rc, cast(HBRUSH, GetCurrentObject(hDC, OBJ_BRUSH)))
