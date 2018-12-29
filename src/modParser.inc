@@ -95,7 +95,7 @@ ParseAgain:
    if gFileLoading then
       dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
       dim wszText as wstring * MAX_PATH: StatusBar_GetText(hStatusbar, 0, @wszText)
-      if wszText <> "Parsing:" then StatusBar_SetText(hStatusBar, 3, "Parsing:")
+      if wszText <> L(66,"Parsing") & ":" then StatusBar_SetText(hStatusBar, 3, L(66,"Parsing:") & ":")
       StatusBar_SetText(hStatusBar, 4, wszFilename)
    END IF
 

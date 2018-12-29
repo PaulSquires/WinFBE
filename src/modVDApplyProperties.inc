@@ -41,7 +41,7 @@ function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
       else
          AfxRemoveWindowStyle(pCtrl->hWindow, WS_SYSMENU)
       end if
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
       
    case "ICON"
       dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszPropValue)
@@ -49,7 +49,7 @@ function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
       if pImageType then hIcon = AfxGdipIconFromFile(pImageType->wszFilename)
       SendMessage( pCtrl->hWindow, WM_SETICON, CAST(WPARAM, ICON_BIG), CAST(LPARAM, hIcon))
       SendMessage( pCtrl->hWindow, WM_SETICON, CAST(WPARAM, ICON_SMALL), CAST(LPARAM, hIcon))
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
       
    case "MAXIMIZEBOX"
       if wszPropValue = "True" then
@@ -57,7 +57,7 @@ function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
       else
          AfxRemoveWindowStyle(pCtrl->hWindow, WS_MAXIMIZEBOX)
       end if
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "MINIMIZEBOX"
       if wszPropValue = "True" then
@@ -65,7 +65,7 @@ function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
       else
          AfxRemoveWindowStyle(pCtrl->hWindow, WS_MINIMIZEBOX)
       end if
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
       
    case "BORDERSTYLE"
       ' Remove all existing styles before adding the new style
@@ -106,7 +106,7 @@ function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_DLGMODALFRAME)
       end select     
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    end select
    
@@ -209,7 +209,7 @@ function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
       end select
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "TEXTALIGN"
       AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTER)
@@ -226,7 +226,7 @@ function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
          CASE "LabelAlignment.TopRight":     wsStyle = SS_RIGHT  
       END SELECT
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    end select
    
@@ -298,7 +298,7 @@ function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
          CASE "ButtonAlignment.TopRight":     wsStyle = BS_RIGHT  OR BS_TOP
       END SELECT
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    end select
    
@@ -371,7 +371,7 @@ function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
          CASE "ButtonAlignment.TopRight":     wsStyle = BS_RIGHT  OR BS_TOP
       END SELECT
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    end select
    
@@ -415,7 +415,7 @@ function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
       end select
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "INTEGRALHEIGHT"
 ' Do not do anything with the IntegralHeight property. Let the user size at whatever
@@ -483,7 +483,7 @@ function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
       end select
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "DROPDOWNSTYLE"
       dim as long nCtrlId, dwStyle, dwExStyle = -1
@@ -511,7 +511,7 @@ function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       if IsWindow(hWndListCtrl) then
          SetWindowSubclass(hWndListCtrl, CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_COMBOBOX, CAST(DWORD_PTR, pDoc))
       end if
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
       
    end select
    
@@ -552,7 +552,7 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
       end select
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "CHARACTERCASING"
       AfxRemoveWindowStyle(pCtrl->hWindow, ES_LOWERCASE)
@@ -594,7 +594,7 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
             wsStyle = (WS_HSCROLL or WS_VSCROLL)
       end select
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "TEXTALIGN"
       AfxRemoveWindowStyle(pCtrl->hWindow, ES_CENTER)
@@ -607,7 +607,7 @@ function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
          CASE "TextAlignment.Right":  wsStyle = ES_RIGHT  
       END SELECT
       AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    end select
    
@@ -649,7 +649,7 @@ function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
       end select
-      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
+      AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "TEXT", "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER"
       dim as CWSTR wszMaskString = GetControlProperty(pCtrl, "MASKSTRING")
@@ -690,36 +690,6 @@ function Frame_ApplyProperties( byval pDoc as clsDocument ptr, _
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
-
-'   case "BORDERSTYLE"
-'      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-'      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
-'      dim as long wsStyle
-'      select case **wszPropValue
-'         case "ControlBorderStyle.None"
-'         case "ControlBorderStyle.Fixed3D"
-'            AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-'         case "ControlBorderStyle.FixedSingle"
-'            AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
-'      end select
-'      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
-
-'   case "TEXTALIGN"
-'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTER)
-'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_LEFT)
-'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_RIGHT)
-'      AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTERIMAGE)
-'      dim as long wsStyle
-'      select case **wszPropValue
-'         CASE "LabelAlignment.MiddleCenter": wsStyle = SS_CENTER OR SS_CENTERIMAGE
-'         CASE "LabelAlignment.MiddleLeft":   wsStyle = SS_LEFT   OR SS_CENTERIMAGE
-'         CASE "LabelAlignment.MiddleRight":  wsStyle = SS_RIGHT  OR SS_CENTERIMAGE
-'         CASE "LabelAlignment.TopCenter":    wsStyle = SS_CENTER 
-'         CASE "LabelAlignment.TopLeft":      wsStyle = SS_LEFT   
-'         CASE "LabelAlignment.TopRight":     wsStyle = SS_RIGHT  
-'      END SELECT
-'      AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-'      SetWindowPos( pCtrl->hWindow, 0, 0, 0, 0, 0, SWP_NOMOVE Or SWP_NOSIZE Or SWP_DRAWFRAME)
 
    end select
    
@@ -831,6 +801,7 @@ function ApplyControlProperties( byval pDoc as clsDocument ptr, _
    ' Repaint to ensure that the grab handles draw
    AfxRedrawWindow(pDoc->hWndFrame)
    AfxRedrawWindow(pDoc->hWndForm)
+   AfxRedrawNonClientArea(pDoc->hWndForm) 
    
    function = 0
 

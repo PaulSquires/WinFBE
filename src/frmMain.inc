@@ -606,6 +606,7 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    If pDocIn = 0 Then   ' Create a new pDoc 
       gFileLoading = true  ' allows parsing of newly loading file
       pDoc = New clsDocument
+      gApp.AddDocument(pDoc) 
       pDoc->IsDesigner = bIsDesigner 
       ' All pDoc's will have an associated Scintilla window for code.
       If bIsNewFile Then
@@ -613,7 +614,6 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       Else
          pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
       End If   
-      gApp.AddDocument(pDoc) 
       ParseDocument(pDoc, "")
       gFileLoading = false
    Else
@@ -1078,7 +1078,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_OPTIONS
          frmOptions_Show( HWnd, SW_NORMAL )
       case IDM_COMPILECONFIG
-         frmCompileConfig_Show( HWND ) 
+         frmBuildConfig_Show( HWND ) 
       case IDM_USERTOOLSDIALOG
          frmUserTools_Show( HWND ) 
          
@@ -1167,7 +1167,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             Dim lpnm As NMMOUSE Ptr
             lpnm = Cast(NMMOUSE Ptr, pNMHDR)
             If lpnm->dwItemSpec = 0 Then   ' compiler panel is panel 0
-               frmCompileConfig_Show( HWND ) 
+               frmBuildConfig_Show( HWND ) 
             End If
             If lpnm->dwItemSpec = 1 Then   ' line/column panel 
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr

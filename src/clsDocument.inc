@@ -265,6 +265,8 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
             this.LoadingFromFile = true
             dim sText as string  ' this will be an UTF-8 encoded string
+            ' GetFileToString has a call to pDoc->ParseFormMetaData which will create/recreate
+            ' the designer form.
             if GetFileToString(*pwszFile, sText, @this) = false then
                this.SetText( sText ) 
                this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )

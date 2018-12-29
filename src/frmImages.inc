@@ -12,7 +12,6 @@
 '    GNU General Public License for more details.
 
 
-
 ' ========================================================================================
 ' Display a selected image in the Image Manager
 ' ========================================================================================
@@ -20,27 +19,34 @@ Function frmImages_DisplayImage(byval hwnd as HWND, byval nIndex as long) As LRE
    dim pImageCtx as CImageCtx PTR = AfxCImageCtxPtr(hwnd, IDC_FRMIMAGES_IMAGECTX)
    if pImageCtx = 0 then exit function
    
+   dim as hwnd hImageCtx = GetDlgItem(hwnd, IDC_FRMIMAGES_IMAGECTX)
+   
    dim pImageType as IMAGES_TYPE ptr 
    dim wszImageName as wstring * MAX_PATH
    dim as CWSTR wszFilename = L(0002, "File") & ": "
    
    ' Get the disk filename for the selected Image. Do not use the method of storing
    ' a pointer to the IMAGES_TYPE in the ListView data area because the pDoc->AllImages
-   ' array gets REDIM PRESERVE which moxes the array elements around in memory.
-   FF_ListView_GetItemText(GetDlgItem(hwnd, IDC_FRMIMAGES_LISTVIEW), nIndex, 0, @wszImageName, MAX_PATH)
-   pImageType = GetImagesTypePtr(wszImageName)
+   ' array gets REDIM PRESERVE which moves the array elements around in memory.
+   ShowWindow(hImageCtx, SW_HIDE)
+   if nIndex >= 0 then
+      FF_ListView_GetItemText(GetDlgItem(hwnd, IDC_FRMIMAGES_LISTVIEW), nIndex, 0, @wszImageName, MAX_PATH)
+      pImageType = GetImagesTypePtr(wszImageName)
 
-   if pImageType then 
-      pImageCtx->LoadImageFromFile(pImageType->wszFileName)
-      if SendMessage( GetDlgItem(hwnd, IDC_FRMIMAGES_ACTUALSIZE), BM_GETCHECK, 0, 0) = BST_CHECKED then
-         pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
-      else   
-         pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_AUTOSIZE, CTRUE )
+      if pImageType then 
+         pImageCtx->LoadImageFromFile(pImageType->wszFileName)
+         if SendMessage( GetDlgItem(hwnd, IDC_FRMIMAGES_ACTUALSIZE), BM_GETCHECK, 0, 0) = BST_CHECKED then
+            pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
+         else   
+            pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_AUTOSIZE, CTRUE )
+         end if
+         wszFilename = wszFilename & pImageType->wszFileName
+         if AfxFileExists(pImageType->wszFileName) = false then
+            wszFilename = wszFilename & " (" & L(81, "File not found") & ")"
+         end if   
+         ShowWindow(hImageCtx, SW_SHOW)
       end if
-      wszFilename = wszFilename & pImageType->wszFileName
-   else
-      pImageCtx->Clear   
-   end if
+   end if         
    AfxSetWindowText( GetDlgItem(hwnd, IDC_FRMIMAGES_LBLFILENAME), wszFilename)
 
    Function = 0
@@ -139,6 +145,9 @@ Function frmImages_AddImage(ByVal HWnd As HWnd) As LRESULT
    Next
    pItems->lpVtbl->Release(pItems)
 
+   ' Save the changes to the pDoc
+   if pDoc then pDoc->SaveFile
+
    ListView_SelectItem(hLV, nSelLine)
    frmImages_DisplayImage(hwnd, nSelLine)
    SetFocus hLV
@@ -207,7 +216,11 @@ Function frmImages_RemoveImage(ByVal HWnd As HWnd) As LRESULT
       for i as long = nCurSel to ubound(pDoc->AllImages) - 1
          pDoc->AllImages(i) = pDoc->AllImages(i+1) 
       next
-      Redim Preserve pDoc->AllImages(Ubound(pDoc->AllImages)-1)
+      if Ubound(pDoc->AllImages)-1 < 0 then
+         erase pDoc->AllImages
+      else   
+         Redim Preserve pDoc->AllImages(Ubound(pDoc->AllImages)-1)
+      end if
       ' Save the changes to the pDoc
       pDoc->SaveFile
    end if
@@ -226,6 +239,8 @@ Function frmImages_RemoveImage(ByVal HWnd As HWnd) As LRESULT
       nCurSel = nCurSel - 1
       if nCurSel < 0 then nCurSel = 0
       ListView_SelectItem(hLV, nCurSel)
+   else
+      nCurSel = -1   
    end if
    frmImages_DisplayImage(hwnd, nCurSel)
    SetFocus hLV
@@ -267,8 +282,22 @@ End Function
 ' ========================================================================================
 Function frmImages_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
 
-   dim pImageCtx as CImageCtx PTR
+   dim as hwnd hLV = GetDlgItem(HWND, IDC_FRMIMAGES_LISTVIEW)
+   dim as long nCurSel 
+   dim wszImageName as wstring * MAX_PATH
+   dim wszText as wstring * MAX_PATH
 
+   dim pImageCtx  as CImageCtx PTR
+   dim pImageType as IMAGES_TYPE ptr
+   dim pProp      as clsProperty ptr
+
+   if IsWindow(hLV) then
+      nCurSel = ListView_GetSelection(hLV)
+      FF_ListView_GetItemText(hLV, nCurSel, 0, @wszImageName, MAX_PATH)
+      pImageType = GetImagesTypePtr(wszImageName)
+   end if
+   
+   
    Select Case id
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
@@ -278,13 +307,48 @@ Function frmImages_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
          
       case IDM_ADDIMAGE
          frmImages_AddImage(HWND)
+         exit function
      
       case IDM_REMOVEIMAGE   
          frmImages_RemoveImage(HWND)
+         exit function
       
-      case IDM_ATTACHIMAGE   
-      case IDM_DETACHIMAGE   
-
+      case IDM_FORMATIMAGE
+         if nCurSel = -1 then exit function
+         Dim pt As Point   
+         Dim as HMENU hPopUpMenu = CreateImagesResourceMenu()
+         GetCursorPos @pt
+         TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
+         DestroyMenu hPopUpMenu
+         exit function
+         
+      case IDC_FRMIMAGES_FORMATBITMAP, IDC_FRMIMAGES_FORMATICON, _
+           IDC_FRMIMAGES_FORMATCURSOR, IDC_FRMIMAGES_FORMATRCDATA
+         if id = IDC_FRMIMAGES_FORMATBITMAP then wszText = "BITMAP"
+         if id = IDC_FRMIMAGES_FORMATICON   then wszText = "ICON"
+         if id = IDC_FRMIMAGES_FORMATCURSOR then wszText = "CURSOR"
+         if id = IDC_FRMIMAGES_FORMATRCDATA then wszText = "RCDATA"
+         if pImageType then 
+            pImageType->wszFormat = wszText
+            FF_ListView_SetItemText( hLV, nCurSel, 1, @wszText, MAX_PATH )
+            pImageType->pDoc->SaveFile
+         end if
+         exit function
+         
+      case IDM_ATTACHIMAGE, IDM_DETACHIMAGE
+         if nCurSel = -1 then exit function
+         if len(wszImageName) = 0 then exit function
+         if id = IDM_DETACHIMAGE then wszImageName = ""
+         pProp = GetActivePropertyPtr()
+         if pProp then pProp->wszPropValue = wszImageName
+         DisplayPropertyList(gTTabCtl.GetActiveDocumentPtr)
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+         dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
+         ApplyControlProperties( pDoc, pCtrl )
+         pDoc->UserModified = true
+         SendMessage( HWnd, WM_CLOSE, 0, 0)
+         exit function
+         
       CASE IDC_FRMIMAGES_AUTOSIZE
          If codeNotify = BN_CLICKED Then
             pImageCtx = AfxCImageCtxPtr(hwnd, IDC_FRMIMAGES_IMAGECTX)
@@ -342,6 +406,7 @@ Function frmImages_OnDestroy(HWnd As HWnd) As LRESULT
    ImageList_Destroy CAST(HIMAGELIST, SendMessage(GetDlgItem(hwnd, IDC_FRMIMAGES_TOOLBAR), TB_SETIMAGELIST, 0, 0))
    ImageList_Destroy CAST(HIMAGELIST, SendMessage(GetDlgItem(hwnd, IDC_FRMIMAGES_TOOLBAR), TB_SETHOTIMAGELIST, 0, 0))
    ImageList_Destroy CAST(HIMAGELIST, SendMessage(GetDlgItem(hwnd, IDC_FRMIMAGES_TOOLBAR), TB_SETDISABLEDIMAGELIST, 0, 0))
+   HWND_FRMIMAGES = 0
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -438,6 +503,7 @@ Function frmImages_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
+   HWND_FRMIMAGES = _
    pWindow->Create( hWndParent, L(368,"Image Manager"), @frmImages_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT )
@@ -544,12 +610,12 @@ Function frmImages_Show( ByVal hWndParent As HWnd, _
 
    ' Add a button without coordinates (it will be reiszed in WM_SIZE, below)
    DIM hCtl AS HWND = _
-      pWindow->AddControl("RadioButton", , IDC_FRMIMAGES_ACTUALSIZE, L(376, "Actual size"), 370, nTop + 354, 100, 20)
-      pWindow->AddControl("RadioButton", , IDC_FRMIMAGES_AUTOSIZE, L(375, "Autosize"), 370, nTop + 376, 100, 20)
+      pWindow->AddControl("RadioButton", , IDC_FRMIMAGES_ACTUALSIZE, L(376, "Actual size"), 370, nTop + 354, 120, 20)
+      pWindow->AddControl("RadioButton", , IDC_FRMIMAGES_AUTOSIZE, L(375, "Autosize"), 492, nTop + 354, 100, 20)
       SendMessage hCtl, BM_SETCHECK, BST_CHECKED, 0
 
    Dim As HWnd hLabel = _
-      pWindow->AddControl("LABEL", , IDC_FRMIMAGES_LBLFILENAME, "", 370, nTop + 403, 320, 40, _
+      pWindow->AddControl("LABEL", , IDC_FRMIMAGES_LBLFILENAME, "", 370, nTop + 380, 320, 52, _
            WS_CHILD Or WS_VISIBLE Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
 
 

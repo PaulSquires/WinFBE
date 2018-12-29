@@ -368,7 +368,7 @@ Function frmFindInFiles_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
          
       Case IDCANCEL  ' Close
          If codeNotify = BN_CLICKED Then
-            SendMessageW HWnd, WM_CLOSE, 0, 0
+            SendMessage( HWnd, WM_CLOSE, 0, 0)
             Exit Function
          End If
 
@@ -573,13 +573,6 @@ End Function
 ' ========================================================================================
 Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
 
-   ' If the FindInFiles window already exists then simply set focus to it and exit.
-   If IsWindow(HWND_FRMFINDINFILES) Then
-      SetForegroundWindow(HWND_FRMFINDINFILES)
-      SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND) )
-      Exit Function
-   End If
-
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
@@ -679,7 +672,7 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFIND_COMBOFIND) )
 
    ' Process Windows messages
-   Function = pWindow->DoEvents(0)
+   Function = pWindow->DoEvents(SW_SHOW)
    
    ' Delete the frmFindInFiles CWindow class manually allocated memory 
    Delete pWindow

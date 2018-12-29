@@ -727,10 +727,10 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL9, "", 238, 370, 425, 3, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMUSERTOOLS_CMDOK, L(0,"&OK"), 509, 388, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDC_FRMUSERTOOLS_CMDOK, L(0,"OK"), 509, 388, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&OK"), 591, 388, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 591, 388, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -756,7 +756,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    SetFocus GetDlgItem(hForm, IDC_FRMUSERTOOLS_LSTTOOLS)
 
    ' Process Windows messages
-   Function = pWindow->DoEvents(nCmdShow)
+   Function = pWindow->DoEvents(SW_SHOW)
    
    ' Delete the frmUserTools CWindow class manually allocated memory 
    Delete pWindow

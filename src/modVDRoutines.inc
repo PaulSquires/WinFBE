@@ -18,8 +18,10 @@
 Function GetImagesTypePtr( byref wszImageName as wstring ) As IMAGES_TYPE ptr
    dim pDoc as clsDocument ptr = gApp.pDocList
    do until pDoc = 0
-      if (gApp.IsProjectActive = false) andalso (pDoc <> gTTabCtl.GetActiveDocumentPtr) then 
-         ' For non-projects only output images related to the active form.
+      if (gApp.IsProjectActive = false) andalso _
+         (gTTabCtl.GetActiveDocumentPtr <> 0) andalso _
+         (pDoc <> gTTabCtl.GetActiveDocumentPtr) then 
+         ' For non-projects only get images related to the active form.
       else
          for i as long = lbound(pDoc->AllImages) to ubound(pDoc->AllImages)
             if pDoc->AllImages(i).wszImageName = wszImageName then

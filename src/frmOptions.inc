@@ -350,7 +350,7 @@ Function frmOptions_Show( ByVal hWndParent As HWnd, _
    SetFocus hWndTreeview
    
    ' Process Windows messages
-   Function = pWindow->DoEvents(nCmdShow)
+   Function = pWindow->DoEvents(SW_SHOW)
    
    ' Delete the frmOptions CWindow class manually allocated memory 
    Delete pWindow

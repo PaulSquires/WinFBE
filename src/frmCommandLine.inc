@@ -47,6 +47,7 @@ Function frmCommandLine_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          End If
+         
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
@@ -142,7 +143,7 @@ Function frmCommandLine_Show( ByVal hWndParent As HWnd, _
    SetFocus hTextBox
    
    ' Process Windows messages
-   Function = pWindow->DoEvents(nCmdShow)
+   Function = pWindow->DoEvents(SW_SHOW)
    
    ' Delete the frmCommandLine CWindow class manually allocated memory 
    Delete pWindow

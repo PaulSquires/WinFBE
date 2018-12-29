@@ -1227,7 +1227,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    
    If AfxFileExists(wzFile) = 0 Then Exit Function
 
-   StatusBar_SetText(hStatusBar, 3, "Parsing:")
+   StatusBar_SetText(hStatusBar, 3, L(66,"Parsing") & ":")
    StatusBar_SetText(hStatusBar, 4, "")
 
    dim as HCURSOR hCurSave = GetCursor()

@@ -519,7 +519,7 @@ end function
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
-Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
+Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -543,7 +543,7 @@ End Function
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
-Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
+Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor

@@ -496,7 +496,7 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    
    HWND_FRMMENUEDITOR = _
    pWindow->Create(hWndParent, L(312,"Menu Editor"), @frmMenuEditor_WndProc, 0, 0, 411, 418, _
-        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
+        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)
 
@@ -650,7 +650,7 @@ Function frmMenuEditor_Show( ByVal hWndParent As HWnd, _
    frmMenuEditor_DisplayMenuItem
    
    ' Process Windows messages
-   Function = pWindow->DoEvents(nCmdShow)
+   Function = pWindow->DoEvents(SW_SHOW)
    
    ' Delete the frmMenuEditor CWindow class manually allocated memory 
    Delete pWindow

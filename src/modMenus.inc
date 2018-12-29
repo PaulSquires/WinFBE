@@ -553,6 +553,38 @@ Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
  
 End Function
 
+
+''
+''
+Function CreateImagesResourceMenu() As HMENU
+   
+   dim wszImageFormat as wstring * MAX_PATH
+   dim as hwnd hLV = GetDlgItem(HWND_FRMIMAGES, IDC_FRMIMAGES_LISTVIEW)
+   dim as long nCurSel = ListView_GetSelection(hLV)
+   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszImageFormat, MAX_PATH)
+
+   dim as long fNormal  = MF_ENABLED or MF_STRING 
+   dim as long fChecked = MF_CHECKED or MF_ENABLED or MF_STRING
+   dim as long i
+   
+   select case wszImageFormat
+      case "RCDATA": i = 1
+      case "BITMAP": i = 2
+      case "ICON":   i = 3
+      case "CURSOR": i = 4
+   end select
+   
+   Dim hPopUpMenu As HMENU = CreatePopupMenu()
+      AppendMenu( hPopUpMenu, iif(i = 1, fChecked, fNormal), IDC_FRMIMAGES_FORMATRCDATA,  "RCDATA")
+      AppendMenu( hPopUpMenu, iif(i = 2, fChecked, fNormal), IDC_FRMIMAGES_FORMATBITMAP,  "BITMAP")
+      AppendMenu( hPopUpMenu, iif(i = 3, fChecked, fNormal), IDC_FRMIMAGES_FORMATICON,    "ICON")
+      AppendMenu( hPopUpMenu, iif(i = 4, fChecked, fNormal), IDC_FRMIMAGES_FORMATCURSOR,  "CURSOR")
+
+   Function = hPopupMenu
+ 
+End Function
+
+
 ''
 ''
 Function CreateScintillaContextMenu() As HMENU

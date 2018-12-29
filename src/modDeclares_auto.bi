@@ -61,8 +61,8 @@ Declare Function FileEncodingTextDescription(byval FileEncoding as long) as CWST
 Declare Function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr) as boolean
 Declare Function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long
 Declare Function OpenSelectedDocument( byref wszFilename as wstring, byref wszFunctionName as WSTRING, byval nLineNumber as long = 0 ) as long
-Declare Function ProcessToCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
-Declare Function ProcessFromCurdrive( ByRef wzFilename As CWSTR ) As CWSTR
+Declare Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
+Declare Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
 Declare Function Treeview_RemoveCheckBox( byval hTree as hwnd, byval hNode as HTREEITEM) as long
 Declare Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, ByVal hParent As HANDLE, ByRef TheText As WString, ByVal lParam As LPARAM = 0, ByVal iImage As Long = 0, ByVal iSelectedImage As Long = 0 ) As HANDLE
 Declare Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As Long

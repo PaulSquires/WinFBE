@@ -160,7 +160,7 @@ Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long
    SetFocus GetDlgItem(pWindow->hWindow, IDC_FRMGOTO_TXTLINE)
 
    ' Process Windows messages
-   Function = pWindow->DoEvents(0)
+   Function = pWindow->DoEvents(SW_SHOW)
    
    ' Delete the frmGoto CWindow class manually allocated memory 
    Delete pWindow

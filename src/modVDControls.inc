@@ -306,34 +306,6 @@ end function
 
 
 ' ========================================================================================
-' Generate the next Index in an OptionButton group.
-' ========================================================================================
-'function GenerateOptionButtonIndex( byval pDoc as clsDocument ptr, _
-'                                    byval pCtrl as clsControl ptr _
-'                                    ) as CWSTR
-
-'   dim as long NextIndexNumber = 1
-'   dim as long nIndex
-'   dim as CWSTR wszOptionGroup
-'   dim pCtrl2 as clsControl ptr 
-    
-'   wszOptionGroup = ucase(GetControlProperty(pCtrl, "GROUPNAME"))
-
-'   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-'      pCtrl2 = pDoc->Controls.ItemAt(i)
-'      if pCtrl2->ControlType <> CTRL_OPTION then continue for
-'      if pCtrl2 = pCtrl then continue for
-'      if ucase(GetControlProperty(pCtrl2, "GROUPNAME")) = wszOptionGroup THEN
-'         nIndex = val(GetControlProperty(pCtrl2, "INDEX")) 
-'         if nIndex >= NextIndexNumber then NextIndexNumber = nIndex + 1
-'      end if
-'   NEXT
-    
-'   return wstr(NextIndexNumber)
-'end function
-
-
-' ========================================================================================
 ' Generate a default TabIndex value for the new control
 ' ========================================================================================
 function GenerateDefaultTabIndex( byval pDoc as clsDocument ptr ) as CWSTR
@@ -462,9 +434,6 @@ function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    if pDoc->LoadingFromFile = false then
       ' By default, generate the next highest TabIndex value for this new control. 
       SetControlProperty(pCtrl, "TABINDEX", GenerateDefaultTabIndex(pDoc))
-      'if ControlType = CTRL_OPTION then
-      '   SetControlProperty(pCtrl, "INDEX", GenerateOptionButtonIndex(pDoc, pCtrl))
-      'end if   
       pCtrl->SuspendLayout = true
       ApplyControlProperties( pDoc, pCtrl )
       pCtrl->SuspendLayout = false
