@@ -1237,7 +1237,7 @@ Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As 
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows(HWnd)
                PostMessage(hwnd, MSG_USER_GENERATECODE, 0, 0)
-         END SELECT
+         END SELECT  
 
          
       Case TTN_GETDISPINFO
