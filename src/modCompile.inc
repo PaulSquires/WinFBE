@@ -16,27 +16,28 @@
 ''  Handle information related to Compile process 
 ''
 Type COMPILE_TYPE
-   MainFilename    As WString * MAX_PATH   ' main source file (full path and file.ext)
-   MainName        As WString * MAX_PATH   ' main source file (Name only, no extension)
-   MainFolder      As WString * MAX_PATH   ' main source folder 
-   ResourceFile    As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
-   OutputFilename  As WString * MAX_PATH   ' resulting exe/dll/lib name 
-   CompilerPath    As WString * MAX_PATH   ' full path and file.ext to fbc.exe
-   ObjFolder       As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
-   ObjFolderShort  As WString * MAX_PATH   ' ".\.wfbe\"
-   ObjID           As WString * MAX_PATH   ' "32" or "64" appended to object name
-   CompileFlags    As WString * 2048
-   RunAfterCompile As BOOLEAN
-   StartTime       As Double
-   EndTime         As Double
-   CompileID       as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
+   MainFilename     As WString * MAX_PATH   ' main source file (full path and file.ext)
+   MainName         As WString * MAX_PATH   ' main source file (Name only, no extension)
+   MainFolder       As WString * MAX_PATH   ' main source folder 
+   ResourceFile     As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
+   TempResourceFile As WString * MAX_PATH   ' full path and file.ext to temporary resource file (if applicable) 
+   OutputFilename   As WString * MAX_PATH   ' resulting exe/dll/lib name 
+   CompilerPath     As WString * MAX_PATH   ' full path and file.ext to fbc.exe
+   ObjFolder        As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
+   ObjFolderShort   As WString * MAX_PATH   ' ".\.wfbe\"
+   ObjID            As WString * MAX_PATH   ' "32" or "64" appended to object name
+   CompileFlags     As WString * 2048
+   RunAfterCompile  As BOOLEAN
+   StartTime        As Double
+   EndTime          As Double
+   CompileID        as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
 End Type
 Dim Shared gCompile As COMPILE_TYPE
 
 
 ''
 ''  Set the statusbar text and icon for a good/bad compile
-'------------------------------------------------------------------------------------------------------------------------
+''
 function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    StatusBar_SetIcon(hStatusBar, 4, hIconCompile)
@@ -46,12 +47,103 @@ end function
 
 
 ''
+''  Create Resource file (if necessary) for the compile and return
+''  the full disk filename of the resource file.
+function CreateTempResourceFile() as boolean
+   dim as CWSTR wszResourceFile = gCompile.ResourceFile
+   
+   ' Collect all of the IMAGE_NAME used by controls/properties in the file/project
+   ' and generate a string to output to the resource file.
+   dim pDoc as clsDocument ptr
+   dim as CWSTR wszInternalText, wszExistingText
+   
+   pDoc = gApp.pDocList
+   do until pDoc = 0
+      for i as long = lbound(pDoc->AllImages) to ubound(pDoc->AllImages)
+         ' IMAGE_ARROWLEFT    RCDATA "IMAGES\\LEFTARROW.PNG"
+         wszInternalText = wszInternalText & _
+                   pDoc->AllImages(i).wszImageName & wspace(6) & _
+                   pDoc->AllImages(i).wszFormat    & wspace(2) & _
+                   wchr(34) & pDoc->AllImages(i).wszFileName & wchr(34) & _
+                   vbcrlf
+      next   
+      pDoc = pDoc->pDocNext
+   loop
+
+   ' If resource items were found then we need to generate the new resource file
+   ' and return its name. The new file will be a temporary file that will need to
+   ' added to the App.AddQuickRunEXE list. That list is checked in the main WinFBE
+   ' message loop and deletes not only QuickRun EXEs but any other WinFBE generated
+   ' temporary file that we want to get rid of.
+   if len(wszInternalText) then
+
+      ' Need to copy a default manifest file to the compiling folder as well because
+      ' the newly generated resource file will depend on it.
+      dim as CWSTR wszManifestTemplate = AfxGetExePathName + "Settings\WinFBE_manifest.xml"
+      dim as CWSTR wszManifest = gCompile.MainFolder + "manifest.xml"
+      if AfxFileExists(wszManifestTemplate) then
+         if AfxFileExists(wszManifest) = false then
+            AfxCopyFile( wszManifestTemplate, wszManifest, true )
+         end if
+      end if
+
+      ' If a resource file already exists then use whatever text is in the file as
+      ' the basis for the newly generated resource file. 
+      if AfxFileExists(gCompile.ResourceFile) then
+         ' Load the entire file into a string
+         DIM dwCount AS DWORD, dwFileSize AS DWORD, dwHighSize AS DWORD, dwBytesRead AS DWORD
+         DIM hFile AS HANDLE = CreateFileW(@gCompile.ResourceFile, GENERIC_READ, FILE_SHARE_READ, NULL, _
+                                            OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
+         IF hFile = INVALID_HANDLE_VALUE THEN return false
+         dwFileSize = GetFileSize(hFile, @dwHighSize)
+         dim as string txtBuffer = String(dwFileSize, 0)
+         ReadFile(hFile, strptr(txtBuffer), dwFileSize, @dwBytesRead, NULL)
+         CloseHandle(hFile)
+
+         ' Check for BOM signatures
+         if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
+            ' UTF8 BOM encoded 
+            wszExistingText = Utf8ToUnicode( mid(txtBuffer, 4) )   ' bypass the BOM
+         elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
+            ' UTF16 BOM (little endian) encoded
+            wszExistingText = mid(txtBuffer, 3)   ' bypass the BOM
+         else
+            wszExistingText = wstr(txtBuffer)   ' ansi -> unicode
+         END IF
+
+      end if   
+      
+      ' Ensure that the reference to the manifest file exists
+      dim as CWSTR wszLookFor = "1 24 " & wchr(34) & ".\manifest.xml" & wchr(34)
+      if instr(wszExistingText, wszLookFor ) = 0 then
+         wszInternalText = wszLookFor & vbcrlf & wszInternalText  
+      end if
+      
+      ' Append the internally generated resource text to the new resource file.
+      gCompile.TempResourceFile = GetTemporaryFilename(gCompile.MainFolder, "rc")
+      dim pStream AS CTextStream   '(utf16)
+      if pStream.Create(gCompile.TempResourceFile, true, true) = S_OK then 
+         pStream.WriteLine wszExistingText
+         pStream.WriteLine ""
+         pStream.WriteLine wszInternalText
+         pStream.WriteLine ""
+         pStream.Close 
+      end if
+      
+      function = true
+   end if
+   
+   function = false
+end function
+
+
+''
 ''  Reset all Scintilla editing cursors
-'------------------------------------------------------------------------------------------------------------------------
+''
 function ResetScintillaCursors() as Long
    Dim pDoc As clsDocument Ptr
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
-   Dim TB   As TC_ITEM 
+   Dim TB As TC_ITEM 
 
    For i as long = 0 To nCount - 1
       ' Get the document pointer and then save file to disk
@@ -152,6 +244,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    If pDocMain = 0 Then return 0
    
+
    ' If this is a QuickRun then we need to copy the current source code to a temporary bas file
    ' and compile that bas file instead. The resulting bas file will be deleted after the compiling
    ' has completed and exe will be deleted when the exe is terminated. 
@@ -235,7 +328,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.CompileFlags = gConfig.Builds(idxBuild).wszOptions
 
    ' If the path to the WinFBX (Afx) library is valid then add that path
-   ' as a -i switch to the compiler.
+   ' as a -i switch to the compiler. This option is no longer presented in the
+   ' Environment Options dialog but Jose Roca still uses it to assist in 
+   ' more easily being able to maintain his library code.
    if AfxIsFolder(gConfig.WinFBXPath) THEN
       gCompile.CompileFlags = gCompile.CompileFlags + " -i " + chr(34) + gConfig.WinFBXPath + chr(34)
    end if
@@ -285,6 +380,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       END select
    next
 
+
    ' Need to determine the output filename in order to search for any existing
    ' running process.
    gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
@@ -297,6 +393,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
       gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
    End If
+
 
    ' Need to test if the resulting application to be compiled is actually running
    ' in memory. This would cause the compile to fail.
@@ -376,9 +473,16 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
    wszParams = "-m " + wDQ + gCompile.MainFilename + wDQ 
-   If Len(gCompile.ResourceFile) then
+
+   ' Determine if we need to generate a temporary Resource file to hold any
+   ' necessary for visual designer forms/projects where image references need to be outputted.
+   if CreateTempResourceFile() then
+      wszParams = wszParams + " " + wDQ + gCompile.TempResourceFile + wDQ
+   else   
       wszParams = wszParams + " " + wDQ + gCompile.ResourceFile + wDQ
    end if   
+
+   ' Ensure verbose compiler message output
    wszParams = wszParams + " -v " + gCompile.CompileFlags 
    
    If gApp.IsProjectActive Then
@@ -435,6 +539,9 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If gCompile.RunAfterCompile Then 
       RunEXE( gCompile.OutputFilename, gApp.ProjectCommandLine)
    End If
+
+   ' Add any temp resource file to the list of temp files to later be deleted.
+'   gApp.AddQuickRunEXE(gCompile.TempResourceFile)
       
    Function = True   ' successful
 End Function

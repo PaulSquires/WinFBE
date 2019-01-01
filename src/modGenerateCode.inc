@@ -437,7 +437,8 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
             if ucase(wszPropValue) <> ucase(wszPropDefault) then
                select case ucase(wszPropName)
                   case "TEXT", "TAG", "PASSWORDCHAR", "GROUPNAME", _
-                       "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER", "VALIDCHARACTERS"            
+                       "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER", "VALIDCHARACTERS", _
+                       "ICON"            
                      ' Ensure that any embedded double quotes are escaped
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ

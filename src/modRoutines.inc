@@ -364,14 +364,14 @@ function GetFileToString( byref wszFilename as const wstring, _
    ' Check for BOM signatures
    if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
       ' UTF8 BOM encoded 
-      pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
+      if pDoc then pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
       txtBuffer = mid(txtBuffer, 4)   ' bypass the BOM
    elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
       ' UTF16 BOM (little endian) encoded
-      pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
+      if pDoc then pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
       txtBuffer = mid(txtBuffer, 3)   ' bypass the BOM
    else
-      pDoc->FileEncoding = FILE_ENCODING_ANSI
+      if pDoc then pDoc->FileEncoding = FILE_ENCODING_ANSI
    END IF
 
    select case pDoc->FileEncoding
@@ -388,11 +388,10 @@ function GetFileToString( byref wszFilename as const wstring, _
 
          ' Need to parse wszText to remove/process any possible visual designer code. Only
          ' the non-VD text is returned. We also skip over any codegen code.
-         wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
+         if pDoc then wszText = pDoc->ParseFormMetaData(HWND_FRMMAIN, wszText)
 
          ' Convert to UTF8 so it can display in the editor
          ' Need to pass a WSTRING pointer to the conversion function.
-         'txtBuffer = UnicodeToUtf8( wszText )
          txtBuffer = wszText.utf8
 
    END select

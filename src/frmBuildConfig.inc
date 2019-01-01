@@ -312,10 +312,20 @@ Function frmBuildConfig_ListBox_SubclassProc ( _
          ' to the bottom edge of the listbox. All other lines are already drawn. This helps
          ' reduce screen flicker.
          dim as RECT rc: GetClientRect(hwnd, @rc)
-         rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
+         ' If the number of lines in the listbox is less than the number per page then 
+         ' calculate from last item to bottom of listbox, otherwise calculate based on
+         ' the mod of the lineheight to listbox height so we can color the partial line
+         ' that won't be displayed at the bottom of the list.
+         dim as long NumItems = ListBox_GetCount(hwnd)
+         dim as long ItemsPerPage = ( rc.bottom / LISTBOX_LINEHEIGHT)
+         if NumItems < ItemsPerPage then 
+            rc.top = LISTBOX_LINEHEIGHT * NumItems
+         else
+            rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
+         end if
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
-            FillRect(hDC, @rc, cast(HBRUSH, GetCurrentObject(hDC, OBJ_BRUSH)))
+            FillRect(hDC, @rc, GetSysColorBrush(COLOR_WINDOW))
          end if
          return TRUE
          
@@ -641,7 +651,7 @@ Function frmBuildConfig_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMBUILDCONFIG_LABEL1, L(278,"Description") & ":", 240, 11, 91, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMBUILDCONFIG_CHKISDEFAULT, L(280,"Set as default"), 500, 10, 172, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMBUILDCONFIG_CHKISDEFAULT, L(280,"Set as default"), 380, 10, 240, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMBUILDCONFIG_TXTDESCRIPTION, "", 240, 32, 372, 20, _

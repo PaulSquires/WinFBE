@@ -11,7 +11,7 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-declare Function frmImages_Show( ByVal hWndParent As HWnd, Byval pProp as clsProperty ptr = 0 ) As Long
+declare Function frmImageManager_Show( ByVal hWndParent As HWnd, Byval pProp as clsProperty ptr = 0 ) As Long
 declare Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
 declare Function frmHelpViewer_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = -1) As Long
 declare function IsPropertyExists( byval pCtrl as clsControl ptr, byval wszPropName as CWSTR) as boolean

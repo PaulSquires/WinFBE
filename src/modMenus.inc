@@ -559,7 +559,7 @@ End Function
 Function CreateImagesResourceMenu() As HMENU
    
    dim wszImageFormat as wstring * MAX_PATH
-   dim as hwnd hLV = GetDlgItem(HWND_FRMIMAGES, IDC_FRMIMAGES_LISTVIEW)
+   dim as hwnd hLV = GetDlgItem(HWND_FRMIMAGES, IDC_FRMIMAGEMANAGER_LISTVIEW)
    dim as long nCurSel = ListView_GetSelection(hLV)
    FF_ListView_GetItemText(hLV, nCurSel, 1, @wszImageFormat, MAX_PATH)
 
@@ -575,10 +575,10 @@ Function CreateImagesResourceMenu() As HMENU
    end select
    
    Dim hPopUpMenu As HMENU = CreatePopupMenu()
-      AppendMenu( hPopUpMenu, iif(i = 1, fChecked, fNormal), IDC_FRMIMAGES_FORMATRCDATA,  "RCDATA")
-      AppendMenu( hPopUpMenu, iif(i = 2, fChecked, fNormal), IDC_FRMIMAGES_FORMATBITMAP,  "BITMAP")
-      AppendMenu( hPopUpMenu, iif(i = 3, fChecked, fNormal), IDC_FRMIMAGES_FORMATICON,    "ICON")
-      AppendMenu( hPopUpMenu, iif(i = 4, fChecked, fNormal), IDC_FRMIMAGES_FORMATCURSOR,  "CURSOR")
+      AppendMenu( hPopUpMenu, iif(i = 1, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATRCDATA,  "RCDATA")
+      AppendMenu( hPopUpMenu, iif(i = 2, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATBITMAP,  "BITMAP")
+      AppendMenu( hPopUpMenu, iif(i = 3, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATICON,    "ICON")
+      AppendMenu( hPopUpMenu, iif(i = 4, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATCURSOR,  "CURSOR")
 
    Function = hPopupMenu
  

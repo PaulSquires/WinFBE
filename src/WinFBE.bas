@@ -90,7 +90,7 @@ Using Afx
 #Include Once "modCodetips.inc"
 #Include Once "modGenerateCode.inc"
 
-#Include Once "frmImages.inc" 
+#Include Once "frmImageManager.inc" 
 #Include Once "frmRecent.inc" 
 #Include Once "frmExplorer.inc" 
 #Include Once "frmUserTools.inc" 

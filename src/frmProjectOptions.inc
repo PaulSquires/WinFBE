@@ -25,8 +25,8 @@ function CreateResourceManifest() as Long
    
    if AfxFileExists(wszManifestTemplate) = false then exit function
    if AfxFileExists(wszResourceTemplate) = false then exit function
-   if AfxFileExists(wszManifest) = false then CopyFile( wszManifestTemplate, wszManifest, true )
-   if AfxFileExists(wszResource) = false then CopyFile( wszResourceTemplate, wszResource, true )
+   if AfxFileExists(wszManifest) = false then AfxCopyFile( wszManifestTemplate, wszManifest, true )
+   if AfxFileExists(wszResource) = false then AfxCopyFile( wszResourceTemplate, wszResource, true )
 
    ' Add the resource file to the project if it does not already exist in the project
    if gApp.GetDocumentPtrByFilename(wszResource) = 0 then

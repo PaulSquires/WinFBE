@@ -21,9 +21,9 @@ function frmOptionsLocal_LocalEditCheck() as Long
                
    dim as CWSTR wszLocalName = AfxGetWindowText( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
    dim as CWSTR wszFileName = AfxGetExePathName + wstr("Languages\" + wszLocalName)
-   dim as CWSTR wszTemp
+   dim as CWSTR wszTemp, wszPhrase
    
-   ' If the english file is selected then we do not want to allow any editing so disable the controls.
+   ' If the english file is selected then we do not want to allow any modifications to that file.
    if ucase(trim(AfxStrPathname( "NAMEX", wszFilename ))) = "ENGLISH.LANG" then exit function
 
    dim as HWND hLV = GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LVWPHRASES)
@@ -45,14 +45,22 @@ function frmOptionsLocal_LocalEditCheck() as Long
       "'" & vbcrlf & _  
       "' Each line represents a key/value pair describing the position to store the" & vbcrlf & _
       "' localized word/phrase into the localization array used by WinFBE. Simple." & vbcrlf & vbcrlf & _
-      "MAXIMUM:" & wstr(nCount+10) & vbcrlf & vbcrlf
+      "MAXIMUM:" & wstr(nCount) & vbcrlf & vbcrlf
       pStream.WriteLine(wszTemp) 
 
       for i as long = 0 to nCount - 1
          FF_ListView_GetItemText(hLV, i, 0, @wszIndex, MAX_PATH )
-         wszTemp = gLocalPhrases(val(wszIndex))
-         wszTemp = AfxStrRSet(wszIndex, 5, "0") & wstr(":") & wszTemp
-         pStream.WriteLine( wszTemp)
+         wszTemp = wspace(1024)
+         wszPhrase = AfxStrRSet(wszIndex, 5, "0") & wstr(":") & gLocalPhrases(val(wszIndex))
+         ' Use ** version of CWSTR on MID statements per the documentation.
+         mid(**wszTemp, 1) = wszPhrase
+         if len(gLangEnglish(val(wszIndex))) then
+            ' Always attempt to insert the ENGLISH comment at position 60. If the local
+            ' phrase is too long then simply put the ENGLISH comment after it.
+            dim as long nPos = iif( len(wszPhrase) < 60, 60, len(wszPhrase) + 5)
+            mid(**wszTemp, nPos) = "; " & gLangEnglish(val(wszIndex))
+         end if   
+         pStream.WriteLine rtrim(wszTemp)
       next
    end if
    pStream.Close
@@ -77,23 +85,23 @@ function frmOptionsLocal_DisableEnglish() as Long
       EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_CMDNEW), true )
       EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_CMDEDIT), false )
       EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_CMDDELETE), false )
-      EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LVWPHRASES), false )
-      EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLENGLISH), false )
-      EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTENGLISH), false )
-      EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLTRANSLATE), false )
-      EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTTRANSLATE), false )
-      EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMEEDITAREA), false )
+      ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LVWPHRASES), SW_HIDE )
+      ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLENGLISH), SW_HIDE )
+      ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTENGLISH), SW_HIDE )
+      ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLTRANSLATE), SW_HIDE )
+      ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTTRANSLATE), SW_HIDE )
+      ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMEEDITAREA), SW_HIDE )
       exit function
    end if
    
    ' If a non-english file is being edited then enable the fields.   
-   bEnable = iif(gLocalPhrasesEdit, true, false)
-   EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LVWPHRASES), bEnable )
-   EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLENGLISH), bEnable )
-   EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTENGLISH), bEnable )
-   EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLTRANSLATE), bEnable )
-   EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTTRANSLATE), bEnable )
-   EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMEEDITAREA), bEnable )
+   dim as long nShow = iif(gLocalPhrasesEdit, SW_SHOW, SW_HIDE)
+   ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LVWPHRASES), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLENGLISH), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTENGLISH), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LBLTRANSLATE), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_TXTTRANSLATE), nShow )
+   ShowWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMEEDITAREA), nShow )
 
    EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION), true )
    EnableWindow( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_CMDNEW), true )
@@ -121,6 +129,7 @@ end function
 ' Load the selected localization file into the global array
 ' ========================================================================================
 function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as Long
+
    If AfxFileExists(wszFileName) = 0 Then exit function
 
    Dim as CBSTR wst, wKey, wData
@@ -148,9 +157,11 @@ function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as
       nKey  = Val(wKey)
       nData = Val(wData)
 
+      ' MAXMIUM for a non-English does not redimension the gLocalPhrases array because
+      ' that array is always sized according to the main ENGLISH array.
       If Ucase(wKey) <> "MAXIMUM" Then
          if (nKey >= lbound(gLocalPhrases)) and (nKey <= ubound(gLocalPhrases)) then
-            gLocalPhrases(nKey) = wData
+            gLocalPhrases(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
             ' If the English phrase is blank then blank the translation phrase
             if gLangEnglish(nKey) = "" then gLocalPhrases(nKey) = ""
             ' If the Translated phrase is blank then replace it with the English version
@@ -256,8 +267,10 @@ Function frmOptionsLocal_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal h
       Case IDC_FRMOPTIONSLOCAL_CMDEDIT
          ' Edit the loaded localization file
          If codeNotify = BN_CLICKED Then
-            ' If a localization file is currently being edited then save it now.
-            frmOptionsLocal_LocalEditCheck
+            dim as CWSTR wszLanguage = _
+               AfxGetExePathName & wstr("Languages\") & AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
+            frmOptionsLocal_LoadLocalizationFile(wszLanguage)
+            AfxSetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_LBLTRANSLATE), AfxStrPathName("NAME", wszLanguage) )
             gLocalPhrasesEdit = true
             frmOptionsLocal_DisableEnglish()
             dim as HWND hLV = GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_LVWPHRASES)
@@ -411,14 +424,16 @@ Function frmOptionsLocal_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   frmOptionsLocal_DisableEnglish()
    AfxSetWindowText(GetDlgItem( HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION), gConfig.LocalizationFile)
+   frmOptionsLocal_DisableEnglish()
 
    ' Display the columns in the Listview and load the English phrases
    ListView_AddColumn( hwndLV, 0, @wstr("Index"), pWindow->ScaleX(50) )
    ListView_AddColumn( hwndLV, 1, @wstr("English Phrase"), pWindow->ScaleX(280))
 
-   ReDim gLocalPhrases(Ubound(gLangEnglish)) '
+   ' Always size the local phrase array to be the same size as the ENGLISH array.
+   ReDim gLocalPhrases(Ubound(gLangEnglish)) 
+   frmOptionsLocal_LoadLocalizationFile(gConfig.LocalizationFile)
    
    dim as long nRow = 0
    for i as long = LBound(gLangEnglish) to Ubound(gLangEnglish)

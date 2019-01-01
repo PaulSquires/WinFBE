@@ -1091,7 +1091,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          frmMenuEditor_Show( HWND, SW_NORMAL )
          if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
       case IDM_IMAGEMANAGER
-         frmImages_Show( HWND, 0 )
+         frmImageManager_Show( HWND, 0 )
          
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _

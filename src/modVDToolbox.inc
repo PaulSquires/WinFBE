@@ -947,10 +947,20 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
          ' to the bottom edge of the listbox. All other lines are already drawn. This helps
          ' reduce screen flicker.
          dim as RECT rc: GetClientRect(hwnd, @rc)
-         rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
+         ' If the number of lines in the listbox is less than the number per page then 
+         ' calculate from last item to bottom of listbox, otherwise calculate based on
+         ' the mod of the lineheight to listbox height so we can color the partial line
+         ' that won't be displayed at the bottom of the list.
+         dim as long NumItems = ListBox_GetCount(hwnd)
+         dim as long ItemsPerPage = ( rc.bottom / LISTBOX_LINEHEIGHT)
+         if NumItems < ItemsPerPage then 
+            rc.top = LISTBOX_LINEHEIGHT * NumItems
+         else
+            rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
+         end if
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
-            FillRect(hDC, @rc, cast(HBRUSH, GetCurrentObject(hDC, OBJ_BRUSH)))
+            FillRect(hDC, @rc, GetSysColorBrush(COLOR_WINDOW))
          end if
          return TRUE
          
@@ -967,7 +977,7 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
                      frmMain_UpdateLineCol(HWND_FRMMAIN)
                      PostMessage(HWND_FRMVDCOLORS, WM_ACTIVATE, WA_INACTIVE, 0)  ' to apply properties
                   elseif pProp->PropType = PropertyType.ImagePicker then
-                     frmImages_Show(HWND_FRMMAIN, pProp)
+                     frmImageManager_Show(HWND_FRMMAIN, pProp)
                   elseif pProp->PropType = PropertyType.ColorPicker then
                      dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
                      dim as long nCurSel = ListBox_GetCurSel(hList)

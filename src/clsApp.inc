@@ -295,6 +295,7 @@ End Function
 ''
 function clsApp.AddQuickRunEXE( byref wszFilename as wstring ) as Long
    dim as long nFoundAt = -1
+   if len(wszFilename) = 0 then exit function
    
    ' Scan array for an empty slot
    for i as long = lbound(m_arrQuickRun) to ubound(m_arrQuickRun)
