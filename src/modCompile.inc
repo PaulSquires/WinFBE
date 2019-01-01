@@ -130,10 +130,10 @@ function CreateTempResourceFile() as boolean
          pStream.Close 
       end if
       
-      function = true
+      return true
    end if
    
-   function = false
+   return false
 end function
 
 
@@ -541,7 +541,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
 
    ' Add any temp resource file to the list of temp files to later be deleted.
-'   gApp.AddQuickRunEXE(gCompile.TempResourceFile)
+   gApp.AddQuickRunEXE(gCompile.TempResourceFile)
       
    Function = True   ' successful
 End Function
