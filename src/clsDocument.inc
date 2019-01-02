@@ -423,12 +423,18 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       
       numOffsetLines = numOffsetLines + 1
       
-      if left(wst, 15) = "' LOCKCONTROLS=" then
+      if left(wst, 16) = "' WINFBE VERSION" then
+         wszPropValue = trim(mid(**wst, 17))
+         if ConvertWinFBEversion(wszPropValue) < ConvertWinFBEversion(APPVERSION) then
+            this.bRegenerateCode = true
+            this.UserModified = true
+         end if
+         
+      elseif left(wst, 15) = "' LOCKCONTROLS=" then
          wszPropValue = mid(**wst, 16)
          if wszPropValue = "True" then this.bLockControls = true
-      end if
-      
-      if left(wst, 17) = "' WINFBE FORM_END" then
+
+      elseif left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
       
       'elseif left(wst, 23) = "' WINFBE MAINMENU_START" then
@@ -849,6 +855,7 @@ Function clsDocument.SetText( ByRef sText As Const String ) As Long
    Function = 0
 End Function
 
+
 ''
 ''
 Function clsDocument.AppendText( ByRef sText As Const String ) As Long 
@@ -858,64 +865,144 @@ Function clsDocument.AppendText( ByRef sText As Const String ) As Long
    Function = 0
 End Function
 
+
 ''
+''  IsFunctionLine
+''
+''  Determine if incoming line number is the start of a valid sub/function.
+''  By default we assume every line will be a valid function in order to
+''  make the comparisons easier. The value returned is the position 
+''  immediately after the declaration (0 if not found). This is useful
+''  because this function can then also be used for determining the 
+''  actual sub/function name rather than having to code a separate function
+''  to do the same comparisons.
+''  
+function clsDocument.IsFunctionLine( byval lineNum as long ) as long
+   
+   ' default that no function declaration found
+   dim as long position = 0
+
+   ' trim and remove double spaces and replace TABs with single space
+   dim as string lineText = this.GetLine( lineNum )
+   lineText = ltrim(ucase( AfxStrShrink(lineText, chr(32,9)) ))
+      
+   If Left( lineText, 9 ) = "FUNCTION " then
+      ' bypass any line with = that is a "FUNCTION = " line.
+      dim as string subText = ltrim( mid(lineText, 9) )
+      if left( subText, 1 ) <> "=" then position = 10
+   elseif Left(lineText, 17) = "PRIVATE FUNCTION " then
+      position = 18   
+   elseif Left(lineText, 16) = "PUBLIC FUNCTION " then
+      position = 17
+   elseif Left(lineText, 4)  = "SUB " then
+      position = 5
+   elseif Left(lineText, 12) = "PRIVATE SUB " Then
+      position = 13
+   elseif Left(lineText, 11) = "PUBLIC SUB " then
+      position = 12
+   ElseIf Left(lineText, 9)  = "PROPERTY " Then
+      position = 10
+   ElseIf Left(lineText, 17) = "PRIVATE PROPERTY " Then
+      position = 18
+   ElseIf Left(lineText, 12) = "CONSTRUCTOR " Then
+      position = 13
+   ElseIf Left(lineText, 11) = "DESTRUCTOR " Then
+      position = 12
+   End If
+
+   function = position
+End Function
+
+
+''
+''  GetCurrentFunctionName
+''
+''  Determine the sub/function name based on the current editing position 
+''  within the file.
+''  This is needed by CodeTips (DereferenceLine)
 ''
 Function clsDocument.GetCurrentFunctionName() As string
-   ' Determine the sub/function name based on the current 
-   ' editing position within the file.
-   ' 
-   ' Search up the file until we find the start of a sub/function or start of file.
-   dim as string sText, sFuncName 
-   dim as long nCurLine, i, n
+    
+   dim as string lineText
+   dim as string funcName 
    
-   nCurLine = this.GetCurrentLineNumber
-   for i = nCurLine to 0 step -1
-      ' Remove double spaces and replace TABs with single space
-      sText = ltrim(ucase(AfxStrShrink(this.GetLine(i), chr(32,9))))
-      sFuncName = ""
-         
-      ' If we reached the bottom of a previous Sub/Function then exit out
-      if (left(sText, 12) = "END FUNCTION") orelse _
-         (left(sText, 7) = "END SUB") orelse _
-         (left(sText, 12) = "END PROPERTY") then
-         exit function
-      END IF
-
-      If Left(sText, 9)  = "FUNCTION " then
-         sFuncName = ltrim(mid(sText, 9))
-      elseif Left(sText, 16) = "PUBLIC FUNCTION " then
-         sFuncName = ltrim(mid(sText, 16))
-      elseif Left(sText, 17) = "PRIVATE FUNCTION " then
-         sFuncName = ltrim(mid(sText, 17)) 
-      elseif Left(sText, 4)  = "SUB " then
-         sFuncName = ltrim(mid(sText, 4)) 
-      elseif Left(sText, 11) = "PUBLIC SUB " then
-         sFuncName = ltrim(mid(sText, 11))
-      elseif Left(sText, 12) = "PRIVATE SUB " Then
-         sFuncName = ltrim(mid(sText, 12))
-      ElseIf Left(sText, 9) = "PROPERTY " Then
-         sFuncName = ltrim(mid(sText, 10))
-      ElseIf Left(sText, 17) = "PRIVATE PROPERTY " Then
-         sFuncName = ltrim(mid(sText, 18))
-      ElseIf Left(sText, 12) = "CONSTRUCTOR " Then
-         sFuncName = ltrim(mid(sText, 13)) & "."
-      ElseIf Left(sText, 11) = "DESTRUCTOR " Then
-         sFuncName = ltrim(mid(sText, 12)) & "."
-      End If
+   dim as long curLine
+   dim as long position
+   
+   ' search up the file until we find the start of a sub/function or start of file.
+   curLine = this.GetCurrentLineNumber
+   
+   for i as long = curLine to 0 step -1
+      ' trim and remove double spaces and replace TABs with single space
+      lineText = ltrim(ucase( AfxStrShrink(this.GetLine(i), chr(32,9)) ))
       
-      ' bypass any line with = that is a "FUNCTION = " line.
-      if len(sFuncName) THEN
-         If left(sFuncName, 1) <> "=" Then
-            ' remove any parameters from the line
-            sFuncName = trim(AfxStrParse(sFuncName, 1, "("))
-            exit for
-         end if   
-      End If
-         
+      position = this.IsFunctionLine( i )
+      if position then 
+         funcName = ltrim(mid(lineText, position))
+         exit for
+      end if   
    NEXT
 
-   return sFuncName
+   return funcName
 End Function
+
+
+''
+''  GotoNextFunction
+''
+''  Go to the next sub/function in the document
+''
+function clsDocument.GotoNextFunction() as long
+   
+   dim as long curLine  = this.GetCurrentLineNumber
+   dim as long maxLines = this.GetLineCount - 1
+   dim as long newLine  = curLine
+   
+   for i as long = curLine + 1 to maxLines
+      if this.IsFunctionLine( i ) then
+         newLine = i
+         exit for
+      end if
+   next
+
+   ' if we have found a new line then reposition to that line
+   if newLine <> curLine then
+      dim as any ptr pSci = this.GetActiveScintillaPtr()
+      SciMsg( pSci, SCI_SETFIRSTVISIBLELINE, newLine - 5, 0) 
+      SciMsg( pSci, SCI_GOTOLINE, newLine, 0) 
+   end if
+   
+   function = 0
+end function
+
+
+''
+''  GotoPrevFunction
+''
+''  Go to the previous sub/function in the document
+''
+function clsDocument.GotoPrevFunction() as long
+   
+   dim as long curLine  = this.GetCurrentLineNumber
+   dim as long newLine  = curLine
+   
+   for i as long = curLine - 1 to 0 step -1
+      if this.IsFunctionLine( i ) then
+         newLine = i
+         exit for
+      end if
+   next
+
+   ' if we have found a new line then reposition to that line
+   if newLine <> curLine then
+      dim as any ptr pSci = this.GetActiveScintillaPtr()
+      SciMsg( pSci, SCI_SETFIRSTVISIBLELINE, newLine - 5, 0) 
+      SciMsg( pSci, SCI_GOTOLINE, newLine, 0) 
+   end if
+   
+   function = 0
+end function
+
 
 ''
 ''
@@ -936,6 +1023,7 @@ Function clsDocument.GetSelectedLineRange( ByRef startLine As Long, _
 
    Function = 0
 End Function
+
 
 ''
 ''
@@ -990,6 +1078,7 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
    Function = 0
 End Function
 
+
 ''
 ''
 Function clsDocument.CurrentLineUp() As Long
@@ -1004,6 +1093,15 @@ Function clsDocument.CurrentLineUp() As Long
    End If
    Function = 0
 End Function
+
+
+''
+''
+Function clsDocument.GetLineCount() As Long
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   function = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
+end function
+
 
 ''
 ''

@@ -845,7 +845,7 @@ function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
          AddControlProperty(pCtrl, "TextBackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextForeColorDown", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextBackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
-'         AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
+         AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
 '         AddControlProperty(pCtrl, "ImageAlign", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)

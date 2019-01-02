@@ -12,6 +12,8 @@
 '    GNU General Public License for more details.
 
 
+
+
 ' ========================================================================================
 ' Position editor to document/function under the current caret position
 ' ========================================================================================
@@ -102,6 +104,7 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
       StatusBar_SetText(hStatusbar, 1, "")    ' line/col/sel
       StatusBar_SetText(hStatusbar, 2, "")    ' file type (normal, main, resource, module)
       StatusBar_SetText(hStatusbar, 3, "")    ' file disktype (Unicode/Ansi)
+      StatusBar_SetIcon(hStatusBar, 4, 0)
       StatusBar_SetText(hStatusbar, 4, "")    ' compile messages
       Dim wzText As WString * MAX_PATH
       wzText = APPNAME            
@@ -743,9 +746,14 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             frmMain_UpdateLineCol(HWND)
          END IF  
       
-      Case IDM_NEXTTAB:            gTTabCtl.NextTab()
-      Case IDM_PREVTAB:            gTTabCtl.PrevTab()
-      Case IDM_CLOSETAB:           gTTabCtl.CloseTab()
+      Case IDM_GOTONEXTTAB
+         gTTabCtl.NextTab
+         
+      Case IDM_GOTOPREVTAB
+         gTTabCtl.PrevTab
+         
+      Case IDM_CLOSETAB
+         gTTabCtl.CloseTab
 
       ''  FILE MENU
       Case IDM_FILENEW:            OnCommand_FileNew( HWnd )
@@ -973,9 +981,14 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
 
       ''  SEARCH MENU              
-      Case IDM_FIND:               frmFindReplace_Show(hEdit, false)
-      Case IDM_REPLACE:            frmFindReplace_Show(hEdit, true)
-      Case IDM_FINDINFILES:        frmFindInFiles_Show(hEdit)
+      Case IDM_FIND
+         frmFindReplace_Show( hEdit, false )
+      
+      Case IDM_REPLACE
+         frmFindReplace_Show( hEdit, true )
+      
+      Case IDM_FINDINFILES
+         frmFindInFiles_Show( hEdit )
 
       Case IDM_FINDNEXT, IDM_FINDPREV
          Dim As String sFindText = pDoc->GetSelText()
@@ -1007,14 +1020,42 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
          end if
 
-      Case IDM_DEFINITION:         frmMain_GotoDefinition( pDoc )
-      Case IDM_LASTPOSITION:       frmMain_GotoLastPosition()
-      Case IDM_GOTO:               frmGoto_Show(hEdit)
-      Case IDM_FUNCTIONLIST:       frmFunctionList_Show( HWnd )    ' this will also toggle visibility 
-      Case IDM_BOOKMARKTOGGLE:     pDoc->ToggleBookmark(pDoc->GetCurrentLineNumber() )
-      Case IDM_BOOKMARKNEXT:       pDoc->NextBookmark()
-      Case IDM_BOOKMARKPREV:       pDoc->PrevBookmark()
-      Case IDM_BOOKMARKCLEARALL:   SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
+      Case IDM_DEFINITION
+         frmMain_GotoDefinition( pDoc )
+         
+      Case IDM_LASTPOSITION
+         frmMain_GotoLastPosition()
+      
+      case IDM_GOTONEXTTAB
+         gTTabCtl.NextTab
+      
+      case IDM_GOTOPREVTAB
+         gTTabCtl.PrevTab
+      
+      case IDM_GOTONEXTFUNCTION
+         pDoc->GotoNextFunction
+         
+      case IDM_GOTOPREVFUNCTION
+         pDoc->GotoPrevFunction
+      
+      Case IDM_GOTO
+         frmGoto_Show( hEdit )
+         
+      Case IDM_FUNCTIONLIST
+         ' this will also toggle visibility 
+         frmFunctionList_Show( HWnd )
+             
+      Case IDM_BOOKMARKTOGGLE
+         pDoc->ToggleBookmark( pDoc->GetCurrentLineNumber )
+      
+      Case IDM_BOOKMARKNEXT
+         pDoc->NextBookmark
+      
+      Case IDM_BOOKMARKPREV
+         pDoc->PrevBookmark
+      
+      Case IDM_BOOKMARKCLEARALL
+         SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
       
       ''  VIEW MENU
       Case IDM_FOLDTOGGLE:         pDoc->FoldToggle( pDoc->GetCurrentLineNumber() )

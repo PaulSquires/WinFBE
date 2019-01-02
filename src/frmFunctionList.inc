@@ -99,7 +99,8 @@ Function frmFunctionList_UpdateListBox() As Long
       bFound = frmFunctionList_SearchChildNodes(hParent, hChild, wszSearch) 
       if bFound then   
          p = Listbox_AddString( hList, strptr(wszText) )
-         ListBox_SetItemData( hList, p, hParent )    ' Treeview node item is stored in ListBox ItemData
+         ' Treeview node item is stored in ListBox ItemData
+         ListBox_SetItemData( hList, p, hParent )    
       end if
       
       ' Get all functions in the file

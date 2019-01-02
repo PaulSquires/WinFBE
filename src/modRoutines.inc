@@ -13,6 +13,19 @@
 
 
 ' ========================================================================================
+' Convert WinFBE version to whole number for comparison to file versions being loaded.
+' ========================================================================================
+function ConvertWinFBEversion( byref wszVersion as wstring ) as long
+   dim as CWSTR wszPart1, wszPart2, wszPart3
+   
+   wszPart1 = AfxStrLSet( AfxStrParse(wszVersion, 1, "."), 3, "0" )
+   wszPart2 = AfxStrLSet( AfxStrParse(wszVersion, 2, "."), 3, "0" )
+   wszPart3 = AfxStrRSet( AfxStrParse(wszVersion, 3, "."), 3, "0" )
+   
+   function = val(wszPart1 + wszPart2 + wszPart3) 
+end function
+
+' ========================================================================================
 ' Disable all modeless windows belonging to frmMain so that the popup modal is truly modal.
 ' ========================================================================================
 function DisableAllModeless() as long

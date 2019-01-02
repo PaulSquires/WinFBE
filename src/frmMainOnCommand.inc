@@ -368,6 +368,7 @@ Function OnCommand_FileOpen( ByVal HWnd As HWnd, byval bShowInTab as Boolean = t
    
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    StatusBar_SetText(hStatusbar, 3, "")    ' parsing message
+   StatusBar_SetIcon(hStatusBar, 4, 0)
    StatusBar_SetText(hStatusbar, 4, "")    ' parsing message
 
    frmMain_PositionWindows(HWnd)
@@ -435,8 +436,8 @@ End Function
 
 ' ========================================================================================
 ' Save Sub/Function Declares to disk
-' ========================================================================================
 Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
+' ========================================================================================
 
    dim as CWSTR wszFilename 
    

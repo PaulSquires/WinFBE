@@ -96,6 +96,7 @@ ParseAgain:
       dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
       dim wszText as wstring * MAX_PATH: StatusBar_GetText(hStatusbar, 0, @wszText)
       if wszText <> L(66,"Parsing") & ":" then StatusBar_SetText(hStatusBar, 3, L(66,"Parsing:") & ":")
+      StatusBar_SetIcon(hStatusBar, 4, 0)
       StatusBar_SetText(hStatusBar, 4, wszFilename)
    END IF
 

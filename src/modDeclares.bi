@@ -472,6 +472,7 @@ Enum
    IDM_SEARCH
    IDM_FIND, IDM_FINDNEXT, IDM_FINDPREV, IDM_FINDNEXTACCEL, IDM_FINDPREVACCEL 
    IDM_FINDINFILES, IDM_REPLACE, IDM_DEFINITION,IDM_LASTPOSITION
+   IDM_GOTONEXTTAB, IDM_GOTOPREVTAB, IDM_CLOSETAB, IDM_GOTONEXTFUNCTION, IDM_GOTOPREVFUNCTION
    IDM_GOTO, IDM_BOOKMARKTOGGLE, IDM_BOOKMARKNEXT, IDM_BOOKMARKPREV, IDM_BOOKMARKCLEARALL
    IDM_VIEW
    IDM_FOLDTOGGLE, IDM_FOLDBELOW, IDM_FOLDALL, IDM_UNFOLDALL, IDM_ZOOMIN, IDM_ZOOMOUT
@@ -489,7 +490,7 @@ Enum
    IDM_OPTIONS, IDM_COMPILECONFIG, IDM_USERTOOLSDIALOG
    IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
-   IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR, IDM_NEXTTAB, IDM_PREVTAB, IDM_CLOSETAB
+   IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
    IDM_CONSOLE, IDM_GUI, IDM_RESOURCE   ' used for compiler directives in code
    IDM_ADDIMAGE, IDM_REMOVEIMAGE, IDM_FORMATIMAGE, IDM_ATTACHIMAGE, IDM_DETACHIMAGE
    IDM_32BIT, IDM_64BIT   ' mainly used for identifying compiler associated with a project
@@ -927,6 +928,10 @@ Type clsDocument
       Declare Function GetCurrentLineNumber() As Long
       Declare Function SelectLine( ByVal nLineNum As Long ) As Long
       Declare Function GetLine( ByVal nLine As Long) As String
+      declare function IsFunctionLine( byval lineNum as long ) as long
+      declare function GotoNextFunction() as long
+      declare function GotoPrevFunction() as long
+      Declare Function GetLineCount() As long
       Declare Function GetSelText() As String
       Declare Function GetText() As String
       Declare Function SetText( ByRef sText As Const String ) As Long 

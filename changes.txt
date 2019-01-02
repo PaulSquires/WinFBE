@@ -1,6 +1,8 @@
 Version 1.8.8
 - Added: Search textbox added to Function List (filters the function list based on the search term).
 - Added: Creating a New Project will automatically add a default empty .bas main file (unsaved) to the project for convenience.
+- Added: Next Tab, Previous Tab, Close Tab to the Search menu.
+- Added: Next Function, Previous Function to the Search menu.
 - Changed: Updated FreeBasic Compiler to November 22, 2018 Nightly Build.
 - Changed: Lots of internal code refractoring. Many efficiencies found with regards to loading files/projects, saving, and displaying files. More internal code cleanup to occur in the next few future releases.
 - Changed: Removed loading of multiple projects into WinFBE at the same time.

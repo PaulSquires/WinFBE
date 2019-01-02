@@ -1,18 +1,32 @@
-'    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
-'
-'    This program is free software: you can redistribute it and/or modify
-'    it under the terms of the GNU General Public License as published by
-'    the Free Software Foundation, either version 3 of the License, or
-'    (at your option) any later version.
-'
-'    This program is distributed in the hope that it will be useful,
-'    but WITHOUT any WARRANTY; without even the implied warranty of
-'    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
-'    GNU General Public License for more details.
-
+''    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
+''    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+''
+''    This program is free software: you can redistribute it and/or modify
+''    it under the terms of the GNU General Public License as published by
+''    the Free Software Foundation, either version 3 of the License, or
+''    (at your option) any later version.
+''
+''    This program is distributed in the hope that it will be useful,
+''    but WITHOUT any WARRANTY; without even the implied warranty of
+''    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
+''    GNU General Public License for more details.
 
 ''
+''
+''   modCompile.inc
+''
+''   Paul Squires 2019-01-01
+''
+''   Code here handles the entire compiling process. It prepares the necessary
+''   command line data to pass to the applicable 32 or 64 version of the FBC
+''   compiler. Compile time errors are parsed through analyis of the log file
+''   and presented to the user via the Compiler Results listview and the Compiler
+''   Lof File text box.
+''
+''
+
+
+'':::::
 ''  Handle information related to Compile process 
 ''
 Type COMPILE_TYPE
@@ -49,6 +63,7 @@ end function
 ''
 ''  Create Resource file (if necessary) for the compile and return
 ''  the full disk filename of the resource file.
+''
 function CreateTempResourceFile() as boolean
    dim as CWSTR wszResourceFile = gCompile.ResourceFile
    
@@ -159,9 +174,8 @@ function ResetScintillaCursors() as Long
 end function
 
 ''
-''  Main module that handles the entire compile process
+'' Main module that handles the entire compile process
 ''
-'------------------------------------------------------------------------------------------------------------------------
 Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Dim pDoc As clsDocument Ptr
@@ -500,7 +514,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Attempt to delete any existing output file so it will not exist
    ' should the compile fail.
    if AfxFileExists(gCompile.OutputFilename) then
-      kill gCompile.OutputFilename
+      AfxDeleteFile( gCompile.OutputFilename )
    end if
 
    wst = L(203, "Compiling") + "... " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
@@ -524,9 +538,12 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' If this was a QuickRun then delete the temporary code file that was created.
    if wID = IDM_QUICKRUN THEN 
-      kill gCompile.MainFilename
-   end if   
+      AfxDeleteFile( gCompile.MainFilename )
+   end if    
    
+   ' Add any temp resource file to the list of temp files to later be deleted.
+   gApp.AddQuickRunEXE(gCompile.TempResourceFile)
+      
    if ParseLogForError(sConsoleText, true, wID, fCompile64) = true then return false
    
    ' Run any postcompile tools
@@ -540,9 +557,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
       RunEXE( gCompile.OutputFilename, gApp.ProjectCommandLine)
    End If
 
-   ' Add any temp resource file to the list of temp files to later be deleted.
-   gApp.AddQuickRunEXE(gCompile.TempResourceFile)
-      
    Function = True   ' successful
 End Function
 
@@ -1000,9 +1014,9 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
          dim as long nFileSize = AfxGetFileSize(gCompile.OutputFilename)
          cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
                          L(192, "Warnings") & " " & NumWarnings & _
-                         "  [ " & gCompile.OutputFilename & "  " & _
+                         "  [ " & AfxStrPathname("NAMEX", gCompile.OutputFilename) & "  " & _
                          (fix(nFileSize / 1024)+1) & "K  (" & _
-                         nFileSize & " " & L(199,"bytes") & ")]"
+                         nFileSize & " " & L(199,"bytes") & ") ]"
          SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
          ' Simply sound a success

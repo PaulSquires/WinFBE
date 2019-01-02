@@ -140,6 +140,12 @@ function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
          pCtrl->AfxButtonPtr->DisableTheming
       end if
       
+   case "IMAGE"
+      dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszPropValue)
+      if pImageType then 
+         pCtrl->AfxButtonPtr->SetImageFromFile( pImageType->wszFilename )
+      end if
+      
    case "BACKCOLOR"
       pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(pProp), true )
 

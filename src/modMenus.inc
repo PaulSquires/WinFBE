@@ -96,6 +96,13 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function Definition") & Chr(9) & "F6"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"Last Position") & Chr(9) & "Shift+F6"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTONEXTFUNCTION, L(84,"Next Function") & Chr(9) & "Ctrl+PgDn"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTOPREVFUNCTION, L(85,"Previous Function") & Chr(9) & "Ctrl+PgUp"
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTONEXTTAB, L(82,"Next Tab") & Chr(9) & "Ctrl+TAB"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTOPREVTAB, L(83,"Previous Tab") & Chr(9) & "Ctrl+Shift+TAB"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CLOSETAB, L(86,"Close Tab") & Chr(9) & "Ctrl+W"
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"Goto Line") & "..." & Chr(9) & "Ctrl+G"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKTOGGLE, L(50,"Toggle Bookmark") & Chr(9) & "Ctrl+F2"
@@ -203,9 +210,6 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    '  Create the accelerator table for the menu
    pWindow->AddAccelerator( FVIRTKEY, VK_TAB,  IDM_INDENTBLOCK )
    pWindow->AddAccelerator( FVIRTKEY or FSHIFT, VK_TAB,  IDM_UNINDENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,  IDM_NEXTTAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,  IDM_PREVTAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,  IDM_CLOSETAB )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_N,  IDM_FILENEW )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_O,  IDM_FILEOPEN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,  IDM_FILECLOSE )
@@ -235,6 +239,11 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY, VK_F6,  IDM_DEFINITION )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F6,  IDM_LASTPOSITION )
    pWindow->AddAccelerator( FVIRTKEY, VK_F4,  IDM_FUNCTIONLIST )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,  IDM_GOTONEXTTAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,  IDM_GOTOPREVTAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,  IDM_CLOSETAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_NEXT, IDM_GOTONEXTFUNCTION )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_PRIOR, IDM_GOTOPREVFUNCTION )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,  IDM_GOTO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,  IDM_BOOKMARKTOGGLE )
    pWindow->AddAccelerator( FVIRTKEY, VK_F2,  IDM_BOOKMARKNEXT )
