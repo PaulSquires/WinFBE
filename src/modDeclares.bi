@@ -311,6 +311,20 @@
 #Define IDC_FRMIMAGEMANAGER_FORMATRCDATA            1010
 #Define IDC_FRMIMAGEMANAGER_LABEL1                  1011
 
+#DEFINE IDC_FRMSNIPPETS_LIST1                       1000
+#DEFINE IDC_FRMSNIPPETS_TXTDESCRIPTION              1001
+#DEFINE IDC_FRMSNIPPETS_TXTTRIGGER                  1002
+#DEFINE IDC_FRMSNIPPETS_TXTCODE                     1003
+#DEFINE IDC_FRMSNIPPETS_LABEL1                      1004
+#DEFINE IDC_FRMSNIPPETS_LABEL2                      1005
+#DEFINE IDC_FRMSNIPPETS_LABEL3                      1006
+#DEFINE IDC_FRMSNIPPETS_LABEL4                      1007
+#DEFINE IDC_FRMSNIPPETS_CMDUP                       1008
+#DEFINE IDC_FRMSNIPPETS_CMDDOWN                     1009
+#DEFINE IDC_FRMSNIPPETS_CMDINSERT                   1010
+#DEFINE IDC_FRMSNIPPETS_CMDDELETE                   1011
+#DEFINE IDC_FRMSNIPPETS_CMDOK                       1012
+
 #Define IDC_LBLFAKEMAINMENU                         1000
 
 #Define IsFalse(e) ( Not CBool(e) )
@@ -487,7 +501,8 @@ Enum
    IDM_ALIGNBOTTOMS, IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH 
    IDM_VSPACEDECREASE, IDM_VSPACEREMOVE, IDM_CENTERHORIZ
    IDM_CENTERVERT, IDM_CENTERBOTH, IDM_LOCKCONTROLS
-   IDM_OPTIONS, IDM_COMPILECONFIG, IDM_USERTOOLSDIALOG
+   IDM_OPTIONS
+   IDM_BUILDCONFIG, IDM_USERTOOLSDIALOG, IDM_USERSNIPPETS
    IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX, IDM_ABOUT
    IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, IDM_SETFILERESOURCE
    IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
@@ -520,7 +535,7 @@ Dim Shared As HWnd HWND_FRMOPTIONSCOMPILER, HWND_FRMOPTIONSLOCAL, HWND_FRMOPTION
 Dim Shared As HWnd HWND_FRMFINDREPLACE, HWND_FRMFINDINFILES, HWND_FRMVDTOOLBOX, HWND_FRMVDCOLORS
 Dim Shared As HWnd HWND_FRMFUNCTIONLIST, HWND_FRMBUILDCONFIG, HWND_FRMUSERTOOLS, HWND_FRMMENUEDITOR
 Dim Shared As HWnd HWND_PROPLIST_EDIT, HWND_PROPLIST_COMBO, HWND_PROPLIST_COMBOLIST, HWND_FRMHELPVIEWER
-dim shared as hwnd HWND_FRMIMAGES
+dim shared as hwnd HWND_FRMIMAGES, HWND_FRMSNIPPETS
 
 '  Global handle to hhctrl.ocx for context sensitive help
 Dim Shared As Any Ptr gpHelpLib
@@ -1006,6 +1021,13 @@ type TYPE_TOOLS
    Action           as long 
 END TYPE
 
+' Create array to hold unlimited number of code snippets.
+type TYPE_SNIPPETS
+   wszDescription as CWSTR
+   wszTrigger     as CWSTR
+   wszCode        as CWSTR
+END TYPE
+
 ' Create array to hold unlimited number of build configurations.
 type TYPE_BUILDS
    id             as string    ' GUID
@@ -1057,6 +1079,7 @@ END TYPE
 Type clsConfig
    Private:
       _ConfigFilename As CWSTR 
+      _SnippetsFilename as CWSTR
       _FBKeywordsFilename as CWSTR 
       _FBCodetipsFilename as CWSTR
       _WinAPICodetipsFilename as CWSTR 
@@ -1073,6 +1096,8 @@ Type clsConfig
       ToolsTemp(any)       as TYPE_TOOLS  
       Builds(any)          as TYPE_BUILDS  
       BuildsTemp(any)      as TYPE_BUILDS  
+      Snippets(any)        as TYPE_SNIPPETS
+      SnippetsTemp(any)    as TYPE_SNIPPETS  
       FBKeywords           As String
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
       AskExit              As Long = false         ' use Long so True/False string not written to file
@@ -1125,6 +1150,8 @@ Type clsConfig
       Declare Function SaveKeywords() As Long
       Declare Function SaveConfigFile() As Long
       Declare Function LoadConfigFile() As Long
+      declare Function LoadSnippets() as Long
+      declare Function SaveSnippets() as Long
       declare Function InitializeToolBox() as Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    

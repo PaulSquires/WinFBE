@@ -107,7 +107,7 @@ end function
 ' ========================================================================================
 ' Set the build description and compiler options depending on what listbox entry is selected
 ' ========================================================================================
-function SetCompilerConfigTextboxes() as long
+function SetBuildConfigTextboxes() as long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LIST1)
    dim as hwnd hList2 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LSTOPTIONS)
    dim as hwnd hCheck = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_CHKISDEFAULT)
@@ -409,7 +409,7 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
    Select Case id
       case IDC_FRMBUILDCONFIG_LIST1
          if codeNotify = LBN_SELCHANGE THEN
-            SetCompilerConfigTextboxes()
+            SetBuildConfigTextboxes()
          END IF
           
       case IDC_FRMBUILDCONFIG_TXTDESCRIPTION
@@ -511,7 +511,7 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
             LoadBuildListBox(HWND)
             nCurSel = Min(nCurSel, ubound(gConfig.BuildsTemp))
             ListBox_SetCurSel(hList1, nCurSel)
-            SetCompilerConfigTextboxes()
+            SetBuildConfigTextboxes()
             SetFocus hList1
          end if
 
@@ -534,7 +534,7 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
                   LoadBuildListBox(HWND)
                   nCurSel = Min(nCurSel, ubound(gConfig.BuildsTemp))
                   ListBox_SetCurSel(hList1, nCurSel)
-                  SetCompilerConfigTextboxes()
+                  SetBuildConfigTextboxes()
                   SetFocus hList1
                end if
             END IF
@@ -731,7 +731,7 @@ Function frmBuildConfig_Show( ByVal hWndParent As HWnd, _
    dim hList as hwnd = GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    if nCurSel = -1 then nCurSel = 0 
    ListBox_SetCurSel(hList, nCurSel)
-   SetCompilerConfigTextboxes()
+   SetBuildConfigTextboxes()
    
    SetFocus GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    

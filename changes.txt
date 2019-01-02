@@ -1,5 +1,7 @@
 Version 1.8.8
-- Added: Search textbox added to Function List (filters the function list based on the search term).
+- Added: User Snippets (insert user defined code snippets).
+- Added: Image Manager.
+- Added: A search textbox added to Function List (filters the function list based on the search term).
 - Added: Creating a New Project will automatically add a default empty .bas main file (unsaved) to the project for convenience.
 - Added: Next Tab, Previous Tab, Close Tab to the Search menu.
 - Added: Next Function, Previous Function to the Search menu.

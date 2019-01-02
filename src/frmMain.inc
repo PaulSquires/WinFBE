@@ -912,14 +912,19 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          ' If a TAB was pressed then manually terminate any active autocomplete.
          if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
             SciExec(hEdit, SCI_AUTOCCOMPLETE, 0, 0) 
-         elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
+         end if
+         if GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND) then
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
          else
-            ' Do a block indent
-            gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_TAB, 0, 0)
-            gApp.SuppressNotify = false
+            ' Determine if a Snippet can be inserted. This takes precedence over doing a block indent.
+            if DoInsertSnippet( pDoc ) = false then
+               ' No snippet to insert, do a block indent instead.
+               gApp.SuppressNotify = true
+               Function = SciExec(hEdit, SCI_TAB, 0, 0)
+               gApp.SuppressNotify = false
+            end if
          end if
       
       Case IDM_UNINDENTBLOCK
@@ -928,7 +933,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
          else
-            gApp.SuppressNotify = true: Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
+            gApp.SuppressNotify = true
+            Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
             gApp.SuppressNotify = false
          end if
          
@@ -1117,12 +1123,18 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
       ''  OPTIONS MENU
       Case IDM_OPTIONS
-         frmOptions_Show( HWnd, SW_NORMAL )
-      case IDM_COMPILECONFIG
+         frmOptions_Show( HWnd )
+      
+      case IDM_BUILDCONFIG
          frmBuildConfig_Show( HWND ) 
+      
       case IDM_USERTOOLSDIALOG
          frmUserTools_Show( HWND ) 
          
+      case IDM_USERSNIPPETS
+         frmSnippets_Show( HWND ) 
+      
+      
       ''   DESIGNER MENU
       case IDM_NEWFORM
          OnCommand_DesignerNewForm(HWND)

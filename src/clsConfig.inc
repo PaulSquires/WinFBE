@@ -19,6 +19,7 @@
 ''
 Constructor clsConfig
    _ConfigFilename            = AfxGetExePathName & "Settings\WinFBE.ini" 
+   _SnippetsFilename          = AfxGetExePathName & "Settings\user_snippets.ini" 
    _FBKeywordsFilename        = AfxGetExePathName & "Settings\freebasic_keywords.txt" 
    _FBCodetipsFilename        = AfxGetExePathName & "Settings\codetips.ini" 
    _WinAPICodetipsFilename    = AfxGetExePathName & "Settings\codetips_winapi.ini" 
@@ -779,6 +780,73 @@ Function clsConfig.ImportTheme( byref st as wstring, _
       end if   
    end if
    
+   function = 0
+end function
+
+
+''
+''  LOAD SNIPPETS FROM DISK FILE
+''
+Function clsConfig.LoadSnippets() as Long
+
+   Dim as CWSTR wst
+   Dim as long ub     
+
+   If AfxFileExists(_SnippetsFilename) = 0 Then Exit Function
+    
+   dim pStream AS CTextStream   '(utf16)
+   if pStream.OpenUnicode(_SnippetsFilename) <> S_OK then return true   ' error
+
+   
+   Do Until pStream.EOS
+      wst = pStream.ReadLine
+
+      If Len(wst) = 0 Then Continue Do
+      
+      If Left(wst, 15) = "' SNIPPET START" Then  
+         ub = ubound(this.Snippets) 
+         redim preserve this.Snippets(ub + 1) 
+
+      elseIf Left(wst, 14) = "' DESCRIPTION=" Then  
+         ub = ubound(this.Snippets) 
+         this.Snippets(ub).wszDescription = mid(wst, 15)
+         
+      elseIf Left(wst, 10) = "' TRIGGER=" Then  
+         ub = ubound(this.Snippets) 
+         this.Snippets(ub).wszTrigger = mid(wst, 11)
+      
+      elseIf Left(wst, 7) = "' CODE=" Then  
+         ub = ubound(this.Snippets) 
+         this.Snippets(ub).wszCode = AfxStrReplace( mid(wst, 8), "\LF", vbcrlf )
+         
+      elseIf Left(wst, 13) = "' SNIPPET END" Then  
+      end if
+
+   Loop
+   pStream.Close
+
+   function = 0
+end function
+
+
+''
+''  SAVE SNIPPETS TO DISK FILE
+''
+Function clsConfig.SaveSnippets() as Long
+
+   dim pStream AS CTextStream   '(utf16)
+   if pStream.Create(_SnippetsFilename, true, true) <> S_OK then return true   ' error
+   
+   for i as long = lbound(this.Snippets) to ubound(this.Snippets)
+      pStream.WriteLine "' SNIPPET START" 
+      pStream.WriteLine "' DESCRIPTION=" & this.Snippets(i).wszDescription 
+      pStream.WriteLine "' TRIGGER="     & this.Snippets(i).wszTrigger
+      pStream.WriteLine "' CODE=" & AfxStrReplace( this.Snippets(i).wszCode, vbcrlf, "\LF" )
+      pStream.WriteLine "' SNIPPET END" 
+   next
+
+   pStream.Close 
+
    function = 0
 end function
 

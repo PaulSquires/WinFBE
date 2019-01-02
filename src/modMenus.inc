@@ -156,8 +156,9 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"Options")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..."
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_COMPILECONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDCONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERSNIPPETS, L(88,"User Snippets") & "..." & Chr(9) & "Ctrl+Shift+F7"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(309,"Designer")
@@ -262,8 +263,9 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FALT, VK_F5,  IDM_REBUILDALL)
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_QUICKRUN)
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_COMPILECONFIG )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_BUILDCONFIG )
    pWindow->AddAccelerator( FVIRTKEY or FCONTROL, VK_F7,  IDM_USERTOOLSDIALOG )
+   pWindow->AddAccelerator( FVIRTKEY or FCONTROL or FSHIFT, VK_F7,  IDM_USERSNIPPETS)
    pWindow->AddAccelerator( FVIRTKEY, VK_F1, IDM_HELP )
    
    pWindow->CreateAcceleratorTable()
@@ -307,8 +309,9 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_OPTIONS, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTNEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_PROJECTOPEN, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_COMPILECONFIG, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_BUILDCONFIG, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_USERTOOLSDIALOG, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_USERSNIPPETS, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_NEWFORM, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELP, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINAPI, MF_BYCOMMAND Or MF_ENABLED

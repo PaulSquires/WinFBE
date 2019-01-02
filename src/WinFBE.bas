@@ -95,6 +95,7 @@ Using Afx
 #Include Once "frmRecent.inc" 
 #Include Once "frmExplorer.inc" 
 #Include Once "frmUserTools.inc" 
+#Include Once "frmSnippets.inc"
 #Include Once "frmBuildConfig.inc" 
 #Include Once "frmOutput.inc" 
 #Include Once "frmOptionsGeneral.inc"
@@ -182,6 +183,9 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
       gConfig.LoadCodetipsWinFBX()
    end if
    
+   ' Load any user code snippets
+   gConfig.LoadSnippets
+
    ' Initialize the controls in the ToolBox
    gConfig.InitializeToolBox
    
