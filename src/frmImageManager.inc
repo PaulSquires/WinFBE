@@ -20,7 +20,8 @@ Function frmImageManager_DisplayImage(byval hwnd as HWND, byval nIndex as long) 
    if pImageCtx = 0 then exit function
    
    dim as hwnd hImageCtx = GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_IMAGECTX)
-   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+    
    dim pImageType as IMAGES_TYPE ptr 
    dim wszImageName as wstring * MAX_PATH
    dim as CWSTR wszFilename 
@@ -35,11 +36,27 @@ Function frmImageManager_DisplayImage(byval hwnd as HWND, byval nIndex as long) 
 
       if pImageType then 
          pImageCtx->LoadImageFromFile(pImageType->wszFileName)
-         if SendMessage( GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_ACTUALSIZE), BM_GETCHECK, 0, 0) = BST_CHECKED then
-            pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
-         else   
-            pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_AUTOSIZE, CTRUE )
-         end if
+         ' Resize the image based on the ComboBox selections
+         dim as long nCurSel = ComboBox_GetCurSel( GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_COMBO1) )
+         select case nCurSel
+            case 0     ' Actual size
+               pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
+            case 1     ' Apply High DPI scaling
+               ' Make the image high dpi aware
+               if pWindow then
+                  pImageCtx->SetImageWidth( pWindow->ScaleX(pImageCtx->GetImageWidth) )
+                  pImageCtx->SetImageHeight( pWindow->ScaleY(pImageCtx->GetImageHeight) )
+               end if
+               pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
+            case 2     ' AutoSize
+               pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_AUTOSIZE, CTRUE )
+            case 3     ' Fit to Width
+               pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_FITTOWIDTH, CTRUE )
+            case 4     ' Fit to Height
+               pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_FITTOHEIGHT, CTRUE )
+            case 5     ' Stretch
+               pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_STRETCH, CTRUE )
+         end select
          wszFilename = wszFilename & pImageType->wszFileName
          if AfxFileExists(pImageType->wszFileName) = false then
             wszFilename = wszFilename & " (" & L(81, "File not found") & ")"
@@ -250,18 +267,6 @@ End Function
 
 
 ' ========================================================================================
-' Process WM_SIZE message for window/dialog: frmImages
-' ========================================================================================
-Function frmImageManager_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
-   If state <> SIZE_MINIMIZED Then
-      ' Size the toolbar
-      Toolbar_AutoSize GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_TOOLBAR)
-   End If
-   Function = 0
-End Function
-
-
-' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmImages
 ' ========================================================================================
 Function frmImageManager_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
@@ -349,19 +354,12 @@ Function frmImageManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal h
          SendMessage( HWnd, WM_CLOSE, 0, 0)
          exit function
          
-      CASE IDC_FRMIMAGEMANAGER_AUTOSIZE
-         If codeNotify = BN_CLICKED Then
-            pImageCtx = AfxCImageCtxPtr(hwnd, IDC_FRMIMAGEMANAGER_IMAGECTX)
-            if pImageCtx then pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_AUTOSIZE, CTRUE )
+      CASE IDC_FRMIMAGEMANAGER_COMBO1
+         If codeNotify = CBN_SELCHANGE Then
+            frmImageManager_DisplayImage( hwnd, nCurSel )
             EXIT FUNCTION
          END IF
 
-      CASE IDC_FRMIMAGEMANAGER_ACTUALSIZE
-         If codeNotify = BN_CLICKED Then
-            pImageCtx = AfxCImageCtxPtr(hwnd, IDC_FRMIMAGEMANAGER_IMAGECTX)
-            if pImageCtx then pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
-            EXIT FUNCTION
-         END IF
    End Select
 
    Function = 0
@@ -373,8 +371,6 @@ End Function
 ' ========================================================================================
 Function frmImageManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
 
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-    
    Select Case id
       Case IDC_FRMIMAGEMANAGER_LISTVIEW
          If pNMHDR->code = LVN_ITEMCHANGED Then
@@ -477,7 +473,6 @@ Function frmImageManager_WndProc( ByVal HWnd   As HWnd, _
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmImageManager_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmImageManager_OnClose)
-      HANDLE_MSG (HWnd, WM_SIZE,     frmImageManager_OnSize)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmImageManager_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmImageManager_OnCommand)
       HANDLE_MSG (HWnd, WM_NOTIFY,   frmImageManager_OnNotify)
@@ -608,12 +603,25 @@ Function frmImageManager_Show( ByVal hWndParent As HWnd, _
    ' Add an image control                                                         
    DIM pImageCtx AS CImageCtx = CImageCtx(pWindow, IDC_FRMIMAGEMANAGER_IMAGECTX, , 370, nTop + 30, 306, 306)
 
-   ' Add a button without coordinates (it will be reiszed in WM_SIZE, below)
+   ' Add a combobox for the various image resize options.
+   
+   ' Add a button without coordinates (it will be resized in WM_SIZE, below)
    DIM hCtl AS HWND = _
-      pWindow->AddControl("RadioButton", , IDC_FRMIMAGEMANAGER_ACTUALSIZE, L(376, "Actual size"), 356, nTop + 354, 160, 20)
-      pWindow->AddControl("RadioButton", , IDC_FRMIMAGEMANAGER_AUTOSIZE, L(375, "Autosize"), 518, nTop + 354, 160, 20)
-      SendMessage hCtl, BM_SETCHECK, BST_CHECKED, 0
-
+   pWindow->AddControl("COMBOBOX", , IDC_FRMIMAGEMANAGER_COMBO1, "", 356, nTop + 354, 334, 20, _
+           WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR WS_BORDER OR WS_TABSTOP OR CBS_DROPDOWNLIST OR CBS_HASSTRINGS, _
+           WS_EX_CLIENTEDGE or WS_EX_LEFT Or WS_EX_LTRREADING)
+   ComboBox_AddString( hCtl, @L(376, "Actual Size") )
+   ComboBox_AddString( hCtl, @L(165, "Apply High DPI Scaling") )
+   ComboBox_AddString( hCtl, @L(375, "Autosize") )
+   ComboBox_AddString( hCtl, @L(151, "Fit to Width") )
+   ComboBox_AddString( hCtl, @L(160, "Fit to Height") )
+   ComboBox_AddString( hCtl, @L(164, "Stretch") )
+   if pWindow->DPI > 96 then
+      ComboBox_SetCurSel( hCtl, 1 )   ' Use High DPI Scaling
+   else
+      ComboBox_SetCurSel( hCtl, 0 )   ' Actual Size
+   end if
+   
    pWindow->AddControl("LABEL", , IDC_FRMIMAGEMANAGER_LABEL1, L(0002, "File") & ":", 356, nTop + 380, 320, 20, _
            WS_CHILD Or WS_VISIBLE Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
 

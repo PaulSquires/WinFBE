@@ -27,6 +27,7 @@
 <ul>
 <li>MID as a function: Something like MID(cbs, 2) doesn't work with languages such Russian and Chinese. Using MID(**cbs, 2), MID(cbs.wstr, 2) or cbs.MidChars(2) works.</li>
 <li>MID as a statement: Something like MID(cbs, 2, 1) = &quot;x&quot; compiles but does not change the contents of the dynamic unicode string. MID(**cbs, 2, 1) = &quot;x&quot; works.</li>
+<li>TRIM, LTRIM, RTRIM, LSET and RSET don't work with languages like Russian or Chinese unless we prepend ** to the variable name.</li>
 <li>SELECT CASE: Something like SELECT CASE LEFT(cbs, 2) does not compile; we have to use SELECT CASE LEFT(**cbs, 2).</li>
 </ul>
 <table>
@@ -74,52 +75,60 @@
 <td>Appends a string to the CBSTR.</td>
 </tr>
 <tr class="even">
+<td><a href="#Operator[]">Operator []</a></td>
+<td>Gets or sets the corresponding unicode integer representation of the character at the specified position.</td>
+</tr>
+<tr class="odd">
 <td><a href="#OperatorLet">Operator Let</a></td>
 <td>Assigns a string to the CBSTR. It implements the = operator.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#OperatorCast">Operator Cast</a></td>
 <td>Returns a pointer to the CBSTR buffer or the string data.<br>Casting is automatic. You don't have to call this operator.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#wstr">wstr</a></td>
 <td>Returns the string data. Same as **.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#wchar">wchar</a></td>
 <td>Returns the string data as a new unicode string allocated with CoTaskMemAlloc.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#Utf8">Utf8</a></td>
 <td>Converts from UTF8 to Unicode and from Unicode to UTF8.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#Attach">Attach</a></td>
 <td>Attaches a BSTR to the CBSTR class.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#Detach">Detach</a></td>
 <td>Detaches the underlying BSTR from the CBSTR class and returns it as the result of the function.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#Append">Append</a></td>
 <td>Appends a string to the CBSTR.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#Clear">Clear</a></td>
 <td>Frees the underlying BSTR.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#Empty">Empty</a></td>
 <td>Frees the underlying BSTR.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#Left">Left</a></td>
 <td>Returns the leftmost substring of the string. Same as LEFT.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#Right">Right</a></td>
 <td>Returns the rightmost substring of the string. Same as RIGHT.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Char">Char</a></td>
+<td>Gets or sets the corresponding unicode integer representation of the character at the specified position.</td>
 </tr>
 <tr class="even">
 <td><a href="#LeftChars">LeftChars</a></td>
@@ -291,6 +300,16 @@ OPERATOR &amp;= (BYREF ansiStr AS STRING)
 </tr>
 </tbody>
 </table>
+<h2 id="operator-[]"><a name="Operator[]"></a>Operator []</h2>
+<p>Gets or sets the corresponding unicode integer representation of the character at the specified position. The index parameter is zero based ((0 for the first character, 1 for the second, etc.). This operator must not be used in case of empty string because reference is undefined (inducing runtime error). Otherwise, the user must ensure that the index does not exceed the range &quot;[0, Len(cbs) - 1]&quot;. Outside this range, results are undefined.</p>
+<pre><code>OPERATOR [] (BYVAL nIndex AS LONG) BYREF AS USHORT
+</code></pre>
+<h4 id="example">Example</h4>
+<pre><code>DIM cbs as CBSTR = &quot;1234567890&quot;
+print cbs[1]
+cbs[1] = ASC(&quot;X&quot;)
+print cbs
+</code></pre>
 <h2 id="operator-let"><a name="OperatorLet"></a>Operator Let</h2>
 <p>Assigns a string to the CBSTR.</p>
 <pre><code>OPERATOR LET (BYREF wszStr AS CONST WSTRING)
@@ -414,6 +433,29 @@ PROPERTY Utf8 (BYREF utf8String AS STRING)
 <tr class="even">
 <td><em>nChars</em></td>
 <td>The substring length, in characters.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="char"><a name="Char"></a>Char</h2>
+<p>Gets or sets the corresponding unicode integer representation of the character at the position specified by the <em>nIndex</em> parameter.</p>
+<pre><code>PROPERTY Char (BYVAL nIndex AS UINT) AS USHORT
+PROPERTY Char (BYVAL nIndex AS UINT, BYVAL nValue AS USHORT)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nIndex</em></td>
+<td>The one based index of the character in the string (1 for the first character, 2 for the second, etc.). If nIndex is beyond the current length of the string, a 0 is returned.</td>
+</tr>
+<tr class="even">
+<td><em>nValue</em></td>
+<td>The unicode integer representation of the character.</td>
 </tr>
 </tbody>
 </table>

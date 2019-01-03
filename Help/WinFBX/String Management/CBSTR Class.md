@@ -8,6 +8,7 @@ Quirks:
 
 * MID as a function: Something like MID(cbs, 2) doesn't work with languages such Russian and Chinese. Using MID(\*\*cbs, 2), MID(cbs.wstr, 2) or cbs.MidChars(2) works.
 * MID as a statement: Something like MID(cbs, 2, 1) = "x" compiles but does not change the contents of the dynamic unicode string. MID(\*\*cbs, 2, 1) = "x" works.
+* TRIM, LTRIM, RTRIM, LSET and RSET don't work with languages like Russian or Chinese unless we prepend \*\* to the variable name.
 * SELECT CASE: Something like SELECT CASE LEFT(cbs, 2) does not compile; we have to use SELECT CASE LEFT(\*\*cbs, 2).
 
 | Name       | Description |
@@ -21,6 +22,7 @@ Quirks:
 | [Operator &](#Operator&) | Concatenates strings. |
 | [Operator +=](#Operator+=) | Appends a string to the CBSTR. |
 | [Operator &=](#Operator&=) | Appends a string to the CBSTR. |
+| [Operator []](#Operator[]) | Gets or sets the corresponding unicode integer representation of the character at the specified position. |
 | [Operator Let](#OperatorLet) | Assigns a string to the CBSTR. It implements the = operator. |
 | [Operator Cast](#OperatorCast) | Returns a pointer to the CBSTR buffer or the string data.<br>Casting is automatic. You don't have to call this operator. |
 | [wstr](#wstr) | Returns the string data. Same as \*\*. |
@@ -33,6 +35,7 @@ Quirks:
 | [Empty](#Empty) | Frees the underlying BSTR. |
 | [Left](#Left) | Returns the leftmost substring of the string. Same as LEFT. |
 | [Right](#Right) | Returns the rightmost substring of the string. Same as RIGHT. |
+| [Char](#Char) | Gets or sets the corresponding unicode integer representation of the character at the specified position. |
 | [LeftChars](#LeftChars) | Returns the leftmost substring of the string. Same as Left. |
 | [MidChars](#MidChars) | Returns a substring of the string. Same as Mid. |
 | [RightChars](#RightChars) | Returns the rightmost substring of the string. Same as Right. |
@@ -154,6 +157,21 @@ OPERATOR &= (BYREF ansiStr AS STRING)
 | *cws* | A CWSTR. |
 | *cbs* | A CBSTR. |
 | *ansiStr* | An ansi string or string literal. |
+
+## <a name="Operator[]"></a>Operator []
+
+Gets or sets the corresponding unicode integer representation of the character at the specified position. The index parameter is zero based ((0 for the first character, 1 for the second, etc.). This operator must not be used in case of empty string because reference is undefined (inducing runtime error). Otherwise, the user must ensure that the index does not exceed the range "\[0, Len(cbs) - 1]". Outside this range, results are undefined.
+
+```
+OPERATOR [] (BYVAL nIndex AS LONG) BYREF AS USHORT
+```
+#### Example
+```
+DIM cbs as CBSTR = "1234567890"
+print cbs[1]
+cbs[1] = ASC("X")
+print cbs
+```
 
 ## <a name="OperatorLet"></a>Operator Let
 
@@ -278,6 +296,20 @@ FUNCTION Right OVERLOAD (BYREF cbs AS CBSTR, BYVAL nChars AS INTEGER) AS CBSTR
 | ---------- | ----------- |
 | *cbs* | The source CBSTR. |
 | *nChars* | The substring length, in characters. |
+
+## <a name="Char"></a>Char
+
+Gets or sets the corresponding unicode integer representation of the character at the position specified by the *nIndex* parameter.
+
+```
+PROPERTY Char (BYVAL nIndex AS UINT) AS USHORT
+PROPERTY Char (BYVAL nIndex AS UINT, BYVAL nValue AS USHORT)
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *nIndex* | The one based index of the character in the string (1 for the first character, 2 for the second, etc.). If nIndex is beyond the current length of the string, a 0 is returned. |
+| *nValue* | The unicode integer representation of the character. |
 
 ## <a name="LeftChars"></a>LeftChars
 

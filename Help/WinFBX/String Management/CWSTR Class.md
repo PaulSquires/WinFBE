@@ -6,10 +6,10 @@ The `CWSTR` class implements a dynamic unicode null terminated string. Free Basi
 
 Quirks:
 
-* MID as a function: Something like MID(cws, 2) doesn't work with languages such Russian and Chinese. Using MID(\*\*cws, 2), MID(cws.wstr, 2) or cws.MidChars(2) works.
+* MID as a function: Something like MID(cws, 2) doesn't work with languages like Russian or Chinese. Using MID(\*\*cws, 2), MID(cws.wstr, 2) or cws.MidChars(2) works.
 * MID as a statement: Something like MID(cws, 2, 1) = "x" compiles but does not change the contents of the dynamic unicode string. MID(cws.wstr, 2, 1) = "x" or MID(\*\*cws, 2, 1) = "x" works.
+* TRIM, LTRIM, RTRIM, LSET and RSET don't work with languages like Russian or Chinese unless we prepend \*\* to the variable name.
 * SELECT CASE: Something like SELECT CASE LEFT(cws, 2) does not compile; we have to use SELECT CASE LEFT(\*\*cws, 2).
-* Operator []: cwsText[0] = ASC("x") does not compile; we have to use (\*cwsText)\[0] = ASC("x").
 
 | Name       | Description |
 | ---------- | ----------- |
@@ -21,7 +21,7 @@ Quirks:
 | [Operator &](#Operator&) | Concatenates strings. |
 | [Operator +=](#Operator+=) | Appends a string to the CWSTR. |
 | [Operator &=](#Operator&=) | Appends a string to the CWSTR. |
-| [Operator []](#Operator[]) | Gets the corresponding unicode integer representation of the character at the specified position. |
+| [Operator []](#Operator[]) | Gets or sets the corresponding unicode integer representation of the character at the specified position. |
 | [Operator Let](#OperatorLet) | Assigns a string to the CWSTR. It implements the = operator. |
 | [Operator Cast](#OperatorCast) | Returns a pointer to the CWSTR buffer or the string data.<br>Casting is automatic. You don't have to call this operator. |
 | [bstr](#bstr) | Returns the contents of the CWSTR as a BSTR. |
@@ -268,10 +268,17 @@ OPERATOR &= (BYREF ansiStr AS STRING)
 
 ## <a name="Operator[]"></a>Operator []
 
-Appends a string to the CWSTR.
+Gets or sets the corresponding unicode integer representation of the character at the specified position. The index parameter is zero based ((0 for the first character, 1 for the second, etc.). This operator must not be used in case of empty string because reference is undefined (inducing runtime error). Otherwise, the user must ensure that the index does not exceed the range "\[0, Len(cws) - 1]". Outside this range, results are undefined.
 
 ```
-OPERATOR [] (BYVAL nIndex AS LONG) AS USHORT
+OPERATOR [] (BYVAL nIndex AS LONG) BYREF AS USHORT
+```
+#### Example
+```
+DIM cws as CWSTR = "1234567890"
+print cws[0]
+cws[0] = ASC("X")
+print cws
 ```
 
 ## <a name="OperatorLet"></a>Operator Let

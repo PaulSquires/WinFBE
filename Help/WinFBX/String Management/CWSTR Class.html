@@ -25,10 +25,10 @@
 <p><strong>Include file</strong>: CWSTR.INC.</p>
 <p>Quirks:</p>
 <ul>
-<li>MID as a function: Something like MID(cws, 2) doesn't work with languages such Russian and Chinese. Using MID(**cws, 2), MID(cws.wstr, 2) or cws.MidChars(2) works.</li>
+<li>MID as a function: Something like MID(cws, 2) doesn't work with languages like Russian or Chinese. Using MID(**cws, 2), MID(cws.wstr, 2) or cws.MidChars(2) works.</li>
 <li>MID as a statement: Something like MID(cws, 2, 1) = &quot;x&quot; compiles but does not change the contents of the dynamic unicode string. MID(cws.wstr, 2, 1) = &quot;x&quot; or MID(**cws, 2, 1) = &quot;x&quot; works.</li>
+<li>TRIM, LTRIM, RTRIM, LSET and RSET don't work with languages like Russian or Chinese unless we prepend ** to the variable name.</li>
 <li>SELECT CASE: Something like SELECT CASE LEFT(cws, 2) does not compile; we have to use SELECT CASE LEFT(**cws, 2).</li>
-<li>Operator []: cwsText[0] = ASC(&quot;x&quot;) does not compile; we have to use (*cwsText)[0] = ASC(&quot;x&quot;).</li>
 </ul>
 <table>
 <thead>
@@ -72,7 +72,7 @@
 </tr>
 <tr class="odd">
 <td><a href="#Operator[]">Operator []</a></td>
-<td>Gets the corresponding unicode integer representation of the character at the specified position.</td>
+<td>Gets or sets the corresponding unicode integer representation of the character at the specified position.</td>
 </tr>
 <tr class="even">
 <td><a href="#OperatorLet">Operator Let</a></td>
@@ -400,8 +400,14 @@ OPERATOR &amp;= (BYREF cbs AS CBStr)
 OPERATOR &amp;= (BYREF ansiStr AS STRING)
 </code></pre>
 <h2 id="operator-[]"><a name="Operator[]"></a>Operator []</h2>
-<p>Appends a string to the CWSTR.</p>
-<pre><code>OPERATOR [] (BYVAL nIndex AS LONG) AS USHORT
+<p>Gets or sets the corresponding unicode integer representation of the character at the specified position. The index parameter is zero based ((0 for the first character, 1 for the second, etc.). This operator must not be used in case of empty string because reference is undefined (inducing runtime error). Otherwise, the user must ensure that the index does not exceed the range &quot;[0, Len(cws) - 1]&quot;. Outside this range, results are undefined.</p>
+<pre><code>OPERATOR [] (BYVAL nIndex AS LONG) BYREF AS USHORT
+</code></pre>
+<h4 id="example">Example</h4>
+<pre><code>DIM cws as CWSTR = &quot;1234567890&quot;
+print cws[0]
+cws[0] = ASC(&quot;X&quot;)
+print cws
 </code></pre>
 <h2 id="operator-let"><a name="OperatorLet"></a>Operator Let</h2>
 <p>Assigns a string to the CWSTR.</p>
@@ -859,7 +865,7 @@ FUNCTION Insert (BYREF ansiStr AS STRING, BYVAL nIndex AS UINT, BYVAL nCodePage 
 </tr>
 </tbody>
 </table>
-<h2 id="example">Example</h2>
+<h2 id="example-1">Example</h2>
 <pre><code>REDIM rg(1 TO 10) AS CWSTR
 FOR i AS LONG = 1 TO 10
    rg(i) = &quot;string &quot; &amp; i
@@ -895,7 +901,7 @@ NEXT
 </tr>
 </tbody>
 </table>
-<h4 id="example-1">Example</h4>
+<h4 id="example-2">Example</h4>
 <pre><code>REDIM rg(1 TO 10) AS CWSTR
 FOR i AS LONG = 1 TO 10
    rg(i) = &quot;string &quot; &amp; i
@@ -931,7 +937,7 @@ FUNCTION AfxCWstrArrayRemoveLast (rgwstr() AS CWSTR) AS BOOLEAN
 </table>
 <h4 id="remarks">Remarks</h4>
 <p><strong>AfxCWstrArrayRemoveFirst</strong> removes the first element of the array <strong>AfxCWstrArrayRemoveLast</strong> removes the last element of the array</p>
-<h4 id="example-2">Example</h4>
+<h4 id="example-3">Example</h4>
 <pre><code>REDIM rg(1 TO 10) AS CWSTR
 FOR i AS LONG = 1 TO 10
    rg(i) = &quot;string &quot; &amp; i
@@ -963,7 +969,7 @@ NEXT
 </tr>
 </tbody>
 </table>
-<h4 id="example-3">Example</h4>
+<h4 id="example-4">Example</h4>
 <pre><code>DIM rg(1 TO 10) AS CWSTR
 FOR i AS LONG = 1 TO 10
    rg(i) = &quot;string &quot; &amp; i
@@ -1055,7 +1061,7 @@ string20
 </tr>
 </tbody>
 </table>
-<h4 id="example-4">Example</h4>
+<h4 id="example-5">Example</h4>
 <pre><code>DIM rg(1 TO 9) AS CWSTR
 rg(1) = &quot;20string&quot;
 rg(2) = &quot;2string&quot;
@@ -1112,7 +1118,7 @@ string20
 </tr>
 </tbody>
 </table>
-<h4 id="example-5">Example</h4>
+<h4 id="example-6">Example</h4>
 <pre><code>DIM rg(1 TO 10) AS CWSTR
 FOR i AS LONG = 1 TO 10
    rg(i) = &quot;string &quot; &amp; i

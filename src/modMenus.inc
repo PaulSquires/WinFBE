@@ -204,6 +204,8 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Framework Help"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINAPI, "WinAPI Help"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CHECKFORUPDATES, L(91,"Check for Updates")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_ABOUT, L(74,"About")
 
    Function = hMenu
@@ -317,6 +319,7 @@ Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_HELPWINAPI, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINFBE, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINFBX, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_CHECKFORUPDATES, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 
    ' Enable everything if a document is open

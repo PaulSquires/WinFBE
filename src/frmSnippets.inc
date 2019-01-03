@@ -335,6 +335,14 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmSnippets
 ' ========================================================================================
 Function frmSnippets_OnClose(HWnd As HWnd) As LRESULT
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+   if pWindow then 
+      ' Save the window size and placement. Use the pWindow version in order to
+      ' get the coordinates UnScaled. We do this because rcSnippets is fed to
+      ' pWindow->Create and that function will rescale the values.
+      pWindow->GetWindowRect( @gConfig.rcSnippets )
+   end if
+   
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow( HWnd )
@@ -404,14 +412,29 @@ Function frmSnippets_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
+   ' Resize the Form should the user have previously manually resized it.
+   dim as long nLeft, nTop, nWidth, nHeight
+   If IsRectEmpty( @gConfig.rcSnippets ) = false then
+      nLeft   = gConfig.rcSnippets.left
+      nTop    = gConfig.rcSnippets.top
+      nWidth  = gConfig.rcSnippets.right - gConfig.rcSnippets.left
+      nHeight = gConfig.rcSnippets.bottom - gConfig.rcSnippets.top
+   else
+      Dim rcWork As Rect = pWindow->GetWorkArea
+      nWidth  = (rcWork.Right - rcWork.Left) * .60
+      nHeight = (rcWork.Bottom - rcWork.Top) * .80
+   end if
+
    Dim As HWnd hForm = _
    pWindow->Create(hWndParent, L(88,"User Snippets"), _
-        @frmSnippets_WndProc, 0, 0, 0, 0, _
+        @frmSnippets_WndProc, nLeft, nTop, nWidth, nHeight, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_THICKFRAME, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT )
-   pWindow->SetClientSize(622, 436)
-   pWindow->Center(pWindow->hWindow, hWndParent)
-
+   
+   If IsRectEmpty( @gConfig.rcSnippets ) then
+      pWindow->Center(pWindow->hWindow, hWndParent)
+   end if
+   
    ' Set the small and large icon for the main window (must be set after main window is created)
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
@@ -431,10 +454,10 @@ Function frmSnippets_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMSNIPPETS_LABEL2, L(89,"Trigger") & ":", 240, 56, 100, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMSNIPPETS_TXTTRIGGER, "", 240, 77, 100, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSNIPPETS_TXTTRIGGER, "", 240, 77, 130, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMSNIPPETS_LABEL4, "(" & L(90,"Press TAB in code editor to activate") & ")", 346, 77, 250, 20, _
+   pWindow->AddControl("LABEL", , IDC_FRMSNIPPETS_LABEL4, "(" & L(90,"Press TAB in code editor to activate") & ")", 376, 77, 250, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

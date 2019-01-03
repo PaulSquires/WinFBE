@@ -78,6 +78,7 @@ A pointer to the CImageCtx class.
 | ---------- | ----------- |
 | [Clear](#Clear) | Clears the contents of the controlr. |
 | [GetBkColor](#GetBkColor) | Gets the background RGB color used by the **CImageCtx** control. |
+| [GetBkColorHot](#GetBkColorHot) | Gets the background hot RGB color used by the **CImageCtx** control. |
 | [GetImageAdjustment](#GetImageAdjustment) | Gets the image adjustment setting used by the control. |
 | [GetImageHeight](#GetImageHeight) | Gets the height of the image, in pixels, currently loaded in the **CImageCtx** control. |
 | [GetImagePtr](#GetImagePtr) | Gets a pointer to the GDI+ GpImage object used by the control to render the loaded image. |
@@ -89,7 +90,11 @@ A pointer to the CImageCtx class.
 | [LoadImageFromResource](#LoadImageFromResource) | Loads an image from a resource file into the control. |
 | [Redraw](#Redraw) | Redraws the **CImageCtx** control. |
 | [SetBkColor](#SetBkColor) | Sets the background RGB color used by the **CImageCtx** control. |
+| [SetBkColorHot](#SetBkColorHot) | Sets the background hot RGB color used by the **CImageCtx** control. |
 | [SetImageAdjustment](#SetImageAdjustment) | Sets the image adjustment setting used by the control. |
+| [SetImageHeight](#SetImageHeight) | Sets the height of the image. |
+| [SetImageSize](#SetImageSize) | Sets the size of the image. |
+| [SetImageWidth](#SetImageWidth) | Sets the width of the image. |
 | [SetInterpolationMode](#SetInterpolationMode) | Sets the interpolation mode used by GDI+. |
 
 ### Notification Messages
@@ -237,6 +242,14 @@ Gets the background RGB color used by the **CImageCtx** control.
 
 ```
 FUNCTION GetBkColor () AS LONG
+```
+
+# <a name="GetBkColorHot"></a>GetBkColorHot
+
+Gets the background hot RGB color used by the **CImageCtx** control (when the mouse is over the control).
+
+```
+FUNCTION GetBkColorHot () AS LONG
 ```
 
 # <a name="GetImageAdjustment"></a>GetImageAdjustment
@@ -397,6 +410,19 @@ FUNCTION SetBkColor (BYVAL clr AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LON
 | *clr* | The new RGB background color. |
 | *fRedraw* | Optional. TRUE to redraw the control to reflect the changes. |
 
+# <a name="SetBkColorHot"></a>SetBkColorHot
+
+Sets the background hot RGB color used by the **CImageCtx** control (when the mouse i over the control).
+
+```
+FUNCTION SetBkColorHot (BYVAL clr AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *clr* | The new RGB background color. |
+| *fRedraw* | Optional. TRUE to redraw the control to reflect the changes. |
+
 #### Return value
 
 The previous background color.
@@ -427,6 +453,46 @@ FUNCTION SetImageAdjustment (BYVAL ImageAdjustment AS LONG, BYVAL fRedraw AS BOO
 #### Return value
 
 The previous setting value.
+
+# <a name="SetImageHeight"></a>SetImageHeight
+
+Sets the height of the image.
+
+```
+SUB SetImageHeight (BYVAL nHeight AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE)
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *nHeight* | Height of the image, in pixels. |
+| *fRedraw* | Optional. TRUE to redraw the control to reflect the changes. |
+
+# <a name="SetImageSize"></a>SetImageSize
+
+Sets the size of the image.
+
+```
+SUB SetImageSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE)
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *nWidth* | Width of the image, in pixels. |
+| *nHeight* | Height of the image, in pixels. |
+| *fRedraw* | Optional. TRUE to redraw the control to reflect the changes. |
+
+# <a name="SetImageWidth"></a>SetImageWidth
+
+Sets the width of the image.
+
+```
+SUB SetImageWidth (BYVAL nWidth AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE)
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *nWidth* | Height of the image, in pixels. |
+| *fRedraw* | Optional. TRUE to redraw the control to reflect the changes. |
 
 # <a name="SetInterpolationMode"></a>SetInterpolationMode
 

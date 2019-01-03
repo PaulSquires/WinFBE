@@ -1169,6 +1169,11 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
          ShowContextHelp(id) 
 
+      case IDM_CHECKFORUPDATES
+         DisableAllModeless()
+         DoCheckForUpdates
+         EnableAllModeless()
+         
       Case IDM_ABOUT
          DisableAllModeless()
          MessageBox( HWnd, APPNAME & vbcrlf & _
@@ -1731,43 +1736,6 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
 
       
-      case MSG_USER_GENERATECODE
-         Dim pDoc As clsDocument Ptr 
-         if lParam = 0 then
-            pDoc = gTTabCtl.GetActiveDocumentPtr()
-         else
-            pDoc = cast(clsDocument Ptr, lParam)
-         end if   
-         if pDoc then
-            if IsDesignerView(pDoc) = false then  ' clicked on the code window
-               dim as hwnd hEdit = pDoc->hWindow(0)
-               dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
-               dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
-               GenerateFormCode(pDoc)
-               if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
-               if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
-            else
-               GenerateFormCode(pDoc)
-            END IF
-         end if
-
-      case MSG_USER_SHOWAUTOCOMPLETE
-         return ShowAutocompleteList()
-
-      case MSG_USER_APPENDEQUALSSIGN
-         ' The = key was used to terminate a popup autocomplete. Take that
-         ' character and format it with a space before and a space after.
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN
-            dim as hwnd hEdit = pDoc->hWndActiveScintilla
-            Dim As Long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
-            dim as string sWord = " = "
-            SciExec( hEdit, SCI_SETSEL, nPos-1, nPos)
-            SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(sWord)))
-            nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
-            SciExec( hEdit, SCI_SETSEL, nPos, nPos)
-         end if   
-              
       case WM_MOUSEMOVE
          ' Determine if we have mouse over a edit split area
          Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -1906,6 +1874,43 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          ' process any command line arguments that may have been passed to the program.
          frmMain_ProcessCommandLine(HWnd)
 
+      case MSG_USER_GENERATECODE
+         Dim pDoc As clsDocument Ptr 
+         if lParam = 0 then
+            pDoc = gTTabCtl.GetActiveDocumentPtr()
+         else
+            pDoc = cast(clsDocument Ptr, lParam)
+         end if   
+         if pDoc then
+            if IsDesignerView(pDoc) = false then  ' clicked on the code window
+               dim as hwnd hEdit = pDoc->hWindow(0)
+               dim as long nFirstLine = SendMessage( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
+               dim as long curPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0)
+               GenerateFormCode(pDoc)
+               if curPos >=0 then SendMessage( hEdit, SCI_GOTOPOS, curPos, 0)
+               if nFirstLine >=0 then SendMessage( hEdit, SCI_SETFIRSTVISIBLELINE, nFirstLine, 0)
+            else
+               GenerateFormCode(pDoc)
+            END IF
+         end if
+
+      case MSG_USER_SHOWAUTOCOMPLETE
+         return ShowAutocompleteList()
+
+      case MSG_USER_APPENDEQUALSSIGN
+         ' The = key was used to terminate a popup autocomplete. Take that
+         ' character and format it with a space before and a space after.
+         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+         if pDoc THEN
+            dim as hwnd hEdit = pDoc->hWndActiveScintilla
+            Dim As Long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            dim as string sWord = " = "
+            SciExec( hEdit, SCI_SETSEL, nPos-1, nPos)
+            SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(sWord)))
+            nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            SciExec( hEdit, SCI_SETSEL, nPos, nPos)
+         end if   
+              
 
       '-------------------------------------------------------------------------------
       '                        Scrollbar Handler

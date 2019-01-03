@@ -37,6 +37,8 @@
 #Include Once "Afx\CMaskedEdit.inc"
 #Include Once "Afx\CImageCtx.inc"
 #Include Once "Afx\CAxHost\CWebCtx.inc"
+#Include Once "Afx\CWinHttpRequest.inc"
+#Include Once "Afx\CStream.inc"
 
 Using Afx
 
@@ -90,6 +92,7 @@ Using Afx
 #Include Once "modMRU.inc"
 #Include Once "modCodetips.inc"
 #Include Once "modGenerateCode.inc"
+#Include Once "modCheckForUpdate.inc"
 
 #Include Once "frmImageManager.inc" 
 #Include Once "frmRecent.inc" 
@@ -118,6 +121,7 @@ Using Afx
 #Include Once "frmMain.inc"
 
 
+
 ' ========================================================================================
 ' WinMain
 ' ========================================================================================
@@ -131,24 +135,28 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    gConfig.LoadConfigFile()
    gConfig.LoadKeywords()
 
-   dim as CWSTR wszLocalizationFile
    ' Attempt to load the english localization file. This is necessary because
    ' any non-english localization file will have missing entries filled by the
    ' english version.
+   dim as CWSTR wszLocalizationFile
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\english.lang")
    If LoadLocalizationFile(wszLocalizationFile, true) = False Then
-      MessageBox( 0, WStr("English Localization file could not be loaded. Aborting application.") + vbcrlf + _
-                   wszLocalizationFile, _
-                   WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      MessageBox( 0, _
+                  WStr("English Localization file could not be loaded. Aborting application.") + vbcrlf + _
+                  wszLocalizationFile, _
+                  WStr("Error"), _
+                  MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Return 1
    End If
    
    ' Load the selected localization file
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\") + gConfig.LocalizationFile
    If LoadLocalizationFile(wszLocalizationFile, false) = False Then
-      MessageBox( 0, WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
-                   wszLocalizationFile, _
-                   WStr("Error"), MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      MessageBox( 0, _
+                  WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
+                  wszLocalizationFile, _
+                  WStr("Error"), _
+                  MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Return 1
    End If
 

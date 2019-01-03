@@ -156,54 +156,74 @@ FUNCTION AfxCImageCtxPtr (BYVAL hParent AS HWND, BYVAL cID AS LONG) AS CImageCtx
 <td>Gets the background RGB color used by the <strong>CImageCtx</strong> control.</td>
 </tr>
 <tr class="odd">
+<td><a href="#GetBkColorHot">GetBkColorHot</a></td>
+<td>Gets the background hot RGB color used by the <strong>CImageCtx</strong> control.</td>
+</tr>
+<tr class="even">
 <td><a href="#GetImageAdjustment">GetImageAdjustment</a></td>
 <td>Gets the image adjustment setting used by the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#GetImageHeight">GetImageHeight</a></td>
 <td>Gets the height of the image, in pixels, currently loaded in the <strong>CImageCtx</strong> control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#GetImagePtr">GetImagePtr</a></td>
 <td>Gets a pointer to the GDI+ GpImage object used by the control to render the loaded image.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#GetImageWidth">GetImageWidth</a></td>
 <td>Gets the width of the image, in pixels, currently loaded in the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#GetInterpolationMode">GetInterpolationMode</a></td>
 <td>Gets the interpolation mode used by GDI+.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#hWindow">hWindow</a></td>
 <td>Returns the handle of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#LoadBitmapFromResource">LoadBitmapFromResource</a></td>
 <td>Loads a bitmap from a resource file into the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#LoadImageFromFile">LoadImageFromFile</a></td>
 <td>Loads an image from disk into the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#LoadImageFromResource">LoadImageFromResource</a></td>
 <td>Loads an image from a resource file into the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#Redraw">Redraw</a></td>
 <td>Redraws the <strong>CImageCtx</strong> control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#SetBkColor">SetBkColor</a></td>
 <td>Sets the background RGB color used by the <strong>CImageCtx</strong> control.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetBkColorHot">SetBkColorHot</a></td>
+<td>Sets the background hot RGB color used by the <strong>CImageCtx</strong> control.</td>
 </tr>
 <tr class="even">
 <td><a href="#SetImageAdjustment">SetImageAdjustment</a></td>
 <td>Sets the image adjustment setting used by the control.</td>
 </tr>
 <tr class="odd">
+<td><a href="#SetImageHeight">SetImageHeight</a></td>
+<td>Sets the height of the image.</td>
+</tr>
+<tr class="even">
+<td><a href="#SetImageSize">SetImageSize</a></td>
+<td>Sets the size of the image.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetImageWidth">SetImageWidth</a></td>
+<td>Sets the width of the image.</td>
+</tr>
+<tr class="even">
 <td><a href="#SetInterpolationMode">SetInterpolationMode</a></td>
 <td>Sets the interpolation mode used by GDI+.</td>
 </tr>
@@ -335,6 +355,10 @@ END IF
 <h1 id="getbkcolor"><a name="GetBkColor"></a>GetBkColor</h1>
 <p>Gets the background RGB color used by the <strong>CImageCtx</strong> control.</p>
 <pre><code>FUNCTION GetBkColor () AS LONG
+</code></pre>
+<h1 id="getbkcolorhot"><a name="GetBkColorHot"></a>GetBkColorHot</h1>
+<p>Gets the background hot RGB color used by the <strong>CImageCtx</strong> control (when the mouse is over the control).</p>
+<pre><code>FUNCTION GetBkColorHot () AS LONG
 </code></pre>
 <h1 id="getimageadjustment"><a name="GetImageAdjustment"></a>GetImageAdjustment</h1>
 <p>Gets the image adjustment setting used by the control.</p>
@@ -503,6 +527,28 @@ InterpolationModeHighQualityBicubic = 7
 </tr>
 </tbody>
 </table>
+<h1 id="setbkcolorhot"><a name="SetBkColorHot"></a>SetBkColorHot</h1>
+<p>Sets the background hot RGB color used by the <strong>CImageCtx</strong> control (when the mouse i over the control).</p>
+<pre><code>FUNCTION SetBkColorHot (BYVAL clr AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>clr</em></td>
+<td>The new RGB background color.</td>
+</tr>
+<tr class="even">
+<td><em>fRedraw</em></td>
+<td>Optional. TRUE to redraw the control to reflect the changes.</td>
+</tr>
+</tbody>
+</table>
 <h4 id="return-value-8">Return value</h4>
 <p>The previous background color.</p>
 <h1 id="setimageadjustment"><a name="SetImageAdjustment"></a>SetImageAdjustment</h1>
@@ -560,6 +606,76 @@ InterpolationModeHighQualityBicubic = 7
 </table>
 <h4 id="return-value-9">Return value</h4>
 <p>The previous setting value.</p>
+<h1 id="setimageheight"><a name="SetImageHeight"></a>SetImageHeight</h1>
+<p>Sets the height of the image.</p>
+<pre><code>SUB SetImageHeight (BYVAL nHeight AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nHeight</em></td>
+<td>Height of the image, in pixels.</td>
+</tr>
+<tr class="even">
+<td><em>fRedraw</em></td>
+<td>Optional. TRUE to redraw the control to reflect the changes.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setimagesize"><a name="SetImageSize"></a>SetImageSize</h1>
+<p>Sets the size of the image.</p>
+<pre><code>SUB SetImageSize (BYVAL nWidth AS LONG, BYVAL nHeight AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>Width of the image, in pixels.</td>
+</tr>
+<tr class="even">
+<td><em>nHeight</em></td>
+<td>Height of the image, in pixels.</td>
+</tr>
+<tr class="odd">
+<td><em>fRedraw</em></td>
+<td>Optional. TRUE to redraw the control to reflect the changes.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="setimagewidth"><a name="SetImageWidth"></a>SetImageWidth</h1>
+<p>Sets the width of the image.</p>
+<pre><code>SUB SetImageWidth (BYVAL nWidth AS LONG, BYVAL fRedraw AS BOOLEAN = FALSE)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nWidth</em></td>
+<td>Height of the image, in pixels.</td>
+</tr>
+<tr class="even">
+<td><em>fRedraw</em></td>
+<td>Optional. TRUE to redraw the control to reflect the changes.</td>
+</tr>
+</tbody>
+</table>
 <h1 id="setinterpolationmode"><a name="SetInterpolationMode"></a>SetInterpolationMode</h1>
 <p>Sets the interpolation mode used by GDI+. The interpolation mode determines the algorithm that is used when images are scaled or rotated.</p>
 <pre><code>SUB SetInterpolationMode (BYVAL InterpolationMode AS LONG)
