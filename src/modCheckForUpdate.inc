@@ -19,7 +19,7 @@
 ''  the latest WinFBE version number. If an update exists then ask the user
 ''  if they wish to navigate to the Releases page on GitHub.
 ''
-function DoCheckForUpdates() as long
+function DoCheckForUpdates( byval bSilentCheck as Boolean = false ) as long
    
    dim as CWSTR wszServerFile = "winfbe_version.txt"
    dim as CWSTR wszFilename
@@ -64,10 +64,12 @@ function DoCheckForUpdates() as long
       close #f
       AfxDeleteFile( wszFilename ) 
    else
-      MessageBox( HWND_FRMMAIN, _
-                  L(92,"Failed to retrieve update information"), _
-                  L(94,"Software Update"), _
-                  MB_ICONINFORMATION Or MB_OK )
+      if bSilentCheck = false then      
+         MessageBox( HWND_FRMMAIN, _
+                     L(92,"Failed to retrieve update information"), _
+                     L(94,"Software Update"), _
+                     MB_ICONINFORMATION Or MB_OK )
+      end if
       exit function
    end if
 
@@ -75,10 +77,16 @@ function DoCheckForUpdates() as long
       dim as long latestVersion = ConvertWinFBEversion(wszLatestVersion)
       dim as long installedVersion = ConvertWinFBEversion(APPVERSION)
 
+      ' Save the config file so that other editor instances will not also do update checks again
+      gConfig.LastUpdateCheck = JulianDateNow
+      gConfig.SaveConfigFile
+      
       if installedVersion = latestVersion then
-         wszMsg = L(96,"You are up to date!") & vbcrlf & _
-                  "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
-         MessageBox( HWND_FRMMAIN, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
+         if bSilentCheck = false then      
+            wszMsg = L(96,"You are up to date!") & vbcrlf & _
+                     "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
+            MessageBox( HWND_FRMMAIN, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
+         end if
          exit function
       
       elseif installedVersion < latestVersion then
@@ -96,3 +104,4 @@ function DoCheckForUpdates() as long
    
    function = 0
 end function
+

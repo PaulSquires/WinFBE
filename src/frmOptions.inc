@@ -28,6 +28,7 @@ Sub SaveEditorOptions()
    gConfig.AskExit              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT) )
    gConfig.HideToolbar          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR) )
    gConfig.HideStatusbar        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR) )
+   gConfig.CheckForUpdates      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES) )
 
    ' EDITOR OPTIONS   
    HWnd = HWND_FRMOPTIONSEDITOR

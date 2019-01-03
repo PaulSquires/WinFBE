@@ -13,6 +13,13 @@
 
 
 ' ========================================================================================
+' Calculate the Julian date for today's date. Used by CheckForUpdates.
+' ========================================================================================
+function JulianDateNow() as long
+   function = AfxGregorianToJulian( AfxSystemDay, AfxSystemMonth, AfxSystemYear )
+end function
+
+' ========================================================================================
 ' Convert WinFBE version to whole number for comparison to file versions being loaded.
 ' ========================================================================================
 function ConvertWinFBEversion( byref wszVersion as wstring ) as long

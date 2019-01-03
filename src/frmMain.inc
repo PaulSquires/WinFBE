@@ -1176,17 +1176,8 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          
       Case IDM_ABOUT
          DisableAllModeless()
-         MessageBox( HWnd, APPNAME & vbcrlf & _
-                       "Version " & APPVERSION & APPBITS & _
-                       vbcrlf & vbcrlf & _
-                       "PAUL SQUIRES" & vbcrlf & _
-                       "PlanetSquires Software" & vbcrlf & vbcrlf & _
-                       "Special thanks to:" & vbcrlf & _
-                       "José Roca (WinFBX Framework)", _
-                       @WStr("About"), _
-                       MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_TASKMODAL )
+         frmAbout_Show( hwnd )
          EnableAllModeless()
- 
          frmMain_SetFocusToCurrentCodeWindow()
         
    End Select
@@ -1874,6 +1865,18 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          ' process any command line arguments that may have been passed to the program.
          frmMain_ProcessCommandLine(HWnd)
 
+      Case MSG_USER_PROCESS_UPDATECHECK
+         ' perform an update check one per day if the option has been set by the user.
+         if gConfig.CheckForUpdates then
+            dim as long curJulian = JulianDateNow
+            if gConfig.LastUpdateCheck <> curJulian then
+               DoCheckForUpdates( true )  ' no messages if up to date
+            end if
+            ' Save the config file so that other editor instances will not also do update checks again
+            gConfig.LastUpdateCheck = curJulian
+            gConfig.SaveConfigFile
+         end if   
+
       case MSG_USER_GENERATECODE
          Dim pDoc As clsDocument Ptr 
          if lParam = 0 then
@@ -2080,8 +2083,10 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    UpdateWindow pWindow->hWindow
 
    ' Post a message to process the application's command line as applicable.
-   PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE , 0, 0 )
+   PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE, 0, 0 )
 
+   ' Post a message to do an update check (if applicable)
+   PostMessage( pWindow->hWindow, MSG_USER_PROCESS_UPDATECHECK, 0, 0 )
 
 ' TODO: Remove SetTimer (debug for showing GDI count)
 'SetTimer(HWND_FRMMAIN, 1000, 500, 0)

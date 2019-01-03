@@ -61,6 +61,9 @@ Function frmOptionsGeneral_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR, L(340,"Hide main statusbar"), 0, 105, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSGENERAL_CHKUPDATES, L(166,"Check for update at startup (once per day)"), 0, 126, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As Long idx = 0
    Dim As HWnd HWnd = HWND_FRMOPTIONSGENERAL
@@ -71,6 +74,7 @@ Function frmOptionsGeneral_Show( ByVal hWndParent As HWnd, _
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKASKEXIT),            gConfig.AskExit)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR),        gConfig.HideToolbar)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR),      gConfig.HideStatusbar)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES),            gConfig.CheckForUpdates)
 
    Function = 0
    

@@ -587,6 +587,8 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine ""
    pStream.WriteLine "[Editor]"
    pStream.WriteLine "AskExit="               & this.AskExit
+   pStream.WriteLine "CheckForUpdates="       & this.CheckForUpdates
+   pStream.WriteLine "LastUpdateCheck="       & this.LastUpdateCheck
    pStream.WriteLine "HideToolbar="           & this.HideToolbar
    pStream.WriteLine "HideStatusbar="         & this.HideStatusbar
    pStream.WriteLine "MultipleInstances="     & this.MultipleInstances    
@@ -861,151 +863,154 @@ Function clsConfig.LoadConfigFile() as Long
    Dim i      as Long
    dim bReadingNote as Boolean
 
-   If AfxFileExists(_ConfigFilename) = 0 Then Exit Function
-    
-   dim pStream AS CTextStream   '(utf16)
-   if pStream.OpenUnicode(_ConfigFilename) <> S_OK then return true   ' error
+   If AfxFileExists(_ConfigFilename) then
+      dim pStream AS CTextStream   '(utf16)
+      if pStream.OpenUnicode(_ConfigFilename) <> S_OK then return true   ' error
 
-   gApp.NonProjectNotes = ""
+      gApp.NonProjectNotes = ""
+      
+      Do Until pStream.EOS
+         wst = pStream.ReadLine
+
+         If Len(wst) = 0 Then Continue Do
+         If Left(wst, 1) = "'" Then Continue Do
+         If Left(wst, 1) = "[" Then Continue Do
+         
+         If Left(wst, 11) = "NOTES-START" Then  
+            bReadingNote = true
+            continue do
+         end if   
+         If Left(wst, 9) = "NOTES-END" Then  
+            bReadingNote = false
+            continue do
+         end if
+         if bReadingNote THEN
+            gApp.NonProjectNotes = gApp.NonProjectNotes + wst + vbcrlf
+            continue do
+         END IF
+
+         i = InStr(wst, "=")
+         If i = 0 Then Continue Do
+         
+         wKey = "": wData = "": nData = 0
+         
+         wKey  = Left(wst, i-1)
+         wData = Mid(wst.wstr, i+1)
+         nData = Val(wData)
+         
+         wData = ProcessFromCurdrive(wData)
+
+
+         If Left(wKey, 9) = "USERTOOL_" Then  ' is this a User Tool entry
+            i = Val(Right(wKey,2))
+            If i > ubound(this.Tools) Then
+               redim preserve this.Tools(i) 
+               this.Tools(i).wszDescription   = AfxStrParse(wData, 1, "|-|")
+               this.Tools(i).wszCommand       = AfxStrParse(wData, 2, "|-|")
+               this.Tools(i).wszParameters    = AfxStrParse(wData, 3, "|-|")
+               this.Tools(i).wszKey           = AfxStrParse(wData, 4, "|-|")
+               this.Tools(i).wszWorkingFolder = AfxStrParse(wData, 5, "|-|")
+               this.Tools(i).IsCtrl           = val(**AfxStrParse(wData, 6, "|-|"))
+               this.Tools(i).IsAlt            = val(**AfxStrParse(wData, 7, "|-|"))
+               this.Tools(i).IsShift          = val(**AfxStrParse(wData, 8, "|-|"))
+               this.Tools(i).IsPromptRun      = val(**AfxStrParse(wData, 9, "|-|"))
+               this.Tools(i).IsMinimized      = val(**AfxStrParse(wData, 10, "|-|"))
+               this.Tools(i).IsWaitFinish     = val(**AfxStrParse(wData, 11, "|-|"))
+               this.Tools(i).IsDisplayMenu    = val(**AfxStrParse(wData, 12, "|-|"))
+               this.Tools(i).Action           = val(**AfxStrParse(wData, 13, "|-|"))
+               Continue Do
+            End If
+         End If
+
+         If Left(wKey, 6) = "BUILD_" Then  ' is this a BUILD entry
+            i = Val(Right(wKey,2))
+            If i > ubound(this.Builds) Then
+               redim preserve this.Builds(i) 
+               this.Builds(i).id             = AfxStrParse(wData, 1, "|-|")
+               this.Builds(i).wszDescription = AfxStrParse(wData, 2, "|-|")
+               this.Builds(i).wszOptions     = AfxStrParse(wData, 3, "|-|")
+               this.Builds(i).IsDefault      = val(**AfxStrParse(wData, 4, "|-|"))
+               this.Builds(i).Is32bit        = val(**AfxStrParse(wData, 5, "|-|"))
+               this.Builds(i).Is64bit        = val(**AfxStrParse(wData, 6, "|-|"))
+               Continue Do
+            End If
+         End If
+
+         If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
+            this.ImportTheme(wst, false)
+            continue do
+         End If
+
+         If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
+            i = Val(Right(wKey,2))
+            If (i >= 0) And (i <= 9) Then 
+               this.MRU(i) = wData
+               Continue Do
+            End If
+         End If
+         
+         If Left(wKey, 11) = "MRUPROJECT_" Then  ' is this an MRU Project entry
+            i = Val(Right(wKey,2))
+            If (i >= 0) And (i <= 9) Then 
+               this.MRUProject(i) = wData
+               Continue Do
+            End If
+         End If
+
+         
+         Select Case **wKey
+            Case "WinFBEversion":        this.WinFBEversion        = wData
+            Case "SelectedTheme":        this.SelectedTheme        = wData
+            Case "AskExit":              this.AskExit              = nData
+            Case "CheckForUpdates":      this.CheckForUpdates      = nData
+            Case "LastUpdateCheck":      this.LastUpdateCheck      = nData
+            Case "HideToolbar":          this.HideToolbar          = nData
+            Case "HideStatusbar":        this.HideStatusbar        = nData
+            Case "MultipleInstances":    this.MultipleInstances    = nData
+            Case "CompileAutosave":      this.CompileAutosave      = nData
+            Case "CloseFuncList":        this.CloseFuncList        = nData
+            Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
+            Case "Codetips":             this.Codetips             = nData
+            Case "AutoComplete":         this.AutoComplete         = nData
+            Case "RightEdge":            this.RightEdge            = nData
+            Case "RightEdgePosition":    this.RightEdgePosition    = wData
+            Case "LeftMargin":           this.LeftMargin           = nData
+            Case "FoldMargin":           this.FoldMargin           = nData
+            Case "AutoIndentation":      this.AutoIndentation      = nData
+            Case "ConfineCaret":         this.ConfineCaret         = nData
+            Case "LineNumbering":        this.LineNumbering        = nData
+            Case "HighlightCurrentLine": this.HighlightCurrentLine = nData
+            Case "IndentGuides":         this.IndentGuides         = nData
+            Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
+            Case "LocalizationFile":     this.LocalizationFile     = wData
+            Case "TabSize":              this.TabSize              = wData
+            Case "UnicodeEncoding":      this.UnicodeEncoding      = nData
+            Case "EditorFontname":       this.EditorFontname       = wData
+            Case "EditorFontsize":       this.EditorFontsize       = wData
+            Case "EditorFontCharSet":    this.EditorFontCharSet    = wData
+            Case "KeywordCase":          this.KeywordCase          = nData
+            Case "StartupLeft":          this.StartupLeft          = nData
+            Case "StartupTop":           this.StartupTop           = nData
+            Case "StartupRight":         this.StartupRight         = nData
+            Case "StartupBottom":        this.StartupBottom        = nData
+            Case "StartupMaximized":     this.StartupMaximized     = nData
+            Case "ShowExplorer":         this.ShowExplorer         = nData
+            Case "ShowExplorerWidth":    this.ShowExplorerWidth    = nData
+            Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
+            Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
+            case "WinFBXPath":           this.WinFBXPath           = wData
+            Case "CompilerSwitches":     this.CompilerSwitches     = wData
+            Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
+            Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
+            Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData
+            case "RunViaCommandWindow":  this.RunViaCommandWindow  = nData
+         End Select
+      
+      Loop
+      pStream.Close
+   end if
    
-   Do Until pStream.EOS
-      wst = pStream.ReadLine
-
-      If Len(wst) = 0 Then Continue Do
-      If Left(wst, 1) = "'" Then Continue Do
-      If Left(wst, 1) = "[" Then Continue Do
-      
-      If Left(wst, 11) = "NOTES-START" Then  
-         bReadingNote = true
-         continue do
-      end if   
-      If Left(wst, 9) = "NOTES-END" Then  
-         bReadingNote = false
-         continue do
-      end if
-      if bReadingNote THEN
-         gApp.NonProjectNotes = gApp.NonProjectNotes + wst + vbcrlf
-         continue do
-      END IF
-
-      i = InStr(wst, "=")
-      If i = 0 Then Continue Do
-      
-      wKey = "": wData = "": nData = 0
-      
-      wKey  = Left(wst, i-1)
-      wData = Mid(wst.wstr, i+1)
-      nData = Val(wData)
-      
-      wData = ProcessFromCurdrive(wData)
-
-
-      If Left(wKey, 9) = "USERTOOL_" Then  ' is this a User Tool entry
-         i = Val(Right(wKey,2))
-         If i > ubound(this.Tools) Then
-            redim preserve this.Tools(i) 
-            this.Tools(i).wszDescription   = AfxStrParse(wData, 1, "|-|")
-            this.Tools(i).wszCommand       = AfxStrParse(wData, 2, "|-|")
-            this.Tools(i).wszParameters    = AfxStrParse(wData, 3, "|-|")
-            this.Tools(i).wszKey           = AfxStrParse(wData, 4, "|-|")
-            this.Tools(i).wszWorkingFolder = AfxStrParse(wData, 5, "|-|")
-            this.Tools(i).IsCtrl           = val(**AfxStrParse(wData, 6, "|-|"))
-            this.Tools(i).IsAlt            = val(**AfxStrParse(wData, 7, "|-|"))
-            this.Tools(i).IsShift          = val(**AfxStrParse(wData, 8, "|-|"))
-            this.Tools(i).IsPromptRun      = val(**AfxStrParse(wData, 9, "|-|"))
-            this.Tools(i).IsMinimized      = val(**AfxStrParse(wData, 10, "|-|"))
-            this.Tools(i).IsWaitFinish     = val(**AfxStrParse(wData, 11, "|-|"))
-            this.Tools(i).IsDisplayMenu    = val(**AfxStrParse(wData, 12, "|-|"))
-            this.Tools(i).Action           = val(**AfxStrParse(wData, 13, "|-|"))
-            Continue Do
-         End If
-      End If
-
-      If Left(wKey, 6) = "BUILD_" Then  ' is this a BUILD entry
-         i = Val(Right(wKey,2))
-         If i > ubound(this.Builds) Then
-            redim preserve this.Builds(i) 
-            this.Builds(i).id             = AfxStrParse(wData, 1, "|-|")
-            this.Builds(i).wszDescription = AfxStrParse(wData, 2, "|-|")
-            this.Builds(i).wszOptions     = AfxStrParse(wData, 3, "|-|")
-            this.Builds(i).IsDefault      = val(**AfxStrParse(wData, 4, "|-|"))
-            this.Builds(i).Is32bit        = val(**AfxStrParse(wData, 5, "|-|"))
-            this.Builds(i).Is64bit        = val(**AfxStrParse(wData, 6, "|-|"))
-            Continue Do
-         End If
-      End If
-
-      If Left(wKey, 6) = "THEME_" Then  ' is this a THEME entry
-         this.ImportTheme(wst, false)
-         continue do
-      End If
-
-      If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
-         i = Val(Right(wKey,2))
-         If (i >= 0) And (i <= 9) Then 
-            this.MRU(i) = wData
-            Continue Do
-         End If
-      End If
-      
-      If Left(wKey, 11) = "MRUPROJECT_" Then  ' is this an MRU Project entry
-         i = Val(Right(wKey,2))
-         If (i >= 0) And (i <= 9) Then 
-            this.MRUProject(i) = wData
-            Continue Do
-         End If
-      End If
-
-      
-      Select Case **wKey
-         Case "WinFBEversion":        this.WinFBEversion        = wData
-         Case "SelectedTheme":        this.SelectedTheme        = wData
-         Case "AskExit":              this.AskExit              = nData
-         Case "HideToolbar":          this.HideToolbar          = nData
-         Case "HideStatusbar":        this.HideStatusbar        = nData
-         Case "MultipleInstances":    this.MultipleInstances    = nData
-         Case "CompileAutosave":      this.CompileAutosave      = nData
-         Case "CloseFuncList":        this.CloseFuncList        = nData
-         Case "SyntaxHighlighting":   this.SyntaxHighlighting   = nData
-         Case "Codetips":             this.Codetips             = nData
-         Case "AutoComplete":         this.AutoComplete         = nData
-         Case "RightEdge":            this.RightEdge            = nData
-         Case "RightEdgePosition":    this.RightEdgePosition    = wData
-         Case "LeftMargin":           this.LeftMargin           = nData
-         Case "FoldMargin":           this.FoldMargin           = nData
-         Case "AutoIndentation":      this.AutoIndentation      = nData
-         Case "ConfineCaret":         this.ConfineCaret         = nData
-         Case "LineNumbering":        this.LineNumbering        = nData
-         Case "HighlightCurrentLine": this.HighlightCurrentLine = nData
-         Case "IndentGuides":         this.IndentGuides         = nData
-         Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
-         Case "LocalizationFile":     this.LocalizationFile     = wData
-         Case "TabSize":              this.TabSize              = wData
-         Case "UnicodeEncoding":      this.UnicodeEncoding      = nData
-         Case "EditorFontname":       this.EditorFontname       = wData
-         Case "EditorFontsize":       this.EditorFontsize       = wData
-         Case "EditorFontCharSet":    this.EditorFontCharSet    = wData
-         Case "KeywordCase":          this.KeywordCase          = nData
-         Case "StartupLeft":          this.StartupLeft          = nData
-         Case "StartupTop":           this.StartupTop           = nData
-         Case "StartupRight":         this.StartupRight         = nData
-         Case "StartupBottom":        this.StartupBottom        = nData
-         Case "StartupMaximized":     this.StartupMaximized     = nData
-         Case "ShowExplorer":         this.ShowExplorer         = nData
-         Case "ShowExplorerWidth":    this.ShowExplorerWidth    = nData
-         Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
-         Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
-         case "WinFBXPath":           this.WinFBXPath           = wData
-         Case "CompilerSwitches":     this.CompilerSwitches     = wData
-         Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
-         Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
-         Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData
-         case "RunViaCommandWindow":  this.RunViaCommandWindow  = nData
-      End Select
-   
-   Loop
-   pStream.Close
-   
+   ' Set some defaults if the config file was missing or corrupt
    ' If no builds exist then create some default ones...
    if ubound(this.Builds) = -1 THEN
       redim this.Builds(11) 

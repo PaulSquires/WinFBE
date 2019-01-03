@@ -38,7 +38,6 @@
 #Include Once "Afx\CImageCtx.inc"
 #Include Once "Afx\CAxHost\CWebCtx.inc"
 #Include Once "Afx\CWinHttpRequest.inc"
-#Include Once "Afx\CStream.inc"
 
 Using Afx
 
@@ -46,6 +45,7 @@ Using Afx
 #Define APPNAME        WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT   WStr("WinFBE")
 #Define APPVERSION     WStr("1.8.8") 
+#Define APPCOPYRIGHT   WStr("Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software") 
 
 
 #ifdef __FB_64BIT__
@@ -94,6 +94,7 @@ Using Afx
 #Include Once "modGenerateCode.inc"
 #Include Once "modCheckForUpdate.inc"
 
+#Include Once "frmAbout.inc" 
 #Include Once "frmImageManager.inc" 
 #Include Once "frmRecent.inc" 
 #Include Once "frmExplorer.inc" 

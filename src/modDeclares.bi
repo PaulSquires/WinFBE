@@ -52,6 +52,7 @@
 #Define IDC_FRMOPTIONSGENERAL_CHKASKEXIT            1004
 #Define IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR        1005
 #Define IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR      1006
+#Define IDC_FRMOPTIONSGENERAL_CHKUPDATES            1007
 
 #Define IDC_FRMOPTIONSEDITOR_LBLTABSIZE             1000
 #Define IDC_FRMOPTIONSEDITOR_TXTTABSIZE             1001
@@ -324,6 +325,12 @@
 #DEFINE IDC_FRMSNIPPETS_CMDDELETE                   1011
 #DEFINE IDC_FRMSNIPPETS_CMDOK                       1012
 
+#Define IDC_FRMABOUT_LBLAPPNAME                     1000
+#Define IDC_FRMABOUT_LBLAPPVERSION                  1001
+#Define IDC_FRMABOUT_LBLAPPCOPYRIGHT                1002
+#Define IDC_FRMABOUT_CMDUPDATES                     1003
+#Define IDC_FRMABOUT_IMAGE1                         1004
+
 #Define IDC_LBLFAKEMAINMENU                         1000
 
 #Define IsFalse(e) ( Not CBool(e) )
@@ -466,6 +473,7 @@ Enum
    MSG_USER_SETCOLORCUSTOM
    MSG_USER_GETCOLORCUSTOM
    MSG_USER_PROCESS_COMMANDLINE 
+   MSG_USER_PROCESS_UPDATECHECK
    MSG_USER_SHOWAUTOCOMPLETE
    MSG_USER_APPENDEQUALSSIGN
    MSG_USER_GENERATECODE
@@ -1101,6 +1109,8 @@ Type clsConfig
       FBKeywords           As String
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
       AskExit              As Long = false         ' use Long so True/False string not written to file
+      CheckForUpdates      As Long = True
+      LastUpdateCheck      as long = 0             ' Julian date of last update check
       HideToolbar          as long = false
       HideStatusbar        as long = false
       CloseFuncList        As Long = True
