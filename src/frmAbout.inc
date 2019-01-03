@@ -36,7 +36,7 @@ Function frmAbout_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl 
    Select Case id
       Case IDC_FRMABOUT_CMDUPDATES
          If codeNotify = BN_CLICKED Then
-            DoCheckForUpdates
+            DoCheckForUpdates( hwnd, false )
          End If
    End Select
 
@@ -99,40 +99,35 @@ Function frmAbout_Show( ByVal hWndParent As HWnd, _
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowPtr(hwndParent)->DPI
 
-   ' Add an image control                                                         
-   DIM pImageCtx AS CImageCtx = CImageCtx(pWindow, IDC_FRMIMAGEMANAGER_IMAGECTX, , 30, 30, 100, 100)
-   pImageCtx.LoadImageFromResource( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON" )
-
 
    pWindow->Create( hWndParent, L(74,"About"), @frmAbout_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT )
-   pWindow->SetClientSize(625, 460)
+   pWindow->SetClientSize(580, 280)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
+   ' Add an image control                                                         
+   DIM pImageCtx AS CImageCtx = CImageCtx(pWindow, IDC_FRMABOUT_IMAGE1, , 60, 50, 100, 100)
+   pImageCtx.LoadImageFromResource( pWindow->InstanceHandle, "IMAGE_WINFBE" )
+
    Dim As HWnd hLabel = _
-      pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPNAME, APPNAME, 210, 30, 400, 30, _
-           WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_CENTERIMAGE Or SS_NOTIFY, _
-           WS_EX_LEFT Or WS_EX_LTRREADING)
+      pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPNAME, APPNAME, 200, 40, 400, 30, _
+           WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_CENTERIMAGE Or SS_NOTIFY, WS_EX_LEFT Or WS_EX_LTRREADING)
    Dim As HFONT hFont = pWindow->CreateFont("", 12, FW_BOLD)
    AfxSetWindowFont hLabel, hFont, True
 
-   pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPVERSION, _
-        "Version " & APPVERSION & APPBITS, 210, 75, 200, 20, _
-        WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPVERSION, "Version " & APPVERSION & APPBITS, 200, 71, 200, 20, _
+        WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPCOPYRIGHT, _
-        APPCOPYRIGHT, 210, 90, 300, 20, _
-        WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPCOPYRIGHT, APPCOPYRIGHT, 200, 115, 370, 20, _
+        WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("BUTTON", , IDC_FRMABOUT_CMDUPDATES, L(91,"Check for Updates"), 210, 140, 200, 28, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLJOSE, "Special thanks to: José Roca (WinFBX Framework)", _
+        200, 131, 300, 20, WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   pWindow->AddControl("BUTTON", , IDC_FRMABOUT_CMDUPDATES, L(91,"Check for Updates"), 200, 180, 200, 28, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, WS_EX_LEFT Or WS_EX_LTRREADING)
     
-'                       "Special thanks to:" & vbcrlf & _
-'                       "José Roca (WinFBX Framework)", _
 
    ' Process Windows messages
    Function = pWindow->DoEvents(SW_SHOW)

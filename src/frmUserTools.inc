@@ -163,23 +163,26 @@ Function CreateUserTools_AcceleratorTable() As Long
    dim NumKeys  As Long
    dim nKey     As Long
    dim fVirt    As Long
-   dim nEnabled as long = MF_GRAYED
      
    If ghAccelUserTools Then DestroyAcceleratorTable(ghAccelUserTools)
    Dim a(any) As ACCEL
       
    dim as HMENU hPopUpMenu = CreatePopupMenu
    
-   ' Delete the existing Tools top menu and reinsert making it enabled only
-   ' if one or more Tools are designated to display in the top menu.
+   ' If at least one Tool exists that needs to be displayed in the top menu
+   ' then add a separator bar between the "User Tools" menu option and the 
+   ' actual list of tools.
    DeleteMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION)
+   InsertMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION or MF_POPUP, _
+               Cast(UINT_PTR, hPopUpMenu), L(305,"Tools"))
+   AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
+   
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
       if gConfig.Tools(y).IsDisplayMenu then
-         nEnabled = MF_ENABLED: exit for
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         exit for
       end if   
    NEXT
-   InsertMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION, MF_BYPOSITION or MF_POPUP Or nEnabled, _
-               Cast(UINT_PTR, hPopUpMenu), L(305,"Tools"))
    
    dim as HMENU hToolsMenu = GetSubMenu(HWND_FRMMAIN_TOPMENU, TOOLS_MENU_POSITION)
 

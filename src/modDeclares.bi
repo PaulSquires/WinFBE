@@ -330,6 +330,7 @@
 #Define IDC_FRMABOUT_LBLAPPCOPYRIGHT                1002
 #Define IDC_FRMABOUT_CMDUPDATES                     1003
 #Define IDC_FRMABOUT_IMAGE1                         1004
+#Define IDC_FRMABOUT_LBLJOSE                        1005
 
 #Define IDC_LBLFAKEMAINMENU                         1000
 

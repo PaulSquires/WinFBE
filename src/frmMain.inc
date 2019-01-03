@@ -1171,7 +1171,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
 
       case IDM_CHECKFORUPDATES
          DisableAllModeless()
-         DoCheckForUpdates
+         DoCheckForUpdates( hwnd, false )
          EnableAllModeless()
          
       Case IDM_ABOUT
@@ -1870,7 +1870,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          if gConfig.CheckForUpdates then
             dim as long curJulian = JulianDateNow
             if gConfig.LastUpdateCheck <> curJulian then
-               DoCheckForUpdates( true )  ' no messages if up to date
+               DoCheckForUpdates( hwnd, true )  ' no messages if up to date
             end if
             ' Save the config file so that other editor instances will not also do update checks again
             gConfig.LastUpdateCheck = curJulian

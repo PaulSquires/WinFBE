@@ -157,7 +157,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"Options")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..."
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDCONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
+'         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERSNIPPETS, L(88,"User Snippets") & "..." & Chr(9) & "Ctrl+Shift+F7"
 
    hPopUpMenu = CreatePopupMenu
@@ -195,6 +195,7 @@ Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
 
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(305,"Tools")
+      AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(73,"Help")

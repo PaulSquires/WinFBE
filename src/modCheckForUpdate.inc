@@ -19,7 +19,9 @@
 ''  the latest WinFBE version number. If an update exists then ask the user
 ''  if they wish to navigate to the Releases page on GitHub.
 ''
-function DoCheckForUpdates( byval bSilentCheck as Boolean = false ) as long
+function DoCheckForUpdates( byval hWndParent as hwnd, _
+                            byval bSilentCheck as Boolean = false _
+                            ) as long
    
    dim as CWSTR wszServerFile = "winfbe_version.txt"
    dim as CWSTR wszFilename
@@ -65,7 +67,7 @@ function DoCheckForUpdates( byval bSilentCheck as Boolean = false ) as long
       AfxDeleteFile( wszFilename ) 
    else
       if bSilentCheck = false then      
-         MessageBox( HWND_FRMMAIN, _
+         MessageBox( hWndParent, _
                      L(92,"Failed to retrieve update information"), _
                      L(94,"Software Update"), _
                      MB_ICONINFORMATION Or MB_OK )
@@ -85,7 +87,7 @@ function DoCheckForUpdates( byval bSilentCheck as Boolean = false ) as long
          if bSilentCheck = false then      
             wszMsg = L(96,"You are up to date!") & vbcrlf & _
                      "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
-            MessageBox( HWND_FRMMAIN, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
+            MessageBox( hWndParent, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
          end if
          exit function
       
@@ -95,7 +97,7 @@ function DoCheckForUpdates( byval bSilentCheck as Boolean = false ) as long
                   L(99,"Current") & ": " & APPVERSION & vbcrlf & _
                   L(107,"Available") & ": " & wszLatestVersion & vbcrlf & vbcrlf & _
                   L(137,"Do you wish to visit the download website?")
-         If MessageBox( HWND_FRMMAIN, wszMsg, L(94,"Software Update"), MB_ICONQUESTION Or MB_YESNOCANCEL ) = IDYES Then 
+         If MessageBox( hWndParent, wszMsg, L(94,"Software Update"), MB_ICONQUESTION Or MB_YESNOCANCEL ) = IDYES Then 
             ShellExecute( NULL, "open", "https://github.com/PaulSquires/WinFBE/releases", Null, Null, SW_SHOWNORMAL )
          end if
          exit function
