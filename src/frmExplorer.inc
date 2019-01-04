@@ -11,12 +11,25 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-DIM shared pBtnExplorerClose AS CImageCtx ptr
+
+''
+''  frmExplorer.inc
+''   
+''  This is the left hand side panel that houses the Explorer treeview listing all of
+''  the project files. When no project open or files to show, then the Explorer will
+''  the Open/Recent treeviews.
+''
+
+#include once "frmExplorer.bi"
+#include once "frmRecent.bi"
+#include once "clsDocument.bi"
+#include once "clsDB2.bi"
+
 
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    If pWindow = 0 Then Exit Function
@@ -49,7 +62,7 @@ Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
       ' If no project open then show Recent dialog
       if gApp.GetDocumentCount = 0 then
          ' Ensure that the Recent lists are the most current
-         If IsWindowVisible(HWND_FRMRECENT) = 0 Then LoadRecentFilesTreeview(HWND_FRMRECENT)
+         If IsWindowVisible(HWND_FRMRECENT) = 0 Then frmRecent_LoadTreeview(HWND_FRMRECENT)
          ShowWindow hTree, SW_HIDE
          ShowWindow HWND_FRMRECENT, SW_SHOW
       else
@@ -71,7 +84,9 @@ End Function
 ' ========================================================================================
 ' Add the names of all subs/functions belonging to this document to the Explorer treeview
 ' ========================================================================================
-Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fUpdateNodes As BOOLEAN ) As Long
+private Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
+                                                 ByVal fUpdateNodes As BOOLEAN _
+                                                 ) As Long
  
    If pDoc = 0 Then Exit Function
    
@@ -131,7 +146,11 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmExplorer
 ' ========================================================================================
-Function frmExplorer_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmExplorer_OnSize( ByVal HWnd As HWnd, _
+                                     ByVal state As UINT, _
+                                     ByVal cx As Long, _
+                                     ByVal cy As Long _
+                                     ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
       PositionExplorerWindows(HWnd)
@@ -143,7 +162,10 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmExplorer
 ' ========================================================================================
-Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
+                                       ByVal id As Long, _
+                                       ByVal pNMHDR As NMHDR Ptr _
+                                       ) As LRESULT
  
    Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
    Dim As HTREEITEM hItem
@@ -212,34 +234,6 @@ Function frmExplorer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR
             end if
          end if
          
-'      Case NM_CUSTOMDRAW
-'         Dim tvcd As NMTVCUSTOMDRAW Ptr = Cast(NMTVCUSTOMDRAW Ptr, pNMHDR)
-
-'         Select Case tvcd->nmcd.dwDrawStage
-'            Case CDDS_PREPAINT
-'               Return CDRF_NOTIFYITEMDRAW 
-
-'            Case CDDS_ITEMPREPAINT 
-'               Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(hWnd, id))
-'               SelectFont(tvcd->nmcd.hdc, hFont)
-''               If (tvcd->nmcd.uItemState And ODS_SELECTED) And (GetFocus() = tvcd->nmcd.hdr.hwndFrom) Then
-''                  tvcd->clrTextBk = gTheme.exlistbox_selected_active_bg
-''                  tvcd->clrText   = gTheme.exlistbox_selected_active_fg
-''               ElseIf (tvcd->nmcd.uItemState And ODS_SELECTED) Then
-''                  tvcd->clrTextBk = gTheme.exlistbox_selected_inactive_bg
-''                  tvcd->clrText   = gTheme.exlistbox_selected_inactive_fg
-''               ElseIf (tvcd->nmcd.uItemState And CDIS_HOT) Then
-''                  tvcd->clrTextBk = gTheme.exlistbox_hot_bg
-''                  tvcd->clrText   = gTheme.exlistbox_hot_fg
-''               Else
-'                  tvcd->clrText   = gConfig.Themes(gConfig.idxTheme).colors(CLR_PANELTEXT).nFg
-'                  tvcd->clrTextBk = gConfig.Themes(gConfig.idxTheme).colors(CLR_PANELTEXT).nBg
-''               End If
-                                    
-'               Return CDRF_NEWFONT 
-'
-'         End Select
-
    End Select
  
    Function = 0
@@ -249,10 +243,10 @@ End Function
 ' ========================================================================================
 ' Retrieve the filename and function name of the specified Treeview node
 ' ========================================================================================
-function frmExplorer_GetFileNameFunctionName( byval hItem as HTREEITEM, _
-                                              byref wszFilename as CWSTR, _
-                                              byref wszFunctionName as CWSTR _
-                                              ) as long
+private function frmExplorer_GetFileNameFunctionName( byval hItem as HTREEITEM, _
+                                                      byref wszFilename as CWSTR, _
+                                                      byref wszFunctionName as CWSTR _
+                                                      ) as long
 
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    Dim pDoc As clsDocument Ptr
@@ -288,7 +282,7 @@ end function
 ' ========================================================================================
 ' Processes messages for the subclassed frmExplorer treeview control.
 ' ========================================================================================
-Function frmExplorer_Tree_SubclassProc ( _
+private Function frmExplorer_Tree_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -347,7 +341,7 @@ End Function
 ' ========================================================================================
 ' Process WM_PAINT message for window/dialog: frmExplorer
 ' ========================================================================================
-Function frmExplorer_OnPaint( ByVal HWnd As HWnd) As LRESULT
+private Function frmExplorer_OnPaint( ByVal HWnd As HWnd ) As LRESULT
             
    Dim As PAINTSTRUCT ps
    Dim As HPEN hPen
@@ -381,30 +375,31 @@ End Function
 ' ========================================================================================
 ' frmExplorer Window procedure
 ' ========================================================================================
-Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
-                              ByVal uMsg   As UINT, _
-                              ByVal wParam As WPARAM, _
-                              ByVal lParam As LPARAM _
-                              ) As LRESULT
+private Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
+                                      ByVal uMsg   As UINT, _
+                                      ByVal wParam As WPARAM, _
+                                      ByVal lParam As LPARAM _
+                                      ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_SIZE,    frmExplorer_OnSize)
       HANDLE_MSG (HWnd, WM_NOTIFY,  frmExplorer_OnNotify)
       HANDLE_MSG (HWnd, WM_PAINT,   frmExplorer_OnPaint)
    
-      case WM_DESTROY
-         Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
-         dim as HFONT hFont = AfxGetWindowFont(hTree)
-         if pBtnExplorerClose then delete pBtnExplorerClose
-         DeleteFont(hFont)
-         
-      case WM_ERASEBKGND
-         return true
+   case WM_DESTROY
+      Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
+      dim as HFONT hFont = AfxGetWindowFont(hTree)
+      DIM pImageCtx AS CImageCtx ptr = AfxCImageCtxPtr(hwnd, IDC_FRMEXPLORER_BTNCLOSE)
+      if pImageCtx then delete pImageCtx
+      DeleteFont(hFont)
+      
+   case WM_ERASEBKGND
+      return true
 
-      case WM_CTLCOLORSTATIC
-         ' Background color for the Explorer label
-         SetBkColor Cast(HDC,wParam), GetSysColor(COLOR_BTNFACE)
-         return Cast( LRESULT, GetSysColorBrush(COLOR_BTNFACE))
+   case WM_CTLCOLORSTATIC
+      ' Background color for the Explorer label
+      SetBkColor Cast(HDC,wParam), GetSysColor(COLOR_BTNFACE)
+      return Cast( LRESULT, GetSysColorBrush(COLOR_BTNFACE))
 
    End Select
 
@@ -417,7 +412,7 @@ End Function
 ' ========================================================================================
 ' frmExplorer_Show
 ' ========================================================================================
-Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
+public Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -432,22 +427,21 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         WS_CHILD Or iif(gConfig.ShowExplorer, WS_VISIBLE, 0) Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-
    ' Disable background erasing by only assigning the one style
    pWindow->ClassStyle = CS_DBLCLKS
    pWindow->SetFont( "Segoe UI Semibold", 9)
-   'pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    Dim As HWnd hBtn = _
    pWindow->AddControl("LABEL", , IDC_FRMEXPLORER_LBLEXPLORER, L(247,"EXPLORER"), 10, 12, 75, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pBtnExplorerClose = new CImageCtx(pWindow, IDC_FRMEXPLORER_BTNCLOSE, "", 0, 0, 16, 16)
-   pBtnExplorerClose->SetBkColor(GetSysColor(COLOR_BTNFACE))
-   pBtnExplorerClose->SetBkColorHot(GetSysColor(COLOR_BTNHIGHLIGHT))
-   pBtnExplorerClose->LoadImageFromResource (pWindow->InstanceHandle, wstr("IMAGE_CLOSE"))
-   AfxAddTooltip(pBtnExplorerClose->hWindow, L(161, "Close"))
+   DIM pImageCtx AS CImageCtx ptr
+   pImageCtx = new CImageCtx(pWindow, IDC_FRMEXPLORER_BTNCLOSE, "", 0, 0, 16, 16)
+   pImageCtx->SetBkColor(GetSysColor(COLOR_BTNFACE))
+   pImageCtx->SetBkColorHot(GetSysColor(COLOR_BTNHIGHLIGHT))
+   pImageCtx->LoadImageFromResource (pWindow->InstanceHandle, wstr("IMAGE_CLOSE"))
+   AfxAddTooltip(pImageCtx->hWindow, L(161, "Close"))
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
@@ -470,7 +464,6 @@ Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
-'   SendMessage( hTree, TVM_SETITEMHEIGHT, pWindow->ScaleY(20), 0 )
    SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
 
    PositionExplorerWindows(HWND_FRMEXPLORER)

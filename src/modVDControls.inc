@@ -11,6 +11,8 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmMenuEditor.bi"
+
 
 ' ========================================================================================
 ' Respond to keyboard input and move selected controls by 1 pixel 

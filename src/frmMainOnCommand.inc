@@ -11,11 +11,19 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmMainOnCommand.bi"
+
+#include once "frmOutput.bi"
+#include once "clsApp.bi"
+#include once "clsDocument.bi"
+
 
 ' ========================================================================================
 ' Save project file to disk
 ' ========================================================================================
-Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
+private Function OnCommand_ProjectSave( byval HWnd As HWnd, _
+                                        ByVal bSaveAs As BOOLEAN = False _
+                                        ) As LRESULT
    ' Save all dirty files
    OnCommand_FileSaveAll( HWnd )
    
@@ -31,7 +39,7 @@ End Function
 ' ========================================================================================
 ' Close currently active project
 ' ========================================================================================
-Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
+private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 
    ' Save the project configuration to disk and any dirty files
    ' Do the actual saving to disk of the Project file
@@ -84,10 +92,10 @@ End Function
 ' ========================================================================================
 ' Create a new project
 ' ========================================================================================
-Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
+private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 
    ' Ensure that the Project Manager window has been created (show it now as well)
-   frmProjectOptions_Show( HWnd, SW_SHOW, true ) 
+   frmProjectOptions_Show( HWnd, true ) 
    
    PositionExplorerWindows(HWND_FRMEXPLORER)
    frmMain_PositionWindows(HWND_FRMMAIN)
@@ -102,7 +110,7 @@ End Function
 ' ========================================================================================
 ' Open a Project
 ' ========================================================================================
-Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
+private Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
 
    ' Display the Open File Dialog
    Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, IDM_PROJECTOPEN)
@@ -119,7 +127,7 @@ End Function
 ' ========================================================================================
 ' Create a new visual designer window
 ' ========================================================================================
-Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
+private Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
    frmMain_OpenFileSafely(HWnd, _
                            True,  _   ' bIsNewFile
                            False, _   ' bIsTemplate
@@ -135,7 +143,9 @@ End Function
 ' ========================================================================================
 ' Align controls on the form
 ' ========================================================================================
-function OnCommand_DesignerAlign( byval HWND as HWND, byval id as long) as LRESULT
+private function OnCommand_DesignerAlign( byval HWND as HWND, _
+                                          byval id as long _
+                                          ) as LRESULT
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc = 0 THEN exit function
@@ -208,7 +218,9 @@ end function
 ' ========================================================================================
 ' Center controls on the form
 ' ========================================================================================
-function OnCommand_DesignerCenter( byval HWND as HWND, byval id as long) as LRESULT
+private function OnCommand_DesignerCenter( byval HWND as HWND, _
+                                           byval id as long _
+                                           ) as LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    If pWindow = 0 Then Exit Function
@@ -283,7 +295,7 @@ end function
 ' ========================================================================================
 ' Create a new editing window
 ' ========================================================================================
-Function OnCommand_FileNew( ByVal HWnd As HWnd ) As clsDocument ptr
+private Function OnCommand_FileNew( ByVal HWnd As HWnd ) As clsDocument ptr
    function = frmMain_OpenFileSafely(HWnd, _
                                      True,  _   ' bIsNewFile
                                      False, _   ' bIsTemplate
@@ -297,7 +309,9 @@ End Function
 ' ========================================================================================
 ' Open one or more files for editing
 ' ========================================================================================
-Function OnCommand_FileOpen( ByVal HWnd As HWnd, byval bShowInTab as Boolean = true ) As LRESULT
+private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
+                                     byval bShowInTab as Boolean = true _
+                                     ) As LRESULT
 
    dim pDoc as clsDocument ptr
    
@@ -380,25 +394,11 @@ End Function
 
 
 ' ========================================================================================
-' Open #Include file that was selected from the right click popup menu
-' ========================================================================================
-Function OnCommand_OpenIncludeFile( ByVal HWnd As HWnd ) As LRESULT
-   frmMain_OpenFileSafely(HWnd, _
-                           False, _    ' bIsNewFile
-                           False, _    ' bIsTemplate
-                           True,  _    ' bShowInTab
-                           true, _     ' bIsInclude
-                           gApp.IncludeFilename, _ ' pwszName
-                           0 )         ' pDocIn
-   gApp.IncludeFilename = ""
-   Function = 0
-End Function
-
-
-' ========================================================================================
 ' Save current active file to disk
 ' ========================================================================================
-Function OnCommand_FileSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False) As LRESULT
+private Function OnCommand_FileSave( ByVal HWnd As HWnd, _
+                                     ByVal bSaveAs As BOOLEAN = False _
+                                     ) As LRESULT
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then Return 0
@@ -436,8 +436,8 @@ End Function
 
 ' ========================================================================================
 ' Save Sub/Function Declares to disk
-Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 ' ========================================================================================
+private Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 
    dim as CWSTR wszFilename 
    
@@ -493,7 +493,7 @@ End Function
 ' ========================================================================================
 ' Save all open files to disk
 ' ========================================================================================
-Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
+private Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
 
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    If nCount = 0 Then Exit Function
@@ -541,9 +541,9 @@ End Function
 ' ========================================================================================
 ' Close current (or all) open file(s)
 ' ========================================================================================
-Function OnCommand_FileClose( ByVal HWnd As HWnd, _
-                              ByVal veFileClose As eFileClose = EFC_CLOSECURRENT _
-                              ) As LRESULT
+private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
+                                      ByVal veFileClose As eFileClose = EFC_CLOSECURRENT _
+                                      ) As LRESULT
 
    Dim wText As WString * MAX_PATH  
    Dim pDoc As clsDocument Ptr
@@ -620,7 +620,7 @@ Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    gTTabCtl.SetFocusTab(nCurSel)
       
    ' Update the TODO listview in the frmOutput form
-   UpdateToDoListview
+   frmOutput_UpdateToDoListview
    
    frmMain_PositionWindows(HWnd)
    PositionExplorerWindows(HWND_FRMEXPLORER)

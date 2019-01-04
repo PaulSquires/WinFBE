@@ -11,11 +11,15 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modCommandLine.bi"
+
 
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmCommandLine
 ' ========================================================================================
-Function frmCommandLine_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmCommandLine_OnCreate( ByVal HWnd As HWnd, _
+                                          ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                          ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -31,7 +35,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmCommandLine
 ' ========================================================================================
-Function frmCommandLine_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmCommandLine_OnCommand( ByVal HWnd As HWnd, _
+                                           ByVal id As Long, _
+                                           ByVal hwndCtl As HWnd, _
+                                           ByVal codeNotify As UINT _
+                                           ) As LRESULT
 
    Select Case id
       Case IDOK
@@ -62,7 +70,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmCommandLine
 ' ========================================================================================
-Function frmCommandLine_OnClose(HWnd As HWnd) As LRESULT
+private Function frmCommandLine_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -73,7 +81,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmCommandLine
 ' ========================================================================================
-Function frmCommandLine_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmCommandLine_OnDestroy( byval HWnd As HWnd ) As LRESULT
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -82,11 +90,11 @@ End Function
 ' ========================================================================================
 ' frmCommandLine Window procedure
 ' ========================================================================================
-Function frmCommandLine_WndProc( ByVal HWnd   As HWnd, _
-                             ByVal uMsg   As UINT, _
-                             ByVal wParam As WPARAM, _
-                             ByVal lParam As LPARAM _
-                             ) As LRESULT
+private Function frmCommandLine_WndProc( ByVal HWnd   As HWnd, _
+                                         ByVal uMsg   As UINT, _
+                                         ByVal wParam As WPARAM, _
+                                         ByVal lParam As LPARAM _
+                                         ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmCommandLine_OnCreate)
@@ -95,7 +103,6 @@ Function frmCommandLine_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND,  frmCommandLine_OnCommand)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -104,9 +111,7 @@ End Function
 ' ========================================================================================
 ' frmCommandLine_Show
 ' ========================================================================================
-Function frmCommandLine_Show( ByVal hWndParent As HWnd, _
-                              ByVal nCmdShow   As Long = 0 _
-                              ) As Long
+public Function frmCommandLine_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

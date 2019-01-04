@@ -67,6 +67,10 @@
 '
 ' 
 
+#include once "clsDB2.bi"
+#include once "clsParser.bi"
+
+
 ''
 ''
 constructor clsDB2
@@ -86,15 +90,16 @@ constructor clsDB2
                 "Double|String|WString|ZString"
    for i as long = 1 to nCount
       parser.typeName = AfxStrParse(wszMainStr, i, "|")
-      this.dbAdd(parser, DB2_STANDARDDATATYPE)  
+      this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
    next
    this.dbRewind
 end constructor    
 
+
 ''
 ''
-function clsDB2.dbAdd( byref parser as clsParser, _
-                       byref id as long _
+function clsDB2.dbAdd( byval parser as clsParser ptr, _
+                       byval id as long _
                        ) as DB2_DATA ptr
    
    dim as long nSlot = -1
@@ -104,50 +109,50 @@ function clsDB2.dbAdd( byref parser as clsParser, _
    with db
       .deleted      = false
       .id           = id                ' the type of database record that we are storing
-      .nLineNum     = parser.lineNum
-      .fileName     = parser.fileName
+      .nLineNum     = parser->lineNum
+      .fileName     = parser->fileName
       
       select CASE id
          case DB2_STANDARDDATATYPE
-            .ElementName  = parser.typeName
-            .ElementValue = parser.typeName
-            .IsWinApi     = parser.IsWinApi
+            .ElementName  = parser->typeName
+            .ElementValue = parser->typeName
+            .IsWinApi     = parser->IsWinApi
             if .ElementName = "" then exit function
             
          case DB2_TYPE    ' this handles ENUM also
             ' If the type has already been added skip adding it again. 
-            if this.dbFindTYPE( parser.typeName) then return 0
-            .nLineNum     = parser.funcLineNum
-            .ElementName  = parser.typeName
-            .ElementValue = parser.typeAlias     ' same as typeName unless it was an ALIAS (always search using this name)
-            .IsWinApi     = parser.IsWinApi
-            .IsEnum       = parser.IsEnum
-            .TypeExtends  = parser.TypeExtends
+            if this.dbFindTYPE( parser->typeName) then return 0
+            .nLineNum     = parser->funcLineNum
+            .ElementName  = parser->typeName
+            .ElementValue = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
+            .IsWinApi     = parser->IsWinApi
+            .IsEnum       = parser->IsEnum
+            .TypeExtends  = parser->TypeExtends
             if .ElementName = "" then exit function
          
          case DB2_TODO
             .ElementName  = ""
-            .ElementValue = parser.todoText
+            .ElementValue = parser->todoText
          
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
-            .nLineNum     = parser.funcLineNum
-            .ElementName  = parser.funcName
-            .ElementValue = parser.funcParams   ' Calltip
-            .IsWinApi     = parser.IsWinApi
+            .nLineNum     = parser->funcLineNum
+            .ElementName  = parser->funcName
+            .ElementValue = parser->funcParams   ' Calltip
+            .IsWinApi     = parser->IsWinApi
             if .ElementName = "" then exit function
          
          case DB2_VARIABLE
             ' Variables are always in the format:
             ' <OwnerName>.<FunctionName>.<VariableName>
-            if instr(parser.funcName, ".") = 0 then
-               .ElementName = parser.typeName & "." & parser.funcName & "." & parser.varName
+            if instr(parser->funcName, ".") = 0 then
+               .ElementName = parser->typeName & "." & parser->funcName & "." & parser->varName
             Else
                ' funcName is already mytype.MyFunctionName
-               .ElementName = parser.funcName & "." & parser.varName
+               .ElementName = parser->funcName & "." & parser->varName
             end if
-            .ElementValue = parser.varType 
-            .IsPrivate = iif(parser.bInTypePublic, false, true)
-            .IsWinApi     = parser.IsWinApi
+            .ElementValue = parser->varType 
+            .IsPrivate = iif(parser->bInTypePublic, false, true)
+            .IsWinApi     = parser->IsWinApi
             if .ElementName = "" then exit function
 
       END SELECT

@@ -11,11 +11,85 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmSnippets.bi"
+
+
+' ========================================================================================
+' Create the right-click popup Snippets Parameters menu 
+' ========================================================================================
+private Function frmSnippets_CreateSnippetsParametersMenu() As HMENU
+   
+   Dim hPopUpMenu As HMENU = CreatePopupMenu()
+   for i as long = lbound(gSnippetParameter) to ubound(gSnippetParameter)
+      AppendMenu( hPopUpMenu, MF_ENABLED or MF_STRING, _
+                  IDM_FRMSNIPPETS_PARAMETERBASE + i, gSnippetParameter(i) )
+   next
+   
+   Function = hPopupMenu
+ 
+End Function
+
+
+' ========================================================================================
+' Replace any embedded Parameters in the code text
+' ========================================================================================
+private function frmSnippets_DoReplaceParameters( byval wszInsertText as CWSTR ) as CWSTR
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   
+   dim as CWSTR wszText = wszInsertText
+   
+   ' Contents of the clipboard
+   wszText = AfxStrReplace( wszText, "{CLIPBOARD}", AfxGetClipboardText )
+
+   ' Filename (full path and name)
+   if pDoc then
+      wszText = AfxStrReplace( wszText, "{FILENAME}", pDoc->DiskFilename )
+      wszText = AfxStrReplace( wszText, "{FILENAME_SHORT}", AfxStrPathname( "NAMEX", pDoc->DiskFilename ))
+   end if   
+   
+   ' The current year
+   wszText = AfxStrReplace( wszText, "{CURRENT_YEAR}", wstr(AfxLocalYear) )
+   
+   ' The current year's last two digits
+   wszText = AfxStrReplace( wszText, "{CURRENT_YEAR_SHORT}", right( wstr(AfxLocalYear), 2) )
+
+   ' The month as two digits (example '02')
+   wszText = AfxStrReplace( wszText, "{CURRENT_MONTH}", AfxStrRSet(wstr(AfxLocalMonth), 2, "0") )
+     
+   ' The full name of the month (example 'July')
+   wszText = AfxStrReplace( wszText, "{CURRENT_MONTH_NAME}", AfxLocalMonthName )
+
+   ' The short name of the month (example 'Jul')
+   wszText = AfxStrReplace( wszText, "{CURRENT_MONTH_NAME_SHORT}", AfxLocalShortMonthName )
+
+   ' The day of the month as two digits (example '09')
+   wszText = AfxStrReplace( wszText, "{CURRENT_DAY}", AfxStrRSet(wstr(AfxLocalDay), 2, "0") )
+
+   ' The name of day (example 'Monday')
+   wszText = AfxStrReplace( wszText, "{CURRENT_DAY_NAME}", AfxLocalDayName )
+   
+   ' The short name of the day (example 'Mon')
+   wszText = AfxStrReplace( wszText, "{CURRENT_DAY_NAME_SHORT}", AfxLocalDayShortName )
+   
+   dim as CWSTR wszCurTime = AfxLocalTimeStr( "HHmmss" )
+   
+   ' The current hour in 24-hour clock format
+   wszText = AfxStrReplace( wszText, "{CURRENT_HOUR}", left(wszCurTime, 2) )
+   
+   ' The current minute
+   wszText = AfxStrReplace( wszText, "{CURRENT_MINUTE}", mid(wszCurTime, 3, 2) )
+   
+   ' The current second
+   wszText = AfxStrReplace( wszText, "{CURRENT_SECOND}", right(wszCurTime, 2) )
+
+   function = wszText
+end function
+
 
 ' ========================================================================================
 ' Attempt to insert/expand a user snippet
 ' ========================================================================================
-function DoInsertSnippet( byval pDoc as clsDocument ptr ) as Boolean
+public function frmSnippets_DoInsertSnippet( byval pDoc as clsDocument ptr ) as Boolean
    if pDoc = 0 then exit function
    
    Dim As HWnd hEdit = pDoc->hWndActiveScintilla
@@ -31,12 +105,21 @@ function DoInsertSnippet( byval pDoc as clsDocument ptr ) as Boolean
          ' Insert the snippet by replacing the current word
          SendMessage( hEdit, SCI_SETSELECTIONSTART, curPos - len(strWord), 0)
          SendMessage( hEdit, SCI_SETSELECTIONEND, curPos, 0)
+         curPos = curPos - len(strWord)
          ' Replace the selection (SCI_REPLACESEL fails if text is "" so use Cut instead for that scenario)                                
          If Len(strWord) = 0 Then
             SendMessage( hEdit, SCI_CUT, 0, 0 )
          Else
-            strReplaceText = gConfig.Snippets(i).wszCode
-            SendMessage( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, Strptr(strReplaceText)) )
+            strReplaceText = frmSnippets_DoReplaceParameters( gConfig.Snippets(i).wszCode )
+            
+            ' Check of the {CURSOR_POSITION} parameter exists. This is where we want to 
+            ' position our cursor after the edit it made.
+            dim as string strParam = "{CURSOR_POSITION}"
+            dim as long iPos = instr( strReplaceText, strParam )
+            if iPos then strReplaceText = AfxStrRemove( strReplaceText, strParam )
+            SciExec( hEdit, SCI_REPLACESEL, 0, Strptr(strReplaceText) )
+            if iPos then SciExec( hEdit, SCI_GOTOPOS, curPos + iPos - 1, 0 )
+
          End If
          return true
       end if
@@ -49,7 +132,7 @@ end function
 ' ========================================================================================
 ' Load all of the snippets descriptions into the listbox
 ' ========================================================================================
-function LoadSnippetsListBox( byval hParent as hwnd ) as Long
+private function frmSnippets_LoadListBox( byval hParent as hwnd ) as Long
    dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMSNIPPETS_LIST1)
 
    ListBox_ResetContent(hList1)
@@ -64,7 +147,9 @@ end function
 ' ========================================================================================
 ' Swap two entries in the snippets Listbox
 ' ========================================================================================
-function SwapSnippetsListBoxItems( byval Item1 as long, Byval Item2 as long) as Long
+private function frmSnippets_SwapListBoxItems( byval Item1 as long, _
+                                               Byval Item2 as long _
+                                               ) as Long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_LIST1)
    
    ' Swap the array values
@@ -80,7 +165,7 @@ end function
 ' ========================================================================================
 ' Set the snippets information depending on what listbox entry is selected
 ' ========================================================================================
-function SetSnippetsTextboxes() as long
+private function frmSnippets_SetTextboxes() as long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_LIST1)
    dim as hwnd hText1 = GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTDESCRIPTION)
    dim as hwnd hText2 = GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTTRIGGER)
@@ -108,9 +193,48 @@ end function
                
 
 ' ========================================================================================
+' Processes messages for the subclassed code textbox window.
+' ========================================================================================
+private Function frmSnippets_TextBox_SubclassProc ( _
+                           ByVal HWnd   As HWnd, _                 ' // Control window handle
+                           ByVal uMsg   As UINT, _                 ' // Type of message
+                           ByVal wParam As WPARAM, _               ' // First message parameter
+                           ByVal lParam As LPARAM, _               ' // Second message parameter
+                           ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
+                           ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
+                           ) As LRESULT
+
+   
+   Select Case uMsg
+
+      case WM_CONTEXTMENU
+         ' Override the default edit control menu with our own to show a list
+         ' of replaceable parameters.
+         dim pt as POINT
+         Dim hPopUpMenu As HMENU = frmSnippets_CreateSnippetsParametersMenu()
+         GetCursorPos @pt
+         TrackPopupMenu( hPopUpMenu, 0, pt.x, pt.y, 0, HWND_FRMSNIPPETS, ByVal Null )
+         DestroyMenu hPopUpMenu
+         return true
+            
+      Case WM_DESTROY
+         ' REQUIRED: Remove control subclassing
+         RemoveWindowSubclass HWnd, @frmSnippets_TextBox_SubclassProc, uIdSubclass
+
+   End Select
+
+   ' Default processing of Windows messages
+   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
+
+End Function
+
+
+' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmSnippets
 ' ========================================================================================
-Function frmSnippets_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmSnippets_OnCreate( ByVal HWnd As HWnd, _
+                                       ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                       ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -126,7 +250,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmSnippets
 ' ========================================================================================
-Function frmSnippets_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmSnippets_OnCommand( ByVal HWnd As HWnd, _
+                                        ByVal id As Long, _
+                                        ByVal hwndCtl As HWnd, _
+                                        ByVal codeNotify As UINT _
+                                        ) As LRESULT
 
    dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMSNIPPETS_LIST1)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
@@ -137,9 +265,20 @@ Function frmSnippets_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
    END IF
    
    Select Case id
+      case IDM_FRMSNIPPETS_PARAMETERBASE + lbound(gSnippetParameter) to _
+           IDM_FRMSNIPPETS_PARAMETERBASE + ubound(gSnippetParameter)
+         
+         ' Create the parameter to insert
+         dim wszText as wstring * MAX_PATH
+         wszText = "{" & gSnippetParameter( id-IDM_FRMSNIPPETS_PARAMETERBASE ) & "}"
+         
+         ' Insert the parameter at the current textbox location.
+         SendMessage( GetDlgItem(HWND, IDC_FRMSNIPPETS_TXTCODE), _
+                        EM_REPLACESEL, true, cast(LPARAM, @wszText) )
+            
       case IDC_FRMSNIPPETS_LIST1
          if codeNotify = LBN_SELCHANGE THEN
-            SetSnippetsTextboxes()
+            frmSnippets_SetTextboxes()
          END IF
           
       case IDC_FRMSNIPPETS_TXTDESCRIPTION
@@ -170,14 +309,14 @@ Function frmSnippets_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
       case IDC_FRMSNIPPETS_CMDUP
          if codeNotify = BN_CLICKED THEN
             if nCurSel > 0 THEN
-               SwapSnippetsListboxItems( nCurSel, nCurSel - 1 )
+               frmSnippets_SwapListBoxItems( nCurSel, nCurSel - 1 )
             END IF
          end if
 
       case IDC_FRMSNIPPETS_CMDDOWN
          if codeNotify = BN_CLICKED THEN
             if nCurSel < ListBox_GetCount(hList1) - 1 THEN
-               SwapSnippetsListboxItems( nCurSel, nCurSel + 1 )
+               frmSnippets_SwapListBoxItems( nCurSel, nCurSel + 1 )
             END IF
          end if
 
@@ -198,10 +337,10 @@ Function frmSnippets_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
             gConfig.SnippetsTemp(nCurSel).wszTrigger = ""
             gConfig.SnippetsTemp(nCurSel).wszCode = ""
             ' reload the listbox
-            LoadSnippetsListBox(HWND)
+            frmSnippets_LoadListBox(HWND)
             nCurSel = Min(nCurSel, ubound(gConfig.SnippetsTemp))
             ListBox_SetCurSel(hList1, nCurSel)
-            SetSnippetsTextboxes()
+            frmSnippets_SetTextboxes()
             SetFocus GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTDESCRIPTION )
          end if
 
@@ -221,10 +360,10 @@ Function frmSnippets_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
                      redim preserve gConfig.BuildsTemp( ubound(gConfig.SnippetsTemp) - 1 )
                   END IF
                   ' reload the listbox
-                  LoadSnippetsListBox(HWND)
+                  frmSnippets_LoadListBox(HWND)
                   nCurSel = Min( nCurSel, ubound(gConfig.SnippetsTemp) )
                   ListBox_SetCurSel(hList1, nCurSel)
-                  SetSnippetsTextboxes()
+                  frmSnippets_SetTextboxes()
                   SetFocus hList1
                end if
             END IF
@@ -257,7 +396,7 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmSnippets_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmSnippets_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
    if pWindow = 0 then exit function
@@ -290,7 +429,15 @@ Function frmSnippets_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 
    hCtrl = GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_CMDOK )
    cx = pWindow->ScaleX(168)
-   AfxSetWindowLocation( hCtrl, rc.right - cx, rc.bottom - cy )
+   nLeft = rc.right - cx
+   AfxSetWindowLocation( hCtrl, nLeft, rc.bottom - cy )
+   dim as long nLeftOK = nLeft
+   
+   hCtrl = GetDlgItem( HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_LBLPARAMETERS )
+   AfxGetWindowLocation( hCtrl, nLeft, nTop )
+   AfxSetWindowLocation( hCtrl, nLeft, rc.bottom - cy )
+   nHeight = AfxGetWindowHeight( hCtrl )
+   AfxSetWindowSize( hCtrl, nLeftOK - nLeft, nHeight )
 
    hCtrl = GetDlgItem( HWND_FRMSNIPPETS, IDCANCEL )
    cx = pWindow->ScaleX(86)
@@ -322,7 +469,11 @@ end function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmSnippets
 ' ========================================================================================
-Function frmSnippets_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmSnippets_OnSize( ByVal HWnd As HWnd, _
+                                     ByVal state As UINT, _
+                                     ByVal cx As Long, _
+                                     ByVal cy As Long _
+                                     ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
       frmSnippets_PositionWindows(HWnd)
@@ -334,7 +485,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmSnippets
 ' ========================================================================================
-Function frmSnippets_OnClose(HWnd As HWnd) As LRESULT
+private Function frmSnippets_OnClose( byval HWnd As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
    if pWindow then 
       ' Save the window size and placement. Use the pWindow version in order to
@@ -353,7 +504,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmSnippets
 ' ========================================================================================
-Function frmSnippets_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmSnippets_OnDestroy( byval HWnd As HWnd ) As LRESULT
    ' Delete the font we created and applied to the multiline textbox
    DeleteObject( AfxGetWindowFont( GetDlgItem(hwnd, IDC_FRMSNIPPETS_TXTCODE) ))
    PostQuitMessage(0)
@@ -364,11 +515,11 @@ End Function
 ' ========================================================================================
 ' frmSnippets Window procedure
 ' ========================================================================================
-Function frmSnippets_WndProc( ByVal HWnd   As HWnd, _
-                              ByVal uMsg   As UINT, _
-                              ByVal wParam As WPARAM, _
-                              ByVal lParam As LPARAM _
-                              ) As LRESULT
+private Function frmSnippets_WndProc( ByVal HWnd   As HWnd, _
+                                      ByVal uMsg   As UINT, _
+                                      ByVal wParam As WPARAM, _
+                                      ByVal lParam As LPARAM _
+                                      ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,  frmSnippets_OnCreate)
@@ -377,21 +528,20 @@ Function frmSnippets_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_SIZE,    frmSnippets_OnSize)
       HANDLE_MSG (HWnd, WM_COMMAND, frmSnippets_OnCommand)
 
-      Case WM_GETMINMAXINFO
-         Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
-         if pWindow = 0 then exit function
-         DefWindowProc(hwnd, uMsg, wParam, lParam)
-         Dim pMinMaxInfo As MINMAXINFO Ptr
-         pMinMaxInfo = Cast(MINMAXINFO Ptr,lParam)
-         pMinMaxInfo->ptMinTrackSize.x = pWindow->ScaleX( 622 )
-         pMinMaxInfo->ptMinTrackSize.y = pWindow->ScaleY( 436 )
-         pMinMaxInfo->ptMaxTrackSize.x = pMinMaxInfo->ptMaxTrackSize.x
-         pMinMaxInfo->ptMaxTrackSize.y = pMinMaxInfo->ptMaxTrackSize.y
-         return 0
+   Case WM_GETMINMAXINFO
+      Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+      if pWindow = 0 then exit function
+      DefWindowProc(hwnd, uMsg, wParam, lParam)
+      Dim pMinMaxInfo As MINMAXINFO Ptr
+      pMinMaxInfo = Cast(MINMAXINFO Ptr,lParam)
+      pMinMaxInfo->ptMinTrackSize.x = pWindow->ScaleX( 622 )
+      pMinMaxInfo->ptMinTrackSize.y = pWindow->ScaleY( 436 )
+      pMinMaxInfo->ptMaxTrackSize.x = pMinMaxInfo->ptMaxTrackSize.x
+      pMinMaxInfo->ptMaxTrackSize.y = pMinMaxInfo->ptMaxTrackSize.y
+      return 0
 
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -400,9 +550,7 @@ End Function
 ' ========================================================================================
 ' frmSnippets_Show
 ' ========================================================================================
-Function frmSnippets_Show( ByVal hWndParent As HWnd, _
-                           ByVal nCmdShow   As Long = 0 _
-                           ) As Long
+public Function frmSnippets_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    DIM hBitmap AS HBITMAP 
    dim hCtrl as HWnd
@@ -467,8 +615,9 @@ Function frmSnippets_Show( ByVal hWndParent As HWnd, _
    hCtrl = _
    pWindow->AddControl("MULTILINETEXTBOX", , IDC_FRMSNIPPETS_TXTCODE, "", 240, 122, 372, 270, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or _  'WS_HSCROLL or WS_VSCROLL or _
-        ES_LEFT Or ES_MULTILINE or ES_WANTRETURN or ES_AUTOHSCROLL or ES_AUTOVSCROLL, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        ES_LEFT Or ES_MULTILINE or ES_WANTRETURN or ES_AUTOHSCROLL or ES_AUTOVSCROLL or WS_HSCROLL or WS_VSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(SUBCLASSPROC, @frmSnippets_TextBox_SubclassProc), IDC_FRMSNIPPETS_TXTCODE, Cast(DWORD_PTR, @pWindow))
    dim as HFONT _hFont = pWindow->CreateFont( gConfig.EditorFontname, Val(**gConfig.EditorFontsize) )
    AfxSetWindowFont( hCtrl, _hFont )
    
@@ -497,6 +646,10 @@ Function frmSnippets_Show( ByVal hWndParent As HWnd, _
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
+   pWindow->AddControl("LABEL", , IDC_FRMSNIPPETS_LBLPARAMETERS, L(172,"Use right-click popup menu to insert parameters"), _
+        240, 388, 212, 34, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("BUTTON", , IDC_FRMSNIPPETS_CMDOK, L(0,"OK"), 454, 388, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
@@ -512,10 +665,10 @@ Function frmSnippets_Show( ByVal hWndParent As HWnd, _
    for i as long = lbound(gConfig.Snippets) to ubound(gConfig.Snippets)
       gConfig.SnippetsTemp(i) = gConfig.Snippets(i)   
    NEXT
-   LoadSnippetsListBox(hForm)
+   frmSnippets_LoadListBox( hForm )
    
    ListBox_SetCurSel( GetDlgItem(hForm, IDC_FRMSNIPPETS_LIST1), 0 )
-   SetSnippetsTextboxes()
+   frmSnippets_SetTextboxes()
    
    frmSnippets_PositionWindows(hForm)
    

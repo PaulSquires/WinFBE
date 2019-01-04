@@ -11,11 +11,15 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmProjectOptions.bi"
+#include once "frmBuildConfig.bi"
+
+
 
 ' ========================================================================================
 ' Create a generic resource file and manifest for the Project
 ' ========================================================================================
-function CreateResourceManifest() as Long
+private function frmProjectOptions_CreateResourceManifest() as Long
 
    dim as CWSTR wszProjectPath = AfxStrPathname("PATH", gApp.ProjectFilename)
    dim as CWSTR wszManifest    = wszProjectPath + "manifest.xml"
@@ -48,7 +52,7 @@ end function
 ' ========================================================================================
 ' Save all options for the Project
 ' ========================================================================================
-Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN    
+private Function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN    
    
    Dim wText As WString * MAX_PATH  
    
@@ -80,13 +84,13 @@ Function SaveProjectOptions( ByVal HWnd As HWnd ) As BOOLEAN
    gApp.ProjectOther32     = AfxGetWindowText(GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS32))
    gApp.ProjectOther64     = AfxGetWindowText(GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTOPTIONS64))
    gApp.ProjectManifest    = Button_GetCheck(GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_CHKMANIFEST))
-   gApp.ProjectBuild       = GetSelectedBuildGUID()
+   gApp.ProjectBuild       = frmBuildConfig_GetSelectedBuildGUID()
    gApp.ProjectNotes       = ""
    gApp.ProjectCommandLine = ""
    
 
    ' Create the resource file and manifest if applicable
-   if gApp.ProjectManifest THEN CreateResourceManifest()
+   if gApp.ProjectManifest THEN frmProjectOptions_CreateResourceManifest()
 
    ' Save the actual Project data to disk.
    gConfig.ProjectSaveToFile()   
@@ -115,8 +119,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmProjectOptions
 ' ========================================================================================
-Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmProjectOptions_OnCommand( ByVal HWnd As HWnd, _
+                                              ByVal id As Long, _
+                                              ByVal hwndCtl As HWnd, _
+                                              ByVal codeNotify As UINT _
+                                              ) As LRESULT
    Select Case id
       Case IDC_FRMPROJECTOPTIONS_CMDSELECT
          If codeNotify = BN_CLICKED Then
@@ -132,7 +139,7 @@ Function frmProjectOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal
          
       Case IDOK
          If codeNotify = BN_CLICKED Then
-            If SaveProjectOptions(HWnd) Then
+            If frmProjectOptions_SaveProjectOptions(HWnd) Then
                SendMessage HWnd, WM_CLOSE, 0, 0
             End If
             Exit Function
@@ -152,7 +159,9 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmProjectOptions
 ' ========================================================================================
-Function frmProjectOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmProjectOptions_OnCreate( ByVal HWnd As HWnd, _
+                                             ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                             ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -168,7 +177,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmProjectOptions
 ' ========================================================================================
-Function frmProjectOptions_OnClose(HWnd As HWnd) As LRESULT
+private Function frmProjectOptions_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -179,7 +188,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmProjectOptions
 ' ========================================================================================
-Function frmProjectOptions_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmProjectOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
    gApp.IsProjectLoading = FALSE
    gApp.IsNewProjectFlag = false
    PostQuitMessage(0)
@@ -190,12 +199,11 @@ End Function
 ' ========================================================================================
 ' frmProjectOptions Window procedure
 ' ========================================================================================
-Function frmProjectOptions_WndProc( ByVal HWnd   As HWnd, _
-                                    ByVal uMsg   As UINT, _
-                                    ByVal wParam As WPARAM, _
-                                    ByVal lParam As LPARAM _
-                                    ) As LRESULT
-
+private Function frmProjectOptions_WndProc( ByVal HWnd   As HWnd, _
+                                            ByVal uMsg   As UINT, _
+                                            ByVal wParam As WPARAM, _
+                                            ByVal lParam As LPARAM _
+                                            ) As LRESULT
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmProjectOptions_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmProjectOptions_OnClose)
@@ -203,7 +211,6 @@ Function frmProjectOptions_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND,  frmProjectOptions_OnCommand)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -212,10 +219,9 @@ End Function
 ' ========================================================================================
 ' frmProjectOptions_Show
 ' ========================================================================================
-Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
-                                 ByVal nCmdShow   As Long = 0, _
-                                 byval IsNewProject as boolean = false _
-                                 ) As Long
+public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
+                                        byval IsNewProject as boolean _
+                                        ) As LRESULT
 
    Dim wszTitle As WString * MAX_PATH
    

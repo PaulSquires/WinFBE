@@ -11,6 +11,9 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmRecent.bi"
+
+
 ''
 ''
 Function GetMRUMenuHandle() as HMENU
@@ -49,15 +52,15 @@ Function ClearMRUlist( ByVal wID As Long ) As Long
          For i = 0 To 9
             gConfig.MRU(i) = ""
          Next
-         LoadRecentFilesTreeview(HWND_FRMRECENT)
+         frmRecent_LoadTreeview(HWND_FRMRECENT)
       Case IDM_MRUPROJECTCLEAR
          For i = 0 To 9
             gConfig.MRUPROJECT(i) = ""
          Next
-         LoadRecentFilesTreeview(HWND_FRMRECENT)
+         frmRecent_LoadTreeview(HWND_FRMRECENT)
    End Select
    
-   PositionRecentWindows(HWND_FRMRECENT)
+   frmRecent_PositionWindows(HWND_FRMRECENT)
 
    Function = 0
 End Function
@@ -229,7 +232,7 @@ End Function
    
 ''
 ''
-Function UpdateMRUProjectList( Byref wzFilename As WString ) As Long
+Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
 
    Dim idxExistsAt As Long = -1   ' index of where filename already exists 
    Dim i           As Long
@@ -238,7 +241,7 @@ Function UpdateMRUProjectList( Byref wzFilename As WString ) As Long
    ' also for an available entry to put the filename in.
    For i = 0 To 9
       gConfig.MRUProject(i) = ProcessFromCurdrive(gConfig.MRUProject(i))
-      If Ucase(gConfig.MRUProject(i)) = Ucase(wzFilename) Then
+      If Ucase(gConfig.MRUProject(i)) = Ucase(wszFilename) Then
          idxExistsAt = i:  Exit For
       End If   
    Next
@@ -251,7 +254,7 @@ Function UpdateMRUProjectList( Byref wzFilename As WString ) As Long
    For i = idxExistsAt To 1 Step -1
       gConfig.MRUProject(i) = gConfig.MRUProject(i-1)
    Next
-   gConfig.MRUProject(0) = wzFilename 
+   gConfig.MRUProject(0) = wszFilename 
 
    ' Save the configuration file
    gConfig.SaveConfigFile

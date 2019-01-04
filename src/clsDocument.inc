@@ -16,12 +16,12 @@
 ''  clsDocument (Class to handle everything related to a Scintilla editing window)
 ''
 
+#include once "clsDocument.bi"
+#include once "modVDToolbox.bi"
+#include once "frmFindReplace.bi"
+#include once "modVDDesignFrame.bi"
+#include once "modVDDesignMain.bi"
 
-''
-''
-Constructor clsDocument
-'
-End Constructor
    
 ''
 ''

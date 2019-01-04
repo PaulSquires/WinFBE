@@ -11,11 +11,50 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmImageManager.bi"
+#include once "clsDocument.bi"
+#include once "clsTopTabCtl.bi"
+
+
+' ========================================================================================
+' Create the popup menu showing the list of valid image formats
+' ========================================================================================
+Function frmImageManager_CreateImagesResourceMenu() As HMENU
+   
+   dim wszImageFormat as wstring * MAX_PATH
+   dim as hwnd hLV = GetDlgItem(HWND_FRMIMAGES, IDC_FRMIMAGEMANAGER_LISTVIEW)
+   dim as long nCurSel = ListView_GetSelection(hLV)
+   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszImageFormat, MAX_PATH)
+
+   dim as long fNormal  = MF_ENABLED or MF_STRING 
+   dim as long fChecked = MF_CHECKED or MF_ENABLED or MF_STRING
+   dim as long i
+   
+   select case wszImageFormat
+      case "RCDATA": i = 1
+      case "BITMAP": i = 2
+      case "ICON":   i = 3
+      case "CURSOR": i = 4
+   end select
+   
+   Dim hPopUpMenu As HMENU = CreatePopupMenu()
+      AppendMenu( hPopUpMenu, iif(i = 1, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATRCDATA,  "RCDATA")
+      AppendMenu( hPopUpMenu, iif(i = 2, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATBITMAP,  "BITMAP")
+      AppendMenu( hPopUpMenu, iif(i = 3, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATICON,    "ICON")
+      AppendMenu( hPopUpMenu, iif(i = 4, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATCURSOR,  "CURSOR")
+
+   Function = hPopupMenu
+ 
+End Function
+   
 
 ' ========================================================================================
 ' Display a selected image in the Image Manager
 ' ========================================================================================
-Function frmImageManager_DisplayImage(byval hwnd as HWND, byval nIndex as long) As LRESULT
+private Function frmImageManager_DisplayImage( byval hwnd as HWND, _
+                                               byval nIndex as long _
+                                               ) As LRESULT
+   
    dim pImageCtx as CImageCtx PTR = AfxCImageCtxPtr(hwnd, IDC_FRMIMAGEMANAGER_IMAGECTX)
    if pImageCtx = 0 then exit function
    
@@ -73,7 +112,8 @@ End Function
 ' ========================================================================================
 ' Generate an IMAGE name based on the filename.
 ' ========================================================================================
-function frmImageManager_GenerateImageName( byref wszFilename as wstring ) as CWSTR
+private function frmImageManager_GenerateImageName( byval wszFilename as CWSTR ) as CWSTR
+   
    dim as CWSTR wszImageName
    dim as Boolean fDuplicateName
    dim as long counter = 0
@@ -83,7 +123,7 @@ function frmImageManager_GenerateImageName( byref wszFilename as wstring ) as CW
       ' Construct an IMAGE name to test
       fDuplicateName = false
       wszImageName = "IMAGE_" & ucase(AfxStrPathname("NAME", wszFilename))
-      wszImageName = AfxStrRemoveAny(wszImageName, " .,") 
+      wszImageName = AfxStrRemoveAny( wszImageName, " .," ) 
       if counter > 0 then wszImageName = wszImageName & counter
 
       dim pDoc as clsDocument ptr = gApp.pDocList
@@ -112,11 +152,17 @@ end function
 ' ========================================================================================
 ' Add an image to the Image Manager
 ' ========================================================================================
-Function frmImageManager_AddImage(ByVal HWnd As HWnd) As LRESULT
+private Function frmImageManager_AddImage( ByVal HWnd As HWnd ) As LRESULT
+   
    ' Display the Open File Dialog
    Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd, IDM_ADDIMAGE)
    If pItems = Null Then Exit Function
-   Dim dwItemCount As Long, i As Long, pItem As IShellItem Ptr, pwszName As WString Ptr
+   
+   Dim as long dwItemCount 
+   dim as long i 
+   dim pItem As IShellItem Ptr
+   dim pwszName As WString Ptr
+   
    pItems->lpVtbl->GetCount(pItems, @dwItemCount)
    
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
@@ -176,7 +222,7 @@ End Function
 ' ========================================================================================
 ' Remove an image from the Image Manager
 ' ========================================================================================
-Function frmImageManager_RemoveImage(ByVal HWnd As HWnd) As LRESULT
+private Function frmImageManager_RemoveImage( ByVal HWnd As HWnd ) As LRESULT
 
    dim pDoc  as clsDocument ptr 
    dim pCtrl as clsControl ptr 
@@ -269,7 +315,9 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmImages
 ' ========================================================================================
-Function frmImageManager_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmImageManager_OnCreate( ByVal HWnd As HWnd, _
+                                           ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                           ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -285,7 +333,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmImages
 ' ========================================================================================
-Function frmImageManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmImageManager_OnCommand( ByVal HWnd As HWnd, _
+                                            ByVal id As Long, _
+                                            ByVal hwndCtl As HWnd, _
+                                            ByVal codeNotify As UINT _
+                                            ) As LRESULT
 
    dim as hwnd hLV = GetDlgItem(HWND, IDC_FRMIMAGEMANAGER_LISTVIEW)
    dim as long nCurSel 
@@ -321,7 +373,7 @@ Function frmImageManager_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal h
       case IDM_FORMATIMAGE
          if nCurSel = -1 then exit function
          Dim pt As Point   
-         Dim as HMENU hPopUpMenu = CreateImagesResourceMenu()
+         Dim as HMENU hPopUpMenu = frmImageManager_CreateImagesResourceMenu()
          GetCursorPos @pt
          TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd, ByVal Null)
          DestroyMenu hPopUpMenu
@@ -369,8 +421,10 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmImages
 ' ========================================================================================
-Function frmImageManager_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-
+private Function frmImageManager_OnNotify( ByVal HWnd As HWnd, _
+                                           ByVal id As Long, _
+                                           ByVal pNMHDR As NMHDR Ptr _
+                                           ) As LRESULT
    Select Case id
       Case IDC_FRMIMAGEMANAGER_LISTVIEW
          If pNMHDR->code = LVN_ITEMCHANGED Then
@@ -386,7 +440,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmImages
 ' ========================================================================================
-Function frmImageManager_OnClose(HWnd As HWnd) As LRESULT
+private Function frmImageManager_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -397,7 +451,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmImages
 ' ========================================================================================
-Function frmImageManager_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmImageManager_OnDestroy( byval HWnd As HWnd ) As LRESULT
    ' Destroy the toolbar image lists
    ImageList_Destroy CAST(HIMAGELIST, SendMessage(GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_TOOLBAR), TB_SETIMAGELIST, 0, 0))
    ImageList_Destroy CAST(HIMAGELIST, SendMessage(GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_TOOLBAR), TB_SETHOTIMAGELIST, 0, 0))
@@ -407,10 +461,11 @@ Function frmImageManager_OnDestroy(HWnd As HWnd) As LRESULT
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' Processes messages for the subclassed frmImages listview control.
 ' ========================================================================================
-Function frmImageManager_Listview_SubclassProc ( _
+private Function frmImageManager_Listview_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -464,11 +519,11 @@ End Function
 ' ========================================================================================
 ' frmImages Window procedure
 ' ========================================================================================
-Function frmImageManager_WndProc( ByVal HWnd   As HWnd, _
-                            ByVal uMsg   As UINT, _
-                            ByVal wParam As WPARAM, _
-                            ByVal lParam As LPARAM _
-                            ) As LRESULT
+private Function frmImageManager_WndProc( ByVal HWnd   As HWnd, _
+                                          ByVal uMsg   As UINT, _
+                                          ByVal wParam As WPARAM, _
+                                          ByVal lParam As LPARAM _
+                                          ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmImageManager_OnCreate)
@@ -478,7 +533,6 @@ Function frmImageManager_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_NOTIFY,   frmImageManager_OnNotify)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -487,9 +541,9 @@ End Function
 ' ========================================================================================
 ' frmImageManager_Show
 ' ========================================================================================
-Function frmImageManager_Show( ByVal hWndParent As HWnd, _
-                         Byval pProp as clsProperty ptr = 0 _
-                         ) As Long
+public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
+                                      Byval pProp as clsProperty ptr = 0 _
+                                      ) As LRESULT
 
    dim wszImageName as wstring * MAX_PATH
    if pProp then wszImageName = pProp->wszPropValue
@@ -560,7 +614,7 @@ Function frmImageManager_Show( ByVal hWndParent As HWnd, _
       pWindow->AddControl("LISTVIEW", , IDC_FRMIMAGEMANAGER_LISTVIEW, "", 10, nTop, 330, 430, _
       WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or LVS_REPORT Or LVS_SHOWSELALWAYS or LVS_SINGLESEL, _
       WS_EX_LEFT Or WS_EX_CLIENTEDGE or WS_EX_RIGHTSCROLLBAR, , _
-      Cast(SUBCLASSPROC, @frmOutput_Listview_SubclassProc), IDC_FRMOUTPUT_LISTVIEW, Cast(DWORD_PTR, @pWindow))
+      Cast(SUBCLASSPROC, @frmImageManager_Listview_SubclassProc), IDC_FRMOUTPUT_LISTVIEW, Cast(DWORD_PTR, @pWindow))
                                      
    ' Make the listview header flat
    ListView_MakeHeaderFlat(hLV)

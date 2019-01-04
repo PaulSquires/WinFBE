@@ -11,12 +11,17 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmGoto.bi"
+
 
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmGoto
 ' ========================================================================================
-Function frmGoto_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmGoto_OnCommand( ByVal HWnd As HWnd, _
+                                    ByVal id As Long, _
+                                    ByVal hwndCtl As HWnd, _
+                                    ByVal codeNotify As UINT _
+                                    ) As LRESULT
    Select Case id
       Case IDOK
          If codeNotify = BN_CLICKED Then
@@ -48,7 +53,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmGoto
 ' ========================================================================================
-Function frmGoto_OnClose(HWnd As HWnd) As LRESULT
+private Function frmGoto_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -59,7 +64,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmGoto
 ' ========================================================================================
-Function frmGoto_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmGoto_OnDestroy( byval HWnd As HWnd ) As LRESULT
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -68,7 +73,9 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmGoto
 ' ========================================================================================
-Function frmGoto_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmGoto_OnCreate( ByVal HWnd As HWnd, _
+                                   ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                   ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -84,12 +91,11 @@ End Function
 ' ========================================================================================
 ' frmGoto Window procedure
 ' ========================================================================================
-Function frmGoto_WndProc( ByVal HWnd   As HWnd, _
-                          ByVal uMsg   As UINT, _
-                          ByVal wParam As WPARAM, _
-                          ByVal lParam As LPARAM _
-                          ) As LRESULT
-
+private Function frmGoto_WndProc( ByVal HWnd   As HWnd, _
+                                  ByVal uMsg   As UINT, _
+                                  ByVal wParam As WPARAM, _
+                                  ByVal lParam As LPARAM _
+                                  ) As LRESULT
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmGoto_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmGoto_OnClose)
@@ -97,7 +103,6 @@ Function frmGoto_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND,  frmGoto_OnCommand)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -106,7 +111,7 @@ End Function
 ' ========================================================================================
 ' frmGoto_Show
 ' ========================================================================================
-Function frmGoto_Show( ByVal hWndParent As HWnd ) As Long 
+public Function frmGoto_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

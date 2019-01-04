@@ -11,12 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmOptionsLocal.bi"
 
 
 ' ========================================================================================
 ' If a localization file has been edited then save it.
 ' ========================================================================================
-function frmOptionsLocal_LocalEditCheck() as Long
+public function frmOptionsLocal_LocalEditCheck() as Long
    if gLocalPhrasesEdit = false then exit function
                
    dim as CWSTR wszLocalName = AfxGetWindowText( GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
@@ -72,7 +73,7 @@ end function
 ' ========================================================================================
 ' Do not allow the English language file to be edited or deleted
 ' ========================================================================================
-function frmOptionsLocal_DisableEnglish() as Long
+private function frmOptionsLocal_DisableEnglish() as Long
    dim as boolean bEnable, bEnglish
    Dim as CWSTR wszFilename = ucase(AfxGetWindowText(GetDlgItem(HWND_FRMOPTIONSLOCAL, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION)))
    
@@ -116,7 +117,7 @@ end function
 ' ========================================================================================
 ' Clear the global localization phrase array.
 ' ========================================================================================
-function frmOptionsLocal_ClearGlobalArray() as Long
+private function frmOptionsLocal_ClearGlobalArray() as Long
    ' Clear the global array contents
    for i as long = lbound(gLocalPhrases) to ubound(gLocalPhrases) 
       gLocalPhrases(i) = ""
@@ -128,7 +129,7 @@ end function
 ' ========================================================================================
 ' Load the selected localization file into the global array
 ' ========================================================================================
-function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as Long
+private function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as Long
 
    If AfxFileExists(wszFileName) = 0 Then exit function
 
@@ -183,10 +184,11 @@ function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as
    function = 0
 end function
 
+
 ' ========================================================================================
 ' Update the translation textboxes
 ' ========================================================================================
-Function frmOptionsLocal_UpdateTextBoxes(ByVal HWnd As HWnd) As LRESULT
+private Function frmOptionsLocal_UpdateTextBoxes( ByVal HWnd As HWnd ) As LRESULT
    dim wszIndex     as wstring * MAX_PATH
    dim wszEnglish   as wstring * MAX_PATH
    dim wszTranslate as wstring * MAX_PATH
@@ -210,8 +212,11 @@ end function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOptionsLocal
 ' ========================================================================================
-Function frmOptionsLocal_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmOptionsLocal_OnCommand( ByVal HWnd As HWnd, _
+                                            ByVal id As Long, _
+                                            ByVal hwndCtl As HWnd, _
+                                            ByVal codeNotify As UINT _
+                                            ) As LRESULT
    Select Case id
 
       Case IDC_FRMOPTIONSLOCAL_CMDLOCALIZATION
@@ -327,8 +332,10 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmOptionsLocal
 ' ========================================================================================
-Function frmOptionsLocal_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-
+private Function frmOptionsLocal_OnNotify( ByVal HWnd As HWnd, _
+                                           ByVal id As Long, _
+                                           ByVal pNMHDR As NMHDR Ptr _
+                                           ) As LRESULT
    SELECT CASE id
       Case IDC_FRMOPTIONSLOCAL_LVWPHRASES
          select case pNMHDR->code
@@ -344,18 +351,17 @@ end function
 ' ========================================================================================
 ' frmOptionsLocal Window procedure
 ' ========================================================================================
-Function frmOptionsLocal_WndProc( ByVal HWnd   As HWnd, _
-                                  ByVal uMsg   As UINT, _
-                                  ByVal wParam As WPARAM, _
-                                  ByVal lParam As LPARAM _
-                                  ) As LRESULT
+private Function frmOptionsLocal_WndProc( ByVal HWnd   As HWnd, _
+                                          ByVal uMsg   As UINT, _
+                                          ByVal wParam As WPARAM, _
+                                          ByVal lParam As LPARAM _
+                                          ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsLocal_OnCommand)
       HANDLE_MSG (HWnd, WM_NOTIFY,  frmOptionsLocal_OnNotify)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -364,9 +370,7 @@ End Function
 ' ========================================================================================
 ' frmOptionsLocal_Show
 ' ========================================================================================
-Function frmOptionsLocal_Show( ByVal hWndParent As HWnd, _
-                                ByVal nCmdShow   As Long = 0 _
-                                ) As Long
+public Function frmOptionsLocal_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

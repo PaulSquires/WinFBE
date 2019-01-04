@@ -11,13 +11,16 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modVDToolbox.bi"
+#include once "frmImageManager.bi"
+
 
 ' ========================================================================================
 ' Display the last selected property for the control (or it's default property). This
 ' allows the user to switch between controls always accessing a common property like 'Text'
 ' rather than having to seach the PropertyList every time for the property.
 ' ========================================================================================
-Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) as Long
+private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) as Long
 
    dim as hwnd hList 
    dim as long idx
@@ -93,7 +96,7 @@ end function
 ' ========================================================================================
 ' Display the properties/events for the current active control/form.
 ' ========================================================================================
-Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
+private Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    if pDoc = 0 then exit function
 
    ' If the ToolBox has not been created yet then exit.
@@ -180,7 +183,7 @@ End Function
 ' ========================================================================================
 ' Hide the PropetyList controls for edit, combobox, etc.
 ' ========================================================================================
-function HidePropertyListControls() as long 
+private function HidePropertyListControls() as long 
    dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
    ShowWindow(HWND_PROPLIST_EDIT, SW_HIDE)
    ShowWindow(HWND_PROPLIST_COMBO, SW_HIDE)
@@ -193,7 +196,7 @@ END FUNCTION
 ' ========================================================================================
 ' Property value was manually changed... initiate the value change.
 ' ========================================================================================
-function InitiatePropertyValueChange() as Long
+private function InitiatePropertyValueChange() as Long
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
@@ -375,7 +378,7 @@ END FUNCTION
 ' ========================================================================================
 ' Show the propertylist control related to the current selected propertylist row.
 ' ========================================================================================
-function ShowPropertyListControl() as Long
+private function ShowPropertyListControl() as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMVDTOOLBOX)
    if pWindow = 0 THEN exit function
@@ -485,7 +488,11 @@ END FUNCTION
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmVDToolbox_OnCommand( ByVal HWnd As HWnd, _
+                                         ByVal id As Long, _
+                                         ByVal hwndCtl As HWnd, _
+                                         ByVal codeNotify As UINT _
+                                         ) As LRESULT
 
    select case id
       CASE IDC_FRMVDTOOLBOX_COMBOCONTROLS
@@ -526,7 +533,10 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+private Function frmVDToolbox_OnNotify( ByVal HWnd As HWnd, _
+                                        ByVal id As Long, _
+                                        ByVal pNMHDR As NMHDR Ptr _
+                                        ) As LRESULT
 
    SELECT CASE id
       CASE IDC_FRMVDTOOLBOX_TABCONTROL
@@ -575,7 +585,7 @@ end function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmVDToolbox_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmVDToolbox_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    if pWindow = 0 THEN exit function
@@ -622,7 +632,11 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmVDToolbox_OnSize( ByVal HWnd As HWnd, _
+                                      ByVal state As UINT, _
+                                      ByVal cx As Long, _
+                                      ByVal cy As Long _
+                                      ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
       frmVDToolbox_PositionWindows(HWnd)
    End If   
@@ -633,7 +647,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnClose( ByVal HWnd As HWnd ) As LRESULT
+private Function frmVDToolbox_OnClose( ByVal HWnd As HWnd ) As LRESULT
    ' Never close the window; simply hide it.
    ShowWindow( HWnd, SW_HIDE )
    Function = 0
@@ -643,7 +657,9 @@ End Function
 ' ========================================================================================
 ' Process WM_MEASUREITEM message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnMeasureItem( ByVal HWnd As HWnd, ByVal lpmis As MEASUREITEMSTRUCT Ptr ) As Long
+private Function frmVDToolbox_OnMeasureItem( ByVal HWnd As HWnd, _
+                                             ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+                                             ) As Long
    ' Set the height of the List box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    lpmis->itemHeight = pWindow->ScaleY(LISTBOX_LINEHEIGHT)
@@ -654,7 +670,9 @@ End Function
 ' ========================================================================================
 ' Process WM_DRAWITEM message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEMSTRUCT Ptr ) As Long
+private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
+                                          ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+                                          ) As Long
 
    Dim As HBRUSH hBrush 
    dim as HANDLE hImage
@@ -919,7 +937,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmVDToolbox
 ' ========================================================================================
-Function frmVDToolbox_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmVDToolbox_OnDestroy( byval HWnd As HWnd ) As LRESULT
    HWND_FRMVDTOOLBOX = 0
    Function = 0
 End Function
@@ -928,7 +946,7 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed ListBox window.
 ' ========================================================================================
-Function frmVDToolbox_ListBox_SubclassProc ( _
+private Function frmVDToolbox_ListBox_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -1010,7 +1028,7 @@ Function frmVDToolbox_ListBox_SubclassProc ( _
          Select Case Loword(wParam)
             Case VK_RETURN
                ' Simulate the sending of a LBN_DBLCLK to the control.
-               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(IDC_FRMFUNCTIONLIST_LISTBOX, LBN_DBLCLK), Cast(LPARAM,HWnd) )
+               SendMessage( GetParent(HWnd), WM_COMMAND, MAKEWPARAM(hwnd, LBN_DBLCLK), Cast(LPARAM,HWnd) )
                Exit Function
          End Select
 
@@ -1101,7 +1119,7 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed TextEdit window.
 ' ========================================================================================
-Function frmVDToolbox_TextEdit_SubclassProc ( _
+private Function frmVDToolbox_TextEdit_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -1166,11 +1184,11 @@ End Function
 ' ========================================================================================
 ' frmVDToolbox Window procedure
 ' ========================================================================================
-Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
-                               ByVal uMsg   As UINT, _
-                               ByVal wParam As WPARAM, _
-                               ByVal lParam As LPARAM _
-                               ) As LRESULT
+private Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
+                                            ByVal uMsg   As UINT, _
+                                            ByVal wParam As WPARAM, _
+                                            ByVal lParam As LPARAM _
+                                            ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND,     frmVDToolbox_OnCommand)
@@ -1198,18 +1216,15 @@ End Function
 ' ========================================================================================
 ' frmVDToolbox_Show
 ' ========================================================================================
-Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
-                            ByVal nCmdShow   As Long = 0 _
-                            ) As Long
+public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
+                                   ByVal nCmdShow   As Long = 0 _
+                                   ) As LRESULT
 
    ' If Toolbox already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.
    If IsWindow(HWND_FRMVDTOOLBOX) Then
       If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMVDTOOLBOX), SW_HIDE, SW_SHOW)
       ShowWindow HWND_FRMVDTOOLBOX, nCmdShow
-      If nCmdShow = SW_SHOW Then
-         SetFocus GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX)
-      End If
       Exit Function 
    Else 
       ' If the window does not exist yet then ensure that it becomes visible after creation.

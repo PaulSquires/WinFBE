@@ -12,37 +12,56 @@
 '    GNU General Public License for more details.
 
 
+#include once "clsDocument.bi"
+#include once "frmUserTools.bi"
+#include once "frmSnippets.bi"
+#include once "frmProjectOptions.bi"
+#include once "frmBuildConfig.bi"
+
+
+
+' Global array to hold cut/copy/paste controls
+dim shared gCopyControls(any) as clsControl
 
 
 ' ========================================================================================
 ' Position editor to document/function under the current caret position
 ' ========================================================================================
-Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
+private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
    If pDoc = 0 Then Exit Function
    
    dim pData as DB2_DATA ptr
-    
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   dim as CWSTR wszFilename
+   dim as string sWord
+   
+   ' Version 1.8.8 added ability to open an underlying #Include file if such
+   ' a file exists on the current editing line.
+   if IsCurrentLineIncludeFilename() then
+      wszFilename = gApp.IncludeFilename 
+   else
 
-   ' Determine the word at the current caret position.
-   Dim As String sWord = pDoc->GetWord
+      ' Determine the word at the current caret position.
+      sWord = pDoc->GetWord
 
-   ' Search the list of Function names
-   pData = gdb2.dbFindFunction(sWord)
-   if pData = 0 then
-      pData = gdb2.dbFindSub(sWord)
-      IF pData = 0 then
-         MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
-         exit function
-      end if
-   END IF
-      
+      ' Search the list of Function names
+      pData = gdb2.dbFindFunction(sWord)
+      if pData = 0 then
+         pData = gdb2.dbFindSub(sWord)
+         IF pData = 0 then
+            MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+            exit function
+         end if
+      END IF
+      wszFilename = pData->filename
+   end if
+   
    ' Save our current position in case user invokes "Last Position" option,   
-   gLastPosition.pDoc = pDoc
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   gLastPosition.pDoc       = pDoc
    gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
-   gLastPosition.nPosition = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   OpenSelectedDocument(pData->filename, sWord)
+   gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
+   OpenSelectedDocument(wszFilename, sWord)
    
    Function = 0
 End Function
@@ -51,7 +70,7 @@ End Function
 ' ========================================================================================
 ' Return to most previous position (invoked when "Last Position" is selected
 ' ========================================================================================
-Function frmMain_GotoLastPosition() As Long
+private Function frmMain_GotoLastPosition() As Long
 
    ' Is the pDoc pointer still valid
    If gLastPosition.pDoc = 0 Then Exit Function
@@ -74,7 +93,7 @@ End Function
 ' ========================================================================================
 ' Update display info related to currently active document
 ' ========================================================================================
-Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
+private Function frmMain_UpdateLineCol( ByVal HWnd As HWnd ) As Long
 
    if gApp.IsProjectLoading then exit function  ' to prevent flickering during a project load
 
@@ -116,7 +135,7 @@ Function frmMain_UpdateLineCol( ByVal HWnd As HWnd) As Long
       pDoc->DisplayStats
    End If
    frmMain_ChangeToolbarButtonsState
-   LoadBuildComboBox
+   frmBuildConfig_LoadBuildComboBox
 
   Function = 0
 End Function
@@ -125,7 +144,7 @@ End Function
 ' ========================================================================================
 ' Process any command line that was passed to the editor
 ' ========================================================================================
-Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd) As Long
+private Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd ) As Long
 
    ' The incoming command line may contain a regular file to open or a project file.
    
@@ -187,9 +206,9 @@ End Function
 ' ========================================================================================
 ' Process Scintilla Notifications
 ' ========================================================================================
-Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
-                             ByVal pNSC As SCNOTIFICATION Ptr _
-                             ) As Long
+private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
+                                     ByVal pNSC As SCNOTIFICATION Ptr _
+                                     ) As Long
 
    If pNSC = 0 Then Exit Function
    
@@ -344,7 +363,7 @@ End Function
 ' ========================================================================================
 ' Set focus to currently active Scintilla window
 ' ========================================================================================
-Function frmMain_SetFocusToCurrentCodeWindow() As Long
+private Function frmMain_SetFocusToCurrentCodeWindow() As Long
    ' Post a message to the main form CUSTOM handler that will
    ' set focus to the currently active Scintilla code window. We
    ' use PostMessage to ensure that all all other windows 
@@ -357,7 +376,7 @@ End Function
 ' ========================================================================================
 ' Process WM_PAINT message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnPaint( ByVal HWnd As HWnd) As LRESULT
+private Function frmMain_OnPaint( ByVal HWnd As HWnd ) As LRESULT
             
    Dim As PAINTSTRUCT ps
    Dim As HPEN hPen
@@ -400,7 +419,7 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim As HWnd hEdit, hTabCtl
    Dim As Rect rc
@@ -559,7 +578,9 @@ End Function
 ' ========================================================================================
 ' Attempt to open specified project. 
 ' ========================================================================================
-Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, byref wszProjectFileName as WString ) as Boolean
+private Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
+                                            byref wszProjectFileName as const WString _
+                                            ) as Boolean
 
    ' If a project is open then close any files that may be open in the editor. No need to
    ' do this if a new project is being created/opened because that function has already
@@ -640,9 +661,9 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    ' Set the default build configuration for this document. If no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
    if pDoc->DocumentBuild = "" THEN 
-      pDoc->DocumentBuild = GetDefaultBuildGUID()
+      pDoc->DocumentBuild = frmBuildConfig_GetDefaultBuildGUID()
       if pDoc->DocumentBuild = "" THEN 
-         pDoc->DocumentBuild = GetSelectedBuildGUID()
+         pDoc->DocumentBuild = frmBuildConfig_GetSelectedBuildGUID()
       end if
    end if      
    
@@ -767,11 +788,21 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_FILECLOSEALLOTHERS: OnCommand_FileClose( HWnd, EFC_CLOSEALLOTHERS )
       Case IDM_CLOSEALLFORWARD:    OnCommand_FileClose( HWnd, EFC_CLOSEALLFORWARD )
       Case IDM_CLOSEALLBACKWARD:   OnCommand_FileClose( HWnd, EFC_CLOSEALLBACKWARD )
-      Case IDC_MRUBASE To (IDC_MRUBASE + 10): OpenMRUFile( HWnd, id )
-      Case IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR: ClearMRUlist( id )
-      Case IDM_OPENINCLUDE:        OnCommand_OpenIncludeFile( HWnd )
-      Case IDM_COMMAND:            Shell(Environ("COMSPEC"))
-      Case IDM_EXIT:               SendMessage( HWnd, WM_CLOSE, 0, 0 )
+      
+      Case IDC_MRUBASE To (IDC_MRUBASE + 10)
+         OpenMRUFile( HWnd, id )
+      
+      Case IDM_MRUCLEAR, IDM_MRUPROJECTCLEAR
+         ClearMRUlist( id )
+      
+      Case IDM_OPENINCLUDE
+         OpenSelectedDocument( gApp.IncludeFilename )
+
+      Case IDM_COMMAND
+         Shell(Environ("COMSPEC"))
+         
+      Case IDM_EXIT
+         SendMessage( HWnd, WM_CLOSE, 0, 0 )
 
       ''  EDIT MENU
       Case IDM_REDO:               SciExec( hEdit, SCI_REDO, 0, 0)
@@ -919,12 +950,13 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
          else
             ' Determine if a Snippet can be inserted. This takes precedence over doing a block indent.
-            if DoInsertSnippet( pDoc ) = false then
+            if frmSnippets_DoInsertSnippet( pDoc ) = false then
                ' No snippet to insert, do a block indent instead.
                gApp.SuppressNotify = true
                Function = SciExec(hEdit, SCI_TAB, 0, 0)
                gApp.SuppressNotify = false
             end if
+            frmMain_UpdateLineCol(HWND_FRMMAIN)
          end if
       
       Case IDM_UNINDENTBLOCK
@@ -936,6 +968,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             gApp.SuppressNotify = true
             Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
             gApp.SuppressNotify = false
+            frmMain_UpdateLineCol(HWND_FRMMAIN)
          end if
          
       Case IDM_COMMENTBLOCK:       pDoc->BlockComment(True) 
@@ -1090,7 +1123,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       Case IDM_PROJECTOPEN:           OnCommand_ProjectOpen( HWnd )
       Case IDM_PROJECTFILESADD:       OnCommand_FileOpen( HWnd, false )
       Case IDM_PROJECTCLOSE:          OnCommand_ProjectClose( HWnd )
-      Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd ) 
+      Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd, false ) 
       Case IDM_SETFILENORMAL:         gApp.ProjectSetFileType( pDoc, FILETYPE_NORMAL )
       Case IDM_SETFILEMODULE:         gApp.ProjectSetFileType( pDoc, FILETYPE_MODULE )
       Case IDM_SETFILEMAIN:           gApp.ProjectSetFileType( pDoc, FILETYPE_MAIN )
@@ -1141,7 +1174,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       case IDM_VIEWTOOLBOX
          frmVDToolbox_Show(HWND)   ' toggle show/hide
       case IDM_MENUEDITOR            
-         frmMenuEditor_Show( HWND, SW_NORMAL )
+         frmMenuEditor_Show( HWND )
          if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
       case IDM_IMAGEMANAGER
          frmImageManager_Show( HWND, 0 )
@@ -1164,7 +1197,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
       
       ''   TOOLS MENU
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
-         ExecuteUserTool( id - IDM_USERTOOL )
+         frmUserTools_ExecuteUserTool( id - IDM_USERTOOL )
 
       Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
          ShowContextHelp(id) 
@@ -2002,7 +2035,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    frmMain_ChangeToolbarButtonsState
 
    ' Load the build configurations into the toolbar
-   LoadBuildComboBox()
+   frmBuildConfig_LoadBuildComboBox()
 
    ' Add a status bar
    Dim As HWnd hStatusbar = pWindow->AddControl("Statusbar", pWindow->hWindow, IDC_FRMMAIN_STATUSBAR)
@@ -2054,7 +2087,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    frmOutput_Show( HWND_FRMMAIN )
 
    ' Create the UserTools accelerator table
-   CreateUserTools_AcceleratorTable            
+   frmUserTools_CreateAcceleratorTable            
    
    ' SET STARTUP POSITION
    ' If no valid window size exists then set to the default working area of the screen

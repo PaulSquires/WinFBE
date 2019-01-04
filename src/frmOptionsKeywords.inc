@@ -11,12 +11,17 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmOptionsKeywords.bi"
+
 
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOptionsKeywords
 ' ========================================================================================
-Function frmOptionsKeywords_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmOptionsKeywords_OnCommand( ByVal HWnd As HWnd, _
+                                               ByVal id As Long, _
+                                               ByVal hwndCtl As HWnd, _
+                                               ByVal codeNotify As UINT _
+                                               ) As LRESULT
    Select Case id
       Case IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS
          If codeNotify = EN_CHANGE Then 
@@ -34,7 +39,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmOptionsKeywords
 ' ========================================================================================
-Function frmOptionsKeywords_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmOptionsKeywords_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOPTIONSKEYWORDS_TXTKEYWORDS))
    DeleteFont(hFont)
    Function = 0
@@ -44,18 +49,17 @@ End Function
 ' ========================================================================================
 ' frmOptionsKeywords Window procedure
 ' ========================================================================================
-Function frmOptionsKeywords_WndProc( ByVal HWnd   As HWnd, _
-                                  ByVal uMsg   As UINT, _
-                                  ByVal wParam As WPARAM, _
-                                  ByVal lParam As LPARAM _
-                                  ) As LRESULT
+private Function frmOptionsKeywords_WndProc( ByVal HWnd   As HWnd, _
+                                             ByVal uMsg   As UINT, _
+                                             ByVal wParam As WPARAM, _
+                                             ByVal lParam As LPARAM _
+                                             ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsKeywords_OnCommand)
       HANDLE_MSG (HWnd, WM_DESTROY, frmOptionsKeywords_OnDestroy)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -64,9 +68,7 @@ End Function
 ' ========================================================================================
 ' frmOptionsKeywords_Show
 ' ========================================================================================
-Function frmOptionsKeywords_Show( ByVal hWndParent As HWnd, _
-                                  ByVal nCmdShow   As Long = 0 _
-                                  ) As Long
+public function frmOptionsKeywords_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

@@ -11,11 +11,18 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmOptionsCompiler.bi"
+#include once "clsConfig.bi"
+
 
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOptionsCompiler
 ' ========================================================================================
-Function frmOptionsCompiler_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmOptionsCompiler_OnCommand( ByVal HWnd As HWnd, _
+                                               ByVal id As Long, _
+                                               ByVal hwndCtl As HWnd, _
+                                               ByVal codeNotify As UINT _
+                                               ) As LRESULT
 
    Select Case id
 
@@ -46,17 +53,16 @@ End Function
 ' ========================================================================================
 ' frmOptionsCompiler Window procedure
 ' ========================================================================================
-Function frmOptionsCompiler_WndProc( ByVal HWnd   As HWnd, _
-                                     ByVal uMsg   As UINT, _
-                                     ByVal wParam As WPARAM, _
-                                     ByVal lParam As LPARAM _
-                                     ) As LRESULT
+private Function frmOptionsCompiler_WndProc( ByVal HWnd   As HWnd, _
+                                             ByVal uMsg   As UINT, _
+                                             ByVal wParam As WPARAM, _
+                                             ByVal lParam As LPARAM _
+                                             ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsCompiler_OnCommand)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProcW(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -65,9 +71,7 @@ End Function
 ' ========================================================================================
 ' frmOptionsCompiler_Show
 ' ========================================================================================
-Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd, _
-                                  ByVal nCmdShow   As Long = 0 _
-                                  ) As Long
+public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -128,16 +132,6 @@ Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOMPILER_CMDAPIHELPPATH, "...", 362, 270, 24, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-
-'   pWindow->AddControl("LABEL", , IDC_FRMOPTIONSCOMPILER_LBLWINFBXHELP, "WinFBX Help file (WinFBX.chm):", 0, 300, 375, 16, _
-'        WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSCOMPILER_TXTWINFBXHELPPATH, "", 0, 320, 356, 20, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
-'        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-'   pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOMPILER_CMDWINFBXHELPPATH, "...", 362, 320, 24, 20, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    
    gConfig.FBWINCompiler32  = ProcessFromCurdrive(gConfig.FBWINCompiler32)

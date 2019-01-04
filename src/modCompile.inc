@@ -15,8 +15,6 @@
 ''
 ''   modCompile.inc
 ''
-''   Paul Squires 2019-01-01
-''
 ''   Code here handles the entire compiling process. It prepares the necessary
 ''   command line data to pass to the applicable 32 or 64 version of the FBC
 ''   compiler. Compile time errors are parsed through analyis of the log file
@@ -25,9 +23,13 @@
 ''
 ''
 
+#include once "frmUserTools.bi"
+#include once "frmOutput.bi"
 
-'':::::
-''  Handle information related to Compile process 
+
+''
+''  COMPILE_TYPE
+''  Handle information related to the currnet compile process 
 ''
 Type COMPILE_TYPE
    MainFilename     As WString * MAX_PATH   ' main source file (full path and file.ext)
@@ -52,7 +54,9 @@ Dim Shared gCompile As COMPILE_TYPE
 ''
 ''  Set the statusbar text and icon for a good/bad compile
 ''
-function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
+function SetCompileStatusBarMessage( byref wszText as const wstring, _
+                                     byval hIconCompile as HICON _
+                                     ) as LRESULT
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    StatusBar_SetIcon(hStatusBar, 4, hIconCompile)
    StatusBar_SetText(hStatusBar, 4, wszText)
@@ -172,6 +176,7 @@ function ResetScintillaCursors() as Long
    next
    function = 0
 end function
+
 
 ''
 '' Main module that handles the entire compile process
@@ -420,7 +425,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Run any precompile tools
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
       if gConfig.Tools(y).Action = USERTOOL_ACTION_PRECOMPILE then
-         ExecuteUserTool(y)
+         frmUserTools_ExecuteUserTool(y)
       end if   
    NEXT
 
@@ -549,7 +554,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Run any postcompile tools
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
       if gConfig.Tools(y).Action = USERTOOL_ACTION_POSTCOMPILE then
-         ExecuteUserTool(y)
+         frmUserTools_ExecuteUserTool(y)
       end if   
    NEXT
 
@@ -601,6 +606,7 @@ FUNCTION CreateChildProcess( byref zCmdLine AS wstring, _
  END IF
 END FUNCTION
 
+
 ''
 ''
 SUB RedirConsoleToFile( byref szExe AS wstring, _
@@ -648,6 +654,7 @@ SUB RedirConsoleToFile( byref szExe AS wstring, _
       END IF
    END IF
 END SUB
+
 
 ''
 ''
@@ -712,6 +719,7 @@ End Function
 
 ' ========================================================================================
 ' Set the cursor to the error position based on the selected line in frmCompileResults
+' or the TODO listview. 
 ' ========================================================================================
 Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Long
 
@@ -736,24 +744,9 @@ Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Lon
    else
       If AfxFileExists(wszErrorFile) = 0 Then Exit Function
    
-      ' Position the editor to the Error line
-      idx = gTTabCtl.GetTabIndexFromFilename( @wszErrorFile )
-      If idx >= 0 Then
-         gTTabCtl.SetFocusTab(idx)
-         pDoc = gTTabCtl.GetActiveDocumentPtr()
-      Else
-         ' File is not already loaded. Load it now.
-         pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                 False, _    ' bIsNewFile
-                                 False, _    ' bIsTemplate
-                                 true, _     ' bShowInTab
-                                 false, _    ' bIsInclude
-                                 @wszErrorFile, _  ' pwszName
-                                 0 )  ' pDocIn
-         
-         ' Position all of the controls into place
-         frmMain_PositionWindows(HWND_FRMMAIN)
-      End If 
+      ' If the document is already loaded then simply show the
+      ' document, otherwise we need to load it first and show it.
+      pDoc = OpenSelectedDocument( wszErrorFile )
    END IF
    if pDoc = 0 then exit function
    
@@ -980,15 +973,17 @@ function ParseLogForError( byref wsLogSt as CWSTR, _
       
       ' If fGoodCompile is False then something unusual occurred so better show the log file by default
       If fGoodCompile = False Then
-         PositionOutputWindows(HWND_FRMOUTPUT)
-      End If 
+         frmOutput_PositionWindows(HWND_FRMOUTPUT)
+      End If
+       
       ' If the Search Results, TODO, Notes tab is active then reposition to 
       ' the first tab for error listview
       select case TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) 
          case 2, 3, 4
          TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
-         PositionOutputWindows(HWND_FRMOUTPUT)
+         frmOutput_PositionWindows(HWND_FRMOUTPUT)
       end select
+      
       ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
       frmMain_PositionWindows(HWND_FRMMAIN)
       ' Set to error line position only after all windows have been shown and resized

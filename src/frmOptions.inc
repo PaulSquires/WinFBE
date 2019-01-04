@@ -11,11 +11,21 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmOptions.bi"
+#include once "frmOptionsGeneral.bi"
+#include once "frmOptionsEditor.bi"
+#include once "frmOptionsCompiler.bi"
+#include once "frmOptionsColors.bi"
+#include once "frmOptionsLocal.bi"
+#include once "frmOptionsKeywords.bi"
+
+#include once "clsConfig.bi"
+
 
 ' ========================================================================================
 ' Save all options to the gConfig class
 ' ========================================================================================
-Sub SaveEditorOptions()    
+private function frmOptions_SaveEditorOptions() as long   
    
    Dim HWnd As HWnd 
    Dim wText As WString * MAX_PATH  
@@ -29,6 +39,7 @@ Sub SaveEditorOptions()
    gConfig.HideToolbar          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDETOOLBAR) )
    gConfig.HideStatusbar        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKHIDESTATUSBAR) )
    gConfig.CheckForUpdates      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSGENERAL_CHKUPDATES) )
+
 
    ' EDITOR OPTIONS   
    HWnd = HWND_FRMOPTIONSEDITOR
@@ -58,8 +69,10 @@ Sub SaveEditorOptions()
    HWnd = HWND_FRMOPTIONSLOCAL
    wText = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSLOCAL_FRAMELOCALIZATION) )
    If (Ucase(wText) <> Ucase(gConfig.LocalizationFile)) orelse (gLocalPhrasesEdit = true) Then
-      MessageBox( HWND_FRMMAIN, L(108,"Localization changes will be applied the next time the application is run."), _
-                  L(109,"Warning"), MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      MessageBox( HWND_FRMMAIN, _
+                  L(108,"Localization changes will be applied the next time the application is run."), _
+                  L(109,"Warning"), _
+                  MB_OK Or MB_ICONINFORMATION Or MB_DEFBUTTON1 Or MB_APPLMODAL )
    End If
    gConfig.LocalizationFile = wText
    
@@ -83,6 +96,7 @@ Sub SaveEditorOptions()
    gConfig.EditorFontSize = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTSIZE), idx )  
    idx = ComboBox_GetCurSel( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET) )
    gConfig.EditorFontCharSet = AfxGetComboBoxText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTCHARSET), idx )
+   
    
    ' COMPILER OPTIONS
    HWnd = HWND_FRMOPTIONSCOMPILER
@@ -111,13 +125,16 @@ Sub SaveEditorOptions()
    ' Output the config settings to disk file
    gConfig.SaveConfigFile
 
-End Sub
+   function = 0
+End function
 
 
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmOptions
 ' ========================================================================================
-Function frmOptions_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmOptions_OnCreate( ByVal HWnd As HWnd, _
+                                      ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                      ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -133,12 +150,17 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOptions
 ' ========================================================================================
-Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmOptions_OnCommand( ByVal HWnd As HWnd, _
+                                       ByVal id As Long, _
+                                       ByVal hwndCtl As HWnd, _
+                                       ByVal codeNotify As UINT _
+                                       ) As LRESULT
 
    Select Case id
+      
       Case IDC_FRMOPTIONS_CMDOK
          If codeNotify = BN_CLICKED Then
-            SaveEditorOptions()
+            frmOptions_SaveEditorOptions()
             ' Reposition main windows in case hide toolbar/statusbar selected
             frmMain_PositionWindows(HWND_FRMMAIN)
             ' Apply the newly saved options to all open Scintilla windows
@@ -150,11 +172,13 @@ Function frmOptions_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCt
             SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
+      
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
             SendMessage HWnd, WM_CLOSE, 0, 0
             Exit Function
          End If
+   
    End Select
 
    Function = 0
@@ -164,11 +188,15 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmOptions
 ' ========================================================================================
-Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
+                                      ByVal id As Long, _
+                                      ByVal pNMHDR As NMHDR Ptr _
+                                      ) As LRESULT
 
     Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
     
     Select Case id
+   
        Case IDC_FRMOPTIONS_TVWCATEGORIES
           If pNMHDR->code = TVN_SELCHANGED Then
              Dim As Long nLeft, nTop
@@ -209,15 +237,16 @@ Function frmOptions_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR 
              GetWindowRect( hLabel, @rc )
              MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
              SetWindowPos hForm, HWND_TOP, _
-                            rc.Left + pWindow->ScaleX(5), pWindow->ScaleY(50), _
-                            pWindow->ScaleX(420), pWindow->ScaleY(350), _
-                            SWP_SHOWWINDOW
+                           rc.Left + pWindow->ScaleX(5), pWindow->ScaleY(50), _
+                           pWindow->ScaleX(420), pWindow->ScaleY(350), _
+                           SWP_SHOWWINDOW
              
              InvalidateRect HWnd, ByVal Null, True
              UpdateWindow HWnd
              
              hCurrent = hForm
           End If
+
    End Select
 
    Function = 0
@@ -227,23 +256,27 @@ End Function
 ' ========================================================================================
 ' Process WM_CTLCOLORSTATIC message for window/dialog: frmOptions
 ' ========================================================================================
-Function frmOptions_OnCtlColorStatic(HWnd As HWnd, hdc As HDC, hWndChild As HWnd, nType As Long) As HBRUSH
+private Function frmOptions_OnCtlColorStatic( byval HWnd As HWnd, _
+                                              byval hdc As HDC, _
+                                              byval hWndChild As HWnd, _
+                                              byval nType As Long _
+                                              ) As HBRUSH
 
-   Select Case hWndChild
-      Case GetDlgItem( HWnd, IDC_FRMOPTIONS_LBLCATEGORY )
-         ' Set the category label to blue text 
-         SetTextColor hdc, 8388608
-         SetBkColor   hdc, GetSysColor( COLOR_BTNFACE )
-         Function = GetSysColorBrush( COLOR_BTNFACE )
-   End Select
-         
+   if hWndChild = GetDlgItem( HWnd, IDC_FRMOPTIONS_LBLCATEGORY ) then
+      ' Set the category label to blue text 
+      SetTextColor hdc, 8388608
+      SetBkColor   hdc, GetSysColor( COLOR_BTNFACE )
+      return GetSysColorBrush( COLOR_BTNFACE )
+   end if
+   
+   function = 0      
 End Function
 
 
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmOptions
 ' ========================================================================================
-Function frmOptions_OnClose(HWnd As HWnd) As LRESULT
+private Function frmOptions_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow HWnd
@@ -254,7 +287,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmOptions
 ' ========================================================================================
-Function frmOptions_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim As HFONT hFont = AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOPTIONS_LBLCATEGORY))
    DeleteFont(hFont)
    PostQuitMessage(0)
@@ -265,11 +298,11 @@ End Function
 ' ========================================================================================
 ' frmOptions Window procedure
 ' ========================================================================================
-Function frmOptions_WndProc( ByVal HWnd   As HWnd, _
-                             ByVal uMsg   As UINT, _
-                             ByVal wParam As WPARAM, _
-                             ByVal lParam As LPARAM _
-                             ) As LRESULT
+private Function frmOptions_WndProc( ByVal HWnd   As HWnd, _
+                                     ByVal uMsg   As UINT, _
+                                     ByVal wParam As WPARAM, _
+                                     ByVal lParam As LPARAM _
+                                     ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmOptions_OnCreate)
@@ -280,7 +313,6 @@ Function frmOptions_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_CTLCOLORSTATIC, frmOptions_OnCtlColorStatic)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -289,9 +321,7 @@ End Function
 ' ========================================================================================
 ' frmOptions_Show
 ' ========================================================================================
-Function frmOptions_Show( ByVal hWndParent As HWnd, _
-                          ByVal nCmdShow   As Long = 0 _
-                          ) As Long
+public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

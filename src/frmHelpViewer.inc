@@ -12,9 +12,12 @@
 '    GNU General Public License for more details.
 
 
+#include once "frmHelpViewer.bi"
+
+
 ''
 ''
-function HighlightTreeviewNode( byref wszLocationURL as WSTRING ) as Long
+private function frmHelpViewer_HighlightTreeviewNode( byref wszLocationURL as WSTRING ) as Long
    for i as long = lbound(gHTMLHelp) to Ubound(gHTMLHelp)
       if wszLocationURL = gHTMLHelp(i).wszLocationURL then
          TreeView_SelectItem( gHTMLHelp(i).hTreeview, gHTMLHelp(i).TreeviewNode )
@@ -28,7 +31,7 @@ end function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Get the entire client area
    Dim As Rect rc
@@ -82,8 +85,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmHelpViewer
 ' ========================================================================================
-Function frmHelpViewer_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmHelpViewer_OnCommand( ByVal HWnd As HWnd, _
+                                          ByVal id As Long, _
+                                          ByVal hwndCtl As HWnd, _
+                                          ByVal codeNotify As UINT _
+                                          ) As LRESULT
    DIM pwb AS CWebCtx PTR 
 
    select case TabCtrl_GetCurSel( GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TABCONTROL) ) 
@@ -98,13 +104,13 @@ Function frmHelpViewer_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwn
          If codeNotify = BN_CLICKED Then
             pwb->GoBack
             pwb->WaitForPageLoad(10)
-            HighlightTreeviewNode(pwb->LocationURL)
+            frmHelpViewer_HighlightTreeviewNode(pwb->LocationURL)
          End If
       Case IDC_FRMHELPVIEWER_FORWARD
          If codeNotify = BN_CLICKED Then
             pwb->GoForward
             pwb->WaitForPageLoad(10)
-            HighlightTreeviewNode(pwb->LocationURL)
+            frmHelpViewer_HighlightTreeviewNode(pwb->LocationURL)
          End If
       Case IDC_FRMHELPVIEWER_PRINT
          If codeNotify = BN_CLICKED Then
@@ -123,7 +129,7 @@ End Function
 ''
 ''  Display the HTML file held in the array index
 ''
-function frmHelpViewer_DisplayHTML( byval idx as long ) as Long
+private function frmHelpViewer_DisplayHTML( byval idx as long ) as Long
    
    if idx >= lbound(gHTMLHelp) andalso idx <= ubound(gHTMLHelp) then
       if AfxFileExists(gHTMLHelp(idx).wszFilename) then
@@ -157,8 +163,10 @@ end function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmHelpViewer
 ' ========================================================================================
-Function frmHelpViewer_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-
+private Function frmHelpViewer_OnNotify( ByVal HWnd As HWnd, _
+                                         ByVal id As Long, _
+                                         ByVal pNMHDR As NMHDR Ptr _
+                                         ) As LRESULT
    select case pNMHDR->code
       case TCN_SELCHANGE 
          if id = IDC_FRMHELPVIEWER_TABCONTROL then
@@ -177,8 +185,11 @@ end function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmHelpViewer
 ' ========================================================================================
-Function frmHelpViewer_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
-
+private Function frmHelpViewer_OnSize( ByVal HWnd As HWnd, _
+                                       ByVal state As UINT, _
+                                       ByVal cx As Long, _
+                                       ByVal cy As Long _
+                                       ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
       frmHelpViewer_PositionWindows(HWnd)
    End If   
@@ -190,7 +201,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmHelpViewer
 ' ========================================================================================
-Function frmHelpViewer_OnClose( ByVal HWnd As HWnd ) As LRESULT
+private Function frmHelpViewer_OnClose( ByVal HWnd As HWnd ) As LRESULT
    ' Never close the window; simply hide it.
    ShowWindow( HWnd, SW_HIDE )
    Function = 0
@@ -200,7 +211,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmHelpViewer
 ' ========================================================================================
-Function frmHelpViewer_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmHelpViewer_OnDestroy( byval HWnd As HWnd ) As LRESULT
    HWND_FRMHELPVIEWER = 0
    ' Delete the CWewbCtx class
    DIM pwb1 AS CWebCtx PTR = CAST(CWebCtx PTR, GetProp(hwnd, "CWEBCTXPTR_WINFBE"))
@@ -218,12 +229,11 @@ End Function
 ' ========================================================================================
 ' frmHelpViewer Window procedure
 ' ========================================================================================
-Function frmHelpViewer_WndProc( ByVal HWnd   As HWnd, _
-                                ByVal uMsg   As UINT, _
-                                ByVal wParam As WPARAM, _
-                                ByVal lParam As LPARAM _
-                                ) As LRESULT
-
+private Function frmHelpViewer_WndProc( ByVal HWnd   As HWnd, _
+                                        ByVal uMsg   As UINT, _
+                                        ByVal wParam As WPARAM, _
+                                        ByVal lParam As LPARAM _
+                                        ) As LRESULT
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND,     frmHelpViewer_OnCommand)
       HANDLE_MSG (HWnd, WM_NOTIFY,      frmHelpViewer_OnNotify)
@@ -232,7 +242,6 @@ Function frmHelpViewer_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_DESTROY,     frmHelpViewer_OnDestroy)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -240,7 +249,10 @@ End Function
 
 ''
 ''
-function LoadHelpTreeview( byval hTreeview as hwnd, byval sPath as CWSTR, byval hParent as HTREEITEM ) as long
+private function LoadHelpTreeview( byval hTreeview as hwnd, _
+                                   byval sPath as CWSTR, _
+                                   byval hParent as HTREEITEM _
+                                   ) as long
 
    DIM pFinder AS CFindFile
 
@@ -287,12 +299,13 @@ function LoadHelpTreeview( byval hTreeview as hwnd, byval sPath as CWSTR, byval 
    function = 0
 end function
 
+
 ' ========================================================================================
 ' frmHelpViewer_Show
 ' ========================================================================================
-Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
-                             ByVal nCmdShow   As Long = -1 _
-                             ) As Long
+public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
+                                    ByVal nCmdShow   As Long = -1 _
+                                    ) As LRESULT
 
    ' If function list already exists then toggle its visibility
    ' unless nCmdShow is explicitly set to show it.

@@ -11,11 +11,16 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmBuildConfig.bi"
+#include once "clsConfig.bi"
+#include once "clsTopTabCtl.bi"
+#include once "clsDocument.bi"
+
 
 ' ========================================================================================
 ' Load all of the build descriptions into the listbox
 ' ========================================================================================
-function LoadBuildListBox( byval hParent as hwnd ) as Long
+private function frmBuildConfig_LoadBuildListBox( byval hParent as hwnd ) as Long
    dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMBUILDCONFIG_LIST1)
 
    ListBox_ResetContent(hList1)
@@ -26,10 +31,11 @@ function LoadBuildListBox( byval hParent as hwnd ) as Long
    function = 0
 end function
 
+
 ' ========================================================================================
 ' Return the string GUID of the currently selected build configuration
 ' ========================================================================================
-function GetSelectedBuildGUID() as String
+public function frmBuildConfig_GetSelectedBuildGUID() as String
 
    dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
    if nCurSel > -1 THEN
@@ -38,10 +44,11 @@ function GetSelectedBuildGUID() as String
 
 end function
 
+
 ' ========================================================================================
 ' Return the string GUID of the default (if any) build configuration
 ' ========================================================================================
-function GetDefaultBuildGUID() as String
+private function frmBuildConfig_GetDefaultBuildGUID() as String
 
    for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
       if gConfig.Builds(i).IsDefault then 
@@ -52,10 +59,11 @@ function GetDefaultBuildGUID() as String
    
 end function
 
+
 ' ========================================================================================
 ' Load all of the build descriptions into the toolbar combobox and set to selected
 ' ========================================================================================
-function LoadBuildComboBox() as Long
+public function frmBuildConfig_LoadBuildComboBox() as Long
 
    Dim pDocMain As clsDocument Ptr 
    dim as long nCurSel = 0
@@ -91,7 +99,9 @@ end function
 ' ========================================================================================
 ' Swap two entries in the build Listbox
 ' ========================================================================================
-function SwapBuildListBoxItems( byval Item1 as long, Byval Item2 as long) as Long
+private function frmBuildConfig_SwapListBoxItems( byval Item1 as long, _
+                                                  Byval Item2 as long _
+                                                  ) as Long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LIST1)
    
    ' Swap the array values
@@ -107,7 +117,7 @@ end function
 ' ========================================================================================
 ' Set the build description and compiler options depending on what listbox entry is selected
 ' ========================================================================================
-function SetBuildConfigTextboxes() as long
+private function frmBuildConfig_SetBuildConfigTextboxes() as long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LIST1)
    dim as hwnd hList2 = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_LSTOPTIONS)
    dim as hwnd hCheck = GetDlgItem( HWND_FRMBUILDCONFIG, IDC_FRMBUILDCONFIG_CHKISDEFAULT)
@@ -155,7 +165,9 @@ end function
 ' ========================================================================================
 ' Process WM_MEASUREITEM message for window/dialog: frmBuildConfig
 ' ========================================================================================
-Function frmBuildConfig_OnMeasureItem( ByVal HWnd As HWnd, ByVal lpmis As MEASUREITEMSTRUCT Ptr ) As Long
+private Function frmBuildConfig_OnMeasureItem( ByVal HWnd As HWnd, _
+                                               ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+                                               ) As Long
    ' Set the height of the List box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    lpmis->itemHeight = pWindow->ScaleY(LISTBOX_LINEHEIGHT)
@@ -166,7 +178,9 @@ End Function
 ' ========================================================================================
 ' Process WM_DRAWITEM message for window/dialog: frmBuildConfig
 ' ========================================================================================
-Function frmBuildConfig_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEMSTRUCT Ptr ) As Long
+private Function frmBuildConfig_OnDrawItem( ByVal HWnd As HWnd, _
+                                            ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+                                            ) As Long
 
    Dim memDC as HDC                 ' Double buffering
    Dim hbit  As HBITMAP             ' Double buffering
@@ -272,7 +286,9 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed ListBox window.
 ' ========================================================================================
-function frmBuildConfig_ProcessListboxClick( byval hwnd as HWND, byval nCurSel as long ) as long
+private function frmBuildConfig_ProcessListboxClick( byval hwnd as HWND, _
+                                                     byval nCurSel as long _
+                                                     ) as long
    if nCurSel = -1 then exit function
    
    ' Get the action text for this listbox item. If it exists in the Options
@@ -295,7 +311,7 @@ end function
 ' ========================================================================================
 ' Processes messages for the subclassed ListBox window.
 ' ========================================================================================
-Function frmBuildConfig_ListBox_SubclassProc ( _
+private Function frmBuildConfig_ListBox_SubclassProc ( _
                            ByVal HWnd   As HWnd, _                 ' // Control window handle
                            ByVal uMsg   As UINT, _                 ' // Type of message
                            ByVal wParam As WPARAM, _               ' // First message parameter
@@ -380,7 +396,9 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmBuildConfig
 ' ========================================================================================
-Function frmBuildConfig_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmBuildConfig_OnCreate( ByVal HWnd As HWnd, _
+                                          ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                          ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -396,7 +414,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmBuildConfig
 ' ========================================================================================
-Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmBuildConfig_OnCommand( ByVal HWnd As HWnd, _
+                                           ByVal id As Long, _
+                                           ByVal hwndCtl As HWnd, _
+                                           ByVal codeNotify As UINT _
+                                           ) As LRESULT
 
    dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMBUILDCONFIG_LIST1)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
@@ -409,7 +431,7 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
    Select Case id
       case IDC_FRMBUILDCONFIG_LIST1
          if codeNotify = LBN_SELCHANGE THEN
-            SetBuildConfigTextboxes()
+            frmBuildConfig_SetBuildConfigTextboxes()
          END IF
           
       case IDC_FRMBUILDCONFIG_TXTDESCRIPTION
@@ -477,14 +499,14 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
       case IDC_FRMBUILDCONFIG_CMDUP
          if codeNotify = BN_CLICKED THEN
             if nCurSel > 0 THEN
-               SwapBuildListboxItems(nCurSel, nCurSel-1)
+               frmBuildConfig_SwapListboxItems(nCurSel, nCurSel-1)
             END IF
          end if
 
       case IDC_FRMBUILDCONFIG_CMDDOWN
          if codeNotify = BN_CLICKED THEN
             if nCurSel < ListBox_GetCount(hList1)-1 THEN
-               SwapBuildListboxItems(nCurSel, nCurSel+1)
+               frmBuildConfig_SwapListboxItems(nCurSel, nCurSel+1)
             END IF
          end if
 
@@ -508,10 +530,10 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
             gConfig.BuildsTemp(nCurSel).Is32bit = 1
             gConfig.BuildsTemp(nCurSel).Is64bit = 0
             ' reload the listbox
-            LoadBuildListBox(HWND)
+            frmBuildConfig_LoadBuildListBox(HWND)
             nCurSel = Min(nCurSel, ubound(gConfig.BuildsTemp))
             ListBox_SetCurSel(hList1, nCurSel)
-            SetBuildConfigTextboxes()
+            frmBuildConfig_SetBuildConfigTextboxes()
             SetFocus hList1
          end if
 
@@ -531,10 +553,10 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
                      redim preserve gConfig.BuildsTemp(ubound(gConfig.BuildsTemp)-1)
                   END IF
                   ' reload the listbox
-                  LoadBuildListBox(HWND)
+                  frmBuildConfig_LoadBuildListBox(HWND)
                   nCurSel = Min(nCurSel, ubound(gConfig.BuildsTemp))
                   ListBox_SetCurSel(hList1, nCurSel)
-                  SetBuildConfigTextboxes()
+                  frmBuildConfig_SetBuildConfigTextboxes()
                   SetFocus hList1
                end if
             END IF
@@ -558,7 +580,7 @@ Function frmBuildConfig_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hw
                pDocMain = gTTabCtl.GetActiveDocumentPtr()
                If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
             end if
-            LoadBuildListBox(HWND)
+            frmBuildConfig_LoadBuildListBox(HWND)
             frmMain_UpdateLineCol(HWND_FRMMAIN)
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
@@ -578,7 +600,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmBuildConfig
 ' ========================================================================================
-Function frmBuildConfig_OnClose(HWnd As HWnd) As LRESULT
+private Function frmBuildConfig_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow( HWnd )
@@ -589,7 +611,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmBuildConfig
 ' ========================================================================================
-Function frmBuildConfig_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmBuildConfig_OnDestroy( byval HWnd As HWnd) As LRESULT
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -598,11 +620,11 @@ End Function
 ' ========================================================================================
 ' frmBuildConfig Window procedure
 ' ========================================================================================
-Function frmBuildConfig_WndProc( ByVal HWnd   As HWnd, _
-                                 ByVal uMsg   As UINT, _
-                                 ByVal wParam As WPARAM, _
-                                 ByVal lParam As LPARAM _
-                                 ) As LRESULT
+private Function frmBuildConfig_WndProc( ByVal HWnd   As HWnd, _
+                                         ByVal uMsg   As UINT, _
+                                         ByVal wParam As WPARAM, _
+                                         ByVal lParam As LPARAM _
+                                         ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,      frmBuildConfig_OnCreate)
@@ -622,9 +644,7 @@ End Function
 ' ========================================================================================
 ' frmBuildConfig_Show
 ' ========================================================================================
-Function frmBuildConfig_Show( ByVal hWndParent As HWnd, _
-                              ByVal nCmdShow   As Long = 0 _
-                              ) As Long
+public Function frmBuildConfig_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    DIM hBitmap AS HBITMAP 
    dim hCtrl as HWnd
@@ -717,7 +737,7 @@ Function frmBuildConfig_Show( ByVal hWndParent As HWnd, _
    for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
       gConfig.BuildsTemp(i) = gConfig.Builds(i)   
    NEXT
-   LoadBuildListBox(hForm)
+   frmBuildConfig_LoadBuildListBox(hForm)
    
    ' Load the Compiler Options Listbox
    hCtrl = GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LSTOPTIONS)
@@ -731,7 +751,7 @@ Function frmBuildConfig_Show( ByVal hWndParent As HWnd, _
    dim hList as hwnd = GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    if nCurSel = -1 then nCurSel = 0 
    ListBox_SetCurSel(hList, nCurSel)
-   SetBuildConfigTextboxes()
+   frmBuildConfig_SetBuildConfigTextboxes()
    
    SetFocus GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LIST1)
    

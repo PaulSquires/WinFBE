@@ -11,20 +11,20 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-DIM shared pBtnOutputClose AS CImageCtx ptr
+#include once "frmOutput.bi"
+#include once "clsApp.bi"
+
 
 ' ========================================================================================
 ' Clear data from all of the controls in the frmOutput windows. This is needed
 ' when Projects are loaded and closed.
 ' ========================================================================================
-function frmOutput_ResetAllControls() as long 
-
+private function frmOutput_ResetAllControls() as long 
    ListView_DeleteAllItems( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW) )
    AfxSetWindowText( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), "" )
    ListBox_ResetContent( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH) )
    ListView_DeleteAllItems( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO) )
    AfxSetWindowText( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), "" )
-
    function = 0
 END FUNCTION
 
@@ -32,7 +32,7 @@ END FUNCTION
 ' ========================================================================================
 ' Ensure that the correct notes are shown
 ' ========================================================================================
-function frmOutput_ShowNotes() as long 
+public function frmOutput_ShowNotes() as long 
 
    dim hCtl as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES)
 
@@ -49,7 +49,7 @@ END FUNCTION
 ' ========================================================================================
 ' Update the TODO listview
 ' ========================================================================================
-function UpdateToDoListview() as long 
+public function frmOutput_UpdateToDoListview() as long 
    dim as hwnd hLV = GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO)
    ListView_DeleteAllItems( hLV )
    dim as long n = 0
@@ -74,31 +74,34 @@ END FUNCTION
 ' ========================================================================================
 ' Process the search result that was double clicked
 ' ========================================================================================
-function DoSearchFileSelected() as LONG
+private function frmOutput_DoSearchFileSelected() as LONG
 
-   dim as long nCursel, f1, f2, nSize, nLineNum
-   dim wzText as wstring * MAX_PATH
-   dim wzFilename as wstring * MAX_PATH
+   dim wszText as wstring * MAX_PATH
+   dim wszFilename as wstring * MAX_PATH
+   dim as long nCursel, nLineNum
 
-   dim as HWND hLB = GetDlgItem(hWnd_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH)
-   nCurSel = ListBox_GetCurSel(hLB)
-   SendMessage( hLB, LB_GETTEXT, nCurSel, cast(LPARAM, @wzText))
+   dim as HWND hList = GetDlgItem(hWnd_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH)
+   nCurSel = ListBox_GetCurSel( hList )
+   SendMessage( hList, LB_GETTEXT, nCurSel, cast(LPARAM, @wszText))
    
    'X:\FB\WinFBE - Editor\license.txt(1): WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
    
+   ' Do not use AfxStrExtract because the string could have multiple parenthesis.
+   
    ' Search for the first open parenthesis 
-   f1 = instr(wzText, "(")
+   dim as long f1, f2
+   f1 = instr(wszText, "(")
    if f1 THEN
-      wzFilename = left(wzText, f1-1)
-      wzText = mid(wzText, f1+1) 
-      f2 = instr(wzText, ")")
+      wszFilename = left(wszText, f1-1)
+      wszText = mid(wszText, f1+1) 
+      f2 = instr(wszText, ")")
       if f2 THEN
-         wzText = left(wzText, f2-1) 
-         nLineNum = val(wzText) - 1
+         wszText = left(wszText, f2-1) 
+         nLineNum = val(wszText) - 1
       end if
    END IF
-
-   OpenSelectedDocument( wzFilename, "", nLineNum )
+   
+   OpenSelectedDocument( wszFilename, "", nLineNum )
 
    function = 0
 end function
@@ -107,7 +110,7 @@ end function
 ' ========================================================================================
 ' Show/Hide correct child controls
 ' ========================================================================================
-Function ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
+public Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
 
    Dim As HWND hTabCtl
 
@@ -140,7 +143,7 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
+public Function frmOutput_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    If pWindow = 0 Then Exit Function
@@ -169,7 +172,7 @@ Function PositionOutputWindows( ByVal HWnd As HWnd ) As LRESULT
    SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
 
    ' Determine which child controls should be shown or hidden
-   ShowHideOutputControls(hWnd)
+   frmOutput_ShowHideOutputControls(hWnd)
    
    Function = 0
 End Function
@@ -178,10 +181,14 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmOutput
 ' ========================================================================================
-Function frmOutput_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmOutput_OnSize( ByVal HWnd As HWnd, _
+                                   ByVal state As UINT, _
+                                   ByVal cx As Long, _
+                                   ByVal cy As Long _
+                                   ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
-      PositionOutputWindows(HWnd)
+      frmOutput_PositionWindows(HWnd)
    End If
    Function = 0
 End Function
@@ -190,14 +197,17 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOutput
 ' ========================================================================================
-Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmOutput_OnCommand( ByVal HWnd As HWnd, _
+                                      ByVal id As Long, _
+                                      ByVal hwndCtl As HWnd, _
+                                      ByVal codeNotify As UINT _
+                                      ) As LRESULT
    Select case codeNotify
 
       case LBN_DBLCLK 
          if (id = IDC_FRMOUTPUT_LISTSEARCH) orelse _
               (id = IDC_FRMOUTPUT_LVTODO) then
-            DoSearchFileSelected()   
+            frmOutput_DoSearchFileSelected()   
             Exit Function
          End If
       
@@ -218,17 +228,20 @@ Function frmOutput_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl
    Function = 0
 End Function
       
+
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmOutput
 ' ========================================================================================
-Function frmOutput_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
-     
+private Function frmOutput_OnNotify( ByVal HWnd As HWnd, _
+                                     ByVal id As Long, _
+                                     ByVal pNMHDR As NMHDR Ptr _
+                                     ) As LRESULT
    Select Case pNMHDR->code 
       
       Case TCN_SELCHANGING
       Case TCN_SELCHANGE
          If id = IDC_FRMOUTPUT_TABCONTROL Then
-            PositionOutputWindows(HWND)
+            frmOutput_PositionWindows(HWND)
          End If
       case NM_CLICK
          If id = IDC_FRMOUTPUT_BTNCLOSE Then
@@ -244,7 +257,7 @@ End Function
 ' ========================================================================================
 ' Process WM_PAINT message for window/dialog: frmOutput
 ' ========================================================================================
-Function frmOutput_OnPaint( ByVal HWnd As HWnd) As LRESULT
+private Function frmOutput_OnPaint( ByVal HWnd As HWnd) As LRESULT
             
    Dim As PAINTSTRUCT ps
    Dim As HPEN hPen
@@ -274,10 +287,11 @@ Function frmOutput_OnPaint( ByVal HWnd As HWnd) As LRESULT
    Function = 0
 End Function
 
+
 ' ========================================================================================
-' Processes messages for the subclassed frmOutput listview control.
+' Processes messages for the subclassed frmOutput Compile Results and TODO listviews .
 ' ========================================================================================
-Function frmOutput_Listview_SubclassProc ( _
+private Function frmOutput_Listview_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -328,15 +342,14 @@ Function frmOutput_Listview_SubclassProc ( _
 End Function
 
 
-
 ' ========================================================================================
 ' frmOutput Window procedure
 ' ========================================================================================
-Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
-                            ByVal uMsg   As UINT, _
-                            ByVal wParam As WPARAM, _
-                            ByVal lParam As LPARAM _
-                            ) As LRESULT
+private Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
+                                    ByVal uMsg   As UINT, _
+                                    ByVal wParam As WPARAM, _
+                                    ByVal lParam As LPARAM _
+                                    ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND, frmOutput_OnCommand)
@@ -344,13 +357,14 @@ Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_SIZE,    frmOutput_OnSize)
       HANDLE_MSG (HWnd, WM_PAINT,   frmOutput_OnPaint)
   
-      CASE WM_DESTROY
-         DeleteFont( AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOUTPUT_TXTLOGFILE)) )
-         if pBtnOutputClose then delete pBtnOutputClose
+   CASE WM_DESTROY
+      DIM pImageCtx AS CImageCtx ptr = AfxCImageCtxPtr(hwnd, IDC_FRMOUTPUT_BTNCLOSE)
+      if pImageCtx then delete pImageCtx
+      DeleteFont( AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOUTPUT_TXTLOGFILE)) )
+      if pImageCtx then delete pImageCtx
          
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -359,7 +373,7 @@ End Function
 ' ========================================================================================
 ' frmOutput_Show
 ' ========================================================================================
-Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
+public Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -384,11 +398,12 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    TabCtrl_AddTab( hCtl, -1, L(264, "Notes") )
    TabCtrl_SetCurSel( hCtl, 0 )
    
-   pBtnOutputClose = new CImageCtx(pWindow, IDC_FRMOUTPUT_BTNCLOSE, "", 0, 0, 24, 24)
-   pBtnOutputClose->SetBkColor(GetSysColor(COLOR_BTNFACE))
-   pBtnOutputClose->SetBkColorHot(GetSysColor(COLOR_BTNHIGHLIGHT))
-   pBtnOutputClose->LoadImageFromResource (pWindow->InstanceHandle, wstr("IMAGE_CLOSE"))
-   AfxAddTooltip(pBtnOutputClose->hWindow, L(161, "Close"))
+   DIM pImageCtx AS CImageCtx ptr 
+   pImageCtx = new CImageCtx(pWindow, IDC_FRMOUTPUT_BTNCLOSE, "", 0, 0, 24, 24)
+   pImageCtx->SetBkColor(GetSysColor(COLOR_BTNFACE))
+   pImageCtx->SetBkColorHot(GetSysColor(COLOR_BTNHIGHLIGHT))
+   pImageCtx->LoadImageFromResource (pWindow->InstanceHandle, wstr("IMAGE_CLOSE"))
+   AfxAddTooltip(pImageCtx->hWindow, L(161, "Close"))
 
    hCtl = _
       pWindow->AddControl("EDITMULTILINE", , IDC_FRMOUTPUT_TXTLOGFILE, "", 0, 0, 0, 0, _
@@ -452,7 +467,7 @@ Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    AfxSetWindowFont( hCtl, hFont, True )
    AfxSetWindowText(hCtl, gApp.NonProjectNotes)
    
-   PositionOutputWindows(HWND_FRMOUTPUT)
+   frmOutput_PositionWindows(HWND_FRMOUTPUT)
    
    Function = 0
 

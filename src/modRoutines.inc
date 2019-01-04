@@ -11,6 +11,12 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmUserTools.bi"
+#include once "frmOutput.bi"
+#include once "frmOptionsCompiler.bi"
+#include once "frmOptionsLocal.bi"
+#include once "frmProjectOptions.bi"
+
 
 ' ========================================================================================
 ' Calculate the Julian date for today's date. Used by CheckForUpdates.
@@ -472,12 +478,78 @@ end function
 
 
 ' ========================================================================================
+' Determine if current line is a valid #Include filename
+' ========================================================================================
+function IsCurrentLineIncludeFilename() as Boolean
+   ' Determine if the text under the current line is a valid #Include filename
+   ' and return TRUE if it is. If F6 was pressed then the calling program can
+   ' simply open/load the gApp.IncludeFilename. If the right click popup menu
+   ' is to be shown then simply add the option to open this file.
+
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then Exit Function
+   
+   Dim wszPath         As WString * MAX_PATH
+   Dim wszCompilerPath As WString * MAX_PATH
+   Dim wszText         As WString * MAX_PATH
+   Dim sFilename       As String 
+   Dim sLine           As String 
+   Dim nLine           As Long   
+   Dim i               As Long
+
+   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+   if idxBuild = -1 then idxBuild = 0
+   if gConfig.Builds(idxBuild).Is32bit then wszCompilerPath = gConfig.FBWINcompiler32
+   if gConfig.Builds(idxBuild).Is64bit then wszCompilerPath = gConfig.FBWINcompiler64
+   wszCompilerPath = ProcessFromCurdrive(wszCompilerPath)
+   wszCompilerPath = AfxStrPathname( "PATH", wszCompilerPath ) & "inc"
+
+   ' Convert relative path to absolute path if needed.
+   if AfxPathIsRelative(wszCompilerPath) then
+      wszCompilerPath = AfxPathCombine(AfxGetExePathName, wszCompilerPath)
+   END IF
+
+   nLine = pDoc->GetCurrentLineNumber()
+   sLine = LTrim(pDoc->GetLine(nLine))
+   
+   If Left(Ucase(sLine), 9) = "#INCLUDE " Then sFilename = Mid(sLine, 10)
+   If Left(Ucase(sLine), 14) = "#INCLUDE ONCE " Then sFilename = Mid(sLine, 15)
+
+   gApp.IncludeFilename = ""   
+   If Len(sFilename) Then
+      ' remove any comments at the end of the line
+      i = Instr(sFilename, "'")
+      If i Then sFilename = Left(sFilename, i-1)
+      sFilename = Trim(sFilename, Any Chr(32,34))  ' remove spaces and double quotes
+      wszPath = AfxStrPathname( "PATH", pDoc->DiskFilename )
+
+      If AfxFileExists(wszPath & sFilename) Then 
+         gApp.IncludeFilename = wszPath & sFilename
+      ElseIf AfxFileExists(sFilename) Then 
+         gApp.IncludeFilename = sFilename
+      ElseIf AfxFileExists(AfxGetCurDir & "\" & sFilename) Then 
+         gApp.IncludeFilename = AfxGetCurDir & "\" & sFilename
+      ElseIf AfxFileExists(AfxGetExePathName & sFilename) Then 
+         gApp.IncludeFilename = AfxGetExePathName & sFilename
+      ElseIf AfxFileExists(Str(wszCompilerPath) & "\" & sFilename) Then 
+         gApp.IncludeFilename = Str(wszCompilerPath) & "\" & sFilename
+      End If
+      gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "/", "\")
+      gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "\\", "\")
+   End If
+   
+   function = AfxFileExists( gApp.IncludeFilename ) 
+
+end function
+
+
+' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
 ' ========================================================================================
 function OpenSelectedDocument( byref wszFilename as wstring, _
-                               byref wszFunctionName as WSTRING, _
+                               byref wszFunctionName as WSTRING = "", _
                                byval nLineNumber as long = 0 _
-                               ) as long
+                               ) as clsDocument ptr
 
    ' This function is called in the following situations:
    '   1. When a selection is made in the Function List.
@@ -485,6 +557,8 @@ function OpenSelectedDocument( byref wszFilename as wstring, _
    '   3. When a Find In Files line is selected.
    '   4. When a Goto Definition word is clicked on.
    '   5. When OnActivateApp needs to reload a document.
+   '   6. When a compile error occurs and need to position to the error line.
+   '   7. When right-click select #Include file to open. 
    
    dim pData as DB2_DATA ptr    
    if len(wszFunctionName) then
@@ -527,11 +601,11 @@ function OpenSelectedDocument( byref wszFilename as wstring, _
    ' function just to make it visually more appealing.
    if pDoc THEN
       dim as hwnd hEdit = pDoc->hWndActiveScintilla
-      SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, nLineNumber - 3, 0) 
+      SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, Max(nLineNumber - 3, 0), 0) 
       SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
    END IF
    
-   function = 0
+   function = pDoc
 end function
 
 
@@ -1395,3 +1469,196 @@ FUNCTION AfxStrRemoveWithMark (BYREF wszMainStr AS CONST WSTRING, BYREF wszDelim
       RETURN AfxStrRemoveWithMark(MID(wszMainStr, 1, nPos1 - 1) & MarkKeys & MID(wszMainStr, nPos2), wszDelim1, wszDelim2,MarkKeys, fRemoveAll,IsInstrRev)  
    end if
 END FUNCTION
+
+
+''
+''
+Function ParseDocument( byval pDoc as clsDocument ptr, _
+                        byval wszFilename as CWSTR _    
+                        ) As Long
+
+   dim as long nLineCount, nLineNum, nPos
+   Dim As String st, st_ucase, sLine
+
+   ' Dynamic string array to hold all lines loaded from the file. It
+   ' is sized at a reasonable beginning capacity in order to avoid
+   ' too many memory reallocations if constantly redim'd. 
+   redim sLineArray(5000) as string 
+   
+   dim as boolean bParseCodeGenString = false
+   
+ParseAgain:
+   ' The incoming document may already be loaded into a clsDocument so we can simply 
+   ' use that pDoc to retrieve the lines. If the pDoc = Null then we need to load
+   ' the file from disk into a standard string array.
+   if bParseCodeGenString then
+      ' Load the codegen lines into the sLineArray
+      if pDoc THEN
+         wszFilename = pDoc->DiskFilename
+         dim as CWSTR wst
+         dim as long iLineStart = 1
+         dim as long iLineEnd
+
+         nLineCount = 0
+         do until iLineStart >= len(pDoc->wszFormCodeGen)
+            iLineEnd = instr(iLineStart, pDoc->wszFormCodeGen, vbcrlf)
+            if iLineEnd = 0 then iLineEnd = len(pDoc->wszFormCodeGen)  ' cr/lf not found
+            wst = mid(pDoc->wszFormCodeGen.wstr, iLineStart, iLineEnd - iLineStart)
+            iLineStart = iLineStart + len(wst) + len(vbcrlf)
+            if nLineCount >= ubound(sLineArray) THEN
+               redim preserve sLineArray(nLineCount + 5000)
+            END IF
+            sLineArray(nLineCount) = wst   
+            nLineCount = nLineCount + 1
+         loop
+         pDoc = 0
+      end if
+   
+   else
+      if pDoc THEN
+         nLineCount = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0)
+         wszFilename = pDoc->DiskFilename
+         ' Before starting to parse this document we must remove any previously saved
+         ' data that exists in the gdb2 database for this file.
+         gdb2.dbDelete(wszFilename)
+      else
+         ' These are often the FB/WinAPI codetip files and Include Files. Everything else in
+         ' a project would have a valid pDoc.
+         if AfxFileExists(wszFilename) = 0 THEN exit function
+
+         dim pStream as CTextStream
+         if pStream.Open(wszFilename) = S_OK then
+            do until pStream.EOS
+               if nLineCount >= ubound(sLineArray) THEN
+                  redim preserve sLineArray(nLineCount + 5000)
+               END IF
+               sLineArray(nLineCount) = pStream.ReadLine 
+               nLineCount = nLineCount + 1
+            loop
+         end if
+         pStream.Close
+         ' Before starting to parse this document we must remove any previously saved
+         ' data that exists in the gdb2 database for this file.
+         gdb2.dbDelete(wszFilename)
+      END IF                     
+   end if
+   
+   if gFileLoading then
+      dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
+      dim wszText as wstring * MAX_PATH: StatusBar_GetText(hStatusbar, 0, @wszText)
+      if wszText <> L(66,"Parsing") & ":" then StatusBar_SetText(hStatusBar, 3, L(66,"Parsing:") & ":")
+      StatusBar_SetIcon(hStatusBar, 4, 0)
+      StatusBar_SetText(hStatusBar, 4, wszFilename)
+   END IF
+
+   ' Create a parse TYPE that handles the state information throughout parsing this document.
+   dim parser as clsParser
+   
+   with parser
+      .action   = ACTION_NONE
+      .fileName = wszFilename
+   end with
+
+
+   ' Analyze all lines in the file
+   for nLineNum = 0 to nLineCount - 1
+      parser.st       = ""
+      parser.st_ucase = ""
+      sLine           = ""   ' reset our full line string
+      
+      ' IMPORTANT: Get the full line as it could be across multiple lines via the line continuation underscore.
+      do
+         if pDoc THEN
+            st = pDoc->GetLine( nLineNum )
+         else
+            st = sLineArray(nLineNum)
+         END IF
+         
+         parser.lineNum = nLineNum 
+             
+         ' Check for a TODO entry. Do not normalize line until after this check is done because
+         ' TODO's are found as part of a comment.
+         if parser.parseToDoItem(st) THEN continue for
+         
+         ' Mask out all characters inside of a string. This enables us to correctly
+         ' test for embedded comment characters and multiple line ":" separators.
+         st = trim(MaskStringCharacters(st))   ' important to remove all pre/post spaces
+
+         ' Check for multiline comments 
+         if parser.IsMultilineComment(st) THEN continue for
+                
+         ' Remove any single line comments
+         st = trim(RemoveComments(st))
+         
+         if right(st, 2) = " _" THEN
+            sLine = sLine & left(st, len(st) - 1) & " "
+            nLineNum = nLineNum + 1
+         else
+            ' no line continuation character so we now have all the characters for the current line.   
+            sLine = sLine & st 
+            exit do
+         end if
+      loop
+      
+      parser.lineNum = nLineNum 
+    
+      ' If the line contains ":" characters then the line needs to be broken up
+      ' into as many sublines to be processed. Don't use AfxStrParse because we
+      ' need to manually check whether the substring was actually created because
+      ' of a trailing ":". Using AfxStrParse and adding a trailing ":" will cause
+      ' parse problems.
+      for nPos = 1 to len(sLine)
+         ' Get the subline but ensure that we add back the ":" because it 
+         ' could be part of a Label or identifier like PRIVATE: or PUBLIC:
+         dim AS LONG i = instr(nPos, sLine, ":")
+         parser.st = trim(AfxStrExtract(nPos, sLine, ":"))
+         if i THEN parser.st = parser.st & ":"
+         nPos = iif(i, i + 1, len(sLine) + 1)
+            
+         ' Skip blank lines for speed
+         if len(parser.st) = 0 THEN continue for
+         parser.st_ucase = Ucase(parser.st)
+
+         ' If normalized line is len = 0 then returns TRUE to continue to next line.
+         ' This removes double spaces and also stores the UCASE version of the line.
+         if parser.NormalizeLine() then continue for 
+         
+         ' Continue to parse a TYPE if applicable
+         if parser.parseTYPE() then continue for
+
+         ' Continue to parse an ENUM if applicable
+         if parser.parseENUM() then continue for
+
+         ' Test the line to see if we have encountered any start or end points
+         ' for a parse. For example, starting to parse a TYPE or FUNCTION, or
+         ' ending an existing parse of a TYPE or FUNCTION. If we have completed/ended
+         ' a parse action then function returns TRUE and we can advance to the next line.
+         if parser.InspectLine() then continue for
+         
+         ' Parse the line for any DIM'd variables. This call parses for variables 
+         ' regardless whether they are global/local, inside a sub/function, or as
+         ' part of a TYPE structure. The current parser state will dictate how the
+         ' variable information is saved to the database.
+         if parser.parseVariableDefinitions() then continue for
+
+      NEXT
+   next
+
+   if bParseCodeGenString = false then
+      ' Check to see if this is a visual design form. If it is, then we need
+      ' to parse the codegen string.
+      if pDoc->IsDesigner then
+         bParseCodeGenString = true
+         goto ParseAgain
+      END IF
+   END IF
+   
+   ' Update the TODO listview in the frmOutput form
+   frmOutput_UpdateToDoListview
+   
+   Function = 0
+
+End Function
+
+
+

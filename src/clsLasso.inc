@@ -11,11 +11,17 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "clsLasso.bi"
+
 
 ' ========================================================================================
 ' Lasso window callback procedure
 ' ========================================================================================
-FUNCTION WndProcLasso( BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+private FUNCTION clsLasso_WndProc( BYVAL hwnd AS HWND, _
+                                   BYVAL uMsg AS UINT, _
+                                   BYVAL wParam AS WPARAM, _
+                                   BYVAL lParam AS LPARAM _
+                                   ) AS LRESULT
    
    ' Default processing of Windows messages
    FUNCTION = DefWindowProc(hWnd, uMsg, wParam, lParam)
@@ -67,7 +73,7 @@ function clsLasso.Create( byval hWndParent as hwnd ) as boolean
    if this.pWindow THEN
       GetClientRect(hWndParent, @rc)
       MapWindowPoints(hWndParent, 0, cast( POINT Ptr, @rc), 2)
-      this.hWindow = this.pWindow->Create( hWndParent, "", @WndProcLasso, _
+      this.hWindow = this.pWindow->Create( hWndParent, "", @clsLasso_WndProc, _
                                            rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, _
                                            WS_POPUP or WS_VISIBLE, WS_EX_LAYERED)
       this.pWindow->ClassStyle = CS_DBLCLKS
@@ -117,12 +123,6 @@ end function
 
 function clsLasso.Show() as Long
    if this.bLasso THEN 
-
-'    CRect cMoveRect(crPos);
-'    cMoveRect.NormalizeRect();
-
-'    CRect cIntersectRect(cMoveRect);
-'    cIntersectRect.IntersectRect(m_cParentCliRect, cMoveRect);
 
       dim as RECT rcPos = this.GetLassoRect()
       
@@ -214,6 +214,5 @@ function clsLasso.Destroy() as boolean
 END FUNCTION
 
 
-dim shared gLasso as clsLasso
 
 

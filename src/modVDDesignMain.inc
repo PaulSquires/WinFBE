@@ -14,10 +14,13 @@
 '    VISUAL DESIGNER ROUTINES
 '
 
+#include once "modVDDesignMain.bi"
+
+
 ' ========================================================================================
 ' Process WM_DESTROY message for Visual Designer main window
 ' ========================================================================================
-Function DesignerMain_OnDestroy(HWnd As HWnd) As LRESULT
+private Function DesignerMain_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    if pWindow then Delete pWindow
    Function = 0
@@ -27,11 +30,11 @@ End Function
 ' ========================================================================================
 ' Visual Designer Main (hWindow) Window procedure 
 ' ========================================================================================
-Function DesignerMain_WndProc( ByVal HWnd   As HWnd, _
-                               ByVal uMsg   As UINT, _
-                               ByVal wParam As WPARAM, _
-                               ByVal lParam As LPARAM _
-                               ) As LRESULT
+public Function DesignerMain_WndProc( ByVal HWnd   As HWnd, _
+                                      ByVal uMsg   As UINT, _
+                                      ByVal wParam As WPARAM, _
+                                      ByVal lParam As LPARAM _
+                                      ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_DESTROY, DesignerMain_OnDestroy)

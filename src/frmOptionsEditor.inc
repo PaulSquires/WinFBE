@@ -11,15 +11,18 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include "frmOptionsEditor.bi"
+#include "clsConfig.bi"
+
 
 ' ========================================================================================
 ' frmOptionsEditor Window procedure
 ' ========================================================================================
-Function frmOptionsEditor_WndProc( ByVal HWnd   As HWnd, _
-                                   ByVal uMsg   As UINT, _
-                                   ByVal wParam As WPARAM, _
-                                   ByVal lParam As LPARAM _
-                                   ) As LRESULT
+private Function frmOptionsEditor_WndProc( ByVal HWnd   As HWnd, _
+                                           ByVal uMsg   As UINT, _
+                                           ByVal wParam As WPARAM, _
+                                           ByVal lParam As LPARAM _
+                                           ) As LRESULT
 
    ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
@@ -30,9 +33,7 @@ End Function
 ' ========================================================================================
 ' frmOptionsEditor_Show
 ' ========================================================================================
-Function frmOptionsEditor_Show( ByVal hWndParent As HWnd, _
-                                ByVal nCmdShow   As Long = 0 _
-                                ) As Long
+public Function frmOptionsEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow

@@ -11,6 +11,14 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "clsControl.bi"
+
+type TABORDER_TYPE
+   pCtrl as clsControl ptr
+   TabIndex   as Long        ' 999999 if TabStop=False or TabIndex property doesn't exist
+END TYPE
+
+
 
 ' ========================================================================================
 ' Retrieve the Form name for this document.
@@ -485,7 +493,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ''  Add the controls to the form collection (we first need to sort based on TabIndex).
    ''
    dim pProp as clsProperty ptr
-   dim TabOrder(pDoc->Controls.Count) as clsTabOrder
+   dim TabOrder(pDoc->Controls.Count) as TABORDER_TYPE
    dim nTabIndex as Long
    
    ' Load the temporary array

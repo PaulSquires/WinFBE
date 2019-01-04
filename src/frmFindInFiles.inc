@@ -11,12 +11,15 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmFindInFiles.bi"
+#include once "frmOutput.bi"
+#include once "clsDocument.bi"
 
 
 ' ========================================================================================
 ' Add a string to the Find combobox (ensure no duplicates)
 ' ========================================================================================
-Function frmFindInFiles_AddToFindCombo( ByRef sText As Const String ) As Long
+private Function frmFindInFiles_AddToFindCombo( ByRef sText As Const String ) As Long
    Dim as long i
    dim as long nFound = -1
    
@@ -38,10 +41,11 @@ Function frmFindInFiles_AddToFindCombo( ByRef sText As Const String ) As Long
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' Add a string to the Files combobox (ensure no duplicates)
 ' ========================================================================================
-Function frmFindInFiles_AddToFilesCombo( ByRef sText As Const String ) As Long
+private Function frmFindInFiles_AddToFilesCombo( ByRef sText As Const String ) As Long
    Dim as long i
    dim as long nFound = -1
    
@@ -63,10 +67,11 @@ Function frmFindInFiles_AddToFilesCombo( ByRef sText As Const String ) As Long
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' Add a string to the Folders combobox (ensure no duplicates)
 ' ========================================================================================
-Function frmFindInFiles_AddToFolderCombo( ByRef sText As Const String ) As Long
+private Function frmFindInFiles_AddToFolderCombo( ByRef sText As Const String ) As Long
    Dim as long i
    dim as long nFound = -1
    
@@ -88,10 +93,11 @@ Function frmFindInFiles_AddToFolderCombo( ByRef sText As Const String ) As Long
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' File search procedure (shell out to builtin Windows "findstr" utility
 ' ========================================================================================
-function ParseSearchResults( byref wszResultFile as wstring ) as long 
+private function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstring ) as long 
    
    dim hLB as hwnd = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH)
    ListBox_ResetContent( hLB )
@@ -144,7 +150,7 @@ function ParseSearchResults( byref wszResultFile as wstring ) as long
    ' Show the ListBox search results
    TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 2 )
    ShowWindow HWND_FRMOUTPUT, SW_SHOW
-   PositionOutputWindows(HWND_FRMOUTPUT)
+   frmOutput_PositionWindows(HWND_FRMOUTPUT)
    frmMain_PositionWindows(HWND_FRMMAIN)
       
    function = 0
@@ -154,7 +160,7 @@ END FUNCTION
 ' ========================================================================================
 ' File search procedure (shell out to builtin Windows "findstr" utility
 ' ========================================================================================
-function DoFindInFilesEx() as LONG
+private function frmFindInFiles_DoFindInFilesEx() as LONG
    Dim ShExecInfo As SHELLEXECUTEINFOW  
 
 '  /L         Uses search strings literally.
@@ -299,7 +305,7 @@ function DoFindInFilesEx() as LONG
 
    kill wszBatchFile
    
-   ParseSearchResults(wszResults)
+   frmFindInFiles_ParseSearchResults(wszResults)
 
 'C:\>findstr /?
 'Searches for strings in files.
@@ -355,13 +361,16 @@ end function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmFindInFiles
 ' ========================================================================================
-Function frmFindInFiles_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmFindInFiles_OnCommand( ByVal HWnd As HWnd, _
+                                           ByVal id As Long, _
+                                           ByVal hwndCtl As HWnd, _
+                                           ByVal codeNotify As UINT _
+                                           ) As LRESULT
    Select Case id
       Case IDOK  ' Find Next
          If codeNotify = BN_CLICKED Then
             EnableWindow(hwndCtl, False)
-            DoFindInFilesEx()
+            frmFindInFiles_DoFindInFilesEx()
             EnableWindow(hwndCtl, true)
             Exit Function
          End If  
@@ -505,7 +514,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmFindInFiles
 ' ========================================================================================
-Function frmFindInFiles_OnClose(HWnd As HWnd) As LRESULT
+private Function frmFindInFiles_OnClose( byval HWnd As HWnd ) As LRESULT
    EnableAllModeless()
    DestroyWindow HWnd
    Function = 0
@@ -515,7 +524,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmFindInFiles
 ' ========================================================================================
-Function frmFindInFiles_OnDestroy(HWnd As HWnd) As LRESULT 
+private Function frmFindInFiles_OnDestroy( byval HWnd As HWnd ) As LRESULT 
    ' Save the search parameters for later instances of the find/replace dialog
    gFindInFiles.nWholeWord = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKWHOLEWORDS) )  
    gFindInFiles.nMatchCase = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKMATCHCASE) )    
@@ -534,7 +543,9 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmFindInFiles
 ' ========================================================================================
-Function frmFindInFiles_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmFindInFiles_OnCreate( ByVal HWnd As HWnd, _
+                                          ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                          ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -546,15 +557,15 @@ Function frmFindInFiles_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As 
    Return True
 End Function
 
+
 ' ========================================================================================
 ' frmFindInFiles Window procedure
 ' ========================================================================================
-Function frmFindInFiles_WndProc( ByVal HWnd   As HWnd, _
-                                 ByVal uMsg   As UINT, _
-                                 ByVal wParam As WPARAM, _
-                                 ByVal lParam As LPARAM _
-                                 ) As LRESULT
-
+private Function frmFindInFiles_WndProc( ByVal HWnd   As HWnd, _
+                                         ByVal uMsg   As UINT, _
+                                         ByVal wParam As WPARAM, _
+                                         ByVal lParam As LPARAM _
+                                         ) As LRESULT
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmFindInFiles_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmFindInFiles_OnClose)
@@ -562,7 +573,6 @@ Function frmFindInFiles_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND,  frmFindInFiles_OnCommand)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -571,7 +581,7 @@ End Function
 ' ========================================================================================
 ' frmFindInFiles_Show
 ' ========================================================================================
-Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
+public Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -587,10 +597,10 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LBLFINDWHAT, L(159,"Find What") & ":", 7, 20, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(259,"In Files") & ":", 7, 50, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LABEL1, L(259,"In Files") & ":", 7, 50, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMREPLACE_LBLREPLACEWITH, L(260,"In Folder") & ":", 7, 80, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LABEL1, L(260,"In Folder") & ":", 7, 80, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("COMBOBOX", , IDC_FRMFINDINFILES_COMBOFIND, "", 85, 17, 317, 22, _
@@ -669,7 +679,7 @@ Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As Long
    Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKSUBFOLDERS), gFindInFiles.nSearchSubFolders )
    
    ShowWindow HWND_FRMFINDINFILES, SW_SHOW
-   SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFIND_COMBOFIND) )
+   SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND) )
 
    ' Process Windows messages
    Function = pWindow->DoEvents(SW_SHOW)

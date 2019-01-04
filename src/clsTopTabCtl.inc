@@ -11,6 +11,11 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "clsTopTabCtl.bi"
+#include once "frmFindReplace.bi"
+#include once "frmMainOnCommand.bi"
+
+
 ''
 ''
 Function clsTopTabCtl.GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) As Long

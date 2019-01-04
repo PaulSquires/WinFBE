@@ -11,11 +11,15 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmFunctionList.bi"
+#include once "clsDocument.bi"
+#include once "clsTopTabCtl.bi"
+
 
 ' ========================================================================================
 ' Set the Listbox selected item to the currently selected open document (if applicable)
 ' ========================================================================================
-Function frmFunctionList_SetListBoxPosition() As Long
+private Function frmFunctionList_SetListBoxPosition() As Long
 
    Dim nCurSel As Long = -1
 
@@ -47,10 +51,10 @@ End Function
 ' ========================================================================================
 ' Search child nodes to see if search text exists. Needed to allow output of parent node.
 ' ========================================================================================
-function frmFunctionList_SearchChildNodes( byval hParent as HTREEITEM, _
-                                           byval hChild as HTREEITEM, _
-                                           byref wszSearch as wstring _
-                                           ) as Boolean
+private function frmFunctionList_SearchChildNodes( byval hParent as HTREEITEM, _
+                                                   byval hChild as HTREEITEM, _
+                                                   byref wszSearch as wstring _
+                                                   ) as Boolean
    dim as Boolean bFound = true
    
    ' If a search term exists then only add the header if a valid found
@@ -74,7 +78,7 @@ end function
 ' ========================================================================================
 ' Update the Listbox with the list of functions from all loaded documents
 ' ========================================================================================
-Function frmFunctionList_UpdateListBox() As Long
+private Function frmFunctionList_UpdateListBox() As Long
 
    Dim As HWnd hList = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX)
    
@@ -131,7 +135,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: FunctionList
 ' ========================================================================================
-Function frmFunctionList_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmFunctionList_OnCommand( ByVal HWnd As HWnd, _
+                                            ByVal id As Long, _
+                                            ByVal hwndCtl As HWnd, _
+                                            ByVal codeNotify As UINT _
+                                            ) As LRESULT
 
    Select Case id
       Case IDC_FRMFUNCTIONLIST_LISTBOX
@@ -163,7 +171,7 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmFunctionList_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmFunctionList_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Get the entire client area
    Dim As Rect rc
@@ -183,7 +191,11 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: FunctionList
 ' ========================================================================================
-Function frmFunctionList_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmFunctionList_OnSize( ByVal HWnd As HWnd, _
+                                         ByVal state As UINT, _
+                                         ByVal cx As Long, _
+                                         ByVal cy As Long _
+                                         ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
       frmFunctionList_PositionWindows(HWnd)
    End If   
@@ -194,7 +206,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: FunctionList
 ' ========================================================================================
-Function frmFunctionList_OnClose( ByVal HWnd As HWnd ) As LRESULT
+private Function frmFunctionList_OnClose( ByVal HWnd As HWnd ) As LRESULT
    DestroyWindow(HWnd)
    Function = 0
 End Function
@@ -203,7 +215,9 @@ End Function
 ' ========================================================================================
 ' Process WM_MEASUREITEM message for window/dialog: FunctionList
 ' ========================================================================================
-Function frmFunctionList_OnMeasureItem( ByVal HWnd As HWnd, ByVal lpmis As MEASUREITEMSTRUCT Ptr ) As Long
+private Function frmFunctionList_OnMeasureItem( ByVal HWnd As HWnd, _
+                                                ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+                                                ) As Long
    ' Set the height of the List box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
 
@@ -217,7 +231,9 @@ End Function
 ' ========================================================================================
 ' Process WM_DRAWITEM message for window/dialog: FunctionList
 ' ========================================================================================
-Function frmFunctionList_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEMSTRUCT Ptr ) As Long
+private Function frmFunctionList_OnDrawItem( ByVal HWnd As HWnd, _
+                                             ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+                                             ) As Long
 
    Dim As HBRUSH hBrush 
    Dim As HFONT hFont, hFontOld
@@ -278,7 +294,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: FunctionList
 ' ========================================================================================
-Function frmFunctionList_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmFunctionList_OnDestroy( byval HWnd As HWnd ) As LRESULT
    HWND_FRMFUNCTIONLIST = 0
    Function = 0
 End Function
@@ -287,7 +303,7 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed ListBox window.
 ' ========================================================================================
-Function frmFunctionList_ListBox_SubclassProc ( _
+private Function frmFunctionList_ListBox_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -328,11 +344,11 @@ End Function
 ' ========================================================================================
 ' FunctionList Window procedure
 ' ========================================================================================
-Function frmFunctionList_WndProc( ByVal HWnd   As HWnd, _
-                                  ByVal uMsg   As UINT, _
-                                  ByVal wParam As WPARAM, _
-                                  ByVal lParam As LPARAM _
-                                  ) As LRESULT
+private Function frmFunctionList_WndProc( ByVal HWnd   As HWnd, _
+                                          ByVal uMsg   As UINT, _
+                                          ByVal wParam As WPARAM, _
+                                          ByVal lParam As LPARAM _
+                                          ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND,     frmFunctionList_OnCommand)
@@ -352,7 +368,7 @@ End Function
 ' ========================================================================================
 ' Reparse any dirty files
 ' ========================================================================================
-function frmFunctionList_ReparseFiles() as Long
+private function frmFunctionList_ReparseFiles() as Long
    '  Need to re-parse any dirty files. This is especially important for QuickRun scenarios
    '  where the file is never physically saved.
    Dim pDoc As clsDocument Ptr = gApp.pDocList
@@ -366,12 +382,11 @@ function frmFunctionList_ReparseFiles() as Long
    function = 0
 end function
 
+
 ' ========================================================================================
 ' frmFunctionList_Show
 ' ========================================================================================
-Function frmFunctionList_Show( ByVal hWndParent As HWnd, _
-                         ByVal nCmdShow   As Long = 0 _
-                         ) As Long
+public Function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    ' Calling this function works as a toggle to display/close the popup form.
    if IsWindowVisible(HWND_FRMFUNCTIONLIST) then

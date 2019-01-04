@@ -14,10 +14,13 @@
 '    VISUAL DESIGNER ROUTINES
 '
 
+#include once "modVDDesignFrame.bi"
+
+
 ' ========================================================================================
 ' Process WM_PAINT message for Visual Designer Frame
 ' ========================================================================================
-Function DesignerFrame_OnPaint( ByVal HWnd As HWnd) As LRESULT
+private Function DesignerFrame_OnPaint( ByVal HWnd As HWnd) As LRESULT
 
    Dim As PAINTSTRUCT ps
    Dim As HDC hDC
@@ -36,7 +39,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for Visual Designer frame
 ' ========================================================================================
-Function DesignerFrame_OnDestroy(HWnd As HWnd) As LRESULT
+private Function DesignerFrame_OnDestroy(HWnd As HWnd) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    if pWindow then Delete pWindow
    Function = 0
@@ -46,11 +49,11 @@ End Function
 ' ========================================================================================
 ' Visual Designer Frame Window procedure (the container frame window)
 ' ========================================================================================
-Function DesignerFrame_WndProc( ByVal HWnd   As HWnd, _
-                                ByVal uMsg   As UINT, _
-                                ByVal wParam As WPARAM, _
-                                ByVal lParam As LPARAM _
-                                ) As LRESULT
+public Function DesignerFrame_WndProc( ByVal HWnd   As HWnd, _
+                                       ByVal uMsg   As UINT, _
+                                       ByVal wParam As WPARAM, _
+                                       ByVal lParam As LPARAM _
+                                       ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_PAINT,   DesignerFrame_OnPaint)

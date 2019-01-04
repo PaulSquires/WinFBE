@@ -11,6 +11,8 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmHelpViewer.bi"
+
 
 ' Size = 32 bytes
 TYPE HH_AKLINK 

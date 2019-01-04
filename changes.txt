@@ -8,6 +8,7 @@ Version 1.8.8
 - Added: Next Tab, Previous Tab, Close Tab to the Search menu.
 - Added: Next Function, Previous Function to the Search menu.
 - Added: New About form replaces the generic messagebox.
+- Added: Pressing F6 or selecting "Sub/Function Definition" will open any #Include file on the current editing line.
 - Changed: Updated FreeBasic Compiler to November 22, 2018 Nightly Build.
 - Changed: Lots of internal code refractoring. Many efficiencies found with regards to loading files/projects, saving, and displaying files. More internal code cleanup to occur in the next few future releases.
 - Changed: Removed loading of multiple projects into WinFBE at the same time.
@@ -19,7 +20,7 @@ Version 1.8.8
 - Fixed: Some issues with right-click menu on #Include line to display "Open <include filename>" when a project is open.
 - Fixed: F3/Shift+F3 Find/Find Next accelerator tweaked slightly to ensure previously selected text gets searched.
 - Fixed: Parsing of multiline characters where both /' and '/ appear on the same line.
-- Fixed: Infitie loop when responding "No" to reload a currently loaded file that has been modified outside of WinFBE.
+- Fixed: Infinite loop when responding "No" to reload a currently loaded file that has been modified outside of WinFBE.
 - Fixed: The search option for 'Sub/Function Definition (F6)" was not correctly finding SUBS (Functions worked okay). 
 - Fixed: Localization language editor in Environment Options / Localization not allowing editing (incorrect logic).
 - Fixed: Graceful creation of a default WinFBE.ini config file should it be missing or corrupted.

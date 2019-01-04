@@ -11,11 +11,14 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmUserTools.bi"
+#include once "clsConfig.bi"
+
 
 ' ========================================================================================
 ' Prepare and Execute a user tool
 ' ========================================================================================
-Function ExecuteUserTool( ByVal nToolNum As Long ) As Long            
+public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long            
             
    Dim ShExecInfo  As SHELLEXECUTEINFOW  
    Dim pDocMain    As clsDocument Ptr 
@@ -36,7 +39,6 @@ Function ExecuteUserTool( ByVal nToolNum As Long ) As Long
    ' Make sure that the incoming Tool Number is valid
    If (nToolNum < LBound(gConfig.Tools)) Orelse (nToolNum > UBound(gConfig.Tools)) Then exit function
        
-
    If gConfig.Tools(nToolNum).IsPromptRun Then
       If MessageBox( HWND_FRMMAIN, L(304,"Please confirm that you wish to run the following User Tool:") + vbcrlf + _
                      gConfig.Tools(nToolNum).wszDescription, L(276,"Confirm"), _
@@ -157,7 +159,7 @@ End Function
 ' Create an accelerator table based on selections for the user tools.
 ' Also adds the Tools to the top menu.
 ' ========================================================================================
-Function CreateUserTools_AcceleratorTable() As Long
+public Function frmUserTools_CreateAcceleratorTable() As Long
 
    dim wszShortcut as CWSTR
    dim NumKeys  As Long
@@ -286,7 +288,7 @@ End Function
 ' ========================================================================================
 ' Load all of the Tools descriptions into the listbox
 ' ========================================================================================
-function LoadToolsListBox( byval hParent as hwnd ) as Long
+private function frmUserTools_LoadListBox( byval hParent as hwnd ) as Long
    dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMUSERTOOLS_LSTTOOLS)
 
    ListBox_ResetContent(hList1)
@@ -301,7 +303,9 @@ end function
 ' ========================================================================================
 ' Swap two entries in the Tools Listbox
 ' ========================================================================================
-function SwapToolsListBoxItems( byval Item1 as long, Byval Item2 as long) as Long
+private function frmUserTools_SwapListBoxItems( byval Item1 as long, _
+                                                Byval Item2 as long _
+                                                ) as Long
    dim as hwnd hList1 = GetDlgItem( HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_LSTTOOLS)
    
    ' Swap the array values
@@ -317,7 +321,7 @@ end function
 ' ========================================================================================
 ' Set the UserTools textboxes and options depending on what listbox entry is selected
 ' ========================================================================================
-function SetUserToolsTextboxes() as long
+private function frmUserTools_SetTextboxes() as long
    dim as long nCurSel = ListBox_GetCurSel(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_LSTTOOLS))
    dim as Boolean fEnabled = iif( nCurSel < 0, false, true)
 
@@ -354,7 +358,9 @@ end function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmUserTools
 ' ========================================================================================
-Function frmUserTools_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmUserTools_OnCreate( ByVal HWnd As HWnd, _
+                                        ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                        ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    DisableAllModeless()
@@ -370,7 +376,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmUserTools
 ' ========================================================================================
-Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmUserTools_OnCommand( ByVal HWnd As HWnd, _
+                                         ByVal id As Long, _
+                                         ByVal hwndCtl As HWnd, _
+                                         ByVal codeNotify As UINT _
+                                         ) As LRESULT
 
    dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMUSERTOOLS_LSTTOOLS)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
@@ -378,7 +388,7 @@ Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
    Select Case id
       case IDC_FRMUSERTOOLS_LSTTOOLS
          if codeNotify = LBN_SELCHANGE THEN
-            SetUserToolsTextboxes()
+            frmUserTools_SetTextboxes()
          END IF
            
       case IDC_FRMUSERTOOLS_TXTTOOLNAME
@@ -470,14 +480,14 @@ Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
       case IDC_FRMUSERTOOLS_CMDUP
          if codeNotify = BN_CLICKED THEN
             if nCurSel > 0 THEN
-               SwapToolsListboxItems(nCurSel, nCurSel-1)
+               frmUserTools_SwapListboxItems(nCurSel, nCurSel-1)
             END IF
          end if
 
       case IDC_FRMUSERTOOLS_CMDDOWN
          if codeNotify = BN_CLICKED THEN
             if nCurSel < ListBox_GetCount(hList1)-1 THEN
-               SwapToolsListboxItems(nCurSel, nCurSel+1)
+               frmUserTools_SwapListboxItems(nCurSel, nCurSel+1)
             END IF
          end if
 
@@ -507,10 +517,10 @@ Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
             gConfig.ToolsTemp(nCurSel).IsWaitFinish     = 0
             gConfig.ToolsTemp(nCurSel).IsDisplayMenu    = 0
             ' reload the listbox
-            LoadToolsListBox(HWND)
+            frmUserTools_LoadListBox(HWND)
             nCurSel = Min(nCurSel, ubound(gConfig.ToolsTemp))
             ListBox_SetCurSel(hList1, nCurSel)
-            SetUserToolsTextboxes()
+            frmUserTools_SetTextboxes()
             SetFocus GetDlgItem(HWND, IDC_FRMUSERTOOLS_TXTTOOLNAME)
          end if
 
@@ -530,10 +540,10 @@ Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
                      redim preserve gConfig.ToolsTemp(ubound(gConfig.ToolsTemp)-1)
                   END IF
                   ' reload the listbox
-                  LoadToolsListBox(HWND)
+                  frmUserTools_LoadListBox(HWND)
                   nCurSel = Min(nCurSel, ubound(gConfig.ToolsTemp))
                   ListBox_SetCurSel(hList1, nCurSel)
-                  SetUserToolsTextboxes()
+                  frmUserTools_SetTextboxes()
                   SetFocus hList1
                end if
             END IF
@@ -547,7 +557,7 @@ Function frmUserTools_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwnd
                gConfig.Tools(i) = gConfig.ToolsTemp(i)   
             NEXT
             erase gConfig.ToolsTemp
-            CreateUserTools_AcceleratorTable            
+            frmUserTools_CreateAcceleratorTable            
             gConfig.SaveConfigFile
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
@@ -567,7 +577,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmUserTools
 ' ========================================================================================
-Function frmUserTools_OnClose(HWnd As HWnd) As LRESULT
+private Function frmUserTools_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow( HWnd )
@@ -578,7 +588,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmUserTools
 ' ========================================================================================
-Function frmUserTools_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmUserTools_OnDestroy( byval HWnd As HWnd ) As LRESULT
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -587,11 +597,11 @@ End Function
 ' ========================================================================================
 ' frmUserTools Window procedure
 ' ========================================================================================
-Function frmUserTools_WndProc( ByVal HWnd   As HWnd, _
-                               ByVal uMsg   As UINT, _
-                               ByVal wParam As WPARAM, _
-                               ByVal lParam As LPARAM _
-                               ) As LRESULT
+private Function frmUserTools_WndProc( ByVal HWnd   As HWnd, _
+                                       ByVal uMsg   As UINT, _
+                                       ByVal wParam As WPARAM, _
+                                       ByVal lParam As LPARAM _
+                                       ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmUserTools_OnCreate)
@@ -600,7 +610,6 @@ Function frmUserTools_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_COMMAND,  frmUserTools_OnCommand)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -609,9 +618,7 @@ End Function
 ' ========================================================================================
 ' frmUserTools_Show
 ' ========================================================================================
-Function frmUserTools_Show( ByVal hWndParent As HWnd, _
-                            ByVal nCmdShow   As Long = 0 _
-                            ) As Long
+public Function frmUserTools_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    DIM hBitmap AS HBITMAP
    dim hCtrl as HWnd
@@ -745,7 +752,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    for i as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
       gConfig.ToolsTemp(i) = gConfig.Tools(i)   
    NEXT
-   LoadToolsListBox(hForm)
+   frmUserTools_LoadListBox(hForm)
 
    ' Load the Actions combobox
    dim hCombo as hwnd = GetDlgItem(hForm, IDC_FRMUSERTOOLS_COMBOACTION)
@@ -755,7 +762,7 @@ Function frmUserTools_Show( ByVal hWndParent As HWnd, _
    
    dim hList as hwnd = GetDlgItem(hForm, IDC_FRMUSERTOOLS_LSTTOOLS)
    ListBox_SetCurSel(hList, 0)
-   SetUserToolsTextboxes()
+   frmUserTools_SetTextboxes()
    SetFocus GetDlgItem(hForm, IDC_FRMUSERTOOLS_LSTTOOLS)
 
    ' Process Windows messages

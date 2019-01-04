@@ -11,18 +11,7 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-
-''
-''
-Constructor clsApp()
-'
-End Constructor
-
-''
-''
-Destructor clsApp()
-'
-End Destructor 
+#include once "clsApp.bi"
 
 ''
 ''
@@ -98,7 +87,6 @@ Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As cls
    loop
    function = 0
 End Function
-
 
 ''
 ''

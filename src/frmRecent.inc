@@ -11,13 +11,14 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
  
-DIM shared pBtnOpenFile AS CXpButton ptr
-DIM shared pBtnOpenProject AS CXpButton ptr
+#include once "frmRecent.bi"
+#include once "clsConfig.bi"
+
 
 ' ========================================================================================
 ' Load the Recent Files/Projects Treeview
 ' ========================================================================================
-Function LoadRecentFilesTreeview( ByVal HWnd As HWnd ) As LRESULT
+public Function frmRecent_LoadTreeview( ByVal HWnd As HWnd ) As LRESULT
 
    Dim As CWSTR wzStr 
    dim As HTREEITEM hNode, hFirstNode
@@ -79,7 +80,7 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function PositionRecentWindows( ByVal HWnd As HWnd ) As LRESULT
+public Function frmRecent_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    If pWindow = 0 Then Exit Function
@@ -118,10 +119,14 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmMain
 ' ========================================================================================
-Function frmRecent_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmRecent_OnSize( ByVal HWnd As HWnd, _
+                                   ByVal state As UINT, _
+                                   ByVal cx As Long, _
+                                   ByVal cy As Long _
+                                   ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
-      PositionRecentWindows(HWnd)
+      frmRecent_PositionWindows(HWnd)
    End If
    Function = 0
 End Function
@@ -130,8 +135,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmRecent
 ' ========================================================================================
-Function frmRecent_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmRecent_OnCommand( ByVal HWnd As HWnd, _
+                                      ByVal id As Long, _
+                                      ByVal hwndCtl As HWnd, _
+                                      ByVal codeNotify As UINT _
+                                      ) As LRESULT
    Select Case id
       Case IDC_FRMRECENT_BTNOPENFILE
          If codeNotify = BN_CLICKED Then
@@ -150,11 +158,14 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmRecent
 ' ========================================================================================
-Function frmRecent_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmRecent_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
 
-   if pBtnOpenFile then delete pBtnOpenFile
-   if pBtnOpenProject then delete pBtnOpenProject
+   DIM pButton AS CXpButton ptr 
+   pButton = AfxCXpButtonPtr(hwnd, IDC_FRMRECENT_BTNOPENFILE)
+   if pButton then delete pButton
+   pButton = AfxCXpButtonPtr(hwnd, IDC_FRMRECENT_BTNOPENPROJECT)
+   if pButton then delete pButton
    
    Dim As HFONT hFont
    Dim As HWnd hTree
@@ -167,7 +178,7 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed frmRecent Treeview controls.
 ' ========================================================================================
-Function frmRecent_Tree_SubclassProc ( _
+private Function frmRecent_Tree_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -235,11 +246,11 @@ End Function
 ' ========================================================================================
 ' frmRecent Window procedure
 ' ========================================================================================
-Function frmRecent_WndProc( ByVal HWnd   As HWnd, _
-                            ByVal uMsg   As UINT, _
-                            ByVal wParam As WPARAM, _
-                            ByVal lParam As LPARAM _
-                            ) As LRESULT
+private Function frmRecent_WndProc( ByVal HWnd   As HWnd, _
+                                    ByVal uMsg   As UINT, _
+                                    ByVal wParam As WPARAM, _
+                                    ByVal lParam As LPARAM _
+                                    ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_SIZE,    frmRecent_OnSize)
@@ -247,7 +258,6 @@ Function frmRecent_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_DESTROY, frmRecent_OnDestroy)
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -256,7 +266,7 @@ End Function
 ' ========================================================================================
 ' frmRecent_Show
 ' ========================================================================================
-Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
+public Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -271,19 +281,20 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->SetFont( "Segoe UI Semibold", 9)
    pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
-   pBtnOpenFile = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENFILE, L(248, "Open File"), 0, 0, 0, 0)
-   pBtnOpenFile->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
-   pBtnOpenFile->DisableTheming
-   pBtnOpenFile->SetTextForeColor(BGR(255,255,250))
-   pBtnOpenFile->SetButtonBkColor(BGR(9,71,113))
-   pBtnOpenFile->SetButtonBkColorHot(BGR(63,63,70))
+   DIM pButton AS CXpButton ptr 
+   pButton = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENFILE, L(248, "Open File"), 0, 0, 0, 0)
+   pButton->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
+   pButton->DisableTheming
+   pButton->SetTextForeColor(BGR(255,255,250))
+   pButton->SetButtonBkColor(BGR(9,71,113))
+   pButton->SetButtonBkColorHot(BGR(63,63,70))
     
-   pBtnOpenProject = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENPROJECT, L(249, "Open Project"), 0, 0, 0, 0)
-   pBtnOpenProject->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
-   pBtnOpenProject->DisableTheming
-   pBtnOpenProject->SetTextForeColor(BGR(255,255,250))
-   pBtnOpenProject->SetButtonBkColor(BGR(9,71,113))
-   pBtnOpenProject->SetButtonBkColorHot(BGR(63,63,70))
+   pButton = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENPROJECT, L(249, "Open Project"), 0, 0, 0, 0)
+   pButton->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
+   pButton->DisableTheming
+   pButton->SetTextForeColor(BGR(255,255,250))
+   pButton->SetButtonBkColor(BGR(9,71,113))
+   pButton->SetButtonBkColorHot(BGR(63,63,70))
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMRECENT_TREEVIEW, "", 0, 0, 0, 0, _
@@ -298,8 +309,8 @@ Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
 
-   LoadRecentFilesTreeview(HWND_FRMRECENT)
-   PositionRecentWindows(HWND_FRMRECENT)
+   frmRecent_LoadTreeview(HWND_FRMRECENT)
+   frmRecent_PositionWindows(HWND_FRMRECENT)
 
    Function = 0
    

@@ -11,11 +11,15 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmTemplates.bi"
+
 
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmTemplates
 ' ========================================================================================
-Function frmTemplates_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
+private Function frmTemplates_OnCreate( ByVal HWnd As HWnd, _
+                                        ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                        ) As BOOLEAN
 
    ' This is a modal popup window so disable the parent window
    EnableWindow GetParent(HWnd), False
@@ -31,8 +35,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmTemplates
 ' ========================================================================================
-Function frmTemplates_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmTemplates_OnCommand( ByVal HWnd As HWnd, _
+                                         ByVal id As Long, _
+                                         ByVal hwndCtl As HWnd, _
+                                         ByVal codeNotify As UINT _
+                                         ) As LRESULT
    Select Case id
       Case IDOK  
          If codeNotify = BN_CLICKED Then
@@ -87,7 +94,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmTemplates
 ' ========================================================================================
-Function frmTemplates_OnClose(HWnd As HWnd) As LRESULT
+private Function frmTemplates_OnClose( byval HWnd As HWnd ) As LRESULT
    ' Enables parent window keeping parent's zorder
    EnableWindow GetParent(HWnd), True 
    DestroyWindow HWnd
@@ -98,7 +105,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmTemplates
 ' ========================================================================================
-Function frmTemplates_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmTemplates_OnDestroy( byval HWnd As HWnd ) As LRESULT
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -107,8 +114,11 @@ End Function
 ' ========================================================================================
 ' Templates window procedure
 ' ========================================================================================
-Function frmTemplates_WndProc (ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As LRESULT
-
+private Function frmTemplates_WndProc( ByVal HWnd As HWnd, _
+                                       ByVal uMsg As UINT, _
+                                       ByVal wParam As WPARAM, _
+                                       ByVal lParam As LPARAM _
+                                       ) As LRESULT
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,   frmTemplates_OnCreate)
       HANDLE_MSG (HWnd, WM_CLOSE,    frmTemplates_OnClose)
@@ -116,7 +126,6 @@ Function frmTemplates_WndProc (ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wPa
       HANDLE_MSG (HWnd, WM_COMMAND,  frmTemplates_OnCommand)
    End Select
 
-   ' Default processing of Windows messages
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -125,7 +134,10 @@ End Function
 ' ========================================================================================
 ' Templates popup dialog
 ' ========================================================================================
-Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As Long) As Long
+public Function frmTemplates_Show( ByVal hParent As HWnd, _
+                                   ByVal x As Long, _
+                                   ByVal y As Long _
+                                   ) As LRESULT
 
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hParent)->DPI
@@ -184,7 +196,7 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
       DO
          IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
             wszFullPath = wszPath & WFD.cFileName
-            ' // Get the description
+            ' Get the description
             if pStream.Open(wszFullPath) = S_OK then
                nLin = 0
                DO UNTIL pStream.EOS
@@ -196,11 +208,11 @@ Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As L
                   IF nType = 2 AND nLin = 4 THEN EXIT DO
                LOOP
                pStream.Close
-               ' // Display the description in the listbox
+               ' Display the description in the listbox
                nItem = SendMessage(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
-               ' // Store the full path in the array
+               ' Store the full path in the array
                rgwszPaths(idx) = wszFullPath
-               ' // Store a pointer to the element of the array in the listbox item
+               ' Store a pointer to the element of the array in the listbox item
                SendMessageW hListBox, LB_SETITEMDATA, nItem, cast(LPARAM, VARPTR(rgwszPaths(idx)))
                idx += 1
                IF idx > UBOUND(rgwszPaths) THEN EXIT DO

@@ -572,37 +572,6 @@ End Function
 
 ''
 ''
-Function CreateImagesResourceMenu() As HMENU
-   
-   dim wszImageFormat as wstring * MAX_PATH
-   dim as hwnd hLV = GetDlgItem(HWND_FRMIMAGES, IDC_FRMIMAGEMANAGER_LISTVIEW)
-   dim as long nCurSel = ListView_GetSelection(hLV)
-   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszImageFormat, MAX_PATH)
-
-   dim as long fNormal  = MF_ENABLED or MF_STRING 
-   dim as long fChecked = MF_CHECKED or MF_ENABLED or MF_STRING
-   dim as long i
-   
-   select case wszImageFormat
-      case "RCDATA": i = 1
-      case "BITMAP": i = 2
-      case "ICON":   i = 3
-      case "CURSOR": i = 4
-   end select
-   
-   Dim hPopUpMenu As HMENU = CreatePopupMenu()
-      AppendMenu( hPopUpMenu, iif(i = 1, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATRCDATA,  "RCDATA")
-      AppendMenu( hPopUpMenu, iif(i = 2, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATBITMAP,  "BITMAP")
-      AppendMenu( hPopUpMenu, iif(i = 3, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATICON,    "ICON")
-      AppendMenu( hPopUpMenu, iif(i = 4, fChecked, fNormal), IDC_FRMIMAGEMANAGER_FORMATCURSOR,  "CURSOR")
-
-   Function = hPopupMenu
- 
-End Function
-
-
-''
-''
 Function CreateScintillaContextMenu() As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -610,13 +579,6 @@ Function CreateScintillaContextMenu() As HMENU
 
    Dim hPopupMenu    As HMENU
    Dim hPopupSubMenu As HMENU
-   Dim wPath         As WString * MAX_PATH
-   Dim wCompilerPath As WString * MAX_PATH
-   Dim wzText        As WString * MAX_PATH
-   Dim sFilename     As String 
-   Dim nLine         As Long   = pDoc->GetCurrentLineNumber()
-   Dim sLine         As String = LTrim(pDoc->GetLine(nLine))
-   Dim i             As Long
    Dim pt            As Point
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
@@ -628,53 +590,15 @@ Function CreateScintillaContextMenu() As HMENU
 
    If RealChildWindowFromPoint(HWND_FRMMAIN, pt) <> hEdit Then Exit Function
    
-
-   dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
-   if idxBuild = -1 then idxBuild = 0
-   if gConfig.Builds(idxBuild).Is32bit then wCompilerPath = gConfig.FBWINcompiler32
-   if gConfig.Builds(idxBuild).Is64bit then wCompilerPath = gConfig.FBWINcompiler64
-   wCompilerPath = ProcessFromCurdrive(wCompilerPath)
-   wCompilerPath = AfxStrPathname( "PATH", wCompilerPath ) & "inc"
-
-   ' Convert relative path to absolute path if needed.
-   if AfxPathIsRelative(wCompilerPath) then
-      wCompilerPath = AfxPathCombine(AfxGetExePathName, wCompilerPath)
-   END IF
-
-
    hPopupMenu = CreatePopupMenu
 
-   If Left(Ucase(sLine), 9) = "#INCLUDE " Then sFilename = Mid(sLine, 10)
-   If Left(Ucase(sLine), 14) = "#INCLUDE ONCE " Then sFilename = Mid(sLine, 15)
-
-   gApp.IncludeFilename = ""   
-   If Len(sFilename) Then
-      ' remove any comments at the end of the line
-      i = Instr(sFilename, "'")
-      If i Then sFilename = Left(sFilename, i-1)
-      sFilename = Trim(sFilename, Any Chr(32,34))  ' remove spaces and double quotes
-      wPath = AfxStrPathname( "PATH", pDoc->DiskFilename )
-
-      If AfxFileExists(wPath & sFilename) Then 
-         gApp.IncludeFilename = wPath & sFilename
-      ElseIf AfxFileExists(sFilename) Then 
-         gApp.IncludeFilename = sFilename
-      ElseIf AfxFileExists(AfxGetCurDir & "\" & sFilename) Then 
-         gApp.IncludeFilename = AfxGetCurDir & "\" & sFilename
-      ElseIf AfxFileExists(AfxGetExePathName & sFilename) Then 
-         gApp.IncludeFilename = AfxGetExePathName & sFilename
-      ElseIf AfxFileExists(Str(wCompilerPath) & "\" & sFilename) Then 
-         gApp.IncludeFilename = Str(wCompilerPath) & "\" & sFilename
-      End If
-      gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "/", "\")
-      gApp.IncludeFilename = AfxStrReplace(gApp.IncludeFilename, "\\", "\")
-      
-      If AfxFileExists(gApp.IncludeFilename) Then        
-         AppendMenu hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") + Chr(32, 34) + gApp.IncludeFilename + Chr(34)
-         AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-      End If
-   End If
-
+   ' Determine if the text under the cursor is an #Include file. If yes, then add a
+   ' menu option to allow to open it.
+   if IsCurrentLineIncludeFilename() then
+      AppendMenu hPopupMenu, MF_ENABLED, IDM_OPENINCLUDE, L(75,"Open") + Chr(32, 34) + gApp.IncludeFilename + Chr(34)
+      AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
+   end if
+   
    AppendMenu hPopupMenu, MF_ENABLED, IDM_UNDO, L(15,"Undo")
    AppendMenu hPopupMenu, MF_ENABLED, IDM_REDO, L(16,"Redo")
    AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
@@ -692,8 +616,7 @@ Function CreateScintillaContextMenu() As HMENU
    
    If (gApp.IsProjectActive = True) Then
       AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
-      wzText = L(190,"Remove from project")
-      AppendMenu hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wzText
+      AppendMenu hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, L(190,"Remove from project")
       AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
    End If
    

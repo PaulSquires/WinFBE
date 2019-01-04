@@ -11,6 +11,8 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.     
 
+#include once "clsParser.bi"
+
 
 function clsParser.parseToDoItem( byval sText as string ) as boolean
    dim as long nPos = instr(ucase(sText), "' TODO:")
@@ -22,9 +24,10 @@ function clsParser.parseToDoItem( byval sText as string ) as boolean
       if sText[i] <> 32 THEN return false
    NEXT
    this.todoText = mid(sText, nPos + 7)
-   gdb2.dbAdd( this, DB2_TODO)
+   gdb2.dbAdd( @this, DB2_TODO)
    return true
 end function
+
 
 function clsParser.IsMultilineComment(byval sLine as String) as boolean
    ' If we are already in a comment then test to see if we have now reached the end of it.
@@ -44,6 +47,7 @@ function clsParser.IsMultilineComment(byval sLine as String) as boolean
    END IF
    return true
 end function
+
 
 function clsParser.NormalizeLine() as boolean
    
@@ -76,7 +80,7 @@ function clsParser.InspectLine() as boolean
             if i THEN 
                this.typeName  = trim(mid(st, 6, (i-6)))
                this.typeAlias = trim(AfxStrRemainI(st, " AS "))
-               gdb2.dbAdd(this, DB2_TYPE)
+               gdb2.dbAdd( @this, DB2_TYPE )
                this.typeName  = "": this.typeAlias = ""
                this.funcLineNum = this.lineNum
                return true
@@ -102,7 +106,7 @@ function clsParser.InspectLine() as boolean
 
          ' CHECK FOR THE END OF A TYPE STRUCTURE
          elseif (left(st_ucase, 8) = "END TYPE") and (gConfig.CodeTips) THEN
-            gdb2.dbAdd(this, DB2_TYPE)
+            gdb2.dbAdd( @this, DB2_TYPE )
             this.action = ACTION_NONE
             this.typeName  = ""
             this.typeAlias = ""
@@ -169,9 +173,9 @@ function clsParser.InspectLine() as boolean
 
          ' Add the function to the database
          select case this.action
-            CASE ACTION_PARSEFUNCTION: gdb2.dbAdd(this, DB2_FUNCTION)
-            CASE ACTION_PARSESUB:      gdb2.dbAdd(this, DB2_SUB)
-            CASE ACTION_PARSEPROPERTY: gdb2.dbAdd(this, DB2_PROPERTY)
+            CASE ACTION_PARSEFUNCTION: gdb2.dbAdd( @this, DB2_FUNCTION )
+            CASE ACTION_PARSESUB:      gdb2.dbAdd( @this, DB2_SUB )
+            CASE ACTION_PARSEPROPERTY: gdb2.dbAdd( @this, DB2_PROPERTY )
          END SELECT
          
          ' Parse the function parameters
@@ -315,7 +319,7 @@ function clsParser.parseVariableDefinitions() as boolean
       numParts = AfxStrParseCount(sList, ",")
       for i as long = 1 to numParts
          this.varName = trim(AfxStrParse(sList, i, ","), any " :")
-         gdb2.dbAdd(this, DB2_VARIABLE)
+         gdb2.dbAdd( @this, DB2_VARIABLE )
       NEXT
       return true
    elseIF instr(sTemp, ",") THEN
@@ -325,7 +329,7 @@ function clsParser.parseVariableDefinitions() as boolean
          sList= trim(AfxStrParse(sTemp, i, ","), any " :")
          this.varName = AfxStrParse(sList, 1, " ") 
          this.varType = trim(AfxStrParse(sList, 3, " "), any " :") 
-         gdb2.dbAdd(this, DB2_VARIABLE)
+         gdb2.dbAdd( @this, DB2_VARIABLE )
       NEXT
       return true
    else
@@ -333,10 +337,10 @@ function clsParser.parseVariableDefinitions() as boolean
       this.varName = AfxStrParse(sTemp, 1, " ") 
       this.varType = trim(AfxStrParse(sTemp, 3, " "), any " :") 
       if this.action = ACTION_PARSETYPE THEN 
-         gdb2.dbAdd(this, DB2_VARIABLE)
+         gdb2.dbAdd( @this, DB2_VARIABLE )
       else
          if IsStandardDataType(this.varType) = false THEN 
-            gdb2.dbAdd(this, DB2_VARIABLE)
+            gdb2.dbAdd( @this, DB2_VARIABLE )
             return true
          end if
       end if
@@ -419,7 +423,7 @@ function clsParser.parseENUM() as boolean
       ' CHECK FOR THE END OF AN ENUM STRUCTURE
       elseif left(st_ucase, 8) = "END ENUM" THEN
          if len(this.typeName) then
-            gdb2.dbAdd(this, DB2_TYPE)   ' we save ENUM the same way as TYPEs
+            gdb2.dbAdd( @this, DB2_TYPE )   ' we save ENUM the same way as TYPEs
          end if
          this.action = ACTION_NONE
          this.typeName  = ""
@@ -446,7 +450,7 @@ function clsParser.parseENUM() as boolean
          ' Get the first parse because we don't need the = <value> piece
          this.varName = trim(AfxStrParse(sTemp, 1, "=") )
          this.varType = "Long"
-         gdb2.dbAdd(this, DB2_VARIABLE)
+         gdb2.dbAdd( @this, DB2_VARIABLE )
       end if
    NEXT
    

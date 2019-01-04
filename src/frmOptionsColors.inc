@@ -11,6 +11,9 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "frmOptionsColors.bi"
+#include once "clsConfig.bi"
+
 
 ' ========================================================================================
 ' Enumerate the names of all the fonts. Note the difference between how to enumerate them
@@ -20,7 +23,11 @@
 ' %TMPF_DEVICE for device fonts (like printer fonts)
 ' Exclude what you don't want to include in list.
 ' ========================================================================================
-Function EnumFontName(lf As LOGFONTW, tm As TEXTMETRIC, ByVal FontType As Long, HWnd As HWnd) As Long
+private Function frmOptionsColors_EnumFontName( byref lf As LOGFONTW, _
+                                                byref tm As TEXTMETRIC, _
+                                                ByVal FontType As Long, _
+                                                HWnd As HWnd _
+                                                ) As Long
 
    If (FontType And TRUETYPE_FONTTYPE) Then                      ' // True type fonts
       ComboBox_AddString( HWnd, @lf.lfFaceName )
@@ -42,19 +49,19 @@ End Function
 ' ========================================================================================
 ' Fill combobox with list of valid font names
 ' ========================================================================================
-Sub FillFontCombo( ByVal HWnd As HWnd)
-   Dim hDC As HDC
+private function frmOptionsColors_FillFontCombo( ByVal HWnd As HWnd ) as long
+   Dim hDC As HDC = GetDC(0)
    SendMessage( HWnd, CB_RESETCONTENT, 0, 0)
-   hDC = GetDC(0)
-   EnumFontFamilies hDC, ByVal 0, Cast(FONTENUMPROCW, @EnumFontName), Cast(LPARAM, HWnd)
+   EnumFontFamilies hDC, ByVal 0, Cast(FONTENUMPROCW, @frmOptionsColors_EnumFontName), Cast(LPARAM, HWnd)
    ReleaseDC 0, hDC
-End Sub
+   function = 0
+End function
 
 
 ' ========================================================================================
 ' Fill combobox with list of Theme names
 ' ========================================================================================
-function FillThemesCombo( byval hComboThemes as hwnd ) as long    
+private function frmOptionsColors_FillThemesCombo( byval hComboThemes as hwnd ) as long    
    SendMessage( hComboThemes, CB_RESETCONTENT, 0, 0)
    for i as long = lbound(gConfig.ThemesTemp) to ubound(gConfig.ThemesTemp)
       ComboBox_AddString( hComboThemes, gConfig.ThemesTemp(i).wszDescription )
@@ -66,8 +73,10 @@ end function
 ' ========================================================================================
 ' WM_DRAWITEM procedure
 ' ========================================================================================
-Function DrawFontCombo(ByVal HWnd As HWnd, ByVal wParam As WPARAM, ByVal lParam As LPARAM) As Long
-
+private Function frmOptionsColors_DrawFontCombo( ByVal HWnd As HWnd, _
+                                                 ByVal wParam As WPARAM, _
+                                                 ByVal lParam As LPARAM _
+                                                 ) As Long
    Dim hFont As HFONT
    Dim lpdis As DRAWITEMSTRUCT Ptr
    Dim wText As WString * MAX_PATH
@@ -115,8 +124,9 @@ End Function
 ' ========================================================================================
 ' Fill combobox with list of valid font sizes
 ' ========================================================================================
-Sub FillFontSizeCombo( ByVal hCb As HWnd, ByVal strFontName As WString Ptr )
-
+private function frmOptionsColors_FillFontSizeCombo( ByVal hCb As HWnd, _
+                                                     ByVal strFontName As WString Ptr _
+                                                     ) as long
    Select Case Ucase(*strFontName)
       Case "FIXEDSYS"
          ComboBox_ResetContent(hCb)
@@ -146,12 +156,14 @@ Sub FillFontSizeCombo( ByVal hCb As HWnd, ByVal strFontName As WString Ptr )
          ComboBox_AddString( hCb, @WStr("36"))
    End Select
 
-End Sub
+   function = 0
+End function
+
 
 ' ========================================================================================
 ' Fill combobox with list of valid character sets
 ' ========================================================================================
-Sub FillFontCharSets( ByVal hCtl As HWnd )
+private function frmOptionsColors_FillFontCharSets( ByVal hCtl As HWnd ) as long
    ComboBox_AddString( hCtl, @WStr("Default") )
    ComboBox_AddString( hCtl, @WStr("Ansi") )
    ComboBox_AddString( hCtl, @WStr("Arabic") )
@@ -171,14 +183,17 @@ Sub FillFontCharSets( ByVal hCtl As HWnd )
    ComboBox_AddString( hCtl, @WStr("Thai") )
    ComboBox_AddString( hCtl, @WStr("Turkish") )
    ComboBox_AddString( hCtl, @WStr("Vietnamese") )
-End Sub
+   
+   function = 0
+End function
 
 
 ' ========================================================================================
 ' SetTempColorSelection
 ' ========================================================================================
-Function SetTempColorSelection( ByVal HWnd As HWnd, ByVal nCtrlID As Long ) As Long
-
+private Function frmOptionsColors_SetTempColorSelection( ByVal HWnd As HWnd, _
+                                                         ByVal nCtrlID As Long _
+                                                         ) As Long
    Dim As COLORREF nFg, nBg
    Dim As Long nCurSel, idx
    
@@ -219,7 +234,7 @@ End Function
 ' ========================================================================================
 ' ShowComboColors
 ' ========================================================================================
-Function ShowComboColors( ByVal HWnd As HWnd ) As Long
+private Function frmOptionsColors_ShowComboColors( ByVal HWnd As HWnd ) As Long
            
    Dim as long NumItems, foundat, nItem, i 
    Dim as Boolean fHideBack, fShowStyles
@@ -299,8 +314,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmOptionsColors
 ' ========================================================================================
-Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmOptionsColors_OnCommand( ByVal HWnd As HWnd, _
+                                             ByVal id As Long, _
+                                             ByVal hwndCtl As HWnd, _
+                                             ByVal codeNotify As UINT _
+                                             ) As LRESULT
    select CASE id
       case IDM_CREATE_THEME
          dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
@@ -314,11 +332,11 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             gConfig.ThemesTemp(ub) = gConfig.ThemesTemp(gConfig.idxTheme)
             gConfig.ThemesTemp(ub).id = AfxGuidText(AfxGuid())
             gConfig.ThemesTemp(ub).wszDescription = cwsText
-            FillThemesCombo(hWndCombo)
+            frmOptionsColors_FillThemesCombo(hWndCombo)
             ub = ComboBox_GetCount(hWndCombo) - 1
             ComboBox_SetCurSel(hWndCombo, ub )
             Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
-            ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+            frmOptionsColors_ShowComboColors( HWND_FRMOPTIONSCOLORS )   
          END IF
          
       case IDM_DELETE_THEME
@@ -339,10 +357,10 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
                   redim preserve gConfig.ThemesTemp(ubound(gConfig.ThemesTemp)-1)
                END IF
                ' reload the combobox
-               FillThemesCombo(hWndCombo)
+               frmOptionsColors_FillThemesCombo(hWndCombo)
                ComboBox_SetCurSel(hWndCombo, 0 )
                Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
-               ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+               frmOptionsColors_ShowComboColors( HWND_FRMOPTIONSCOLORS )   
             end if
          END IF
 
@@ -363,10 +381,10 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             loop
             pStream.Close
             ' reload the combobox
-            FillThemesCombo(hWndCombo)
+            frmOptionsColors_FillThemesCombo(hWndCombo)
             ComboBox_SetCurSel(hWndCombo, 0 )
             Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
-            ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+            frmOptionsColors_ShowComboColors( HWND_FRMOPTIONSCOLORS )   
             Exit Function
          END IF
          
@@ -380,7 +398,7 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             if nCurSel = MODCBCOLOR_USERSELECTED THEN
                PostMessage(hwnd, MSG_USER_GETCOLORCUSTOM, id, 0)
             else   
-               SetTempColorSelection(HWnd, id)
+               frmOptionsColors_SetTempColorSelection(HWnd, id)
             END IF
          end if
          
@@ -388,7 +406,7 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
             gConfig.idxTheme = Combobox_GetCurSel( hwndCtl )
             if gConfig.idxTheme < 0 THEN exit function
             Listbox_SetCurSel( GetDlgItem(HWND, IDC_FRMOPTIONSCOLORS_LSTCOLORS), 0 )
-            ShowComboColors( HWND_FRMOPTIONSCOLORS )
+            frmOptionsColors_ShowComboColors( HWND_FRMOPTIONSCOLORS )
             ' Make sure the text in the edit control is not highlighted
             PostMessage( hwndCtl, CB_SETEDITSEL, 0, MAKELPARAM(-1,0) )   
          End If
@@ -416,7 +434,7 @@ Function frmOptionsColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal 
          if (id = IDC_FRMOPTIONSCOLORS_CHKFONTBOLD) orelse _
             (id = IDC_FRMOPTIONSCOLORS_CHKFONTITALIC) orelse _
             (id = IDC_FRMOPTIONSCOLORS_CHKFONTUNDERLINE) then
-            SetTempColorSelection(HWnd, id)
+            frmOptionsColors_SetTempColorSelection(HWnd, id)
          end if
          if id = IDC_FRMOPTIONSCOLORS_BTNACTIONS then
             ' Get screen coordinates of the button
@@ -444,7 +462,10 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmMain
 ' ========================================================================================
-Function frmOptionsColors_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+private Function frmOptionsColors_OnNotify( ByVal HWnd As HWnd, _
+                                            ByVal id As Long, _
+                                            ByVal pNMHDR As NMHDR Ptr _
+                                            ) As LRESULT
 
    ' Processs notify messages sent by the split button
    DIM pNmh AS NMHDR PTR = CAST(NMHDR PTR, pNMHDR)
@@ -460,11 +481,11 @@ End Function
 ' ========================================================================================
 ' frmOptionsColors Window procedure
 ' ========================================================================================
-Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
-                                   ByVal uMsg   As UINT, _
-                                   ByVal wParam As WPARAM, _
-                                   ByVal lParam As LPARAM _
-                                   ) As LRESULT
+private Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
+                                           ByVal uMsg   As UINT, _
+                                           ByVal wParam As WPARAM, _
+                                           ByVal lParam As LPARAM _
+                                           ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND, frmOptionsColors_OnCommand)
@@ -477,7 +498,7 @@ Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
             Return True
          End If
          If (wParam = IDC_FRMOPTIONSCOLORS_COMBOFONTNAME) Then 
-            DrawFontCombo( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), wParam, lParam )
+            frmOptionsColors_DrawFontCombo( GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_COMBOFONTNAME), wParam, lParam )
             Return True 
          End If
 
@@ -492,7 +513,7 @@ Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
          End If
 
       case MSG_USER_SHOWCOLORCOMBOBOXES
-         ShowComboColors( HWnd )
+         frmOptionsColors_ShowComboColors( HWnd )
    
       case MSG_USER_GETCOLORCUSTOM
          ' wParam contains the id of the color combobox
@@ -517,7 +538,7 @@ Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
                gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+ CLR_CARET).nBg = clrResult
             end if
          end if
-         ShowComboColors(hwnd)
+         frmOptionsColors_ShowComboColors(hwnd)
          
    End Select
 
@@ -530,9 +551,7 @@ End Function
 ' ========================================================================================
 ' frmOptionsColors_Show
 ' ========================================================================================
-Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
-                                ByVal nCmdShow   As Long = 0 _
-                                ) As Long
+public Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -620,15 +639,15 @@ Function frmOptionsColors_Show( ByVal hWndParent As HWnd, _
       if gConfig.Themes(i).id = gConfig.SelectedTheme THEN gConfig.idxTheme = i
       gConfig.ThemesTemp(i) = gConfig.Themes(i)
    NEXT
-   FillThemesCombo(hComboThemes)   
+   frmOptionsColors_FillThemesCombo(hComboThemes)   
    ComboBox_SetCurSel( hComboThemes, gConfig.idxTheme )
 
    Listbox_SetCurSel( hList, 0 )
-   ShowComboColors( HWND_FRMOPTIONSCOLORS )   
+   frmOptionsColors_ShowComboColors( HWND_FRMOPTIONSCOLORS )   
 
-   FillFontCombo( hComboFontName )
-   FillFontSizeCombo( hComboFontSize, gConfig.EditorFontname )
-   FillFontCharSets( hComboFontCharSet )
+   frmOptionsColors_FillFontCombo( hComboFontName )
+   frmOptionsColors_FillFontSizeCombo( hComboFontSize, gConfig.EditorFontname )
+   frmOptionsColors_FillFontCharSets( hComboFontCharSet )
    
    Dim idx As Long
    idx = SendMessage( hComboFontName, CB_FINDSTRING, 0, Cast(LPARAM, *gConfig.EditorFontname))

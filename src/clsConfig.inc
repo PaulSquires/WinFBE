@@ -13,6 +13,12 @@
 
 
 ''  CONFIGURATION MODULE
+
+#include once "clsConfig.bi"
+#include once "frmExplorer.bi"
+#include once "frmOutput.bi"
+#include once "frmBuildConfig.bi"
+
                
 ''
 ''  CONSTRUCTOR
@@ -72,7 +78,7 @@ Function clsConfig.LoadCodetipsFB() as boolean
       If i Then
          parser.funcName   = Left(wst, i-1)
          parser.funcParams = Mid(**wst, i+1)
-         gdb2.dbAdd(parser, DB2_FUNCTION)
+         gdb2.dbAdd( @parser, DB2_FUNCTION )
       End If   
    Loop
    pStream.Close
@@ -83,7 +89,10 @@ End Function
 
 ''
 ''
-Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWinAPI as boolean ) as boolean
+Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
+                                        byval IsWinAPI as boolean _
+                                        ) as boolean
+                                        
    Dim as CWSTR wst, wsID, wsTypeName, wsTypeElements, wsParts, wsPart, wsBaseType
    Dim as long i, nCount
    
@@ -122,13 +131,13 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
             i = instr(wst, "|")
             parser.typeName = Left(wst, i-1)
             parser.Description = mid(**wst, i+1)
-            gdb2.dbAdd(parser, DB2_STANDARDDATATYPE)  
+            gdb2.dbAdd( @parser, DB2_STANDARDDATATYPE )  
             
          CASE "F"    ' function
             i = instr(wst, "(")
             parser.funcName   = trim(Left(wst, i-1))
             parser.funcParams = wst
-            gdb2.dbAdd(parser, DB2_FUNCTION)
+            gdb2.dbAdd( @parser, DB2_FUNCTION )
 
          case "T"     ' type
             i = instr(wst, "|")
@@ -148,7 +157,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
                      if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
                END SELECT
             END IF
-            gdb2.dbAdd(parser, DB2_TYPE)
+            gdb2.dbAdd( @parser, DB2_TYPE )
 
             ' Each element of the TYPE structure is added to the database. The
             ' element is in the format elementname,elementtype
@@ -159,7 +168,7 @@ Function clsConfig.LoadCodetipsGeneric( byref wszFilename as wstring, byval IsWi
                parser.varName = AfxStrParse(wsPart, 1, ",") 
                parser.varType = AfxStrParse(wsPart, 2, ",") 
                parser.bInTypePublic = true
-               gdb2.dbAdd(parser, DB2_VARIABLE)
+               gdb2.dbAdd( @parser, DB2_VARIABLE )
             NEXT
 
       END SELECT
@@ -179,10 +188,10 @@ Function clsConfig.LoadCodetipsWinFormsX() as boolean
    parser.IsWinApi = false
    parser.typeName = "Application"
    parser.typeAlias = "wfxApplication"
-   gdb2.dbAdd(parser, DB2_TYPE)
+   gdb2.dbAdd( @parser, DB2_TYPE )
    parser.typeName = "Colors"
    parser.typeAlias = "wfxColors"
-   gdb2.dbAdd(parser, DB2_TYPE)
+   gdb2.dbAdd( @parser, DB2_TYPE )
 end function
 
 ''
@@ -1281,7 +1290,7 @@ End Function
 ' ========================================================================================
 ' Load all options for the Project from a diskfile
 ' ========================================================================================
-Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN    
+Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN    
 
    Dim pDoc As clsDocument Ptr
    Dim as CWSTR wst, wKey, wData, wszFilename
@@ -1298,7 +1307,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    
-   If AfxFileExists(wzFile) = 0 Then Exit Function
+   If AfxFileExists(wszFile) = 0 Then Exit Function
 
    StatusBar_SetText(hStatusBar, 3, L(66,"Parsing") & ":")
    StatusBar_SetIcon(hStatusBar, 4, 0)
@@ -1308,7 +1317,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    SetCursor( LoadCursor(0, IDC_WAIT) )
    AfxDoEvents()
 
-   gApp.ProjectFilename = wzFile
+   gApp.ProjectFilename = wszFile
    gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
    gApp.ProjectNotes = ""
 
@@ -1460,7 +1469,7 @@ Function clsConfig.ProjectLoadFromFile( byref wzFile as WSTRING) As BOOLEAN
    
    ' If no active build configuration then assign the currently active selection
    if gApp.ProjectBuild = "" then 
-      gApp.ProjectBuild = GetSelectedBuildGUID()
+      gApp.ProjectBuild = frmBuildConfig_GetSelectedBuildGUID()
    end if   
    
    TreeView_SetItemText(hTV, gApp.hExplorerRootNode, ucase(gApp.ProjectName) )
