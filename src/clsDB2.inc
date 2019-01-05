@@ -133,6 +133,7 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
          case DB2_TODO
             .ElementName  = ""
             .ElementValue = parser->todoText
+            .nLineNum     = parser->lineNum + 1  ' display in listview
          
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
             .nLineNum     = parser->funcLineNum

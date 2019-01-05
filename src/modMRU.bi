@@ -15,3 +15,15 @@
 
 #define IDC_MRUBASE          5000  ' Windows id of MRU items 1 to 10 (located under File menu)
 #define IDC_MRUPROJECTBASE   6000  ' Windows id of MRUPROJECT items 1 to 10 (located under Project menu)
+
+
+declare Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
+declare Function ClearMRUlist( ByVal wID As Long ) As Long
+declare Function CreateMRUpopup() As HMENU
+declare Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
+declare Function UpdateMRUList( Byref wzFilename As WString ) As Long
+declare Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long) As Long
+declare Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
+declare Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
+
+

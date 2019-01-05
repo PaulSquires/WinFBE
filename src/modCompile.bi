@@ -17,3 +17,32 @@
 const USERTOOL_ACTION_SELECTED    = 0   
 const USERTOOL_ACTION_PRECOMPILE  = 1   
 const USERTOOL_ACTION_POSTCOMPILE = 2
+
+''
+''  COMPILE_TYPE
+''  Handle information related to the currnet compile process 
+''
+Type COMPILE_TYPE
+   MainFilename     As WString * MAX_PATH   ' main source file (full path and file.ext)
+   MainName         As WString * MAX_PATH   ' main source file (Name only, no extension)
+   MainFolder       As WString * MAX_PATH   ' main source folder 
+   ResourceFile     As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
+   TempResourceFile As WString * MAX_PATH   ' full path and file.ext to temporary resource file (if applicable) 
+   OutputFilename   As WString * MAX_PATH   ' resulting exe/dll/lib name 
+   CompilerPath     As WString * MAX_PATH   ' full path and file.ext to fbc.exe
+   ObjFolder        As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
+   ObjFolderShort   As WString * MAX_PATH   ' ".\.wfbe\"
+   ObjID            As WString * MAX_PATH   ' "32" or "64" appended to object name
+   CompileFlags     As WString * 2048
+   RunAfterCompile  As BOOLEAN
+   StartTime        As Double
+   EndTime          As Double
+   CompileID        as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
+End Type
+
+declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
+declare Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Long
+declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
+
+
+

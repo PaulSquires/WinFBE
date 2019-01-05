@@ -11,6 +11,7 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modRoutines.bi"
 #include once "frmUserTools.bi"
 #include once "frmOutput.bi"
 #include once "frmOptionsCompiler.bi"
@@ -18,17 +19,45 @@
 #include once "frmProjectOptions.bi"
 #include once "frmMain.bi"
 
+
+' ========================================================================================
+' Change everything between quotes to # symbols
+' ========================================================================================
+public function MaskStringCharacters( byval st as string) as string
+   ' Iterate the line and change everything between quotes to # symbols. This
+   ' ensures that we correctly deal with strings that have embedded single 
+   ' quote characters.
+   dim as long i 
+   dim as Boolean bInString = false
+   for i = 0 to len(st) - 1
+      if st[i] = 34 THEN bInString = not(bInString)
+      if bInString THEN  
+         if st[i] <> 34 THEN st[i] = 35   ' # symbol
+      END IF
+   NEXT
+   function = st
+end function
+
+
+' ========================================================================================
+' Removes a single line comment.
+' ========================================================================================
+public function RemoveComments( byval st as string) as string
+   function = AfxStrExtract( 1, st, "'")
+end function
+
+
 ' ========================================================================================
 ' Calculate the Julian date for today's date. Used by CheckForUpdates.
 ' ========================================================================================
-function JulianDateNow() as long
+public function JulianDateNow() as long
    function = AfxGregorianToJulian( AfxSystemDay, AfxSystemMonth, AfxSystemYear )
 end function
 
 ' ========================================================================================
 ' Convert WinFBE version to whole number for comparison to file versions being loaded.
 ' ========================================================================================
-function ConvertWinFBEversion( byref wszVersion as wstring ) as long
+public function ConvertWinFBEversion( byref wszVersion as wstring ) as long
    dim as CWSTR wszPart1, wszPart2, wszPart3
    
    wszPart1 = AfxStrLSet( AfxStrParse(wszVersion, 1, "."), 3, "0" )
@@ -41,7 +70,7 @@ end function
 ' ========================================================================================
 ' Disable all modeless windows belonging to frmMain so that the popup modal is truly modal.
 ' ========================================================================================
-function DisableAllModeless() as long
+public function DisableAllModeless() as long
    ' No need to enable/disable the modeless Help form.
    if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, false)
    if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, false)
@@ -53,7 +82,7 @@ end function
 ' ========================================================================================
 ' Enable all modeless windows belonging to frmMain.
 ' ========================================================================================
-function EnableAllModeless() as long
+public function EnableAllModeless() as long
    ' No need to enable/disable the modeless Help form.
    if IsWindowVisible(HWND_FRMFUNCTIONLIST) then EnableWindow(HWND_FRMFUNCTIONLIST, true)
    if IsWindowVisible(HWND_FRMFINDREPLACE)  then EnableWindow(HWND_FRMFINDREPLACE, true)
@@ -66,7 +95,9 @@ end function
 ' ========================================================================================
 ' Return temporary file name
 ' ========================================================================================
-FUNCTION GetTemporaryFilename( byref wszFolder as wstring, BYREF wszExtension AS wSTRING) AS string
+public FUNCTION GetTemporaryFilename( byref wszFolder as wstring, _
+                                      BYREF wszExtension AS wSTRING _
+                                      ) AS string
    dim wszTempFilename as wstring * MAX_PATH
    if GetTempFileName(@wszFolder, "TMP", 0, @wszTempFilename) then
       ' Delete the temp file that gets created b/c we will create it ourselves based on the 
@@ -83,7 +114,11 @@ END FUNCTION
 ' ========================================================================================
 ' Replace a string in a combobox
 ' ========================================================================================
-FUNCTION ComboBox_ReplaceString (BYVAL hComboBox AS HWND, BYVAL index AS LONG, BYVAL pwszNewText AS WSTRING PTR, BYVAL pNewData AS LONG_PTR = 0) AS LONG
+public FUNCTION ComboBox_ReplaceString( BYVAL hComboBox AS HWND, _
+                                        BYVAL index AS LONG, _
+                                        BYVAL pwszNewText AS WSTRING PTR, _
+                                        BYVAL pNewData AS LONG_PTR = 0 _
+                                        ) AS LONG
    ' Delete the string
    DIM lRes AS LRESULT = SendMessage(hComboBox, CB_DELETESTRING, index, 0)
    IF lRes = LB_ERR THEN RETURN lRes
@@ -99,7 +134,7 @@ END FUNCTION
 ' ========================================================================================
 ' Get the Scintilla value for a character sets
 ' ========================================================================================
-Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
+public Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 
    If Len(wzCharsetName) = 0 Then Return SC_CHARSET_DEFAULT
    
@@ -128,40 +163,10 @@ Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 End Function
 
 
-'' ========================================================================================
-'' Simple Bubblesort to sort function names before displaying them
-'' ========================================================================================
-'Sub BubbleSort( MyArray() As String )
-'   dim as long i, j
-'   For i = 1 To UBound(MyArray)-1
-'      For j = i To UBound(MyArray)
-'         If MyArray(i) > MyArray(j) Then Swap MyArray(i), MyArray(j) 
-'      Next 
-'   Next 
-'End Sub
-
-'' ========================================================================================
-'' Simple Insertion sort to sort function names before displaying them (case insensitive)
-'' ========================================================================================
-'Sub InsertionSort( MyArray() As String )
-'   dim as long lb = LBound(myArray)
-'   dim as long ub = Ubound(myArray)
-'   for startIndex as long = lb + 1 to ub 'establish starting index of each pass
-'      for index as long = startIndex to lb + 1 step -1
-'         if (ucase(myArray(index)) < ucase(myArray(index-1))) then   'REVERSE TO SORT DECENDING
-'            swap myArray(index), myArray(index-1)
-'         else
-'            exit for
-'         end if
-'      next 
-'   next 
-'end sub
-
-
 ' ========================================================================================
 ' Remove duplicate spaces from the incoming line.
 ' ========================================================================================
-function RemoveDuplicateSpaces( byref sText as const string) as string
+public function RemoveDuplicateSpaces( byref sText as const string) as string
    dim as string st = sText
    do until instr(st, "  ") = 0
       st = AfxStrReplace(st, "  ", " ")
@@ -173,7 +178,7 @@ end function
 ' ========================================================================================
 ' Convert incoming text to proper case based on config setting. Used for autocomplete.
 ' ========================================================================================
-function ConvertCase( byval sText as string) as string
+public function ConvertCase( byval sText as string) as string
 
    Select Case gConfig.KeywordCase
       Case 0:  return lcase(sText)
@@ -199,7 +204,7 @@ end function
 ' ========================================================================================
 ' Maps UTF-8 string to Ansi string.
 ' ========================================================================================
-FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
+public FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
 
    dim i AS LONG                ' // Loop counter
    dim strAscii AS STRING       ' // Ascii string
@@ -254,10 +259,11 @@ FUNCTION Utf8ToAscii(byref strUtf8 AS STRING) AS STRING
 
 END FUNCTION
 
+
 ' ========================================================================================
 ' Maps Ansi character string to a UTF-8 string.
 ' ========================================================================================
-FUNCTION AnsiToUtf8(BYREF sAnsi AS STRING) AS STRING
+public FUNCTION AnsiToUtf8(BYREF sAnsi AS STRING) AS STRING
  dim sUnicode AS STRING
  dim sUtf8    AS STRING
 
@@ -290,7 +296,7 @@ END FUNCTION
 ' ========================================================================================
 ' Maps UTF-8 string to Unicode character string 
 ' ========================================================================================
-FUNCTION Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
+public FUNCTION Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
    DIM dwLen AS DWORD = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
    IF dwLen THEN
       DIM s AS STRING = SPACE(dwLen * 2)
@@ -303,7 +309,7 @@ end function
 ' ========================================================================================
 ' Maps Unicode character string to a UTF-8 string.
 ' ========================================================================================
-FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
+public FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
  dim sUtf8 AS STRING
 
  'Maps Unicode character string to a UTF-8 string.
@@ -324,10 +330,10 @@ END FUNCTION
 ' ========================================================================================
 ' Open a disk file and read it into a string (ANSI or UTF8)
 ' ========================================================================================
-function GetFileToString( byref wszFilename as const wstring, _
-                          byref txtBuffer as string, _
-                          byval pDoc as clsDocument ptr _
-                          ) as boolean
+public function GetFileToString( byref wszFilename as const wstring, _
+                                 byref txtBuffer as string, _
+                                 byval pDoc as clsDocument ptr _
+                                 ) as boolean
    
    if pDoc = 0 then return true
    
@@ -385,7 +391,7 @@ END FUNCTION
 ' ========================================================================================
 ' Convert the current text buffer to the specified encoding and redisplay the text.
 ' ========================================================================================
-function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
+public function ConvertTextBuffer( byval pDoc as clsDocument ptr, _
                             byval FileEncoding as long _
                             ) as Long
                             
@@ -436,7 +442,7 @@ end function
 ' ========================================================================================
 ' Determine if current line is a valid #Include filename
 ' ========================================================================================
-function IsCurrentLineIncludeFilename() as Boolean
+public function IsCurrentLineIncludeFilename() as Boolean
    ' Determine if the text under the current line is a valid #Include filename
    ' and return TRUE if it is. If F6 was pressed then the calling program can
    ' simply open/load the gApp.IncludeFilename. If the right click popup menu
@@ -502,10 +508,10 @@ end function
 ' ========================================================================================
 ' Generic open document handler for when Function ListBox item selected or Explorer Treeview
 ' ========================================================================================
-function OpenSelectedDocument( byref wszFilename as wstring, _
-                               byref wszFunctionName as WSTRING = "", _
-                               byval nLineNumber as long = 0 _
-                               ) as clsDocument ptr
+public function OpenSelectedDocument( byref wszFilename as wstring, _
+                                      byref wszFunctionName as WSTRING = "", _
+                                      byval nLineNumber as long = 0 _
+                                      ) as clsDocument ptr
 
    ' This function is called in the following situations:
    '   1. When a selection is made in the Function List.
@@ -568,7 +574,7 @@ end function
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
-Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
+public Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -589,10 +595,11 @@ Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
    Return wzFilename
 End Function
 
+
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
-Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
+public Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -613,31 +620,15 @@ End Function
 
 
 ' ========================================================================================
-' Removes checkbox from a node in a Treeview
-' ========================================================================================
-function Treeview_RemoveCheckBox( byval hTree as hwnd, byval hNode as HTREEITEM) as long 
-   
-   dim as TVITEM tvi
-   tvi.hItem = hNode
-   tvi.mask = TVIF_STATE
-   tvi.stateMask = TVIS_STATEIMAGEMASK
-   tvi.state = 0
-   function = TreeView_SetItem(hTree, @tvi)
-
-END FUNCTION
-
-
-' ========================================================================================
 ' Adds an item to a Treeview
 ' ========================================================================================
-Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, _
-                                 ByVal hParent As HANDLE, _
-                                 ByRef TheText As WString, _
-                                 ByVal lParam As LPARAM = 0, _
-                                 ByVal iImage As Long = 0, _
-                                 ByVal iSelectedImage As Long = 0 _
-                                 ) As HANDLE
-
+public Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, _
+                                        ByVal hParent As HANDLE, _
+                                        ByRef TheText As WString, _
+                                        ByVal lParam As LPARAM = 0, _
+                                        ByVal iImage As Long = 0, _
+                                        ByVal iSelectedImage As Long = 0 _
+                                        ) As HANDLE
    Dim uInsert As TV_INSERTSTRUCT
 
    uInsert.hInsertAfter            = TVI_LAST
@@ -655,77 +646,29 @@ End Function
 ' ========================================================================================
 ' Retrieve the lParam value from a Treeview
 ' ========================================================================================
-Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, _
-                                ByVal hItem As HANDLE _
-                                ) As Long
-
+public Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, _
+                                       ByVal hItem As HANDLE _
+                                       ) As Long
     Dim ti As TV_ITEM
-
     ti.hItem = hItem                                                 
     ti.mask  = TVIF_HANDLE Or TVIF_PARAM  
     TreeView_GetItem(hWndControl, Varptr(ti))
-
     Function = ti.lParam
-End Function
-
-' ========================================================================================
-' Returns True/False state for whether node is Expanded
-' ========================================================================================
-Function FF_TreeView_SetCheckState( ByVal hWndControl As HWnd, _
-                                    ByVal hItem As HANDLE, _
-                                    ByVal fCheck As Boolean _
-                                    ) As BOOLEAN
-
-   Dim ti As TV_ITEM
-
-   ti.hItem = hItem                                                 
-   ti.mask  = TVIF_HANDLE Or TVIF_STATE
-   ti.stateMask = TVIS_STATEIMAGEMASK
-   
-   ' Image 0: Blank image
-   ' Image 1: Closed image
-   ' Image 2: Open image
- 
-   ti.state = INDEXTOSTATEIMAGEMASK( Iif(fCheck, 2, 1)  )
-                    
-   ' Returns a nonzero value if successful, or zero otherwise.                  
-   Function = TreeView_SetItem(hWndControl, @ti)
-
-End Function
-
-' ========================================================================================
-' Returns True/False state for whether node is Expanded
-' ========================================================================================
-Function FF_TreeView_GetCheckState( ByVal hWndControl As HWnd, _
-                                    ByVal hItem As HANDLE _
-                                    ) As BOOLEAN
-
-   Dim ti As TV_ITEM
-
-   ti.hItem = hItem                                                 
-   ti.mask  = TVIF_HANDLE Or TVIF_STATE
-   ti.stateMask = TVIS_STATEIMAGEMASK
-   
-   TreeView_GetItem(hWndControl, @ti)
-
-   Return (ti.state Shr 12) - 1
 End Function
 
 
 ' ========================================================================================
 ' Set the lParam value for a Treeview Item
 ' ========================================================================================
-Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, _
-                                ByVal hItem as HANDLE, _
-                                ByVal lParam as Long) as Long
-
+public Function FF_TreeView_SetlParam( ByVal hWndControl as HWnd, _
+                                       ByVal hItem as HANDLE, _
+                                       ByVal lParam as Long _
+                                       ) as Long
    Dim ti as TV_ITEM
-
    ti.hItem  = hItem                                        
    ti.mask   = TVIF_PARAM
    ti.lParam = lParam
    If TreeView_SetItem( hWndControl, @ti ) = 0 Then Function = True
-    
 End Function
 
 
@@ -733,7 +676,9 @@ End Function
 ' Displays the FileOpenDialog.
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================
-Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) As WString Ptr
+public Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, _
+                                     ByVal idButton As Long _
+                                     ) As WString Ptr
 
    Dim hr As Long
    Dim CLSID_FileOpenDialog As CLSID = (&hDC1C5A9C, &hE88A, &h4DDE, {&hA5, &hA1, &h60, &hF8, &h2A, &h20, &hAE, &hF7})
@@ -835,7 +780,9 @@ End Function
 ' Displays the FileOpenDialog (multiple selection)
 ' Returns a pointer to the IShellItemArray collection.
 ' ========================================================================================
-Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal idButton As Long) As IShellItemArray Ptr
+public Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, _
+                                            ByVal idButton As Long _
+                                            ) As IShellItemArray Ptr
 
    ' Create an instance of the FileOpenDialog interface
    Dim hr As Long
@@ -899,12 +846,12 @@ End Function
 ' Displays the FileSaveDialog
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================
-Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
-                             ByVal pwszFileName As WString Ptr, _
-                             ByVal pwszDefExt As WString Ptr, _
-                             ByVal id As Long = 0, _
-                             ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH _
-                             ) As WString Ptr
+public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
+                                    ByVal pwszFileName As WString Ptr, _
+                                    ByVal pwszDefExt As WString Ptr, _
+                                    ByVal id As Long = 0, _
+                                    ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH _
+                                    ) As WString Ptr
 
    ' // Create an instance of the IFileSaveDialog interface
    Dim hr As Long
@@ -992,19 +939,23 @@ End Function
 ' Enables the specified button in a toolbar.
 ' Returns TRUE if successful, or FALSE otherwise.
 ' ========================================================================================
-Function FF_Toolbar_EnableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
+public Function FF_Toolbar_EnableButton( ByVal hToolBar As HWnd, _
+                                         ByVal idButton As Long _
+                                         ) As BOOLEAN
    ' Only enable the button if it is not already enabled. This should help reduce flicker.
    If SendMessage(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) = 0 Then
       Function = SendMessage(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(CTRUE, 0)))
    End If   
 End Function
-' ========================================================================================
+
 
 ' ========================================================================================
 ' Disables the specified button in a toolbar.
 ' Returns TRUE if successful, or FALSE otherwise.
 ' ========================================================================================
-Function FF_Toolbar_DisableButton (ByVal hToolBar As HWnd, ByVal idButton As Long) As BOOLEAN
+public Function FF_Toolbar_DisableButton( ByVal hToolBar As HWnd, _
+                                          ByVal idButton As Long _
+                                          ) As BOOLEAN
    ' Only disable the button if it is not already disabled. This should help reduce flicker.
    If SendMessage(hToolBar, TB_ISBUTTONENABLED, Cast(WPARAM, idButton), 0 ) Then
       Function = SendMessage(hToolBar, TB_ENABLEBUTTON, Cast(WPARAM, idButton), Cast(LPARAM, MAKELONG(False, 0)))
@@ -1025,20 +976,17 @@ End Function
 '                   to other than Column 0 then the function returns
 '                   TRUE if successful, FALSE if otherwise.
 '
-Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, _
-                                 ByVal iRow        As Long, _         
-                                 ByVal iColumn     As Long, _
-                                 ByVal pwszText    As WString Ptr, _
-                                 ByVal lParam      As LPARAM = 0 _
-                                 ) As BOOLEAN
-
+public Function FF_ListView_InsertItem( ByVal hWndControl As HWnd, _
+                                        ByVal iRow        As Long, _         
+                                        ByVal iColumn     As Long, _
+                                        ByVal pwszText    As WString Ptr, _
+                                        ByVal lParam      As LPARAM = 0 _
+                                        ) As BOOLEAN
    Dim lvi As LVITEMW
-
    lvi.iItem     = iRow
    lvi.iSubItem  = iColumn 
    lvi.pszText   = pwszText
    lvi.lParam    = lParam
-  
    If iColumn = 0 Then
       lvi.mask = LVIF_TEXT Or LVIF_PARAM Or LVIF_IMAGE 
       Function = SendMessage( hWndControl, LVM_INSERTITEM, 0, Cast(LPARAM, @lvi) )
@@ -1058,16 +1006,14 @@ End Function
 '   nTextMax:     Size of text buffer pointed to by pwszText.           
 '   Returns:      Returns TRUE if successful, FALSE otherwise.
 '
-Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, _
-                                  ByVal iRow As Long, _
-                                  ByVal iColumn As Long, _
-                                  ByVal pwszText As WString Ptr, _
-                                  ByVal nTextMax As Long _
-                                  ) As BOOLEAN
-
+public Function FF_ListView_GetItemText( ByVal hWndControl As HWnd, _
+                                         ByVal iRow As Long, _
+                                         ByVal iColumn As Long, _
+                                         ByVal pwszText As WString Ptr, _
+                                         ByVal nTextMax As Long _
+                                         ) As BOOLEAN
    If pwszText = 0 Then Return False
    If nTextMax = 0 Then Return False
-   
    Dim lvi As LVITEMW
 
    lvi.mask       = LVIF_TEXT
@@ -1083,21 +1029,18 @@ End Function
 ' ========================================================================================
 ' Set the text for the specified row and col item
 ' ========================================================================================
-Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, _
-                                  ByVal iRow As Long, _
-                                  ByVal iColumn As Long, _
-                                  ByVal pwszText As WString Ptr, _
-                                  ByVal nTextMax As Long _
-                                  ) As Long
-
+public Function FF_ListView_SetItemText( ByVal hWndControl As HWnd, _
+                                         ByVal iRow As Long, _
+                                         ByVal iColumn As Long, _
+                                         ByVal pwszText As WString Ptr, _
+                                         ByVal nTextMax As Long _
+                                         ) As Long
   Dim li As LV_ITEM
-
   li.mask       = LVIF_TEXT
   li.iItem      = iRow
   li.iSubItem   = iColumn 
   li.pszText    = pwszText
   li.cchTextMax = nTextMax
-       
   Function = SendMessage( hWndControl, LVM_SETITEM, 0, Cast(LPARAM, @li) )
 End Function
 
@@ -1105,36 +1048,31 @@ End Function
 ' ========================================================================================
 ' Retrieve the lParam value from a Listview line
 ' ========================================================================================
-Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
-                                ByVal iRow As Long _
-                                ) As LPARAM
+public Function FF_ListView_GetlParam( ByVal hWndControl As HWnd, _
+                                       ByVal iRow As Long _
+                                       ) As LPARAM
    Dim li As LV_ITEM
-
    li.mask       = LVIF_PARAM
    li.iItem      = iRow
    li.iSubItem   = 0 
-   
    If SendMessage( hWndControl, LVM_GETITEM, 0, Cast(LPARAM, @li) ) Then
       Function = li.lParam
    End If   
-   
 End Function
 
 
 ' ========================================================================================
 ' Set the lParam value for a Listview line
 ' ========================================================================================
-Function FF_ListView_SetlParam( ByVal hWndControl As HWnd, _
-                                ByVal iRow As Long, _
-                                ByVal ilParam As LPARAM _
-                                ) As long
+public Function FF_ListView_SetlParam( ByVal hWndControl As HWnd, _
+                                       ByVal iRow As Long, _
+                                       ByVal ilParam As LPARAM _
+                                       ) As long
    Dim li As LV_ITEM
-
    li.mask       = LVIF_PARAM
    li.iItem      = iRow
    li.iSubItem   = 0
    li.lParam     = ilParam
-   
    function = SendMessage( hWndControl, LVM_SETITEM, 0, Cast(LPARAM, @li) ) 
 End Function
 
@@ -1142,7 +1080,9 @@ End Function
 ' ========================================================================================
 ' Load a .lang localization file from disk and populate the localization array
 ' ========================================================================================
-Function LoadLocalizationFile( Byref wszFileName As CWSTR, byval IsEnglish as boolean = false ) As BOOLEAN
+public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
+                                      byval IsEnglish as boolean = false _
+                                      ) As BOOLEAN
 
    ' default that the file failed to load
    Function = False
@@ -1214,9 +1154,9 @@ End Function
 ' ========================================================================================
 ' Get the full process image name
 ' ========================================================================================
-Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, _
-                              ByVal pwszExeName As WString Ptr _
-                              ) As Long
+public Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, _
+                                     ByVal pwszExeName As WString Ptr _
+                                     ) As Long
    Dim dwSize As Long
    Dim hProcess As HANDLE 
    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION Or PROCESS_VM_READ, 1, pe32w->th32ProcessID)
@@ -1248,7 +1188,7 @@ End Function
 ' ========================================================================================
 ' Checks if the program that we are going to compile is already running
 ' ========================================================================================
-Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
+public Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 
    Dim hSnapShot As HANDLE
    Dim pe32w As PROCESSENTRY32W
@@ -1279,9 +1219,10 @@ Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 
 End Function
 
+
 ''
 ''
-function GetRunExecutableFilename() as CWSTR
+public function GetRunExecutableFilename() as CWSTR
    ' Determine the EXE name of the currently active document or project. Used
    ' by the top menu and toolbar to determine if the Run Executable options
    ' should be grayed out.
@@ -1375,7 +1316,9 @@ END TYPE
              
 ''
 ''
-FUNCTION LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING) as any ptr
+public FUNCTION LoadPNGfromRes( BYVAL hInstance AS HINSTANCE, _
+                                BYREF wszImageName AS WSTRING _
+                                ) as any ptr
    dim as HBITMAP hBitmap = AfxGdipImageFromRes(hInstance, wszImageName, 0, false, IMAGE_BITMAP) 
         
    dim bi AS MYBITMAPINFO
@@ -1410,28 +1353,13 @@ FUNCTION LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTR
    DeleteObject(hBitmap)
    return pPixel
 END FUNCTION
-' ========================================================================================
-
-FUNCTION AfxStrRemoveWithMark (BYREF wszMainStr AS CONST WSTRING, BYREF wszDelim1 AS CONST WSTRING, BYREF wszDelim2 AS CONST WSTRING, BYREF MarkKeys AS CONST WSTRING="", BYVAL fRemoveAll AS BOOLEAN = FALSE, BYVAL IsInstrRev AS BOOLEAN = FALSE) AS CWSTR
-   DIM nPos1 AS LONG =iif(IsInstrRev=true, INSTRRev(wszMainStr, wszDelim1), INSTR(wszMainStr, wszDelim1))
-   IF nPos1 = 0 THEN RETURN wszMainStr
-   DIM nPos2 AS LONG = INSTR(nPos1 + LEN(wszDelim1), wszMainStr, wszDelim2)
-   IF nPos2 = 0 THEN RETURN wszMainStr
-   nPos2 += LEN(wszDelim2)
-   DIM nLen AS LONG = nPos2 - nPos1
-   IF fRemoveAll = FALSE THEN 
-      RETURN MID(wszMainStr, 1, nPos1 - 1)& MarkKeys & MID(wszMainStr, nPos2)
-   else
-      RETURN AfxStrRemoveWithMark(MID(wszMainStr, 1, nPos1 - 1) & MarkKeys & MID(wszMainStr, nPos2), wszDelim1, wszDelim2,MarkKeys, fRemoveAll,IsInstrRev)  
-   end if
-END FUNCTION
 
 
 ''
 ''
-Function ParseDocument( byval pDoc as clsDocument ptr, _
-                        byval wszFilename as CWSTR _    
-                        ) As Long
+public Function ParseDocument( byval pDoc as clsDocument ptr, _
+                               byval wszFilename as CWSTR _    
+                               ) As Long
 
    dim as long nLineCount, nLineNum, nPos
    Dim As String st, st_ucase, sLine
@@ -1614,5 +1542,100 @@ ParseAgain:
 
 End Function
 
+
+''
+''  DoCheckForUpdates
+''
+''  Contact the PlanetSquires server and download the text file containing
+''  the latest WinFBE version number. If an update exists then ask the user
+''  if they wish to navigate to the Releases page on GitHub.
+''
+public function DoCheckForUpdates( byval hWndParent as hwnd, _
+                                   byval bSilentCheck as Boolean = false _
+                                   ) as long
+   
+   dim as CWSTR wszServerFile = "winfbe_version.txt"
+   dim as CWSTR wszFilename
+   dim as CWSTR wszLatestVersion
+   dim as CWSTR wszMsg
+   dim as string st
+    
+   DIM pWHttp AS CWinHttpRequest
+
+   ' Open an HTTP connection to an HTTP resource
+   pWHttp.Open "GET", "https://www.planetsquires.com/" & wszServerFile
+
+   ' Send HTTP request and wait 5 seconds for response 
+   pWHttp.Send
+    
+   DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
+   if iSucceeded then
+      st = pWHttp.GetResponseBody
+       
+      ' Open a file stream and save the downloaded file
+      DIM pFileStream AS CFileStream
+      IF pFileStream.Open("winfbe_version.txt", STGM_CREATE OR STGM_WRITE) = S_OK then
+         pFileStream.WriteTextA(st)
+      END IF
+   end if
+    
+   ' Open the downloaded file and check for the version number
+   wszFilename = AfxGetExePathName + wszServerFile
+   if AfxFileExists( wszFilename ) then
+       
+      dim as long f = freefile
+      open wszFilename for input as #f
+       
+      do until eof(f)
+         line input #f, st
+         if left( st, 15 ) = "latest_version=" then
+            wszLatestVersion = mid( st, 16 )
+            exit do
+         end if
+      loop
+          
+      close #f
+      AfxDeleteFile( wszFilename ) 
+   else
+      if bSilentCheck = false then      
+         MessageBox( hWndParent, _
+                     L(92,"Failed to retrieve update information"), _
+                     L(94,"Software Update"), _
+                     MB_ICONINFORMATION Or MB_OK )
+      end if
+      exit function
+   end if
+
+   if len(wszLatestVersion) then
+      dim as long latestVersion = ConvertWinFBEversion(wszLatestVersion)
+      dim as long installedVersion = ConvertWinFBEversion(APPVERSION)
+
+      ' Save the config file so that other editor instances will not also do update checks again
+      gConfig.LastUpdateCheck = JulianDateNow
+      gConfig.SaveConfigFile
+      
+      if installedVersion = latestVersion then
+         if bSilentCheck = false then      
+            wszMsg = L(96,"You are up to date!") & vbcrlf & _
+                     "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
+            MessageBox( hWndParent, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
+         end if
+         exit function
+      
+      elseif installedVersion < latestVersion then
+         wszMsg = APPNAME & vbcrlf & _
+                  L(98,"A new version is available.") & vbcrlf & vbcrlf & _
+                  L(99,"Current") & ": " & APPVERSION & vbcrlf & _
+                  L(107,"Available") & ": " & wszLatestVersion & vbcrlf & vbcrlf & _
+                  L(137,"Do you wish to visit the download website?")
+         If MessageBox( hWndParent, wszMsg, L(94,"Software Update"), MB_ICONQUESTION Or MB_YESNOCANCEL ) = IDYES Then 
+            ShellExecute( NULL, "open", "https://github.com/PaulSquires/WinFBE/releases", Null, Null, SW_SHOWNORMAL )
+         end if
+         exit function
+      end if
+   end if
+   
+   function = 0
+end function
 
 

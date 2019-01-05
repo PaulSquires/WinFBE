@@ -11,14 +11,17 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modVDApplyProperties.bi"
+#include once "modVDDesignForm.bi"
+
 
 ' ========================================================================================
 ' Apply properties to the form 
 ' ========================================================================================
-function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
-                               byval pCtrl as clsControl ptr, _
-                               byval pProp as clsProperty ptr _ 
-                               ) as Long
+private function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                       byval pCtrl as clsControl ptr, _
+                                       byval pProp as clsProperty ptr _ 
+                                       ) as Long
       
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -117,10 +120,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the button
 ' ========================================================================================
-function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                 byval pCtrl as clsControl ptr, _
-                                 byval pProp as clsProperty ptr _ 
-                                 ) as Long
+private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                         byval pCtrl as clsControl ptr, _
+                                         byval pProp as clsProperty ptr _ 
+                                         ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -182,10 +185,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the label
 ' ========================================================================================
-function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                byval pCtrl as clsControl ptr, _
-                                byval pProp as clsProperty ptr _ 
-                                ) as Long
+private function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                        byval pCtrl as clsControl ptr, _
+                                        byval pProp as clsProperty ptr _ 
+                                        ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -243,10 +246,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the checkbox
 ' ========================================================================================
-function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                   byval pCtrl as clsControl ptr, _
-                                   byval pProp as clsProperty ptr _ 
-                                   ) as Long
+private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                           byval pCtrl as clsControl ptr, _
+                                           byval pProp as clsProperty ptr _ 
+                                           ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -315,10 +318,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the optionbutton
 ' ========================================================================================
-function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                       byval pCtrl as clsControl ptr, _
-                                       byval pProp as clsProperty ptr _ 
-                                       ) as Long
+private function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                               byval pCtrl as clsControl ptr, _
+                                               byval pProp as clsProperty ptr _ 
+                                               ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -387,10 +390,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the listbox
 ' ========================================================================================
-function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                  byval pCtrl as clsControl ptr, _
-                                  byval pProp as clsProperty ptr _ 
-                                  ) as Long
+private function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                          byval pCtrl as clsControl ptr, _
+                                          byval pProp as clsProperty ptr _ 
+                                          ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
    if pWindow = 0 then exit function
@@ -424,27 +427,11 @@ function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
    case "INTEGRALHEIGHT"
-' Do not do anything with the IntegralHeight property. Let the user size at whatever
-' size he wishes during runtime. If property is set to True then it will resize
-' appropriately at runtime. It appears that even though you can dynamically set the
-' NOINTEGRALHEIGHT flag, the control itself doesn't seem to respond to it correctly
-' once the original listview has been cfreated.
-
-'      ' Get the current dimensions of the control based on Properties
-'      dim as RECT rc = GetControlRect(pCtrl)
-'      if wszPropValue = "True" then
-'         AfxRemoveWindowStyle(pCtrl->hWindow, LBS_NOINTEGRALHEIGHT)
-'         pWindow->SetWindowPos( pCtrl->hWindow, 0, rc.left, rc.top, _
-'                    rc.right-rc.left, rc.bottom-rc.top, SWP_DRAWFRAME)
-'      else
-'         AfxAddWindowStyle(pCtrl->hWindow, LBS_NOINTEGRALHEIGHT)
-'      END IF
-'      AfxRedrawWindow(pCtrl->hWindow)
-'      ' Get the new height because the Integral setting can change it based on how many
-'      ' row items can fit into the visible area.
-'      rc.bottom = rc.top + pWindow->UnScaleY(AfxGetWindowHeight(pCtrl->hWindow)) 
-'      SetControlProperty(pCtrl, "HEIGHT", str(rc.bottom-rc.top))
-'      DisplayPropertyList(pDoc)
+      ' Do not do anything with the IntegralHeight property. Let the user size at whatever
+      ' size he wishes during runtime. If property is set to True then it will resize
+      ' appropriately at runtime. It appears that even though you can dynamically set the
+      ' NOINTEGRALHEIGHT flag, the control itself doesn't seem to respond to it correctly
+      ' once the original listview has been cfreated.
 
    end select
    
@@ -455,10 +442,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the combobox
 ' ========================================================================================
-function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                   byval pCtrl as clsControl ptr, _
-                                   byval pProp as clsProperty ptr _ 
-                                   ) as Long
+private function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                           byval pCtrl as clsControl ptr, _
+                                           byval pProp as clsProperty ptr _ 
+                                           ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
    if pWindow = 0 then exit function
@@ -524,13 +511,14 @@ function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    function = 0
 end function
 
+
 ' ========================================================================================
 ' Apply properties to the textbox
 ' ========================================================================================
-function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                  byval pCtrl as clsControl ptr, _
-                                  byval pProp as clsProperty ptr _ 
-                                  ) as Long
+private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                          byval pCtrl as clsControl ptr, _
+                                          byval pProp as clsProperty ptr _ 
+                                          ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -624,10 +612,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the MaskedEdit textbox
 ' ========================================================================================
-function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                     byval pCtrl as clsControl ptr, _
-                                     byval pProp as clsProperty ptr _ 
-                                     ) as Long
+private function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                             byval pCtrl as clsControl ptr, _
+                                             byval pProp as clsProperty ptr _ 
+                                             ) as Long
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -675,10 +663,10 @@ end function
 ' ========================================================================================
 ' Apply properties to the frame
 ' ========================================================================================
-function Frame_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                byval pCtrl as clsControl ptr, _
-                                byval pProp as clsProperty ptr _ 
-                                ) as Long
+private function Frame_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                        byval pCtrl as clsControl ptr, _
+                                        byval pProp as clsProperty ptr _ 
+                                        ) as Long
     
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
 
@@ -706,7 +694,7 @@ end function
 ' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
-function ApplyControlProperties( byval pDoc as clsDocument ptr, _
+public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
                                  byval pCtrl as clsControl ptr _
                                  ) as long
 

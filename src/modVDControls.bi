@@ -14,3 +14,16 @@
 #pragma once
 
 #Define IDC_LBLFAKEMAINMENU                         1000
+
+declare function KeyboardMoveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
+declare function KeyboardResizeControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
+declare function KeyboardCycleActiveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
+declare function IsControlNameExists( byval pDoc as clsDocument ptr, byref wszControlName as wstring ) as boolean
+Declare Function IsControlLocked( byval pDoc as clsDocument ptr, byval pCtrl as clsControl ptr ) as boolean
+Declare Function IsFormNameExists( byref wszFormName as wstring ) as boolean
+declare function CreateToolboxControl( byval pDoc as clsDocument ptr, byval ControlType as long, byref rcDraw as RECT ) as clsControl ptr
+
+
+
+
+

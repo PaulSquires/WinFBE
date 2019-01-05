@@ -11,11 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modMenus.bi"
+
 
 ' ========================================================================================
 ' Build the frmMain topmenu
 ' ========================================================================================
-Function frmMain_BuildMenu ( ByVal pWindow As CWindow Ptr ) As HMENU
+public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
 
    Dim As HMENU hMenu, hPopUpMenu, hPopUpSubMenu
 
@@ -279,7 +281,7 @@ End Function
 ' ========================================================================================
 ' Enable/Disable top menu items depending on application state
 ' ========================================================================================
-Function frmMain_ChangeTopMenuStates() As Long
+public Function frmMain_ChangeTopMenuStates() As Long
 
    Dim hMenu As HMENU = GetMenu(HWND_FRMMAIN)
    Dim idMenu      As Long
@@ -432,10 +434,10 @@ End Function
 
 ''
 ''
-Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
-                                    ByVal pDoc As clsDocument Ptr, _
-                                    byval fNoSeparator as BOOLEAN = false _
-                                    ) As Long
+private Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
+                                            ByVal pDoc As clsDocument Ptr, _
+                                            byval fNoSeparator as BOOLEAN = false _
+                                            ) As Long
 
    if fNoSeparator = false then
       AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
@@ -460,7 +462,7 @@ End Function
 
 ''
 ''
-Function CreateStatusBarFileTypeContextMenu() As HMENU
+public Function CreateStatusBarFileTypeContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
@@ -472,9 +474,10 @@ Function CreateStatusBarFileTypeContextMenu() As HMENU
    Function = hPopupMenu
 End Function
 
+
 ''
 ''
-Function CreateStatusBarFileEncodingContextMenu() As HMENU
+public Function CreateStatusBarFileEncodingContextMenu() As HMENU
    Dim hPopUpMenu As HMENU
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -502,7 +505,7 @@ End Function
 
 ''
 ''
-Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
+public Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
    Dim hPopUpMenu As HMENU
    Dim hPopUpSubMenu As HMENU
    Dim wszText As WString * MAX_PATH
@@ -535,7 +538,7 @@ End Function
 
 ''
 ''
-Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
+public Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HMENU
    
    Dim wszText As WString * MAX_PATH
    Dim hPopUpMenu As HMENU = CreatePopupMenu()
@@ -572,7 +575,7 @@ End Function
 
 ''
 ''
-Function CreateScintillaContextMenu() As HMENU
+public Function CreateScintillaContextMenu() As HMENU
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc = 0 Then Exit Function

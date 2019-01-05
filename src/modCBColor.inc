@@ -11,20 +11,20 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-
 ''
 ''  Owner draw combo box for color selection
 ''  Based on code by José Roca 2011 and Börje Hagsten, January 2001
 
-const MODCBCOLOR_USERSELECTED = 41
+#include once "modCBColor.bi"
+
 
 ' ========================================================================================
 ' GetColorInfo
 ' ========================================================================================
-Sub GetColorInfo( ByVal nIndex      As Long, _
-                  ByVal wColorName  As WString Ptr, _
-                  ByRef nColorValue As COLORREF _
-                  ) 
+private function modCBColor_GetColorInfo( ByVal nIndex      As Long, _
+                                          ByVal wColorName  As WString Ptr, _
+                                          ByRef nColorValue As COLORREF _
+                                          ) as long
                        
    Select Case nIndex
       Case 0:  *wColorName = "Black":          nColorValue = BGR(000,000,000)
@@ -72,13 +72,14 @@ Sub GetColorInfo( ByVal nIndex      As Long, _
     
    End Select
    
-End Sub
+   function = 0
+End function
 
 
 ' ========================================================================================
 ' Subclassed Combobox procedure
 ' ========================================================================================
-Function CBProc( ByVal HWnd   As HWnd, _
+private Function modCBColor_CBProc( ByVal HWnd   As HWnd, _
                  ByVal wMsg   As UInt, _
                  ByVal wParam As WPARAM, _
                  ByVal lParam As LPARAM _
@@ -107,7 +108,7 @@ Function CBProc( ByVal HWnd   As HWnd, _
          lpdis = Cast(DRAWITEMSTRUCT Ptr, lParam)
          If lpdis->itemID = &HFFFFFFFF Then Exit Function
 
-         GetColorInfo lpdis->itemID, @wColorName, nColorValue
+         modCBColor_GetColorInfo lpdis->itemID, @wColorName, nColorValue
          ' Actually, get the colorvalue from the item of the row
          ' being drawn because the "user selected" value can change.
          nColorValue = lpdis->itemData
@@ -177,10 +178,13 @@ End Function
 ' ========================================================================================
 ' CreateCBColorList
 ' ========================================================================================
-Function CreateCBColorList( ByVal HWnd As HWnd, ByVal CtrlId As Long, _
-                            ByVal nLeft As Long, ByVal nTop As Long, _
-                            ByVal nWidth As Long, ByVal nHeight As Long _
-                            ) As HWnd
+public Function CreateCBColorList( ByVal HWnd As HWnd, _
+                                   ByVal CtrlId As Long, _
+                                   ByVal nLeft As Long, _
+                                   ByVal nTop As Long, _
+                                   ByVal nWidth As Long, _
+                                   ByVal nHeight As Long _
+                                   ) As HWnd
 
    Dim i           As Long
    Dim hCombo      As HWnd
@@ -198,12 +202,12 @@ Function CreateCBColorList( ByVal HWnd As HWnd, ByVal CtrlId As Long, _
    If hCombo = 0 Then Exit Function
 
    ' Subclass the combo and initialize some control specific data
-   OldWndProc = SetWindowLongPtr( hCombo, GWLP_WNDPROC, Cast(LONG_PTR, @CBProc) )
+   OldWndProc = SetWindowLongPtr( hCombo, GWLP_WNDPROC, Cast(LONG_PTR, @modCBColor_CBProc) )
    SetWindowLongPtr( hCombo, GWLP_USERDATA, OldWndProc )
 
    ' Add items to the combo box
    For i = 0 To MODCBCOLOR_USERSELECTED
-      GetColorInfo i, @wColorName, nColorValue
+      modCBColor_GetColorInfo i, @wColorName, nColorValue
       idx = SendMessage(hCombo, CB_ADDSTRING, 0, Cast(LPARAM, @wColorName))
       SendMessage(hCombo, CB_SETITEMDATA, idx, Cast(LPARAM, nColorValue))
    Next

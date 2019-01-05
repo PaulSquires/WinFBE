@@ -34,3 +34,36 @@ enum
    GRAB_LEFT
 end enum   
 
+declare function IsDesignerView( byval pDoc as clsDocument ptr ) as Boolean
+declare function DrawGrabHandles( byval hDC as HDC, byval pDoc as clsDocument ptr, byval bFormOnly as Boolean ) as long
+declare function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
+declare function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
+declare function HandleDesignerRButtonDown( ByVal HWnd As HWnd ) as LRESULT
+declare function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
+declare Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
+                                       ByVal uMsg   As UINT, _
+                                       ByVal wParam As WPARAM, _
+                                       ByVal lParam As LPARAM _
+                                       ) As LRESULT
+declare FUNCTION Control_SubclassProc( BYVAL hwnd   AS HWND, _                 ' Control window handle
+                                      BYVAL uMsg   AS UINT, _                 ' Type of message
+                                      BYVAL wParam AS WPARAM, _               ' First message parameter
+                                      BYVAL lParam AS LPARAM, _               ' Second message parameter
+                                      BYVAL uIdSubclass AS UINT_PTR, _        ' The subclass ID
+                                      BYVAL dwRefData AS DWORD_PTR _          ' Pointer to reference data
+                                      ) AS LRESULT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

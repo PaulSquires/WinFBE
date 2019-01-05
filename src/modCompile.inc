@@ -24,40 +24,20 @@
 ''
 
 #include once "modCompile.bi"
+#include once "modGenerateCode.bi"
 #include once "frmUserTools.bi"
 #include once "frmOutput.bi"
 
 
-''
-''  COMPILE_TYPE
-''  Handle information related to the currnet compile process 
-''
-Type COMPILE_TYPE
-   MainFilename     As WString * MAX_PATH   ' main source file (full path and file.ext)
-   MainName         As WString * MAX_PATH   ' main source file (Name only, no extension)
-   MainFolder       As WString * MAX_PATH   ' main source folder 
-   ResourceFile     As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
-   TempResourceFile As WString * MAX_PATH   ' full path and file.ext to temporary resource file (if applicable) 
-   OutputFilename   As WString * MAX_PATH   ' resulting exe/dll/lib name 
-   CompilerPath     As WString * MAX_PATH   ' full path and file.ext to fbc.exe
-   ObjFolder        As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
-   ObjFolderShort   As WString * MAX_PATH   ' ".\.wfbe\"
-   ObjID            As WString * MAX_PATH   ' "32" or "64" appended to object name
-   CompileFlags     As WString * 2048
-   RunAfterCompile  As BOOLEAN
-   StartTime        As Double
-   EndTime          As Double
-   CompileID        as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
-End Type
 Dim Shared gCompile As COMPILE_TYPE
 
 
 ''
 ''  Set the statusbar text and icon for a good/bad compile
 ''
-function SetCompileStatusBarMessage( byref wszText as wstring, _
-                                     byval hIconCompile as HICON _
-                                     ) as LRESULT
+private function SetCompileStatusBarMessage( byref wszText as wstring, _
+                                             byval hIconCompile as HICON _
+                                             ) as LRESULT
    gApp.wszPanelText = wszText
    gApp.hIconPanel = hIconCompile
    frmMain_SetStatusbar
@@ -69,7 +49,7 @@ end function
 ''  Create Resource file (if necessary) for the compile and return
 ''  the full disk filename of the resource file.
 ''
-function CreateTempResourceFile() as boolean
+private function CreateTempResourceFile() as boolean
    dim as CWSTR wszResourceFile = gCompile.ResourceFile
    
    ' Collect all of the IMAGE_NAME used by controls/properties in the file/project
@@ -160,7 +140,7 @@ end function
 ''
 ''  Reset all Scintilla editing cursors
 ''
-function ResetScintillaCursors() as Long
+private function ResetScintillaCursors() as Long
    Dim pDoc As clsDocument Ptr
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    Dim TB As TC_ITEM 
@@ -179,10 +159,478 @@ function ResetScintillaCursors() as Long
 end function
 
 
+'' July 2017, attempted to capture STDERR output from a running FB compiled
+'' program in order to capture runtime errors. This code works okay on Windows 10
+'' but does not PRINT on Windows 7. Also, dkl posted in FB forum that FB prints
+'' to STDOUT rather than STDERR. This is too bad.
+
+''
+''
+private FUNCTION CreateChildProcess( byref zCmdLine AS wstring, _
+                                     byref zParams  AS wstring, _
+                                     byval hChildStdOutWrite AS HANDLE _
+                                     ) AS BOOLEAN
+    
+   dim ProcessInfo AS PROCESS_INFORMATION
+   dim StartupInf  AS STARTUPINFO
+
+   StartupInf.cb         = SIZEOF(STARTUPINFO)
+   StartupInf.hStdError  = hChildStdOutWrite   
+   StartupInf.hStdOutput = hChildStdOutWrite  
+   StartupInf.dwFlags    = STARTF_USESTDHANDLES
+
+   IF CreateProcess( zCmdLine,  _    ' Create the child process.
+                     zParams, _      ' Command line
+                     BYVAL 0,     _  ' Process security attributes
+                     BYVAL 0,     _  ' Primary thread security attributes
+                     TRUE,        _  ' Handles are inherited
+                     CREATE_NO_WINDOW, _  ' Creation flags  
+                     BYVAL 0,     _  ' Use parent's environment
+                     BYVAL 0,     _  ' Use parent's current directory
+                     @StartupInf,  _  ' STARTUPINFO pointer
+                     @ProcessInfo) = FALSE THEN
+   ELSE
+      ' Close handles to the child process and its primary thread.
+      ' Some applications might keep these handles to monitor the status 
+      ' of the child process, for example.
+      CloseHandle( ProcessInfo.hProcess )
+      CloseHandle( ProcessInfo.hThread )
+      FUNCTION = TRUE
+ END IF
+END FUNCTION
+
+
+''
+''
+private function RedirConsoleToFile( byref szExe AS wstring, _
+                                     byref szCmdLine AS wstring, _
+                                     byref sConsoleText AS string _
+                                     ) as long
+
+   dim SecurityAttribute AS SECURITY_ATTRIBUTES
+   dim hChildStdOutRead  AS PHANDLE
+   dim hChildStdOutWrite AS PHANDLE
+   dim dwReadBytes       AS long
+   dim sBuffer AS STRING * 4096
+  
+   ' Set the bInheritHandle flag so pipe handles are inherited.
+   SecurityAttribute.nLength              = SIZEOF(SECURITY_ATTRIBUTES)
+   SecurityAttribute.bInheritHandle       = TRUE
+   SecurityAttribute.lpSecurityDescriptor = NULL
+
+   ' Create a pipe for the child process's STDOUT.
+   IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
+      '? "error creating pipe"
+   ELSE
+      ' Ensure the read handle to the pipe for STDOUT is not inherited.
+      IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
+         '? "error SetHandleInformation"
+      ELSE
+         ' Create the child process and read from its standard output
+         IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
+            CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
+            DO
+               IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN 
+                  '? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead, "dwReadBytes=";dwReadBytes
+                  '? "GetLastError: "; GetLastError
+                  EXIT DO
+               end if  
+               '? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
+               '? LEFT(sBuffer, dwReadBytes)
+               sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
+               '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
+               ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
+            LOOP
+         else
+            '? "CreateChildProcess failed"      
+         END IF
+      END IF
+   END IF
+   function = 0
+END function
+
+
+''
+''
+public Function RunEXE( ByRef wszFileExe As CWSTR, _
+                        ByRef wszParam As CWSTR _
+                        ) As Long
+                         
+   dim as CWSTR wszPath = AfxStrPathname("PATH", wszFileExe)
+   dim as CWSTR wszBatchFile = AfxGetExePathName + AfxStrPathname("NAME", wszFileExe) + ".bat"
+   dim as CWSTR wszQuickRunExe = wszFileExe
+   
+   ' If option is specified to launch command window prior to running the
+   ' compiled program then we do so by executing a shell to a batch file.
+   ' This allows being able to see any runtime errors that might be thrown.
+   ' Otherwise, simple shell to the program.
+   if gConfig.RunViaCommandWindow THEN
+      dim pStream as CTextStream
+      if pStream.Create(wszBatchFile) = S_OK then
+         pStream.WriteLine "@echo off"
+         pStream.WriteLine Left(**wszPath, 2)     ' ensure on correct drive
+         pStream.WriteLine "cd " & chr(34) & wszPath & chr(34)   ' change to correct folder
+         pStream.WriteLine chr(34) & wszFileExe & chr(34) & " " & wszParam
+         pStream.WriteLine "pause"
+         pStream.WriteLine "del " & chr(34) & wszBatchFile & chr(34) & " >> nul"
+      end if
+      pStream.Close
+      wszFileExe = wszBatchFile
+      wszParam = ""
+   END IF
+   
+
+   Dim ShExecInfo As SHELLEXECUTEINFOW  
+
+   ' Run the EXE
+   With ShExecInfo
+      .cbSize       = Len(SHELLEXECUTEINFOW)
+      .fMask        = SEE_MASK_NOCLOSEPROCESS
+      .HWnd         = 0
+      .lpVerb       = Null
+      .lpFile       = wszFileExe
+      .lpParameters = wszParam   
+      .lpDirectory  = 0
+      .nShow        = SW_SHOW
+      .hInstApp     = 0 
+   End With
+   ShellExecuteEx(@ShExecInfo)
+
+   ' If this was a QuickRun then add the filename to the global tracking array
+   ' that checks if the file exists and then deletes it.
+   if gCompile.CompileID = IDM_QUICKRUN THEN
+      ' Give time for the application to start to run (especially if being run via
+      ' the RunViaCommandWindow batch file, otherwise the exe will be deleted even
+      ' before it gets a chance to execute.
+      sleep 500
+      gApp.AddQuickRunEXE(wszQuickRunExe)
+   END IF
+   
+   Function = 0
+End Function
+
+
+
+' ========================================================================================
+' Set the cursor to the error position based on the selected line in frmCompileResults
+' or the TODO listview. 
+' ========================================================================================
+public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
+                                          Byval wID as long _
+                                          ) As Long
+
+   Dim wszErrorLine As WString * MAX_PATH
+   Dim wszErrorFile As WString * MAX_PATH
+   
+   Dim As Long idx
+   Dim As Long nCurSel = ListView_GetSelection(hLV)
+   If nCurSel < 0 Then Return 0 
+   
+   Dim pDoc As clsDocument Ptr 
+
+   ' Get the line number and filename of the selected item
+   FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
+   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
+
+   ' If we are doing a QuickRun then it must be on the currently loaded
+   ' and active file in the editor, therefore simply use that pDoc.
+   if wID = IDM_QUICKRUN THEN
+      pDoc = gTTabCtl.GetActiveDocumentPtr()
+      
+   else
+      If AfxFileExists(wszErrorFile) = 0 Then Exit Function
+   
+      ' If the document is already loaded then simply show the
+      ' document, otherwise we need to load it first and show it.
+      pDoc = OpenSelectedDocument( wszErrorFile )
+   END IF
+   if pDoc = 0 then exit function
+   
+   ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
+   ' initiate the toggle between the code editor and visual designer.
+   if pDoc->IsDesigner then
+      ' Show the code editor.
+      TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, 1)  ' 1 = code tab
+      frmMain_PositionWindows(HWND_FRMMAIN)
+   END IF
+
+   ' Move Scintilla cursor to the correct error line 
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   dim as long nLineNum = Val(wszErrorLine) - 1   ' because visually the editor is one based line numbers
+   SciExec( hEdit, SCI_GOTOLINE, nLineNum, 0 )
+
+End Function
+
+''
+''
+private function ParseLogForError( byref wsLogSt as CWSTR, _
+                                   byval bAllowSuccessMessage as Boolean, _
+                                   Byval wID as long, _
+                                   byval fCompile64 as Boolean _
+                                   ) as Boolean
+   ' Returns TRUE if error has been detected. This signals to the calling code
+   ' that we can break out of performing any further compiles (eg. modules).
+   Dim wszTemp As WString * MAX_PATH 
+
+   Dim As Long Parenthesis_Start, Parenthesis_End, Error_Start       
+   Dim As Long i, NumLines, NextLine, r, nCount
+   Dim As Long NumWarnings, NumErrors, IsError, IsWarning
+   Dim As Long nFirstErrorLine = -1
+   Dim As HWnd hLV
+   Dim As CWSTR wDQ, wst1, wst2, wst3, wst, wst_ucase, wszOutputMsg        
+   dim as Boolean fGoodCompile
+
+   wDQ = wchr(34) ' unicode double quotes
+
+   ' Copy the log file text to the logfile textbox
+   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wsLogSt )
+   
+   hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW)
+   ListView_DeleteAllItems( hLV )
+   
+   ' On some Windows systems with tight security policies, the CreateChildProcess used
+   ' by the sub RedirConsoleToFile will fail. This seems to happen mostly when trying
+   ' to compile using the FB 64 bit compiler on a 32-bit version of Windows. For this
+   ' reason we will do a manual check here rather than relying on detecting the error
+   ' through the log file string.
+   if fCompile64 then   ' trying to compile a 64-bit program
+      if AfxWindowsBitness() <> 64 then  ' Windows is not 64 bit
+         wsLogSt = "This version of the FreeBASIC compiler is not compatible with the version " & _
+                   "of Windows you're running. Check your computer's system information to see " & _
+                   "whether you need a x86 (32-bit) or x64 (64-bit) version of the program, and " & _
+                   "then contact the software publisher."   
+      end if
+   end if
+
+   ' Parse the log string.
+   NumLines = AfxStrParseCount( wsLogSt, vbCrLf)
+ 
+   For NextLine = 1 To NumLines                   
+   
+      wst = Trim(AfxStrParse(wsLogSt, NextLine, vbCrlf))                 
+      wst_ucase = Ucase(wst)
+      
+      ' Deal with the situation where we might be trying to compile a 64-bit application
+      ' from a 32-bit operating system.
+      If Left(**wst_ucase, 16) = WSTR("THIS VERSION OF ") Then
+         fGoodCompile = false
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Windows not 64-bit (refer to log file)") ) 
+         AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
+         exit for
+      End If   
+
+      ' Save the FB version and copyright information. 
+      If Left(**wst_ucase, 19) = WSTR("FREEBASIC COMPILER ") Then
+         fGoodCompile = True
+         wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
+      End If        
+      If Left(**wst_ucase, 13) = WSTR("COPYRIGHT (C)") Then
+         fGoodCompile = True
+         wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
+      End If        
+      
+      ' Check to see if an error occurred in compiling a resource script.
+      ' If there was a bad source name passed to the compiler (for 
+      ' example, missing .rc file), then the output at the end of the
+      ' log file is like the following:
+      '
+      ' Error!
+      ' Could Not Open source file (p.RC)
+      ' OBJ file Not made
+      ' compiling resource FAILED: Error Code 1
+      '
+      ' Very sorry, but GoRC had a problem.
+                                          
+      ' Check to see if linking failed
+      If (Left(**wst_ucase, 6) = WSTR("ERROR!")) or _
+         (left(**wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1 (refer to log file)") ) 
+         NumErrors = NumErrors + 1
+      elseIf (Left(**wst_ucase, 5) = WSTR("ERROR")) Then
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Error Code 1 (refer to log file)") ) 
+         NumErrors = NumErrors + 1
+      elseIf (Left(**wst_ucase, 19) = WSTR("COMPILING C FAILED:")) Then
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling C FAILED: Error Code 1 (refer to log file)") ) 
+         NumErrors = NumErrors + 1
+      end if
+      
+      If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, wst & " (refer to log file)" ) 
+         NumErrors = NumErrors + 1
+      End If
+ 
+ 
+      ' Check for the "linking: " line because that line identifies the actual output filename being created
+      If Left(**wst_ucase, 9) = WSTR("LINKING: ") Then 
+         ' -o "WinFBE.exe" 
+         i = Instr(wst, WSTR(" -o "))
+         If i Then
+            wszTemp = Mid(**wst, i+4)
+            i = Instr(wszTemp, wDQ & WSTR(" "))
+            If i Then gCompile.OutputFilename = AfxStrRemove(Left(wszTemp, i), wDQ)
+         End If      
+      End If
+      
+      ' Check for any compiler warnings
+      Error_Start = 0
+      IsWarning = Instr(**wst_ucase, WSTR(") WARNING "))
+      If IsWarning Then Error_Start = IsWarning
+      IsError   = Instr(**wst_ucase, WSTR(") ERROR ")) 
+      If IsError Then Error_Start = IsError
+      
+      If (Error_Start > 0) Then 
+         'sample warning message
+         'c:\freebasic\test.bas(1394) warning 1(1): Passing scalar as pointer, at parameter 2 (hwndOldFocus) of ONSETFOCUS()
+         'sample error message
+         'c:\freebasic\test.bas(17) error 41: Variable not declared, kjljjada in 'kjljjada Error'
+
+         ' Determine the line number. Error_Start variable holds the position of the closing
+         ' parenthesis of the line number. We simply need to reverse search from there for the
+         ' opening parenthesis.
+         ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
+         Parenthesis_End   = Error_Start
+         Parenthesis_Start = InStrRev(**wst, WSTR("("), Parenthesis_End)
+         
+         If (Parenthesis_Start < Parenthesis_End) Andalso _
+            (Parenthesis_End <= Error_Start) then
+    
+            wst1 = left(**wst, Parenthesis_Start-1)   ' filename
+            wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
+            wst3 = Mid( **wst, Error_Start + 1)  ' error message
+  
+            ' If this is a visual designer form file then we need to modify the line
+            ' number based on the error offset number.
+            dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
+            if pDoc then
+               if pDoc->IsDesigner then
+                  if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
+                  if len(pDoc->wszFormCodegen) = 0 then GenerateFormCode(pDoc)   ' regenerate visual designer code
+                  ' Offset is based on form metadata + code generation
+                  pDoc->ErrorOffset = 0
+                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
+                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
+                  wst2 = str( val(wst2) - pDoc->ErrorOffset)
+               end if
+            END IF
+
+            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, wst2 )  ' line#
+            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, wst1 )  ' filename
+            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, wst3 )  ' error message
+             
+            If IsWarning Then 
+               NumWarnings = NumWarnings + 1
+            ElseIf IsError Then
+               If nFirstErrorLine = -1 Then
+                  nFirstErrorLine = NumWarnings + NumErrors
+               End If
+               NumErrors = NumErrors + 1
+            End If            
+         End If
+
+      End If
+ 
+   Next
+ 
+   ' If there were no errors but the fGoodCompile flag was not set to True then the log file
+   ' did not contain the required FB copyright notice. Something must have went wrong, like trying
+   ' to call the 64 bit compiler using a 32 bit operating system. Show the message to the user via
+   ' the Output window (log file).
+   If fGoodCompile = False Then NumErrors = NumErrors + 1
+
+   dim as CWSTR cwsCompileMsg
+
+   ' If the output file was never created then throw an error
+   If (NumWarnings = 0) andalso (NumErrors = 0) then
+      if FileLen(gCompile.OutputFilename) = 0 then 
+         NumErrors = NumErrors + 1
+      end if
+   end if
+   
+   ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
+   If (NumWarnings > 0) orelse (NumErrors > 0) then
+      cwsCompileMsg = L(193, "Errors") & ": " & NumErrors & "  " & _
+                      L(192, "Warnings") & ": " & NumWarnings & _
+                      "  [" & Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
+      SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
+      MessageBeep(MB_ICONWARNING)
+      
+      ' Position the Compiler Log to the first error/warning
+      ListView_SelectItem( hLV, 0 )
+      
+      ' If fGoodCompile is False then something unusual occurred so better show the log file by default
+      If fGoodCompile = False Then
+         frmOutput_PositionWindows(HWND_FRMOUTPUT)
+      End If
+       
+      ' If the Search Results, TODO, Notes tab is active then reposition to 
+      ' the first tab for error listview
+      select case TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) 
+         case 2, 3, 4
+         TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
+         frmOutput_PositionWindows(HWND_FRMOUTPUT)
+      end select
+      
+      ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
+      frmMain_PositionWindows(HWND_FRMMAIN)
+      ' Set to error line position only after all windows have been shown and resized
+      SetDocumentErrorPosition(hLV, wID)
+   end if
+   
+   ' If there were no errors or warnings then close any previously open compiler results listviews
+   If (NumWarnings = 0) andalso (NumErrors = 0) then
+      if IsWindowVisible(HWND_FRMOUTPUT) THEN
+         if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
+            ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
+            frmMain_PositionWindows(HWND_FRMMAIN)
+         END IF   
+      END IF 
+   end if
+
+   If NumErrors = 0 Then 
+      ' 2018-08-29: Show popup compile message in cases where no errors but warnings may exist.
+      ' Hide the Output window is already open but there is no longer any warnings
+      ' or errors to show in the listview. Only close if the listview is active. Do not
+      ' close if the user is looking at the logfile textbox.
+      if bAllowSuccessMessage then  ' we are not compiling modules
+         dim as long nFileSize = AfxGetFileSize(gCompile.OutputFilename)
+         cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
+                         L(192, "Warnings") & " " & NumWarnings & _
+                         "  [ " & AfxStrPathname("NAMEX", gCompile.OutputFilename) & "  " & _
+                         (fix(nFileSize / 1024)+1) & "K  (" & _
+                         nFileSize & " " & L(199,"bytes") & ") ]"
+         SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
+         ' 2018-12-13: No longer offer the option to show the popup successful dialog.
+         ' Simply sound a success
+         MessageBeep(MB_OK)
+      end if
+   End if 
+
+   ' If Errors have occurred then return TRUE. We will allow processing
+   ' to continue if only Warnings occurred.
+   ' There were errors then do not allow running the EXE (warnings are okay)
+   If NumErrors > 0 Then 
+      gCompile.RunAfterCompile = False 
+      return true
+   end if
+   
+   function = false
+end function
+
+
 ''
 '' Main module that handles the entire compile process
 ''
-Function code_Compile( ByVal wID As Long ) As BOOLEAN
+public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Dim pDoc As clsDocument Ptr
    
@@ -575,471 +1023,5 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    Function = True   ' successful
 End Function
-
-
-'' July 2017, attempted to capture STDERR output from a running FB compiled
-'' program in order to capture runtime errors. This code works okay on Windows 10
-'' but does not PRINT on Windows 7. Also, dkl posted in FB forum that FB prints
-'' to STDOUT rather than STDERR. This is too bad.
-
-''
-''
-FUNCTION CreateChildProcess( byref zCmdLine AS wstring, _
-                             byref zParams  AS wstring, _
-                             byval hChildStdOutWrite AS HANDLE _
-                             ) AS BOOLEAN
-    
-   dim ProcessInfo AS PROCESS_INFORMATION
-   dim StartupInf  AS STARTUPINFO
-
-   StartupInf.cb         = SIZEOF(STARTUPINFO)
-   StartupInf.hStdError  = hChildStdOutWrite   
-   StartupInf.hStdOutput = hChildStdOutWrite  
-   StartupInf.dwFlags    = STARTF_USESTDHANDLES
-
-   IF CreateProcess( zCmdLine,  _    ' Create the child process.
-                     zParams, _      ' Command line
-                     BYVAL 0,     _  ' Process security attributes
-                     BYVAL 0,     _  ' Primary thread security attributes
-                     TRUE,        _  ' Handles are inherited
-                     CREATE_NO_WINDOW, _  ' Creation flags  
-                     BYVAL 0,     _  ' Use parent's environment
-                     BYVAL 0,     _  ' Use parent's current directory
-                     @StartupInf,  _  ' STARTUPINFO pointer
-                     @ProcessInfo) = FALSE THEN
-   ELSE
-      ' Close handles to the child process and its primary thread.
-      ' Some applications might keep these handles to monitor the status 
-      ' of the child process, for example.
-      CloseHandle( ProcessInfo.hProcess )
-      CloseHandle( ProcessInfo.hThread )
-      FUNCTION = TRUE
- END IF
-END FUNCTION
-
-
-''
-''
-SUB RedirConsoleToFile( byref szExe AS wstring, _
-                        byref szCmdLine AS wstring, _
-                        byref sConsoleText AS string _
-                        )
-
-   dim SecurityAttribute AS SECURITY_ATTRIBUTES
-   dim hChildStdOutRead  AS PHANDLE
-   dim hChildStdOutWrite AS PHANDLE
-   dim dwReadBytes       AS long
-   dim sBuffer AS STRING * 4096
-  
-   ' Set the bInheritHandle flag so pipe handles are inherited.
-   SecurityAttribute.nLength              = SIZEOF(SECURITY_ATTRIBUTES)
-   SecurityAttribute.bInheritHandle       = TRUE
-   SecurityAttribute.lpSecurityDescriptor = NULL
-
-   ' Create a pipe for the child process's STDOUT.
-   IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
-      '? "error creating pipe"
-   ELSE
-      ' Ensure the read handle to the pipe for STDOUT is not inherited.
-      IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
-         '? "error SetHandleInformation"
-      ELSE
-         ' Create the child process and read from its standard output
-         IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
-            CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
-            DO
-               IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN 
-                  '? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead, "dwReadBytes=";dwReadBytes
-                  '? "GetLastError: "; GetLastError
-                  EXIT DO
-               end if  
-               '? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
-               '? LEFT(sBuffer, dwReadBytes)
-               sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
-               '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
-               ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
-            LOOP
-         else
-            '? "CreateChildProcess failed"      
-         END IF
-      END IF
-   END IF
-END SUB
-
-
-''
-''
-Function RunEXE( ByRef wszFileExe As CWSTR, _
-                 ByRef wszParam As CWSTR _
-                 ) As Long
-                         
-   dim as CWSTR wszPath = AfxStrPathname("PATH", wszFileExe)
-   dim as CWSTR wszBatchFile = AfxGetExePathName + AfxStrPathname("NAME", wszFileExe) + ".bat"
-   dim as CWSTR wszQuickRunExe = wszFileExe
-   
-   ' If option is specified to launch command window prior to running the
-   ' compiled program then we do so by executing a shell to a batch file.
-   ' This allows being able to see any runtime errors that might be thrown.
-   ' Otherwise, simple shell to the program.
-   if gConfig.RunViaCommandWindow THEN
-      dim pStream as CTextStream
-      if pStream.Create(wszBatchFile) = S_OK then
-         pStream.WriteLine "@echo off"
-         pStream.WriteLine Left(**wszPath, 2)     ' ensure on correct drive
-         pStream.WriteLine "cd " & chr(34) & wszPath & chr(34)   ' change to correct folder
-         pStream.WriteLine chr(34) & wszFileExe & chr(34) & " " & wszParam
-         pStream.WriteLine "pause"
-         pStream.WriteLine "del " & chr(34) & wszBatchFile & chr(34) & " >> nul"
-      end if
-      pStream.Close
-      wszFileExe = wszBatchFile
-      wszParam = ""
-   END IF
-   
-
-   Dim ShExecInfo As SHELLEXECUTEINFOW  
-
-   ' Run the EXE
-   With ShExecInfo
-      .cbSize       = Len(SHELLEXECUTEINFOW)
-      .fMask        = SEE_MASK_NOCLOSEPROCESS
-      .HWnd         = 0
-      .lpVerb       = Null
-      .lpFile       = wszFileExe
-      .lpParameters = wszParam   
-      .lpDirectory  = 0
-      .nShow        = SW_SHOW
-      .hInstApp     = 0 
-   End With
-   ShellExecuteEx(@ShExecInfo)
-
-   ' If this was a QuickRun then add the filename to the global tracking array
-   ' that checks if the file exists and then deletes it.
-   if gCompile.CompileID = IDM_QUICKRUN THEN
-      ' Give time for the application to start to run (especially if being run via
-      ' the RunViaCommandWindow batch file, otherwise the exe will be deleted even
-      ' before it gets a chance to execute.
-      sleep 500
-      gApp.AddQuickRunEXE(wszQuickRunExe)
-   END IF
-   
-   Function = 0
-End Function
-
-
-
-' ========================================================================================
-' Set the cursor to the error position based on the selected line in frmCompileResults
-' or the TODO listview. 
-' ========================================================================================
-Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Long
-
-   Dim wszErrorLine As WString * MAX_PATH
-   Dim wszErrorFile As WString * MAX_PATH
-   
-   Dim As Long idx
-   Dim As Long nCurSel = ListView_GetSelection(hLV)
-   If nCurSel < 0 Then Return 0 
-   
-   Dim pDoc As clsDocument Ptr 
-
-   ' Get the line number and filename of the selected item
-   FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
-   FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
-
-   ' If we are doing a QuickRun then it must be on the currently loaded
-   ' and active file in the editor, therefore simply use that pDoc.
-   if wID = IDM_QUICKRUN THEN
-      pDoc = gTTabCtl.GetActiveDocumentPtr()
-      
-   else
-      If AfxFileExists(wszErrorFile) = 0 Then Exit Function
-   
-      ' If the document is already loaded then simply show the
-      ' document, otherwise we need to load it first and show it.
-      pDoc = OpenSelectedDocument( wszErrorFile )
-   END IF
-   if pDoc = 0 then exit function
-   
-   ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
-   ' initiate the toggle between the code editor and visual designer.
-   if pDoc->IsDesigner then
-      ' Show the code editor.
-      TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, 1)  ' 1 = code tab
-      frmMain_PositionWindows(HWND_FRMMAIN)
-   END IF
-
-   ' Move Scintilla cursor to the correct error line 
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   dim as long nLineNum = Val(wszErrorLine) - 1   ' because visually the editor is one based line numbers
-   SciExec( hEdit, SCI_GOTOLINE, nLineNum, 0 )
-
-End Function
-
-''
-''
-function ParseLogForError( byref wsLogSt as CWSTR, _
-                           byval bAllowSuccessMessage as Boolean, _
-                           Byval wID as long, _
-                           byval fCompile64 as Boolean _
-                           ) as Boolean
-   ' Returns TRUE if error has been detected. This signals to the calling code
-   ' that we can break out of performing any further compiles (eg. modules).
-   Dim wszTemp As WString * MAX_PATH 
-
-   Dim As Long Parenthesis_Start, Parenthesis_End, Error_Start       
-   Dim As Long i, NumLines, NextLine, r, nCount
-   Dim As Long NumWarnings, NumErrors, IsError, IsWarning
-   Dim As Long nFirstErrorLine = -1
-   Dim As HWnd hLV
-   Dim As CWSTR wDQ, wst1, wst2, wst3, wst, wst_ucase, wszOutputMsg        
-   dim as Boolean fGoodCompile
-
-   wDQ = wchr(34) ' unicode double quotes
-
-   ' Copy the log file text to the logfile textbox
-   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wsLogSt )
-   
-   hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW)
-   ListView_DeleteAllItems( hLV )
-   
-   ' On some Windows systems with tight security policies, the CreateChildProcess used
-   ' by the sub RedirConsoleToFile will fail. This seems to happen mostly when trying
-   ' to compile using the FB 64 bit compiler on a 32-bit version of Windows. For this
-   ' reason we will do a manual check here rather than relying on detecting the error
-   ' through the log file string.
-   if fCompile64 then   ' trying to compile a 64-bit program
-      if AfxWindowsBitness() <> 64 then  ' Windows is not 64 bit
-         wsLogSt = "This version of the FreeBASIC compiler is not compatible with the version " & _
-                   "of Windows you're running. Check your computer's system information to see " & _
-                   "whether you need a x86 (32-bit) or x64 (64-bit) version of the program, and " & _
-                   "then contact the software publisher."   
-      end if
-   end if
-
-   ' Parse the log string.
-   NumLines = AfxStrParseCount( wsLogSt, vbCrLf)
- 
-   For NextLine = 1 To NumLines                   
-   
-      wst = Trim(AfxStrParse(wsLogSt, NextLine, vbCrlf))                 
-      wst_ucase = Ucase(wst)
-      
-      ' Deal with the situation where we might be trying to compile a 64-bit application
-      ' from a 32-bit operating system.
-      If Left(**wst_ucase, 16) = WSTR("THIS VERSION OF ") Then
-         fGoodCompile = false
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Windows not 64-bit (refer to log file)") ) 
-         AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
-         exit for
-      End If   
-
-      ' Save the FB version and copyright information. 
-      If Left(**wst_ucase, 19) = WSTR("FREEBASIC COMPILER ") Then
-         fGoodCompile = True
-         wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
-      End If        
-      If Left(**wst_ucase, 13) = WSTR("COPYRIGHT (C)") Then
-         fGoodCompile = True
-         wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
-      End If        
-      
-      ' Check to see if an error occurred in compiling a resource script.
-      ' If there was a bad source name passed to the compiler (for 
-      ' example, missing .rc file), then the output at the end of the
-      ' log file is like the following:
-      '
-      ' Error!
-      ' Could Not Open source file (p.RC)
-      ' OBJ file Not made
-      ' compiling resource FAILED: Error Code 1
-      '
-      ' Very sorry, but GoRC had a problem.
-                                          
-      ' Check to see if linking failed
-      If (Left(**wst_ucase, 6) = WSTR("ERROR!")) or _
-         (left(**wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1 (refer to log file)") ) 
-         NumErrors = NumErrors + 1
-      elseIf (Left(**wst_ucase, 5) = WSTR("ERROR")) Then
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Error Code 1 (refer to log file)") ) 
-         NumErrors = NumErrors + 1
-      elseIf (Left(**wst_ucase, 19) = WSTR("COMPILING C FAILED:")) Then
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling C FAILED: Error Code 1 (refer to log file)") ) 
-         NumErrors = NumErrors + 1
-      end if
-      
-      If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, wst & " (refer to log file)" ) 
-         NumErrors = NumErrors + 1
-      End If
- 
- 
-      ' Check for the "linking: " line because that line identifies the actual output filename being created
-      If Left(**wst_ucase, 9) = WSTR("LINKING: ") Then 
-         ' -o "WinFBE.exe" 
-         i = Instr(wst, WSTR(" -o "))
-         If i Then
-            wszTemp = Mid(**wst, i+4)
-            i = Instr(wszTemp, wDQ & WSTR(" "))
-            If i Then gCompile.OutputFilename = AfxStrRemove(Left(wszTemp, i), wDQ)
-         End If      
-      End If
-      
-      ' Check for any compiler warnings
-      Error_Start = 0
-      IsWarning = Instr(**wst_ucase, WSTR(") WARNING "))
-      If IsWarning Then Error_Start = IsWarning
-      IsError   = Instr(**wst_ucase, WSTR(") ERROR ")) 
-      If IsError Then Error_Start = IsError
-      
-      If (Error_Start > 0) Then 
-         'sample warning message
-         'c:\freebasic\test.bas(1394) warning 1(1): Passing scalar as pointer, at parameter 2 (hwndOldFocus) of ONSETFOCUS()
-         'sample error message
-         'c:\freebasic\test.bas(17) error 41: Variable not declared, kjljjada in 'kjljjada Error'
-
-         ' Determine the line number. Error_Start variable holds the position of the closing
-         ' parenthesis of the line number. We simply need to reverse search from there for the
-         ' opening parenthesis.
-         ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
-         Parenthesis_End   = Error_Start
-         Parenthesis_Start = InStrRev(**wst, WSTR("("), Parenthesis_End)
-         
-         If (Parenthesis_Start < Parenthesis_End) Andalso _
-            (Parenthesis_End <= Error_Start) then
-    
-            wst1 = left(**wst, Parenthesis_Start-1)   ' filename
-            wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
-            wst3 = Mid( **wst, Error_Start + 1)  ' error message
-  
-            ' If this is a visual designer form file then we need to modify the line
-            ' number based on the error offset number.
-            dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
-            if pDoc then
-               if pDoc->IsDesigner then
-                  if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
-                  if len(pDoc->wszFormCodegen) = 0 then GenerateFormCode(pDoc)   ' regenerate visual designer code
-                  ' Offset is based on form metadata + code generation
-                  pDoc->ErrorOffset = 0
-                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
-                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
-                  wst2 = str( val(wst2) - pDoc->ErrorOffset)
-               end if
-            END IF
-
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, wst2 )  ' line#
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, wst1 )  ' filename
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, wst3 )  ' error message
-             
-            If IsWarning Then 
-               NumWarnings = NumWarnings + 1
-            ElseIf IsError Then
-               If nFirstErrorLine = -1 Then
-                  nFirstErrorLine = NumWarnings + NumErrors
-               End If
-               NumErrors = NumErrors + 1
-            End If            
-         End If
-
-      End If
- 
-   Next
- 
-   ' If there were no errors but the fGoodCompile flag was not set to True then the log file
-   ' did not contain the required FB copyright notice. Something must have went wrong, like trying
-   ' to call the 64 bit compiler using a 32 bit operating system. Show the message to the user via
-   ' the Output window (log file).
-   If fGoodCompile = False Then NumErrors = NumErrors + 1
-
-   dim as CWSTR cwsCompileMsg
-
-   ' If the output file was never created then throw an error
-   If (NumWarnings = 0) andalso (NumErrors = 0) then
-      if FileLen(gCompile.OutputFilename) = 0 then 
-         NumErrors = NumErrors + 1
-      end if
-   end if
-   
-   ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
-   If (NumWarnings > 0) orelse (NumErrors > 0) then
-      cwsCompileMsg = L(193, "Errors") & ": " & NumErrors & "  " & _
-                      L(192, "Warnings") & ": " & NumWarnings & _
-                      "  [" & Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
-      SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
-      MessageBeep(MB_ICONWARNING)
-      
-      ' Position the Compiler Log to the first error/warning
-      ListView_SelectItem( hLV, 0 )
-      
-      ' If fGoodCompile is False then something unusual occurred so better show the log file by default
-      If fGoodCompile = False Then
-         frmOutput_PositionWindows(HWND_FRMOUTPUT)
-      End If
-       
-      ' If the Search Results, TODO, Notes tab is active then reposition to 
-      ' the first tab for error listview
-      select case TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) 
-         case 2, 3, 4
-         TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
-         frmOutput_PositionWindows(HWND_FRMOUTPUT)
-      end select
-      
-      ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
-      frmMain_PositionWindows(HWND_FRMMAIN)
-      ' Set to error line position only after all windows have been shown and resized
-      SetDocumentErrorPosition(hLV, wID)
-   end if
-   
-   ' If there were no errors or warnings then close any previously open compiler results listviews
-   If (NumWarnings = 0) andalso (NumErrors = 0) then
-      if IsWindowVisible(HWND_FRMOUTPUT) THEN
-         if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
-            ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
-            frmMain_PositionWindows(HWND_FRMMAIN)
-         END IF   
-      END IF 
-   end if
-
-   If NumErrors = 0 Then 
-      ' 2018-08-29: Show popup compile message in cases where no errors but warnings may exist.
-      ' Hide the Output window is already open but there is no longer any warnings
-      ' or errors to show in the listview. Only close if the listview is active. Do not
-      ' close if the user is looking at the logfile textbox.
-      if bAllowSuccessMessage then  ' we are not compiling modules
-         dim as long nFileSize = AfxGetFileSize(gCompile.OutputFilename)
-         cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
-                         L(192, "Warnings") & " " & NumWarnings & _
-                         "  [ " & AfxStrPathname("NAMEX", gCompile.OutputFilename) & "  " & _
-                         (fix(nFileSize / 1024)+1) & "K  (" & _
-                         nFileSize & " " & L(199,"bytes") & ") ]"
-         SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
-         ' 2018-12-13: No longer offer the option to show the popup successful dialog.
-         ' Simply sound a success
-         MessageBeep(MB_OK)
-      end if
-   End if 
-
-   ' If Errors have occurred then return TRUE. We will allow processing
-   ' to continue if only Warnings occurred.
-   ' There were errors then do not allow running the EXE (warnings are okay)
-   If NumErrors > 0 Then 
-      gCompile.RunAfterCompile = False 
-      return true
-   end if
-   
-   function = false
-end function
-
 
 

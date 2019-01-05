@@ -17,7 +17,7 @@
 
 ''
 ''
-Function GetMRUMenuHandle() as HMENU
+private Function GetMRUMenuHandle() as HMENU
    Dim hFileMenu as HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, FILES_MENU_POSITION ) 
    Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, MRUFILES_MENU_POSITION )
    Function = hSubMenu
@@ -26,7 +26,9 @@ End Function
 
 ''
 ''
-Function OpenMRUFile( ByVal HWnd As HWnd, ByVal wID As Long ) As Long
+public Function OpenMRUFile( ByVal HWnd As HWnd, _
+                             ByVal wID As Long _
+                             ) As Long
    Dim wzFile As WString * MAX_PATH
    
    wzFile = gConfig.MRU(wID - IDC_MRUBASE)
@@ -44,7 +46,7 @@ End Function
 
 ''
 ''
-Function ClearMRUlist( ByVal wID As Long ) As Long
+public Function ClearMRUlist( ByVal wID As Long ) As Long
 
    Dim As Long i 
    
@@ -69,7 +71,7 @@ End Function
 
 ''
 ''
-Function CreateMRUpopup() As HMENU
+public Function CreateMRUpopup() As HMENU
    ' Popup menu that is displayed when downarrown on toolbar is pressed.
    Dim As HMENU hPopupMenu = CreatePopupMenu()
    
@@ -105,7 +107,7 @@ End Function
 
 ''
 ''
-Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
+public Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    ' Modify the actual topmenu display items based on the MRU strings
    Dim hSubMenu As HMENU = GetMRUMenuHandle()
    Dim i        As Long 
@@ -140,7 +142,7 @@ End Function
    
 ''
 ''
-Function UpdateMRUList( Byref wzFilename As WString ) As Long
+public Function UpdateMRUList( Byref wzFilename As WString ) As Long
 
    Dim idxExistsAt as Long = -1   ' index of where filename already exists 
    Dim i           as Long
@@ -180,7 +182,7 @@ End Function
 
 ''
 ''
-Function GetMRUProjectMenuHandle() As HMENU
+private Function GetMRUProjectMenuHandle() As HMENU
    Dim hFileMenu As HMENU = GetSubMenu( HWND_FRMMAIN_TOPMENU, PROJECT_MENU_POSITION ) 
    Dim hSubMenu  As HMENU = GetSubMenu( hFileMenu, MRUPROJECTS_MENU_POSITION )
    Function = hSubMenu
@@ -189,7 +191,9 @@ End Function
 
 ''
 ''
-Function OpenMRUProjectFile( ByVal HWnd As HWnd, ByVal wID As Long) As Long
+public Function OpenMRUProjectFile( ByVal HWnd As HWnd, _
+                                    ByVal wID As Long _
+                                    ) As Long
    Dim wzFile As WString * MAX_PATH
    wzFile = gConfig.MRUPROJECT(wID - IDC_MRUPROJECTBASE)
    frmMain_OpenProjectSafely(HWnd, wzFile) 
@@ -198,7 +202,7 @@ End Function
 
 ''
 ''
-Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
+public Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
    ' Modify the actual topmenu display items based on the MRU strings
    Dim hSubMenu As HMENU = GetMRUProjectMenuHandle()
    Dim i        As Long 
@@ -233,7 +237,7 @@ End Function
    
 ''
 ''
-Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
+public Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
 
    Dim idxExistsAt As Long = -1   ' index of where filename already exists 
    Dim i           As Long

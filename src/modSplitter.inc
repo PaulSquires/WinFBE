@@ -11,11 +11,14 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modSplitter.bi"
+#include once "frmMain.bi"
+
 
 ' ========================================================================================
 ' Process WM_LBUTTONDOWN message for splitter
 ' ========================================================================================
-Function Splitter_OnLButtonDown() As BOOLEAN
+public Function Splitter_OnLButtonDown() As BOOLEAN
 
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
    If pWindow = 0 Then Exit Function
@@ -71,7 +74,7 @@ End Function
 ' ========================================================================================
 ' Process WM_LBUTTONUP message for splitter
 ' ========================================================================================
-Function Splitter_OnLButtonUp() As BOOLEAN
+public Function Splitter_OnLButtonUp() As BOOLEAN
    if gApp.bDragActive then
       ReleaseCapture()
       gApp.bDragActive = False 
@@ -84,7 +87,7 @@ End Function
 ' ========================================================================================
 ' Process WM_MOUSEMOVE message for splitter
 ' ========================================================================================
-Function Splitter_OnMouseMove() As BOOLEAN
+public Function Splitter_OnMouseMove() As BOOLEAN
 
    ' Determine the right edge of the window and see if the mouse is currently
    ' hovering over it. Can't use WM_NCHITTEST because window not created with resizable borders.

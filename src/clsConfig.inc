@@ -15,6 +15,7 @@
 ''  CONFIGURATION MODULE
 
 #include once "clsConfig.bi"
+#include once "modRoutines.bi"
 #include once "frmExplorer.bi"
 #include once "frmOutput.bi"
 #include once "frmBuildConfig.bi"
@@ -1338,6 +1339,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    Treeview_DeleteAllItems(hTV)
    gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTV, TVI_ROOT, "" )
    Treeview_SetBold(hTV, gApp.hExplorerRootNode, TRUE)
+   ' Add the subnodes for the various 
 
    Do Until pStream.EOS
       AfxDoEvents()

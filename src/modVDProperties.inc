@@ -11,45 +11,18 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modVDProperties.bi"
+
 #include once "clsApp.bi"
 #include once "clsDocument.bi"
 #include once "modVDColors.bi"
 
-Enum FontStyles
-   Normal    = 0
-   Bold      = 1
-   Italic    = 2
-   Strikeout = 4
-   Underline = 8
-End Enum
-
-Enum FontCharset
-   Default     = DEFAULT_CHARSET
-   Ansi        = ANSI_CHARSET
-   Arabic      = ARABIC_CHARSET
-   Baltic      = BALTIC_CHARSET
-   ChineseBig5 = CHINESEBIG5_CHARSET
-   EastEurope  = EASTEUROPE_CHARSET
-   GB2312      = GB2312_CHARSET
-   Greek       = GREEK_CHARSET
-   Hangul      = HANGUL_CHARSET
-   Hebrew      = HEBREW_CHARSET
-   Johab       = JOHAB_CHARSET
-   Mac         = MAC_CHARSET
-   OEM         = OEM_CHARSET
-   Russian     = RUSSIAN_CHARSET
-   Shiftjis    = SHIFTJIS_CHARSET
-   Symbol      = SYMBOL_CHARSET
-   Thai        = THAI_CHARSET
-   Turkish     = TURKISH_CHARSET
-   Vietnamese  = VIETNAMESE_CHARSET
-End Enum
 
 
 ' ========================================================================================
 ' Display the Name and Description of the current selected Property.
 ' ========================================================================================
-function DisplayPropertyDetails() as Long
+public function DisplayPropertyDetails() as Long
    
    Dim As HWnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
    Dim As HWnd hPropName = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LBLPROPNAME)
@@ -228,7 +201,7 @@ end function
 ' ========================================================================================
 ' Display the Name and Description of the current selected Event.
 ' ========================================================================================
-function DisplayEventDetails() as Long
+public function DisplayEventDetails() as Long
    
    Dim As HWnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS)
    Dim As HWnd hEventName = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LBLPROPNAME)
@@ -317,7 +290,7 @@ end function
 ' ========================================================================================
 ' Get the RGB (BGR) color value from the specified property value
 ' ========================================================================================
-function GetRGBColorFromProperty( byval pProp as clsProperty ptr ) as COLORREF
+public function GetRGBColorFromProperty( byval pProp as clsProperty ptr ) as COLORREF
    if pProp = 0 then exit function
    
    dim as CWSTR wszPropValue, wszList, wszValue
@@ -344,63 +317,9 @@ end function
 
 
 ' ========================================================================================
-' Set values of a WinFormsX Font class (used for code generation)
-' ========================================================================================
-function SetFontClassFromPropValue( byref wszPropValue as wstring ) as CWSTR
-   
-   dim as CWSTR wszFont, wszStyles, wszCharSet
-      
-   if val(AfxStrParse(wszPropValue, 3, ",")) <> 400 then
-      wszStyles = wszStyles & "FontStyles.Bold or "
-   END IF
-   if val(AfxStrParse(wszPropValue, 4, ",")) then
-      wszStyles = wszStyles & "FontStyles.Italic or "
-   END IF
-   if val(AfxStrParse(wszPropValue, 5, ",")) then
-      wszStyles = wszStyles & "FontStyles.Underline or "
-   end if
-   if val(AfxStrParse(wszPropValue, 6, ",")) then
-      wszStyles = wszStyles & "FontStyles.StrikeOut or "
-   end if
-   wszStyles = rtrim(wszStyles, " or ")
-   if len(wszStyles) = 0 then wszStyles = "FontStyles.Normal"
-
-   select case val(AfxStrParse(wszPropValue, 7, ","))   ' charset
-      case DEFAULT_CHARSET:     wszCharSet = "FontCharset.Default"
-      case ANSI_CHARSET:        wszCharSet = "FontCharset.Ansi"        
-      case ARABIC_CHARSET:      wszCharSet = "FontCharset.Arabic"      
-      case BALTIC_CHARSET:      wszCharSet = "FontCharset.Baltic"      
-      case CHINESEBIG5_CHARSET: wszCharSet = "FontCharset.ChineseBig5" 
-      case EASTEUROPE_CHARSET:  wszCharSet = "FontCharset.EastEurope"  
-      case GB2312_CHARSET:      wszCharSet = "FontCharset.GB2312"
-      case GREEK_CHARSET:       wszCharSet = "FontCharset.Greek"      
-      case HANGUL_CHARSET:      wszCharSet = "FontCharset.Hangul"      
-      case HEBREW_CHARSET:      wszCharSet = "FontCharset.Hebrew"      
-      case JOHAB_CHARSET:       wszCharSet = "FontCharset.Johab"       
-      case MAC_CHARSET:         wszCharSet = "FontCharset.Mac"         
-      case OEM_CHARSET:         wszCharSet = "FontCharset.OEM"         
-      case RUSSIAN_CHARSET:     wszCharSet = "FontCharset.Russian"     
-      case SHIFTJIS_CHARSET:    wszCharSet = "FontCharset.Shiftjis"    
-      case SYMBOL_CHARSET:      wszCharSet = "FontCharset.Symbol"      
-      case THAI_CHARSET:        wszCharSet = "FontCharset.Thai"        
-      case TURKISH_CHARSET:     wszCharSet = "FontCharset.Turkish"     
-      case VIETNAMESE_CHARSET:  wszCharSet = "FontCharset.Vietnamese"  
-      case else: wszCharSet = "FontCharset.Default"
-   end select
-         
-   wszFont = _
-      chr(34) & AfxStrParse(wszPropValue, 1, ",") & chr(34) & "," & _
-      AfxStrParse(wszPropValue, 2, ",") & "," & wszStyles & "," & wszCharSet
-
-   function = wszFont
-
-end function
-
-' ========================================================================================
 ' Set values of a LOGFONT based on property value string
 ' ========================================================================================
-function SetLogFontFromPropValue( byref wszPropValue as wstring ) as LOGFONT
-   
+public function SetLogFontFromPropValue( byref wszPropValue as wstring ) as LOGFONT
    dim lf as LOGFONT
    lf.lfFaceName  = AfxStrParse(wszPropValue, 1, ",") 
    lf.lfHeight    = AfxGetFontHeight(val(AfxStrParse(wszPropValue, 2, ",")))
@@ -409,7 +328,6 @@ function SetLogFontFromPropValue( byref wszPropValue as wstring ) as LOGFONT
    lf.lfUnderline = val(AfxStrParse(wszPropValue, 5, ","))
    lf.lfStrikeOut = val(AfxStrParse(wszPropValue, 6, ","))
    lf.lfCharSet   = val(AfxStrParse(wszPropValue, 7, ","))
-            
    function = lf
 end function
 
@@ -417,8 +335,7 @@ end function
 ' ========================================================================================
 ' Set values of a property value string based on LOGFONT 
 ' ========================================================================================
-function SetPropValueFromLogFont( byref lf as LOGFONT ) as CWSTR
-   
+public function SetPropValueFromLogFont( byref lf as LOGFONT ) as CWSTR
    dim as CWSTR wszPropValue = _
    lf.lfFaceName  & "," & _
    AfxGetFontPointSize(lf.lfHeight) & "," & _
@@ -427,40 +344,14 @@ function SetPropValueFromLogFont( byref lf as LOGFONT ) as CWSTR
    lf.lfUnderline & "," & _
    lf.lfStrikeOut & "," & _
    lf.lfCharSet   
-            
    function = wszPropValue
 end function
 
 
 ' ========================================================================================
-' Show the popup font selection dialog for the current property
-' ========================================================================================
-function ChooseFontForProperty( byval pProp as clsProperty ptr ) as long
-   if pProp = 0 then exit function
-   
-   dim cf as CHOOSEFONT 
-   dim lf as LOGFONT
-   cf.lStructSize = sizeof(cf)
-   cf.hwndOwner = HWND_FRMVDTOOLBOX
-   cf.lpLogFont = @lf
-   cf.Flags = CF_SCREENFONTS or CF_EFFECTS or CF_INITTOLOGFONTSTRUCT
-
-   lf = SetLogFontFromPropValue(pProp->wszPropValue)
-
-   EnableWindow(HWND_FRMMAIN, false)
-   if ChooseFont(@cf) then
-      pProp->wszPropValue = SetPropValueFromLogFont(*cf.lpLogFont) 
-      AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
-   END IF
-   EnableWindow(HWND_FRMMAIN, true)
-
-   function = 0
-end function
-
-' ========================================================================================
 ' Create a default value for a FONT property of a control
 ' ========================================================================================
-function CreateDefaultFontPropValue() as CWSTR
+private function CreateDefaultFontPropValue() as CWSTR
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd_FRMMAIN)
    if pWindow = 0 THEN exit function
@@ -475,9 +366,9 @@ end function
 ' ========================================================================================
 ' Determine if an Property exists for a Form
 ' ========================================================================================
-function IsPropertyExists( byval pCtrl as clsControl ptr, _
-                           byval wszPropName as CWSTR _
-                           ) as boolean
+public function IsPropertyExists( byval pCtrl as clsControl ptr, _
+                                  byval wszPropName as CWSTR _
+                                  ) as boolean
    if pCtrl = 0 THEN return false
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)
@@ -495,9 +386,9 @@ end function
 ' ========================================================================================
 ' Determine if an Event exists for a Form
 ' ========================================================================================
-function IsEventExists( byval pCtrl as clsControl ptr, _
-                        byval wszEventName as CWSTR _
-                        ) as boolean
+public function IsEventExists( byval pCtrl as clsControl ptr, _
+                               byval wszEventName as CWSTR _
+                               ) as boolean
    if pCtrl = 0 THEN return false
    dim as long lb = lbound(pCtrl->Events)
    dim as long ub = ubound(pCtrl->Events)
@@ -515,9 +406,9 @@ end function
 ' ========================================================================================
 ' Retrieve the Property pointer for the specified control property
 ' ========================================================================================
-function GetControlPropertyPtr( byval pCtrl as clsControl ptr, _
-                                byval wszPropName as CWSTR _
-                                ) as clsProperty Ptr
+public function GetControlPropertyPtr( byval pCtrl as clsControl ptr, _
+                                       byval wszPropName as CWSTR _
+                                       ) as clsProperty Ptr
    if pCtrl = 0 THEN return 0
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)
@@ -533,24 +424,26 @@ function GetControlPropertyPtr( byval pCtrl as clsControl ptr, _
    return 0
 end function
 
+
 ' ========================================================================================
 ' Retrieve the value for the specified control property
 ' ========================================================================================
-function GetControlProperty( byval pCtrl as clsControl ptr, _
-                             byval wszPropName as CWSTR _
-                             ) as CWSTR
+public function GetControlProperty( byval pCtrl as clsControl ptr, _
+                                    byval wszPropName as CWSTR _
+                                    ) as CWSTR
    dim pProp as clsProperty ptr = GetControlPropertyPtr(pCtrl, wszPropName)
    if pProp then return pProp->wszPropValue 
    return 0
 end function
 
+
 ' ========================================================================================
 ' Set the value for the specified control property
 ' ========================================================================================
-function SetControlProperty( byval pCtrl as clsControl ptr, _
-                             byval wszPropName as CWSTR, _
-                             byval wszPropValue as CWSTR _
-                             ) as long
+public function SetControlProperty( byval pCtrl as clsControl ptr, _
+                                    byval wszPropName as CWSTR, _
+                                    byval wszPropValue as CWSTR _
+                                    ) as long
    if pCtrl = 0 then exit function
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)
@@ -569,10 +462,10 @@ end function
 ' ========================================================================================
 ' Add an event to the incoming control and optionally a value
 ' ========================================================================================
-function AddControlEvent( byval pCtrl as clsControl ptr, _
-                          byref wszEventName as CWSTR, _
-                          byval bIsSelected as boolean = false _
-                          ) as Long
+private function AddControlEvent( byval pCtrl as clsControl ptr, _
+                                  byref wszEventName as CWSTR, _
+                                  byval bIsSelected as boolean = false _
+                                  ) as Long
    dim as long ub = ubound(pCtrl->Events) + 1
    redim preserve pCtrl->Events(ub) as clsEvent
    pCtrl->Events(ub).wszEventName = wszEventName
@@ -584,10 +477,10 @@ end function
 ' ========================================================================================
 ' Set the value for the specified control event
 ' ========================================================================================
-function SetControlEvent( byval pCtrl as clsControl ptr, _
-                          byval wszEventName as CWSTR, _
-                          byval bIsSelected as boolean _
-                          ) as long
+public function SetControlEvent( byval pCtrl as clsControl ptr, _
+                                 byval wszEventName as CWSTR, _
+                                 byval bIsSelected as boolean _
+                                 ) as long
    if pCtrl = 0 then exit function
    dim as long lb = lbound(pCtrl->Events)
    dim as long ub = ubound(pCtrl->Events)
@@ -602,574 +495,5 @@ function SetControlEvent( byval pCtrl as clsControl ptr, _
    function = 0
 end function
 
-' ========================================================================================
-' Attach default events for the incoming control
-' ========================================================================================
-function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as Long
-
-   ' Only add default events if the no events already exist for the control
-   if ubound(pCtrl->Events) - lbound(pCtrl->Events) + 1 > 0 then exit function
-  
-   ' Add the default AllEvents event that applies to all controls
-   AddControlEvent(pCtrl, "AllEvents")
-
-   ' Add control specific properties
-   select CASE pCtrl->ControlType
-      case CTRL_FORM
-         AddControlEvent(pCtrl, "Load")
-         AddControlEvent(pCtrl, "Initialize")
-         AddControlEvent(pCtrl, "Shown")
-         AddControlEvent(pCtrl, "Activated")
-         AddControlEvent(pCtrl, "Deactivate")
-         AddControlEvent(pCtrl, "Resize")
-         AddControlEvent(pCtrl, "FormClosing")
-         AddControlEvent(pCtrl, "FormClosed")
-         AddControlEvent(pCtrl, "Move")
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_LABEL
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-      case CTRL_BUTTON
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_TEXTBOX
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "TextChanged")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_MASKEDEDIT
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "TextChanged")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_CHECKBOX
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_LISTBOX
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_OPTION
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_FRAME
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-      case CTRL_COMBOBOX
-         AddControlEvent(pCtrl, "Click")
-         AddControlEvent(pCtrl, "Destroy")
-         AddControlEvent(pCtrl, "DropFiles")
-         AddControlEvent(pCtrl, "DropDown")
-         AddControlEvent(pCtrl, "DropDownClosed")
-         AddControlEvent(pCtrl, "GotFocus")
-         AddControlEvent(pCtrl, "LostFocus")
-         AddControlEvent(pCtrl, "MouseMove")
-         AddControlEvent(pCtrl, "MouseDown")
-         AddControlEvent(pCtrl, "MouseUp")
-         AddControlEvent(pCtrl, "MouseDoubleClick")
-         AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
-         AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
-         AddControlEvent(pCtrl, "TextChanged")
-      case CTRL_PICTURE
-      case CTRL_HSCROLL
-      case CTRL_VSCROLL
-      case CTRL_TIMER
-      case CTRL_TABCONTROL
-      case CTRL_RICHEDIT
-      case CTRL_PROGRESSBAR
-      case CTRL_UPDOWN
-      case CTRL_LISTVIEW
-      case CTRL_TREEVIEW
-      case CTRL_SLIDER
-      case CTRL_DATETIMEPICKER
-      case CTRL_MONTHCALENDAR
-      case CTRL_WEBBROWSER
-      case CTRL_CUSTOM
-      case CTRL_OCX
-   END SELECT
-
-   function = 0
-end function
-
-
-' ========================================================================================
-' Add a property to the incoming control and optionally a value
-' ========================================================================================
-function AddControlProperty( byval pCtrl as clsControl ptr, _
-                             byref wszPropName as CWSTR, _
-                             byref wszPropValue as CWSTR, _
-                             byval nPropType as PropertyType _
-                             ) as Long
-   dim as long ub = ubound(pCtrl->Properties) + 1
-   redim preserve pCtrl->Properties(ub) as clsProperty
-   pCtrl->Properties(ub).wszPropName  = wszPropName
-   pCtrl->Properties(ub).wszPropValue = wszPropValue
-   pCtrl->Properties(ub).wszPropDefault = wszPropValue
-   pCtrl->Properties(ub).PropType = nPropType
-   function = 0
-end function
-
-
-' ========================================================================================
-' Attach default properties for the incoming control
-' ========================================================================================
-function AttachDefaultControlProperties( byval pCtrl as clsControl ptr ) as Long
-
-   ' Only add default properties if the no properties already exist for the control
-   if ubound(pCtrl->Properties) - lbound(pCtrl->Properties) + 1 > 0 then exit function
-  
-   ' Add the default same generic proprties that apply to all controls
-   AddControlProperty(pCtrl, "Name", "", PropertyType.EditEnter)
-   AddControlProperty(pCtrl, "Left", "0", PropertyType.EditEnterNumericOnly)
-   AddControlProperty(pCtrl, "Top", "0", PropertyType.EditEnterNumericOnly)
-   AddControlProperty(pCtrl, "Width", "0", PropertyType.EditEnterNumericOnly)
-   AddControlProperty(pCtrl, "Height", "0", PropertyType.EditEnterNumericOnly)
-
-   ' Add control specific properties
-   select CASE pCtrl->ControlType
-      case CTRL_FORM
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "WindowState", "FormWindowState.Normal", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "StartPosition", "FormStartPosition.Manual", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "BorderStyle", "FormBorderStyle.Sizable", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "MinimizeBox", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "MaximizeBox", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "ControlBox", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "AcceptButton", "", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "KeyPreview", "False", PropertyType.TrueFalse)
-'         AddControlProperty(pCtrl, "BackgroundImage", "", PropertyType.ImagePicker)
-'         AddControlProperty(pCtrl, "BackgroundImageLayout", "ImageLayout.None", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "CancelButton", "", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Icon", "", PropertyType.ImagePicker)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "MaximumHeight", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "MaximumWidth", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "MinimumHeight", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "MinimumWidth", "0", PropertyType.EditEnterNumericOnly)
-'         AddControlProperty(pCtrl, "ShowInTaskBar", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-
-      case CTRL_LABEL
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.None", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.TopLeft", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-          
-      case CTRL_BUTTON
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "BackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "TextForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "TextBackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "TextForeColorDown", "SYSTEM|ControlText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "TextBackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
-'         AddControlProperty(pCtrl, "ImageAlign", "ImageLayout.None", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
-'         AddControlProperty(pCtrl, "TextMargin", "4", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "ThemeSupport", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "ToggleMode", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-      case CTRL_TEXTBOX
-         AddControlProperty(pCtrl, "AcceptsReturn", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "AcceptsTab", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "CharacterCasing", "CharacterCasing.Normal", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "HideSelection", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "MaxLength", "32767", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "Multiline", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "PasswordChar", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "ReadOnly", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TextScrollBars", "ScrollBars.None", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "TextAlign", "TextAlignment.Left", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "WordWrap", "False", PropertyType.TrueFalse)
-
-      case CTRL_MASKEDEDIT
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "DefaultCharacter", "_", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "HideSelection", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "InputString", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "MaskString", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "ReadOnly", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "ValidCharacters", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-      case CTRL_CHECKBOX
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-         'AddControlProperty(pCtrl, "CheckAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "CheckState", "CheckBoxState.Unchecked", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         'AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleLeft", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "ThreeState", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-      case CTRL_LISTBOX
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "ColumnWidth", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "HorizontalExtent", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "IntegralHeight", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "MultiColumn", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "ScrollAlwaysVisible", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "SelectionMode", "ListSelectionMode.One", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Sorted", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "UseTabStops", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-      case CTRL_COMBOBOX
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         'AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
-         'AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "DropDownStyle", "ComboBoxStyle.DropDownList", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         'AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "IntegralHeight", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Sorted", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-      case CTRL_OPTION
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-         'AddControlProperty(pCtrl, "CheckAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Checked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "GroupName", "OptionGroup1", PropertyType.EditEnter)
-         'AddControlProperty(pCtrl, "Index", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleLeft", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-      case CTRL_FRAME
-         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
-'         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
-'         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.None", PropertyType.ComboPicker)
-'         AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.TopLeft", PropertyType.ComboPicker)
-         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
-         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-
-'      case CTRL_PICTURE
-      case CTRL_HSCROLL
-      case CTRL_VSCROLL
-      case CTRL_TIMER
-      case CTRL_TABCONTROL
-      case CTRL_RICHEDIT
-      case CTRL_PROGRESSBAR
-      case CTRL_UPDOWN
-      case CTRL_LISTVIEW
-      case CTRL_TREEVIEW
-      case CTRL_SLIDER
-      case CTRL_DATETIMEPICKER
-      case CTRL_MONTHCALENDAR
-      case CTRL_WEBBROWSER
-      case CTRL_CUSTOM
-      case CTRL_OCX
-   END SELECT
-
-   function = 0
-end function
-
-
-' ========================================================================================
-' Load the dropdown PropertyList listbox that shows chocies for the current property
-' ========================================================================================
-function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
-                                   byval pCtrl as clsControl ptr, _
-                                   byval pProp as clsProperty ptr _
-                                   ) as Long
-
-   if pDoc = 0 then exit function
-   if pCtrl = 0 then exit function
-   if pProp = 0 then exit function
-   
-   ListBox_ResetContent(HWND_PROPLIST_COMBOLIST)
-   
-   if pProp->PropType = PropertyType.TrueFalse then
-      ListBox_AddString(HWND_PROPLIST_COMBOLIST, @WSTR("True"))
-      ListBox_AddString(HWND_PROPLIST_COMBOLIST, @WSTR("False"))
-      exit function
-   end if
-
-   select case ucase(pProp->wszPropName)
-      case "ACCEPTBUTTON", "CANCELBUTTON"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("(none)"))
-         for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-            pCtrl = pDoc->Controls.ItemAt(i)
-            if pCtrl then
-               if pCtrl->ControlType = CTRL_BUTTON then
-                  ListBox_AddString(HWND_PROPLIST_COMBOLIST, GetControlProperty(pCtrl, "NAME"))
-               end if
-            END if
-         NEXT
-         
-      CASE "BORDERSTYLE"
-         select case pCtrl->ControlType
-            case CTRL_FORM
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.None"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.Sizable"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.Fixed3D"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.FixedSingle"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.FixedDialog"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.FixedToolWindow"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.SizableToolWindow"))
-            case else
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlBorderStyle.None"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlBorderStyle.FixedSingle"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlBorderStyle.Fixed3D"))
-         end select
-         
-      case "CHARACTERCASING"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Normal"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Upper"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Lower"))
-
-      case "CHECKSTATE"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Checked"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
-
-      case "DROPDOWNSTYLE"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.Simple"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDown"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDownList"))
-
-      case "TEXTSCROLLBARS"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Horizontal"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Vertical"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Both"))
-
-      CASE "STARTPOSITION"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterParent"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterScreen"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.Manual"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.WindowsDefaultLocation"))
-
-      CASE "SELECTIONMODE"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.One"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.MultiSimple"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.MultiExtended"))
-
-      case "WINDOWSTATE"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Maximized"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Minimized"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Normal"))
-
-      case "BACKGROUNDIMAGELAYOUT"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Tile"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Center"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Stretch"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Zoom"))
-
-      case "TEXTALIGN"
-         select case pCtrl->ControlType
-            case CTRL_BUTTON, CTRL_CHECKBOX, CTRL_OPTION, CTRL_FRAME
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomCenter"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomLeft"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomRight"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.MiddleCenter"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.MiddleLeft"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.MiddleRight"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopCenter"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopLeft"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopRight"))
-            case CTRL_LABEL
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleCenter"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleLeft"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleRight"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopCenter"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopLeft"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopRight"))
-            case CTRL_TEXTBOX
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Left"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Right"))
-               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Center"))
-         end select
-   END SELECT
-
-   function = 0
-end function
 
 

@@ -11,19 +11,69 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modGenerateCode.bi"
 #include once "clsControl.bi"
 
-type TABORDER_TYPE
-   pCtrl as clsControl ptr
-   TabIndex   as Long        ' 999999 if TabStop=False or TabIndex property doesn't exist
-END TYPE
 
+
+' ========================================================================================
+' Set values of a WinFormsX Font class (used for code generation)
+' ========================================================================================
+private function SetFontClassFromPropValue( byref wszPropValue as wstring ) as CWSTR
+   
+   dim as CWSTR wszFont, wszStyles, wszCharSet
+      
+   if val(AfxStrParse(wszPropValue, 3, ",")) <> 400 then
+      wszStyles = wszStyles & "FontStyles.Bold or "
+   END IF
+   if val(AfxStrParse(wszPropValue, 4, ",")) then
+      wszStyles = wszStyles & "FontStyles.Italic or "
+   END IF
+   if val(AfxStrParse(wszPropValue, 5, ",")) then
+      wszStyles = wszStyles & "FontStyles.Underline or "
+   end if
+   if val(AfxStrParse(wszPropValue, 6, ",")) then
+      wszStyles = wszStyles & "FontStyles.StrikeOut or "
+   end if
+   wszStyles = rtrim(wszStyles, " or ")
+   if len(wszStyles) = 0 then wszStyles = "FontStyles.Normal"
+
+   select case val(AfxStrParse(wszPropValue, 7, ","))   ' charset
+      case DEFAULT_CHARSET:     wszCharSet = "FontCharset.Default"
+      case ANSI_CHARSET:        wszCharSet = "FontCharset.Ansi"        
+      case ARABIC_CHARSET:      wszCharSet = "FontCharset.Arabic"      
+      case BALTIC_CHARSET:      wszCharSet = "FontCharset.Baltic"      
+      case CHINESEBIG5_CHARSET: wszCharSet = "FontCharset.ChineseBig5" 
+      case EASTEUROPE_CHARSET:  wszCharSet = "FontCharset.EastEurope"  
+      case GB2312_CHARSET:      wszCharSet = "FontCharset.GB2312"
+      case GREEK_CHARSET:       wszCharSet = "FontCharset.Greek"      
+      case HANGUL_CHARSET:      wszCharSet = "FontCharset.Hangul"      
+      case HEBREW_CHARSET:      wszCharSet = "FontCharset.Hebrew"      
+      case JOHAB_CHARSET:       wszCharSet = "FontCharset.Johab"       
+      case MAC_CHARSET:         wszCharSet = "FontCharset.Mac"         
+      case OEM_CHARSET:         wszCharSet = "FontCharset.OEM"         
+      case RUSSIAN_CHARSET:     wszCharSet = "FontCharset.Russian"     
+      case SHIFTJIS_CHARSET:    wszCharSet = "FontCharset.Shiftjis"    
+      case SYMBOL_CHARSET:      wszCharSet = "FontCharset.Symbol"      
+      case THAI_CHARSET:        wszCharSet = "FontCharset.Thai"        
+      case TURKISH_CHARSET:     wszCharSet = "FontCharset.Turkish"     
+      case VIETNAMESE_CHARSET:  wszCharSet = "FontCharset.Vietnamese"  
+      case else: wszCharSet = "FontCharset.Default"
+   end select
+         
+   wszFont = _
+      chr(34) & AfxStrParse(wszPropValue, 1, ",") & chr(34) & "," & _
+      AfxStrParse(wszPropValue, 2, ",") & "," & wszStyles & "," & wszCharSet
+
+   function = wszFont
+
+end function
 
 
 ' ========================================================================================
 ' Retrieve the Form name for this document.
 ' ========================================================================================
-function GetFormName( byval pDoc as clsDocument ptr ) as CWSTR
+private function GetFormName( byval pDoc as clsDocument ptr ) as CWSTR
    if pDoc = 0 then exit function
    
    dim pCtrl as clsControl ptr
@@ -44,7 +94,7 @@ end function
 ' ========================================================================================
 ' Generate the metadata that defines the form
 ' ========================================================================================
-function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
+public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long 
    if pDoc = 0 then exit function
    dim pCtrl as clsControl ptr
    dim wszControls as CWSTR
@@ -128,7 +178,7 @@ end function
 ' ========================================================================================
 ' Generate code for any existing Form MainMenu.
 ' ========================================================================================
-function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
+private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
    dim as clsMenuItem iMenu
    dim as CWSTR wszText, wszShortcut, wszFormName
    dim as CWSTR DQ = chr(34)
@@ -241,7 +291,7 @@ end function
 ' ========================================================================================
 ' Generate (or regenerate) visual designer code and insert it into the code editor.
 ' ========================================================================================
-function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
+public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    if pDoc = 0 then exit function
    if pDoc->IsDesigner = false then exit function
    if pDoc->bRegenerateCode = false then exit function

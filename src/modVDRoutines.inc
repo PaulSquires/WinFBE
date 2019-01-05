@@ -11,11 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modVDRoutines.bi"
+
 
 ' ========================================================================================
 ' Retrieve the IMAGES_TYPE pointer for the IMAGE name.
 ' ========================================================================================
-Function GetImagesTypePtr( byref wszImageName as wstring ) As IMAGES_TYPE ptr
+public Function GetImagesTypePtr( byref wszImageName as wstring ) As IMAGES_TYPE ptr
    dim pDoc as clsDocument ptr = gApp.pDocList
    do until pDoc = 0
       if (gApp.IsProjectActive = false) andalso _
@@ -36,40 +38,9 @@ end function
 
 
 ' ========================================================================================
-' Retrieve the control/toolbox name that is currently actively selected in the Toolbox
-' ========================================================================================
-function GetActiveToolboxControlName() as CWSTR
-
-   Dim As HWnd hList1 = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX)
-   dim as long nCurSel = ListBox_GetCurSel(hList1)
-   
-   if nCurSel = -1 THEN return CTRL_POINTER
-   
-   ' The index into the global gToolbox array is stored in the line's data area.
-   dim as long idx = ListBox_GetItemData(hList1, nCurSel)
-   return gToolbox(idx).wszControlName
-end function
-
-
-' ========================================================================================
-' Retrieve the control class name that is currently actively selected in the Toolbox
-' ========================================================================================
-function GetActiveToolboxControlClassName() as CWSTR
-
-   Dim As HWnd hList1 = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX)
-   dim as long nCurSel = ListBox_GetCurSel(hList1)
-   
-   if nCurSel = -1 THEN return CTRL_POINTER
-   
-   ' The index into the global gToolbox array is stored in the line's data area.
-   dim as long idx = ListBox_GetItemData(hList1, nCurSel)
-   return gToolbox(idx).wszClassName
-end function
-
-' ========================================================================================
 ' Retrieve the control type that is currently actively selected in the Toolbox
 ' ========================================================================================
-function GetActiveToolboxControlType() as Long
+public function GetActiveToolboxControlType() as Long
 
    Dim As HWnd hList1 = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX)
    dim as long nCurSel = ListBox_GetCurSel(hList1)
@@ -85,7 +56,7 @@ end function
 ' ========================================================================================
 ' Retrieve a pointer to the currently selected Property in the PropertyList
 ' ========================================================================================
-function GetActivePropertyPtr() as clsProperty ptr
+public function GetActivePropertyPtr() as clsProperty ptr
 
    Dim As HWnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
    dim as long nCurSel = ListBox_GetCurSel(hList)
@@ -105,7 +76,7 @@ end function
 ' ========================================================================================
 ' Retrieve a pointer to the currently selected Event in the PropertyList
 ' ========================================================================================
-function GetActiveEventPtr() as clsEvent ptr
+public function GetActiveEventPtr() as clsEvent ptr
 
    Dim As HWnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS)
    dim as long nCurSel = ListBox_GetCurSel(hList)
@@ -125,7 +96,7 @@ end function
 ' ========================================================================================
 ' Get the pCtrl pointer for the Form
 ' ========================================================================================
-function GetFormCtrlPtr( byval pDoc as clsDocument ptr ) as clsControl ptr
+public function GetFormCtrlPtr( byval pDoc as clsDocument ptr ) as clsControl ptr
    dim pCtrl as clsControl ptr
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
@@ -138,7 +109,7 @@ end function
 ' ========================================================================================
 ' Set the Tools listbox to incoming control type.
 ' ========================================================================================
-function SetActiveToolboxControl( byval ControlType as long ) as Long
+public function SetActiveToolboxControl( byval ControlType as long ) as Long
 
    Dim As HWnd hList1 = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX)
    dim as long NumItems = ListBox_GetCount(hList1)
@@ -155,10 +126,11 @@ function SetActiveToolboxControl( byval ControlType as long ) as Long
    function = 0
 end function
 
+
 ' ========================================================================================
 ' Get the class name based on the type of control
 ' ========================================================================================
-function GetControlClassName( byval pCtrl as clsControl ptr ) as CWSTR
+public function GetControlClassName( byval pCtrl as clsControl ptr ) as CWSTR
    for i as long = lbound(gToolbox) to ubound(gToolbox)
       if gToolbox(i).nToolType = pCtrl->ControlType THEN 
          return gToolbox(i).wszClassName
@@ -166,11 +138,12 @@ function GetControlClassName( byval pCtrl as clsControl ptr ) as CWSTR
    NEXT
    return ""
 end function
+
    
 ' ========================================================================================
 ' Get the control ToolBox name based on the type of control
 ' ========================================================================================
-function GetToolBoxName( byval nControlType as long ) as CWSTR
+public function GetToolBoxName( byval nControlType as long ) as CWSTR
    if nControlType = CTRL_FORM then return "Form"
    for i as long = lbound(gToolbox) to ubound(gToolbox)
       if gToolbox(i).nToolType = nControlType THEN 
@@ -180,10 +153,11 @@ function GetToolBoxName( byval nControlType as long ) as CWSTR
    return ""
 end function
 
+
 ' ========================================================================================
 ' Get the control name based on the type of control
 ' ========================================================================================
-function GetControlName( byval nControlType as long ) as CWSTR
+public function GetControlName( byval nControlType as long ) as CWSTR
    if nControlType = CTRL_FORM then return "Form"
    for i as long = lbound(gToolbox) to ubound(gToolbox)
       if gToolbox(i).nToolType = nControlType THEN 
@@ -193,10 +167,11 @@ function GetControlName( byval nControlType as long ) as CWSTR
    return ""
 end function
 
+
 ' ========================================================================================
 ' Get the control type number based on the name of the control
 ' ========================================================================================
-function GetControlType( byval wszControlName as CWSTR ) as long
+public function GetControlType( byval wszControlName as CWSTR ) as long
    wszControlName = ucase(wszControlName)
    if wszControlName = "FORM" then return CTRL_FORM 
    for i as long = lbound(gToolbox) to ubound(gToolbox)
@@ -207,10 +182,11 @@ function GetControlType( byval wszControlName as CWSTR ) as long
    return 0
 end function
 
+
 ' ========================================================================================
 ' Get the WinFormsX class name for the incoming control type
 ' ========================================================================================
-function GetWinformsXClassName( byval nControlType as long ) as CWSTR
+public function GetWinformsXClassName( byval nControlType as long ) as CWSTR
    dim wszText as CWSTR
    select case nControlType 
       CASE CTRL_FORM:              wszText = "wfxForm"
@@ -248,7 +224,7 @@ end function
 ' ========================================================================================
 ' Get the RECT of the specified control 
 ' ========================================================================================
-function GetControlRECT( byval pCtrl as clsControl ptr ) as RECT
+public function GetControlRECT( byval pCtrl as clsControl ptr ) as RECT
    if pCtrl = 0 then exit function
    dim as long lb = lbound(pCtrl->Properties)
    dim as long ub = ubound(pCtrl->Properties)

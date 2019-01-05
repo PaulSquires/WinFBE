@@ -17,29 +17,15 @@
 ''  in the code editor and gConfig. AutoComplete is TRUE.
 ''
 
-enum
-   BLOCK_STATEMENT_IF 
-   BLOCK_STATEMENT_FOR
-   BLOCK_STATEMENT_SELECT
-   BLOCK_STATEMENT_WHILE
-   BLOCK_STATEMENT_DO
-   BLOCK_STATEMENT_FUNCTION
-   BLOCK_STATEMENT_SUB
-   BLOCK_STATEMENT_PROPERTY
-   BLOCK_STATEMENT_TYPE
-   BLOCK_STATEMENT_WITH
-   BLOCK_STATEMENT_ENUM
-   BLOCK_STATEMENT_UNION
-   BLOCK_STATEMENT_CONSTRUCTOR
-   BLOCK_STATEMENT_DESTRUCTOR
-end enum
+#include once "modAutoInsert.bi"
+
 
 ''
 ''
-function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
-                                    byval idBlockType as long, _
-                                    byval nStartLine as long _
-                                    ) as boolean
+private function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
+                                            byval idBlockType as long, _
+                                            byval nStartLine as long _
+                                            ) as boolean
    
    If gConfig.AutoComplete = false Then return false
    
@@ -120,7 +106,7 @@ end function
 
 ''
 ''
-function AttemptAutoInsert() as Long
+public function AttemptAutoInsert() as Long
    ' Attempts to Autocomplete a FOR/DO/SELECT, etc block. This function also deals
    ' with AutoIndentation so need to handle both separately depending on the user
    ' chosen settings.

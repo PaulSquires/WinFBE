@@ -18,6 +18,11 @@
 #include once "frmProjectOptions.bi"
 #include once "frmBuildConfig.bi"
 #include once "modMRU.bi"
+#include once "modAutoInsert.bi"
+#include once "modSplitter.bi"
+#include once "modToolbar.bi"
+#include once "modMenus.bi"
+#include once "modCompile.bi"
 
 
 ' Global array to hold cut/copy/paste controls
@@ -456,7 +461,7 @@ End Function
 ' ========================================================================================
 ' Set focus to currently active Scintilla window
 ' ========================================================================================
-private Function frmMain_SetFocusToCurrentCodeWindow() As Long
+public Function frmMain_SetFocusToCurrentCodeWindow() As Long
    ' Post a message to the main form CUSTOM handler that will
    ' set focus to the currently active Scintilla code window. We
    ' use PostMessage to ensure that all all other windows 
@@ -512,7 +517,7 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+public Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim As HWnd hEdit, hTabCtl
    Dim As Rect rc
@@ -671,9 +676,9 @@ End Function
 ' ========================================================================================
 ' Attempt to open specified project. 
 ' ========================================================================================
-private Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
-                                            byref wszProjectFileName as const WString _
-                                            ) as Boolean
+public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
+                                           byref wszProjectFileName as const WString _
+                                           ) as Boolean
 
    ' If a project is open then close any files that may be open in the editor. No need to
    ' do this if a new project is being created/opened because that function has already
@@ -706,7 +711,7 @@ end function
 ' ========================================================================================
 ' Attempt to open specified file. If it exists then position to Tab if applicable
 ' ========================================================================================
-Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
+public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                  ByVal bIsNewFile  As BOOLEAN, _ 
                                  ByVal bIsTemplate As BOOLEAN, _
                                  ByVal bShowInTab  As BOOLEAN, _
@@ -782,8 +787,9 @@ End Function
 ' ========================================================================================
 ' Process WM_CREATE message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnCreate(ByVal HWnd As HWnd, ByVal lpCreateStructPtr As LPCREATESTRUCT) As BOOLEAN
-
+private Function frmMain_OnCreate( ByVal HWnd As HWnd, _
+                                   ByVal lpCreateStructPtr As LPCREATESTRUCT _
+                                   ) As BOOLEAN
    ' Enable drag and drop files
    DragAcceptFiles HWnd, CTRUE
    
@@ -798,7 +804,11 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmMain_OnSize( ByVal HWnd As HWnd, _
+                                 ByVal state As UINT, _
+                                 ByVal cx As Long, _
+                                 ByVal cy As Long _
+                                 ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Update the size of the Rebar control
       SendMessage GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), WM_SIZE, cx, cy
@@ -818,8 +828,11 @@ End Function
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
-
+private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
+                                    ByVal id As Long, _
+                                    ByVal hwndCtl As HWnd, _
+                                    ByVal codeNotify As UINT _
+                                    ) As LRESULT
    Dim As HWnd hEdit 
    
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -1313,7 +1326,10 @@ End Function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
+                                   ByVal id As Long, _
+                                   ByVal pNMHDR As NMHDR Ptr _
+                                   ) As LRESULT
 
    Dim ptttdi As NMTTDISPINFOW Ptr    ' Tooltip notification message information
    Dim wszText As WString * MAX_PATH  
@@ -1452,9 +1468,10 @@ End Function
 ' ========================================================================================
 ' Process WM_ACTIVATEAPP message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, ByVal dwThreadId As DWORD) As LRESULT
-
-   
+private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
+                                        ByVal fActivate As BOOLEAN, _
+                                        ByVal dwThreadId As DWORD _
+                                        ) As LRESULT
    Dim pDoc As clsDocument Ptr
    
    ' If the application is losing focus then validate any currently editing property
@@ -1571,11 +1588,11 @@ End Function
 ' ========================================================================================
 ' Process WM_CONTEXTMENU message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
-                                ByVal hwndContext As HWnd, _
-                                ByVal xPos As Long, _
-                                ByVal yPos As Long ) As LRESULT
-
+private Function frmMain_OnContextMenu( ByVal HWnd As HWnd, _
+                                        ByVal hwndContext As HWnd, _
+                                        ByVal xPos As Long, _  
+                                        ByVal yPos As Long _
+                                        ) As LRESULT
    Dim hPopupMenu as HMENU 
    Dim pt         As Point 
    
@@ -1603,7 +1620,9 @@ End Function
 ' ========================================================================================
 ' Process WM_DROPFILES message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnDropFiles( ByVal HWnd As HWnd, ByVal hDrop As HDROP ) As LRESULT
+private Function frmMain_OnDropFiles( ByVal HWnd As HWnd, _
+                                      ByVal hDrop As HDROP _
+                                      ) As LRESULT
 
    ' Get the number of dropped files
    Dim As Long nCount = DragQueryFile(hDrop, &HFFFFFFFF, Null, 0)
@@ -1649,7 +1668,7 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnClose(ByVal HWnd As HWnd) As LRESULT
+private Function frmMain_OnClose( ByVal HWnd As HWnd ) As LRESULT
 
    ' If configuration option to confirm closing editor is active then ask now.
    if gConfig.AskExit THEN
@@ -1686,7 +1705,7 @@ End Function
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmMain
 ' ========================================================================================
-Function frmMain_OnDestroy(byval HWnd As HWnd) As LRESULT
+private Function frmMain_OnDestroy( byval HWnd As HWnd ) As LRESULT
    ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETIMAGELIST, 0, 0))
    ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETHOTIMAGELIST, 0, 0))
    ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETDISABLEDIMAGELIST, 0, 0))
@@ -1706,7 +1725,7 @@ End Function
 ' ========================================================================================
 ' Processes messages for the subclassed frmMain TabControl control.
 ' ========================================================================================
-Function frmMain_TabCtl_SubclassProc ( _
+private Function frmMain_TabCtl_SubclassProc ( _
                   ByVal HWnd   As HWnd, _                 ' // Control window handle
                   ByVal uMsg   As UINT, _                 ' // Type of message
                   ByVal wParam As WPARAM, _               ' // First message parameter
@@ -1834,11 +1853,11 @@ End Function
 ' ========================================================================================
 ' frmMain Window procedure
 ' ========================================================================================
-Function frmMain_WndProc( ByVal HWnd   As HWnd, _
-                          ByVal uMsg   As UINT, _
-                          ByVal wParam As WPARAM, _
-                          ByVal lParam As LPARAM _
-                          ) As LRESULT
+private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
+                                  ByVal uMsg   As UINT, _
+                                  ByVal wParam As WPARAM, _
+                                  ByVal lParam As LPARAM _
+                                  ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_CREATE,      frmMain_OnCreate)
@@ -2091,9 +2110,7 @@ End Function
 ' ========================================================================================
 ' frmMain_Show
 ' ========================================================================================
-Function frmMain_Show( ByVal hWndParent As HWnd, _
-                       ByVal nCmdShow   As Long = 0 _
-                       ) As Long
+public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow("WinFBE_Class")

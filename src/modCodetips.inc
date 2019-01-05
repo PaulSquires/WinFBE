@@ -52,31 +52,6 @@ private function FormatCodetip( byval strCodeTip as string ) as STRING
 end function
 
 
-''
-''
-private function MaskStringCharacters( byval st as string) as string
-   ' Iterate the line and change everything between quotes to # symbols. This
-   ' ensures that we correctly deal with strings that have embedded single 
-   ' quote characters.
-   dim as long i 
-   dim as Boolean bInString = false
-   for i = 0 to len(st) - 1
-      if st[i] = 34 THEN bInString = not(bInString)
-      if bInString THEN  
-         if st[i] <> 34 THEN st[i] = 35   ' # symbol
-      END IF
-   NEXT
-   function = st
-end function
-
-
-''
-''
-private function RemoveComments( byval st as string) as string
-   ' Removes a single line comment.
-   function = AfxStrExtract( 1, st, "'")
-end function
-
 
 ''
 ''

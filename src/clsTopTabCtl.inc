@@ -14,6 +14,7 @@
 #include once "clsTopTabCtl.bi"
 #include once "frmFindReplace.bi"
 #include once "frmMainOnCommand.bi"
+#include once "modVDDesignForm.bi"
 
 
 ''

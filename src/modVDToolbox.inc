@@ -18,6 +18,153 @@
 
 
 ' ========================================================================================
+' Load the dropdown PropertyList listbox that shows chocies for the current property
+' ========================================================================================
+private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
+                                           byval pCtrl as clsControl ptr, _
+                                           byval pProp as clsProperty ptr _
+                                           ) as Long
+   if pDoc = 0 then exit function
+   if pCtrl = 0 then exit function
+   if pProp = 0 then exit function
+   
+   ListBox_ResetContent(HWND_PROPLIST_COMBOLIST)
+   
+   if pProp->PropType = PropertyType.TrueFalse then
+      ListBox_AddString(HWND_PROPLIST_COMBOLIST, @WSTR("True"))
+      ListBox_AddString(HWND_PROPLIST_COMBOLIST, @WSTR("False"))
+      exit function
+   end if
+
+   select case ucase(pProp->wszPropName)
+      case "ACCEPTBUTTON", "CANCELBUTTON"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("(none)"))
+         for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+            pCtrl = pDoc->Controls.ItemAt(i)
+            if pCtrl then
+               if pCtrl->ControlType = CTRL_BUTTON then
+                  ListBox_AddString(HWND_PROPLIST_COMBOLIST, GetControlProperty(pCtrl, "NAME"))
+               end if
+            END if
+         NEXT
+         
+      CASE "BORDERSTYLE"
+         select case pCtrl->ControlType
+            case CTRL_FORM
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.None"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.Sizable"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.Fixed3D"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.FixedSingle"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.FixedDialog"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.FixedToolWindow"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormBorderStyle.SizableToolWindow"))
+            case else
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlBorderStyle.None"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlBorderStyle.FixedSingle"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlBorderStyle.Fixed3D"))
+         end select
+         
+      case "CHARACTERCASING"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Normal"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Upper"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CharacterCase.Lower"))
+
+      case "CHECKSTATE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Checked"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
+
+      case "DROPDOWNSTYLE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.Simple"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDown"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDownList"))
+
+      case "TEXTSCROLLBARS"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Horizontal"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Vertical"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Both"))
+
+      CASE "STARTPOSITION"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterParent"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterScreen"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.Manual"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.WindowsDefaultLocation"))
+
+      CASE "SELECTIONMODE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.One"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.MultiSimple"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.MultiExtended"))
+
+      case "WINDOWSTATE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Maximized"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Minimized"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Normal"))
+
+      case "BACKGROUNDIMAGELAYOUT"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Tile"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Center"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Stretch"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Zoom"))
+
+      case "TEXTALIGN"
+         select case pCtrl->ControlType
+            case CTRL_BUTTON, CTRL_CHECKBOX, CTRL_OPTION, CTRL_FRAME
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomCenter"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomLeft"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.BottomRight"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.MiddleCenter"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.MiddleLeft"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.MiddleRight"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopCenter"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopLeft"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopRight"))
+            case CTRL_LABEL
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleCenter"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleLeft"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleRight"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopCenter"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopLeft"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopRight"))
+            case CTRL_TEXTBOX
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Left"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Right"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Center"))
+         end select
+   END SELECT
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Show the popup font selection dialog for the current property
+' ========================================================================================
+private function ChooseFontForProperty( byval pProp as clsProperty ptr ) as long
+   if pProp = 0 then exit function
+   
+   dim cf as CHOOSEFONT 
+   dim lf as LOGFONT
+   cf.lStructSize = sizeof(cf)
+   cf.hwndOwner = HWND_FRMVDTOOLBOX
+   cf.lpLogFont = @lf
+   cf.Flags = CF_SCREENFONTS or CF_EFFECTS or CF_INITTOLOGFONTSTRUCT
+
+   lf = SetLogFontFromPropValue(pProp->wszPropValue)
+
+   EnableWindow(HWND_FRMMAIN, false)
+   if ChooseFont(@cf) then
+      pProp->wszPropValue = SetPropValueFromLogFont(*cf.lpLogFont) 
+      AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
+   END IF
+   EnableWindow(HWND_FRMMAIN, true)
+
+   function = 0
+end function
+
+' ========================================================================================
 ' Display the last selected property for the control (or it's default property). This
 ' allows the user to switch between controls always accessing a common property like 'Text'
 ' rather than having to seach the PropertyList every time for the property.
@@ -98,7 +245,7 @@ end function
 ' ========================================================================================
 ' Display the properties/events for the current active control/form.
 ' ========================================================================================
-private Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
+public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    if pDoc = 0 then exit function
 
    ' If the ToolBox has not been created yet then exit.

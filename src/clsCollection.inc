@@ -170,10 +170,10 @@ function clsCollection.GetCtrlPtr( byval hWndCtrl as hwnd) as clsControl ptr
 end function
 
 function clsCollection.Debug() as long
-   ? "Control Count = "; this.Count
-   for i as long = lbound(_arrControls) to ubound(_arrControls)
-      ? GetControlName(_arrControls(i)->ControlType), _arrControls(i)
-   NEXT
-   ? ""
+'   ? "Control Count = "; this.Count
+'   for i as long = lbound(_arrControls) to ubound(_arrControls)
+'      ? GetControlName(_arrControls(i)->ControlType), _arrControls(i)
+'   NEXT
+'   ? ""
    function = 0
 end function

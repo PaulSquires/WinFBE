@@ -19,8 +19,14 @@
 #include once "clsDocument.bi"
 #include once "modVDToolbox.bi"
 #include once "frmFindReplace.bi"
+#include once "modVDRoutines.bi"
+#include once "modVDControls.bi"
 #include once "modVDDesignFrame.bi"
 #include once "modVDDesignMain.bi"
+#include once "modVDApplyProperties.bi"
+#include once "modVDProperties.bi"
+#include once "modGenerateCode.bi"
+#include once "modMRU.bi"
 
    
 ''

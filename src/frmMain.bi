@@ -32,3 +32,8 @@ dim shared as long SPLITSIZE
 SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for split editing windows
 
 declare Function frmMain_SetStatusbar() as long
+declare Function frmMain_SetFocusToCurrentCodeWindow() As Long
+Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false ) As clsDocument Ptr
+declare Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, byref wszProjectFileName as const WString ) as Boolean
+declare Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+declare Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT

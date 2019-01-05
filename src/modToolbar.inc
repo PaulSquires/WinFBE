@@ -11,11 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modToolbar.bi"
+
 
 ' ========================================================================================
 ' Create the frmMain rebar/toolbar
 ' ========================================================================================
-Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
+public Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
 
    Dim As HINSTANCE hInst = pWindow->InstanceHandle
 
@@ -201,7 +203,7 @@ End Function
 ' ========================================================================================
 ' Disable toolbar buttons
 ' ========================================================================================
-Function frmMain_DisableToolbarButtons() As Long
+private Function frmMain_DisableToolbarButtons() As Long
 
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_FILESAVE)
    FF_Toolbar_DisableButton(HWND_FRMMAIN_TOOLBAR, IDM_CUT)
@@ -228,7 +230,7 @@ End Function
 ' ========================================================================================
 ' Change toolbar button's state
 ' ========================================================================================
-Function frmMain_ChangeToolbarButtonsState() As Long
+public Function frmMain_ChangeToolbarButtonsState() As Long
 
    ' Disables toolbar buttons if there is not any file being edited
    Dim hEdit       As HWnd

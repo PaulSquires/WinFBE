@@ -13,6 +13,28 @@
 
 #include once "clsParser.bi"
 
+''
+''
+private FUNCTION AfxStrRemoveWithMark( BYREF wszMainStr AS CONST WSTRING, _
+                                       BYREF wszDelim1 AS CONST WSTRING, _
+                                       BYREF wszDelim2 AS CONST WSTRING, _
+                                       BYREF MarkKeys AS CONST WSTRING="", _
+                                       BYVAL fRemoveAll AS BOOLEAN = FALSE, _
+                                       BYVAL IsInstrRev AS BOOLEAN = FALSE _
+                                       ) AS CWSTR
+   DIM nPos1 AS LONG =iif(IsInstrRev=true, INSTRRev(wszMainStr, wszDelim1), INSTR(wszMainStr, wszDelim1))
+   IF nPos1 = 0 THEN RETURN wszMainStr
+   DIM nPos2 AS LONG = INSTR(nPos1 + LEN(wszDelim1), wszMainStr, wszDelim2)
+   IF nPos2 = 0 THEN RETURN wszMainStr
+   nPos2 += LEN(wszDelim2)
+   DIM nLen AS LONG = nPos2 - nPos1
+   IF fRemoveAll = FALSE THEN 
+      RETURN MID(wszMainStr, 1, nPos1 - 1)& MarkKeys & MID(wszMainStr, nPos2)
+   else
+      RETURN AfxStrRemoveWithMark(MID(wszMainStr, 1, nPos1 - 1) & MarkKeys & MID(wszMainStr, nPos2), wszDelim1, wszDelim2,MarkKeys, fRemoveAll,IsInstrRev)  
+   end if
+END FUNCTION
+
 
 function clsParser.parseToDoItem( byval sText as string ) as boolean
    dim as long nPos = instr(ucase(sText), "' TODO:")

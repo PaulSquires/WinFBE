@@ -11,7 +11,7 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-#include once "modCommandLine.bi"
+#include once "frmCommandLine.bi"
 
 
 ' ========================================================================================
