@@ -16,7 +16,7 @@
 #include once "frmOptionsCompiler.bi"
 #include once "frmOptionsLocal.bi"
 #include once "frmProjectOptions.bi"
-
+#include once "frmMain.bi"
 
 ' ========================================================================================
 ' Calculate the Julian date for today's date. Used by CheckForUpdates.
@@ -319,50 +319,6 @@ FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
  FUNCTION = rtrim(sUtf8, chr(0))
 
 END FUNCTION
-
-' ========================================================================================
-' Return if string is UTF8 encoded
-' ========================================================================================
-'function isutf8( byval _string as  zstring ptr ) as boolean
-'     if _string = 0 then return 0
-'    if left(*_string,2)= wchr(&hFF,&hFE) or left(*_string,2)=wchr(&hFE,&hFF) then print "utf16":exit function 'utf-16 boms
-'     if left(*_string,3)=wchr(&hEF,&hBB,&hBF) then return 1  'utf-8 bom
-'   dim bytes as const ubyte ptr = cptr(const ubyte ptr, _string)
-'   while *bytes
-'      if (((bytes[0] = &h09) orelse (bytes[0] = &h0A)) orelse (bytes[0] = &h0D)) orelse ((&h20 <= bytes[0]) andalso (bytes[0] <= &h7E)) then
-'         bytes += 1
-'         continue while
-'      end if
-'      if ((&hC2 <= bytes[0]) andalso (bytes[0] <= &hDF)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF)) then
-'         bytes += 2
-'         continue while
-'      end if
-'      if ((((bytes[0] = &hE0) andalso ((&hA0 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) orelse ((((((&hE1 <= bytes[0]) andalso (bytes[0] <= &hEC)) orelse (bytes[0] = &hEE)) orelse (bytes[0] = &hEF)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF)))) orelse (((bytes[0] = &hED) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &h9F))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) then
-'         bytes += 3
-'         continue while
-'      end if
-'      if (((((bytes[0] = &hF0) andalso ((&h90 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF))) orelse (((((&hF1 <= bytes[0]) andalso (bytes[0] <= &hF3)) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &hBF))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF)))) orelse ((((bytes[0] = &hF4) andalso ((&h80 <= bytes[1]) andalso (bytes[1] <= &h8F))) andalso ((&h80 <= bytes[2]) andalso (bytes[2] <= &hBF))) andalso ((&h80 <= bytes[3]) andalso (bytes[3] <= &hBF))) then
-'         bytes += 4
-'         continue while
-'      end if
-'      return 0
-'   wend
-'   return 1
-'end function
-
-' ========================================================================================
-' Return text description of the specified file encoding
-' ========================================================================================
-function FileEncodingTextDescription(byval FileEncoding as long) as CWSTR
-
-   select case FileEncoding
-      case FILE_ENCODING_UTF8_BOM:  RETURN "UTF-8 (BOM)"   
-      case FILE_ENCODING_UTF16_BOM: RETURN "UTF-16 (BOM)"   
-      case else
-         return "ANSI"    ' includes FILE_ENCODING_ANSI
-   END select
-
-end function
 
 
 ' ========================================================================================
@@ -1521,7 +1477,7 @@ ParseAgain:
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
          gdb2.dbDelete(wszFilename)
-      else
+      else                          
          ' These are often the FB/WinAPI codetip files and Include Files. Everything else in
          ' a project would have a valid pDoc.
          if AfxFileExists(wszFilename) = 0 THEN exit function
@@ -1543,12 +1499,10 @@ ParseAgain:
       END IF                     
    end if
    
-   if gFileLoading then
-      dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-      dim wszText as wstring * MAX_PATH: StatusBar_GetText(hStatusbar, 0, @wszText)
-      if wszText <> L(66,"Parsing") & ":" then StatusBar_SetText(hStatusBar, 3, L(66,"Parsing:") & ":")
-      StatusBar_SetIcon(hStatusBar, 4, 0)
-      StatusBar_SetText(hStatusBar, 4, wszFilename)
+   if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then
+      gApp.wszPanelText = wszFilename
+      gApp.hIconPanel = 0
+      frmMain_SetStatusbar
    END IF
 
    ' Create a parse TYPE that handles the state information throughout parsing this document.

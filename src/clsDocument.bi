@@ -13,8 +13,24 @@
 
 #pragma once
 
+'  Scintilla Control identifiers
+#Define IDC_SCINTILLA              100
+#Define IDC_SCROLLV                200
+
+' File encodings
+#define FILE_ENCODING_ANSI         0
+#define FILE_ENCODING_UTF8_BOM     1
+#define FILE_ENCODING_UTF16_BOM    2
+
+#define FILETYPE_UNDEFINED         0
+#define FILETYPE_MAIN              1
+#define FILETYPE_MODULE            2
+#define FILETYPE_NORMAL            3
+#define FILETYPE_RESOURCE          4
+
+
 #include once "clsMenuItem.bi"
-#include once "clsControl.bi"
+#include once "clsControl.bi"      ' Includes properties and events types
 #include once "clsCollection.bi"
 
 ' Structure that holds all of the user embedded compiler directives
@@ -25,6 +41,16 @@ type COMPILE_DIRECTIVES
    DirectiveText as String            ' reource filename
 END TYPE
 
+' Forward references
+Type clsDocument_ As clsDocument
+
+' Structure that holds all Images found for an individual file.
+type IMAGES_TYPE
+   wszImageName as CWSTR              ' Based on filename. IMAGE_OPEN, IMAGE_CLOSE, etc
+   wszFileName  as CWSTR
+   wszFormat    as CWSTR              ' BITMAP, ICON, RCDATA, CURSOR
+   pDoc         as clsDocument_ ptr   ' backpointer to pDoc in case search on wszImageName performed.
+end type
 
 Type clsDocument
    Private:
@@ -88,7 +114,7 @@ Type clsDocument
       ' Following used for split edit views
       hScrollBar       as hwnd
       ScrInfo          As SCROLLINFO  ' Scrollbar parameters array
-      rcSplitButton    as RECT        ' Split gripper
+      rcSplitButton    as RECT        ' Split gripper vertical for Scintilla window
       SplitY           As long        ' Y coordinate of vertical splitter
       
       static NextFileNum as Long
@@ -132,7 +158,7 @@ Type clsDocument
       Declare Function UnFoldAll() As Long
       Declare Function FoldToggleOnwards( ByVal nLine As Long) As Long
       Declare Function ConvertEOL( ByVal nMode As Long) As Long
-      Declare Function DisplayStats() As Long
+      'Declare Function DisplayStats() As Long
       Declare Function TabsToSpaces() As Long
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Function GetBookmarks() As String

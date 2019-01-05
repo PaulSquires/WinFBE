@@ -102,7 +102,6 @@ dim shared gLasso   as clsLasso
 #Include Once "modVDDesignMain.inc"
 #Include Once "modVDToolbox.inc"
 #Include Once "modAutoInsert.inc"
-#Include Once "modHelp.inc"
 #Include Once "modCompile.inc"
 #Include Once "modMenus.inc"
 #Include Once "modToolbar.inc"

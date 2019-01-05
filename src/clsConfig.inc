@@ -18,6 +18,8 @@
 #include once "frmExplorer.bi"
 #include once "frmOutput.bi"
 #include once "frmBuildConfig.bi"
+#include once "frmMain.bi"
+#include once "modVDColors.bi"
 
                
 ''
@@ -1309,10 +1311,6 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    
    If AfxFileExists(wszFile) = 0 Then Exit Function
 
-   StatusBar_SetText(hStatusBar, 3, L(66,"Parsing") & ":")
-   StatusBar_SetIcon(hStatusBar, 4, 0)
-   StatusBar_SetText(hStatusBar, 4, "")
-
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
    AfxDoEvents()
@@ -1330,7 +1328,6 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    Dim nTabs(any) As clsDocument Ptr
 
   
-   ' Prevent the constant updating of the app caption bar with filename, (pDoc->DisplayStats)
    gApp.IsProjectLoading = true 
    gApp.IsWindowIncludes = false
    gdb2.dbDeleteWinAPI
@@ -1449,10 +1446,6 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    
    LockWindowUpdate(0)
    
-   StatusBar_SetText(hStatusBar, 3, "")
-   StatusBar_SetIcon(hStatusBar, 4, 0)
-   StatusBar_SetText(hStatusBar, 4, "")
-
    ' Display all of the tabs
    For i = LBound(nTabs) To UBound(nTabs)
       iTab = gTTabCtl.GetTabIndexFromFilename(nTabs(i)->DiskFilename)
@@ -1466,6 +1459,9 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    
    gApp.IsProjectLoading = false
    gApp.IsProjectActive = true
+   gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
+   gApp.hIconPanel = 0
+   frmMain_SetStatusbar
    
    ' If no active build configuration then assign the currently active selection
    if gApp.ProjectBuild = "" then 

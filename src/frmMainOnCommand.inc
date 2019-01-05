@@ -82,7 +82,7 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    PositionExplorerWindows(HWND_FRMEXPLORER)
    frmMain_PositionWindows(HWND_FRMMAIN)
     
-   frmMain_UpdateLineCol(HWND_FRMMAIN)
+   frmMain_SetStatusbar
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = true
@@ -326,8 +326,8 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    ' visually more appealing for thos files that will display in the top Tab Control.
    Dim pDocTabs(dwItemCount - 1) As clsDocument Ptr
 
-   ' Prevent the constant updating of the app caption bar with filename, (pDoc->DisplayStats)
-   gApp.IsProjectLoading = true  ' use this flag even though File loading is not related to an actual project
+   ' Prevent the constant updating of the app caption bar with filename
+   gApp.IsFileLoading = true  
 
    ' Prevent Treeview flickering during adding
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
@@ -369,7 +369,8 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    Next   
    gTTabCtl.SetFocusTab(iTab)
 
-   gApp.IsProjectLoading = false
+   gApp.IsFileLoading = false
+   gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
    LockWindowUpdate(0)
 
    ' Update the MRU list. Do this after the tabs are loaded because IsProjectLoading
@@ -380,11 +381,6 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
       Next     
    end if
    
-   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   StatusBar_SetText(hStatusbar, 3, "")    ' parsing message
-   StatusBar_SetIcon(hStatusBar, 4, 0)
-   StatusBar_SetText(hStatusbar, 4, "")    ' parsing message
-
    frmMain_PositionWindows(HWnd)
    frmMain_SetFocusToCurrentCodeWindow
 
@@ -420,7 +416,6 @@ private Function OnCommand_FileSave( ByVal HWnd As HWnd, _
          gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
       End If
       pDoc->ApplyProperties
-      pDoc->DisplayStats()   
       ' Parse the code for sub/function listing and create list
       ParseDocument(pDoc, "")
       AddFunctionsToExplorerTreeview(pDoc, true)
@@ -497,7 +492,7 @@ private Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
 
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    If nCount = 0 Then Exit Function
-   
+                
    Dim pDoc As clsDocument Ptr 
    Dim i    As Long               
    Dim TB   As TC_ITEM 
@@ -524,8 +519,7 @@ private Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
             gTTabCtl.SetFocusTab(i)
          End If
          pDoc->SaveFile()
-         pDoc->DisplayStats()   
-         gTTabCtl.SetTabText(i)
+         gTTabCtl.SetTabText(i)  ' make sure "*" updates
          ' Parse the code for sub/function listing and create list
          ParseDocument(pDoc, "")
          AddFunctionsToExplorerTreeview(pDoc, true)
@@ -552,6 +546,9 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    ' Build a list of files to check
    dim as long nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
    dim as long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+
+   if nCount = 0 then return true
+   
    redim bCloseIndex(nCount - 1) as boolean
 
    for i as long = 0 to nCount - 1 

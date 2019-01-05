@@ -57,3 +57,5 @@ type clsControl
       hBackBrush        as HBRUSH          ' needed for STATIC/LABEL controls (destroyed in destructor)
       Declare Destructor
 END TYPE
+
+

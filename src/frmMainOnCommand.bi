@@ -13,6 +13,14 @@
 
 #pragma once
 
+enum eFileClose
+   EFC_CLOSECURRENT
+   EFC_CLOSEALL
+   EFC_CLOSEALLFORWARD
+   EFC_CLOSEALLOTHERS
+   EFC_CLOSEALLBACKWARD 
+end enum
+
 Declare Function OnCommand_ProjectSave( ByVal HWnd As HWnd, ByVal bSaveAs As BOOLEAN = False ) As LRESULT
 Declare Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT

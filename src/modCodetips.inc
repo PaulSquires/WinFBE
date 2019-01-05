@@ -11,10 +11,14 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modCodetips.bi"
+#include once "clsDocument.bi"
+
+
 ' ========================================================================================
 ' Format the codetip prior to showing it
 ' ========================================================================================
-function FormatCodetip( byval strCodeTip as string ) as STRING
+private function FormatCodetip( byval strCodeTip as string ) as STRING
    dim as long p
 
    ' remove multiple duplicate spaces 
@@ -50,7 +54,7 @@ end function
 
 ''
 ''
-function MaskStringCharacters( byval st as string) as string
+private function MaskStringCharacters( byval st as string) as string
    ' Iterate the line and change everything between quotes to # symbols. This
    ' ensures that we correctly deal with strings that have embedded single 
    ' quote characters.
@@ -68,14 +72,15 @@ end function
 
 ''
 ''
-function RemoveComments( byval st as string) as string
+private function RemoveComments( byval st as string) as string
    ' Removes a single line comment.
    function = AfxStrExtract( 1, st, "'")
 end function
 
+
 ''
 ''
-function DetermineWithVariable( byval pDoc as clsDocument ptr) as string
+private function DetermineWithVariable( byval pDoc as clsDocument ptr) as string
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
    dim as long nCurLine = pDoc->GetCurrentLineNumber - 1
    dim as string sLine, sWithVariable 
@@ -100,9 +105,9 @@ end function
 ' Dereferences expressions like:  g.MyFunction, g.ot.rc, g->MyFunction
 ' Used for determining what popup autocomplete list or codetip to display.
 ' ========================================================================================
-function DereferenceLine( byval pDoc as clsDocument ptr, _
-                          byval sTrigger as String _
-                          ) as DB2_DATA ptr
+private function DereferenceLine( byval pDoc as clsDocument ptr, _
+                                  byval sTrigger as String _
+                                  ) as DB2_DATA ptr
    if pDoc = 0 THEN exit function
    
    dim pData as DB2_DATA ptr
@@ -243,7 +248,7 @@ END FUNCTION
 ' ========================================================================================
 ' Show codetips
 ' ========================================================================================
-function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
+private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 
    if gConfig.CodeTips = false then exit function
    
@@ -279,7 +284,9 @@ END FUNCTION
 ' ========================================================================================
 ' Display the actual Autocomplete popup list window
 ' ========================================================================================
-function ShowAutoCompletePopup( byval hEdit as hwnd, byref sList as string ) as Long
+private function ShowAutoCompletePopup( byval hEdit as hwnd, _
+                                        byref sList as string _
+                                        ) as Long
    if len(sList) = 0 THEN exit function
    dim as string sFillups = "(=."
                                   
@@ -301,11 +308,14 @@ function ShowAutoCompletePopup( byval hEdit as hwnd, byref sList as string ) as 
                             
    function = 0
 end function
+
        
 ' ========================================================================================
 ' Don't add duplicates in the Autocomplete list    
 ' ========================================================================================
-function ExistsInAutocompleteList( byref sList as string, byref sMatch as string ) as long
+private function ExistsInAutocompleteList( byref sList as string, _
+                                           byref sMatch as string _
+                                           ) as long
    if instr( "|" & ucase(sList) & "|", ucase(sMatch) & "?") THEN return true
    return false
 end function
@@ -314,7 +324,7 @@ end function
 ' ========================================================================================
 ' Show Autocomplete list    
 ' ========================================================================================
-function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
+private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
   
    IF gConfig.AutoComplete = false THEN exit function
    

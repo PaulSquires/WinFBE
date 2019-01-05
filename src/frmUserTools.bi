@@ -44,6 +44,8 @@
 #Define IDC_FRMUSERTOOLS_CHKDISPLAYMENU             1028
 #Define IDC_FRMUSERTOOLS_CMDOK                      1029
 
+common shared as HACCEL ghAccelUserTools
+
 declare Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long            
 declare Function frmUserTools_CreateAcceleratorTable() As Long
 declare Function frmUserTools_Show( ByVal hWndParent As HWnd ) as LRESULT

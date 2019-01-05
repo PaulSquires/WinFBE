@@ -14,6 +14,57 @@
 #pragma once
 
 
+' Colors
+enum
+   ' Start the enum at 2 because when theme is saved to file the first parse is the
+   ' theme id and theme description. The colors start at parse 2.
+   CLR_CARET = 2          
+   CLR_COMMENTS
+   CLR_HIGHLIGHTED     
+   CLR_KEYWORD         
+   CLR_FOLDMARGIN
+   CLR_FOLDSYMBOL      
+   CLR_LINENUMBERS     
+   CLR_OPERATORS       
+   CLR_INDENTGUIDES    
+   CLR_PREPROCESSOR    
+   CLR_SELECTION       
+   CLR_STRINGS         
+   CLR_TEXT            
+   CLR_WINDOW
+end enum
+
+'  Control types   
+enum
+   CTRL_FORM = 1
+   CTRL_POINTER 
+   CTRL_LABEL
+   CTRL_BUTTON
+   CTRL_TEXTBOX
+   CTRL_CHECKBOX
+   CTRL_OPTION
+   CTRL_FRAME
+   CTRL_PICTURE
+   CTRL_COMBOBOX
+   CTRL_LISTBOX
+   CTRL_HSCROLL
+   CTRL_VSCROLL
+   CTRL_TIMER
+   CTRL_TABCONTROL
+   CTRL_RICHEDIT
+   CTRL_PROGRESSBAR
+   CTRL_UPDOWN
+   CTRL_LISTVIEW
+   CTRL_TREEVIEW
+   CTRL_SLIDER
+   CTRL_DATETIMEPICKER
+   CTRL_MONTHCALENDAR
+   CTRL_WEBBROWSER
+   CTRL_CUSTOM
+   CTRL_OCX
+   CTRL_MASKEDEDIT
+end enum
+   
 type TYPE_TOOLS
    wszDescription   as CWSTR
    wszCommand       as CWSTR

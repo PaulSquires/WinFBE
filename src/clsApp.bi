@@ -30,8 +30,12 @@ Type clsApp
       hWndPanel                  As HWND              ' the panel being split left/right or up/down
       IncludeFilename            As CWSTR
       NonProjectNotes            as CWSTR             ' Save/load from config file
+      wszPanelText               as CWSTR             ' Current file loading or being compiled (for statusbar updating)
+      hIconPanel                 as HANDLE            ' Success/failure of most previous compile (for Statusbar updating)
       IsNewProjectFlag           As BOOLEAN
       IsProjectLoading           as Boolean           ' Project loading. Disable some screen updating.
+      IsFileLoading              as Boolean           ' File loading. Disable some screen updating.
+      IsCompiling                as Boolean           ' File/Project currently being compiled (spinning mouse cursor).
       IsShutDown                 as boolean           ' App is currently closing
       wszCommandLine             as CWSTR             ' non-project commandline (not saved to file)
       
@@ -50,6 +54,11 @@ Type clsApp
       ProjectNotes               as CWSTR             ' Save/Load from project file
       ProjectCommandLine         as CWSTR
       ProjectManifest            as long              ' T/F create a generic resource and manifest file
+
+      ' Global string to track the last accessed property/event in the PropertyList. This allows the
+      ' user to quickly sqitch between controls that share common properties like 'Text'.
+      PreviousPropName           as CWSTR
+      PreviousEventName          as CWSTR
 
       declare function AddQuickRunEXE( byref sFilename as wstring ) as Long
       declare function CheckQuickRunEXE() as Long

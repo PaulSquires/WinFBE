@@ -157,7 +157,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    
    ' Ensure that the caption bar and Explorer root node is updated with the name
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   frmMain_UpdateLineCol(HWND_FRMMAIN)    ' this will update the caption
+   frmMain_SetStatusbar    ' this will update the caption
    wFilename = ucase(this.ProjectName)
    TreeView_SetItemText( hTree, this.hExplorerRootNode, @wFilename)
    
@@ -230,7 +230,7 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
    pDoc->ProjectFileType = nFileType
 
    ' Refresh the statusbar to ensure that the file's type is displayed properly
-   pDoc->DisplayStats
+   frmMain_SetStatusbar
 
    Function = 0
 End Function

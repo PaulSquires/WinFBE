@@ -293,7 +293,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
-         if (gApp.IsProjectLoading = false) orelse (gFileLoading = false) then
+         if (gApp.IsProjectLoading = false) orelse (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
             if pData = 0 THEN
                wszMenuSelect = sp(1) & "Select Case UCase(sender.Name)" & vbcrlf 
@@ -352,7 +352,7 @@ function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
                ' not yet been loaded.
-               if (gApp.IsProjectLoading = false) orelse (gFileLoading = false) then
+               if (gApp.IsProjectLoading = false) orelse (gApp.IsFileLoading = false) then
                   pData = gdb2.dbFindFunction(wszFunction)
                   if pData = 0 THEN
                      wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _

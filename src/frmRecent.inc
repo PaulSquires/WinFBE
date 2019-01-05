@@ -38,14 +38,14 @@ public Function frmRecent_LoadTreeview( ByVal HWnd As HWnd ) As LRESULT
       ' If the file no longer exists then remove it from the MRU list 
       gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i)) 
       If AfxFileExists(gConfig.MRU(i)) Then 
-         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRU(i), 0, gidxImageBlank, gidxImageBlank) 
+         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRU(i), 0 ) 
          FF_TreeView_SetCheckState( hTree, hNode, False) 
          fEmpty = False 
       End If 
    Next 
    If fEmpty Then 
       wzStr = @L(11,"(Empty)") 
-      FF_TreeView_InsertItem( hTree, hNode, wzStr, 0, gidxImageBlank, gidxImageBlank) 
+      FF_TreeView_InsertItem( hTree, hNode, wzStr, 0 ) 
    End If 
    Treeview_Expand(hTree, hNode, TVE_EXPAND)  
 

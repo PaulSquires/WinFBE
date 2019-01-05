@@ -16,6 +16,27 @@
 #include once "clsTopTabCtl.bi"
 #include once "clsDocument.bi"
 
+' Create an array that holds all options in the Build compiler options listbox. The
+' description contains a parenthesis enclosed action.
+Dim shared gBuildOptions(...) as CWSTR => _
+   {  "Language compatibility FreeBasic (-lang fb)", _
+      "Language compatibility FreeBasic Lite (-lang fblite)", _
+      "Language compatibility QuickBasic (-lang qb)", _
+      "Subsystem to console (-s console)", _
+      "Subsystem to GUI (-s gui)", _
+      "Compiler assembler backend (-gen gas)", _
+      "Compiler GCC backend (-gen gcc)", _
+      "Compiler LLVM backend (-gen llvm)", _
+      "Create DLL and import library (-dll)", _
+      "Create static library (-lib)", _
+      "Add error checking (-e)", _
+      "Add error checking with RESUME support (-ex)", _
+      "Same as -ex with array bounds and null pointer (-exx)", _
+      "Add debug information (-g)", _
+      "Compile only, do not link (-c)", _
+      "Do not delete the object files (-C)", _
+      "Emit preprocessed output, do not compile (-pp)" _
+   }
 
 ' ========================================================================================
 ' Load all of the build descriptions into the listbox
@@ -170,7 +191,7 @@ private Function frmBuildConfig_OnMeasureItem( ByVal HWnd As HWnd, _
                                                ) As Long
    ' Set the height of the List box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-   lpmis->itemHeight = pWindow->ScaleY(LISTBOX_LINEHEIGHT)
+   lpmis->itemHeight = pWindow->ScaleY(FRMBUILDCONFIG_LISTBOX_LINEHEIGHT)
    Function = 0
 End Function
 
@@ -229,7 +250,7 @@ private Function frmBuildConfig_OnDrawItem( ByVal HWnd As HWnd, _
          FillRect(memDC, @rc, GetSysColorBrush(COLOR_WINDOW))  
             
          ' Draw the tick/untick image
-         ' The line height is LISTBOX_LINEHEIGHT so center the 16x16 icon vertically and horizontally
+         ' The line height is FRMBUILDCONFIG_LISTBOX_LINEHEIGHT so center the 16x16 icon vertically and horizontally
          rc2 = rc
          if hCheckBox then
             DrawIconEx( memDC, _
@@ -333,11 +354,11 @@ private Function frmBuildConfig_ListBox_SubclassProc ( _
          ' the mod of the lineheight to listbox height so we can color the partial line
          ' that won't be displayed at the bottom of the list.
          dim as long NumItems = ListBox_GetCount(hwnd)
-         dim as long ItemsPerPage = ( rc.bottom / LISTBOX_LINEHEIGHT)
+         dim as long ItemsPerPage = ( rc.bottom / FRMBUILDCONFIG_LISTBOX_LINEHEIGHT)
          if NumItems < ItemsPerPage then 
-            rc.top = LISTBOX_LINEHEIGHT * NumItems
+            rc.top = FRMBUILDCONFIG_LISTBOX_LINEHEIGHT * NumItems
          else
-            rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
+            rc.top = rc.bottom - ( rc.bottom mod FRMBUILDCONFIG_LISTBOX_LINEHEIGHT)
          end if
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
@@ -581,7 +602,7 @@ private Function frmBuildConfig_OnCommand( ByVal HWnd As HWnd, _
                If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
             end if
             frmBuildConfig_LoadBuildListBox(HWND)
-            frmMain_UpdateLineCol(HWND_FRMMAIN)
+            frmMain_SetStatusbar
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if

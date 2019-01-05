@@ -24,4 +24,10 @@
 #Define IDC_FRMVDTOOLBOX_LBLPROPNAME                1008
 #Define IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE            1009
 
+#define FRMVDTOOLBOX_LISTBOX_LINEHEIGHT   20
+
+' PropertyList divider globals
+dim shared as long gPropDivPos
+dim shared as boolean gPropDivTracking
+
 declare Function frmVDToolbox_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As LRESULT

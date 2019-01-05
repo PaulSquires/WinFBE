@@ -11,6 +11,41 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "clsApp.bi"
+#include once "clsDocument.bi"
+#include once "modVDColors.bi"
+
+Enum FontStyles
+   Normal    = 0
+   Bold      = 1
+   Italic    = 2
+   Strikeout = 4
+   Underline = 8
+End Enum
+
+Enum FontCharset
+   Default     = DEFAULT_CHARSET
+   Ansi        = ANSI_CHARSET
+   Arabic      = ARABIC_CHARSET
+   Baltic      = BALTIC_CHARSET
+   ChineseBig5 = CHINESEBIG5_CHARSET
+   EastEurope  = EASTEUROPE_CHARSET
+   GB2312      = GB2312_CHARSET
+   Greek       = GREEK_CHARSET
+   Hangul      = HANGUL_CHARSET
+   Hebrew      = HEBREW_CHARSET
+   Johab       = JOHAB_CHARSET
+   Mac         = MAC_CHARSET
+   OEM         = OEM_CHARSET
+   Russian     = RUSSIAN_CHARSET
+   Shiftjis    = SHIFTJIS_CHARSET
+   Symbol      = SYMBOL_CHARSET
+   Thai        = THAI_CHARSET
+   Turkish     = TURKISH_CHARSET
+   Vietnamese  = VIETNAMESE_CHARSET
+End Enum
+
+
 ' ========================================================================================
 ' Display the Name and Description of the current selected Property.
 ' ========================================================================================
@@ -29,7 +64,7 @@ function DisplayPropertyDetails() as Long
    dim as CWSTR wszPropName, wszPropDescribe
    if pProp then 
       wszPropName = pProp->wszPropName
-      gwszPreviousPropName = pProp->wszPropName
+      gApp.PreviousPropName = pProp->wszPropName
    END IF
    
    select case ucase(wszPropName)
@@ -208,7 +243,7 @@ function DisplayEventDetails() as Long
    dim as CWSTR wszEventName, wszEventDescribe
    if pEvent then 
       wszEventName = pEvent->wszEventName
-      gwszPreviousEventName = pEvent->wszEventName
+      gApp.PreviousEventName = pEvent->wszEventName
    END IF
    
    select case ucase(wszEventName)

@@ -28,6 +28,9 @@
 #Define IDC_FRMBUILDCONFIG_LSTOPTIONS               1011
 #Define IDC_FRMBUILDCONFIG_CHKISDEFAULT             1012
 
+#define FRMBUILDCONFIG_LISTBOX_LINEHEIGHT  20 
+
 declare function frmBuildConfig_LoadBuildComboBox() as Long
 declare function frmBuildConfig_GetSelectedBuildGUID() as String
 declare Function frmBuildConfig_Show( ByVal hWndParent As HWnd ) As LRESULT
+

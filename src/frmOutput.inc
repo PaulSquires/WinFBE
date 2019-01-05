@@ -86,20 +86,8 @@ private function frmOutput_DoSearchFileSelected() as LONG
    
    'X:\FB\WinFBE - Editor\license.txt(1): WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
    
-   ' Do not use AfxStrExtract because the string could have multiple parenthesis.
-   
-   ' Search for the first open parenthesis 
-   dim as long f1, f2
-   f1 = instr(wszText, "(")
-   if f1 THEN
-      wszFilename = left(wszText, f1-1)
-      wszText = mid(wszText, f1+1) 
-      f2 = instr(wszText, ")")
-      if f2 THEN
-         wszText = left(wszText, f2-1) 
-         nLineNum = val(wszText) - 1
-      end if
-   END IF
+   wszFilename = AfxStrExtract( 1, wszText, "(" )
+   nLineNum    = val( AfxStrExtract( wszText, "(", ")" ) ) - 1
    
    OpenSelectedDocument( wszFilename, "", nLineNum )
 
@@ -358,9 +346,8 @@ private Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_PAINT,   frmOutput_OnPaint)
   
    CASE WM_DESTROY
-      DIM pImageCtx AS CImageCtx ptr = AfxCImageCtxPtr(hwnd, IDC_FRMOUTPUT_BTNCLOSE)
-      if pImageCtx then delete pImageCtx
       DeleteFont( AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOUTPUT_TXTLOGFILE)) )
+      DIM pImageCtx AS CImageCtx ptr = AfxCImageCtxPtr(hwnd, IDC_FRMOUTPUT_BTNCLOSE)
       if pImageCtx then delete pImageCtx
          
    End Select

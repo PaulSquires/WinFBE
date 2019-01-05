@@ -11,6 +11,7 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modMRU.bi"
 #include once "frmRecent.bi"
 
 

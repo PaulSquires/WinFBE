@@ -23,6 +23,7 @@
 ''
 ''
 
+#include once "modCompile.bi"
 #include once "frmUserTools.bi"
 #include once "frmOutput.bi"
 
@@ -54,12 +55,12 @@ Dim Shared gCompile As COMPILE_TYPE
 ''
 ''  Set the statusbar text and icon for a good/bad compile
 ''
-function SetCompileStatusBarMessage( byref wszText as const wstring, _
+function SetCompileStatusBarMessage( byref wszText as wstring, _
                                      byval hIconCompile as HICON _
                                      ) as LRESULT
-   dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
-   StatusBar_SetIcon(hStatusBar, 4, hIconCompile)
-   StatusBar_SetText(hStatusBar, 4, wszText)
+   gApp.wszPanelText = wszText
+   gApp.hIconPanel = hIconCompile
+   frmMain_SetStatusbar
    function = 0
 end function
 
@@ -191,7 +192,7 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    dim wszCommand   as CWSTR 
    dim wszParams    as CWSTR
    dim sConsoleText as string 
-
+    
    Dim As CWSTR wexecmd, wDQ, wsLogSt, wst
          
    Dim As BOOLEAN fCompile32, fCompile64
@@ -432,18 +433,19 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Change to the output code directory
    ChDir gCompile.MainFolder
    
+   gApp.IsCompiling = true    
+   
    ' Indicate in the StatusBar that we have started to compile
    SetCompileStatusBarMessage( L(203, "Compiling") & "...", 0 )
-   AfxDoEvents
    
    gCompile.StartTime = Timer
-   gCompiling = true    
    
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
 
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+   AfxDoEvents
 
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
@@ -524,6 +526,8 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    wst = L(203, "Compiling") + "... " + AfxStrPathname("NAMEX", gCompile.MainFilename) 
    SetCompileStatusBarMessage( wst, 0 )
+   SetCursor( LoadCursor(0, IDC_WAIT) )
+
    AfxDoEvents
 
    sConsoleText = ""
@@ -538,7 +542,6 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ResetScintillaCursors()
    
    gCompile.EndTime = Timer
-   gCompiling = false
    AfxDoEvents
 
    ' If this was a QuickRun then delete the temporary code file that was created.
@@ -549,18 +552,26 @@ Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Add any temp resource file to the list of temp files to later be deleted.
    gApp.AddQuickRunEXE(gCompile.TempResourceFile)
       
-   if ParseLogForError(sConsoleText, true, wID, fCompile64) = true then return false
-   
-   ' Run any postcompile tools
-   for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
-      if gConfig.Tools(y).Action = USERTOOL_ACTION_POSTCOMPILE then
-         frmUserTools_ExecuteUserTool(y)
-      end if   
-   NEXT
+   if ParseLogForError(sConsoleText, true, wID, fCompile64) = true then 
+      ' Error was found. Editor has now been set to the error position. Nothing
+      ' more we can do now but exit out. 
+      ' Make sure gApp.IsCompiling = false before returning
+   else
+      
+      ' Run any postcompile tools
+      for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
+         if gConfig.Tools(y).Action = USERTOOL_ACTION_POSTCOMPILE then
+            frmUserTools_ExecuteUserTool(y)
+         end if   
+      NEXT
 
-   If gCompile.RunAfterCompile Then 
-      RunEXE( gCompile.OutputFilename, gApp.ProjectCommandLine)
-   End If
+      If gCompile.RunAfterCompile Then 
+         RunEXE( gCompile.OutputFilename, gApp.ProjectCommandLine)
+      End If
+   
+   end if
+   
+   gApp.IsCompiling = false
 
    Function = True   ' successful
 End Function

@@ -14,6 +14,8 @@
 '    VISUAL DESIGNER ROUTINES
 '
 
+#include once "modVDDesignForm.bi"
+
 
 ' ========================================================================================
 ' Determines if the current view should be Design or Code. This is done by checking
@@ -470,7 +472,7 @@ function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
             END IF
          END IF
          pDoc->Controls.SetActiveControl( iif(pCtrl->IsSelected, hWndCtrl, 0) )
-         frmMain_UpdateLineCol(HWND_FRMMAIN)
+         frmMain_SetStatusbar
       END IF
    END IF
 
@@ -556,7 +558,7 @@ function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    ' Ensure the grab handles of form and controls are redrawn or hidden
    AfxRedrawWindow(pDoc->hWndFrame)
    AfxRedrawWindow(pDoc->hWndForm)
-   frmMain_UpdateLineCol(HWND_FRMMAIN)
+   frmMain_SetStatusbar
    
    function = 0
 end function
@@ -690,7 +692,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
 
       ' Ensure the grab handles are redrawn
       AfxRedrawWindow(hwnd)   ' HWND because could be form or frame
-      frmMain_UpdateLineCol(HWND_FRMMAIN)
+      frmMain_SetStatusbar
       DisplayPropertyList(pDoc)
       
    elseif pDoc->bMoving then
@@ -770,7 +772,7 @@ function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
 
       ' Ensure the grab handles are redrawn
       AfxRedrawWindow(pDoc->hWndForm)
-      frmMain_UpdateLineCol(HWND_FRMMAIN)
+      frmMain_SetStatusbar
       DisplayPropertyList(pDoc)
       
    elseif gLasso.IsActive then

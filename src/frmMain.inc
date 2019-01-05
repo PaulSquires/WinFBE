@@ -11,13 +11,13 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-
+#include once "frmMain.bi"
 #include once "clsDocument.bi"
 #include once "frmUserTools.bi"
 #include once "frmSnippets.bi"
 #include once "frmProjectOptions.bi"
 #include once "frmBuildConfig.bi"
-
+#include once "modMRU.bi"
 
 
 ' Global array to hold cut/copy/paste controls
@@ -90,50 +90,143 @@ private Function frmMain_GotoLastPosition() As Long
 End Function
 
 
-' ========================================================================================
-' Update display info related to currently active document
-' ========================================================================================
-private Function frmMain_UpdateLineCol( ByVal HWnd As HWnd ) As Long
+'private Function frmMain_UpdateLineCol( ByVal HWnd As HWnd ) As Long
 
-   if gApp.IsProjectLoading then exit function  ' to prevent flickering during a project load
+' ========================================================================================
+' Update the main form statusbar. This is the only routine that updates
+' the statusbar in the entire program.
+' ========================================================================================
+public Function frmMain_SetStatusbar() as long
+
+   Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
+
 
    ' Update the statusbar with the current Line/Col position
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-
-   Dim As HWnd hStatusbar = GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR)
-   Static wText As WString * MAX_PATH
    
-   ' Only update statusbar text if changed in order to prevent flicker
-   if IsWindowVisible(HWND_FRMRECENT) THEN
-      StatusBar_SetText(hStatusbar, 0, "")    ' Build configuration
-   else
-      dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
-      if nCurSel > -1 THEN
-         StatusBar_GetText(hStatusbar, 0, @wText)
-         If LTrim(wText) <> gConfig.Builds(nCurSel).wszDescription Then
-            StatusBar_SetText(hStatusbar, 0, " " & gConfig.Builds(nCurSel).wszDescription)
-         End If
-      else
-         StatusBar_SetText(hStatusbar, 0, "")    ' Build configuration
-      END IF
-   END IF
+   
+   dim wszText as wstring * MAX_PATH
 
-   ' If there is not any file being edited
-   If pDoc = 0 Then
-      StatusBar_SetText(hStatusbar, 1, "")    ' line/col/sel
-      StatusBar_SetText(hStatusbar, 2, "")    ' file type (normal, main, resource, module)
-      StatusBar_SetText(hStatusbar, 3, "")    ' file disktype (Unicode/Ansi)
-      StatusBar_SetIcon(hStatusBar, 4, 0)
-      StatusBar_SetText(hStatusbar, 4, "")    ' compile messages
-      Dim wzText As WString * MAX_PATH
-      wzText = APPNAME            
-      If gApp.IsProjectActive Then
-         wzText = APPNAMESHORT + " - [" + gApp.ProjectName + "]"
+   ' PANEL (0) Build Configuration
+   ' PANEL (1) Line/Col/Sel -or- VD coordinates
+   ' PANEL (2) Filetype (Normal/Main/Resource/Module)
+   ' PANEL (3) File Encoding (Unicode/Ansi) -or- "Parsing:"
+   ' PANEL (4) Compiling Results -or- Filename being parsed
+   dim wszPanel(4) As WString * MAX_PATH
+   dim hIconPanel4 as HANDLE
+   for i as long = lbound(wszPanel) to ubound(wszPanel)
+      StatusBar_GetText( hStatusbar, i, wszPanel(i) )
+   next
+   
+   ' Default Panel4 text to be whatever is stored in gApp. That string will always hold
+   ' the latest file being parsed or the latest compile success/failure message. We will
+   ' reset the value when files are finished loading but we always what to keep the latest
+   ' compiled message.
+   wszPanel(4) = gApp.wszPanelText
+   hIconPanel4 = gApp.hIconPanel
+
+   if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then
+      wszPanel(1) = ""
+      wszPanel(2) = ""
+      wszPanel(3) = L(66,"Parsing") & ":" 
+   
+   elseif gApp.IsCompiling then
+      ' The gApp info is set in modCompile
+      
+   elseif pDoc <> 0 then
+      dim as HWND hEdit = pDoc->hWndActiveScintilla
+      wszText = ""
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) THEN 
+         dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
+         if pCtrl THEN
+            wszText = "L:" & GetControlProperty(pCtrl, "LEFT") & ", T:" & GetControlProperty(pCtrl, "TOP") & "  ::  " & _
+                      "W:" & GetControlProperty(pCtrl, "WIDTH") & " x H:" & GetControlProperty(pCtrl, "HEIGHT")
+         END IF
+      else
+         Dim As Long curPos, nLine, nCol
+         Dim As Long startPos, endPos, startLine, endLine, nLines 
+         ' Retrieve the information and show it in the status bar
+         curPos    = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+         nLine     = SciExec( hEdit, SCI_LINEFROMPOSITION, curPos, 0) 
+         nCol      = SciExec( hEdit, SCI_GETCOLUMN, curPos, 0) 
+         nLines    = SciExec( hEdit, SCI_GETLINECOUNT, 0, 0) 
+         pDoc->GetSelectedLineRange(startLine, endLine, startPos, endPos )
+
+         wszText = " Ln " & Str(nLine + 1) & ", Col " & Str(nCol + 1) 
+         If endPos - startPos Then  ' there is selected text
+            wszText = wszText + " (" + Str(endPos - startPos) + " selected)"
+            ' Update whether Selection icon should be highlighted
+            if IsWindowVisible(HWND_FRMFINDREPLACE) then frmFindReplace_ShowControls()
+         else
+            wszText = wszText + ", Lines " + Str(nLines)
+         End If 
+         pDoc->ScrInfo.nMax = SciExec(hEdit, SCI_GETLINECOUNT, 0, 0) - 1    
+         pDoc->ScrInfo.nPos = SciExec(hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
+         SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE) 
       end if
-      SetWindowText( HWnd, wzText )
-   Else
-      pDoc->DisplayStats
-   End If
+      wszPanel(1) = wszText
+   
+      wszText = ""
+      Select Case pDoc->ProjectFileType
+         Case FILETYPE_NORMAL:    wszText = ucase(L(210,"Normal")) 
+         Case FILETYPE_MODULE:    wszText = ucase(L(211,"Module"))
+         Case FILETYPE_MAIN:      wszText = ucase(L(212,"Main"))
+         Case FILETYPE_RESOURCE:  wszText = ucase(L(213,"Resource"))
+      End Select
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) THEN 
+         wszText = "FORM"
+      end if
+      wszPanel(2) = wszText
+      
+      wszText = ""
+      select case pDoc->FileEncoding
+         case FILE_ENCODING_UTF8_BOM
+            wszText = "UTF-8 (BOM)"   
+            SciExec( hEdit, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+         case FILE_ENCODING_UTF16_BOM
+            wszText = "UTF-16 (BOM)"   
+            SciExec( hEdit, SCI_SETCODEPAGE, SC_CP_UTF8, 0 )
+         case else
+            wszText = "ANSI"  
+            SciExec( hEdit, SCI_SETCODEPAGE, 0, 0 )
+      END select
+      wszPanel(3) = wszText
+      
+   else      
+      ' No document must be active and nothing else happening so blank out the statusbar.
+      ' The wszPanel() array already contains blank data.   
+   END IF
+   
+
+   ' MAIN WINDOW CAPTION 
+   wszText = iif( gApp.GetDocumentCount, APPNAMESHORT, APPNAME )
+   If (gApp.IsProjectActive = true) or (gApp.IsProjectLoading = true) Then 
+      wszText = wszText & " - [" & gApp.ProjectName & "]"
+   end if
+   if pDoc then wszText = wszText & " - [" & pDoc->DiskFilename & "]"
+   If wszText <> AfxGetWindowText( HWND_FRMMAIN ) Then AfxSetWindowText( HWND_FRMMAIN, wszText )
+
+
+   ' TAB CONTROL FILENAME ( * modified flag )
+   gTTabCtl.SetTabText(-1)
+
+
+   ' BUILD CONFIGURATION
+   wszText = ""
+   if gApp.GetDocumentCount THEN
+      dim as long nCurSel = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
+      if nCurSel > -1 THEN wszText = " " & gConfig.Builds(nCurSel).wszDescription
+   END IF
+   wszPanel(0) = wszText
+   
+
+   ' UPDATE THE PANELS THAT HAVE CHANGED
+   for i as long = lbound(wszPanel) to ubound(wszPanel)
+      StatusBar_GetText( hStatusbar, i, @wszText )
+      if wszText <> wszPanel(i) then StatusBar_SetText( hStatusbar, i, wszPanel(i) )
+   next
+   if StatusBar_GetIcon( hStatusBar, 4 ) <> hIconPanel4 then StatusBar_SetIcon( hStatusBar, 4, hIconPanel4 )
+
    frmMain_ChangeToolbarButtonsState
    frmBuildConfig_LoadBuildComboBox
 
@@ -239,7 +332,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                   SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
                end select
             end if
-            frmMain_UpdateLineCol(HWnd)
+            frmMain_SetStatusbar
          end if
          return true
          
@@ -249,7 +342,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          ' Show line and column. Only do on modification of text otherwise we will have
          ' a huge slowdown when notifications sent for UI updates.
          If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or (pNSC->modificationType And SC_MOD_DELETETEXT) Then
-            frmMain_UpdateLineCol(HWnd)
+            frmMain_SetStatusbar
          end if
          return true
          
@@ -559,7 +652,7 @@ private Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
          pDoc->ScrInfo.nMax = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0) - 1    
          pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
          SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
-         frmMain_UpdateLineCol(HWND)
+         frmMain_SetStatusbar
          frmMain_SetFocusToCurrentCodeWindow
       end if
       
@@ -569,7 +662,7 @@ private Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
-   frmMain_UpdateLineCol(hwnd)
+   frmMain_SetStatusbar
    Function = 0
 End Function
 
@@ -628,7 +721,6 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    
    If pDocIn = 0 Then   ' Create a new pDoc 
-      gFileLoading = true  ' allows parsing of newly loading file
       pDoc = New clsDocument
       gApp.AddDocument(pDoc) 
       pDoc->IsDesigner = bIsDesigner 
@@ -639,7 +731,6 @@ Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
          pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
       End If   
       ParseDocument(pDoc, "")
-      gFileLoading = false
    Else
       ' deal with the existing pDoc
       pDoc = pDocIn     
@@ -764,7 +855,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                pDocMain = gTTabCtl.GetActiveDocumentPtr()
                If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
             end if
-            frmMain_UpdateLineCol(HWND)
+            frmMain_SetStatusbar
          END IF  
       
       Case IDM_GOTONEXTTAB
@@ -895,7 +986,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             pDoc->UserModified = true
             AfxRedrawWindow(pDoc->hWndFrame)
             AfxRedrawWindow(pDoc->hWndForm)
-            frmMain_UpdateLineCol(HWND_FRMMAIN)
+            frmMain_SetStatusbar
             DisplayPropertyList(pDoc)
          else
             SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
@@ -933,7 +1024,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
          pDoc->Controls.SetActiveControl(pDoc->hWndForm)
          AfxRedrawWindow(pDoc->hWndFrame)
          AfxRedrawWindow(pDoc->hWndForm)
-         frmMain_UpdateLineCol(HWND_FRMMAIN)
+         frmMain_SetStatusbar
          DisplayPropertyList(pDoc)
         
       Case IDM_DELETELINE:  SciExec(hEdit, SCI_LINECUT, 0, 0)
@@ -956,7 +1047,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
                Function = SciExec(hEdit, SCI_TAB, 0, 0)
                gApp.SuppressNotify = false
             end if
-            frmMain_UpdateLineCol(HWND_FRMMAIN)
+            frmMain_SetStatusbar
          end if
       
       Case IDM_UNINDENTBLOCK
@@ -968,7 +1059,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             gApp.SuppressNotify = true
             Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
             gApp.SuppressNotify = false
-            frmMain_UpdateLineCol(HWND_FRMMAIN)
+            frmMain_SetStatusbar
          end if
          
       Case IDM_COMMENTBLOCK:       pDoc->BlockComment(True) 
@@ -1001,7 +1092,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             ConvertTextBuffer(pDoc, FILE_ENCODING_ANSI)
          end if   
          pDoc->FileEncoding = FILE_ENCODING_ANSI 
-         frmMain_UpdateLineCol( HWND_FRMMAIN )
+         frmMain_SetStatusbar
       
       case IDM_UTF8BOM
          if pDoc->FileEncoding <> FILE_ENCODING_UTF8_BOM THEN 
@@ -1009,14 +1100,14 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             ConvertTextBuffer(pDoc, FILE_ENCODING_UTF8_BOM)
          end if   
          pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM 
-         frmMain_UpdateLineCol( HWND_FRMMAIN )
+         frmMain_SetStatusbar
       
       case IDM_UTF16BOM
          if pDoc->FileEncoding <> FILE_ENCODING_UTF16_BOM THEN 
             pDoc->UserModified = true
             ConvertTextBuffer(pDoc, FILE_ENCODING_UTF16_BOM)
          end if   
-         frmMain_UpdateLineCol( HWND_FRMMAIN )
+         frmMain_SetStatusbar
 
 
       ''  SEARCH MENU              
@@ -1192,7 +1283,7 @@ Function frmMain_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl A
             pDoc->UserModified = true
             AfxRedrawWindow(pDoc->hWndFrame)
             AfxRedrawWindow(pDoc->hWndForm)
-            frmMain_UpdateLineCol( HWND_FRMMAIN )
+            frmMain_SetStatusbar
          end if
       
       ''   TOOLS MENU
@@ -1381,6 +1472,8 @@ Function frmMain_OnActivateApp(ByVal HWnd As HWnd, ByVal fActivate As BOOLEAN, B
    ' documents have been modified by an external application. If yes, then ask
    ' the user if wish to reload.
    If fActivate = true Then
+      if gApp.GetDocumentCount = 0 then exit function
+      
       ' Search all loaded documents
       Dim As FILETIME ft
       Dim As Long i, idx, nDocumentCount
@@ -1761,19 +1854,23 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
 
       
       case WM_MOUSEMOVE
-         ' Determine if we have mouse over a edit split area
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN
-            dim as POINT pt = (LoWord(lParam), HiWord(lParam))
-            if pDoc->bSizing then
-               if pt.y <> pDoc->ptPrev.y then
-                  pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
-                  frmMain_PositionWindows(HWND)
-                  pDoc->ptPrev.y = pt.y
-               end if   
-            else   
-               if PtInRect(@pDoc->rcSplitButton, pt) THEN SetCursor(ghCursorNS)
-            END if
+         if (gApp.IsCompiling = false) andalso (gApp.IsProjectLoading = false) then
+            ' Determine if we have mouse over a edit split area
+            Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+            if pDoc THEN
+               dim as POINT pt = (LoWord(lParam), HiWord(lParam))
+               if pDoc->bSizing then
+                  if pt.y <> pDoc->ptPrev.y then
+                     pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
+                     frmMain_PositionWindows(HWND)
+                     pDoc->ptPrev.y = pt.y
+                  end if   
+               else   
+                  if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+                     SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+                  end if   
+               END if
+            end if
          end if
          
       Case WM_LBUTTONDOWN
@@ -1786,7 +1883,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
                pDoc->bSizing = true
                pDoc->SplitY = pDoc->rcSplitButton.top  
                pDoc->ptPrev.y = pt.y
-               SetCursor(ghCursorNS)
+               SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
             END IF
          end if
 
@@ -1829,8 +1926,9 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             ' Change mouse cursor because Tab in TabCtl being moved
             SetCursor( LoadCursor( null, IDC_HAND ))
             return true
-         elseif (gCompiling = true) then
+         elseif (gApp.IsCompiling = true) or (gApp.IsProjectLoading = true) then
             SetCursor( LoadCursor(0, IDC_WAIT) )
+            return true
          end if
             
       Case WM_ERASEBKGND
@@ -1885,7 +1983,7 @@ Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       Case MSG_USER_SETFOCUS
          ' Set focus to current Scintilla window and update the document
          ' display such as Line#, Col#, Filename, etc.
-         frmMain_UpdateLineCol(HWnd)
+         frmMain_SetStatusbar
          Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
          if pDoc THEN
             if pDoc->IsDesigner THEN
@@ -2021,11 +2119,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ghIconTick   = LoadImage( pWindow->InstanceHandle, "IMAGE_TICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
    ghIconNoTick = LoadImage( pWindow->InstanceHandle, "IMAGE_NOTICK", IMAGE_ICON, cx, cx, LR_DEFAULTCOLOR )
 
-   ' Create a global bold font that is used in the controls combobox and also for
-   ' the label that describes the property name/description.
-   ghNormalFont = pWindow->CreateFont(pWindow->DefaultFontName, pWindow->DefaultFontSize, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
-   ghBoldFont = pWindow->CreateFont(pWindow->DefaultFontName, pWindow->DefaultFontSize, 700, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
-   
    ' Create the main application topmenu
    HWND_FRMMAIN_TOPMENU = frmMain_BuildMenu(pWindow)
    SetMenu pWindow->hWindow, HWND_FRMMAIN_TOPMENU
@@ -2064,17 +2157,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    ImageList_AddIcon(hImageList, hIcon)
    TabCtrl_SetImageList(gTTabCtl.hWindow, hImageList)
                                                         
-   ' Create the ImageLists that will hold the images for the Explorer and Recent treeviews
-   cx = 24 * (pWindow->DPI \ 96)
-   ghImageListNormal = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 4, 1)
-   gidxImageBlank  = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_BLANK")
-   gidxImageClosed = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_CLOSED")
-   gidxImageOpened = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_OPENED")
-   gidxImageCode   = AfxGdipAddIconFromRes(ghImageListNormal, pWindow->InstanceHandle, "IMAGE_CODE")
-
-   ' Load the splitter cursors
-   ghCursorNS = LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED)
-
    ' Load the graphisc PNG pointers for the scintilla popup autocomplete listbox.
    gApp.pImageAutocompleteBaseType = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_BASETYPE")     
    gApp.pImageAutocompleteClass    = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_CLASS")     
@@ -2129,7 +2211,6 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    
    ' Message loop
    Do While GetMessage(@uMsg, Null, 0, 0)
-
 
 '      if uMsg.message = WM_TIMER then
 '         Dim As HWnd hStatusbar = GetDlgItem(HWnd_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
@@ -2198,7 +2279,7 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
                                  AfxRedrawWindow(hEventList)
                                  pDoc->UserModified = true
                                  pDoc->bRegenerateCode = true
-                                 frmMain_UpdateLineCol(HWND_FRMMAIN)
+                                 frmMain_SetStatusbar
                               end if
                            end if
                         end if   
@@ -2261,14 +2342,8 @@ Function frmMain_Show( ByVal hWndParent As HWnd, _
    Loop
    Function = uMsg.wParam
 
-   
-   ' Destroy the Explorer and Recent treeview imagelist
-   ImageList_Destroy(ghImageListNormal)
-
    If ghIconGood       Then DestroyIcon(ghIconGood) 
    If ghIconBad        Then DestroyIcon(ghIconBad)
-   if ghNormalFont     then DeleteFont(ghNormalFont)
-   if ghBoldFont       then DeleteFont(ghBoldFont)
    if ghAccelUserTools THEN DestroyAcceleratorTable(ghAccelUserTools)
    
    if gApp.pImageAutocompleteBaseType then deallocate(gApp.pImageAutocompleteBaseType)

@@ -13,6 +13,8 @@
 
 #include once "modVDToolbox.bi"
 #include once "frmImageManager.bi"
+#include once "clsApp.bi"
+#include once "clsDocument.bi"
 
 
 ' ========================================================================================
@@ -62,8 +64,8 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
    ' Try to match the last accessed property/event name for this control. This allows
    ' you to switch between common properties/events of controls more quickly. If there 
    ' is no match on the last accessed, then use the default value instead.
-   wszDefaultProp  = iif(IsPropertyExists(pCtrl, gwszPreviousPropName), gwszPreviousPropName, wszDefaultProp) 
-   wszDefaultEvent = iif(IsEventExists(pCtrl, gwszPreviousEventName), gwszPreviousEventName, wszDefaultEvent)
+   wszDefaultProp  = iif(IsPropertyExists(pCtrl, gApp.PreviousPropName), gApp.PreviousPropName, wszDefaultProp) 
+   wszDefaultEvent = iif(IsEventExists(pCtrl, gApp.PreviousEventName), gApp.PreviousEventName, wszDefaultEvent)
 
    
    ' Match the default names in the properties and events lists
@@ -367,7 +369,7 @@ private function InitiatePropertyValueChange() as Long
          ' Indicate that the file is now dirty and will need to be saved
          pDoc->UserModified = true
          pDoc->bRegenerateCode = true
-         frmMain_UpdateLineCol(HWND_FRMMAIN)
+         frmMain_SetStatusbar
       end if
    END IF
 
@@ -506,7 +508,7 @@ private Function frmVDToolbox_OnCommand( ByVal HWnd As HWnd, _
             if pCtrl then 
                pDoc->Controls.DeselectAllControls
                pDoc->Controls.SetActiveControl(pCtrl->hWindow)
-               frmMain_UpdateLineCol(HWND_FRMMAIN)
+               frmMain_SetStatusbar
                AfxRedrawWindow(pDoc->hWndFrame)
                AfxRedrawWindow(pDoc->hWndForm)
                DisplayPropertyList(pDoc)
@@ -662,7 +664,7 @@ private Function frmVDToolbox_OnMeasureItem( ByVal HWnd As HWnd, _
                                              ) As Long
    ' Set the height of the List box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-   lpmis->itemHeight = pWindow->ScaleY(LISTBOX_LINEHEIGHT)
+   lpmis->itemHeight = pWindow->ScaleY(FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
    Function = 0
 End Function
 
@@ -676,7 +678,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
 
    Dim As HBRUSH hBrush 
    dim as HANDLE hImage
-   dim as HFONT hFont 
+   dim as HFONT hFont, hFontNormal, hFontBold 
    Dim As RECT rc, rc2 
    Dim wzText As WString * MAX_PATH
    
@@ -688,6 +690,14 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
    Select Case lpdis->itemAction
       Case ODA_DRAWENTIRE, ODA_SELECT
          
+         hFontNormal = pWindow->CreateFont( pWindow->DefaultFontName, _
+                                            pWindow->DefaultFontSize, _
+                                            FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
+
+         hFontBold   = pWindow->CreateFont( pWindow->DefaultFontName, _
+                                            pWindow->DefaultFontSize, _
+                                            FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
+
          SaveDC(lpdis->hDC)
          
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_COMBOCONTROLS then
@@ -711,7 +721,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                dim pCtrl as clsControl ptr
                pCtrl = pDoc->Controls.ItemAt(lpdis->itemData)
                if pCtrl then
-                  SelectObject(lpdis->hDC, ghBoldFont)
+                  SelectObject(lpdis->hDC, hFontBold)
                   rc = lpdis->rcItem
                   dim as CWSTR wszCtrlName = GetControlProperty(pCtrl, "NAME")
                   ' Get the size of this string because the Control type string must be drawn after this.
@@ -724,7 +734,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                             DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
                 
                   ' Determine the Control Type
-                  SelectObject(lpdis->hDC, ghNormalFont)
+                  SelectObject(lpdis->hDC, hFontNormal)
                   wszCtrlName = GetToolBoxName(pCtrl->ControlType) & " (" & GetWinformsXClassName(pCtrl->ControlType) & ")"
                   ' Text is drawn immediately after the Control Name
                   rc.left = rc.left + nSize.cx + pWindow->ScaleX(4)
@@ -821,7 +831,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   end if   
                   if ucase(pCtrl->Properties(lpdis->itemData).wszPropName) = "FONT" then
                      dim as LOGFONT lf
-                     GetObject(ghNormalFont, sizeof(lf), @lf)
+                     GetObject(hFontNormal, sizeof(lf), @lf)
                      dim as CWSTR wszFaceName = lf.lfFaceName
                      dim as long nHeight = lf.lfHeight
                      dim as long nCharSet = lf.lfCharSet
@@ -864,7 +874,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                             wszPropValue, _
                             -1, Cast(lpRect, @rc2), _
                             DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
-                  SelectObject(lpdis->hDC, ghNormalFont)
+                  SelectObject(lpdis->hDC, hFontNormal)
                   if hFont then DeleteFont(hFont)
                   
  
@@ -900,7 +910,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   end if
 
                   ' Draw the tick/untick image
-                  ' The line height is LISTBOX_LINEHEIGHT so center the 16x16 icon vertically and horizontally
+                  ' The line height is FRMVDTOOLBOX_LISTBOX_LINEHEIGHT so center the 16x16 icon vertically and horizontally
                   FillRect(lpdis->hDC, @rc, GetSysColorBrush(COLOR_WINDOW))  
                   DrawIconEx( lpdis->hDC, _
                               rc.Left + pWindow->ScaleX(2), _
@@ -926,6 +936,9 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
          end if
          RestoreDC(lpdis->hDC, -1)
 
+         if hFontNormal then DeleteFont(hFontNormal)
+         if hFontBold   then DeleteFont(hFontBold)
+         
          Function = True : Exit Function
    
    End Select
@@ -938,6 +951,10 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmVDToolbox
 ' ========================================================================================
 private Function frmVDToolbox_OnDestroy( byval HWnd As HWnd ) As LRESULT
+   ' Delete the manually created bold font
+   dim as hFONT hFontBold = AfxGetWindowFont( GetDlgItem(hwnd, IDC_FRMVDTOOLBOX_LBLPROPNAME ))
+   if hFontBold then DeleteFont(hFontBold)
+   
    HWND_FRMVDTOOLBOX = 0
    Function = 0
 End Function
@@ -970,11 +987,11 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
          ' the mod of the lineheight to listbox height so we can color the partial line
          ' that won't be displayed at the bottom of the list.
          dim as long NumItems = ListBox_GetCount(hwnd)
-         dim as long ItemsPerPage = ( rc.bottom / LISTBOX_LINEHEIGHT)
+         dim as long ItemsPerPage = ( rc.bottom / FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
          if NumItems < ItemsPerPage then 
-            rc.top = LISTBOX_LINEHEIGHT * NumItems
+            rc.top = FRMVDTOOLBOX_LISTBOX_LINEHEIGHT * NumItems
          else
-            rc.top = rc.bottom - ( rc.bottom mod LISTBOX_LINEHEIGHT)
+            rc.top = rc.bottom - ( rc.bottom mod FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
          end if
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
@@ -992,7 +1009,7 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
                      ChooseFontForProperty(pProp)
                      pDoc->UserModified = true
                      pDoc->bRegenerateCode = true
-                     frmMain_UpdateLineCol(HWND_FRMMAIN)
+                     frmMain_SetStatusbar
                      PostMessage(HWND_FRMVDCOLORS, WM_ACTIVATE, WA_INACTIVE, 0)  ' to apply properties
                   elseif pProp->PropType = PropertyType.ImagePicker then
                      frmImageManager_Show(HWND_FRMMAIN, pProp)
@@ -1057,7 +1074,7 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
                AfxRedrawWindow(hwnd)
             end if
          end if
-         
+          
          if hwnd = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS) THEN
             ' Handle if the Events checkbox is clicked
             dim as long nCurSel = ListBox_GetCurSel(hwnd)
@@ -1081,7 +1098,7 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
                      InvalidateRect(hwnd, @rc, true): UpdateWindow(hwnd)
                      pDoc->UserModified = true
                      pDoc->bRegenerateCode = true
-                     frmMain_UpdateLineCol(HWND_FRMMAIN)
+                     frmMain_SetStatusbar
                   END IF
                end if
             end if   
@@ -1279,7 +1296,8 @@ public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    Dim As HWnd hLabel = _ 
          pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPNAME, "", 0, 0, 0, 0, _
          WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
-         AfxSetWindowFont(hLabel, ghBoldFont)     
+         dim as HFONT hFontBold = pWindow->CreateFont( pWindow->DefaultFontName, pWindow->DefaultFontSize, FW_BOLD )
+         AfxSetWindowFont(hLabel, hFontBold)     
               
          pWindow->AddControl("LABEL", , IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE, "", 0, 0, 0, 0, _
          WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)

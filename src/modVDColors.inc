@@ -11,11 +11,19 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modVDColors.bi"
+#include once "clsDocument.bi"
+
 
 ' ========================================================================================
 ' Process WM_COMMAND message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndCtl As HWnd, ByVal codeNotify As UINT) As LRESULT
+private Function frmVDColors_OnCommand( ByVal HWnd As HWnd, _
+                                        ByVal id As Long, _
+                                        ByVal hwndCtl As HWnd, _
+                                        ByVal codeNotify As UINT _
+                                        ) As LRESULT
+                                        
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    dim pProp as clsProperty ptr = GetActivePropertyPtr()
    dim as long nCurSel, idx
@@ -40,7 +48,7 @@ Function frmVDColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
                      AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
                      pDoc->UserModified = true
                      pDoc->bRegenerateCode = true
-                     frmMain_UpdateLineCol(HWND_FRMMAIN)
+                     frmMain_SetStatusbar
                      PostMessage(HWND_FRMVDCOLORS, WM_ACTIVATE, WA_INACTIVE, 0)  ' to apply properties
                   end if   
                end if
@@ -57,14 +65,14 @@ Function frmVDColors_OnCommand(ByVal HWnd As HWnd, ByVal id As Long, ByVal hwndC
                   pProp->wszPropValue = pProp->wszPropValue & gColors(idx).wszColorName
                   pDoc->UserModified = true
                   pDoc->bRegenerateCode = true
-                  frmMain_UpdateLineCol(HWND_FRMMAIN)
+                  frmMain_SetStatusbar
                   ShowWindow(HWND_FRMVDCOLORS, SW_HIDE)
                   AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
                end if   
             end if
          end if
    end select
-   
+          
    function = 0
 end function
 
@@ -72,7 +80,10 @@ end function
 ' ========================================================================================
 ' Process WM_NOTIFY message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnNotify(ByVal HWnd As HWnd, ByVal id As Long, ByVal pNMHDR As NMHDR Ptr) As LRESULT
+private Function frmVDColors_OnNotify( ByVal HWnd As HWnd, _
+                                       ByVal id As Long, _
+                                       ByVal pNMHDR As NMHDR Ptr _
+                                       ) As LRESULT
 
    SELECT CASE id
       CASE IDC_FRMVDCOLORS_TABCONTROL
@@ -99,7 +110,7 @@ end function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-Function frmVDColors_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmVDColors_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    if pWindow = 0 THEN exit function
@@ -125,7 +136,11 @@ End Function
 ' ========================================================================================
 ' Process WM_SIZE message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnSize(ByVal HWnd As HWnd, ByVal state As UINT, ByVal cx As Long, ByVal cy As Long) As LRESULT
+private Function frmVDColors_OnSize( ByVal HWnd As HWnd, _
+                                     ByVal state As UINT, _
+                                     ByVal cx As Long, _
+                                     ByVal cy As Long _
+                                     ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
       frmVDColors_PositionWindows(HWnd)
    End If   
@@ -136,10 +151,12 @@ End Function
 ' ========================================================================================
 ' Process WM_MEASUREITEM message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnMeasureItem( ByVal HWnd As HWnd, ByVal lpmis As MEASUREITEMSTRUCT Ptr ) As Long
+private Function frmVDColors_OnMeasureItem( ByVal HWnd As HWnd, _
+                                            ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+                                            ) As Long
    ' Set the height of the List box items. 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
-   lpmis->itemHeight = pWindow->ScaleY(LISTBOX_LINEHEIGHT)
+   lpmis->itemHeight = pWindow->ScaleY(FRMVDCOLORS_LISTBOX_LINEHEIGHT)
    Function = 0
 End Function
 
@@ -147,7 +164,9 @@ End Function
 ' ========================================================================================
 ' Process WM_DRAWITEM message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnDrawItem( ByVal HWnd As HWnd, ByVal lpdis As Const DRAWITEMSTRUCT Ptr ) As Long
+private Function frmVDColors_OnDrawItem( ByVal HWnd As HWnd, _
+                                         ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+                                         ) As Long
 
    Dim As HBRUSH hBrush, hBrushOld
    Dim As RECT rc1, rc2
@@ -220,16 +239,17 @@ End Function
 ' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnClose( ByVal HWnd As HWnd ) As LRESULT
+private Function frmVDColors_OnClose( ByVal HWnd As HWnd ) As LRESULT
    ' Never close the window; simply hide it.
    ShowWindow( HWnd, SW_HIDE )
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' Process WM_DESTROY message for window/dialog: frmVDColors
 ' ========================================================================================
-Function frmVDColors_OnDestroy(HWnd As HWnd) As LRESULT
+private Function frmVDColors_OnDestroy( byval HWnd As HWnd ) As LRESULT
    HWND_FRMVDCOLORS = 0
    Function = 0
 End Function
@@ -238,11 +258,11 @@ End Function
 ' ========================================================================================
 ' frmVDColors Window procedure
 ' ========================================================================================
-Function frmVDColors_WndProc( ByVal HWnd   As HWnd, _
-                              ByVal uMsg   As UINT, _
-                              ByVal wParam As WPARAM, _
-                              ByVal lParam As LPARAM _
-                              ) As LRESULT
+private Function frmVDColors_WndProc( ByVal HWnd   As HWnd, _
+                                      ByVal uMsg   As UINT, _
+                                      ByVal wParam As WPARAM, _
+                                      ByVal lParam As LPARAM _
+                                      ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND,     frmVDcolors_OnCommand)
@@ -253,17 +273,17 @@ Function frmVDColors_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_MEASUREITEM, frmVDColors_OnMeasureItem)
       HANDLE_MSG (HWnd, WM_DRAWITEM,    frmVDColors_OnDrawItem)
 
-      case WM_ACTIVATE
-         if wParam = WA_INACTIVE then
-            ShowWindow(HWND_FRMVDCOLORS, SW_HIDE)
-            dim pCtrl as clsControl ptr
-            dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-            if pDoc then pCtrl = pDoc->Controls.GetActiveControl
-            if pCtrl then ApplyControlProperties(pDoc, pCtrl)
-         end if   
+   case WM_ACTIVATE
+      if wParam = WA_INACTIVE then
+         ShowWindow(HWND_FRMVDCOLORS, SW_HIDE)
+         dim pCtrl as clsControl ptr
+         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+         if pDoc then pCtrl = pDoc->Controls.GetActiveControl
+         if pCtrl then ApplyControlProperties(pDoc, pCtrl)
+      end if   
+
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -272,7 +292,7 @@ End Function
 ' ========================================================================================
 ' frmVDColors_Show
 ' ========================================================================================
-Function SetColorListBoxSelection( byref wszPropValue as wstring ) as Long
+private Function frmVDColors_SetColorListBoxSelection( byref wszPropValue as wstring ) as Long
 
    ' wszPropValue is in two parts separated by "|"
    ' eg.  SYSTEM|ButtonFace
@@ -321,11 +341,13 @@ end function
 ' ========================================================================================
 ' frmVDColors_Show
 ' ========================================================================================
-Function frmVDColors_Show( ByVal hWndParent As HWnd, byref wszPropValue as wstring ) as Long
+public Function frmVDColors_Show( ByVal hWndParent As HWnd, _
+                                  byref wszPropValue as wstring _
+                                  ) as LRESULT
 
    ' If the colors popup already exists then no need to recreate it.
    If IsWindow(HWND_FRMVDCOLORS) Then 
-      SetColorListBoxSelection(wszPropValue)
+      frmVDColors_SetColorListBoxSelection(wszPropValue)
       exit function
    END IF
 
@@ -377,7 +399,7 @@ Function frmVDColors_Show( ByVal hWndParent As HWnd, byref wszPropValue as wstri
    NEXT
 
    frmVDColors_PositionWindows(HWND_FRMVDCOLORS)
-   SetColorListBoxSelection(wszPropValue)
+   frmVDColors_SetColorListBoxSelection(wszPropValue)
 
    Function = 0
 End Function

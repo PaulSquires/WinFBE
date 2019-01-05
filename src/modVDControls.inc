@@ -11,7 +11,9 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
+#include once "modVDControls.bi"
 #include once "frmMenuEditor.bi"
+
 
 
 ' ========================================================================================
@@ -52,7 +54,7 @@ function KeyboardMoveControls( byval pDoc as clsDocument ptr, byval vKeycode as 
    next
 
    AfxRedrawWindow(pDoc->hWndForm)
-   frmMain_UpdateLineCol(HWND_FRMMAIN)
+   frmMain_SetStatusbar
    DisplayPropertyList(pDoc)
 
    function = 0
@@ -97,7 +99,7 @@ function KeyboardResizeControls( byval pDoc as clsDocument ptr, byval vKeycode a
    next
 
    AfxRedrawWindow(pDoc->hWndForm)
-   frmMain_UpdateLineCol(HWND_FRMMAIN)
+   frmMain_SetStatusbar
    DisplayPropertyList(pDoc)
 
    function = 0
@@ -179,7 +181,7 @@ function KeyboardCycleActiveControls( byval pDoc as clsDocument ptr, byval vKeyc
                   if pCtrl->IsSelected then
                      idxNext = i: exit for
                   end if   
-               else
+               else    
                   idxNext = i: exit for
                end if   
             next
@@ -193,7 +195,7 @@ function KeyboardCycleActiveControls( byval pDoc as clsDocument ptr, byval vKeyc
    end select
 
    AfxRedrawWindow(pDoc->hWndForm)
-   frmMain_UpdateLineCol(HWND_FRMMAIN)
+   frmMain_SetStatusbar
    DisplayPropertyList(pDoc)
 
    function = 0

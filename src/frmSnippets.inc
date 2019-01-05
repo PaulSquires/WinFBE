@@ -13,6 +13,25 @@
 
 #include once "frmSnippets.bi"
 
+' Create an array that holds all options in the replaceable parameters for snippets.
+Dim shared gSnippetParameter(...) as CWSTR => _
+   {  "CLIPBOARD", _
+      "CURSOR_POSITION", _
+      "FILENAME", _
+      "FILENAME_SHORT", _
+      "CURRENT_YEAR", _
+      "CURRENT_YEAR_SHORT", _
+      "CURRENT_MONTH", _
+      "CURRENT_MONTH_NAME", _
+      "CURRENT_MONTH_NAME_SHORT", _
+      "CURRENT_DAY", _
+      "CURRENT_DAY_NAME", _
+      "CURRENT_DAY_NAME_SHORT", _
+      "CURRENT_HOUR", _
+      "CURRENT_MINUTE", _
+      "CURRENT_SECOND" _
+   }
+
 
 ' ========================================================================================
 ' Create the right-click popup Snippets Parameters menu 

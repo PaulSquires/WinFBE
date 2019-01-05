@@ -1,6 +1,5 @@
 Declare Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 Declare Function frmMain_GotoLastPosition() As Long
-Declare Function frmMain_UpdateLineCol( ByVal HWnd As HWnd ) As Long
 Declare Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd ) As Long
 Declare Function Scintilla_OnNotify( ByVal HWnd As HWnd, ByVal pNSC As SCNOTIFICATION Ptr ) As Long
 Declare Function frmMain_SetFocusToCurrentCodeWindow() As Long
@@ -20,7 +19,6 @@ Declare Function frmMain_OnDestroy(byval HWnd As HWnd) As LRESULT
 Declare Function frmMain_TabCtl_SubclassProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM, ByVal uIdSubclass As UINT_PTR, ByVal dwRefData As DWORD_PTR ) As LRESULT
 Declare Function frmMain_WndProc( ByVal HWnd As HWnd, ByVal uMsg As UINT, ByVal wParam As WPARAM, ByVal lParam As LPARAM ) As LRESULT
 Declare Function frmMain_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = 0 ) As Long
-Declare Function SetCompileStatusBarMessage( byref wszText as const wstring, byval hIconCompile as HICON ) as LRESULT
 Declare Function CreateTempResourceFile() as boolean
 Declare Function ResetScintillaCursors() as Long
 Declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
@@ -118,7 +116,6 @@ Declare Function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
 Declare Function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
 Declare Function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 Declare Function SetColorListBoxSelection( byref wszPropValue as wstring ) as Long
-Declare Function frmVDColors_Show( ByVal hWndParent As HWnd, byref wszPropValue as wstring ) as Long
 Declare Function KeyboardMoveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
 Declare Function KeyboardResizeControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
 Declare Function KeyboardCycleActiveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long

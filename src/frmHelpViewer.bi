@@ -23,4 +23,34 @@
 #Define IDC_FRMHELPVIEWER_PRINT                     1007 
 #Define IDC_FRMHELPVIEWER_FIND                      1008 
 
+' Size = 32 bytes
+TYPE HH_AKLINK 
+   cbStruct     AS LONG         ' int       cbStruct;     // sizeof this structure
+   fReserved    AS BOOLEAN      ' BOOL      fReserved;    // must be FALSE (really!)
+   pszKeywords  AS WSTRING PTR  ' LPCTSTR   pszKeywords;  // semi-colon separated keywords
+   pszUrl       AS WSTRING PTR  ' LPCTSTR   pszUrl;       // URL to jump to if no keywords found (may be NULL)
+   pszMsgText   AS WSTRING PTR  ' LPCTSTR   pszMsgText;   // Message text to display in MessageBox if pszUrl is NULL and no keyword match
+   pszMsgTitle  AS WSTRING PTR  ' LPCTSTR   pszMsgTitle;  // Message text to display in MessageBox if pszUrl is NULL and no keyword match
+   pszWindow    AS WSTRING PTR  ' LPCTSTR   pszWindow;    // Window to display URL in
+   fIndexOnFail AS BOOLEAN      ' BOOL      fIndexOnFail; // Displays index if keyword lookup fails.
+END TYPE
+
+#Define HH_DISPLAY_TOPIC   0000 
+#Define HH_DISPLAY_TOC     0001
+#Define HH_KEYWORD_LOOKUP  0013
+#Define HH_HELP_CONTEXT    0015
+
+
+'  Global holding all full path/name for HTML files linked to Help Treeview (index in lParam)
+type HTMLHELPNODES
+   wszFilename    as CWSTR
+   wszLocationURL as CWSTR
+   TreeviewNode   as HTREEITEM
+   hTreeview      as HWND
+end type
+dim shared as HTMLHELPNODES gHTMLHelp(any)
+
+Dim Shared As Any Ptr gpHelpLib
+dim shared as long gHelpViewerIndex
+
 declare Function frmHelpViewer_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = -1 ) As LRESULT

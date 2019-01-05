@@ -388,10 +388,9 @@ private Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
    
    case WM_DESTROY
       Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
-      dim as HFONT hFont = AfxGetWindowFont(hTree)
+      DeleteFont( AfxGetWindowFont(hTree) )
       DIM pImageCtx AS CImageCtx ptr = AfxCImageCtxPtr(hwnd, IDC_FRMEXPLORER_BTNCLOSE)
       if pImageCtx then delete pImageCtx
-      DeleteFont(hFont)
       
    case WM_ERASEBKGND
       return true

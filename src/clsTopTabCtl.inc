@@ -243,37 +243,36 @@ End Function
 ''
 Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    Dim TB    As TC_ITEM 
-   Dim wText As WString * MAX_PATH  
-   Dim wTemp As WString * MAX_PATH  
+   Dim wszText As WString * MAX_PATH  
+   Dim wszTemp As WString * MAX_PATH  
 
    If idx = -1 Then idx = TabCtrl_GetCurSel(this.hWindow)
 
-   ' Get the pointer to the clsDocument stored in lParam and also retrieve
-   ' the existing text. 
+   ' Get the pointer to the clsDocument stored in lParam and also retrieve the existing text. 
    TB.Mask       = TCIF_PARAM Or TCIF_TEXT
-   TB.pszText    = @wTemp
+   TB.pszText    = @wszTemp
    TB.cchTextMax = MAX_PATH
    TabCtrl_GetItem( this.hWindow, idx, @TB )
    
    Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
    If pDoc Then 
       ' Set the text that displays on the tab
-      wText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
+      wszText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         wText = wText & "*"
+         wszText = wszText & "*"
       End If   
             
       ' We only update the text if it has changed in order to prevent flicker.
-      If wText <> wTemp Then
+      If wszText <> wszTemp Then
          TB.Mask    = TCIF_TEXT 
-         TB.pszText = @wText  
+         TB.pszText = @wszText  
          Function = TabCtrl_SetItem( this.hWindow, idx, @TB )
          ' Also update the Explorer node's filename
          if pDoc->hNodeExplorer then
             Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
             ' We don't want any * modififer to show
-            wText = rtrim(wText, "*")
-            TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wText )
+            wszText = rtrim(wszText, "*")
+            TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wszText )
          end if   
       End If
    End If
