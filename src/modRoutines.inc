@@ -510,7 +510,7 @@ end function
 ' ========================================================================================
 public function OpenSelectedDocument( byref wszFilename as wstring, _
                                       byref wszFunctionName as WSTRING = "", _
-                                      byval nLineNumber as long = 0 _
+                                      byval nLineNumber as long = -1 _
                                       ) as clsDocument ptr
 
    ' This function is called in the following situations:
@@ -522,6 +522,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
    '   6. When a compile error occurs and need to position to the error line.
    '   7. When right-click select #Include file to open. 
    
+   ' If incoming FunctionName then search for filename and line number.
    dim pData as DB2_DATA ptr    
    if len(wszFunctionName) then
       pData = gdb2.dbFindFunction( wszFunctionName, wszFilename) 
@@ -562,9 +563,13 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
-      dim as hwnd hEdit = pDoc->hWndActiveScintilla
-      SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, Max(nLineNumber - 3, 0), 0) 
-      SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
+      ' Do not reposition if incoming LineNumber is -1 because that value represents
+      ' the caller specifically not wanting a repositioning.
+      if nLineNumber <> -1 then 
+         dim as hwnd hEdit = pDoc->hWndActiveScintilla
+         SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, Max(nLineNumber - 3, 0), 0) 
+         SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
+      end if
    END IF
    
    function = pDoc
@@ -711,13 +716,13 @@ public Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, _
       
       Case IDM_INSERTFILE
          rgFileTypes(1).pszName = @L(106,"Open source file")
-         rgFileTypes(2).pszName = @L(77,"FB code files")
-         rgFileTypes(3).pszName = @L(78,"FB Include files")
+         rgFileTypes(2).pszName = @L(77,"Code files")
+         rgFileTypes(3).pszName = @L(78,"Header files")
          rgFileTypes(4).pszName = @L(209,"Resource files")
          rgFileTypes(5).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
-         rgFileTypes(2).pszSpec = @WSTR("*.bas")
-         rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas;*.inc")
+         rgFileTypes(3).pszSpec = @WSTR("*.bi")
          rgFileTypes(4).pszSpec = @WSTR("*.rc")
          rgFileTypes(5).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
@@ -796,13 +801,13 @@ public Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, _
    select case idButton
       case IDM_FILEOPEN
          rgFileTypes(1).pszName = @L(106,"Open source file")
-         rgFileTypes(2).pszName = @L(77,"FB code files")
-         rgFileTypes(3).pszName = @L(78,"FB Include files")
+         rgFileTypes(2).pszName = @L(77,"Code files")
+         rgFileTypes(3).pszName = @L(78,"Header files")
          rgFileTypes(4).pszName = @L(209,"Resource files")
          rgFileTypes(5).pszName = @L(79,"All files")
          rgFileTypes(1).pszSpec = @WSTR("*.bas;*.bi;*.inc;*.rc")
-         rgFileTypes(2).pszSpec = @WSTR("*.bas")
-         rgFileTypes(3).pszSpec = @WSTR("*.bi;*.inc")
+         rgFileTypes(2).pszSpec = @WSTR("*.bas;*.inc")
+         rgFileTypes(3).pszSpec = @WSTR("*.bi")
          rgFileTypes(4).pszSpec = @WSTR("*.rc")
          rgFileTypes(5).pszSpec = @WSTR("*.*")
          pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))

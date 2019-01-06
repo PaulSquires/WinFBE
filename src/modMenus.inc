@@ -95,22 +95,32 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDINFILES, L(257,"Find In Files...") & Chr(9) & "Ctrl+Shift+F"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_REPLACE, L(46,"Replace") & "..." & Chr(9) & "Ctrl+R"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function Definition") & Chr(9) & "F6"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"Last Position") & Chr(9) & "Shift+F6"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTONEXTFUNCTION, L(84,"Next Function") & Chr(9) & "Ctrl+PgDn"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTOPREVFUNCTION, L(85,"Previous Function") & Chr(9) & "Ctrl+PgUp"
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTONEXTTAB, L(82,"Next Tab") & Chr(9) & "Ctrl+TAB"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTOPREVTAB, L(83,"Previous Tab") & Chr(9) & "Ctrl+Shift+TAB"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_CLOSETAB, L(86,"Close Tab") & Chr(9) & "Ctrl+W"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"Goto Line") & "..." & Chr(9) & "Ctrl+G"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKTOGGLE, L(50,"Toggle Bookmark") & Chr(9) & "Ctrl+F2"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKNEXT, L(51,"Next Bookmark") & Chr(9) & "F2"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKPREV, L(52,"Previous Bookmark") & Chr(9) & "Shift+F2"
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_BOOKMARKCLEARALL, L(53,"Clear Bookmarks") & Chr(9) & "Ctrl+Shift+F2"
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(189,"Source Navigation")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_DEFINITION, L(47,"Sub/Function Definition") & Chr(9) & "F6"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_LASTPOSITION, L(48,"Last Position") & Chr(9) & "Shift+F6"
+               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTONEXTFUNCTION, L(84,"Next Function") & Chr(9) & "Ctrl+PgDn"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOPREVFUNCTION, L(85,"Previous Function") & Chr(9) & "Ctrl+PgUp"
+               AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOHEADERFILE, L(194,"Goto Header File") & Chr(9) & "Ctrl+Shift+H"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOSOURCEFILE, L(195,"Goto Code File") & Chr(9) & "Ctrl+Shift+C"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOMAINFILE, L(196,"Goto Main File") & Chr(9) & "Ctrl+Shift+M"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTORESOURCEFILE, L(197,"Goto Resource File") & Chr(9) & "Ctrl+Shift+R"
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(187,"Tab Navigation")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTONEXTTAB, L(82,"Next Tab") & Chr(9) & "Ctrl+TAB"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOPREVTAB, L(83,"Previous Tab") & Chr(9) & "Ctrl+Shift+TAB"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CLOSETAB, L(86,"Close Tab") & Chr(9) & "Ctrl+W"
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(188,"Bookmarks")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKTOGGLE, L(50,"Toggle Bookmark") & Chr(9) & "Ctrl+F2"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKNEXT, L(51,"Next Bookmark") & Chr(9) & "F2"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKPREV, L(52,"Previous Bookmark") & Chr(9) & "Shift+F2"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_BOOKMARKCLEARALL, L(53,"Clear Bookmarks") & Chr(9) & "Ctrl+Shift+F2"
 
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(54,"View")
@@ -159,7 +169,6 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"Options")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..."
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDCONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
-'         AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERTOOLSDIALOG, L(289,"User Tools") & "..." & Chr(9) & "Ctrl+F7"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERSNIPPETS, L(88,"User Snippets") & "..." & Chr(9) & "Ctrl+Shift+F7"
 
    hPopUpMenu = CreatePopupMenu
@@ -214,65 +223,74 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    Function = hMenu
 
    '  Create the accelerator table for the menu
-   pWindow->AddAccelerator( FVIRTKEY, VK_TAB,  IDM_INDENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY or FSHIFT, VK_TAB,  IDM_UNINDENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_N,  IDM_FILENEW )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_O,  IDM_FILEOPEN )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,  IDM_FILECLOSE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_S,  IDM_FILESAVE )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F1,   IDM_HELP )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F2,   IDM_BOOKMARKNEXT )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F3,   IDM_FINDNEXTACCEL )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F4,   IDM_FUNCTIONLIST )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F5,   IDM_BUILDEXECUTE )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F6,   IDM_DEFINITION )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F7,   IDM_BUILDCONFIG )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F8,   IDM_FOLDTOGGLE )
+   pWindow->AddAccelerator( FVIRTKEY, VK_F9,   IDM_VIEWEXPLORER)
    pWindow->AddAccelerator( FVIRTKEY, VK_F12,  IDM_FILESAVEAS )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_S,  IDM_FILESAVEALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_D,  IDM_FILESAVEDECLARES )
+   pWindow->AddAccelerator( FVIRTKEY, VK_TAB,  IDM_INDENTBLOCK )
+
    pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_F4, IDM_EXIT )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_E,  IDM_REDO )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,  IDM_DELETELINE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_I,  IDM_INSERTFILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_B,  IDM_COMMENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_B,  IDM_UNCOMMENTBLOCK )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_D,  IDM_DUPLICATELINE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_UP,  IDM_MOVELINEUP )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_DOWN,  IDM_MOVELINEDOWN )
+   pWindow->AddAccelerator( FVIRTKEY Or FALT,     VK_F8, IDM_FOLDALL )
+
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F2,  IDM_BOOKMARKPREV )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F3,  IDM_FINDPREVACCEL )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F5,  IDM_RUNEXE )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F6,  IDM_LASTPOSITION )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F8,  IDM_UNFOLDALL )
+   pWindow->AddAccelerator( FVIRTKEY or FSHIFT,   VK_TAB, IDM_UNINDENTBLOCK )
+   
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_A,          IDM_SELECTALL )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_B,          IDM_COMMENTBLOCK )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_D,          IDM_DUPLICATELINE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_E,          IDM_REDO )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F,          IDM_FIND )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,          IDM_GOTO )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_I,          IDM_INSERTFILE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_L,          IDM_SELECTLINE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_N,          IDM_FILENEW )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_O,          IDM_FILEOPEN )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,          IDM_FILECLOSE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,          IDM_REPLACE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_S,          IDM_FILESAVE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,          IDM_CLOSETAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,          IDM_DELETELINE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,         IDM_BOOKMARKTOGGLE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,         IDM_COMPILE )
+   pWindow->AddAccelerator( FVIRTKEY or FCONTROL, VK_F7,         IDM_USERTOOLSDIALOG )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F8,         IDM_FOLDBELOW )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,         IDM_VIEWOUTPUT )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,        IDM_GOTONEXTTAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_NEXT,       IDM_GOTONEXTFUNCTION )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_PRIOR,      IDM_GOTOPREVFUNCTION )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,   IDM_ZOOMIN )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
+
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_U,  IDM_TOUPPERCASE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_L,  IDM_TOLOWERCASE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_M,  IDM_TOMIXEDCASE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_A,  IDM_SELECTALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_L,  IDM_SELECTLINE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F,  IDM_FIND )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F3,  IDM_FINDNEXTACCEL )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F3,  IDM_FINDPREVACCEL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F, IDM_FINDINFILES)
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,  IDM_REPLACE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F6,  IDM_DEFINITION )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F6,  IDM_LASTPOSITION )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F4,  IDM_FUNCTIONLIST )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_TAB,  IDM_GOTONEXTTAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,  IDM_GOTOPREVTAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,  IDM_CLOSETAB )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_NEXT, IDM_GOTONEXTFUNCTION )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_PRIOR, IDM_GOTOPREVFUNCTION )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,  IDM_GOTO )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,  IDM_BOOKMARKTOGGLE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F2,  IDM_BOOKMARKNEXT )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F2,  IDM_BOOKMARKPREV )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F2,  IDM_BOOKMARKCLEARALL )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F8,  IDM_FOLDTOGGLE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F8,  IDM_FOLDBELOW )
-   pWindow->AddAccelerator( FVIRTKEY Or FALT, VK_F8,  IDM_FOLDALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F8,  IDM_UNFOLDALL )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,  IDM_ZOOMIN )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F9,  IDM_VIEWEXPLORER)
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F9,  IDM_VIEWOUTPUT )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F5,  IDM_BUILDEXECUTE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,  IDM_COMPILE )
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FALT, VK_F5,  IDM_REBUILDALL)
-   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,  IDM_QUICKRUN)
-   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT, VK_F5,  IDM_RUNEXE )
-   pWindow->AddAccelerator( FVIRTKEY, VK_F7,  IDM_BUILDCONFIG )
-   pWindow->AddAccelerator( FVIRTKEY or FCONTROL, VK_F7,  IDM_USERTOOLSDIALOG )
-   pWindow->AddAccelerator( FVIRTKEY or FCONTROL or FSHIFT, VK_F7,  IDM_USERSNIPPETS)
-   pWindow->AddAccelerator( FVIRTKEY, VK_F1, IDM_HELP )
-   
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FALT, VK_F5, IDM_REBUILDALL)
+
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_B,     IDM_UNCOMMENTBLOCK )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_C,     IDM_GOTOSOURCEFILE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_D,     IDM_FILESAVEDECLARES )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F,     IDM_FINDINFILES )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_H,     IDM_GOTOHEADERFILE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_M,     IDM_GOTOMAINFILE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_R,     IDM_GOTORESOURCEFILE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_S,     IDM_FILESAVEALL )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_F2,    IDM_BOOKMARKCLEARALL )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL or FSHIFT, VK_F5,    IDM_QUICKRUN )
+   pWindow->AddAccelerator( FVIRTKEY or FCONTROL or FSHIFT, VK_F7,    IDM_USERSNIPPETS )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_TAB,   IDM_GOTOPREVTAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_UP,    IDM_MOVELINEUP )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FSHIFT, VK_DOWN,  IDM_MOVELINEDOWN )
+
    pWindow->CreateAcceleratorTable()
 
 End Function
@@ -383,6 +401,23 @@ public Function frmMain_ChangeTopMenuStates() As Long
                EnableMenuItem hMenu, IDM_PASTE, MF_GRAYED
             End If
          
+            if gApp.GetMainDocumentPtr = 0 then
+               EnableMenuItem hMenu, IDM_GOTOMAINFILE, MF_GRAYED
+            end if
+            
+            if gApp.GetResourceDocumentPtr = 0 then
+               EnableMenuItem hMenu, IDM_GOTORESOURCEFILE, MF_GRAYED
+            end if
+
+            if gApp.GetHeaderDocumentPtr( pDoc ) = 0 then
+               EnableMenuItem hMenu, IDM_GOTOHEADERFILE, MF_GRAYED
+            end if
+
+            if gApp.GetSourceDocumentPtr( pDoc ) = 0 then
+               EnableMenuItem hMenu, IDM_GOTOSOURCEFILE, MF_GRAYED
+            end if
+            
+
             ' Check the File Encoding
             select CASE pDoc->FileEncoding
                case FILE_ENCODING_ANSI: nSelected = IDM_ANSI

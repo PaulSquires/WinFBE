@@ -106,9 +106,11 @@ private Function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As B
       ' gets assigned a null.
       frmMain_OpenProjectSafely(HWND_FRMMAIN, wText) 
 
-     ' ' Add a new blank file to the project and set it as the Main by default   
+      ' Add a new blank file to the project and set it as the Main by default   
       dim pDoc as clsDocument ptr = OnCommand_FileNew(HWND_FRMMAIN)
-      if pDoc then gApp.ProjectSetFileType(pDoc, FILETYPE_MAIN)
+      if pDoc then 
+         SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
+      end if
    end if
    
    function = true   

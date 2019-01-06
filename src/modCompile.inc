@@ -331,35 +331,29 @@ public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
    ' Get the line number and filename of the selected item
    FF_ListView_GetItemText(hLV, nCurSel, 0, @wszErrorLine, MAX_PATH)
    FF_ListView_GetItemText(hLV, nCurSel, 1, @wszErrorFile, MAX_PATH)
+   dim as long nLineNum = Val(wszErrorLine) - 1   ' because visually the editor is one based line numbers
 
    ' If we are doing a QuickRun then it must be on the currently loaded
    ' and active file in the editor, therefore simply use that pDoc.
    if wID = IDM_QUICKRUN THEN
       pDoc = gTTabCtl.GetActiveDocumentPtr()
-      
-   else
-      If AfxFileExists(wszErrorFile) = 0 Then Exit Function
-   
-      ' If the document is already loaded then simply show the
-      ' document, otherwise we need to load it first and show it.
-      pDoc = OpenSelectedDocument( wszErrorFile )
+      if pDoc then wszErrorFile = pDoc->DiskFilename 
    END IF
+
    if pDoc = 0 then exit function
+   pDoc = OpenSelectedDocument( wszErrorFile, "", nLineNum )
    
    ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
    ' initiate the toggle between the code editor and visual designer.
    if pDoc->IsDesigner then
       ' Show the code editor.
-      TabCtrl_SetCurSel(pDoc->hDesignTabCtrl, 1)  ' 1 = code tab
+      TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
       frmMain_PositionWindows(HWND_FRMMAIN)
    END IF
 
-   ' Move Scintilla cursor to the correct error line 
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
-   dim as long nLineNum = Val(wszErrorLine) - 1   ' because visually the editor is one based line numbers
-   SciExec( hEdit, SCI_GOTOLINE, nLineNum, 0 )
-
+   function = 0
 End Function
+
 
 ''
 ''

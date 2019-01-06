@@ -93,7 +93,7 @@ private function frmOutput_DoSearchFileSelected() as LONG
 
    function = 0
 end function
-
+  
 
 ' ========================================================================================
 ' Show/Hide correct child controls

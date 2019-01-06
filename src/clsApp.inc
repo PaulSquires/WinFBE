@@ -5,7 +5,7 @@
 '    it under the terms of the GNU General Public License as published by
 '    the Free Software Foundation, either version 3 of the License, or
 '    (at your option) any later version.
-'
+'  
 '    This program is distributed in the hope that it will be useful,
 '    but WITHOUT any WARRANTY; without even the implied warranty of
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
@@ -26,6 +26,7 @@ Function clsApp.GetDocumentCount() As Long
    function = nCount
 end function
 
+
 ''
 ''
 Function clsApp.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
@@ -34,6 +35,7 @@ Function clsApp.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
    this.pDocList = pDoc
    Function = 0
 End Function
+
 
 ''
 ''
@@ -59,6 +61,7 @@ Function clsApp.RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
    Function = 0
 End Function
 
+
 ''
 ''
 Function clsApp.RemoveAllDocuments() As Long
@@ -77,6 +80,7 @@ Function clsApp.RemoveAllDocuments() As Long
    Function = 0
 End Function
 
+
 ''
 ''
 Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
@@ -88,6 +92,7 @@ Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As cls
    loop
    function = 0
 End Function
+
 
 ''
 ''
@@ -101,6 +106,7 @@ Function clsApp.GetMainDocumentPtr() As clsDocument Ptr
    function = 0
 End Function
 
+
 ''
 ''
 Function clsApp.GetResourceDocumentPtr() As clsDocument Ptr
@@ -112,6 +118,63 @@ Function clsApp.GetResourceDocumentPtr() As clsDocument Ptr
    loop
    function = 0
 End Function
+
+
+''
+''
+Function clsApp.GetHeaderDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr
+   ' Get the Header document related to the pDoc document. The Header
+   ' is simply the same source file name but with a ".bi" extension.
+   if pDocIn = 0 then exit function
+   
+   dim pDoc as clsDocument ptr
+   
+   dim as CWSTR wszFilename = _
+                  AfxStrPathname( "PATH", pDocIn->Diskfilename ) & _
+                  AfxStrPathname( "NAME", pDocIn->Diskfilename ) & ".bi"
+   pDoc = this.GetDocumentPtrByFilename( wszFilename )
+   
+   if ( pDoc <> 0 ) andalso ( this.IsProjectActive = true ) then
+      If pDoc->ProjectFileType <> FILETYPE_HEADER Then 
+         pDoc = 0
+      end if
+   end if
+   
+   function = pDoc
+End Function
+
+
+''
+''
+Function clsApp.GetSourceDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr
+   ' Get the Source document related to the pDoc document. The Header
+   ' is simply the same file name but with a ".bas" or ".inc" extension.
+   if pDocIn = 0 then exit function
+   
+   dim as CWSTR wszFilename
+   dim pDoc as clsDocument ptr
+   
+   wszFilename = AfxStrPathname( "PATH", pDocIn->Diskfilename ) & _
+                 AfxStrPathname( "NAME", pDocIn->Diskfilename ) & ".bas"
+   pDoc = this.GetDocumentPtrByFilename( wszFilename )
+   
+   if pDoc = 0 then
+      wszFilename = AfxStrPathname( "PATH", pDocIn->Diskfilename ) & _
+                    AfxStrPathname( "NAME", pDocIn->Diskfilename ) & ".inc"
+      pDoc = this.GetDocumentPtrByFilename( wszFilename )
+   end if
+   
+   if ( pDoc <> 0 ) andalso ( this.IsProjectActive = true ) then
+      select case pDoc->ProjectFileType 
+         case FILETYPE_MAIN, FILETYPE_MODULE, FILETYPE_NORMAL
+         case else
+            pDoc = 0
+      end select
+   end if
+   
+   function = pDoc
+End Function
+
 
 ''
 ''
@@ -125,6 +188,7 @@ Function clsApp.GetProjectCompiler() As long
    NEXT
    function = 0
 End Function
+
 
 ''
 ''

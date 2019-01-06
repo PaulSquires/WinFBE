@@ -95,7 +95,54 @@ private Function frmMain_GotoLastPosition() As Long
 End Function
 
 
-'private Function frmMain_UpdateLineCol( ByVal HWnd As HWnd ) As Long
+' ========================================================================================
+' Position editor to Header/Source/Main/Resource document
+' ========================================================================================
+private Function frmMain_GotoFile( ByVal pDoc As clsDocument Ptr, _
+                                   byval nMenuId as long _
+                                   ) As Long
+
+   If pDoc = 0 Then Exit Function
+   
+   dim pDocFile as clsDocument ptr
+   dim as CWSTR wszFilename
+   
+   select case nMenuId
+      case IDM_GOTOMAINFILE
+         pDocFile = gApp.GetMainDocumentPtr
+         if pDocFile then wszFilename = pDocFile->DiskFilename
+         
+      case IDM_GOTORESOURCEFILE
+         pDocFile = gApp.GetResourceDocumentPtr
+         if pDocFile then wszFilename = pDocFile->DiskFilename
+
+      case IDM_GOTOHEADERFILE
+         pDocFile = gApp.GetHeaderDocumentPtr( pDoc )
+         if pDocFile then wszFilename = pDocFile->DiskFilename
+
+      case IDM_GOTOSOURCEFILE
+         pDocFile = gApp.GetSourceDocumentPtr( pDoc )
+         if pDocFile then wszFilename = pDocFile->DiskFilename
+   end select
+
+   
+   ' If the document when going to is the same as the one that we are 
+   ' already in then no need to execute the movement.
+   if pDocFile = pDoc then exit function
+   
+   ' Save our current position in case user invokes "Last Position" option,   
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
+   gLastPosition.pDoc       = pDoc
+   gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
+   gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
+
+   OpenSelectedDocument( wszFilename )
+   
+   Function = 0
+End Function
+
+
+
 
 ' ========================================================================================
 ' Update the main form statusbar. This is the only routine that updates
@@ -1165,31 +1212,33 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
          end if
 
+      Case IDM_GOTO
+         frmGoto_Show( hEdit )
+
       Case IDM_DEFINITION
          frmMain_GotoDefinition( pDoc )
          
       Case IDM_LASTPOSITION
          frmMain_GotoLastPosition()
       
+      case IDM_GOTONEXTFUNCTION
+         pDoc->GotoNextFunction
+         
+      case IDM_GOTOPREVFUNCTION
+         pDoc->GotoPrevFunction
+
       case IDM_GOTONEXTTAB
          gTTabCtl.NextTab
       
       case IDM_GOTOPREVTAB
          gTTabCtl.PrevTab
       
-      case IDM_GOTONEXTFUNCTION
-         pDoc->GotoNextFunction
+      case IDM_GOTOHEADERFILE, _
+           IDM_GOTOSOURCEFILE, _ 
+           IDM_GOTOMAINFILE, _ 
+           IDM_GOTORESOURCEFILE 
+         frmMain_GotoFile( pDoc, id )
          
-      case IDM_GOTOPREVFUNCTION
-         pDoc->GotoPrevFunction
-      
-      Case IDM_GOTO
-         frmGoto_Show( hEdit )
-         
-      Case IDM_FUNCTIONLIST
-         ' this will also toggle visibility 
-         frmFunctionList_Show( HWnd )
-             
       Case IDM_BOOKMARKTOGGLE
          pDoc->ToggleBookmark( pDoc->GetCurrentLineNumber )
       
@@ -1202,6 +1251,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_BOOKMARKCLEARALL
          SciExec(hEdit, SCI_MARKERDELETEALL, -1, 0)
       
+      
       ''  VIEW MENU
       Case IDM_FOLDTOGGLE:         pDoc->FoldToggle( pDoc->GetCurrentLineNumber() )
       Case IDM_FOLDBELOW:          pDoc->FoldToggleOnwards( pDoc->GetCurrentLineNumber() )
@@ -1210,12 +1260,18 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_ZOOMIN:             SciExec(hEdit, SCI_ZOOMIN, 0, 0)
       Case IDM_ZOOMOUT:            SciExec(hEdit, SCI_ZOOMOUT, 0, 0)
 
+      Case IDM_FUNCTIONLIST
+         ' this will also toggle visibility 
+         frmFunctionList_Show( HWnd )
+
       Case IDM_VIEWEXPLORER
          ShowWindow HWND_FRMEXPLORER, Iif(IsWindowVisible(HWND_FRMEXPLORER), SW_HIDE, SW_SHOW)
          frmMain_PositionWindows(HWND_FRMMAIN)
+
       Case IDM_VIEWOUTPUT
          ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
          frmMain_PositionWindows(HWND_FRMMAIN)
+
       Case IDM_RESTOREMAIN
          Dim rc As Rect
          SystemParametersInfo SPI_GETWORKAREA, 0, @rc, 0
@@ -1241,6 +1297,18 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          if id = IDM_SETFILERESOURCE then nFileType = FILETYPE_RESOURCE
          if id = IDM_SETFILEHEADER   then nFileType = FILETYPE_HEADER
          if pDoc->ProjectFileType <> nFileType then
+            ' If attemptin to set MAIN or RESOURCE then we need to move any existing
+            ' pDoc that have that filetype over to the NORMAL branch.
+            if (nFileType = FILETYPE_MAIN) or (nFileType = FILETYPE_RESOURCE) then
+               dim pDoc2 as clsDocument ptr = iif(nFileType = FILETYPE_MAIN, gApp.GetMainDocumentPtr, gApp.GetResourceDocumentPtr)
+               if pDoc2 then
+                  Treeview_DeleteItem( hTV, pDoc2->hNodeExplorer )
+                  pDoc2->hNodeExplorer = 0
+                  pDoc2->ProjectFileType = FILETYPE_NORMAL
+                  AddFunctionsToExplorerTreeview( pDoc2, false )
+               end if   
+            end if
+            ' Set the new FileType for the currently selected document
             gApp.ProjectSetFileType( pDoc, nFileType )
             Treeview_DeleteItem( hTV, pDoc->hNodeExplorer )
             pDoc->hNodeExplorer = 0

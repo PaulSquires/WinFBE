@@ -76,8 +76,12 @@ Type clsApp
       Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
       Declare Function GetMainDocumentPtr() As clsDocument Ptr
       Declare Function GetResourceDocumentPtr() As clsDocument Ptr
+      declare function GetSourceDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr
+      declare function GetHeaderDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr
       Declare Function SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       Declare Function ProjectSetFileType( ByVal pDoc As clsDocument Ptr, ByVal nFileType As Long ) As LRESULT
       declare Function GetProjectCompiler() As long
       
 End Type
+
+

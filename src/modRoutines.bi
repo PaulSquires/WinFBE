@@ -31,7 +31,7 @@ declare FUNCTION UnicodeToUtf8(byval pswzUnicode as wstring ptr) AS STRING
 declare function GetFileToString( byref wszFilename as const wstring, byref txtBuffer as string, byval pDoc as clsDocument ptr ) as boolean
 declare function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long
 declare function IsCurrentLineIncludeFilename() as Boolean
-declare function OpenSelectedDocument( byref wszFilename as wstring, byref wszFunctionName as WSTRING = "", byval nLineNumber as long = 0 ) as clsDocument ptr
+declare function OpenSelectedDocument( byref wszFilename as wstring, byref wszFunctionName as WSTRING = "", byval nLineNumber as long = -1 ) as clsDocument ptr
 declare Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
 declare Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
 Declare Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, ByVal hParent As HANDLE, ByRef TheText As WString, ByVal lParam As LPARAM = 0, ByVal iImage As Long = 0, ByVal iSelectedImage As Long = 0 ) As HANDLE

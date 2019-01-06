@@ -1,13 +1,17 @@
 Version 1.8.8
-- Added: Subnodes in Explorer treeview to hold Header, Resource, Main, Module, Normal files (Projects only).
+- Added: Goto Header file (.bi) (Ctrl+Shift+H). Option found in Search / Code Navigation.
+- Added: Goto Code file (.bas, .inc) (Ctrl+Shift+C). Option found in Search / Code Navigation.
+- Added: Goto Main file (.bas) (Ctrl+Shift+M). Option found in Search / Code Navigation.
+- Added: Goto Resource file (.rc) (Ctrl+Shift+R). Option found in Search / Code Navigation.
+- Added: Explorer treeview subnodes to hold Header, Resource, Main, Module, Normal files (for Projects only).
 - Added: User Snippets (insert user defined code snippets).
 - Added: Image Manager.
 - Added: A search textbox added to Function List (filters the function list based on the search term).
 - Added: Creating a New Project will automatically add a default empty .bas main file (unsaved) to the project for convenience.
 - Added: Environment Option to Check for update at startup (once per day).
 - Added: Check for Updates added to Help menu.
-- Added: Next Tab, Previous Tab, Close Tab to the Search menu.
-- Added: Next Function, Previous Function to the Search menu.
+- Added: Next Tab, Previous Tab, Close Tab to the Search menu (Tab Navigation submenu).
+- Added: Next Function (Ctrl+PgDn), Previous Function (Ctrl+PgUp) to the Search menu.
 - Added: New About form replaces the generic messagebox.
 - Added: Pressing F6 or selecting "Sub/Function Definition" will open any #Include file on the current editing line.
 - Changed: Updated FreeBasic Compiler to November 22, 2018 Nightly Build.
@@ -17,6 +21,8 @@ Version 1.8.8
 - Changed: Removed the option to display the successful compile results dialog. Result will now only show in the statusbar.
 - Changed: Any missing non-English translation phrases will now use the English phrase rather than nothing at all.
 - Changed: Moved "User Tools" from Options menu to "Tools" menu.
+- Changed: File Open file types now have *.inc included in "Code files". "FB Include files" change to "Header files".
+- Changed: Moved Bookmark menu entries to "Bookmarks" submenu of the "Search" menu.
 - Fixed: Modified English.lang file to compress by 58 entries. Other language files will need to be slightly modified by their respective authors.
 - Fixed: Some issues with right-click menu on #Include line to display "Open <include filename>" when a project is open.
 - Fixed: F3/Shift+F3 Find/Find Next accelerator tweaked slightly to ensure previously selected text gets searched.
@@ -25,7 +31,7 @@ Version 1.8.8
 - Fixed: The search option for 'Sub/Function Definition (F6)" was not correctly finding SUBS (Functions worked okay). 
 - Fixed: Localization language editor in Environment Options / Localization not allowing editing (incorrect logic).
 - Fixed: Graceful creation of a default WinFBE.ini config file should it be missing or corrupted.
-- Fixed: Wait cursor now correctly consistently shows when loading a project or compiling code.
+- Fixed: The "Wait" cursor now correctly and consistently shows when loading a project, compiling code, or loading many files.
 
 Version 1.8.7 (December 9, 2018)
 - Added: Click and Popup menu handlers are now created with a pre-populated SELECT CASE of menu item names.

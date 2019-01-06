@@ -90,7 +90,12 @@ public function GetExplorerSpecialSubNode( byval nFileType as long ) as HTREEITE
    
    ' Add the pDoc to the node depending on what file type it is.
    select case nFileType
-      case FILETYPE_UNDEFINED: hRootNode = gApp.hExplorerNormalNode
+      case FILETYPE_UNDEFINED
+         if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+            hRootNode = gApp.hExplorerNormalNode
+         else   
+            hRootNode = gApp.hExplorerRootNode
+         end if   
       case FILETYPE_MAIN:      hRootNode = gApp.hExplorerMainNode
       case FILETYPE_MODULE:    hRootNode = gApp.hExplorerModuleNode
       case FILETYPE_NORMAL:    hRootNode = gApp.hExplorerNormalNode
@@ -149,7 +154,15 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
    End If
  
    ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
-   Treeview_SortChildren( hTree, hRootNode, 0 )
+   ' We never want to sort the ExplorerRootNode if a project is active because it will move
+   ' our special subnode branches (Main/Resource/Normal/Module/Header).
+   if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+      if hRootNode <> gApp.hExplorerRootNode then
+         Treeview_SortChildren( hTree, hRootNode, 0 )
+      end if   
+   else
+      Treeview_SortChildren( hTree, hRootNode, 0 )
+   end if
       
    If fAddChildren Then
       dim wszText as wstring * MAX_PATH
