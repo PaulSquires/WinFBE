@@ -962,98 +962,125 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_UNDO, WM_UNDO:      SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_UNDO, WM_UNDO), 0, 0)
       
       Case IDM_CUT, WM_CUT
-         if IsDesignerView(pDoc) then
-            SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
-            SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
-         else
-            SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
-         end if   
+         ' Check if the Compiler log file or Notes windows or Snippets have
+         ' input focus. If they do then select that text rather than Scintilla.
+         select case GetFocus()
+            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
+                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+               SendMessage( GetFocus, WM_CUT, 0, 0 )
+            case else     
+               if IsDesignerView(pDoc) then
+                  SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_COPY, 0), 0)
+                  SendMessage(HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_DELETE, 0), 0)
+               else
+                  SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_CUT, WM_CUT), 0, 0)
+               end if   
+         end select
       
       Case IDM_COPY, WM_COPY
-         if IsDesignerView(pDoc) then
-            dim as long NumControls = pDoc->Controls.SelectedControlsCount
-            if NumControls = 0 THEN exit function
-            redim gCopyControls(NumControls-1) as clsControl
+         ' Check if the Compiler log file or Notes windows or Snippets have
+         ' input focus. If they do then select that text rather than Scintilla.
+         select case GetFocus()
+            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
+                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+               SendMessage( GetFocus, WM_COPY, 0, 0 )
+            case else     
+               if IsDesignerView(pDoc) then
+                  dim as long NumControls = pDoc->Controls.SelectedControlsCount
+                  if NumControls = 0 THEN exit function
+                  redim gCopyControls(NumControls-1) as clsControl
 
-            dim as long NextControl = 0
-            dim pCtrl as clsControl ptr
-            for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
-               pCtrl = pDoc->Controls.ItemAt(i)
-               if pCtrl->IsSelected THEN 
-                  gCopyControls(NextControl) = *pCtrl
-                  NextControl = NextControl + 1
-               END IF
-            NEXT
-         else
-            SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
-         end if
+                  dim as long NextControl = 0
+                  dim pCtrl as clsControl ptr
+                  for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+                     pCtrl = pDoc->Controls.ItemAt(i)
+                     if pCtrl->IsSelected THEN 
+                        gCopyControls(NextControl) = *pCtrl
+                        NextControl = NextControl + 1
+                     END IF
+                  NEXT
+               else
+                  SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_COPY, WM_COPY), 0, 0)
+               end if
+         end select
 
             
       Case IDM_PASTE, WM_PASTE
-         if IsDesignerView(pDoc) then
-            dim pCtrl as clsControl ptr
-            dim rc as RECT
-            dim as long nLeft, nTop, nLeftActive, nTopActive
-            
-            ' Need to get the Left/Top properties for the active control in the copy group
-            for i as long = lbound(gCopyControls) to ubound(gCopyControls)
-               if gCopyControls(i).IsActive THEN
-                  nLeftActive = val(GetControlProperty(@gCopyControls(i), "LEFT"))
-                  nTopActive  = val(GetControlProperty(@gCopyControls(i), "TOP"))
-                  exit for
-               END IF
-            next
-               
-            ' Create the control and copy the properties to it
-            for i as long = lbound(gCopyControls) to ubound(gCopyControls)
-               pCtrl = CreateToolboxControl(pDoc, gCopyControls(i).ControlType, rc)
-               
-               for ii as long = lbound(gCopyControls(i).Properties) to ubound(gCopyControls(i).Properties)
-                  select case ucase(gCopyControls(i).Properties(ii).wszPropName)
-                     case "NAME"  ' don't copy b/c we will then have duplicate control names
-                        continue for
-                     case "LEFT": nLeft = val(gCopyControls(i).Properties(ii).wszPropValue)
-                     case "TOP":  nTop  = val(gCopyControls(i).Properties(ii).wszPropValue) 
-                     case "GROUPNAME"
-                        ' Copy the GroupName and then increment the Index property
+         ' Check if the Compiler log file or Notes windows or Snippets have
+         ' input focus. If they do then select that text rather than Scintilla.
+         select case GetFocus()
+            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
+                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+               SendMessage( GetFocus, WM_PASTE, 0, 0 )
+            case else     
+               if IsDesignerView(pDoc) then
+                  dim pCtrl as clsControl ptr
+                  dim rc as RECT
+                  dim as long nLeft, nTop, nLeftActive, nTopActive
+                  
+                  ' Need to get the Left/Top properties for the active control in the copy group
+                  for i as long = lbound(gCopyControls) to ubound(gCopyControls)
+                     if gCopyControls(i).IsActive THEN
+                        nLeftActive = val(GetControlProperty(@gCopyControls(i), "LEFT"))
+                        nTopActive  = val(GetControlProperty(@gCopyControls(i), "TOP"))
+                        exit for
+                     END IF
+                  next
+                     
+                  ' Create the control and copy the properties to it
+                  for i as long = lbound(gCopyControls) to ubound(gCopyControls)
+                     pCtrl = CreateToolboxControl(pDoc, gCopyControls(i).ControlType, rc)
+                     
+                     for ii as long = lbound(gCopyControls(i).Properties) to ubound(gCopyControls(i).Properties)
+                        select case ucase(gCopyControls(i).Properties(ii).wszPropName)
+                           case "NAME"  ' don't copy b/c we will then have duplicate control names
+                              continue for
+                           case "LEFT": nLeft = val(gCopyControls(i).Properties(ii).wszPropValue)
+                           case "TOP":  nTop  = val(gCopyControls(i).Properties(ii).wszPropValue) 
+                           case "GROUPNAME"
+                              ' Copy the GroupName and then increment the Index property
+                              pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
+                              continue for
+                           CASE "TABINDEX"
+                              continue for    
+                        END select
                         pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
-                        continue for
-                     CASE "TABINDEX"
-                        continue for    
-                  END select
-                  pCtrl->Properties(ii) = gCopyControls(i).Properties(ii)
-               NEXT
-               
-               ' Set the left/top properties relative to the current insert position
-               dim pt as point
-               GetCursorPos(@pt)
-               MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pt), 1)
-               Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
-               if pWindow then
-                  pt.x = pWindow->UnScaleX(pt.x)
-                  pt.y = pWindow->UnScaleY(pt.y)
+                     NEXT
+                     
+                     ' Set the left/top properties relative to the current insert position
+                     dim pt as point
+                     GetCursorPos(@pt)
+                     MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pt), 1)
+                     Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+                     if pWindow then
+                        pt.x = pWindow->UnScaleX(pt.x)
+                        pt.y = pWindow->UnScaleY(pt.y)
+                     end if   
+                     SetControlProperty(pCtrl, "LEFT", str(pt.x + (nLeft-nLeftActive)))
+                     SetControlProperty(pCtrl, "TOP", str(pt.y + (nTop-nTopActive)))
+                     pCtrl->IsActive = false
+                     pCtrl->IsSelected = false
+                     
+                     pCtrl->SuspendLayout = true
+                     ApplyControlProperties( pDoc, pCtrl )
+                     pCtrl->SuspendLayout = false
+                  NEXT
+                  ' Ensure the grab handles of form and controls are redrawn or hidden
+                  pDoc->Controls.SetActiveControl(pDoc->hWndForm)
+                  pDoc->bRegenerateCode = true
+                  pDoc->UserModified = true
+                  AfxRedrawWindow(pDoc->hWndFrame)
+                  AfxRedrawWindow(pDoc->hWndForm)
+                  frmMain_SetStatusbar
+                  DisplayPropertyList(pDoc)
+               else
+                  SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
                end if   
-               SetControlProperty(pCtrl, "LEFT", str(pt.x + (nLeft-nLeftActive)))
-               SetControlProperty(pCtrl, "TOP", str(pt.y + (nTop-nTopActive)))
-               pCtrl->IsActive = false
-               pCtrl->IsSelected = false
-               
-               pCtrl->SuspendLayout = true
-               ApplyControlProperties( pDoc, pCtrl )
-               pCtrl->SuspendLayout = false
-            NEXT
-            ' Ensure the grab handles of form and controls are redrawn or hidden
-            pDoc->Controls.SetActiveControl(pDoc->hWndForm)
-            pDoc->bRegenerateCode = true
-            pDoc->UserModified = true
-            AfxRedrawWindow(pDoc->hWndFrame)
-            AfxRedrawWindow(pDoc->hWndForm)
-            frmMain_SetStatusbar
-            DisplayPropertyList(pDoc)
-         else
-            SciExec( GetFocus(), Iif(GetFocus()=hEdit, SCI_PASTE, WM_PASTE), 0, 0)
-         end if   
-      
+         end select
+         
       case IDM_DELETE
          ' Delete selected controls
          dim pCtrl as clsControl ptr
@@ -1137,15 +1164,25 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_EOLTOLF:            pDoc->ConvertEOL(SC_EOL_LF)
       Case IDM_TABSTOSPACES:       pDoc->TabsToSpaces()
       Case IDM_SELECTLINE:         pDoc->SelectLine(-1)
+
       Case IDM_SELECTALL
-            if IsDesignerView(pDoc) THEN
-               pDoc->Controls.SelectAllControls
-               ' Ensure the grab handles of form and controls are redrawn or hidden
-               AfxRedrawWindow(pDoc->hWndFrame)
-               AfxRedrawWindow(pDoc->hWndForm)
-            else
-               SciExec(hEdit, SCI_SELECTALL, 0, 0)
-            END IF
+         ' Check if the Compiler log file or Notes windows or Snippets have
+         ' input focus. If they do then select that text rather than Scintilla.
+         select case GetFocus()
+            case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
+                 GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+               Edit_SetSel( GetFocus, 0, -1 )
+            case else     
+               if IsDesignerView(pDoc) THEN
+                  pDoc->Controls.SelectAllControls
+                  ' Ensure the grab handles of form and controls are redrawn or hidden
+                  AfxRedrawWindow(pDoc->hWndFrame)
+                  AfxRedrawWindow(pDoc->hWndForm)
+               else
+                  SciExec(hEdit, SCI_SELECTALL, 0, 0)
+               END IF
+         end select
                                    
       case IDM_ANSI
          if pDoc->FileEncoding <> FILE_ENCODING_ANSI THEN 

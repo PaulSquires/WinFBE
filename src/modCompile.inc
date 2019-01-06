@@ -322,7 +322,6 @@ public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
    Dim wszErrorLine As WString * MAX_PATH
    Dim wszErrorFile As WString * MAX_PATH
    
-   Dim As Long idx
    Dim As Long nCurSel = ListView_GetSelection(hLV)
    If nCurSel < 0 Then Return 0 
    
@@ -339,20 +338,47 @@ public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
       pDoc = gTTabCtl.GetActiveDocumentPtr()
       if pDoc then wszErrorFile = pDoc->DiskFilename 
    END IF
-
-   if pDoc = 0 then exit function
+   
    pDoc = OpenSelectedDocument( wszErrorFile, "", nLineNum )
    
    ' Get the pDoc for this tab and check to see if it is a visual designer. If it is, then
    ' initiate the toggle between the code editor and visual designer.
-   if pDoc->IsDesigner then
-      ' Show the code editor.
-      TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
-      frmMain_PositionWindows(HWND_FRMMAIN)
+   if pDoc then
+      if pDoc->IsDesigner then
+         ' Show the code editor.
+         TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
+         frmMain_PositionWindows(HWND_FRMMAIN)
+      end if
    END IF
 
    function = 0
 End Function
+
+
+''
+''
+private function SetLogFileTextbox() as long
+   
+   ' Construct the text that will be displayed:
+   ' - FBC version, exe name, file size, compile time
+   ' - raw log file output
+   ' - compile command line used
+   dim as CWSTR wszText
+   
+   if len(gCompile.wszOutputMsg) then 
+      gCompile.wszOutputMsg = gCompile.wszOutputMsg + vbcrlf
+   end if
+   wszText = _
+      gCompile.wszOutputMsg + _
+      L(178,"Command Line") + ": " + vbcrlf + _
+      gCompile.wszFullCommandLine + vbcrlf + vbcrlf + _
+      gCompile.wszFullLogFile 
+             
+   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wszText )
+
+   ' Reset the type parameters so subsequent compiles will not append
+   function = 0
+end function
 
 
 ''
@@ -362,6 +388,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                                    Byval wID as long, _
                                    byval fCompile64 as Boolean _
                                    ) as Boolean
+   
    ' Returns TRUE if error has been detected. This signals to the calling code
    ' that we can break out of performing any further compiles (eg. modules).
    Dim wszTemp As WString * MAX_PATH 
@@ -376,9 +403,6 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
 
    wDQ = wchr(34) ' unicode double quotes
 
-   ' Copy the log file text to the logfile textbox
-   AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wsLogSt )
-   
    hLV = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW)
    ListView_DeleteAllItems( hLV )
    
@@ -392,7 +416,8 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          wsLogSt = "This version of the FreeBASIC compiler is not compatible with the version " & _
                    "of Windows you're running. Check your computer's system information to see " & _
                    "whether you need a x86 (32-bit) or x64 (64-bit) version of the program, and " & _
-                   "then contact the software publisher."   
+                   "then contact the software publisher."  
+         gCompile.wszFullLogFile = wsLogSt
       end if
    end if
 
@@ -411,7 +436,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
          FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
          FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Windows not 64-bit (refer to log file)") ) 
-         AfxSetWindowText( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), wst )
+         wszOutputMsg = wsLogSt: exit For
          exit for
       End If   
 
@@ -552,9 +577,13 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    
    ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
    If (NumWarnings > 0) orelse (NumErrors > 0) then
-      cwsCompileMsg = L(193, "Errors") & ": " & NumErrors & "  " & _
-                      L(192, "Warnings") & ": " & NumWarnings & _
-                      "  [" & Format(Now, "yyyy-mm-dd h:mm:ss AM/PM") & "]" 
+
+      cwsCompileMsg = L(193, "Errors")   & " " & NumErrors   & "  " & _
+                      L(192, "Warnings") & " " & NumWarnings & _
+                      "  [" & _
+                        AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
+                        AfxSystemTimeToTimeStr( gCompile.SystemTime, "hh:mm:ss" ) & "]"
+      gCompile.wszOutputMsg = L(229,"Failed Compile")  & " (" & cwsCompileMsg & ")" & vbcrlf
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
       
@@ -606,8 +635,24 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
          ' Simply sound a success
          MessageBeep(MB_OK)
-      end if
-   End if 
+
+         gCompile.wszOutputMsg = _
+         L(228,"Successful Compile")  & " (" & _
+               L(193,"Errors")        & " " & NumErrors & " " & _
+               L(192,"Warnings")      & " " & NumWarnings & ")" & vbcrlf & vbcrlf & _
+         L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
+         L(195,"Target Compilation:") & " " & gCompile.OutputFilename & " (" & _
+               (fix(nFileSize / 1024) + 1) & "K, " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
+         L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & _
+                                        " " & L(198,"seconds") & " (" & _
+                                        AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
+                                        AfxSystemTimeToTimeStr( gCompile.SystemTime, "hh:mm:ss" ) & ")" & vbcrlf
+      end if 
+   End if
+
+
+   ' Update the log file text box in the frmOutput window
+   SetLogFileTextbox
 
    ' If Errors have occurred then return TRUE. We will allow processing
    ' to continue if only Warnings occurred.
@@ -643,6 +688,10 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    wDQ = wchr(34) ' unicode double quotes
    
+   gCompile.wszFullCommandLine = ""
+   gCompile.wszFullLogFile = ""
+   gCompile.wszOutputMsg = ""
+
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
    if wID <> IDM_QUICKRUN THEN
@@ -915,6 +964,9 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                wszParams = " -c " + wDQ + pDoc->DiskFilename + wDQ + _
                            " -v -o " + wDQ + wszTemp + wDQ 
                RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
+               gCompile.wszFullCommandLine = wszCommand & " " & wszParams
+               gCompile.wszFullLogFile = sConsoleText
+               
                ' Need to check to see if any errors occurred while compiling this
                ' object file. If yes, then stop processing object files and display
                ' the error.
@@ -962,7 +1014,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Attempt to delete any existing output file so it will not exist
    ' should the compile fail.
-   if AfxFileExists(gCompile.OutputFilename) then
+   if AfxFileExists( gCompile.OutputFilename ) then
       AfxDeleteFile( gCompile.OutputFilename )
    end if
 
@@ -975,6 +1027,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    sConsoleText = ""
    wszCommand = gCompile.CompilerPath
    RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
+   gCompile.wszFullCommandLine = wszCommand & " " & wszParams
+   gCompile.wszFullLogFile = sConsoleText
                
    ' Attempt to fix the random problem whereby the spinning mouse wait cursor is not reset
    ' to an arrow. It seems to happen in random cases whereby an error is thrown and a new 
@@ -984,6 +1038,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ResetScintillaCursors()
    
    gCompile.EndTime = Timer
+   gCompile.SystemTime = AfxSystemSystemTime 
+
    AfxDoEvents
 
    ' If this was a QuickRun then delete the temporary code file that was created.

@@ -106,10 +106,10 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTONEXTFUNCTION, L(84,"Next Function") & Chr(9) & "Ctrl+PgDn"
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOPREVFUNCTION, L(85,"Previous Function") & Chr(9) & "Ctrl+PgUp"
                AppendMenu hPopUpSubMenu, MF_SEPARATOR, 0, ""
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOHEADERFILE, L(194,"Goto Header File") & Chr(9) & "Ctrl+Shift+H"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOSOURCEFILE, L(195,"Goto Code File") & Chr(9) & "Ctrl+Shift+C"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOMAINFILE, L(196,"Goto Main File") & Chr(9) & "Ctrl+Shift+M"
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTORESOURCEFILE, L(197,"Goto Resource File") & Chr(9) & "Ctrl+Shift+R"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOHEADERFILE, L(231,"Goto Header File") & Chr(9) & "Ctrl+Shift+H"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOSOURCEFILE, L(232,"Goto Code File") & Chr(9) & "Ctrl+Shift+C"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTOMAINFILE, L(233,"Goto Main File") & Chr(9) & "Ctrl+Shift+M"
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTORESOURCEFILE, L(234,"Goto Resource File") & Chr(9) & "Ctrl+Shift+R"
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(187,"Tab Navigation")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_GOTONEXTTAB, L(82,"Next Tab") & Chr(9) & "Ctrl+TAB"

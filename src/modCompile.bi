@@ -23,21 +23,25 @@ const USERTOOL_ACTION_POSTCOMPILE = 2
 ''  Handle information related to the currnet compile process 
 ''
 Type COMPILE_TYPE
-   MainFilename     As WString * MAX_PATH   ' main source file (full path and file.ext)
-   MainName         As WString * MAX_PATH   ' main source file (Name only, no extension)
-   MainFolder       As WString * MAX_PATH   ' main source folder 
-   ResourceFile     As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
-   TempResourceFile As WString * MAX_PATH   ' full path and file.ext to temporary resource file (if applicable) 
-   OutputFilename   As WString * MAX_PATH   ' resulting exe/dll/lib name 
-   CompilerPath     As WString * MAX_PATH   ' full path and file.ext to fbc.exe
-   ObjFolder        As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
-   ObjFolderShort   As WString * MAX_PATH   ' ".\.wfbe\"
-   ObjID            As WString * MAX_PATH   ' "32" or "64" appended to object name
-   CompileFlags     As WString * 2048
-   RunAfterCompile  As BOOLEAN
-   StartTime        As Double
-   EndTime          As Double
-   CompileID        as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
+   MainFilename       As WString * MAX_PATH   ' main source file (full path and file.ext)
+   MainName           As WString * MAX_PATH   ' main source file (Name only, no extension)
+   MainFolder         As WString * MAX_PATH   ' main source folder 
+   ResourceFile       As WString * MAX_PATH   ' full path and file.ext to resource file (if applicable) 
+   TempResourceFile   As WString * MAX_PATH   ' full path and file.ext to temporary resource file (if applicable) 
+   OutputFilename     As WString * MAX_PATH   ' resulting exe/dll/lib name 
+   CompilerPath       As WString * MAX_PATH   ' full path and file.ext to fbc.exe
+   ObjFolder          As WString * MAX_PATH   ' *.o for all modules (set depending on 32/64 bit) (full path)
+   ObjFolderShort     As WString * MAX_PATH   ' ".\.wfbe\"
+   ObjID              As WString * MAX_PATH   ' "32" or "64" appended to object name
+   CompileFlags       As WString * 2048
+   wszFullCommandLine as CWSTR                ' Command line sent to the FB compiler
+   wszFullLogFile     as CWSTR                ' Full log file returned from the FB compiler
+   wszOutputMsg       as CWSTR                ' Additional info during compile process (time/filesize)
+   RunAfterCompile    As BOOLEAN
+   SystemTime         AS SYSTEMTIME           ' System time when compile finished
+   StartTime          As Double
+   EndTime            As Double
+   CompileID          as long                 ' Type of compile (wID). Needed in case frmOutput listview later clicked on.
 End Type
 
 declare function ResetScintillaCursors() as Long
