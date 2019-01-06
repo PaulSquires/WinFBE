@@ -33,7 +33,7 @@ SPLITSIZE = AfxScaleY(6)       ' Width/Height of the scrollbar split buttons for
 
 declare Function frmMain_SetStatusbar() as long
 declare Function frmMain_SetFocusToCurrentCodeWindow() As Long
-Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false ) As clsDocument Ptr
+Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, ByVal pwszName As WString Ptr, ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false, byval nFileType as long = FILETYPE_UNDEFINED ) As clsDocument Ptr
 declare Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, byref wszProjectFileName as const WString ) as Boolean
 declare Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 declare Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT

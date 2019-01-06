@@ -18,4 +18,6 @@
 #Define IDC_FRMEXPLORER_TREE                        1001
 #Define IDC_FRMEXPLORER_BTNCLOSE                    1002
 
+declare function GetExplorerSpecialSubNode( byval nFileType as long ) as HTREEITEM
+declare Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fUpdateNodes As BOOLEAN ) As Long
 declare Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT

@@ -12,6 +12,7 @@
 '    GNU General Public License for more details.
 
 #include once "clsApp.bi"
+#include once "frmExplorer.bi"
 
 ''
 ''
@@ -194,7 +195,7 @@ Function clsApp.ProjectSetFileType( ByVal pDoc As clsDocument Ptr, _
          Select Case Ucase(wzFileExt)
             Case ".BAS":  nFileType = FILETYPE_MODULE
             Case ".RC":   nFileType = FILETYPE_RESOURCE
-            Case ".BI":   nFileType = FILETYPE_NORMAL
+            Case ".BI":   nFileType = FILETYPE_HEADER
             Case ".INC":  nFileType = FILETYPE_NORMAL
             Case Else:    nFileType = FILETYPE_NORMAL
          End Select   

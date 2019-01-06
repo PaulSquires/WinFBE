@@ -105,7 +105,6 @@ public Function frmMain_SetStatusbar() as long
 
    Dim As HWnd hStatusbar = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
 
-
    ' Update the statusbar with the current Line/Col position
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    
@@ -199,7 +198,10 @@ public Function frmMain_SetStatusbar() as long
       
    else      
       ' No document must be active and nothing else happening so blank out the statusbar.
-      ' The wszPanel() array already contains blank data.   
+      wszPanel(1) = ""
+      wszPanel(2) = ""
+      wszPanel(3) = "" 
+      wszPanel(4) = "" 
    END IF
    
 
@@ -712,14 +714,15 @@ end function
 ' Attempt to open specified file. If it exists then position to Tab if applicable
 ' ========================================================================================
 public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
-                                 ByVal bIsNewFile  As BOOLEAN, _ 
-                                 ByVal bIsTemplate As BOOLEAN, _
-                                 ByVal bShowInTab  As BOOLEAN, _
-                                 byval bIsInclude  as BOOLEAN, _
-                                 ByVal pwszName    As WString Ptr, _
-                                 ByVal pDocIn      As clsDocument Ptr, _
-                                 byval bIsDesigner as Boolean = false _
-                                 ) As clsDocument Ptr
+                                        ByVal bIsNewFile  As BOOLEAN, _ 
+                                        ByVal bIsTemplate As BOOLEAN, _
+                                        ByVal bShowInTab  As BOOLEAN, _
+                                        byval bIsInclude  as BOOLEAN, _
+                                        ByVal pwszName    As WString Ptr, _
+                                        ByVal pDocIn      As clsDocument Ptr, _
+                                        byval bIsDesigner as Boolean = false, _
+                                        byval nFileType as long = FILETYPE_UNDEFINED _
+                                        ) As clsDocument Ptr
    
    Dim As Long iTab = -1
    Dim pDoc As clsDocument Ptr 
@@ -736,23 +739,18 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
          pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
       End If   
       ParseDocument(pDoc, "")
+      ' When a Project is being loaded, the incoming nFileType is from the project
+      ' file. We pass it to the AddFunctionsToExplorerTreeview function in order to
+      ' ensure that the pDoc is attached to the right node.
+      pDoc->ProjectFileType = nFileType
    Else
       ' deal with the existing pDoc
       pDoc = pDocIn     
    End If   
    pwszName = @pDoc->DiskFilename
 
+   ' Add the document to the Explorer treeview
    AddFunctionsToExplorerTreeview( pDoc, False )
-
-   if gApp.IsProjectActive then 
-      ' Give this document a default project type depending on its file extension
-      gApp.ProjectSetFileType(pDoc, pDoc->ProjectFileType)
-      ' If opening a project file that does not yet have a file type designation
-      ' then assign it as a NORMAL file rather than leaving it empty.
-      if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
-         pDoc->ProjectFileType = FILETYPE_NORMAL
-      end if   
-   end if
 
    ' Set the default build configuration for this document. If no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
@@ -763,7 +761,11 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       end if
    end if      
    
-   Treeview_SortChildren( hTree, gApp.hExplorerRootNode, 0 )
+   ' Only sort the root if no project is active because we do not want the 
+   ' ordering of our special subnodes to be reorganized.
+   if ( gApp.IsProjectActive = false ) andalso (gApp.IsProjectLoading = false ) then
+      Treeview_SortChildren( hTree, gApp.hExplorerRootNode, 0 )
+   end if   
    TreeView_Expand( hTree, gApp.hExplorerRootNode, TVE_EXPAND)
 
    If bShowInTab Then
@@ -1228,11 +1230,26 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_PROJECTFILESADD:       OnCommand_FileOpen( HWnd, false )
       Case IDM_PROJECTCLOSE:          OnCommand_ProjectClose( HWnd )
       Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd, false ) 
-      Case IDM_SETFILENORMAL:         gApp.ProjectSetFileType( pDoc, FILETYPE_NORMAL )
-      Case IDM_SETFILEMODULE:         gApp.ProjectSetFileType( pDoc, FILETYPE_MODULE )
-      Case IDM_SETFILEMAIN:           gApp.ProjectSetFileType( pDoc, FILETYPE_MAIN )
-      Case IDM_SETFILERESOURCE:       gApp.ProjectSetFileType( pDoc, FILETYPE_RESOURCE )
-      
+
+      Case IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, _
+           IDM_SETFILERESOURCE, IDM_SETFILEHEADER
+         dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+         dim as long nFileType
+         if id = IDM_SETFILENORMAL   then nFileType = FILETYPE_NORMAL
+         if id = IDM_SETFILEMODULE   then nFileType = FILETYPE_MODULE
+         if id = IDM_SETFILEMAIN     then nFileType = FILETYPE_MAIN
+         if id = IDM_SETFILERESOURCE then nFileType = FILETYPE_RESOURCE
+         if id = IDM_SETFILEHEADER   then nFileType = FILETYPE_HEADER
+         if pDoc->ProjectFileType <> nFileType then
+            gApp.ProjectSetFileType( pDoc, nFileType )
+            Treeview_DeleteItem( hTV, pDoc->hNodeExplorer )
+            pDoc->hNodeExplorer = 0
+            AddFunctionsToExplorerTreeview( pDoc, false )
+            Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
+            frmMain_SetStatusbar
+         end if
+   
+
       Case IDC_MRUPROJECTBASE To (IDC_MRUPROJECTBASE + 10)
          OpenMRUProjectFile( HWnd, id )
 
@@ -1945,7 +1962,9 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             ' Change mouse cursor because Tab in TabCtl being moved
             SetCursor( LoadCursor( null, IDC_HAND ))
             return true
-         elseif (gApp.IsCompiling = true) or (gApp.IsProjectLoading = true) then
+         elseif (gApp.IsCompiling = true) or _
+                (gApp.IsProjectLoading = true) or _
+                (gApp.IsFileLoading = true) then
             SetCursor( LoadCursor(0, IDC_WAIT) )
             return true
          end if

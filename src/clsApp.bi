@@ -25,6 +25,11 @@ Type clsApp
       hRecentFilesRootNode       As HTREEITEM
       hRecentProjectsRootNode    As HTREEITEM
       hExplorerRootNode          As HTREEITEM
+      hExplorerNormalNode        As HTREEITEM
+      hExplorerMainNode          As HTREEITEM
+      hExplorerResourceNode      As HTREEITEM
+      hExplorerHeaderNode        As HTREEITEM
+      hExplorerModuleNode        As HTREEITEM
       bDragTabActive             as BOOLEAN           ' a tab in the top tabcontrol is being dragged
       bDragActive                As BOOLEAN           ' splitter drag is currently active 
       hWndPanel                  As HWND              ' the panel being split left/right or up/down

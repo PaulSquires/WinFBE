@@ -93,38 +93,57 @@ private Function frmFunctionList_UpdateListBox() As Long
    dim as CWSTR wszSearch = AfxGetWindowText(GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TXTSEARCH))
    
    LockWindowUpdate(hList)
-   hParent = Treeview_GetChild( hTree, gApp.hExplorerRootNode)
-   do until hParent = 0 
-      ' Filename
-      Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
-      pDoc = FF_TreeView_GetlParam(hTree, hParent)
-      wszText = ucase(wszText)
+   
+   redim hRootNodes(any) as HTREEITEM
+   
+   if gApp.IsProjectActive then
+      redim hRootNodes(4) as HTREEITEM
+      hRootNodes(0) = gApp.hExplorerNormalNode        
+      hRootNodes(1) = gApp.hExplorerMainNode          
+      hRootNodes(2) = gApp.hExplorerResourceNode      
+      hRootNodes(3) = gApp.hExplorerHeaderNode        
+      hRootNodes(4) = gApp.hExplorerModuleNode        
+   else   
+      redim hRootNodes(0) as HTREEITEM
+      hRootNodes(0) = gApp.hExplorerRootNode
+   end if
+   
+   for ii as long = lbound(hRootNodes) to ubound(hRootNodes)
+      hParent = Treeview_GetChild( hTree, hRootNodes(ii))
+      do until hParent = 0 
+         ' Filename
+         Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
+         pDoc = FF_TreeView_GetlParam(hTree, hParent)
+         wszText = ucase(wszText)
 
-      bFound = frmFunctionList_SearchChildNodes(hParent, hChild, wszSearch) 
-      if bFound then   
-         p = Listbox_AddString( hList, strptr(wszText) )
-         ' Treeview node item is stored in ListBox ItemData
-         ListBox_SetItemData( hList, p, hParent )    
-      end if
-      
-      ' Get all functions in the file
-      hChild = Treeview_GetChild( hTree, hParent)
-      do until hChild = 0 
-         bFound = true
-         Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
-         if len(wszSearch) then
-            bFound = instr(ucase(wszText), ucase(wszSearch))
-         end if   
-         if bFound then      
+         bFound = frmFunctionList_SearchChildNodes(hParent, hChild, wszSearch) 
+         if bFound then   
             p = Listbox_AddString( hList, strptr(wszText) )
-            ListBox_SetItemData( hList, p, hChild )  ' Treeview node item is stored in ListBox ItemData
+            ' Treeview node item is stored in ListBox ItemData
+            ListBox_SetItemData( hList, p, hParent )    
          end if
-         hChild = Treeview_GetNextSibling(hTree, hChild)
-      loop
-      
-      ' Get the next filename
-      hParent = Treeview_GetNextSibling(hTree, hParent)
-   loop 
+         
+         ' Get all functions in the file
+         hChild = Treeview_GetChild( hTree, hParent)
+         do until hChild = 0 
+            bFound = true
+            Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+            if len(wszSearch) then
+               bFound = instr(ucase(wszText), ucase(wszSearch))
+            end if   
+            if bFound then      
+               p = Listbox_AddString( hList, strptr(wszText) )
+               ListBox_SetItemData( hList, p, hChild )  ' Treeview node item is stored in ListBox ItemData
+            end if
+            hChild = Treeview_GetNextSibling(hTree, hChild)
+         loop
+         
+         ' Get the next filename
+         hParent = Treeview_GetNextSibling(hTree, hParent)
+      loop 
+   
+   next
+   
    LockWindowUpdate(null)
 
    Function = 0
@@ -431,7 +450,7 @@ public Function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' "  The LBS_MULTICOLUMN and LBS_OWNERDRAWVARIABLE styles cannot be combined. If both are "
    '    specified, LBS_OWNERDRAWVARIABLE is ignored.  "
 
-   SendMessageW( hList, LB_SETCOLUMNWIDTH, 250 * pWindow->rxRatio, 0 )
+   SendMessage( hList, LB_SETCOLUMNWIDTH, 250 * pWindow->rxRatio, 0 )
    
    frmFunctionList_PositionWindows(HWND_FRMFUNCTIONLIST)
 

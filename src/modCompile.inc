@@ -140,7 +140,7 @@ end function
 ''
 ''  Reset all Scintilla editing cursors
 ''
-private function ResetScintillaCursors() as Long
+public function ResetScintillaCursors() as Long
    Dim pDoc As clsDocument Ptr
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    Dim TB As TC_ITEM 
@@ -890,7 +890,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
-
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
    AfxDoEvents
@@ -926,6 +925,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                ' object file. If yes, then stop processing object files and display
                ' the error.
                if ParseLogForError(sConsoleText, false, wID, fCompile64) then   ' error detected
+                  gApp.IsCompiling = false
                   SetCursor( hCurSave )
                   ResetScintillaCursors()
                   return true

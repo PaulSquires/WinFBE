@@ -82,11 +82,33 @@ End Function
  
 
 ' ========================================================================================
+' Get the special subnode based on the filetype
+' ========================================================================================
+public function GetExplorerSpecialSubNode( byval nFileType as long ) as HTREEITEM
+   
+   dim hRootNode as HTREEITEM
+   
+   ' Add the pDoc to the node depending on what file type it is.
+   select case nFileType
+      case FILETYPE_UNDEFINED: hRootNode = gApp.hExplorerNormalNode
+      case FILETYPE_MAIN:      hRootNode = gApp.hExplorerMainNode
+      case FILETYPE_MODULE:    hRootNode = gApp.hExplorerModuleNode
+      case FILETYPE_NORMAL:    hRootNode = gApp.hExplorerNormalNode
+      case FILETYPE_RESOURCE:  hRootNode = gApp.hExplorerResourceNode
+      case FILETYPE_HEADER:    hRootNode = gApp.hExplorerHeaderNode
+   end select
+
+   function = hRootNode
+
+end function
+
+
+' ========================================================================================
 ' Add the names of all subs/functions belonging to this document to the Explorer treeview
 ' ========================================================================================
-private Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
-                                                 ByVal fUpdateNodes As BOOLEAN _
-                                                 ) As Long
+public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
+                                                ByVal fUpdateNodes As BOOLEAN _
+                                                ) As Long
  
    If pDoc = 0 Then Exit Function
    
@@ -101,9 +123,20 @@ private Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, 
    ' If hNodeExplorer does not exist then we must be adding a new document. If it does
    ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
+
+      if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+         ' Give this document a default project type depending on its file extension
+         if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType)
+         end if
+      end if
+
       If pDoc->hNodeExplorer = 0 Then
-         pDoc->hNodeExplorer = FF_TreeView_InsertItem (hTree, hRootNode, wzFile, cast(LPARAM, pDoc) )
+         hRootNode = GetExplorerSpecialSubNode( pDoc->ProjectFileType )
+         pDoc->hNodeExplorer = FF_TreeView_InsertItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc) )
          fAddChildren = True
+      else
+         hRootNode = TreeView_GetParent( hTree, pDoc->hNodeExplorer )
       End If
    Else
       ' Delete any existing children sub/function nodes and then update with new pointer values

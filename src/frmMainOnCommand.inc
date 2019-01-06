@@ -326,6 +326,12 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    ' visually more appealing for thos files that will display in the top Tab Control.
    Dim pDocTabs(dwItemCount - 1) As clsDocument Ptr
 
+   dim as HCURSOR hCurSave = GetCursor()
+   SetCursor( LoadCursor(0, IDC_WAIT) )
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+   AfxDoEvents()
+
    ' Prevent the constant updating of the app caption bar with filename
    gApp.IsFileLoading = true  
 
@@ -338,6 +344,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
       If pItem Then
          pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
          If pwszName Then 
+            AfxDoEvents()
             ' Test to see if the file is already loaded in the editor. If it is, then
             ' bypass loading it again thereby creating multiple ghost instances.
             pDoc = gApp.GetDocumentPtrByFilename(pwszName) 
@@ -370,8 +377,9 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    gTTabCtl.SetFocusTab(iTab)
 
    gApp.IsFileLoading = false
-   gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
    LockWindowUpdate(0)
+   gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
+   frmMain_SetStatusbar
 
    ' Update the MRU list. Do this after the tabs are loaded because IsProjectLoading
    ' will prevent the list from updating.
@@ -381,6 +389,8 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
       Next     
    end if
    
+   SetCursor( hCurSave )
+   ResetScintillaCursors
    frmMain_PositionWindows(HWnd)
    frmMain_SetFocusToCurrentCodeWindow
 

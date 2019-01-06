@@ -1337,9 +1337,26 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    LockWindowUpdate(hTV)
 
    Treeview_DeleteAllItems(hTV)
-   gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTV, TVI_ROOT, "" )
+   gApp.hExplorerRootNode = FF_TreeView_InsertItem( hTV, TVI_ROOT, "" )
    Treeview_SetBold(hTV, gApp.hExplorerRootNode, TRUE)
-   ' Add the subnodes for the various 
+   ' Add the subnodes for the various file types
+   
+   gApp.hExplorerMainNode = _
+      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(212,"Main"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerMainNode, TRUE)
+   gApp.hExplorerResourceNode = _
+      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(213,"Resource"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerResourceNode, TRUE)
+   gApp.hExplorerHeaderNode = _
+      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(175,"Header"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerHeaderNode, TRUE)
+   gApp.hExplorerModuleNode = _
+      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(211,"Module"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerModuleNode, TRUE)
+   gApp.hExplorerNormalNode = _
+      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(210,"Normal"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerNormalNode, TRUE)
+   
 
    Do Until pStream.EOS
       AfxDoEvents()
@@ -1407,8 +1424,9 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
                                        FALSE, _    ' bShowInTab
                                        false, _    ' bIsInclude
                                        wszFilename, _  ' pwszName
-                                       0 )  ' pDocIn
-               pDoc->ProjectFileType = nFileType
+                                       0, _        ' pDocIn
+                                       false, _    ' bIsDesigner
+                                       nFileType )
                ' If opening a project file that does not yet have a file type designation
                ' then assign it as a NORMAL file rather than leaving it empty.
                if pDoc->ProjectFileType = FILETYPE_UNDEFINED then

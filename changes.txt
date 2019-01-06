@@ -1,4 +1,5 @@
 Version 1.8.8
+- Added: Subnodes in Explorer treeview to hold Header, Resource, Main, Module, Normal files (Projects only).
 - Added: User Snippets (insert user defined code snippets).
 - Added: Image Manager.
 - Added: A search textbox added to Function List (filters the function list based on the search term).

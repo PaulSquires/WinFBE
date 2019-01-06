@@ -27,6 +27,7 @@
 #define FILETYPE_MODULE            2
 #define FILETYPE_NORMAL            3
 #define FILETYPE_RESOURCE          4
+#define FILETYPE_HEADER            5
 
 
 #include once "clsMenuItem.bi"

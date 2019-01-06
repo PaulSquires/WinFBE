@@ -442,19 +442,21 @@ private Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
    if fNoSeparator = false then
       AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
    end if
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
    AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMAIN,     L(206,"Main file") 
    AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILERESOURCE, L(209,"Resource file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEHEADER,   L(181,"Header file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
 
    Dim nFileType As Long
    Select Case pDoc->ProjectFileType
-      Case FILETYPE_NORMAL:   nFileType = IDM_SETFILENORMAL
-      Case FILETYPE_MODULE:   nFileType = IDM_SETFILEMODULE
       Case FILETYPE_MAIN:     nFileType = IDM_SETFILEMAIN
       Case FILETYPE_RESOURCE: nFileType = IDM_SETFILERESOURCE
+      Case FILETYPE_HEADER:   nFileType = IDM_SETFILEHEADER
+      Case FILETYPE_MODULE:   nFileType = IDM_SETFILEMODULE
+      Case FILETYPE_NORMAL:   nFileType = IDM_SETFILENORMAL
    End Select
-   CheckMenuRadioItem( hPopupMenu, IDM_SETFILENORMAL, IDM_SETFILERESOURCE, nFileType, MF_BYCOMMAND )
+   CheckMenuRadioItem( hPopupMenu, IDM_SETFILENORMAL, IDM_SETFILEHEADER, nFileType, MF_BYCOMMAND )
 
    Function = 0
 End Function

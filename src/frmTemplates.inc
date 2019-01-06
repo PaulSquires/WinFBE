@@ -144,7 +144,7 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
 
    pWindow->Create(hParent, L(176,"Templates"), @frmTemplates_WndProc, _
                pWindow->UnScaleX(x), pWindow->UnScaleY(y), 0, 0, _
-               WS_VISIBLE Or WS_CAPTION Or WS_POPUPWINDOW, WS_EX_WINDOWEDGE)
+               WS_CAPTION Or WS_POPUPWINDOW, WS_EX_WINDOWEDGE)
    pWindow->SetClientSize(420,395)
    
    ' Set the small and large icon for the main window (must be set after main window is created)
@@ -165,15 +165,15 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
    pWindow->AddControl("Button", , IDCANCEL, L(1,"&Cancel"), 333, 353, 74, 28, _
                WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_FLAT, WS_EX_NOPARENTNOTIFY)
 
-   ' // Search templates
+   ' Search templates
    DIM hSearch as HANDLE, WFD AS WIN32_FIND_DATAW, FileNo AS LONG, nType AS LONG, nItem AS LONG
    DIM wszPath AS WSTRING * MAX_PATH, wszCurPath AS WSTRING * MAX_PATH, wszText AS WSTRING * 260
    DIM wszFullPath AS WSTRING * MAX_PATH * 2, idx AS LONG, nLin AS LONG
    wszPath = AfxGetExePathName & "Templates\"
    wszCurPath = wszPath & "*.fbtpl"
 
-   ' // Count the number of files and dimension the array
-   ' // REDIM PRESERVE causes problems
+   ' Count the number of files and dimension the array
+   ' REDIM PRESERVE causes problems
    DIM nCount AS LONG
    hSearch = FindFirstFile(wszCurPath, @WFD)
    IF hSearch <> INVALID_HANDLE_VALUE THEN
@@ -184,7 +184,7 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
       LOOP WHILE FindNextFile(hSearch, @WFD)
       FindClose(hSearch)
    END IF
-   ' // Dimension the array
+   ' Dimension the array
    IF nCount = 0 THEN EXIT FUNCTION
    DIM rgwszPaths(nCount - 1) AS WSTRING * MAX_PATH
    idx = 0
@@ -222,6 +222,8 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
       FindClose(hSearch)
    END IF
    
+   ShowWindow( pWindow->hWindow, SW_SHOW )
+   
    ' Process Windows messages
    Function = pWindow->DoEvents
 
@@ -229,11 +231,6 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
    Delete pWindow
 
 End Function
-
-
-
-
-
 
 
 

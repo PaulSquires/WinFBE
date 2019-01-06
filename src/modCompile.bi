@@ -40,6 +40,7 @@ Type COMPILE_TYPE
    CompileID        as long                 ' This is the wID. Needed in case frmOutput listview later clicked on.
 End Type
 
+declare function ResetScintillaCursors() as Long
 declare Function RunEXE( ByRef wszFileExe As CWSTR, ByRef wszParam As CWSTR ) As Long
 declare Function SetDocumentErrorPosition( ByVal hLV As HWnd, Byval wID as long ) As Long
 declare Function code_Compile( ByVal wID As Long ) As BOOLEAN
