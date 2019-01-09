@@ -234,7 +234,7 @@ private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 
    ' If the file is dirty then reparse it before attempting the codetip
    If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-      ParseDocument(pDoc, "")
+      ParseDocument(pDoc)
    End If   
    
    pData = DereferenceLine(pDoc, "(")
@@ -382,7 +382,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
          If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-            ParseDocument(pDoc, "")
+            ParseDocument(pDoc)
          End If   
       end if
    END IF

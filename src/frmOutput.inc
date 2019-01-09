@@ -131,9 +131,9 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-public Function frmOutput_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+public Function frmOutput_PositionWindows() As LRESULT
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMOUTPUT)
    If pWindow = 0 Then Exit Function
    
    Dim As Long nTop  = pWindow->ScaleY(2)
@@ -141,10 +141,10 @@ public Function frmOutput_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    Dim As Long nCtlHeight, nCtlWidth
    Dim As Rect rc
    
-   GetClientRect hWnd, @rc
+   GetClientRect HWND_FRMOUTPUT, @rc
    
-   Dim As HWND hBtn    = GetDlgItem(hWnd, IDC_FRMOUTPUT_BTNCLOSE) 
-   dim as hwnd hTabCtl = GetDlgItem(hWnd, IDC_FRMOUTPUT_TABCONTROL)
+   Dim As HWND hBtn    = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_BTNCLOSE) 
+   dim as hwnd hTabCtl = GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL)
 
    nCtlWidth = AfxGetWindowWidth(hBtn) + pWindow->ScaleX(2)
    SetWindowPos hBtn, 0, rc.Right - nCtlWidth, nTop, 0, 0, SWP_NOZORDER or SWP_NOSIZE
@@ -153,14 +153,14 @@ public Function frmOutput_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
 
    ' Position the child controls
    nTop = nTop + nCtlHeight 
-   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTLOGFILE), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
-   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTVIEW), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
-   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LISTSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
-   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_LVTODO), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
-   SetWindowPos GetDlgItem(hWnd, IDC_FRMOUTPUT_TXTNOTES), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTVIEW), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LISTSEARCH), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_LVTODO), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
+   SetWindowPos GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), 0, nLeft, nTop, rc.Right, rc.Bottom - nTop, SWP_NOZORDER
 
    ' Determine which child controls should be shown or hidden
-   frmOutput_ShowHideOutputControls(hWnd)
+   frmOutput_ShowHideOutputControls(HWND_FRMOUTPUT)
    
    Function = 0
 End Function
@@ -176,7 +176,7 @@ private Function frmOutput_OnSize( ByVal HWnd As HWnd, _
                                    ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
-      frmOutput_PositionWindows(HWnd)
+      frmOutput_PositionWindows
    End If
    Function = 0
 End Function
@@ -229,12 +229,12 @@ private Function frmOutput_OnNotify( ByVal HWnd As HWnd, _
       Case TCN_SELCHANGING
       Case TCN_SELCHANGE
          If id = IDC_FRMOUTPUT_TABCONTROL Then
-            frmOutput_PositionWindows(HWND)
+            frmOutput_PositionWindows
          End If
       case NM_CLICK
          If id = IDC_FRMOUTPUT_BTNCLOSE Then
             ShowWindow HWND_FRMOUTPUT, SW_HIDE
-            frmMain_PositionWindows(HWND_FRMMAIN)
+            frmMain_PositionWindows
          end if
    End Select
             
@@ -454,7 +454,7 @@ public Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
    AfxSetWindowFont( hCtl, hFont, True )
    AfxSetWindowText(hCtl, gApp.NonProjectNotes)
    
-   frmOutput_PositionWindows(HWND_FRMOUTPUT)
+   frmOutput_PositionWindows
    
    Function = 0
 

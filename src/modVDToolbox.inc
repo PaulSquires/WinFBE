@@ -445,7 +445,7 @@ private function InitiatePropertyValueChange() as Long
                         SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
                         SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
                      loop
-                     if bReparse then ParseDocument(pDocParse, "")
+                     if bReparse then ParseDocument(pDocParse)
                      pDocParse = pDocParse->pDocNext
                   loop
                next   
@@ -734,22 +734,22 @@ end function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmVDToolbox_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmVDToolbox_PositionWindows() As LRESULT
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMVDTOOLBOX)
    if pWindow = 0 THEN exit function
       
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMVDTOOLBOX, @rc)
    
-   Dim As HWnd hList1  = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LSTTOOLBOX )
-   Dim As HWnd hList2  = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LSTPROPERTIES )
-   Dim As HWnd hList3  = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LSTEVENTS )
-   Dim As HWnd hTabCtl = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_TABCONTROL )
-   Dim As HWnd hCombo  = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_COMBOCONTROLS )
-   Dim As HWnd hPropName = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LBLPROPNAME)
-   Dim As HWnd hPropDescribe = GetDlgItem(HWnd, IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE )
+   Dim As HWnd hList1  = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTTOOLBOX )
+   Dim As HWnd hList2  = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES )
+   Dim As HWnd hList3  = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTEVENTS )
+   Dim As HWnd hTabCtl = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_TABCONTROL )
+   Dim As HWnd hCombo  = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_COMBOCONTROLS )
+   Dim As HWnd hPropName = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LBLPROPNAME)
+   Dim As HWnd hPropDescribe = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LBLPROPDESCRIBE )
    
    SetWindowPos( hTabCtl, 0, 0, 0, rc.Right-rc.Left, pWindow->ScaleY(24), SWP_SHOWWINDOW Or SWP_NOZORDER )
 
@@ -787,7 +787,7 @@ private Function frmVDToolbox_OnSize( ByVal HWnd As HWnd, _
                                       ByVal cy As Long _
                                       ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
-      frmVDToolbox_PositionWindows(HWnd)
+      frmVDToolbox_PositionWindows
    End If   
    Function = 0
 End Function
@@ -1492,7 +1492,7 @@ public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    ' Initialize the popup Colors selection dialog
    frmVDColors_Show(hList2, "")
    
-   frmVDToolbox_PositionWindows(HWND_FRMVDTOOLBOX)
+   frmVDToolbox_PositionWindows
 
    TabCtrl_SetCurSel(hTabCtl, 0)
    ShowWindow HWND_FRMVDTOOLBOX, nCmdShow

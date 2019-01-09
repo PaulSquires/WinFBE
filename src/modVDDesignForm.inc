@@ -408,7 +408,7 @@ private function HandleDesignerLButtonDoubleClick( ByVal HWnd As HWnd ) as LRESU
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc then
       TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, 1)
-      frmMain_PositionWindows(HWND_FRMMAIN)
+      frmMain_PositionWindows
       PostMessage(HWND_FRMMAIN, MSG_USER_GENERATECODE, 0, 0)
    END IF
    function = 0

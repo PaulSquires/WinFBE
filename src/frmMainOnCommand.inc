@@ -74,13 +74,13 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.ProjectCommandLine   = ""
        
    ' Clear any previous info from the Output windows
-   frmOutput_ResetAllControls()
+   frmOutput_ResetAllControls
    
    ' Reset the ProjectNotes text box with the generic non-project related notes
    AfxSetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), gApp.NonProjectNotes)
 
-   PositionExplorerWindows(HWND_FRMEXPLORER)
-   frmMain_PositionWindows(HWND_FRMMAIN)
+   frmExplorer_PositionWindows
+   frmMain_PositionWindows
     
    frmMain_SetStatusbar
    frmMain_SetFocusToCurrentCodeWindow
@@ -97,8 +97,8 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
    ' Ensure that the Project Manager window has been created (show it now as well)
    frmProjectOptions_Show( HWnd, true ) 
    
-   PositionExplorerWindows(HWND_FRMEXPLORER)
-   frmMain_PositionWindows(HWND_FRMMAIN)
+   frmExplorer_PositionWindows
+   frmMain_PositionWindows
    
    ' This will update the main window to show the project name in the window caption
    frmMain_SetFocusToCurrentCodeWindow
@@ -330,7 +330,6 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    SetCursor( LoadCursor(0, IDC_WAIT) )
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
-   AfxDoEvents()
 
    ' Prevent the constant updating of the app caption bar with filename
    gApp.IsFileLoading = true  
@@ -339,12 +338,13 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    LockWindowUpdate(hTV)
 
+   gApp.FileLoadingCount = 0
+   
    For i = 0 To dwItemCount - 1
       pItems->lpVtbl->GetItemAt(pItems, i, @pItem)
       If pItem Then
          pItem->lpVtbl->GetDisplayName(pItem, SIGDN_FILESYSPATH, @pwszName)
          If pwszName Then 
-            AfxDoEvents()
             ' Test to see if the file is already loaded in the editor. If it is, then
             ' bypass loading it again thereby creating multiple ghost instances.
             pDoc = gApp.GetDocumentPtrByFilename(pwszName) 
@@ -391,7 +391,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    
    SetCursor( hCurSave )
    ResetScintillaCursors
-   frmMain_PositionWindows(HWnd)
+   frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = 0
@@ -400,19 +400,18 @@ End Function
 
 
 ' ========================================================================================
-' Save current active file to disk
+' Save the incoming pDoc file to disk
 ' ========================================================================================
-private Function OnCommand_FileSave( ByVal HWnd As HWnd, _
-                                     ByVal bSaveAs As BOOLEAN = False _
-                                     ) As LRESULT
-
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
+                                    byval pDoc as clsDocument ptr, _
+                                    ByVal bSaveAs As BOOLEAN _
+                                    ) As LRESULT
    If pDoc = 0 Then Return 0
 
    if pDoc->IsDesigner then
       ' Parse the code to ensure up to date list of functions so that compiling will not
       ' fail by generating a Declare without a body function.
-      ParseDocument(pDoc, "")
+      ParseDocument(pDoc)
       ' Regenerate code to ensure that any missing body functions are now present
       pDoc->bRegenerateCode = true
       SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
@@ -427,7 +426,7 @@ private Function OnCommand_FileSave( ByVal HWnd As HWnd, _
       End If
       pDoc->ApplyProperties
       ' Parse the code for sub/function listing and create list
-      ParseDocument(pDoc, "")
+      ParseDocument(pDoc)
       AddFunctionsToExplorerTreeview(pDoc, true)
    EndIf   
 
@@ -442,7 +441,7 @@ End Function
 ' ========================================================================================
 ' Save Sub/Function Declares to disk
 ' ========================================================================================
-private Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
+public Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 
    dim as CWSTR wszFilename 
    
@@ -498,7 +497,7 @@ End Function
 ' ========================================================================================
 ' Save all open files to disk
 ' ========================================================================================
-private Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
+public Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
 
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    If nCount = 0 Then Exit Function
@@ -516,7 +515,7 @@ private Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
       if pDoc->IsDesigner then
          ' Parse the code to ensure up to date list of functions so that compiling will not
          ' fail by generating a Declare without a body function.
-         ParseDocument(pDoc, "")
+         ParseDocument(pDoc)
          ' Regenerate code to ensure that any missing body functions are now present
          pDoc->bRegenerateCode = true
          SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
@@ -531,7 +530,7 @@ private Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          pDoc->SaveFile()
          gTTabCtl.SetTabText(i)  ' make sure "*" updates
          ' Parse the code for sub/function listing and create list
-         ParseDocument(pDoc, "")
+         ParseDocument(pDoc)
          AddFunctionsToExplorerTreeview(pDoc, true)
       End If   
    Next
@@ -629,8 +628,8 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    ' Update the TODO listview in the frmOutput form
    frmOutput_UpdateToDoListview
    
-   frmMain_PositionWindows(HWnd)
-   PositionExplorerWindows(HWND_FRMEXPLORER)
+   frmMain_PositionWindows
+   frmExplorer_PositionWindows
    
    Function = true
 End Function

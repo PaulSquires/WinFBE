@@ -55,15 +55,15 @@ public Function ClearMRUlist( ByVal wID As Long ) As Long
          For i = 0 To 9
             gConfig.MRU(i) = ""
          Next
-         frmRecent_LoadTreeview(HWND_FRMRECENT)
+         frmRecent_LoadTreeview
       Case IDM_MRUPROJECTCLEAR
          For i = 0 To 9
             gConfig.MRUPROJECT(i) = ""
          Next
-         frmRecent_LoadTreeview(HWND_FRMRECENT)
+         frmRecent_LoadTreeview
    End Select
    
-   frmRecent_PositionWindows(HWND_FRMRECENT)
+   frmRecent_PositionWindows
 
    Function = 0
 End Function

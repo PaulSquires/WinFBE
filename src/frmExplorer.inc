@@ -25,18 +25,21 @@
 #include once "clsDocument.bi"
 #include once "clsDB2.bi"
 
+' Drag/drop for Explorer Treeview
+dim shared treedragger as DRAG_STATE
+
 
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmExplorer_PositionWindows() As LRESULT
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMEXPLORER)
    If pWindow = 0 Then Exit Function
    
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMEXPLORER, @rc)
 
    Dim As HWnd hCtl, hTree
    Dim As Long nLeft, nTop, nWidth, nHeight
@@ -46,7 +49,7 @@ private Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
    nHeight = pWindow->ScaleY(24)
    nTop    = pWindow->ScaleY(10)
    
-   hCtl = GetDlgItem(HWND, IDC_FRMEXPLORER_BTNCLOSE)
+   hCtl = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_BTNCLOSE)
    SetWindowPos( hCtl, 0, rc.Right - (nWidth*1.4), nTop, nWidth, nHeight, SWP_SHOWWINDOW Or SWP_NOZORDER )
 
    nTop = nTop + nHeight + pWindow->ScaleY(12)
@@ -62,7 +65,7 @@ private Function PositionExplorerWindows( ByVal HWnd As HWnd ) As LRESULT
       ' If no project open then show Recent dialog
       if gApp.GetDocumentCount = 0 then
          ' Ensure that the Recent lists are the most current
-         If IsWindowVisible(HWND_FRMRECENT) = 0 Then frmRecent_LoadTreeview(HWND_FRMRECENT)
+         If IsWindowVisible(HWND_FRMRECENT) = 0 Then frmRecent_LoadTreeview
          ShowWindow hTree, SW_HIDE
          ShowWindow HWND_FRMRECENT, SW_SHOW
       else
@@ -109,184 +112,6 @@ end function
 
 
 ' ========================================================================================
-' Add the names of all subs/functions belonging to this document to the Explorer treeview
-' ========================================================================================
-public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
-                                                ByVal fUpdateNodes As BOOLEAN _
-                                                ) As Long
- 
-   If pDoc = 0 Then Exit Function
-   
-   Dim As CWSTR wzFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
-   Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   Dim As HTREEITEM hChild, hRootNode
-   Dim As BOOLEAN fAddChildren = False
-   dim as long idx
-   
-   hRootNode = gApp.hExplorerRootNode
-
-   ' If hNodeExplorer does not exist then we must be adding a new document. If it does
-   ' exist then we simply need to update the child nodes.
-   If fUpdateNodes = False Then
-
-      if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
-         ' Give this document a default project type depending on its file extension
-         if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
-            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType)
-         end if
-      end if
-
-      If pDoc->hNodeExplorer = 0 Then
-         hRootNode = GetExplorerSpecialSubNode( pDoc->ProjectFileType )
-         pDoc->hNodeExplorer = FF_TreeView_InsertItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc) )
-         fAddChildren = True
-      else
-         hRootNode = TreeView_GetParent( hTree, pDoc->hNodeExplorer )
-      End If
-   Else
-      ' Delete any existing children sub/function nodes and then update with new pointer values
-      hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
-      Do Until hChild = 0
-         TreeView_DeleteItem( hTree, hChild )
-         hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
-      Loop
-      fAddChildren = True
-   End If
- 
-   ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
-   ' We never want to sort the ExplorerRootNode if a project is active because it will move
-   ' our special subnode branches (Main/Resource/Normal/Module/Header).
-   if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
-      if hRootNode <> gApp.hExplorerRootNode then
-         Treeview_SortChildren( hTree, hRootNode, 0 )
-      end if   
-   else
-      Treeview_SortChildren( hTree, hRootNode, 0 )
-   end if
-      
-   If fAddChildren Then
-      dim wszText as wstring * MAX_PATH
-      dim as HTREEITEM hNode
-      dim pData as DB2_DATA ptr
-      dim as string sFilename = ucase(pDoc->DiskFilename)
-      
-      gdb2.dbRewind()
-      do 
-         pData = gdb2.dbGetNext
-         if pData = 0 THEN exit do
-         select case pData->id 
-            case DB2_FUNCTION, DB2_SUB
-               if sFilename = ucase(pData->fileName) THEN
-                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0 )
-               END IF
-         END SELECT
-      loop      
-      Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
-   End If
-   AfxRedrawWindow(hTree)
-   
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Process WM_SIZE message for window/dialog: frmExplorer
-' ========================================================================================
-private Function frmExplorer_OnSize( ByVal HWnd As HWnd, _
-                                     ByVal state As UINT, _
-                                     ByVal cx As Long, _
-                                     ByVal cy As Long _
-                                     ) As LRESULT
-   If state <> SIZE_MINIMIZED Then
-      ' Position all of the child windows
-      PositionExplorerWindows(HWnd)
-   End If
-   Function = 0
-End Function
-
-
-' ========================================================================================
-' Process WM_NOTIFY message for window/dialog: frmExplorer
-' ========================================================================================
-private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
-                                       ByVal id As Long, _
-                                       ByVal pNMHDR As NMHDR Ptr _
-                                       ) As LRESULT
- 
-   Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
-   Dim As HTREEITEM hItem
-   Dim As HWND hTree 
-   Dim As LPARAM lParam
-   Dim pDoc As clsDocument Ptr
-   Dim ht As TVHITTESTINFO
-   Dim As POINT pt
-   
-   ' Determine what node was clicked on
-   Select Case pNMHDR->code 
-      
-      case TVN_GETINFOTIP
-         ' Display a tooltip when a treeview node is hovered over. This will normally
-         ' be the full filename for the project or document.
-         dim pnmTip as NMTVGETINFOTIPW ptr = cast(NMTVGETINFOTIPW ptr, pNMHDR)
-         if gApp.hExplorerRootNode = pnmTip->hItem then
-            pnmTip->pszText = cast(WSTRING Ptr, @**gApp.ProjectFilename)
-            pnmTip->cchTextMax = len(gApp.ProjectFilename)
-            exit function
-         end if   
-         ' Second, search for a matching document
-         pDoc = Cast(clsDocument ptr, pnmTip->lParam)
-         if pDoc THEN
-            pnmTip->pszText = @pDoc->DiskFilename
-            pnmTip->cchTextMax = len(pDoc->DiskFilename)
-         END IF
-         exit function   
-
-      Case NM_CLICK, NM_RCLICK
-         if id = IDC_FRMEXPLORER_TREE then
-            ' If we have clicked on a folder item then issue an expand. Must use HitTest because the 
-            ' the current node has not been selected yet.
-            hTree = lpNMTV->hdr.hWndFrom
-            GetCursorPos(@pt)  
-            ScreenToClient(hTree, @pt)
-            
-            ht.pt = pt 
-            Treeview_HitTest(hTree, @ht )
-            hItem = ht.hItem
-            If hItem Then Treeview_Select( hTree, hItem, TVGN_CARET)
-            
-            If pNMHDR->code = NM_CLICK Then
-               ' Ensure that the correct Project name is showing
-               frmMain_PositionWindows(HWND_FRMMAIN)
-            end if
-            
-            If pNMHDR->code = NM_RCLICK Then
-               ' Create the popup menu
-               lParam = FF_TreeView_GetlParam(hTree, hItem)
-               pDoc = Cast(clsDocument ptr, lParam)
-               ' Select the node and show the document
-               if pDoc then SendMessage(hTree, WM_LBUTTONDBLCLK, 0, 0)
-               Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
-               GetCursorPos @pt
-               TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWND_FRMMAIN, ByVal Null)
-               DestroyMenu hPopUpMenu
-               Function = True
-            End If
-         end if
-         
-         if id = IDC_FRMEXPLORER_BTNCLOSE then
-            If pNMHDR->code = NM_CLICK Then
-               ShowWindow HWND_FRMEXPLORER, SW_HIDE
-               frmMain_PositionWindows(HWND_FRMMAIN)
-            end if
-         end if
-         
-   End Select
- 
-   Function = 0
-End Function
-
-
-' ========================================================================================
 ' Retrieve the filename and function name of the specified Treeview node
 ' ========================================================================================
 private function frmExplorer_GetFileNameFunctionName( byval hItem as HTREEITEM, _
@@ -326,61 +151,386 @@ end function
 
 
 ' ========================================================================================
-' Processes messages for the subclassed frmExplorer treeview control.
+' Add the names of all subs/functions belonging to this document to the Explorer treeview
 ' ========================================================================================
-private Function frmExplorer_Tree_SubclassProc ( _
-                  ByVal HWnd   As HWnd, _                 ' // Control window handle
-                  ByVal uMsg   As UINT, _                 ' // Type of message
-                  ByVal wParam As WPARAM, _               ' // First message parameter
-                  ByVal lParam As LPARAM, _               ' // Second message parameter
-                  ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
-                  ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
-                  ) As LRESULT
+public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
+                                                ByVal fUpdateNodes As BOOLEAN _
+                                                ) As Long
+ 
+   If pDoc = 0 Then Exit Function
+   
+   Dim As CWSTR wzFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
+   Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   Dim As HTREEITEM hChild, hRootNode
+   Dim As BOOLEAN fAddChildren = False
+   dim as long idx
+   
+   hRootNode = gApp.hExplorerRootNode
 
-   Dim As HWND hTree 
-   Dim As POINT pt
-   Dim As HTREEITEM hItem
-   Dim As BOOLEAN bIsFolder
-   Dim As BOOLEAN bIsExpanded
+   ' If hNodeExplorer does not exist then we must be adding a new document. If it does
+   ' exist then we simply need to update the child nodes.
+   If fUpdateNodes = False Then
 
-   ' Convert our ENTER key presses into LBUTTONDBLCLK to process them similarly
-   If (uMsg = WM_KEYUP) And (Loword(wParam) = VK_RETURN) Then uMsg = WM_LBUTTONDBLCLK
+      if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+         ' Give this document a default project type depending on its file extension
+         if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType)
+         end if
+      end if
 
+      If pDoc->hNodeExplorer = 0 Then
+         hRootNode = GetExplorerSpecialSubNode( pDoc->ProjectFileType )
+         pDoc->hNodeExplorer = FF_TreeView_InsertItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc), 1, 1 )
+         fAddChildren = True
+      else
+         hRootNode = TreeView_GetParent( hTree, pDoc->hNodeExplorer )
+      End If
+   Else
+      ' Delete any existing children sub/function nodes and then update with new pointer values
+      hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
+      Do Until hChild = 0
+         TreeView_DeleteItem( hTree, hChild )
+         hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
+      Loop
+      fAddChildren = True
+   End If
+ 
+   ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
+   ' We never want to sort the ExplorerRootNode if a project is active because it will move
+   ' our special subnode branches (Main/Resource/Normal/Module/Header).
+   if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+      if hRootNode <> gApp.hExplorerRootNode then
+         Treeview_SortChildren( hTree, hRootNode, 0 )
+      end if   
+   else
+      Treeview_SortChildren( hTree, hRootNode, 0 )
+   end if
       
-   Select Case uMsg
+   If fAddChildren Then
+      dim wszText as wstring * MAX_PATH
+      dim as HTREEITEM hNode
+      dim pData as DB2_DATA ptr
+      dim as string sFilename = ucase(pDoc->DiskFilename)
+      
+      gdb2.dbRewind()
+      do 
+         pData = gdb2.dbGetNext
+         if pData = 0 THEN exit do
+         select case pData->id 
+            case DB2_FUNCTION, DB2_SUB
+               if sFilename = ucase(pData->fileName) THEN
+                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0, 2, 2 )
+               END IF
+         END SELECT
+      loop      
+      Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
+   End If
+   AfxRedrawWindow(hTree)
+   
+   Function = 0
+End Function
 
-      Case WM_GETDLGCODE
-         ' All keyboard input
-         Function = DLGC_WANTALLKEYS
-         Exit Function
 
-      Case WM_LBUTTONDBLCLK
-         hTree = hWnd
+' ========================================================================================
+' Process WM_SIZE message for window/dialog: frmExplorer
+' ========================================================================================
+private Function frmExplorer_OnSize( ByVal HWnd As HWnd, _
+                                     ByVal state As UINT, _
+                                     ByVal cx As Long, _
+                                     ByVal cy As Long _
+                                     ) As LRESULT
+   If state <> SIZE_MINIMIZED Then
+      ' Position all of the child windows
+      frmExplorer_PositionWindows
+   End If
+   Function = 0
+End Function
+
+
+
+' ========================================================================================
+' Timer callback to handle scrolling of the Explorer treeview
+' ========================================================================================
+private function frmExplorer_timerProc( byval hwnd as hwnd, _ 
+                                        byval msg as long, _
+                                        byval id as long, _
+                                        byval ticks as long _
+                                         ) as LRESULT
+   PostMessage( hwnd, UWM_SCROLL, 0, 0 )
+   function = 0
+end function
+
+
+' ========================================================================================
+' Logic to determine if we can allow a drop on the specified node
+' Testing is called from WM_MOUSEMOVE
+' ========================================================================================
+private function frmExplorer_AllowDrop( byval target as HTREEITEM, _
+                                        byref msgFileType as long _
+                                        ) as boolean
+
+   if (target <> null) andalso (target <> treedragger.DragItem ) then
+      ' Determine what type of subnode the target drop node belongs to. 
+      dim as HTREEITEM parent = TreeView_GetParent( treedragger.hTree, target )
+      
+      if target = gApp.hExplorerRootNode     then msgFileType = IDM_SETFILENORMAL
+      if target = gApp.hExplorerResourceNode then msgFileType = IDM_SETFILERESOURCE
+      if target = gApp.hExplorerHeaderNode   then msgFileType = IDM_SETFILEHEADER
+      if target = gApp.hExplorerModuleNode   then msgFileType = IDM_SETFILEMODULE
+      if target = gApp.hExplorerNormalNode   then msgFileType = IDM_SETFILENORMAL
+      if target = gApp.hExplorerMainNode     then msgFileType = IDM_SETFILEMAIN
+
+      if parent = gApp.hExplorerResourceNode then msgFileType = IDM_SETFILERESOURCE
+      if parent = gApp.hExplorerHeaderNode   then msgFileType = IDM_SETFILEHEADER
+      if parent = gApp.hExplorerModuleNode   then msgFileType = IDM_SETFILEMODULE
+      if parent = gApp.hExplorerNormalNode   then msgFileType = IDM_SETFILENORMAL
+      if parent = gApp.hExplorerMainNode     then msgFileType = IDM_SETFILEMAIN
+      
+   end if
+
+   ' Allow the drop if msgFileType has positive value
+   function = cast(boolean, msgFileType)
+end function
+
+
+' ========================================================================================
+' Send info to TIMER to handle scrolling of the Explorer treeview
+' ========================================================================================
+private function frmExplorer_AutoScroll( byval hwnd as hwnd, _ 
+                                         byval SBcode as long, _
+                                         byval scrollspeed as long _
+                                         ) as LRESULT
+   
+   if scrollspeed = 0 then
+      ' kill any active timer 
+      if treedragger.idTimer then
+         KillTimer( hwnd, treedragger.idTimer )
+         treedragger.idTimer = 0
+      end if
+      exit function
+   end if
+   
+   ' create timer based on the new speed
+   treedragger.ScrollDirection = SBcode
+   
+   ' If the hWnd parameter is not NULL and the window specified by hWnd 
+   ' already has a timer with the value nIDEvent, then the existing timer 
+   ' is replaced by the new timer. When SetTimer replaces a timer, the timer is reset. 
+   treedragger.idTimer = SetTimer( hwnd, 1, scrollspeed, _
+                                   cast(TIMERPROC, @frmExplorer_timerProc) )
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Handle initiating scroll for Explorer treeview
+' ========================================================================================
+private function frmExplorer_CheckAutoScroll( byval hwnd as hwnd, _ 
+                                              byval x as long, _
+                                              byval y as long _
+                                              ) as LRESULT
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMEXPLORER)
+   If pWindow = 0 Then Exit Function
+
+   dim as long ScrollBarHeight
+   dim as Boolean hasscroll
+
+   dim as SCROLLINFO si
+   dim as long SCROLL_OFF    = 0
+   dim as long SCROLL_SLOWLY = 50
+   dim as long SCROLL_FASTER = 20
+
+   si.cbSize = sizeof(SCROLLINFO)
+   si.fMask = SIF_RANGE
+   hasscroll = GetScrollInfo( treedragger.hTree, SB_VERT, @si )
+   
+   ' GetSystemMetrics is not dpi aware so we need to scale it here
+   ScrollBarHeight = pWindow->ScaleY( GetSystemMetrics(SM_CYHSCROLL) ) * 2
+   
+   if hasscroll andalso (si.nMin <> si.nMax) then
+      ' Treeview has a scrollbar, now see if the mouse is in the window
+      dim as POINT pt
+      dim as RECT rc
+      
+      pt.x = x
+      pt.y = y
+      GetClientRect( treedragger.hTree, @rc )
+      
+      if PtInRect( @rc, pt ) then
+         ' We are within the treeview window
+         ' See if we are in the scroll zone
+         if pt.y < rc.top + ScrollBarHeight then
+            ' Scroll up
+            frmExplorer_AutoScroll( hwnd, SB_LINEUP, SCROLL_SLOWLY )
+         elseif pt.y > rc.bottom - ScrollBarHeight then
+            ' Scroll down
+            frmExplorer_AutoScroll( hwnd, SB_LINEDOWN, SCROLL_SLOWLY )
+         else
+            frmExplorer_AutoScroll( hwnd, 0, SCROLL_OFF )
+         end if   
+      
+      else
+         ' Outside the treeview window
+         if pt.y < rc.top then
+            ' fast up
+            frmExplorer_AutoScroll( hwnd, SB_LINEUP, SCROLL_FASTER )
+         elseif pt.y > rc.bottom then
+            ' fast down
+            frmExplorer_AutoScroll( hwnd, SB_LINEDOWN, SCROLL_FASTER )
+         end if
+      end if      
+
+   end if
+
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Start the drag/drop action for the Explorer treeview
+' ========================================================================================
+private function frmExplorer_StartDrag( byval hwnd as hwnd, _
+                                        byval tvh As NM_TREEVIEW Ptr _
+                                        ) as LRESULT
+   
+   ' Only allow to start a drag on a node that is not the root node
+   ' or one of the special subnodes.
+   select case tvh->itemNew.hItem
+      case gApp.hExplorerRootNode, gApp.hExplorerMainNode, _
+           gApp.hExplorerModuleNode, gApp.hExplorerNormalNode, _
+           gApp.hExplorerResourceNode, gApp.hExplorerHeaderNode
+         ' Returning TRUE will exit the WM_NOTIFY message cracker
+         ' and cancel the drag initiation.
+         return true
+      case else
+         ' If the node does not have a valid lParam then it means that 
+         ' the node does not have a pDoc and would therefore be a child
+         ' node representing a function name. We only want to move
+         ' valid pDoc's because they are the filename node.
+         if tvh->itemNew.lParam = 0 then return true
+   end select
+       
+   dim as RECT rc
+   treedragger.hTree = tvh->hdr.hwndFrom
+   treedragger.DragItem = tvh->itemNew.hItem
+   treedragger.DragImage = TreeView_CreateDragImage( tvh->hdr.hwndFrom, tvh->itemNew.hItem )
+   
+   treedragger.pDoc = Cast( clsDocument Ptr, tvh->itemNew.lParam )
+
+   TreeView_SelectItem( tvh->hdr.hwndFrom, null )   ' remove active selections
+   
+   TreeView_GetItemRect( tvh->hdr.hwndFrom, tvh->itemNew.hItem, @rc, true )  ' text only
+   
+   ImageList_BeginDrag( treedragger.DragImage, 0, _    ' use first image
+                        tvh->ptDrag.x - rc.left, _     ' coords of image hot spot
+                        tvh->ptDrag.y - rc.top )
+                        
+   ImageList_DragEnter( tvh->hdr.hwndFrom, _
+                        tvh->ptDrag.x, tvh->ptDrag.y )
+                                             
+   ShowCursor( false )
+   SetCapture( hwnd )
+   treedragger.dragging = true
+   
+   function = 0
+end function
+
+
+
+' ========================================================================================
+' Process WM_NOTIFY message for window/dialog: frmExplorer
+' ========================================================================================
+private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
+                                       ByVal id As Long, _
+                                       ByVal pNMHDR As NMHDR Ptr _
+                                       ) As LRESULT
+ 
+   Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
+   Dim As HTREEITEM hItem
+   Dim As HWND hTree 
+   Dim As LPARAM lParam
+   Dim pDoc As clsDocument Ptr
+   Dim ht As TVHITTESTINFO
+   Dim As POINT pt
+   
+   ' Determine what node was clicked on
+   Select Case pNMHDR->code 
+      
+      case TVN_BEGINDRAG
+         ' Start a drag and drop operation on the Explorer treeview. If
+         ' StartDrag returns TRUE then it effectively will cancel the drag
+         ' initiation because this message cracker will return TRUE.
+         return frmExplorer_StartDrag( hwnd, lpNMTV )
+         
+      case TVN_GETINFOTIP
+         ' Display a tooltip when a treeview node is hovered over. This will normally
+         ' be the full filename for the project or document.
+         dim pnmTip as NMTVGETINFOTIPW ptr = cast(NMTVGETINFOTIPW ptr, pNMHDR)
+         if gApp.hExplorerRootNode = pnmTip->hItem then
+            pnmTip->pszText = cast(WSTRING Ptr, @**gApp.ProjectFilename)
+            pnmTip->cchTextMax = len(gApp.ProjectFilename)
+            exit function
+         end if   
+         ' Second, search for a matching document
+         pDoc = Cast(clsDocument ptr, pnmTip->lParam)
+         if pDoc THEN
+            pnmTip->pszText = @pDoc->DiskFilename
+            pnmTip->cchTextMax = len(pDoc->DiskFilename)
+         END IF
+         exit function   
+
+      case NM_DBLCLK
+         hTree = lpNMTV->hdr.hWndFrom
          hItem = Treeview_GetSelection(hTree)
          dim as CWSTR wszFilename, wszFunctionName
          frmExplorer_GetFileNameFunctionName(hItem, wszFilename, wszFunctionName)
-         OpenSelectedDocument(wszFilename, wszFunctionName)
-         TreeView_SelectItem(hTree, hItem)
-         Exit Function
+         OpenSelectedDocument( wszFilename, wszFunctionName )
+         TreeView_SelectItem( hTree, hItem )
+         return true    ' prevent branch from expanding
          
-      Case WM_KEYUP
-         Select Case Loword(wParam)
-            Case VK_RETURN  ' already processed in WM_LBUTTONDBLCLK 
-         End Select
-         Exit Function
-
-      Case WM_CHAR   ' prevent the annoying beep!
-         If wParam = VK_RETURN Then Return 0
-
-      Case WM_DESTROY
-         ' REQUIRED: Remove control subclassing
-         RemoveWindowSubclass HWnd, @frmExplorer_Tree_SubclassProc, uIdSubclass
-
+      Case NM_CLICK, NM_RCLICK
+         if id = IDC_FRMEXPLORER_TREE then
+            ' If we have clicked on a folder item then issue an expand. Must use HitTest because the 
+            ' the current node has not been selected yet.
+            hTree = lpNMTV->hdr.hWndFrom
+            GetCursorPos(@pt)  
+            ScreenToClient(hTree, @pt)
+            
+            ht.pt = pt 
+            Treeview_HitTest(hTree, @ht )
+            hItem = ht.hItem
+            If hItem Then Treeview_Select( hTree, hItem, TVGN_CARET)
+            
+            If pNMHDR->code = NM_CLICK Then
+               ' Ensure that the correct Project name is showing
+               frmMain_PositionWindows
+            end if
+            
+            If pNMHDR->code = NM_RCLICK Then
+               ' Create the popup menu
+               lParam = FF_TreeView_GetlParam(hTree, hItem)
+               pDoc = Cast(clsDocument ptr, lParam)
+               Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
+               GetCursorPos @pt
+               TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWND_FRMMAIN, ByVal Null)
+               DestroyMenu hPopUpMenu
+               Function = True
+            End If
+         end if
+         
+         if id = IDC_FRMEXPLORER_BTNCLOSE then
+            If pNMHDR->code = NM_CLICK Then
+               ShowWindow HWND_FRMEXPLORER, SW_HIDE
+               frmMain_PositionWindows
+            end if
+         end if
+         
    End Select
-
-   ' Default processing of Windows messages
-   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
-
+ 
+   Function = 0
 End Function
 
 
@@ -446,6 +596,88 @@ private Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
       SetBkColor Cast(HDC,wParam), GetSysColor(COLOR_BTNFACE)
       return Cast( LRESULT, GetSysColorBrush(COLOR_BTNFACE))
 
+   case WM_MOUSEMOVE
+      ' These are relative to <hWnd>
+      dim as POINT pt
+      pt.x = GET_X_LPARAM( lParam )
+      pt.y = GET_Y_LPARAM( lParam )
+
+      if treedragger.dragging then
+         dim as TV_HITTESTINFO hti
+         dim as HTREEITEM target
+         
+         
+         ' Convert to tree co-ordinates...
+         MapWindowPoints( hWnd, treedragger.hTree, cast(POINT ptr, @pt), 1 )
+
+         ImageList_DragMove( pt.x, pt.y )
+         
+         hti.pt = pt
+         target = TreeView_HitTest( treedragger.hTree, @hti )
+         
+         if frmExplorer_AllowDrop( target, 0 ) = false then
+            target = null
+         end if
+         
+         ImageList_DragShowNoLock( false )   ' hide the image
+         Treeview_SelectDropTarget( treedragger.hTree, target )   
+         ImageList_DragShowNoLock( true )    ' make it visible again
+         
+         frmExplorer_CheckAutoScroll( hwnd, pt.x, pt.y )
+      
+      else
+         frmExplorer_AutoScroll( hwnd, 0, 0 )
+
+      end if
+   
+   case WM_LBUTTONUP
+      if treedragger.dragging then
+         ' Handle the drop
+         dim as HTREEITEM target
+         dim as TV_ITEM tvi
+         dim as long msgFileType
+
+         ImageList_EndDrag
+         ImageList_DragLeave( treedragger.hTree )
+         
+         ShowCursor( true )    ' restore mouse cursor
+         
+         ReleaseCapture
+         
+         ImageList_Destroy( treedragger.DragImage )
+         treedragger.DragImage = null
+         
+         ' Proceed with the drop...
+         target = TreeView_GetDropHilight( treedragger.hTree )
+         
+         ' Unselect the drop hilight item...
+         TreeView_SelectDropTarget( treedragger.hTree , NULL )
+
+         if frmExplorer_AllowDrop( target, msgFileType ) then
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(msgFileType, 0), 0 )
+         end if
+         
+         treedragger.dragging = false
+         frmExplorer_AutoScroll( hwnd, 0, 0 )
+         AfxRedrawWindow( treedragger.hTree )
+         
+      end if
+   
+   case UWM_SCROLL
+      ' User defined message to handle slow/fast Explorer treeview scrolling
+      dim as POINT pt
+      
+      ImageList_DragShowNoLock( false )
+      SendMessage( treedragger.hTree, WM_VSCROLL, _
+                   MAKELONG( treedragger.ScrollDirection, 0 ), _
+                   cast(LPARAM, null) )
+      ImageList_DragShowNoLock( true )
+      
+      ' Get mouse position and convert to tree co-ordinates
+      GetCursorPos( @pt )
+      MapWindowPoints( hWnd, treedragger.hTree, cast(POINT ptr, @pt), 1 )
+      frmExplorer_CheckAutoScroll( hwnd, pt.x, pt.y )
+      
    End Select
 
    ' for messages that we don't deal with
@@ -490,18 +722,19 @@ public Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
 
    Dim As HWnd hTree = _
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or _
         TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
         TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
-        WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
-        Cast(SUBCLASSPROC, @frmExplorer_Tree_SubclassProc), IDC_FRMEXPLORER_TREE, Cast(DWORD_PTR, @pWindow))
-
+        WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR )  
+        
       ' Use the new style Explorer Treeview (triangles instead of boxes).
       ' Set an undocumented extended style that enables the treeview glyphs to resize
       ' according to the high dpi setting.
       ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
-      SendMessage(hTree, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
+      TreeView_SetExtendedStyle( hTree, &H1000, &H1000 )
+      'SendMessage(hTree, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
       SetWindowTheme(hTree, @wstr("EXPLORER"), 0)
+      TreeView_SetExtendedStyle( hTree, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER )
 
       gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, wstr("FILES") )
       Treeview_SetBold(hTree, gApp.hExplorerRootNode, TRUE)
@@ -509,9 +742,17 @@ public Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
-   SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
 
-   PositionExplorerWindows(HWND_FRMEXPLORER)
+
+   ' Create the imagelist for Explorer drag/drop
+   dim as long cx = 16 * (pWindow->DPI \ 96)
+   Dim As HANDLE hDragImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 3, 0)
+   AfxGdipAddIconFromRes( hDragImageList, pWindow->InstanceHandle, "IMAGE_WINFBE")
+   AfxGdipAddIconFromRes( hDragImageList, pWindow->InstanceHandle, "IMAGE_DOCUMENT")
+   AfxGdipAddIconFromRes( hDragImageList, pWindow->InstanceHandle, "IMAGE_BASETYPE")
+   TreeView_SetImageList( hTree, hDragImageList, TVSIL_NORMAL )
+
+   frmExplorer_PositionWindows
 
    Function = 0
    

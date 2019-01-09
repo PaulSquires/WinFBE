@@ -18,6 +18,19 @@
 #Define IDC_FRMEXPLORER_TREE                        1001
 #Define IDC_FRMEXPLORER_BTNCLOSE                    1002
 
+
+#define UWM_SCROLL  WM_USER + 101
+
+type DRAG_STATE
+   dragging        as Boolean
+   DragImage       as HIMAGELIST
+   DragItem        as HTREEITEM
+   hTree           as hwnd
+   idTimer         as long
+   ScrollDirection as long
+   pDoc            as clsDocument ptr
+end type
+
 declare function GetExplorerSpecialSubNode( byval nFileType as long ) as HTREEITEM
 declare Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fUpdateNodes As BOOLEAN ) As Long
 declare Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT

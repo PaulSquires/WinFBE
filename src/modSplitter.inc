@@ -122,7 +122,7 @@ public Function Splitter_OnMouseMove() As BOOLEAN
          GetClientRect HWND_FRMEXPLORER, @rc
          Dim As Long nWidth = (rc.Right - rc.Left + nDiff)
          SetWindowPos HWND_FRMEXPLORER, 0, 0, 0, nWidth, rc.Bottom - rc.Top, SWP_NOMOVE Or SWP_NOZORDER
-         frmMain_PositionWindows(HWND_FRMMAIN)
+         frmMain_PositionWindows
          AfxDoEvents   ' allow screen to repaint
          Exit Function
       End If
@@ -150,7 +150,7 @@ public Function Splitter_OnMouseMove() As BOOLEAN
          GetClientRect HWND_FRMOUTPUT, @rc
          rc.Top = rc.Top + nDiff
          SetWindowPos HWND_FRMOUTPUT, 0, 0, 0, rc.Right - rc.Left, rc.Bottom-rc.Top, SWP_NOMOVE Or SWP_NOZORDER
-         frmMain_PositionWindows(HWND_FRMMAIN)
+         frmMain_PositionWindows
          Exit Function
       End If
    End If

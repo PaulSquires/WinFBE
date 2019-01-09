@@ -29,7 +29,7 @@ public Function frmMain_CreateToolbar( ByVal pWindow As CWindow Ptr ) As BOOLEAN
    HWND_FRMMAIN_TOOLBAR = hToolBar
    
    ' Allow drop down arrows
-   SendMessageW hToolBar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS
+   SendMessage( hToolBar, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS )
 
    ' Create the ImageLists that will hold the images for the toolbar
    Dim As HIMAGELIST hImageListNormal, hImageListHot, hImageListDisabled

@@ -26,6 +26,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(2,"&File")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILENEW, L(3,"New") & Chr(9) & "Ctrl+N"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN, L(4,"Open") & "..." & Chr(9) & "Ctrl+O"
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPENTEMPLATES, L(197,"Open Templates") & "..." & Chr(9) & "Ctrl+T"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE, L(5,"Close") & Chr(9) & "Ctrl+Q"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSEALL, L(6,"Close All")
@@ -258,6 +259,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,          IDM_FILECLOSE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,          IDM_REPLACE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_S,          IDM_FILESAVE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_T,          IDM_FILEOPENTEMPLATES )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,          IDM_CLOSETAB )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,          IDM_DELETELINE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,         IDM_BOOKMARKTOGGLE )
@@ -471,27 +473,44 @@ End Function
 ''
 private Function AddProjectFileTypesToMenu( ByVal hPopUpMenu As HMENU, _
                                             ByVal pDoc As clsDocument Ptr, _
-                                            byval fNoSeparator as BOOLEAN = false _
+                                            byval fSeparator as BOOLEAN, _
+                                            byval fExplorerTreeview as BOOLEAN _
                                             ) As Long
 
-   if fNoSeparator = false then
-      AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
-   end if
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMAIN,     L(206,"Main file") 
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILERESOURCE, L(209,"Resource file") 
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEHEADER,   L(181,"Header file") 
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILEMODULE,   L(205,"Module file") 
-   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, IDM_SETFILENORMAL,   L(204,"Normal file") 
+   if fSeparator then AppendMenu( hPopUpMenu, MF_SEPARATOR, 0, "" )
+
+   dim messages(...) as long => _
+      { IDM_SETFILEMAIN, _
+        IDM_SETFILERESOURCE, _
+        IDM_SETFILEHEADER, _
+        IDM_SETFILEMODULE, _
+        IDM_SETFILENORMAL, _
+        IDM_SETFILEMAIN_EXPLORERTREEVIEW, _
+        IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
+        IDM_SETFILEHEADER_EXPLORERTREEVIEW, _
+        IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
+        IDM_SETFILENORMAL_EXPLORERTREEVIEW _
+       }
+
+   ' If we need to use the Explorer Treeview version of the messages then we
+   ' simply just increment our array starting index.
+   dim as long idx = iif( fExplorerTreeview, 5, 0 )
+
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 0), L(206,"Main file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 1), L(209,"Resource file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 2), L(181,"Header file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 3), L(205,"Module file") 
+   AppendMenu hPopUpMenu, MF_ENABLED Or MFT_RADIOCHECK, messages(idx + 4), L(204,"Normal file") 
 
    Dim nFileType As Long
    Select Case pDoc->ProjectFileType
-      Case FILETYPE_MAIN:     nFileType = IDM_SETFILEMAIN
-      Case FILETYPE_RESOURCE: nFileType = IDM_SETFILERESOURCE
-      Case FILETYPE_HEADER:   nFileType = IDM_SETFILEHEADER
-      Case FILETYPE_MODULE:   nFileType = IDM_SETFILEMODULE
-      Case FILETYPE_NORMAL:   nFileType = IDM_SETFILENORMAL
+      Case FILETYPE_MAIN:     nFileType = messages(idx + 0)
+      Case FILETYPE_RESOURCE: nFileType = messages(idx + 1)
+      Case FILETYPE_HEADER:   nFileType = messages(idx + 2)
+      Case FILETYPE_MODULE:   nFileType = messages(idx + 3)
+      Case FILETYPE_NORMAL:   nFileType = messages(idx + 4)
    End Select
-   CheckMenuRadioItem( hPopupMenu, IDM_SETFILENORMAL, IDM_SETFILEHEADER, nFileType, MF_BYCOMMAND )
+   CheckMenuRadioItem( hPopupMenu, messages(idx + 0), messages(idx + 4), nFileType, MF_BYCOMMAND )
 
    Function = 0
 End Function
@@ -505,7 +524,7 @@ public Function CreateStatusBarFileTypeContextMenu() As HMENU
    If pDoc Then
       If gApp.IsProjectActive Then
          hPopUpMenu = CreatePopupMenu
-         AddProjectFileTypesToMenu( hPopUpMenu, pDoc, true ) 
+         AddProjectFileTypesToMenu( hPopUpMenu, pDoc, false, false ) 
       End If
    End If
    Function = hPopupMenu
@@ -551,6 +570,7 @@ public Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
 
    hPopUpMenu = CreatePopupMenu
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
+   AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
    AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
    AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
@@ -565,7 +585,7 @@ public Function CreateTopTabCtlContextMenu( ByVal idx As Long ) As HMENU
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          wszText = L(190, "Remove from project")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText
-         AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+         AddProjectFileTypesToMenu(hPopUpMenu, pDoc, true, false)
       End If
    End If
 
@@ -592,16 +612,23 @@ public Function CreateExplorerContextMenu( ByVal pDoc As clsDocument Ptr ) As HM
       END IF
    else
       If gApp.IsProjectActive Then
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILEOPEN_EXPLORERTREEVIEW,   L(75,"Open") 
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+         if gTTabCtl.GetTabIndexByDocumentPtr( pDoc ) <> -1 then
+            AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE_EXPLORERTREEVIEW,  L(5,"Close") 
+            AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+         end if
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE_EXPLORERTREEVIEW,   L(7,"Save") 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS_EXPLORERTREEVIEW, L(8,"Save As") 
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
          wszText = L(190,"Remove from project") 
-         AppendMenu( hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, wszText )
-         AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+         AppendMenu( hPopUpMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT_EXPLORERTREEVIEW, wszText )
+         AddProjectFileTypesToMenu(hPopUpMenu, pDoc, true, true)
       Else
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE,  L(5,"Close") 
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE,   L(7,"Save") 
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS, L(8,"Save As") 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILECLOSE_EXPLORERTREEVIEW,  L(5,"Close") 
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, "" 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVE_EXPLORERTREEVIEW,   L(7,"Save") 
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_FILESAVEAS_EXPLORERTREEVIEW, L(8,"Save As") 
       End If
    END IF
 
@@ -657,7 +684,7 @@ public Function CreateScintillaContextMenu() As HMENU
    If (gApp.IsProjectActive = True) Then
       AppendMenu hPopupMenu, MF_SEPARATOR, 0, ""
       AppendMenu hPopupMenu, MF_ENABLED, IDM_REMOVEFILEFROMPROJECT, L(190,"Remove from project")
-      AddProjectFileTypesToMenu(hPopUpMenu, pDoc)
+      AddProjectFileTypesToMenu(hPopUpMenu, pDoc, true, false)
    End If
    
    Function = hPopupMenu

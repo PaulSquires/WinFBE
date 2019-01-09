@@ -347,7 +347,7 @@ public Function SetDocumentErrorPosition( ByVal hLV As HWnd, _
       if pDoc->IsDesigner then
          ' Show the code editor.
          TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
-         frmMain_PositionWindows(HWND_FRMMAIN)
+         frmMain_PositionWindows
       end if
    END IF
 
@@ -592,7 +592,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       
       ' If fGoodCompile is False then something unusual occurred so better show the log file by default
       If fGoodCompile = False Then
-         frmOutput_PositionWindows(HWND_FRMOUTPUT)
+         frmOutput_PositionWindows
       End If
        
       ' If the Search Results, TODO, Notes tab is active then reposition to 
@@ -600,11 +600,11 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       select case TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) 
          case 2, 3, 4
          TabCtrl_SetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 0 ) 
-         frmOutput_PositionWindows(HWND_FRMOUTPUT)
+         frmOutput_PositionWindows
       end select
       
       ShowWindow( HWND_FRMOUTPUT, SW_SHOW)
-      frmMain_PositionWindows(HWND_FRMMAIN)
+      frmMain_PositionWindows
       ' Set to error line position only after all windows have been shown and resized
       SetDocumentErrorPosition(hLV, wID)
    end if
@@ -614,7 +614,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       if IsWindowVisible(HWND_FRMOUTPUT) THEN
          if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
             ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
-            frmMain_PositionWindows(HWND_FRMMAIN)
+            frmMain_PositionWindows
          END IF   
       END IF 
    end if
@@ -935,7 +935,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    SetCursor( LoadCursor(0, IDC_WAIT) )
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
-   AfxDoEvents
 
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
@@ -958,7 +957,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
                wst = L(203, "Compiling") + "... " + AfxStrPathname("NAMEX", pDoc->DiskFilename) 
                SetCompileStatusBarMessage( wst, 0 )
-               AfxDoEvents
  
                wszCommand = gCompile.CompilerPath
                wszParams = " -c " + wDQ + pDoc->DiskFilename + wDQ + _
@@ -1022,7 +1020,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    SetCompileStatusBarMessage( wst, 0 )
    SetCursor( LoadCursor(0, IDC_WAIT) )
 
-   AfxDoEvents
 
    sConsoleText = ""
    wszCommand = gCompile.CompilerPath
@@ -1040,7 +1037,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.EndTime = Timer
    gCompile.SystemTime = AfxSystemSystemTime 
 
-   AfxDoEvents
 
    ' If this was a QuickRun then delete the temporary code file that was created.
    if wID = IDM_QUICKRUN THEN 

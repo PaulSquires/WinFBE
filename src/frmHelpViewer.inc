@@ -137,22 +137,22 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmHelpViewer_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmHelpViewer_PositionWindows() As LRESULT
    
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMHELPVIEWER, @rc)
    
-   dim as hwnd hTabCtrl = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TABCONTROL)
+   dim as hwnd hTabCtrl = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TABCONTROL)
    dim as hwnd hTree(1), hWebBrowser(1), hBtn(3)
-   hTree(0) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TVWINFBE)
-   hTree(1) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_TVWINFBX)
-   hWebBrowser(0) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE )
-   hWebBrowser(1) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX )
-   hBtn(0) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_BACK ) 
-   hBtn(1) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_FORWARD ) 
-   hBtn(2) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_PRINT ) 
-   hBtn(3) = GetDlgItem(HWnd, IDC_FRMHELPVIEWER_FIND )
+   hTree(0) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TVWINFBE)
+   hTree(1) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TVWINFBX)
+   hWebBrowser(0) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE )
+   hWebBrowser(1) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX )
+   hBtn(0) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_BACK ) 
+   hBtn(1) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_FORWARD ) 
+   hBtn(2) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_PRINT ) 
+   hBtn(3) = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_FIND )
     
    dim as long nCurSel = TabCtrl_GetCurSel(hTabCtrl) 
    select case nCurSel
@@ -276,7 +276,7 @@ private Function frmHelpViewer_OnNotify( ByVal HWnd As HWnd, _
    select case pNMHDR->code
       case TCN_SELCHANGE 
          if id = IDC_FRMHELPVIEWER_TABCONTROL then
-            frmHelpViewer_PositionWindows(HWND_FRMHELPVIEWER)
+            frmHelpViewer_PositionWindows
          end if 
       case TVN_SELCHANGED
          Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
@@ -297,7 +297,7 @@ private Function frmHelpViewer_OnSize( ByVal HWnd As HWnd, _
                                        ByVal cy As Long _
                                        ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
-      frmHelpViewer_PositionWindows(HWnd)
+      frmHelpViewer_PositionWindows
    End If   
 
    Function = 0
@@ -422,7 +422,7 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
          case IDM_HELPWINFBE: TabCtrl_SetCurSel(hTabCtrl, 0) 
          case IDM_HELPWINFBX: TabCtrl_SetCurSel(hTabCtrl, 1) 
       end select
-      frmHelpViewer_PositionWindows(HWND_FRMHELPVIEWER)
+      frmHelpViewer_PositionWindows
       ShowWindow HWND_FRMHELPVIEWER, nCmdShow
       Exit Function 
    Else 
@@ -534,7 +534,7 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
    DIM pwb2 AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
    SetProp(pWindow->hWindow, "CWEBCTXPTR_WINFBX", CAST(HANDLE, pwb2))
    
-   frmHelpViewer_PositionWindows(HWND_FRMHELPVIEWER)
+   frmHelpViewer_PositionWindows
    
    ' Display the window
    ShowWindow HWND_FRMHELPVIEWER, nCmdShow

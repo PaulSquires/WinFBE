@@ -415,9 +415,9 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmSnippets_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmSnippets_PositionWindows() As LRESULT
 
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMSNIPPETS)
    if pWindow = 0 then exit function
    
    dim as hwnd hCtrl
@@ -425,7 +425,7 @@ private Function frmSnippets_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
    
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect( HWnd, @rc )
+   GetClientRect( HWND_FRMSNIPPETS, @rc )
   
    ' The command buttons are initially positioned at 48 pixels from the bottom of the form
    cy = pWindow->ScaleY(48)
@@ -495,7 +495,7 @@ private Function frmSnippets_OnSize( ByVal HWnd As HWnd, _
                                      ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
-      frmSnippets_PositionWindows(HWnd)
+      frmSnippets_PositionWindows
    End If
    Function = 0
 End Function
@@ -689,7 +689,7 @@ public Function frmSnippets_Show( ByVal hWndParent As HWnd ) as LRESULT
    ListBox_SetCurSel( GetDlgItem(hForm, IDC_FRMSNIPPETS_LIST1), 0 )
    frmSnippets_SetTextboxes()
    
-   frmSnippets_PositionWindows(hForm)
+   frmSnippets_PositionWindows
    
    SetFocus GetDlgItem(hForm, IDC_FRMSNIPPETS_LIST1)
    

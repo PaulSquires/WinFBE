@@ -119,8 +119,8 @@ public Function frmOptionsEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKUNICODE),            gConfig.UnicodeEncoding)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWRIGHTEDGE),      gConfig.RightEdge)
 
-   SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTRIGHTEDGE), gConfig.RightEdgePosition
-   SetWindowTextW GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), gConfig.TabSize
+   AfxSetWindowText( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTRIGHTEDGE), gConfig.RightEdgePosition )
+   AfxSetWindowText( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE), gConfig.TabSize )
    
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(130,"Lower Case") )
    ComboBox_AddString( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE), @L(131,"Upper Case") )

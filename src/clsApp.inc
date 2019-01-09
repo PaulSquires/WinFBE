@@ -226,7 +226,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    wFilename = ucase(this.ProjectName)
    TreeView_SetItemText( hTree, this.hExplorerRootNode, @wFilename)
    
-   frmMain_PositionWindows(HWND_FRMMAIN)
+   frmMain_PositionWindows
 
    Function = True
 End Function

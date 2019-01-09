@@ -338,7 +338,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
          ' If the Event/function does not already exist in code then create it now.
-         ParseDocument(pDoc, "")
+         ParseDocument(pDoc)
          
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
@@ -397,7 +397,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
                
                ' If the Event/function does not already exist in code then create it now.
-               ParseDocument(pDoc, "")
+               ParseDocument(pDoc)
                
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
@@ -640,7 +640,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ' If any new Events were discovered then append them to the code editor
    if len(wszAllEvents) then
       pDoc->AppendText(wszAllEvents)
-      ParseDocument(pDoc, "")
+      ParseDocument(pDoc)
    END IF
   
    ' Save the generated codegen code because we will output it to a disk file

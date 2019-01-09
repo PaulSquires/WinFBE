@@ -1314,7 +1314,6 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
 
    dim as HCURSOR hCurSave = GetCursor()
    SetCursor( LoadCursor(0, IDC_WAIT) )
-   AfxDoEvents()
 
    gApp.ProjectFilename = wszFile
    gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
@@ -1357,9 +1356,9 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
       FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(210,"Normal"), cast(LPARAM, 0) )
       Treeview_SetBold(hTV, gApp.hExplorerNormalNode, TRUE)
    
-
+   gApp.FileLoadingCount = 0
+   
    Do Until pStream.EOS
-      AfxDoEvents()
       wst = pStream.ReadLine
       
       If Len(wst) = 0 Then Continue Do

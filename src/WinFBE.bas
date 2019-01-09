@@ -61,7 +61,7 @@ Using Afx
 #Define MRUPROJECTS_MENU_POSITION  3
 
 #Include Once "modScintilla.bi"
-#Include Once "modDeclares.bi"         ' TYPES, DEFINES, etc
+#Include Once "modDeclares.bi"         
 
 #include once "clsLasso.bi"
 #include once "clsDocument.bi"
@@ -75,6 +75,7 @@ Dim Shared gApp     As clsApp
 Dim Shared gConfig  As clsConfig
 Dim Shared gTTabCtl As clsTopTabCtl
 dim shared gLasso   as clsLasso
+
 
 #Include Once "clsDB2.inc"
 #Include Once "clsParser.inc"

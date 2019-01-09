@@ -110,19 +110,19 @@ end function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmVDColors_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmVDColors_PositionWindows() As LRESULT
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMVDCOLORS)
    if pWindow = 0 THEN exit function
       
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMVDCOLORS, @rc)
    
-   Dim As HWnd hTabCtl = GetDlgItem(HWnd, IDC_FRMVDCOLORS_TABCONTROL)
-   Dim As HWnd hList1  = GetDlgItem(HWnd, IDC_FRMVDCOLORS_LSTCUSTOM)
-   Dim As HWnd hList2  = GetDlgItem(HWnd, IDC_FRMVDCOLORS_LSTCOLORS)
-   Dim As HWnd hList3  = GetDlgItem(HWnd, IDC_FRMVDCOLORS_LSTSYSTEM)
+   Dim As HWnd hTabCtl = GetDlgItem(HWND_FRMVDCOLORS, IDC_FRMVDCOLORS_TABCONTROL)
+   Dim As HWnd hList1  = GetDlgItem(HWND_FRMVDCOLORS, IDC_FRMVDCOLORS_LSTCUSTOM)
+   Dim As HWnd hList2  = GetDlgItem(HWND_FRMVDCOLORS, IDC_FRMVDCOLORS_LSTCOLORS)
+   Dim As HWnd hList3  = GetDlgItem(HWND_FRMVDCOLORS, IDC_FRMVDCOLORS_LSTSYSTEM)
    
    SetWindowPos( hTabCtl, 0, 0, 0, rc.Right-rc.Left, pWindow->ScaleY(24), SWP_SHOWWINDOW Or SWP_NOZORDER )
    SetWindowPos( hList1, 0, 0, pWindow->ScaleY(24), rc.Right-rc.Left, rc.Bottom-rc.top-pWindow->ScaleY(24), SWP_NOZORDER )
@@ -142,7 +142,7 @@ private Function frmVDColors_OnSize( ByVal HWnd As HWnd, _
                                      ByVal cy As Long _
                                      ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
-      frmVDColors_PositionWindows(HWnd)
+      frmVDColors_PositionWindows
    End If   
    Function = 0
 End Function
@@ -398,7 +398,7 @@ public Function frmVDColors_Show( ByVal hWndParent As HWnd, _
       END SELECT
    NEXT
 
-   frmVDColors_PositionWindows(HWND_FRMVDCOLORS)
+   frmVDColors_PositionWindows
    frmVDColors_SetColorListBoxSelection(wszPropValue)
 
    Function = 0

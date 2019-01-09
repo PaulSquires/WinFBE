@@ -150,8 +150,8 @@ private function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstri
    ' Show the ListBox search results
    TabCtrl_SetCurSel( GetDlgItem( HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL), 2 )
    ShowWindow HWND_FRMOUTPUT, SW_SHOW
-   frmOutput_PositionWindows(HWND_FRMOUTPUT)
-   frmMain_PositionWindows(HWND_FRMMAIN)
+   frmOutput_PositionWindows
+   frmMain_PositionWindows
       
    function = 0
 END FUNCTION

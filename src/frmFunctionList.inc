@@ -190,17 +190,17 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-private Function frmFunctionList_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+private Function frmFunctionList_PositionWindows() As LRESULT
    
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMFUNCTIONLIST, @rc)
    
-   dim as long nHeight = AfxGetWindowHeight(GetDlgItem(HWnd, IDC_FRMFUNCTIONLIST_TXTSEARCH))
-   SetWindowPos GetDlgItem(HWnd, IDC_FRMFUNCTIONLIST_TXTSEARCH ), 0, _
+   dim as long nHeight = AfxGetWindowHeight(GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TXTSEARCH))
+   SetWindowPos GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TXTSEARCH ), 0, _
                   0, 0, rc.Right-rc.Left, nHeight, SWP_NOZORDER
 
-   SetWindowPos GetDlgItem(HWnd, IDC_FRMFUNCTIONLIST_LISTBOX ), 0, _
+   SetWindowPos GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX ), 0, _
                   0, nHeight, rc.Right-rc.Left, rc.Bottom-rc.top-nHeight, SWP_NOZORDER
 
    Function = 0
@@ -216,7 +216,7 @@ private Function frmFunctionList_OnSize( ByVal HWnd As HWnd, _
                                          ByVal cy As Long _
                                          ) As LRESULT
    If state <> SIZE_MINIMIZED Then 
-      frmFunctionList_PositionWindows(HWnd)
+      frmFunctionList_PositionWindows
    End If   
    Function = 0
 End Function
@@ -393,7 +393,7 @@ private function frmFunctionList_ReparseFiles() as Long
    Dim pDoc As clsDocument Ptr = gApp.pDocList
    do until pDoc = 0
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         ParseDocument(pDoc, "")
+         ParseDocument(pDoc)
          AddFunctionsToExplorerTreeview(pDoc, true)
       end if
       pDoc = pDoc->pDocNext
@@ -452,7 +452,7 @@ public Function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    SendMessage( hList, LB_SETCOLUMNWIDTH, 250 * pWindow->rxRatio, 0 )
    
-   frmFunctionList_PositionWindows(HWND_FRMFUNCTIONLIST)
+   frmFunctionList_PositionWindows
 
    LockWindowUpdate(hList)
    frmFunctionList_ReparseFiles

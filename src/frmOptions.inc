@@ -162,7 +162,7 @@ private Function frmOptions_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             frmOptions_SaveEditorOptions()
             ' Reposition main windows in case hide toolbar/statusbar selected
-            frmMain_PositionWindows(HWND_FRMMAIN)
+            frmMain_PositionWindows
             ' Apply the newly saved options to all open Scintilla windows
             Dim pDoc As clsDocument Ptr = gApp.pDocList
             do until pDoc = 0

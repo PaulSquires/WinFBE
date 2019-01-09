@@ -15,6 +15,8 @@ Version 1.8.8
 - Added: New About form replaces the generic messagebox.
 - Added: Pressing F6 or selecting "Sub/Function Definition" will open any #Include file on the current editing line.
 - Added: Additional info outputted to "Compile Log File" in Output window (Full compiler command line, filesize, compile time, error/warning count).
+- Added: "Open Templates... (Ctrl+T)" in the "File" menu. Previously, templates could only be accessed from the Toolbar.
+- Changed: You must now hold down the SHIFT key to drag and drop tabs in the top tab control to reorder any open document tabs.
 - Changed: Updated FreeBasic Compiler to November 22, 2018 Nightly Build.
 - Changed: Lots of internal code refractoring. Many efficiencies found with regards to loading files/projects, saving, and displaying files. More internal code cleanup to occur in the next few future releases.
 - Changed: Removed loading of multiple projects into WinFBE at the same time.

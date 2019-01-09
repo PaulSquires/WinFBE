@@ -17,6 +17,7 @@
 #include once "frmSnippets.bi"
 #include once "frmProjectOptions.bi"
 #include once "frmBuildConfig.bi"
+#include once "frmExplorer.bi"
 #include once "modMRU.bi"
 #include once "modAutoInsert.bi"
 #include once "modSplitter.bi"
@@ -179,7 +180,8 @@ public Function frmMain_SetStatusbar() as long
    if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then
       wszPanel(1) = ""
       wszPanel(2) = ""
-      wszPanel(3) = L(66,"Parsing") & ":" 
+      wszPanel(3) = L(66,"Parsing") & ": "
+      wszPanel(4) = "(" & gApp.FileLoadingCount & ")  " & gApp.wszPanelText 
    
    elseif gApp.IsCompiling then
       ' The gApp info is set in modCompile
@@ -249,6 +251,7 @@ public Function frmMain_SetStatusbar() as long
       wszPanel(2) = ""
       wszPanel(3) = "" 
       wszPanel(4) = "" 
+      hIconPanel4 = 0
    END IF
    
 
@@ -566,23 +569,23 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-public Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+public Function frmMain_PositionWindows() As LRESULT
    
    Dim As HWnd hEdit, hTabCtl
    Dim As Rect rc
    dim as long nHeightTabControl, nLeft
    
    ' Get the entire client area
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMMAIN, @rc)
   
    ' Get the heights of the rebar and statusbar
-   Dim As Long nHeightRebar     = AfxGetWindowHeight( GetDlgItem(HWnd, IDC_FRMMAIN_REBAR) )
-   dim as long nHeightStatusBar = AfxGetWindowHeight( GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR) )
+   Dim As Long nHeightRebar     = AfxGetWindowHeight( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_REBAR) )
+   dim as long nHeightStatusBar = AfxGetWindowHeight( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR) )
    Dim As Long nHeightOutput    = AfxGetWindowHeight( HWND_FRMOUTPUT)
    Dim As Long nWidthExplorer   = AfxGetWindowWidth( HWND_FRMEXPLORER )
 
-   ShowWindow( GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), iif(gConfig.HideToolbar, SW_HIDE, SW_SHOW) )
-   ShowWindow( GetDlgItem(HWnd, IDC_FRMMAIN_STATUSBAR), iif(gConfig.HideStatusbar, SW_HIDE, SW_SHOW) )
+   ShowWindow( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_REBAR), iif(gConfig.HideToolbar, SW_HIDE, SW_SHOW) )
+   ShowWindow( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR), iif(gConfig.HideStatusbar, SW_HIDE, SW_SHOW) )
    if gConfig.HideToolbar THEN nHeightRebar = 0
    if gConfig.HideStatusbar THEN nHeightStatusBar = 0
       
@@ -595,14 +598,14 @@ public Function frmMain_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
                      nWidthExplorer, _
                      rc.Bottom - nHeightStatusBar - nHeightRebar, _
                      SWP_NOZORDER Or SWP_SHOWWINDOW ) 
-      PositionExplorerWindows(HWND_FRMEXPLORER)
+      frmExplorer_PositionWindows
       nLeft = nWidthExplorer
    Else
       nWidthExplorer = 0
    End If
 
    ' If items exist in the top tabcontrol then show the tab control and account for its height
-   hTabCtl = GetDlgItem(HWnd, IDC_FRMMAIN_TOPTABCONTROL)
+   hTabCtl = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_TOPTABCONTROL)
    If TabCtrl_GetItemCount(hTabCtl) = 0 Then
       ShowWindow(hTabCtl, SW_HIDE)
    Else
@@ -751,8 +754,8 @@ public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
    gApp.IsProjectActive = true
    
    ' Position all of the controls into place
-   PositionExplorerWindows(HWND_FRMEXPLORER)
-   frmMain_PositionWindows(HWND_FRMMAIN)
+   frmExplorer_PositionWindows
+   frmMain_PositionWindows
 
    function = true
 end function
@@ -776,6 +779,7 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    
    If pDocIn = 0 Then   ' Create a new pDoc 
+      gApp.FileLoadingCount = gApp.FileLoadingCount + 1
       pDoc = New clsDocument
       gApp.AddDocument(pDoc) 
       pDoc->IsDesigner = bIsDesigner 
@@ -785,7 +789,7 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       Else
          pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
       End If   
-      ParseDocument(pDoc, "")
+      ParseDocument(pDoc)
       ' When a Project is being loaded, the incoming nFileType is from the project
       ' file. We pass it to the AddFunctionsToExplorerTreeview function in order to
       ' ensure that the pDoc is attached to the right node.
@@ -826,7 +830,7 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    End If
 
    ' Position all of the controls into place
-   frmMain_PositionWindows(HWnd)
+   frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow
 
    Function = pDoc
@@ -868,7 +872,7 @@ private Function frmMain_OnSize( ByVal HWnd As HWnd, _
       InvalidateRect hStatusBar, Null, True
       
       ' Position all of the child windows
-      frmMain_PositionWindows(HWnd)
+      frmMain_PositionWindows
    End If
    Function = 0
 End Function
@@ -930,13 +934,53 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          gTTabCtl.CloseTab
 
       ''  FILE MENU
-      Case IDM_FILENEW:            OnCommand_FileNew( HWnd )
-      Case IDM_FILEOPEN:           OnCommand_FileOpen( HWnd, true )
-      Case IDM_FILESAVE:           OnCommand_FileSave( HWnd )
-      Case IDM_FILESAVEAS:         OnCommand_FileSave( HWnd, True )
+      Case IDM_FILENEW
+         OnCommand_FileNew( HWnd )
+      
+      Case IDM_FILEOPEN
+         OnCommand_FileOpen( HWnd, true )
+      
+      Case IDM_FILEOPENTEMPLATES
+         dim as RECT rc
+         SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
+         MapWindowPoints(hwnd, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
+         frmTemplates_Show(HWnd, rc.Left, rc.Bottom)
+
+      Case IDM_FILESAVE
+         OnCommand_FileSave( HWnd, pDoc, False )
+      
+      Case IDM_FILESAVEAS
+         OnCommand_FileSave( HWnd, pDoc, True )
+
+      case IDM_FILEOPEN_EXPLORERTREEVIEW, _
+           IDM_FILESAVE_EXPLORERTREEVIEW, IDM_FILESAVEAS_EXPLORERTREEVIEW, _
+           IDM_FILECLOSE_EXPLORERTREEVIEW
+         dim as hwnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
+         dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
+         dim as long ItemLParam = FF_TreeView_GetlParam( hTV, hItem )
+         ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
+         pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
+         if id = IDM_FILEOPEN_EXPLORERTREEVIEW then
+            dim as CWSTR wszFilename, wszFunctionName
+            frmExplorer_GetFileNameFunctionName( hItem, wszFilename, wszFunctionName )
+            OpenSelectedDocument( wszFilename, wszFunctionName )
+            TreeView_SelectItem( hTV, hItem )
+         elseif id = IDM_FILESAVE_EXPLORERTREEVIEW then
+            OnCommand_FileSave( HWnd, pDoc, False )
+         elseif id = IDM_FILESAVEAS_EXPLORERTREEVIEW then
+            OnCommand_FileSave( HWnd, pDoc, true )
+         elseif IDM_FILECLOSE_EXPLORERTREEVIEW then
+            if gTTabCtl.SetTabIndexByDocumentPtr( pDoc ) <> -1 then
+               OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
+            end if   
+         end if   
+         
+      Case IDM_FILECLOSE
+         OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
+      
       Case IDM_FILESAVEDECLARES:   OnCommand_FileSaveDeclares( HWnd )
       Case IDM_FILESAVEALL:        OnCommand_FileSaveAll( HWnd ) 
-      Case IDM_FILECLOSE:          OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
+      
       Case IDM_FILECLOSEALL:       OnCommand_FileClose( HWnd, EFC_CLOSEALL )
       Case IDM_FILECLOSEALLOTHERS: OnCommand_FileClose( HWnd, EFC_CLOSEALLOTHERS )
       Case IDM_CLOSEALLFORWARD:    OnCommand_FileClose( HWnd, EFC_CLOSEALLFORWARD )
@@ -1303,11 +1347,11 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
       Case IDM_VIEWEXPLORER
          ShowWindow HWND_FRMEXPLORER, Iif(IsWindowVisible(HWND_FRMEXPLORER), SW_HIDE, SW_SHOW)
-         frmMain_PositionWindows(HWND_FRMMAIN)
+         frmMain_PositionWindows
 
       Case IDM_VIEWOUTPUT
          ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
-         frmMain_PositionWindows(HWND_FRMMAIN)
+         frmMain_PositionWindows
 
       Case IDM_RESTOREMAIN
          Dim rc As Rect
@@ -1324,17 +1368,53 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_PROJECTCLOSE:          OnCommand_ProjectClose( HWnd )
       Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd, false ) 
 
+      
+      
       Case IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, _
-           IDM_SETFILERESOURCE, IDM_SETFILEHEADER
+           IDM_SETFILERESOURCE, IDM_SETFILEHEADER, _
+           IDM_SETFILEMAIN_EXPLORERTREEVIEW, _
+           IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
+           IDM_SETFILEHEADER_EXPLORERTREEVIEW, _
+           IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
+           IDM_SETFILENORMAL_EXPLORERTREEVIEW 
+         
          dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
          dim as long nFileType
-         if id = IDM_SETFILENORMAL   then nFileType = FILETYPE_NORMAL
-         if id = IDM_SETFILEMODULE   then nFileType = FILETYPE_MODULE
-         if id = IDM_SETFILEMAIN     then nFileType = FILETYPE_MAIN
-         if id = IDM_SETFILERESOURCE then nFileType = FILETYPE_RESOURCE
-         if id = IDM_SETFILEHEADER   then nFileType = FILETYPE_HEADER
+         
+         ' This code also handles right click messages from the Explorer Treeview. In
+         ' that case the pDoc needs to be taken from the Treeview rather than the 
+         ' currently active document in the editor.
+         select case id
+            case IDM_SETFILENORMAL_EXPLORERTREEVIEW, IDM_SETFILEMODULE_EXPLORERTREEVIEW, _
+                 IDM_SETFILEMAIN_EXPLORERTREEVIEW, IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
+                 IDM_SETFILEHEADER_EXPLORERTREEVIEW
+               dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
+               dim as long ItemLParam = FF_TreeView_GetlParam( hTV, hItem )
+               ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
+               pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
+         end select
+
+         select case id
+            case IDM_SETFILENORMAL, IDM_SETFILENORMAL_EXPLORERTREEVIEW 
+               nFileType = FILETYPE_NORMAL
+            case IDM_SETFILEMODULE, IDM_SETFILEMODULE_EXPLORERTREEVIEW
+               nFileType = FILETYPE_MODULE
+            case IDM_SETFILEMAIN, IDM_SETFILEMAIN_EXPLORERTREEVIEW
+               nFileType = FILETYPE_MAIN
+            case IDM_SETFILERESOURCE, IDM_SETFILERESOURCE_EXPLORERTREEVIEW
+               nFileType = FILETYPE_RESOURCE
+            case IDM_SETFILEHEADER, IDM_SETFILEHEADER_EXPLORERTREEVIEW
+               nFileType = FILETYPE_HEADER
+         end select
+
+         ' This code is also used for treeview drag/drop operation. For a drag/drop
+         ' the pDoc is not necessarily the current active document. Therefore, if
+         ' dragging is active then we need to get the pDoc from the drag node lParam.
+         if treedragger.dragging then pDoc = treedragger.pDoc
+         if pDoc = 0 then exit function
+         
          if pDoc->ProjectFileType <> nFileType then
-            ' If attemptin to set MAIN or RESOURCE then we need to move any existing
+            ' If attempting to set MAIN or RESOURCE then we need to move any existing
             ' pDoc that have that filetype over to the NORMAL branch.
             if (nFileType = FILETYPE_MAIN) or (nFileType = FILETYPE_RESOURCE) then
                dim pDoc2 as clsDocument ptr = iif(nFileType = FILETYPE_MAIN, gApp.GetMainDocumentPtr, gApp.GetResourceDocumentPtr)
@@ -1358,15 +1438,23 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDC_MRUPROJECTBASE To (IDC_MRUPROJECTBASE + 10)
          OpenMRUProjectFile( HWnd, id )
 
-      Case IDM_REMOVEFILEFROMPROJECT
-         Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         dim as HTREEITEM hNode = pDoc->hNodeExplorer
-         if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) then
-            ' File close succeeded. Remove this document from the project collection and remove treeview node 
-            gdb2.dbDelete(pDoc->DiskFilename)
-            Treeview_DeleteItem( hTree, hNode)
-            gApp.RemoveDocument(pDoc)
-         end if   
+      Case IDM_REMOVEFILEFROMPROJECT, IDM_REMOVEFILEFROMPROJECT_EXPLORERTREEVIEW
+         ' These messages will already have the correct node selected in the Explorer
+         ' treeview. If the document is open in a tab then we do need to set that
+         ' tab as current and issue a EFC_CLOSECURRENT. 
+         dim as hwnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
+         dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
+         dim as long ItemLParam = FF_TreeView_GetlParam( hTV, hItem )
+         ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
+         pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
+         if pDoc = 0 then exit function
+         if gTTabCtl.SetTabIndexByDocumentPtr( pDoc ) <> -1 then
+           if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) = false then exit function
+         end if  
+         ' File close succeeded. Remove this document from the project collection and remove treeview node. 
+         gdb2.dbDelete(pDoc->DiskFilename)
+         Treeview_DeleteItem( hTV, hItem)
+         gApp.RemoveDocument(pDoc)
          
            
       ''  COMPILE MENU          
@@ -1499,7 +1587,7 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
             If lpnm->dwItemSpec = 4 Then   ' Compile results is 
                ' Toggle show/hide compile results
                ShowWindow HWND_FRMOUTPUT, Iif(IsWindowVisible(HWND_FRMOUTPUT), SW_HIDE, SW_SHOW)
-               frmMain_PositionWindows(HWND_FRMMAIN)
+               frmMain_PositionWindows
             End If   
          End If
 
@@ -1511,6 +1599,7 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
                   SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
                   MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
                   frmTemplates_Show(HWnd, rc.Left, rc.Bottom)
+               
                Case IDM_FILEOPEN    ' Dropdown most recently used files
                   SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_REBAR), RB_GETRECT, 0, Cast(LPARAM, @rc))
                   MapWindowPoints(ptbn->hdr.hwndFrom, HWND_DESKTOP, Cast(Point Ptr, @rc), 2)
@@ -1529,7 +1618,7 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
                nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
                gTTabCtl.DisplayScintilla(nCurSel, False)
             case IDC_DESIGNTABCTRL 
-               frmMain_PositionWindows(HWnd)
+               frmMain_PositionWindows
          END SELECT
          
       Case TCN_SELCHANGE
@@ -1539,14 +1628,19 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
                ' Show the new tab
                nCurSel = TabCtrl_GetCurSel(pNMHDR->hwndFrom) 
                gTTabCtl.DisplayScintilla(nCurSel, True)
-               frmMain_PositionWindows(HWnd)
+               frmMain_PositionWindows
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
                If pDoc Then
-                  Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
-                                       pDoc->hNodeExplorer )
+                  ' Prevent Treeview flickering during the selection movement. This
+                  ' is necessary because for large treeview we will see noticable flicker
+                  ' as the new selection scrolls into view.
+                  dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+                  LockWindowUpdate(hTV)
+                  Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
+                  LockWindowUpdate(0)
                end if
             case IDC_DESIGNTABCTRL 
-               frmMain_PositionWindows(HWnd)
+               frmMain_PositionWindows
                PostMessage(hwnd, MSG_USER_GENERATECODE, 0, 0)
          END SELECT  
 
@@ -1831,7 +1925,9 @@ private Function frmMain_OnDestroy( byval HWnd As HWnd ) As LRESULT
    ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETIMAGELIST, 0, 0))
    ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETHOTIMAGELIST, 0, 0))
    ImageList_Destroy Cast(HIMAGELIST, SendMessage(GetDlgItem(HWnd, IDC_FRMMAIN_TOOLBAR), TB_GETDISABLEDIMAGELIST, 0, 0))
+
    ImageList_Destroy TabCtrl_GetImageList(gTTabCtl.hWindow) 
+   ImageList_Destroy TreeView_GetImageList( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), TVSIL_NORMAL )
    
    ' Output the config settings to disk file
    gConfig.SaveConfigFile
@@ -1857,11 +1953,7 @@ private Function frmMain_TabCtl_SubclassProc ( _
                   ) As LRESULT
 
    Dim pInfo As TCHITTESTINFO
-   Dim As HWND hLV 
-   Dim As POINT pt
    dim as long nCurSel
-   dim as HMENU hPopupMenu 
-   static as long oldX, oldY
 
 
    ' Convert our ENTER key presses into LBUTTONDBLCLK to process them similarly
@@ -1885,7 +1977,7 @@ private Function frmMain_TabCtl_SubclassProc ( _
                nCurSel = TabCtrl_GetCurSel(pDoc->hDesignTabCtrl)
                nCurSel = iif(nCurSel = 0, 1, 0)
                TabCtrl_SetCurFocus(pDoc->hDesignTabCtrl, nCurSel)
-               frmMain_PositionWindows(HWND_FRMMAIN)
+               frmMain_PositionWindows
             END IF
          END IF
          
@@ -1896,7 +1988,8 @@ private Function frmMain_TabCtl_SubclassProc ( _
          nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
          gTTabCtl.SetFocusTab(nCurSel)
          ' Create the popup menu
-         hPopupMenu = CreateTopTabCtlContextMenu(nCurSel)
+         Dim As POINT pt
+         dim as HMENU hPopupMenu = CreateTopTabCtlContextMenu(nCurSel)
          GetCursorPos @pt
          TrackPopupMenu(hPopUpMenu, 0, pt.x, pt.y, 0, HWnd_FRMMAIN, ByVal Null)
          DestroyMenu hPopUpMenu
@@ -1912,13 +2005,17 @@ private Function frmMain_TabCtl_SubclassProc ( _
          If pInfo.flags = TCHT_ONITEMICON Then 
             gTTabCtl.CloseTab()
          else
-            gApp.bDragTabActive = true: oldX = pt.x: oldY = pt.y
-            SetCursor( LoadCursor( null, IDC_HAND ))
+            if (wParam and MK_SHIFT) then
+               gApp.bDragTabActive = true
+               SetCursor( LoadCursor(0, MAKEINTRESOURCE(OCR_SIZEALL)) )
+            end if
          end if
+         SetCapture(hWnd)
             
-      Case WM_LBUTTONUP
-         If gApp.bDragTabActive Then 
-            gApp.bDragTabActive = false
+      Case WM_MOUSEMOVE
+         if gApp.bDragTabActive then
+            SetCursor( LoadCursor(0, MAKEINTRESOURCE(OCR_SIZEALL)) )
+
             dim as long idx, iCurTab, iDropTab, nCount
             dim As TC_HITTESTINFO HT
             Dim AS TCITEM TB_CURRENT, TB_TEMP 
@@ -1957,10 +2054,14 @@ private Function frmMain_TabCtl_SubclassProc ( _
             gTTabCtl.SetFocusTab(iDropTab)
 
          end if
-         gApp.bDragTabActive = false
+
+      Case WM_LBUTTONUP
          ' Reset the mouse pointer
          SetCursor( LoadCursor( null, IDC_ARROW ))
+         ReleaseCapture
+         gApp.bDragTabActive = false
 
+         
       Case WM_DESTROY
          ' REQUIRED: Remove control subclassing
          RemoveWindowSubclass HWnd, @frmOutput_Listview_SubclassProc, uIdSubclass
@@ -2003,7 +2104,7 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
                if pDoc->bSizing then
                   if pt.y <> pDoc->ptPrev.y then
                      pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
-                     frmMain_PositionWindows(HWND)
+                     frmMain_PositionWindows
                      pDoc->ptPrev.y = pt.y
                   end if   
                else   
@@ -2041,7 +2142,7 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             if PtInRect(@pDoc->rcSplitButton, pt) THEN 
                pDoc->bSizing = false
                pDoc->SplitY = 0
-               frmMain_PositionWindows(HWND)
+               frmMain_PositionWindows
             END IF
          end if
           
@@ -2064,8 +2165,8 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             
       case WM_SETCURSOR
          if (gApp.bDragTabActive = true) Then 
-            ' Change mouse cursor because Tab in TabCtl being moved
-            SetCursor( LoadCursor( null, IDC_HAND ))
+            ' We handle the cursor in the TabControl subclass. Don't allow the
+            ' main window to change our cursor. Return True.
             return true
          elseif (gApp.IsCompiling = true) or _
                 (gApp.IsProjectLoading = true) or _
@@ -2379,8 +2480,10 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
             End Select      
 
             ' Close any open Find/Replace window with ESC key
+            ' Close any open FunctionList window
             if (uMsg.message = WM_KEYDOWN) andAlso (uMsg.wParam = VK_ESCAPE) THEN
                if IsWindowVisible( HWND_FRMFINDREPLACE ) THEN SendMessage( HWND_FRMFINDREPLACE, WM_CLOSE, 0, 0 )
+               if IsWindowVisible( HWND_FRMFUNCTIONLIST ) THEN SendMessage( HWND_FRMFUNCTIONLIST, WM_CLOSE, 0, 0 )
             END IF
 
             ' Handle any keypress that would move or resize control(s) on a Designer Form.
@@ -2483,19 +2586,19 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    Loop
    Function = uMsg.wParam
 
-   If ghIconGood       Then DestroyIcon(ghIconGood) 
-   If ghIconBad        Then DestroyIcon(ghIconBad)
-   if ghAccelUserTools THEN DestroyAcceleratorTable(ghAccelUserTools)
+   If ghIconGood       Then DestroyIcon( ghIconGood ) 
+   If ghIconBad        Then DestroyIcon( ghIconBad )
+   if ghAccelUserTools THEN DestroyAcceleratorTable( ghAccelUserTools )
    
-   if gApp.pImageAutocompleteBaseType then deallocate(gApp.pImageAutocompleteBaseType)
-   if gApp.pImageAutocompleteClass    then deallocate(gApp.pImageAutocompleteClass)
-   if gApp.pImageAutocompleteMethod   then deallocate(gApp.pImageAutocompleteMethod)
-   if gApp.pImageAutocompleteProperty then deallocate(gApp.pImageAutocompleteProperty)
+   if gApp.pImageAutocompleteBaseType then deallocate( gApp.pImageAutocompleteBaseType )
+   if gApp.pImageAutocompleteClass    then deallocate( gApp.pImageAutocompleteClass )
+   if gApp.pImageAutocompleteMethod   then deallocate( gApp.pImageAutocompleteMethod )
+   if gApp.pImageAutocompleteProperty then deallocate( gApp.pImageAutocompleteProperty )
 
    ' Delete the allocated memory for the various child windows
-   pWindow = AfxCWindowPtr(HWND_FRMEXPLORER):       Delete pWindow
-   pWindow = AfxCWindowPtr(HWND_FRMRECENT):         Delete pWindow
-   pWindow = AfxCWindowPtr(HWND_FRMOUTPUT):         Delete pWindow
-   pWindow = AfxCWindowPtr(HWND_FRMMAIN):           Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER ): Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMRECENT ):   Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ):   Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMMAIN ):     Delete pWindow
 
 End Function

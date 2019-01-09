@@ -37,6 +37,7 @@ Type clsApp
       NonProjectNotes            as CWSTR             ' Save/load from config file
       wszPanelText               as CWSTR             ' Current file loading or being compiled (for statusbar updating)
       hIconPanel                 as HANDLE            ' Success/failure of most previous compile (for Statusbar updating)
+      FileLoadingCount           as long              ' Track count of files loading for statusbar display
       IsNewProjectFlag           As BOOLEAN
       IsProjectLoading           as Boolean           ' Project loading. Disable some screen updating.
       IsFileLoading              as Boolean           ' File loading. Disable some screen updating.

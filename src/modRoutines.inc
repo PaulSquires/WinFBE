@@ -1363,7 +1363,7 @@ END FUNCTION
 ''
 ''
 public Function ParseDocument( byval pDoc as clsDocument ptr, _
-                               byval wszFilename as CWSTR _    
+                               byval wszFilename as CWSTR = "" _    
                                ) As Long
 
    dim as long nLineCount, nLineNum, nPos

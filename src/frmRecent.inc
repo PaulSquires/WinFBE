@@ -18,13 +18,13 @@
 ' ========================================================================================
 ' Load the Recent Files/Projects Treeview
 ' ========================================================================================
-public Function frmRecent_LoadTreeview( ByVal HWnd As HWnd ) As LRESULT
+public Function frmRecent_LoadTreeview() As LRESULT
 
    Dim As CWSTR wzStr 
    dim As HTREEITEM hNode, hFirstNode
    Dim As BOOLEAN fEmpty = True 
 
-   Dim As HWnd hTree = GetDlgItem(HWnd, IDC_FRMRECENT_TREEVIEW) 
+   Dim As HWnd hTree = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_TREEVIEW) 
 
    Treeview_DeleteAllItems(hTree) 
 
@@ -79,14 +79,14 @@ End Function
 ' ========================================================================================
 ' Position all child windows. Called manually and/or by WM_SIZE
 ' ========================================================================================
-public Function frmRecent_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+public Function frmRecent_PositionWindows() As LRESULT
    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMRECENT)
    If pWindow = 0 Then Exit Function
    
    ' Get the entire client area
    Dim As Rect rc
-   GetClientRect(HWnd, @rc)
+   GetClientRect(HWND_FRMRECENT, @rc)
 
    Dim As HWnd hBtn
    Dim As Long nLeft, nTop, nWidth, nHeight
@@ -125,7 +125,7 @@ private Function frmRecent_OnSize( ByVal HWnd As HWnd, _
                                    ) As LRESULT
    If state <> SIZE_MINIMIZED Then
       ' Position all of the child windows
-      frmRecent_PositionWindows(HWnd)
+      frmRecent_PositionWindows
    End If
    Function = 0
 End Function
@@ -216,7 +216,7 @@ private Function frmRecent_Tree_SubclassProc ( _
                                           0 )  ' pDocIn
                End If
             End If
-            frmMain_PositionWindows(HWND_FRMMAIN)
+            frmMain_PositionWindows
             SetFocusScintilla
          End If   
          Exit Function
@@ -308,8 +308,8 @@ public Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    SendMessage( hTree, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
 
-   frmRecent_LoadTreeview(HWND_FRMRECENT)
-   frmRecent_PositionWindows(HWND_FRMRECENT)
+   frmRecent_LoadTreeview
+   frmRecent_PositionWindows
 
    Function = 0
    

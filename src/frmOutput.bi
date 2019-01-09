@@ -24,6 +24,6 @@
 declare function frmOutput_ShowNotes() as long 
 declare function frmOutput_UpdateToDoListview() as long 
 declare Function frmOutput_ShowHideOutputControls( ByVal HWnd As HWnd ) As LRESULT
-declare Function frmOutput_PositionWindows( ByVal HWnd As HWnd ) As LRESULT
+declare Function frmOutput_PositionWindows As LRESULT
 declare Function frmOutput_Show( ByVal hWndParent As HWnd ) As LRESULT
 
