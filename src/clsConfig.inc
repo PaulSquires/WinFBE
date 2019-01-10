@@ -60,6 +60,21 @@ End Function
   
 ''
 ''
+Function clsConfig.GetThemePtr() as TYPE_THEMES ptr
+   ' Determine the default theme index.
+   dim pTheme as TYPE_THEMES ptr
+   for i as long = lbound(gConfig.Themes) to ubound(gConfig.Themes)
+      if gConfig.Themes(i).id = gConfig.SelectedTheme then 
+         pTheme = @gConfig.Themes(i): exit for
+      end if   
+   NEXT
+   if pTheme = 0 THEN pTheme = @gConfig.Themes(0)
+   function = pTheme
+end function
+
+   
+''
+''
 Function clsConfig.LoadCodetipsFB() as boolean
 
    Dim as CWSTR wst

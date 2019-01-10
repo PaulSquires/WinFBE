@@ -573,6 +573,161 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_MOUSEMOVE message for window/dialog: frmExplorer
+' ========================================================================================
+private Function frmExplorer_OnMouseMove( ByVal HWnd As HWnd, _
+                                          ByVal x as long, _
+                                          byval y as long, _
+                                          byval keyflags as UINT _
+                                          ) As Long
+
+   DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
+   If pWindow = 0 Then Exit Function
+
+   ' These are relative to <hWnd>
+   dim as POINT pt = (x, y)
+
+   if treedragger.dragging then
+      dim as TV_HITTESTINFO hti
+      dim as HTREEITEM target
+      
+      ' Convert to tree co-ordinates...
+      MapWindowPoints( hWnd, treedragger.hTree, cast(POINT ptr, @pt), 1 )
+
+      ImageList_DragMove( pt.x, pt.y )
+      
+      hti.pt = pt
+      target = TreeView_HitTest( treedragger.hTree, @hti )
+      
+      if frmExplorer_AllowDrop( target, 0 ) = false then
+         target = null
+      end if
+      
+      ImageList_DragShowNoLock( false )   ' hide the image
+      Treeview_SelectDropTarget( treedragger.hTree, target )   
+      ImageList_DragShowNoLock( true )    ' make it visible again
+      
+      frmExplorer_CheckAutoScroll( hwnd, pt.x, pt.y )
+      exit function
+      
+   else
+   
+      ' PANELS LEFT/RIGHT SPLITTER
+      Dim As Rect rc
+      GetWindowRect HWND_FRMEXPLORER, @rc
+      rc.Left = rc.Right - pWindow->ScaleX(3)
+      GetCursorPos(@pt)
+      If PtInRect( @rc, pt ) Then
+         if WindowFromPoint(pt) = HWND_FRMEXPLORER then
+            SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         end if
+      End If
+      If gApp.bDragActive Then
+         If gApp.hWndPanel = HWND_FRMEXPLORER Then
+            ' Get the current rect of the frmExplorer and compare right side to the current cursor position
+            ' and then move the right side to equal the cursor position.
+            Dim As Long nDiff = pt.x - rc.Right
+            GetClientRect HWND_FRMEXPLORER, @rc
+            Dim As Long nWidth = (rc.Right - rc.Left + nDiff)
+            SetWindowPos HWND_FRMEXPLORER, 0, 0, 0, nWidth, rc.Bottom - rc.Top, SWP_NOMOVE Or SWP_NOZORDER
+            frmMain_PositionWindows
+            AfxDoEvents   ' allow screen to repaint
+            Exit Function
+         End If
+      End If
+   end if
+   
+   ' Turn off the autoscroll
+   frmExplorer_AutoScroll( hwnd, 0, 0 )
+      
+   function = 0
+end function
+
+
+' ========================================================================================
+' Process WM_LBUTTONDOWN message for window/dialog: frmExplorer
+' ========================================================================================
+private Function frmExplorer_OnLButtonDown( ByVal HWnd As HWnd, _
+                                            byval fDoubleClick as Boolean, _
+                                            ByVal x as long, _
+                                            byval y as long, _
+                                            byval keyflags as UINT _
+                                            ) As Long
+
+   DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
+   If pWindow = 0 Then Exit Function
+
+   ' PANELS LEFT/RIGHT SPLITTER
+   Dim As Rect rc
+   Dim As Point pt 
+
+   gApp.bDragActive = False 
+   GetWindowRect HWND_FRMEXPLORER, @rc
+   rc.Left = rc.Right - pWindow->ScaleX(3)
+   GetCursorPos(@pt)
+   If PtInRect( @rc, pt ) Then
+      if WindowFromPoint(pt) = HWND_FRMEXPLORER then
+         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZEWE), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         gApp.bDragActive = True 
+         gApp.hWndPanel   = HWND_FRMEXPLORER
+         SetCapture( HWND_FRMEXPLORER )
+      end if
+   End If
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Process WM_LBUTTONUP message for window/dialog: frmExplorer
+' ========================================================================================
+private Function frmExplorer_OnLButtonUp( ByVal HWnd As HWnd, _
+                                          ByVal x as long, _
+                                          byval y as long, _
+                                          byval keyflags as UINT _
+                                          ) As Long
+   if treedragger.dragging then
+      ' Handle the drop
+      dim as HTREEITEM target
+      dim as TV_ITEM tvi
+      dim as long msgFileType
+
+      ImageList_EndDrag
+      ImageList_DragLeave( treedragger.hTree )
+      
+      ShowCursor( true )    ' restore mouse cursor
+      
+      ReleaseCapture
+      
+      ImageList_Destroy( treedragger.DragImage )
+      treedragger.DragImage = null
+      
+      ' Proceed with the drop...
+      target = TreeView_GetDropHilight( treedragger.hTree )
+      
+      ' Unselect the drop hilight item...
+      TreeView_SelectDropTarget( treedragger.hTree , NULL )
+
+      if frmExplorer_AllowDrop( target, msgFileType ) then
+         SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(msgFileType, 0), 0 )
+      end if
+      
+      treedragger.dragging = false
+      frmExplorer_AutoScroll( hwnd, 0, 0 )
+      AfxRedrawWindow( treedragger.hTree )
+      exit function
+
+   elseif gApp.bDragActive then
+      gApp.bDragActive = False 
+      gApp.hWndPanel = 0
+      ReleaseCapture()
+   end if
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' frmExplorer Window procedure
 ' ========================================================================================
 private Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
@@ -582,9 +737,12 @@ private Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
                                       ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_SIZE,    frmExplorer_OnSize)
-      HANDLE_MSG (HWnd, WM_NOTIFY,  frmExplorer_OnNotify)
-      HANDLE_MSG (HWnd, WM_PAINT,   frmExplorer_OnPaint)
+      HANDLE_MSG (HWnd, WM_SIZE,        frmExplorer_OnSize)
+      HANDLE_MSG (HWnd, WM_NOTIFY,      frmExplorer_OnNotify)
+      HANDLE_MSG (HWnd, WM_PAINT,       frmExplorer_OnPaint)
+      HANDLE_MSG (HWnd, WM_LBUTTONUP,   frmExplorer_OnLButtonUp)
+      HANDLE_MSG (HWnd, WM_LBUTTONDOWN, frmExplorer_OnLButtonDown)
+      HANDLE_MSG (HWnd, WM_MOUSEMOVE,   frmExplorer_OnMouseMove)
    
    case WM_DESTROY
       Dim As HWnd hTree = GetDlgItem( hWnd, IDC_FRMEXPLORER_TREE)
@@ -600,73 +758,6 @@ private Function frmExplorer_WndProc( ByVal HWnd   As HWnd, _
       SetBkColor Cast(HDC,wParam), GetSysColor(COLOR_BTNFACE)
       return Cast( LRESULT, GetSysColorBrush(COLOR_BTNFACE))
 
-   case WM_MOUSEMOVE
-      ' These are relative to <hWnd>
-      dim as POINT pt
-      pt.x = GET_X_LPARAM( lParam )
-      pt.y = GET_Y_LPARAM( lParam )
-
-      if treedragger.dragging then
-         dim as TV_HITTESTINFO hti
-         dim as HTREEITEM target
-         
-         
-         ' Convert to tree co-ordinates...
-         MapWindowPoints( hWnd, treedragger.hTree, cast(POINT ptr, @pt), 1 )
-
-         ImageList_DragMove( pt.x, pt.y )
-         
-         hti.pt = pt
-         target = TreeView_HitTest( treedragger.hTree, @hti )
-         
-         if frmExplorer_AllowDrop( target, 0 ) = false then
-            target = null
-         end if
-         
-         ImageList_DragShowNoLock( false )   ' hide the image
-         Treeview_SelectDropTarget( treedragger.hTree, target )   
-         ImageList_DragShowNoLock( true )    ' make it visible again
-         
-         frmExplorer_CheckAutoScroll( hwnd, pt.x, pt.y )
-      
-      else
-         frmExplorer_AutoScroll( hwnd, 0, 0 )
-
-      end if
-   
-   case WM_LBUTTONUP
-      if treedragger.dragging then
-         ' Handle the drop
-         dim as HTREEITEM target
-         dim as TV_ITEM tvi
-         dim as long msgFileType
-
-         ImageList_EndDrag
-         ImageList_DragLeave( treedragger.hTree )
-         
-         ShowCursor( true )    ' restore mouse cursor
-         
-         ReleaseCapture
-         
-         ImageList_Destroy( treedragger.DragImage )
-         treedragger.DragImage = null
-         
-         ' Proceed with the drop...
-         target = TreeView_GetDropHilight( treedragger.hTree )
-         
-         ' Unselect the drop hilight item...
-         TreeView_SelectDropTarget( treedragger.hTree , NULL )
-
-         if frmExplorer_AllowDrop( target, msgFileType ) then
-            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(msgFileType, 0), 0 )
-         end if
-         
-         treedragger.dragging = false
-         frmExplorer_AutoScroll( hwnd, 0, 0 )
-         AfxRedrawWindow( treedragger.hTree )
-         
-      end if
-   
    case UWM_SCROLL
       ' User defined message to handle slow/fast Explorer treeview scrolling
       dim as POINT pt

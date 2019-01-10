@@ -14,6 +14,7 @@
 #include once "clsApp.bi"
 #include once "frmExplorer.bi"
 
+
 ''
 ''
 Function clsApp.GetDocumentCount() As Long
@@ -364,6 +365,7 @@ function clsApp.AddQuickRunEXE( byref wszFilename as wstring ) as Long
 
    function = 0
 end function
+
 
 ''
 ''

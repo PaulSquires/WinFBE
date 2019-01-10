@@ -190,6 +190,7 @@ Type clsConfig
       
       Declare Constructor()
       declare function ImportTheme( byref st as wstring, byval bImportExternal as Boolean = false ) as Long
+      declare Function GetThemePtr() as TYPE_THEMES ptr
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long
       Declare Function SaveConfigFile() As Long

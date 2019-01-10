@@ -890,7 +890,9 @@ function clsDocument.IsFunctionLine( byval lineNum as long ) as long
 
    ' trim and remove double spaces and replace TABs with single space
    dim as string lineText = this.GetLine( lineNum )
+   if len( lineText ) < 4 then exit function
    lineText = ltrim(ucase( AfxStrShrink(lineText, chr(32,9)) ))
+   if len( lineText ) < 4 then exit function
       
    If Left( lineText, 9 ) = "FUNCTION " then
       ' bypass any line with = that is a "FUNCTION = " line.
@@ -994,7 +996,7 @@ function clsDocument.GotoNextFunction() as long
    dim as long newLine  = curLine
    
    for i as long = curLine + 1 to maxLines
-      if this.IsFunctionLine( i ) then
+      if this.IsFunctionLine( i ) > 0 then
          newLine = i
          exit for
       end if
@@ -1022,7 +1024,7 @@ function clsDocument.GotoPrevFunction() as long
    dim as long newLine  = curLine
    
    for i as long = curLine - 1 to 0 step -1
-      if this.IsFunctionLine( i ) then
+      if this.IsFunctionLine( i ) > 0 then
          newLine = i
          exit for
       end if
@@ -1464,13 +1466,8 @@ Function clsDocument.ApplyProperties() As Long
    
    If m_pSci(0) = 0 Then Exit Function
 
-   ' Determine the default theme index.
-   for i = lbound(gConfig.Themes) to ubound(gConfig.Themes)
-      if gConfig.Themes(i).id = gConfig.SelectedTheme then 
-         pTheme = @gConfig.Themes(i): exit for
-      end if   
-   NEXT
-   if pTheme = 0 THEN pTheme = @gConfig.Themes(0)
+   pTheme = gConfig.GetThemePtr
+   
 
    ' Must apply all settings/styles to each Scintilla split window to ensure that
    ' they all appear and act the same.

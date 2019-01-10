@@ -441,7 +441,6 @@ private Function frmOptionsColors_OnCommand( ByVal HWnd As HWnd, _
             dim as RECT rcButton
             GetWindowRect(hwndCtl, @rcButton)
             DIM pt AS POINT = (rcButton.left, rcButton.bottom)
-            'ClientToScreen(pNmh->hwndFrom, @pt)
             ' Don't allow the first (Default) theme to be deleted.
             dim as long fGrayed = iif(gConfig.idxTheme = 0, MF_GRAYED, MF_ENABLED)
             ' Create a menu and add items
@@ -542,7 +541,6 @@ private Function frmOptionsColors_WndProc( ByVal HWnd   As HWnd, _
          
    End Select
 
-   ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
 
 End Function
@@ -569,6 +567,7 @@ public Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow->AddControl("BUTTON", , IDC_FRMOPTIONSCOLORS_BTNACTIONS, L(345,"Actions"), 224, 21, 146, 25, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_SPLITBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   
    Dim As HWnd hList = _
    pWindow->AddControl("LISTBOX",, IDC_FRMOPTIONSCOLORS_LSTCOLORS, "", 11, 50, 200, 225, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _

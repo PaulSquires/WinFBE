@@ -20,7 +20,6 @@
 #include once "frmExplorer.bi"
 #include once "modMRU.bi"
 #include once "modAutoInsert.bi"
-#include once "modSplitter.bi"
 #include once "modToolbar.bi"
 #include once "modMenus.bi"
 #include once "modCompile.bi"
@@ -148,8 +147,17 @@ public Function frmMain_SelectComboFunctions() As Long
    dim as CWSTR wszFunctionName = pDoc->GetCurrentFunctionName
    dim as long idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
 
-   ' If the function name is not found then we must be between functions. Set
-   ' the index to 0 so that the "(Module level)" entry is selected.
+   ' If the function name is not found then check to see if the file is dirty
+   ' and do a reparse and second check of the function list. If still not found
+   ' then we must be between functions. Set the index to 0 so that the "(Module level)" 
+   ' entry is selected.
+   if idx = -1 then 
+      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+         ParseDocument( pDoc )
+         frmMain_LoadComboFunctions
+         idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
+      end if
+   end if
    if idx = -1 then idx = 0
    ComboBox_SetCurSel( hComboFunctions, idx ) 
    
@@ -701,9 +709,11 @@ private Function frmMain_OnPaint( ByVal HWnd As HWnd ) As LRESULT
          AfxGetWindowLocation( hEdit, nLeft, nTop )
          GetClientRect( HWND_FRMMAIN, @rc )
          rc.left = nLeft
-         rc.right = nLeft + AfxGetWindowWidth( hEdit )
+         rc.right = nLeft + AfxGetWindowWidth( hEdit ) + AfxGetWindowWidth( pDoc->hScrollbar )
          rc.bottom = nTop
          FillRect( hDC, @rc, GetSysColorBrush( COLOR_BTNFACE ) )
+         rc.top = rc.bottom - pWindow->ScaleY(1)
+         FillRect( hDC, @rc, GetSysColorBrush( COLOR_WINDOWFRAME ) )
       end if
          
    end if
@@ -1114,18 +1124,41 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             pDocSelected = cast( clsDocument ptr, ComboBox_GetItemData(hwndCtl, nCurSel) ) 
             if pDocSelected <> pDoc then
                OpenSelectedDocument( pDocSelected->DiskFilename )
-            else
-               frmMain_SetFocusToCurrentCodeWindow
             end if   
+            frmMain_SetFocusToCurrentCodeWindow
          end if
 
       
       case IDC_FRMMAIN_COMBOFUNCTIONS
          if codeNotify = CBN_CLOSEUP THEN
             frmMain_SetFocusToCurrentCodeWindow
+         
          elseif codeNotify = CBN_SELCHANGE THEN
-
-            frmMain_SetFocusToCurrentCodeWindow()
+            ' Load the pDoc that is held in the itemData of the Files combobox
+            dim pDocSelected as clsDocument ptr 
+            dim wszFilename as wstring * MAX_PATH
+            dim wszFunctionName as wstring * MAX_PATH
+            dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
+            dim as long nCurSel = ComboBox_GetCurSel( hComboFiles )
+            if nCurSel = -1 then exit function
+            ' Get the File name
+            pDocSelected = cast( clsDocument ptr, ComboBox_GetItemData(hComboFiles, nCurSel) ) 
+            wszFilename = pDocSelected->DiskFilename
+            ' Get the Function name
+            ' If the pDoc is dirty then we will need to reparse to the document otherwise
+            ' the line numbers will not be correct in the DB2 database.
+            ' If we have selected "(Module level)" then simply reposition to start of file.
+            nCurSel = ComboBox_GetCurSel( hwndCtl )
+            if nCurSel = 0 then
+               OpenSelectedDocument( wszFilename, "", 0 )
+            else   
+               If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+                  ParseDocument( pDoc )
+               end if
+               ComboBox_GetText( hwndCtl, wszFunctionName, MAX_PATH )
+               OpenSelectedDocument( wszFilename, wszFunctionName )
+            end if
+            frmMain_SetFocusToCurrentCodeWindow
          end if
          
          
@@ -1694,7 +1727,11 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       ''  OPTIONS MENU
       Case IDM_OPTIONS
          frmOptions_Show( HWnd )
-      
+         ' Repaint the File/Functions and Build comboboxes because the Theme may have changed.
+         AfxRedrawWindow( GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES ) )
+         AfxRedrawWindow( GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS ) )
+         AfxRedrawWindow( GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOBUILDS ) )
+         
       case IDM_BUILDCONFIG
          frmBuildConfig_Show( HWND ) 
       
@@ -2328,6 +2365,8 @@ private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
                                      ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
                                      ) As Long
 
+   If lpdis->itemID = -1 Then Exit Function
+   
    Dim As HBRUSH hBrush 
    dim as HFONT hFontNormal, hFontBold 
    Dim As RECT rc
@@ -2336,8 +2375,9 @@ private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
    if pWindow = 0 THEN exit function
       
-   If lpdis->itemID = -1 Then Exit Function
+   dim pTheme as TYPE_THEMES ptr = gConfig.GetThemePtr
    
+
    Select Case lpdis->itemAction
       Case ODA_DRAWENTIRE, ODA_SELECT
          
@@ -2349,13 +2389,13 @@ private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
             
             ' CLEAR BACKGROUND
             If (lpdis->itemState And ODS_SELECTED) Then     
-               SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
-               SetTextColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT))
-               hBrush = GetSysColorBrush(COLOR_HIGHLIGHT) 
+               SetTextColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nFg )
+               SetBkColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nBg )
+               hBrush = CreateSolidBrush( pTheme->colors(CLR_SELECTION).nBg )
             else
-               SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
-               SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
-               hBrush = GetSysColorBrush(COLOR_WINDOW) 
+               SetTextColor( lpdis->hDC, pTheme->colors(CLR_TEXT).nFg )
+               SetBkColor( lpdis->hDC, pTheme->colors(CLR_WINDOW).nFg )
+               hBrush = CreateSolidBrush( pTheme->colors(CLR_WINDOW).nFg )
             end if
             SelectObject(lpdis->hDC, hBrush)      
             FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
@@ -2371,13 +2411,124 @@ private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
          end if
 
          RestoreDC(lpdis->hDC, -1)
-
+         If hBrush then DeleteObject( hBrush )
+         
          Function = True : Exit Function
    
    End Select
 
    Function = 0
 End Function
+
+
+' ========================================================================================
+' Process WM_MOUSEMOVE message for window/dialog: frmMain
+' ========================================================================================
+public Function frmMain_OnMouseMove( ByVal HWnd As HWnd, _
+                                     ByVal x as long, _
+                                     byval y as long, _
+                                     byval keyflags as UINT _
+                                     ) As Long
+
+   ' HITTEST (DOCUMENT SPLITTER)
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc THEN 
+      Dim As Rect rc
+      Dim As Point pt = (x, y)
+      if pDoc->bSizing then
+         if pt.y <> pDoc->ptPrev.y then
+            pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
+            frmMain_PositionWindows
+            pDoc->ptPrev.y = pt.y
+         end if   
+      else   
+         if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+            SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         end if   
+      END if
+   end if
+         
+   function = 0
+end function
+
+
+' ========================================================================================
+' Process WM_LBUTTONDOWN message for window/dialog: frmMain
+' ========================================================================================
+private Function frmMain_OnLButtonDown( ByVal HWnd As HWnd, _
+                                        byval fDoubleClick as Boolean, _
+                                        ByVal x as long, _
+                                        byval y as long, _
+                                        byval keyflags as UINT _
+                                        ) As Long
+                                        
+   ' HITTEST (DOCUMENT SPLITTER)
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc THEN 
+      Dim As Rect rc 
+      Dim As Point pt = (x, y)
+      if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+         pDoc->bSizing = true
+         pDoc->SplitY = pDoc->rcSplitButton.top  
+         pDoc->ptPrev.y = pt.y
+         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         SetCapture( HWND_FRMMAIN )
+      END IF
+   end if
+
+   function = 0
+end function
+
+         
+' ========================================================================================
+' Process WM_LBUTTONUP message for window/dialog: frmMain
+' ========================================================================================
+private Function frmMain_OnLButtonUp( ByVal HWnd As HWnd, _
+                                      ByVal x as long, _
+                                      byval y as long, _
+                                      byval keyflags as UINT _
+                                      ) As Long
+
+   ' HITTEST (DOCUMENT SPLITTER)
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc THEN 
+      if pDoc->bSizing then
+         pDoc->bSizing = false
+         ReleaseCapture
+      end if
+   end if   
+   SetCursor( LoadCursor( null, IDC_ARROW ))
+         
+   function = 0
+end function
+
+
+' ========================================================================================
+' Process WM_LBUTTONDOWN message for window/dialog: frmMain
+' ========================================================================================
+private Function frmMain_OnLButtonDblClk( ByVal HWnd As HWnd, _
+                                          byval fDoubleClick as Boolean, _
+                                          ByVal x as long, _
+                                          byval y as long, _
+                                          byval keyflags as UINT _
+                                          ) As Long
+
+   if gApp.bDragActive = false then
+      ' Are we over a split edit area (toggle off the split)
+      dim as POINT pt = (x, y)
+      Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+      if pDoc THEN 
+         if PtInRect(@pDoc->rcSplitButton, pt) THEN 
+            pDoc->bSizing = false
+            pDoc->SplitY = 0
+            ReleaseCapture
+            frmMain_PositionWindows
+         END IF
+      end if
+   end if
+   
+   function = 0
+end function
 
 
 ' ========================================================================================
@@ -2390,69 +2541,23 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
                                   ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_CREATE,      frmMain_OnCreate)
-      HANDLE_MSG (HWnd, WM_PAINT,       frmMain_OnPaint)
-      HANDLE_MSG (HWnd, WM_SIZE,        frmMain_OnSize)
-      HANDLE_MSG (HWnd, WM_CLOSE,       frmMain_OnClose)
-      HANDLE_MSG (HWnd, WM_DESTROY,     frmMain_OnDestroy)
-      HANDLE_MSG (HWnd, WM_COMMAND,     frmMain_OnCommand)
-      HANDLE_MSG (HWnd, WM_NOTIFY,      frmMain_OnNotify)
-      HANDLE_MSG (HWnd, WM_ACTIVATEAPP, frmMain_OnActivateApp)
-      HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
-      HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
-      HANDLE_MSG (HWnd, WM_MEASUREITEM, frmMain_OnMeasureItem)
-      HANDLE_MSG (HWnd, WM_DRAWITEM,    frmMain_OnDrawItem)
+      HANDLE_MSG (HWnd, WM_CREATE,        frmMain_OnCreate)
+      HANDLE_MSG (HWnd, WM_PAINT,         frmMain_OnPaint)
+      HANDLE_MSG (HWnd, WM_SIZE,          frmMain_OnSize)
+      HANDLE_MSG (HWnd, WM_CLOSE,         frmMain_OnClose)
+      HANDLE_MSG (HWnd, WM_DESTROY,       frmMain_OnDestroy)
+      HANDLE_MSG (HWnd, WM_COMMAND,       frmMain_OnCommand)
+      HANDLE_MSG (HWnd, WM_NOTIFY,        frmMain_OnNotify)
+      HANDLE_MSG (HWnd, WM_ACTIVATEAPP,   frmMain_OnActivateApp)
+      HANDLE_MSG (HWnd, WM_CONTEXTMENU,   frmMain_OnContextMenu)
+      HANDLE_MSG (HWnd, WM_DROPFILES,     frmMain_OnDropFiles)
+      HANDLE_MSG (HWnd, WM_MEASUREITEM,   frmMain_OnMeasureItem)
+      HANDLE_MSG (HWnd, WM_DRAWITEM,      frmMain_OnDrawItem)
+      HANDLE_MSG (HWnd, WM_LBUTTONDOWN,   frmMain_OnLButtonDown)
+      HANDLE_MSG (HWnd, WM_LBUTTONUP,     frmMain_OnLButtonUp)
+      HANDLE_MSG (HWnd, WM_MOUSEMOVE,     frmMain_OnMouseMove)
+      HANDLE_MSG (HWnd, WM_LBUTTONDBLCLK, frmMain_OnLButtonDblClk)
 
-      case WM_MOUSEMOVE
-         if (gApp.IsCompiling = false) andalso (gApp.IsProjectLoading = false) then
-            ' Determine if we have mouse over a edit split area
-            Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-            if pDoc THEN
-               dim as POINT pt = (LoWord(lParam), HiWord(lParam))
-               if pDoc->bSizing then
-                  if pt.y <> pDoc->ptPrev.y then
-                     pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
-                     frmMain_PositionWindows
-                     pDoc->ptPrev.y = pt.y
-                  end if   
-               else   
-                  if PtInRect(@pDoc->rcSplitButton, pt) THEN 
-                     SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
-                  end if   
-               END if
-            end if
-         end if
-         
-      Case WM_LBUTTONDOWN
-         ' Are we over a split edit area
-         dim as POINT pt = (LoWord(lParam), hiword(lParam))
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN 
-            SetCapture(hWnd)
-            if PtInRect(@pDoc->rcSplitButton, pt) THEN 
-               pDoc->bSizing = true
-               pDoc->SplitY = pDoc->rcSplitButton.top  
-               pDoc->ptPrev.y = pt.y
-               SetCursor LoadImageW( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
-            END IF
-         end if
-
-      case WM_LBUTTONUP
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN pDoc->bSizing = false
-         ReleaseCapture
-         
-      Case WM_LBUTTONDBLCLK 
-         ' Are we over a split edit area (toggle off the split)
-         dim as POINT pt = (LoWord(lParam), hiword(lParam))
-         Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-         if pDoc THEN 
-            if PtInRect(@pDoc->rcSplitButton, pt) THEN 
-               pDoc->bSizing = false
-               pDoc->SplitY = 0
-               frmMain_PositionWindows
-            END IF
-         end if
           
       Case WM_NCACTIVATE
          ' Ensure that the caption bar for any DesignerForm retains its active 
@@ -2472,10 +2577,16 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
          End If
             
       case WM_SETCURSOR
-         if (gApp.bDragTabActive = true) Then 
+         If gApp.bDragActive = true Then
+            ' Either the horiz or vert splitter bar is being resized. We handle
+            ' setting the mouse cursor in the splitter_mousemove function.
+            return true
+            
+         elseif gApp.bDragTabActive = true Then 
             ' We handle the cursor in the TabControl subclass. Don't allow the
             ' main window to change our cursor. Return True.
             return true
+
          elseif (gApp.IsCompiling = true) or _
                 (gApp.IsProjectLoading = true) or _
                 (gApp.IsFileLoading = true) then
@@ -2796,14 +2907,6 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
       If (pWindow->AccelHandle = 0) Orelse (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg) = 0) then
           
          if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) Then 
-
-            ' Intercept all MouseMove messages in order to test if we are over the splitter area. This
-            ' easier and more efficent than trying to deal with mouse messages at the child control/form level.
-            Select case uMsg.message
-               Case WM_LBUTTONDOWN: Splitter_OnLButtonDown
-               Case WM_LBUTTONUP:   Splitter_OnLButtonUp
-               Case WM_MOUSEMOVE:   Splitter_OnMouseMove
-            End Select      
 
             ' Close any open Find/Replace window with ESC key
             ' Close any open FunctionList window

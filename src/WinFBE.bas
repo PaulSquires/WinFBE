@@ -81,7 +81,6 @@ dim shared gLasso   as clsLasso
 #Include Once "clsParser.inc"
 #Include Once "clsConfig.inc"
 #Include Once "modRoutines.inc"
-#Include Once "modSplitter.inc" 
 #Include Once "modCBColor.inc"
 #Include Once "clsControl.inc"
 #Include Once "clsCollection.inc"

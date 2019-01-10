@@ -331,6 +331,104 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_MOUSEMOVE message for window/dialog: frmOutput
+' ========================================================================================
+private Function frmOutput_OnMouseMove( ByVal HWnd As HWnd, _
+                                        ByVal x as long, _
+                                        byval y as long, _
+                                        byval keyflags as UINT _
+                                        ) As Long
+
+   DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
+   If pWindow = 0 Then Exit Function
+
+   ' HITTEST (PANELS TOP/BOTTOM SPLITTER)
+
+   ' These are relative to <hWnd>
+   dim as POINT pt = (x, y)
+   dim as RECT rc
+   GetWindowRect HWND_FRMOUTPUT, @rc
+   rc.Bottom = rc.Top + pWindow->ScaleY(3)
+   GetCursorPos(@pt)
+   If PtInRect( @rc, pt ) Then
+      if WindowFromPoint(pt) = HWND_FRMOUTPUT then
+         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+      end if
+   End If
+   If gApp.bDragActive Then
+      If gApp.hWndPanel = HWND_FRMOUTPUT Then
+         Dim As Long nDiff = pt.y - rc.Top
+         ' Adjust the height. The positioning will be taken care of in PositionMainWindows().
+         GetClientRect HWND_FRMOUTPUT, @rc
+         rc.Top = rc.Top + nDiff
+         SetWindowPos HWND_FRMOUTPUT, 0, 0, 0, rc.Right - rc.Left, rc.Bottom-rc.Top, SWP_NOMOVE Or SWP_NOZORDER
+         frmMain_PositionWindows
+         Exit Function
+      End If
+   End If
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Process WM_LBUTTONDOWN message for window/dialog: frmOutput
+' ========================================================================================
+private Function frmOutput_OnLButtonDown( ByVal HWnd As HWnd, _
+                                          byval fDoubleClick as Boolean, _
+                                          ByVal x as long, _
+                                          byval y as long, _
+                                          byval keyflags as UINT _
+                                          ) As Long
+
+   DIM pWindow AS CWindow PTR = AfxCWindowPtr(HWND_FRMMAIN)
+   If pWindow = 0 Then Exit Function
+
+   ' HITTEST (PANELS TOP/BOTTOM SPLITTER)
+   Dim As Rect rc
+   Dim As Point pt 
+
+   gApp.bDragActive = False 
+   
+   GetWindowRect HWND_FRMOUTPUT, @rc
+   rc.Bottom = rc.Top + pWindow->ScaleY(3)
+   GetCursorPos(@pt)
+   If PtInRect( @rc, pt ) Then
+      if WindowFromPoint(pt) = HWND_FRMOUTPUT then
+         SetCursor LoadImage( Null, MAKEINTRESOURCEW(OCR_SIZENS), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE Or LR_SHARED )
+         gApp.bDragActive = True 
+         gApp.hWndPanel   = HWND_FRMOUTPUT
+         SetCapture( HWND_FRMOUTPUT )
+      end if
+      Exit Function
+   End If
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Process WM_LBUTTONUP message for window/dialog: frmOutput
+' ========================================================================================
+private Function frmOutput_OnLButtonUp( ByVal HWnd As HWnd, _
+                                        ByVal x as long, _
+                                        byval y as long, _
+                                        byval keyflags as UINT _
+                                        ) As Long
+
+   ' HITTEST (PANELS TOP/BOTTOM SPLITTER)
+   if gApp.bDragActive then
+      gApp.bDragActive = False 
+      gApp.hWndPanel = 0
+      ReleaseCapture()
+   end if
+   SetCursor( LoadCursor( null, IDC_ARROW ))
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' frmOutput Window procedure
 ' ========================================================================================
 private Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
@@ -340,10 +438,13 @@ private Function frmOutput_WndProc( ByVal HWnd   As HWnd, _
                                     ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_COMMAND, frmOutput_OnCommand)
-      HANDLE_MSG (HWnd, WM_NOTIFY,  frmOutput_OnNotify)
-      HANDLE_MSG (HWnd, WM_SIZE,    frmOutput_OnSize)
-      HANDLE_MSG (HWnd, WM_PAINT,   frmOutput_OnPaint)
+      HANDLE_MSG (HWnd, WM_COMMAND,     frmOutput_OnCommand)
+      HANDLE_MSG (HWnd, WM_NOTIFY,      frmOutput_OnNotify)
+      HANDLE_MSG (HWnd, WM_SIZE,        frmOutput_OnSize)
+      HANDLE_MSG (HWnd, WM_PAINT,       frmOutput_OnPaint)
+      HANDLE_MSG (HWnd, WM_LBUTTONUP,   frmOutput_OnLButtonUp)
+      HANDLE_MSG (HWnd, WM_LBUTTONDOWN, frmOutput_OnLButtonDown)
+      HANDLE_MSG (HWnd, WM_MOUSEMOVE,   frmOutput_OnMouseMove)
   
    CASE WM_DESTROY
       DeleteFont( AfxGetWindowFont(GetDlgItem(HWnd, IDC_FRMOUTPUT_TXTLOGFILE)) )

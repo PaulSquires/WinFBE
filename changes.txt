@@ -35,6 +35,7 @@ Version 1.8.8
 - Fixed: Localization language editor in Environment Options / Localization not allowing editing (incorrect logic).
 - Fixed: Graceful creation of a default WinFBE.ini config file should it be missing or corrupted.
 - Fixed: The "Wait" cursor now correctly and consistently shows when loading a project, compiling code, or loading many files.
+- Fixed: Occassional problem of resizing/dragging of Explorer panel would not stop after left mouse buttonup action.
 
 Version 1.8.7 (December 9, 2018)
 - Added: Click and Popup menu handlers are now created with a pre-populated SELECT CASE of menu item names.
