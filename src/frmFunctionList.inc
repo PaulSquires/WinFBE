@@ -169,12 +169,10 @@ private Function frmFunctionList_OnCommand( ByVal HWnd As HWnd, _
             ' The ItemData holds the Explorer Treeview node item handle
             dim as CWSTR wszFilename, wszFunctionName
             Dim As HTREEITEM hNode = cast(HTREEITEM, Listbox_GetItemData(hWndCtl, nCurSel))
-            frmExplorer_GetFileNameFunctionName(hNode, wszFilename, wszFunctionName)
+            frmExplorer_GetFileNameFunctionName( hNode, wszFilename, wszFunctionName )
 
-            If gConfig.CloseFuncList Then 
-               PostMessage( hWnd, WM_CLOSE, 0, 0 ) 
-            end if
-            OpenSelectedDocument(wszFilename, wszFunctionName)
+            If gConfig.CloseFuncList Then PostMessage( hWnd, WM_CLOSE, 0, 0 ) 
+            OpenSelectedDocument( wszFilename, wszFunctionName )
          end if
          
       Case IDC_FRMFUNCTIONLIST_TXTSEARCH

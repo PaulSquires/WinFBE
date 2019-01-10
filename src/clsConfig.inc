@@ -1328,6 +1328,10 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    Dim nTabs(any) As clsDocument Ptr
 
   
+   ' Clear the Files and Function comboboxes
+   ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES) )
+   ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS) )
+   
    gApp.IsProjectLoading = true 
    gApp.IsWindowIncludes = false
    gdb2.dbDeleteWinAPI
@@ -1487,6 +1491,9 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
       gApp.ProjectBuild = frmBuildConfig_GetSelectedBuildGUID()
    end if   
    
+   frmMain_LoadComboFiles
+   frmMain_SelectComboFiles
+
    TreeView_SetItemText(hTV, gApp.hExplorerRootNode, ucase(gApp.ProjectName) )
    Treeview_EnsureVisible(hTV, gApp.hExplorerRootNode)
    

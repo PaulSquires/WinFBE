@@ -159,7 +159,6 @@ Type clsDocument
       Declare Function UnFoldAll() As Long
       Declare Function FoldToggleOnwards( ByVal nLine As Long) As Long
       Declare Function ConvertEOL( ByVal nMode As Long) As Long
-      'Declare Function DisplayStats() As Long
       Declare Function TabsToSpaces() As Long
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Function GetBookmarks() As String

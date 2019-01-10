@@ -181,6 +181,7 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
       If pDoc->hNodeExplorer = 0 Then
          hRootNode = GetExplorerSpecialSubNode( pDoc->ProjectFileType )
          pDoc->hNodeExplorer = FF_TreeView_InsertItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc), 1, 1 )
+         frmMain_AddToComboFiles( pDoc )
          fAddChildren = True
       else
          hRootNode = TreeView_GetParent( hTree, pDoc->hNodeExplorer )
@@ -459,6 +460,9 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
    ' Determine what node was clicked on
    Select Case pNMHDR->code 
       
+      case TVN_DELETEITEM
+         ' A node in the treeview is being removed.
+         
       case TVN_BEGINDRAG
          ' Start a drag and drop operation on the Explorer treeview. If
          ' StartDrag returns TRUE then it effectively will cancel the drag

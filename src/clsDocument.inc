@@ -914,6 +914,20 @@ function clsDocument.IsFunctionLine( byval lineNum as long ) as long
       position = 13
    ElseIf Left(lineText, 11) = "DESTRUCTOR " Then
       position = 12
+      
+   ' If we encounter one of these END statements then our cursor must 
+   ' be positioned between functions (ie we're at the module level).   
+   ElseIf Left(lineText, 12) = "END FUNCTION" Then
+      position = -1
+   ElseIf Left(lineText, 7)  = "END SUB" Then
+      position = -1
+   ElseIf Left(lineText, 15) = "END CONSTRUCTOR" Then
+      position = -1
+   ElseIf Left(lineText, 14) = "END DESTRUCTOR" Then
+      position = -1
+   ElseIf Left(lineText, 12) = "END PROPERTY" Then
+      position = -1
+
    End If
 
    function = position
@@ -939,14 +953,29 @@ Function clsDocument.GetCurrentFunctionName() As string
    curLine = this.GetCurrentLineNumber
    
    for i as long = curLine to 0 step -1
-      ' trim and remove double spaces and replace TABs with single space
-      lineText = ltrim(ucase( AfxStrShrink(this.GetLine(i), chr(32,9)) ))
-      
       position = this.IsFunctionLine( i )
-      if position then 
+      
+      if position = -1 then 
+         ' We found an "END SUB", "END FUNCTION", etc line. Keep looking for 
+         ' the very next instance of SUB/FUNCTION and then break out of loop
+         ' with that function name.
+         if i = this.GetCurrentLineNumber then 
+            continue for
+         else
+            exit for
+         end if
+            
+      elseif position = 0 then
+         ' Just a regular line... keep looking...
+      
+      elseif position > 0 then
+         ' We found a valid SUB/FUNCTION line so process it
+         ' trim and remove double spaces and replace TABs with single space
+         lineText = ltrim(ucase( AfxStrShrink(this.GetLine(i), chr(32,9)) ))
          funcName = ltrim(mid(lineText, position))
+         funcName = AfxStrParseAny( funcName, 1, " (" )
          exit for
-      end if   
+      end if
    NEXT
 
    return funcName

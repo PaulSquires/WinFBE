@@ -52,6 +52,12 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
       
    ' If we get this far then we can safely remove all of the open pDocs
    gApp.RemoveAllDocuments
+   
+   ' Clear the Files and Function comboboxes
+   ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES) )
+   ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS) )
+
+   ' Delete all nodes in the Explorer treeview and reset it to "FILES" mode.
    dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    Treeview_DeleteAllItems(hTree)
    gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, wstr("FILES") )
@@ -617,7 +623,8 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
          ' if the file is not part of an active project, otherwise, we will lose
          ' references to function names, etc.
          gdb2.dbDelete(pDoc->DiskFilename)
-         gApp.RemoveDocument(pDoc)
+         frmMain_RemoveFromComboFiles( pDoc )
+         gApp.RemoveDocument( pDoc )
       end if   
    next
       

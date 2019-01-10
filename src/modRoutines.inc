@@ -524,7 +524,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
    
    ' If incoming FunctionName then search for filename and line number.
    dim pData as DB2_DATA ptr    
-   if len(wszFunctionName) then
+   if len( wszFunctionName ) then
       pData = gdb2.dbFindFunction( wszFunctionName, wszFilename) 
       if pData = 0 then pData = gdb2.dbFindSub( wszFunctionName, wszFilename) 
       if pData then
@@ -538,7 +538,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
    ' determine if the filename has a pDoc already associated with it. If it does, then
    ' pass that pDoc rather than looking for a disk filename.
    dim pDoc as clsDocument ptr
-   pDoc = gApp.GetDocumentPtrByFilename(wszFilename)
+   pDoc = gApp.GetDocumentPtrByFilename( wszFilename )
    
    if pDoc then
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _

@@ -1119,9 +1119,6 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
                   ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
                   ) As LRESULT
 
-   dim lpmis As MEASUREITEMSTRUCT Ptr 
-   dim lpdis As DRAWITEMSTRUCT Ptr 
-   
    Select Case uMsg
 
       case WM_ERASEBKGND

@@ -720,9 +720,13 @@ public Function frmFindReplace_Show( ByVal hWndParent As HWnd, _
 
    frmFindReplace_ShowControls
 
-   ' Position the window to the top right of the active edit window
-   GetWindowRect( gTTabCtl.hWindow, @rc )
-   SetWindowPos HWND_FRMFINDREPLACE, HWND_TOP, rc.right - pWindow->ScaleX(frmWidth + 50), rc.bottom, _
+   ' Position the window to the top right of the active edit window below 
+   ' the fFiles/Functions combos.
+   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+   GetWindowRect( hComboFunctions, @rc )
+   SetWindowPos HWND_FRMFINDREPLACE, HWND_TOP, _
+                  rc.right - pWindow->ScaleX(frmWidth + 50), _
+                  rc.bottom + pWindow->ScaleY(2), _
                   0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOACTIVATE
    
    hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND )

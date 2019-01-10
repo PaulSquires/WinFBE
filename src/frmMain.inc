@@ -31,6 +31,133 @@ dim shared gCopyControls(any) as clsControl
 
 
 ' ========================================================================================
+' Load the Files combobox
+' ========================================================================================
+public Function frmMain_RemoveFromComboFiles( byval pDoc as clsDocument ptr ) As Long
+   if pDoc = 0 then exit function
+   
+   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
+   dim as long nCount = ComboBox_GetCount( hComboFiles )
+   
+   for i as long = 0 to nCount - 1
+      if ComboBox_GetItemData( hComboFiles, i ) = pDoc then
+         ComboBox_DeleteString( hComboFiles, i )
+         exit for
+      end if
+   next
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Add a file to the Files combobox
+' ========================================================================================
+public Function frmMain_AddToComboFiles( byval pDoc as clsDocument ptr ) As Long
+   if pDoc = 0 then exit function
+   
+   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
+   
+   dim as long idx = ComboBox_AddString( hComboFiles, AfxStrPathname( "NAMEX", pDoc->DiskFilename ) )
+   ' Save the pDoc in the itemData in order to quickly load the file later when
+   ' selected from the Files combobox.
+   ComboBox_SetItemData( hComboFiles, idx, cast(LPARAM, pDoc) )
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Load the Files combobox
+' ========================================================================================
+public Function frmMain_LoadComboFiles() As Long
+   
+   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
+   ComboBox_ResetContent( hComboFiles )
+   
+   dim pDoc as clsDocument ptr = gApp.pDocList
+   do until pDoc = 0
+      frmMain_AddToComboFiles( pDoc )
+      pDoc = pDoc->pDocNext
+   loop
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Load the Functions combobox
+' ========================================================================================
+public Function frmMain_LoadComboFunctions() As Long
+   
+   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+   ComboBox_ResetContent( hComboFunctions )
+
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc = 0 then exit function
+   
+   dim as string sFilename = ucase(pDoc->DiskFilename)
+   dim wszText as wstring * MAX_PATH
+   
+   ' Add a default entry for when not positioned within a function.
+   wszText = L(218,"(Module level)")
+   ComboBox_AddString( hComboFunctions, @wszText )
+
+   dim pData as DB2_DATA ptr
+   gdb2.dbRewind()
+   do 
+      pData = gdb2.dbGetNext
+      if pData = 0 THEN exit do
+      select case pData->id 
+         case DB2_FUNCTION, DB2_SUB
+            if sFilename = ucase(pData->fileName) THEN
+               wszText = pData->ElementName
+               ComboBox_AddString( hComboFunctions, @wszText )
+            END IF
+      END SELECT
+   loop      
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Select the Files combobox item based on incoming filename
+' ========================================================================================
+public Function frmMain_SelectComboFiles() As Long
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc = 0 then exit function
+   
+   dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
+   dim as CWSTR wszFilename = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
+   dim as long idx = ComboBox_FindStringExact( hComboFiles, -1, wszFilename )
+   ComboBox_SetCurSel( hComboFiles, idx )
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Select the Files combobox item based on incoming filename
+' ========================================================================================
+public Function frmMain_SelectComboFunctions() As Long
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc = 0 then exit function
+   
+   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+   dim as CWSTR wszFunctionName = pDoc->GetCurrentFunctionName
+   dim as long idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
+
+   ' If the function name is not found then we must be between functions. Set
+   ' the index to 0 so that the "(Module level)" entry is selected.
+   if idx = -1 then idx = 0
+   ComboBox_SetCurSel( hComboFunctions, idx ) 
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Position editor to document/function under the current caret position
 ' ========================================================================================
 private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
@@ -143,8 +270,6 @@ private Function frmMain_GotoFile( ByVal pDoc As clsDocument Ptr, _
 End Function
 
 
-
-
 ' ========================================================================================
 ' Update the main form statusbar. This is the only routine that updates
 ' the statusbar in the entire program.
@@ -216,6 +341,18 @@ public Function frmMain_SetStatusbar() as long
          pDoc->ScrInfo.nMax = SciExec(hEdit, SCI_GETLINECOUNT, 0, 0) - 1    
          pDoc->ScrInfo.nPos = SciExec(hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0)
          SetScrollInfo(pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE) 
+
+         ' Only search for the current sub/function if the pDoc or linenumber has changed
+         ' from the last time we checked. This ensures that we are not constantly checking lines
+         ' every time a character is entered.
+         static pDocLast as clsDocument ptr
+         static nLineLast as long
+         if ( pDocLast <> pDoc ) orelse ( nLineLast <> nLine ) then
+            frmMain_SelectComboFunctions
+         end if
+         pDocLast = pDoc
+         nLineLast = nLine
+         
       end if
       wszPanel(1) = wszText
    
@@ -285,9 +422,8 @@ public Function frmMain_SetStatusbar() as long
    if StatusBar_GetIcon( hStatusBar, 4 ) <> hIconPanel4 then StatusBar_SetIcon( hStatusBar, 4, hIconPanel4 )
 
    frmMain_ChangeToolbarButtonsState
-   frmBuildConfig_LoadBuildComboBox
-
-  Function = 0
+   
+   Function = 0
 End Function
 
 
@@ -555,6 +691,21 @@ private Function frmMain_OnPaint( ByVal HWnd As HWnd ) As LRESULT
          End If
          DrawFrameControl( hDC, @rc, DFC_BUTTON, DFCS_BUTTONPUSH)
       end if
+
+      ' Paint under the Files/Functions comboboxes because the boxes do not
+      ' cover the entire width fo the client area.
+      Dim pWindow As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
+      if pWindow then
+         dim as hwnd hEdit = iif( IsWindowVisible( pDoc->hWindow(1)), pDoc->hWindow(1), pDoc->hWindow(0) )
+         dim as long nLeft, nTop
+         AfxGetWindowLocation( hEdit, nLeft, nTop )
+         GetClientRect( HWND_FRMMAIN, @rc )
+         rc.left = nLeft
+         rc.right = nLeft + AfxGetWindowWidth( hEdit )
+         rc.bottom = nTop
+         FillRect( hDC, @rc, GetSysColorBrush( COLOR_BTNFACE ) )
+      end if
+         
    end if
    
    RestoreDC hDC, -1 
@@ -571,69 +722,111 @@ End Function
 ' ========================================================================================
 public Function frmMain_PositionWindows() As LRESULT
    
-   Dim As HWnd hEdit, hTabCtl
-   Dim As Rect rc
+   Dim As HWnd hEdit, hTabCtl, hComboFiles, hComboFunctions
    dim as long nHeightTabControl, nLeft
+   Dim As Rect rc
    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
+   if pWindow = 0 then exit function
+   
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+
    ' Get the entire client area
-   GetClientRect(HWND_FRMMAIN, @rc)
+   GetClientRect( HWND_FRMMAIN, @rc )
   
-   ' Get the heights of the rebar and statusbar
+   hTabCtl = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_TOPTABCONTROL )
+   hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
+   hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+
    Dim As Long nHeightRebar     = AfxGetWindowHeight( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_REBAR) )
    dim as long nHeightStatusBar = AfxGetWindowHeight( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR) )
    Dim As Long nHeightOutput    = AfxGetWindowHeight( HWND_FRMOUTPUT)
    Dim As Long nWidthExplorer   = AfxGetWindowWidth( HWND_FRMEXPLORER )
+   Dim As Long nHeightCombo     = AfxGetWindowHeight( hComboFiles )
 
    ShowWindow( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_REBAR), iif(gConfig.HideToolbar, SW_HIDE, SW_SHOW) )
    ShowWindow( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR), iif(gConfig.HideStatusbar, SW_HIDE, SW_SHOW) )
    if gConfig.HideToolbar THEN nHeightRebar = 0
    if gConfig.HideStatusbar THEN nHeightStatusBar = 0
+   
       
    nLeft = rc.Left 
    
    ' Set the Explorer pane into place if applicable
    If IsWindowVisible(HWND_FRMEXPLORER) Then
       SetWindowPos( HWND_FRMEXPLORER, 0, _
-                     nLeft, rc.Top + nHeightRebar, _
-                     nWidthExplorer, _
-                     rc.Bottom - nHeightStatusBar - nHeightRebar, _
-                     SWP_NOZORDER Or SWP_SHOWWINDOW ) 
+                    nLeft, rc.Top + nHeightRebar, _
+                    nWidthExplorer, _
+                    rc.Bottom - nHeightStatusBar - nHeightRebar, _
+                    SWP_NOZORDER Or SWP_SHOWWINDOW ) 
       frmExplorer_PositionWindows
       nLeft = nWidthExplorer
    Else
       nWidthExplorer = 0
    End If
 
+
    ' If items exist in the top tabcontrol then show the tab control and account for its height
-   hTabCtl = GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_TOPTABCONTROL)
    If TabCtrl_GetItemCount(hTabCtl) = 0 Then
       ShowWindow(hTabCtl, SW_HIDE)
+      nHeightTabControl = 0
+      ShowWindow( hComboFiles, SW_HIDE )
+      ShowWindow( hComboFunctions, SW_HIDE )
+      nHeightCombo = 0
    Else
       nHeightTabControl = AfxGetWindowHeight(hTabCtl)
-      SetWindowPos hTabCtl, 0, _
-                     nLeft, rc.Top + nHeightRebar, _
-                     rc.Right - nWidthExplorer, nHeightTabControl, _
-                     SWP_SHOWWINDOW Or SWP_NOZORDER
+      SetWindowPos( hTabCtl, 0, _
+                    nLeft, rc.Top + nHeightRebar, _
+                    rc.Right - nWidthExplorer, nHeightTabControl, _
+                    SWP_SHOWWINDOW Or SWP_NOZORDER )
+      ShowWindow( hComboFiles, SW_SHOW )
+      ShowWindow( hComboFunctions, SW_SHOW )
    End If
+   
+   
+   ' If the visual designer is being shown then we will hide the files and functions combos
+   If pDoc Then 
+      if (pDoc->IsDesigner) andalso (IsDesignerView(pDoc)) THEN
+         ShowWindow( hComboFiles, SW_HIDE )
+         ShowWindow( hComboFunctions, SW_HIDE )
+         nHeightCombo = 0
+      else
+         ' Position the Files and Functions comboboxes just after the top tab control
+         dim as long nWidthCombo = (rc.Right - nWidthExplorer - pWindow->ScaleX(10)) * .5
+          
+         SetWindowPos( hComboFiles, 0, _
+                       nleft, _
+                       rc.Top + nHeightRebar + nHeightTabControl + pWindow->ScaleY(2), _
+                       nWidthCombo, nHeightCombo, _
+                       SWP_SHOWWINDOW or SWP_NOZORDER )
+
+         SetWindowPos( hComboFunctions, 0, _
+                       nleft + nWidthCombo + pWindow->ScaleX(10), _
+                       rc.Top + nHeightRebar + nHeightTabControl + pWindow->ScaleY(2), _
+                       nWidthCombo, nHeightCombo, _
+                       SWP_SHOWWINDOW or SWP_NOZORDER )
+      end if
+   end if
+   
    
    ' Set the Output pane into place if applicable
    If IsWindowVisible(HWND_FRMOUTPUT) Then
       SetWindowPos( HWND_FRMOUTPUT, 0, _
-                     nLeft, rc.Bottom - nHeightStatusbar - nHeightOutput, _
-                     rc.Right - nLeft, _
-                     nHeightOutput, _
-                     SWP_NOZORDER Or SWP_SHOWWINDOW ) 
+                    nLeft, rc.Bottom - nHeightStatusbar - nHeightOutput, _
+                    rc.Right - nLeft, _
+                    nHeightOutput, _
+                    SWP_NOZORDER Or SWP_SHOWWINDOW ) 
    Else
       nHeightOutput = 0
    End If
 
-   ' Reduce the height of the client area by the size of the rebar and statusbar.
-   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+
    If pDoc Then 
       ' Position the Scintilla child edit windows
       dim as RECT rcClient
+      ' Reduce the height of the client area by the size of the rebar and statusbar.
       rcClient.left = nLeft
-      rcClient.top = rc.Top + nHeightRebar + nHeightTabControl
+      rcClient.top = rc.Top + nHeightRebar + nHeightTabControl + nHeightCombo + pWindow->ScaleY(4)
       rcClient.right = rc.Right - nWidthExplorer
       rcClient.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
       
@@ -665,51 +858,49 @@ public Function frmMain_PositionWindows() As LRESULT
                        rcClient.left, rcClient.top, _
                        rcClient.right, rcClient.bottom - rcClient.top - nDesignCodeTabHeight, _
                        lStyle )
-         ShowWindow(HWND_FRMVDTOOLBOX, SW_SHOWNORMAL)
-         ShowWindow(pDoc->hWindow(0), SW_HIDE)
-         ShowWindow(pDoc->hWindow(1), SW_HIDE)
-         ShowWindow(pDoc->hScrollbar, SW_HIDE)
+         ShowWindow( HWND_FRMVDTOOLBOX, SW_SHOWNORMAL )
+         ShowWindow( pDoc->hWindow(0), SW_HIDE )
+         ShowWindow( pDoc->hWindow(1), SW_HIDE )
       else
       
-         ShowWindow(pDoc->hWndDesigner, SW_HIDE)
-         ShowWindow(HWND_FRMVDTOOLBOX, SW_HIDE)
+         ShowWindow( pDoc->hWndDesigner, SW_HIDE )
+         ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE )
 
          dim as long nSplitSize 
          
          ' Position top (optional) edit window
          if pDoc->SplitY - rcClient.top <= 0 THEN 
-            ShowWindow(pDoc->hWindow(1), SW_HIDE)      
+            ShowWindow( pDoc->hWindow(1), SW_HIDE )      
             nSplitSize = 0              
          Else
             SetWindowPos( pDoc->hWindow(1), 0, _
                           rcClient.left, rcClient.top, _
                           rcClient.right, pDoc->SplitY - rcClient.top, _ 
-                          lStyle)
+                          lStyle )
             nSplitSize = SPLITSIZE              
          end if
          
-         dim as long nTop = Max(rcClient.top, pDoc->SplitY)
+         dim as long nTop = Max( rcClient.top, pDoc->SplitY )
 
          ' Position main edit window
          SetWindowPos( pDoc->hWindow(0), 0, _
                        rcClient.left, nTop + nSplitSize, _
                        iWidth, rcClient.bottom - nTop - nSplitSize - nDesignCodeTabHeight, _
-                       lStyle)
+                       lStyle )
 
          ' Position the main view vertical scroll bar
          SetWindowPos( pDoc->hScrollbar, 0, _ 
                        rcClient.left + iWidth, _
                        nTop + SPLITSIZE, _
                        iScrollbarWidth, _
-                       rcClient.bottom - SPLITSIZE - nTop  - nDesignCodeTabHeight, _ ' - iScrollbarHeight, _
-                       lStyle)
+                       rcClient.bottom - SPLITSIZE - nTop  - nDesignCodeTabHeight, _ 
+                       lStyle )
 
          ' Update vertical scroll bar page value
-         pDoc->ScrInfo.nPage = SciExec(pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0)
-         pDoc->ScrInfo.nMax = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0) - 1    
-         pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
-         SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE)
-         frmMain_SetStatusbar
+         pDoc->ScrInfo.nPage = SciExec( pDoc->hWindow(0), SCI_LINESONSCREEN, 0, 0 )
+         pDoc->ScrInfo.nMax  = SciExec( pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0 ) - 1    
+         pDoc->ScrInfo.nPos  = SciExec( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0 )
+         SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE )
          frmMain_SetFocusToCurrentCodeWindow
       end if
       
@@ -720,6 +911,7 @@ public Function frmMain_PositionWindows() As LRESULT
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
    frmMain_SetStatusbar
+   
    Function = 0
 End Function
 
@@ -910,8 +1102,37 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
    
    Select Case id
              
+      case IDC_FRMMAIN_COMBOFILES
+         if codeNotify = CBN_CLOSEUP THEN
+            frmMain_SetFocusToCurrentCodeWindow
+         
+         elseif codeNotify = CBN_SELCHANGE THEN
+            ' Load the pDoc that is held in the itemData 
+            dim as long nCurSel = ComboBox_GetCurSel( hwndCtl )
+            if nCurSel = -1 then exit function
+            dim pDocSelected as clsDocument ptr 
+            pDocSelected = cast( clsDocument ptr, ComboBox_GetItemData(hwndCtl, nCurSel) ) 
+            if pDocSelected <> pDoc then
+               OpenSelectedDocument( pDocSelected->DiskFilename )
+            else
+               frmMain_SetFocusToCurrentCodeWindow
+            end if   
+         end if
+
+      
+      case IDC_FRMMAIN_COMBOFUNCTIONS
+         if codeNotify = CBN_CLOSEUP THEN
+            frmMain_SetFocusToCurrentCodeWindow
+         elseif codeNotify = CBN_SELCHANGE THEN
+
+            frmMain_SetFocusToCurrentCodeWindow()
+         end if
+         
+         
       case IDC_FRMMAIN_COMBOBUILDS
-         if codeNotify = CBN_SELCHANGE THEN
+         if codeNotify = CBN_CLOSEUP THEN
+            frmMain_SetFocusToCurrentCodeWindow
+         elseif codeNotify = CBN_SELCHANGE THEN
             dim as long nCurSel = ComboBox_GetCurSel(hwndCtl)
             if nCurSel = -1 THEN exit function
             If gApp.IsProjectActive Then
@@ -921,8 +1142,9 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                pDocMain = gTTabCtl.GetActiveDocumentPtr()
                If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
             end if
-            frmMain_SetStatusbar
+            frmMain_SetFocusToCurrentCodeWindow()
          END IF  
+      
       
       Case IDM_GOTONEXTTAB
          gTTabCtl.NextTab
@@ -1454,6 +1676,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          ' File close succeeded. Remove this document from the project collection and remove treeview node. 
          gdb2.dbDelete(pDoc->DiskFilename)
          Treeview_DeleteItem( hTV, hItem)
+         frmMain_RemoveFromComboFiles( pDoc )
          gApp.RemoveDocument(pDoc)
          
            
@@ -1515,7 +1738,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
       Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
          ShowContextHelp(id) 
-
+  
       case IDM_CHECKFORUPDATES
          DisableAllModeless()
          DoCheckForUpdates( hwnd, false )
@@ -1638,7 +1861,17 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
                   LockWindowUpdate(hTV)
                   Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
                   LockWindowUpdate(0)
+                  
+                  ' Select the correct Files combobox item based on the current document
+                  frmMain_SelectComboFiles
+                  
+                  ' Load the Functions list combobox and set it to the current function
+                  ' based on line position.
+                  frmMain_LoadComboFunctions
+                  frmMain_SelectComboFunctions
+               
                end if
+
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows
                PostMessage(hwnd, MSG_USER_GENERATECODE, 0, 0)
@@ -2073,6 +2306,80 @@ private Function frmMain_TabCtl_SubclassProc ( _
 
 End Function
 
+
+
+' ========================================================================================
+' Process WM_MEASUREITEM message for window/dialog: frmMain
+' ========================================================================================
+private Function frmMain_OnMeasureItem( ByVal HWnd As HWnd, _
+                                        ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+                                        ) As Long
+   ' Set the height of the List box items. 
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   lpmis->itemHeight = pWindow->ScaleY(FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Process WM_DRAWITEM message for window/dialog: frmMain
+' ========================================================================================
+private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
+                                     ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+                                     ) As Long
+
+   Dim As HBRUSH hBrush 
+   dim as HFONT hFontNormal, hFontBold 
+   Dim As RECT rc
+   Dim wszText As WString * MAX_PATH
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   if pWindow = 0 THEN exit function
+      
+   If lpdis->itemID = -1 Then Exit Function
+   
+   Select Case lpdis->itemAction
+      Case ODA_DRAWENTIRE, ODA_SELECT
+         
+         SaveDC(lpdis->hDC)
+         
+         if (lpdis->CtlID = IDC_FRMMAIN_COMBOFILES) orelse _
+            (lpdis->CtlID = IDC_FRMMAIN_COMBOFUNCTIONS) orelse _
+            (lpdis->CtlID = IDC_FRMMAIN_COMBOBUILDS) then
+            
+            ' CLEAR BACKGROUND
+            If (lpdis->itemState And ODS_SELECTED) Then     
+               SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
+               SetTextColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT))
+               hBrush = GetSysColorBrush(COLOR_HIGHLIGHT) 
+            else
+               SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
+               SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
+               hBrush = GetSysColorBrush(COLOR_WINDOW) 
+            end if
+            SelectObject(lpdis->hDC, hBrush)      
+            FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
+
+            rc = lpdis->rcItem
+            rc.left = rc.left + pWindow->ScaleX( iif(lpdis->CtlID = IDC_FRMMAIN_COMBOBUILDS, 8, 16) )
+            ComboBox_GetLBText( lpdis->hwndItem, lpdis->itemID, @wszText ) 
+            DrawText( lpdis->hDC, _
+                      wszText, _
+                      -1, Cast(lpRect, @rc), _
+                      DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
+                
+         end if
+
+         RestoreDC(lpdis->hDC, -1)
+
+         Function = True : Exit Function
+   
+   End Select
+
+   Function = 0
+End Function
+
+
 ' ========================================================================================
 ' frmMain Window procedure
 ' ========================================================================================
@@ -2093,8 +2400,9 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_ACTIVATEAPP, frmMain_OnActivateApp)
       HANDLE_MSG (HWnd, WM_CONTEXTMENU, frmMain_OnContextMenu)
       HANDLE_MSG (HWnd, WM_DROPFILES,   frmMain_OnDropFiles)
+      HANDLE_MSG (HWnd, WM_MEASUREITEM, frmMain_OnMeasureItem)
+      HANDLE_MSG (HWnd, WM_DRAWITEM,    frmMain_OnDrawItem)
 
-      
       case WM_MOUSEMOVE
          if (gApp.IsCompiling = false) andalso (gApp.IsProjectLoading = false) then
             ' Determine if we have mouse over a edit split area
@@ -2372,6 +2680,7 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Load the build configurations into the toolbar
    frmBuildConfig_LoadBuildComboBox()
 
+   
    ' Add a status bar
    Dim As HWnd hStatusbar = pWindow->AddControl("Statusbar", pWindow->hWindow, IDC_FRMMAIN_STATUSBAR)
    Dim As Long rgParts(5)
@@ -2395,24 +2704,41 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Create the imagelist for the TopTabControl tabs
    cx = 16 * (pWindow->DPI \ 96)
    Dim As HANDLE hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
-   Dim As HICON hIcon = LoadIcon(pWindow->InstanceHandle, "IMAGE_TABCLOSE")
-   ImageList_AddIcon(hImageList, hIcon)
-   TabCtrl_SetImageList(gTTabCtl.hWindow, hImageList)
+   Dim As HICON hIcon = LoadIcon( pWindow->InstanceHandle, "IMAGE_TABCLOSE" )
+   ImageList_AddIcon( hImageList, hIcon )
+   TabCtrl_SetImageList( gTTabCtl.hWindow, hImageList )
                                                         
+   
+   ' Add the file list navigation combo box
+   pWindow->AddControl("COMBOBOX", pWindow->hWindow, _
+      IDC_FRMMAIN_COMBOFILES, "", 0, 0, 0, 20, _
+      WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR CBS_OWNERDRAWFIXED or _
+      CBS_DROPDOWNLIST OR CBS_HASSTRINGS OR CBS_SORT, WS_EX_CLIENTEDGE )
+   
+   ' Add the functions list navigation combo box
+   pWindow->AddControl("COMBOBOX", pWindow->hWindow, _
+      IDC_FRMMAIN_COMBOFUNCTIONS, "", 0, 0, 0, 20, _
+      WS_CHILD OR WS_VISIBLE OR WS_VSCROLL OR CBS_OWNERDRAWFIXED or  _
+      CBS_DROPDOWNLIST OR CBS_HASSTRINGS OR CBS_SORT, WS_EX_CLIENTEDGE )
+
+   
    ' Load the graphisc PNG pointers for the scintilla popup autocomplete listbox.
-   gApp.pImageAutocompleteBaseType = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_BASETYPE")     
-   gApp.pImageAutocompleteClass    = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_CLASS")     
-   gApp.pImageAutocompleteMethod   = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_METHOD")     
-   gApp.pImageAutocompleteProperty = LoadPNGfromRes(pWindow->InstanceHandle, "IMAGE_PROPERTY")  
+   gApp.pImageAutocompleteBaseType = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_BASETYPE" )      
+   gApp.pImageAutocompleteClass    = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_CLASS" )     
+   gApp.pImageAutocompleteMethod   = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_METHOD" )     
+   gApp.pImageAutocompleteProperty = LoadPNGfromRes( pWindow->InstanceHandle, "IMAGE_PROPERTY" )  
+
 
    ' Create the various child windows
    frmExplorer_Show( HWND_FRMMAIN )
    frmRecent_Show( HWND_FRMEXPLORER )     ' child of frmExplorer
    frmOutput_Show( HWND_FRMMAIN )
 
+
    ' Create the UserTools accelerator table
    frmUserTools_CreateAcceleratorTable            
    
+
    ' SET STARTUP POSITION
    ' If no valid window size exists then set to the default working area of the screen
    If (gConfig.StartupRight = 0) OrElse (gConfig.StartupBottom = 0) Then
