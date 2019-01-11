@@ -1366,6 +1366,11 @@ public Function ParseDocument( byval pDoc as clsDocument ptr, _
                                byval wszFilename as CWSTR = "" _    
                                ) As Long
 
+   If pDoc Then 
+      if pDoc->bNeedsParsing = false then exit function
+   end if
+
+
    dim as long nLineCount, nLineNum, nPos
    Dim As String st, st_ucase, sLine
 
@@ -1540,6 +1545,9 @@ ParseAgain:
       END IF
    END IF
    
+   ' Document has now been fully parsed
+   pDoc->bNeedsParsing = false
+
    ' Update the TODO listview in the frmOutput form
    frmOutput_UpdateToDoListview
    

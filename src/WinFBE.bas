@@ -57,7 +57,7 @@ Using Afx
 #Define FILES_MENU_POSITION        0
 #Define PROJECT_MENU_POSITION      4
 #Define TOOLS_MENU_POSITION        8
-#Define MRUFILES_MENU_POSITION    11
+#Define MRUFILES_MENU_POSITION     11
 #Define MRUPROJECTS_MENU_POSITION  3
 
 #Include Once "modScintilla.bi"

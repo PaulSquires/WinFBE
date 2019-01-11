@@ -105,6 +105,7 @@ Type clsDocument
       DateFileTime     As FILETIME  
       hNodeExplorer    As HTREEITEM
       FileEncoding     as long       
+      bNeedsParsing    as Boolean  ' Document requires to be parsed due to changes.
       UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
       DeletedButKeep   as boolean  ' file no longer exists but keep open anyway
       DocumentBuild    as string   ' specific build configuration to use for this document

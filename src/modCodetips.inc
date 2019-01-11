@@ -346,6 +346,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       pDoc->sMatchWord = ""
       nLenMatchWord = 0         
       sLine_ucase = ucase(sLine)
+
       if right(sLine_ucase, 4) = " AS " then 
          ' okay
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
@@ -390,7 +391,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    sList = "|"
          
    select case pDoc->AutoCompleteType
-        
+      
       case AUTOCOMPLETE_DIM_AS
          ' Create the space separated data type list
          ' Add all of the TYPE definitions that were found
@@ -398,6 +399,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          do 
             pData = gdb2.dbGetNext()
             if pData = 0 THEN exit do
+            
             if bTypesOnly = false then
                if pData->id = DB2_STANDARDDATATYPE then
                   if nLenMatchWord then
@@ -409,6 +411,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                   END IF
                END IF      
             end if
+            
             if pData->id = DB2_TYPE THEN
                if bTypesOnly then
                   if pData->IsEnum then continue do

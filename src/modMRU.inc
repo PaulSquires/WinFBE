@@ -115,7 +115,7 @@ public Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    If hMenu <> hSubMenu Then Exit Function
    
    ' Remove the existing items
-   Do Until GetMenuItemCount(hSubMenu) = 0
+   Do Until GetMenuItemCount( hSubMenu ) = 0
       RemoveMenu( hSubMenu, 0, MF_BYPOSITION )
    Loop
    
@@ -123,14 +123,14 @@ public Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    For i = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
       gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
-      If AfxFileExists(gConfig.MRU(i)) = 0 Then
-         gConfig.MRU(i) = ""
-      Else
+      If AfxFileExists( gConfig.MRU(i) ) Then
          AppendMenu( hSubMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
+      Else
+         gConfig.MRU(i) = ""
       End If
    Next
    
-   If GetMenuItemCount(hSubMenu) = 0 Then
+   If GetMenuItemCount( hSubMenu ) = 0 Then
       AppendMenu( hSubMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    Else
       AppendMenu( hSubMenu, MF_SEPARATOR, 0, "" )

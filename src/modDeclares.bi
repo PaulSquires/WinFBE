@@ -139,7 +139,6 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 #Define L(e,s) LL(e)
 
 #Define SetFocusScintilla  PostMessage HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
-#Define ResizeExplorerWindow  PostMessage HWND_FRMEXPLORER, MSG_USER_OPENEDITORS_RESIZE, 0, 0
 #Define SciExec(h, m, w, l) SendMessage(h, m, w, CAST(LPARAM, l))
 
 

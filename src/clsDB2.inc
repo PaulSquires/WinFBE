@@ -83,11 +83,12 @@ constructor clsDB2
      .Filename   = ""
    end with
 
-   dim as CWSTR wszMainStr
+   dim as CWSTR wszMainStr = _
+   "Boolean|Byte|UByte|Short|UShort|Integer|UInteger|Long|ULong|LongInt|ULongInt|Single|" & _
+   "Double|String|WString|ZString"
+
    dim as long nCount = AfxStrParseCount(wszMainStr, "|")
    
-   wszMainStr = "Boolean|Byte|UByte|Short|UShort|Integer|UInteger|Long|ULong|LongInt|ULongInt|Single|" & _
-                "Double|String|WString|ZString"
    for i as long = 1 to nCount
       parser.typeName = AfxStrParse(wszMainStr, i, "|")
       this.dbAdd( @parser, DB2_STANDARDDATATYPE )  
@@ -238,6 +239,7 @@ function clsDB2.dbGetNext() as DB2_DATA ptr
    function = @m_arrData(m_index)
 END FUNCTION
 
+
 ''
 ''
 function clsDB2.dbSeek( byval sLookFor as string, _
@@ -276,11 +278,13 @@ function clsDB2.dbFindFunction( byref sFunctionName as string, byref sFilename a
    return this.dbSeek(sFunctionName, DB2_FUNCTION, sFilename) 
 end function
 
+
 ''
 ''
 function clsDB2.dbFindSub( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
    return this.dbSeek(sFunctionName, DB2_SUB, sFilename) 
 end function
+
 
 ''
 ''
@@ -288,11 +292,13 @@ function clsDB2.dbFindProperty( byref sFunctionName as string, byref sFilename a
    return this.dbSeek(sFunctionName, DB2_PROPERTY, sFilename) 
 end function
 
+
 ''
 ''
 function clsDB2.dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
    return this.dbSeek(sVariableName, DB2_VARIABLE)      
 end function
+
 
 ''
 ''
@@ -306,6 +312,7 @@ function clsDB2.dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
    END IF   
    return pData
 end function
+
 
 ''
 ''
@@ -321,6 +328,7 @@ function clsDB2.dbFilenameExists( byref sFilename as CWSTR ) as boolean
    loop
    return false
 end function
+
 
 ''
 ''

@@ -309,6 +309,7 @@ private Function OnCommand_FileNew( ByVal HWnd As HWnd ) As clsDocument ptr
                                      false, _   ' bIsInclude
                                      0, _       ' pwszName
                                      0 )        ' pDocIn
+
 End Function
 
 
@@ -444,61 +445,6 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
    Function = 0
 End Function
 
-' ========================================================================================
-' Save Sub/Function Declares to disk
-' ========================================================================================
-public Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
-
-   dim as CWSTR wszFilename 
-   
-   Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, wszFilename, "bi", IDM_FILESAVEDECLARES)
-   If pwszName Then
-      wszFilename = *pwszName
-      CoTaskMemFree(pwszName)
-   Else
-      Return False
-   End If
- 
-   dim pDoc as clsDocument ptr
-   dim pData as DB2_DATA ptr
-
-   dim pStream AS CTextStream
-   if pStream.Create(wszFileName) <> S_OK then exit function
-
-   gdb2.dbRewind()
-   do 
-      pData = gdb2.dbGetNext()
-      if pData = 0 THEN exit do
-      if (pData->id <> DB2_SUB) andalso (pData->id <> DB2_FUNCTION) THEN continue do
-
-      ' Bypass any declares for Class subs/functions
-      if instr(pData->ElementName, ".") = 0 THEN
-         if gApp.GetDocumentPtrByFilename(pData->fileName) THEN 
-            if pData->id = DB2_SUB then
-               pStream.WriteLine "Declare Sub " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
-            end if
-            if pData->id = DB2_FUNCTION then
-               pStream.WriteLine "Declare Function " & AfxStrShrink(pData->ElementValue, Chr(32,9,13,10))
-            end if
-         end if
-      END IF
-   loop
-   pStream.Close
-   
-   ' If the declares file is loaded in the project then we need to reload
-   ' it in order to ensure most current document data.
-   pDoc = gApp.GetDocumentPtrByFilename(wszFilename)
-   if pDoc THEN 
-      dim sText as string
-      if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
-         pDoc->SetText( sText ) 
-         pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )
-         SciExec(pDoc->hWindow(0), SCI_SETSAVEPOINT, 0, 0)
-      End If
-   end if
-  
-   Function = 0
-End Function
 
 ' ========================================================================================
 ' Save all open files to disk
