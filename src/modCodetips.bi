@@ -29,3 +29,5 @@ enum
    IMAGE_AUTOC_METHOD   = 3        ' subs/functions
    IMAGE_AUTOC_PROPERTY = 4        ' variable within a TYPE that can be set directly
 end enum
+
+declare function DereferenceLine( byval pDoc as clsDocument ptr, byval sTrigger as String, byval nPosition as long ) as DB2_DATA ptr

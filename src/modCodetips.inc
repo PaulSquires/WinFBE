@@ -81,7 +81,8 @@ end function
 ' Used for determining what popup autocomplete list or codetip to display.
 ' ========================================================================================
 private function DereferenceLine( byval pDoc as clsDocument ptr, _
-                                  byval sTrigger as String _
+                                  byval sTrigger as String, _
+                                  byval nPosition as long _
                                   ) as DB2_DATA ptr
    if pDoc = 0 THEN exit function
    
@@ -94,7 +95,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    dim as Boolean bIsTHIS
              
    dim as hwnd hEdit   = pDoc->hWndActiveScintilla
-   dim as long curPos  = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
+   dim as long curPos  = nPosition  'SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
    dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
    dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
    
@@ -104,9 +105,10 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
 
    ' Test to ensure that the incoming sTrigger character still exists after
    ' the commenting of the line. If it does then we know that the line
-   ' is good and we can proceed to derefence elements on the line.
+   ' is good and we can proceed to dereference elements on the line.
    ' The identifer that triggers an autocomplete list for a TYPE variable
    ' is either a dot "." or a pointer dereference "->"
+
    if right(sLine, len(sTrigger)) <> sTrigger THEN exit function
    sLine = rtrim(sLine, sTrigger)
 
@@ -237,7 +239,7 @@ private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
       ParseDocument(pDoc)
    End If   
    
-   pData = DereferenceLine(pDoc, "(")
+   pData = DereferenceLine(pDoc, "(", curPos)
    if pData then
       select case pData->id 
          CASE DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
@@ -301,7 +303,7 @@ end function
 ' ========================================================================================
 private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
   
-   IF gConfig.AutoComplete = false THEN exit function
+   IF gConfig.CodeTips = false THEN exit function
    
    dim as long curPos, nCol, nLenMatchWord, ub, iNextType
    dim as string sWord, sList, st, sDot, sLookFor, sElement, sProp
@@ -317,7 +319,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
              
    ' Retrieve the position
    curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) '+ 1
+   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
   
    dim as string sLine = left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol)
    dim as string sLine_ucase
@@ -346,6 +348,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       pDoc->sMatchWord = ""
       nLenMatchWord = 0         
       sLine_ucase = ucase(sLine)
+
       if right(sLine_ucase, 4) = " AS " then 
          ' okay
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
@@ -390,7 +393,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    sList = "|"
          
    select case pDoc->AutoCompleteType
-        
+      
       case AUTOCOMPLETE_DIM_AS
          ' Create the space separated data type list
          ' Add all of the TYPE definitions that were found
@@ -398,6 +401,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          do 
             pData = gdb2.dbGetNext()
             if pData = 0 THEN exit do
+            
             if bTypesOnly = false then
                if pData->id = DB2_STANDARDDATATYPE then
                   if nLenMatchWord then
@@ -409,6 +413,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                   END IF
                END IF      
             end if
+            
             if pData->id = DB2_TYPE THEN
                if bTypesOnly then
                   if pData->IsEnum then continue do
@@ -431,7 +436,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          loop
               
       case AUTOCOMPLETE_TYPE
-         pData = DereferenceLine( pDoc, sDot )
+         pData = DereferenceLine( pDoc, sDot, curPos )
          if pData then 
 
             if (pData->id = DB2_VARIABLE) or (pData->id = DB2_TYPE) then

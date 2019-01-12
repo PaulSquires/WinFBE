@@ -145,6 +145,10 @@ public Function frmMain_SelectComboFunctions() As Long
    
    dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
    dim as CWSTR wszFunctionName = pDoc->GetCurrentFunctionName
+   
+   ' If no Functions exist in the Functions combo then it obviously has not
+   ' been loaded yet.
+   if ComboBox_GetCount( hComboFunctions ) = 0 then frmMain_LoadComboFunctions
    dim as long idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
 
    ' If the function name is not found then check to see if the file is dirty
@@ -152,7 +156,7 @@ public Function frmMain_SelectComboFunctions() As Long
    ' then we must be between functions. Set the index to 0 so that the "(Module level)" 
    ' entry is selected.
    if idx = -1 then 
-      If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+      if pDoc->bNeedsParsing then
          ParseDocument( pDoc )
          frmMain_LoadComboFunctions
          idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
@@ -174,7 +178,9 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
    
    dim pData as DB2_DATA ptr
    dim as CWSTR wszFilename
-   dim as string sWord
+   dim as string sFunctionName, sTrigger
+
+   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    
    ' Version 1.8.8 added ability to open an underlying #Include file if such
    ' a file exists on the current editing line.
@@ -183,27 +189,44 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
    else
 
       ' Determine the word at the current caret position.
-      sWord = pDoc->GetWord
+      sFunctionName = pDoc->GetWord
+      
+      ' Determine if the function name is part of a class. This would be identified
+      ' by a preceeding "." or "->" symbol.  eg  pDoc->GetCurrentLineNumber
+      dim as long curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+      dim as long wordStartPos = SciExec( hEdit, SCI_WORDSTARTPOSITION, curPos, True)
+      sTrigger = right( pDoc->GetWord( wordStartPos - 1 ), 1 )
+      if sTrigger = ">" then sTrigger = "->"
+      if ( sTrigger = "." ) orelse ( sTrigger = "->" ) then
+         ' In the DereferenceLine function any "->" are converted to "." for simplicity.
+         pData = DereferenceLine( pDoc, sTrigger, wordStartPos - 1 )
+         if pData then 
+            sFunctionName = pData->ElementName & "." & sFunctionName
+            ' Set pData to null because it currently points at the TYPE definition and
+            ' we the gdb2 searches below to actually find the sub/function.
+            pData = 0
+         end if
+      end if   
+
 
       ' Search the list of Function names
-      pData = gdb2.dbFindFunction(sWord)
-      if pData = 0 then
-         pData = gdb2.dbFindSub(sWord)
-         IF pData = 0 then
-            MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
-            exit function
-         end if
-      END IF
+      if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
+      if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
+      if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
+      
+      IF pData = 0 then
+         MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
+         exit function
+      end if
       wszFilename = pData->filename
    end if
    
    ' Save our current position in case user invokes "Last Position" option,   
-   dim as hwnd hEdit = pDoc->hWndActiveScintilla
    gLastPosition.pDoc       = pDoc
    gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
    gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   OpenSelectedDocument(wszFilename, sWord)
-   
+   OpenSelectedDocument( wszFilename, sFunctionName )
+
    Function = 0
 End Function
 
@@ -537,12 +560,17 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          end if
          return true
          
-            
       Case SCN_MODIFIED
          if gApp.SuppressNotify then return true
          ' Show line and column. Only do on modification of text otherwise we will have
          ' a huge slowdown when notifications sent for UI updates.
          If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+            ' Set parsing flag to true. We use a parse flag rather than depending on the dirty
+            ' flags because the file could stay dirty for a long time before it gets saved and 
+            ' every call to the parser would happen even in cases where only directional 
+            ' movement has occured with no text modifications at all.
+            pDoc = gTTabCtl.GetActiveDocumentPtr()
+            If pDoc Then pDoc->bNeedsParsing = true
             frmMain_SetStatusbar
          end if
          return true
@@ -609,46 +637,49 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          end if
 
       case SCN_AUTOCCHARDELETED    
-         ' Use deleted a character while autocompletion list was active. Display
-         ' new contents of list because the underlying word being typed as changed.
-         ShowAutocompleteList(SCN_AUTOCCHARDELETED)
+         if gConfig.CodeTips then
+            ' Use deleted a character while autocompletion list was active. Display
+            ' new contents of list because the underlying word being typed as changed.
+            ShowAutocompleteList(SCN_AUTOCCHARDELETED)
+         end if
                                     
       CASE SCN_CHARADDED
-         pDoc = gTTabCtl.GetActiveDocumentPtr()
-         If pDoc = 0 Then exit function
-         hEdit = pDoc->hWndActiveScintilla
-       
-         select CASE chr(pNSC->ch)
-         case ".", ">"    '  Show autocomplete list for TYPE variables
-            ' dot "." or ">"  part of a pointer
-            ' Need to PostMessage in order to give time for notification to complete. the "."
-            ' is also used as a character that selects and closes the popup list. If no
-            ' PostMessage then the "." will automatically select the first entry in the list
-            ' and close.
-            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
+         if gConfig.CodeTips then
+            pDoc = gTTabCtl.GetActiveDocumentPtr()
+            If pDoc = 0 Then exit function
+            hEdit = pDoc->hWndActiveScintilla
           
-         case ")"      ' Close and active code tip 
-            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
-               
-         case "("      ' Show code tip 
-            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
-
-         case chr(13)  ' ENTER KEY PRESSED
-            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            AttemptAutoInsert()
-    
-         case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
-            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-            if ShowAutocompleteList() then exit function
-
-         case else   ' all other letters
-            if ShowAutocompleteList() then exit function
+            select CASE chr(pNSC->ch)
+            case ".", ">"    '  Show autocomplete list for TYPE variables
+               ' dot "." or ">"  part of a pointer
+               ' Need to PostMessage in order to give time for notification to complete. the "."
+               ' is also used as a character that selects and closes the popup list. If no
+               ' PostMessage then the "." will automatically select the first entry in the list
+               ' and close.
+               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+               If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
              
-         END SELECT
+            case ")"      ' Close and active code tip 
+               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+               SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
+                  
+            case "("      ' Show code tip 
+               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+               If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
 
+            case chr(13)  ' ENTER KEY PRESSED
+               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+               AttemptAutoInsert()
+       
+            case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
+               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+               if ShowAutocompleteList() then exit function
+
+            case else   ' all other letters
+               if ShowAutocompleteList() then exit function
+                
+            END SELECT
+         end if
    End Select
 
    Function = 0
@@ -991,6 +1022,7 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       Else
          pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
       End If   
+      pDoc->bNeedsParsing = true
       ParseDocument(pDoc)
       ' When a Project is being loaded, the incoming nFileType is from the project
       ' file. We pass it to the AddFunctionsToExplorerTreeview function in order to
@@ -1093,8 +1125,12 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
       select case codeNotify
-         case SCEN_SETFOCUS:  pDoc->hWndActiveScintilla = hwndCtl
-         case SCEN_KILLFOCUS: pDoc->hWndActiveScintilla = 0
+         case SCEN_SETFOCUS
+            pDoc->hWndActiveScintilla = hwndCtl
+            frmMain_SelectComboFiles
+            frmMain_SelectComboFunctions
+         case SCEN_KILLFOCUS
+            pDoc->hWndActiveScintilla = 0
       end select      
       hEdit = pDoc->hWndActiveScintilla
       frmMain_ChangeToolbarButtonsState
@@ -1111,7 +1147,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
    
    Select Case id
-             
+      
       case IDC_FRMMAIN_COMBOFILES
          if codeNotify = CBN_CLOSEUP THEN
             frmMain_SetFocusToCurrentCodeWindow
@@ -1233,7 +1269,6 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_FILECLOSE
          OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
       
-      Case IDM_FILESAVEDECLARES:   OnCommand_FileSaveDeclares( HWnd )
       Case IDM_FILESAVEALL:        OnCommand_FileSaveAll( HWnd ) 
       
       Case IDM_FILECLOSEALL:       OnCommand_FileClose( HWnd, EFC_CLOSEALL )

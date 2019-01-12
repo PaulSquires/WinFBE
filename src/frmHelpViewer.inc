@@ -324,6 +324,8 @@ private Function frmHelpViewer_OnDestroy( byval HWnd As HWnd ) As LRESULT
    IF pwb1 THEN Delete pwb1
    DIM pwb2 AS CWebCtx PTR = CAST(CWebCtx PTR, GetProp(hwnd, "CWEBCTXPTR_WINFBX"))
    IF pwb2 THEN Delete pwb2
+   DIM pwb3 AS CWebCtx PTR = CAST(CWebCtx PTR, GetProp(hwnd, "CWEBCTXPTR_HELPTIPS"))
+   IF pwb3 THEN Delete pwb3
    
    ' Delete the popup CWindow class
    DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
@@ -421,6 +423,7 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
       select case gHelpViewerIndex 
          case IDM_HELPWINFBE: TabCtrl_SetCurSel(hTabCtrl, 0) 
          case IDM_HELPWINFBX: TabCtrl_SetCurSel(hTabCtrl, 1) 
+         case IDM_HELPTIPS:   TabCtrl_SetCurSel(hTabCtrl, 2) 
       end select
       frmHelpViewer_PositionWindows
       ShowWindow HWND_FRMHELPVIEWER, nCmdShow
@@ -458,9 +461,11 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
       
       TabCtrl_AddTab(hTabCtrl, 0, "WinFBE Editor", 0)
       TabCtrl_AddTab(hTabCtrl, 0, "WinFBX Library", 0)
+      TabCtrl_AddTab(hTabCtrl, 0, "Tips", 0)
       select case gHelpViewerIndex 
          case IDM_HELPWINFBE: TabCtrl_SetCurSel(hTabCtrl, 0) 
          case IDM_HELPWINFBX: TabCtrl_SetCurSel(hTabCtrl, 1) 
+         case IDM_HELPTIPS:   TabCtrl_SetCurSel(hTabCtrl, 2) 
       end select
       
    Dim As HWnd hTree = _

@@ -1366,6 +1366,11 @@ public Function ParseDocument( byval pDoc as clsDocument ptr, _
                                byval wszFilename as CWSTR = "" _    
                                ) As Long
 
+   If pDoc Then 
+      if pDoc->bNeedsParsing = false then exit function
+   end if
+
+
    dim as long nLineCount, nLineNum, nPos
    Dim As String st, st_ucase, sLine
 
@@ -1540,6 +1545,9 @@ ParseAgain:
       END IF
    END IF
    
+   ' Document has now been fully parsed
+   pDoc->bNeedsParsing = false
+
    ' Update the TODO listview in the frmOutput form
    frmOutput_UpdateToDoListview
    
@@ -1568,40 +1576,43 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    DIM pWHttp AS CWinHttpRequest
 
    ' Open an HTTP connection to an HTTP resource
-   pWHttp.Open "GET", "https://www.planetsquires.com/" & wszServerFile
+   if pWHttp.Open( "GET", "https://www.planetsquires.com/" & wszServerFile ) = S_OK then
 
-   ' Send HTTP request and wait 5 seconds for response 
-   pWHttp.Send
+      ' Send HTTP request and wait 5 seconds for response 
+      pWHttp.Send
     
-   DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
-   if iSucceeded then
-      st = pWHttp.GetResponseBody
-       
-      ' Open a file stream and save the downloaded file
-      DIM pFileStream AS CFileStream
-      IF pFileStream.Open("winfbe_version.txt", STGM_CREATE OR STGM_WRITE) = S_OK then
-         pFileStream.WriteTextA(st)
-      END IF
+      if pWHttp.WaitForResponse(5) then
+         st = pWHttp.GetResponseBody
+          
+         ' Open a file stream and save the downloaded file
+         DIM pFileStream AS CFileStream
+         IF pFileStream.Open("winfbe_version.txt", STGM_CREATE OR STGM_WRITE) = S_OK then
+            pFileStream.WriteTextA(st)
+         END IF
+      end if
    end if
-    
-   ' Open the downloaded file and check for the version number
+   
+   ' Open the downloaded file and check for the version number. It is possible that the socket
+   ' will open but fail and send request but security parameters of the system will prevent data
+   ' from being received resulting in a zero byte file. 
    wszFilename = AfxGetExePathName + wszServerFile
    if AfxFileExists( wszFilename ) then
-       
       dim as long f = freefile
       open wszFilename for input as #f
        
       do until eof(f)
          line input #f, st
          if left( st, 15 ) = "latest_version=" then
-            wszLatestVersion = mid( st, 16 )
+            wszLatestVersion = trim(mid( st, 16 ))
             exit do
          end if
       loop
           
       close #f
       AfxDeleteFile( wszFilename ) 
-   else
+   end if
+   
+   if len(wszLatestVersion) = 0 then
       if bSilentCheck = false then      
          MessageBox( hWndParent, _
                      L(92,"Failed to retrieve update information"), _
@@ -1610,22 +1621,21 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
       end if
       exit function
    end if
-
-   if len(wszLatestVersion) then
-      dim as long latestVersion = ConvertWinFBEversion(wszLatestVersion)
-      dim as long installedVersion = ConvertWinFBEversion(APPVERSION)
-
-      ' Save the config file so that other editor instances will not also do update checks again
-      gConfig.LastUpdateCheck = JulianDateNow
-      gConfig.SaveConfigFile
       
+      
+   ' Check the installed vs. available version numbers   
+   dim as long latestVersion = ConvertWinFBEversion(wszLatestVersion)
+   dim as long installedVersion = ConvertWinFBEversion(APPVERSION)
+
+   ' Save the config file so that other editor instances will not also do update checks again
+   gConfig.LastUpdateCheck = JulianDateNow
+   gConfig.SaveConfigFile
+   
+   if bSilentCheck = false then      
       if installedVersion = latestVersion then
-         if bSilentCheck = false then      
-            wszMsg = L(96,"You are up to date!") & vbcrlf & _
-                     "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
-            MessageBox( hWndParent, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
-         end if
-         exit function
+         wszMsg = L(96,"You are up to date!") & vbcrlf & _
+                  "WinFBE v" & APPVERSION & " " & L(97,"is currently the newest version available.")
+         MessageBox( hWndParent, wszMsg,L(94,"Software Update"), MB_ICONINFORMATION Or MB_OK )
       
       elseif installedVersion < latestVersion then
          wszMsg = APPNAME & vbcrlf & _
@@ -1636,7 +1646,6 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
          If MessageBox( hWndParent, wszMsg, L(94,"Software Update"), MB_ICONQUESTION Or MB_YESNOCANCEL ) = IDYES Then 
             ShellExecute( NULL, "open", "https://github.com/PaulSquires/WinFBE/releases", Null, Null, SW_SHOWNORMAL )
          end if
-         exit function
       end if
    end if
    
