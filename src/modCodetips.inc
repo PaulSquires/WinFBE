@@ -53,8 +53,9 @@ end function
 
 
 
-''
-''
+' ========================================================================================
+' Determine what variable relates to the "With" statement
+' ========================================================================================
 private function DetermineWithVariable( byval pDoc as clsDocument ptr) as string
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
    dim as long nCurLine = pDoc->GetCurrentLineNumber - 1
@@ -303,7 +304,7 @@ end function
 ' ========================================================================================
 private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEAN
   
-   IF gConfig.CodeTips = false THEN exit function
+   IF gConfig.AutoComplete = false THEN exit function
    
    dim as long curPos, nCol, nLenMatchWord, ub, iNextType
    dim as string sWord, sList, st, sDot, sLookFor, sElement, sProp

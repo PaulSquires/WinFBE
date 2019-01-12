@@ -1371,7 +1371,7 @@ public Function ParseDocument( byval pDoc as clsDocument ptr, _
    end if
 
 
-   dim as long nLineCount, nLineNum, nPos
+   dim as long nLineCount, nLineNum, nPos, nStartParseLine
    Dim As String st, st_ucase, sLine
 
    ' Dynamic string array to hold all lines loaded from the file. It
@@ -1411,10 +1411,11 @@ ParseAgain:
    else
       if pDoc THEN
          nLineCount = SciExec(pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0)
+         nStartParseLine = pDoc->ParseStartLine
          wszFilename = pDoc->DiskFilename
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
-         gdb2.dbDelete(wszFilename)
+         gdb2.dbDelete( wszFilename, nStartParseLine )
       else                          
          ' These are often the FB/WinAPI codetip files and Include Files. Everything else in
          ' a project would have a valid pDoc.
@@ -1433,7 +1434,8 @@ ParseAgain:
          pStream.Close
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file.
-         gdb2.dbDelete(wszFilename)
+         nStartParseLine = 0
+         gdb2.dbDelete(wszFilename, nStartParseLine)
       END IF                     
    end if
    
@@ -1451,9 +1453,9 @@ ParseAgain:
       .fileName = wszFilename
    end with
 
-
+     
    ' Analyze all lines in the file
-   for nLineNum = 0 to nLineCount - 1
+   for nLineNum = nStartParseLine to nLineCount - 1
       parser.st       = ""
       parser.st_ucase = ""
       sLine           = ""   ' reset our full line string
@@ -1547,12 +1549,13 @@ ParseAgain:
    
    ' Document has now been fully parsed
    pDoc->bNeedsParsing = false
+   pDoc->ParseStartLine = 0
 
    ' Update the TODO listview in the frmOutput form
    frmOutput_UpdateToDoListview
    
    Function = 0
-
+ 
 End Function
 
 

@@ -569,7 +569,10 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             ' every call to the parser would happen even in cases where only directional 
             ' movement has occured with no text modifications at all.
             pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc Then pDoc->bNeedsParsing = true
+            If pDoc Then 
+               pDoc->bNeedsParsing = true
+               pDoc->ParseStartLine = pDoc->GetCurrentLineNumber
+            end if
             frmMain_SetStatusbar
          end if
          return true
@@ -643,46 +646,45 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          end if
                                     
       CASE SCN_CHARADDED
-         if gConfig.CodeTips then
-            pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc = 0 Then exit function
-            hEdit = pDoc->hWndActiveScintilla
-          
-            select CASE chr(pNSC->ch)
-            case ".", ">"    '  Show autocomplete list for TYPE variables
-               ' dot "." or ">"  part of a pointer
-               ' Need to PostMessage in order to give time for notification to complete. the "."
-               ' is also used as a character that selects and closes the popup list. If no
-               ' PostMessage then the "." will automatically select the first entry in the list
-               ' and close.
-               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-               If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
-             
-            case ")"      ' Close and active code tip 
-               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-               SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
-                  
-            case "("      ' Show code tip 
-               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-               If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
-
-            case chr(13)  ' ENTER KEY PRESSED
-               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-               AttemptAutoInsert()
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
+         If pDoc = 0 Then exit function
+         hEdit = pDoc->hWndActiveScintilla
        
-            case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
-               pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-               if ShowAutocompleteList() then exit function
+         select CASE chr(pNSC->ch)
+         case ".", ">"    '  Show autocomplete list for TYPE variables
+            ' dot "." or ">"  part of a pointer
+            ' Need to PostMessage in order to give time for notification to complete. the "."
+            ' is also used as a character that selects and closes the popup list. If no
+            ' PostMessage then the "." will automatically select the first entry in the list
+            ' and close.
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
+          
+         case ")"      ' Close and active code tip 
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
+               
+         case "("      ' Show code tip 
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
 
-            case else   ' all other letters
-               if ShowAutocompleteList() then exit function
-                
-            END SELECT
-         end if
+         case chr(13)  ' ENTER KEY PRESSED
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            AttemptAutoInsert()
+    
+         case chr(32)  ' Space key pressed (Insert AutoComplete constructs if applicable)
+            pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            if ShowAutocompleteList() then exit function
+
+         case else   ' all other letters
+            if ShowAutocompleteList() then exit function
+             
+         END SELECT
    End Select
 
    Function = 0
 End Function
+
 
 ' ========================================================================================
 ' Set focus to currently active Scintilla window
@@ -991,6 +993,7 @@ public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
 
    function = true
 end function
+
 
 ' ========================================================================================
 ' Attempt to open specified file. If it exists then position to Tab if applicable
@@ -1741,15 +1744,15 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
            if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) = false then exit function
          end if  
          ' File close succeeded. Remove this document from the project collection and remove treeview node. 
-         gdb2.dbDelete(pDoc->DiskFilename)
+         gdb2.dbDelete( pDoc->DiskFilename, 0 )
          Treeview_DeleteItem( hTV, hItem)
          frmMain_RemoveFromComboFiles( pDoc )
-         gApp.RemoveDocument(pDoc)
+         gApp.RemoveDocument( pDoc )
          
            
       ''  COMPILE MENU          
       Case IDM_BUILDEXECUTE, IDM_COMPILE, IDM_REBUILDALL, IDM_QUICKRUN
-         code_Compile(id)
+         code_Compile( id )
       
       Case IDM_RUNEXE
          RunExe( GetRunExecutableFilename, gApp.ProjectCommandLine )

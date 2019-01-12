@@ -568,7 +568,7 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
          ' Remove all references from the gdb2 database. Only remove the reference
          ' if the file is not part of an active project, otherwise, we will lose
          ' references to function names, etc.
-         gdb2.dbDelete(pDoc->DiskFilename)
+         gdb2.dbDelete( pDoc->DiskFilename, 0 )
          frmMain_RemoveFromComboFiles( pDoc )
          gApp.RemoveDocument( pDoc )
       end if   

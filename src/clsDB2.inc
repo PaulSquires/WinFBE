@@ -181,14 +181,18 @@ end function
 
 ''
 ''
-function clsDB2.dbDelete( byref wszFilename as WString ) as long
+function clsDB2.dbDelete( byref wszFilename as WString, _
+                          byval nParseStartLine as long _
+                           ) as long
    dim nCount as long 
    dim as CWSTR wszFile = ucase(wszFilename)
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted = true then continue for
       if ucase(m_arrData(i).fileName) = wszFile THEN
-         m_arrData(i).deleted = true
-         nCount = nCount + 1
+         if m_arrData(i).nLineNum >= nParseStartLine then
+            m_arrData(i).deleted = true
+            nCount = nCount + 1
+         end if
       END IF   
    NEXT
    function = nCount

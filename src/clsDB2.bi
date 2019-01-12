@@ -48,7 +48,7 @@ TYPE clsDB2
       
    public:  
       declare function dbAdd( byval parser as clsParser ptr, byval id as long) as DB2_DATA ptr
-      declare function dbDelete( byref wszFilename as WString) as long
+      declare function dbDelete( byref wszFilename as WString, byval nParseStartLine as long ) as long
       declare function dbDeleteAll() as boolean
       declare function dbDeleteWinAPI() as boolean
       declare function dbRewind() as LONG

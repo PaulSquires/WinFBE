@@ -20,8 +20,9 @@
 #include once "modAutoInsert.bi"
 
 
-''
-''
+' ========================================================================================
+' Determine if end of the block statement exists.
+' ========================================================================================
 private function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
                                             byval idBlockType as long, _
                                             byval nStartLine as long _
@@ -104,8 +105,9 @@ private function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
 end function
 
 
-''
-''
+' ========================================================================================
+' Attempt to autocomplete a statement block
+' ========================================================================================
 public function AttemptAutoInsert() as Long
    ' Attempts to Autocomplete a FOR/DO/SELECT, etc block. This function also deals
    ' with AutoIndentation so need to handle both separately depending on the user

@@ -13,8 +13,9 @@
 
 #include once "clsParser.bi"
 
-''
-''
+' ========================================================================================
+' 
+' ========================================================================================
 private FUNCTION AfxStrRemoveWithMark( BYREF wszMainStr AS CONST WSTRING, _
                                        BYREF wszDelim1 AS CONST WSTRING, _
                                        BYREF wszDelim2 AS CONST WSTRING, _
@@ -36,6 +37,9 @@ private FUNCTION AfxStrRemoveWithMark( BYREF wszMainStr AS CONST WSTRING, _
 END FUNCTION
 
 
+' ========================================================================================
+' Get the details of a TODO item
+' ========================================================================================
 function clsParser.parseToDoItem( byval sText as string ) as boolean
    dim as long nPos = instr(ucase(sText), "' TODO:")
    if nPos = 0 THEN return false
@@ -51,6 +55,9 @@ function clsParser.parseToDoItem( byval sText as string ) as boolean
 end function
 
 
+' ========================================================================================
+' Determine if we are inside a multiline comment block
+' ========================================================================================
 function clsParser.IsMultilineComment(byval sLine as String) as boolean
    ' If we are already in a comment then test to see if we have now reached the end of it.
    if action = ACTION_PARSECOMMENT THEN 
@@ -71,6 +78,9 @@ function clsParser.IsMultilineComment(byval sLine as String) as boolean
 end function
 
 
+' ========================================================================================
+' Normalize the line by removing double spaces, tabs, etc
+' ========================================================================================
 function clsParser.NormalizeLine() as boolean
    
    ' Remove double spaces and replace TABs with single space
@@ -84,6 +94,9 @@ function clsParser.NormalizeLine() as boolean
 end function
 
 
+' ========================================================================================
+' Inspect the line for start/end points of the current parser action
+' ========================================================================================
 function clsParser.InspectLine() as boolean
    ' Inspect the current line for any start/end points of an existing parse
    ' and take the appropriate action.
@@ -228,7 +241,9 @@ function clsParser.InspectLine() as boolean
 END FUNCTION
 
 
-
+' ========================================================================================
+' Determine if the variable is one of the predefined standard data types
+' ========================================================================================
 function clsParser.IsStandardDataType( byref sVarType as string ) as Boolean
    static as string sList 
    sList = " boolean byte double integer long longint short single" & _
@@ -238,6 +253,9 @@ function clsParser.IsStandardDataType( byref sVarType as string ) as Boolean
 end function
 
 
+' ========================================================================================
+' Parse a DIM that has multiple variables
+' ========================================================================================
 function clsParser.parseVariableDefinitions() as boolean
    if gConfig.CodeTips = false then return false
    if len(this.st) < 6 THEN return false  ' minimum line length needed "AS " (see below)
@@ -373,6 +391,9 @@ function clsParser.parseVariableDefinitions() as boolean
 end function
 
 
+' ========================================================================================
+' Parse a TYPE/Class structure
+' ========================================================================================
 function clsParser.parseTYPE() as boolean
    if gConfig.CodeTips = false then return false
 
@@ -421,6 +442,9 @@ function clsParser.parseTYPE() as boolean
 end function
 
 
+' ========================================================================================
+' Parse an ENUM structure
+' ========================================================================================
 function clsParser.parseENUM() as boolean
    if gConfig.CodeTips = false then return false
    ' We are inside of an ENUM structure. 
