@@ -208,7 +208,6 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
          end if
       end if   
 
-
       ' Search the list of Function names
       if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
       if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
