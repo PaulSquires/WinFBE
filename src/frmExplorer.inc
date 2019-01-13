@@ -822,21 +822,21 @@ public Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR )  
         
-      ' Use the new style Explorer Treeview (triangles instead of boxes).
-      ' Set an undocumented extended style that enables the treeview glyphs to resize
-      ' according to the high dpi setting.
-      ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
-      TreeView_SetExtendedStyle( hTree, &H1000, &H1000 )
-      'SendMessage(hTree, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
-      SetWindowTheme(hTree, @wstr("EXPLORER"), 0)
-      TreeView_SetExtendedStyle( hTree, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER )
-
-      gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, wstr("FILES") )
-      Treeview_SetBold(hTree, gApp.hExplorerRootNode, TRUE)
+   ' Use the new style Explorer Treeview (triangles instead of boxes).
+   ' Set an undocumented extended style that enables the treeview glyphs to resize
+   ' according to the high dpi setting.
+   ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
+   TreeView_SetExtendedStyle( hTree, &H1000, &H1000 )
+   'SendMessage(hTree, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
+   SetWindowTheme(hTree, @wstr("EXPLORER"), 0)
+   TreeView_SetExtendedStyle( hTree, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER )
 
    Dim As HFONT hFont = pWindow->CreateFont("Segoe UI", 9) 
    SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
+
+   gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, wstr("FILES") )
+   Treeview_SetBold( hTree, gApp.hExplorerRootNode, TRUE )
 
 
    ' Create the imagelist for Explorer drag/drop

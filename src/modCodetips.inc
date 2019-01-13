@@ -322,12 +322,14 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
    nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
   
-   dim as string sLine = left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol)
+   dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
    dim as string sLine_ucase
    
-   ' Get the current entered word/characters to only match 
-   pDoc->sMatchWord = ucase(trim(pDoc->GetWord))
-   nLenMatchWord = len(pDoc->sMatchWord)
+   ' Get the current entered word/characters to only match.
+   ' Remove any trailing "." because we have modified valid scintilla to recognize
+   ' the period as part of a valid word.
+   pDoc->sMatchWord = ucase( trim( pDoc->GetWord, any " .") )
+   nLenMatchWord = len( pDoc->sMatchWord )
 
    ' If an autocomplete is active but now there is no match word then
    ' a space or tab must have been pressed so autocomplete cancel and now exit.
@@ -435,7 +437,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                END IF
             END IF
          loop
-              
+
       case AUTOCOMPLETE_TYPE
          pData = DereferenceLine( pDoc, sDot, curPos )
          if pData then 

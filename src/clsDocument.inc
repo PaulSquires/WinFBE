@@ -1610,7 +1610,6 @@ Function clsDocument.ApplyProperties() As Long
 
       ''
       ''  IDENTIFY CHARACTERS TO BE USED IN WORDS
-      'SciMsg( m_pSci, SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~._:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
       SciMsg( m_pSci(i), SCI_SETWORDCHARS, 0, Cast(LPARAM, @"~_:\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") )
 
       ''  UNICODE (UTF-8 encoding)

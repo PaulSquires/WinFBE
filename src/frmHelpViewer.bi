@@ -52,5 +52,7 @@ dim shared as HTMLHELPNODES gHTMLHelp(any)
 
 Dim Shared As Any Ptr gpHelpLib
 dim shared as long gHelpViewerIndex
+dim shared as Long gHelpViewerTipsIndex
 
+declare Function ShowContextHelp( byval id as long ) As Long
 declare Function frmHelpViewer_Show( ByVal hWndParent As HWnd, ByVal nCmdShow As Long = -1 ) As LRESULT

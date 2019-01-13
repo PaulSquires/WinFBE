@@ -1810,7 +1810,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
          frmUserTools_ExecuteUserTool( id - IDM_USERTOOL )
 
-      Case IDM_HELP, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
+      Case IDM_HELP, IDM_HELPTIPS, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
          ShowContextHelp(id) 
   
       case IDM_CHECKFORUPDATES
