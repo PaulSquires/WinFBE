@@ -96,7 +96,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    dim as Boolean bIsTHIS
              
    dim as hwnd hEdit   = pDoc->hWndActiveScintilla
-   dim as long curPos  = nPosition  'SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
+   dim as long curPos  = nPosition   
    dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
    dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
    
@@ -110,8 +110,12 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    ' The identifer that triggers an autocomplete list for a TYPE variable
    ' is either a dot "." or a pointer dereference "->"
 
+? "In DereferenceLie sLine: "; sLine
+? "In DereferenceLie sTrigger: "; sTrigger
+
    if right(sLine, len(sTrigger)) <> sTrigger THEN exit function
    sLine = rtrim(sLine, sTrigger)
+
 
    ' Proceed to parse the line. Find the beginning of the line in order to
    ' isolate the expression to dereference. The expression might contain an
@@ -237,10 +241,10 @@ private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 
    ' If the file is dirty then reparse it before attempting the codetip
    If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-      ParseDocument(pDoc)
+      ParseDocument( pDoc )
    End If   
    
-   pData = DereferenceLine(pDoc, "(", curPos)
+   pData = DereferenceLine(pDoc, "(", curPos-1)
    if pData then
       select case pData->id 
          CASE DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
@@ -329,7 +333,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    ' Remove any trailing "." because we have modified valid scintilla to recognize
    ' the period as part of a valid word.
    pDoc->sMatchWord = ucase( trim( pDoc->GetWord, any " .") )
-   nLenMatchWord = len( pDoc->sMatchWord )
+   nLenMatchWord = len(pDoc->sMatchWord )
 
    ' If an autocomplete is active but now there is no match word then
    ' a space or tab must have been pressed so autocomplete cancel and now exit.

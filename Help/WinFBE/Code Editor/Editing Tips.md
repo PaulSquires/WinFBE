@@ -46,7 +46,7 @@ When editing code sometimes you see a call to a sub or function and would like t
 
 Bookmarks allow you to jump quickly between various lines in your code file. The bookmarker (circle icon) is shown to the left of the bookmarked line.
 
-### Tip 12: Rearrange tab order (drag drop)
+### Tip 12: Rearrange tab order (Shift+LMouse)
 
 The ordering of the Tabs that are displayed across the top of the code editor can be easily reordered by pressing the Shift key and drag and dropping it with your mouse.
 

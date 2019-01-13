@@ -55,6 +55,7 @@ function clsParser.parseToDoItem( byval sText as string ) as boolean
 end function
 
 
+   
 ' ========================================================================================
 ' Determine if we are inside a multiline comment block
 ' ========================================================================================
