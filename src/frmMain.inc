@@ -3062,9 +3062,10 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    if gApp.pImageAutocompleteProperty then deallocate( gApp.pImageAutocompleteProperty )
 
    ' Delete the allocated memory for the various child windows
-   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER ): Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMRECENT ):   Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ):   Delete pWindow
-   pWindow = AfxCWindowPtr( HWND_FRMMAIN ):     Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMHELPVIEWER ): Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMEXPLORER ):   Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMRECENT ):     Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMOUTPUT ):     Delete pWindow
+   pWindow = AfxCWindowPtr( HWND_FRMMAIN ):       Delete pWindow
 
 End Function

@@ -139,7 +139,7 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ' also a descriptive label (that is ignored), and return the LL array value.
 #Define L(e,s) LL(e)
 
-#Define SetFocusScintilla  PostMessage HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0
+#Define SetFocusScintilla  PostMessage( HWND_FRMMAIN, MSG_USER_SETFOCUS, 0, 0 )
 #Define SciExec(h, m, w, l) SendMessage(h, m, w, CAST(LPARAM, l))
 
 

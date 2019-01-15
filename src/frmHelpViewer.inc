@@ -66,19 +66,8 @@ public Function ShowContextHelp( byval id as long ) As Long
             wszHelpFilename = gConfig.Win32APIHelpfile 
          END IF
 
-      case IDM_HELPTIPS
-         gHelpViewerIndex = IDM_HELPTIPS
-         frmHelpViewer_Show(HWND_FRMMAIN, SW_SHOW)
-         exit function
-
-      case IDM_HELPWINFBE
-         gHelpViewerIndex = IDM_HELPWINFBE
-         frmHelpViewer_Show(HWND_FRMMAIN, SW_SHOW)
-         exit function
-
-      case IDM_HELPWINFBX
-         gHelpViewerIndex = IDM_HELPWINFBX
-         frmHelpViewer_Show(HWND_FRMMAIN, SW_SHOW)
+      case IDM_HELPTIPS, IDM_HELPWINFBE, IDM_HELPWINFBX
+         frmHelpViewer_Show( HWND_FRMMAIN, id )
          exit function
 
    END SELECT
@@ -304,7 +293,6 @@ private Function frmHelpViewer_OnSize( ByVal HWnd As HWnd, _
    If state <> SIZE_MINIMIZED Then 
       frmHelpViewer_PositionWindows
    End If   
-
    Function = 0
 End Function
 
@@ -313,7 +301,7 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmHelpViewer
 ' ========================================================================================
 private Function frmHelpViewer_OnClose( ByVal HWnd As HWnd ) As LRESULT
-   ' Never close the window; simply hide it.
+   ' Only hide the window rather than destroy it
    ShowWindow( HWnd, SW_HIDE )
    Function = 0
 End Function
@@ -392,9 +380,6 @@ private function LoadHelpTreeview( byval hTreeview as hwnd, _
             gHTMLHelp(ub).TreeviewNode = TreeView_AddItem(hTreeView, hParent, addMode, pFinder.Filename, ub, 0, 0)
             gHTMLHelp(ub).hTreeView = hTreeView
             Treeview_SortChildren( hTreeView, hParent, 0 )
-            if AfxStrPathName( "NAMEX", ucase( gHTMLHelp(ub).wszFilename )) = "EDITING TIPS.HTML" then
-               gHelpViewerTipsIndex = ub
-            end if   
          end if
          
       end if
@@ -419,159 +404,153 @@ end function
 ' frmHelpViewer_Show
 ' ========================================================================================
 public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
-                                    ByVal nCmdShow   As Long = -1 _
+                                    byval idmHelpMessage as long _
                                     ) As LRESULT
 
-   ' If function list already exists then toggle its visibility
-   ' unless nCmdShow is explicitly set to show it.
-   If IsWindow(HWND_FRMHELPVIEWER) Then
-      If nCmdShow <> SW_SHOW Then nCmdShow = Iif(IsWindowVisible(HWND_FRMHELPVIEWER), SW_HIDE, SW_SHOWNORMAL)
-      dim as hwnd hTabCtrl = GetDlgItem(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TABCONTROL)
-      select case gHelpViewerIndex 
-         case IDM_HELPTIPS:   TabCtrl_SetCurSel(hTabCtrl, 0) 
-         case IDM_HELPWINFBE: TabCtrl_SetCurSel(hTabCtrl, 0) 
-         case IDM_HELPWINFBX: TabCtrl_SetCurSel(hTabCtrl, 1) 
-      end select
-      frmHelpViewer_PositionWindows
-      ShowWindow HWND_FRMHELPVIEWER, nCmdShow
-      Exit Function 
-   Else 
-      if nCmdShow = -1 then nCmdShow = SW_HIDE
-   End If
+   static as Long idxNodeTips = -1
+   dim as hwnd hTree1, hTree2, hTabCtrl
+   
+   if IsWindow( HWND_FRMHELPVIEWER ) = 0 then
+
+      '  Create the main window and child controls
+      Dim pWindow As CWindow Ptr = New CWindow
+      pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
+
+      Dim rcWork  As Rect = pWindow->GetWorkArea
+      Dim nHeight As Long = (rcWork.Bottom - rcWork.Top) * .80
+      Dim nWidth  As Long = (rcWork.Right - rcWork.Left) * .80
+
+      HWND_FRMHELPVIEWER = _
+      pWindow->Create( 0, "Help Viewer", @frmHelpViewer_WndProc, 0, 0, nWidth, nHeight, _
+           WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_MAXIMIZEBOX or WS_MINIMIZEBOX or WS_THICKFRAME or _
+           WS_CLIPCHILDREN OR WS_CLIPSIBLINGS, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      pWindow->Center(pWindow->hWindow, hWndParent)
+      pWindow->brush = GetSysColorBrush(COLOR_WINDOW)
       
+      ' Set the small and large icon for the main window (must be set after main window is created)
+      pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
+      pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
 
-   '  Create the main window and child controls
-   Dim pWindow As CWindow Ptr = New CWindow
-   pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
-   Dim rcWork  As Rect = pWindow->GetWorkArea
-   Dim nHeight As Long = (rcWork.Bottom - rcWork.Top) * .80
-   Dim nWidth  As Long = (rcWork.Right - rcWork.Left) * .80
+      hTree1 = _
+           pWindow->AddControl("TREEVIEW", , IDC_FRMHELPVIEWER_TVWINFBE, "", 0, 0, 0, 0, _
+           WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
+           TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
+           TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
+           WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
 
-   HWND_FRMHELPVIEWER = _
-   pWindow->Create( 0, "Help Viewer", @frmHelpViewer_WndProc, 0, 0, nWidth, nHeight, _
-        WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_MAXIMIZEBOX or WS_MINIMIZEBOX or WS_THICKFRAME or _
-        WS_CLIPCHILDREN OR WS_CLIPSIBLINGS, _
-        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->Center(pWindow->hWindow, hWndParent)
-   pWindow->brush = GetSysColorBrush(COLOR_WINDOW)
+         ' Use the new style Explorer Treeview (triangles instead of boxes).
+         ' Set an undocumented extended style that enables the treeview glyphs to resize
+         ' according to the high dpi setting.
+         ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
+         SendMessage(hTree1, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
+         SetWindowTheme(hTree1, @wstr("EXPLORER"), 0)
+         SendMessage( hTree1, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
+
+         ' Load the Treeview 
+         LoadHelpTreeview(hTree1, AfxGetExePath & "\Help\WinFBE\", null)
+
+      
+      hTree2 = _
+           pWindow->AddControl("TREEVIEW", , IDC_FRMHELPVIEWER_TVWINFBX, "", 0, 0, 0, 0, _
+           WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
+           TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
+           TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
+           WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
+
+         ' Use the new style Explorer Treeview (triangles instead of boxes).
+         ' Set an undocumented extended style that enables the treeview glyphs to resize
+         ' according to the high dpi setting.
+         ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
+         SendMessage(hTree2, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
+         SetWindowTheme(hTree2, @wstr("EXPLORER"), 0)
+         SendMessage( hTree2, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
+
+         ' Load the Treeview 
+         LoadHelpTreeview(hTree2, AfxGetExePath & "\Help\WinFBX\", null)
+      
+      
+      ' Add the naviagation and print buttons
+      pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_BACK, "Back", 0, 0, 0, 0, _
+           WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+      
+      pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_FORWARD, "Forward", 0, 0, 0, 0, _
+           WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+
+      pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_PRINT, "Print", 0, 0, 0, 0, _
+           WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+
+      pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_FIND, "Find", 0, 0, 0, 0, _
+           WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+
+      ' Add a WebBrowser controls
+      DIM pwb1 AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
+      SetProp(pWindow->hWindow, "CWEBCTXPTR_WINFBE", CAST(HANDLE, pwb1))
+      DIM pwb2 AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
+      SetProp(pWindow->hWindow, "CWEBCTXPTR_WINFBX", CAST(HANDLE, pwb2))
    
-   ' Set the small and large icon for the main window (must be set after main window is created)
-   pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
-   pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
-
-
-   Dim As HWnd hTree1 = _
-        pWindow->AddControl("TREEVIEW", , IDC_FRMHELPVIEWER_TVWINFBX, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
-        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
-        TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
-        WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
-
-      ' Use the new style Explorer Treeview (triangles instead of boxes).
-      ' Set an undocumented extended style that enables the treeview glyphs to resize
-      ' according to the high dpi setting.
-      ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
-      SendMessage(hTree1, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
-      SetWindowTheme(hTree1, @wstr("EXPLORER"), 0)
-      SendMessage( hTree1, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
-
-      ' Load the Treeview 
-      LoadHelpTreeview(hTree1, AfxGetExePath & "\Help\WinFBX\", null)
-   
-   
-   Dim As HWnd hTree2 = _
-        pWindow->AddControl("TREEVIEW", , IDC_FRMHELPVIEWER_TVWINFBE, "", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or _
-        TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
-        TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
-        WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
-
-      ' Use the new style Explorer Treeview (triangles instead of boxes).
-      ' Set an undocumented extended style that enables the treeview glyphs to resize
-      ' according to the high dpi setting.
-      ' https://stackoverflow.com/questions/38772670/ctreectrl-with-explorer-theme-not-dpi-aware
-      SendMessage(hTree2, TVM_SETEXTENDEDSTYLE, &H1000, &H1000)
-      SetWindowTheme(hTree2, @wstr("EXPLORER"), 0)
-      SendMessage( hTree2, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER)   
-
-      ' Load the Treeview 
-      LoadHelpTreeview(hTree2, AfxGetExePath & "\Help\WinFBE\", null)
-
-   
-   ' Add the naviagation and print buttons
-   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_BACK, "Back", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   
-   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_FORWARD, "Forward", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-
-   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_PRINT, "Print", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-
-   pWindow->AddControl("BUTTON", , IDC_FRMHELPVIEWER_FIND, "Find", 0, 0, 0, 0, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-
-   ' Add a WebBrowser controls
-   DIM pwb1 AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBE, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
-   SetProp(pWindow->hWindow, "CWEBCTXPTR_WINFBE", CAST(HANDLE, pwb1))
-   DIM pwb2 AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_FRMHELPVIEWER_WEBBROWSER_WINFBX, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
-   SetProp(pWindow->hWindow, "CWEBCTXPTR_WINFBX", CAST(HANDLE, pwb2))
-   
-   dim as hwnd hTabCtrl = pWindow->AddControl("TABCONTROL", , _
-      IDC_FRMHELPVIEWER_TABCONTROL, "", 0, 0, 0, 24, _
-      WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
-      TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+      hTabCtrl = pWindow->AddControl("TABCONTROL", , _
+         IDC_FRMHELPVIEWER_TABCONTROL, "", 0, 0, 0, 24, _
+         WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
+         TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
       
       TabCtrl_AddTab(hTabCtrl, 0, "WinFBE Editor", 0)
       TabCtrl_AddTab(hTabCtrl, 0, "WinFBX Library", 0)
-      select case gHelpViewerIndex 
-         case IDM_HELPTIPS:   TabCtrl_SetCurSel(hTabCtrl, 0)
-         case IDM_HELPWINFBE: TabCtrl_SetCurSel(hTabCtrl, 0) 
-         case IDM_HELPWINFBX: TabCtrl_SetCurSel(hTabCtrl, 1) 
-      end select
+
+   
+      ' Set the treeviews to their default topic (the first topic found in the array for each treeview).
+      dim as long idxNodeTree1 = -1
+      dim as long idxNodeTree2 = -1
+      
+      for i as long = lbound(gHTMLHelp) to ubound(gHTMLHelp) 
+         if gHTMLHelp(i).hTreeview = hTree1 then
+            if idxNodeTree1 = -1 then idxNodeTree1 = i
+         elseif gHTMLHelp(i).hTreeview = hTree2 then
+            if idxNodeTree2 = -1 then idxNodeTree2 = i
+         end if
+         if AfxStrPathName( "NAMEX", ucase( gHTMLHelp(i).wszFilename )) = "EDITING TIPS.HTML" then
+            if idxNodeTips = -1 then idxNodeTips = i
+         end if
+      next 
+
+      ' Set the default first page to show for each treeview
+      TabCtrl_SetCurSel( hTabCtrl, 0 ) 
+      if idxNodeTree1 > -1 then TreeView_SelectItem( hTree1, gHTMLHelp(idxNodeTree1).TreeviewNode )
+      frmHelpViewer_DisplayHTML( idxNodeTree1 )
+
+      TabCtrl_SetCurSel( hTabCtrl, 1 ) 
+      if idxNodeTree2 > -1 then TreeView_SelectItem( hTree2, gHTMLHelp(idxNodeTree2).TreeviewNode )
+      frmHelpViewer_DisplayHTML( idxNodeTree2 )
+   end if
+
+
+   ' Must set the active tab page first because frmHelpViewer_DisplayHTML and frmHelpViewer_PositionWindows
+   ' both test what the active tab page in order to perform their work.
+   hTabCtrl = GetDlgItem( HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TABCONTROL )
+   select case idmHelpMessage
+      case IDM_HELPTIPS
+         TabCtrl_SetCurSel( hTabCtrl, 0 )
+         frmHelpViewer_DisplayHTML( idxNodeTips )
+      
+      case IDM_HELPWINFBE
+         TabCtrl_SetCurSel( hTabCtrl, 0 ) 
+      
+      case IDM_HELPWINFBX
+         TabCtrl_SetCurSel( hTabCtrl, 1 ) 
+   end select
       
    frmHelpViewer_PositionWindows
-   
-   select case gHelpViewerIndex 
-      case IDM_HELPTIPS
-         if ( gHelpViewerTipsIndex >= lbound(gHTMLHelp) ) and _
-            ( gHelpViewerTipsIndex <= ubound(gHTMLHelp) ) then         
-            TreeView_SelectItem( hTree1, gHTMLHelp(gHelpViewerTipsIndex ).TreeviewNode )
-            frmHelpViewer_DisplayHTML(gHelpViewerTipsIndex)
-         end if
-      case IDM_HELPWINFBE
-         ' Set focus to the first node in the WinFBE help treeview.
-         for i as long = lbound(gHTMLHelp) to ubound(gHTMLHelp) 
-            if gHTMLHelp(i).hTreeview = hTree1 then
-               TreeView_SelectItem( hTree1, gHTMLHelp(i).TreeviewNode )
-               frmHelpViewer_DisplayHTML(i)
-               exit for
-            end if   
-         next 
-      case IDM_HELPWINFBX
-         ' Set focus to the first node in the WinFBX help treeview.
-         for i as long = lbound(gHTMLHelp) to ubound(gHTMLHelp) 
-            if gHTMLHelp(i).hTreeview = hTree2 then
-               TreeView_SelectItem( hTree2, gHTMLHelp(i).TreeviewNode )
-               frmHelpViewer_DisplayHTML(i)
-               exit for
-            end if   
-         next 
-   end select
 
+         
    ' Display the window
-   ShowWindow HWND_FRMHELPVIEWER, nCmdShow
+   ShowWindow HWND_FRMHELPVIEWER, SW_SHOW
    UpdateWindow(HWND_FRMHELPVIEWER)
 
    Function = 0
 End Function
-
-
-
-
 

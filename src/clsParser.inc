@@ -54,7 +54,6 @@ function clsParser.parseToDoItem( byval sText as string ) as boolean
    return true
 end function
 
-
    
 ' ========================================================================================
 ' Determine if we are inside a multiline comment block
@@ -123,7 +122,7 @@ function clsParser.InspectLine() as boolean
             else
                ' We have encountered the start of a TYPE structure. Save the TYPE name.
                ' Syntax:   TYPE typename [Extends base_typename] [Field = alignment]
-               action = ACTION_PARSETYPE
+               this.action = ACTION_PARSETYPE
                this.typeName  = AfxStrParse(st, 2, " ")
                this.typeAlias = this.typeName
                ' Handle case where this Type extends from another Type

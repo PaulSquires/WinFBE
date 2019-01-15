@@ -982,7 +982,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       loop
    End If
 
-
+   AfxDoEvents
+   
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
    wszParams = "-m " + wDQ + gCompile.MainFilename + wDQ 
