@@ -265,7 +265,9 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' Search for "|", replace it with an empty space "" and position the caret in that place
             this.FindReplace( "|", "" )
             ' don't set SAVEPOINT for newly loaded Template files because we want the document to display as dirty
+
          Else
+
             ' Set a flag that we are loading code from a file. This is important because if the file
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
@@ -1454,6 +1456,13 @@ Function clsDocument.ApplyProperties() As Long
       ryRatio = pWindow->ryRatio
    End If   
    
+   ' If this is a read-only file then set the flag so that the document can not be edited.
+   if AfxIsReadOnlyFile( this.DiskFilename ) then
+      SciMsg( m_pSci(0), SCI_SETREADONLY, 1, 0)
+   else
+      SciMsg( m_pSci(0), SCI_SETREADONLY, 0, 0)
+   end if
+
    strFontName = Str(gConfig.EditorFontname)
    nFontSize   = Val(**gConfig.EditorFontsize)
    

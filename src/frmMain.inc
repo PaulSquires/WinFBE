@@ -412,6 +412,11 @@ public Function frmMain_SetStatusbar() as long
       END select
       wszPanel(3) = wszText
       
+      if SciExec( hEdit, SCI_GETREADONLY, 0, 0 ) then
+         wszPanel(4) = L(222,"Read Only")
+         hIconPanel4 = ghIconBad
+      end if
+
    else      
       ' No document must be active and nothing else happening so blank out the statusbar.
       wszPanel(1) = ""
@@ -427,7 +432,12 @@ public Function frmMain_SetStatusbar() as long
    If (gApp.IsProjectActive = true) or (gApp.IsProjectLoading = true) Then 
       wszText = wszText & " - [" & gApp.ProjectName & "]"
    end if
-   if pDoc then wszText = wszText & " - [" & pDoc->DiskFilename & "]"
+   if pDoc then 
+      wszText = wszText & " - [" & pDoc->DiskFilename & "]"
+      if SciExec( pDoc->hWndActiveScintilla, SCI_GETREADONLY, 0, 0 ) then
+         wszText = wszText & " - [" & L(222,"Read Only") & "]"
+      end if
+   end if
    If wszText <> AfxGetWindowText( HWND_FRMMAIN ) Then AfxSetWindowText( HWND_FRMMAIN, wszText )
 
 
@@ -559,6 +569,12 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          end if
          return true
          
+      
+      case SCN_MODIFYATTEMPTRO
+         ' Attempting to modify a read-only document.
+         MessageBeep(MB_ICONWARNING)
+                  
+                  
       Case SCN_MODIFIED
          if gApp.SuppressNotify then return true
          ' Show line and column. Only do on modification of text otherwise we will have
@@ -1123,7 +1139,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                                     ByVal codeNotify As UINT _
                                     ) As LRESULT
    Dim As HWnd hEdit 
-   
+
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
       select case codeNotify
@@ -1140,13 +1156,15 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
    ' If the popup Help Viewer window has focus then exit function because we don't
    ' want accelerator keys to act on the code editor.
-   if GetForegroundWindow() = HWND_FRMHELPVIEWER then 
-      if id = IDM_FIND then
-         frmHelpViewer_OnCommand(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_FIND, 0, BN_CLICKED)
-      end if   
-      exit function
+   if IsWindow( HWND_FRMHELPVIEWER ) then
+      if GetForegroundWindow() = HWND_FRMHELPVIEWER then 
+         if id = IDM_FIND then
+            frmHelpViewer_OnCommand(HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_FIND, 0, BN_CLICKED)
+         end if   
+         exit function
+      end if
    end if
-
+   
    
    Select Case id
       
@@ -2056,7 +2074,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
          if AfxFileExists(pDoc->DiskFilename) = false THEN
             if pDoc->DeletedButKeep = false then
                ' Ensure that the file is open and displayed
-               frmMain_OpenFileSafely(HWnd, _
+               frmMain_OpenFileSafely(HWND_FRMMAIN, _
                                        False, _    ' bIsNewFile
                                        False, _    ' bIsTemplate
                                        True,  _    ' bShowInTab
@@ -2071,7 +2089,9 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
                   pDoc->UserModified = true                
                else
                   ' No. Close the file.
-                  frmMain_OnCommand(HWnd, IDM_REMOVEFILEFROMPROJECT, 0, 0)
+                  frmMain_OnCommand(HWND_FRMMAIN, IDM_REMOVEFILEFROMPROJECT, 0, 0)
+                  pDocs(idx) = 0
+                  continue do
                end if
             end if
             pDoc->DeletedButKeep = true
