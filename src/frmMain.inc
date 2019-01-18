@@ -89,32 +89,26 @@ end function
 ' ========================================================================================
 public Function frmMain_LoadComboFunctions() As Long
    
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
    ComboBox_ResetContent( hComboFunctions )
 
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 then exit function
    
-   dim as string sFilename = ucase(pDoc->DiskFilename)
    dim wszText as wstring * MAX_PATH
    
    ' Add a default entry for when not positioned within a function.
    wszText = L(218,"(Module level)")
    ComboBox_AddString( hComboFunctions, @wszText )
 
-   dim pData as DB2_DATA ptr
-   gdb2.dbRewind()
-   do 
-      pData = gdb2.dbGetNext
-      if pData = 0 THEN exit do
-      select case pData->id 
-         case DB2_FUNCTION, DB2_SUB
-            if sFilename = ucase(pData->fileName) THEN
-               wszText = pData->ElementName
-               ComboBox_AddString( hComboFunctions, @wszText )
-            END IF
-      END SELECT
-   loop      
+   ' Get all functions in the file
+   Dim As HTREEITEM hChild = Treeview_GetChild( hTree, pDoc->hNodeExplorer )
+   do until hChild = 0 
+      Treeview_GetItemText(hTree, hChild, @wszText, MAX_PATH)
+      ComboBox_AddString( hComboFunctions, @wszText )
+      hChild = Treeview_GetNextSibling(hTree, hChild)
+   loop
 
    function = 0
 end function
@@ -139,17 +133,53 @@ end function
 ' ========================================================================================
 ' Select the Files combobox item based on incoming filename
 ' ========================================================================================
+private Function frmMain_ComboFunctionsFindString( byval sFunctionName as string, _
+                                                   byval nGetSet as long _
+                                                   ) As Long
+   
+   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+   dim as long nCount = ComboBox_GetCount( hComboFunctions )
+   dim as long nResult = -1
+   
+   dim wszText as WString * MAX_PATH
+   dim as string sLookFor = ucase( sFunctionName )
+   
+   select case nGetSet 
+      case ClassProperty.Getter: sLookFor = sLookFor & " (GET)"
+      case ClassProperty.Setter: sLookFor = sLookFor & " (SET)"
+      case ClassProperty.ctor:   sLookFor = sLookFor & " (CTOR)"
+      case ClassProperty.dtor:   sLookFor = sLookFor & " (DTOR)"
+   end select
+   
+   for i as long = 0 to nCount - 1
+      ComboBox_GetLBText( hComboFunctions, i, @wszText )
+      if ucase( wszText ) = sLookFor then
+         nResult = i
+         exit for
+      end if
+   next
+
+   function = nResult
+end function
+
+
+' ========================================================================================
+' Select the Files combobox item based on incoming filename
+' ========================================================================================
 public Function frmMain_SelectComboFunctions() As Long
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 then exit function
    
    dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
-   dim as CWSTR wszFunctionName = pDoc->GetCurrentFunctionName
+   dim as string sFunctionName 
+   dim as ClassProperty nGetSet
+   
+   pDoc->GetCurrentFunctionName( sFunctionName, nGetSet )
    
    ' If no Functions exist in the Functions combo then it obviously has not
    ' been loaded yet.
    if ComboBox_GetCount( hComboFunctions ) = 0 then frmMain_LoadComboFunctions
-   dim as long idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
+   dim as long idx = frmMain_ComboFunctionsFindString( sFunctionName, nGetSet )
 
    ' If the function name is not found then check to see if the file is dirty
    ' and do a reparse and second check of the function list. If still not found
@@ -159,7 +189,7 @@ public Function frmMain_SelectComboFunctions() As Long
       if pDoc->bNeedsParsing then
          ParseDocument( pDoc )
          frmMain_LoadComboFunctions
-         idx = ComboBox_FindStringExact( hComboFunctions, -1, wszFunctionName )
+         idx = frmMain_ComboFunctionsFindString( sFunctionName, nGetSet )
       end if
    end if
    if idx = -1 then idx = 0
@@ -386,6 +416,7 @@ public Function frmMain_SetStatusbar() as long
       end if
       wszPanel(1) = wszText
    
+      
       wszText = ""
       Select Case pDoc->ProjectFileType
          Case FILETYPE_NORMAL:    wszText = ucase(L(210,"Normal")) 
@@ -397,6 +428,7 @@ public Function frmMain_SetStatusbar() as long
          wszText = "FORM"
       end if
       wszPanel(2) = wszText
+      
       
       wszText = ""
       select case pDoc->FileEncoding
@@ -587,7 +619,14 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             pDoc = gTTabCtl.GetActiveDocumentPtr()
             If pDoc Then 
                pDoc->bNeedsParsing = true
-               pDoc->ParseStartLine = pDoc->GetCurrentLineNumber
+               ' 1.8.8 Tried changing the parse routine to only parse from the modified line
+               ' to the end of the file. The problem with that is that the parser looks for starting
+               ' Sub/Function and End Sub / End Function line. Same thing with TYPE/END TYPE and ENUMS.
+               ' If we start parsing in the middle of one of those block structures then we will
+               ' not have them recognized because only the end points will be found in the parse.
+               ' For now, until a better algorithm is found, it is wise to simply reparse the 
+               ' whole file.
+               pDoc->ParseStartLine = 0  'pDoc->GetCurrentLineNumber
             end if
             frmMain_SetStatusbar
          end if
@@ -1027,21 +1066,27 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    
    Dim As Long iTab = -1
    Dim pDoc As clsDocument Ptr 
-   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   Dim As Hwnd hTree = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
    
-   If pDocIn = 0 Then   ' Create a new pDoc 
+   If pDocIn = 0 Then   
+      ' Create a new pDoc 
       gApp.FileLoadingCount = gApp.FileLoadingCount + 1
+
       pDoc = New clsDocument
-      gApp.AddDocument(pDoc) 
+
+      gApp.AddDocument( pDoc ) 
       pDoc->IsDesigner = bIsDesigner 
+
       ' All pDoc's will have an associated Scintilla window for code.
       If bIsNewFile Then
-         pDoc->CreateCodeWindow(HWnd, True)  ' Create the new Scintilla window
+         pDoc->CreateCodeWindow( HWnd, True )  ' Create the new Scintilla window
       Else
-         pDoc->CreateCodeWindow(HWnd, false, bIsTemplate, pwszName)
+         pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, pwszName )
       End If   
+
       pDoc->bNeedsParsing = true
-      ParseDocument(pDoc)
+      ParseDocument( pDoc )
+
       ' When a Project is being loaded, the incoming nFileType is from the project
       ' file. We pass it to the AddFunctionsToExplorerTreeview function in order to
       ' ensure that the pDoc is attached to the right node.
@@ -1052,7 +1097,8 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    End If   
    pwszName = @pDoc->DiskFilename
 
-   ' Add the document to the Explorer treeview
+   ' Add the document to the Explorer treeview and ensure that the root and special
+   ' nodes are created.
    AddFunctionsToExplorerTreeview( pDoc, False )
 
    ' Set the default build configuration for this document. If no IsDefault option
@@ -1197,6 +1243,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
             dim as long nCurSel = ComboBox_GetCurSel( hComboFiles )
             if nCurSel = -1 then exit function
+            
             ' Get the File name
             pDocSelected = cast( clsDocument ptr, ComboBox_GetItemData(hComboFiles, nCurSel) ) 
             wszFilename = pDocSelected->DiskFilename
@@ -2070,7 +2117,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
             pDocs(idx) = 0: continue do
          end if
 
-         ' Has the external file been deleted or is now not available?
+         ' Has the external file been deleted or is now not available
          if AfxFileExists(pDoc->DiskFilename) = false THEN
             if pDoc->DeletedButKeep = false then
                ' Ensure that the file is open and displayed

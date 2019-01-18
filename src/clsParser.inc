@@ -19,7 +19,7 @@
 private FUNCTION AfxStrRemoveWithMark( BYREF wszMainStr AS CONST WSTRING, _
                                        BYREF wszDelim1 AS CONST WSTRING, _
                                        BYREF wszDelim2 AS CONST WSTRING, _
-                                       BYREF MarkKeys AS CONST WSTRING="", _
+                                       BYREF MarkKeys AS CONST WSTRING = "", _
                                        BYVAL fRemoveAll AS BOOLEAN = FALSE, _
                                        BYVAL IsInstrRev AS BOOLEAN = FALSE _
                                        ) AS CWSTR
@@ -163,7 +163,12 @@ function clsParser.InspectLine() as boolean
       If Left(st_ucase, 4)  = "SUB " Then
          sTemp = Mid(st, 5): this.action = ACTION_PARSESUB
       elseIf Left(st_ucase, 9)  = "FUNCTION " Then
-         sTemp = Mid(st, 10): this.action = ACTION_PARSEFUNCTION
+         ' bypass any line with = that is a "FUNCTION = " line.
+         dim as string subText = ltrim( mid(st, 9) )
+         if left( subText, 1 ) <> "=" then 
+            sTemp = Mid(st, 10)
+            this.action = ACTION_PARSEFUNCTION
+         end if   
       ElseIf Left(st_ucase, 16) = "PUBLIC FUNCTION " Then
          sTemp = Mid(st, 17): this.action = ACTION_PARSEFUNCTION
       ElseIf Left(st_ucase, 17) = "PRIVATE FUNCTION " Then
@@ -173,25 +178,73 @@ function clsParser.InspectLine() as boolean
       ElseIf Left(st_ucase, 12) = "PRIVATE SUB " Then
          sTemp = Mid(st, 13): this.action = ACTION_PARSESUB
       ElseIf Left(st_ucase, 9) = "PROPERTY " Then
-         sTemp = Mid(st, 10): this.action = ACTION_PARSEPROPERTY
+         ' bypass any line with = that is a "PROPERTY = " line.
+         dim as string subText = ltrim( mid(st, 9) )
+         if left( subText, 1 ) <> "=" then 
+            sTemp = Mid(st, 10)
+            this.action = ACTION_PARSEPROPERTY
+         end if   
       ElseIf Left(st_ucase, 17) = "PRIVATE PROPERTY " Then
          sTemp = Mid(st, 18): this.action = ACTION_PARSEPROPERTY
+      ElseIf Left(st_ucase, 12) = "CONSTRUCTOR " Then
+         sTemp = Mid(st, 13): this.action = ACTION_PARSECONSTRUCTOR
+      ElseIf Left(st_ucase, 11) = "DESTRUCTOR " Then
+         sTemp = Mid(st, 12): this.action = ACTION_PARSEDESTRUCTOR
       End If
    end if   
+   
    if len(sTemp) THEN 
       ' bypass any line with = embedded in it. Because the FUNCTION keyword has now
       ' been removed from the line, it is easy to check if the "=" sign is the next character.
       if sTemp[0] = 61 then return true   ' 61 is "="
       ' Save data values for later until the end of the block is encountered.
+      dim as string sFuncParams, st
       this.funcName = sTemp
       i = instr(sTemp, "(")
       if i THEN this.funcName = rtrim(left(sTemp, i-1))
-      if i then this.funcParams = this.funcName & mid(sTemp, i)
+      if i then sFuncParams = mid(sTemp, i)
+      
+      ' If this is a PROPERTY then we need to make an educated assessment of whether
+      ' it is a Get or Set property and set the flag appropriately.
+      if this.action = ACTION_PARSEPROPERTY then
+         ' if funcParams exist then this must be a Set property. Need to sanitize the
+         ' property parameters first. Need to get the starting ( and the ending ) and
+         ' evaluate the text between it. Not as easy as using Parse because there could
+         ' be embedded array() parameters and the property could end in something like 
+         ' AS LONG, etc.
+         dim as long p1, p2
+         p1 = instr( sFuncParams, "(" )
+         p2 = InstrRev( sFuncParams, ")" )
+         if ( p1 = 0 ) orelse (p2 = 0 ) then
+            st = ""
+         elseif p2 > p1 then
+            st = mid( sFuncParams, p1, p2 - p1 )
+         end if
+         st = trim( st, any "( )" )
+         
+         if len( st ) then
+            this.GetSet = ClassProperty.Setter
+         else   
+            this.GetSet = ClassProperty.Getter
+         end if
+
+      elseif this.action = ACTION_PARSECONSTRUCTOR then
+         this.GetSet = ClassProperty.ctor
+
+      elseif this.action = ACTION_PARSEDESTRUCTOR then
+         this.GetSet = ClassProperty.dtor
+
+      else      
+         this.GetSet = ClassProperty.None
+      end if
+
+      if i then this.funcParams = this.funcName & sFuncParams
       this.funcName = AfxStrRemoveI(this.funcName, " OVERLOAD")
       this.funcName = AfxStrRemoveI(this.funcName, " CDECL")
       this.funcName = AfxStrRemoveI(this.funcName, " PASCAL")
       this.funcName = AfxStrRemoveI(this.funcName, " STDCALL")
       this.funcLineNum = this.lineNum
+      
       return true
    END IF
 
@@ -199,13 +252,17 @@ function clsParser.InspectLine() as boolean
    if len(st_ucase) >= 7 THEN 
       if (left(st_ucase, 7) = "END SUB") orelse _
          (left(st_ucase, 12) = "END FUNCTION") orelse _
-         (left(st_ucase, 12) = "END PROPERTY") THEN 
+         (left(st_ucase, 12) = "END PROPERTY") orelse _
+         (left(st_ucase, 15) = "END CONSTRUCTOR") orelse _
+         (left(st_ucase, 14) = "END DESTRUCTOR") then 
 
          ' Add the function to the database
          select case this.action
-            CASE ACTION_PARSEFUNCTION: gdb2.dbAdd( @this, DB2_FUNCTION )
-            CASE ACTION_PARSESUB:      gdb2.dbAdd( @this, DB2_SUB )
-            CASE ACTION_PARSEPROPERTY: gdb2.dbAdd( @this, DB2_PROPERTY )
+            CASE ACTION_PARSEFUNCTION:    gdb2.dbAdd( @this, DB2_FUNCTION )
+            CASE ACTION_PARSESUB:         gdb2.dbAdd( @this, DB2_SUB )
+            CASE ACTION_PARSEPROPERTY:    gdb2.dbAdd( @this, DB2_PROPERTY )
+            CASE ACTION_PARSECONSTRUCTOR: gdb2.dbAdd( @this, DB2_PROPERTY ) ' lump in with properties
+            CASE ACTION_PARSEDESTRUCTOR:  gdb2.dbAdd( @this, DB2_PROPERTY ) ' lump in with properties
          END SELECT
          
          if gConfig.CodeTips then
@@ -363,6 +420,7 @@ function clsParser.parseVariableDefinitions() as boolean
          gdb2.dbAdd( @this, DB2_VARIABLE )
       NEXT
       return true
+   
    elseIF instr(sTemp, ",") THEN
       'For example: "S1 AS Long , S2 AS BOOLEAN , ZZ AS WString * MAX_PATH"
       numParts = AfxStrParseCount(sTemp, ",")
@@ -373,6 +431,7 @@ function clsParser.parseVariableDefinitions() as boolean
          gdb2.dbAdd( @this, DB2_VARIABLE )
       NEXT
       return true
+   
    else
       ' "var1 AS Long"
       this.varName = AfxStrParse(sTemp, 1, " ") 

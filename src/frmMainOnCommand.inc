@@ -432,9 +432,8 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
          gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
       End If
       pDoc->ApplyProperties
-      ' Parse the code for sub/function listing and create list
-      ParseDocument(pDoc)
-      AddFunctionsToExplorerTreeview(pDoc, true)
+      ParseDocument( pDoc )
+      AddFunctionsToExplorerTreeview( pDoc, true )
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed

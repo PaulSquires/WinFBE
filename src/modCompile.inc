@@ -642,14 +642,13 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                L(192,"Warnings")      & " " & NumWarnings & ")" & vbcrlf & vbcrlf & _
          L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
          L(195,"Target Compilation:") & " " & gCompile.OutputFilename & " (" & _
-               (fix(nFileSize / 1024) + 1) & "K, " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
+               AfxStrFormatKBSize(nFileSize) & "K, " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
          L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & _
                                         " " & L(198,"seconds") & " (" & _
                                         AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
                                         AfxSystemTimeToTimeStr( gCompile.SystemTime, "hh:mm:ss" ) & ")" & vbcrlf
       end if 
    End if
-
 
    ' Update the log file text box in the frmOutput window
    SetLogFileTextbox

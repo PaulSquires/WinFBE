@@ -148,7 +148,29 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
       if pImageType then 
          pCtrl->AfxButtonPtr->SetImageFromFile( pImageType->wszFilename )
       end if
+
+   case "IMAGEWIDTH"
+      pCtrl->AfxButtonPtr->SetImageWidth( nPropValue )
       
+   case "IMAGEHEIGHT"
+      pCtrl->AfxButtonPtr->SetImageHeight( nPropValue )
+         
+   case "IMAGESCALING"
+      ' The default width/height is 16x16 so adjust that size accordingly.
+      dim as long nWidth = val( GetControlProperty(pCtrl, "IMAGEWIDTH") )
+      dim as long nHeight = val( GetControlProperty(pCtrl, "IMAGEHEIGHT") )
+      select case **wszPropValue
+         case "ImageScale.None"
+            pCtrl->AfxButtonPtr->SetImageSize( 16, 16, true )
+         case "ImageScale.HighDPI"
+            pCtrl->AfxButtonPtr->SetImageSize( pWindow->ScaleX(nWidth), pWindow->ScaleY(nHeight), true )
+         case "ImageScale.AutoSize"
+            pCtrl->AfxButtonPtr->SetImageSize( nWidth, nHeight, true )
+         case "ImageScale.FitWidth"   
+         case "ImageScale.FitHeight"   
+         case "ImageScale.Stretch"
+      end select        
+
    case "BACKCOLOR"
       pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(pProp), true )
 
@@ -695,8 +717,8 @@ end function
 ' Apply properties to the incoming control
 ' ========================================================================================
 public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
-                                 byval pCtrl as clsControl ptr _
-                                 ) as long
+                                        byval pCtrl as clsControl ptr _
+                                        ) as long
 
    if pDoc = 0 then exit function
    if pCtrl = 0 then exit function
@@ -769,20 +791,20 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       END SELECT
       
    
-   ' Handle control specific properties
-   select CASE pCtrl->ControlType
-      case CTRL_FORM:       Form_ApplyProperties(pDoc, pCtrl, pProp)
-      case CTRL_BUTTON:     Button_ApplyProperties(pDoc, pCtrl, pProp)
-      case CTRL_LABEL:      Label_ApplyProperties(pDoc, pCtrl, pProp)
-      case CTRL_CHECKBOX:   CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_OPTION:     OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_TEXTBOX:    TextBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_MASKEDEDIT: MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_LISTBOX:    ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_COMBOBOX:   ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
-      case CTRL_FRAME:      Frame_ApplyProperties(pDoc, pCtrl, pProp)
-      CASE ELSE
-   END SELECT
+      ' Handle control specific properties
+      select CASE pCtrl->ControlType
+         case CTRL_FORM:       Form_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_BUTTON:     Button_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_LABEL:      Label_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_CHECKBOX:   CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_OPTION:     OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_TEXTBOX:    TextBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_MASKEDEDIT: MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_LISTBOX:    ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_COMBOBOX:   ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_FRAME:      Frame_ApplyProperties(pDoc, pCtrl, pProp)
+         CASE ELSE
+      END SELECT
 
    next
 

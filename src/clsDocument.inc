@@ -296,23 +296,27 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
 
    if this.IsDesigner then
       ' Select the Form as the default focus control
-      this.Controls.SelectControl(this.hWndForm)
-      this.Controls.SetActiveControl(this.hWndForm)
+      this.Controls.SelectControl( this.hWndForm )
+      this.Controls.SetActiveControl( this.hWndForm )
+
       ' Display the ToolBox/PropertyList
-      frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW)
-      DisplayPropertyList(@this)
+      frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW )
+      DisplayPropertyList( @this )
+
       ' If the data that was read contained anything that caused the form to have
       ' to be code regenerated then we need to save the file back to disk with the
       ' new meta data and code generation.
       if this.bRegenerateCode then 
          If this.IsNewFlag = false then this.SaveFile
       end if   
+
       ' In any event, regenerate code for the visual designer 
       this.bRegenerateCode = true
-      GenerateFormCode(@this)
+      GenerateFormCode( @this )
    end if   
 
    this.ApplyProperties()
+
    Function = this.hWindow(0)
 End Function
 
@@ -911,7 +915,9 @@ function clsDocument.IsFunctionLine( byval lineNum as long ) as long
    elseif Left(lineText, 11) = "PUBLIC SUB " then
       position = 12
    ElseIf Left(lineText, 9)  = "PROPERTY " Then
-      position = 10
+      ' bypass any line with = that is a "PROPERTY = " line.
+      dim as string subText = ltrim( mid(lineText, 9) )
+      if left( subText, 1 ) <> "=" then position = 10
    ElseIf Left(lineText, 17) = "PRIVATE PROPERTY " Then
       position = 18
    ElseIf Left(lineText, 12) = "CONSTRUCTOR " Then
@@ -938,29 +944,31 @@ function clsDocument.IsFunctionLine( byval lineNum as long ) as long
 End Function
 
 
-''
-''  GetCurrentFunctionName
-''
-''  Determine the sub/function name based on the current editing position 
-''  within the file.
-''  This is needed by CodeTips (DereferenceLine)
-''
-Function clsDocument.GetCurrentFunctionName() As string
+' ========================================================================================
+' Determine the sub/function name based on the current editing position 
+' within the file. This is needed by CodeTips (DereferenceLine) and for code navigation
+' in the editor to set the Functions ComboBox to the correct item.
+' ========================================================================================
+Function clsDocument.GetCurrentFunctionName( byref sFunctionName as string, _
+                                             byref nGetSet as ClassProperty _
+                                             ) As long
     
    dim as string lineText
    dim as string funcName 
+   dim as string funcParams
    
    dim as long curLine
    dim as long position
    
    ' search up the file until we find the start of a sub/function or start of file.
    curLine = this.GetCurrentLineNumber
+   nGetSet = ClassProperty.None
    
    for i as long = curLine to 0 step -1
       position = this.IsFunctionLine( i )
       
       if position = -1 then 
-         ' We found an "END SUB", "END FUNCTION", etc line. Keep looking for 
+         ' We found an "END SUB", "END FUNCTION", "END PROPERTY" line. Keep looking for 
          ' the very next instance of SUB/FUNCTION and then break out of loop
          ' with that function name.
          if i = this.GetCurrentLineNumber then 
@@ -978,11 +986,47 @@ Function clsDocument.GetCurrentFunctionName() As string
          lineText = ltrim(ucase( AfxStrShrink(this.GetLine(i), chr(32,9)) ))
          funcName = ltrim(mid(lineText, position))
          funcName = AfxStrParseAny( funcName, 1, " (" )
+         
+         ' If this is a Property then we need to differentiate between a Get/Set
+         If ( Left(lineText, 9)  = "PROPERTY " ) orelse _
+            ( Left(lineText, 17) = "PRIVATE PROPERTY " ) Then
+            ' if funcParams exist then this must be a Set property. Need to sanitize the
+            ' property parameters first. Need to get the starting ( and the ending ) and
+            ' evaluate the text between it. Not as easy as using Parse because there could
+            ' be embedded array() parameters and the property could end in something like 
+            ' AS LONG, etc.
+            dim as String st
+            dim as string sFuncParams = lineText
+            dim as long p1, p2
+            p1 = instr( sFuncParams, "(" )
+            p2 = InstrRev( sFuncParams, ")" )
+            if ( p1 = 0 ) orelse (p2 = 0 ) then
+               st = ""
+            elseif p2 > p1 then
+               st = mid( sFuncParams, p1, p2 - p1 )
+            end if
+            st = trim( st, any "( )" )
+            if len( st ) then
+               nGetSet = ClassProperty.Setter
+            else   
+               nGetSet = ClassProperty.Getter
+            end if
+
+         elseIf ( Left(lineText, 12)  = "CONSTRUCTOR " ) then
+            nGetSet = ClassProperty.ctor
+            
+         elseIf ( Left(lineText, 11)  = "DESTRUCTOR " ) then
+            nGetSet = ClassProperty.dtor
+         end if   
+
          exit for
       end if
    NEXT
 
-   return funcName
+   sFunctionName = funcName
+   nGetSet = nGetSet
+   
+   function = 0
 End Function
 
 

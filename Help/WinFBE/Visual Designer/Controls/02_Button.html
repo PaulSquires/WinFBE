@@ -87,8 +87,16 @@
 <td>Gets or set the image to display.</td>
 </tr>
 <tr class="odd">
-<td>ImageLayout</td>
-<td>Gets or sets the layout position of the image. Refer to the <a href="#ImageLayout">ImageLayout</a> enum.</td>
+<td>ImageScaling</td>
+<td>Gets or sets the scaling of the image. Refer to the <a href="#ImageScale">ImageScale</a> enum.</td>
+</tr>
+<tr class="even">
+<td>ImageHeight</td>
+<td>Gets or sets the height of the image.</td>
+</tr>
+<tr class="odd">
+<td>ImageWidth</td>
+<td>Gets or sets the width of the image.</td>
 </tr>
 <tr class="even">
 <td>Left</td>
@@ -282,13 +290,14 @@
 </tr>
 </tbody>
 </table>
-<h5 id="imagelayout">ImageLayout</h5>
-<pre><code>Enum ImageLayout
+<h5 id="imagescale">ImageScale</h5>
+<pre><code>Enum ImageScale
    None = 1
-   Tile
-   Center
+   HighDPI
+   AutoSize
+   FitWidth
+   FitHeight   
    Stretch
-   Zoom
 End Enum
 </code></pre>
 <h5 id="controlborderstyle">ControlBorderStyle</h5>

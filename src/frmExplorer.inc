@@ -186,6 +186,7 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
       else
          hRootNode = TreeView_GetParent( hTree, pDoc->hNodeExplorer )
       End If
+
    Else
       ' Delete any existing children sub/function nodes and then update with new pointer values
       hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
@@ -212,15 +213,23 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
       dim as HTREEITEM hNode
       dim pData as DB2_DATA ptr
       dim as string sFilename = ucase(pDoc->DiskFilename)
+      dim as string sNodeName
       
       gdb2.dbRewind()
       do 
          pData = gdb2.dbGetNext
          if pData = 0 THEN exit do
          select case pData->id 
-            case DB2_FUNCTION, DB2_SUB
+            case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
                if sFilename = ucase(pData->fileName) THEN
-                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, pData->ElementName, 0, 2, 2 )
+                  sNodeName = pData->ElementName
+                  select case pData->GetSet 
+                     case ClassProperty.Getter: sNodeName = sNodeName & " (get)"
+                     case ClassProperty.Setter: sNodeName = sNodeName & " (set)"
+                     case ClassProperty.ctor:   sNodeName = sNodeName & " (ctor)"
+                     case ClassProperty.dtor:   sNodeName = sNodeName & " (dtor)"
+                  end select      
+                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, sNodeName, 0, 2, 2 )
                END IF
          END SELECT
       loop      
@@ -491,8 +500,17 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
          hItem = Treeview_GetSelection(hTree)
          dim as CWSTR wszFilename, wszFunctionName
          frmExplorer_GetFileNameFunctionName(hItem, wszFilename, wszFunctionName)
-         OpenSelectedDocument( wszFilename, wszFunctionName )
+         pDoc = OpenSelectedDocument( wszFilename, wszFunctionName )
          TreeView_SelectItem( hTree, hItem )
+         ' Get the pDoc and check to see if it is a visual designer. If it is, then
+         ' initiate the toggle between the code editor and visual designer.
+         if pDoc then
+            if pDoc->IsDesigner then
+               ' Show the code editor.
+               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
+               frmMain_PositionWindows
+            end if
+         END IF
          return true    ' prevent branch from expanding
          
       Case NM_CLICK, NM_RCLICK

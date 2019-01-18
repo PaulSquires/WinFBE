@@ -92,9 +92,10 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    dim pLastData as DB2_DATA ptr
    
    dim as long i, nTotalElements, nCurElement
+   dim as ClassProperty nGetSet
    dim as string sElement, sVarName, sCurrentFunction, sTypeName, sLocal, sGlobal, sTemp
    dim as Boolean bIsTHIS
-             
+
    dim as hwnd hEdit   = pDoc->hWndActiveScintilla
    dim as long curPos  = nPosition   
    dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
@@ -109,10 +110,6 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    ' is good and we can proceed to dereference elements on the line.
    ' The identifer that triggers an autocomplete list for a TYPE variable
    ' is either a dot "." or a pointer dereference "->"
-
-? "In DereferenceLie sLine: "; sLine
-? "In DereferenceLie sTrigger: "; sTrigger
-
    if right(sLine, len(sTrigger)) <> sTrigger THEN exit function
    sLine = rtrim(sLine, sTrigger)
 
@@ -158,7 +155,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    ' a class/type function.
    ' eg.   clsType.MyFunctionName      ' inside a class/type function
    ' eg.   MyFunctionName              ' standalone function
-   sCurrentFunction = pDoc->GetCurrentFunctionName     
+   pDoc->GetCurrentFunctionName( sCurrentFunction, nGetSet )
 
    do until nCurElement > nTotalElements
       sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
@@ -178,11 +175,11 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
       '' ATTEMPT TO MATCH A FUNCTION NAME
       ' eg.    MyFunction
       ' eg.    mytype.MyFunction
-      pData = gdb2.dbFindFunction(sVarName)
+      pData = gdb2.dbFindFunction( sVarName )
       if pData then return pData
-      pData = gdb2.dbFindProperty(sVarName)
+      pData = gdb2.dbFindSub( sVarName )
       if pData then return pData
-      pData = gdb2.dbFindSub(sVarName)
+      pData = gdb2.dbFindProperty( sVarName )
       if pData then return pData
                  
       '' ATTEMPT TO MATCH LOCAL VARIABLE

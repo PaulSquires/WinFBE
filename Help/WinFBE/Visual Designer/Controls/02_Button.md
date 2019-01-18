@@ -18,7 +18,9 @@
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
 | Image | Gets or set the image to display.|
-| ImageLayout | Gets or sets the layout position of the image. Refer to the [ImageLayout](#ImageLayout) enum.|
+| ImageScaling | Gets or sets the scaling of the image. Refer to the [ImageScale](#ImageScale) enum. |
+| ImageHeight | Gets or sets the height of the image.|
+| ImageWidth | Gets or sets the width of the image.|
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
@@ -71,14 +73,15 @@
 | MouseUp | Occurs when the mouse pointer is over the control and a mouse button is released.|
 
 
-##### ImageLayout
+##### ImageScale
 ```
-Enum ImageLayout
+Enum ImageScale
    None = 1
-   Tile
-   Center
+   HighDPI
+   AutoSize
+   FitWidth
+   FitHeight   
    Stretch
-   Zoom
 End Enum
 ```
 ##### ControlBorderStyle

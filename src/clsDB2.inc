@@ -141,6 +141,7 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
             .ElementName  = parser->funcName
             .ElementValue = parser->funcParams   ' Calltip
             .IsWinApi     = parser->IsWinApi
+            .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
          
          case DB2_VARIABLE
@@ -254,13 +255,40 @@ function clsDB2.dbSeek( byval sLookFor as string, _
    ' Find the array element that contains the function name beng searched for
    dim pData as DB2_DATA ptr
             
+   ' Determine if this is a get or set property
+   dim as long nGetSet, i
+
+   i = instr( sLookFor, " (get)" )
+   if i then
+      nGetSet = ClassProperty.Getter
+   else
+      i = instr( sLookFor, " (set)" )
+      if i then
+         nGetSet = ClassProperty.Setter
+      else      
+         i = instr( sLookFor, " (ctor)" )
+         if i then
+            nGetSet = ClassProperty.ctor
+         else      
+            i = instr( sLookFor, " (dtor)" )
+            if i then
+               nGetSet = ClassProperty.dtor
+            end if
+         end if   
+      end if
+   end if
+   if i then sLookFor = left( sLookFor, i - 1 )
+      
    sLookFor = ucase(sLookFor)
    this.dbRewind()
    do 
       pData = this.dbGetNext()
       if pData = 0 THEN exit do
       if pData->id = Action THEN
-         if sLookFor = ucase(pData->ElementName) THEN
+         
+         if ( sLookFor = ucase(pData->ElementName) ) andalso _
+            ( nGetSet = pData->GetSet )  THEN
+            
             if len(sFilename) then
                if ucase(pData->fileName) = ucase(sFilename) then 
                   return pData
@@ -268,7 +296,9 @@ function clsDB2.dbSeek( byval sLookFor as string, _
             else
                return pData
             end if      
+         
          end if
+      
       END IF
    loop
    
@@ -279,28 +309,28 @@ end function
 ''
 ''
 function clsDB2.dbFindFunction( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek(sFunctionName, DB2_FUNCTION, sFilename) 
+   return this.dbSeek( sFunctionName, DB2_FUNCTION, sFilename ) 
 end function
 
 
 ''
 ''
 function clsDB2.dbFindSub( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek(sFunctionName, DB2_SUB, sFilename) 
+   return this.dbSeek( sFunctionName, DB2_SUB, sFilename ) 
 end function
 
 
 ''
 ''
 function clsDB2.dbFindProperty( byref sFunctionName as string, byref sFilename as string = "") as DB2_DATA ptr
-   return this.dbSeek(sFunctionName, DB2_PROPERTY, sFilename) 
+   return this.dbSeek( sFunctionName, DB2_PROPERTY, sFilename ) 
 end function
 
 
 ''
 ''
 function clsDB2.dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
-   return this.dbSeek(sVariableName, DB2_VARIABLE)      
+   return this.dbSeek( sVariableName, DB2_VARIABLE )      
 end function
 
 

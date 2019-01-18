@@ -101,7 +101,14 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TextBackColor", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextForeColorDown", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "TextBackColorDown", "SYSTEM|Control", PropertyType.ColorPicker)
+         ' The properties are automatically sorted when they are displayed, however we
+         ' need to order them here correctly because with ApplyProperties is called we want
+         ' to ensure that the properties are acted on in a specific order. The width and height
+         ' need to be set beforescaling is called.
          AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
+         AddControlProperty(pCtrl, "ImageWidth", "16", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "ImageHeight", "16", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "ImageScaling", "ImageScale.HighDPI", PropertyType.ComboPicker)
 '         AddControlProperty(pCtrl, "ImageAlign", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)

@@ -38,6 +38,7 @@ type DB2_DATA
    IsTHIS       as Boolean         ' Dynamically set in DereferenceLine so caller can show/hide private elements
    IsWinApi     as Boolean         ' If data item is WinApi related
    IsEnum       as Boolean         ' If TYPE is treated as an ENUM
+   GetSet       as ClassProperty   ' 0=sub/function, 1=propertyGet, 2=propertySet
    TypeExtends  as String          ' The TYPE is extended from this TYPE
 END TYPE
 

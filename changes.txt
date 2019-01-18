@@ -29,6 +29,8 @@ Version 1.8.8
 - Changed: Moved Bookmark menu entries to "Bookmarks" submenu of the "Search" menu.
 - Changed: Removed the "Save Declares File" menu option as it is obsolete.
 - Changed: Updated Spanish language translation file by José Roca.
+- Changed: Updated German language translation file by Joerg Buckel.
+- Changed: Updated Chinese language translation file by ganlinlao.
 - Fixed: Modified English.lang file to compress by 58 entries. Other language files will need to be slightly modified by their respective authors.
 - Fixed: Some issues with right-click menu on #Include line to display "Open <include filename>" when a project is open.
 - Fixed: F3/Shift+F3 Find/Find Next accelerator tweaked slightly to ensure previously selected text gets searched.

@@ -42,15 +42,6 @@ function clsCollection.ItemAt( byval nIndex as long ) as clsControl ptr
    return _arrControls(nIndex)
 end function
 
-'function clsCollection.ItemByName( byref wszName as wstring ) as clsControl ptr
-'   for i as long = lbound(_arrControls) to ubound(_arrControls)
-'       if ucase(_arrControls(i)->Name) = ucase(wszName) THEN
-'         return _arrControls(i) 
-'       END IF
-'   next
-'   function = 0   ' null pointer not found
-'end function
-
 function clsCollection.Add( byval pCtrl as clsControl ptr ) as long
    dim as long ub = ubound(_arrControls) + 1
    redim preserve _arrControls(ub) as clsControl ptr

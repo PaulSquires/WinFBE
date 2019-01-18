@@ -1499,7 +1499,6 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    gApp.IsProjectActive = true
    gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
    gApp.hIconPanel = 0
-   frmMain_SetStatusbar
    
    ' If no active build configuration then assign the currently active selection
    if gApp.ProjectBuild = "" then 
@@ -1515,6 +1514,10 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    ' Show the correct notes for this project
    frmOutput_ShowNotes
 
+   ' Ensure that the correct build is selected
+   frmBuildConfig_LoadBuildComboBox
+   
+   frmMain_SetStatusbar
    SetCursor( hCurSave )
 
    Function = True   ' successful open

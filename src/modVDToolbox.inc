@@ -16,6 +16,10 @@
 #include once "clsApp.bi"
 #include once "clsDocument.bi"
 
+' PropertyList divider globals
+dim shared as long gPropDivPos
+dim shared as boolean gPropDivTracking
+
 
 ' ========================================================================================
 ' Load the dropdown PropertyList listbox that shows chocies for the current property
@@ -73,6 +77,14 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Checked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
+
+      case "IMAGESCALING"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.HighDPI"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.AutoSize"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitWidth"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitHeight"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.Stretch"))
 
       case "DROPDOWNSTYLE"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.Simple"))
@@ -847,6 +859,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
 
          SaveDC(lpdis->hDC)
          
+         ' COMBOBOX LIST OF CONTROLS ON FORM
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_COMBOCONTROLS then
             ' CLEAR BACKGROUND
             If (lpdis->itemState And ODS_SELECTED) Then     
@@ -862,7 +875,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
             FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
 
             dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-            
+             
             if (pDoc <> 0) andalso (lpdis->itemData < pDoc->Controls.Count) then
                dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
                dim pCtrl as clsControl ptr
@@ -879,7 +892,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                             wszCtrlName, _
                             -1, Cast(lpRect, @rc), _
                             DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
-                
+                 
                   ' Determine the Control Type
                   SelectObject(lpdis->hDC, hFontNormal)
                   wszCtrlName = GetToolBoxName(pCtrl->ControlType) & " (" & GetWinformsXClassName(pCtrl->ControlType) & ")"
@@ -894,6 +907,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
          end if
 
          
+         ' TOOLBOX OF CONTROLS
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTTOOLBOX then
             ' CLEAR BACKGROUND
             If (lpdis->itemState And ODS_SELECTED) Then     
@@ -929,6 +943,8 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
             end if          
          end if
 
+         
+         ' PROPERTYLIST
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTPROPERTIES then
             dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
             dim pCtrl as clsControl ptr 
@@ -939,7 +955,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   rc2 = lpdis->rcItem
                   rc.right = rc.left + gPropDivPos
                   rc2.left = rc.right
-                  
+                   
                   ' CLEAR BACKGROUND
                   If (lpdis->itemState And ODS_SELECTED) Then     
                      SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
@@ -967,7 +983,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
                   SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
                   rc2.left = rc2.left + pWindow->ScaleX(4)
-                  
+                   
                   ' Some properties that are blank will show "(none)"
                   dim as CWSTR wszPropValue = pCtrl->Properties(lpdis->itemData).wszPropValue
                   if len(wszPropValue) = 0 then
@@ -998,14 +1014,14 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                      wszValue = AfxStrParse(wszPropValue, 2, "|")
                      wszPropValue = wszValue
                      if wszList = "CUSTOM" then wszPropValue = "Custom Color"
-                     
+                      
                      dim as HBRUSH hBrushColor, hBrushOld
                      dim as RECT rcColor = rc2
                      rcColor.left   = rcColor.left 
                      rcColor.right  = rcColor.left + pWindow->ScaleX(18)
                      rcColor.top    = rcColor.top + pWindow->ScaleY(1)
                      rcColor.bottom = rcColor.bottom - pWindow->ScaleY(4)
-                     
+                      
                      dim as COLORREF rgbClr = GetRGBColorFromProperty(@pCtrl->Properties(lpdis->itemData))
                      hBrushColor = CreateSolidBrush(rgbClr)
 
@@ -1023,19 +1039,21 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                             DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
                   SelectObject(lpdis->hDC, hFontNormal)
                   if hFont then DeleteFont(hFont)
-                  
- 
+                   
+  
                   ' Draw the border edges
                   SetBkMode(lpdis->hDC, TRANSPARENT)   
                   rc  = lpdis->rcItem: rc.right = rc.left + gPropDivPos
                   rc2 = lpdis->rcItem: rc2.left = rc.right
                   DrawEdge( lpdis->hDC, @rc, EDGE_SUNKEN, BF_BOTTOMRIGHT)
                   DrawEdge( lpdis->hDC, @rc2, EDGE_SUNKEN, BF_BOTTOMRIGHT)
-                  
+                   
                end if
             END IF
          end if
-         
+          
+          
+         ' EVENTS ASSOCIATED WITH A CONTROL
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTEVENTS then
             dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
             dim pCtrl as clsControl ptr 
@@ -1044,7 +1062,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                if pCtrl THEN
                   rc  = lpdis->rcItem
                   rc2 = lpdis->rcItem: rc2.Left = pWindow->ScaleX(20)
-                  
+                   
                   ' CLEAR BACKGROUND
                   If (lpdis->itemState And ODS_SELECTED) Then     
                      SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
@@ -1064,7 +1082,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                               rc.Top + pWindow->ScaleY(2), _
                               iIf( pCtrl->Events(lpdis->itemData).bIsSelected, ghIconTick, ghIconNoTick), _
                               pWindow->ScaleX(16), pWindow->ScaleY(16), 0, 0, DI_NORMAL) 
-                  
+                   
                   ' Draw the event name 
                   SelectObject(lpdis->hDC, hBrush)      
                   FillRect(lpdis->hDC, @rc2, hBrush)  
@@ -1101,7 +1119,6 @@ private Function frmVDToolbox_OnDestroy( byval HWnd As HWnd ) As LRESULT
    ' Delete the manually created bold font
    dim as hFONT hFontBold = AfxGetWindowFont( GetDlgItem(hwnd, IDC_FRMVDTOOLBOX_LBLPROPNAME ))
    if hFontBold then DeleteFont(hFontBold)
-   
    HWND_FRMVDTOOLBOX = 0
    Function = 0
 End Function

@@ -289,7 +289,7 @@ end function
 
 
 ' ========================================================================================
-' Generate (or regenerate) visual designer code and insert it into the code editor.
+' Generate (or regenerate) visual designer code.
 ' ========================================================================================
 public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    if pDoc = 0 then exit function
@@ -338,12 +338,12 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
          ' If the Event/function does not already exist in code then create it now.
-         ParseDocument(pDoc)
+         ParseDocument( pDoc )
          
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
-         if (gApp.IsProjectLoading = false) orelse (gApp.IsFileLoading = false) then
+         if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
             if pData = 0 THEN
                wszMenuSelect = sp(1) & "Select Case UCase(sender.Name)" & vbcrlf 
@@ -397,12 +397,12 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
                
                ' If the Event/function does not already exist in code then create it now.
-               ParseDocument(pDoc)
+               ParseDocument( pDoc )
                
                ' Only check if we are not loading the project because the event handling
                ' could already exist but just be in another source code file that has
                ' not yet been loaded.
-               if (gApp.IsProjectLoading = false) orelse (gApp.IsFileLoading = false) then
+               if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
                   pData = gdb2.dbFindFunction(wszFunction)
                   if pData = 0 THEN
                      wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _

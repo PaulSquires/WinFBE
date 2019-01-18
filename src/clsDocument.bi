@@ -33,6 +33,7 @@
 #include once "clsMenuItem.bi"
 #include once "clsControl.bi"      ' Includes properties and events types
 #include once "clsCollection.bi"
+#include once "clsParser.bi"
 
 ' Structure that holds all of the user embedded compiler directives
 ' in the source code. Currently, only the main source file is searched
@@ -165,7 +166,7 @@ Type clsDocument
       Declare Function GetWord( ByVal curPos As Long = -1 ) As String
       Declare Function GetBookmarks() As String
       Declare Function SetBookmarks( ByVal sBookmarks As String ) As Long
-      declare Function GetCurrentFunctionName() As string
+      declare Function GetCurrentFunctionName( byref sFunctionName as string, byref nGetSet as ClassProperty ) As long
       declare Function LineDuplicate() As Long
       declare function SetMarkerHighlight() As Long
       declare Function RemoveMarkerHighlight() As Long

@@ -52,7 +52,7 @@ Declare Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, ByVal 
 Declare Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 Declare Function GetRunExecutableFilename() as CWSTR
 Declare Function LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING) as any ptr
-Declare Function ParseDocument( byval pDoc as clsDocument ptr, byval wszFilename as CWSTR = "") As Long
+Declare Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
 declare function DoCheckForUpdates( byval hWndParent as hwnd, byval bSilentCheck as Boolean = false ) as long
 
 
