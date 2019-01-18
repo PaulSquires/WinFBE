@@ -14,10 +14,11 @@ Features:
 - Localized for 9 languages:
 - - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukranian
 - Projects and non-project based editing.
+- Built-in Visual Designer for GUI application development.
 - Easy integration of Console or GUI based code.
 - Incremental compiling of code defined as a "module".
 - Easy including of Windows Resource files simply by specifying which source code file is the resource.
-- Seemless integration of the FreeBasic Compiler (both 32 bit and 64 bit).
+- Seamless integration of the FreeBasic Compiler (both 32 bit and 64 bit).
 - Codetip popups and auto completion.
 
 Requirements:
@@ -26,14 +27,13 @@ Requirements:
 
 Resources:
 - Jose Roca: 
-  -- CWINDOW class (Windows GUI API encapsulation)
-  -- CWSTR class (Dynamic WSTRING Unicode class)
-  -- AFX* classes (various useful string, date/time, GUI control, GDIPlus, routines)  [https://github.com/JoseRoca/WinFBX](https://github.com/JoseRoca/WinFBX)
+  - CWINDOW class (Windows GUI API encapsulation)
+  - CWSTR class (Dynamic WSTRING Unicode class)
+  - AFX* classes (various useful string, date/time, GUI control, GDI+, routines)  [https://github.com/JoseRoca/WinFBX](https://github.com/JoseRoca/WinFBX)
 - Visit http://www.planetsquires.com/protect/forum/index.php for support forum.
 
-
 WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-Copyright (C) 2016-2018 Paul Squires, PlanetSquires Software
+Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
 
 The WinFBE editor is licensed under the GNU GPLv3 or later.
 
