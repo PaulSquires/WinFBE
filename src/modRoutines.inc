@@ -1396,6 +1396,11 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
       with parser
          .action   = ACTION_NONE
          .fileName = wszFilename
+         ' Flag whether we are parsing the codegen code. We do nit want to save any
+         ' of the Form Types sub/function/ctor/dtor because those will then display
+         ' in the Explorer Treeview. The user would click on them expecting to be
+         ' able to then see them in the editor. We can't allow that.
+         .bParsingCodeGen = bParsingCodeGen
       end with
 
         

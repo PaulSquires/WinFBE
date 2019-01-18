@@ -257,13 +257,15 @@ function clsParser.InspectLine() as boolean
          (left(st_ucase, 14) = "END DESTRUCTOR") then 
 
          ' Add the function to the database
-         select case this.action
-            CASE ACTION_PARSEFUNCTION:    gdb2.dbAdd( @this, DB2_FUNCTION )
-            CASE ACTION_PARSESUB:         gdb2.dbAdd( @this, DB2_SUB )
-            CASE ACTION_PARSEPROPERTY:    gdb2.dbAdd( @this, DB2_PROPERTY )
-            CASE ACTION_PARSECONSTRUCTOR: gdb2.dbAdd( @this, DB2_PROPERTY ) ' lump in with properties
-            CASE ACTION_PARSEDESTRUCTOR:  gdb2.dbAdd( @this, DB2_PROPERTY ) ' lump in with properties
-         END SELECT
+         if this.bParsingCodeGen = false then
+            select case this.action
+               CASE ACTION_PARSEFUNCTION:    gdb2.dbAdd( @this, DB2_FUNCTION )
+               CASE ACTION_PARSESUB:         gdb2.dbAdd( @this, DB2_SUB )
+               CASE ACTION_PARSEPROPERTY:    gdb2.dbAdd( @this, DB2_PROPERTY )
+               CASE ACTION_PARSECONSTRUCTOR: gdb2.dbAdd( @this, DB2_PROPERTY ) ' lump in with properties
+               CASE ACTION_PARSEDESTRUCTOR:  gdb2.dbAdd( @this, DB2_PROPERTY ) ' lump in with properties
+            END SELECT
+         end if
          
          if gConfig.CodeTips then
             ' Need to parse any function parameters to ensure that they get added
