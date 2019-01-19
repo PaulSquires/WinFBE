@@ -196,7 +196,7 @@ public function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       CASE CTRL_CHECKBOX:          wszText = "wfxCheckBox" 
       CASE CTRL_OPTION:            wszText = "wfxOptionButton"
       CASE CTRL_FRAME:             wszText = "wfxFrame"    
-      CASE CTRL_PICTURE:           wszText = "wfxPicture"  
+      CASE CTRL_PICTUREBOX:        wszText = "wfxPictureBox"  
       CASE CTRL_COMBOBOX:          wszText = "wfxComboBox" 
       CASE CTRL_LISTBOX:           wszText = "wfxListBox"  
       case CTRL_HSCROLL

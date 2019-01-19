@@ -33,5 +33,5 @@ Declare Function OnCommand_FileOpen( ByVal HWnd As HWnd, byval bShowInTab as Boo
 Declare Function OnCommand_FileSave( ByVal HWnd As HWnd, byval pDoc as clsDocument ptr, ByVal bSaveAs As BOOLEAN = False ) As LRESULT
 Declare Function OnCommand_FileSaveDeclares( ByVal HWnd As HWnd ) As LRESULT
 Declare Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
-Declare Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal veFileClose As eFileClose = EFC_CLOSECURRENT ) As LRESULT
+Declare Function OnCommand_FileClose( ByVal HWnd As HWnd, ByVal veFileClose As eFileClose ) As LRESULT
 

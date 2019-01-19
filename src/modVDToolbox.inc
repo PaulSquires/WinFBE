@@ -80,7 +80,6 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
 
       case "IMAGESCALING"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.HighDPI"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.AutoSize"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitWidth"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitHeight"))
@@ -198,10 +197,11 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
       case CTRL_LISTBOX, CTRL_COMBOBOX
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Click" 
+      case CTRL_PICTUREBOX
+         wszDefaultProp  = "Image" 
+         wszDefaultEvent = "Click" 
    
-   ' TODO: Set default property/event for each control.
-   '   CTRL_PICTURE
-   '   CTRL_IMAGEBUTTON
+' TODO: Set default property/event for each control.
    '   CTRL_HSCROLL
    '   CTRL_VSCROLL
    '   CTRL_TIMER

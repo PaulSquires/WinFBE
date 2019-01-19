@@ -12,7 +12,6 @@
 '    GNU General Public License for more details.
 
 #include once "modVDProperties.bi"
-
 #include once "clsApp.bi"
 #include once "clsDocument.bi"
 #include once "modVDColors.bi"
@@ -97,12 +96,16 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "The icon is displayed in the form's system menu box and when the form is minimized."
       case "IMAGE"   
          wszPropDescribe = "The image that will be displayed on the control."
+      case "IMAGEHIGHDPI"   
+         wszPropDescribe = "Determines whether high DPI scaling will be applied to the Image."
       case "IMAGESCALING"   
-         wszPropDescribe = "Determines the scaling (if any) to apply to the Image property."
+         wszPropDescribe = "Determines the scaling (if any) to apply to the Image."
       case "IMAGEWIDTH", "IMAGEHEIGHT"   
          wszPropDescribe = "The size of the image in pixels."
       case "IMAGEALIGN"   
          wszPropDescribe = "The alignment of the image that will be displayed on the control."
+      case "IMAGEMARGIN"   
+         wszPropDescribe = "The margin in pixels to apply to the image of a Button control."
       CASE "INPUTSTRING"
          wszPropDescribe = "A mask template string that specifies the literal characters that can appear at each position in the user input. Use the underscore character as a character placeholder."
 '      case "INDEX"   

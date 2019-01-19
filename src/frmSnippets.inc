@@ -624,7 +624,7 @@ public Function frmSnippets_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow->AddControl("TEXTBOX", , IDC_FRMSNIPPETS_TXTTRIGGER, "", 240, 77, 130, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("LABEL", , IDC_FRMSNIPPETS_LABEL4, "(" & L(90,"Press TAB in code editor to activate") & ")", 376, 77, 250, 20, _
+   pWindow->AddControl("LABEL", , IDC_FRMSNIPPETS_LABEL4, "(" & L(90,"Press TAB in code editor to activate") & ")", 376, 77, 350, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

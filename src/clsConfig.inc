@@ -230,7 +230,7 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(9) as TOOLBOX_TYPE
+   redim gToolBox(10) as TOOLBOX_TYPE
    
    gToolBox(0).nToolType = CTRL_POINTER
    gToolBox(0).wszToolBoxName   = "Pointer"
@@ -302,12 +302,12 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(9).wszCursor = "IMAGE_CURSOR_TEXTBOX"
    gToolBox(9).wszClassName = "TEXTBOX"
 
-
-'   gToolBox(8).nToolType = CTRL_PICTURE
-'   gToolBox(8).wszName   = "Picture"
-'   gToolBox(8).wszImage  = "IMAGE_PICTURE"
-'   gToolBox(8).wszCursor = "IMAGE_CURSOR_PICTURE"
-'   gToolBox(8).wszClassName = "STATIC"
+   gToolBox(10).nToolType = CTRL_PICTUREBOX
+   gToolBox(10).wszToolBoxName   = "PictureBox"
+   gToolBox(10).wszControlName   = "Picture"
+   gToolBox(10).wszImage  = "IMAGE_PICTUREBOX"
+   gToolBox(10).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
+   gToolBox(10).wszClassName = "PICTUREBOX"
 
 '   gToolBox(10).nToolType = CTRL_IMAGEBUTTON
 '   gToolBox(10).wszName   = "ImageButton"

@@ -155,22 +155,14 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
    case "IMAGEHEIGHT"
       pCtrl->AfxButtonPtr->SetImageHeight( nPropValue )
          
-   case "IMAGESCALING"
+   case "IMAGEHIGHDPI"
       ' The default width/height is 16x16 so adjust that size accordingly.
       dim as long nWidth = val( GetControlProperty(pCtrl, "IMAGEWIDTH") )
       dim as long nHeight = val( GetControlProperty(pCtrl, "IMAGEHEIGHT") )
-      select case **wszPropValue
-         case "ImageScale.None"
-            pCtrl->AfxButtonPtr->SetImageSize( 16, 16, true )
-         case "ImageScale.HighDPI"
-            pCtrl->AfxButtonPtr->SetImageSize( pWindow->ScaleX(nWidth), pWindow->ScaleY(nHeight), true )
-         case "ImageScale.AutoSize"
-            pCtrl->AfxButtonPtr->SetImageSize( nWidth, nHeight, true )
-         case "ImageScale.FitWidth"   
-         case "ImageScale.FitHeight"   
-         case "ImageScale.Stretch"
-      end select        
-
+      if wszPropValue = "True" then
+         pCtrl->AfxButtonPtr->SetImageSize( pWindow->ScaleX(nWidth), pWindow->ScaleY(nHeight), true )
+      end if
+      
    case "BACKCOLOR"
       pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(pProp), true )
 
@@ -408,6 +400,7 @@ private function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
    
    function = 0
 end function
+
 
 ' ========================================================================================
 ' Apply properties to the listbox
@@ -714,6 +707,64 @@ end function
 
 
 ' ========================================================================================
+' Apply properties to the PictureBox
+' ========================================================================================
+private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                             byval pCtrl as clsControl ptr, _
+                                             byval pProp as clsProperty ptr _ 
+                                             ) as Long
+    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+   
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "IMAGE"
+      dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszPropValue)
+      if pImageType then 
+         pCtrl->AfxPicturePtr->LoadImageFromFile( pImageType->wszFilename )
+      end if
+
+   case "IMAGEWIDTH"
+      if nPropValue > 0 then
+         pCtrl->AfxPicturePtr->SetImageWidth( nPropValue )
+      end if
+      
+   case "IMAGEHEIGHT"
+      if nPropValue > 0 then
+         pCtrl->AfxPicturePtr->SetImageHeight( nPropValue )
+      end if
+         
+   case "IMAGESCALING"
+      select case **wszPropValue
+         case "ImageScale.None"
+            pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, true )
+         case "ImageScale.AutoSize"
+            pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_AUTOSIZE, true )
+         case "ImageScale.FitWidth"   
+            pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_FITTOWIDTH, true )
+         case "ImageScale.FitHeight"   
+            pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_FITTOHEIGHT, true )
+         case "ImageScale.Stretch"
+            pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_STRETCH, true )
+      end select        
+
+   case "BACKCOLOR"
+      pCtrl->AfxPicturePtr->SetBkColor( GetRGBColorFromProperty(pProp), true )
+
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
 public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
@@ -803,6 +854,7 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
          case CTRL_LISTBOX:    ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
          case CTRL_COMBOBOX:   ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
          case CTRL_FRAME:      Frame_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_PICTUREBOX: PictureBox_ApplyProperties(pDoc, pCtrl, pProp)
          CASE ELSE
       END SELECT
 

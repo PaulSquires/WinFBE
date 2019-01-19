@@ -496,7 +496,7 @@ End Function
 ' Close current (or all) open file(s)
 ' ========================================================================================
 private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
-                                      ByVal veFileClose As eFileClose = EFC_CLOSECURRENT _
+                                      ByVal veFileClose As eFileClose _
                                       ) As LRESULT
 
    Dim wText As WString * MAX_PATH  

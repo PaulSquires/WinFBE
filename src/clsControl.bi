@@ -48,10 +48,11 @@ type clsControl
       ControlType       as long 
       AfxButtonPtr      as CXPButton Ptr    ' we use XPButton rather than the built in Windows button
       AfxMaskedPtr      as CMaskedEdit Ptr 
+      AfxPicturePtr     as CImageCtx Ptr 
       IsSelected        as Boolean
       IsActive          as Boolean
       SuspendLayout     as Boolean         ' prevent layout properties from being acted on individually (instead treat as a group)
-      rcHandles(1 to 8) as RECT        ' 8 grab handles
+      rcHandles(1 to 8) as RECT            ' 8 grab handles
       Properties(Any)   As clsProperty
       Events(Any)       As clsEvent
       hBackBrush        as HBRUSH          ' needed for STATIC/LABEL controls (destroyed in destructor)

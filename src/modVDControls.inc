@@ -108,11 +108,12 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
          AddControlProperty(pCtrl, "ImageWidth", "16", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageHeight", "16", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "ImageScaling", "ImageScale.HighDPI", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "ImageMargin", "4", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "ImageHighDPI", "True", PropertyType.TrueFalse)
 '         AddControlProperty(pCtrl, "ImageAlign", "ImageLayout.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleCenter", PropertyType.ComboPicker)
-'         AddControlProperty(pCtrl, "TextMargin", "4", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TextMargin", "4", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ThemeSupport", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ToggleMode", "False", PropertyType.TrueFalse)
@@ -256,7 +257,23 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
-'      case CTRL_PICTURE
+      case CTRL_PICTUREBOX
+         AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+         ' The properties are automatically sorted when they are displayed, however we
+         ' need to order them here correctly because with ApplyProperties is called we want
+         ' to ensure that the properties are acted on in a specific order. 
+         AddControlProperty(pCtrl, "Image", "", PropertyType.ImagePicker)
+         AddControlProperty(pCtrl, "ImageWidth", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "ImageHeight", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "ImageScaling", "ImageScale.AutoSize", PropertyType.ComboPicker)
+
+
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
@@ -449,7 +466,17 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
          AddControlEvent(pCtrl, "TextChanged")
-      case CTRL_PICTURE
+      case CTRL_PICTUREBOX
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
@@ -851,6 +878,11 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
             pCtrl->AfxMaskedPtr = new CMaskedEdit(pWindow, 100, _
                              rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
             pCtrl->hWindow = pCtrl->AfxMaskedPtr->hWindow
+            SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+         case CTRL_PICTUREBOX
+            pCtrl->AfxPicturePtr = new CImageCtx(pWindow, 100, , _
+                             rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
+            pCtrl->hWindow = pCtrl->AfxPicturePtr->hWindow
             SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
          case else   
             dim as long dwExStyle = -1
