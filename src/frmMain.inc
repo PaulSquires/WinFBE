@@ -2372,13 +2372,13 @@ private Function frmMain_TabCtl_SubclassProc ( _
       Case WM_LBUTTONDOWN
          ' Get the position of the hit and determine if the CLOSE icon was clicked.
          GetCursorPos( @pInfo.pt )
-         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
+         ScreenToClient( gTTabCtl.hWindow, @pInfo.pt )
          nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-         gTTabCtl.SetFocusTab(nCurSel)
          ' Was the close icon pressed
          If pInfo.flags = TCHT_ONITEMICON Then 
-            gTTabCtl.CloseTab()
+            OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT, nCurSel )
          else
+            gTTabCtl.SetFocusTab(nCurSel)
             if (wParam and MK_SHIFT) then
                gApp.bDragTabActive = true
                SetCursor( LoadCursor(0, MAKEINTRESOURCE(OCR_SIZEALL)) )

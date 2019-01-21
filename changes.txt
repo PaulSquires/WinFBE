@@ -6,6 +6,8 @@ Version 1.8.8
 - Added: Explorer treeview subnodes to hold Header, Resource, Main, Module, Normal files (for Projects only).
 - Added: User Snippets (insert user defined code snippets).
 - Added: Image Manager.
+- Added: Image related properties for the Button control and Form.
+- Added: PictureBox control.
 - Added: A search textbox added to Function List (filters the function list based on the search term).
 - Added: Creating a New Project will automatically add a default empty .bas main file (unsaved) to the project for convenience.
 - Added: Environment Option to Check for update at startup (once per day).

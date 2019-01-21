@@ -496,7 +496,8 @@ End Function
 ' Close current (or all) open file(s)
 ' ========================================================================================
 private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
-                                      ByVal veFileClose As eFileClose _
+                                      ByVal veFileClose As eFileClose, _
+                                      byval nTabNum as long = -1 _
                                       ) As LRESULT
 
    Dim wText As WString * MAX_PATH  
@@ -504,7 +505,15 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    Dim As Long r
    
    ' Build a list of files to check
-   dim as long nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+   dim as long nCurSel 
+   ' If the incoming nTabNum is -1 then we want to close the current
+   ' active document, otherwise close the specified tab.
+   if nTabNum = -1 then 
+      nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+   else
+      nCurSel = nTabNum   
+   end if
+
    dim as long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
 
    if nCount = 0 then return true
@@ -546,6 +555,8 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       for ii as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
          ShowWindow( pDoc->hWindow(ii), SW_HIDE)
       NEXT
+      ShowWindow( pDoc->hScrollBar, SW_HIDE )
+      SetRectEmpty( @pDoc->rcSplitButton )
        ' Hide visual designer window
       if pDoc->IsDesigner THEN 
          ShowWindow(pDoc->hWndDesigner, SW_HIDE)
@@ -582,6 +593,10 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    
    frmMain_PositionWindows
    frmExplorer_PositionWindows
+   
+   ' important to repaint the workspace to remove any separator bar and splitter
+   ' rectangle should all documents be closed. Removes screen artifacts.
+   AfxRedrawWindow( HWND_FRMMAIN )
    
    Function = true
 End Function
