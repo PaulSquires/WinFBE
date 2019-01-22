@@ -706,6 +706,9 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
          If OnCommand_FileSaveAll(HWND_FRMMAIN) Then 
             Return True  ' user cancelled save
          end if   
+         ' Reload the main form files combobox in case names have changed
+         frmMain_LoadComboFiles
+         frmMain_SelectComboFiles
       End If
    END IF
    
