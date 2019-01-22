@@ -286,8 +286,6 @@ private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
 end function
 
 
-
-
 ' ========================================================================================
 ' Generate (or regenerate) visual designer code.
 ' ========================================================================================
@@ -338,6 +336,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
          
          ' If the Event/function does not already exist in code then create it now.
+         pDoc->bNeedsParsing = true
          ParseDocument( pDoc )
          
          ' Only check if we are not loading the project because the event handling
@@ -397,6 +396,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
                
                ' If the Event/function does not already exist in code then create it now.
+               pDoc->bNeedsParsing = true
                ParseDocument( pDoc )
                
                ' Only check if we are not loading the project because the event handling
@@ -620,13 +620,14 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
       dim as CWSTR wszHeader
       if gApp.IsProjectActive = false then
          wszHeader = wszHeader & _
-         "' You should always include a resource file that references a valid manifest.xml" & vbcrlf & _
-         "' file otherwise your application will not properly display Windows themed controls." & vbcrlf & _
-         "' Sample resource.rc and manifest.xml files can be found in the WinFormsX download." & vbcrlf & _
-         "' The following WinFBE directive includes the resource in your application. If you" & vbcrlf & _
-         "' are using WinFBE's project management features then omit the following line because" & vbcrlf & _
-         "' one will be generated automatically." & vbcrlf & _
-         "'#RESOURCE " & DQ & "resource.rc" & DQ & vbcrlf & vbcrlf 
+         "' You should always include a resource file that references a valid manifest.xml"      & vbcrlf & _
+         "' file otherwise your application will not properly display Windows themed controls."  & vbcrlf & _
+         "' Sample resource.rc and manifest.xml files can be found in the WinFBE \Settings folder."   & vbcrlf & _
+         "' The following WinFBE directive includes the resource in your application. Simply" & vbcrlf & _
+         "' uncomment the line." & vbcrlf & _
+         "' If you are using WinFBE's project management features then delete the following line" & vbcrlf & _
+         "' because a resource file will be generated automatically." & vbcrlf & _
+         "'     '#RESOURCE " & DQ & "resource.rc" & DQ & vbcrlf & vbcrlf 
       END IF
       wszHeader = wszHeader & vbcrlf & _
       "''" & vbcrlf & _
@@ -639,7 +640,8 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
 
    ' If any new Events were discovered then append them to the code editor
    if len(wszAllEvents) then
-      pDoc->AppendText(wszAllEvents)
+      pDoc->AppendText( wszAllEvents )
+      pDoc->bNeedsParsing = true
       ParseDocument(pDoc)
    END IF
   

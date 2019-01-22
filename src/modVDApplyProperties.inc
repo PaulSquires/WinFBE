@@ -729,6 +729,8 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszPropValue)
       if pImageType then 
          pCtrl->AfxPicturePtr->LoadImageFromFile( pImageType->wszFilename )
+      else
+         pCtrl->AfxPicturePtr->Clear
       end if
 
    case "IMAGEWIDTH"
@@ -757,6 +759,9 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    case "BACKCOLOR"
       pCtrl->AfxPicturePtr->SetBkColor( GetRGBColorFromProperty(pProp), true )
+
+   case "BACKCOLOR"
+      pCtrl->AfxPicturePtr->SetBkColorHot( GetRGBColorFromProperty(pProp), true )
 
    end select
    

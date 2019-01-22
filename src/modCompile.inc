@@ -686,15 +686,23 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    dim as long idxBuild, f, i, n, nCount
    
    wDQ = wchr(34) ' unicode double quotes
-   
+                             
    gCompile.wszFullCommandLine = ""
    gCompile.wszFullLogFile = ""
    gCompile.wszOutputMsg = ""
-
+  
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
    if wID <> IDM_QUICKRUN THEN
       If gConfig.CompileAutosave Then
+         ' If there any "New" files that have not been edited yet causing thm to show 
+         ' as dirty then we will mark them now so that the FileSaveAll command will
+         ' ask to save it (otherwise a compile error will show).
+         dim pDoc as clsDocument ptr = gApp.pDocList
+         do until pDoc = 0
+            if pDoc->IsNewFlag then pDoc->UserModified = true
+            pDoc = pDoc->pDocNext
+         loop
          If OnCommand_FileSaveAll(HWND_FRMMAIN) Then 
             Return True  ' user cancelled save
          end if   

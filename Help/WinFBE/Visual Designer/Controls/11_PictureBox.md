@@ -1,4 +1,4 @@
-# Frame (wfxFrame)
+# PictureBox (wfxPictureBox)
 
 ### Properties
 
@@ -6,22 +6,24 @@
 | ------------------------------- | ------------------------------ |
 | AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
 | BackColor | Gets or sets the background color of the control. Refer to the **Colors** object. |
+| BackColorHot | Gets or sets the background color of the control when the mouse passes over it. Refer to the **Colors** object. |
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
-| CtrlType | Gets or sets the control type value. Always **ControlType.Frame** and used when adding the control to the form's control collection. |
+| CtrlType | Gets or sets the control type value. Always **ControlType.PictureBox** and used when adding the control to the form's control collection.|
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
-| Font | Gets or sets the font for the control. Refer to the Font object.|
 | Height | Gets or sets the height of the control.|
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
+| Image | Gets or sets the image to display in the control. The image is retrieved from the resource file for the project. Use the Image Manager to store you images specifying the RC_DATA resource type format. |
+| ImageHeight | Gets or sets the height of the image. Use the value of zero (0) to allow the control to manage the height. |
+| ImageWidth | Gets or sets the width of the image. Use the value of zero (0) to allow the control to manage the width. |
+| ImageScaling | Gets or sets the scale used to apply to the image.Refer to the [ImageScale](#ImageScale) enum for values. |
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
 | Parent | Gets or sets the parent container of the control.|
 | Size | Gets or sets the size of the form. Get: returns [wfxSize](#wfxSize) object. Set: (width, height)|
-| Tag | Gets or sets user defined text associated with the form.|
-| Text | Gets or sets the text (caption) associated with this form.|
+| Tag | Gets or sets user defined text associated with the control.|
 | Top | Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).|
-| UseMnemonic | Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&) character will be used as the control’s accelerator key.|
 | Visible | Gets or sets a value (true/false) indicating whether the control is displayed.|
 | Width | Gets or sets the width of the control.|
 
@@ -49,6 +51,16 @@
 | MouseMove | Occurs when the mouse pointer is moved over the control.|
 | MouseUp | Occurs when the mouse pointer is over the control and a mouse button is released.|
 
+##### ImageScale
+```
+enum ImageScale
+   None = 1
+   AutoSize
+   FitWidth
+   FitHeight   
+   Stretch
+end enum
+```
 
 ##### wfxSize
 ```

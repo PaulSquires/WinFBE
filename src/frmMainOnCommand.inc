@@ -422,9 +422,11 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
       ' Regenerate code to ensure that any missing body functions are now present
       pDoc->bRegenerateCode = true
       SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
+      AddFunctionsToExplorerTreeview( pDoc, true )
    end if
    
    ' Do the actual saving to disk
+   dim wszFilename as CWSTR = pDoc->DiskFilename
    If pDoc->SaveFile(bSaveAs) Then
       ' Apply document properties to this file because the file extension may have
       ' changed. For example from Untitled to *.bas
@@ -433,6 +435,11 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
       End If
       pDoc->ApplyProperties
       ParseDocument( pDoc )
+      ' Reload the main form files combobox in case names have changed. 
+      if pDoc->DiskFilename <> wszFilename then
+         frmMain_LoadComboFiles
+         frmMain_SelectComboFiles
+      end if
       AddFunctionsToExplorerTreeview( pDoc, true )
    EndIf   
 
@@ -470,6 +477,7 @@ public Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          ' Regenerate code to ensure that any missing body functions are now present
          pDoc->bRegenerateCode = true
          SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
+         AddFunctionsToExplorerTreeview( pDoc, true )
       end if
 
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
@@ -496,7 +504,8 @@ End Function
 ' Close current (or all) open file(s)
 ' ========================================================================================
 private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
-                                      ByVal veFileClose As eFileClose _
+                                      ByVal veFileClose As eFileClose, _
+                                      byval nTabNum as long = -1 _
                                       ) As LRESULT
 
    Dim wText As WString * MAX_PATH  
@@ -504,7 +513,15 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    Dim As Long r
    
    ' Build a list of files to check
-   dim as long nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+   dim as long nCurSel 
+   ' If the incoming nTabNum is -1 then we want to close the current
+   ' active document, otherwise close the specified tab.
+   if nTabNum = -1 then 
+      nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
+   else
+      nCurSel = nTabNum   
+   end if
+
    dim as long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
 
    if nCount = 0 then return true
@@ -546,6 +563,8 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       for ii as long = lbound(pDoc->hWindow) to ubound(pDoc->hWindow)
          ShowWindow( pDoc->hWindow(ii), SW_HIDE)
       NEXT
+      ShowWindow( pDoc->hScrollBar, SW_HIDE )
+      SetRectEmpty( @pDoc->rcSplitButton )
        ' Hide visual designer window
       if pDoc->IsDesigner THEN 
          ShowWindow(pDoc->hWndDesigner, SW_HIDE)
@@ -582,6 +601,10 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    
    frmMain_PositionWindows
    frmExplorer_PositionWindows
+   
+   ' important to repaint the workspace to remove any separator bar and splitter
+   ' rectangle should all documents be closed. Removes screen artifacts.
+   AfxRedrawWindow( HWND_FRMMAIN )
    
    Function = true
 End Function

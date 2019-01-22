@@ -52,7 +52,7 @@ public function frmOptionsLocal_LocalEditCheck() as Long
       for i as long = 0 to nCount - 1
          FF_ListView_GetItemText(hLV, i, 0, @wszIndex, MAX_PATH )
          wszTemp = wspace(1024)
-         wszPhrase = AfxStrRSet(wszIndex, 5, "0") & wstr(":") & gLocalPhrases(val(wszIndex))
+         wszPhrase = AfxStrRSet(wszIndex, 5, "0") + wstr(":") + gLocalPhrases(val(wszIndex))
          ' Use ** version of CWSTR on MID statements per the documentation.
          mid(**wszTemp, 1) = wszPhrase
          if len(gLangEnglish(val(wszIndex))) then
@@ -131,19 +131,20 @@ end function
 ' ========================================================================================
 private function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstring ) as Long
 
-   If AfxFileExists(wszFileName) = 0 Then exit function
+   If AfxFileExists( wszFileName ) = 0 Then exit function
 
    Dim as CBSTR wst, wKey, wData
    Dim as long nKey, nData, i, nRow, maxKey
     
    dim pStream AS CTextStream
-   if pStream.OpenUnicode(wszFileName) <> S_OK then exit function
+   if pStream.OpenUnicode( wszFileName ) <> S_OK then exit function
    
    frmOptionsLocal_ClearGlobalArray()
 
    do until pStream.EOS
       wst = pStream.ReadLine
       
+
       If Len(wst) = 0 Then Continue Do
       If Left(wst, 1) = "'" Then Continue Do
       
@@ -162,7 +163,9 @@ private function frmOptionsLocal_LoadLocalizationFile( byref wszFilename as wstr
       ' that array is always sized according to the main ENGLISH array.
       If Ucase(wKey) <> "MAXIMUM" Then
          if (nKey >= lbound(gLocalPhrases)) and (nKey <= ubound(gLocalPhrases)) then
-            gLocalPhrases(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
+            ' Use ** to ensure that cyrillic langauge gets converted correctly. FB intrinsic
+            ' functions (RTRIM) automatically convert those incorrectly when using CBSTR or CWSTR.
+            gLocalPhrases(nKey) = rtrim(**AfxStrParse(wData, 1, ";"), any chr(9,32))
             ' If the English phrase is blank then blank the translation phrase
             if gLangEnglish(nKey) = "" then gLocalPhrases(nKey) = ""
             ' If the Translated phrase is blank then replace it with the English version

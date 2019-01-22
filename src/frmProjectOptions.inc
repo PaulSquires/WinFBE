@@ -111,6 +111,8 @@ private Function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As B
       if pDoc then 
          SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
       end if
+      ' Ensure that the main form files combo shows the correct list of files
+      frmMain_LoadComboFiles
    end if
    
    function = true   

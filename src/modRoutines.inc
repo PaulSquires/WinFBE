@@ -1074,6 +1074,8 @@ End Function
 
 ' ========================================================================================
 ' Load a .lang localization file from disk and populate the localization array
+' The IsEnglish parameter is used when we want to populate the gLangEnglish global
+' array that is used in the WinFBE.bas startup code.
 ' ========================================================================================
 public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
                                       byval IsEnglish as boolean = false _
@@ -1081,7 +1083,7 @@ public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
 
    ' default that the file failed to load
    Function = False
-   If AfxFileExists(wszFileName) = 0 Then Exit Function
+   If AfxFileExists( wszFileName ) = 0 Then Exit Function
 
    Dim as CBSTR wst, wKey, wData
    Dim nKey  As Long
@@ -1089,7 +1091,7 @@ public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
    Dim i     As Long
     
    dim pStream AS CTextStream
-   if pStream.OpenUnicode(wszFileName) <> S_OK then exit function
+   if pStream.OpenUnicode( wszFileName ) <> S_OK then exit function
    
    do until pStream.EOS
       wst = pStream.ReadLine
@@ -1122,13 +1124,17 @@ public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
          ' boundaries of the array.
          if IsEnglish then
             If (nKey >= LBound(gLangEnglish)) AndAlso (nKey <= Ubound(gLangEnglish)) Then
-               gLangEnglish(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
+               ' Use ** to ensure that cyrillic langauge gets converted correctly. FB intrinsic
+               ' functions (RTRIM) automatically convert those incorrectly when using CBSTR or CWSTR.
+               gLangEnglish(nKey) = rtrim(**AfxStrParse(wData, 1, ";"), any chr(9,32))
             end if
          else
             If (nKey >= LBound(LL)) AndAlso (nKey <= Ubound(LL)) Then
                ' Remove any comments from end of the line. Comments begin with
                ' a semicolon character.
-               LL(nKey) = rtrim(AfxStrParse(wData, 1, ";"), any chr(9,32))
+               ' Use ** to ensure that cyrillic langauge gets converted correctly. FB intrinsic
+               ' functions (RTRIM) automatically convert those incorrectly when using CBSTR or CWSTR.
+               LL(nKey) = rtrim(**AfxStrParse(wData, 1, ";"), any chr(9,32))
                ' If the local phrase is empty then fill it using the English version.
                if len(LL(nKey)) = 0 then 
                   If (nKey >= LBound(gLangEnglish)) AndAlso (nKey <= Ubound(gLangEnglish)) Then
@@ -1141,7 +1147,7 @@ public Function LoadLocalizationFile( Byref wszFileName As CWSTR, _
          
    Loop
    pStream.Close
-   
+ 
    Function = True
 End Function
 

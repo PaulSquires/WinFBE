@@ -1328,8 +1328,9 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          elseif id = IDM_FILESAVEAS_EXPLORERTREEVIEW then
             OnCommand_FileSave( HWnd, pDoc, true )
          elseif IDM_FILECLOSE_EXPLORERTREEVIEW then
-            if gTTabCtl.SetTabIndexByDocumentPtr( pDoc ) <> -1 then
-               OnCommand_FileClose( HWnd, EFC_CLOSECURRENT )
+            dim as long nCurSel = gTTabCtl.GetTabIndexByDocumentPtr( pDoc )
+            if nCurSel <> -1 then
+               OnCommand_FileClose( HWnd, EFC_CLOSECURRENT, nCurSel )
             end if   
          end if   
          
@@ -1847,11 +1848,14 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       ''   DESIGNER MENU
       case IDM_NEWFORM
          OnCommand_DesignerNewForm(HWND)
+
       case IDM_VIEWTOOLBOX
          frmVDToolbox_Show(HWND)   ' toggle show/hide
+
       case IDM_MENUEDITOR            
          frmMenuEditor_Show( HWND )
          if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
+
       case IDM_IMAGEMANAGER
          frmImageManager_Show( HWND, 0 )
          
@@ -1859,6 +1863,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
            IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            
          OnCommand_DesignerAlign(HWND, id)
+
       case IDM_CENTERHORIZ, IDM_CENTERVERT, IDM_CENTERBOTH
          OnCommand_DesignerCenter(HWND, id)
          
@@ -2372,13 +2377,13 @@ private Function frmMain_TabCtl_SubclassProc ( _
       Case WM_LBUTTONDOWN
          ' Get the position of the hit and determine if the CLOSE icon was clicked.
          GetCursorPos( @pInfo.pt )
-         ScreenToClient gTTabCtl.hWindow, @pInfo.pt
+         ScreenToClient( gTTabCtl.hWindow, @pInfo.pt )
          nCurSel = TabCtrl_HitTest(gTTabCtl.hWindow, @pInfo)
-         gTTabCtl.SetFocusTab(nCurSel)
          ' Was the close icon pressed
          If pInfo.flags = TCHT_ONITEMICON Then 
-            gTTabCtl.CloseTab()
+            OnCommand_FileClose( HWND_FRMMAIN, EFC_CLOSECURRENT, nCurSel )
          else
+            gTTabCtl.SetFocusTab(nCurSel)
             if (wParam and MK_SHIFT) then
                gApp.bDragTabActive = true
                SetCursor( LoadCursor(0, MAKEINTRESOURCE(OCR_SIZEALL)) )
@@ -2492,14 +2497,29 @@ private Function frmMain_OnDrawItem( ByVal HWnd As HWnd, _
             (lpdis->CtlID = IDC_FRMMAIN_COMBOBUILDS) then
             
             ' CLEAR BACKGROUND
+            ' The following code uses the theme as definied for the Scintilla
+            ' code editing component. We could use those colors so that a dark
+            ' code editing window would also give us dark comboboxes. I am not
+            ' convinced that is the best route to go. Maybe. Propbably later
+            ' add an option to customize the color settings or toggle the 
+            ' visibility of these comboxes altogether.
+            'If (lpdis->itemState And ODS_SELECTED) Then     
+            '   SetTextColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nFg )
+            '   SetBkColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nBg )
+            '   hBrush = CreateSolidBrush( pTheme->colors(CLR_SELECTION).nBg )
+            'else
+            '   SetTextColor( lpdis->hDC, pTheme->colors(CLR_TEXT).nFg )
+            '   SetBkColor( lpdis->hDC, pTheme->colors(CLR_WINDOW).nFg )
+            '   hBrush = CreateSolidBrush( pTheme->colors(CLR_WINDOW).nFg )
+            'end if
             If (lpdis->itemState And ODS_SELECTED) Then     
-               SetTextColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nFg )
-               SetBkColor( lpdis->hDC, pTheme->colors(CLR_SELECTION).nBg )
-               hBrush = CreateSolidBrush( pTheme->colors(CLR_SELECTION).nBg )
+               SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
+               SetTextColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT))
+               hBrush = GetSysColorBrush(COLOR_HIGHLIGHT) 
             else
-               SetTextColor( lpdis->hDC, pTheme->colors(CLR_TEXT).nFg )
-               SetBkColor( lpdis->hDC, pTheme->colors(CLR_WINDOW).nFg )
-               hBrush = CreateSolidBrush( pTheme->colors(CLR_WINDOW).nFg )
+               SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
+               SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
+               hBrush = GetSysColorBrush(COLOR_WINDOW) 
             end if
             SelectObject(lpdis->hDC, hBrush)      
             FillRect(lpdis->hDC, @lpdis->rcItem, hBrush)  
