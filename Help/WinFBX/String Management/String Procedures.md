@@ -4,8 +4,10 @@
 
 | Name       | Description |
 | ---------- | ----------- |
-| [AfxStrLCase](#AfxStrLCase) | Returns a lowercased version of a string. |
-| [AfxStrUCase](#AfxStrUCase) | Returns an uppercased version of a string. |
+| [AfxStrClipLeft](#AfxStrClipLeft) | Returns a string with the specified number of characters removed from the left side of the string. |
+| [AfxStrClipMid](#AfxStrClipMid) | Returns a string with the specified number of characters removed starting at the specified position. |
+| [AfxStrClipRight](#AfxStrClipRight) | Returns a string with the specified number of characters removed from the right side of the string. |
+| [AfxStrCSet](#AfxStrCSet) | Returns a string containing a centered string. |
 | [AfxStrDelete](#AfxStrDelete) | Deletes a specified number of characters from a string expression. |
 | [AfxStrExtract](#AfxStrExtract) | Extracts characters from a string up to (but not including) the specified matching. Case sensitive. |
 | [AfxStrExtractI](#AfxStrExtractI) | Extracts characters from a string up to (but not including) the specified matching string. Case insensitive. |
@@ -13,6 +15,8 @@
 | [AfxStrExtractAnyI](#AfxStrExtractAnyI) | Extracts characters from a string up to (but not including) any character in the matching string. Case insensitive. |
 | [AfxStrInsert](#AfxStrInsert) | Inserts a string at a specified position within another string expression. |
 | [AfxStrJoin](#AfxStrJoin) | Returns a string consisting of all of the strings in an array, each separated by a delimiter. |
+| [AfxStrLCase](#AfxStrLCase) | Returns a lowercased version of a string. |
+| [AfxStrLSet](#AfxStrLSet) | Returns a string containing a left justified string. |
 | [AfxStrParse](#AfxStrParse) | Returns a delimited field from a string expression. |
 | [AfxStrParseAny](#AfxStrParseAny) | Returns a delimited field from a string expression. Supports more than one character for the delimiter. |
 | [AfxStrParseCount](#AfxStrParseCount) | Returns the count of delimited fields from a string expression. |
@@ -35,6 +39,7 @@
 | [AfxStrRetainAny](#AfxStrRetainAny) | Returns a string containing only the characters contained in a specified group of characters. Case sensitive. |
 | [AfxStrRetainAnyI](#AfxStrRetainAnyI) | Returns a string containing only the characters contained in a specified group of characters. Case insensitive. |
 | [AfxStrReverse](#AfxStrReverse) | Reverses the contents of a string expression. |
+| [AfxStrRSet](#AfxStrRSet) | Returns a string containing a right justified string. |
 | [AfxStrShrink](#AfxStrShrink) | Shrinks a string to use a consistent single character delimiter. |
 | [AfxStrSplit](#AfxStrSplit) | Splits a string into tokens, which are sequences of contiguous characters separated by any of the characters that are part of delimiters. |
 | [AfxStrSpn](#AfxStrSpn) | Returns the length of the initial portion of a string which consists only of characters that are part of a specified set of characters. |
@@ -42,243 +47,21 @@
 | [AfxStrTallyI](#AfxStrTallyI) | Count the number of occurrences of a string within a string. Case insensitive. |
 | [AfxStrTallyAny](#AfxStrTallyAny) | Count the number of occurrences of a list of characters within a string. Case sensitive. |
 | [AfxStrTallyAnyI](#AfxStrTallyAnyI) | Count the number of occurrences of a list of characters within a string. Case insensitive. |
+| [AfxStrUCase](#AfxStrUCase) | Returns an uppercased version of a string. |
 | [AfxStrVerify](#AfxStrVerify) | Determine whether each character of a string is present in another string. Case sensitive. |
 | [AfxStrVerifyI](#AfxStrVerifyI) | Determine whether each character of a string is present in another string. Case insensitive. |
 | [AfxStrWrap](#AfxStrWrap) | Adds paired characters to the beginning and end of a string. |
 | [AfxStrUnWrap](#AfxStrUnWrap) | Removes paired characters to the beginning and end of a string. |
-| [AfxStrCSet](#AfxStrCSet) | Returns a string containing a centered string. |
-| [AfxStrLSet](#AfxStrLSet) | Returns a string containing a left justified string. |
-| [AfxStrRSet](#AfxStrRSet) | Returns a string containing a right justified string. |
-| [AfxStrClipLeft](#AfxStrClipLeft) | Returns a string with the specified number of characters removed from the left side of the string. |
-| [AfxStrClipMid](#AfxStrClipMid) | Returns a string with the specified number of characters removed starting at the specified position. |
-| [AfxStrClipRight](#AfxStrClipRight) | Returns a string with the specified number of characters removed from the right side of the string. |
 | [AfxStrPathName](#AfxStrPathName) | Parses a path to extract component parts. |
 | [AfxStrFormatByteSize](#AfxStrFormatByteSize) | Converts a numeric value into a string that represents the number expressed as a size value in bytes, kilobytes, megabytes, or gigabytes, depending on the size. |
 | [AfxStrFormatKBSize](#AfxStrFormatKBSize) | Converts a numeric value into a string that represents the number expressed as a size value in kilobytes. |
 | [AfxStrFromTimeInterval](#AfxStrFromTimeInterval) | Converts a time interval, specified in milliseconds, to a string. |
-| [AfxBase64Decode](#AfxBase64Decode) | Converts the contents of a Base64 mime encoded string to an ascii string. |
-| [AfxBase64Encode](#AfxBase64Encode) | Converts the contents of a string to Base64 mime encoding. |
-| [AfxXmlBase64Decode](#AfxXmlBase64Decode) | Converts the contents of a Base64 mime encoded string to an ascii string. |
-| [AfxXmlBase64Encode](#AfxXmlBase64Encode) | Converts the contents of a string to Base64 mime encoding. |
+| [AfxBase64DecodeA](#AfxBase64DecodeA) | Converts the contents of a Base64 mime encoded string to an ascii string. |
+| [AfxBase64DecodeW](#AfxBase64DecodeW) | Converts the contents of a Base64 mime encoded string to an unicode string. |
+| [AfxBase64EncodeA](#AfxBase64EncodeA) | Converts the contents of an ascii string to Base64 mime encoding. |
+| [AfxBase64EncodeW](#AfxBase64EncodeW) | Converts the contents of an unicode string to Base64 mime encoding. |
 | [AfxCryptBinaryToString](#AfxCryptBinaryToString) | Converts an array of bytes into a formatted string. |
 | [AfxCryptStringToBinary](#AfxCryptStringToBinary) | Converts a formatted string into an array of bytes. |
-
-# <a name="AfxBase64Decode"></a>AfxBase64Decode
-
-Converts the contents of a Base64 mime encoded string to an ascii string.
-
-```
-FUNCTION AfxBase64Decode (BYREF strData AS STRING) AS STRING
-```
-
-| Parameter  | Description |
-| ---------- | ----------- |
-| *strData* | The string to decode. |
-
-#### Return value
-
-The decoded string on success, or a null string on failure.
-
-#### Remaks
-
-Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.
-
-Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.
-
-If we want to encode a unicode string, we must convert it to utf8 before calling AfxBase64Encode, e.g.
-
-````
-DIM cws AS CWSTR = "おはようございます – Good morning!"
-DIM s AS STRING = AfxBase64Encode(cws.Utf8)
-````
-
-To decode it, we can use
-
-````
-DIM cwsOut AS CWSTR = CWSTR(AfxBase64Decode(s), CP_UTF8)
-````
-
-or
-
-````
-DIM cwsOut AS CWSTR
-cws.utf8 = AfxBase64Decode(s)
-````
-
-# <a name="AfxBase64Encode"></a>AfxBase64Encode
-
-Converts the contents of a string to Base64 mime encoding.
-
-```
-FUNCTION AfxBase64Encode (BYREF strData AS STRING) AS STRING
-```
-
-| Parameter  | Description |
-| ---------- | ----------- |
-| *strData* | The string to encode. |
-
-#### Return value
-
-The encoded string on succeess, or a null string on failure.
-
-#### Remarks
-
-Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.
-
-Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.
-
-If we want to encode a unicode string, we must convert it to utf8 before calling AfxBase64Encode, e.g.
-
-````
-DIM cws AS CWSTR = "おはようございます – Good morning!"
-DIM s AS STRING = AfxBase64Encode(cws.Utf8)
-````
-
-To decode it, we can use
-
-````
-DIM cwsOut AS CWSTR = CWSTR(AfxBase64Decode(s), CP_UTF8)
-````
-
-or
-
-````
-DIM cwsOut AS CWSTR
-cws.utf8 = AfxBase64Decode(s)
-````
-
-# <a name="AfxCryptBinaryToString"></a>AfxCryptBinaryToString
-
-Converts an array of bytes into a formatted string.
-
-```
-FUNCTION FUNCTION AfxCryptBinaryToStringA ( _
-   BYVAL pbBinary AS CONST UBYTE PTR, _
-   BYVAL cbBinary AS DWORD, _
-   BYVAL dwFlags AS DWORD, _
-   BYVAL pszString AS LPSTR, _
-   BYVAL pcchString AS DWORD PTR _
-) AS WINBOOL
-```
-
-```
-FUNCTION AfxCryptBinaryToStringW ( _
-   BYVAL pbBinary AS CONST UBYTE PTR, _
-   BYVAL cbBinary AS DWORD, _
-   BYVAL dwFlags AS DWORD, _
-   BYVAL pszString AS LPWSTR, _
-   BYVAL pcchString AS DWORD PTR _
-) AS WINBOOL
-```
-
-| Parameter  | Description |
-| ---------- | ----------- |
-| *pbBinary* | A pointer to the array of bytes to be converted into a string. |
-| *cbBinary* | The number of elements in the *pbBinary* array. |
-| *dwFlags* | Specifies the format of the resulting formatted string. |
-| *pszString* | A pointer to a buffer that receives the converted string. To calculate the number of characters that must be allocated to hold the returned string, set this parameter to NULL. The function will place the required number of characters, including the terminating NULL character, in the value pointed to by *pcchString*. |
-| *pcchString* | A pointer to a DWORD variable that contains the size, in characters, of the *pszString* buffer. If *pszString* is NULL, the function calculates the length of the return string (including the terminating null character) in characters and returns it in this parameter. If *pszString* is not NULL and big enough, the function converts the binary data into a specified string format including the terminating null character, but *pcchString* receives the length in characters, not including the terminating null character. |
-
-Values available for the *dwFlags* parameter:
-
-| Value      | Meaning |
-| ---------- | ----------- |
-| CRYPT_STRING_BASE64HEADER | Base64, with certificate beginning and ending headers. |
-| CRYPT_STRING_BASE64 | Base64, without headers. |
-| CRYPT_STRING_BINARY | Pure binary copy. |
-| CRYPT_STRING_BASE64REQUESTHEADER | Base64, with request beginning and ending headers. |
-| CRYPT_STRING_HEX | Hexadecimal only. |
-| CRYPT_STRING_HEXASCII | Hexadecimal, with ASCII character display. |
-| CRYPT_STRING_BASE64X509CRLHEADER | Base64, with X.509 CRL beginning and ending headers. |
-| CRYPT_STRING_HEXADDR | Hexadecimal, with address display. |
-| CRYPT_STRING_HEXASCIIADDR | Hexadecimal, with ASCII character and address display. |
-| CRYPT_STRING_HEXRAW | A raw hexadecimal string. Not supported in Windows Server 2003 and Windows XP. |
-| CRYPT_STRING_STRICT | Enforce strict decoding of ASN.1 text formats. Some ASN.1 binary BLOBS can have the first few bytes of the BLOB incorrectly interpreted as Base64 text. In this case, the rest of the text is ignored. Use this flag to enforce complete decoding of the BLOB. Not suported in Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP. |
-
-In addition to the values above, one or more of the following values can be specified to modify the behavior of the function.
-
-| Value      | Meaning |
-| ---------- | ----------- |
-| CRYPT_STRING_NOCRLF | Do not append any new line characters to the encoded string. The default behavior is to use a carriage return/line feed (CR/LF) pair (0x0D/0x0A) to represent a new line. Not supported in Windows Server 2003 and Windows XP. |
-| CRYPT_STRING_NOCR | Only use the line feed (LF) character (0x0A) for a new line. The default behavior is to use a CR/LF pair (0x0D/0x0A) to represent a new line. |
-
-
-#### Return value
-
-If the function succeeds, the function returns nonzero (CTRUE).
-If the function fails, it returns zero (FALSE).
-
-#### Remarks
-
-With the exception of when **CRYPT_STRING_BINARY** encoding is used, all strings are appended with a new line sequence. By default, the new line sequence is a CR/LF pair (0x0D/0x0A). If the *dwFlags* parameter contains the **CRYPT_STRING_NOCR** flag, then the new line sequence is a LF character (0x0A). If the *dwFlags* parameter contains the **CRYPT_STRING_NOCRLF** flag, then no new line sequence is appended to the string.
-
-# <a name="AfxCryptStringToBinary"></a>AfxCryptStringToBinary
-
-Converts a formatted string into an array of bytes.
-
-```
-FUNCTION AfxCryptStringToBinaryA ( _
-   BYVAL pszString AS LPCSTR, _
-   BYVAL cchString AS DWORD, _
-   BYVAL dwFlags AS DWORD, _
-   BYVAL pbBinary AS UBYTE PTR, _
-   BYVAL pcbBinary AS DWORD PTR, _
-   BYVAL pdwSkip AS DWORD PTR, _
-   BYVAL pdwFlags AS DWORD PTR _
-) AS WINBOOL
-```
-
-```
-FUNCTION AfxCryptStringToBinaryW ( _
-   BYVAL pszString AS LPCWSTR, _
-   BYVAL cchString AS DWORD, _
-   BYVAL dwFlags AS DWORD, _
-   BYVAL pbBinary AS UBYTE PTR, _
-   BYVAL pcbBinary AS DWORD PTR, _
-   BYVAL pdwSkip AS DWORD PTR, _
-   BYVAL pdwFlags AS DWORD PTR _
-) AS WINBOOL
-```
-
-| Parameter  | Description |
-| ---------- | ----------- |
-| *pszString* | A pointer to a string that contains the formatted string to be converted. |
-| *cchString* | The number of characters of the formatted string to be converted, not including the terminating NULL character. If this parameter is zero, pszString is considered to be a null-terminated string. |
-| *dwFlags* | Indicates the format of the string to be converted. |
-| *pbBinary* | A pointer to a buffer that receives the returned sequence of bytes. If this parameter is NULL, the function calculates the length of the buffer needed and returns the size, in bytes, of required memory in the DWORD pointed to by *pcbBinary*. |
-| *pcbBinary* | A pointer to a DWORD variable that, on entry, contains the size, in bytes, of the *pbBinary* buffer. After the function returns, this variable contains the number of bytes copied to the buffer. If this value is not large enough to contain all of the data, the function fails and GetLastError returns **ERROR_MORE_DATA**. If *pbBinary* is NULL, the DWORD pointed to by *pcbBinary* is ignored. |
-| *pdwSkip* | A pointer to a DWORD value that receives the number of characters skipped to reach the beginning of the actual base64 or hexadecimal strings. This parameter is optional and can be NULL if it is not needed. |
-| *pdwFlags* | A pointer to a DWORD value that receives the flags actually used in the conversion. These are the same flags used for the *dwFlags* parameter. In many cases, these will be the same flags that were passed in the *dwFlags* parameter. If *dwFlags* contains one of the flags inicated below, this value will receive a flag that indicates the actual format of the string. This parameter is optional and can be NULL if it is not needed. |
-
-Values available for the *dwFlags* parameter:
-
-| Value      | Meaning |
-| ---------- | ----------- |
-| CRYPT_STRING_BASE64HEADER | Base64, with certificate beginning and ending headers. |
-| CRYPT_STRING_BASE64 | Base64, without headers. |
-| CRYPT_STRING_BINARY | Pure binary copy. |
-| CRYPT_STRING_BASE64REQUESTHEADER | Base64, with request beginning and ending headers. |
-| CRYPT_STRING_BASE64 | Base64, without headers. |
-| CRYPT_STRING_HEX | Hexadecimal only. |
-| CRYPT_STRING_HEXASCII | Hexadecimal, with ASCII character display. |
-| CRYPT_STRING_BASE64_ANY | Tries the following, in order: CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64. |
-| CRYPT_STRING_ANY | Tries the following, in order: CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64, CRYPT_STRING_BINARY. |
-| CRYPT_STRING_HEX_ANY | Tries the following, in order: CRYPT_STRING_HEXADDR, CRYPT_STRING_HEXASCIIADDR, CRYPT_STRING_HEX, CRYPT_STRING_HEXRAW, CRYPT_STRING_HEXASCII. |
-| CRYPT_STRING_HEX | Hexadecimal only. |
-| CRYPT_STRING_BASE64X509CRLHEADER | Base64, with X.509 CRL beginning and ending headers. |
-| CRYPT_STRING_HEXADDR | Hexadecimal, with address display. |
-| CRYPT_STRING_HEXASCIIADDR | Hexadecimal, with ASCII character and address display. |
-| CRYPT_STRING_HEXRAW | A raw hexadecimal string. Not supported in Windows Server 2003 and Windows XP. |
-| CRYPT_STRING_STRICT | Enforce strict decoding of ASN.1 text formats. Some ASN.1 binary BLOBS can have the first few bytes of the BLOB incorrectly interpreted as Base64 text. In this case, the rest of the text is ignored. Use this flag to enforce complete decoding of the BLOB. Not suported in Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP. |
-
-Values available for the *pdwFlags* parameter:
-
-| Value      | Meaning |
-| ---------- | ----------- |
-| CRYPT_STRING_ANY | This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64, CRYPT_STRING_BINARY. |
-| CRYPT_STRING_BASE64_ANY | This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64. |
-| CRYPT_STRING_HEX_ANY | This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_HEXADDR, CRYPT_STRING_HEXASCIIADDR, CRYPT_STRING_HEX, CRYPT_STRING_HEXRAW, CRYPT_STRING_HEXASCII. |
-
 # <a name="AfxStrClipLeft"></a>AfxStrClipLeft
 
 Returns a string with *nCount* characters removed from the left side of the string.
@@ -1490,13 +1273,14 @@ AfxStrWrap("Paul", "'") results in 'Paul'
 AfxStrWrap("Paul") results in "Paul"
 ```
 
-# <a name="AfxXmlBase64Decode"></a>AfxXmlBase64Decode
+# <a name="AfxBase64DecodeA"></a>AfxBase64DecodeA
 
 Converts the contents of a Base64 mime encoded string to an ascii string.
 
 ```
-FUNCTION AfxXmlBase64Decode (BYREF strData AS STRING) AS STRING
+FUNCTION AfxBase64DecodeA (BYREF strData AS STRING) AS STRING
 ```
+
 | Parameter  | Description |
 | ---------- | ----------- |
 | *strData* | The string to decode. |
@@ -1505,25 +1289,62 @@ FUNCTION AfxXmlBase64Decode (BYREF strData AS STRING) AS STRING
 
 The decoded string on success, or a null string on failure.
 
-Remaks
+#### Remaks
 
 Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.
 
 Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.
 
-#### Important note
+If we want to encode a unicode string, we must convert it to utf8 before calling AfxBase64EncodeA, e.g.
 
-Because it uses COM, you must initialize the COM library before calling this function.
+````
+DIM cws AS CWSTR = "おはようございます – Good morning!"
+DIM s AS STRING = AfxBase64EncodeA(cws.Utf8)
+````
 
-**Include file**: CSafeArray.inc
+To decode it, we can use
 
-# <a name="AfxXmlBase64Encode"></a>AfxXmlBase64Encode
+````
+DIM cwsOut AS CWSTR = CWSTR(AfxBase64DecodeA(s), CP_UTF8)
+````
 
-Converts the contents of a string to Base64 mime encoding.
+or
+
+````
+DIM cwsOut AS CWSTR
+cws.utf8 = AfxBase64DecodeA(s)
+````
+
+# <a name="AfxBase64DecodeW"></a>AfxBase64DecodeW
+
+Converts the contents of a Base64 mime encoded string to an unicode string.
 
 ```
-FUNCTION AfxXmlBase64Encode (BYREF strData AS STRING) AS STRING
+FUNCTION AfxBase64DecodeW (BYREF cwsData AS CWSTR) AS CWSTR
 ```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *cwsData* | The string to decode. |
+
+#### Return value
+
+The decoded string on success, or a null string on failure.
+
+#### Remaks
+
+Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.
+
+Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.
+
+# <a name="AfxBase64EncodeA"></a>AfxBase64EncodeA
+
+Converts the contents of an ascii string to Base64 mime encoding.
+
+```
+FUNCTION AfxBase64EncodeA (BYREF strData AS STRING) AS STRING
+```
+
 | Parameter  | Description |
 | ---------- | ----------- |
 | *strData* | The string to encode. |
@@ -1532,10 +1353,183 @@ FUNCTION AfxXmlBase64Encode (BYREF strData AS STRING) AS STRING
 
 The encoded string on succeess, or a null string on failure.
 
-Remaks
+#### Remarks
 
 Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.
 
 Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.
 
-**Include file**: CSafeArray.inc
+If we want to encode a unicode string, we must convert it to utf8 before calling AfxBase64Encode, e.g.
+
+````
+DIM cws AS CWSTR = "おはようございます – Good morning!"
+DIM s AS STRING = AfxBase64EncodeA(cws.Utf8)
+````
+
+To decode it, we can use
+
+````
+DIM cwsOut AS CWSTR = CWSTR(AfxBase64DecodeA(s), CP_UTF8)
+````
+
+or
+
+````
+DIM cwsOut AS CWSTR
+cws.utf8 = AfxBase64DecodeA(s)
+````
+
+# <a name="AfxBase64EncodeW"></a>AfxBase64EncodeW
+
+Converts the contents of an unicode string to Base64 mime encoding.
+
+```
+FUNCTION AfxBase64EncodWeA (BYREF cwsData AS CWSTR) AS CWSTR
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *cwsData* | The string to encode. |
+
+#### Return value
+
+The encoded string on succeess, or a null string on failure.
+
+#### Remarks
+
+Base64 is a group of similar encoding schemes that represent binary data in an ASCII string format by translating it into a radix-64 representation. The Base64 term originates from a specific MIME content transfer encoding.
+
+Base64 encoding schemes are commonly used when there is a need to encode binary data that needs be stored and transferred over media that are designed to deal with textual data. This is to ensure that the data remains intact without modification during transport. Base64 is used commonly in a number of applications including email via MIME, and storing complex data in XML.
+
+# <a name="AfxCryptBinaryToString"></a>AfxCryptBinaryToString
+
+Converts an array of bytes into a formatted string.
+
+```
+FUNCTION FUNCTION AfxCryptBinaryToStringA ( _
+   BYVAL pbBinary AS CONST UBYTE PTR, _
+   BYVAL cbBinary AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pszString AS LPSTR, _
+   BYVAL pcchString AS DWORD PTR _
+) AS WINBOOL
+```
+
+```
+FUNCTION AfxCryptBinaryToStringW ( _
+   BYVAL pbBinary AS CONST UBYTE PTR, _
+   BYVAL cbBinary AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pszString AS LPWSTR, _
+   BYVAL pcchString AS DWORD PTR _
+) AS WINBOOL
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *pbBinary* | A pointer to the array of bytes to be converted into a string. |
+| *cbBinary* | The number of elements in the *pbBinary* array. |
+| *dwFlags* | Specifies the format of the resulting formatted string. |
+| *pszString* | A pointer to a buffer that receives the converted string. To calculate the number of characters that must be allocated to hold the returned string, set this parameter to NULL. The function will place the required number of characters, including the terminating NULL character, in the value pointed to by *pcchString*. |
+| *pcchString* | A pointer to a DWORD variable that contains the size, in characters, of the *pszString* buffer. If *pszString* is NULL, the function calculates the length of the return string (including the terminating null character) in characters and returns it in this parameter. If *pszString* is not NULL and big enough, the function converts the binary data into a specified string format including the terminating null character, but *pcchString* receives the length in characters, not including the terminating null character. |
+
+Values available for the *dwFlags* parameter:
+
+| Value      | Meaning |
+| ---------- | ----------- |
+| CRYPT_STRING_BASE64HEADER | Base64, with certificate beginning and ending headers. |
+| CRYPT_STRING_BASE64 | Base64, without headers. |
+| CRYPT_STRING_BINARY | Pure binary copy. |
+| CRYPT_STRING_BASE64REQUESTHEADER | Base64, with request beginning and ending headers. |
+| CRYPT_STRING_HEX | Hexadecimal only. |
+| CRYPT_STRING_HEXASCII | Hexadecimal, with ASCII character display. |
+| CRYPT_STRING_BASE64X509CRLHEADER | Base64, with X.509 CRL beginning and ending headers. |
+| CRYPT_STRING_HEXADDR | Hexadecimal, with address display. |
+| CRYPT_STRING_HEXASCIIADDR | Hexadecimal, with ASCII character and address display. |
+| CRYPT_STRING_HEXRAW | A raw hexadecimal string. Not supported in Windows Server 2003 and Windows XP. |
+| CRYPT_STRING_STRICT | Enforce strict decoding of ASN.1 text formats. Some ASN.1 binary BLOBS can have the first few bytes of the BLOB incorrectly interpreted as Base64 text. In this case, the rest of the text is ignored. Use this flag to enforce complete decoding of the BLOB. Not suported in Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP. |
+
+In addition to the values above, one or more of the following values can be specified to modify the behavior of the function.
+
+| Value      | Meaning |
+| ---------- | ----------- |
+| CRYPT_STRING_NOCRLF | Do not append any new line characters to the encoded string. The default behavior is to use a carriage return/line feed (CR/LF) pair (0x0D/0x0A) to represent a new line. Not supported in Windows Server 2003 and Windows XP. |
+| CRYPT_STRING_NOCR | Only use the line feed (LF) character (0x0A) for a new line. The default behavior is to use a CR/LF pair (0x0D/0x0A) to represent a new line. |
+
+
+#### Return value
+
+If the function succeeds, the function returns nonzero (CTRUE).
+If the function fails, it returns zero (FALSE).
+
+#### Remarks
+
+With the exception of when **CRYPT_STRING_BINARY** encoding is used, all strings are appended with a new line sequence. By default, the new line sequence is a CR/LF pair (0x0D/0x0A). If the *dwFlags* parameter contains the **CRYPT_STRING_NOCR** flag, then the new line sequence is a LF character (0x0A). If the *dwFlags* parameter contains the **CRYPT_STRING_NOCRLF** flag, then no new line sequence is appended to the string.
+
+# <a name="AfxCryptStringToBinary"></a>AfxCryptStringToBinary
+
+Converts a formatted string into an array of bytes.
+
+```
+FUNCTION AfxCryptStringToBinaryA ( _
+   BYVAL pszString AS LPCSTR, _
+   BYVAL cchString AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pbBinary AS UBYTE PTR, _
+   BYVAL pcbBinary AS DWORD PTR, _
+   BYVAL pdwSkip AS DWORD PTR, _
+   BYVAL pdwFlags AS DWORD PTR _
+) AS WINBOOL
+```
+
+```
+FUNCTION AfxCryptStringToBinaryW ( _
+   BYVAL pszString AS LPCWSTR, _
+   BYVAL cchString AS DWORD, _
+   BYVAL dwFlags AS DWORD, _
+   BYVAL pbBinary AS UBYTE PTR, _
+   BYVAL pcbBinary AS DWORD PTR, _
+   BYVAL pdwSkip AS DWORD PTR, _
+   BYVAL pdwFlags AS DWORD PTR _
+) AS WINBOOL
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *pszString* | A pointer to a string that contains the formatted string to be converted. |
+| *cchString* | The number of characters of the formatted string to be converted, not including the terminating NULL character. If this parameter is zero, pszString is considered to be a null-terminated string. |
+| *dwFlags* | Indicates the format of the string to be converted. |
+| *pbBinary* | A pointer to a buffer that receives the returned sequence of bytes. If this parameter is NULL, the function calculates the length of the buffer needed and returns the size, in bytes, of required memory in the DWORD pointed to by *pcbBinary*. |
+| *pcbBinary* | A pointer to a DWORD variable that, on entry, contains the size, in bytes, of the *pbBinary* buffer. After the function returns, this variable contains the number of bytes copied to the buffer. If this value is not large enough to contain all of the data, the function fails and GetLastError returns **ERROR_MORE_DATA**. If *pbBinary* is NULL, the DWORD pointed to by *pcbBinary* is ignored. |
+| *pdwSkip* | A pointer to a DWORD value that receives the number of characters skipped to reach the beginning of the actual base64 or hexadecimal strings. This parameter is optional and can be NULL if it is not needed. |
+| *pdwFlags* | A pointer to a DWORD value that receives the flags actually used in the conversion. These are the same flags used for the *dwFlags* parameter. In many cases, these will be the same flags that were passed in the *dwFlags* parameter. If *dwFlags* contains one of the flags inicated below, this value will receive a flag that indicates the actual format of the string. This parameter is optional and can be NULL if it is not needed. |
+
+Values available for the *dwFlags* parameter:
+
+| Value      | Meaning |
+| ---------- | ----------- |
+| CRYPT_STRING_BASE64HEADER | Base64, with certificate beginning and ending headers. |
+| CRYPT_STRING_BASE64 | Base64, without headers. |
+| CRYPT_STRING_BINARY | Pure binary copy. |
+| CRYPT_STRING_BASE64REQUESTHEADER | Base64, with request beginning and ending headers. |
+| CRYPT_STRING_BASE64 | Base64, without headers. |
+| CRYPT_STRING_HEX | Hexadecimal only. |
+| CRYPT_STRING_HEXASCII | Hexadecimal, with ASCII character display. |
+| CRYPT_STRING_BASE64_ANY | Tries the following, in order: CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64. |
+| CRYPT_STRING_ANY | Tries the following, in order: CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64, CRYPT_STRING_BINARY. |
+| CRYPT_STRING_HEX_ANY | Tries the following, in order: CRYPT_STRING_HEXADDR, CRYPT_STRING_HEXASCIIADDR, CRYPT_STRING_HEX, CRYPT_STRING_HEXRAW, CRYPT_STRING_HEXASCII. |
+| CRYPT_STRING_HEX | Hexadecimal only. |
+| CRYPT_STRING_BASE64X509CRLHEADER | Base64, with X.509 CRL beginning and ending headers. |
+| CRYPT_STRING_HEXADDR | Hexadecimal, with address display. |
+| CRYPT_STRING_HEXASCIIADDR | Hexadecimal, with ASCII character and address display. |
+| CRYPT_STRING_HEXRAW | A raw hexadecimal string. Not supported in Windows Server 2003 and Windows XP. |
+| CRYPT_STRING_STRICT | Enforce strict decoding of ASN.1 text formats. Some ASN.1 binary BLOBS can have the first few bytes of the BLOB incorrectly interpreted as Base64 text. In this case, the rest of the text is ignored. Use this flag to enforce complete decoding of the BLOB. Not suported in Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP. |
+
+Values available for the *pdwFlags* parameter:
+
+| Value      | Meaning |
+| ---------- | ----------- |
+| CRYPT_STRING_ANY | This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64, CRYPT_STRING_BINARY. |
+| CRYPT_STRING_BASE64_ANY | This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_BASE64HEADER, CRYPT_STRING_BASE64. |
+| CRYPT_STRING_HEX_ANY | This variable will receive one of the following values. Each value indicates the actual format of the string. CRYPT_STRING_HEXADDR, CRYPT_STRING_HEXASCIIADDR, CRYPT_STRING_HEX, CRYPT_STRING_HEXRAW, CRYPT_STRING_HEXASCII. |
+

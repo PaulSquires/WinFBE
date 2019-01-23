@@ -20,6 +20,7 @@ Assorted Windows procedures.
 | [AfxGetWindowHeight](#AfxGetWindowHeight) | Returns the height of a window, in pixels. |
 | [AfxGetWindowLocation](#AfxGetWindowLocation) | Returns the location of the top left corner of the window, in pixels. |
 | [AfxGetWindowRect](#AfxGetWindowRect) | Retrieves the dimensions of the bounding rectangle of the specified window. |
+| [AfxGetWindowSize](#AfxGetWindowSize) | Gets the width and height of a window, in pixels. |
 | [AfxGetWindowText](#AfxGetWindowText) | Gets the text of a window. |
 | [AfxGetWindowTextLength](#AfxGetWindowTextLength) | Gets the length of the text of a window. |
 | [AfxGetWindowWidth](#AfxGetWindowWidth) | Returns the width of a window, in pixels. |
@@ -187,6 +188,8 @@ Assorted Windows procedures.
 | ---------- | ----------- |
 | [AfxCommand](#AfxCommand) | Returns command line parameters used to call the program. |
 | [AfxEnviron](#AfxEnviron) | Retrieves the contents of the specified variable from the environment block of the calling process. |
+| [AfxExtractResource](#AfxExtractResource) | Extracts resource data and returns it as a string. |
+| [AfxExtractResourceToFile](#AfxExtractResourceToFile) | Extracts resource data and saves it to a file. |
 | [AfxGetComputerName](#AfxGetComputerName) | Retrieves the NetBIOS name of the local computer. |
 | [AfxGetMACAddress](#AfxGetMACAddress) | Retrieves the MAC address of a machine's Ethernet card. |
 | [AfxGetUserName](#AfxGetUserName) | Retrieves the name of the user associated with the current thread. |
@@ -446,6 +449,81 @@ FUNCTION AfxSetDlgMsgResult (BYVAL hDlg AS HWND, BYVAL msg AS UINT, BYVAL result
 #### Return value
 
 If the function succeeds, the return value is TRUE. If the function fails, the return value is FALSE.
+
+# <a name="AfxExtractResource"></a>AfxExtractResource
+
+Extracts resource data and returns it as a string.
+
+```
+FUNCTION AfxExtractResource (BYVAL hInstance AS HINSTANCE, _
+   BYREF wszResourceName AS WSTRING, BYVAL pResourceType AS LPWSTR = RT_RCDATA) AS STRING
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *hInstance* | A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process. |
+| *wszResourceName* | Name of the resource. If the resource is an image that uses an integral identifier, *wszResourceName* should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., "#998". Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be in format .png, .jpg, .gif, .tiff. |
+| *pResourceType* | Type of the resource, e.g. RT_RCDATA. For a list of predefined resource types see: [Resource Types](https://docs.microsoft.com/en-us/windows/desktop/menurc/resource-types) |
+
+#### Return value
+
+A string containing the resource data.
+
+#### Example
+
+```
+DIM strResData AS STRING = AfxExtractResource(NULL, "IDI_ARROW_RIGHT")
+where IDI_ARROW_RIGHT is the identifier in the resource file for
+IDI_ARROW_RIGHT RCDATA ".\Resources\arrow_right_64.png"
+--or--
+DIM strResData AS STRING = AfxExtractResource(NULL, "#111")
+' where "#111" is the identifier in the resource file for
+' 111 RCDATA ".\Resources\VEGA_PAZ_01.jpg"
+-----
+' // Write the resource data to a file
+DIM hFile AS HANDLE = CreateFileW("PazVega.jpg", GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)
+IF hFile THEN
+   DIM dwBytesWritten AS DWORD
+   DIM bSuccess AS BOOLEAN = WriteFile(hFile, STRPTR(strResData), LEN(strResData), @dwBytesWritten, NULL)
+   CloseHandle(hFile)
+   print bSuccess
+END IF
+```
+
+# <a name="AfxExtractResourceToFile"></a>AfxExtractResourceToFile
+
+Extracts resource data and saves it to a file.
+
+```
+FUNCTION AfxExtractResourceToFile (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING, _
+   BYREF wszFileName AS WSTRING, BYVAL pResourceType AS LPWSTR = RT_RCDATA) AS STRING
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *hInstance* | A handle to the module whose portable executable file or an accompanying MUI file contains the resource. If this parameter is NULL, the function searches the module used to create the current process. |
+| *wszResourceName* | Name of the resource. If the resource is an image that uses an integral identifier, *wszResourceName* should begin with a number symbol (#) followed by the identifier in an ASCII format, e.g., "#998". Otherwise, use the text identifier name for the image. Only images embedded as raw data (type RCDATA) are valid. These must be in format .png, .jpg, .gif, .tiff. |
+| *wszFileName* | Path of the file where to save the extracted resource. |
+| *pResourceType* | Type of the resource, e.g. RT_RCDATA. For a list of predefined resource types see: [Resource Types](https://docs.microsoft.com/en-us/windows/desktop/menurc/resource-types) |
+
+#### Return value
+
+TRUE on success of FALSE on failure.
+
+#### Example
+
+```
+AfxExtractResourceToFile(NULL, "IDI_ARROW_RIGHT", "IDI_ARROW_RIGHT.png")
+where IDI_ARROW_RIGHT is the identifier in the resource file for
+IDI_ARROW_RIGHT RCDATA ".\Resources\arrow_right_64.png"
+```
+#### Example
+
+```
+AfxExtractResourceToFile(NULL, "#111", "VEGA_PAZ_01.jpg")
+where "#111" is the identifier in the resource file for
+111 RCDATA ".\Resources\VEGA_PAZ_01.jpg"
+```
 
 # <a name="AfxGetComputerName"></a>AfxGetComputerName
 
@@ -2115,6 +2193,20 @@ FUNCTION AfxGetWindowRect (BYVAL hwnd AS HWND) AS RECT
 #### Return value
 
 A RECT structure with the retrieved dimensions.
+
+# <a name="AfxGetWindowSize"></a>AfxGetWindowSize
+
+Gets the width and height of the specified window, in pixels.
+
+```
+FUNCTION AfxGetWindowSize (BYVAL hwnd AS HWND, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS BOOLEAN
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *hwnd* | Handle to the window. |
+| *nWidth* | The width of the window. |
+| *nHeight* | The height of the window. |
 
 # <a name="AfxGetWindowText"></a>AfxGetWindowText
 

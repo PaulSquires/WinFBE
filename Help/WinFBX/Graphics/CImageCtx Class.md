@@ -58,7 +58,7 @@ pImageCtx.LoadImageFromFile ExePath & "\image.jpg"
 Returns a pointer to the CIMageCtx class given the handle of its associated window.
 
 ```
-FUNCTION AfxCImageCtxPtr (BYVAL hwnd AS HWND) AS CGraphCtx PTR
+FUNCTION AfxCImageCtxPtr (BYVAL hwnd AS HWND) AS CImageCtx PTR
 FUNCTION AfxCImageCtxPtr (BYVAL hParent AS HWND, BYVAL cID AS LONG) AS CImageCtx PTR
 ```
 

@@ -186,8 +186,8 @@ IF hFile THEN
 END IF
 ```
 
-' // Read the file
 ```
+' // Read the file
 hFile = CreateFileW(cwsFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL)
 IF hFile THEN
    DIM dwFileSize AS DWORD = GetFileSize(hFile, NULL)

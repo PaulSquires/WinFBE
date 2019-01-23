@@ -60,8 +60,8 @@ OPERATOR CAST () AS IStream PTR
 | [Open](#Open) | Opens or creates a file and retrieves a stream to read or write to that file. |
 | [Close](#Close) | Releases the stream object. |
 | [Read](#Read) | Reads a specified number of bytes from the stream into memory, starting at the current seek pointer. |
-| [ReadTextA](#ReadTextA) | Reads a specified number of characters from the stream into memory, starting at the current seek pointer, and returns then as an ansi string. |
-| [ReadTextW](#ReadTextW) | Reads a specified number of characters from the stream into memory, starting at the current seek pointer, and returns then as a unicode string. |
+| [ReadTextA](#ReadTextA) | Reads a specified number of characters from the stream into memory, starting at the current seek pointer, and returns them as an ansi string. |
+| [ReadTextW](#ReadTextW) | Reads a specified number of characters from the stream into memory, starting at the current seek pointer, and returns them as a unicode string. |
 | [Write](#Write) | Writes a specified number of bytes into the stream starting at the current seek pointer. |
 | [WriteTextA](#WriteTextA) | Writes a ansi string into the stream starting at the current seek pointer. |
 | [WriteTextW](#WriteTextW) | Writes a unicode string into the stream starting at the current seek pointer. |
@@ -236,7 +236,7 @@ ULONG. The actual number of bytes read from the stream. Note: The number of byte
 
 # <a name="ReadTextA"></a>ReadTextA
 
-Reads a specified number of characters from the stream into memory, starting at the current seek pointer. Ansio version.
+Reads a specified number of characters from the stream into memory, starting at the current seek pointer. Ansi version.
 
 ```
 FUNCTION ReadTextA (BYVAL numChars AS LONG) AS STRING

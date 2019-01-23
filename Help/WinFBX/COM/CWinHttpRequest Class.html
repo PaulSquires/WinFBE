@@ -253,6 +253,30 @@ PRINT cbsResponseHeaders
 </table>
 <h4 id="return-value-4">Return value</h4>
 <p>Variant that contains the option value.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>#include once &quot;Afx/CWinHttpRequest.inc&quot;
+using Afx
+
+' // Create an instance of the CWinHttp class
+DIM pWHttp AS CWinHttpRequest
+' // Open an HTTP connection to an HTTP resource
+pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
+' // Specify the user agent
+pWHttp.SetOption(WinHttpRequestOption_UserAgentString, &quot;A WinHttpRequest Example Program&quot;)
+' // Send an HTTP request to the HTTP server
+pWHttp.Send
+IF pWHttp.GetLastResult = S_OK THEN
+   ' // Get user agent string.
+   PRINT pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
+   ' // Get URL
+   PRINT pWHttp.GetOption(WinHttpRequestOption_URL)
+   ' // Get URL Code Page.
+   PRINT pWHttp.GetOption(WinHttpRequestOption_URLCodePage)
+   ' // Convert percent symbols to escape sequences.
+   PRINT pWHttp.GetOption(WinHttpRequestOption_EscapePercentInURL)
+END IF
+Sleep
+</code></pre>
 <h4 id="getlastresult-2">GetLastResult</h4>
 <p>Returns S_OK (0) if successful or an error value otherwise.</p>
 <h1 id="getresponsebody"><a name="GetResponseBody"></a>GetResponseBody</h1>
@@ -326,7 +350,7 @@ END IF
 <p>Returns S_OK (0) if successful or an error value otherwise.</p>
 <h4 id="remarks-3">Remarks</h4>
 <p>Invoke this method only after the <strong>Send</strong> method has been called.</p>
-<h4 id="example-1">Example</h4>
+<h4 id="example-2">Example</h4>
 <pre><code>#include &quot;Afx/CWinHttpRequest.inc&quot;
 using Afx
 
@@ -413,7 +437,7 @@ PRINT cbsResponseHeader
 <p>The return value is S_OK (0) on success or an error value otherwise.</p>
 <h4 id="remarks-8">Remarks</h4>
 <p>This method opens a connection to the resource identified in <em>cbsUrl</em> using the HTTP verb given in <em>cbsMethod</em>.</p>
-<h4 id="example-2">Example</h4>
+<h4 id="example-3">Example</h4>
 <pre><code>#include &quot;Afx/CWinHttpRequest.inc&quot;
 using Afx
 
@@ -570,25 +594,21 @@ DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
 </table>
 <h4 id="return-value-16">Return value</h4>
 <p>Returns S_OK (0) if successful or an error value otherwise.</p>
-<h4 id="example-3">Example</h4>
-<pre><code>#include &quot;Afx/CWinHttpRequest.inc&quot;
+<h4 id="example-4">Example</h4>
+<pre><code>#include once &quot;Afx/CWinHttpRequest.inc&quot;
 using Afx
 
-' // Create an instance of the CWinHttpRequest class
+' // Create an instance of the CWinHttp class
 DIM pWHttp AS CWinHttpRequest
 ' // Open an HTTP connection to an HTTP resource
 pWHttp.Open &quot;GET&quot;, &quot;http://microsoft.com&quot;
 ' // Specify the user agent
 pWHttp.SetOption(WinHttpRequestOption_UserAgentString, &quot;A WinHttpRequest Example Program&quot;)
-
 ' // Send an HTTP request to the HTTP server
 pWHttp.Send
 IF pWHttp.GetLastResult = S_OK THEN
    ' // Get user agent string.
-   DIM cvText AS CVAR = pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
-   PRINT cvText
-   ' // We can also use:
-   ' PRINT pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
+   PRINT pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
    ' // Get URL
    PRINT pWHttp.GetOption(WinHttpRequestOption_URL)
    ' // Get URL Code Page.
@@ -596,6 +616,7 @@ IF pWHttp.GetLastResult = S_OK THEN
    ' // Convert percent symbols to escape sequences.
    PRINT pWHttp.GetOption(WinHttpRequestOption_EscapePercentInURL)
 END IF
+Sleep
 </code></pre>
 <h1 id="setproxy"><a name="SetProxy"></a>SetProxy</h1>
 <p>Sets proxy server information.</p>

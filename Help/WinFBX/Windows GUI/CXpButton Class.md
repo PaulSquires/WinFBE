@@ -36,6 +36,25 @@ CONSTRUCTOR CXpButton (BYVAL pWindow AS CWindow PTR, BYVAL cID AS LONG_PTR, _
 
 A pointer to the new instance of the class.
 
+### Helper Procedure: AfxCXpButtonPtr
+
+Returns a pointer to the CXpButton class given the handle of its associated window.
+
+```
+FUNCTION AfxCXpButtonPtr (BYVAL hwnd AS HWND) AS CXpButton PTR
+FUNCTION AfxCXpButtonPtr (BYVAL hParent AS HWND, BYVAL cID AS LONG) AS CXpButton PTR
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *hwnd* | Handle of the window associated with the button control. Call the **hWindow** method of the **CXpButton** class to retrieve it. |
+| *hParent* | The handle of the parent window of the control. |
+| *cID* | The identifier of the control. |
+
+#### Return value
+
+A pointer to the CXpButton class.
+
 ### Methods
 
 | Parameter  | Description |
