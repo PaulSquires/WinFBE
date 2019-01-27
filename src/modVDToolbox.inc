@@ -133,6 +133,9 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopLeft"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopRight"))
             case CTRL_LABEL
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.BottomCenter"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.BottomLeft"))
+               ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.BottomRight"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleCenter"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleLeft"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.MiddleRight"))
@@ -1142,23 +1145,13 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
          ' Only erase the bottom portion of the listbox that extends from the last item
          ' to the bottom edge of the listbox. All other lines are already drawn. This helps
          ' reduce screen flicker.
-         dim as RECT rc: GetClientRect(hwnd, @rc)
-         ' If the number of lines in the listbox is less than the number per page then 
-         ' calculate from last item to bottom of listbox, otherwise calculate based on
-         ' the mod of the lineheight to listbox height so we can color the partial line
-         ' that won't be displayed at the bottom of the list.
-         dim as long NumItems = ListBox_GetCount(hwnd)
-         dim as long ItemsPerPage = ( rc.bottom / FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
-         if NumItems < ItemsPerPage then 
-            rc.top = FRMVDTOOLBOX_LISTBOX_LINEHEIGHT * NumItems
-         else
-            rc.top = rc.bottom - ( rc.bottom mod FRMVDTOOLBOX_LISTBOX_LINEHEIGHT)
-         end if
+         dim as RECT rc = GetListBoxEmptyClientArea( HWND_FRMVDTOOLBOX, HWND, FRMVDTOOLBOX_LISTBOX_LINEHEIGHT )
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
             FillRect(hDC, @rc, GetSysColorBrush(COLOR_WINDOW))
          end if
          return TRUE
+
          
       case WM_COMMAND
          if loword(wParam) = IDC_FRMVDTOOLBOX_COMBO then

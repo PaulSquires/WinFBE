@@ -81,7 +81,9 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Control", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "ForeColorHot", "SYSTEM|ControlText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.TopLeft", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
@@ -190,13 +192,18 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_LISTBOX
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BackColorSelected", "SYSTEM|Highlight", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "ColumnWidth", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "ForeColorHot", "SYSTEM|WindowText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "ForeColorSelected", "SYSTEM|HighlightText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "HorizontalExtent", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "IntegralHeight", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ItemHeight", "28", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MultiColumn", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ScrollAlwaysVisible", "False", PropertyType.TrueFalse)
@@ -246,7 +253,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_FRAME
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "BackColorHot", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Control", PropertyType.ColorPicker)
 '         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|ControlText", PropertyType.ColorPicker)
 '         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.None", PropertyType.ComboPicker)
 '         AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.TopLeft", PropertyType.ComboPicker)
@@ -893,6 +900,8 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
                ' our listboxes have NoIntegralHeight.
                dwStyle = WS_CHILD or WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
                          LBS_HASSTRINGS OR LBS_NOTIFY or LBS_NOINTEGRALHEIGHT
+            elseif ControlType = CTRL_LABEL then
+               dwStyle = WS_CHILD or WS_VISIBLE OR SS_LEFT OR WS_GROUP OR SS_NOTIFY or SS_OWNERDRAW
             elseif ControlType = CTRL_COMBOBOX then
                ' WinFBX defaults to combobox with integralheight. We want to make sure that
                ' our comboboxes have NoIntegralHeight.

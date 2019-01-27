@@ -7,6 +7,8 @@
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
 | AllowSelection | Gets a value (true/false) indicating whether the control will allow items to be selected.|
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
+| BackColorHot | Gets or sets the background color of the item in the control that the mouse is over. Refer to the **Colors** object. |
+| BackColorSelected | Gets or sets the background color of the selected/highlighted items in the control. Refer to the **Colors** object. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
 | ColumnWidth | Gets or sets a value indicating how wide (in pixels) each column should be in a multicolumn listbox.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
@@ -15,11 +17,14 @@
 | Focused | Gets or sets a value (true/false) indicating whether the control has input focus.|
 | Font | Gets or sets the font for the control. Refer to the Font object.|
 | ForeColor | Gets or sets the foreground color of the control. Refer to the **Colors** object. |
+| ForeColorHot | Gets or sets the foreground color of the item in the control that the mouse is over. Refer to the **Colors** object. |
+| ForeColorSelected | Gets or sets the foreground color of the selected/highlighted items in the control. Refer to the **Colors** object. |
 | Height | Gets or sets the height of the control.|
 | HorizontalExtent | Gets or sets the width (in pixels) by which a listbox can be scrolled horizontally. Only valid if the **HorizontalScrollBars** property is True.|
 | HorizontalScrollBars | Gets or sets a value (true/false) indicating whether the ListBox will display a horizontal scroll bar for items beyond the right edge of the ListBox.|
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
+| ItemHeight | Gets or sets the height of a line in the control.|
 | IntegralHeight | Gets or sets a value (true/false) indicating whether the list can contain only complete items.|
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |

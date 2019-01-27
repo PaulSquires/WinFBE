@@ -1583,6 +1583,8 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    dim as string st
     
    DIM pWHttp AS CWinHttpRequest
+   
+   wszFilename = AfxGetExePathName + wszServerFile
 
    ' Open an HTTP connection to an HTTP resource
    if pWHttp.Open( "GET", "https://www.planetsquires.com/" & wszServerFile ) = S_OK then
@@ -1595,7 +1597,7 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
           
          ' Open a file stream and save the downloaded file
          DIM pFileStream AS CFileStream
-         IF pFileStream.Open("winfbe_version.txt", STGM_CREATE OR STGM_WRITE) = S_OK then
+         IF pFileStream.Open(wszFilename, STGM_CREATE OR STGM_WRITE) = S_OK then
             pFileStream.WriteTextA(st)
          END IF
       end if
@@ -1604,7 +1606,6 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    ' Open the downloaded file and check for the version number. It is possible that the socket
    ' will open but fail and send request but security parameters of the system will prevent data
    ' from being received resulting in a zero byte file. 
-   wszFilename = AfxGetExePathName + wszServerFile
    if AfxFileExists( wszFilename ) then
       dim as long f = freefile
       open wszFilename for input as #f
@@ -1662,3 +1663,36 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
 end function
 
 
+' ========================================================================================
+' Calcluate the client area at bottom of Listbox not covered by a row (needed to manually
+' paint the unused area in WM_ERASEBKGRD messages to avoid flicker.
+' ========================================================================================
+public function GetListBoxEmptyClientArea( byval hWndForm as HWND, _
+                                           byval hListBox as HWND, _
+                                           byval nLineHeight as long _
+                                           ) as RECT
+   
+   dim as RECT rc: GetClientRect( hListBox, @rc )
+   ' If the number of lines in the listbox is less than the number per page then 
+   ' calculate from last item to bottom of listbox, otherwise calculate based on
+   ' the mod of the lineheight to listbox height so we can color the partial line
+   ' that won't be displayed at the bottom of the list.
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWndForm)
+   if pWindow = 0 then exit function
+   dim as long itemHeight = pWindow->ScaleY(nLineHeight)
+   dim as long NumItems = ListBox_GetCount(hListBox)
+   dim as long ItemsPerPage = ( rc.bottom \ itemHeight )
+   dim as long nTopIndex = SendMessage( hListBox, LB_GETTOPINDEX, 0, 0 ) 
+   dim as long visible_rows = 0
+
+   if NumItems > 0 then
+      ItemsPerPage = (rc.bottom - rc.top) / itemHeight
+      dim as long bottom_index = (nTopIndex + ItemsPerPage) - 1
+      if bottom_index >= NumItems then bottom_index = NumItems - 1
+      visible_rows = (bottom_index - nTopIndex) + 1
+   end if
+
+   rc.top = visible_rows * itemHeight 
+   
+   return rc
+end function

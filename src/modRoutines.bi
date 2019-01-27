@@ -54,6 +54,7 @@ Declare Function GetRunExecutableFilename() as CWSTR
 Declare Function LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING) as any ptr
 Declare Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
 declare function DoCheckForUpdates( byval hWndParent as hwnd, byval bSilentCheck as Boolean = false ) as long
+declare function GetListBoxEmptyClientArea( byval hWndForm as HWND, byval hListBox as HWND, byval nLineHeight as long ) as RECT
 
 
 

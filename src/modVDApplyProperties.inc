@@ -234,23 +234,6 @@ private function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
       end select
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
-   case "TEXTALIGN"
-      AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTER)
-      AfxRemoveWindowStyle(pCtrl->hWindow, SS_LEFT)
-      AfxRemoveWindowStyle(pCtrl->hWindow, SS_RIGHT)
-      AfxRemoveWindowStyle(pCtrl->hWindow, SS_CENTERIMAGE)
-      dim as long wsStyle
-      select case **wszPropValue
-         CASE "LabelAlignment.MiddleCenter": wsStyle = SS_CENTER OR SS_CENTERIMAGE
-         CASE "LabelAlignment.MiddleLeft":   wsStyle = SS_LEFT   OR SS_CENTERIMAGE
-         CASE "LabelAlignment.MiddleRight":  wsStyle = SS_RIGHT  OR SS_CENTERIMAGE
-         CASE "LabelAlignment.TopCenter":    wsStyle = SS_CENTER 
-         CASE "LabelAlignment.TopLeft":      wsStyle = SS_LEFT   
-         CASE "LabelAlignment.TopRight":     wsStyle = SS_RIGHT  
-      END SELECT
-      AfxAddWindowStyle(pCtrl->hWindow, wsStyle)
-      AfxRedrawNonClientArea(pCtrl->hWindow) 
-
    end select
    
    function = 0

@@ -129,6 +129,7 @@ dim shared gLasso   as clsLasso
 #Include Once "frmProjectOptions.inc"
 #Include Once "frmHelpViewer.inc"
 #Include Once "frmMenuEditor.inc"
+#Include Once "frmStatusBarEditor.inc"
 #Include Once "frmMainOnCommand.inc"
 #Include Once "frmMain.inc"
 

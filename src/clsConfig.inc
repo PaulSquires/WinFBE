@@ -171,8 +171,9 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
                      wsBaseType = wsParts
                      continue do
                   case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
-                       "WFXCHECKBOX", "WFXMASKEDEDIT", "WFXCOMBOBOX"
+                       "WFXCHECKBOX", "WFXMASKEDEDIT", "WFXCOMBOBOX", "WFXOPTIONBUTTON"
                      if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
+                  case "WFXFRAME", "WFXPICTUREBOX"
                END SELECT
             END IF
             gdb2.dbAdd( @parser, DB2_TYPE )

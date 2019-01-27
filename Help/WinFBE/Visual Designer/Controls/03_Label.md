@@ -5,13 +5,15 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
-| BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
+| BackColor | Gets or sets the background color of the control. Refer to the **Colors** object. |
+| BackColorHot | Gets or sets the background color of the control when the mouse is over the control. Refer to the **Colors** object. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum. |
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
 | CtrlType | Gets or sets the control type value. Always **ControlType.Label** and used when adding form to the application’s form collection.|
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
 | Font | Gets or sets the font for the control. Refer to the Font object.|
 | ForeColor | Gets or sets the foreground color of the control. Refer to the **Colors** object. |
+| ForeColorHot | Gets or sets the foreground color of the control when the mouse is over the control. Refer to the **Colors** object. |
 | Height | Gets or sets the height of the control.|
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |

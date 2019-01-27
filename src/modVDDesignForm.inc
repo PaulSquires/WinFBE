@@ -931,7 +931,10 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
          Function = nHitTest    ' Return the default code from the default window handler.
          Exit Function
                               
-      case WM_CTLCOLORSTATIC, WM_CTLCOLOREDIT, WM_CTLCOLORBTN, WM_CTLCOLORLISTBOX 
+      case WM_CTLCOLORSTATIC
+         ' Colors for Label controls are set in WM_DRAWITEM
+               
+      case WM_CTLCOLOREDIT, WM_CTLCOLORBTN, WM_CTLCOLORLISTBOX 
          ' wParam: HDC of the control. 
          ' lParam: Handle to the control.
          ' Need to determine the child control handle that is sending the request to be painted.
@@ -956,6 +959,51 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
             end if   
          end if
    
+      case WM_DRAWITEM
+         ' Label controls are OwnerDraw
+         dim lpdis As DRAWITEMSTRUCT Ptr = cast( DRAWITEMSTRUCT Ptr, lParam )
+         if lpdis = 0 then exit function
+         dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
+         if pDoc THEN 
+            dim pCtrl as clsControl ptr = pDoc->Controls.GetCtrlPtr( lpdis->hwndItem )
+            if pCtrl then
+               dim pProp as clsProperty ptr
+               pProp = GetControlPropertyPtr( pCtrl, "FORECOLOR" )
+               if pProp then 
+                  SetTextColor( lpdis->hDC, GetRGBColorFromProperty(pProp) )
+               end if
+               pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
+               if pProp then 
+                  dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+                  SetBkColor( lpdis->hDC, clrBack )
+                  dim as RECT rc
+                  GetClientRect( lpdis->hwndItem, @rc )
+                  if pCtrl->hBackBrush then DeleteBrush( pCtrl->hBackBrush )
+                  pCtrl->hBackBrush = CreateSolidBrush( clrBack )
+                  FillRect( lpdis->hDC, @rc, pCtrl->hBackBrush )
+               end if
+               dim wszText as WString * MAX_PATH
+               dim as long lFormat 
+               Select Case **GetControlProperty(pCtrl, "TEXTALIGN")
+                  Case "LabelAlignment.BottomCenter": lFormat = DT_CENTER Or DT_BOTTOM
+                  Case "LabelAlignment.BottomLeft":   lFormat = DT_LEFT   Or DT_BOTTOM
+                  Case "LabelAlignment.BottomRight":  lFormat = DT_RIGHT  Or DT_BOTTOM
+                  Case "LabelAlignment.MiddleCenter": lFormat = DT_CENTER Or DT_VCENTER
+                  Case "LabelAlignment.MiddleLeft":   lFormat = DT_LEFT   Or DT_VCENTER
+                  Case "LabelAlignment.MiddleRight":  lFormat = DT_RIGHT  Or DT_VCENTER
+                  Case "LabelAlignment.TopCenter":    lFormat = DT_CENTER Or DT_TOP
+                  Case "LabelAlignment.TopLeft":      lFormat = DT_LEFT   Or DT_TOP
+                  Case "LabelAlignment.TopRight":     lFormat = DT_RIGHT  Or DT_TOP
+               End Select
+               lFormat = lFormat or DT_SINGLELINE
+
+               wszText = AfxGetWindowText( lpdis->hwndItem )
+               DrawText( lpdis->hDC, wszText, -1, Cast(lpRect, @lpdis->rcItem), lFormat )
+
+            end if   
+         end if
+
+      
    End Select
 
    ' for messages that we don't deal with
