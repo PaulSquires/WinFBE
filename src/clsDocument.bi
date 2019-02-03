@@ -54,6 +54,14 @@ type IMAGES_TYPE
    pDoc         as clsDocument_ ptr   ' backpointer to pDoc in case search on wszImageName performed.
 end type
 
+enum SnapLinePosition
+   top = 0
+   bottom
+   left
+   right
+end enum
+
+
 Type clsDocument
    Private:
       ' 2 Scintilla direct pointers to accommodate split editing
@@ -89,16 +97,15 @@ Type clsDocument
       bLockControls    as Boolean   ' Global flag that locks the form and all controls from moving or resizing.
       rcSize           as RECT      ' Current size of form/control. Used during sizing action
       pCtrlAction      as clsControl ptr  ' The control that the size/move action is being performed on
-      pCtrlCloseLeft   as clsControl ptr  ' closest control to the left of selected control
-      pCtrlCloseTop    as clsControl ptr  ' closest control to the top of selected control
-      pCtrlCloseRight  as clsControl ptr  ' closest control to the right of selected control
-      pCtrlCloseBottom as clsControl ptr  ' closest control to the bottom of selected control
-      ptBlueStart      as POINT     ' Start of blue line for snapping
-      ptBlueEnd        as POINT     ' End of blue line for snapping
-      SnapUpWait       as long      ' #pixels of movement to wait until snap operation ends
       wszFormCodeGen   as CWSTR     ' Form code generated  
       wszFormMetaData  as CWSTR     ' Form metadata that defines the form
       AllImages(any)   as IMAGES_TYPE ' All Images belonging to the Form
+      
+      ' SnapLine
+      hSnapLine(3)     as HWND      ' top, bottom, left, right (ENUM SnapLinePosition)
+      hBrushSnapLine   as HBRUSH
+      bSnapPerformed   as Boolean
+      ptCursorStart    as POINT     ' Client coordinate of cursor at time of snap
       
       ' Code document related
       ProjectFileType  As Long = FILETYPE_UNDEFINED

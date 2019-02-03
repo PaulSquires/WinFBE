@@ -41,96 +41,94 @@ END FUNCTION
 
 
 ' ========================================================================================
-' Reset the references to the closest controls to the selected control.
+' Calculate any SnapLines and show them on screen.
+' Returns True if SnapLines have been set and calling program should perform the snap.
 ' ========================================================================================
-private Function ResetClosestControls( byval pDoc as clsDocument ptr ) as long
-   pDoc->pCtrlCloseLeft   = 0
-   pDoc->pCtrlCloseTop    = 0
-   pDoc->pCtrlCloseRight  = 0
-   pDoc->pCtrlCloseBottom = 0
-   function = 0
-end function
-
-
-' ========================================================================================
-' Set the values for the blue color snap line.
-' ========================================================================================
-private Function SetBlueSnapLine( byval pDoc as clsDocument ptr, _
-                                  byval x1 as long, byval y1 as long, _
-                                  byval x2 as long, byval y2 as long _
-                                  ) as long
-   if pDoc = 0 THEN exit function
-   pDoc->ptBlueStart.x = x1
-   pDoc->ptBlueStart.y = y1
-   pDoc->ptBlueEnd.x   = x2
-   pDoc->ptBlueEnd.y   = y2
-   function = 0
-end function
-
-      
-' ========================================================================================
-' Get the closest controls pointer to the current active control.
-' ========================================================================================
-private Function SetClosestControls( byval pDoc as clsDocument ptr, _
-                                     byval pCtrlActive as clsControl ptr _
-                                     ) As clsControl ptr
+private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
+                                   byval pCtrlActive as clsControl ptr, _
+                                   byval ptCursor as POINT, _
+                                   byref xDelta as long, _
+                                   byref yDelta as long _
+                                   ) As long
+                               
+   ' Incoming ptCursor is in client coordinates
+   
    dim pCtrl as clsControl ptr
-   dim as clsControl ptr pCtrlLeft, pCtrlTop, pCtrlRight, pCtrlBottom
-   dim as long nLeft, nTop, nRight = 9999999, nBottom = 9999999
-   dim as RECT rc, rcClient, rcActive, rcDest, rcTop, rcLeft, rcRight, rcBottom
+   dim as RECT rc, rcClient, rcIntersect, rcActive
    
-   ResetClosestControls(pDoc)
+   dim as RECT rcTest1   ' the hit area for the control being tested
+   dim as RECT rcTest2   ' the hit area for the active control 
+    
+   dim as long HitPixels = AfxScaleY(8)
    
-   GetClientRect(pDoc->hWndForm, @rcClient)
-   GetWindowRect(pDoc->pCtrlAction->hWindow, @rcActive)
-   MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rcActive), 2)
+   dim as Boolean bHitTop
+   dim as RECT rcSnapTop
+   dim as long nShowWindow
+   dim as long nCursorDistance
+   dim as long nSnapTop
    
-   ' Define the rectangle search areas based on the active control
-   SetRect(@rcLeft, 0, rcActive.top, rcActive.left, rcActive.bottom)
-   SetRect(@rcTop, rcActive.left, 0, rcActive.right, rcActive.top)
-   SetRect(@rcRight, rcActive.right, rcActive.top, rcClient.right, rcActive.bottom)
-   SetRect(@rcBottom, rcActive.left, rcActive.bottom, rcClient.bottom, rcActive.right)
-   
+   ' Get the rectangle of the current active control being moved or sized 
+   GetClientRect( pDoc->hWndForm, @rcClient )
+   GetWindowRect( pDoc->pCtrlAction->hWindow, @rcActive )
+   MapWindowPoints( 0, pDoc->hWndForm, cast(point ptr, @rcActive), 2 )
+    
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
       if pCtrl->ControlType = CTRL_FORM then continue for
       if pCtrl->IsSelected = true THEN continue for
       if pCtrl = pCtrlActive THEN continue for
+       
+      ' Get the control rectangle to test
+      GetWindowRect( pCtrl->hWindow, @rc )
+      MapWindowPoints( 0, pDoc->hWndForm, cast(point ptr, @rc), 2 )
       
-      GetWindowRect(pCtrl->hWindow, @rc)
-      MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
+      ' TOP TEST
+      SetRect( @rcTest1, 0, rc.top - HitPixels, rcClient.right, rc.top + HitPixels )
+      SetRect( @rcTest2, 0, rcActive.top, rcClient.right, rcActive.top + 1)
+      if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
+         bHitTop = true
+         if IsRectEmpty( @rcSnapTop ) then
+            SetRect( @rcSnapTop, rcActive.left, rc.top - AfxScaleY(1), rcActive.right, rc.top )
+         end if
+         if rc.left < rcSnapTop.left then rcSnapTop.left = rc.left
+         if rc.right > rcSnapTop.right then rcSnapTop.right = rc.right
+         nSnapTop = rc.top
+      end if
       
-      ' LEFT
-      if IntersectRect(@rcDest, @rcLeft, @rc) then
-         if (rc.right > nLeft) THEN
-            nLeft = rc.right: pCtrlLeft = pCtrl
-         END IF
-      end if
-      ' TOP
-      if IntersectRect(@rcDest, @rcTop, @rc) then
-         if (rc.bottom > nTop) THEN
-            nTop = rc.bottom: pCtrlTop = pCtrl
-         END IF
-      end if
-      ' RIGHT
-      if IntersectRect(@rcDest, @rcRight, @rc) then
-         if (rc.left < nRight) THEN
-            nRight = rc.left: pCtrlRight = pCtrl
-         END IF
-      end if
-      ' BOTTOM
-      if IntersectRect(@rcDest, @rcBottom, @rc) then
-         if (rc.top < nBottom) THEN
-            nBottom = rc.top: pCtrlBottom = pCtrl
-         END IF
-      end if
    next
-   
-   pDoc->pCtrlCloseLeft   = pCtrlLeft
-   pDoc->pCtrlCloseTop    = pCtrlTop
-   pDoc->pCtrlCloseRight  = pCtrlRight
-   pDoc->pCtrlCloseBottom = pCtrlBottom
 
+    
+   if bHitTop then
+      ' If the snap has not performed then do it now and save the current screen
+      ' cursor position.
+      if pDoc->bSnapPerformed = false then
+         pDoc->bSnapPerformed = true
+         pDoc->ptCursorStart = ptCursor
+         yDelta = nSnapTop - rcActive.top 
+      else
+         ' A previous SnapLine action has occurred and the control is still snapped
+         ' to the snapline. Need to test if the cursor has moved far enough outside
+         ' the capture area to free the control from the snap.
+         nCursorDistance = ( ptCursor.y - pDoc->ptCursorStart.y )
+         if abs(nCursorDistance) > HitPixels then
+            pDoc->bSnapPerformed = false
+            yDelta = nCursorDistance
+         else
+            ' We are still snapped and still within the snap area. Therefore, do not
+            ' allow the control to move by setting YDelta to zero.
+            yDelta = 0
+         end if
+      end if
+   end if   
+   
+   nShowWindow = iif( bHitTop, SWP_SHOWWINDOW, SWP_HIDEWINDOW )
+   if pDoc->bSnapPerformed then nShowWindow = SWP_SHOWWINDOW
+   
+   SetWindowPos( pDoc->hSnapLine( SnapLinePosition.top ), HWND_TOP, _
+                 rcSnapTop.left, rcSnapTop.top, _
+                 rcSnapTop.right - rcSnapTop.left, rcSnapTop.bottom - rcSnapTop.top, _
+                 nShowWindow )
+   
    function = 0
 end function
 
@@ -439,8 +437,6 @@ public function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
    
    SetCapture(hwnd)
 
-   ResetClosestControls(pDoc)
-
 
    ' #1: Determine if a grab handle has been clicked on
    pDoc->GrabHit = SetGrabHandleMouseCursor(pDoc, pt.x, pt.y, pCtrl)
@@ -480,7 +476,6 @@ public function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
             else
                pDoc->pCtrlAction = pCtrl
                pDoc->bMoving = true
-               SetClosestControls( pDoc, pCtrl)
             END IF
          END IF
          pDoc->Controls.SetActiveControl( iif(pCtrl->IsSelected, hWndCtrl, 0) )
@@ -515,8 +510,12 @@ public function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    
    dim as Rect rcIntersect, rcLasso, rcCtrl
    
-   ResetClosestControls(pDoc)
+   ' Hide any visible SnapLines
+   for i as long = 0 to 3
+      ShowWindow( pDoc->hSnapLine(i), SW_HIDE )
+   next
 
+   
    ' Hide any previous lasso (and select controls)
    if gLasso.IsActive THEN 
       dim pCtrl as clsControl ptr
@@ -563,7 +562,6 @@ public function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    pDoc->bMoving  = false
    pDoc->pCtrlAction = 0
    
-   SetBlueSnapLine(pDoc, -1, -1, -1, -1)
    SetActiveToolboxControl(CTRL_POINTER)
    SetMouseCursor
    
@@ -574,6 +572,7 @@ public function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    
    function = 0
 end function
+
 
 ' ========================================================================================
 ' Handle WM_RBUTTONDOWN messages for the Form and Frame windows
@@ -643,7 +642,6 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       SetMouseCursor
    end if
    
-   SetBlueSnapLine(pDoc,-1,-1,-1,-1)
    
    if pDoc->bSizing THEN
 
@@ -708,55 +706,9 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       DisplayPropertyList(pDoc)
       
    elseif pDoc->bMoving then
-      ' Iterate controls to determine if we can snap to another control
-      dim as long nDirection
-      dim as RECT rcActive, rc
-      dim as Boolean bSnap
       
-'      SetClosestControls( pDoc, pDoc->pCtrlAction)
-
-'      GetWindowRect(pDoc->pCtrlAction->hWindow, @rcActive)
-'      MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rcActive), 2)
-
-'      if yDelta < 0 THEN nDirection = DIRECTION_TOP
-'      if yDelta > 0 THEN nDirection = DIRECTION_BOTTOM
-       
-'      SetBlueSnapLine(pDoc, -1, -1, -1, -1)
-
-'      if nDirection = DIRECTION_TOP then
-
-'         if pDoc->SnapUpWait <> 0 THEN 
-'            pDoc->SnapUpWait = pDoc->SnapUpWait - abs(yDelta)
-'            pDoc->ptPrev.x = pt.x: pDoc->ptPrev.y = pt.y
-'            if pDoc->SnapUpWait > 0 then exit function
-'            pDoc->SnapUpWait = 0
-'         END IF
-
-'         pCtrl = pDoc->pCtrlCloseTop
-'         if cbool(pCtrl <> 0) andalso (bSnap = false) THEN
-'            GetWindowRect(pCtrl->hWindow, @rc)
-'            MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
-'            if rcActive.top <= rc.top + 5 THEN 
-'               yDelta = (rc.top - rcActive.top): bSnap = true
-'            end if   
-'         END IF
-'         pCtrl = pDoc->pCtrlCloseLeft
-'         if cbool(pCtrl <> 0) andalso (bSnap = false) THEN
-'            GetWindowRect(pCtrl->hWindow, @rc)
-'            MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
-'            if (rcActive.top > rc.top) andalso (rcActive.top <= rc.top + 5) THEN 
-'               yDelta = (rc.top - rcActive.top): bSnap = true
-'               pDoc->SnapUpWait = abs(yDelta)
-'               SetBlueSnapLine(pDoc, rc.left, rc.top, rcActive.left, rcActive.top)
-'            end if
-'         END IF
-'      end if
-          
-'      if nDirection = DIRECTION_BOTTOM then
-''            ? "BOTTOM"
-'      end if
-             
-
+      ' Determine if snap to Snaplines
+      PerformSnapLines( pDoc, pDoc->pCtrlAction, pt, xDelta, yDelta )
       
       ' Move the control to its new position
       for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
@@ -765,8 +717,10 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
             if IsControlLocked(pDoc, pCtrl) then continue for
             GetWindowRect(pCtrl->hWindow, @pDoc->rcSize)
             MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pDoc->rcSize), 2)
+      
             pDoc->rcSize.left  = pDoc->rcSize.left + xDelta
             pDoc->rcSize.top   = pDoc->rcSize.top + yDelta
+            
             ' Ensure that the rect is unscaled
             SetRect(@pDoc->rcSize, pWindow->UnScaleX(pDoc->rcSize.Left), pWindow->UnScaleY(pDoc->rcSize.Top), _
                                    pWindow->UnScaleX(pDoc->rcSize.Right), pWindow->UnScaleY(pDoc->rcSize.Bottom))
@@ -803,7 +757,6 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
 END FUNCTION
 
 
-
 ' ========================================================================================
 ' Process WM_PAINT message for Visual Designer Form
 ' ========================================================================================
@@ -822,14 +775,8 @@ private Function DesignerForm_OnPaint( ByVal HWnd As HWnd) As LRESULT
 
    dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
    if pDoc THEN
-      ' Draw any blue snap lines
-      SelectObject(hDC, hPen)
-      MoveToEx(hDC, pDoc->ptBlueStart.x, pDoc->ptBlueStart.y, 0)
-      LineTo(hDC, pDoc->ptBlueEnd.x, pDoc->ptBlueStart.y)
-      
       ' Draw the control's grab handles 
       DrawGrabHandles(hDC, pDoc, false)
-
    end if   
 
    RestoreDC hDC, -1 
@@ -915,6 +862,7 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
          END IF
          Function = TRUE: Exit Function
 
+
       Case WM_NCHITTEST
          ' Catch certain critical mouseover points on the form so we can stop processing them.
          dim as LRESULT nHitTest = DefWindowProc(hWnd, uMsg, wParam, lParam)
@@ -931,9 +879,20 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
          Function = nHitTest    ' Return the default code from the default window handler.
          Exit Function
                               
+
       case WM_CTLCOLORSTATIC
-         ' Colors for Label controls are set in WM_DRAWITEM
+         ' Colors for WinFormsX Label controls are set in WM_DRAWITEM
+         
+         ' SnapLines labels have Blue back brush
+         dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
+         if pDoc THEN 
+            if pDoc->hBrushSnapLine = 0 then 
+               pDoc->hBrushSnapLine = CreateSolidBrush( BGR(128,0,128) )  ' purple
+            end if
+            Return Cast(LRESULT, pDoc->hBrushSnapLine)
+         end if
                
+
       case WM_CTLCOLOREDIT, WM_CTLCOLORBTN, WM_CTLCOLORLISTBOX 
          ' wParam: HDC of the control. 
          ' lParam: Handle to the control.
@@ -959,6 +918,7 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
             end if   
          end if
    
+
       case WM_DRAWITEM
          ' Label controls are OwnerDraw
          dim lpdis As DRAWITEMSTRUCT Ptr = cast( DRAWITEMSTRUCT Ptr, lParam )

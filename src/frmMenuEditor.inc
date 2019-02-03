@@ -662,7 +662,7 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    frmMenuEditor_DisplayMenuItem
    
    ' Process Windows messages
-   Function = pWindow->DoEvents(SW_SHOW)
+   Function = pWindow->DoEvents( SW_SHOW )
    
    ' Delete the frmMenuEditor CWindow class manually allocated memory 
    Delete pWindow

@@ -46,6 +46,9 @@ Destructor clsDocument
             this.Controls.Remove(pCtrl)
          NEXT
       loop   
+      for i as long = 0 to 3
+         DestroyWindow(this.hSnapLine(i))
+      next
       DestroyWindow(this.hWndForm)
       DestroyWindow(this.hWndFrame)
       DestroyWindow(this.hWndDesigner)
@@ -164,6 +167,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
       SetRect(@rc, 10, 10, 510, 310)
       pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
    end if
+   
    
    function = this.hWindow(0)
 end function

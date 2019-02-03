@@ -872,6 +872,14 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       pDoc->hFontFakeMenu = CreateFontIndirect(@ncm.lfMenuFont)
       SendMessage( pDoc->hWndFakeMenu, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, TRUE))
    
+      ' Create the four SnapLines 
+      for i as long = 0 to 3
+         pDoc->hSnapLine(i) = _
+               pForm->AddControl("LABEL", pDoc->hWndForm, IDC_LBLSNAPLINE, "", 0, 0, 0, 0, _
+               WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+      next
+
+   
    else
       if pWindow = 0 THEN exit function
       wszDefaultControlName = GenerateDefaultControlName(pDoc, ControlType)

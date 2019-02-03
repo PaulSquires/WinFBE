@@ -53,28 +53,28 @@ end function
 ' ========================================================================================
 private Function frmStatusBarEditor_PositionWindows() As LRESULT
    
-   Dim As HWnd hTabCtl = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TABCONTROL )
-   dim as long nCurSel = TabCtrl_GetCurSel( hTabCtl )
+'   Dim As HWnd hTabCtl = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TABCONTROL )
+'   dim as long nCurSel = TabCtrl_GetCurSel( hTabCtl )
 
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LABEL1), _
-               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LABEL2), _
-               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOSTYLE), _
-               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTSIMPLETEXT), _
-               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LABEL1), _
+'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LABEL2), _
+'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOSTYLE), _
+'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTSIMPLETEXT), _
+'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
 
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS), _
-               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDINSERT), _
-               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDDELETE), _
-               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDUP), _
-               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDDOWN), _
-               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS), _
+'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDINSERT), _
+'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDDELETE), _
+'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDUP), _
+'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
+'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDDOWN), _
+'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
    
    Function = 0
 End Function
@@ -240,21 +240,21 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
 '            if nCurSel > -1 then gConfig.ToolsTemp(nCurSel).Action = ComboBox_GetCurSel(hwndCtl) 
 '         END IF
 
-      case IDC_FRMSTATUSBAREDITOR_CMDUP
+      case IDC_FRMSTATUSBAREDITOR_CMDPANELUP
          if codeNotify = BN_CLICKED THEN
             if nCurSel > 0 THEN
                frmStatusBarEditor_SwapListboxItems(nCurSel, nCurSel-1)
             END IF
          end if
 
-      case IDC_FRMSTATUSBAREDITOR_CMDDOWN
+      case IDC_FRMSTATUSBAREDITOR_CMDPANELDOWN
          if codeNotify = BN_CLICKED THEN
             if nCurSel < ListBox_GetCount(hList1)-1 THEN
                frmStatusBarEditor_SwapListboxItems(nCurSel, nCurSel+1)
             END IF
          end if
 
-      case IDC_FRMSTATUSBAREDITOR_CMDINSERT
+      case IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT
          if codeNotify = BN_CLICKED THEN
 '            if ubound(gConfig.ToolsTemp) = -1 THEN
 '               redim gConfig.ToolsTemp(0)
@@ -287,7 +287,7 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
 '            SetFocus GetDlgItem(HWND, IDC_FRMSTATUSBAREDITOR_TXTTOOLNAME)
          end if
 
-      case IDC_FRMSTATUSBAREDITOR_CMDDELETE
+      case IDC_FRMSTATUSBAREDITOR_CMDPANELDELETE
          if codeNotify = BN_CLICKED THEN
             if nCurSel > -1  THEN
 '               if MessageBox( HWND, L(300, "Are you sure you want to delete this user tool?"), L(276,"Confirm"), _
@@ -347,9 +347,9 @@ private Function frmStatusBarEditor_OnNotify( ByVal HWnd As HWnd, _
    Select Case pNMHDR->code 
       
       Case TCN_SELCHANGE
-         if id = IDC_FRMSTATUSBAREDITOR_TABCONTROL then
-            frmStatusBarEditor_PositionWindows
-         end if
+'         if id = IDC_FRMSTATUSBAREDITOR_TABCONTROL then
+'            frmStatusBarEditor_PositionWindows
+'         end if
    
    end select
    
@@ -408,38 +408,27 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    dim hCtrl as HWnd
    dim wszImage as wstring * 100
    
+
    '  Create the main window and child controls
    Dim pWindow as CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
-
+   
    Dim As HWnd hForm = _
-   pWindow->Create(hWndParent, L(314,"Statusbar Editor"), _
-        @frmStatusBarEditor_WndProc, 0, 0, 683, 465, _
+   pWindow->Create( hWndParent, L(314,"Statusbar Editor"), _
+        @frmStatusBarEditor_WndProc, 0, 0, 408, 380, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(677, 436)
+   pWindow->SetClientSize(408, 380)
    pWindow->Center
-
-   Dim As HWnd hTabCtl = _ 
-        pWindow->AddControl("TABCONTROL", , IDC_FRMSTATUSBAREDITOR_TABCONTROL, "", 4, 4, 669, 24, _
-        WS_CHILD Or WS_VISIBLE or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
-        TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING )
         
-   TabCtrl_AddTab( hTabCtl, 0, L(235,"General") )
-   TabCtrl_AddTab( hTabCtl, 0, L(236,"Panels") )
+   HWND_FRMSTATUSBAREDITOR = hForm
 
-   pWindow->AddControl("LISTBOX", , IDC_FRMSTATUSBAREDITOR_LSTPANELS, "", 9, 34, 218, 338, _
+   pWindow->AddControl("LISTBOX", , IDC_FRMSTATUSBAREDITOR_LSTPANELS, "", 21, 14, 365, 84, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDINSERT, L(281, "Insert"), 8, 388, 74, 28, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDDELETE, L(282, "Delete"), 87, 388, 74, 28, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   
+
    hCtrl = _
-   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMSTATUSBAREDITOR_CMDUP, "", 166, 388, 28, 28, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELUP, "", 21, 102, 24, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWUP", "IMAGE_ARROWUP16")
@@ -448,7 +437,7 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
          IF hBitmap THEN DeleteObject(hBitmap)
 
    hCtrl = _
-   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMSTATUSBAREDITOR_CMDDOWN, "", 199, 388, 28, 28, _
+   pWindow->AddControl("BITMAPBUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELDOWN, "", 48, 102, 24, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or BS_BITMAP Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER Or LR_DEFAULTCOLOR Or LR_LOADMAP3DCOLORS Or LR_LOADTRANSPARENT Or LR_SHARED, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    wszImage = iif(pWindow->DPI > 96, "IMAGE_ARROWDOWN", "IMAGE_ARROWDOWN16")
@@ -456,111 +445,94 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT, L(281, "Insert"), 77, 102, 70, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_FLAT Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELDELETE, L(282, "Delete"), 152, 102, 70, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_FLAT Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL1, L(237,"Style") & ":", 230, 25, 95, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL1, L(150,"Text") & ":", 21, 135, 93, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   dim as HWND hCombo = _
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOSTYLE, "", 334, 22, 305, 22, _
-        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   ComboBox_AddString( hCombo, @L(245,"Normal") )
-   ComboBox_AddString( hCombo, @L(246,"Simple") )
-   ComboBox_SetCurSel( hCombo, 0 )
-   
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL2, L(238,"Simple Text") & ":", 230, 50, 95, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTSIMPLETEXT, "", 334, 47, 267, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTTEXT, "", 114, 134, 272, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-'   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDBROWSEEXE, "...", 610, 46, 30, 23, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL2, L(235,"Tooltip Text") & ":", 21, 160, 93, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTTOOLTIP, "", 114, 158, 272, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL3, L(236,"Alignment") & ":", 21, 194, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT, "", 114, 190, 107, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL4, L(237,"Style") & ":", 21, 220, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOSTYLE, "", 114, 217, 107, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(238,"Bevel") & ":", 21, 247, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBEVEL, "", 114, 244, 107, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL6, L(239,"Autosize") & ":", 21, 275, 93, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE, "", 114, 271, 107, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL7, L(245,"Minimum Width") & ":", 21, 301, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH, "", 114, 298, 107, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+
+   pWindow->AddControl("GROUPBOX", , IDC_FRMSTATUSBAREDITOR_FRAME1, L(246,"Image"), 242, 190, 144, 128, _
+        WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
+        WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
+
+
+'   pWindow->AddControl("BUTTON", pWindow->hWindow, IDC_STATUSBAREDITOR_CMDPICSELECT, "Select", 304, 200, 48, 24, _
 '        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
 '        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL3, L(292,"Parameters") & ":", 230, 75, 95, 18, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTPARAMETERS, "", 334, 72, 305, 20, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
-'        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL4, "<P> Project Name  <S> Main Source File  <W> Current Word  <E> Exe/DLL Name", 334, 101, 302, 36, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(293,"Working Folder") & ":", 230, 177, 95, 18, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTWORKINGFOLDER, "", 334, 174, 267, 20, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
-'        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-'   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDBROWSEFOLDER, "...", 610, 173, 30, 23, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL6, L(294,"Accelerator") & ":", 230, 205, 95, 18, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKCTRL, "Ctrl", 335, 202, 48, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKALT, "Alt", 391, 202, 42, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKSHIFT, "Shift", 441, 202, 48, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL7, "Key", 559, 204, 38, 18, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTKEY, "", 498, 201, 52, 20, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
-'        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKPROMPT, L(295,"Prompt for confirmation when Tool is invoked"), 334, 259, 347, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKMINIMIZED, L(296,"Run minimized"), 334, 281, 214, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKWAIT, L(297,"Wait for Tool to complete before continuing"), 334, 303, 344, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKDISPLAYMENU, L(299,"Display this item in the editor menu"), 334, 325, 344, 19, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOACTION, "", 334, 228, 308, 22, _
-'        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
-'        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL8, L(298,"Action:"), 230, 232, 95, 18, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL9, "", 238, 370, 425, 3, _
-'        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDOK, L(0,"OK"), 509, 388, 74, 28, _
+'   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_STATUSBAREDITOR_PICICON, "", 250, 220, 32, 32, _
+'        WS_CHILD Or WS_BORDER Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_ICON Or SS_NOTIFY Or LR_SHARED, _
+'        )
+
+
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDOK, L(0,"OK"), 231, 333, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 591, 388, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 312, 333, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   HWND_FRMSTATUSBAREDITOR = hForm
 
-'   ' Copy all of the Panels to the PanelsTemp array because we will work with 
-'   ' temporary copies until the user hits OK.
-'   redim gConfig.ToolsTemp(ubound(gConfig.Tools))
-'   for i as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
-'      gConfig.ToolsTemp(i) = gConfig.Tools(i)   
-'   NEXT
-'   frmUserTools_LoadListBox(hForm)
-
-   dim hList as hwnd = GetDlgItem(hForm, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
-   ListBox_SetCurSel( hList, 0 )
-   TabCtrl_SetCurSel( hTabCtl, 0 )
-   frmStatusBarEditor_PositionWindows()
-   frmStatusBarEditor_SetTextboxes()
-   SetFocus hList
+'   dim hList as hwnd = GetDlgItem(hForm, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+'   ListBox_SetCurSel( hList, 0 )
+'   TabCtrl_SetCurSel( hTabCtl, 0 )
+'   frmStatusBarEditor_PositionWindows()
+'   frmStatusBarEditor_SetTextboxes()
+'   SetFocus hList
 
    ' Process Windows messages
-   Function = pWindow->DoEvents(SW_SHOW)
+   Function = pWindow->DoEvents( SW_SHOW )
    
    ' Delete the frmStatusBarEditor CWindow class manually allocated memory 
    Delete pWindow

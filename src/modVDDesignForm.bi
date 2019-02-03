@@ -13,14 +13,6 @@
 
 #pragma once
 
-' Directions when determining next closest control pointer
-ENUM
-   DIRECTION_TOP = 1
-   DIRECTION_LEFT
-   DIRECTION_RIGHT
-   DIRECTION_BOTTOM
-end enum   
-
 '  Grab handles (clockwise starting at top left corner)
 enum
    GRAB_NOHIT = 0
