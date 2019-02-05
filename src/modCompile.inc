@@ -949,6 +949,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
    If gApp.IsProjectActive Then
+      dim as long nFileCount   ' used to calculate when to fire an AfxDoEvents
       pDoc = gApp.pDocList
       do until pDoc = 0
          If pDoc->ProjectFileType = FILETYPE_MODULE Then
@@ -965,11 +966,14 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
             If (AfxFileTimeToVariantTime(ft1) > AfxFileTimeToVariantTime(ft2)) or _
                (wID = IDM_REBUILDALL)  Then
 
+               nFileCount = nFileCount + 1
+               if (nFileCount mod 5) = 0 then AfxDoEvents
+               
                wst = L(203, "Compiling") + "... " + AfxStrPathname("NAMEX", pDoc->DiskFilename) 
                SetCompileStatusBarMessage( wst, 0 )
  
                wszCommand = gCompile.CompilerPath
-               wszParams = " -c " + wDQ + pDoc->DiskFilename + wDQ + _
+               wszParams = " -c -b " + wDQ + pDoc->DiskFilename + wDQ + _
                            " -v -o " + wDQ + wszTemp + wDQ 
                RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
                gCompile.wszFullCommandLine = wszCommand & " " & wszParams

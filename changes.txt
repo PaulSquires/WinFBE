@@ -1,6 +1,7 @@
 Version 1.9.1
 - Added: PictureBox autocomplete popup properties.
 - Added: Some missing Button control Image related autocomplete popup properties.
+- Added: The -b compile flag when compiling Modules. This allows non *.bas files to be compiled. 
 - Changed: Updated Italian language file thanks to Massimiliano.
 - Fixed: Regression from 1.9.0. Frame BackColor property inadvertantly changed to BackColorHot.
 

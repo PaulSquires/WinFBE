@@ -102,10 +102,10 @@ Type clsDocument
       AllImages(any)   as IMAGES_TYPE ' All Images belonging to the Form
       
       ' SnapLine
-      hSnapLine(3)     as HWND      ' top, bottom, left, right (ENUM SnapLinePosition)
       hBrushSnapLine   as HBRUSH
-      bSnapPerformed   as Boolean
-      ptCursorStart    as POINT     ' Client coordinate of cursor at time of snap
+      hSnapLine(3)     as HWND      ' top, bottom, left, right (ENUM SnapLinePosition)
+      bSnapActive(3)   as Boolean
+      ptCursorStart(3) as POINT     ' Client coordinate of cursor at time of snap
       
       ' Code document related
       ProjectFileType  As Long = FILETYPE_UNDEFINED
