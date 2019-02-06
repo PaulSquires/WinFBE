@@ -125,7 +125,7 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
       SetRect( @rcTest1, rc.right - HitPixels, 0, rc.right + HitPixels, rcClient.bottom )
       SetRect( @rcTest2, rcActive.right, 0, rcActive.right + 1, rcClient.bottom )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHitLeft = true
+         bHitRight = true
          if IsRectEmpty( @rcSnapRight ) then
             SetRect( @rcSnapRight, rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
          end if
