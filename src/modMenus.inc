@@ -190,6 +190,20 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNTOPS, L(319,"Tops")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNMIDDLES, L(320,"Middles")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNBOTTOMS, L(321,"Bottoms")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(265,"Horizontal Spacing")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZEQUAL, L(329,"Make Equal")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZINCREASE, L(330,"Increase")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZDECREASE, L(331,"Decrease")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_HORIZREMOVE, L(349,"Remove")
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(284,"Vertical Spacing")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTEQUAL, L(329,"Make Equal")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTINCREASE, L(330,"Increase")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTDECREASE, L(331,"Decrease")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTREMOVE, L(349,"Remove")
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same Size")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEWIDTHS, L(323,"Widths")
@@ -367,9 +381,22 @@ public Function frmMain_ChangeTopMenuStates() As Long
             for idMenu = IDM_UNDO to IDM_FUNCTIONLIST
                EnableMenuItem( hMenu, idMenu, MF_GRAYED)
             NEXT
+            ' Only re-enable the cut/copy if an actual control is selected.
             if pDoc->Controls.SelectedControlsCount > 0 THEN
                EnableMenuItem hMenu, IDM_CUT, MF_BYCOMMAND Or MF_ENABLED
                EnableMenuItem hMenu, IDM_COPY, MF_BYCOMMAND Or MF_ENABLED
+            END IF
+            ' Disable Align, Horiz, Vert, and Same Size if less than 2 controls are selected.
+            if pDoc->Controls.SelectedControlsCount < 2 THEN
+               for i as long = IDM_ALIGNLEFTS to IDM_SAMEBOTH
+                  EnableMenuItem hMenu, i, MF_BYCOMMAND Or MF_GRAYED
+               next
+            END IF
+            ' Disable Center in Form if no controls are selected
+            if pDoc->Controls.SelectedControlsCount = 0 THEN
+               for i as long = IDM_CENTERHORIZ to IDM_CENTERBOTH
+                  EnableMenuItem hMenu, i, MF_BYCOMMAND Or MF_GRAYED
+               next
             END IF
             EnableMenuItem hMenu, IDM_PASTE, MF_BYCOMMAND Or MF_ENABLED
             EnableMenuItem hMenu, IDM_SELECTALL, MF_BYCOMMAND Or MF_ENABLED

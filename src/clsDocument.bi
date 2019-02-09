@@ -54,14 +54,6 @@ type IMAGES_TYPE
    pDoc         as clsDocument_ ptr   ' backpointer to pDoc in case search on wszImageName performed.
 end type
 
-enum SnapLinePosition
-   top = 0
-   bottom
-   left
-   right
-end enum
-
-
 Type clsDocument
    Private:
       ' 2 Scintilla direct pointers to accommodate split editing

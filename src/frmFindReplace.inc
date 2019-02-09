@@ -415,7 +415,7 @@ private Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
    GetWindowRect(hCtl, @rc)
    MapWindowPoints( HWND_DESKTOP, HWND, CAST(LPPOINT, @rc), 2)
    rc.right = rc.right + pWindow->ScaleX(44)
-   FillRect(hDC, @rc, cast(HBRUSH, COLOR_WINDOW + 1))
+   FillRect( hDC, @rc, GetSysColorBrush(COLOR_WINDOW) )
    
  
    ' Outline the dialog with a dull gray pen
@@ -465,7 +465,6 @@ private Function frmFindReplace_OnPaint( ByVal HWnd As HWnd) As LRESULT
 
    DeletePen(hPen)
    RestoreDC hDC, -1 
-   
    EndPaint hWnd, @ps
    
    Function = 0
@@ -528,6 +527,27 @@ End Function
 
 
 ' ========================================================================================
+' frmFindReplace_PositionWindow
+' ========================================================================================
+public Function frmFindReplace_PositionWindow() As LRESULT
+
+   if IsWindow( HWND_FRMFINDREPLACE ) = 0 then exit function
+
+   Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr( HWND_FRMFINDREPLACE )
+   if pWindow = 0 THEN exit function
+
+   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
+   dim as RECT rc
+   GetWindowRect( hComboFunctions, @rc )
+   SetWindowPos HWND_FRMFINDREPLACE, HWND_TOP, _
+                  rc.right - AfxGetWindowWidth(HWND_FRMFINDREPLACE) - pWindow->ScaleX(50), _
+                  rc.bottom + pWindow->ScaleY(2), _
+                  0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOACTIVATE
+   function = 0
+end function
+
+
+' ========================================================================================
 ' frmFindReplace Window procedure
 ' ========================================================================================
 private Function frmFindReplace_WndProc( ByVal HWnd   As HWnd, _
@@ -573,7 +593,7 @@ public Function frmFindReplace_Show( ByVal hWndParent As HWnd, _
       AfxRedrawWindow(HWND_FRMFINDREPLACE)
       Exit Function
    End If
-
+   
    dim as RECT rc
    dim as long frmWidth   = 435
    dim as long frmHeight  = 64
@@ -607,8 +627,8 @@ public Function frmFindReplace_Show( ByVal hWndParent As HWnd, _
    
    HWND_FRMFINDREPLACE = _
    pWindow->Create(hWndParent, "FINDREPLACE", @frmFindReplace_WndProc, 0, 0, 0, 0, _
-        WS_POPUP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
-        WS_EX_CONTROLPARENT or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+        WS_POPUP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _   
+        WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->SetClientSize(frmWidth, frmHeight)
 
    DIM pImageCtx AS CImageCtx ptr
@@ -720,14 +740,7 @@ public Function frmFindReplace_Show( ByVal hWndParent As HWnd, _
 
    frmFindReplace_ShowControls
 
-   ' Position the window to the top right of the active edit window below 
-   ' the fFiles/Functions combos.
-   dim as HWND hComboFunctions = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS )
-   GetWindowRect( hComboFunctions, @rc )
-   SetWindowPos HWND_FRMFINDREPLACE, HWND_TOP, _
-                  rc.right - pWindow->ScaleX(frmWidth + 50), _
-                  rc.bottom + pWindow->ScaleY(2), _
-                  0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOACTIVATE
+   frmFindReplace_PositionWindow
    
    hCtl = GetDlgItem( HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND )
    if len(AfxGetWindowText(hCtl)) then Edit_SetSel(hCtl, 0, -1)

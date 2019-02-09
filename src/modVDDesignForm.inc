@@ -61,11 +61,11 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
     
    dim as long HitPixels = AfxScaleY(8)
    
-   dim as Boolean bHitTop, bHitLeft, bHitBottom, bHitRight
-   dim as RECT rcSnapTop, rcSnapLeft, rcSnapBottom, rcSnapRight
+   dim as Boolean bHit(3)
+   dim as RECT rcSnap(3)
    dim as long nShowWindow
-   dim as long nCursorDistance
-   dim as long nSnapTop, nSnapLeft, nSnapBottom, nSnapRight
+   dim as long xCursorDistance, yCursorDistance
+   dim as long nSnap(3)
    
    ' Get the rectangle of the current active control being moved or sized 
    GetClientRect( pDoc->hWndForm, @rcClient )
@@ -86,186 +86,117 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
       SetRect( @rcTest1, 0, rc.top - HitPixels, rcClient.right, rc.top + HitPixels )
       SetRect( @rcTest2, 0, rcActive.top, rcClient.right, rcActive.top + 1 )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHitTop = true
-         if IsRectEmpty( @rcSnapTop ) then
-            SetRect( @rcSnapTop, rcActive.left, rc.top - 1, rcActive.right, rc.top )
+         bHit(SnapLinePosition.top) = true
+         if IsRectEmpty( @rcSnap(SnapLinePosition.top) ) then
+            SetRect( @rcSnap(SnapLinePosition.top), rcActive.left, rc.top - 1, rcActive.right, rc.top )
          end if
-         if rc.left < rcSnapTop.left then rcSnapTop.left = rc.left
-         if rc.right > rcSnapTop.right then rcSnapTop.right = rc.right
-         nSnapTop = rc.top
+         if rc.left < rcSnap(SnapLinePosition.top).left then rcSnap(SnapLinePosition.top).left = rc.left
+         if rc.right > rcSnap(SnapLinePosition.top).right then rcSnap(SnapLinePosition.top).right = rc.right
+         nSnap(SnapLinePosition.top) = rc.top
       end if
 
       ' BOTTOM TEST
       SetRect( @rcTest1, 0, rc.bottom - HitPixels, rcClient.right, rc.bottom + HitPixels )
       SetRect( @rcTest2, 0, rcActive.bottom, rcClient.right, rcActive.bottom + 1 )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHitBottom = true
-         if IsRectEmpty( @rcSnapBottom ) then
-            SetRect( @rcSnapBottom, rcActive.left, rc.bottom - 1, rcActive.right, rc.bottom )
+         bHit(SnapLinePosition.bottom) = true
+         if IsRectEmpty( @rcSnap(SnapLinePosition.bottom) ) then
+            SetRect( @rcSnap(SnapLinePosition.bottom), rcActive.left, rc.bottom - 1, rcActive.right, rc.bottom )
          end if
-         if rc.left < rcSnapBottom.left then rcSnapBottom.left = rc.left
-         if rc.right > rcSnapBottom.right then rcSnapBottom.right = rc.right
-         nSnapBottom = rc.bottom
+         if rc.left < rcSnap(SnapLinePosition.bottom).left then rcSnap(SnapLinePosition.bottom).left = rc.left
+         if rc.right > rcSnap(SnapLinePosition.bottom).right then rcSnap(SnapLinePosition.bottom).right = rc.right
+         nSnap(SnapLinePosition.bottom) = rc.bottom
       end if
       
       ' LEFT TEST
       SetRect( @rcTest1, rc.left - HitPixels, 0, rc.left + HitPixels, rcClient.bottom )
       SetRect( @rcTest2, rcActive.left, 0, rcActive.left + 1, rcClient.bottom )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHitLeft = true
-         if IsRectEmpty( @rcSnapLeft ) then
-            SetRect( @rcSnapLeft, rc.left - 1, rcActive.top, rc.left, rcActive.bottom )
+         bHit(SnapLinePosition.left) = true
+         if IsRectEmpty( @rcSnap(SnapLinePosition.left) ) then
+            SetRect( @rcSnap(SnapLinePosition.left), rc.left - 1, rcActive.top, rc.left, rcActive.bottom )
          end if
-         if rc.top < rcSnapLeft.top then rcSnapLeft.top = rc.top
-         if rc.bottom > rcSnapLeft.bottom then rcSnapLeft.bottom = rc.bottom
-         nSnapLeft = rc.left
+         if rc.top < rcSnap(SnapLinePosition.left).top then rcSnap(SnapLinePosition.left).top = rc.top
+         if rc.bottom > rcSnap(SnapLinePosition.left).bottom then rcSnap(SnapLinePosition.left).bottom = rc.bottom
+         nSnap(SnapLinePosition.left) = rc.left
       end if
 
       ' RIGHT TEST
       SetRect( @rcTest1, rc.right - HitPixels, 0, rc.right + HitPixels, rcClient.bottom )
       SetRect( @rcTest2, rcActive.right, 0, rcActive.right + 1, rcClient.bottom )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHitRight = true
-         if IsRectEmpty( @rcSnapRight ) then
-            SetRect( @rcSnapRight, rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
+         bHit(SnapLinePosition.right) = true
+         if IsRectEmpty( @rcSnap(SnapLinePosition.right) ) then
+            SetRect( @rcSnap(SnapLinePosition.right), rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
          end if
-         if rc.top < rcSnapRight.top then rcSnapRight.top = rc.top
-         if rc.bottom > rcSnapLeft.bottom then rcSnapRight.bottom = rc.bottom
-         nSnapRight = rc.right
+         if rc.top < rcSnap(SnapLinePosition.right).top then rcSnap(SnapLinePosition.right).top = rc.top
+         if rc.bottom > rcSnap(SnapLinePosition.right).bottom then rcSnap(SnapLinePosition.right).bottom = rc.bottom
+         nSnap(SnapLinePosition.right) = rc.right
       end if
    next
 
-    
-   if bHitTop then
-      ' If the snap has not performed then do it now and save the current screen
-      ' cursor position.
-      if pDoc->bSnapActive(SnapLinePosition.top) = false then
-         pDoc->bSnapActive(SnapLinePosition.top) = true
-         pDoc->ptCursorStart(SnapLinePosition.top) = ptCursor
-         yDelta = nSnapTop - rcActive.top 
-      else
-         ' A previous SnapLine action has occurred and the control is still snapped
-         ' to the snapline. Need to test if the cursor has moved far enough outside
-         ' the capture area to free the control from the snap.
-         nCursorDistance = ( ptCursor.y - pDoc->ptCursorStart(SnapLinePosition.top).y )
-         if abs(nCursorDistance) > HitPixels then
-            pDoc->bSnapActive(SnapLinePosition.top) = false
-            pDoc->bSnapActive(SnapLinePosition.bottom) = false
-            yDelta = nCursorDistance
+
+   for i as long = SnapLinePosition.top to SnapLinePosition.right
+
+      if bHit(i) then
+         ' If the snap has not performed then do it now and save the current screen cursor position.
+         if pDoc->bSnapActive(i) = false then
+            pDoc->bSnapActive(i) = true
+            pDoc->ptCursorStart(i) = ptCursor
+            select case i
+               case SnapLinePosition.top
+                  yDelta = nSnap(i) - rcActive.top 
+               case SnapLinePosition.left
+                  xDelta = nSnap(i) - rcActive.left 
+               case SnapLinePosition.bottom      
+                  yDelta = nSnap(i) - rcActive.bottom
+               case SnapLinePosition.right      
+                  xDelta = nSnap(i) - rcActive.right 
+            end select
+            
          else
-            ' We are still snapped and still within the snap area. Therefore, do not
-            ' allow the control to move by setting yDelta to zero.
-            yDelta = 0
+            ' A previous SnapLine action has occurred and the control is still snapped
+            ' to the snapline. Need to test if the cursor has moved far enough outside
+            ' the capture area to free the control from the snap.
+            xCursorDistance = ( ptCursor.x - pDoc->ptCursorStart(i).x )
+            yCursorDistance = ( ptCursor.y - pDoc->ptCursorStart(i).y )
+            select case i
+               case SnapLinePosition.top, SnapLinePosition.bottom
+                  if abs(yCursorDistance) > HitPixels then
+                     pDoc->bSnapActive(SnapLinePosition.top) = false
+                     pDoc->bSnapActive(SnapLinePosition.bottom) = false
+                     yDelta = yCursorDistance
+                  else
+                     ' We are still snapped and still within the snap area. Therefore, do not
+                     ' allow the control to move by setting yDelta to zero.
+                     yDelta = 0
+                  end if
+               case SnapLinePosition.left, SnapLinePosition.right     
+                  if abs(xCursorDistance) > HitPixels then
+                     pDoc->bSnapActive(SnapLinePosition.left) = false
+                     pDoc->bSnapActive(SnapLinePosition.right) = false
+                     xDelta = xCursorDistance
+                  else
+                     ' We are still snapped and still within the snap area. Therefore, do not
+                     ' allow the control to move by setting xDelta to zero.
+                     xDelta = 0
+                  end if
+            end select
+            
          end if
-      end if
-   end if   
+      end if   
+      
+      nShowWindow = iif( bHit(i), SWP_SHOWWINDOW, SWP_HIDEWINDOW )
+      if pDoc->bSnapActive(i) then nShowWindow = SWP_SHOWWINDOW
+      
+      SetWindowPos( pDoc->hSnapLine(i), HWND_TOP, _
+                    rcSnap(i).left, rcSnap(i).top, _
+                    rcSnap(i).right - rcSnap(i).left, _
+                    rcSnap(i).bottom - rcSnap(i).top, _
+                    nShowWindow )
+   next              
+      
    
-   nShowWindow = iif( bHitTop, SWP_SHOWWINDOW, SWP_HIDEWINDOW )
-   if pDoc->bSnapActive(SnapLinePosition.top) then nShowWindow = SWP_SHOWWINDOW
-   
-   SetWindowPos( pDoc->hSnapLine(SnapLinePosition.top), HWND_TOP, _
-                 rcSnapTop.left, rcSnapTop.top, _
-                 rcSnapTop.right - rcSnapTop.left, rcSnapTop.bottom - rcSnapTop.top, _
-                 nShowWindow )
-
-
-   if bHitBottom then
-      ' If the snap has not performed then do it now and save the current screen
-      ' cursor position.
-      if pDoc->bSnapActive(SnapLinePosition.bottom) = false then
-         pDoc->bSnapActive(SnapLinePosition.bottom) = true
-         pDoc->ptCursorStart(SnapLinePosition.bottom) = ptCursor
-         yDelta = nSnapBottom - rcActive.bottom
-      else
-         ' A previous SnapLine action has occurred and the control is still snapped
-         ' to the snapline. Need to test if the cursor has moved far enough outside
-         ' the capture area to free the control from the snap.
-         nCursorDistance = ( ptCursor.y - pDoc->ptCursorStart(SnapLinePosition.bottom).y )
-         if abs(nCursorDistance) > HitPixels then
-            pDoc->bSnapActive(SnapLinePosition.bottom) = false
-            pDoc->bSnapActive(SnapLinePosition.top) = false
-            yDelta = nCursorDistance
-         else
-            ' We are still snapped and still within the snap area. Therefore, do not
-            ' allow the control to move by setting yDelta to zero.
-            yDelta = 0
-         end if
-      end if
-   end if   
-
-   nShowWindow = iif( bHitBottom, SWP_SHOWWINDOW, SWP_HIDEWINDOW )
-   if pDoc->bSnapActive(SnapLinePosition.bottom) then nShowWindow = SWP_SHOWWINDOW
-   
-   SetWindowPos( pDoc->hSnapLine(SnapLinePosition.bottom), HWND_TOP, _
-                 rcSnapBottom.left, rcSnapBottom.top, _
-                 rcSnapBottom.right - rcSnapBottom.left, rcSnapBottom.bottom - rcSnapBottom.top, _
-                 nShowWindow )
-   
-
-   if bHitLeft then
-      ' If the snap has not performed then do it now and save the current screen
-      ' cursor position.
-      if pDoc->bSnapActive(SnapLinePosition.left) = false then
-         pDoc->bSnapActive(SnapLinePosition.left) = true
-         pDoc->ptCursorStart(SnapLinePosition.left) = ptCursor
-         xDelta = nSnapLeft - rcActive.left 
-      else
-         ' A previous SnapLine action has occurred and the control is still snapped
-         ' to the snapline. Need to test if the cursor has moved far enough outside
-         ' the capture area to free the control from the snap.
-         nCursorDistance = ( ptCursor.x - pDoc->ptCursorStart(SnapLinePosition.left).x )
-         if abs(nCursorDistance) > HitPixels then
-            pDoc->bSnapActive(SnapLinePosition.left) = false
-            pDoc->bSnapActive(SnapLinePosition.right) = false
-            xDelta = nCursorDistance
-         else
-            ' We are still snapped and still within the snap area. Therefore, do not
-            ' allow the control to move by setting xDelta to zero.
-            xDelta = 0
-         end if
-      end if
-   end if   
-   
-   nShowWindow = iif( bHitLeft, SWP_SHOWWINDOW, SWP_HIDEWINDOW )
-   if pDoc->bSnapActive(SnapLinePosition.left) then nShowWindow = SWP_SHOWWINDOW
-   
-   SetWindowPos( pDoc->hSnapLine(SnapLinePosition.left), HWND_TOP, _
-                 rcSnapLeft.left, rcSnapLeft.top, _
-                 rcSnapLeft.right - rcSnapLeft.left, rcSnapLeft.bottom - rcSnapLeft.top, _
-                 nShowWindow )
-
-   if bHitRight then
-      ' If the snap has not performed then do it now and save the current screen
-      ' cursor position.
-      if pDoc->bSnapActive(SnapLinePosition.right) = false then
-         pDoc->bSnapActive(SnapLinePosition.right) = true
-         pDoc->ptCursorStart(SnapLinePosition.right) = ptCursor
-         xDelta = nSnapRight - rcActive.right 
-      else
-         ' A previous SnapLine action has occurred and the control is still snapped
-         ' to the snapline. Need to test if the cursor has moved far enough outside
-         ' the capture area to free the control from the snap.
-         nCursorDistance = ( ptCursor.x - pDoc->ptCursorStart(SnapLinePosition.right).x )
-         if abs(nCursorDistance) > HitPixels then
-            pDoc->bSnapActive(SnapLinePosition.right) = false
-            pDoc->bSnapActive(SnapLinePosition.left) = false
-            xDelta = nCursorDistance
-         else
-            ' We are still snapped and still within the snap area. Therefore, do not
-            ' allow the control to move by setting xDelta to zero.
-            xDelta = 0
-         end if
-      end if
-   end if   
-   
-   nShowWindow = iif( bHitRight, SWP_SHOWWINDOW, SWP_HIDEWINDOW )
-   if pDoc->bSnapActive(SnapLinePosition.right) then nShowWindow = SWP_SHOWWINDOW
-   
-   SetWindowPos( pDoc->hSnapLine(SnapLinePosition.right), HWND_TOP, _
-                 rcSnapRight.left, rcSnapRight.top, _
-                 rcSnapRight.right - rcSnapRight.left, rcSnapRight.bottom - rcSnapRight.top, _
-                 nShowWindow )
-
    function = 0
 end function
 

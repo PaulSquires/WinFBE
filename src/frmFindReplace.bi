@@ -28,4 +28,5 @@
 
 declare function frmFindReplace_HighlightSearches() as long
 declare function frmFindReplace_ShowControls() as long
+declare Function frmFindReplace_PositionWindow() As LRESULT
 declare Function frmFindReplace_Show( ByVal hWndParent As HWnd, byval fShowReplace as BOOLEAN ) As LRESULT

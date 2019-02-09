@@ -998,12 +998,18 @@ public Function frmMain_PositionWindows() As LRESULT
          pDoc->ScrInfo.nMax  = SciExec( pDoc->hWindow(0), SCI_GETLINECOUNT, 0, 0 ) - 1    
          pDoc->ScrInfo.nPos  = SciExec( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0 )
          SetScrollInfo( pDoc->hScrollbar, SB_CTL, @pDoc->ScrInfo, TRUE )
+         
+         ' If the FiND/REPLACE window is open then ensure that it is positioned correctly
+         ' especially important if the Main window is resized.
+         frmFindReplace_PositionWindow
+         
          frmMain_SetFocusToCurrentCodeWindow
       end if
       
       AfxRedrawWindow(HWND_FRMMAIN)
 
    end if
+   
    
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
@@ -1612,11 +1618,8 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
 
       ''  SEARCH MENU              
-      Case IDM_FIND
-         frmFindReplace_Show( hEdit, false )
-      
-      Case IDM_REPLACE
-         frmFindReplace_Show( hEdit, true )
+      Case IDM_FIND, IDM_REPLACE
+         frmFindReplace_Show( hEdit, iif(id = IDM_FIND, false, true) )
       
       Case IDM_FINDINFILES
          frmFindInFiles_Show( hEdit )
@@ -2685,7 +2688,11 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_MOUSEMOVE,     frmMain_OnMouseMove)
       HANDLE_MSG (HWnd, WM_LBUTTONDBLCLK, frmMain_OnLButtonDblClk)
 
-          
+      case WM_MOVE
+         ' Ensure that if the Find/Replace dialog is open that it moves with
+         ' underlying main WinFBE window.     
+         frmFindReplace_PositionWindow
+      
       Case WM_NCACTIVATE
          ' Ensure that the caption bar for any DesignerForm retains its active 
          ' state. This looks better than having it lose and gain active colors. 
