@@ -31,6 +31,7 @@
 
 
 #include once "clsMenuItem.bi"
+#include once "clsPanelItem.bi"
 #include once "clsControl.bi"      ' Includes properties and events types
 #include once "clsCollection.bi"
 #include once "clsParser.bi"
@@ -73,6 +74,7 @@ Type clsDocument
       
       ' Visual designer related
       MenuItems(any)   as clsMenuItem
+      PanelItems(any)  as clsPanelItem
       Controls         as clsCollection
       hWndDesigner     as HWnd      ' DesignMain window (switch to this window when in design mode (versus code mode)
       hDesignTabCtrl   as HWnd      ' TabCtrl to switch between Design/Code
@@ -93,7 +95,8 @@ Type clsDocument
       wszFormMetaData  as CWSTR     ' Form metadata that defines the form
       AllImages(any)   as IMAGES_TYPE ' All Images belonging to the Form
       
-      ' SnapLine
+      ' SnapLines
+      bSnapLines       as Boolean = true  ' Enable/Disable SnapLines
       hBrushSnapLine   as HBRUSH
       hSnapLine(3)     as HWND      ' top, bottom, left, right (ENUM SnapLinePosition)
       bSnapActive(3)   as Boolean

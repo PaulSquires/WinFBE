@@ -57,7 +57,7 @@ End Function
                   
 
 ' ========================================================================================
-' Determine if a blank entry should be added to the end of the listbox.
+' Display menu information for the specified line.
 ' ========================================================================================
 private function frmMenuEditor_ListBoxLine( byval nCurSel as long ) as CWSTR
    dim as long nBullet, nDash

@@ -176,11 +176,6 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_NEWFORM, L(310,"New Form")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWTOOLBOX, L(311,"View Toolbox")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"Menu Editor") & "..."
-      '   AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Toolbar Editor") & "..."
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"Statusbar Editor") & "..."
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_IMAGEMANAGER, L(368,"Image Manager") & "..."
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(315,"Align")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNLEFTS, L(316,"Lefts")
@@ -190,6 +185,11 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNTOPS, L(319,"Tops")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNMIDDLES, L(320,"Middles")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNBOTTOMS, L(321,"Bottoms")
+         hPopUpSubMenu = CreatePopupMenu
+            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same Size")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEWIDTHS, L(323,"Widths")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEHEIGHTS, L(324,"Heights")
+               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEBOTH, L(325,"Both")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(265,"Horizontal Spacing")
@@ -205,17 +205,17 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_VERTREMOVE, L(349,"Remove")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
-            AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(322,"Make Same Size")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEWIDTHS, L(323,"Widths")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEHEIGHTS, L(324,"Heights")
-               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_SAMEBOTH, L(325,"Both")
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(332,"Center in Form")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERHORIZ, L(333,"Horizontally")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERVERT, L(334,"Vertically")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_CENTERBOTH, L(325,"Both")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_MENUEDITOR, L(312,"Menu Editor") & "..."
+      '   AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOOLBAREDITOR, L(313,"Toolbar Editor") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_STATUSBAREDITOR, L(314,"Statusbar Editor") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_IMAGEMANAGER, L(368,"Image Manager") & "..."
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_SNAPLINES, L(365,"Enable SnapLines")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_LOCKCONTROLS, L(335,"Lock Controls")
 
    hPopUpMenu = CreatePopupMenu
@@ -400,6 +400,7 @@ public Function frmMain_ChangeTopMenuStates() As Long
             END IF
             EnableMenuItem hMenu, IDM_PASTE, MF_BYCOMMAND Or MF_ENABLED
             EnableMenuItem hMenu, IDM_SELECTALL, MF_BYCOMMAND Or MF_ENABLED
+            CheckMenuItem( hMenu, IDM_SNAPLINES, MF_BYCOMMAND or iif(pDoc->bSnapLines, MF_CHECKED, MF_UNCHECKED))
             CheckMenuItem( hMenu, IDM_LOCKCONTROLS, MF_BYCOMMAND or iif(pDoc->bLockControls, MF_CHECKED, MF_UNCHECKED))
          else
             ' Code editor is active

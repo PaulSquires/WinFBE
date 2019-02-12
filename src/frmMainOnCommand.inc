@@ -130,10 +130,11 @@ private Function OnCommand_ProjectOpen( ByVal HWnd As HWnd ) As LRESULT
    Function = 0
 End Function
 
+
 ' ========================================================================================
 ' Create a new visual designer window
 ' ========================================================================================
-private Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
+public Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
    frmMain_OpenFileSafely(HWnd, _
                            True,  _   ' bIsNewFile
                            False, _   ' bIsTemplate
@@ -147,11 +148,249 @@ End Function
 
 
 ' ========================================================================================
+' Horizonal Spacing (controls on the form)
+' ========================================================================================
+private function OnCommand_DesignerHorizSpacing( byval HWND as HWND, _
+                                                 byval id as long _
+                                                 ) as LRESULT
+
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   if pDoc = 0 THEN exit function
+
+   dim pCtrlActive as clsControl ptr = pDoc->Controls.GetActiveControl()
+   if pCtrlActive = 0 THEN exit function
+
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hwnd)
+   if pWindow = 0 then exit function
+
+   dim pCtrl as clsControl ptr
+   dim as RECT rcCtrl, rcActive
+
+   dim as long NumSelected = pDoc->Controls.SelectedControlsCount 
+   dim as long nTotalRectWidth, nLeft
+   
+
+   ' Load all selected controls into array for easy processing
+   dim pCtrls( 1 to NumSelected ) as clsControl ptr
+   
+   dim as long nextCtrl = 1
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl->IsSelected THEN
+         rcCtrl = GetControlRECT(pCtrl)
+         nTotalRectWidth = nTotalRectWidth + (rcCtrl.right - rcCtrl.left)
+         pCtrls(nextCtrl) = pCtrl
+         nextCtrl = nextCtrl + 1
+      END IF
+   next
+
+   
+   ' Sort the array based on Left (small to large)(bubble sort)
+   dim done as long
+   do
+      done = 0
+      For i as long = 1 To NumSelected - 1
+         If val(GetControlProperty(pCtrls(i), "LEFT")) > val(GetControlProperty(pCtrls(i+1), "LEFT")) Then
+            Swap pCtrls(i), pCtrls(i+1)
+            done = 1
+         End If
+      Next
+    Loop Until done = 0
+    
+       
+   dim as RECT rcCtrlLeft  = GetControlRECT(pCtrls(1))
+   dim as RECT rcCtrlRight = GetControlRECT(pCtrls(NumSelected))
+   dim as long nFreeSpace = rcCtrlRight.right - rcCtrlLeft.left - nTotalRectWidth
+   dim as long nEqualSpace = nFreeSpace / (NumSelected - 1)
+
+   If id = IDM_HORIZREMOVE Then nEqualSpace = 0
+
+   ' Determine the position in the array of the active control
+   dim as long nActiveControlIndex = 0
+   for i as long = 1 to NumSelected 
+      if pCtrls(i) = pCtrlActive then 
+         nActiveControlIndex = i: exit for
+      end if
+   next 
+   
+
+   ' Adjust all of the controls to the left of the active control and then adjust
+   ' all of the controls to the right of the active control.
+   for i as long = nActiveControlIndex - 1 to 1 step -1
+      pCtrl = pCtrls(i)
+      if IsControlLocked(pDoc, pCtrl) then continue for
+      
+      ' Get coordinates of current (Left) and (Right) controls
+      rcCtrlLeft  = GetControlRECT( pCtrls(i) )
+      rcCtrlRight = GetControlRECT( pCtrls(i+1) )
+
+      select case id 
+         case IDM_HORIZEQUAL, IDM_HORIZREMOVE
+            nLeft = rcCtrlLeft.left + (rcCtrlRight.left - rcCtrlLeft.right) - nEqualSpace
+         case IDM_HORIZINCREASE
+            nLeft = rcCtrlLeft.left - 8
+         case IDM_HORIZDECREASE
+            nLeft = rcCtrlLeft.left + 8
+      end select
+
+      SetControlProperty( pCtrl, "LEFT", str(nLeft) )
+      ApplyControlProperties( pDoc, pCtrl )
+   next
+
+   for i as long = nActiveControlIndex + 1 to NumSelected
+      pCtrl = pCtrls(i)
+      if IsControlLocked(pDoc, pCtrl) then continue for
+
+      ' Get coordinates of current (Left) and (Right) controls
+      rcCtrlLeft  = GetControlRECT( pCtrls(i-1) )
+      rcCtrlRight = GetControlRECT( pCtrls(i) )
+
+      select case id 
+         case IDM_HORIZEQUAL, IDM_HORIZREMOVE
+            nLeft = rcCtrlRight.left + nEqualSpace - (rcCtrlRight.left - rcCtrlLeft.right)  
+         case IDM_HORIZINCREASE
+            nLeft = rcCtrlRight.left + 8
+         case IDM_HORIZDECREASE
+            nLeft = rcCtrlRight.left - 8
+      end select
+             
+      SetControlProperty( pCtrl, "LEFT", str(nLeft) )
+      ApplyControlProperties( pDoc, pCtrl )
+   next
+
+   
+   ' Ensure the grab handles are redrawn
+   AfxRedrawWindow(pDoc->hWndForm)
+
+   function = 0
+end function
+
+
+' ========================================================================================
+' Vertical Spacing (controls on the form)
+' ========================================================================================
+private function OnCommand_DesignerVertSpacing( byval HWND as HWND, _
+                                                byval id as long _
+                                                ) as LRESULT
+
+   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+   if pDoc = 0 THEN exit function
+
+   dim pCtrlActive as clsControl ptr = pDoc->Controls.GetActiveControl()
+   if pCtrlActive = 0 THEN exit function
+
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hwnd)
+   if pWindow = 0 then exit function
+
+   dim pCtrl as clsControl ptr
+   dim as RECT rcCtrl, rcActive
+
+   dim as long NumSelected = pDoc->Controls.SelectedControlsCount 
+   dim as long nTotalRectHeight, nTop
+   
+
+   ' Load all selected controls into array for easy processing
+   dim pCtrls( 1 to NumSelected ) as clsControl ptr
+   
+   dim as long nextCtrl = 1
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl->IsSelected THEN
+         rcCtrl = GetControlRECT(pCtrl)
+         nTotalRectHeight = nTotalRectHeight + (rcCtrl.bottom - rcCtrl.top)
+         pCtrls(nextCtrl) = pCtrl
+         nextCtrl = nextCtrl + 1
+      END IF
+   next
+
+   
+   ' Sort the array based on top (small to large)(bubble sort)
+   dim done as long
+   do
+      done = 0
+      For i as long = 1 To NumSelected - 1
+         If val(GetControlProperty(pCtrls(i), "TOP")) > val(GetControlProperty(pCtrls(i+1), "TOP")) Then
+            Swap pCtrls(i), pCtrls(i+1)
+            done = 1
+         End If
+      Next
+    Loop Until done = 0
+    
+       
+   dim as RECT rcCtrlTop    = GetControlRECT(pCtrls(1))
+   dim as RECT rcCtrlBottom = GetControlRECT(pCtrls(NumSelected))
+   dim as long nFreeSpace = rcCtrlBottom.bottom - rcCtrlTop.top - nTotalRectHeight
+   dim as long nEqualSpace = nFreeSpace / (NumSelected - 1)
+
+   If id = IDM_VERTREMOVE Then nEqualSpace = 0
+
+   ' Determine the position in the array of the active control
+   dim as long nActiveControlIndex = 0
+   for i as long = 1 to NumSelected 
+      if pCtrls(i) = pCtrlActive then 
+         nActiveControlIndex = i: exit for
+      end if
+   next 
+   
+
+   ' Adjust all of the controls above the active control and then adjust
+   ' all of the controls below the active control.
+   for i as long = nActiveControlIndex - 1 to 1 step -1
+      pCtrl = pCtrls(i)
+      if IsControlLocked(pDoc, pCtrl) then continue for
+      
+      ' Get coordinates of current (Left) and (Right) controls
+      rcCtrlTop    = GetControlRECT( pCtrls(i) )
+      rcCtrlBottom = GetControlRECT( pCtrls(i+1) )
+
+      select case id 
+         case IDM_VERTEQUAL, IDM_VERTREMOVE
+            nTop = rcCtrlTop.top + (rcCtrlBottom.top - rcCtrlTop.bottom) - nEqualSpace
+         case IDM_VERTINCREASE
+            nTop = rcCtrlTop.top - 8
+         case IDM_VERTDECREASE
+            nTop = rcCtrlTop.top + 8
+      end select
+
+      SetControlProperty( pCtrl, "TOP", str(nTop) )
+      ApplyControlProperties( pDoc, pCtrl )
+   next
+
+   for i as long = nActiveControlIndex + 1 to NumSelected
+      pCtrl = pCtrls(i)
+      if IsControlLocked(pDoc, pCtrl) then continue for
+
+      ' Get coordinates of current (Left) and (Right) controls
+      rcCtrlTop    = GetControlRECT( pCtrls(i-1) )
+      rcCtrlBottom = GetControlRECT( pCtrls(i) )
+
+      select case id 
+         case IDM_VERTEQUAL, IDM_VERTREMOVE
+            nTop = rcCtrlBottom.top + nEqualSpace - (rcCtrlBottom.top - rcCtrlTop.bottom)  
+         case IDM_VERTINCREASE
+            nTop = rcCtrlBottom.top + 8
+         case IDM_VERTDECREASE
+            nTop = rcCtrlBottom.top - 8
+      end select
+             
+      SetControlProperty( pCtrl, "TOP", str(nTop) )
+      ApplyControlProperties( pDoc, pCtrl )
+   next
+
+   
+   ' Ensure the grab handles are redrawn
+   AfxRedrawWindow(pDoc->hWndForm)
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Align controls on the form
 ' ========================================================================================
-private function OnCommand_DesignerAlign( byval HWND as HWND, _
-                                          byval id as long _
-                                          ) as LRESULT
+public function OnCommand_DesignerAlign( byval HWND as HWND, _
+                                         byval id as long _
+                                         ) as LRESULT
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
    if pDoc = 0 THEN exit function
@@ -185,7 +424,7 @@ private function OnCommand_DesignerAlign( byval HWND as HWND, _
                SetControlProperty(pCtrl, "TOP", str(rcActive.top))
                ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNRIGHTS
-               SetControlProperty(pCtrl, "LEFT", str(rcctrl.left + (rcActive.right-rcCtrl.right)) )
+               SetControlProperty(pCtrl, "LEFT", str(rcCtrl.left + (rcActive.right-rcCtrl.right)) )
                ApplyControlProperties(pDoc, pCtrl)
             case IDM_ALIGNBOTTOMS 
                SetControlProperty(pCtrl, "TOP", str(rcCtrl.top + (rcActive.bottom-rcCtrl.bottom)) )
@@ -224,9 +463,9 @@ end function
 ' ========================================================================================
 ' Center controls on the form
 ' ========================================================================================
-private function OnCommand_DesignerCenter( byval HWND as HWND, _
-                                           byval id as long _
-                                           ) as LRESULT
+public function OnCommand_DesignerCenter( byval HWND as HWND, _
+                                          byval id as long _
+                                          ) as LRESULT
 
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
    If pWindow = 0 Then Exit Function

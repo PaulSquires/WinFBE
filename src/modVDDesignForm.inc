@@ -51,6 +51,8 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                                    byref yDelta as long _
                                    ) As long
                                
+   if pDoc->bSnapLines = false then exit function
+   
    ' Incoming ptCursor is in client coordinates
    
    dim pCtrl as clsControl ptr
@@ -136,6 +138,8 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
    next
 
 
+   ' Testing Sequence
+   ' Top, Left, Bottom, Right
    for i as long = SnapLinePosition.top to SnapLinePosition.right
 
       if bHit(i) then
@@ -150,7 +154,7 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                   xDelta = nSnap(i) - rcActive.left 
                case SnapLinePosition.bottom      
                   yDelta = nSnap(i) - rcActive.bottom
-               case SnapLinePosition.right      
+               case SnapLinePosition.right
                   xDelta = nSnap(i) - rcActive.right 
             end select
             
@@ -165,6 +169,8 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                   if abs(yCursorDistance) > HitPixels then
                      pDoc->bSnapActive(SnapLinePosition.top) = false
                      pDoc->bSnapActive(SnapLinePosition.bottom) = false
+                     bHit(SnapLinePosition.top) = false  ' prevent further tests
+                     bHit(SnapLinePosition.bottom) = false  ' prevent further tests
                      yDelta = yCursorDistance
                   else
                      ' We are still snapped and still within the snap area. Therefore, do not
@@ -175,6 +181,8 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                   if abs(xCursorDistance) > HitPixels then
                      pDoc->bSnapActive(SnapLinePosition.left) = false
                      pDoc->bSnapActive(SnapLinePosition.right) = false
+                     bHit(SnapLinePosition.left) = false  ' prevent further tests
+                     bHit(SnapLinePosition.right) = false  ' prevent further tests
                      xDelta = xCursorDistance
                   else
                      ' We are still snapped and still within the snap area. Therefore, do not

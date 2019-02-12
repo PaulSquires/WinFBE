@@ -12,22 +12,12 @@
 '    GNU General Public License for more details.
 
 #include once "frmStatusBarEditor.bi"
+#include once "clsPanelItem.bi"
 #include once "clsConfig.bi"
 
-
-' ========================================================================================
-' Load all of the Panel descriptions into the listbox
-' ========================================================================================
-private function frmStatusBarEditor_LoadListBox( byval hParent as hwnd ) as Long
-   dim hList1 as hwnd = GetDlgItem(hParent, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
-
-'   ListBox_ResetContent(hList1)
-'   for i as long = lbound(gConfig.ToolsTemp) to ubound(gConfig.ToolsTemp)
-'      ListBox_AddString(hList1, gConfig.ToolsTemp(i).wszDescription)
-'   NEXT
-
-   function = 0
-end function
+' Temporary PanelItem array to hold items while they are being
+' edited in the StatusBar Editor. 
+dim shared gPanelItems(any) as clsPanelItem
 
 
 ' ========================================================================================
@@ -36,83 +26,63 @@ end function
 private function frmStatusBarEditor_SwapListBoxItems( byval Item1 as long, _
                                                       Byval Item2 as long _
                                                       ) as Long
-   dim as hwnd hList1 = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+   ' Do not swap the Panel Name
+   dim as CWSTR wszPanelName1 = gPanelItems(Item1).wszName
+   dim as CWSTR wszPanelName2 = gPanelItems(Item2).wszName
    
-'   ' Swap the array values
-'   swap gConfig.ToolsTemp(Item1), gConfig.ToolsTemp(Item2)
+   ' Swap the array values
+   swap gPanelItems(Item1), gPanelItems(Item2)
     
-'   ListBox_ReplaceString(hList1, Item1, gConfig.ToolsTemp(Item1).wszDescription)
-'   ListBox_ReplaceString(hList1, Item2, gConfig.ToolsTemp(Item2).wszDescription)
+   gPanelItems(Item1).wszName = wszPanelName1
+   gPanelItems(Item2).wszName = wszPanelName2 
 
    function = 0
 end function
 
 
 ' ========================================================================================
-' Position all child windows. Called manually.
-' ========================================================================================
-private Function frmStatusBarEditor_PositionWindows() As LRESULT
-   
-'   Dim As HWnd hTabCtl = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TABCONTROL )
-'   dim as long nCurSel = TabCtrl_GetCurSel( hTabCtl )
-
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LABEL1), _
-'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LABEL2), _
-'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOSTYLE), _
-'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTSIMPLETEXT), _
-'               iif( nCurSel = 1, SW_HIDE, SW_SHOW ) )
-
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS), _
-'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDINSERT), _
-'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDDELETE), _
-'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDUP), _
-'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-'   ShowWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDDOWN), _
-'               iif( nCurSel = 0, SW_HIDE, SW_SHOW ) )
-   
-   Function = 0
-End Function
-
-
-' ========================================================================================
 ' Set the frmStatusBarEditor textboxes and options depending on what listbox entry is selected
 ' ========================================================================================
 private function frmStatusBarEditor_SetTextboxes() as long
-   dim as long nCurSel = ListBox_GetCurSel(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS))
+   dim as HWND hListBox = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+   dim as long nCurSel = ListBox_GetCurSel( hListBox )
    dim as Boolean fEnabled = iif( nCurSel < 0, false, true)
+   if ListBox_GetCount( hListBox ) = 0 then fEnabled = false
 
-'   AfxSetWindowText(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTTOOLNAME), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszDescription, wstr("")))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTTOOLNAME), fEnabled)
-'   AfxSetWindowText(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTCOMMAND), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszCommand, wstr("")))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTCOMMAND), fEnabled)
-'   AfxSetWindowText(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTPARAMETERS), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszParameters, wstr("")))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTPARAMETERS), fEnabled)
-'   AfxSetWindowText(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTKEY), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszKey, wstr("")))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTKEY), fEnabled)
-'   AfxSetWindowText(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTWORKINGFOLDER), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszWorkingFolder, wstr("")))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTWORKINGFOLDER), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKCTRL), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsCtrl, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKCTRL), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKALT), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsAlt, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKALT), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKSHIFT), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsShift, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKSHIFT), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKPROMPT), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsPromptRun, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKPROMPT), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKMINIMIZED), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsMinimized, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKMINIMIZED), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKWAIT), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsWaitFinish, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKWAIT), fEnabled)
-'   Button_SetCheck(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYMENU), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsDisplayMenu, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYMENU), fEnabled)
-'   ComboBox_SetCurSel(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOACTION), iif(fEnabled, gConfig.ToolsTemp(nCurSel).Action, 0))
-'   EnableWindow(GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOACTION), fEnabled)
+   dim as HWND hCtrl
+   dim as long nIndex
+   
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTTEXT)
+   EnableWindow( hCtrl, fEnabled)
+   AfxSetWindowText( hCtrl, gPanelItems(nCurSel).wszText )
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTTOOLTIP)
+   EnableWindow( hCtrl, fEnabled)
+   AfxSetWindowText( hCtrl, gPanelItems(nCurSel).wszTooltip )
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOSTYLE)
+   nIndex = ComboBox_FindStringExact( hCtrl, -1, gPanelItems(nCurSel).wszStyle ) 
+   ComboBox_SetCurSel( hCtrl, nIndex)
+   EnableWindow( hCtrl, fEnabled)
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT)
+   nIndex = ComboBox_FindStringExact( hCtrl, -1, gPanelItems(nCurSel).wszAlignment ) 
+   ComboBox_SetCurSel( hCtrl, nIndex)
+   EnableWindow( hCtrl, fEnabled)
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBEVEL)
+   nIndex = ComboBox_FindStringExact( hCtrl, -1, gPanelItems(nCurSel).wszBevel ) 
+   ComboBox_SetCurSel( hCtrl, nIndex)
+   EnableWindow( hCtrl, fEnabled)
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE)
+   nIndex = ComboBox_FindStringExact( hCtrl, -1, gPanelItems(nCurSel).wszAutoSize ) 
+   ComboBox_SetCurSel( hCtrl, nIndex)
+   EnableWindow( hCtrl, fEnabled)
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH)
+   EnableWindow( hCtrl, fEnabled)
+   AfxSetWindowText( hCtrl, gPanelItems(nCurSel).wszMinWidth )
 
    function = 0
 end function
@@ -154,91 +124,40 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
             frmStatusBarEditor_SetTextboxes()
          END IF
            
-'      case IDC_FRMSTATUSBAREDITOR_TXTTOOLNAME
-'         if codeNotify = EN_CHANGE THEN
-'            ' Update the temp array and the Listbox
-'            if nCurSel > -1 THEN
-'               gConfig.ToolsTemp(nCurSel).wszDescription = AfxGetWindowText(hwndCtl)
-'               ListBox_ReplaceString(hList1, nCurSel, gConfig.ToolsTemp(nCurSel).wszDescription)
-'            END IF
-'         end if
+      CASE IDC_FRMSTATUSBAREDITOR_TXTTEXT
+         if codeNotify = EN_CHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszText = AfxGetWindowText(hwndCtl)
+         end if
+
+      CASE IDC_FRMSTATUSBAREDITOR_TXTTOOLTIP
+         if codeNotify = EN_CHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszTooltip = AfxGetWindowText(hwndCtl)
+         end if
            
-'      CASE IDC_FRMSTATUSBAREDITOR_TXTCOMMAND
-'         if codeNotify = EN_CHANGE THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).wszCommand = AfxGetWindowText(hwndCtl)
-'         end if
-           
-'      case IDC_FRMSTATUSBAREDITOR_CMDBROWSEEXE
-'         if codeNotify = BN_CLICKED THEN
-'            Dim pwszName As WString Ptr = AfxIFileOpenDialogW(HWnd, IDC_FRMSTATUSBAREDITOR_CMDBROWSEEXE)
-'            If pwszName Then
-'               AfxSetWindowText( GetDlgItem(HWnd, IDC_FRMSTATUSBAREDITOR_TXTCOMMAND), pwszName )
-'               CoTaskMemFree pwszName
-'            End If
-'         end if
-          
-'      CASE IDC_FRMSTATUSBAREDITOR_TXTPARAMETERS
-'         if codeNotify = EN_CHANGE THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).wszParameters = AfxGetWindowText(hwndCtl)
-'         end if
+      case IDC_FRMSTATUSBAREDITOR_COMBOSTYLE
+         if codeNotify = CBN_SELCHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszStyle = ComboBox_GetCurSel(hwndCtl) 
+         END IF
 
-'      CASE IDC_FRMSTATUSBAREDITOR_TXTKEY
-'         if codeNotify = EN_CHANGE THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).wszKey = AfxGetWindowText(hwndCtl)
-'         end if
+      case IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT
+         if codeNotify = CBN_SELCHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAlignment = ComboBox_GetCurSel(hwndCtl) 
+         END IF
 
-'      CASE IDC_FRMSTATUSBAREDITOR_TXTWORKINGFOLDER
-'         if codeNotify = EN_CHANGE THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).wszWorkingFolder = AfxGetWindowText(hwndCtl)
-'         end if
-                    
-'      case IDC_FRMSTATUSBAREDITOR_CMDBROWSEFOLDER
-'         if codeNotify = BN_CLICKED THEN
-'            dim as CWSTR cwsFolder = AfxBrowseForFolder(HWND, L(293,"Working Folder:"), curdir)
-'            if len(cwsFolder) THEN
-'               AfxSetWindowText( GetDlgItem(HWnd, IDC_FRMSTATUSBAREDITOR_TXTWORKINGFOLDER), cwsFolder)
-'            END IF
-'         end if
-          
-'      case IDC_FRMSTATUSBAREDITOR_CHKCTRL
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsCtrl = Button_GetCheck(hwndCtl) 
-'         end if
+      case IDC_FRMSTATUSBAREDITOR_COMBOBEVEL
+         if codeNotify = CBN_SELCHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszBevel = ComboBox_GetCurSel(hwndCtl) 
+         END IF
 
-'      case IDC_FRMSTATUSBAREDITOR_CHKALT
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsAlt = Button_GetCheck(hwndCtl) 
-'         end if
+      case IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE
+         if codeNotify = CBN_SELCHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAutoSize = ComboBox_GetCurSel(hwndCtl) 
+         END IF
 
-'      case IDC_FRMSTATUSBAREDITOR_CHKSHIFT
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsShift = Button_GetCheck(hwndCtl) 
-'         end if
-
-'      case IDC_FRMSTATUSBAREDITOR_CHKPROMPT
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsPromptRun = Button_GetCheck(hwndCtl) 
-'         end if
-
-'      case IDC_FRMSTATUSBAREDITOR_CHKMINIMIZED
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsMinimized = Button_GetCheck(hwndCtl) 
-'         end if
-
-'      case IDC_FRMSTATUSBAREDITOR_CHKWAIT
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsWaitFinish = Button_GetCheck(hwndCtl) 
-'         end if
-
-'      case IDC_FRMSTATUSBAREDITOR_CHKDISPLAYMENU
-'         if codeNotify = BN_CLICKED THEN
-'            if nCurSel > -1 THEN gConfig.ToolsTemp(nCurSel).IsDisplayMenu = Button_GetCheck(hwndCtl) 
-'         end if
-
-'      case IDC_FRMSTATUSBAREDITOR_COMBOACTION
-'         if codeNotify = CBN_SELCHANGE THEN
-'            if nCurSel > -1 then gConfig.ToolsTemp(nCurSel).Action = ComboBox_GetCurSel(hwndCtl) 
-'         END IF
+      CASE IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH
+         if codeNotify = EN_CHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszMinWidth = AfxGetWindowText(hwndCtl)
+         end if
 
       case IDC_FRMSTATUSBAREDITOR_CMDPANELUP
          if codeNotify = BN_CLICKED THEN
@@ -256,74 +175,47 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
 
       case IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT
          if codeNotify = BN_CLICKED THEN
-'            if ubound(gConfig.ToolsTemp) = -1 THEN
-'               redim gConfig.ToolsTemp(0)
-'               nCurSel = 0
-'            Else
-'               redim preserve gConfig.ToolsTemp(ubound(gConfig.ToolsTemp)+1)
-'               if nCurSel = -1 THEN nCurSel = 0
-'               ' insert the item above current entry in the internal array
-'               for i as long = ubound(gConfig.ToolsTemp) to nCurSel + 1 step -1
-'                  gConfig.ToolsTemp(i) = gConfig.ToolsTemp(i-1)
-'               NEXT
-'            END IF
-'            gConfig.ToolsTemp(nCurSel).wszDescription   = ""
-'            gConfig.ToolsTemp(nCurSel).wszCommand       = ""
-'            gConfig.ToolsTemp(nCurSel).wszParameters    = ""
-'            gConfig.ToolsTemp(nCurSel).wszKey           = ""
-'            gConfig.ToolsTemp(nCurSel).wszWorkingFolder = ""
-'            gConfig.ToolsTemp(nCurSel).IsCtrl           = 0
-'            gConfig.ToolsTemp(nCurSel).IsAlt            = 0
-'            gConfig.ToolsTemp(nCurSel).IsShift          = 0
-'            gConfig.ToolsTemp(nCurSel).IsPromptRun      = 0
-'            gConfig.ToolsTemp(nCurSel).IsMinimized      = 0
-'            gConfig.ToolsTemp(nCurSel).IsWaitFinish     = 0
-'            gConfig.ToolsTemp(nCurSel).IsDisplayMenu    = 0
-'            ' reload the listbox
-'            frmUserTools_LoadListBox(HWND)
-'            nCurSel = Min(nCurSel, ubound(gConfig.ToolsTemp))
-'            ListBox_SetCurSel(hList1, nCurSel)
-'            frmUserTools_SetTextboxes()
-'            SetFocus GetDlgItem(HWND, IDC_FRMSTATUSBAREDITOR_TXTTOOLNAME)
+            if nCurSel = -1 then exit function 
+            Redim Preserve gPanelItems(Ubound(gPanelItems)+1)
+            For i as long = Ubound(gPanelItems) To nCurSel Step -1
+               gPanelItems(i) = gPanelItems(i-1) 
+            Next
+            dim newPanelItem as clsPanelItem
+            gPanelItems(nCurSel) = newPanelItem
+            Listbox_InsertString(hList1, nCurSel, gPanelItems(nCurSel).wszName)
+            frmStatusBarEditor_SetTextBoxes
          end if
 
       case IDC_FRMSTATUSBAREDITOR_CMDPANELDELETE
-         if codeNotify = BN_CLICKED THEN
-            if nCurSel > -1  THEN
-'               if MessageBox( HWND, L(300, "Are you sure you want to delete this user tool?"), L(276,"Confirm"), _
-'                                 MB_YESNOCANCEL Or MB_ICONINFORMATION Or MB_DEFBUTTON1 ) = IDYES then
-'                  if ubound(gConfig.ToolsTemp) = 0 THEN
-'                     erase gConfig.ToolsTemp
-'                     nCurSel = -1
-'                  else
-'                     ' remove the item from the internal array
-'                     for i as long = nCurSel to ubound(gConfig.ToolsTemp) - 1
-'                        gConfig.ToolsTemp(i) = gConfig.ToolsTemp(i+1)
-'                     NEXT
-'                     redim preserve gConfig.ToolsTemp(ubound(gConfig.ToolsTemp)-1)
-'                  END IF
-'                  ' reload the listbox
-'                  frmUserTools_LoadListBox(HWND)
-'                  nCurSel = Min(nCurSel, ubound(gConfig.ToolsTemp))
-'                  ListBox_SetCurSel(hList1, nCurSel)
-'                  frmUserTools_SetTextboxes()
-'                  SetFocus hList1
-'               end if
-            END IF
+         If codeNotify = BN_CLICKED Then
+            if nCurSel = -1 then exit function 
+            for i as long = nCurSel to ubound(gMenuItems) - 1
+               gMenuItems(i) = gMenuItems(i+1) 
+            next
+            Redim Preserve gMenuItems(Ubound(gMenuItems)-1)
+            Listbox_DeleteString(hList1, nCurSel)
+            frmStatusBarEditor_SetTextBoxes
          end if
+
 
       Case IDC_FRMSTATUSBAREDITOR_CMDOK    
          If codeNotify = BN_CLICKED Then
-'            ' Copy the temporary items to the main array  
-'            redim gConfig.Tools(ubound(gConfig.ToolsTemp))
-'            for i as long = lbound(gConfig.ToolsTemp) to ubound(gConfig.ToolsTemp)
-'               gConfig.Tools(i) = gConfig.ToolsTemp(i)   
-'            NEXT
-'            erase gConfig.ToolsTemp
-'            gConfig.SaveConfigFile
-            SendMessage( HWnd, WM_CLOSE, 0, 0 )
+            ' Copy the temporary array back to the form's panel items 
+            Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+            If pDoc Then 
+               dim as long numItems = ubound(gPanelItems)
+               if numItems > -1 then
+                  redim pDoc->MenuItems(numItems)
+                  for i as long = lbound(gPanelItems) to ubound(gPanelItems)
+                     pDoc->PanelItems(i) = gPanelItems(i) 
+                  next
+               end if
+               pDoc->UserModified = true
+            end if
+            SendMessage(HWnd, WM_CLOSE, 0, 0)
             Exit Function
          end if
+
              
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
@@ -337,30 +229,11 @@ End Function
 
 
 ' ========================================================================================
-' Process WM_NOTIFY message for window/dialog: frmStatusBarEditor
-' ========================================================================================
-private Function frmStatusBarEditor_OnNotify( ByVal HWnd As HWnd, _
-                                              ByVal id As Long, _
-                                              ByVal pNMHDR As NMHDR Ptr _
-                                              ) As LRESULT
-
-   Select Case pNMHDR->code 
-      
-      Case TCN_SELCHANGE
-'         if id = IDC_FRMSTATUSBAREDITOR_TABCONTROL then
-'            frmStatusBarEditor_PositionWindows
-'         end if
-   
-   end select
-   
-   Function = 0
-End Function
-
-
-' ========================================================================================
 ' Process WM_CLOSE message for window/dialog: frmStatusBarEditor
 ' ========================================================================================
 private Function frmStatusBarEditor_OnClose( byval HWnd As HWnd ) As LRESULT
+   ' Reset the global MenuItems array
+   erase gPanelItems
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
    DestroyWindow( HWnd )
@@ -391,7 +264,6 @@ private Function frmStatusBarEditor_WndProc( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_CLOSE,    frmStatusBarEditor_OnClose)
       HANDLE_MSG (HWnd, WM_DESTROY,  frmStatusBarEditor_OnDestroy)
       HANDLE_MSG (HWnd, WM_COMMAND,  frmStatusBarEditor_OnCommand)
-      HANDLE_MSG (HWnd, WM_NOTIFY,   frmStatusBarEditor_OnNotify)
    End Select
 
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
@@ -524,12 +396,27 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
 
-'   dim hList as hwnd = GetDlgItem(hForm, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
-'   ListBox_SetCurSel( hList, 0 )
-'   TabCtrl_SetCurSel( hTabCtl, 0 )
-'   frmStatusBarEditor_PositionWindows()
-'   frmStatusBarEditor_SetTextboxes()
-'   SetFocus hList
+   ' Copy the form's menu items to the temporary array for editing
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then 
+      dim as long numItems = ubound(pDoc->MenuItems)
+      if numItems > -1 then
+         redim gMenuItems(numItems)
+         for i as long = 0 to numItems
+            gMenuItems(i) = pDoc->MenuItems(i)
+         next
+      end if
+   end if
+   
+   ' Display the menuitems in the listbox
+   dim hList as hwnd = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_LSTPANELS )
+   for i as long = 0 to ubound(gMenuItems)
+      ListBox_AddString(hList, frmMenuEditor_ListBoxLine(i))
+   next
+
+   ListBox_SetCurSel( hList, 0 )
+   frmStatusBarEditor_SetTextboxes()
+   SetFocus hList
 
    ' Process Windows messages
    Function = pWindow->DoEvents( SW_SHOW )

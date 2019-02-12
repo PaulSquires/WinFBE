@@ -1619,7 +1619,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
       ''  SEARCH MENU              
       Case IDM_FIND, IDM_REPLACE
-         frmFindReplace_Show( hEdit, iif(id = IDM_FIND, false, true) )
+         frmFindReplace_Show( HWND_FRMMAIN, iif(id = IDM_FIND, false, true) )
       
       Case IDM_FINDINFILES
          frmFindInFiles_Show( hEdit )
@@ -1868,11 +1868,23 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       case IDM_ALIGNLEFTS, IDM_ALIGNCENTERS, IDM_ALIGNRIGHTS, _
            IDM_ALIGNTOPS, IDM_ALIGNMIDDLES, IDM_ALIGNBOTTOMS, _
            IDM_SAMEWIDTHS, IDM_SAMEHEIGHTS, IDM_SAMEBOTH            
-         OnCommand_DesignerAlign(HWND, id)
+         OnCommand_DesignerAlign( HWND, id )
 
       case IDM_CENTERHORIZ, IDM_CENTERVERT, IDM_CENTERBOTH
-         OnCommand_DesignerCenter(HWND, id)
+         OnCommand_DesignerCenter( HWND, id )
          
+      case IDM_HORIZEQUAL, IDM_HORIZINCREASE, IDM_HORIZDECREASE, IDM_HORIZREMOVE
+         OnCommand_DesignerHorizSpacing( hwnd, id )
+
+      case IDM_VERTEQUAL, IDM_VERTINCREASE, IDM_VERTDECREASE, IDM_VERTREMOVE
+         OnCommand_DesignerVertSpacing( hwnd, id )
+      
+      case IDM_SNAPLINES
+         if pDoc then 
+            pDoc->bSnapLines = not pDoc->bSnapLines
+            pDoc->UserModified = true
+         end if
+
       case IDM_LOCKCONTROLS
          if pDoc then 
             pDoc->bLockControls = not pDoc->bLockControls

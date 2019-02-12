@@ -428,7 +428,9 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    
    ' Iterate all of the lines related to the visual designer
    dim as long iLineStart = 1
-   dim as long iLineEnd, NextMenuItem, NextImageItem
+   dim as long iLineEnd, NextMenuItem, NextPanelItem, NextImageItem
+
+   dim as boolean bReadingMenuItem, bReadingPanelItem, bReadingImageItem
 
    do until iLineStart >= len(wszAllText)
       
@@ -450,6 +452,10 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          wszPropValue = mid(**wst, 16)
          if wszPropValue = "True" then this.bLockControls = true
 
+      elseif left(wst, 12) = "' SNAPLINES=" then
+         wszPropValue = mid(**wst, 13)
+         if wszPropValue = "True" then this.bSnapLines = true
+
       elseif left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
       
@@ -460,39 +466,69 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          dim as long ub = ubound(this.MenuItems)
          redim preserve this.MenuItems(ub + 1)
          NextMenuItem = ub + 1
+         bReadingMenuItem = true
       elseif left(wst, 11) = "'     NAME=" then
-         this.MenuItems(NextMenuItem).wszName = mid(**wst, 12)
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszName = mid(**wst, 12)
       elseif left(wst, 14) = "'     CAPTION=" then
-         this.MenuItems(NextMenuItem).wszCaption = mid(**wst, 15)
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszCaption = mid(**wst, 15)
       elseif left(wst, 13) = "'     INDENT=" then
-         this.MenuItems(NextMenuItem).nIndent = val(mid(**wst, 14))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).nIndent = val(mid(**wst, 14))
       elseif left(wst, 10) = "'     ALT=" then
-         this.MenuItems(NextMenuItem).chkAlt = val(mid(**wst, 11))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkAlt = val(mid(**wst, 11))
       elseif left(wst, 12) = "'     SHIFT=" then
-         this.MenuItems(NextMenuItem).chkShift = val(mid(**wst, 13))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkShift = val(mid(**wst, 13))
       elseif left(wst, 11) = "'     CTRL=" then
-         this.MenuItems(NextMenuItem).chkCtrl = val(mid(**wst, 12))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkCtrl = val(mid(**wst, 12))
       elseif left(wst, 15) = "'     SHORTCUT=" then
-         this.MenuItems(NextMenuItem).wszShortcut = mid(**wst, 16)
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszShortcut = mid(**wst, 16)
       elseif left(wst, 14) = "'     CHECKED=" then
-         this.MenuItems(NextMenuItem).chkChecked = val(mid(**wst, 15))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkChecked = val(mid(**wst, 15))
       elseif left(wst, 13) = "'     GRAYED=" then
-         this.MenuItems(NextMenuItem).chkGrayed = val(mid(**wst, 14))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkGrayed = val(mid(**wst, 14))
+      elseif left(wst, 16) = "'   MENUITEM_END" then
+         bReadingMenuItem = false   
+      
+      
+      elseif left(wst, 19) = "'   PANELITEM_START" then
+         dim as long ub = ubound(this.PanelItems)
+         redim preserve this.PanelItems(ub + 1)
+         NextPanelItem = ub + 1
+         bReadingPanelItem = true
+      elseif left(wst, 16) = "'     PANELNAME=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszName = mid(**wst, 17)
+      elseif left(wst, 16) = "'     PANELTEXT=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszText = mid(**wst, 17)
+      elseif left(wst, 19) = "'     PANELTOOLTIP=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszTooltip = mid(**wst, 20)
+      elseif left(wst, 21) = "'     PANELALIGNMENT=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAlignment = mid(**wst, 22)
+      elseif left(wst, 17) = "'     PANELSTYLE=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszStyle = mid(**wst, 18)
+      elseif left(wst, 17) = "'     PANELBEVEL=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBevel = mid(**wst, 18)
+      elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(**wst, 21)
+      elseif left(wst, 20) = "'     PANELMINWIDTH=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszMinWidth = mid(**wst, 21)
+      elseif left(wst, 17) = "'   PANELITEM_END" then
+         bReadingPanelItem = false   
+
       
       elseif left(wst, 15) = "'   IMAGE_START" then
          dim as long ub = ubound(this.AllImages)
          redim preserve this.AllImages(ub + 1)
          NextImageItem = ub + 1
          this.AllImages(NextImageItem).pDoc = @this
+         bReadingImageItem = true
       elseif left(wst, 16) = "'     IMAGENAME=" then
-         this.AllImages(NextImageItem).wszImageName = mid(**wst, 17)
+         if bReadingImageItem then this.AllImages(NextImageItem).wszImageName = mid(**wst, 17)
       elseif left(wst, 15) = "'     FILENAME=" then
-         this.AllImages(NextImageItem).wszFileName = ProcessFromCurdrive(mid(**wst, 16))
+         if bReadingImageItem then this.AllImages(NextImageItem).wszFileName = ProcessFromCurdrive(mid(**wst, 16))
       elseif left(wst, 19) = "'     RESOURCETYPE=" then
-         this.AllImages(NextImageItem).wszFormat = mid(**wst, 20)
+         if bReadingImageItem then this.AllImages(NextImageItem).wszFormat = mid(**wst, 20)
+      elseif left(wst, 13) = "'   IMAGE_END" then
+         bReadingImageItem = false   
 
-      'elseif left(wst, 13) = "'   IMAGE_END" then
-      'elseif left(wst, 16) = "'   MENUITEM_END" then
       'elseif left(wst, 16) = "'   EVENTS_START" then
       'elseif left(wst, 14) = "'   EVENTS_END" then
       'elseif left(wst, 19) = "' WINFBE IMAGES_END" then

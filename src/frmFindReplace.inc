@@ -578,7 +578,6 @@ public Function frmFindReplace_Show( ByVal hWndParent As HWnd, _
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
-   pWindow->ClassStyle = CS_DROPSHADOW
 
    dim as HWND hCtl
 

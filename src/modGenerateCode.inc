@@ -132,9 +132,30 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
               "'     GRAYED="   & pDoc->MenuItems(ii).chkGrayed   & vbcrlf & _
               "'   MENUITEM_END" & vbcrlf 
       next
+      wszControls = wszControls & "' WINFBE MAINMENU_END" & vbcrlf
+   end if
+   
+   ' Save StatusBar Panels (if applicable)
+   dim as long numPanelItems = Ubound(pDoc->PanelItems) - lbound(pDoc->PanelItems) + 1
+   if numPanelItems > 0 then
+      wszControls = wszControls & "' WINFBE PANELS_START" & vbcrlf 
+      for ii as long = lbound(pDoc->PanelItems) to ubound(pDoc->PanelItems)
+         wszControls = wszControls & _
+              "'   PANELITEM_START" & vbcrlf & _
+              "'     PANELNAME="      & pDoc->PanelItems(ii).wszName      & vbcrlf & _
+              "'     PANELTEXT="      & pDoc->PanelItems(ii).wszText      & vbcrlf & _
+              "'     PANELTOOLTIP="   & pDoc->PanelItems(ii).wszTooltip   & vbcrlf & _
+              "'     PANELALIGNMENT=" & pDoc->PanelItems(ii).wszAlignment & vbcrlf & _
+              "'     PANELSTYLE="     & pDoc->PanelItems(ii).wszStyle     & vbcrlf & _
+              "'     PANELBEVEL="     & pDoc->PanelItems(ii).wszBevel     & vbcrlf & _
+              "'     PANELAUTOSIZE="  & pDoc->PanelItems(ii).wszAutoSize  & vbcrlf & _
+              "'     PANELMINWIDTH="  & pDoc->PanelItems(ii).wszMinWidth  & vbcrlf & _
+              "'   PANELITEM_END" & vbcrlf 
+      next
+
       wszControls = wszControls & "'   EVENTS_START" & vbcrlf
       wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
-                                  "' WINFBE MAINMENU_END" & vbcrlf
+                                  "' WINFBE PANELS_END" & vbcrlf
    end if
    
    
@@ -167,6 +188,7 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
                  "' WINFBE FORM" & vbcrlf & _
                  "' WINFBE VERSION " & APPVERSION & vbcrlf & _
                  "' LOCKCONTROLS=" & iif(pDoc->bLockControls, "True", "False") & vbcrlf & _
+                 "' SNAPLINES=" & iif(pDoc->bSnapLines, "True", "False") & vbcrlf & _
                  "' WINFBE FORM_START" & vbcrlf & _
                  wszControls & _
                  "' WINFBE FORM_END" & vbcrlf 
