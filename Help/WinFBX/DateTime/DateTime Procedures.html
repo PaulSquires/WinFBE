@@ -749,9 +749,17 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 <td><em>ft</em></td>
 <td>A FILETIME structure.</td>
 </tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the time.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
 </tbody>
 </table>
-<p>A picture string that is used to form the time.</p>
+<p>The application can use the following elements to construct a format picture string. If spaces are used to separate the elements in the format string, these spaces appear in the same location in the output string. The letters must be in uppercase or lowercase as shown, for example, &quot;ss&quot;, not &quot;SS&quot;. Characters in the format string that are enclosed in single quotation marks appear in the same location and unchanged in the output string.</p>
 <table>
 <thead>
 <tr class="header">
@@ -2236,7 +2244,7 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 </thead>
 <tbody>
 <tr class="odd">
-<td><em>nYenMonthar</em></td>
+<td><em>nMonth</em></td>
 <td>A month number (1-12).</td>
 </tr>
 <tr class="even">

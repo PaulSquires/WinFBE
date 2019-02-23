@@ -394,8 +394,8 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    Dim wszTemp As WString * MAX_PATH 
 
    Dim As Long Parenthesis_Start, Parenthesis_End, Error_Start       
-   Dim As Long i, NumLines, NextLine, r, nCount
-   Dim As Long NumWarnings, NumErrors, IsError, IsWarning
+   Dim As Long i, NumLines, NextLine, r, nCount, nListViewLine
+   Dim As Long NumWarnings, NumErrors, NumDirectives, IsError, IsWarning
    Dim As Long nFirstErrorLine = -1
    Dim As HWnd hLV
    Dim As CWSTR wDQ, wst1, wst2, wst3, wst, wst_ucase, wszOutputMsg        
@@ -421,12 +421,14 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       end if
    end if
 
+   dim as Boolean bReadingCompileOutput = false
+   
    ' Parse the log string.
    NumLines = AfxStrParseCount( wsLogSt, vbCrLf)
  
    For NextLine = 1 To NumLines                   
    
-      wst = Trim(AfxStrParse(wsLogSt, NextLine, vbCrlf))                 
+      wst = Trim(AfxStrParse(wsLogSt, NextLine, vbCrLf))                 
       wst_ucase = Ucase(wst)
       
       ' Deal with the situation where we might be trying to compile a 64-bit application
@@ -465,26 +467,26 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       ' Check to see if linking failed
       If (Left(**wst_ucase, 6) = WSTR("ERROR!")) or _
          (left(**wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling resource FAILED: Error Code 1 (refer to log file)") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, WStr("compiling resource FAILED: Error Code 1 (refer to log file)") ) 
          NumErrors = NumErrors + 1
       elseIf (Left(**wst_ucase, 5) = WSTR("ERROR")) Then
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Error Code 1 (refer to log file)") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, WStr("compiling FAILED: Error Code 1 (refer to log file)") ) 
          NumErrors = NumErrors + 1
       elseIf (Left(**wst_ucase, 19) = WSTR("COMPILING C FAILED:")) Then
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling C FAILED: Error Code 1 (refer to log file)") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, WStr("compiling C FAILED: Error Code 1 (refer to log file)") ) 
          NumErrors = NumErrors + 1
       end if
       
       If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, wst & " (refer to log file)" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, wst & " (refer to log file)" ) 
          NumErrors = NumErrors + 1
       End If
  
@@ -500,64 +502,93 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          End If      
       End If
       
-      ' Check for any compiler warnings
-      Error_Start = 0
-      IsWarning = Instr(**wst_ucase, WSTR(") WARNING "))
-      If IsWarning Then Error_Start = IsWarning
-      IsError   = Instr(**wst_ucase, WSTR(") ERROR ")) 
-      If IsError Then Error_Start = IsError
-      
-      If (Error_Start > 0) Then 
-         'sample warning message
-         'c:\freebasic\test.bas(1394) warning 1(1): Passing scalar as pointer, at parameter 2 (hwndOldFocus) of ONSETFOCUS()
-         'sample error message
-         'c:\freebasic\test.bas(17) error 41: Variable not declared, kjljjada in 'kjljjada Error'
+      ' Determine if we are reading any lines in the log file that appear after the "compiling: " line
+      ' but before the "assembling: ". Anything there is data output by #print preprocessor statements.
+      If Left(**wst_ucase, 11) = WSTR("COMPILING: ") Then 
+         bReadingCompileOutput = true
+         continue for
+      elseIf Left(**wst_ucase, 13) = WSTR("COMPILING C: ") Then 
+         bReadingCompileOutput = true
+         continue for
+      elseIf Left(**wst_ucase, 12) = WSTR("ASSEMBLING: ") Then 
+         bReadingCompileOutput = false
+      elseIf Left(**wst_ucase, 14) = WSTR("COMPILING RC: ") Then 
+         bReadingCompileOutput = false
+      elseIf Left(**wst_ucase, 9) = WSTR("LINKING: ") Then 
+         bReadingCompileOutput = false
+      end if
 
-         ' Determine the line number. Error_Start variable holds the position of the closing
-         ' parenthesis of the line number. We simply need to reverse search from there for the
-         ' opening parenthesis.
-         ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
-         Parenthesis_End   = Error_Start
-         Parenthesis_Start = InStrRev(**wst, WSTR("("), Parenthesis_End)
+      if bReadingCompileOutput then
+
+         if len(wst) = 0 then continue for
+
+         ' Check for any compiler warnings
+         Error_Start = 0
+         IsWarning = Instr(**wst_ucase, WSTR(") WARNING "))
+         If IsWarning Then Error_Start = IsWarning
+         IsError   = Instr(**wst_ucase, WSTR(") ERROR ")) 
+         If IsError Then Error_Start = IsError
          
-         If (Parenthesis_Start < Parenthesis_End) Andalso _
-            (Parenthesis_End <= Error_Start) then
-    
-            wst1 = left(**wst, Parenthesis_Start-1)   ' filename
-            wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
-            wst3 = Mid( **wst, Error_Start + 1)  ' error message
-  
-            ' If this is a visual designer form file then we need to modify the line
-            ' number based on the error offset number.
-            dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
-            if pDoc then
-               if pDoc->IsDesigner then
-                  if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
-                  if len(pDoc->wszFormCodegen) = 0 then GenerateFormCode(pDoc)   ' regenerate visual designer code
-                  ' Offset is based on form metadata + code generation
-                  pDoc->ErrorOffset = 0
-                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
-                  pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
-                  wst2 = str( val(wst2) - pDoc->ErrorOffset)
-               end if
-            END IF
+         If (Error_Start > 0) Then 
+            'sample warning message
+            'c:\freebasic\test.bas(1394) warning 1(1): Passing scalar as pointer, at parameter 2 (hwndOldFocus) of ONSETFOCUS()
+            'sample error message
+            'c:\freebasic\test.bas(17) error 41: Variable not declared, kjljjada in 'kjljjada Error'
 
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 0, wst2 )  ' line#
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 1, wst1 )  ' filename
-            FF_ListView_InsertItem( hLV, NumWarnings+NumErrors, 2, wst3 )  ' error message
-             
-            If IsWarning Then 
-               NumWarnings = NumWarnings + 1
-            ElseIf IsError Then
-               If nFirstErrorLine = -1 Then
-                  nFirstErrorLine = NumWarnings + NumErrors
-               End If
-               NumErrors = NumErrors + 1
-            End If            
-         End If
+            ' Determine the line number. Error_Start variable holds the position of the closing
+            ' parenthesis of the line number. We simply need to reverse search from there for the
+            ' opening parenthesis.
+            ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
+            Parenthesis_End   = Error_Start
+            Parenthesis_Start = InStrRev(**wst, WSTR("("), Parenthesis_End)
+            
+            If (Parenthesis_Start < Parenthesis_End) Andalso _
+               (Parenthesis_End <= Error_Start) then
+       
+               wst1 = left(**wst, Parenthesis_Start-1)   ' filename
+               wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
+               wst3 = Mid( **wst, Error_Start + 1)  ' error message
+     
+               ' If this is a visual designer form file then we need to modify the line
+               ' number based on the error offset number.
+               dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
+               if pDoc then
+                  if pDoc->IsDesigner then
+                     if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
+                     if len(pDoc->wszFormCodegen) = 0 then GenerateFormCode(pDoc)   ' regenerate visual designer code
+                     ' Offset is based on form metadata + code generation
+                     pDoc->ErrorOffset = 0
+                     pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
+                     pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
+                     wst2 = str( val(wst2) - pDoc->ErrorOffset)
+                  end if
+               END IF
 
-      End If
+               FF_ListView_InsertItem( hLV, nListViewLine, 0, wst2 )  ' line#
+               FF_ListView_InsertItem( hLV, nListViewLine, 1, wst1 )  ' filename
+               FF_ListView_InsertItem( hLV, nListViewLine, 2, wst3 )  ' error message
+                
+               If IsWarning Then 
+                  NumWarnings = NumWarnings + 1
+               ElseIf IsError Then
+                  If nFirstErrorLine = -1 Then
+                     nFirstErrorLine = NumWarnings + NumErrors
+                  End If
+                  NumErrors = NumErrors + 1
+               End If            
+            End If
+
+         else
+                     
+            FF_ListView_InsertItem( hLV, nListViewLine, 0, wstr("") )  ' line#
+            FF_ListView_InsertItem( hLV, nListViewLine, 1, wstr("") )  ' filename
+            FF_ListView_InsertItem( hLV, nListViewLine, 2, wst )  ' message
+            NumDirectives = NumDirectives + 1
+         end if
+
+      end if
  
+      nListViewLine = NumWarnings + NumErrors + NumDirectives
    Next
  
    ' If there were no errors but the fGoodCompile flag was not set to True then the log file
@@ -576,7 +607,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    end if
    
    ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
-   If (NumWarnings > 0) orelse (NumErrors > 0) then
+   If (NumWarnings > 0) orelse (NumErrors > 0) orelse (NumDirectives > 0) then
 
       cwsCompileMsg = L(193, "Errors")   & " " & NumErrors   & "  " & _
                       L(192, "Warnings") & " " & NumWarnings & _
@@ -610,7 +641,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    end if
    
    ' If there were no errors or warnings then close any previously open compiler results listviews
-   If (NumWarnings = 0) andalso (NumErrors = 0) then
+   If (NumWarnings = 0) andalso (NumErrors = 0) andalso (NumDirectives = 0) then
       if IsWindowVisible(HWND_FRMOUTPUT) THEN
          if TabCtrl_GetCurSel( GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TABCONTROL) ) = 0 THEN
             ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
@@ -629,7 +660,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
                          L(192, "Warnings") & " " & NumWarnings & _
                          "  [ " & AfxStrPathname("NAMEX", gCompile.OutputFilename) & "  " & _
-                         (fix(nFileSize / 1024)+1) & "K  (" & _
+                         **AfxStrFormatKBSize(nFileSize) & " (" & _
                          nFileSize & " " & L(199,"bytes") & ") ]"
          SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
@@ -642,7 +673,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                L(192,"Warnings")      & " " & NumWarnings & ")" & vbcrlf & vbcrlf & _
          L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
          L(195,"Target Compilation:") & " " & gCompile.OutputFilename & " (" & _
-               AfxStrFormatKBSize(nFileSize) & "K, " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
+               **AfxStrFormatKBSize(nFileSize) & ", " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
          L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & _
                                         " " & L(198,"seconds") & " (" & _
                                         AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
@@ -1042,6 +1073,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.wszFullCommandLine = wszCommand & " " & wszParams
    gCompile.wszFullLogFile = sConsoleText
                
+
    ' Attempt to fix the random problem whereby the spinning mouse wait cursor is not reset
    ' to an arrow. It seems to happen in random cases whereby an error is thrown and a new 
    ' document is loaded to position to the error line. Very hard to reproduce. We will manually

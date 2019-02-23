@@ -407,7 +407,7 @@ using Afx
 
 ' // Create an instance of the CTextStream class
 DIM pTxtStm AS CTextStream
-' // Open file for output as a text stream
+' // Open file for append as a text stream
 IF pTxtStm.OpenForAppendA(ExePath & "\Test.txt") = S_OK THEN
    ' // Write a string and an end of line to the stream
    pTxtStm.WriteLine "This is a test."
@@ -443,7 +443,7 @@ using Afx
 
 ' // Create an instance of the CTextStream class
 DIM pTxtStm AS CTextStream
-' // Open file for output as a text stream
+' // Open file for append as a text stream
 IF pTxtStm.OpenForAppendW(ExePath & "\TestW.txt") = S_OK THEN
    ' // Write a string and an end of line to the stream
    pTxtStm.WriteLine "This is a test."

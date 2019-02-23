@@ -434,7 +434,7 @@ InterpolationModeHighQualityBicubic = 7
 <pre><code>FUNCTION hWindow () AS HWND
 </code></pre>
 <h1 id="loadbitmapfromresource"><a name="LoadBitmapFromResource"></a>LoadBitmapFromResource</h1>
-<p>Loads a bitmap from a resource file into the control.</p>
+<p>Loads a bitmap from a resource file into the control. <strong>Note</strong>: Works with .bmp and .png files, but not with .jpg and .tif files.</p>
 <pre><code>FUNCTION LoadBitmapFromResource (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING) AS LONG
 </code></pre>
 <table>
@@ -478,7 +478,7 @@ InterpolationModeHighQualityBicubic = 7
 <h4 id="return-value-6">Return value</h4>
 <p>Ok (0) or an error code.</p>
 <h1 id="loadimagefromresource"><a name="LoadImageFromResource"></a>LoadImageFromResource</h1>
-<p>Loads an image from a resource file into the control. <strong>Note</strong>: In Windows 7, it fails to load .jpg and .tif files. Works with .bmp and .png files.</p>
+<p>Loads an image from a resource file into the control. <strong>Note</strong>: Works with .bmp and .png files, but not with .jpg and .tif files.</p>
 <pre><code>FUNCTION LoadImageFromResource (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING) AS LONG
 </code></pre>
 <table>

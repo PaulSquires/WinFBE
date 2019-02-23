@@ -225,8 +225,8 @@ IF hr <> S_OK THEN PRINT AfxWmiGetErrorCodeText(hr) : SLEEP : END
 ' // and retrieve the properties using the CDispInvoke class.
 DIM pDispServ AS CDispInvoke = pServices.NextObject
 IF pDispServ.DispPtr THEN
-   PRINT "Caption: "; pDispServ.Get("Caption").ToStr
-   PRINT "Serial number: "; pDispServ.Get("SerialNumber").ToStr
+   PRINT "Caption: "; pDispServ.Get("Caption")
+   PRINT "Serial number: "; pDispServ.Get("SerialNumber")
 END IF
 
 PRINT
@@ -256,8 +256,8 @@ DIM pDispServ AS CDispInvoke
 DO
    pDispServ = pServices.NextObject
    IF pDispServ.DispPtr = NULL THEN EXIT DO
-   PRINT "Caption: "; pDispServ.Get("Caption").ToStr
-   PRINT "Capabilities "; pDispServ.Get("Capabilities").ToStr
+   PRINT "Caption: "; pDispServ.Get("Caption")
+   PRINT "Capabilities "; pDispServ.Get("Capabilities")
 LOOP
 
 PRINT
@@ -291,9 +291,9 @@ IF pServices.GetNamedProperties <> S_OK THEN PRINT "Failed to get the named prop
 
 ' // Retrieve the value of the properties
 'DIM cv AS CVAR = pServices.PropValue("Caption")
-'PRINT cv.ToStr
-PRINT pServices.PropValue("Caption").ToStr
-PRINT pServices.PropValue("SerialNumber").ToStr
+'PRINT cv
+PRINT pServices.PropValue("Caption")
+PRINT pServices.PropValue("SerialNumber")
 
 PRINT
 PRINT "Press any key..."
@@ -326,8 +326,8 @@ FOR i AS LONG = 0 TO nCount - 1
    PRINT "--- Index " & STR(i) & " ---"
    ' // Get a collection of named properties
    IF pServices.GetNamedProperties(i) = S_OK THEN
-      PRINT pServices.PropValue("Caption").ToStr
-      PRINT pServices.PropValue("Capabilities").ToStr
+      PRINT pServices.PropValue("Caption")
+      PRINT pServices.PropValue("Capabilities")
    END IF
 NEXT
 

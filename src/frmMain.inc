@@ -923,7 +923,7 @@ public Function frmMain_PositionWindows() As LRESULT
       dim as RECT rcClient
       ' Reduce the height of the client area by the size of the rebar and statusbar.
       rcClient.left = nLeft
-      rcClient.top = rc.Top + nHeightRebar + nHeightTabControl + nHeightCombo + pWindow->ScaleY(4)
+      rcClient.top = rc.Top + nHeightRebar + nHeightTabControl + nHeightCombo 
       rcClient.right = rc.Right - nWidthExplorer
       rcClient.bottom = rc.bottom - nHeightStatusBar - nHeightOutput
       
@@ -958,11 +958,13 @@ public Function frmMain_PositionWindows() As LRESULT
          ShowWindow( HWND_FRMVDTOOLBOX, SW_SHOWNORMAL )
          ShowWindow( pDoc->hWindow(0), SW_HIDE )
          ShowWindow( pDoc->hWindow(1), SW_HIDE )
+         ShowWindow( pDoc->hScrollbar, SW_HIDE )
       else
       
          ShowWindow( pDoc->hWndDesigner, SW_HIDE )
          ShowWindow( HWND_FRMVDTOOLBOX, SW_HIDE )
 
+         rcClient.top = rcClient.top + pWindow->ScaleY(4)
          dim as long nSplitSize 
          
          ' Position top (optional) edit window

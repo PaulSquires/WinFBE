@@ -20,11 +20,11 @@ type clsPanelItem
    public:
       wszName      as CWSTR
       wszText      as CWSTR
-      wszStyle     as CWSTR
+      wszStyle     as CWSTR = wstr("StatusBar.PanelText")
       wszTooltip   as CWSTR
-      wszAlignment as CWSTR
-      wszBevel     as CWSTR
-      wszAutosize  as CWSTR
-      wszMinWidth  as CWSTR
+      wszAlignment as CWSTR = wstr("StatusBar.PanelAlignLeft")
+      wszBevel     as CWSTR = wstr("StatusBar.PanelNoBevel")
+      wszAutosize  as CWSTR = wstr("StatusBar.PanelNoAutoSize")
+      wszMinWidth  as CWSTR = wstr("0")
 end type
 

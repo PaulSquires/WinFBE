@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CPowerTime Class</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cpowertime-class">CPowerTime Class</h1>
+<p>A <strong>CPowerTime</strong> object contains a date and time value, allowing easy calculations. The date and time value is stored as a 64-bit value representing the number of 100-nanosecond intervals since January 1, 1601. A nanosecond is one-billionth of a second.</p>
+<p>The following static const member variables are provided to simplify calculations (number of 100-nanosecond intervals):</p>
+<pre><code>CPowerTime_Millisecond    10000ull
+CPowerTime_Second         CPowerTime_Millisecond * 1000
+CPowerTime_Minute         CPowerTime_Second * 60
+CPowerTime_Hour           CPowerTime_Minute * 60
+CPowerTime_Day            CPowerTime_Hour * 24
+CPowerTime_Week           CPowerTime_Day * 7
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Constructors1">Constructors</a></td>
+<td>Create new <strong>CPowerTime</strong> objects initialized to the specified value.</td>
+</tr>
+<tr class="even">
+<td><a href="#CastOp1">CAST Operator</a></td>
+<td>Returns the <strong>CPowerTime</strong> value as an unsigned long integer.</td>
+</tr>
+<tr class="odd">
+<td><a href="#LetOp1">LET Operator</a></td>
+<td>Assigns a value to a <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operators1">Operators</a></td>
+<td>Adds, subtracts or compares <strong>CPowerTime</strong> objects.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AddDays">AddDays</a></td>
+<td>Adds the specified number of days to this <strong>CPowerTime</strong> object. You can subtract days by using a negative number.</td>
+</tr>
+<tr class="even">
+<td><a href="#AddHours">AddHours</a></td>
+<td>Adds the specified number of hours to this <strong>CPowerTime</strong> object. You can subtract hours by using a negative number.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AddMinutes">AddMinutes</a></td>
+<td>Adds the specified number of minutes to this <strong>CPowerTime</strong> object. You can subtract minutes by using a negative number.</td>
+</tr>
+<tr class="even">
+<td><a href="#AddMonths">AddMonths</a></td>
+<td>Adds the specified number of months to this <strong>CPowerTime</strong> object. You can subtract months by using a negative number.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AddMSeconds">AddMSeconds</a></td>
+<td>Adds the specified number of milliseconds to this <strong>CPowerTime</strong> object. You can subtract milliseconds by using a negative number.</td>
+</tr>
+<tr class="even">
+<td><a href="#AddSeconds">AddSeconds</a></td>
+<td>Adds the specified number of seconds to this <strong>CPowerTime</strong> object. You can subtract seconds by using a negative number.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AddYears">AddYears</a></td>
+<td>Adds the specified number of years to this <strong>CPowerTime</strong> object. You can subtract years by using a negative number.</td>
+</tr>
+<tr class="even">
+<td><a href="#AstroDay">AstroDay</a></td>
+<td>Returns the Astronomical Day for any given date.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AstroDayOfWeek">AstroDayOfWeek</a></td>
+<td>Returns the Astronomical Day for any given date.</td>
+</tr>
+<tr class="even">
+<td><a href="#DateSerial">DateSerial</a></td>
+<td>Gets/sets the date and time as a FreeBasic date serial.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DateString">DateString</a></td>
+<td>Returns the date as a string based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="even">
+<td><a href="#Day">Day</a></td>
+<td>Returns the Day component of the <strong>CPowerTime</strong> object. It is a value in the range of 1-31.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DaysInMonth">DaysInMonth</a></td>
+<td>Returns the number of days in the specified month.</td>
+</tr>
+<tr class="even">
+<td><a href="#DayOfWeek">DayOfWeek</a></td>
+<td>Returns the Day-of-Week component of the <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DayOfYear">DayOfYear</a></td>
+<td>Returns the day of the year, where Jan 1 is the first day of the year.</td>
+</tr>
+<tr class="even">
+<td><a href="#DayOfWeekstring">DayOfWeekString</a></td>
+<td>Returns the Day-of-Week component of the <strong>CPowerTime</strong> object as a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#DaysDiff">DaysDiff</a></td>
+<td>Returns the days of difference between two dates.</td>
+</tr>
+<tr class="even">
+<td><a href="#DaysInYear">DaysInYear</a></td>
+<td>Returns the number of days of the year.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Format">Format</a></td>
+<td>Converts a <strong>CPowerTime</strong> object to a string.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetAsFileTime">GetAsFileTime</a></td>
+<td>Returns the date and time as a <strong>FILETIME</strong> structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetAsJulianDate">GetAsJulianDate</a></td>
+<td>Returns the date as a Julian date.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetAsSystemTime">GetAsSystemTime</a></td>
+<td>Returns the date and time as a <strong>SYSTEMTIME</strong> structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#GetCurrentTime">GetCurrentTime</a></td>
+<td>Returns a <strong>CPowerTime</strong> object that represents the current system date and time.</td>
+</tr>
+<tr class="even">
+<td><a href="#GetFileTime">GetFileTime</a></td>
+<td>Returns the value of the <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Hour">Hour</a></td>
+<td>Returns the Hour component of the <strong>CPowerTime</strong> object. It is a numeric value in the range of 0-23.</td>
+</tr>
+<tr class="even">
+<td><a href="#IsFirstDayOfMonth">IsFirstDayOfMonth</a></td>
+<td>Returns true if the date is the first day of the month; false, otherwise.</td>
+</tr>
+<tr class="odd">
+<td><a href="#IsLastDayOfMonth">IsLastDayOfMonth</a></td>
+<td>Returns true if the date is the last day of the month; false, otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#IsLeapYear">IsLeapYear</a></td>
+<td>Determines if a given year is a leap year or not.</td>
+</tr>
+<tr class="odd">
+<td><a href="#JulianToGregorian">JulianToGregorian</a></td>
+<td>Converts a Julian date to a Gregorian date.</td>
+</tr>
+<tr class="even">
+<td><a href="#Minute">Minute</a></td>
+<td>Returns the Minute component of the <strong>CPowerTime</strong> object. This is a numeric value in the range of 0-59.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Month">Month</a></td>
+<td>Returns the Month component of the <strong>CPowerTime</strong> object. It is a value in the range of 1-12.</td>
+</tr>
+<tr class="even">
+<td><a href="#MonthString">MonthString</a></td>
+<td>Returns the Month component of the <strong>CPowerTime</strong> object as a string.</td>
+</tr>
+<tr class="odd">
+<td><a href="#MSecond">MSecond</a></td>
+<td>Returns the Millisecond component of the <strong>CPowerTime</strong> object.This is a numeric value in the range of 0-999.</td>
+</tr>
+<tr class="even">
+<td><a href="#NewDate">NewDate</a></td>
+<td>Sets a new date to this <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#NewTime">NewTime</a></td>
+<td>Sets a new time to this <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Now">Now</a></td>
+<td>Assigns the current local date and time on this computer to this <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="odd">
+<td><a href="#NowUTC">NowUTC</a></td>
+<td>Assigns the current Coordinated Universal date and time (UTC) to this <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#Second">Second</a></td>
+<td>Returns the Second component of the <strong>CPowerTime</strong> object. This is a numeric value in the range of 0-59.</td>
+</tr>
+<tr class="odd">
+<td><a href="#SetFileTime">SetFileTime</a></td>
+<td>Sets the date and time of this <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#TimeString">TimeString</a></td>
+<td>Retuns the time as a string based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Today">Today</a></td>
+<td>Assigns the current local date on this computer to this <strong>CPowerTime</strong> object.</td>
+</tr>
+<tr class="even">
+<td><a href="#UTCToLocal">UTCToLocal</a></td>
+<td>Converts time based on the Coordinated Universal Time (UTC) to local file time.</td>
+</tr>
+<tr class="odd">
+<td><a href="#WeekOne">WeekOne</a></td>
+<td>Returns the first day of the first week of the year.</td>
+</tr>
+<tr class="even">
+<td><a href="#WeekNumber">WeekNumber</a></td>
+<td>Returns the week number for a given date.</td>
+</tr>
+<tr class="odd">
+<td><a href="#WeeksInMonth">WeeksInMonth</a></td>
+<td>Returns the number of weeks in the year.</td>
+</tr>
+<tr class="even">
+<td><a href="#WeeksInYear">WeeksInYear</a></td>
+<td>Returns the number of weeks in the specefied month and year.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Year">Year</a></td>
+<td>Returns the Year component of the <strong>CPowerTime</strong> object.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="constructors"><a name="Constructors1"></a>Constructors</h1>
+<p>Create new <strong>CPowerTime</strong> objects initialized to the specified value.</p>
+<pre><code>CONSTRUCTOR CPowerTime
+CONSTRUCTOR CPowerTime (BYVAL nTime AS ULONGLONG)
+CONSTRUCTOR CPowerTime (BYREF ft AS FILETIME)
+CONSTRUCTOR CPowerTime (BYREF st AS SYSTEMTIME)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTime</em></td>
+<td>A date and time expressed as a 64-bit value.</td>
+</tr>
+<tr class="even">
+<td><em>ft</em></td>
+<td>A FILETIME structure.</td>
+</tr>
+<tr class="odd">
+<td><em>st</em></td>
+<td>A SYSTEMTIME structure.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples">Examples</h4>
+<pre><code>DIM cft AS CPowerTime = CPowerTime().GetCurrentTime()
+</code></pre>
+<pre><code>DIM cft AS CPowerTime = AfxLocalFileTime
+print cft.GetFileTime
+</code></pre>
+<pre><code>DIM cft AS CPowerTime = AfxLocalSystemTime
+print cft.GetFileTime
+</code></pre>
+<h1 id="cast-operator"><a name="CastOp1"></a>CAST Operator</h1>
+<p>Returns the <strong>CPowerTime</strong> value as an unsigned long integer.</p>
+<pre><code>OPERATOR CAST () AS ULONGLONG
+</code></pre>
+<h4 id="examples-1">Examples</h4>
+<pre><code>DIM cft AS CPowerTime = CPowerTime().GetCurrentTime()
+DIM nTime AS LONGLONG = cft
+print nTime
+</code></pre>
+<pre><code>DIM cft AS CPowerTime = CPowerTime().GetCurrentTime()
+DIM cft2 AS CPowerTime = cft
+</code></pre>
+<h1 id="let-operator-(=)"><a name="LetOp1"></a>LET Operator (=)</h1>
+<p>Assigns a value to a <strong>CPowerTime</strong> object.</p>
+<pre><code>OPERATOR LET (BYVAL nTime AS ULONGLONG)
+OPERATOR LET (BYREF ft AS FILETIME)
+OPERATOR LET (BYREF st AS SYSTEMTIME)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTime</em></td>
+<td>A date and time expressed as a 64-bit value.</td>
+</tr>
+<tr class="even">
+<td><em>ft</em></td>
+<td>A FILETIME structure.</td>
+</tr>
+<tr class="odd">
+<td><em>st</em></td>
+<td>A SYSTEMTIME structure.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="examples-2">Examples</h4>
+<pre><code>DIM cft AS CPowerTime
+cft = AfxLocalFileTime
+print cft.GetFileTime
+</code></pre>
+<pre><code>DIM cft AS CPowerTime
+cft = AfxLocalSystemTime
+print cft.GetFileTime
+</code></pre>
+<h1 id="operators"><a name="Operators1"></a>Operators</h1>
+<p>Compares <strong>CPowerTime</strong> objects.</p>
+<pre><code>OPERATOR = (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
+OPERATOR &lt;&gt; (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
+OPERATOR &lt; (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
+OPERATOR &gt; (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
+OPERATOR &lt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
+OPERATOR &gt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
+</code></pre>
+<h1 id="adddays"><a name="AddDays"></a>AddDays</h1>
+<p>Adds the specified number of days to this <strong>CPowerTime</strong> object. You can subtract days by using a negative number.</p>
+<pre><code>SUB AddDays (BYVAL nDays AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nDays</em></td>
+<td>The number of days.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="addhours"><a name="AddHours"></a>AddHours</h1>
+<p>Adds the specified number of hours to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 23. You can subtract hours by using a negative number.</p>
+<pre><code>AddHours (BYVAL nHours AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nHours</em></td>
+<td>The number of hours.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="addminutes"><a name="AddMinutes"></a>AddMinutes</h1>
+<p>Adds the specified number of minutes to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 59. You can subtract minutes by using a negative number.</p>
+<pre><code>SUB AddMinutes (BYVAL nMinutes AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMinutes</em></td>
+<td>The number of minutes.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="addmonths"><a name="AddMonths"></a>AddMonths</h1>
+<p>Adds the specified number of months to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 12. You can subtract months by using a negative number.</p>
+<pre><code>SUB AddMonths (BYVAL nMonths AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMonths</em></td>
+<td>The number of months.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="addmseconds"><a name="AddMSeconds"></a>AddMSeconds</h1>
+<p>Adds the specified number of milliseconds to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 999. You can subtract milliseconds by using a negative number.</p>
+<pre><code>SUB AddSeconds (BYVAL nSeconds AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nSeconds</em></td>
+<td>The number of seconds.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="addseconds"><a name="AddSeconds"></a>AddSeconds</h1>
+<p>Adds the specified number of seconds to this <strong>CPowerTime</strong> object. The valid values for this member are 0 through 59. You can subtract seconds by using a negative number.</p>
+<pre><code>SUB AddSeconds (BYVAL nSeconds AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nSeconds</em></td>
+<td>The number of seconds.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="addyears"><a name="AddYears"></a>AddYears</h1>
+<p>Adds the specified number of years to this <strong>CPowerTime</strong> object. You can subtract years by using a negative number.</p>
+<pre><code>SUB AddYears (BYVAL nYears AS LONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYears</em></td>
+<td>The number of years.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="astroday"><a name="AstroDay"></a>AstroDay</h1>
+<p>Returns the Astronomical Day for this <strong>CPowerTime</strong> object.</p>
+<pre><code>FUNCTION AstroDay () AS LONG
+</code></pre>
+<p>Returns the Astronomical Day for any given date.</p>
+<pre><code>FUNCTION AstroDay (BYVAL nYear AS LONG, BYVAL nMonth AS LONG, BYVAL nDay AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>The astronomical day.</p>
+<h4 id="remarks">Remarks</h4>
+<p>Among other things, can be used to find the number of days between any two dates, e.g.:</p>
+<pre><code>DIM cpt AS CPowerTime
+PRINT cpt.AstroDay(-12400, 3, 1) - cpt.AstroDay(-12400, 2, 28)  ' Prints 2
+PRINT cpt.AstroDay(12000, 3, 1) - cpt.AstroDay(-12000, 2, 28) ' Prints 8765822
+PRINT cpt.AstroDay(1902, 2, 28) - cpt.AstroDay(1898, 3, 1)  ' Prints 1459 days
+</code></pre>
+<h1 id="astrodayofweek"><a name="AstroDayOfWeek"></a>AstroDayOfWeek</h1>
+<p>Calculates the day of the week, Sunday through Monday, of a given date.</p>
+<pre><code>FUNCTION AstroDayOfWeek (BYVAL nYear AS LONG = 0, BYVAL nMonth AS LONG = 0, BYVAL nDay AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="day"><a name="Day"></a>Day</h1>
+<p>Returns the Day component of the <strong>CPowerTime</strong> object. It is a value in the range of 1-31.</p>
+<pre><code>FUNCTION Day () AS LONG
+</code></pre>
+<h1 id="daysdiff"><a name="DaysDiff"></a>DaysDiff</h1>
+<p>Returns the days of difference between two dates.</p>
+<p>The date part of the internal <strong>CPowerTime</strong> object is compared to the date part of the specified external <strong>CPowerTime</strong> object. The time-of-day part of each is ignored. The difference in number of days is returned as the result of the function.</p>
+<pre><code>FUNCTION DaysDiff (BYREF cpt AS CPowerTime) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>cpt</em></td>
+<td>The <strong>CPowerTime</strong> object to compare.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example:">Example:</h4>
+<pre><code>DIM cpt AS CPowerTime
+cpt.NewDate(2019, 2, 2)
+DIM cpt2 AS CPowerTime
+cpt2.NewDate(1930, 12, 25)
+print cpt.DaysDiff(cpt2)
+' --or--
+print cpt2.DaysDiff(cpt)
+</code></pre>
+<p>Calculates the days of difference between two dates.</p>
+<pre><code>FUNCTION DaysDiff (BYVAL nYear1 AS LONG, BYVAL nMonth1 AS LONG, BYVAL nDay1 AS LONG, _
+   BYVAL nYear2 AS LONG, BYVAL nMonth2 AS LONG, BYVAL nDay2 AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear1</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth1</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay1</em></td>
+<td>A day number (1-31).</td>
+</tr>
+<tr class="even">
+<td><em>nYear2</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="odd">
+<td><em>nMonth2</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nDay2</em></td>
+<td>A day number (1-31).</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example:-1">Example:</h4>
+<pre><code>DIM cpt AS CPowerTime
+print cpt.DaysDiff(2019, 2, 2, 1930, 12, 25)
+</code></pre>
+<h1 id="daysinmonth"><a name="DaysInMonth"></a>DaysInMonth</h1>
+<p>Returns the number of days of this <strong>CPowerTime</strong> object.</p>
+<pre><code>FUNCTION DaysInMonth () AS LONG
+</code></pre>
+<p>Returns the number of days in the specified month.</p>
+<pre><code>FUNCTION DaysInMonth (BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="dayofweek"><a name="DayOfWeek"></a>DayOfWeek</h1>
+<p>Returns the Day-of-Week component of the <strong>CPowerTime</strong> object. It is a numeric value in the range of 0-6 (representing Sunday through Saturday).</p>
+<pre><code>FUNCTION DayOfWeek () AS LONG
+</code></pre>
+<h1 id="dayofweekstring"><a name="DayOfWeekString"></a>DayOfWeekString</h1>
+<p>Returns the Day-of-Week name of the <strong>CPowerTime</strong> object, expressed as a string (Monday, Tuesday...). The day name is appropriate for the locale, based upon the LCID parameter. If LCID is not given, the default LCID for the user is substituted.</p>
+<pre><code>FUNCTION DayOfWeekString (BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<h1 id="dayofyear"><a name="DayOfYear"></a>DayOfYear</h1>
+<p>Returns the day of the year, where Jan 1 is the first day of the year. If a parameter is omitted, the value stored in this <strong>CPowerTime</strong> object is assumed.</p>
+<pre><code>FUNCTION DayOfYear (BYVAL nYear AS LONG = 0, BYVAL nMonth AS LONG = 0, BYVAL nDay AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="daysinyear"><a name="DaysInYear"></a>DaysInYear</h1>
+<p>Returns the number of days in the specified year. If the year is omitted, the year of this <strong>CPowerTime</strong> object is assumed.</p>
+<pre><code>FUNCTION DaysInYear (BYVAL nYear AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="hour"><a name="Hour"></a>Hour</h1>
+<p>Returns the Hour component of the <strong>CPowerTime</strong> object. It is a numeric value in the range of 0-23.</p>
+<pre><code>FUNCTION Hour () AS LONG
+</code></pre>
+<h1 id="isfirstdayofmonth"><a name="IsFirstDayOfMonth"></a>IsFirstDayOfMonth</h1>
+<p>Returns true if the date is the first day of the month; false, otherwise.</p>
+<pre><code>FUNCTION IsFirstDayOfMonth () AS BOOLEAN
+</code></pre>
+<h1 id="islastdayofmonth"><a name="IsLastDayOfMonth"></a>IsLastDayOfMonth</h1>
+<p>Returns true if the date is the last day of the month; false, otherwise.</p>
+<pre><code>FUNCTION IsLastDayOfMonth () AS BOOLEAN
+</code></pre>
+<h1 id="isleapyear"><a name="IsLeapYear"></a>IsLeapYear</h1>
+<p>Determines if a given year is a leap year or not.</p>
+<p>A leap year is defined as all years divisible by 4, except for years divisible by 100 that are not also divisible by 400. Years divisible by 400 are leap years. 2000 is a eap year. 1900 is not a leap year.</p>
+<pre><code>FUNCTION IsLeapYear (BYVAL nYear AS LONG = 0) AS BOOLEAN
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="juliantogregorian"><a name="JulianToGregorian"></a>JulianToGregorian</h1>
+<p>Converts a Julian date to a Gregorian date.</p>
+<pre><code>FUNCTION JulianToGregorian (BYVAL nJulian AS LONG, BYVAL nDay AS LONG, _
+   BYVAL nMonth AS LONG, BYVAL nYear AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nJulian</em></td>
+<td>The Julian date.</td>
+</tr>
+<tr class="even">
+<td><em>nDay</em></td>
+<td>Out. The day (1-31).</td>
+</tr>
+<tr class="odd">
+<td><em>nMonth</em></td>
+<td>Out. The month (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear</em></td>
+<td>Out. The four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="minute"><a name="Minute"></a>Minute</h1>
+<p>Returns the Minute component of the <strong>CPowerTime</strong> object. This is a numeric value in the range of 0-59.</p>
+<pre><code>FUNCTION Minute () AS LONG
+</code></pre>
+<h1 id="month"><a name="Month"></a>Month</h1>
+<p>Returns the Month component of the <strong>CPowerTime</strong> object. It is a value in the range of 1-12.</p>
+<pre><code>FUNCTION Month () AS LONGç
+</code></pre>
+<h1 id="monthstring"><a name="MonthString"></a>MonthString</h1>
+<p>Returns the Month component of the <strong>CPowerTime</strong> object, expressed as a string (January, February...).</p>
+<pre><code>FUNCTION MonthString () AS CWSTR
+</code></pre>
+<h1 id="msecond"><a name="MSecond"></a>MSecond</h1>
+<p>Returns the Millisecond component of the <strong>CPowerTime</strong> object. This is a numeric value in the range of 0-999.</p>
+<pre><code>FUNCTION MSecond () AS LONG
+</code></pre>
+<h1 id="second"><a name="Second"></a>Second</h1>
+<p>Returns the Second component of the <strong>CPowerTime</strong> object. This is a numeric value in the range of 0-59.</p>
+<pre><code>FUNCTION Second () AS LONG
+</code></pre>
+<h1 id="datestring"><a name="DateString"></a>DateString</h1>
+<p>Retuns the date as a string based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</p>
+<pre><code>FUNCTION DateString (BYREF wszMask AS WSTRING, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the date.<br>The format types &quot;d&quot;, and &quot;y&quot; must be lowercase and the letter &quot;M&quot; must be uppercase.<br>For example, to get the date string &quot;Wed, Aug 31 94&quot;, the application uses the picture string &quot;ddd',' MMM dd yy&quot;.</td>
+</tr>
+<tr class="even">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent days.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>d</td>
+<td>Day of the month as digits without leading zeros for single-digit days.</td>
+</tr>
+<tr class="even">
+<td>dd</td>
+<td>Day of the month as digits with leading zeros for single-digit days.</td>
+</tr>
+<tr class="odd">
+<td>ddd</td>
+<td>Abbreviated day of the week, for example, &quot;Mon&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>dddd</td>
+<td>Day of the week.</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent months.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Month as digits without leading zeros for single-digit months.</td>
+</tr>
+<tr class="even">
+<td>MM</td>
+<td>Month as digits with leading zeros for single-digit months.</td>
+</tr>
+<tr class="odd">
+<td>MMM</td>
+<td>Abbreviated month, for example, &quot;Nov&quot; in English (United States).</td>
+</tr>
+<tr class="even">
+<td>MMMM</td>
+<td>Month value, for example, &quot;November&quot; for English (United States), and &quot;Noviembre&quot; for Spanish (Spain).</td>
+</tr>
+</tbody>
+</table>
+<p>The following table defines the format types used to represent years.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Format type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>y</td>
+<td>Year represented only by the last digit.</td>
+</tr>
+<tr class="even">
+<td>yy</td>
+<td>Year represented only by the last two digits. A leading zero is added for single-digit years.</td>
+</tr>
+<tr class="odd">
+<td>yyyy</td>
+<td>Year represented by a full four or five digits, depending on the calendar used. Thai Buddhist and Korean calendars have five-digit years. The &quot;yyyy&quot; pattern shows five digits for these two calendars, and four digits for all other supported calendars. Calendars that have single-digit or two-digit years, such as for the Japanese Emperor era, are represented differently. A single-digit year is represented with a leading zero, for example, &quot;03&quot;. A two-digit year is represented with two digits, for example, &quot;13&quot;. No additional leading zeros are displayed.</td>
+</tr>
+<tr class="even">
+<td>yyyyy</td>
+<td>Behaves identically to &quot;yyyy&quot;.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-2">Return value</h4>
+<p>The formatted date.</p>
+<h1 id="timestring"><a name="TimeString"></a>TimeString</h1>
+<p>Retuns the time as a string based on the specified mask, e.g. &quot;hh':'mm':'ss&quot;.</p>
+<pre><code>FUNCTION TimeString (BYREF wszMask AS WSTRING, BYVAL lcid AS LCID = LOCALE_USER_DEFAULT) AS CWSTR
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>ft</em></td>
+<td>A FILETIME structure.</td>
+</tr>
+<tr class="even">
+<td><em>wszMask</em></td>
+<td>A picture string that is used to form the time.</td>
+</tr>
+<tr class="odd">
+<td><em>lcid</em></td>
+<td>Optional. The language identifier used for the conversion. Default is LOCALE_USER_DEFAULT.</td>
+</tr>
+</tbody>
+</table>
+<p>The application can use the following elements to construct a format picture string. If spaces are used to separate the elements in the format string, these spaces appear in the same location in the output string. The letters must be in uppercase or lowercase as shown, for example, &quot;ss&quot;, not &quot;SS&quot;. Characters in the format string that are enclosed in single quotation marks appear in the same location and unchanged in the output string.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Picture</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>h</td>
+<td>Hours with no leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="even">
+<td>hh</td>
+<td>Hours with leading zero for single-digit hours; 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>H</td>
+<td>Hours with no leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="even">
+<td>HH</td>
+<td>Hours with leading zero for single-digit hours; 24-hour clock</td>
+</tr>
+<tr class="odd">
+<td>m</td>
+<td>Minutes with no leading zero for single-digit minutes</td>
+</tr>
+<tr class="even">
+<td>mm</td>
+<td>Minutes with leading zero for single-digit minutes</td>
+</tr>
+<tr class="odd">
+<td>s</td>
+<td>Seconds with no leading zero for single-digit seconds</td>
+</tr>
+<tr class="even">
+<td>ss</td>
+<td>Seconds with leading zero for single-digit seconds</td>
+</tr>
+<tr class="odd">
+<td>t</td>
+<td>One character time marker string, such as A or P</td>
+</tr>
+<tr class="even">
+<td>tt</td>
+<td>Multi-character time marker string, such as AM or PM</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-3">Return value</h4>
+<p>The formatted time.</p>
+<h1 id="format"><a name="Format"></a>Format</h1>
+<p>Converts a <strong>CPowerTime</strong> object to a string.</p>
+<pre><code>FUNCTION Format (BYREF wszFmt AS WSTRING) AS CWSTR
+</code></pre>
+<p>Formatting codes:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>%a</td>
+<td>Abbreviated weekday name</td>
+</tr>
+<tr class="even">
+<td>%A</td>
+<td>Full weekday name</td>
+</tr>
+<tr class="odd">
+<td>%b</td>
+<td>Abbreviated month name</td>
+</tr>
+<tr class="even">
+<td>%B</td>
+<td>Full month name</td>
+</tr>
+<tr class="odd">
+<td>%c</td>
+<td>Date and time representation appropriate for locale</td>
+</tr>
+<tr class="even">
+<td>%d</td>
+<td>Day of month as decimal number (01 – 31)</td>
+</tr>
+<tr class="odd">
+<td>%H</td>
+<td>Hour in 24-hour format (00 – 23)</td>
+</tr>
+<tr class="even">
+<td>%I</td>
+<td>Hour in 12-hour format (01 – 12)</td>
+</tr>
+<tr class="odd">
+<td>%j</td>
+<td>Day of year as decimal number (001 – 366)</td>
+</tr>
+<tr class="even">
+<td>%m</td>
+<td>Month as decimal number (01 – 12)</td>
+</tr>
+<tr class="odd">
+<td>%M</td>
+<td>Minute as decimal number (00 – 59)</td>
+</tr>
+<tr class="even">
+<td>%p</td>
+<td>Current locale's A.M./P.M. indicator for 12-hour clock</td>
+</tr>
+<tr class="odd">
+<td>%S</td>
+<td>Second as decimal number (00 – 59)</td>
+</tr>
+<tr class="even">
+<td>%U</td>
+<td>Week of year as decimal number, with Sunday as first day of week (00 – 53)</td>
+</tr>
+<tr class="odd">
+<td>%w</td>
+<td>Weekday as decimal number (0 – 6; Sunday is 0)</td>
+</tr>
+<tr class="even">
+<td>%W</td>
+<td>Week of year as decimal number, with Monday as first day of week (00 – 53)</td>
+</tr>
+<tr class="odd">
+<td>%x</td>
+<td>Date representation for current locale</td>
+</tr>
+<tr class="even">
+<td>%X</td>
+<td>Time representation for current locale</td>
+</tr>
+<tr class="odd">
+<td>%y</td>
+<td>Year without century, as decimal number (00 – 99)</td>
+</tr>
+<tr class="even">
+<td>%Y</td>
+<td>Year with century, as decimal number</td>
+</tr>
+<tr class="odd">
+<td>%z, %Z</td>
+<td>Either the time-zone name or time zone abbreviation, depending on registry settings; no characters if time zone is unknown</td>
+</tr>
+<tr class="even">
+<td>%%</td>
+<td>Percent sign</td>
+</tr>
+</tbody>
+</table>
+<p>The # flag may prefix any formatting code. In that case, the meaning of the format code is changed as follows.</p>
+<ul>
+<li>%#a, %#A, %#b, %#B, %#p, %#X, %#z, %#Z, %#%: # flag is ignored.</li>
+<li>%#c: Long date and time representation, appropriate for current locale. For example: &quot;Tuesday, March 14, 1995, 12:41:29&quot;.</li>
+<li>%#x* Long date representation, appropriate to current locale. For example: &quot;Tuesday, March 14, 1995&quot;.</li>
+<li>%#d, %#H, %#I, %#j, %#m, %#M, %#S, %#U, %#w, %#W, %#y, %#Y: Remove leading zeros (if any).</li>
+</ul>
+<h4 id="remarks-1">Remarks</h4>
+<p>Formats the value by using the format string which contains special formatting codes that are preceded by a percent sign (%).</p>
+<h4 id="examples-3">Examples</h4>
+<pre><code>print cft.Format(&quot;%A, %B %d, %Y %H:%M:%S&quot;)
+</code></pre>
+<pre><code>DIM cft AS CPowerTime
+cft = AfxLocalFileTime
+print cft.Format(&quot;%A, %B %d, %Y %H:%M:%S&quot;)
+</code></pre>
+<h1 id="getasfiletime"><a name="GetAsFileTime"></a>GetAsFileTime</h1>
+<p>Returns the date and time as a FILETIME structure.</p>
+<pre><code>FUNCTION GetAsFileTime () AS FILETIME
+</code></pre>
+<h1 id="getasjuliandate"><a name="GetAsJulianDate"></a>GetAsJulianDate</h1>
+<p>Returns the date as a Julian date.</p>
+<pre><code>FUNCTION GetAsJulianDate () AS LONG
+</code></pre>
+<p>Converts a Gregorian date to a Julian date. The year must be a 4 digit year.</p>
+<pre><code>FUNCTION GetAsJulianDate (BYVAL nYear AS LONG, BYVAL nMonth AS LONG, BYVAL nDay AS LONG) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="getassystemtime"><a name="GetAsSystemTime"></a>GetAsSystemTime</h1>
+<p>Returns the date and time as a <strong>SYSTEMTIME</strong> structure.</p>
+<pre><code>FUNCTION GetAsSystemTime () AS SYSTEMTIME
+</code></pre>
+<h1 id="dateserial"><a name="DateSerial"></a>DateSerial</h1>
+<p>Gets/sets the date and time as a FreeBasic date serial.</p>
+<pre><code>PROPERTY DateSerial () AS DOUBLE
+PROPERTY DateSerial (BYVAL dTime AS DOUBLE)
+</code></pre>
+<h4 id="usage-examples">Usage examples</h4>
+<pre><code>DIM ct AS CPowerTime
+ct.DateSerial = DateSerial(2019, 2, 4)
+Print Format(ct.DateSerial, &quot;yyyy/mm/dd&quot;) 
+ct.DateSerial = DateValue(&quot;4/2/2019&quot;)
+Print Format(ct.DateSerial, &quot;yyyy/mm/dd&quot;) 
+ct.DateSerial = TimeValue(&quot;11:59:59PM&quot;)
+Print Format(dt, &quot;hh:mm:ss&quot;)
+ct.DateSerial = Now
+Print Format(ct.DateSerial, &quot;yyyy/mm/dd hh:mm:ss&quot;) 
+ct.DateSerial = DateSerial(2005, 11, 28) + TimeSerial(7, 30, 50)
+Print Format(ct.DateSerial, &quot;yyyy/mm/dd hh:mm:ss&quot;) 
+</code></pre>
+<h1 id="getcurrenttime"><a name="GetCurrentTime"></a>GetCurrentTime</h1>
+<p>Returns a <strong>CPowerTime</strong> object that represents the current system date and time.</p>
+<pre><code>FUNCTION GetCurrentTime () AS CPowerTime
+</code></pre>
+<h1 id="getfiletime"><a name="GetFileTime"></a>GetFileTime</h1>
+<p>Returns the value of the <strong>CPowerTime</strong> object.</p>
+<pre><code>FUNCTION GetFileTime () AS LONGLONG
+</code></pre>
+<h4 id="example">Example</h4>
+<pre><code>DIM cft AS CPowerTime = CPowerTime().GetCurrentTime()
+print cft.GetFileTime
+</code></pre>
+<h1 id="newdate"><a name="NewDate"></a>NewDate</h1>
+<p>Sets a new date to this <strong>CPowerTime</strong> object.</p>
+<p>The date component of the <strong>CPowerTime</strong> object is assigned a new value based upon the specified parameters. The time component is unchanged. If parameters are invalid, <strong>GetLastError</strong> will return ERROR_INVALID_PARAMETER.</p>
+<pre><code>SUB NewDate (BYVAL nYear AS LONG = 0, BYVAL nMonth AS LONG = 0, BYVAL nDay AS LONG = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>The new year. The valid values for this member are 1601 through 30827.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>The new month. The valid values for this member are 1 through 12.</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>The new day. The valid values for this member are 1 through 31.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="newtime"><a name="NewTime"></a>NewTime</h1>
+<p>Sets a new time to this <strong>CPowerTime</strong> object.</p>
+<p>The time component of the <strong>CPowerTime</strong> object is assigned a new value based upon the specified parameters. The date component is unchanged. If parameters are invalid, <strong>GetLastError</strong> will return ERROR_INVALID_PARAMETER.</p>
+<pre><code>SUB NewTime (BYVAL nHour AS LONG = 0, BYVAL nMinute AS LONG = 0, _
+    BYVAL nSecond AS LONG = 0, BYVAL nMSecond AS LONG = 0)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nHour</em></td>
+<td>The new hour. The valid values for this member are 1 through 23.</td>
+</tr>
+<tr class="even">
+<td><em>nMinute</em></td>
+<td>The new minute. The valid values for this member are 1 through 59.</td>
+</tr>
+<tr class="odd">
+<td><em>nSecond</em></td>
+<td>The new second. The valid values for this member are 1 through 59.</td>
+</tr>
+<tr class="even">
+<td><em>nMSecond</em></td>
+<td>The new milliseond. The valid values for this member are 1 through 999.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="now"><a name="Now"></a>Now</h1>
+<p>Assigns the current local date and time on this computer to this <strong>CPowerTime</strong> object.</p>
+<pre><code>SUB Now
+</code></pre>
+<h1 id="nowutc"><a name="NowUTC"></a>NowUTC</h1>
+<p>Assigns the current Coordinated Universal date and time (UTC) to this <strong>CPowerTime</strong> object.</p>
+<pre><code>SUB NowUTC
+</code></pre>
+<h1 id="setfiletime"><a name="SetFileTime"></a>SetFileTime</h1>
+<p>Sets the date and time of this <strong>CPowerTime</strong> object</p>
+<pre><code>FUNCTION SetFileTime (BYVAL nTime AS ULONGLONG)
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nTime</em></td>
+<td>The date and time expressed as a 64-bit value.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="today"><a name="Today"></a>Today</h1>
+<p>Assigns the current local date on this computer to this <strong>CPowerTime</strong> object.</p>
+<pre><code>SUB Today
+</code></pre>
+<h1 id="toutc"><a name="ToUTC"></a>ToUTC</h1>
+<p>The CPowerTime object is converted to Coordinated Universal Time (UTC). It is assumed that previous value was in local time.</p>
+<pre><code>SUB ToUTC
+</code></pre>
+<h1 id="tolocaltime"><a name="ToLocalTime"></a>ToLocalTime</h1>
+<p>The CPowerTime object is converted to local time. It is assumed that the previous value was in Coordinated Universal Time (UTC).</p>
+<pre><code>SUB ToLocalTime
+</code></pre>
+<h1 id="weeknumber"><a name="WeekNumber"></a>WeekNumber</h1>
+<p>Returns the week number for a given date. The year must be a 4 digit year. If a parameter is omitted, the value stored in this <strong>CPowerTime</strong> object is assumed.</p>
+<pre><code>FUNCTION WeekNumber (BYVAL nYear AS LONG = 0, BYVAL nMonth AS LONG = 0, BYVAL nDay AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+<tr class="even">
+<td><em>nMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="odd">
+<td><em>nDay</em></td>
+<td>A day number (1-31).</td>
+</tr>
+</tbody>
+</table>
+<h1 id="weekone"><a name="WeekOne"></a>WeekOne</h1>
+<p>Returns the first day of the first week of a year. If the year is omitted, the year of this <strong>CPowerTime</strong> object is assumed.</p>
+<pre><code>FUNCTION WeekOne (BYVAL nYear AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="weeksinmonth"><a name="WeeksInMonth"></a>WeeksInMonth</h1>
+<p>Returns the number of weeks in the specified month. Will be 4 or 5. If the year and month are omitted, the values of this <strong>CPowerTime</strong> object are assumed.</p>
+<pre><code>FUNCTION WeeksInMonth (BYVAL nMonth AS LONG = 0, BYVAL nYear AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nnMonth</em></td>
+<td>A month number (1-12).</td>
+</tr>
+<tr class="even">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="weeksinyear"><a name="WeeksInYear"></a>WeeksInYear</h1>
+<p>Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53. The year must be a four figit year. If the year is omitted, the year of this <strong>CPowertime</strong> object is assumed.</p>
+<pre><code>FUNCTION WeeksInYear (BYVAL nYear AS LONG = 0) AS LONG
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>nYear</em></td>
+<td>A four digit year.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="year"><a name="Year"></a>Year</h1>
+<p>Returns the Year component of the <strong>CPowerTime</strong> object.</p>
+<pre><code>FUNCTION Year () AS LONG
+</code></pre>
+</body>
+</html>
+
