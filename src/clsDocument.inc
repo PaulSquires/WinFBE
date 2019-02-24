@@ -502,10 +502,8 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszTooltip = mid(**wst, 20)
       elseif left(wst, 21) = "'     PANELALIGNMENT=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAlignment = mid(**wst, 22)
-      elseif left(wst, 17) = "'     PANELSTYLE=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszStyle = mid(**wst, 18)
-      elseif left(wst, 17) = "'     PANELBEVEL=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBevel = mid(**wst, 18)
+      elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(**wst, 24)
       elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(**wst, 21)
       elseif left(wst, 20) = "'     PANELMINWIDTH=" then

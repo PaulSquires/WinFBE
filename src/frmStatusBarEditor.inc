@@ -85,20 +85,14 @@ private function frmStatusBarEditor_SetTextboxes() as long
    if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszTooltip else wszText = ""
    AfxSetWindowText( hCtrl, wszText )
 
-   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOSTYLE)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszStyle else wszText = ""
-   nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
-   ComboBox_SetCurSel( hCtrl, nIndex)
-   EnableWindow( hCtrl, fEnabled)
-
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT)
    if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszAlignment else wszText = ""
    nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
    ComboBox_SetCurSel( hCtrl, nIndex)
    EnableWindow( hCtrl, fEnabled)
 
-   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBEVEL)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszBevel else wszText = ""
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE)
+   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszBorderStyle else wszText = ""
    nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
    ComboBox_SetCurSel( hCtrl, nIndex)
    EnableWindow( hCtrl, fEnabled)
@@ -167,27 +161,21 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
          end if
            
       
-      case IDC_FRMSTATUSBAREDITOR_COMBOSTYLE
-         if codeNotify = CBN_SELCHANGE THEN
-            if nCurSel > -1 THEN gPanelItems(nCurSel).wszStyle = ComboBox_GetCurSel(hwndCtl) 
-         END IF
-
-      
       case IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT
          if codeNotify = CBN_SELCHANGE THEN
-            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAlignment = ComboBox_GetCurSel(hwndCtl) 
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAlignment = AfxGetWindowText(hwndCtl) 
          END IF
 
       
-      case IDC_FRMSTATUSBAREDITOR_COMBOBEVEL
+      case IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE
          if codeNotify = CBN_SELCHANGE THEN
-            if nCurSel > -1 THEN gPanelItems(nCurSel).wszBevel = ComboBox_GetCurSel(hwndCtl) 
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszBorderStyle = AfxGetWindowText(hwndCtl) 
          END IF
 
       
       case IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE
          if codeNotify = CBN_SELCHANGE THEN
-            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAutoSize = ComboBox_GetCurSel(hwndCtl) 
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAutoSize = AfxGetWindowText(hwndCtl) 
          END IF
 
       
@@ -215,14 +203,16 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
       
       case IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT
          if codeNotify = BN_CLICKED THEN
-            Redim Preserve gPanelItems(Ubound(gPanelItems)+1)
-            if nCurSel <> -1 then 
-               For i as long = Ubound(gPanelItems) To nCurSel + 1 Step -1
-                  gPanelItems(i) = gPanelItems(i-1) 
-               Next
-            else
+            if ubound(gPanelItems) = -1 THEN
+               redim gPanelItems(0)
                nCurSel = 0
-            end if   
+            Else
+               Redim Preserve gPanelItems(Ubound(gPanelItems)+1)
+               if nCurSel = -1 THEN nCurSel = 0
+               for i as long = ubound(gPanelItems) to nCurSel + 1 step -1
+                  gPanelItems(i) = gPanelItems(i-1)
+               NEXT
+            END IF
             dim newPanelItem as clsPanelItem
             gPanelItems(nCurSel) = newPanelItem
             frmStatusBarEditor_DisplayListBox( nCurSel )
@@ -232,13 +222,21 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
 
       case IDC_FRMSTATUSBAREDITOR_CMDPANELDELETE
          If codeNotify = BN_CLICKED Then
-            if nCurSel = -1 then exit function 
-            for i as long = nCurSel to ubound(gMenuItems) - 1
-               gMenuItems(i) = gMenuItems(i+1) 
-            next
-            Redim Preserve gMenuItems(Ubound(gMenuItems)-1)
-            frmStatusBarEditor_DisplayListBox( nCurSel )
-            frmStatusBarEditor_SetTextBoxes
+            if nCurSel > -1  THEN
+               if ubound(gPanelItems) = 0 THEN
+                  erase gPanelItems
+                  nCurSel = -1
+               else
+                  ' remove the item from the internal array
+                  for i as long = nCurSel to ubound(gPanelItems) - 1
+                     gPanelItems(i) = gPanelItems(i+1)
+                  NEXT
+                  redim preserve gPanelItems(ubound(gPanelItems)-1)
+               END IF
+               nCurSel = Min(nCurSel, ubound(gPanelItems))
+               frmStatusBarEditor_DisplayListBox( nCurSel )
+               frmStatusBarEditor_SetTextBoxes
+            end if
          end if
 
 
@@ -391,17 +389,10 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL4, L(237,"Style") & ":", 21, 220, 93, 21, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(238,"Border Style") & ":", 21, 247, 93, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOSTYLE, "", 114, 217, 207, 21, _
-        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(238,"Bevel") & ":", 21, 247, 93, 21, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBEVEL, "", 114, 244, 207, 21, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE, "", 114, 244, 207, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
@@ -456,31 +447,19 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    ' Load the comboboxes
    hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelAlignLeft") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelAlignCenter") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelAlignRight") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAlignment.Left") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAlignment.Center") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAlignment.Right") )
   
-   hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOSTYLE )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelText") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelDateNormal") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelDateShort") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelDateLong") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelTimeNormal") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelTimeShort") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelTimeLong") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelCapsLock") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelNumLock") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelInsertLock") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelScrollLock") )
-  
-   hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOBEVEL )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelNoBevel") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelInset") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelRaised") )
+   hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.None") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.Sunken") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.Raised") )
 
    hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelNoAutoSize") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBar.PanelAutoSize") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAutoSize.None") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAutoSize.Contents") )
+   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAutoSize.Spring") )
 
    
    frmStatusBarEditor_DisplayListBox( 0 )

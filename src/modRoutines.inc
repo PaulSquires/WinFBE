@@ -568,14 +568,20 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
+     
       ' Do not reposition if incoming LineNumber is -1 because that value represents
       ' the caller specifically not wanting a repositioning.
       if nLineNumber <> -1 then 
          dim as hwnd hEdit = pDoc->hWndActiveScintilla
+         ' ensure that the line is visible (not folded)
+         if SciExec( hEdit, SCI_GETLINEVISIBLE, nLineNumber, 0) = false then
+            ' unfold the block that contains this hidden line
+            pDoc->FoldToggle( nLineNumber )
+         end if
          SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, Max(nLineNumber - 3, 0), 0) 
          SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
       end if
-   END IF
+   END IF 
    
    function = pDoc
 end function

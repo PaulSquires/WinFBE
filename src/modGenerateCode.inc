@@ -142,14 +142,13 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
       for ii as long = lbound(pDoc->PanelItems) to ubound(pDoc->PanelItems)
          wszControls = wszControls & _
               "'   PANELITEM_START" & vbcrlf & _
-              "'     PANELNAME="      & pDoc->PanelItems(ii).wszName      & vbcrlf & _
-              "'     PANELTEXT="      & pDoc->PanelItems(ii).wszText      & vbcrlf & _
-              "'     PANELTOOLTIP="   & pDoc->PanelItems(ii).wszTooltip   & vbcrlf & _
-              "'     PANELALIGNMENT=" & pDoc->PanelItems(ii).wszAlignment & vbcrlf & _
-              "'     PANELSTYLE="     & pDoc->PanelItems(ii).wszStyle     & vbcrlf & _
-              "'     PANELBEVEL="     & pDoc->PanelItems(ii).wszBevel     & vbcrlf & _
-              "'     PANELAUTOSIZE="  & pDoc->PanelItems(ii).wszAutoSize  & vbcrlf & _
-              "'     PANELMINWIDTH="  & pDoc->PanelItems(ii).wszMinWidth  & vbcrlf & _
+              "'     PANELNAME="        & pDoc->PanelItems(ii).wszName        & vbcrlf & _
+              "'     PANELTEXT="        & pDoc->PanelItems(ii).wszText        & vbcrlf & _
+              "'     PANELTOOLTIP="     & pDoc->PanelItems(ii).wszTooltip     & vbcrlf & _
+              "'     PANELALIGNMENT="   & pDoc->PanelItems(ii).wszAlignment   & vbcrlf & _
+              "'     PANELBORDERSTYLE=" & pDoc->PanelItems(ii).wszBorderStyle & vbcrlf & _
+              "'     PANELAUTOSIZE="    & pDoc->PanelItems(ii).wszAutoSize    & vbcrlf & _
+              "'     PANELMINWIDTH="    & pDoc->PanelItems(ii).wszMinWidth    & vbcrlf & _
               "'   PANELITEM_END" & vbcrlf 
       next
 

@@ -4,9 +4,10 @@ Version 1.9.1
 - Added: 'Vertical Spacing' menu option to vertically space a selected group of controls.
 - Added: Some missing Button control Image related autocomplete popup properties.
 - Added: The -b compile flag when compiling Modules. This allows non *.bas files to be compiled. 
-- Added: #print compile time messages are now output to the Compiler Results listview.
+- Added: Compile time messages (#print/#error) and "C" compile are now output to the Compiler Results listview.
 - Added: WinFBE source code is now included in the WinFBE Suite download.
 - Changed: Updated Italian language file thanks to Massimiliano.
+- Fixed: Compile errors now correctly display any hidden folded error line.
 - Fixed: Regression from 1.9.0. Frame BackColor property inadvertantly changed to BackColorHot.
 - Fixed: Find/Replace popup dialog would not position correctly when Main for was resized or moved.
 - Fixed: TextBox. Added ES_AUTOVSCROLL for multiline textboxes when AcceptReturn = True. 

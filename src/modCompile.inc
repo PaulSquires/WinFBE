@@ -364,7 +364,7 @@ private function SetLogFileTextbox() as long
    ' - raw log file output
    ' - compile command line used
    dim as CWSTR wszText
-   
+ 
    if len(gCompile.wszOutputMsg) then 
       gCompile.wszOutputMsg = gCompile.wszOutputMsg + vbcrlf
    end if
