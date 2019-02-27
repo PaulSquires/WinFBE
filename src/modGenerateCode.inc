@@ -117,7 +117,9 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    ' Save MainMenu (if applicable)
    dim as long numMenuItems = Ubound(pDoc->MenuItems) - lbound(pDoc->MenuItems) + 1
    if numMenuItems > 0 then
-      wszControls = wszControls & "' WINFBE MAINMENU_START" & vbcrlf 
+      wszControls = wszControls & _
+         "' WINFBE MAINMENU_START" & vbcrlf & _
+         "'   MAINMENU_DISPLAY=" & pDoc->GenerateMenu & vbcrlf
       for ii as long = lbound(pDoc->MenuItems) to ubound(pDoc->MenuItems)
          wszControls = wszControls & _
               "'   MENUITEM_START" & vbcrlf & _
@@ -138,7 +140,9 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    ' Save StatusBar Panels (if applicable)
    dim as long numPanelItems = Ubound(pDoc->PanelItems) - lbound(pDoc->PanelItems) + 1
    if numPanelItems > 0 then
-      wszControls = wszControls & "' WINFBE PANELS_START" & vbcrlf 
+      wszControls = wszControls & _
+         "' WINFBE PANELS_START" & vbcrlf & _
+         "'   STATUSBAR_DISPLAY=" & pDoc->GenerateStatusBar & vbcrlf
       for ii as long = lbound(pDoc->PanelItems) to ubound(pDoc->PanelItems)
          wszControls = wszControls & _
               "'   PANELITEM_START" & vbcrlf & _

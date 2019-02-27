@@ -62,66 +62,68 @@ Type clsDocument
       m_hWndActiveScintilla as hwnd
       
    Public:
-      pDocNext         as clsDocument_ ptr = 0  ' pointer to next document in linked list 
-      IsDesigner       As BOOLEAN
-      IsNewFlag        As BOOLEAN
-      LoadingFromFile  as Boolean
+      pDocNext          as clsDocument_ ptr = 0  ' pointer to next document in linked list 
+      IsDesigner        As BOOLEAN
+      IsNewFlag         As BOOLEAN
+      LoadingFromFile   as Boolean
       
       ' 2 Scintilla controls to accommodate split editing
       ' hWindow(0) is our MAIN control (bottom)
       ' hWindow(1) is our split control (top)
-      hWindow(1)       As HWnd   ' Scintilla split edit windows 
+      hWindow(1)        As HWnd   ' Scintilla split edit windows 
       
       ' Visual designer related
-      MenuItems(any)   as clsMenuItem
-      PanelItems(any)  as clsPanelItem
-      Controls         as clsCollection
-      hWndDesigner     as HWnd      ' DesignMain window (switch to this window when in design mode (versus code mode)
-      hDesignTabCtrl   as HWnd      ' TabCtrl to switch between Design/Code
-      hWndFrame        as hwnd      ' DesignFrame for visual designer windows
-      hWndForm         as hwnd      ' DesignForm for visual designer windows
-      hWndFakeMenu     as HWND      ' Fake top menu to display when using Menu Editor
-      hFontFakeMenu    as HFONT     ' System font used for menus
-      ErrorOffset      as long      ' Number of lines to account for when error thrown for visual designer code files.
-      GrabHit          as long      ' Which grab handle is currently active for sizing action
-      ptPrev           as point     ' Used for sizing action
-      bSizing          as Boolean   ' Flag that sizing action is in progress
-      bMoving          as Boolean   ' Flag that moving action is in progress
-      bRegenerateCode  as Boolean   ' Flag to regenerate code when switching to the code tab
-      bLockControls    as Boolean   ' Global flag that locks the form and all controls from moving or resizing.
-      rcSize           as RECT      ' Current size of form/control. Used during sizing action
-      pCtrlAction      as clsControl ptr  ' The control that the size/move action is being performed on
-      wszFormCodeGen   as CWSTR     ' Form code generated  
-      wszFormMetaData  as CWSTR     ' Form metadata that defines the form
-      AllImages(any)   as IMAGES_TYPE ' All Images belonging to the Form
-      
-      ' SnapLines
-      bSnapLines       as Boolean = true  ' Enable/Disable SnapLines
-      hBrushSnapLine   as HBRUSH
-      hSnapLine(3)     as HWND      ' top, bottom, left, right (ENUM SnapLinePosition)
-      bSnapActive(3)   as Boolean
-      ptCursorStart(3) as POINT     ' Client coordinate of cursor at time of snap
+      MenuItems(any)    as clsMenuItem
+      PanelItems(any)   as clsPanelItem
+      Controls          as clsCollection
+      GenerateMenu      as long = BST_CHECKED  ' Indicates to generate code for the menu
+      GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar
+      hWndDesigner      as HWnd            ' DesignMain window (switch to this window when in design mode (versus code mode)
+      hDesignTabCtrl    as HWnd            ' TabCtrl to switch between Design/Code
+      hWndFrame         as hwnd            ' DesignFrame for visual designer windows
+      hWndForm          as hwnd            ' DesignForm for visual designer windows
+      hWndFakeMenu      as HWND            ' Fake top menu to display when using Menu Editor
+      hFontFakeMenu     as HFONT           ' System font used for menus
+      ErrorOffset       as long            ' Number of lines to account for when error thrown for visual designer code files.
+      GrabHit           as long            ' Which grab handle is currently active for sizing action
+      ptPrev            as point           ' Used for sizing action
+      bSizing           as Boolean         ' Flag that sizing action is in progress
+      bMoving           as Boolean         ' Flag that moving action is in progress
+      bRegenerateCode   as Boolean         ' Flag to regenerate code when switching to the code tab
+      bLockControls     as Boolean         ' Global flag that locks the form and all controls from moving or resizing.
+      rcSize            as RECT            ' Current size of form/control. Used during sizing action
+      pCtrlAction       as clsControl ptr  ' The control that the size/move action is being performed on
+      wszFormCodeGen    as CWSTR           ' Form code generated  
+      wszFormMetaData   as CWSTR           ' Form metadata that defines the form
+      AllImages(any)    as IMAGES_TYPE     ' All Images belonging to the Form
+                        
+      ' SnapLines       
+      bSnapLines        as Boolean = true  ' Enable/Disable SnapLines
+      hBrushSnapLine    as HBRUSH
+      hSnapLine(3)      as HWND      ' top, bottom, left, right (ENUM SnapLinePosition)
+      bSnapActive(3)    as Boolean
+      ptCursorStart(3)  as POINT     ' Client coordinate of cursor at time of snap
       
       ' Code document related
-      ProjectFileType  As Long = FILETYPE_UNDEFINED
-      DiskFilename     As WString * MAX_PATH
-      DateFileTime     As FILETIME  
-      hNodeExplorer    As HTREEITEM
-      FileEncoding     as long       
-      bNeedsParsing    as Boolean  ' Document requires to be parsed due to changes.
-      ParseStartLine   as long     ' Line in file where parsing should start
-      UserModified     as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
-      DeletedButKeep   as boolean  ' file no longer exists but keep open anyway
-      DocumentBuild    as string   ' specific build configuration to use for this document
-      sMatchWord       as string   ' for the incremental autocomplete search
-      AutoCompleteType as long     ' AUTOC_DIMAS, AUTOC_TYPE
-      AutoCStartPos    as Long
+      ProjectFileType   As Long = FILETYPE_UNDEFINED
+      DiskFilename      As WString * MAX_PATH
+      DateFileTime      As FILETIME  
+      hNodeExplorer     As HTREEITEM
+      FileEncoding      as long       
+      bNeedsParsing     as Boolean  ' Document requires to be parsed due to changes.
+      ParseStartLine    as long     ' Line in file where parsing should start
+      UserModified      as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
+      DeletedButKeep    as boolean  ' file no longer exists but keep open anyway
+      DocumentBuild     as string   ' specific build configuration to use for this document
+      sMatchWord        as string   ' for the incremental autocomplete search
+      AutoCompleteType  as long     ' AUTOC_DIMAS, AUTOC_TYPE
+      AutoCStartPos     as Long
       
       ' Following used for split edit views
-      hScrollBar       as hwnd
-      ScrInfo          As SCROLLINFO  ' Scrollbar parameters array
-      rcSplitButton    as RECT        ' Split gripper vertical for Scintilla window
-      SplitY           As long        ' Y coordinate of vertical splitter
+      hScrollBar        as hwnd
+      ScrInfo           As SCROLLINFO  ' Scrollbar parameters array
+      rcSplitButton     as RECT        ' Split gripper vertical for Scintilla window
+      SplitY            As long        ' Y coordinate of vertical splitter
       
       static NextFileNum as Long
       

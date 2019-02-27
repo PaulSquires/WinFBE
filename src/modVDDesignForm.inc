@@ -959,13 +959,24 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
       case WM_CTLCOLORSTATIC
          ' Colors for WinFormsX Label controls are set in WM_DRAWITEM
          
-         ' SnapLines labels have Blue back brush
          dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
          if pDoc THEN 
-            if pDoc->hBrushSnapLine = 0 then 
-               pDoc->hBrushSnapLine = CreateSolidBrush( BGR(128,0,128) )  ' purple
+            ' Need to determine if the incoming control handle relates to
+            ' a snapline or is the fake topmenu label.
+            dim as hwnd hCtrl = cast(HWND, lParam)
+            if hCtrl = pDoc->hWndFakeMenu then
+               Return Cast( LRESULT, GetSysColorBrush(COLOR_MENU+1) )
+            else
+               for i as long = 0 to 3
+                  if hCtrl = pDoc->hSnapLine(i) then
+                     ' SnapLines labels have purple brush
+                     if pDoc->hBrushSnapLine = 0 then 
+                        pDoc->hBrushSnapLine = CreateSolidBrush( BGR(128,0,128) )  ' purple
+                     end if
+                     Return Cast(LRESULT, pDoc->hBrushSnapLine)
+                  end if
+               next
             end if
-            Return Cast(LRESULT, pDoc->hBrushSnapLine)
          end if
                
 

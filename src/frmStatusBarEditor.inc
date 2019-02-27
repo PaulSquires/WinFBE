@@ -252,6 +252,9 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
                      pDoc->PanelItems(i) = gPanelItems(i) 
                   next
                end if
+               ' Save the value indicating that we want the statusbar to display in
+               ' the generated code for the form.
+               pDoc->GenerateStatusBar = Button_GetCheck( GetDlgItem(HWND, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM) )
                pDoc->UserModified = true
             end if
             SendMessage(HWnd, WM_CLOSE, 0, 0)
@@ -411,18 +414,20 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
 
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPICSELECT, "...", 350, 440, 36, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+
+   ' Add an image control                                                         
+   DIM pImageCtx AS CImageCtx = CImageCtx(pWindow, IDC_FRMSTATUSBAREDITOR_PICIMAGE, , 384, 224, 60, 60)
+
    pWindow->AddControl("GROUPBOX", , IDC_FRMSTATUSBAREDITOR_FRAME1, L(246,"Image"), 342, 190, 144, 128, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
 
-
-'   pWindow->AddControl("BUTTON", pWindow->hWindow, IDC_STATUSBAREDITOR_CMDPICSELECT, "Select", 304, 200, 48, 24, _
-'        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
-'        WS_EX_LEFT Or WS_EX_LTRREADING)
-'   pWindow->AddControl("LABEL", pWindow->hWindow, IDC_STATUSBAREDITOR_PICICON, "", 250, 220, 32, 32, _
-'        WS_CHILD Or WS_BORDER Or WS_VISIBLE Or WS_TABSTOP Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_ICON Or SS_NOTIFY Or LR_SHARED, _
-'        )
-
+   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM, L(237,"Display on Form"), 21, 345, 175, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDOK, L(0,"OK"), 331, 333, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
@@ -435,6 +440,8 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Copy the form's menu items to the temporary array for editing
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
+      hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM ) 
+      Button_SetCheck( hCtrl, pDoc->GenerateStatusBar )
       dim as long numItems = ubound(pDoc->PanelItems)
       if numItems > -1 then
          redim gPanelItems(numItems)

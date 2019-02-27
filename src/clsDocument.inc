@@ -85,7 +85,12 @@ end property
 ''
 ''  Returns True/False indicating that a valid top mainmenu exists for this form.
 function clsDocument.MainMenuExists() as Boolean
-   function = iif( (ubound(this.MenuItems) - lbound(this.MenuItems) + 1) > 0, true, false)
+   dim as long numItems = ubound(this.MenuItems) - 1
+   if (this.GenerateMenu = BST_CHECKED) andalso (numItems > -1) then
+      return true
+   else   
+      return false
+   end if
 end function
 
 ''
@@ -467,6 +472,8 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          redim preserve this.MenuItems(ub + 1)
          NextMenuItem = ub + 1
          bReadingMenuItem = true
+      elseif left(wst, 21) = "'   MAINMENU_DISPLAY=" then
+         this.GenerateMenu = val(mid(**wst, 22))
       elseif left(wst, 11) = "'     NAME=" then
          if bReadingMenuItem then this.MenuItems(NextMenuItem).wszName = mid(**wst, 12)
       elseif left(wst, 14) = "'     CAPTION=" then
@@ -494,6 +501,8 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          redim preserve this.PanelItems(ub + 1)
          NextPanelItem = ub + 1
          bReadingPanelItem = true
+      elseif left(wst, 22) = "'   STATUSBAR_DISPLAY=" then
+         this.GenerateStatusBar = val(mid(**wst, 23))
       elseif left(wst, 16) = "'     PANELNAME=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszName = mid(**wst, 17)
       elseif left(wst, 16) = "'     PANELTEXT=" then

@@ -682,7 +682,6 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("LABEL", , IDC_FRMIMAGEMANAGER_LBLFILENAME, "", 356, nTop + 400, 334, 20, _
            WS_CHILD Or WS_VISIBLE Or SS_LEFT or SS_PATHELLIPSIS, WS_EX_LEFT Or WS_EX_LTRREADING)
 
-
    pWindow->AddControl("GROUPBOX",, IDC_FRMIMAGEMANAGER_FRAMEPREVIEW, L(377,"Image Preview"), 356, nTop, 334, 350, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)

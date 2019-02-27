@@ -37,6 +37,7 @@
 #Define IDC_FRMMENUEDITOR_CHKSHIFT                  1021
 #Define IDC_FRMMENUEDITOR_LBLSHORTCUT               1022
 #Define IDC_FRMMENUEDITOR_LBLSTATE                  1023
+#Define IDC_FRMMENUEDITOR_CHKDISPLAYONFORM          1024
 
 declare Function frmMenuEditor_CreateFakeMainMenu( ByVal pDoc as clsDocument ptr ) As Long
 declare Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT

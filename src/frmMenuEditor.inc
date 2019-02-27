@@ -275,8 +275,14 @@ private Function frmMenuEditor_OnCommand( ByVal HWnd As HWnd, _
                      pDoc->MenuItems(i) = gMenuItems(i) 
                   next
                end if
+
+               ' Save the value indicating that we want the menu to display in
+               ' the generated code for the form.
+               pDoc->GenerateMenu = Button_GetCheck( GetDlgItem(HWND, IDC_FRMMENUEDITOR_CHKDISPLAYONFORM) )
+
                pDoc->UserModified = true
             end if
+            
             SendMessage(HWnd, WM_CLOSE, 0, 0)
             Exit Function
          End If
@@ -323,6 +329,12 @@ private Function frmMenuEditor_OnCommand( ByVal HWnd As HWnd, _
             If nCurSel > Listbox_GetCount(hListBox) - 1 then nCurSel = 0
             Listbox_SetCurSel(hListBox, nCurSel )
             frmMenuEditor_DisplayMenuItem
+         End If
+
+      Case IDC_FRMMENUEDITOR_CHKDISPLAYONFORM
+         If codeNotify = BN_CLICKED Then
+            ' Don't need to store the value. We will check it when the 
+            ' Menu Editor is closed.
          End If
 
       Case IDC_FRMMENUEDITOR_CHKALT
@@ -507,7 +519,7 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    dim wszString  as WSTRING * 100
    
    HWND_FRMMENUEDITOR = _
-   pWindow->Create(hWndParent, L(312,"Menu Editor"), @frmMenuEditor_WndProc, 0, 0, 411, 418, _
+   pWindow->Create(hWndParent, L(312,"Menu Editor"), @frmMenuEditor_WndProc, 0, 0, 411, 438, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pWindow->Center(pWindow->hWindow, hWndParent)
@@ -606,9 +618,11 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
+   pWindow->AddControl("CHECKBOX", , IDC_FRMMENUEDITOR_CHKDISPLAYONFORM, L(237,"Display on Form"), 13, 383, 175, 16, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT)
-    
    ComboBox_ResetContent(hCtrl)
 
    For i as long = 1 To 26  ' A-Z
@@ -642,7 +656,9 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    ' Copy the form's menu items to the temporary array for editing
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
-   If pDoc Then 
+   If pDoc Then
+      hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKDISPLAYONFORM )
+      Button_SetCheck( hCtrl, pDoc->GenerateMenu )
       dim as long numItems = ubound(pDoc->MenuItems)
       if numItems > -1 then
          redim gMenuItems(numItems)
