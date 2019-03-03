@@ -94,6 +94,17 @@ function clsDocument.MainMenuExists() as Boolean
 end function
 
 ''
+''  Returns True/False indicating that a valid top statusbar exists for this form.
+function clsDocument.StatusBarExists() as Boolean
+   dim as long numItems = ubound(this.PanelItems) - 1
+   if (this.GenerateStatusBar = BST_CHECKED) andalso (numItems > -1) then
+      return true
+   else   
+      return false
+   end if
+end function
+
+''
 ''
 Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd 
    

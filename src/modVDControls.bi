@@ -15,6 +15,7 @@
 
 #Define IDC_LBLFAKEMAINMENU                         1000
 #Define IDC_LBLSNAPLINE                             1001
+#Define IDC_FAKESTATUSBAR                           1002
 
 declare function KeyboardMoveControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long
 declare function KeyboardResizeControls( byval pDoc as clsDocument ptr, byval vKeycode as long ) as Long

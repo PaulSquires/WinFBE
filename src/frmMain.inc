@@ -1859,10 +1859,11 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
 
       case IDM_MENUEDITOR            
          frmMenuEditor_Show( HWND )
-         if pDoc then frmMenuEditor_CreateFakeMainMenu(pDoc)
+         if pDoc then frmMenuEditor_CreateFakeMainMenu( pDoc )
 
       case IDM_STATUSBAREDITOR            
          frmStatusBarEditor_Show( HWND )
+         if pDoc then frmStatusBarEditor_CreateFakeStatusBar( pDoc )
 
       case IDM_IMAGEMANAGER
          frmImageManager_Show( HWND, 0 )

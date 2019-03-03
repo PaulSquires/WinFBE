@@ -84,6 +84,7 @@ Type clsDocument
       hWndForm          as hwnd            ' DesignForm for visual designer windows
       hWndFakeMenu      as HWND            ' Fake top menu to display when using Menu Editor
       hFontFakeMenu     as HFONT           ' System font used for menus
+      hWndStatusBar     as HWND            ' StatusBar for the form using StatusBar Editor
       ErrorOffset       as long            ' Number of lines to account for when error thrown for visual designer code files.
       GrabHit           as long            ' Which grab handle is currently active for sizing action
       ptPrev            as point           ' Used for sizing action
@@ -131,6 +132,7 @@ Type clsDocument
       declare property hWndActiveScintilla(byval hWindow as hwnd)
       
       declare function MainMenuExists() as Boolean
+      declare function StatusBarExists() as Boolean
       declare function GetActiveScintillaPtr() as any ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   

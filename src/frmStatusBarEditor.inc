@@ -22,6 +22,54 @@ dim shared gPanelItems(any) as clsPanelItem
 
 
 ' ========================================================================================
+' Create the statusbar to display on the Form
+' ========================================================================================
+public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocument ptr ) As Long
+
+   if pDoc = 0 then exit function
+   
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr( pDoc->hWndForm )
+   if pWindow = 0 then exit function
+   
+   ' Only create the StatusBar if PanelItems actually exist.
+   if pDoc->StatusBarExists = false then
+      ShowWindow( pDoc->hWndStatusBar, SW_HIDE )
+      exit function
+   end if
+   
+   dim rc as RECT 
+   GetClientRect( pDoc->hWndForm, @rc )
+   
+   dim as long nHeight = AfxGetWindowHeight( pDoc->hWndStatusBar )
+   SetWindowPos( pDoc->hWndStatusBar, 0, _
+                  0, rc.bottom - nHeight, rc.right, nHeight, _
+                  SWP_NOZORDER )
+
+   ' size the panels in order to accommodate autosize
+   for i as long = 0 to ubound(pDoc->PanelItems)
+      'if pDoc->MenuItems(i).nIndent = 0 then
+      '   wszMenu = wszMenu & pDoc->MenuItems(i).wszCaption & wspace(4)
+      'end if
+   next
+   
+
+   Dim As Long rgParts(5)
+   rgParts(0) = pWindow->ScaleX(200)   ' Build configuration
+   rgParts(1) = pWindow->ScaleX(400)   ' Line/Col
+   rgParts(2) = pWindow->ScaleX(500)   ' Normal/Module/Main/Resource
+   rgParts(3) = pWindow->ScaleX(600)   ' Unicode/ANSI
+   rgParts(4) = -1
+   If SendMessage( pDoc->hWndStatusBar, SB_SETPARTS, 5, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
+      SendMessage( pDoc->hWndStatusBar, SB_SIMPLE, False, 0 )
+   End If
+
+   ShowWindow( pDoc->hWndStatusBar, SW_SHOW )
+   
+   function = 0 
+End Function
+                  
+
+' ========================================================================================
 ' Display the entries in the StatusBarEditor Listbox
 ' ========================================================================================
 private Function frmStatusBarEditor_DisplayListBox( ByVal nIndex As Long ) As Long

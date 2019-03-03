@@ -41,4 +41,5 @@
 #DEFINE IDC_FRMSTATUSBAREDITOR_LABEL8             1026
 #DEFINE IDC_FRMSTATUSBAREDITOR_TXTWIDTH           1027
 
+declare Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocument ptr ) As Long
 declare Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT

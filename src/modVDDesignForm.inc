@@ -770,6 +770,7 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       
       if pDoc->pCtrlAction->ControlType = CTRL_FORM then
          frmMenuEditor_CreateFakeMainMenu(pDoc)
+         frmStatusBarEditor_CreateFakeStatusBar(pDoc)
       end if   
 
       ' Indicate that the file is now dirty and will need to be saved

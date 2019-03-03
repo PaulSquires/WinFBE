@@ -14,6 +14,7 @@
 #include once "modVDControls.bi"
 #include once "modVDDesignForm.bi"
 #include once "frmMenuEditor.bi"
+#include once "frmStatusBarEditor.bi"
 
 
 ' ========================================================================================
@@ -862,6 +863,7 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       SetClassLongPtr(pDoc->hWndForm, GCLP_HCURSOR, 0)   
       pCtrl->hWindow = pDoc->hWndForm
    
+      ' Fake topmenu
       pDoc->hWndFakeMenu = _
       pForm->AddControl("LABEL", pDoc->hWndForm, IDC_LBLFAKEMAINMENU, "", 0, 0, 0, 0, _
            WS_CHILD Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
@@ -872,6 +874,13 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       pDoc->hFontFakeMenu = CreateFontIndirect(@ncm.lfMenuFont)
       SendMessage( pDoc->hWndFakeMenu, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, TRUE))
    
+      ' StatusBar
+      pDoc->hWndStatusBar = _
+      pForm->AddControl("STATUSBAR", pDoc->hWndForm, IDC_FAKESTATUSBAR, "", 0, 0, 0, 0, _
+           WS_CHILD Or WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_SIZEGRIP, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+      
+      
       ' Create the four SnapLines 
       for i as long = 0 to 3
          pDoc->hSnapLine(i) = _
@@ -945,6 +954,7 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    SetControlProperty(pCtrl, "HEIGHT", str(rcDraw.bottom-rcDraw.top))
    
    frmMenuEditor_CreateFakeMainMenu(pDoc)
+   frmStatusBarEditor_CreateFakeStatusBar(pDoc)
 
    ' If this form/control is being created from reading an existing source file then 
    ' then we would wait until the all of the control's properties have been loaded. 
