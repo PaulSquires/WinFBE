@@ -152,7 +152,9 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
               "'     PANELALIGNMENT="   & pDoc->PanelItems(ii).wszAlignment   & vbcrlf & _
               "'     PANELBORDERSTYLE=" & pDoc->PanelItems(ii).wszBorderStyle & vbcrlf & _
               "'     PANELAUTOSIZE="    & pDoc->PanelItems(ii).wszAutoSize    & vbcrlf & _
+              "'     PANELWIDTH="       & pDoc->PanelItems(ii).wszWidth       & vbcrlf & _
               "'     PANELMINWIDTH="    & pDoc->PanelItems(ii).wszMinWidth    & vbcrlf & _
+              "'     PANELIMAGE="       & pDoc->PanelItems(ii).pProp.wszPropValue & vbcrlf & _
               "'   PANELITEM_END" & vbcrlf 
       next
 

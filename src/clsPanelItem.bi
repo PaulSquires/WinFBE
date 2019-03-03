@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include once "clsControl.bi"
 
 type clsPanelItem
    private:
@@ -24,6 +25,8 @@ type clsPanelItem
       wszAlignment   as CWSTR = wstr("StatusBarPanelAlignment.Left")
       wszBorderStyle as CWSTR = wstr("StatusBarPanelBorderStyle.Sunken")
       wszAutosize    as CWSTR = wstr("StatusBarPanelAutoSize.None")
-      wszMinWidth    as CWSTR = wstr("0")
+      wszWidth       as CWSTR = wstr("100")
+      wszMinWidth    as CWSTR = wstr("100")
+      pProp          as clsProperty           ' for the panel image
 end type
 

@@ -515,8 +515,12 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(**wst, 24)
       elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(**wst, 21)
+      elseif left(wst, 17) = "'     PANELWIDTH=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszWidth = mid(**wst, 18)
       elseif left(wst, 20) = "'     PANELMINWIDTH=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszMinWidth = mid(**wst, 21)
+      elseif left(wst, 17) = "'     PANELIMAGE=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).pProp.wszPropValue = mid(**wst, 18)
       elseif left(wst, 17) = "'   PANELITEM_END" then
          bReadingPanelItem = false   
 

@@ -396,13 +396,23 @@ private Function frmImageManager_OnCommand( ByVal HWnd As HWnd, _
          if nCurSel = -1 then exit function
          if len(wszImageName) = 0 then exit function
          if id = IDM_DETACHIMAGE then wszImageName = ""
-         pProp = GetActivePropertyPtr()
-         if pProp then pProp->wszPropValue = wszImageName
-         DisplayPropertyList(gTTabCtl.GetActiveDocumentPtr)
-         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-         dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
-         ApplyControlProperties( pDoc, pCtrl )
-         pDoc->UserModified = true
+         
+         ' If the StatusBar Editor called this ImageManager then save the selected
+         ' image name into the pProp of the currently selected 
+         if GetParent( HWND_FRMIMAGES ) = HWND_FRMSTATUSBAREDITOR then
+            Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMIMAGES)
+            pProp = cast( clsProperty ptr, pWindow->UserData(0) )
+            if pProp then pProp->wszPropValue = wszImageName
+         else   
+            pProp = GetActivePropertyPtr()
+            if pProp then pProp->wszPropValue = wszImageName
+            DisplayPropertyList(gTTabCtl.GetActiveDocumentPtr)
+            dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+            dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
+            ApplyControlProperties( pDoc, pCtrl )
+            pDoc->UserModified = true
+         end if
+         
          SendMessage( HWnd, WM_CLOSE, 0, 0)
          exit function
          
@@ -559,6 +569,11 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
    pWindow->SetClientSize(700, 480)
    pWindow->Center(pWindow->hWindow, hWndParent)
 
+   
+   ' Save the incoming pProp value to the ImageManger window. We do this because if the StatusBar
+   ' Editor called this ImageManager then we need to save the Image Name into the pProp.
+   pWindow->UserData(0) = cast( LONG_PTR, pProp )
+   
    ' Add a tooolbar
    DIM hToolBar AS HWND = pWindow->AddControl("Toolbar", , IDC_FRMIMAGEMANAGER_TOOLBAR, "", 0, 0, 0, 0, _
                            WS_CHILD or WS_VISIBLE OR WS_CLIPCHILDREN OR WS_CLIPSIBLINGS or _
@@ -591,7 +606,7 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
       Toolbar_SetHotImageList hToolBar, hImageList
    END IF
 
-   ' // Add buttons to the toolbar
+   ' Add buttons to the toolbar
    dim as long fStyle = BTNS_BUTTON or BTNS_AUTOSIZE or BTNS_SHOWTEXT
    Toolbar_AddButton hToolBar, 0, IDM_ADDIMAGE,    0, fStyle, 0, L(369, "Add Image")
    Toolbar_AddSeparator hToolBar

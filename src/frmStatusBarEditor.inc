@@ -77,37 +77,72 @@ private function frmStatusBarEditor_SetTextboxes() as long
    
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTTEXT)
    EnableWindow( hCtrl, fEnabled)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszText else wszText = ""
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszText else wszText = ""
    AfxSetWindowText( hCtrl, wszText )
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTTOOLTIP)
    EnableWindow( hCtrl, fEnabled)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszTooltip else wszText = ""
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszTooltip else wszText = ""
    AfxSetWindowText( hCtrl, wszText )
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOALIGNMENT)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszAlignment else wszText = ""
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszAlignment else wszText = ""
    nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
    ComboBox_SetCurSel( hCtrl, nIndex)
    EnableWindow( hCtrl, fEnabled)
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszBorderStyle else wszText = ""
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBorderStyle else wszText = ""
    nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
    ComboBox_SetCurSel( hCtrl, nIndex)
    EnableWindow( hCtrl, fEnabled)
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszAutoSize else wszText = ""
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszAutoSize else wszText = ""
    nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
    ComboBox_SetCurSel( hCtrl, nIndex)
    EnableWindow( hCtrl, fEnabled)
 
-   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH)
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTWIDTH)
    EnableWindow( hCtrl, fEnabled)
-   if( nCurSel <> -1 ) then wszText = gPanelItems(nCurSel).wszMinWidth else wszText = ""
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszWidth else wszText = ""
    AfxSetWindowText( hCtrl, wszText )
 
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH)
+   EnableWindow( hCtrl, fEnabled)
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszMinWidth else wszText = ""
+   AfxSetWindowText( hCtrl, wszText )
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_CMDPICSELECT)
+   EnableWindow( hCtrl, fEnabled )
+
+   ' Display any panel image
+   dim pImageCtx as CImageCtx PTR = AfxCImageCtxPtr(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_PICIMAGE)
+   if pImageCtx = 0 then exit function
+   
+   if nCurSel <> -1 then
+      dim pImageType as IMAGES_TYPE ptr 
+      dim wszImageName as wstring * MAX_PATH
+      dim as CWSTR wszFilename 
+      wszImageName = gPanelItems(nCurSel).pProp.wszPropValue 
+      pImageType = GetImagesTypePtr(wszImageName)
+
+      hCtrl = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_PICIMAGE )
+      if pImageType then 
+         wszFilename = pImageType->wszFileName
+         pImageCtx->LoadImageFromFile(wszFilename)
+         Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMSTATUSBAREDITOR)
+         if pWindow then
+            pImageCtx->SetImageWidth( pWindow->ScaleX(pImageCtx->GetImageWidth) )
+            pImageCtx->SetImageHeight( pWindow->ScaleY(pImageCtx->GetImageHeight) )
+         end if
+         pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, CTRUE )
+         ShowWindow( hCtrl, SW_SHOW )
+      else
+         ShowWindow( hCtrl, SW_HIDE )
+      end if
+   end if
+   
    function = 0
 end function
 
@@ -179,6 +214,12 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
          END IF
 
       
+      CASE IDC_FRMSTATUSBAREDITOR_TXTWIDTH
+         if codeNotify = EN_CHANGE THEN
+            if nCurSel > -1 THEN gPanelItems(nCurSel).wszWidth = AfxGetWindowText(hwndCtl)
+         end if
+
+
       CASE IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH
          if codeNotify = EN_CHANGE THEN
             if nCurSel > -1 THEN gPanelItems(nCurSel).wszMinWidth = AfxGetWindowText(hwndCtl)
@@ -201,6 +242,22 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
          end if
 
       
+      case IDC_FRMSTATUSBAREDITOR_CMDPANELADD
+         if codeNotify = BN_CLICKED THEN
+            if ubound(gPanelItems) = -1 THEN
+               redim gPanelItems(0)
+               nCurSel = 0
+            Else
+               Redim Preserve gPanelItems(Ubound(gPanelItems)+1)
+               nCurSel = Ubound(gPanelItems)
+            END IF
+            dim newPanelItem as clsPanelItem
+            gPanelItems(nCurSel) = newPanelItem
+            frmStatusBarEditor_DisplayListBox( nCurSel )
+            frmStatusBarEditor_SetTextBoxes
+         end if
+
+
       case IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT
          if codeNotify = BN_CLICKED THEN
             if ubound(gPanelItems) = -1 THEN
@@ -240,6 +297,15 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
          end if
 
 
+      case IDC_FRMSTATUSBAREDITOR_CMDPICSELECT
+         If codeNotify = BN_CLICKED Then
+            if nCurSel > -1 then
+               frmImageManager_Show( HWND, @gPanelItems(nCurSel).pProp )
+               frmStatusBarEditor_SetTextBoxes
+            end if
+         end if
+         
+         
       Case IDC_FRMSTATUSBAREDITOR_CMDOK    
          If codeNotify = BN_CLICKED Then
             ' Copy the temporary array back to the form's panel items 
@@ -247,7 +313,7 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
             If pDoc Then 
                dim as long numItems = ubound(gPanelItems)
                if numItems > -1 then
-                  redim pDoc->MenuItems(numItems)
+                  redim pDoc->PanelItems(numItems)
                   for i as long = lbound(gPanelItems) to ubound(gPanelItems)
                      pDoc->PanelItems(i) = gPanelItems(i) 
                   next
@@ -278,7 +344,7 @@ End Function
 ' Process WM_CLOSE message for window/dialog: frmStatusBarEditor
 ' ========================================================================================
 private Function frmStatusBarEditor_OnClose( byval HWnd As HWnd ) As LRESULT
-   ' Reset the global MenuItems array
+   ' Reset the global PanelItems array
    erase gPanelItems
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
@@ -363,10 +429,13 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
          SendMessage(hCtrl, BM_SETIMAGE, IMAGE_BITMAP, cast(LPARAM, hBitmap))
          IF hBitmap THEN DeleteObject(hBitmap)
 
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT, L(281, "Insert"), 77, 102, 70, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELADD, L(380, "Add"), 77, 102, 70, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_FLAT Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELDELETE, L(282, "Delete"), 152, 102, 70, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELINSERT, L(281, "Insert"), 152, 102, 70, 24, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_FLAT Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPANELDELETE, L(282, "Delete"), 227, 102, 70, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_FLAT Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -392,21 +461,28 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(238,"Border Style") & ":", 21, 247, 93, 21, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(238,"Border Style") & ":", 21, 222, 93, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE, "", 114, 244, 207, 21, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE, "", 114, 219, 207, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL6, L(239,"Autosize") & ":", 21, 275, 93, 20, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL6, L(239,"Autosize") & ":", 21, 250, 93, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE, "", 114, 271, 207, 21, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE, "", 114, 247, 207, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL7, L(245,"Minimum Width") & ":", 21, 301, 93, 21, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL8, L(381,"Width") & ":", 21, 277, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTWIDTH, "", 114, 273, 207, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL7, L(245,"Minimum Width") & ":", 21, 302, 93, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH, "", 114, 298, 207, 20, _
@@ -414,7 +490,7 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
 
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPICSELECT, "...", 350, 440, 36, 24, _
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPICSELECT, "...", 350, 295, 26, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -437,7 +513,7 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
 
-   ' Copy the form's menu items to the temporary array for editing
+   ' Copy the form's panel items to the temporary array for editing
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then 
       hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM ) 
