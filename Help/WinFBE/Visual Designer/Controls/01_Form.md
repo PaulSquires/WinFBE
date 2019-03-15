@@ -32,6 +32,8 @@
 | MinimumHeight | Gets or sets the minimum height of the form.|
 | MinimumWidth | Gets or sets the minimum width of the form.|
 | Parent | Gets or sets the parent container of the form.|
+| ScaleX | Gets the scaled value of a value based on the horizontal display resolution.|
+| ScaleY | Gets the scaled value of a value based on the vertical display resolution.|
 | Size | Gets or sets the size of the form. Get: returns [wfxSize](#wfxSize) object. Set: (width, height)|
 | StartPosition | Gets or sets the starting position of the form at run time. Refer to [FormStartPosition](#FormStartPosition) enum.|
 |Tag | Gets or sets user defined text associated with the form.|

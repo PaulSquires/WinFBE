@@ -231,7 +231,7 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(10) as TOOLBOX_TYPE
+   redim gToolBox(11) as TOOLBOX_TYPE
    
    gToolBox(0).nToolType = CTRL_POINTER
    gToolBox(0).wszToolBoxName   = "Pointer"
@@ -310,6 +310,13 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(10).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
    gToolBox(10).wszClassName = "PICTUREBOX"
 
+   gToolBox(11).nToolType = CTRL_RICHEDIT
+   gToolBox(11).wszToolBoxName = "RichEdit"
+   gToolBox(11).wszControlName = "RichEdit"
+   gToolBox(11).wszImage = "IMAGE_RICHEDIT"
+   gToolBox(11).wszCursor = "IMAGE_CURSOR_RICHEDIT"
+   gToolBox(11).wszClassName = "RICHEDIT"
+
 '   gToolBox(10).nToolType = CTRL_IMAGEBUTTON
 '   gToolBox(10).wszName   = "ImageButton"
 '   gToolBox(10).wszImage  = "IMAGE_IMGBUTTON"
@@ -339,12 +346,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(14).wszImage  = "IMAGE_TABCONTROL"
 '   gToolBox(14).wszCursor = "IMAGE_CURSOR_TABCONTROL"
 '   gToolBox(14).wszClassName = "TABCONTROL"
-
-'   gToolBox(15).nToolType = CTRL_RICHEDIT
-'   gToolBox(15).wszName   = "RichEdit"
-'   gToolBox(15).wszImage  = "IMAGE_RICHEDIT"
-'   gToolBox(15).wszCursor = "IMAGE_CURSOR_RICHEDIT"
-'   gToolBox(15).wszClassName = "RICHEDIT"
 
 '   gToolBox(16).nToolType = CTRL_PROGRESSBAR
 '   gToolBox(16).wszName   = "ProgressBar"

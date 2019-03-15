@@ -311,7 +311,7 @@ private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    function = 0
 end function
 
-                       
+
 ' ========================================================================================
 ' Apply properties to the optionbutton
 ' ========================================================================================
@@ -701,7 +701,7 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    dim as long nPropValue
    dim as CWSTR wszPropName, wszPropValue
-   
+
    wszPropName  = pProp->wszPropName
    wszPropValue = pProp->wszPropValue
    nPropValue   = Val(pProp->wszPropValue)
@@ -831,6 +831,8 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       
    
       ' Handle control specific properties
+      ' Only act on properties where the value has changed.
+      if pProp->wszPropValue = pProp->wszPropValuePrev then continue for
       select CASE pCtrl->ControlType
          case CTRL_FORM:       Form_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_BUTTON:     Button_ApplyProperties(pDoc, pCtrl, pProp)

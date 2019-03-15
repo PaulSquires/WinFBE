@@ -127,7 +127,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
-      case CTRL_TEXTBOX
+      case CTRL_TEXTBOX, CTRL_RICHEDIT
          AddControlProperty(pCtrl, "AcceptsReturn", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AcceptsTab", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
@@ -213,6 +213,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.MiddleLeft", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "UseTabStops", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
@@ -282,12 +283,12 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ImageHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageScaling", "ImageScale.AutoSize", PropertyType.ComboPicker)
 
+      
 
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
       case CTRL_TABCONTROL
-      case CTRL_RICHEDIT
       case CTRL_PROGRESSBAR
       case CTRL_UPDOWN
       case CTRL_LISTVIEW
@@ -363,7 +364,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
-      case CTRL_TEXTBOX
+      case CTRL_TEXTBOX, CTRL_RICHEDIT
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
          AddControlEvent(pCtrl, "DropFiles")
@@ -490,7 +491,6 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
       case CTRL_VSCROLL
       case CTRL_TIMER
       case CTRL_TABCONTROL
-      case CTRL_RICHEDIT
       case CTRL_PROGRESSBAR
       case CTRL_UPDOWN
       case CTRL_LISTVIEW
@@ -877,9 +877,8 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       ' StatusBar
       pDoc->hWndStatusBar = _
       pForm->AddControl("STATUSBAR", pDoc->hWndForm, IDC_FAKESTATUSBAR, "", 0, 0, 0, 0, _
-           WS_CHILD Or WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_SIZEGRIP, _
+           WS_CHILD Or WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_TOOLTIPS, _
            WS_EX_LEFT Or WS_EX_LTRREADING)
-      
       
       ' Create the four SnapLines 
       for i as long = 0 to 3

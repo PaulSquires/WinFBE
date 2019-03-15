@@ -40,6 +40,7 @@
 | TabIndex | Gets or sets the position that the control occupies in the TAB position.|
 | TabStop | Gets or sets a value (true/false) indicating whether the user can use the TAB key to give focus to the control.|
 | Tag | Gets or sets user defined text associated with the form.|
+| TextAlign | Gets or sets a value indicating the alignment of the text on a control. Refer to [LabelAlignment](#LabelAlignment) enum. |
 | Top | Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).|
 | TopIndex | Gets or sets the item index of the first visible item in the displayed list.|
 | UseTabStops | Gets or sets a value (true/false) indicating whether the TAB character should be expanded into full spacing.|

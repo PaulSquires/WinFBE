@@ -760,12 +760,13 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       ' Ensure that the rect is unscaled
       SetRect(@rc, pWindow->UnScaleX(rc.Left), pWindow->UnScaleY(rc.Top), _
                    pWindow->UnScaleX(rc.Right), pWindow->UnScaleY(rc.Bottom))
+      
       pDoc->pCtrlAction->SuspendLayout = true
-      SetControlProperty(pDoc->pCtrlAction, "LEFT", str(rc.left))
-      SetControlProperty(pDoc->pCtrlAction, "TOP", str(rc.top))
-      SetControlProperty(pDoc->pCtrlAction, "WIDTH", str(rc.right - rc.left))
-      SetControlProperty(pDoc->pCtrlAction, "HEIGHT", str(rc.bottom - rc.top))
-      ApplyControlProperties(pDoc, pDoc->pCtrlAction)
+      SetControlProperty( pDoc->pCtrlAction, "LEFT", str(rc.left) )
+      SetControlProperty( pDoc->pCtrlAction, "TOP", str(rc.top) )
+      SetControlProperty( pDoc->pCtrlAction, "WIDTH", str(rc.right - rc.left) )
+      SetControlProperty( pDoc->pCtrlAction, "HEIGHT", str(rc.bottom - rc.top) )
+      ApplyControlProperties( pDoc, pDoc->pCtrlAction )
       pDoc->pCtrlAction->SuspendLayout = false
       
       if pDoc->pCtrlAction->ControlType = CTRL_FORM then
@@ -888,6 +889,25 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_NOTIFY message for Visual Designer Form
+' ========================================================================================
+private Function DesignerForm_OnNotify( ByVal HWnd As HWnd, _
+                                        ByVal id As Long, _
+                                        ByVal pNMHDR As NMHDR Ptr _
+                                        ) As LRESULT
+
+   Select Case pNMHDR->code 
+      Case NM_CLICK
+         if id = IDC_FAKESTATUSBAR then
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_STATUSBAREDITOR, 0), 0 )
+         end if
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Process WM_COMMAND message for Visual Designer Form
 ' ========================================================================================
 private Function DesignerForm_OnCommand( ByVal HWnd As HWnd, _
@@ -916,9 +936,10 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
                                        ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_PAINT,       DesignerForm_OnPaint)
-      HANDLE_MSG (HWnd, WM_COMMAND,     DesignerForm_OnCommand)
-      HANDLE_MSG (HWnd, WM_DESTROY,     DesignerForm_OnDestroy)
+      HANDLE_MSG (HWnd, WM_PAINT,   DesignerForm_OnPaint)
+      HANDLE_MSG (HWnd, WM_NOTIFY,  DesignerForm_OnNotify)
+      HANDLE_MSG (HWnd, WM_COMMAND, DesignerForm_OnCommand)
+      HANDLE_MSG (HWnd, WM_DESTROY, DesignerForm_OnDestroy)
 
       case WM_LBUTTONDBLCLK: HandleDesignerLButtonDoubleClick(HWND)
       case WM_RBUTTONDOWN:   HandleDesignerRButtonDown(HWND)
@@ -1016,39 +1037,41 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
             dim pCtrl as clsControl ptr = pDoc->Controls.GetCtrlPtr( lpdis->hwndItem )
             if pCtrl then
                dim pProp as clsProperty ptr
-               pProp = GetControlPropertyPtr( pCtrl, "FORECOLOR" )
-               if pProp then 
-                  SetTextColor( lpdis->hDC, GetRGBColorFromProperty(pProp) )
-               end if
-               pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
-               if pProp then 
-                  dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
-                  SetBkColor( lpdis->hDC, clrBack )
-                  dim as RECT rc
-                  GetClientRect( lpdis->hwndItem, @rc )
-                  if pCtrl->hBackBrush then DeleteBrush( pCtrl->hBackBrush )
-                  pCtrl->hBackBrush = CreateSolidBrush( clrBack )
-                  FillRect( lpdis->hDC, @rc, pCtrl->hBackBrush )
-               end if
-               dim wszText as WString * MAX_PATH
-               dim as long lFormat 
-               Select Case **GetControlProperty(pCtrl, "TEXTALIGN")
-                  Case "LabelAlignment.BottomCenter": lFormat = DT_CENTER Or DT_BOTTOM
-                  Case "LabelAlignment.BottomLeft":   lFormat = DT_LEFT   Or DT_BOTTOM
-                  Case "LabelAlignment.BottomRight":  lFormat = DT_RIGHT  Or DT_BOTTOM
-                  Case "LabelAlignment.MiddleCenter": lFormat = DT_CENTER Or DT_VCENTER
-                  Case "LabelAlignment.MiddleLeft":   lFormat = DT_LEFT   Or DT_VCENTER
-                  Case "LabelAlignment.MiddleRight":  lFormat = DT_RIGHT  Or DT_VCENTER
-                  Case "LabelAlignment.TopCenter":    lFormat = DT_CENTER Or DT_TOP
-                  Case "LabelAlignment.TopLeft":      lFormat = DT_LEFT   Or DT_TOP
-                  Case "LabelAlignment.TopRight":     lFormat = DT_RIGHT  Or DT_TOP
-               End Select
-               lFormat = lFormat or DT_SINGLELINE
+               
+               select case pCtrl->ControlType
+                  case CTRL_LABEL
+                     pProp = GetControlPropertyPtr( pCtrl, "FORECOLOR" )
+                     if pProp then SetTextColor( lpdis->hDC, GetRGBColorFromProperty(pProp) )
+                     pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
+                     if pProp then 
+                        dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+                        SetBkColor( lpdis->hDC, clrBack )
+                        dim as RECT rc
+                        GetClientRect( lpdis->hwndItem, @rc )
+                        if pCtrl->hBackBrush then DeleteBrush( pCtrl->hBackBrush )
+                        pCtrl->hBackBrush = CreateSolidBrush( clrBack )
+                        FillRect( lpdis->hDC, @rc, pCtrl->hBackBrush )
+                     end if
+                     dim wszText as WString * MAX_PATH
+                     dim as long lFormat 
+                     Select Case **GetControlProperty(pCtrl, "TEXTALIGN")
+                        Case "LabelAlignment.BottomCenter": lFormat = DT_CENTER Or DT_BOTTOM
+                        Case "LabelAlignment.BottomLeft":   lFormat = DT_LEFT   Or DT_BOTTOM
+                        Case "LabelAlignment.BottomRight":  lFormat = DT_RIGHT  Or DT_BOTTOM
+                        Case "LabelAlignment.MiddleCenter": lFormat = DT_CENTER Or DT_VCENTER
+                        Case "LabelAlignment.MiddleLeft":   lFormat = DT_LEFT   Or DT_VCENTER
+                        Case "LabelAlignment.MiddleRight":  lFormat = DT_RIGHT  Or DT_VCENTER
+                        Case "LabelAlignment.TopCenter":    lFormat = DT_CENTER Or DT_TOP
+                        Case "LabelAlignment.TopLeft":      lFormat = DT_LEFT   Or DT_TOP
+                        Case "LabelAlignment.TopRight":     lFormat = DT_RIGHT  Or DT_TOP
+                     End Select
+                     lFormat = lFormat or DT_SINGLELINE
 
-               wszText = AfxGetWindowText( lpdis->hwndItem )
-               DrawText( lpdis->hDC, wszText, -1, Cast(lpRect, @lpdis->rcItem), lFormat )
-
+                     wszText = AfxGetWindowText( lpdis->hwndItem )
+                     DrawText( lpdis->hDC, wszText, -1, Cast(lpRect, @lpdis->rcItem), lFormat )
+               end select
             end if   
+            
          end if
 
       

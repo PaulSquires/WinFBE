@@ -466,6 +466,9 @@ public function SetControlProperty( byval pCtrl as clsControl ptr, _
    
    for i as long = lb to ub
       if ucase(pCtrl->Properties(i).wszPropName) = wszPropName_ucase THEN
+         ' Save the previous property value so that ApplyProperties will only
+         ' act on any properties that have actually changed.
+         pCtrl->Properties(i).wszPropValuePrev = pCtrl->Properties(i).wszPropValue
          pCtrl->Properties(i).wszPropValue = wszPropValue
          exit for
       END IF

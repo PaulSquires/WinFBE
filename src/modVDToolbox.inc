@@ -132,7 +132,7 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopCenter"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopLeft"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ButtonAlignment.TopRight"))
-            case CTRL_LABEL
+            case CTRL_LABEL, CTRL_LISTBOX
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.BottomCenter"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.BottomLeft"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.BottomRight"))

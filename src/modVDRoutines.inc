@@ -199,11 +199,12 @@ public function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       CASE CTRL_PICTUREBOX:        wszText = "wfxPictureBox"  
       CASE CTRL_COMBOBOX:          wszText = "wfxComboBox" 
       CASE CTRL_LISTBOX:           wszText = "wfxListBox"  
+      case CTRL_RICHEDIT:          wszText = "wfxRichEdit"
+      case CTRL_MASKEDEDIT:        wszText = "wfxMaskedEdit"
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
       case CTRL_TABCONTROL
-      case CTRL_RICHEDIT
       case CTRL_PROGRESSBAR
       case CTRL_UPDOWN
       case CTRL_LISTVIEW
@@ -214,7 +215,6 @@ public function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM
       case CTRL_OCX
-      case CTRL_MASKEDEDIT:       wszText = "wfxMaskedEdit"
    END SELECT
 
    return wszText

@@ -203,6 +203,30 @@ end function
 
 
 ' ========================================================================================
+' Generate code for any existing Form StatusBar.
+' ========================================================================================
+private function GenerateStatusBarCode( byval pDoc as clsDocument ptr ) as CWSTR
+'   dim as clsMenuItem iMenu
+'   dim as CWSTR wszText, wszShortcut, wszFormName
+'   dim as CWSTR DQ = chr(34)
+    
+'   dim as string sp(5) 
+'   for i as long = 1 to ubound(sp)
+'      sp(i) = space(val(gConfig.TabSize) * i)
+'   NEXT
+
+'   wszText = _
+'   sp(1) & "dim ncm As NONCLIENTMETRICS" & vbcrlf & _
+'   sp(1) & "ncm.cbSize = SizeOf(ncm)" & vbcrlf & _
+'   sp(1) & "SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)" & vbcrlf & _
+'   sp(1) & "nClientOffset = AfxUnScaleY(ncm.iMenuHeight)  ' holds the height of the mainmenu" & vbcrlf & vbcrlf & _
+'   sp(1) & "this.MainMenu.Parent = @this" & vbcrlf 
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Generate code for any existing Form MainMenu.
 ' ========================================================================================
 private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
@@ -475,6 +499,11 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ' If a menu exists for the Form then add the code generation
    if pDoc->MainMenuExists then
       wszText = wszText & GenerateMainMenuCode(pDoc)
+   end if
+   
+   ' If a statusbar exists for the Form then add the code generation
+   if pDoc->StatusBarExists then
+      wszText = wszText & GenerateStatusBarCode(pDoc)
    end if
    
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast

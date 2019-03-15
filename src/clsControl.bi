@@ -34,10 +34,11 @@ END TYPE
 type clsProperty
    private:
    public:
-      wszPropName    as CWSTR          ' Used for Get/Set of property value
-      wszPropValue   as CWSTR
-      wszPropDefault as CWSTR
-      PropType       as PropertyType 
+      wszPropName      as CWSTR      ' Used for Get/Set of property value
+      wszPropValuePrev as CWSTR      ' Previous property value (so that ApplyProperties will only act on changed properties)
+      wszPropValue     as CWSTR
+      wszPropDefault   as CWSTR
+      PropType         as PropertyType 
 END TYPE
 
 type clsControl
