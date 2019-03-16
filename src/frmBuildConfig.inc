@@ -348,7 +348,7 @@ private Function frmBuildConfig_ListBox_SubclassProc ( _
          ' Only erase the bottom portion of the listbox that extends from the last item
          ' to the bottom edge of the listbox. All other lines are already drawn. This helps
          ' reduce screen flicker.
-         dim as RECT rc = GetListBoxEmptyClientArea( HWND_FRMBUILDCONFIG, HWND, FRMBUILDCONFIG_LISTBOX_LINEHEIGHT )
+         dim as RECT rc = GetListBoxEmptyClientArea( HWND, FRMBUILDCONFIG_LISTBOX_LINEHEIGHT )
          if rc.top < rc.bottom then
             dim as HDC hDC = cast(HDC, wParam)
             FillRect(hDC, @rc, GetSysColorBrush(COLOR_WINDOW))

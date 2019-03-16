@@ -128,20 +128,24 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
       case CTRL_TEXTBOX, CTRL_RICHEDIT
-         AddControlProperty(pCtrl, "AcceptsReturn", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "AcceptsReturn", iif(pCtrl->ControlType=CTRL_TEXTBOX,"False","True"), PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AcceptsTab", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
+         if pCtrl->ControlType = CTRL_TEXTBOX then
          AddControlProperty(pCtrl, "CharacterCasing", "CharacterCasing.Normal", PropertyType.ComboPicker)
+         end if
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "HideSelection", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MaxLength", "32767", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "Multiline", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Multiline", iif(pCtrl->ControlType=CTRL_TEXTBOX,"False","True"), PropertyType.TrueFalse)
+         if pCtrl->ControlType = CTRL_TEXTBOX then
          AddControlProperty(pCtrl, "PasswordChar", "", PropertyType.EditEnter)
+         end if
          AddControlProperty(pCtrl, "ReadOnly", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "TextScrollBars", "ScrollBars.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
@@ -150,7 +154,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "TextAlignment.Left", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "WordWrap", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "WordWrap", iif(pCtrl->ControlType=CTRL_TEXTBOX,"False","True"), PropertyType.TrueFalse)
 
       case CTRL_MASKEDEDIT
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)

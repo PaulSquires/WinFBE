@@ -1673,8 +1673,7 @@ end function
 ' Calcluate the client area at bottom of Listbox not covered by a row (needed to manually
 ' paint the unused area in WM_ERASEBKGRD messages to avoid flicker.
 ' ========================================================================================
-public function GetListBoxEmptyClientArea( byval hWndForm as HWND, _
-                                           byval hListBox as HWND, _
+public function GetListBoxEmptyClientArea( byval hListBox as HWND, _
                                            byval nLineHeight as long _
                                            ) as RECT
    
@@ -1683,9 +1682,9 @@ public function GetListBoxEmptyClientArea( byval hWndForm as HWND, _
    ' calculate from last item to bottom of listbox, otherwise calculate based on
    ' the mod of the lineheight to listbox height so we can color the partial line
    ' that won't be displayed at the bottom of the list.
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWndForm)
-   if pWindow = 0 then exit function
-   dim as long itemHeight = pWindow->ScaleY(nLineHeight)
+   dim as RECT rcItem
+   SendMessage( hListBox, LB_GETITEMRECT, 0, cast(LPARAM, @rcItem) )
+   dim as long itemHeight = rcItem.bottom - rcItem.top
    dim as long NumItems = ListBox_GetCount(hListBox)
    dim as long ItemsPerPage = ( rc.bottom \ itemHeight )
    dim as long nTopIndex = SendMessage( hListBox, LB_GETTOPINDEX, 0, 0 ) 
