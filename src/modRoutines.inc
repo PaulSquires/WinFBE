@@ -1692,7 +1692,7 @@ public function GetListBoxEmptyClientArea( byval hListBox as HWND, _
 
    if NumItems > 0 then
       ItemsPerPage = (rc.bottom - rc.top) / itemHeight
-      dim as long bottom_index = (nTopIndex + ItemsPerPage) - 1
+      dim as long bottom_index = (nTopIndex + ItemsPerPage)
       if bottom_index >= NumItems then bottom_index = NumItems - 1
       visible_rows = (bottom_index - nTopIndex) + 1
    end if

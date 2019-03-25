@@ -250,7 +250,7 @@
 </tbody>
 </table>
 <h1 id="csqlitestmt-class">CSQLiteStmt Class</h1>
-<p>Wraps a sqlite3_stmt pointer returned by the Prepare method of the CSQLite class.</p>
+<p>Wraps a sqlite3_stmt pointer returned by the <strong>Prepare</strong> method of the <strong>CSQLite</strong> class.</p>
 <p>Inherits from CSQLite.</p>
 <pre><code>CONSTRUCTOR CSQLiteStmt (BYVAL pStmt AS sqlite3_stmt PTR)
 </code></pre>
@@ -2115,9 +2115,9 @@ PROPERTY hStmt (BYVAL pStmt AS sqlite3_stmt PTR)
 </code></pre>
 <h4 id="return-value-61">Return value</h4>
 <p>TRUE or FALSE.</p>
-<h1 id="readonly-1"><a name="ReadOnly"></a>ReadOnly</h1>
+<h1 id="reset"><a name="Reset"></a>Reset</h1>
 <p>Resets a prepared statement object back to its initial state, ready to be re-executed. Any SQL statement variables that had values bound to them using the <strong>Bind_*</strong>() methods retain their values. Use <strong>ClearBindings</strong> to reset the bindings.</p>
-<pre><code>FUNCTION ReadOnly () AS BOOLEAN
+<pre><code>FUNCTION Reset () AS LONG
 </code></pre>
 <h4 id="return-value-62">Return value</h4>
 <p>If the most recent call to <strong>Step_</strong> for the prepared statement returned SQLITE_ROW or SQLITE_DONE, or if <strong>Step_</strong> has never before been called on the statement, then Reset returns SQLITE_OK.</p>

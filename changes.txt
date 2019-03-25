@@ -1,4 +1,5 @@
-Version 1.9.1
+Version 1.9.1 (March 25, 2019)
+FYI - (The visual designer is still a work in progress)
 - Added: PictureBox autocomplete popup properties.
 - Added: 'Horizonal Spacing' menu option to horizontally space a selected group of controls.
 - Added: 'Vertical Spacing' menu option to vertically space a selected group of controls.
@@ -8,6 +9,7 @@ Version 1.9.1
 - Added: WinFBE source code is now included in the WinFBE Suite download.
 - Added: Several new color and text align options ofr ListBox.
 - Changed: Updated Italian language file thanks to Massimiliano.
+- Fixed: Regression that caused compiling of individual modules to object files in a project to fail.
 - Fixed: Compile errors now correctly display any hidden folded error line.
 - Fixed: Regression from 1.9.0. Frame BackColor property inadvertantly changed to BackColorHot.
 - Fixed: Find/Replace popup dialog would not position correctly when Main for was resized or moved.

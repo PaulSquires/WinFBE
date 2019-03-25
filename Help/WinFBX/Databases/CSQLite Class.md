@@ -89,7 +89,7 @@ The database is opened for reading and writing, and is created if it does not al
 
 # CSQLiteStmt Class
 
-Wraps a sqlite3_stmt pointer returned by the Prepare method of the CSQLite class.
+Wraps a sqlite3_stmt pointer returned by the **Prepare** method of the **CSQLite** class.
 
 Inherits from CSQLite.
 
@@ -1729,12 +1729,12 @@ FUNCTION ReadOnly () AS BOOLEAN
 
 TRUE or FALSE.
 
-# <a name="ReadOnly"></a>ReadOnly
+# <a name="Reset"></a>Reset
 
 Resets a prepared statement object back to its initial state, ready to be re-executed. Any SQL statement variables that had values bound to them using the **Bind_\***() methods retain their values. Use **ClearBindings** to reset the bindings.
 
 ```
-FUNCTION ReadOnly () AS BOOLEAN
+FUNCTION Reset () AS LONG
 ```
 
 #### Return value

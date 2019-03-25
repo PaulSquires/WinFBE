@@ -269,6 +269,14 @@
 <td>Scales a vertical coordinate according the DPI setting.</td>
 </tr>
 <tr class="even">
+<td><a href="#ScreenX">ScreenX</a></td>
+<td>Returns the x-coordinate of the window relative to the screen.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ScreenY">ScreenY</a></td>
+<td>Returns the y-coordinate of the window relative to the screen.</td>
+</tr>
+<tr class="even">
 <td><a href="#ScrollWindowPtr">ScrollWindowPtr</a></td>
 <td>Gets/sets a pointer to the scroll window class.</td>
 </tr>
@@ -4176,6 +4184,20 @@ pWindow.GetWorkArea(@rc)
 <h4 id="usage-example-11">Usage example</h4>
 <pre><code>DIM nWidth AS LONG = pWindow.Width
 </code></pre>
+<h1 id="screenx"><a name="ScreenX"></a>ScreenX</h1>
+<p>Returns the unscaled x-coordinate of the window relative to the screen.</p>
+<pre><code>PROPERTY ScreenX () AS LONG
+</code></pre>
+<h4 id="usage-example-12">Usage example</h4>
+<pre><code>DIM nLeft AS LONG = pWindow.ScreenX
+</code></pre>
+<h1 id="screeny"><a name="ScreenY"></a>ScreenY</h1>
+<p>Returns the unscaled y-coordinate of the window relative to the screen.</p>
+<pre><code>PROPERTY ScreenY () AS LONG
+</code></pre>
+<h4 id="usage-example-13">Usage example</h4>
+<pre><code>DIM nTop AS LONG = pWindow.ScreenY
+</code></pre>
 <h1 id="hwindow"><a name="hWindow"></a>hWindow</h1>
 <p>Gets/sets the main window handle.</p>
 <pre><code>PROPERTY hWindow () AS HWND
@@ -4206,7 +4228,7 @@ PROPERTY hWindow (BYVAL hwnd AS HWND)
 <p>Gets the MDI client window handle.</p>
 <pre><code>PROPERTY hwndClient () AS HWND
 </code></pre>
-<h4 id="usage-example-12">Usage example</h4>
+<h4 id="usage-example-14">Usage example</h4>
 <pre><code>DIM hwnd AS HWND = pWindow.hwndClient
 </code></pre>
 <h1 id="instancehandle"><a name="InstanceHandle"></a>InstanceHandle</h1>
@@ -4230,7 +4252,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 </table>
 <h4 id="return-value-9">Return value</h4>
 <p>The instance handle.</p>
-<h4 id="usage-example-13">Usage example</h4>
+<h4 id="usage-example-15">Usage example</h4>
 <pre><code>DIM hInstance = pWindow.InstanceHandle
 </code></pre>
 <pre><code>pWindow.InstanceHandle = pInstance
@@ -4253,7 +4275,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 </tr>
 </tbody>
 </table>
-<h4 id="usage-example-14">Usage example</h4>
+<h4 id="usage-example-16">Usage example</h4>
 <pre><code>pWindow.MDIClassName = &quot;MyClassName&quot;
 </code></pre>
 <h1 id="movewindow"><a name="MoveWindow"></a>MoveWindow</h1>
@@ -4301,7 +4323,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 <h4 id="remarks-11">Remarks</h4>
 <p>If the <em>bRepaint</em> parameter is CTRUE, the system sends the WM_PAINT message to the window procedure immediately after moving the window (that is, the <strong>MoveWindow</strong> method calls the UpdateWindow function). If <em>bRepaint</em> is FALSE, the application must explicitly invalidate or redraw any parts of the window and parent window that need redrawing.</p>
 <p><strong>MoveWindow</strong> sends the WM_WINDOWPOSCHANGING, WM_WINDOWPOSCHANGED, WM_MOVE, WM_SIZE, and WM_NCCALCSIZE messages to the window.</p>
-<h4 id="usage-example-15">Usage example</h4>
+<h4 id="usage-example-17">Usage example</h4>
 <pre><code>pWindow.MoveWindow GetDlgItem(hwnd, IDCANCEL), pWindow.ClientWidth, _
    pWindow-ClientHeight, 75, 23, CTRUE
 </code></pre>
@@ -4309,21 +4331,21 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 <p>Resizes the window sending a WM_SIZE message with the SIZE_RESTORED value.</p>
 <pre><code>SUB Resize
 </code></pre>
-<h4 id="usage-example-16">Usage example</h4>
+<h4 id="usage-example-18">Usage example</h4>
 <pre><code>pWindow.Resize
 </code></pre>
 <h1 id="rxratio"><a name="rxRatio"></a>rxRatio</h1>
 <p>Returns the horizontal scaling ratio.</p>
 <pre><code>PROPERTY rxRatio () AS SINGLE
 </code></pre>
-<h4 id="usage-example-17">Usage example</h4>
+<h4 id="usage-example-19">Usage example</h4>
 <pre><code>DIM rx AS LONG = pWindow.rxRatio
 </code></pre>
 <h1 id="ryratio"><a name="ryRatio"></a>ryRatio</h1>
 <p>Returns the vertical scaling ratio.</p>
 <pre><code>PROPERTY ryRatio () AS SINGLE
 </code></pre>
-<h4 id="usage-example-18">Usage example</h4>
+<h4 id="usage-example-20">Usage example</h4>
 <pre><code>DIM ry AS LONG = pWindow.ryRatio
 </code></pre>
 <h1 id="scalex"><a name="ScaleX"></a>ScaleX</h1>
@@ -4344,7 +4366,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 </tr>
 </tbody>
 </table>
-<h4 id="usage-example-19">Usage example</h4>
+<h4 id="usage-example-21">Usage example</h4>
 <pre><code>DIM cx AS LONG = pWindow.ScaleX
 </code></pre>
 <h4 id="remarks-12">Remarks</h4>
@@ -4367,7 +4389,7 @@ PROPERTY InstanceHandle (BYVAL hInst AS HINSTANCE)
 </tr>
 </tbody>
 </table>
-<h4 id="usage-example-20">Usage example</h4>
+<h4 id="usage-example-22">Usage example</h4>
 <pre><code>DIM cy AS LONG = pWindow.ScaleY
 </code></pre>
 <h4 id="remarks-13">Remarks</h4>
@@ -4391,7 +4413,7 @@ PROPERTY ScrollWindowPtr (BYVAL pScrollWindow AS CScrollWindow PTR)
 </tr>
 </tbody>
 </table>
-<h4 id="usage-example-21">Usage example</h4>
+<h4 id="usage-example-23">Usage example</h4>
 <pre><code>DIM pScrollWindow AS CScrollWindowPtr = pWindow.ScrollWondowPtr
 </code></pre>
 <pre><code>pWindow.ScrollWondowPtr = pScrollWindow
@@ -4418,7 +4440,7 @@ PROPERTY ScrollWindowPtr (BYVAL pScrollWindow AS CScrollWindow PTR)
 </tr>
 </tbody>
 </table>
-<h4 id="usage-example-22">Usage example</h4>
+<h4 id="usage-example-24">Usage example</h4>
 <pre><code>pWindow.SetClientSize(400, 250)
 </code></pre>
 <h1 id="setfont"><a name="SetFont"></a>SetFont</h1>
@@ -4604,7 +4626,7 @@ pWindow.SetFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 <p>A non-topmost window can own a topmost window, but the reverse cannot occur. Any window (for example, a dialog box) owned by a topmost window is itself made a topmost window, to ensure that all owned windows stay above their owner.</p>
 <p>If an application is not in the foreground, and should be in the foreground, it must call the <strong>SetForegroundWindow</strong> function.</p>
 <p>To use <strong>SetWindowPos</strong> to bring a window to the top, the process that owns the window must have <strong>SetForegroundWindow</strong> permission.</p>
-<h4 id="usage-example-23">Usage example</h4>
+<h4 id="usage-example-25">Usage example</h4>
 <pre><code>SetWindowPos(hwnd, NULL, 0, 0, cx, cy, _
    SWP_NOZORDER OR SWP_NOMOVE OR SWP_NOACTIVATE)
 </code></pre>
@@ -4628,7 +4650,7 @@ pWindow.SetFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 </table>
 <h4 id="remarks-15">Remarks</h4>
 <p>A SINGLE datatype is used instead of a long to avoid rounding errors in the calculation.</p>
-<h4 id="usage-example-24">Usage example</h4>
+<h4 id="usage-example-26">Usage example</h4>
 <p>DIM cx AS SINGLE = pWindow.UnScaleX(250)</p>
 <h1 id="unscaley"><a name="UnScaleY"></a>UnScaleY</h1>
 <p>Unscales a vertical coordinate according the DPI setting.</p>
@@ -4650,7 +4672,7 @@ pWindow.SetFont(&quot;Marlett&quot;, 8, FW_NORMAL, , , , SYMBOL_CHARSET)
 </table>
 <h4 id="remarks-16">Remarks</h4>
 <p>A SINGLE datatype is used instead of a long to avoid rounding errors in the calculation.</p>
-<h4 id="usage-example-25">Usage example</h4>
+<h4 id="usage-example-27">Usage example</h4>
 <p>DIM cy AS SINGLE = pWindow.UnScaleY(250)</p>
 <h1 id="userdata"><a name="UserData"></a>UserData</h1>
 <p>Gets/sets a value in the user data area of the window.</p>
@@ -4787,7 +4809,7 @@ FUNCTION AfxCWindowPtr (BYVAL pCreateStruct AS CREATESTRUCT PTR) AS CWindow PTR
 </table>
 <h4 id="return-value-16">Return value</h4>
 <p>A pointer to the <strong>CWindow</strong> class or NULL.</p>
-<h4 id="usage-example-26">Usage example</h4>
+<h4 id="usage-example-28">Usage example</h4>
 <pre><code>DIM pWindow AS CWindow PTR = AfxCWindowOwnerPtr(hwnd)
 </code></pre>
 <h1 id="afxscrollwindowptr"><a name="AfxScrollWindowPtr"></a>AfxScrollWindowPtr</h1>
@@ -4810,7 +4832,7 @@ FUNCTION AfxCWindowPtr (BYVAL pCreateStruct AS CREATESTRUCT PTR) AS CWindow PTR
 </table>
 <h4 id="return-value-17">Return value</h4>
 <p>A pointer to the <strong>CScrollWindow</strong> class or NULL.</p>
-<h4 id="usage-example-27">Usage example</h4>
+<h4 id="usage-example-29">Usage example</h4>
 <pre><code>DIM pWindow AS CScrollWindow PTR = AfxScrollWindowPtr(hwnd)
 </code></pre>
 <h1 id="afxinputbox"><a name="AfxInputBox"></a>AfxInputBox</h1>
@@ -4860,7 +4882,7 @@ FUNCTION AfxCWindowPtr (BYVAL pCreateStruct AS CREATESTRUCT PTR) AS CWindow PTR
 </table>
 <h4 id="return-value-18">Return value</h4>
 <p>The edited string.</p>
-<h4 id="usage-example-28">Usage example</h4>
+<h4 id="usage-example-30">Usage example</h4>
 <pre><code>DIM cws AS CWSTR = AfxInputBox(hwnd, 0, 0, &quot;InputBox test&quot;, &quot;What's your name?&quot;, &quot;My name is José&quot;)
 </code></pre>
 <h1 id="anchorcontrol"><a name="AnchorControl"></a>AnchorControl</h1>
@@ -4936,7 +4958,7 @@ pChildLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
 <p>Returns the window handle of the tab page.</p>
 <pre><code>PROPERTY hTabPage () AS HWND
 </code></pre>
-<h4 id="usage-example-29">Usage example</h4>
+<h4 id="usage-example-31">Usage example</h4>
 <pre><code>DIM hTabPage AS HWND = pTabPage.hTabPage
 </code></pre>
 <h1 id="insertpage"><a name="InsertPage"></a>InsertPage</h1>
@@ -4977,7 +4999,7 @@ pChildLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
 </table>
 <h4 id="return-value-19">Return value</h4>
 <p>The handle of the new tab page.</p>
-<h4 id="usage-example-30">Usage example</h4>
+<h4 id="usage-example-32">Usage example</h4>
 <pre><code>' // Create a tab page
 DIM pTabPage AS CTabPage PTR = NEW CTabPage
 pTabPage-&gt;InsertPage(hTab, 0, &quot;Tab 1&quot;, -1, @TabPage_WndProc)
@@ -5010,7 +5032,7 @@ pTabPage-&gt;AddControl(&quot;Button&quot;, pTabPage-&gt;hTabPage, IDC_BTNSUBMIT
 </tr>
 </tbody>
 </table>
-<h4 id="usage-example-31">Usage example</h4>
+<h4 id="usage-example-33">Usage example</h4>
 <pre><code>DIM pTabPage AS CTabPage PTR = AfxCTabPagePtr(hTab, 1)
 </code></pre>
 <h1 id="afxdestroytabpage"><a name="AfxDestroyTabPage"></a>AfxDestroyTabPage</h1>
@@ -5037,7 +5059,7 @@ pTabPage-&gt;AddControl(&quot;Button&quot;, pTabPage-&gt;hTabPage, IDC_BTNSUBMIT
 </table>
 <h4 id="return-value-20">Return value</h4>
 <p>TRUE or FALSE.</p>
-<h4 id="usage-example-32">Usage example</h4>
+<h4 id="usage-example-34">Usage example</h4>
 <pre><code>AfxDestroyTabPage(hTab, 1)
 </code></pre>
 <h1 id="afxdestroyalltabpages"><a name="AfxDestroyAllTabPages"></a>AfxDestroyAllTabPages</h1>
@@ -5060,7 +5082,7 @@ pTabPage-&gt;AddControl(&quot;Button&quot;, pTabPage-&gt;hTabPage, IDC_BTNSUBMIT
 </table>
 <h4 id="return-value-21">Return value</h4>
 <p>TRUE or FALSE.</p>
-<h4 id="usage-example-33">Usage example</h4>
+<h4 id="usage-example-35">Usage example</h4>
 <pre><code>AfxDestroyAllTabPages(hTab)
 </code></pre>
 <h1 id="afxresizetabpages"><a name="AfxResizeTabPages"></a>AfxResizeTabPages</h1>
@@ -5083,7 +5105,7 @@ pTabPage-&gt;AddControl(&quot;Button&quot;, pTabPage-&gt;hTabPage, IDC_BTNSUBMIT
 </table>
 <h4 id="return-value-22">Return value</h4>
 <p>TRUE or FALSE.</p>
-<h4 id="usage-example-34">Usage example</h4>
+<h4 id="usage-example-36">Usage example</h4>
 <pre><code>AfxResizeTabPages(hTab)
 </code></pre>
 <h1 id="afxscrolltabpageptr"><a name="AfxScrollTabPagePtr"></a>AfxScrollTabPagePtr</h1>
@@ -5110,7 +5132,7 @@ pTabPage-&gt;AddControl(&quot;Button&quot;, pTabPage-&gt;hTabPage, IDC_BTNSUBMIT
 </table>
 <h4 id="return-value-23">Return value</h4>
 <p>A pointer to the <strong>CScrollWindow</strong> class or NULL.</p>
-<h4 id="usage-example-35">Usage example</h4>
+<h4 id="usage-example-37">Usage example</h4>
 <pre><code>DIM pScrollWindow AS CScrollWindow PTR = AfxScrollTabPagePtr(hTab, 1)
 </code></pre>
 </body>

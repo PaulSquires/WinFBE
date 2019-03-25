@@ -386,7 +386,8 @@ end function
 private function ParseLogForError( byref wsLogSt as CWSTR, _
                                    byval bAllowSuccessMessage as Boolean, _
                                    Byval wID as long, _
-                                   byval fCompile64 as Boolean _
+                                   byval fCompile64 as Boolean, _
+                                   byval fCompilingObjFiles as Boolean _
                                    ) as Boolean
    
    ' Returns TRUE if error has been detected. This signals to the calling code
@@ -597,12 +598,15 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    ' the Output window (log file).
    If fGoodCompile = False Then NumErrors = NumErrors + 1
 
+
    dim as CWSTR cwsCompileMsg
 
-   ' If the output file was never created then throw an error
-   If (NumWarnings = 0) andalso (NumErrors = 0) then
-      if FileLen(gCompile.OutputFilename) = 0 then 
-         NumErrors = NumErrors + 1
+   ' If the EXE output file was never created then throw an error
+   if fCompilingObjFiles = false then
+      If (NumWarnings = 0) andalso (NumErrors = 0) then
+         if FileLen(gCompile.OutputFilename) = 0 then 
+            NumErrors = NumErrors + 1
+         end if
       end if
    end if
    
@@ -1013,7 +1017,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                ' Need to check to see if any errors occurred while compiling this
                ' object file. If yes, then stop processing object files and display
                ' the error.
-               if ParseLogForError(sConsoleText, false, wID, fCompile64) then   ' error detected
+               if ParseLogForError(sConsoleText, false, wID, fCompile64, true) then   ' error detected
                   gApp.IsCompiling = false
                   SetCursor( hCurSave )
                   ResetScintillaCursors()
@@ -1093,7 +1097,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Add any temp resource file to the list of temp files to later be deleted.
    gApp.AddQuickRunEXE(gCompile.TempResourceFile)
       
-   if ParseLogForError(sConsoleText, true, wID, fCompile64) = true then 
+   if ParseLogForError(sConsoleText, true, wID, fCompile64, false) = true then 
       ' Error was found. Editor has now been set to the error position. Nothing
       ' more we can do now but exit out. 
       ' Make sure gApp.IsCompiling = false before returning
