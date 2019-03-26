@@ -222,15 +222,17 @@ private function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRedrawWindow(pCtrl->hWindow)
 
    case "BORDERSTYLE"
-      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
       dim as long wsStyle
       select case **wszPropValue
          case "ControlBorderStyle.None"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.Fixed3D"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
       end select
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
@@ -276,8 +278,8 @@ private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRedrawWindow(pCtrl->hWindow)
       
    case "THREESTATE"
-      AfxRemoveWindowStyle(pCtrl->hWindow, BS_AUTOCHECKBOX)
       AfxRemoveWindowStyle(pCtrl->hWindow, BS_AUTO3STATE)
+      AfxRemoveWindowStyle(pCtrl->hWindow, BS_AUTOCHECKBOX)
       if wszPropValue = "True" then
          AfxAddWindowStyle(pCtrl->hWindow, BS_AUTO3STATE)
       else
@@ -412,15 +414,17 @@ private function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRedrawWindow(pCtrl->hWindow)
 
    case "BORDERSTYLE"
-      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
       dim as long wsStyle                                     
       select case **wszPropValue
          case "ControlBorderStyle.None"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.Fixed3D"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
       end select
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
@@ -464,15 +468,17 @@ private function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRedrawWindow(pCtrl->hWindow)
 
    case "BORDERSTYLE"
-      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
       dim as long wsStyle                                     
       select case **wszPropValue
          case "ControlBorderStyle.None"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.Fixed3D"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
       end select
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
@@ -535,14 +541,16 @@ private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
 
    case "BORDERSTYLE"
-      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
       select case **wszPropValue
          case "ControlBorderStyle.None"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.Fixed3D"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
       end select
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
@@ -632,14 +640,16 @@ private function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
 
    case "BORDERSTYLE"
-      AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
-      AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
       select case **wszPropValue
          case "ControlBorderStyle.None"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.Fixed3D"
+            AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
          case "ControlBorderStyle.FixedSingle"
             AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
+            AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
       end select
       AfxRedrawNonClientArea(pCtrl->hWindow) 
 
@@ -839,7 +849,8 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
          case CTRL_LABEL:      Label_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_CHECKBOX:   CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
          case CTRL_OPTION:     OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_TEXTBOX:    TextBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_TEXTBOX:    TextBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_RICHEDIT:   TextBox_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_MASKEDEDIT: MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
          case CTRL_LISTBOX:    ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
          case CTRL_COMBOBOX:   ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      

@@ -1,3 +1,6 @@
+Version 1.9.2
+- Fixed: Controls property "BorderStyle" not correctly set when dynamically applying WindowStyle and WindowExStyle.
+
 Version 1.9.1 (March 25, 2019)
 FYI - (The visual designer is still a work in progress)
 - Added: PictureBox autocomplete popup properties.

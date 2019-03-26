@@ -194,7 +194,7 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
            CTRL_OPTION, CTRL_FRAME
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "Click" 
-      case CTRL_TEXTBOX, CTRL_MASKEDEDIT
+      case CTRL_TEXTBOX, CTRL_MASKEDEDIT, CTRL_RICHEDIT
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "KeyPress" 
       case CTRL_LISTBOX, CTRL_COMBOBOX
@@ -209,7 +209,6 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
    '   CTRL_VSCROLL
    '   CTRL_TIMER
    '   CTRL_TABCONTROL
-   '   CTRL_RICHEDIT
    '   CTRL_PROGRESSBAR
    '   CTRL_UPDOWN
    '   CTRL_LISTVIEW
@@ -472,6 +471,7 @@ private function InitiatePropertyValueChange() as Long
          '***** WORKAROUND *****           
          dim wst as wstring * 1000 = **wszValue
          pProp->wszPropValue = wst
+         pProp->wszPropValuePrev = wszOldValue
          '**********************           
 
          select case ucase(pProp->wszPropName)
@@ -1185,6 +1185,7 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
          END IF
          if loword(wParam) = IDC_FRMVDTOOLBOX_COMBOLIST then
             if hiword(wParam) = LBN_SELCHANGE then
+? "ComboList LBN_SELCHANGE"
                InitiatePropertyValueChange
                ShowWindow(HWND_PROPLIST_COMBOLIST, SW_HIDE)
             end if
