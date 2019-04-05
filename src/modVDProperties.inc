@@ -78,6 +78,8 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Indicates how wide each column should be in a multicolumn listbox."
       case "CONTROLBOX"   
          wszPropDescribe = "Determines whether a form has a Control/System menu box."
+      case "CUEBANNERTEXT"
+         wszPropDescribe = "Sets the textual cue, or tip, that is displayed by the edit control to prompt the user for information."
       CASE "DEFAULTCHARACTER"
          wszPropDescribe = "A default character that the control substitutes for each invalid character in the user input."
       CASE "DROPDOWNSTYLE"

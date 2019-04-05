@@ -136,6 +136,9 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          if pCtrl->ControlType = CTRL_TEXTBOX then
          AddControlProperty(pCtrl, "CharacterCasing", "CharacterCasing.Normal", PropertyType.ComboPicker)
          end if
+         if pCtrl->ControlType = CTRL_TEXTBOX then
+         AddControlProperty(pCtrl, "CueBannerText", "", PropertyType.EditEnter)
+         end if
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)

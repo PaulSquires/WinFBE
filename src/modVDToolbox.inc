@@ -1185,7 +1185,6 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
          END IF
          if loword(wParam) = IDC_FRMVDTOOLBOX_COMBOLIST then
             if hiword(wParam) = LBN_SELCHANGE then
-? "ComboList LBN_SELCHANGE"
                InitiatePropertyValueChange
                ShowWindow(HWND_PROPLIST_COMBOLIST, SW_HIDE)
             end if
@@ -1376,7 +1375,7 @@ private Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
             InitiatePropertyValueChange
             HidePropertyListControls
          end if 
-         
+
    End Select
 
    ' for messages that we don't deal with

@@ -68,6 +68,7 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
    dim as long nShowWindow
    dim as long xCursorDistance, yCursorDistance
    dim as long nSnap(3)
+   dim as Boolean bDone
    
    ' Get the rectangle of the current active control being moved or sized 
    GetClientRect( pDoc->hWndForm, @rcClient )
@@ -172,6 +173,7 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                      bHit(SnapLinePosition.top) = false  ' prevent further tests
                      bHit(SnapLinePosition.bottom) = false  ' prevent further tests
                      yDelta = yCursorDistance
+                     bDone = true
                   else
                      ' We are still snapped and still within the snap area. Therefore, do not
                      ' allow the control to move by setting yDelta to zero.
@@ -184,6 +186,7 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                      bHit(SnapLinePosition.left) = false  ' prevent further tests
                      bHit(SnapLinePosition.right) = false  ' prevent further tests
                      xDelta = xCursorDistance
+                     bDone = true
                   else
                      ' We are still snapped and still within the snap area. Therefore, do not
                      ' allow the control to move by setting xDelta to zero.
@@ -202,6 +205,7 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                     rcSnap(i).right - rcSnap(i).left, _
                     rcSnap(i).bottom - rcSnap(i).top, _
                     nShowWindow )
+      if bDone then exit for
    next              
       
    

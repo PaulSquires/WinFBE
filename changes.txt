@@ -1,5 +1,8 @@
 Version 1.9.2
+- Added: Language translation for Brazilian-Portuguese by Marco Pimenta (mvpimenta).
 - Fixed: Controls property "BorderStyle" not correctly set when dynamically applying WindowStyle and WindowExStyle.
+- Fixed: "Visible" property of controls reported the "Enabled" value after control was created.
+- Fixed: Label controls could lose their OwnerDraw abilities if visibility was toggled.
 
 Version 1.9.1 (March 25, 2019)
 FYI - (The visual designer is still a work in progress)
