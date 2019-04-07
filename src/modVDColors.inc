@@ -44,6 +44,7 @@ private Function frmVDColors_OnCommand( ByVal HWnd As HWnd, _
                   end if
                   clrResult = AfxChooseColorDialog( hwnd, lCustomColor(0), @lCustomColor(0))
                   if clrResult <> -1 then 
+                     pProp->wszPropValuePrev = pProp->wszPropValue 
                      pProp->wszPropValue = "CUSTOM|" & clrResult
                      AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
                      pDoc->UserModified = true
@@ -60,6 +61,7 @@ private Function frmVDColors_OnCommand( ByVal HWnd As HWnd, _
                nCurSel = ListBox_GetCurSel(hwndCtl)
                if nCurSel > -1 then 
                   idx = ListBox_GetItemData(hwndCtl, nCurSel)
+                  pProp->wszPropValuePrev = pProp->wszPropValue 
                   pProp->wszPropValue = _
                      iif(id = IDC_FRMVDCOLORS_LSTSYSTEM, "SYSTEM|", "COLORS|")
                   pProp->wszPropValue = pProp->wszPropValue & gColors(idx).wszColorName

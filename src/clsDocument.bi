@@ -97,7 +97,8 @@ Type clsDocument
       wszFormCodeGen    as CWSTR           ' Form code generated  
       wszFormMetaData   as CWSTR           ' Form metadata that defines the form
       AllImages(any)    as IMAGES_TYPE     ' All Images belonging to the Form
-                        
+      bDesignerViewLoad as boolean = true  ' Show designer/code when initially loaded from file and displayed in tab
+                  
       ' SnapLines       
       bSnapLines        as Boolean = true  ' Enable/Disable SnapLines
       hBrushSnapLine    as HBRUSH

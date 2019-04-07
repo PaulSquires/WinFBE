@@ -358,7 +358,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    for i as long = 1 to ubound(sp)
       sp(i) = space(val(gConfig.TabSize) * i)
    NEXT
-   
+
    pDoc->wszFormCodegen = ""
 
    wszFormName = GetFormName(pDoc)

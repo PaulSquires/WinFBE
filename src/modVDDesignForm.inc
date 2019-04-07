@@ -1057,6 +1057,11 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
                         FillRect( lpdis->hDC, @rc, pCtrl->hBackBrush )
                      end if
                      dim wszText as WString * MAX_PATH
+                     
+                     ' Windows draws Labels with SS_LEFT, CC_CENTER and SS_RIGHT styles by using
+                     ' DrawText with the DT_WORDBREAK and DT_EXPANDTABS parameters. Other styles
+                     ' must use DT_SINGLELINE and do not word wrap.
+                     dim as long lWrapMode = DT_SINGLELINE
                      dim as long lFormat 
                      Select Case **GetControlProperty(pCtrl, "TEXTALIGN")
                         Case "LabelAlignment.BottomCenter": lFormat = DT_CENTER Or DT_BOTTOM
@@ -1065,11 +1070,17 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
                         Case "LabelAlignment.MiddleCenter": lFormat = DT_CENTER Or DT_VCENTER
                         Case "LabelAlignment.MiddleLeft":   lFormat = DT_LEFT   Or DT_VCENTER
                         Case "LabelAlignment.MiddleRight":  lFormat = DT_RIGHT  Or DT_VCENTER
-                        Case "LabelAlignment.TopCenter":    lFormat = DT_CENTER Or DT_TOP
-                        Case "LabelAlignment.TopLeft":      lFormat = DT_LEFT   Or DT_TOP
-                        Case "LabelAlignment.TopRight":     lFormat = DT_RIGHT  Or DT_TOP
+                        Case "LabelAlignment.TopCenter"
+                           lFormat = DT_CENTER Or DT_TOP
+                           lWrapMode = DT_WORDBREAK
+                        Case "LabelAlignment.TopLeft"
+                           lFormat = DT_LEFT Or DT_TOP
+                           lWrapMode = DT_WORDBREAK
+                        Case "LabelAlignment.TopRight"
+                           lFormat = DT_RIGHT Or DT_TOP
+                           lWrapMode = DT_WORDBREAK
                      End Select
-                     lFormat = lFormat or DT_SINGLELINE
+                     lFormat = lFormat or lWrapMode or DT_EXPANDTABS
 
                      wszText = AfxGetWindowText( lpdis->hwndItem )
                      DrawText( lpdis->hDC, wszText, -1, Cast(lpRect, @lpdis->rcItem), lFormat )

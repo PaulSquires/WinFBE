@@ -170,6 +170,7 @@ private function ChooseFontForProperty( byval pProp as clsProperty ptr ) as long
 
    EnableWindow(HWND_FRMMAIN, false)
    if ChooseFont(@cf) then
+      pProp->wszPropValuePrev = pProp->wszPropValue 
       pProp->wszPropValue = SetPropValueFromLogFont(*cf.lpLogFont) 
       AfxRedrawWindow(GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES))
    END IF
@@ -290,7 +291,7 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
          exit for
       end if
    next
-
+   
    if pCtrlActive = 0 THEN exit function
    
    ' If the current control property being displayed has not changed then do not

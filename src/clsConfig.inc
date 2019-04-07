@@ -21,6 +21,7 @@
 #include once "frmBuildConfig.bi"
 #include once "frmMain.bi"
 #include once "modVDColors.bi"
+#include once "modVDDesignForm.bi"
 
                
 ''
@@ -1261,6 +1262,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
          pStream.WriteLine "FileType=" & pDoc->ProjectFileType
          pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than True
          pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+         pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
          pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
          pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
          pStream.WriteLine "FirstLine1=" & SendMessage( pDoc->hWindow(1), SCI_GETFIRSTVISIBLELINE, 0, 0) 
@@ -1323,7 +1325,8 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
    dim as Boolean bReadingNote
-
+   dim as Boolean bDesignerView
+   
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    
@@ -1423,6 +1426,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
          Case "File":                wszFilename = wData
          Case "FileType":            nFileType   = nData
          
+         case "IsDesignerView":      bDesignerView = nData
          Case "TabIndex":            bLoadInTab  = nData
          Case "Bookmarks":           sBookmarks  = Str(wData)
          Case "FirstLine":           nFirstLine  = nData
@@ -1454,6 +1458,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
                end if   
 
                pDoc->SplitY = nSplitPosition
+               pDoc->bDesignerViewLoad = bDesignerView
                
                If bLoadInTab Then
                   If nTabIndex > Ubound(nTabs) Then
@@ -1490,7 +1495,15 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    For i = LBound(nTabs) To UBound(nTabs)
       iTab = gTTabCtl.GetTabIndexFromFilename(nTabs(i)->DiskFilename)
       If iTab = -1 Then iTab = gTTabCtl.AddTab( nTabs(i) )  ' Add the new document to the top tabcontrol
+      if nTabs(i)->IsDesigner then
+         if nTabs(i)->bDesignerViewLoad then
+            TabCtrl_SetCurSel( nTabs(i)->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
+         else
+            TabCtrl_SetCurSel( nTabs(i)->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+         end if
+      end if
    Next   
+
    gTTabCtl.SetFocusTab( nActiveTab )
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then

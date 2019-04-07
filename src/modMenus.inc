@@ -176,6 +176,8 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_NEWFORM, L(310,"New Form")
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_VIEWTOOLBOX, L(311,"View Toolbox")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_TOGGLEVIEWCODE, L(382,"Toggle View Form/Code") & chr(9) & "Ctrl+M"
+         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(315,"Align")
                AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_ALIGNLEFTS, L(316,"Lefts")
@@ -269,6 +271,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_G,          IDM_GOTO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_I,          IDM_INSERTFILE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_L,          IDM_SELECTLINE )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_M,          IDM_TOGGLEVIEWCODE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_N,          IDM_FILENEW )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_O,          IDM_FILEOPEN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Q,          IDM_FILECLOSE )
@@ -287,6 +290,8 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_PRIOR,      IDM_GOTOPREVFUNCTION )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,   IDM_ZOOMIN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
+
+
 
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_U,  IDM_TOUPPERCASE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL Or FALT, VK_L,  IDM_TOLOWERCASE )
@@ -448,7 +453,10 @@ public Function frmMain_ChangeTopMenuStates() As Long
                EnableMenuItem hMenu, IDM_GOTOSOURCEFILE, MF_GRAYED
             end if
             
-
+            if pDoc->IsDesigner then
+               EnableMenuItem hMenu, IDM_TOGGLEVIEWCODE, MF_BYCOMMAND Or MF_ENABLED
+            end if
+            
             ' Check the File Encoding
             select CASE pDoc->FileEncoding
                case FILE_ENCODING_ANSI: nSelected = IDM_ANSI

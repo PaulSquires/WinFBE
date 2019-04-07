@@ -1492,8 +1492,22 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          end select
          
       case IDM_DELETE
-         ' Delete selected controls
          dim pCtrl as clsControl ptr
+         ' Need to test if any of the selected controls are locked. If any of them are then
+         ' we need to abort the deleting process.
+         for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+            pCtrl = pDoc->Controls.ItemAt(i)
+            if pCtrl->IsSelected THEN 
+               ' Test to ensure that the specific control Locked property is not set, or
+               ' the global Locked setting for the entire form is not set.
+               if IsControlLocked(pDoc, pCtrl) then 
+                  ' Maybe put a messagebox here indicating that can not delete because locked?
+                  exit function
+               end if
+            end if         
+         next
+
+         ' Delete selected controls
          do until pDoc->Controls.SelectedControlsCount = 0
             for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
                pCtrl = pDoc->Controls.ItemAt(i)
@@ -1857,6 +1871,19 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       case IDM_VIEWTOOLBOX
          frmVDToolbox_Show(HWND)   ' toggle show/hide
 
+      case IDM_TOGGLEVIEWCODE
+         if pDoc then
+            dim as long idx = TabCtrl_GetCurSel( pDoc->hDesignTabCtrl )
+            if idx = 0 then
+               ' Designer is active, switch to code
+               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+            else
+               ' Code is active, switch to designer
+               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
+            end if
+            frmMain_PositionWindows
+         end if
+            
       case IDM_MENUEDITOR            
          frmMenuEditor_Show( HWND )
          if pDoc then frmMenuEditor_CreateFakeMainMenu( pDoc )

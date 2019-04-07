@@ -649,6 +649,7 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    ' If this is a FORM document then we need to create the string of controls and properties that gets
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
+      this.bRegenerateCode = true
       GenerateFormMetaData(@this)     ' recreate the metadata
       GenerateFormCode(@this)         ' regenerate visual designer code
       this.ErrorOffset = 0

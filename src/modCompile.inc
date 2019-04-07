@@ -959,6 +959,24 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Function = False: Exit Function
    End If
       
+
+   gApp.IsCompiling = true    
+
+   dim as HCURSOR hCurSave = GetCursor()
+   SetCursor( LoadCursor(0, IDC_WAIT) )
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
+
+
+   ' Regenerate any visual designer code for Forms. Doing a pDoc->Save will regenerate
+   ' the code for a document with pDoc->IsDesigner.
+   pDoc = gApp.pDocList
+   do until pDoc = 0
+      if pDoc->IsDesigner then pDoc->SaveFile
+      pDoc = pDoc->pDocNext
+   loop
+   
+   
    ' Run any precompile tools
    for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
       if gConfig.Tools(y).Action = USERTOOL_ACTION_PRECOMPILE then
@@ -969,17 +987,12 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Change to the output code directory
    ChDir gCompile.MainFolder
    
-   gApp.IsCompiling = true    
    
    ' Indicate in the StatusBar that we have started to compile
    SetCompileStatusBarMessage( L(203, "Compiling") & "...", 0 )
    
    gCompile.StartTime = Timer
    
-   dim as HCURSOR hCurSave = GetCursor()
-   SetCursor( LoadCursor(0, IDC_WAIT) )
-   pDoc = gTTabCtl.GetActiveDocumentPtr()
-   if pDoc THEN SciExec( pDoc->hWindow(0), SCI_SETCURSOR, SC_CURSORWAIT, 0 )
 
    ' If this is a project then we need to compile all of the modules first
    ' in order to create the necessary *.o object files
