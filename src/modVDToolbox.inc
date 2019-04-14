@@ -268,7 +268,7 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    
    dim pCtrl as clsControl ptr  
    dim pCtrlActive as clsControl ptr = pDoc->Controls.GetActiveControl
-   
+
    dim as long idx, nCurSel
 
    ' Always clear the controls combobox and repopuplate it. Do this even
@@ -304,7 +304,7 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
       exit function
    END IF
    pCtrlDisplayed = pCtrlActive
-   
+
       
    ' clear the listbox (PROPERTIES)
    dim as hwnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
@@ -322,8 +322,10 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
          CASE "STYLE", "EXSTYLE"
             continue for
       END SELECT
+
       idx = Listbox_AddString(hList, wszPropName)
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
+
    NEXT
 
    ' clear the listbox (EVENTS)
@@ -975,6 +977,8 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   SelectObject(lpdis->hDC, hBrush)      
                   FillRect(lpdis->hDC, @rc, hBrush)  
                   rc.left = rc.left + pWindow->ScaleX(4)
+
+
                   DrawText( lpdis->hDC, _
                             pCtrl->Properties(lpdis->itemData).wszPropName, _
                             -1, Cast(lpRect, @rc), _
@@ -1018,14 +1022,14 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                      wszValue = AfxStrParse(wszPropValue, 2, "|")
                      wszPropValue = wszValue
                      if wszList = "CUSTOM" then wszPropValue = "Custom Color"
-                      
+                       
                      dim as HBRUSH hBrushColor, hBrushOld
                      dim as RECT rcColor = rc2
                      rcColor.left   = rcColor.left 
                      rcColor.right  = rcColor.left + pWindow->ScaleX(18)
                      rcColor.top    = rcColor.top + pWindow->ScaleY(1)
                      rcColor.bottom = rcColor.bottom - pWindow->ScaleY(4)
-                      
+                       
                      dim as COLORREF rgbClr = GetRGBColorFromProperty(@pCtrl->Properties(lpdis->itemData))
                      hBrushColor = CreateSolidBrush(rgbClr)
 
@@ -1055,7 +1059,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                end if
             END IF
          end if
-          
+
           
          ' EVENTS ASSOCIATED WITH A CONTROL
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTEVENTS then
@@ -1185,7 +1189,7 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
             end if
          END IF
          if loword(wParam) = IDC_FRMVDTOOLBOX_COMBOLIST then
-            if hiword(wParam) = LBN_SELCHANGE then
+            if (hiword(wParam) = LBN_SELCHANGE) then
                InitiatePropertyValueChange
                ShowWindow(HWND_PROPLIST_COMBOLIST, SW_HIDE)
             end if

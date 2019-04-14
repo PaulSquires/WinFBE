@@ -2062,6 +2062,9 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
                   frmMain_LoadComboFunctions
                   frmMain_SelectComboFunctions
                
+                  if pDoc->IsDesigner THEN
+                     DisplayPropertyList( pDoc )
+                  end if   
                end if
 
             case IDC_DESIGNTABCTRL 
