@@ -489,10 +489,11 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    wszText = wszText & _
    "end type" & vbcrlf & vbcrlf 
 
+
    ''
    ''  Generate the Constructor that defines the properties for the form and controls
    ''
-   wszText = wszText & _
+   wszText = wszText & vbcrlf & _
    "constructor " & wszFormName & "Type" & vbcrlf & _
    sp(1) & "dim as long nClientOffset" & vbcrlf & vbcrlf 
 
@@ -594,7 +595,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
       end if
    next   
    
-   
+
    ''
    ''  Add the controls to the form collection (we first need to sort based on TabIndex).
    ''

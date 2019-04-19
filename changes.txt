@@ -1,4 +1,5 @@
 Version 1.9.2
+- CHANGED: TOO MANY VISUAL DESIGNER CHANGES TO LIST
 - Added: Language translation for Brazilian-Portuguese by Marco Pimenta (mvpimenta).
 - Fixed: Controls property "BorderStyle" not correctly set when dynamically applying WindowStyle and WindowExStyle.
 - Fixed: "Visible" property of controls reported the "Enabled" value after control was created.
