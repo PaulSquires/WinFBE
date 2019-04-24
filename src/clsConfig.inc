@@ -199,10 +199,93 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
    return false  ' no error
 End Function
     
+
+''
+''
+Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
+                                        
+   Dim as CWSTR wst
+   
+   dim parser as clsParser
+
+   parser.fileName = ""     ' no need to store this sFilename
+   parser.IsWinApi = false
+
+   ''
+   ''  Codetips definition file for WinFormsX
+   ''
+   ''  Format:
+   ''  TYPE:<typename>
+   ''  <type_element>
+   ''  <type_element>
+   ''  ...etc
+   ''  ENDTYPE
+   ''
+   
+   dim arrBase( any ) as CWSTR
+   
+   dim pStream AS CTextStream
+   if pStream.Open(wszFilename) <> S_OK then return true   ' error
+   
+   dim as Boolean bReadingType = false
+   dim as Boolean bIsBase = false
+   
+   do until pStream.EOS
+      wst = pStream.ReadLine
+
+      wst = Trim(wst)
+      If Len(wst) = 0 Then Continue Do
+      
+      if left(wst, 5) = "TYPE:" then
+         bReadingType = true
+         parser.typeName = mid(**wst, 6) 
+         parser.typeAlias = parser.typeName
+         if parser.typeName = "BASE" then
+            bIsBase = true
+         else   
+            bIsBase = false
+            gdb2.dbAdd( @parser, DB2_TYPE )
+         end if
+         continue do
+      end if
+      
+      if left(wst, 7) = "ENDTYPE" then
+         bReadingType = false
+         bIsBase = false
+      end if
+      
+      if bReadingType then
+         ' Each element of the TYPE structure is added to the database. 
+         parser.funcName = ""
+         parser.varType  = ""
+         parser.bInTypePublic = true
+         if bIsBase then
+            dim as long ub = ubound(arrBase) + 1
+            redim preserve arrBase(ub)
+            arrBase(ub) = wst
+         elseif wst = "+BASE" then
+            ' add all of the BASE properties to this type
+            for i as long = lbound(arrBase) to ubound(arrBase) 
+               parser.varName = arrBase(i)
+               gdb2.dbAdd( @parser, DB2_VARIABLE )
+            next 
+         else
+            parser.varName = wst
+            gdb2.dbAdd( @parser, DB2_VARIABLE )
+         end if
+      end if
+         
+   Loop
+   pStream.Close
+   
+   return false  ' no error
+End Function
+
+
 ''
 ''
 Function clsConfig.LoadCodetipsWinFormsX() as boolean
-   function = this.LoadCodetipsGeneric(_WinFormsXCodetipsFilename, false)
+   function = this.LoadCodetipsWinForms(_WinFormsXCodetipsFilename)
    dim parser as clsParser
    parser.fileName = ""     ' no need to store this sFilename
    parser.IsWinApi = false
@@ -297,32 +380,27 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(8).wszCursor = "IMAGE_CURSOR_OPTION"
    gToolBox(8).wszClassName = "RADIOBUTTON"
 
-   gToolBox(9).nToolType = CTRL_TEXTBOX
-   gToolBox(9).wszToolBoxName   = "TextBox"
-   gToolBox(9).wszControlName   = "Text"
-   gToolBox(9).wszImage  = "IMAGE_TEXTBOX"
-   gToolBox(9).wszCursor = "IMAGE_CURSOR_TEXTBOX"
-   gToolBox(9).wszClassName = "TEXTBOX"
+   gToolBox(9).nToolType = CTRL_PICTUREBOX
+   gToolBox(9).wszToolBoxName   = "PictureBox"
+   gToolBox(9).wszControlName   = "Picture"
+   gToolBox(9).wszImage  = "IMAGE_PICTUREBOX"
+   gToolBox(9).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
+   gToolBox(9).wszClassName = "PICTUREBOX"
 
-   gToolBox(10).nToolType = CTRL_PICTUREBOX
-   gToolBox(10).wszToolBoxName   = "PictureBox"
-   gToolBox(10).wszControlName   = "Picture"
-   gToolBox(10).wszImage  = "IMAGE_PICTUREBOX"
-   gToolBox(10).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
-   gToolBox(10).wszClassName = "PICTUREBOX"
+   gToolBox(10).nToolType = CTRL_RICHEDIT
+   gToolBox(10).wszToolBoxName = "RichEdit"
+   gToolBox(10).wszControlName = "RichEdit"
+   gToolBox(10).wszImage = "IMAGE_RICHEDIT"
+   gToolBox(10).wszCursor = "IMAGE_CURSOR_RICHEDIT"
+   gToolBox(10).wszClassName = "RICHEDIT"
 
-   gToolBox(11).nToolType = CTRL_RICHEDIT
-   gToolBox(11).wszToolBoxName = "RichEdit"
-   gToolBox(11).wszControlName = "RichEdit"
-   gToolBox(11).wszImage = "IMAGE_RICHEDIT"
-   gToolBox(11).wszCursor = "IMAGE_CURSOR_RICHEDIT"
-   gToolBox(11).wszClassName = "RICHEDIT"
+   gToolBox(11).nToolType = CTRL_TEXTBOX
+   gToolBox(11).wszToolBoxName   = "TextBox"
+   gToolBox(11).wszControlName   = "Text"
+   gToolBox(11).wszImage  = "IMAGE_TEXTBOX"
+   gToolBox(11).wszCursor = "IMAGE_CURSOR_TEXTBOX"
+   gToolBox(11).wszClassName = "TEXTBOX"
 
-'   gToolBox(10).nToolType = CTRL_IMAGEBUTTON
-'   gToolBox(10).wszName   = "ImageButton"
-'   gToolBox(10).wszImage  = "IMAGE_IMGBUTTON"
-'   gToolBox(10).wszCursor = "IMAGE_CURSOR_IMGBUTTON"
-'   gToolBox(10).wszClassName = "BUTTON"
 
 '   gToolBox(11).nToolType = CTRL_HSCROLL
 '   gToolBox(11).wszName   = "HScroll"

@@ -245,7 +245,7 @@ private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
    sp(1) & "ncm.cbSize = SizeOf(ncm)" & vbcrlf & _
    sp(1) & "SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)" & vbcrlf & _
    sp(1) & "nClientOffset = AfxUnScaleY(ncm.iMenuHeight)  ' holds the height of the mainmenu" & vbcrlf & vbcrlf & _
-   sp(1) & "this.MainMenu.Parent = @this" & vbcrlf 
+   sp(1) & "pForm->MainMenu.Parent = pForm" & vbcrlf 
 
    ' Every level of indent is a parent menu item
    ' First, create all of the menuitems. Once created, then we can add them 
@@ -279,7 +279,8 @@ private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
       iMenu = pDoc->MenuItems(i)
       if len(rtrim(iMenu.wszName)) = 0 then continue for
       if iMenu.nIndent = 0 then
-         wszNodes(NextFreeNode) = sp(1) & "this.MainMenu.MenuItems.Add(" & iMenu.wszName & ")" 
+         'wszNodes(NextFreeNode) = sp(1) & "this.MainMenu.MenuItems.Add(" & iMenu.wszName & ")" 
+         wszNodes(NextFreeNode) = sp(1) & "pForm->MainMenu.MenuItems.Add(" & iMenu.wszName & ")" 
          NextFreeNode = NextFreeNode + 1
       end if
    next
@@ -329,9 +330,9 @@ private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
 
    wszFormName = GetFormName(pDoc)
    wszText = wszText & _
-      sp(1) & "this.MainMenu.OnPopup = @" & wszFormName & "_MainMenu_Popup" & vbcrlf & _
-      sp(1) & "this.MainMenu.OnClick = @" & wszFormName & "_MainMenu_Click" & vbcrlf & _
-      sp(1) & "this.Controls.Add(ControlType.MainMenu, @this.MainMenu)" & vbcrlf & vbcrlf
+      sp(1) & "pForm->MainMenu.OnPopup = @" & wszFormName & "_MainMenu_Popup" & vbcrlf & _
+      sp(1) & "pForm->MainMenu.OnClick = @" & wszFormName & "_MainMenu_Click" & vbcrlf & _
+      sp(1) & "pForm->Controls.Add(ControlType.MainMenu, @(pForm->MainMenu))" & vbcrlf & vbcrlf
 
    return wszText
 end function
@@ -476,6 +477,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    sp(1) & "private:"              & vbcrlf & _
    sp(2) & "temp as byte"          & vbcrlf & _
    sp(1) & "public:"               & vbcrlf & _
+   sp(2) & "declare static function FormInitializeComponent( byval pForm as " & wszFormName & "Type ptr ) as LRESULT" & vbcrlf & _
    sp(2) & "declare constructor"   & vbcrlf & _
    sp(2) & "' Controls"            & vbcrlf 
       for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
@@ -494,7 +496,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ''  Generate the Constructor that defines the properties for the form and controls
    ''
    wszText = wszText & vbcrlf & _
-   "constructor " & wszFormName & "Type" & vbcrlf & _
+   "function " & wszFormName & "Type.FormInitializeComponent( byval pForm as " & wszFormName & "Type ptr ) as LRESULT" & vbcrlf & _
    sp(1) & "dim as long nClientOffset" & vbcrlf & vbcrlf 
 
    ' If a menu exists for the Form then add the code generation
@@ -513,13 +515,13 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
       if pCtrl then
          wszCtrlName = GetControlProperty(pCtrl, "NAME")
 
-         wszCombinedName = "this" 
+         wszCombinedName = "pForm->" 
          if pCtrl->ControlType <> CTRL_FORM then
-            wszCombinedName = wszCombinedName & "." & **wszCtrlName
+            wszCombinedName = wszCombinedName & **wszCtrlName
          end if
             
          if pCtrl->ControlType <> CTRL_FORM then 
-            wszText = wszText & sp(1) & wszCombinedName & ".Parent = @this" & vbcrlf
+            wszText = wszText & sp(1) & wszCombinedName & ".Parent = pForm" & vbcrlf
          END IF
 
          dim as long nLeft, nTop, nWidth, nHeight
@@ -558,7 +560,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ
                   case "ACCEPTBUTTON", "CANCELBUTTON"
-                     wszPropValue = "@this." & wszPropValue 
+                     wszPropValue = "@pForm->" & wszPropValue 
                end select
                select case nPropType
                   CASE PropertyType.ColorPicker
@@ -572,11 +574,16 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                   case PropertyType.FontPicker
                      wszPropValue = "New wfxFont(" & SetFontClassFromPropValue(wszPropValue) & ")"
                END SELECT
-               wszText = wszText & sp(1) & wszCombinedName & "." & wszPropName & " = " & wszPropValue & vbcrlf
+
+               if pCtrl->ControlType = CTRL_FORM then 
+                  wszText = wszText & sp(1) & wszCombinedName & wszPropName & " = " & wszPropValue & vbcrlf
+               else
+                  wszText = wszText & sp(1) & wszCombinedName & "." & wszPropName & " = " & wszPropValue & vbcrlf
+               end if
             end if
          NEXT
          if pCtrl->ControlType = CTRL_FORM then 
-            wszText = wszText & sp(1) & wszCombinedName & ".SetBounds(" & nLeft & "," & nTop & "," & nWidth & "," & nHeight & ")" & vbcrlf
+            wszText = wszText & sp(1) & wszCombinedName & "SetBounds(" & nLeft & "," & nTop & "," & nWidth & "," & nHeight & ")" & vbcrlf
          else
             wszText = wszText & sp(1) & wszCombinedName & ".SetBounds(" & nLeft & "," & nTop & "-nClientOffset," & nWidth & "," & nHeight & ")" & vbcrlf
          end if
@@ -588,7 +595,11 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszFunction = wszFormName
                if pCtrl->ControlType <> CTRL_FORM then wszFunction = wszFunction & "_" & wszCtrlName
                wszFunction = wszFunction & "_" & pCtrl->Events(ii).wszEventName 
-               wszText = wszText & sp(1) & wszCombinedName & ".On" & pCtrl->Events(ii).wszEventName & " = @" & wszFunction & vbcrlf
+               if pCtrl->ControlType = CTRL_FORM then 
+                  wszText = wszText & sp(1) & wszCombinedName & "On" & pCtrl->Events(ii).wszEventName & " = @" & wszFunction & vbcrlf
+               else
+                  wszText = wszText & sp(1) & wszCombinedName & ".On" & pCtrl->Events(ii).wszEventName & " = @" & wszFunction & vbcrlf
+               end if   
             end if
          next   
 
@@ -648,12 +659,12 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszTemp = ucase(GetControlProperty(pCtrl, "GROUPNAME"))
                if wszTemp <> wszGroupName then
                   wszText = wszText & _
-                  sp(1) & "this." & wszCtrlName & ".StartGroup = True" & vbcrlf
+                  sp(1) & "pForm->" & wszCtrlName & ".StartGroup = True" & vbcrlf
                   wszGroupName = wszTemp 
                end if   
             end if
             wszText = wszText & _
-            sp(1) & "this.Controls.Add(ControlType." & GetToolBoxName(pCtrl->ControlType) & ", @this." & wszCtrlName & ")" & vbcrlf
+            sp(1) & "pForm->Controls.Add(ControlType." & GetToolBoxName(pCtrl->ControlType) & ", @(pForm->" & wszCtrlName & "))" & vbcrlf
          end if
       end if
    next
@@ -662,7 +673,15 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ''  Add the form to the application
    ''
    wszText = wszText & _
-   sp(1) & "Application.Forms.Add(ControlType.Form, @this)" & vbcrlf & _
+   sp(1) & "Application.Forms.Add(ControlType.Form, pForm)" & vbcrlf & _
+   sp(1) & "function = 0" & vbcrlf & _
+   "end function" & vbcrlf & vbcrlf
+
+
+   wszText = wszText & _
+   "constructor " & wszFormName & "Type" & vbcrlf & _      
+   sp(1) & "InitializeComponent = cast( any ptr, @FormInitializeComponent )" & vbcrlf & _
+   sp(1) & "this.FormInitializeComponent( @this )" & vbcrlf & _
    "end constructor" & vbcrlf & vbcrlf
 
    wszText = wszText & _ 

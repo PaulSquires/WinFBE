@@ -202,6 +202,7 @@ Type clsConfig
       declare Function ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN    
       declare Function LoadCodetipsFB() as boolean
       declare Function LoadCodetipsWinAPI() as boolean
+      declare Function LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       declare Function LoadCodetipsWinFormsX() as boolean
       declare Function LoadCodetipsWinFBX() as boolean
       declare Function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval IsWinAPI as boolean ) as boolean
