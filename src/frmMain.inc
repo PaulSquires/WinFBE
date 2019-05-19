@@ -2605,6 +2605,12 @@ public Function frmMain_OnMouseMove( ByVal HWnd As HWnd, _
                                      byval keyflags as UINT _
                                      ) As Long
 
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
+   if pWindow = 0 then exit function
+   
+   dim as RECT rcClient
+   GetClientRect( hwnd, @rcClient )
+   
    ' HITTEST (DOCUMENT SPLITTER)
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc THEN 
@@ -2613,8 +2619,12 @@ public Function frmMain_OnMouseMove( ByVal HWnd As HWnd, _
       if pDoc->bSizing then
          if pt.y <> pDoc->ptPrev.y then
             pDoc->SplitY = pDoc->SplitY + (pt.y - pDoc->ptPrev.y)
-            frmMain_PositionWindows
-            pDoc->ptPrev.y = pt.y
+            ' Don't let the split go all the way to the bottom of the edit window
+            if pDoc->SplitY + pWindow->ScaleY(40) >= rcClient.bottom THEN 
+            else
+               frmMain_PositionWindows
+               pDoc->ptPrev.y = pt.y
+            end if   
          end if   
       else   
          if PtInRect(@pDoc->rcSplitButton, pt) THEN 

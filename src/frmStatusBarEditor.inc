@@ -130,8 +130,6 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
    End If
 
    ShowWindow( pDoc->hWndStatusBar, SW_SHOW )
-   'StatusBar_SetFont( pDoc->hWndStatusBar, cast(DWORD, pWindow->Font), true )
-   SendMessage( pDoc->hWndStatusBar, WM_SETFONT, cast(WPARAM, pWindow->Font), true )
 
    function = 0 
 End Function

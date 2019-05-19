@@ -102,13 +102,15 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
       SetRect( @rcTest1, 0, rc.bottom - HitPixels, rcClient.right, rc.bottom + HitPixels )
       SetRect( @rcTest2, 0, rcActive.bottom, rcClient.right, rcActive.bottom + 1 )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHit(SnapLinePosition.bottom) = true
-         if IsRectEmpty( @rcSnap(SnapLinePosition.bottom) ) then
-            SetRect( @rcSnap(SnapLinePosition.bottom), rcActive.left, rc.bottom - 1, rcActive.right, rc.bottom )
+         if bHit(SnapLinePosition.top) = false then
+            bHit(SnapLinePosition.bottom) = true
+            if IsRectEmpty( @rcSnap(SnapLinePosition.bottom) ) then
+               SetRect( @rcSnap(SnapLinePosition.bottom), rcActive.left, rc.bottom - 1, rcActive.right, rc.bottom )
+            end if
+            if rc.left < rcSnap(SnapLinePosition.bottom).left then rcSnap(SnapLinePosition.bottom).left = rc.left
+            if rc.right > rcSnap(SnapLinePosition.bottom).right then rcSnap(SnapLinePosition.bottom).right = rc.right
+            nSnap(SnapLinePosition.bottom) = rc.bottom
          end if
-         if rc.left < rcSnap(SnapLinePosition.bottom).left then rcSnap(SnapLinePosition.bottom).left = rc.left
-         if rc.right > rcSnap(SnapLinePosition.bottom).right then rcSnap(SnapLinePosition.bottom).right = rc.right
-         nSnap(SnapLinePosition.bottom) = rc.bottom
       end if
       
       ' LEFT TEST
@@ -128,13 +130,15 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
       SetRect( @rcTest1, rc.right - HitPixels, 0, rc.right + HitPixels, rcClient.bottom )
       SetRect( @rcTest2, rcActive.right, 0, rcActive.right + 1, rcClient.bottom )
       if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         bHit(SnapLinePosition.right) = true
-         if IsRectEmpty( @rcSnap(SnapLinePosition.right) ) then
-            SetRect( @rcSnap(SnapLinePosition.right), rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
+         if bHit(SnapLinePosition.left) = false then
+            bHit(SnapLinePosition.right) = true
+            if IsRectEmpty( @rcSnap(SnapLinePosition.right) ) then
+               SetRect( @rcSnap(SnapLinePosition.right), rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
+            end if
+            if rc.top < rcSnap(SnapLinePosition.right).top then rcSnap(SnapLinePosition.right).top = rc.top
+            if rc.bottom > rcSnap(SnapLinePosition.right).bottom then rcSnap(SnapLinePosition.right).bottom = rc.bottom
+            nSnap(SnapLinePosition.right) = rc.right
          end if
-         if rc.top < rcSnap(SnapLinePosition.right).top then rcSnap(SnapLinePosition.right).top = rc.top
-         if rc.bottom > rcSnap(SnapLinePosition.right).bottom then rcSnap(SnapLinePosition.right).bottom = rc.bottom
-         nSnap(SnapLinePosition.right) = rc.right
       end if
    next
 
@@ -170,6 +174,8 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                   if abs(yCursorDistance) > HitPixels then
                      pDoc->bSnapActive(SnapLinePosition.top) = false
                      pDoc->bSnapActive(SnapLinePosition.bottom) = false
+                     bHit(SnapLinePosition.left) = false  ' prevent further tests
+                     bHit(SnapLinePosition.right) = false  ' prevent further tests
                      bHit(SnapLinePosition.top) = false  ' prevent further tests
                      bHit(SnapLinePosition.bottom) = false  ' prevent further tests
                      yDelta = yCursorDistance
@@ -185,6 +191,8 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
                      pDoc->bSnapActive(SnapLinePosition.right) = false
                      bHit(SnapLinePosition.left) = false  ' prevent further tests
                      bHit(SnapLinePosition.right) = false  ' prevent further tests
+                     bHit(SnapLinePosition.top) = false  ' prevent further tests
+                     bHit(SnapLinePosition.bottom) = false  ' prevent further tests
                      xDelta = xCursorDistance
                      bDone = true
                   else

@@ -859,6 +859,7 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    if ControlType = CTRL_FORM THEN
       dim pForm as CWindow ptr = New CWindow
       pForm->DPI = AfxCWindowPtr(pDoc->hWndFrame)->DPI
+
       wszDefaultControlName = GenerateDefaultFormName()
       pDoc->hWndForm = _
          pForm->Create( pDoc->hWndFrame, "Form1", @DesignerForm_WndProc, 0, 0, 0, 0, _
@@ -880,13 +881,14 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       ncm.cbSize = SizeOf(ncm)
       SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)
       pDoc->hFontFakeMenu = CreateFontIndirect(@ncm.lfMenuFont)
-      SendMessage( pDoc->hWndFakeMenu, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, TRUE))
+      SendMessage( pDoc->hWndFakeMenu, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, CTRUE))
    
       ' StatusBar
       pDoc->hWndStatusBar = _
       pForm->AddControl("STATUSBAR", pDoc->hWndForm, IDC_FAKESTATUSBAR, "", 0, 0, 0, 0, _
            WS_CHILD Or WS_CLIPCHILDREN OR WS_CLIPSIBLINGS OR CCS_BOTTOM OR SBARS_TOOLTIPS, _
            WS_EX_LEFT Or WS_EX_LTRREADING)
+      SendMessage( pDoc->hWndStatusBar, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, CTRUE))
       
       ' Create the four SnapLines 
       for i as long = 0 to 3

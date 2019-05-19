@@ -840,6 +840,10 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       END SELECT
       
    
+      ' No need to apply non-positional properties if all we are doing is
+      ' resizing or moving.
+      if (pDoc->bSizing = true) or (pDoc->bMoving = true) then continue for
+      
       ' Handle control specific properties
       ' Only act on properties where the value has changed.
       if pProp->wszPropValue = pProp->wszPropValuePrev then continue for

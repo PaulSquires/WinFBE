@@ -206,23 +206,65 @@ end function
 ' Generate code for any existing Form StatusBar.
 ' ========================================================================================
 private function GenerateStatusBarCode( byval pDoc as clsDocument ptr ) as CWSTR
-'   dim as clsMenuItem iMenu
-'   dim as CWSTR wszText, wszShortcut, wszFormName
-'   dim as CWSTR DQ = chr(34)
     
-'   dim as string sp(5) 
-'   for i as long = 1 to ubound(sp)
-'      sp(i) = space(val(gConfig.TabSize) * i)
-'   NEXT
+   if pDoc = 0 then return ""
+   
+   dim as string sp(5) 
+   for i as long = 1 to ubound(sp)
+      sp(i) = space(val(gConfig.TabSize) * i)
+   NEXT
 
-'   wszText = _
-'   sp(1) & "dim ncm As NONCLIENTMETRICS" & vbcrlf & _
-'   sp(1) & "ncm.cbSize = SizeOf(ncm)" & vbcrlf & _
-'   sp(1) & "SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)" & vbcrlf & _
-'   sp(1) & "nClientOffset = AfxUnScaleY(ncm.iMenuHeight)  ' holds the height of the mainmenu" & vbcrlf & vbcrlf & _
-'   sp(1) & "this.MainMenu.Parent = @this" & vbcrlf 
+   ' Size the panels in order to accommodate autosize
+   dim as long lb = 0 
+   dim as long ub = ubound(pDoc->PanelItems)
+   dim as long nPanelWidth, nPanelMinWidth, nTotalWidths, nBorderStyle, iRightSide 
+   Dim As Long rgParts(ub)
+   Dim As Long rgPanelWidths(ub)
+   dim as long iSpringIndex = -1
+   dim as CWSTR wszText, wszFormName
+   dim as CWSTR wszAlign
+   dim as CWSTR DQ = chr(34)
+   dim hIcon as HICON
+   dim wszImageName as wstring * MAX_PATH
+   
+   
+   wszText = _
+   sp(1) & "dim as long idxPanel" & vbcrlf & _
+   sp(1) & "pForm->StatusBar.Parent = pForm" & vbcrlf & _
+   sp(1) & "pForm->StatusBar.SizingGrip = false" & vbcrlf 
 
-   function = 0
+
+   for i as long = lb to ub
+      wszText = wszText & _
+      sp(1) & "idxPanel = pForm->StatusBar.Panels.Add" & vbcrlf & _   
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).Text = " & DQ & pDoc->PanelItems(i).wszText & DQ & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).Width = 120" & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).Alignment = " & pDoc->PanelItems(i).wszAlignment & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).BorderStyle = " & pDoc->PanelItems(i).wszBorderStyle & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).AutoSize = " & pDoc->PanelItems(i).wszAutoSize & vbcrlf & _
+      sp(1) & "pForm->Controls.add(controltype.StatusBar, @(pForm->StatusBar))" & vbcrlf & vbcrlf
+
+'      StatusBar_SetText( pDoc->hWndStatusBar, i, wszAlign & pDoc->PanelItems(i).wszText, nBorderStyle ) 
+'      if len( pDoc->PanelItems(i).wszToolTip ) then
+'         StatusBar_SetTipText( pDoc->hWndStatusBar, i, pDoc->PanelItems(i).wszToolTip )
+'      end if
+       
+'      wszImageName = pDoc->PanelItems(i).pProp.wszPropValue
+'      hIcon = 0
+'      if len(wszImageName) then
+'         dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszImageName)
+'         DestroyIcon( StatusBar_GetIcon( pDoc->hWndStatusBar, i ) )
+'         if pImageType then
+'            hIcon = AfxGdipIconFromFile( pImageType->wszFileName )
+'         end if
+'      end if
+
+'      ' If no hIcon defined then any previous icon will be removed
+'      StatusBar_SetIcon( pDoc->hWndStatusBar, i, hIcon ) 
+       
+   next
+
+   return wszText
 end function
 
 
@@ -230,6 +272,9 @@ end function
 ' Generate code for any existing Form MainMenu.
 ' ========================================================================================
 private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
+   
+   if pDoc = 0 then return ""
+   
    dim as clsMenuItem iMenu
    dim as CWSTR wszText, wszShortcut, wszFormName
    dim as CWSTR DQ = chr(34)
