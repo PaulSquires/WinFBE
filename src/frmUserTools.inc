@@ -72,20 +72,23 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
 
       dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
       if (idxBuild > -1) andalso (pDocMain <> 0) THEN
-         wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
-                      AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                      wstr(".exe")
-         If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DLL")) orelse _
-            Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DYLIB")) Then 
+         wszExeName = gCompile.OutputFilename
+         if len(wszExeName) = 0 then
             wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
                          AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                         wstr(".dll")
+                         wstr(".exe")
+            If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DLL")) orelse _
+               Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DYLIB")) Then 
+               wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
+                            AfxStrPathname("NAME", pDocMain->DiskFilename) + _
+                            wstr(".dll")
+            end if
+            If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -LIB")) then 
+               wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
+                            AfxStrPathname("NAME", pDocMain->DiskFilename) + _
+                            wstr(".a")
+            end if              
          end if
-         If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -LIB")) then 
-            wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
-                         AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                         wstr(".a")
-         end if              
       END IF
       wszParameters = AfxStrReplace(wszParameters, wstr("<E>"), wszExeName)
       wszParameters = AfxStrReplace(wszParameters, wstr("<e>"), wszExeName)
@@ -128,7 +131,7 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
       wszCommand = left(AfxGetExePathName, 1) + mid(**wszCommand, 2)
    END IF
    wszCommand = chr(34) + wszCommand + chr(34)
-   
+
    With ShExecInfo
       .cbSize       = Len(SHELLEXECUTEINFOW)
       .fMask        = SEE_MASK_NOCLOSEPROCESS
