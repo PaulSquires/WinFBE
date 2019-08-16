@@ -92,6 +92,7 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
    dim rc as RECT 
    GetClientRect( pDoc->hWndForm, @rc )
    
+<<<<<<< HEAD
    
    ' Create the Rebar and ToolBar
    Dim As HWnd hRebar = _
@@ -101,6 +102,11 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
    
    Dim As HWnd hToolBar = _
       pWindow->AddControl("Toolbar", pDoc->hWndForm, IDC_FAKETOOLBAR, "", 0, 0, 0, 0, _
+=======
+   ' Create the Rebar and ToolBar
+   Dim As HWnd hRebar = pWindow->AddControl("Rebar", pDoc->hWndForm, IDC_FAKEREBAR)
+   Dim As HWnd hToolBar = pWindow->AddControl("Toolbar", pDoc->hWndForm, IDC_FAKETOOLBAR, "", 0, 0, 0, 0, _
+>>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
       WS_CHILD Or WS_VISIBLE Or TBSTYLE_TOOLTIPS Or TBSTYLE_FLAT Or CCS_NODIVIDER Or CCS_NOPARENTALIGN)
 
    pDoc->hWndRebar = hRebar
@@ -122,7 +128,10 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
    Dim As HIMAGELIST hImageListNormal
    Dim cx As Long = nImageSize * pWindow->DPI \ 96
    hImageListNormal = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 20, 1)
+<<<<<<< HEAD
    dim wszImageName as wstring * 1024
+=======
+>>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
 
    ' Add buttons to the toolbar
    Dim As Long i, ii
@@ -132,6 +141,7 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
     
    for i as long = lb to ub
        
+<<<<<<< HEAD
       wszImageName = pDoc->ToolBarItems(i).pPropNormalImage.wszPropValue 
       if len(wszImageName) then
          dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszImageName)
@@ -142,15 +152,28 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
 
       select case **pDoc->ToolBarItems(i).wszButtonType 
          case "ToolBarButton.Button"
+=======
+      select case **pDoc->ToolBarItems(i).wszButtonType 
+         case "ToolBarButton.Button" 
+            ii = AfxGdipAddIconFromRes(hImageListNormal, pWindow->InstanceHandle, "IMAGE_TB_SAVE_FILE")
+>>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
             Toolbar_AddButton hToolBar, i, 0
          
          case "ToolBarButton.Separator"
             Toolbar_AddSeparator hToolBar
          
          case "ToolBarButton.DropDown"
+<<<<<<< HEAD
             Toolbar_AddButton hToolBar, i, 0, 0, TBSTYLE_DROPDOWN
          
          case "ToolBarButton.WholeDropDown"
+=======
+            ii = AfxGdipAddIconFromRes(hImageListNormal, pWindow->InstanceHandle, "IMAGE_TB_NEW_FILE")
+            Toolbar_AddButton hToolBar, i, 0, 0, TBSTYLE_DROPDOWN
+         
+         case "ToolBarButton.WholeDropDown"
+            ii = AfxGdipAddIconFromRes(hImageListNormal, pWindow->InstanceHandle, "IMAGE_TB_NEW_FILE")
+>>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
             Toolbar_AddButton hToolBar, i, 0, 0, BTNS_WHOLEDROPDOWN
       end select      
 
@@ -192,6 +215,7 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
    ShowWindow( hToolBar, SW_SHOW )
    ShowWindow( hRebar, SW_SHOW )
 
+<<<<<<< HEAD
     ' Position the Rebar below any existing fake topmenu.
    dim as long nTopMenu_Height, nToolBar_Height 
    nToolBar_Height = AfxGetWindowHeight( hRebar )  
@@ -200,6 +224,8 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
    end if 
    SetWindowPos hRebar, 0, 0, nTopMenu_Height, rc.right, nToolBar_Height, SWP_NOZORDER
     
+=======
+>>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
    function = 0 
 End Function 
 

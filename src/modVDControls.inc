@@ -965,10 +965,13 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    SetControlProperty(pCtrl, "WIDTH", str(rcDraw.right-rcDraw.left))
    SetControlProperty(pCtrl, "HEIGHT", str(rcDraw.bottom-rcDraw.top))
    
+<<<<<<< HEAD
    ' Need to create fake statusbar here in order to ensure that all of the
    ' statusbar panels display correctly when the form is first shown.
    frmStatusBarEditor_CreateFakeStatusBar(pDoc)
 
+=======
+>>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
    ' If this form/control is being created from reading an existing source file then 
    ' then we would wait until the all of the control's properties have been loaded. 
    ' See clsDocument.ParseDesignerString
