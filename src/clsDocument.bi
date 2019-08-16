@@ -31,6 +31,7 @@
 
 
 #include once "clsMenuItem.bi"
+#include once "clsToolBarItem.bi"
 #include once "clsPanelItem.bi"
 #include once "clsControl.bi"      ' Includes properties and events types
 #include once "clsCollection.bi"
@@ -74,9 +75,12 @@ Type clsDocument
       
       ' Visual designer related
       MenuItems(any)    as clsMenuItem
+      ToolBarItems(any) as clsToolBarItem
+      wszToolBarSize    as CWSTR = wstr("SIZE_24")  ' SIZE_16, SIZE_24, SIZE_32, SIZE_48
       PanelItems(any)   as clsPanelItem
       Controls          as clsCollection
       GenerateMenu      as long = BST_CHECKED  ' Indicates to generate code for the menu
+      GenerateToolBar   as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar
       hWndDesigner      as HWnd            ' DesignMain window (switch to this window when in design mode (versus code mode)
       hDesignTabCtrl    as HWnd            ' TabCtrl to switch between Design/Code
@@ -85,6 +89,8 @@ Type clsDocument
       hWndFakeMenu      as HWND            ' Fake top menu to display when using Menu Editor
       hFontFakeMenu     as HFONT           ' System font used for menus
       hWndStatusBar     as HWND            ' StatusBar for the form using StatusBar Editor
+      hWndRebar         as HWND            ' Rebar for the form using ToolBar Editor
+      hWndToolBar       as HWND            ' ToolBar for the form using ToolBar Editor
       ErrorOffset       as long            ' Number of lines to account for when error thrown for visual designer code files.
       GrabHit           as long            ' Which grab handle is currently active for sizing action
       ptPrev            as point           ' Used for sizing action
@@ -133,6 +139,7 @@ Type clsDocument
       declare property hWndActiveScintilla(byval hWindow as hwnd)
       
       declare function MainMenuExists() as Boolean
+      declare function ToolBarExists() as Boolean
       declare function StatusBarExists() as Boolean
       declare function GetActiveScintillaPtr() as any ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd

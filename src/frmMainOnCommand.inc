@@ -620,7 +620,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
       iTab = gTTabCtl.GetTabIndexByDocumentPtr(pDocTabs(i))
       if iTab = -1 then iTab = gTTabCtl.AddTab(pDocTabs(i))  ' Add the new document to the top tabcontrol
    Next   
-   gTTabCtl.SetFocusTab(iTab)
+   if iTab > -1 then gTTabCtl.SetFocusTab(iTab)
 
    gApp.IsFileLoading = false
    LockWindowUpdate(0)

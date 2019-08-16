@@ -138,8 +138,11 @@ function clsCollection.SetActiveControl( byval hWndCtrl as hwnd) as long
          if _arrControls(i)->IsSelected then idxActive = i
       NEXT
    END IF
-   _arrControls(idxActive)->IsActive = true
-   _arrControls(idxActive)->IsSelected = true
+
+   if ubound(_arrControls) > -1 then 
+      _arrControls(idxActive)->IsActive = true
+      _arrControls(idxActive)->IsSelected = true
+   end if
    function = 0
 end function
 

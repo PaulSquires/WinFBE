@@ -85,7 +85,7 @@ constructor clsDB2
 
    dim as CWSTR wszMainStr = _
    "Boolean|Byte|UByte|Short|UShort|Integer|UInteger|Long|ULong|LongInt|ULongInt|Single|" & _
-   "Double|String|WString|ZString"
+   "Double|String|WString|ZString|CWSTR"
 
    dim as long nCount = AfxStrParseCount(wszMainStr, "|")
    

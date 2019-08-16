@@ -270,7 +270,8 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
                gdb2.dbAdd( @parser, DB2_VARIABLE )
             next 
          else
-            parser.varName = wst
+            parser.varName = AfxStrParse(wst, 1, "|")
+            parser.varType = AfxStrParse(wst, 2, "|")
             gdb2.dbAdd( @parser, DB2_VARIABLE )
          end if
       end if

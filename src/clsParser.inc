@@ -306,7 +306,7 @@ END FUNCTION
 function clsParser.IsStandardDataType( byref sVarType as string ) as Boolean
    static as string sList 
    sList = " boolean byte double integer long longint short single" & _
-           " string ubyte uinteger ushort wstring zstring "
+           " string ubyte uinteger ushort wstring zstring cwstr "
    if instr(sList, " " & lcase(sVarType) & " " ) THEN return true
    return false 
 end function

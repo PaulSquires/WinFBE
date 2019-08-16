@@ -137,6 +137,27 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
       wszControls = wszControls & "' WINFBE MAINMENU_END" & vbcrlf
    end if
    
+   ' Save ToolBar items (if applicable)
+   dim as long numToolBarItems = Ubound(pDoc->ToolBarItems) - lbound(pDoc->ToolBarItems) + 1
+   if numToolBarItems > 0 then
+      wszControls = wszControls & _
+         "' WINFBE TOOLBAR_START" & vbcrlf & _
+         "'   TOOLBAR_DISPLAY=" & pDoc->GenerateToolBar & vbcrlf & _
+         "'   TOOLBAR_SIZE=" & pDoc->wszToolBarSize & vbcrlf
+      for ii as long = lbound(pDoc->ToolBarItems) to ubound(pDoc->ToolBarItems)
+         wszControls = wszControls & _
+              "'   TOOLBARITEM_START" & vbcrlf & _
+              "'     BUTTONNAME="          & pDoc->ToolBarItems(ii).wszName        & vbcrlf & _
+              "'     BUTTONTYPE="          & pDoc->ToolBarItems(ii).wszButtonType  & vbcrlf & _
+              "'     BUTTONTOOLTIP="       & pDoc->ToolBarItems(ii).wszTooltip     & vbcrlf & _
+              "'     BUTTONNORMALIMAGE="   & pDoc->ToolBarItems(ii).pPropNormalImage.wszPropValue & vbcrlf & _
+              "'     BUTTONHOTIMAGE="      & pDoc->ToolBarItems(ii).pPropHotImage.wszPropValue & vbcrlf & _
+              "'     BUTTONDISABLEDIMAGE=" & pDoc->ToolBarItems(ii).pPropDisabledImage.wszPropValue & vbcrlf & _
+              "'   TOOLBARITEM_END" & vbcrlf 
+      next
+      wszControls = wszControls & "' WINFBE TOOLBAR_END" & vbcrlf
+   end if
+
    ' Save StatusBar Panels (if applicable)
    dim as long numPanelItems = Ubound(pDoc->PanelItems) - lbound(pDoc->PanelItems) + 1
    if numPanelItems > 0 then
@@ -157,10 +178,7 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
               "'     PANELIMAGE="       & pDoc->PanelItems(ii).pProp.wszPropValue & vbcrlf & _
               "'   PANELITEM_END" & vbcrlf 
       next
-
-      wszControls = wszControls & "'   EVENTS_START" & vbcrlf
-      wszControls = wszControls & "'   EVENTS_END" & vbcrlf & _
-                                  "' WINFBE PANELS_END" & vbcrlf
+      wszControls = wszControls & "' WINFBE PANELS_END" & vbcrlf
    end if
    
    
@@ -203,6 +221,55 @@ end function
 
 
 ' ========================================================================================
+' Generate code for any existing Form ToolBar.
+' ========================================================================================
+private function GenerateToolBarCode( byval pDoc as clsDocument ptr ) as CWSTR
+    
+   if pDoc = 0 then return ""
+   
+   dim as string sp(5) 
+   for i as long = 1 to ubound(sp)
+      sp(i) = space(val(gConfig.TabSize) * i)
+   NEXT
+
+   ' Size the panels in order to accommodate autosize
+   dim as long lb = 0 
+   dim as long ub = ubound(pDoc->ToolBarItems)
+   dim as CWSTR DQ = chr(34)
+   
+   dim as long nButtonSize = 24
+   select case **pDoc->wszToolBarSize
+      case "SIZE_16": nButtonSize = 16
+      case "SIZE_24": nButtonSize = 24
+      case "SIZE_32": nButtonSize = 32
+      case "SIZE_48": nButtonSize = 48
+   end select
+
+   dim as CWSTR wszText = _
+   sp(1) & "dim as long idxButton" & vbcrlf & _
+   sp(1) & "pForm->ToolBar.Parent = pForm" & vbcrlf & _
+   sp(1) & "pForm->ToolBar.ButtonSize = " & nButtonSize & vbcrlf 
+
+   for i as long = lb to ub
+      wszText = wszText & _
+      sp(1) & "idxButton = pForm->ToolBar.Buttons.Add" & vbcrlf & _   
+      sp(1) & "pForm->ToolBar.Button(idxButton).ButtonType = " & pDoc->ToolBarItems(i).wszButtonType & vbcrlf & _
+      sp(1) & "pForm->ToolBar.Button(idxButton).ToolTip = " & DQ & pDoc->ToolBarItems(i).wszToolTip & DQ & vbcrlf & _
+      sp(1) & "pForm->ToolBar.Button(idxButton).NormalImage = " & DQ & pDoc->ToolBarItems(i).pPropNormalImage.wszPropValue & DQ & vbcrlf & _
+      sp(1) & "pForm->ToolBar.Button(idxButton).HotImage = " & DQ & pDoc->ToolBarItems(i).pPropHotImage.wszPropValue & DQ & vbcrlf & _
+      sp(1) & "pForm->ToolBar.Button(idxButton).DisabledImage = " & DQ & pDoc->ToolBarItems(i).pPropDisabledImage.wszPropValue & DQ & vbcrlf 
+   next
+
+   dim as CWSTR wszFormName = GetFormName(pDoc)
+   wszText = wszText & _
+      sp(1) & "pForm->ToolBar.OnClick = @" & wszFormName & "_ToolBar_Click" & vbcrlf & _
+      sp(1) & "pForm->Controls.Add(controltype.ToolBar, @(pForm->ToolBar))" & vbcrlf & vbcrlf
+
+   return wszText
+end function
+
+
+' ========================================================================================
 ' Generate code for any existing Form StatusBar.
 ' ========================================================================================
 private function GenerateStatusBarCode( byval pDoc as clsDocument ptr ) as CWSTR
@@ -217,52 +284,29 @@ private function GenerateStatusBarCode( byval pDoc as clsDocument ptr ) as CWSTR
    ' Size the panels in order to accommodate autosize
    dim as long lb = 0 
    dim as long ub = ubound(pDoc->PanelItems)
-   dim as long nPanelWidth, nPanelMinWidth, nTotalWidths, nBorderStyle, iRightSide 
-   Dim As Long rgParts(ub)
-   Dim As Long rgPanelWidths(ub)
-   dim as long iSpringIndex = -1
-   dim as CWSTR wszText, wszFormName
-   dim as CWSTR wszAlign
    dim as CWSTR DQ = chr(34)
-   dim hIcon as HICON
-   dim wszImageName as wstring * MAX_PATH
    
-   
-   wszText = _
+   dim as CWSTR wszText = _
    sp(1) & "dim as long idxPanel" & vbcrlf & _
    sp(1) & "pForm->StatusBar.Parent = pForm" & vbcrlf & _
    sp(1) & "pForm->StatusBar.SizingGrip = false" & vbcrlf 
-
 
    for i as long = lb to ub
       wszText = wszText & _
       sp(1) & "idxPanel = pForm->StatusBar.Panels.Add" & vbcrlf & _   
       sp(1) & "pForm->StatusBar.Panel(idxPanel).Text = " & DQ & pDoc->PanelItems(i).wszText & DQ & vbcrlf & _
-      sp(1) & "pForm->StatusBar.Panel(idxPanel).Width = 120" & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).Icon = " & DQ & pDoc->PanelItems(i).pProp.wszPropValue & DQ & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).ToolTip = " & DQ & pDoc->PanelItems(i).wszToolTip & DQ & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).Width = 100" & vbcrlf & _
       sp(1) & "pForm->StatusBar.Panel(idxPanel).Alignment = " & pDoc->PanelItems(i).wszAlignment & vbcrlf & _
       sp(1) & "pForm->StatusBar.Panel(idxPanel).BorderStyle = " & pDoc->PanelItems(i).wszBorderStyle & vbcrlf & _
-      sp(1) & "pForm->StatusBar.Panel(idxPanel).AutoSize = " & pDoc->PanelItems(i).wszAutoSize & vbcrlf & _
-      sp(1) & "pForm->Controls.add(controltype.StatusBar, @(pForm->StatusBar))" & vbcrlf & vbcrlf
-
-'      StatusBar_SetText( pDoc->hWndStatusBar, i, wszAlign & pDoc->PanelItems(i).wszText, nBorderStyle ) 
-'      if len( pDoc->PanelItems(i).wszToolTip ) then
-'         StatusBar_SetTipText( pDoc->hWndStatusBar, i, pDoc->PanelItems(i).wszToolTip )
-'      end if
-       
-'      wszImageName = pDoc->PanelItems(i).pProp.wszPropValue
-'      hIcon = 0
-'      if len(wszImageName) then
-'         dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszImageName)
-'         DestroyIcon( StatusBar_GetIcon( pDoc->hWndStatusBar, i ) )
-'         if pImageType then
-'            hIcon = AfxGdipIconFromFile( pImageType->wszFileName )
-'         end if
-'      end if
-
-'      ' If no hIcon defined then any previous icon will be removed
-'      StatusBar_SetIcon( pDoc->hWndStatusBar, i, hIcon ) 
-       
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).AutoSize = " & pDoc->PanelItems(i).wszAutoSize & vbcrlf 
    next
+
+   dim as CWSTR wszFormName = GetFormName(pDoc)
+   wszText = wszText & _
+      sp(1) & "pForm->StatusBar.OnClick = @" & wszFormName & "_StatusBar_Click" & vbcrlf & _
+      sp(1) & "pForm->Controls.Add(controltype.StatusBar, @(pForm->StatusBar))" & vbcrlf & vbcrlf
 
    return wszText
 end function
@@ -394,7 +438,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    dim pCtrl as clsControl ptr
    dim as CWSTR wszText, wszFormName, wszCtrlName, wszPropName, wszPropValue, wszPropDefault
    dim as CWSTR wszFunction, wszAllEvents, wszPrototype, wszAllDeclares
-   dim as CWSTR wszCombinedName, wszCodeGen, wszMenuSelect
+   dim as CWSTR wszCombinedName, wszCodeGen, wszMenuSelect, wszToolBarSelect, wszStatusBarSelect
    dim as CWSTR wszStartTag, wszEndTag
    dim as CWSTR DQ = chr(34)
    dim as long nStartTag, nEndTag, nPropType
@@ -463,6 +507,107 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
                               wszPrototype & _
                               wszMenuSelect & _
+                              sp(1) & "Function = 0" & vbcrlf & _
+                              "End Function" & vbcrlf & vbcrlf
+            end if
+         end if
+      next
+   end if
+
+   ''
+   ''  Generate the Declares for all of the Events for any ToolBar for the Form 
+   ''
+   if pDoc->ToolBarExists then
+      dim as CWSTR wszToolBarEvents(0)
+      wszToolBarEvents(0) = "Click"
+      
+      for i as long = lbound(wszToolBarEvents) to ubound(wszToolBarEvents)
+         ' Determine the name of the event function
+         wszFunction = wszFormName & "_ToolBar_" & wszToolBarEvents(i)
+         
+         ' Define the function prototype/declaration
+         wszPrototype = "Function " & wszFunction & "( ByRef sender As wfxToolBar" & _
+                           ", ByRef e As EventArgs ) As LRESULT" & vbcrlf
+
+         ' Add the event/function to the list of declares
+         wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
+         
+         ' If the Event/function does not already exist in code then create it now.
+         pDoc->bNeedsParsing = true
+         ParseDocument( pDoc )
+         
+         ' Only check if we are not loading the project because the event handling
+         ' could already exist but just be in another source code file that has
+         ' not yet been loaded.
+         if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
+            pData = gdb2.dbFindFunction(wszFunction)
+            if pData = 0 THEN
+               wszToolBarSelect = sp(1) & "Select Case e.ToolBarClickIndex" & vbcrlf 
+               for ii as long = 0 to ubound(pDoc->ToolBarItems) 
+                  wszToolBarSelect = wszToolBarSelect & _
+                        sp(2) & "Case " & ii & vbcrlf
+               next
+
+               ' Must add a CASE ELSE because if no child menu items then SELECT CASE will be 
+               ' empty causing a compile time error.   
+               wszToolBarSelect = wszToolBarSelect & _
+                     sp(2) & "Case Else" & vbcrlf & _
+                     sp(1) & "End Select" & vbcrlf 
+
+               wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
+                              wszPrototype & _
+                              wszToolBarSelect & _
+                              sp(1) & "Function = 0" & vbcrlf & _
+                              "End Function" & vbcrlf & vbcrlf
+            end if
+         end if
+      next
+   end if
+
+
+   ''
+   ''  Generate the Declares for all of the Events for any StatusBar for the Form 
+   ''
+   if pDoc->StatusBarExists then
+      dim as CWSTR wszStatusBarEvents(0)
+      wszStatusBarEvents(0) = "Click"
+      
+      for i as long = lbound(wszStatusBarEvents) to ubound(wszStatusBarEvents)
+         ' Determine the name of the event function
+         wszFunction = wszFormName & "_StatusBar_" & wszStatusBarEvents(i)
+         
+         ' Define the function prototype/declaration
+         wszPrototype = "Function " & wszFunction & "( ByRef sender As wfxStatusBar" & _
+                           ", ByRef e As EventArgs ) As LRESULT" & vbcrlf
+
+         ' Add the event/function to the list of declares
+         wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
+         
+         ' If the Event/function does not already exist in code then create it now.
+         pDoc->bNeedsParsing = true
+         ParseDocument( pDoc )
+         
+         ' Only check if we are not loading the project because the event handling
+         ' could already exist but just be in another source code file that has
+         ' not yet been loaded.
+         if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
+            pData = gdb2.dbFindFunction(wszFunction)
+            if pData = 0 THEN
+               wszStatusBarSelect = sp(1) & "Select Case e.PanelClickIndex" & vbcrlf 
+               for ii as long = 0 to ubound(pDoc->PanelItems) 
+                  wszStatusBarSelect = wszStatusBarSelect & _
+                        sp(2) & "Case " & ii & vbcrlf
+               next
+
+               ' Must add a CASE ELSE because if no child menu items then SELECT CASE will be 
+               ' empty causing a compile time error.   
+               wszStatusBarSelect = wszStatusBarSelect & _
+                     sp(2) & "Case Else" & vbcrlf & _
+                     sp(1) & "End Select" & vbcrlf 
+
+               wszAllEvents = wszAllEvents & "''" & vbcrlf & "''" & vbcrlf & _
+                              wszPrototype & _
+                              wszStatusBarSelect & _
                               sp(1) & "Function = 0" & vbcrlf & _
                               "End Function" & vbcrlf & vbcrlf
             end if
@@ -548,6 +693,11 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    if pDoc->MainMenuExists then
       wszText = wszText & GenerateMainMenuCode(pDoc)
    end if
+
+   ' If a toolbar exists for the Form then add the code generation
+   if pDoc->ToolBarExists then
+      wszText = wszText & GenerateToolBarCode(pDoc)
+   end if
    
    ' If a statusbar exists for the Form then add the code generation
    if pDoc->StatusBarExists then
@@ -605,7 +755,9 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ
                   case "ACCEPTBUTTON", "CANCELBUTTON"
-                     wszPropValue = "@pForm->" & wszPropValue 
+                     if len(rtrim(wszPropValue)) then
+                        wszPropValue = "@pForm->" & wszPropValue 
+                     end if   
                end select
                select case nPropType
                   CASE PropertyType.ColorPicker
