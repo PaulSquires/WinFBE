@@ -581,16 +581,18 @@ private Function frmBuildConfig_OnCommand( ByVal HWnd As HWnd, _
             erase gConfig.BuildsTemp
             
             ' Set the active project or the active document to the selected build
-            if nCurSel = -1 THEN exit function
-            If gApp.IsProjectActive Then
-               gApp.ProjectBuild = gConfig.Builds(nCurSel).Id
-            Else
-               Dim pDocMain As clsDocument Ptr 
-               pDocMain = gTTabCtl.GetActiveDocumentPtr()
-               If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
+            if nCurSel > -1 THEN 
+               If gApp.IsProjectActive Then
+                  gApp.ProjectBuild = gConfig.Builds(nCurSel).Id
+               Else
+                  Dim pDocMain As clsDocument Ptr 
+                  pDocMain = gTTabCtl.GetActiveDocumentPtr()
+                  If pDocMain Then pDocMain->DocumentBuild = gConfig.Builds(nCurSel).Id
+               end if
+               frmBuildConfig_LoadBuildComboBox()
+               frmMain_SetStatusbar
             end if
-            frmBuildConfig_LoadBuildListBox(HWND)
-            frmMain_SetStatusbar
+            
             SendMessage( HWnd, WM_CLOSE, 0, 0 )
             Exit Function
          end if

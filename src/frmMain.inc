@@ -341,7 +341,6 @@ public Function frmMain_SetStatusbar() as long
    ' Update the statusbar with the current Line/Col position
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
    
-   
    dim wszText as wstring * MAX_PATH
 
    ' PANEL (0) Build Configuration
@@ -1105,9 +1104,11 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
    End If   
    pwszName = @pDoc->DiskFilename
 
+   
    ' Add the document to the Explorer treeview and ensure that the root and special
    ' nodes are created.
    AddFunctionsToExplorerTreeview( pDoc, False )
+
 
    ' Set the default build configuration for this document. If no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
@@ -1134,6 +1135,13 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
                            pDoc->hNodeExplorer )
    End If
+
+   ' If a Menu, ToolBar or StatusBar exists on the Form then ensure that it
+   ' resizes to the new Form width.
+   frmMenuEditor_CreateFakeMainMenu(pDoc)
+   frmToolBarEditor_CreateFakeToolBar(pDoc)
+   frmStatusBarEditor_CreateFakeStatusBar(pDoc)
+
 
    ' Position all of the controls into place
    frmMain_PositionWindows
@@ -1888,6 +1896,10 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          frmMenuEditor_Show( HWND )
          if pDoc then frmMenuEditor_CreateFakeMainMenu( pDoc )
 
+      case IDM_TOOLBAREDITOR            
+         frmToolBarEditor_Show( HWND )
+         if pDoc then frmToolBarEditor_CreateFakeToolBar( pDoc )
+
       case IDM_STATUSBAREDITOR            
          frmStatusBarEditor_Show( HWND )
          if pDoc then frmStatusBarEditor_CreateFakeStatusBar( pDoc )
@@ -1913,6 +1925,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          if pDoc then 
             pDoc->bSnapLines = not pDoc->bSnapLines
             pDoc->UserModified = true
+            frmMain_SetStatusbar
          end if
 
       case IDM_LOCKCONTROLS

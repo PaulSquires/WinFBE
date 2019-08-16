@@ -171,6 +171,10 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
    ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
 
+      if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+         if pDoc->IsDesigner then pDoc->ProjectFileType = FILETYPE_NORMAL 
+      end if
+
       if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
          ' Give this document a default project type depending on its file extension
          if pDoc->ProjectFileType = FILETYPE_UNDEFINED then

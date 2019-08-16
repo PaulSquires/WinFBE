@@ -41,6 +41,25 @@ END FUNCTION
 
 
 ' ========================================================================================
+' Reset any SnapLines data in order to ready it for future control movements.
+' ========================================================================================
+private Function ResetSnapLines( byval pDoc as clsDocument ptr ) as Long
+   if pDoc->bSnapLines = false then exit function
+   
+   dim pt as POINT
+   
+   for i as long = SnapLinePosition.top to SnapLinePosition.right
+      ' Hide any visible SnapLines
+      ShowWindow( pDoc->hSnapLine(i), SW_HIDE )
+      pDoc->bSnapActive(i) = false
+      pDoc->ptCursorStart(i) = pt
+   next
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Calculate any SnapLines and show them on screen.
 ' Returns True if SnapLines have been set and calling program should perform the snap.
 ' ========================================================================================
@@ -75,6 +94,15 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
    GetWindowRect( pDoc->pCtrlAction->hWindow, @rcActive )
    MapWindowPoints( 0, pDoc->hWndForm, cast(point ptr, @rcActive), 2 )
     
+   ' NOTE: Based on testing, including the BOTTOM and RIGHT tests can cause
+   ' jerkiness behaviour in the visual designer. For example, a control can
+   ' sometimes get "stuck" alternating between a LEFT hit and a RIGHT hit
+   ' causing the control to immediately snap LEFT and then when you try to
+   ' move, it will snap RIGHT. Being able to dislodge the control from this
+   ' behaviour is very hard.
+   ' Therefore, until a better algorithm can be found, we will just do hit
+   ' testing for TOP and LEFT.
+   '
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
       if pCtrl->ControlType = CTRL_FORM then continue for
@@ -98,20 +126,22 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
          nSnap(SnapLinePosition.top) = rc.top
       end if
 
-      ' BOTTOM TEST
-      SetRect( @rcTest1, 0, rc.bottom - HitPixels, rcClient.right, rc.bottom + HitPixels )
-      SetRect( @rcTest2, 0, rcActive.bottom, rcClient.right, rcActive.bottom + 1 )
-      if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         if bHit(SnapLinePosition.top) = false then
-            bHit(SnapLinePosition.bottom) = true
-            if IsRectEmpty( @rcSnap(SnapLinePosition.bottom) ) then
-               SetRect( @rcSnap(SnapLinePosition.bottom), rcActive.left, rc.bottom - 1, rcActive.right, rc.bottom )
-            end if
-            if rc.left < rcSnap(SnapLinePosition.bottom).left then rcSnap(SnapLinePosition.bottom).left = rc.left
-            if rc.right > rcSnap(SnapLinePosition.bottom).right then rcSnap(SnapLinePosition.bottom).right = rc.right
-            nSnap(SnapLinePosition.bottom) = rc.bottom
-         end if
-      end if
+'      ' BOTTOM TEST
+'      if bHit(SnapLinePosition.top) = false then
+'         SetRect( @rcTest1, 0, rc.bottom - HitPixels, rcClient.right, rc.bottom + HitPixels )
+'         SetRect( @rcTest2, 0, rcActive.bottom, rcClient.right, rcActive.bottom + 1 )
+'         if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
+'            if bHit(SnapLinePosition.top) = false then
+'               bHit(SnapLinePosition.bottom) = true
+'               if IsRectEmpty( @rcSnap(SnapLinePosition.bottom) ) then
+'                  SetRect( @rcSnap(SnapLinePosition.bottom), rcActive.left, rc.bottom - 1, rcActive.right, rc.bottom )
+'               end if
+'               if rc.left < rcSnap(SnapLinePosition.bottom).left then rcSnap(SnapLinePosition.bottom).left = rc.left
+'               if rc.right > rcSnap(SnapLinePosition.bottom).right then rcSnap(SnapLinePosition.bottom).right = rc.right
+'               nSnap(SnapLinePosition.bottom) = rc.bottom
+'            end if
+'         end if
+'      end if
       
       ' LEFT TEST
       SetRect( @rcTest1, rc.left - HitPixels, 0, rc.left + HitPixels, rcClient.bottom )
@@ -126,20 +156,22 @@ private Function PerformSnapLines( byval pDoc as clsDocument ptr, _
          nSnap(SnapLinePosition.left) = rc.left
       end if
 
-      ' RIGHT TEST
-      SetRect( @rcTest1, rc.right - HitPixels, 0, rc.right + HitPixels, rcClient.bottom )
-      SetRect( @rcTest2, rcActive.right, 0, rcActive.right + 1, rcClient.bottom )
-      if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
-         if bHit(SnapLinePosition.left) = false then
-            bHit(SnapLinePosition.right) = true
-            if IsRectEmpty( @rcSnap(SnapLinePosition.right) ) then
-               SetRect( @rcSnap(SnapLinePosition.right), rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
-            end if
-            if rc.top < rcSnap(SnapLinePosition.right).top then rcSnap(SnapLinePosition.right).top = rc.top
-            if rc.bottom > rcSnap(SnapLinePosition.right).bottom then rcSnap(SnapLinePosition.right).bottom = rc.bottom
-            nSnap(SnapLinePosition.right) = rc.right
-         end if
-      end if
+'      ' RIGHT TEST
+'      if bHit(SnapLinePosition.left) = false then
+'         SetRect( @rcTest1, rc.right - HitPixels, 0, rc.right + HitPixels, rcClient.bottom )
+'         SetRect( @rcTest2, rcActive.right, 0, rcActive.right + 1, rcClient.bottom )
+'         if IntersectRect( @rcIntersect, @rcTest1, @rcTest2 ) then
+'            if bHit(SnapLinePosition.left) = false then
+'               bHit(SnapLinePosition.right) = true
+'               if IsRectEmpty( @rcSnap(SnapLinePosition.right) ) then
+'                  SetRect( @rcSnap(SnapLinePosition.right), rc.right - 1, rcActive.top, rc.right, rcActive.bottom )
+'               end if
+'               if rc.top < rcSnap(SnapLinePosition.right).top then rcSnap(SnapLinePosition.right).top = rc.top
+'               if rc.bottom > rcSnap(SnapLinePosition.right).bottom then rcSnap(SnapLinePosition.right).bottom = rc.bottom
+'               nSnap(SnapLinePosition.right) = rc.right
+'            end if
+'         end if
+'      end if
    next
 
 
@@ -598,10 +630,9 @@ public function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
    
    dim as Rect rcIntersect, rcLasso, rcCtrl
    
-   ' Hide any visible SnapLines
-   for i as long = 0 to 3
-      ShowWindow( pDoc->hSnapLine(i), SW_HIDE )
-   next
+   ' Reset any previous SnapLines data in order to ready it for any
+   ' future movement of controls on the form.
+   ResetSnapLines( pDoc )
 
    
    ' Hide any previous lasso (and select controls)
@@ -781,8 +812,14 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       ApplyControlProperties( pDoc, pDoc->pCtrlAction )
       pDoc->pCtrlAction->SuspendLayout = false
       
+      ' If a Menu, ToolBar or StatusBar exists on the Form then ensure that it
+      ' resizes to the new Form width.
       if pDoc->pCtrlAction->ControlType = CTRL_FORM then
          frmMenuEditor_CreateFakeMainMenu(pDoc)
+         if pDoc->hWndRebar then
+            dim as long cy = AfxGetWindowHeight( pDoc->hWndRebar )
+            SendMessage pDoc->hWndRebar, WM_SIZE, rc.right, cy
+         end if
          frmStatusBarEditor_CreateFakeStatusBar(pDoc)
       end if   
 
@@ -911,7 +948,7 @@ private Function DesignerForm_OnNotify( ByVal HWnd As HWnd, _
    Select Case pNMHDR->code 
       Case NM_CLICK
          if id = IDC_FAKESTATUSBAR then
-            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_STATUSBAREDITOR, 0), 0 )
+            PostMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_STATUSBAREDITOR, 0), 0 )
          end if
    end select
    
@@ -930,7 +967,7 @@ private Function DesignerForm_OnCommand( ByVal HWnd As HWnd, _
    Select Case id
       Case IDC_LBLFAKEMAINMENU
          If codeNotify = BN_CLICKED Then
-            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_MENUEDITOR, 0), 0 )
+            PostMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_MENUEDITOR, 0), 0 )
          end if
    end select
    

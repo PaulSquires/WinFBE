@@ -77,10 +77,12 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
          StatusBar_SetTipText( pDoc->hWndStatusBar, i, pDoc->PanelItems(i).wszToolTip )
       end if
       
+      dim as single cx = pWindow->rxRatio
+   
       select case ucase( pDoc->PanelItems(i).wszAutoSize )
          case "STATUSBARPANELAUTOSIZE.NONE"
-            nPanelWidth    = val( pDoc->PanelItems(i).wszWidth )
-            nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth )
+            nPanelWidth    = val( pDoc->PanelItems(i).wszWidth ) * cx
+            nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth ) * cx
             if nPanelWidth < nPanelMinWidth then nPanelWidth = nPanelMinWidth
          case "STATUSBARPANELAUTOSIZE.CONTENTS"
             dim as HDC _hdc = GetDC(pDoc->hWndStatusBar)
@@ -90,8 +92,8 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
             GetTextExtentPoint32( _hdc, wszBuffer, len(wszBuffer), @_size)
             SelectObject( _hdc, oldfont )
             ReleaseDC( pDoc->hWndStatusBar, _hdc )
-            nPanelWidth    = _size.cx
-            nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth )
+            nPanelWidth = _size.cx
+            nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth ) * cx
             if nPanelWidth < nPanelMinWidth then nPanelWidth = nPanelMinWidth
          case "STATUSBARPANELAUTOSIZE.SPRING"
             nPanelWidth = 0
@@ -108,7 +110,7 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
          end if
       end if
 
-      ' If no hIcon defined then any previous icon will be removed
+      ' If no hIcon defined then any previous icon will be removed (hIcon = 0)
       StatusBar_SetIcon( pDoc->hWndStatusBar, i, hIcon ) 
       
       rgPanelWidths(i) = pWindow->ScaleX(nPanelWidth)
@@ -125,7 +127,7 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
       rgParts(i) = iRightSide
    next
    
-   If SendMessage( pDoc->hWndStatusBar, SB_SETPARTS, 5, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
+   If SendMessage( pDoc->hWndStatusBar, SB_SETPARTS, (ub-lb)+1, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
       SendMessage( pDoc->hWndStatusBar, SB_SIMPLE, False, 0 )
    End If
 

@@ -94,6 +94,17 @@ function clsDocument.MainMenuExists() as Boolean
 end function
 
 ''
+''  Returns True/False indicating that a valid top toolbar exists for this form.
+function clsDocument.ToolBarExists() as Boolean
+   dim as long numItems = ubound(this.ToolBarItems) - 1
+   if (this.GenerateToolBar = BST_CHECKED) andalso (numItems > -1) then
+      return true
+   else   
+      return false
+   end if
+end function
+
+''
 ''  Returns True/False indicating that a valid top statusbar exists for this form.
 function clsDocument.StatusBarExists() as Boolean
    dim as long numItems = ubound(this.PanelItems) - 1
@@ -426,6 +437,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    dim as Boolean bIsValidControl = true
    
    ' The first line MUST contain the identifier that this is a form file.
+
    if left(wszAllText, 13) = "' WINFBE FORM" then
       this.IsDesigner = true
       ' Remove any previously created controls, etc otherwise reloading the form
@@ -442,11 +454,12 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       return wszAllText   
    END IF
    
+
    ' Iterate all of the lines related to the visual designer
    dim as long iLineStart = 1
-   dim as long iLineEnd, NextMenuItem, NextPanelItem, NextImageItem
+   dim as long iLineEnd, NextMenuItem, NextToolBarItem, NextPanelItem, NextImageItem
 
-   dim as boolean bReadingMenuItem, bReadingPanelItem, bReadingImageItem
+   dim as boolean bReadingMenuItem, bReadingToolBarItem, bReadingPanelItem, bReadingImageItem
 
    do until iLineStart >= len(wszAllText)
       
@@ -465,12 +478,12 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          end if
          
       elseif left(wst, 15) = "' LOCKCONTROLS=" then
-         wszPropValue = mid(**wst, 16)
+         wszPropValue = mid(**wst, 16)  ' default is False
          if wszPropValue = "True" then this.bLockControls = true
 
       elseif left(wst, 12) = "' SNAPLINES=" then
-         wszPropValue = mid(**wst, 13)
-         if wszPropValue = "True" then this.bSnapLines = true
+         wszPropValue = mid(**wst, 13)  ' default is True
+         if wszPropValue = "False" then this.bSnapLines = false
 
       elseif left(wst, 17) = "' WINFBE FORM_END" then
          this.ErrorOffset = numOffsetLines 
@@ -507,6 +520,31 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          bReadingMenuItem = false   
       
       
+      elseif left(wst, 21) = "'   TOOLBARITEM_START" then
+         dim as long ub = ubound(this.ToolBarItems)
+         redim preserve this.ToolBarItems(ub + 1)
+         NextToolBarItem = ub + 1
+         bReadingToolBarItem = true
+      elseif left(wst, 20) = "'   TOOLBAR_DISPLAY=" then
+         this.GenerateToolBar = val(mid(**wst, 21))
+      elseif left(wst, 17) = "'   TOOLBAR_SIZE=" then
+         this.wszToolBarSize = mid(**wst, 18)
+      elseif left(wst, 17) = "'     BUTTONNAME=" then
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszName = mid(**wst, 18)
+      elseif left(wst, 17) = "'     BUTTONTYPE=" then
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszButtonType = mid(**wst, 18)
+      elseif left(wst, 20) = "'     BUTTONTOOLTIP=" then
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszTooltip = mid(**wst, 21)
+      elseif left(wst, 24) = "'     BUTTONNORMALIMAGE=" then
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropNormalImage.wszPropValue = mid(**wst, 25)
+      elseif left(wst, 21) = "'     BUTTONHOTIMAGE=" then
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropHotImage.wszPropValue = mid(**wst, 22)
+      elseif left(wst, 26) = "'     BUTTONDISABLEDIMAGE=" then
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropDisabledImage.wszPropValue = mid(**wst, 27)
+      elseif left(wst, 19) = "'   TOOLBARITEM_END" then
+         bReadingToolBarItem = false   
+
+
       elseif left(wst, 19) = "'   PANELITEM_START" then
          dim as long ub = ubound(this.PanelItems)
          redim preserve this.PanelItems(ub + 1)

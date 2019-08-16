@@ -399,7 +399,8 @@ private Function frmImageManager_OnCommand( ByVal HWnd As HWnd, _
          
          ' If the StatusBar Editor called this ImageManager then save the selected
          ' image name into the pProp of the currently selected 
-         if GetParent( HWND_FRMIMAGES ) = HWND_FRMSTATUSBAREDITOR then
+         if (GetParent( HWND_FRMIMAGES ) = HWND_FRMSTATUSBAREDITOR) or _
+            (GetParent( HWND_FRMIMAGES ) = HWND_FRMTOOLBAREDITOR) then
             Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMIMAGES)
             pProp = cast( clsProperty ptr, pWindow->UserData(0) )
             if pProp then pProp->wszPropValue = wszImageName
@@ -571,7 +572,7 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
 
    
    ' Save the incoming pProp value to the ImageManger window. We do this because if the StatusBar
-   ' Editor called this ImageManager then we need to save the Image Name into the pProp.
+   ' Editor or ToolBar Editor called this ImageManager then we need to save the Image Name into the pProp.
    pWindow->UserData(0) = cast( LONG_PTR, pProp )
    
    ' Add a tooolbar

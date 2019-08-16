@@ -15,6 +15,7 @@
 #include once "modVDDesignForm.bi"
 #include once "frmMenuEditor.bi"
 #include once "frmStatusBarEditor.bi"
+#include once "frmToolBarEditor.bi"
 
 
 ' ========================================================================================
@@ -890,6 +891,9 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
            WS_EX_LEFT Or WS_EX_LTRREADING)
       SendMessage( pDoc->hWndStatusBar, WM_SETFONT, cast(WPARAM, pDoc->hFontFakeMenu), cast(LPARAM, CTRUE))
       
+      ' ToolBar
+      frmToolBarEditor_CreateFakeToolBar( pDoc )
+
       ' Create the four SnapLines 
       for i as long = 0 to 3
          pDoc->hSnapLine(i) = _
@@ -962,9 +966,6 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
    SetControlProperty(pCtrl, "WIDTH", str(rcDraw.right-rcDraw.left))
    SetControlProperty(pCtrl, "HEIGHT", str(rcDraw.bottom-rcDraw.top))
    
-   frmMenuEditor_CreateFakeMainMenu(pDoc)
-   frmStatusBarEditor_CreateFakeStatusBar(pDoc)
-
    ' If this form/control is being created from reading an existing source file then 
    ' then we would wait until the all of the control's properties have been loaded. 
    ' See clsDocument.ParseDesignerString
