@@ -6,6 +6,7 @@ Version 1.9.2
 - Fixed: "Visible" property of controls reported the "Enabled" value after control was created.
 - Fixed: Label controls could lose their OwnerDraw abilities if visibility was toggled.
 - Fixed: Changing selected Build Configuration via F7 dialog did not set the correct build in combobox in the main toolbar.
+- Fixed: Random GPF when adding Form files via the "Add Files to Project" menu option. 
 
 Version 1.9.1 (March 25, 2019)
 FYI - (The visual designer is still a work in progress)

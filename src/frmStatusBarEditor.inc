@@ -68,11 +68,8 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
    
       select case ucase( pDoc->PanelItems(i).wszAutoSize )
          case "STATUSBARPANELAUTOSIZE.NONE"
-<<<<<<< HEAD
-=======
             nPanelWidth    = val( pDoc->PanelItems(i).wszWidth ) * cx
             nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth ) * cx
->>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
             if nPanelWidth < nPanelMinWidth then nPanelWidth = nPanelMinWidth
          case "STATUSBARPANELAUTOSIZE.CONTENTS"
             dim as HDC _hdc = GetDC(pDoc->hWndStatusBar)
@@ -83,10 +80,7 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
             SelectObject( _hdc, oldfont )
             ReleaseDC( pDoc->hWndStatusBar, _hdc )
             nPanelWidth = _size.cx
-<<<<<<< HEAD
-=======
             nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth ) * cx
->>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
             if nPanelWidth < nPanelMinWidth then nPanelWidth = nPanelMinWidth
          case "STATUSBARPANELAUTOSIZE.SPRING"
             nPanelWidth = iif(i, rc.right - nWidths(i-1), rc.right)
@@ -125,22 +119,6 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
       StatusBar_SetIcon( pDoc->hWndStatusBar, i, hIcon ) 
    next
 
-<<<<<<< HEAD
-=======
-   if iSpringIndex <> -1 then rgPanelWidths(iSpringIndex) = rc.right - nTotalWidths
-   
-   ' Set the right side panel measurments
-   iRightSide = 0
-   for i as long = lb to ub
-      iRightSide = iRightSide + rgPanelWidths(i)   
-      rgParts(i) = iRightSide
-   next
-   
-   If SendMessage( pDoc->hWndStatusBar, SB_SETPARTS, (ub-lb)+1, Cast(LPARAM, @rgParts(0)) ) <> 0 Then
-      SendMessage( pDoc->hWndStatusBar, SB_SIMPLE, False, 0 )
-   End If
-
->>>>>>> f83e8779ff1a0fe9ab1c485d4fc8b83db8ba47cf
    ShowWindow( pDoc->hWndStatusBar, SW_SHOW )
 
    function = 0 
