@@ -316,7 +316,7 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(11) as TOOLBOX_TYPE
+   redim gToolBox(12) as TOOLBOX_TYPE
    
    gToolBox(0).nToolType = CTRL_POINTER
    gToolBox(0).wszToolBoxName   = "Pointer"
@@ -388,19 +388,26 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(9).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
    gToolBox(9).wszClassName = "PICTUREBOX"
 
-   gToolBox(10).nToolType = CTRL_RICHEDIT
-   gToolBox(10).wszToolBoxName = "RichEdit"
-   gToolBox(10).wszControlName = "RichEdit"
-   gToolBox(10).wszImage = "IMAGE_RICHEDIT"
-   gToolBox(10).wszCursor = "IMAGE_CURSOR_RICHEDIT"
-   gToolBox(10).wszClassName = "RICHEDIT"
+   gToolBox(10).nToolType = CTRL_PROGRESSBAR
+   gToolBox(10).wszToolBoxName = "ProgressBar"
+   gToolBox(10).wszControlName = "Progress"
+   gToolBox(10).wszImage = "IMAGE_PROGRESSBAR"
+   gToolBox(10).wszCursor = "IMAGE_CURSOR_PROGRESSBAR"
+   gToolBox(10).wszClassName = "PROGRESSBAR"
 
-   gToolBox(11).nToolType = CTRL_TEXTBOX
-   gToolBox(11).wszToolBoxName   = "TextBox"
-   gToolBox(11).wszControlName   = "Text"
-   gToolBox(11).wszImage  = "IMAGE_TEXTBOX"
-   gToolBox(11).wszCursor = "IMAGE_CURSOR_TEXTBOX"
-   gToolBox(11).wszClassName = "TEXTBOX"
+   gToolBox(11).nToolType = CTRL_RICHEDIT
+   gToolBox(11).wszToolBoxName = "RichEdit"
+   gToolBox(11).wszControlName = "RichEdit"
+   gToolBox(11).wszImage = "IMAGE_RICHEDIT"
+   gToolBox(11).wszCursor = "IMAGE_CURSOR_RICHEDIT"
+   gToolBox(11).wszClassName = "RICHEDIT"
+
+   gToolBox(12).nToolType = CTRL_TEXTBOX
+   gToolBox(12).wszToolBoxName   = "TextBox"
+   gToolBox(12).wszControlName   = "Text"
+   gToolBox(12).wszImage  = "IMAGE_TEXTBOX"
+   gToolBox(12).wszCursor = "IMAGE_CURSOR_TEXTBOX"
+   gToolBox(12).wszClassName = "TEXTBOX"
 
 
 '   gToolBox(11).nToolType = CTRL_HSCROLL
@@ -426,12 +433,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(14).wszImage  = "IMAGE_TABCONTROL"
 '   gToolBox(14).wszCursor = "IMAGE_CURSOR_TABCONTROL"
 '   gToolBox(14).wszClassName = "TABCONTROL"
-
-'   gToolBox(16).nToolType = CTRL_PROGRESSBAR
-'   gToolBox(16).wszName   = "ProgressBar"
-'   gToolBox(16).wszImage  = "IMAGE_PROGRESSBAR"
-'   gToolBox(16).wszCursor = "IMAGE_CURSOR_PROGRESSBAR"
-'   gToolBox(16).wszClassName = "PROGRESSBAR"
 
 '   gToolBox(17).nToolType = CTRL_UPDOWN
 '   gToolBox(17).wszName   = "UpDown"

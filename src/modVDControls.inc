@@ -292,13 +292,23 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ImageHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageScaling", "ImageScale.AutoSize", PropertyType.ComboPicker)
 
+      case CTRL_PROGRESSBAR
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Maximum", "100", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Minimum", "0", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "StepValue", "1", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Value", "0", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+
       
 
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
       case CTRL_TABCONTROL
-      case CTRL_PROGRESSBAR
       case CTRL_UPDOWN
       case CTRL_LISTVIEW
       case CTRL_TREEVIEW
@@ -496,11 +506,23 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+      
+      case CTRL_PROGRESSBAR
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+      
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
       case CTRL_TABCONTROL
-      case CTRL_PROGRESSBAR
       case CTRL_UPDOWN
       case CTRL_LISTVIEW
       case CTRL_TREEVIEW

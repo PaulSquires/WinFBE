@@ -141,16 +141,16 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
 
       select case **pDoc->ToolBarItems(i).wszButtonType 
          case "ToolBarButton.Button"
-            Toolbar_AddButton hToolBar, i, 0
+            Toolbar_AddButton hToolBar, ii, 0
          
          case "ToolBarButton.Separator"
             Toolbar_AddSeparator hToolBar
          
          case "ToolBarButton.DropDown"
-            Toolbar_AddButton hToolBar, i, 0, 0, TBSTYLE_DROPDOWN
+            Toolbar_AddButton hToolBar, ii, 0, 0, TBSTYLE_DROPDOWN
          
          case "ToolBarButton.WholeDropDown"
-            Toolbar_AddButton hToolBar, i, 0, 0, BTNS_WHOLEDROPDOWN
+            Toolbar_AddButton hToolBar, ii, 0, 0, BTNS_WHOLEDROPDOWN
       end select      
 
    next
@@ -423,6 +423,14 @@ private Function frmToolBarEditor_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             if nCurSel > -1 then
                frmImageManager_Show( HWND, @gToolBarItems(nCurSel).pPropNormalImage )
+               if gToolBarItems(nCurSel).pPropHotImage.wszPropValue = "" then
+                  gToolBarItems(nCurSel).pPropHotImage.wszPropValue = _
+                     gToolBarItems(nCurSel).pPropNormalImage.wszPropValue
+               end if      
+               if gToolBarItems(nCurSel).pPropDisabledImage.wszPropValue = "" then
+                  gToolBarItems(nCurSel).pPropDisabledImage.wszPropValue = _
+                     gToolBarItems(nCurSel).pPropNormalImage.wszPropValue
+               end if      
                frmToolBarEditor_DisplayToolBarItem
             end if
          end if
@@ -432,6 +440,14 @@ private Function frmToolBarEditor_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             if nCurSel > -1 then
                frmImageManager_Show( HWND, @gToolBarItems(nCurSel).pPropHotImage )
+               if gToolBarItems(nCurSel).pPropNormalImage.wszPropValue = "" then
+                  gToolBarItems(nCurSel).pPropNormalImage.wszPropValue = _
+                     gToolBarItems(nCurSel).pPropHotImage.wszPropValue
+               end if      
+               if gToolBarItems(nCurSel).pPropDisabledImage.wszPropValue = "" then
+                  gToolBarItems(nCurSel).pPropDisabledImage.wszPropValue = _
+                     gToolBarItems(nCurSel).pPropHotImage.wszPropValue
+               end if      
                frmToolBarEditor_DisplayToolBarItem
             end if
          end if
@@ -441,6 +457,14 @@ private Function frmToolBarEditor_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             if nCurSel > -1 then
                frmImageManager_Show( HWND, @gToolBarItems(nCurSel).pPropDisabledImage )
+               if gToolBarItems(nCurSel).pPropNormalImage.wszPropValue = "" then
+                  gToolBarItems(nCurSel).pPropNormalImage.wszPropValue = _
+                     gToolBarItems(nCurSel).pPropDisabledImage.wszPropValue
+               end if      
+               if gToolBarItems(nCurSel).pPropHotImage.wszPropValue = "" then
+                  gToolBarItems(nCurSel).pPropHotImage.wszPropValue = _
+                     gToolBarItems(nCurSel).pPropDisabledImage.wszPropValue
+               end if      
                frmToolBarEditor_DisplayToolBarItem
             end if
          end if
@@ -463,7 +487,7 @@ private Function frmToolBarEditor_OnCommand( ByVal HWnd As HWnd, _
                pDoc->GenerateToolBar = Button_GetCheck( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_CHKDISPLAYONFORM) )
                
                dim as long nIndex = ComboBox_GetCurSel( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_COMBOSIZE) )
-               pDoc->wszToolBarSize = AfxGetComboBoxText( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_COMBOSIZE), nIndex )
+               pDoc->wszToolBarSize = rtrim(AfxGetComboBoxText( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_COMBOSIZE), nIndex ), chr(0))
                
                pDoc->UserModified = true
             end if
@@ -609,7 +633,7 @@ public Function frmToolBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMTOOLBAREDITOR_TXTNORMALIMAGE, "", 134, 205, 320, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL or ES_READONLY, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    hCtrl = _
    pWindow->AddControl("BITMAPBUTTON", , IDC_FRMTOOLBAREDITOR_CMDNORMALIMAGE, "", 462, 204, 22, 22, _
@@ -625,7 +649,7 @@ public Function frmToolBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMTOOLBAREDITOR_TXTHOTIMAGE, "", 134, 233, 320, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL or ES_READONLY, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    hCtrl = _
    pWindow->AddControl("BITMAPBUTTON", , IDC_FRMTOOLBAREDITOR_CMDHOTIMAGE, "", 462, 232, 22, 22, _
@@ -641,7 +665,7 @@ public Function frmToolBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("TEXTBOX", , IDC_FRMTOOLBAREDITOR_TXTDISABLEDIMAGE, "", 134, 261, 320, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL or ES_READONLY, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    hCtrl = _
    pWindow->AddControl("BITMAPBUTTON", , IDC_FRMTOOLBAREDITOR_CMDDISABLEDIMAGE, "", 462, 260, 22, 22, _

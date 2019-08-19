@@ -753,9 +753,51 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    case "BACKCOLOR"
       pCtrl->AfxPicturePtr->SetBkColor( GetRGBColorFromProperty(pProp), true )
 
-   case "BACKCOLOR"
+   case "BACKCOLORHOT"
       pCtrl->AfxPicturePtr->SetBkColorHot( GetRGBColorFromProperty(pProp), true )
 
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Apply properties to the ProgressBar
+' ========================================================================================
+private function ProgressBar_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                              byval pCtrl as clsControl ptr, _
+                                              byval pProp as clsProperty ptr _ 
+                                              ) as Long
+    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "MAXIMUM"
+      if nPropValue >= 0 then
+         dim as long nMinimum = ProgressBar_GetMinRange( pCtrl->hWindow )
+         ProgressBar_SetRange32( pCtrl->hWindow, nMinimum, nPropValue )
+      end if
+   
+   case "MINIMUM"
+      if nPropValue >= 0 then
+         dim as long nMaximum = ProgressBar_GetMaxRange( pCtrl->hWindow )
+         ProgressBar_SetRange32( pCtrl->hWindow, nPropValue, nMaximum )
+      end if
+      
+   case "VALUE"
+      if nPropValue >= 0 then
+         ProgressBar_SetPos( pCtrl->hWindow, nPropValue )
+      end if
+         
    end select
    
    function = 0
@@ -848,18 +890,19 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       ' Only act on properties where the value has changed.
       if pProp->wszPropValue = pProp->wszPropValuePrev then continue for
       select CASE pCtrl->ControlType
-         case CTRL_FORM:       Form_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_BUTTON:     Button_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_LABEL:      Label_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_CHECKBOX:   CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_OPTION:     OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_TEXTBOX:    TextBox_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_RICHEDIT:   TextBox_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_MASKEDEDIT: MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_LISTBOX:    ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_COMBOBOX:   ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_FRAME:      Frame_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_PICTUREBOX: PictureBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_FORM:         Form_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_BUTTON:       Button_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_LABEL:        Label_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_CHECKBOX:     CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_OPTION:       OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_TEXTBOX:      TextBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_RICHEDIT:     TextBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_MASKEDEDIT:   MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_LISTBOX:      ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_COMBOBOX:     ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_FRAME:        Frame_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_PICTUREBOX:   PictureBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_PROGRESSBAR:  ProgressBar_ApplyProperties(pDoc, pCtrl, pProp)
          CASE ELSE
       END SELECT
 

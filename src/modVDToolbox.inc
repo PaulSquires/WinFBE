@@ -198,7 +198,7 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
       case CTRL_TEXTBOX, CTRL_MASKEDEDIT, CTRL_RICHEDIT
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "KeyPress" 
-      case CTRL_LISTBOX, CTRL_COMBOBOX
+      case CTRL_LISTBOX, CTRL_COMBOBOX, CTRL_PROGRESSBAR
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Click" 
       case CTRL_PICTUREBOX
