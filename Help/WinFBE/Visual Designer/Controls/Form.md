@@ -7,8 +7,6 @@
 | AcceptButton                | Gets or sets a reference to the button that receives a click message when Enter key is pressed.        |
 | AllowDrop           | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.        |
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
-| BackgroundImage | Gets or set the image to display in the background.|
-| BackgroundImageLayout | Gets or sets the layout position of the background image. Refer to the [ImageLayout](#ImageLayout) enum. |
 | BorderStyle | Gets or sets the border style of the form. Refer to the [FormBorderStyle](#FormBorderStyle) enum. |
 | CancelButton | Gets or sets a reference to the button that receives a click message when Escape key is pressed. |
 | ClientSize | Gets or sets the client area of the form.  The client area of the form is the size of the form excluding the borders and the title bar. Get: returns [wfxSize](#wfxSize) object. Set: (width, height) |
@@ -25,6 +23,7 @@
 | Left | Gets or sets the distance, in pixels, between the left edge of the form and the left edge of its container's client area (normally the screen).|
 | Location |Gets or sets the top and left position of the form. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
+| MainMenu | Gets a reference to any defined MainMenu object for the form. |
 | MaximizeBox | Gets or sets a value (true/false) indicating whether the maximize button is displayed in the caption bar of the form.|
 | MaximumHeight | Gets or sets the maximum height of the form.|
 | MaximumWidth | Gets or sets the maximum width of the form.|
@@ -36,8 +35,10 @@
 | ScaleY | Gets the scaled value of a value based on the vertical display resolution.|
 | Size | Gets or sets the size of the form. Get: returns [wfxSize](#wfxSize) object. Set: (width, height)|
 | StartPosition | Gets or sets the starting position of the form at run time. Refer to [FormStartPosition](#FormStartPosition) enum.|
+| StatusBar | Gets a reference to any defined StatusBar object for the form. |
 |Tag | Gets or sets user defined text associated with the form.|
 |Text | Gets or sets the text (caption) associated with this form.|
+| ToolBar | Gets a reference to any defined ToolBar object for the form. |
 | Top | Gets or sets the distance, in pixels, between the top edge of the form and the top edge of its container's client area (normally the screen).|
 | Visible | Gets or sets a value (true/false) indicating whether the form is displayed.|
 | Width | Gets or sets the width of the form.|

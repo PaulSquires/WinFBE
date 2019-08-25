@@ -542,7 +542,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
             if pData = 0 THEN
-               wszToolBarSelect = sp(1) & "Select Case e.ToolBarClickIndex" & vbcrlf 
+               wszToolBarSelect = sp(1) & "Select Case sender.ClickIndex" & vbcrlf 
                for ii as long = 0 to ubound(pDoc->ToolBarItems) 
                   wszToolBarSelect = wszToolBarSelect & _
                         sp(2) & "Case " & ii & vbcrlf
@@ -593,7 +593,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          if (gApp.IsProjectLoading = false) andalso (gApp.IsFileLoading = false) then
             pData = gdb2.dbFindFunction(wszFunction)
             if pData = 0 THEN
-               wszStatusBarSelect = sp(1) & "Select Case e.PanelClickIndex" & vbcrlf 
+               wszStatusBarSelect = sp(1) & "Select Case sender.ClickIndex" & vbcrlf 
                for ii as long = 0 to ubound(pDoc->PanelItems) 
                   wszStatusBarSelect = wszStatusBarSelect & _
                         sp(2) & "Case " & ii & vbcrlf

@@ -21,15 +21,7 @@
 </head>
 <body>
 <h1 id="overview">Overview</h1>
-<p>The visual designer is still a major work in progress so please do not assume that all functionality is available and/or working correctly. The purpose of this release to show the progress of the visual designer to date and to allow input from users regarding its direction and whether changes in basic design philosophy should occur at this point.</p>
-<p>NOTE: Code may fail, GPF’s may occur in the editor. Do not rely on this version of the designer for any production quality code. Treat this mainly as a demo.</p>
-<p>The following areas of the visual designer are not working:</p>
-<ul>
-<li>Toolbar Editor</li>
-<li>Statusbar Editor</li>
-<li>Images/Pictures/Icons. Any control property that relies on these types has not been implemented yet. Need to create an interface between the editor and resource file.</li>
-<li>Guidelines and snap to lines on the design form</li>
-</ul>
+<p>The visual designer is still a work in progress so please do not assume that all functionality is available and/or working correctly. The purpose of this release to show the progress of the visual designer to date and to allow input from users regarding its direction and whether changes in basic design philosophy should occur at this point.</p>
 <p>There are a few controls that have been implemented. More to come as the core structure of the designer itself matures.</p>
 <ul>
 <li>Forms</li>
@@ -43,9 +35,12 @@
 <li>ComboBox</li>
 <li>OptionButton</li>
 <li>Main Menu</li>
-<li>StatusBar (only through code at this time)</li>
+<li>StatusBar</li>
+<li>ToolBar</li>
+<li>PictureBox</li>
+<li>ProgressBar</li>
 </ul>
-<p>The forms and controls are being implemented via the WinFormsX library that I am writing and maintaining on GitHub.</p>
+<p>The forms and controls are being implemented via the WinFormsX library that is also a free and open source PlanetSquires product that is available on GitHub.</p>
 <p>The rest of this document will give you a bare bones introduction to the use of the visual designer and code to perform various tasks.</p>
 <p>The visual designer will automatically generate code whenever something changes related to a form or control. The generated code is based on the syntax of the <strong>WinFormsX library</strong>.</p>
 <p>When the code is first generated, the visual designer will output an additional line:</p>

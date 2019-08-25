@@ -2,7 +2,9 @@
 
 All WinFBE visual designer created applications need to have a resource file and a manifest file. 
 
-If you are using WinFBE’s project management to create your program then the resource file and manifest file will be created automatically. If you are creating your application outside of a project then you need to manually provide a resource file that includes a reference to a manifest file. Failing to do this will result in your application not being theme aware. It will look ugly. If manually specifying a resource file then you can use WinFBE’s built-in statement to identify the resource filename. 
+If you are using WinFBE’s project management to create your program then the resource file and manifest file can be created automatically. If you are creating your application outside of a project then you need to manually provide a resource file that includes a reference to a manifest file. Failing to do this will result in your application not being theme aware. It will look ugly. 
+
+If manually specifying a resource file then you can use WinFBE’s built-in statement to identify the resource filename. 
 
 Don't forget the ' comment marker in front of the #RESOURCE statement
 

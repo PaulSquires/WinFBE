@@ -301,6 +301,9 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Marquee", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "MarqueeAnimationSpeed", "30", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Vertical", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
       

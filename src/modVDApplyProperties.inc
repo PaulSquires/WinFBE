@@ -797,6 +797,14 @@ private function ProgressBar_ApplyProperties( byval pDoc as clsDocument ptr, _
       if nPropValue >= 0 then
          ProgressBar_SetPos( pCtrl->hWindow, nPropValue )
       end if
+      
+   case "VERTICAL"
+      if wszPropValue = "True" then
+         AfxAddWindowStyle(pCtrl->hWindow, PBS_VERTICAL)
+      else
+         AfxRemoveWindowStyle(pCtrl->hWindow, PBS_VERTICAL)
+      end if
+      AfxRedrawWindow(pCtrl->hWindow) 
          
    end select
    

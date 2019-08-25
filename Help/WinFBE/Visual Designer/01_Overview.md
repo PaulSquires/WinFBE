@@ -1,14 +1,5 @@
 # Overview
-The visual designer is still a major work in progress so please do not assume that all functionality is available and/or working correctly. The purpose of this release to show the progress of the visual designer to date and to allow input from users regarding its direction and whether changes in basic design philosophy should occur at this point.
-
-NOTE: Code may fail, GPF’s may occur in the editor. Do not rely on this version of the designer for any production quality code. Treat this mainly as a demo.
-
-The following areas of the visual designer are not working:
-
-- Toolbar Editor
-- Statusbar Editor
-- Images/Pictures/Icons. Any control property that relies on these types has not been implemented yet. Need to create an interface between the editor and resource file.
-- Guidelines and snap to lines on the design form
+The visual designer is still a work in progress so please do not assume that all functionality is available and/or working correctly. The purpose of this release to show the progress of the visual designer to date and to allow input from users regarding its direction and whether changes in basic design philosophy should occur at this point.
 
 There are a few controls that have been implemented. More to come as the core structure of the designer itself matures.
 
@@ -23,9 +14,12 @@ There are a few controls that have been implemented. More to come as the core st
 - ComboBox 
 - OptionButton
 - Main Menu
-- StatusBar (only through code at this time)
+- StatusBar 
+- ToolBar
+- PictureBox
+- ProgressBar
 
-The forms and controls are being implemented via the WinFormsX library that I am writing and maintaining on GitHub.
+The forms and controls are being implemented via the WinFormsX library that is also a free and open source PlanetSquires product that is available on GitHub.
 
 The rest of this document will give you a bare bones introduction to the use of the visual designer and code to perform various tasks.
 

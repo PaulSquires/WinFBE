@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>09_Frame</title>
+  <title>ProgressBar</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,7 @@
   
 </head>
 <body>
-<h1 id="frame-(wfxframe)">Frame (wfxFrame)</h1>
+<h1 id="progressbar-(wfxprogressbar)">ProgressBar (wfxProgressBar)</h1>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -35,24 +35,16 @@
 <td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
 </tr>
 <tr class="even">
-<td>BackColor</td>
-<td>Gets or sets the background color of the control. Refer to the <strong>Colors</strong> object.</td>
-</tr>
-<tr class="odd">
 <td>CtrlId</td>
 <td>Gets or sets a value indicating the control ID of the control.</td>
 </tr>
-<tr class="even">
-<td>CtrlType</td>
-<td>Gets or sets the control type value. Always <strong>ControlType.Frame</strong> and used when adding the control to the form's control collection.</td>
-</tr>
 <tr class="odd">
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.ProgressBar</strong> and used when adding the control to the form's control collection.</td>
+</tr>
+<tr class="even">
 <td>Enabled</td>
 <td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
-</tr>
-<tr class="even">
-<td>Font</td>
-<td>Gets or sets the font for the control. Refer to the Font object.</td>
 </tr>
 <tr class="odd">
 <td>Height</td>
@@ -79,6 +71,14 @@
 <td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
 </tr>
 <tr class="odd">
+<td>Maximum</td>
+<td>Get or sets the maximum value of the range of the control.</td>
+</tr>
+<tr class="even">
+<td>Minimum</td>
+<td>Get or sets the minimum value of the range of the control.</td>
+</tr>
+<tr class="odd">
 <td>Parent</td>
 <td>Gets or sets the parent container of the control.</td>
 </tr>
@@ -87,26 +87,30 @@
 <td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
 </tr>
 <tr class="odd">
-<td>Tag</td>
-<td>Gets or sets user defined text associated with the form.</td>
+<td>StepValue</td>
+<td>Get or sets the amount by which a call to the PerformStep methos increases the current position of the control.</td>
 </tr>
 <tr class="even">
-<td>Text</td>
-<td>Gets or sets the text (caption) associated with this form.</td>
+<td>Tag</td>
+<td>Gets or sets user defined text associated with the form.</td>
 </tr>
 <tr class="odd">
 <td>Top</td>
 <td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
 </tr>
 <tr class="even">
-<td>UseMnemonic</td>
-<td>Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&amp;) character will be used as the control’s accelerator key.</td>
+<td>Value</td>
+<td>Gets or sets the current position of the progress bar in the control.</td>
 </tr>
 <tr class="odd">
+<td>Vertical</td>
+<td>Gets or sets the value (true/false) for the progress bar to display progress status vertically from bottom to top.</td>
+</tr>
+<tr class="even">
 <td>Visible</td>
 <td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Width</td>
 <td>Gets or sets the width of the control.</td>
 </tr>
@@ -130,14 +134,10 @@
 <td>Forces the form to invalidate its client area and immediately redraw itself and any child controls.</td>
 </tr>
 <tr class="odd">
-<td>SelectNextControl</td>
-<td>Moves the input control to the next (True) or previous (False) control in the tab order.</td>
-</tr>
-<tr class="even">
 <td>SetBounds</td>
 <td>Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Show</td>
 <td>Creates and displays the control to the user.</td>
 </tr>

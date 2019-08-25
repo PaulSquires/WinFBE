@@ -131,6 +131,7 @@ public Function frmToolBarEditor_CreateFakeToolBar( ByVal pDoc as clsDocument pt
     
    for i as long = lb to ub
        
+      ii = -1
       wszImageName = pDoc->ToolBarItems(i).pPropNormalImage.wszPropValue 
       if len(wszImageName) then
          dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszImageName)

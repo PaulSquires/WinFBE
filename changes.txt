@@ -1,4 +1,4 @@
-Version 1.9.2
+Version 1.9.2 (August 25, 2019)
 - CHANGED: TOO MANY VISUAL DESIGNER CHANGES TO LIST
 - Added: Language translation for Brazilian-Portuguese by Marco Pimenta (mvpimenta).
 - Added: "Frac", "Date", "Format" keywords to editor syntax highlighting.

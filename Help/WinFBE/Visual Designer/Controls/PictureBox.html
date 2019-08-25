@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>02_Event Handlers</title>
+  <title>PictureBox</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,52 +20,225 @@
   
 </head>
 <body>
-<h1 id="event-handlers">Event Handlers</h1>
-<pre><code>Declare Function frmMain_Click( byref sender as wfxForm, _
-                                byref e as EventArgs _
-                                ) as LRESULT
+<h1 id="picturebox-(wfxpicturebox)">PictureBox (wfxPictureBox)</h1>
+<h3 id="properties">Properties</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AllowDrop</td>
+<td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
+</tr>
+<tr class="even">
+<td>BackColor</td>
+<td>Gets or sets the background color of the control. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="odd">
+<td>BackColorHot</td>
+<td>Gets or sets the background color of the control when the mouse passes over it. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="even">
+<td>CtrlId</td>
+<td>Gets or sets a value indicating the control ID of the control.</td>
+</tr>
+<tr class="odd">
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.PictureBox</strong> and used when adding the control to the form's control collection.</td>
+</tr>
+<tr class="even">
+<td>Enabled</td>
+<td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
+</tr>
+<tr class="odd">
+<td>Height</td>
+<td>Gets or sets the height of the control.</td>
+</tr>
+<tr class="even">
+<td>hWindow</td>
+<td>Gets the Windows handle (hwnd) of the control.</td>
+</tr>
+<tr class="odd">
+<td>hWindowParent</td>
+<td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
+</tr>
+<tr class="even">
+<td>Image</td>
+<td>Gets or sets the image to display in the control. The image is retrieved from the resource file for the project. Use the Image Manager to store you images specifying the RC_DATA resource type format.</td>
+</tr>
+<tr class="odd">
+<td>ImageHeight</td>
+<td>Gets or sets the height of the image. Use the value of zero (0) to allow the control to manage the height.</td>
+</tr>
+<tr class="even">
+<td>ImageWidth</td>
+<td>Gets or sets the width of the image. Use the value of zero (0) to allow the control to manage the width.</td>
+</tr>
+<tr class="odd">
+<td>ImageScaling</td>
+<td>Gets or sets the scale used to apply to the image.Refer to the <a href="#ImageScale">ImageScale</a> enum for values.</td>
+</tr>
+<tr class="even">
+<td>Left</td>
+<td>Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="odd">
+<td>Location</td>
+<td>Gets or sets the top and left position of the control. Get: returns <a href="#wfxPoint">wfxPoint</a> object. Set: (left, top).</td>
+</tr>
+<tr class="even">
+<td>Locked</td>
+<td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
+</tr>
+<tr class="odd">
+<td>Parent</td>
+<td>Gets or sets the parent container of the control.</td>
+</tr>
+<tr class="even">
+<td>Size</td>
+<td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
+</tr>
+<tr class="odd">
+<td>Tag</td>
+<td>Gets or sets user defined text associated with the control.</td>
+</tr>
+<tr class="even">
+<td>Top</td>
+<td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="odd">
+<td>Visible</td>
+<td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
+</tr>
+<tr class="even">
+<td>Width</td>
+<td>Gets or sets the width of the control.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hide</td>
+<td>Conceals the control from the user.</td>
+</tr>
+<tr class="even">
+<td>Refresh</td>
+<td>Forces the form to invalidate its client area and immediately redraw itself and any child controls.</td>
+</tr>
+<tr class="odd">
+<td>SetBounds</td>
+<td>Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).</td>
+</tr>
+<tr class="even">
+<td>Show</td>
+<td>Creates and displays the control to the user.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="events">Events</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>AllEvents</td>
+<td>Special handler where all events are routed through. Use this handler if you prefer to use the Win32 api style messages and wParam and lParam parameters. Set the Handled element of EventArgs to true if you handle a message and do not want Windows to perform any further processing on the message.</td>
+</tr>
+<tr class="even">
+<td>Click</td>
+<td>Occurs when the client area of the control is clicked.</td>
+</tr>
+<tr class="odd">
+<td>Destroy</td>
+<td>Occurs immediately before the control is about to be destroyed and all resources associated with it released.</td>
+</tr>
+<tr class="even">
+<td>DropFiles</td>
+<td>Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.</td>
+</tr>
+<tr class="odd">
+<td>MouseDoubleClick</td>
+<td>Occurs when the control is double clicked by the mouse.</td>
+</tr>
+<tr class="even">
+<td>MouseDown</td>
+<td>Occurs when the mouse pointer is over the control and a mouse button is pressed.</td>
+</tr>
+<tr class="odd">
+<td>MouseEnter</td>
+<td>Occurs when the mouse pointer enters the control.</td>
+</tr>
+<tr class="even">
+<td>MouseHover</td>
+<td>Occurs when the mouse pointer rests on the control.</td>
+</tr>
+<tr class="odd">
+<td>MouseLeave</td>
+<td>Occurs when the mouse pointer leaves the control.</td>
+</tr>
+<tr class="even">
+<td>MouseMove</td>
+<td>Occurs when the mouse pointer is moved over the control.</td>
+</tr>
+<tr class="odd">
+<td>MouseUp</td>
+<td>Occurs when the mouse pointer is over the control and a mouse button is released.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="imagescale">ImageScale</h5>
+<pre><code>enum ImageScale
+   None = 1
+   AutoSize
+   FitWidth
+   FitHeight   
+   Stretch
+end enum
 </code></pre>
-<p>This is a declaration for an <strong>Event Handler</strong>. Event handlers are functions that are called in response to something occurring within the operating system or in response to an action by the user. Windows is an <strong>event based</strong> operating system so when things happenn during the execution of your application, Windows will send messages to your program that you can respond to. For example, if the user clicks on a button or moves their mouse cursor over an area of the form or a control then an event is triggered.</p>
-<p>In the Windows API language this is actually a message or notification generated by the operating system that then flows through the application's message pump eventually finding its way to the procedure handler for the application. If you have ever seen Win32 API style programs then you will recognize functions containing large <strong>SELECT CASE</strong> statements having such things as <strong>WM_COMMAND</strong>, <strong>WM_NOTIFY</strong>, <strong>WM_PAINT</strong>, <strong>WM_SIZE</strong>, etc. The visual designer hides all of the complexity of message pumps and that <strong>SELECT CASE</strong> from you by instead redirecting the message to an Event Handler that you define yourself.</p>
-<p>Every <strong>Event Handler</strong> has the exact same format and is comprised of two parameters that must be defined as <strong>ByRef</strong>.</p>
-<p>Let's break down and explain the various parts of the <strong>Event Handler</strong> defined at the start of this document.</p>
-<h4 id="frmmain_click">frmMain_Click</h4>
-<p>The portion before the underscore is the <strong>form name</strong> and the portion afterwards is the <strong>name of the event</strong> being responded to. In this case, the function is in response to someone clicking on an area of the form. If this event was in relation to say, a button control, then the name of the button would follow the name of the form. For example: <strong>frmMain_btnOK_Click</strong></p>
-<h4 id="sender"><strong>sender</strong></h4>
-<p>A variable representing the form where the click occurred (eg. frmMain and is of the wfxForm class).</p>
-<p>You can interact with that variable and manipulate properties of the form:</p>
-<pre><code>sender.Text = &quot;My new caption for the form's title bar!&quot;
+<h5 id="wfxsize">wfxSize</h5>
+<pre><code>Type wfxSize
+   private:
+      _Width  as Long
+      _Height as long 
+
+   public:
+      Declare Property Width() As Long
+      Declare Property Width( ByVal nValue As Long )
+      Declare Property Height() As Long
+      Declare Property Height( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
+End Type
 </code></pre>
-<p>This is actually equivalent to using the form's explicitly defined shared variable and both are acceptable.</p>
-<pre><code>frmMain.Text = &quot;My new caption for the form's title bar!&quot;
-</code></pre>
-<p>When dealing with controls on a form, the syntax is only slightly different and pretty self-explanatory.</p>
-<pre><code>Declare Function frmMain_cmdOK_Click( byref sender as wfxButton, _
-                                      byref e as EventArgs _
-                                      ) as LRESULT
-</code></pre>
-<p>Of note is that <strong>sender</strong> is now of type <strong>wfxButton</strong> rather than <strong>wfxForm</strong>. This is because the function is in response to the user clicking on the OK button rather than the form itself.</p>
-<h4 id="eventargs"><strong>EventArgs</strong></h4>
-<p>This is an abbreviation for <strong>Event Arguments</strong> and is a variable that contains additional information related to the event being handled. For example, when handling mouse movement the <strong>EventArgs</strong> variable will contain the client coordinates of the mouse cursor and which (if any) mouse buttons are pressed. Likewise, responding to a <strong>KeyPress</strong> event the <strong>EventArgs</strong> variable would contain the character that was pressed and whether any Alt, Shift, or Ctrl keys are pressed. Get to know <strong>EventArgs</strong> because it is extremely convenient.</p>
-<pre><code>Type wfxEventArgs Extends Object
-   Private:
-   Public:
-      Message As UINT        ' Windows value of message being sent
-      wParam as WPARAM       ' the wParam of the raw message
-      lParam as LPARAM       ' the lParam of the raw message
-      Handled as Boolean     ' indicates whether the event is handled by the user
-      Cancel as boolean      ' set to True to cancel closing of Form
-      Ctrl as Boolean        ' the CTRL key is pressed
-      Alt as Boolean         ' the Alt key is pressed
-      Shift as Boolean       ' the SHIFT key is pressed
-      KeyChar as Long        ' stores the character corresponding to the key pressed
-      KeyCode as Long        ' stores the keyboard code for the event
-      LButton as Boolean     ' the left mouse button pressed
-      MButton as Boolean     ' the middle mouse button pressed
-      RButton as Boolean     ' the right mouse button pressed
-      x as Long              ' the x-coordinate of the mouse click
-      y as Long              ' the y-coordinate of the mouse click
-      hDrop as HDROP         ' handle used for WM_DROPFILES message
+<h5 id="wfxpoint">wfxPoint</h5>
+<pre><code>Type wfxPoint
+   private:
+      _x as Long
+      _y as long 
+
+   public:
+      Declare Property x() As Long
+      Declare Property x( ByVal nValue As Long )
+      Declare Property y() As Long
+      Declare Property y( ByVal nValue As Long )
+      Declare Function IsEmpty() as Boolean
+      Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
 End Type
 </code></pre>
 </body>

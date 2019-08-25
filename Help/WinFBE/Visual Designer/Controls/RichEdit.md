@@ -1,34 +1,45 @@
-# ComboBox (wfxComboBox)
+# RichEdit (wfxRichEdit)
 
 ### Properties
 
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
+| AcceptsReturn | Gets or sets a value (true/false) indicating whether the multiline textbox will accept the Enter character as input.|
+| AcceptsTab | Gets or sets a value (true/false) indicating whether the multiline textbox will accept the Tab character as input.|
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
+| BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
+| BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
-| CtrlType | Gets or sets the control type value. Always **ControlType.ComboBox** and used when adding control to the application’s form collection.|
-| DropDownStyle | Gets or sets the style of the control. Refer to the [ComboBoxStyle](#ComboBoxStyle) Enum |
+| CtrlType | Gets or sets the control type value. Always **ControlType.RichEdit** and used when adding control to the application’s form collection. |
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
 | Focused | Gets or sets a value (true/false) indicating whether the control has input focus.|
 | Font | Gets or sets the font for the control. Refer to the Font object.|
+| ForeColor | Gets or sets the foreground color of the control. Refer to the **Colors** object. |
 | Height | Gets or sets the height of the control.|
+| HideSelection | Gets or sets a value (true/false) indicating whether the selection should be hidden when the control loses focus.|
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
-| IntegralHeight | Gets or sets a value (true/false) indicating whether the list can contain only complete items.|
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
+| MaxLength | Gets or sets a value indicating the maximum number of characters that can be entered into the control.|
+| MultiLine | Gets or sets a value (true/false) indicating whether the text in the edit control can span more than one line.|
 | Parent | Gets or sets the parent container of the control.|
-| SelectedItem | Gets or sets the selected item in the combobox (using a [wfxComboBoxItem](#wfxComboBoxItem) object). |
-| SelectedIndex | Gets or sets the index value of the selected item in the combobox.|
+| PasswordChar | Gets or sets a character to display for password input in a single line edit control.|
+| ReadOnly | Gets or sets a value (true/false) indicating whether the text can be edited.|
+| SelectionStart | Gets or sets a value indicating the start of the selected text.|
+| SelectionLength | Gets or sets a value indicating the length of the selected text.|
 | Size | Gets or sets the size of the form. Get: returns [wfxSize](#wfxSize) object. Set: (width, height)|
-| Sorted | Gets or sets a value (true/false) indicating if the combobox should be sorted.|
 | TabIndex | Gets or sets the position that the control occupies in the TAB position.|
 | TabStop | Gets or sets a value (true/false) indicating whether the user can use the TAB key to give focus to the control.|
 | Tag | Gets or sets user defined text associated with the form.|
+| Text | Gets or sets the text (caption) associated with this form.|
+| TextAlign | Gets or sets a value indicating the alignment of the text on a control. Refer to [TextAlignment](#TextAlignment) enum. |
+| TextScrollBars | Gets or sets the value to indicate what scrollbars to display. Refer to the [ScrollBars](#ScrollBars) enum.|
 | Top | Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).|
 | Visible | Gets or sets a value (true/false) indicating whether the control is displayed.|
 | Width | Gets or sets the width of the control.|
+| WordWrap | Gets or sets a value (true/false) indicating whether text is automatically word wrapped for multiline controls.|
 
 ### Methods
 | Name                            | Description                    |
@@ -58,74 +69,39 @@
 | MouseLeave | Occurs when the mouse pointer leaves the control.|
 |MouseMove | Occurs when the mouse pointer is moved over the control.|
 | MouseUp | Occurs when the mouse pointer is over the control and a mouse button is released.|
-| DropDown | Occurs when the drop-down portion of the combobox is shown.|
-| DropDownClosed | Indicates that the drop-down portion of the combobox has closed.|
-| TextChanged | Occurs when the Text property is changed by either a programmatic modification or user interaction. Only valid for DropDownStyle equal to ComboBoxStyle.Simple |
+| TextChanged | Occurs when the Text property is changed by either a programmatic modification or user interaction.|
 
-### Items Collection (wfxComboBoxItemsCollection)
-| Name                            | Description                    |
-| ------------------------------- | ------------------------------ |
-| Add | Add a new item (and optional 32bit value) to the combobox.|
-| ByIndex | Return the wfxComboBoxItem object related to the specified combobox item index.|
-| Clear | Removes all items from the combobox.|
-| Count | Returns the total number of items in the combobox.|
-| Remove | Remove/delete the item identified by the index value.|
-| SelectedCount | Returns the total number of selected items in the combobox.|
-
-### Item (wfxComboBoxItem)
-| Name                            | Description                    |
-| ------------------------------- | ------------------------------ |
-| Index | The index value related to the combobox item.|
-| Selected | Gets or sets a value (true/false) indicating whether the Item is selected.|
-| Text | The text associated with this combobox item.|
-| Data32 | The optional 32bit value associated with this combobox item.|
-
-## Working with a ComboBox
-
-Adding items (Text and 32-bit user defined value)
-
+##### ControlBorderStyle
 ```
-nIndex = Form1.Combo1.Items.Add("First item in ComboBox”, 12345)
+Enum ControlBorderStyle
+   None	= 1
+   FixedSingle	
+   Fixed3D 
+End Enum
 ```
-
-Adding items (Text only)
-
+##### TextAlignment
 ```
-nIndex = Form1.Combo1.Items.Add("Second item in ComboBox”)
+Enum TextAlignment
+   Left = 1 
+   Right  
+   Center 
+end enum
 ```
-
-Deleting an Item (the selected item)
-
+##### CharacterCase
 ```
-Form1.Combo1.Items.Remove(Form1.Combo1.SelectedIndex)
+Enum CharacterCase
+   Normal = 1
+   Upper
+   Lower
+End Enum
 ```
-
-Deleting an Item (based on index)
-
+##### ScrollBars
 ```
-Form1.Combo1.Items.Remove(0)  ‘ removes the first Combobox item
-```
-
-Remove all Items from the ComboBox
-
-```
-Form1.Combo1.Items.Clear
-```
-
-Iterate all items in ComboBox
-
-```
-For i as long = 0 to Form1.Combo.Items.Count – 1
-   ? Form1.Combo1.Item(i).Text, Form1.Combo1.Item(i).Data32
-Next
-```
-
-#####  ComboBoxStyle
-```
-Enum ComboBoxStyle
-   Simple = 1
-   DropDown
-   DropDownList
+Enum ScrollBars
+   None = 1
+   Horizontal
+   Vertical
+   Both
 End Enum
 ```
 ##### wfxSize
@@ -145,7 +121,6 @@ Type wfxSize
 End Type
 ```
 ##### wfxPoint
-
 ```
 Type wfxPoint
    private:

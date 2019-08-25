@@ -11,8 +11,8 @@ Features:
 - 32 bit and 64 bit versions.
 - High DPI aware for any monitor resolution.
 - Language localization. Simple create language file based on English.lang file.
-- Localized for 9 languages:
-- - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukranian
+- Localized for 10 languages:
+- - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukranian, Portuguese 
 - Projects and non-project based editing.
 - Built-in Visual Designer for GUI application development.
 - Easy integration of Console or GUI based code.
@@ -26,10 +26,7 @@ Requirements:
 - FreeBASIC Compiler http://www.freebasic.net/
 
 Resources:
-- Jose Roca: 
-  - CWINDOW class (Windows GUI API encapsulation)
-  - CWSTR class (Dynamic WSTRING Unicode class)
-  - AFX* classes (various useful string, date/time, GUI control, GDI+, routines)  [https://github.com/JoseRoca/WinFBX](https://github.com/JoseRoca/WinFBX)
+- Jose Roca WinFBX library:[https://github.com/JoseRoca/WinFBX](https://github.com/JoseRoca/WinFBX)
 - Visit http://www.planetsquires.com/protect/forum/index.php for support forum.
 
 WinFBE - Programmer's Code Editor for the FreeBASIC Compiler

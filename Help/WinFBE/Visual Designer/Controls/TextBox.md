@@ -12,6 +12,7 @@
 | CharacterCasing |  Gets or sets a value indicating the case of the text. Refer to the [CharacterCasing](#CharacterCasing) enum.|
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
 | CtrlType | Gets or sets the control type value. Always **ControlType.TextBox** and used when adding control to the application’s form collection.|
+| CueBannerText | Gets or sets the textual cue, or tip, that is displayed by the edit control to prompt the user for information. |
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
 | Focused | Gets or sets a value (true/false) indicating whether the control has input focus.|
 | Font | Gets or sets the font for the control. Refer to the Font object.|

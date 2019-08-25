@@ -817,12 +817,16 @@ public function HandleDesignerMouseMove( ByVal HWnd As HWnd ) as LRESULT
       if pDoc->pCtrlAction->ControlType = CTRL_FORM then
          frmMenuEditor_CreateFakeMainMenu(pDoc)
          if pDoc->hWndRebar then
-            dim as long nTopMenu_Height, nToolBar_Height 
-            nToolBar_Height = AfxGetWindowHeight( pDoc->hWndRebar )  
+            dim as long nTopMenu_Height, nRebar_Height 
             if pDoc->hWndFakeMenu then
                nTopMenu_Height = AfxGetWindowHeight( pDoc->hWndFakeMenu )  
             end if 
-            SetWindowPos pDoc->hWndRebar, 0, 0, nTopMenu_Height, rc.right, nToolBar_Height, SWP_NOZORDER
+            GetClientRect( hwnd, @rc )
+            dim as long cx, cy
+            cx = rc.left - rc.right
+            cy = AfxGetWindowHeight( pDoc->hWndRebar )
+            SetWindowPos pDoc->hWndRebar, 0, 0, nTopMenu_Height, rc.right, cy, SWP_NOZORDER
+            SendMessage pDoc->hWndRebar, WM_SIZE, cx, cy
          end if
          frmStatusBarEditor_CreateFakeStatusBar(pDoc)
       end if   

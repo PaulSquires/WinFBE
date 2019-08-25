@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>07_ComboBox</title>
+  <title>Button</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,7 @@
   
 </head>
 <body>
-<h1 id="combobox-(wfxcombobox)">ComboBox (wfxComboBox)</h1>
+<h1 id="button-(wfxbutton)">Button (wfxButton)</h1>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -35,16 +35,24 @@
 <td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
 </tr>
 <tr class="even">
+<td>BackColor</td>
+<td>Gets or sets the background color of the form. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="odd">
+<td>BackColorDown</td>
+<td>Gets or sets the background color of the control when pressed. Refer to the <strong>Colors</strong> object. ThemeSupport property must be set to False.</td>
+</tr>
+<tr class="even">
+<td>BackColorHot</td>
+<td>Gets or sets the background hot color of the control when the mouse is over the button. Refer to the <strong>Colors</strong> object. ThemeSupport property must be set to False.</td>
+</tr>
+<tr class="odd">
 <td>CtrlId</td>
 <td>Gets or sets a value indicating the control ID of the control.</td>
 </tr>
-<tr class="odd">
-<td>CtrlType</td>
-<td>Gets or sets the control type value. Always <strong>ControlType.ComboBox</strong> and used when adding control to the application’s form collection.</td>
-</tr>
 <tr class="even">
-<td>DropDownStyle</td>
-<td>Gets or sets the style of the control. Refer to the <a href="#ComboBoxStyle">ComboBoxStyle</a> Enum</td>
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.Button</strong> and used when adding control to the application’s form collection.</td>
 </tr>
 <tr class="odd">
 <td>Enabled</td>
@@ -71,8 +79,24 @@
 <td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
 </tr>
 <tr class="odd">
-<td>IntegralHeight</td>
-<td>Gets or sets a value (true/false) indicating whether the list can contain only complete items.</td>
+<td>Image</td>
+<td>Gets or set the image to display.</td>
+</tr>
+<tr class="even">
+<td>ImageHighDPI</td>
+<td>Gets or sets a value (true/false) indicating whether to apply high DPI scaling to the image.</td>
+</tr>
+<tr class="odd">
+<td>ImageHeight</td>
+<td>Gets or sets the height of the image.</td>
+</tr>
+<tr class="even">
+<td>ImageWidth</td>
+<td>Gets or sets the width of the image.</td>
+</tr>
+<tr class="odd">
+<td>ImageMargin</td>
+<td>Gets or set the margin in pixels of the image.</td>
 </tr>
 <tr class="even">
 <td>Left</td>
@@ -91,42 +115,70 @@
 <td>Gets or sets the parent container of the control.</td>
 </tr>
 <tr class="even">
-<td>SelectedItem</td>
-<td>Gets or sets the selected item in the combobox (using a <a href="#wfxComboBoxItem">wfxComboBoxItem</a> object).</td>
-</tr>
-<tr class="odd">
-<td>SelectedIndex</td>
-<td>Gets or sets the index value of the selected item in the combobox.</td>
-</tr>
-<tr class="even">
 <td>Size</td>
 <td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
 </tr>
 <tr class="odd">
-<td>Sorted</td>
-<td>Gets or sets a value (true/false) indicating if the combobox should be sorted.</td>
-</tr>
-<tr class="even">
 <td>TabIndex</td>
 <td>Gets or sets the position that the control occupies in the TAB position.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>TabStop</td>
 <td>Gets or sets a value (true/false) indicating whether the user can use the TAB key to give focus to the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Tag</td>
 <td>Gets or sets user defined text associated with the form.</td>
+</tr>
+<tr class="even">
+<td>Text</td>
+<td>Gets or sets the text (caption) associated with this form.</td>
+</tr>
+<tr class="odd">
+<td>TextAlign</td>
+<td>Gets or sets a value indicating the alignment of the text on a control. Refer to <a href="#ButtonAlignment">ButtonAlignment</a> enum.</td>
+</tr>
+<tr class="even">
+<td>TextBackColor</td>
+<td>Gets or sets the background color of the control. ThemeSupport property must be set to False.</td>
+</tr>
+<tr class="odd">
+<td>TextBackColorDown</td>
+<td>Gets or sets the background color of the control when the button is pressed. ThemeSupport property must be set to False.</td>
+</tr>
+<tr class="even">
+<td>TextForeColor</td>
+<td>Gets or sets the foreground color of the control. ThemeSupport property must be set to False.</td>
+</tr>
+<tr class="odd">
+<td>TextForeColorDown</td>
+<td>Gets or sets the foreground color of the control when the button is pressed. ThemeSupport property must be set to False.</td>
+</tr>
+<tr class="even">
+<td>TextMargin</td>
+<td>Gets or sets a value indicating the margin in pixels to the text of a button control.</td>
+</tr>
+<tr class="odd">
+<td>ThemeSupport</td>
+<td>Gets or sets a value (true/false) indicating whether Windows Theme will be applied to the control.</td>
+</tr>
+<tr class="even">
+<td>ToggleMode</td>
+<td>Gets or sets a value (true/false) indicating whether the button allows dual states to toggle between On and Off.</td>
 </tr>
 <tr class="odd">
 <td>Top</td>
 <td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
 </tr>
 <tr class="even">
+<td>UseMnemonic</td>
+<td>Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&amp;) character will be used as the control’s accelerator key.</td>
+</tr>
+<tr class="odd">
 <td>Visible</td>
 <td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Width</td>
 <td>Gets or sets the width of the control.</td>
 </tr>
@@ -236,108 +288,26 @@
 <td>MouseUp</td>
 <td>Occurs when the mouse pointer is over the control and a mouse button is released.</td>
 </tr>
-<tr class="odd">
-<td>DropDown</td>
-<td>Occurs when the drop-down portion of the combobox is shown.</td>
-</tr>
-<tr class="even">
-<td>DropDownClosed</td>
-<td>Indicates that the drop-down portion of the combobox has closed.</td>
-</tr>
-<tr class="odd">
-<td>TextChanged</td>
-<td>Occurs when the Text property is changed by either a programmatic modification or user interaction. Only valid for DropDownStyle equal to ComboBoxStyle.Simple</td>
-</tr>
 </tbody>
 </table>
-<h3 id="items-collection-(wfxcomboboxitemscollection)">Items Collection (wfxComboBoxItemsCollection)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Add</td>
-<td>Add a new item (and optional 32bit value) to the combobox.</td>
-</tr>
-<tr class="even">
-<td>ByIndex</td>
-<td>Return the wfxComboBoxItem object related to the specified combobox item index.</td>
-</tr>
-<tr class="odd">
-<td>Clear</td>
-<td>Removes all items from the combobox.</td>
-</tr>
-<tr class="even">
-<td>Count</td>
-<td>Returns the total number of items in the combobox.</td>
-</tr>
-<tr class="odd">
-<td>Remove</td>
-<td>Remove/delete the item identified by the index value.</td>
-</tr>
-<tr class="even">
-<td>SelectedCount</td>
-<td>Returns the total number of selected items in the combobox.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="item-(wfxcomboboxitem)">Item (wfxComboBoxItem)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Index</td>
-<td>The index value related to the combobox item.</td>
-</tr>
-<tr class="even">
-<td>Selected</td>
-<td>Gets or sets a value (true/false) indicating whether the Item is selected.</td>
-</tr>
-<tr class="odd">
-<td>Text</td>
-<td>The text associated with this combobox item.</td>
-</tr>
-<tr class="even">
-<td>Data32</td>
-<td>The optional 32bit value associated with this combobox item.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="working-with-a-combobox">Working with a ComboBox</h2>
-<p>Adding items (Text and 32-bit user defined value)</p>
-<pre><code>nIndex = Form1.Combo1.Items.Add(&quot;First item in ComboBox”, 12345)
+<h5 id="controlborderstyle">ControlBorderStyle</h5>
+<pre><code>Enum ControlBorderStyle
+   None = 1
+   FixedSingle  
+   Fixed3D 
+End Enum
 </code></pre>
-<p>Adding items (Text only)</p>
-<pre><code>nIndex = Form1.Combo1.Items.Add(&quot;Second item in ComboBox”)
-</code></pre>
-<p>Deleting an Item (the selected item)</p>
-<pre><code>Form1.Combo1.Items.Remove(Form1.Combo1.SelectedIndex)
-</code></pre>
-<p>Deleting an Item (based on index)</p>
-<pre><code>Form1.Combo1.Items.Remove(0)  ‘ removes the first Combobox item
-</code></pre>
-<p>Remove all Items from the ComboBox</p>
-<pre><code>Form1.Combo1.Items.Clear
-</code></pre>
-<p>Iterate all items in ComboBox</p>
-<pre><code>For i as long = 0 to Form1.Combo.Items.Count – 1
-   ? Form1.Combo1.Item(i).Text, Form1.Combo1.Item(i).Data32
-Next
-</code></pre>
-<h5 id="comboboxstyle">ComboBoxStyle</h5>
-<pre><code>Enum ComboBoxStyle
-   Simple = 1
-   DropDown
-   DropDownList
+<h5 id="buttonalignment">ButtonAlignment</h5>
+<pre><code>Enum ButtonAlignment
+   BottomCenter = 1
+   BottomLeft   
+   BottomRight  
+   MiddleCenter 
+   MiddleLeft   
+   MiddleRight  
+   TopCenter    
+   TopLeft      
+   TopRight     
 End Enum
 </code></pre>
 <h5 id="wfxsize">wfxSize</h5>

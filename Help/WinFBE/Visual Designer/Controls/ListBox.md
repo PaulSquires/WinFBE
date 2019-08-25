@@ -26,6 +26,8 @@
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
 | ItemHeight | Gets or sets the height of a line in the control.|
 | IntegralHeight | Gets or sets a value (true/false) indicating whether the list can contain only complete items.|
+| Item |Gets or sets properties of an Item [wfxListBoxItem](#wfxListBoxItem) object |
+| Items | Gets or sets properties of an Items [wfxListBoxItemsCollection](#wfxListBoxItemsCollection) collection object |
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
