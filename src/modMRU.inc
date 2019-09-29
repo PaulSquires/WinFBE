@@ -15,6 +15,7 @@
 #include once "frmRecent.bi"
 
 
+
 ''
 ''
 private Function GetMRUMenuHandle() as HMENU
@@ -170,8 +171,11 @@ public Function UpdateMRUList( Byref wzFilename As WString ) As Long
    Next
    gConfig.MRU(0) = wzFilename 
    
-   ' Save the configuration file
-   gConfig.SaveConfigFile
+   ' Save the MRU to the configuration file. Only write the MRU items
+   ' the ini file rather than overwriting the whole file. This enables
+   ' WinFBE to work better with external tools that manually modify the
+   ' WinFBE.ini file.
+   gConfig.WriteMRU
 
    Function = 0
 End Function  
@@ -261,8 +265,11 @@ public Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
    Next
    gConfig.MRUProject(0) = wszFilename 
 
-   ' Save the configuration file
-   gConfig.SaveConfigFile
+   ' Save the MRU to the configuration file. Only write the MRU items
+   ' the ini file rather than overwriting the whole file. This enables
+   ' WinFBE to work better with external tools that manually modify the
+   ' WinFBE.ini file.
+   gConfig.WriteMRUProjects
 
    Function = 0
 End Function  

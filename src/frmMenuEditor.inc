@@ -140,7 +140,7 @@ private Function frmMenuEditor_DisplayMenuItem() As Long
    AfxSetWindowText( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_TXTNAME), gMenuItems(nCurSel).wszName)
 
    ' Shortcut
-   dim as long nIndex = ComboBox_FindStringExact( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), -1, gMenuItems(nCurSel).wszShortcut ) 
+   dim as long nIndex = ComboBox_FindStringExact( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), -1, gMenuItems(nCurSel).wszShortcut.sptr ) 
    ComboBox_SetCurSel( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), nIndex)
    EnableWindow( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT), bEnabled )
    Button_SetCheck( GetDlgItem(HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CHKCTRL), gMenuItems(nCurSel).chkCtrl)
@@ -449,7 +449,7 @@ private Function frmMenuEditor_OnCommand( ByVal HWnd As HWnd, _
             Next
             dim newMenuItem as clsMenuItem
             gMenuItems(nCurSel) = newMenuItem
-            Listbox_InsertString(hListBox, nCurSel, gMenuItems(nCurSel).wszCaption)
+            Listbox_InsertString(hListBox, nCurSel, gMenuItems(nCurSel).wszCaption.sptr)
             frmMenuEditor_EnsureLastLine
             dim as long NumItems = Listbox_GetCount(hListBox)
             Listbox_SetCurSel( hListBox, nCurSel )
@@ -671,7 +671,7 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Display the menuitems in the listbox
    hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_LSTDETAIL)
    for i as long = 0 to ubound(gMenuItems)
-      ListBox_AddString(hCtrl, frmMenuEditor_ListBoxLine(i))
+      ListBox_AddString(hCtrl, frmMenuEditor_ListBoxLine(i).sptr)
    next
    frmMenuEditor_EnsureLastLine
    ListBox_SetCurSel(hCtrl, 0)

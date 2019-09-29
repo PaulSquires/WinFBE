@@ -135,7 +135,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          if pCtrl->ControlType = CTRL_TEXTBOX then
-         AddControlProperty(pCtrl, "CharacterCasing", "CharacterCasing.Normal", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "CharacterCasing", "CharacterCase.Normal", PropertyType.ComboPicker)
          end if
          if pCtrl->ControlType = CTRL_TEXTBOX then
          AddControlProperty(pCtrl, "CueBannerText", "", PropertyType.EditEnter)
@@ -306,6 +306,28 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Vertical", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
+      case CTRL_LISTVIEW
+         AddControlProperty(pCtrl, "AllowColumnReorder", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "CheckBoxes", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "LabelEdit", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "FullRowSelect", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "GridLines", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "HeaderStyle", "ColumnHeaderStyle.Clickable", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "HideSelection", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "HotTracking", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "MultiSelect", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Sorting", "SortOrder.None", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
       
 
       case CTRL_HSCROLL
@@ -313,7 +335,6 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
       case CTRL_TIMER
       case CTRL_TABCONTROL
       case CTRL_UPDOWN
-      case CTRL_LISTVIEW
       case CTRL_TREEVIEW
       case CTRL_SLIDER
       case CTRL_DATETIMEPICKER

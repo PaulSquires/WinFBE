@@ -43,6 +43,12 @@
 </tbody>
 </table>
 <pre><code>CONSTRUCTOR CFileStream ( _
+   BYREF cwsFile AS CWSTR, _
+   BYVAL grfMode AS DWORD = STGM_READ, _
+   BYVAL dwAttributes AS DWORD = FILE_ATTRIBUTE_NORMAL, _
+   BYVAL fCreate AS WINBOOL = FALSE)
+</code></pre>
+<pre><code>CONSTRUCTOR CFileStream ( _
    BYVAL pwszFile AS WSTRING PTR, _
    BYVAL grfMode AS DWORD = STGM_READ, _
    BYVAL dwAttributes AS DWORD = FILE_ATTRIBUTE_NORMAL, _
@@ -57,18 +63,22 @@
 </thead>
 <tbody>
 <tr class="odd">
+<td><em>cwsFile</em></td>
+<td>The file name.</td>
+</tr>
+<tr class="even">
 <td><em>pwszFile</em></td>
 <td>A pointer to a unicode null-terminated string that specifies the file name.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>grfMode</em></td>
 <td>One or more <strong>STGM</strong> values that are used to specify the file access mode and how the the stream is created and deleted.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>dwAttributes</em></td>
 <td>One or more flag values that specify file attributes in the case that a new file is created.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>fCreate</em></td>
 <td>A BOOL value that helps specify, in conjunction with <em>grfMode</em>, how existing files should be treated when creating the stream.</td>
 </tr>
@@ -269,6 +279,11 @@ OPERATOR CAST () AS IStream PTR
 <p>IStream PTR. A pointer to the <strong>IStream</strong> interface of the stream object.</p>
 <h1 id="open"><a name="Open"></a>Open</h1>
 <p>Opens or creates a file and retrieves a stream to read or write to that file.</p>
+<pre><code>FUNCTION Open (BYREF cwsFile AS CWSTR, _
+   BYVAL grfMode AS DWORD = STGM_READ, _
+   BYVAL dwAttributes AS DWORD = FILE_ATTRIBUTE_NORMAL, _
+   BYVAL fCreate AS WINBOOL = FALSE) AS HRESULT
+</code></pre>
 <pre><code>FUNCTION Open (BYVAL pwszFile AS WSTRING PTR, _
    BYVAL grfMode AS DWORD = STGM_READ, _
    BYVAL dwAttributes AS DWORD = FILE_ATTRIBUTE_NORMAL, _
@@ -283,18 +298,22 @@ OPERATOR CAST () AS IStream PTR
 </thead>
 <tbody>
 <tr class="odd">
+<td><em>cwsFile</em></td>
+<td>The file name.</td>
+</tr>
+<tr class="even">
 <td><em>pwszFile</em></td>
 <td>A pointer to a unicode null-terminated string that specifies the file name.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>grfMode</em></td>
 <td>One or more <strong>STGM</strong> values that are used to specify the file access mode and how the stream is created and deleted. The STGM constants are flags that indicate conditions for creating and deleting the stream and access modes for the stream. These elements are often combined using an <strong>OR</strong> operator. They are interpreted in groups as listed in the following table. It is not valid to use more than one element from a single group.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>dwAttributes</em></td>
 <td>One or more flag values that specify file attributes in the case that a new file is created.<br><strong><em>0</em></strong> = Prevents other processes from opening a file or device if they request delete, read, or write access.<br><strong>FILE_SHARE_DELETE</strong> : Enables subsequent open operations on a file or device to request delete access. Otherwise, other processes cannot open the file or device if they request delete access. If this flag is not specified, but the file or device has been opened for delete access, the function fails. Delete access allows both delete and rename operations.<br><strong>FILE_SHARE_READ</strong> : Enables subsequent open operations on a file or device to request read access. Otherwise, other processes cannot open the file or device if they request read access. If this flag is not specified, but the file or device has been opened for read access, the function fails.<br><strong>FILE_SHARE_WRITE</strong> : Enables subsequent open operations on a file or device to request write access. Otherwise, other processes cannot open the file or device if they request write access. If this flag is not specified, but the file or device has been opened for write access or has a file mapping with write access, the function fails.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>fCreate</em></td>
 <td>BOOL value that helps specify, in conjunction with <em>grfMode</em>, how existing files should be treated when creating the stream</td>
 </tr>
@@ -471,7 +490,7 @@ OPERATOR CAST () AS IStream PTR
 </table>
 <h4 id="example">Example</h4>
 <pre><code>'#CONSOLE ON
-#INCLUDE ONCE &quot;\Afx\CStream.inc&quot;
+#INCLUDE ONCE &quot;Afx/CStream.inc&quot;
 USING Afx
 
 SCOPE
@@ -542,6 +561,21 @@ SLEEP
 </table>
 <h4 id="return-value-4">Return value</h4>
 <p>ULONG. The actual number of bytes read from the stream. Note: The number of bytes read may be zero.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>'#CONSOLE ON
+#INCLUDE ONCE &quot;Afx/AfxWin.inc&quot;
+#INCLUDE ONCE &quot;Afx/CStream.inc&quot;
+USING Afx
+
+DIM pstm AS CFileStream
+pstm.Open(AfxGetExePath &amp; &quot;\TextA1.txt&quot;, STGM_READ)
+DIM strText AS STRING = SPACE(10)
+pstm.Read(STRPTR(strText), LEN(strText))
+print strText
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
 <h1 id="readtexta"><a name="ReadTextA"></a>ReadTextA</h1>
 <p>Reads a specified number of characters from the stream into memory, starting at the current seek pointer. Ansi version.</p>
 <pre><code>FUNCTION ReadTextA (BYVAL numChars AS LONG) AS STRING
@@ -562,6 +596,20 @@ SLEEP
 </table>
 <h4 id="return-value-5">Return value</h4>
 <p>STRING. The characters read.</p>
+<h4 id="example-2">Example</h4>
+<pre><code>'#CONSOLE ON
+#INCLUDE ONCE &quot;Afx/AfxWin.inc&quot;
+#INCLUDE ONCE &quot;Afx/CStream.inc&quot;
+USING Afx
+
+DIM pstm AS CFileStream
+pstm.Open(AfxGetExePath &amp; &quot;\TextA1.txt&quot;, STGM_READ)
+DIM strText AS STRING = pstm.ReadTextA(-1)
+PRINT strText
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
 <h1 id="readtextw"><a name="ReadTextW"></a>ReadTextW</h1>
 <p>Reads a specified number of characters from the stream into memory, starting at the current seek pointer. Unicode version.</p>
 <pre><code>FUNCTION ReadTextW (BYVAL numChars AS LONG) AS CWSTR
@@ -582,6 +630,20 @@ SLEEP
 </table>
 <h4 id="return-value-6">Return value</h4>
 <p>CWSTR. The characters read.</p>
+<h4 id="example-3">Example</h4>
+<pre><code>'#CONSOLE ON
+#INCLUDE ONCE &quot;Afx/AfxWin.inc&quot;
+#INCLUDE ONCE &quot;Afx/CStream.inc&quot;
+USING Afx
+
+DIM pstm AS CFileStream
+pstm.Open(AfxGetExePath &amp; &quot;\TextW1.txt&quot;, STGM_READ)
+DIM cwsText AS CWSTR = pstm.ReadTextW(-1)
+PRINT cwsText
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
 <h1 id="write"><a name="Write"></a>Write</h1>
 <p>Writes a specified number of bytes into the stream starting at the current seek pointer.</p>
 <pre><code>FUNCTION Write (BYVAL pv AS ANY PTR, BYVAL cb AS ULONG, BYVAL pcbWritten AS ULONG PTR) AS HRESULT
@@ -652,6 +714,23 @@ SLEEP
 </table>
 <h4 id="return-value-9">Return value</h4>
 <p>ULONG. The characters written.</p>
+<h4 id="example-4">Example</h4>
+<pre><code>'#CONSOLE ON
+#INCLUDE ONCE &quot;Afx/AfxWin.inc&quot;
+#INCLUDE ONCE &quot;Afx/CStream.inc&quot;
+USING Afx
+
+DIM pstm AS CFileStream
+pstm.Open(AfxGetExePath &amp; &quot;\TextA1.txt&quot;, STGM_READWRITE)
+pstm.Seek(5, STREAM_SEEK_SET)
+pstm.WriteTextA(&quot; 12345 &quot;)
+pstm.Seek(0, STREAM_SEEK_SET)
+DIM s AS STRING = pstm.ReadTextA(50)
+print s
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
 <h1 id="writetextw"><a name="WriteTextW"></a>WriteTextW</h1>
 <p>Writes a string at the current seek position. Unicode version.</p>
 <pre><code>FUNCTION WriteTextW (BYREF wszText AS WSTRING) AS ULONG
@@ -672,6 +751,24 @@ SLEEP
 </table>
 <h4 id="return-value-10">Return value</h4>
 <p>ULONG. The characters written.</p>
+<h4 id="example-5">Example</h4>
+<pre><code>'#CONSOLE ON
+#INCLUDE ONCE &quot;Afx/AfxWin.inc&quot;
+#INCLUDE ONCE &quot;Afx/CStream.inc&quot;
+USING Afx
+
+DIM pstm AS CFileStream
+pstm.Open(AfxGetExePath &amp; &quot;\TextW1.txt&quot;, STGM_READWRITE)
+pstm.Seek(2, STREAM_SEEK_SET)   ' Skip BOM
+pstm.Seek(5 * 2, STREAM_SEEK_CUR)
+pstm.WriteTextW(&quot; 12345 &quot;)
+pstm.Seek(2, STREAM_SEEK_SET)   ' Skip BOM
+DIM cws AS CWSTR = pstm.ReadTextW(50)
+print cws
+
+PRINT &quot;Press any key to end...&quot;
+SLEEP
+</code></pre>
 <h1 id="seek"><a name="Seek"></a>Seek</h1>
 <p>Changes the seek pointer to a new location. The new location is relative to either the beginning of the stream, the end of the stream, or the current seek pointer.</p>
 <pre><code>FUNCTION Seek (BYVAL dlibMove AS ULONGINT, _

@@ -202,8 +202,7 @@ Function clsApp.SaveProject( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    
    If bSaveAs Then
       ' Display the Save File Dialog
-      wText = AfxStrPathname( "NAMEX", wFilename )
-      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wText, @WStr("wfbe"), IDM_PROJECTSAVE)
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wFilename, @WStr("wfbe"), IDM_PROJECTSAVE)
       If pwszName Then
          wFilename = *pwszName
          CoTaskMemFree(pwszName)

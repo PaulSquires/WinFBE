@@ -47,11 +47,18 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
             pCtrl = pDoc->Controls.ItemAt(i)
             if pCtrl then
                if pCtrl->ControlType = CTRL_BUTTON then
-                  ListBox_AddString(HWND_PROPLIST_COMBOLIST, GetControlProperty(pCtrl, "NAME"))
+                  ListBox_AddString(HWND_PROPLIST_COMBOLIST, GetControlProperty(pCtrl, "NAME").sptr)
                end if
             END if
          NEXT
          
+      case "BACKGROUNDIMAGELAYOUT"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Tile"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Center"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Stretch"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Zoom"))
+
       CASE "BORDERSTYLE"
          select case pCtrl->ControlType
             case CTRL_FORM
@@ -78,23 +85,22 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
 
-      case "IMAGESCALING"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.AutoSize"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitWidth"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitHeight"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.Stretch"))
+      CASE "HEADERSTYLE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ColumnHeaderStyle.Clickable"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ColumnHeaderStyle.NonClickable"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ColumnHeaderStyle.None"))
 
       case "DROPDOWNSTYLE"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.Simple"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDown"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ComboBoxStyle.DropDownList"))
 
-      case "TEXTSCROLLBARS"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Horizontal"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Vertical"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Both"))
+      case "IMAGESCALING"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.AutoSize"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitWidth"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitHeight"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.Stretch"))
 
       CASE "STARTPOSITION"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterParent"))
@@ -108,17 +114,10 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.MultiSimple"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ListSelectionMode.MultiExtended"))
 
-      case "WINDOWSTATE"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Maximized"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Minimized"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Normal"))
-
-      case "BACKGROUNDIMAGELAYOUT"
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.None"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Tile"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Center"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Stretch"))
-         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageLayout.Zoom"))
+      CASE "SORTING"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("SortOrder.Ascending"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("SortOrder.Descending"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("SortOrder.None"))
 
       case "TEXTALIGN"
          select case pCtrl->ControlType
@@ -147,6 +146,18 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Right"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Center"))
          end select
+
+      case "TEXTSCROLLBARS"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.None"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Horizontal"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Vertical"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ScrollBars.Both"))
+
+      case "WINDOWSTATE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Maximized"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Minimized"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormWindowState.Normal"))
+
    END SELECT
 
    function = 0
@@ -280,7 +291,7 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
       if pCtrl then
-         idx = Combobox_AddString(hCombo, GetControlProperty(pCtrl, "NAME"))
+         idx = Combobox_AddString(hCombo, GetControlProperty(pCtrl, "NAME").sptr)
          Combobox_SetItemData(hCombo, idx, i)   ' store array index in combobox item
       END if
    NEXT
@@ -323,7 +334,7 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
             continue for
       END SELECT
 
-      idx = Listbox_AddString(hList, wszPropName)
+      idx = Listbox_AddString(hList, wszPropName.sptr)
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
 
    NEXT
@@ -334,7 +345,7 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    ' Iterate through all events and add them to the listbox
    for i as long = lbound(pCtrlActive->Events) to ubound(pCtrlActive->Events)
       dim as CWSTR wszBlank = ""
-      idx = Listbox_AddString(hList, wszBlank)
+      idx = Listbox_AddString(hList, wszBlank.sptr)
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
    NEXT
 
@@ -598,11 +609,11 @@ private function ShowPropertyListControl() as Long
          LoadPropertyComboListbox(pDoc, pCtrl, @pCtrl->Properties(nItemData))
          ' Set the active line based on the current stored value for the property
          dim as long nCurSel = ListBox_FindStringExact(HWND_PROPLIST_COMBOLIST, -1, _
-                                                       pCtrl->Properties(nItemData).wszPropValue)
+                                                       pCtrl->Properties(nItemData).wszPropValue.sptr)
          if nCurSel = -1 then
             pCtrl->Properties(nItemData).wszPropValue = pCtrl->Properties(nItemData).wszPropDefault
             nCurSel = ListBox_FindStringExact( HWND_PROPLIST_COMBOLIST, -1, _
-                                               pCtrl->Properties(nItemData).wszPropValue)
+                                               pCtrl->Properties(nItemData).wszPropValue.sptr)
          END IF
          ListBox_SetCurSel(HWND_PROPLIST_COMBOLIST, nCurSel)
          ' Calculate height of the Listbox
@@ -1496,7 +1507,7 @@ public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    ' Add the Tools to the toolbox
    dim as long ndx
    for i as long = lbound(gToolBox) to ubound(gToolBox)
-      ndx = ListBox_AddString(hList1, gToolBox(i).wszToolBoxName)
+      ndx = ListBox_AddString(hList1, gToolBox(i).wszToolBoxName.sptr)
       ListBox_SetItemData(hList1, ndx, i)
    NEXT
    SetActiveToolboxControl(CTRL_POINTER)

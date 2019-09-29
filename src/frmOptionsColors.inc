@@ -64,7 +64,7 @@ End function
 private function frmOptionsColors_FillThemesCombo( byval hComboThemes as hwnd ) as long    
    SendMessage( hComboThemes, CB_RESETCONTENT, 0, 0)
    for i as long = lbound(gConfig.ThemesTemp) to ubound(gConfig.ThemesTemp)
-      ComboBox_AddString( hComboThemes, gConfig.ThemesTemp(i).wszDescription )
+      ComboBox_AddString( hComboThemes, gConfig.ThemesTemp(i).wszDescription.sptr )
    NEXT
    function = 0
 end function      

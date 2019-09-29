@@ -345,7 +345,7 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or TVS_HASBUTTONS Or TVS_HASLINES Or TVS_LINESATROOT Or TVS_SHOWSELALWAYS, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR)
    
-   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 405, 600, 3, _
+   pWindow->AddControl("LABEL", , IDC_FRMOPTIONS_LABEL1, "", 8, 405, 600, 2, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -357,6 +357,10 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
+
+   ' Reload the config file in case a user has automated a change to it since
+   ' the application started (for example, changing the compiler path).
+   gConfig.LoadConfigFile()
 
    ' Configure the TreeView
    Dim hItem As HANDLE 

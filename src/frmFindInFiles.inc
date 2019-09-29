@@ -113,9 +113,9 @@ private function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstri
    if pStream.Open(wszResultFile) <> S_OK then exit function
    
    cwzStr = L(262, "Search Results") & ": " & gFindInFiles.txtFind
-   ListBox_AddString(hLB, cwzStr)
+   ListBox_AddString(hLB, cwzStr.sptr)
    cwzStr = ""
-   ListBox_AddString(hLB, cwzStr)
+   ListBox_AddString(hLB, cwzStr.sptr)
    
    do until pStream.EOS
       st = pStream.ReadLine
@@ -141,7 +141,7 @@ private function frmFindInFiles_ParseSearchResults( byref wszResultFile as wstri
       END IF
 
       cwzStr = st   
-      ListBox_AddString(hLB, cwzStr)
+      ListBox_AddString(hLB, cwzStr.sptr)
    loop
    pStream.Close
    

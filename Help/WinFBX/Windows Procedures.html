@@ -975,7 +975,7 @@ FUNCTION AfxSetEnviron (BYREF varexp AS WSTRING) AS BOOLEAN
 <h1 id="afxextractresource"><a name="AfxExtractResource"></a>AfxExtractResource</h1>
 <p>Extracts resource data and returns it as a string.</p>
 <pre><code>FUNCTION AfxExtractResource (BYVAL hInstance AS HINSTANCE, _
-   BYREF wszResourceName AS WSTRING, BYVAL pResourceType AS LPWSTR = RT_RCDATA) AS STRING
+   BYREF wszResourceName AS WSTRING, BYVAL pResourceType AS LPWSTR = MAKEINTRESOURCEW(10)) AS STRING
 </code></pre>
 <table>
 <thead>
@@ -1022,7 +1022,7 @@ END IF
 <h1 id="afxextractresourcetofile"><a name="AfxExtractResourceToFile"></a>AfxExtractResourceToFile</h1>
 <p>Extracts resource data and saves it to a file.</p>
 <pre><code>FUNCTION AfxExtractResourceToFile (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING, _
-   BYREF wszFileName AS WSTRING, BYVAL pResourceType AS LPWSTR = RT_RCDATA) AS STRING
+   BYREF wszFileName AS WSTRING, BYVAL pResourceType AS LPWSTR = MAKEINTRESOURCEW(10)) AS STRING
 </code></pre>
 <table>
 <thead>

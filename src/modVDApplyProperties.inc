@@ -844,7 +844,7 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
          case "NAME"
             if pCtrl->ControlType = CTRL_LISTBOX then
                ListBox_ResetContent(pCtrl->hWindow)
-               ListBox_AddString(pCtrl->hWindow, wszPropValue)
+               ListBox_AddString(pCtrl->hWindow, wszPropValue.sptr)
             END IF
          CASE "LEFT"
             nLeft = nPropValue

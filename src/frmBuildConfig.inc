@@ -46,7 +46,7 @@ private function frmBuildConfig_LoadBuildListBox( byval hParent as hwnd ) as Lon
 
    ListBox_ResetContent(hList1)
    for i as long = lbound(gConfig.BuildsTemp) to ubound(gConfig.BuildsTemp)
-      ListBox_AddString(hList1, gConfig.BuildsTemp(i).wszDescription)
+      ListBox_AddString(hList1, gConfig.BuildsTemp(i).wszDescription.sptr)
    NEXT
 
    function = 0
@@ -92,7 +92,7 @@ public function frmBuildConfig_LoadBuildComboBox() as Long
 
    ComboBox_ResetContent(HWND_FRMMAIN_COMBOBUILDS)
    for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
-      ComboBox_AddString(HWND_FRMMAIN_COMBOBUILDS, gConfig.Builds(i).wszDescription)
+      ComboBox_AddString(HWND_FRMMAIN_COMBOBUILDS, gConfig.Builds(i).wszDescription.sptr)
    NEXT
 
    ' 1) If project is active then set using the selected build for the project.
@@ -753,7 +753,7 @@ public Function frmBuildConfig_Show( ByVal hWndParent As HWnd ) As LRESULT
    ' Load the Compiler Options Listbox
    hCtrl = GetDlgItem(hForm, IDC_FRMBUILDCONFIG_LSTOPTIONS)
    for i as long = lbound(gBuildOptions) to ubound(gBuildOptions)
-      ListBox_AddString(hCtrl, gBuildOptions(i))
+      ListBox_AddString(hCtrl, gBuildOptions(i).sptr)
    next
 
    

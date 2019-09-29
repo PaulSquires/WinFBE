@@ -216,7 +216,7 @@ private Function frmToolBarEditor_DisplayToolBarItem() As Long
    If nCurSel = -1 Then Exit Function
     
    ' Button type
-   nIndex = ComboBox_FindStringExact( GetDlgItem(HWND_FRMTOOLBAREDITOR, IDC_FRMTOOLBAREDITOR_COMBOBUTTONTYPE), -1, gToolBarItems(nCurSel).wszButtonType) 
+   nIndex = ComboBox_FindStringExact( GetDlgItem(HWND_FRMTOOLBAREDITOR, IDC_FRMTOOLBAREDITOR_COMBOBUTTONTYPE), -1, gToolBarItems(nCurSel).wszButtonType.sptr) 
    ComboBox_SetCurSel( GetDlgItem(HWND_FRMTOOLBAREDITOR, IDC_FRMTOOLBAREDITOR_COMBOBUTTONTYPE), nIndex)
    ' If this is a Separator button then disable the Images and Tooltip
    If nIndex = 1 Then bEnabled = false   ' Separator index is 1
@@ -252,7 +252,7 @@ private Function frmToolBarEditor_DisplayListBox( ByVal nIndex As Long ) As Long
    ListBox_ResetContent( hList )
    for i as long = 0 to ubound(gToolBarItems)
       gToolBarItems(i).wszName = "ToolBar Button " & i
-      ListBox_AddString( hList, gToolBarItems(i).wszName )
+      ListBox_AddString( hList, gToolBarItems(i).wszName.sptr )
    next
    ListBox_SetCurSel( hList, nIndex )
 
@@ -711,7 +711,7 @@ public Function frmToolBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ComboBox_AddString( hCtrl, @wstr("SIZE_24") )
    ComboBox_AddString( hCtrl, @wstr("SIZE_32") )
    ComboBox_AddString( hCtrl, @wstr("SIZE_48") )
-   dim as long nIndex = ComboBox_FindStringExact( hCtrl, -1, pDoc->wszToolBarSize ) 
+   dim as long nIndex = ComboBox_FindStringExact( hCtrl, -1, pDoc->wszToolBarSize.sptr ) 
    ComboBox_SetCurSel( hCtrl, nIndex)
    
    hCtrl = GetDlgItem( hForm, IDC_FRMTOOLBAREDITOR_COMBOBUTTONTYPE )

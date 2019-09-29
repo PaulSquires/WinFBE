@@ -296,7 +296,7 @@ private function frmUserTools_LoadListBox( byval hParent as hwnd ) as Long
 
    ListBox_ResetContent(hList1)
    for i as long = lbound(gConfig.ToolsTemp) to ubound(gConfig.ToolsTemp)
-      ListBox_AddString(hList1, gConfig.ToolsTemp(i).wszDescription)
+      ListBox_AddString(hList1, gConfig.ToolsTemp(i).wszDescription.sptr)
    NEXT
 
    function = 0
@@ -737,7 +737,7 @@ public Function frmUserTools_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL8, L(298,"Action:"), 230, 232, 95, 18, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL9, "", 238, 370, 425, 3, _
+   pWindow->AddControl("LABEL", , IDC_FRMUSERTOOLS_LABEL9, "", 238, 370, 425, 2, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("BUTTON", , IDC_FRMUSERTOOLS_CMDOK, L(0,"OK"), 509, 388, 74, 28, _

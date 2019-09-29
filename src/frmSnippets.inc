@@ -156,7 +156,7 @@ private function frmSnippets_LoadListBox( byval hParent as hwnd ) as Long
 
    ListBox_ResetContent(hList1)
    for i as long = lbound(gConfig.SnippetsTemp) to ubound(gConfig.SnippetsTemp)
-      ListBox_AddString(hList1, gConfig.SnippetsTemp(i).wszDescription)
+      ListBox_AddString(hList1, gConfig.SnippetsTemp(i).wszDescription.sptr)
    NEXT
 
    function = 0

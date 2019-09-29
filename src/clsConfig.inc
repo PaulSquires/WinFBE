@@ -316,98 +316,122 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(12) as TOOLBOX_TYPE
+   redim gToolBox(20) as TOOLBOX_TYPE
    
-   gToolBox(0).nToolType = CTRL_POINTER
-   gToolBox(0).wszToolBoxName   = "Pointer"
-   gToolBox(0).wszControlName   = "Pointer"
-   gToolBox(0).wszImage  = "IMAGE_POINTER"
-   gToolBox(0).wszCursor = ""
-   gToolBox(0).wszClassName = ""
+   dim as long n = 0
+   gToolBox(n).nToolType = CTRL_POINTER
+   gToolBox(n).wszToolBoxName   = "Pointer"
+   gToolBox(n).wszControlName   = "Pointer"
+   gToolBox(n).wszImage  = "IMAGE_POINTER"
+   gToolBox(n).wszCursor = ""
+   gToolBox(n).wszClassName = ""
    
-   gToolBox(1).nToolType = CTRL_BUTTON
-   gToolBox(1).wszToolBoxName   = "Button"
-   gToolBox(1).wszControlName   = "Button"
-   gToolBox(1).wszImage  = "IMAGE_BUTTON"
-   gToolBox(1).wszCursor = "IMAGE_CURSOR_BUTTON"
-   gToolBox(1).wszClassName = "BUTTON"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_BUTTON
+   gToolBox(n).wszToolBoxName   = "Button"
+   gToolBox(n).wszControlName   = "Button"
+   gToolBox(n).wszImage  = "IMAGE_BUTTON"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_BUTTON"
+   gToolBox(n).wszClassName = "BUTTON"
 
-   gToolBox(2).nToolType = CTRL_CHECKBOX
-   gToolBox(2).wszToolBoxName   = "CheckBox"
-   gToolBox(2).wszControlName   = "Check"
-   gToolBox(2).wszImage  = "IMAGE_CHECKBOX"
-   gToolBox(2).wszCursor = "IMAGE_CURSOR_CHECKBOX"
-   gToolBox(2).wszClassName = "CHECKBOX"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_CHECKBOX
+   gToolBox(n).wszToolBoxName   = "CheckBox"
+   gToolBox(n).wszControlName   = "Check"
+   gToolBox(n).wszImage  = "IMAGE_CHECKBOX"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_CHECKBOX"
+   gToolBox(n).wszClassName = "CHECKBOX"
 
-   gToolBox(3).nToolType = CTRL_COMBOBOX
-   gToolBox(3).wszToolBoxName = "ComboBox"
-   gToolBox(3).wszControlName = "Combo"
-   gToolBox(3).wszImage  = "IMAGE_COMBOBOX"
-   gToolBox(3).wszCursor = "IMAGE_CURSOR_COMBOBOX"
-   gToolBox(3).wszClassName = "COMBOBOX"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_COMBOBOX
+   gToolBox(n).wszToolBoxName = "ComboBox"
+   gToolBox(n).wszControlName = "Combo"
+   gToolBox(n).wszImage  = "IMAGE_COMBOBOX"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_COMBOBOX"
+   gToolBox(n).wszClassName = "COMBOBOX"
 
-   gToolBox(4).nToolType = CTRL_FRAME
-   gToolBox(4).wszToolBoxName   = "Frame"
-   gToolBox(4).wszControlName   = "Frame"
-   gToolBox(4).wszImage  = "IMAGE_FRAME"
-   gToolBox(4).wszCursor = "IMAGE_CURSOR_FRAME"
-   gToolBox(4).wszClassName = "GROUPBOX"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_FRAME
+   gToolBox(n).wszToolBoxName   = "Frame"
+   gToolBox(n).wszControlName   = "Frame"
+   gToolBox(n).wszImage  = "IMAGE_FRAME"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_FRAME"
+   gToolBox(n).wszClassName = "GROUPBOX"
+            
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_LABEL
+   gToolBox(n).wszToolBoxName   = "Label"
+   gToolBox(n).wszControlName   = "Label"
+   gToolBox(n).wszImage  = "IMAGE_LABEL"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_LABEL"
+   gToolBox(n).wszClassName = "LABEL"
 
-   gToolBox(5).nToolType = CTRL_LABEL
-   gToolBox(5).wszToolBoxName   = "Label"
-   gToolBox(5).wszControlName   = "Label"
-   gToolBox(5).wszImage  = "IMAGE_LABEL"
-   gToolBox(5).wszCursor = "IMAGE_CURSOR_LABEL"
-   gToolBox(5).wszClassName = "LABEL"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_LISTBOX
+   gToolBox(n).wszToolBoxName   = "ListBox"
+   gToolBox(n).wszControlName   = "List"
+   gToolBox(n).wszImage  = "IMAGE_LISTBOX"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_LISTBOX"
+   gToolBox(n).wszClassName = "LISTBOX"
 
-   gToolBox(6).nToolType = CTRL_LISTBOX
-   gToolBox(6).wszToolBoxName   = "ListBox"
-   gToolBox(6).wszControlName   = "List"
-   gToolBox(6).wszImage  = "IMAGE_LISTBOX"
-   gToolBox(6).wszCursor = "IMAGE_CURSOR_LISTBOX"
-   gToolBox(6).wszClassName = "LISTBOX"
+'   n = n + 1
+'   gToolBox(n).nToolType = CTRL_LISTVIEW
+'   gToolBox(n).wszToolBoxName   = "ListView"
+'   gToolBox(n).wszControlName   = "ListView"
+'   gToolBox(n).wszImage  = "IMAGE_LISTVIEW"
+'   gToolBox(n).wszCursor = "IMAGE_CURSOR_LISTVIEW"
+'   gToolBox(n).wszClassName = "LISTVIEW"
 
-   gToolBox(7).nToolType = CTRL_MASKEDEDIT
-   gToolBox(7).wszToolBoxName   = "MaskedEdit"
-   gToolBox(7).wszControlName   = "Masked"
-   gToolBox(7).wszImage  = "IMAGE_MASKED"
-   gToolBox(7).wszCursor = "IMAGE_CURSOR_MASKED"
-   gToolBox(7).wszClassName = "MASKEDEDIT"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_MASKEDEDIT
+   gToolBox(n).wszToolBoxName   = "MaskedEdit"
+   gToolBox(n).wszControlName   = "Masked"
+   gToolBox(n).wszImage  = "IMAGE_MASKED"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_MASKED"
+   gToolBox(n).wszClassName = "MASKEDEDIT"
 
-   gToolBox(8).nToolType = CTRL_OPTION
-   gToolBox(8).wszToolBoxName   = "OptionButton"
-   gToolBox(8).wszControlName   = "Option"
-   gToolBox(8).wszImage  = "IMAGE_OPTION"
-   gToolBox(8).wszCursor = "IMAGE_CURSOR_OPTION"
-   gToolBox(8).wszClassName = "RADIOBUTTON"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_OPTION
+   gToolBox(n).wszToolBoxName   = "OptionButton"
+   gToolBox(n).wszControlName   = "Option"
+   gToolBox(n).wszImage  = "IMAGE_OPTION"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_OPTION"
+   gToolBox(n).wszClassName = "RADIOBUTTON"
 
-   gToolBox(9).nToolType = CTRL_PICTUREBOX
-   gToolBox(9).wszToolBoxName   = "PictureBox"
-   gToolBox(9).wszControlName   = "Picture"
-   gToolBox(9).wszImage  = "IMAGE_PICTUREBOX"
-   gToolBox(9).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
-   gToolBox(9).wszClassName = "PICTUREBOX"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_PICTUREBOX
+   gToolBox(n).wszToolBoxName   = "PictureBox"
+   gToolBox(n).wszControlName   = "Picture"
+   gToolBox(n).wszImage  = "IMAGE_PICTUREBOX"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_PICTUREBOX"
+   gToolBox(n).wszClassName = "PICTUREBOX"
 
-   gToolBox(10).nToolType = CTRL_PROGRESSBAR
-   gToolBox(10).wszToolBoxName = "ProgressBar"
-   gToolBox(10).wszControlName = "Progress"
-   gToolBox(10).wszImage = "IMAGE_PROGRESSBAR"
-   gToolBox(10).wszCursor = "IMAGE_CURSOR_PROGRESSBAR"
-   gToolBox(10).wszClassName = "PROGRESSBAR"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_PROGRESSBAR
+   gToolBox(n).wszToolBoxName = "ProgressBar"
+   gToolBox(n).wszControlName = "Progress"
+   gToolBox(n).wszImage = "IMAGE_PROGRESSBAR"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_PROGRESSBAR"
+   gToolBox(n).wszClassName = "PROGRESSBAR"
 
-   gToolBox(11).nToolType = CTRL_RICHEDIT
-   gToolBox(11).wszToolBoxName = "RichEdit"
-   gToolBox(11).wszControlName = "RichEdit"
-   gToolBox(11).wszImage = "IMAGE_RICHEDIT"
-   gToolBox(11).wszCursor = "IMAGE_CURSOR_RICHEDIT"
-   gToolBox(11).wszClassName = "RICHEDIT"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_RICHEDIT
+   gToolBox(n).wszToolBoxName = "RichEdit"
+   gToolBox(n).wszControlName = "RichEdit"
+   gToolBox(n).wszImage = "IMAGE_RICHEDIT"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_RICHEDIT"
+   gToolBox(n).wszClassName = "RICHEDIT"
 
-   gToolBox(12).nToolType = CTRL_TEXTBOX
-   gToolBox(12).wszToolBoxName   = "TextBox"
-   gToolBox(12).wszControlName   = "Text"
-   gToolBox(12).wszImage  = "IMAGE_TEXTBOX"
-   gToolBox(12).wszCursor = "IMAGE_CURSOR_TEXTBOX"
-   gToolBox(12).wszClassName = "TEXTBOX"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_TEXTBOX
+   gToolBox(n).wszToolBoxName   = "TextBox"
+   gToolBox(n).wszControlName   = "Text"
+   gToolBox(n).wszImage  = "IMAGE_TEXTBOX"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_TEXTBOX"
+   gToolBox(n).wszClassName = "TEXTBOX"
+
+
+   redim preserve gToolBox(n) as TOOLBOX_TYPE
 
 
 '   gToolBox(11).nToolType = CTRL_HSCROLL
@@ -439,12 +463,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(17).wszImage  = "IMAGE_UPDOWN"
 '   gToolBox(17).wszCursor = "IMAGE_CURSOR_UPDOWN"
 '   gToolBox(17).wszClassName = "UPDOWN"
-
-'   gToolBox(18).nToolType = CTRL_LISTVIEW
-'   gToolBox(18).wszName   = "ListView"
-'   gToolBox(18).wszImage  = "IMAGE_LISTVIEW"
-'   gToolBox(18).wszCursor = "IMAGE_CURSOR_LISTVIEW"
-'   gToolBox(18).wszClassName = "LISTVIEW"
 
 '   gToolBox(19).nToolType = CTRL_TREEVIEW
 '   gToolBox(19).wszName   = "TreeView"
@@ -834,6 +852,53 @@ Function clsConfig.SaveConfigFile() as Long
 End Function
 
 
+' Save the MRU to the configuration file. Only write the MRU items
+' the ini file rather than overwriting the whole file. This enables
+' WinFBE to work better with external tools that manually modify the
+' WinFBE.ini file.
+FUNCTION clsConfig.WriteMRU() as long 
+   dim as CWSTR wszKeyName, wszValue
+   
+   ' Delete the section name
+   dim as CWSTR wszSectionName = "MRU"
+   WritePrivateProfileString( wszSectionName, NULL, NULL, _ConfigFilename )
+   
+   ' Write the new values.
+   For i As Long = 0 To 9
+      this.MRU(i) = ProcessToCurdrive(this.MRU(i))
+      wszKeyName = "MRU_" & Right("00" & Str(i), 2)
+      wszValue   = this.MRU(i) 
+      WritePrivateProfileString(wszSectionName, wszKeyName, wszValue, _ConfigFilename)
+   Next         
+    
+   function = 0
+END FUNCTION
+
+
+' Save the MRU Projects to the configuration file. Only write the MRU items
+' the ini file rather than overwriting the whole file. This enables
+' WinFBE to work better with external tools that manually modify the
+' WinFBE.ini file.
+FUNCTION clsConfig.WriteMRUProjects() as long 
+   dim as CWSTR wszKeyName, wszValue
+   
+   ' Delete the section name
+   dim as CWSTR wszSectionName = "MRUPROJECTS"
+   WritePrivateProfileString( wszSectionName, NULL, NULL, _ConfigFilename )
+   
+   ' Write the new values.
+   For i As Long = 0 To 9
+      this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
+      wszKeyName = "MRUPROJECT_" & Right("00" & Str(i), 2) 
+      wszValue   = this.MRUProject(i) 
+      WritePrivateProfileString( wszSectionName, wszKeyName, wszValue, _ConfigFilename )
+   Next         
+    
+   function = 0
+END FUNCTION
+   
+
+
 ''
 ''  IMPORT THEME CONTAINED IN INCOMING STRING (THEME_00=)
 ''
@@ -846,6 +911,7 @@ Function clsConfig.ImportTheme( byref st as wstring, _
    Dim wData2 As WString * 1024
    dim as long i
    dim theme as TYPE_THEMES
+   dim bExistsAlready as Boolean  = false
    
    i = InStr(st, "=")
    If i = 0 Then exit function
@@ -886,9 +952,19 @@ Function clsConfig.ImportTheme( byref st as wstring, _
          redim preserve this.ThemesTemp(i)
          this.ThemesTemp(i) = theme
       else
-         i = ubound(this.Themes) + 1
-         redim preserve this.Themes(i)
-         this.Themes(i) = theme
+         ' If the theme already exists then do not add it again otherwise our
+         ' config file will grow out of control.
+         for i = lbound(this.Themes) to ubound(this.Themes)
+            if this.Themes(i).id = theme.id then
+               bExistsAlready = true: exit for
+            end if   
+         next
+
+         if bExistsAlready = false then
+            i = ubound(this.Themes) + 1
+            redim preserve this.Themes(i)
+            this.Themes(i) = theme
+         end if   
       end if   
    end if
    

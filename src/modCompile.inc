@@ -722,6 +722,10 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    wDQ = wchr(34) ' unicode double quotes
                              
+   ' Reload the config file in case a user has automated a change to it since
+   ' the application started (for example, changing the compiler path).
+   gConfig.LoadConfigFile()
+   
    gCompile.wszFullCommandLine = ""
    gCompile.wszFullLogFile = ""
    gCompile.wszOutputMsg = ""
@@ -767,6 +771,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    if AfxPathIsRelative(gCompile.CompilerPath) then
       gCompile.CompilerPath = AfxPathCombine(AfxGetExePathName, gCompile.CompilerPath)
    END IF
+
 
    ' Check to see if the compiler exists
    If AfxFileExists(gCompile.CompilerPath) = 0 Then 

@@ -193,6 +193,8 @@ Type clsConfig
       declare Function GetThemePtr() as TYPE_THEMES ptr
       Declare Function LoadKeywords() As Long
       Declare Function SaveKeywords() As Long
+      Declare Function WriteMRU() As Long
+      Declare Function WriteMRUProjects() As Long
       Declare Function SaveConfigFile() As Long
       Declare Function LoadConfigFile() As Long
       declare Function LoadSnippets() as Long

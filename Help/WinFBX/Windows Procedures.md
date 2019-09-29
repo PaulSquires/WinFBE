@@ -456,7 +456,7 @@ Extracts resource data and returns it as a string.
 
 ```
 FUNCTION AfxExtractResource (BYVAL hInstance AS HINSTANCE, _
-   BYREF wszResourceName AS WSTRING, BYVAL pResourceType AS LPWSTR = RT_RCDATA) AS STRING
+   BYREF wszResourceName AS WSTRING, BYVAL pResourceType AS LPWSTR = MAKEINTRESOURCEW(10)) AS STRING
 ```
 
 | Parameter  | Description |
@@ -496,7 +496,7 @@ Extracts resource data and saves it to a file.
 
 ```
 FUNCTION AfxExtractResourceToFile (BYVAL hInstance AS HINSTANCE, BYREF wszResourceName AS WSTRING, _
-   BYREF wszFileName AS WSTRING, BYVAL pResourceType AS LPWSTR = RT_RCDATA) AS STRING
+   BYREF wszFileName AS WSTRING, BYVAL pResourceType AS LPWSTR = MAKEINTRESOURCEW(10)) AS STRING
 ```
 
 | Parameter  | Description |

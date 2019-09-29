@@ -104,7 +104,7 @@ IF pMatches.DispPtr THEN
       ' // passed variant with a numeric value is of the exact type, since the standard
       ' // implementation of DispInvoke tries to coerce parameters. However, it is always
       ' // safer to use a syntax like CVAR(i, "LONG")) than CVAR(i)
-'      DIM pMatch AS CDIspInvoke = pMatches.Get("Item", CVAR(i, "LONG"))   ' // or CVAR(i, "LONG"))
+'      DIM pMatch AS CDIspInvoke = pMatches.Get("Item", CVAR(i, "LONG"))
       DIM pMatch AS CDIspInvoke = pMatches.Get("Item", i)
       IF pMatch.DispPtr THEN
          ' // Get the value of the match and convert it to a string

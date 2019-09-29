@@ -331,7 +331,7 @@ private Function frmVDColors_SetColorListBoxSelection( byref wszPropValue as wst
          hList = hList3
    END SELECT
 
-   nCurSel = ListBox_FindStringExact(hList, -1, wszValue)
+   nCurSel = ListBox_FindStringExact(hList, -1, wszValue.sptr)
    ShowWindow(hList, SW_SHOW)
    ListBox_SetCurSel(hList, nCurSel)
    SetFocus(hList)
@@ -392,10 +392,10 @@ public Function frmVDColors_Show( ByVal hWndParent As HWnd, _
    for i as long = lbound(gColors) to ubound(gColors)
       select case gColors(i).ColorType
          CASE COLOR_COLORS
-            idx = ListBox_AddString(hListColors, gColors(i).wszColorName)
+            idx = ListBox_AddString(hListColors, gColors(i).wszColorName.sptr)
             ListBox_SetItemData(hListColors, idx, i)   ' store the array index
          CASE COLOR_SYSTEM
-            idx = ListBox_AddString(hListSystem, gColors(i).wszColorName)
+            idx = ListBox_AddString(hListSystem, gColors(i).wszColorName.sptr)
             ListBox_SetItemData(hListSystem, idx, i)   ' store the array index
       END SELECT
    NEXT

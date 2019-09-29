@@ -863,7 +863,7 @@ End Function
 ' The returned pointer must be freed with CoTaskMemFree
 ' ========================================================================================
 public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
-                                    ByVal pwszFileName As WString Ptr, _
+                                    ByVal pwszFileName As WString Ptr, _    ' full path and filename
                                     ByVal pwszDefExt As WString Ptr, _
                                     ByVal id As Long = 0, _
                                     ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH _
@@ -874,6 +874,13 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    Dim psfd As IFileSaveDialog Ptr
    hr = CoCreateInstance(@CLSID_FileSaveDialog, Null, CLSCTX_INPROC_SERVER, @IID_IFileSaveDialog, @psfd)
    If psfd = Null Then Return Null
+
+   dim as CWSTR wszFilename, wszFilePath 
+   
+   wszFilename = AfxStrPathname( "NAMEX", *pwszFileName )
+   if AfxFileExists( *pwszFileName ) then
+      wszFilePath = AfxStrPathName( "PATH", *pwszFileName ) 
+   end if
 
    ' // Set the file types
    Dim rgFileTypes(1 To 4) As COMDLG_FILTERSPEC 
@@ -920,19 +927,24 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    End Select
    
    ' // Set the file name
-   hr = psfd->lpVtbl->SetFileName(psfd, pwszFileName)
+   hr = psfd->lpVtbl->SetFileName(psfd, wszFileName)
    ' // Set the extension
    hr = psfd->lpVtbl->SetDefaultExtension(psfd, pwszDefExt)
+
+   ' // Set the default folder to display in the save dialog
+   if len(wszFilePath ) then
+      Dim pFolder As IShellItem Ptr
+      SHCreateItemFromParsingName (wszFilePath, Null, @IID_IShellItem, @pFolder)
+      If pFolder Then
+         hr = psfd->lpVtbl->SetFolder(psfd, pFolder)
+         If SUCCEEDED(hr) Then
+            pFolder->lpVtbl->Release(pFolder)
+         end if      
+      End If
+   end if
+   
    ' // Display the dialog
    hr = psfd->lpVtbl->Show(psfd, hwndOwner)
-
-   ' // Set the default folder
-   Dim pFolder As IShellItem Ptr
-   SHCreateItemFromParsingName (AfxGetExePathName, Null, @IID_IShellItem, @pFolder)
-   If pFolder Then
-      psfd->lpVtbl->SetDefaultFolder(psfd, pFolder)
-      pFolder->lpVtbl->Release(pFolder)
-   End If
 
    ' // Get the result
    Dim pItem As IShellItem Ptr

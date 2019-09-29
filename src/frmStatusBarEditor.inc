@@ -136,7 +136,7 @@ private Function frmStatusBarEditor_DisplayListBox( ByVal nIndex As Long ) As Lo
    ListBox_ResetContent( hList )
    for i as long = 0 to ubound(gPanelItems)
       gPanelItems(i).wszName = "StatusBar Panel " & i
-      ListBox_AddString( hList, gPanelItems(i).wszName )
+      ListBox_AddString( hList, gPanelItems(i).wszName.sptr )
    next
    ListBox_SetCurSel( hList, nIndex )
 

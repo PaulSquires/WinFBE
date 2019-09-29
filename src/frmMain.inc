@@ -57,7 +57,7 @@ public Function frmMain_AddToComboFiles( byval pDoc as clsDocument ptr ) As Long
    
    dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
    
-   dim as long idx = ComboBox_AddString( hComboFiles, AfxStrPathname( "NAMEX", pDoc->DiskFilename ) )
+   dim as long idx = ComboBox_AddString( hComboFiles, AfxStrPathname( "NAMEX", pDoc->DiskFilename ).sptr )
    ' Save the pDoc in the itemData in order to quickly load the file later when
    ' selected from the Files combobox.
    ComboBox_SetItemData( hComboFiles, idx, cast(LPARAM, pDoc) )
@@ -123,7 +123,7 @@ public Function frmMain_SelectComboFiles() As Long
    
    dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
    dim as CWSTR wszFilename = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
-   dim as long idx = ComboBox_FindStringExact( hComboFiles, -1, wszFilename )
+   dim as long idx = ComboBox_FindStringExact( hComboFiles, -1, wszFilename.sptr )
    ComboBox_SetCurSel( hComboFiles, idx )
    
    function = 0
