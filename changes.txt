@@ -1,9 +1,10 @@
-Version 1.9.3 (September 29, 2019)
+Version 1.9.3 (September 30, 2019)
 - Changed: Updated WinFBE source code to be FB 1.07.1 compatible. WinFBE32.exe and WinFBE64.exe compiled using FB 1.07.1-gcc-5.2.
 - Changed: Updated Italian language translation file thanks to Massimiliano.
 - Changed: Updated German language translation file thanks to Joerg Buckel.
 - Added: Alternate toolchains for gcc versions 8.3 and 9.2. Use the user Tool SetCompilerPathsII to switch between toolchains.
 - Added: Config file is re-read just prior to starting the compiling process. Useful for 3rd party tools that modify the config.
+- Alternate GCC Toolchains for versions 8.3 and 9.2 available as separate downloads.
 - Fixed: For TextBox and RichEdit the default value for CharacterCasing was being set as "CharacterCasing.Normal" when it should have been "CharacterCase.Normal".
 
 Version 1.9.2 (August 25, 2019)
