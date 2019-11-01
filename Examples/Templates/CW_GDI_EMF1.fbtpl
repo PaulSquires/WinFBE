@@ -1,0 +1,121 @@
+2
+FBGUI
+.bas
+CWindow: GDI: Enhanced metafile #1 (memory-based)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_GDI_EMF1.fbtpl
+' Contents: Creates and displays an enhanced metafile with a fairly minimal amount of distraction.
+' This program is a translation/adaptation of EMF1.C -- Enhanced Metafile Demo #1
+' © Charles Petzold, 1998, described and analysed in Chapter 18 of the book Programming
+' Windows, 5th Edition.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Enhanced Metafile Demo #1", @WndProc)
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.SetClientSize(400, 250)
+   pWindow.Center
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hemf   AS HENHMETAFILE   ' // Handle to the enhanced metafile
+   DIM    hdc    AS HDC            ' // Handle to the device context of the window
+   DIM    hdcEMF AS HDC            ' // Handle to the device context for the enhanced metafile
+   DIM    ps     AS PAINTSTRUCT
+   DIM    rc     AS RECT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Creates a device context for a memory-based enhanced-format metafile
+         hdcEMF = CreateEnhMetaFileW(NULL, NULL, NULL, NULL)
+         ' // Draws a rectangle and two lines using GDI
+         Rectangle hdcEMF, 100, 100, 200, 200
+         MoveToEx  hdcEMF, 100, 100, NULL
+         LineTo    hdcEMF, 200, 200
+         MoveToEx  hdcEMF, 200, 100, NULL
+         LineTo    hdcEMF, 100, 200
+         ' // Closes an enhanced-metafile device context and returns
+         ' // a handle that identifies an enhanced-format metafile.
+         hemf = CloseEnhMetaFile(hdcEMF)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_PAINT
+         ' // Displays the picture stored in the specified enhanced-format metafile
+         hdc = BeginPaint(hwnd, @ps)
+         GetClientRect hwnd, @rc
+         rc.Left   =     rc.Right  / 4
+         rc.Right  = 3 * rc.Right  / 4
+         rc.Top    =     rc.Bottom / 4
+         rc.Bottom = 3 * rc.Bottom / 4
+         PlayEnhMetaFile hdc, hemf, @rc
+         EndPaint hwnd, @ps
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Delete the enhanced metafile
+         DeleteEnhMetaFile hemf
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

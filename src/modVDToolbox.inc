@@ -209,7 +209,7 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
       case CTRL_TEXTBOX, CTRL_MASKEDEDIT, CTRL_RICHEDIT
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "KeyPress" 
-      case CTRL_LISTBOX, CTRL_COMBOBOX, CTRL_PROGRESSBAR
+      case CTRL_LISTBOX, CTRL_COMBOBOX, CTRL_PROGRESSBAR, CTRL_LISTVIEW
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Click" 
       case CTRL_PICTUREBOX
@@ -223,7 +223,6 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
    '   CTRL_TABCONTROL
    '   CTRL_PROGRESSBAR
    '   CTRL_UPDOWN
-   '   CTRL_LISTVIEW
    '   CTRL_TREEVIEW
    '   CTRL_SLIDER
    '   CTRL_DATETIMEPICKER
@@ -282,6 +281,9 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
 
    dim as long idx, nCurSel
 
+   ' Hide any active textboxes, dropdowns, etc
+   HidePropertyListControls
+   
    ' Always clear the controls combobox and repopuplate it. Do this even
    ' if the active control has not changed. It is possible that that a 
    ' group of controls may have been deleted.
@@ -960,7 +962,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
             end if          
          end if
 
-         
+
          ' PROPERTYLIST
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTPROPERTIES then
             dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
@@ -989,9 +991,21 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   FillRect(lpdis->hDC, @rc, hBrush)  
                   rc.left = rc.left + pWindow->ScaleX(4)
 
-
+                  
+                  dim as CWSTR wszPropName, wszPropValue
+                  dim as PropertyType nPropType 
+                  
+                  if (lpdis->itemData >= lbound(pCtrl->Properties)) and _
+                     (lpdis->itemData <= ubound(pCtrl->Properties)) then
+                     wszPropName  = pCtrl->Properties(lpdis->itemData).wszPropName
+                     wszPropValue = pCtrl->Properties(lpdis->itemData).wszPropValue
+                     nPropType    = pCtrl->Properties(lpdis->itemData).PropType
+                  else   
+                     exit function
+                  end if   
+                  
                   DrawText( lpdis->hDC, _
-                            pCtrl->Properties(lpdis->itemData).wszPropName, _
+                            wszPropName, _
                             -1, Cast(lpRect, @rc), _
                             DT_LEFT Or DT_SINGLELINE Or DT_VCENTER )
 
@@ -1004,14 +1018,13 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                   rc2.left = rc2.left + pWindow->ScaleX(4)
                    
                   ' Some properties that are blank will show "(none)"
-                  dim as CWSTR wszPropValue = pCtrl->Properties(lpdis->itemData).wszPropValue
                   if len(wszPropValue) = 0 then
-                     select case ucase(pCtrl->Properties(lpdis->itemData).wszPropName)
+                     select case ucase(wszPropName)
                         CASE "ACCEPTBUTTON", "BACKGROUNDIMAGE", "CANCELBUTTON", "ICON", "IMAGE"
                            wszPropValue = "(none)"
                      END SELECT
                   end if   
-                  if ucase(pCtrl->Properties(lpdis->itemData).wszPropName) = "FONT" then
+                  if ucase(wszPropName) = "FONT" then
                      dim as LOGFONT lf
                      GetObject(hFontNormal, sizeof(lf), @lf)
                      dim as CWSTR wszFaceName = lf.lfFaceName
@@ -1027,20 +1040,20 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                                             AfxStrParse(wszPropValue, 2, ",") & "pt"
                      wszPropValue = wszFont
                   end if
-                  if pCtrl->Properties(lpdis->itemData).PropType = PropertyType.ColorPicker then
+                  if nPropType = PropertyType.ColorPicker then
                      dim as CWSTR wszList, wszValue
                      wszList = AfxStrParse(wszPropValue, 1, "|")
                      wszValue = AfxStrParse(wszPropValue, 2, "|")
                      wszPropValue = wszValue
                      if wszList = "CUSTOM" then wszPropValue = "Custom Color"
-                       
+                        
                      dim as HBRUSH hBrushColor, hBrushOld
                      dim as RECT rcColor = rc2
                      rcColor.left   = rcColor.left 
                      rcColor.right  = rcColor.left + pWindow->ScaleX(18)
                      rcColor.top    = rcColor.top + pWindow->ScaleY(1)
                      rcColor.bottom = rcColor.bottom - pWindow->ScaleY(4)
-                       
+                        
                      dim as COLORREF rgbClr = GetRGBColorFromProperty(@pCtrl->Properties(lpdis->itemData))
                      hBrushColor = CreateSolidBrush(rgbClr)
 
@@ -1070,7 +1083,6 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                end if
             END IF
          end if
-
           
          ' EVENTS ASSOCIATED WITH A CONTROL
          if lpdis->CtlID = IDC_FRMVDTOOLBOX_LSTEVENTS then
@@ -1386,12 +1398,12 @@ private Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_MEASUREITEM, frmVDToolbox_OnMeasureItem)
       HANDLE_MSG (HWnd, WM_DRAWITEM,    frmVDToolbox_OnDrawItem)
 
+         
       case WM_ACTIVATE
-         if wParam = WA_INACTIVE then
+         if loword(wParam) = WA_INACTIVE then
             InitiatePropertyValueChange
             HidePropertyListControls
          end if 
-
    End Select
 
    ' for messages that we don't deal with

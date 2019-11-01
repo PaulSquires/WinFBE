@@ -1243,7 +1243,7 @@ FUNCTION RotateTransform (BYVAL angle AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *angle* | Simple precision number that specifies the angle of rotation in degrees. |
+| *angle* | Single precision number that specifies the angle of rotation in degrees. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -1305,8 +1305,8 @@ FUNCTION ScaleTransform (BYVAL sx AS SINGLE, BYVAL sy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *sx* | Simple precision number that specifies the amount to scale in the x direction. |
-| *sy* | Simple precision number that specifies the amount to scale in the y direction. |
+| *sx* | Single precision number that specifies the amount to scale in the x direction. |
+| *sy* | Single precision number that specifies the amount to scale in the y direction. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -1368,8 +1368,8 @@ FUNCTION SetBlend (BYVAL blendFactors AS SINGLE PTR, BYVAL blendPositions AS SIN
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *blendFactors* | Pointer to an array of simple precision numbers that specify blend factors. Each number in the array specifies a percentage of the ending color and should be in the range from 0.0 through 1.0. |
-| *blendPositions* | Pointer to an array of simple precision numbers that specify blend positions. Each number in the array indicates a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates a line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines. |
+| *blendFactors* | Pointer to an array of single precision numbers that specify blend factors. Each number in the array specifies a percentage of the ending color and should be in the range from 0.0 through 1.0. |
+| *blendPositions* | Pointer to an array of single precision numbers that specify blend positions. Each number in the array indicates a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates a line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines. |
 | *count* | Optional. Integer that specifies the number of elements in the blendFactors array. This is the same as the number of elements in the *blendPositions* array. The blend factor at a given array index corresponds to the blend position at that same array index. |
 
 #### Return value
@@ -1423,8 +1423,8 @@ FUNCTION SetBlendBellShape (BYVAL focus AS SINGLE, BYVAL scale AS SINGLE = 1.0) 
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *focus* | Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
-| *scale* | Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
+| *focus* | Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
+| *scale* | Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
 
 #### Return value
 
@@ -1487,8 +1487,8 @@ FUNCTION SetBlendTriangularShape (BYVAL focus AS SINGLE, BYVAL scale AS SINGLE =
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *focus* | Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
-| *scale* | Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
+| *focus* | Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
+| *scale* | Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
 
 #### Return value
 
@@ -1597,7 +1597,7 @@ FUNCTION SetInterpolationColors (BYVAL presetColors AS ARGB PTR, _
 | Parameter  | Description |
 | ---------- | ----------- |
 | *presetColors* | Pointer to an array of ARGB colors that specify the colors to be interpolated for this linear gradient brush. A color of a given index in the *presetColors* array corresponds to the blend position of that same index in the *blendPositions* array. |
-| *blendPositions* | Pointer to an array of simple precision numbers that specify the blend positions. Each number in the array specifies a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates the line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines. |
+| *blendPositions* | Pointer to an array of single precision numbers that specify the blend positions. Each number in the array specifies a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates the line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines. |
 | *count* | Integer that specifies the number of elements in the *presetColors* array. This is the same as the number of elements in the *blendPositions* array. |
 
 #### Return value
@@ -1817,8 +1817,8 @@ FUNCTION TranslateTransform (BYVAL dx AS SINGLE, BYVAL dy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *dx* | Simple precision number that specifies the horizontal component of the translation. |
-| *dy* | Simple precision number that specifies the vertical component of the translation. |
+| *dx* | Single precision number that specifies the horizontal component of the translation. |
+| *dy* | Single precision number that specifies the vertical component of the translation. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -2004,7 +2004,7 @@ FUNCTION GetBlendCount () AS INT_
 
 #### Return value
 
-Before you call the **GetBlend** method of a **PathGradientBrush** object, you must allocate two buffers: one to receive an array of blend factors and one to receive an array of blend positions. To determine the size of the required buffers, call the **GetBlendCount** method of the **PathGradientBrush** object. The size (in bytes) of each buffer should be the return value of **GetBlendCount** multiplied by 4 (the size of a simple precision number).
+Before you call the **GetBlend** method of a **PathGradientBrush** object, you must allocate two buffers: one to receive an array of blend factors and one to receive an array of blend positions. To determine the size of the required buffers, call the **GetBlendCount** method of the **PathGradientBrush** object. The size (in bytes) of each buffer should be the return value of **GetBlendCount** multiplied by 4 (the size of a single precision number).
 
 #### Example
 
@@ -2228,8 +2228,8 @@ FUNCTION GetFocusScales (BYVAL xScale AS SINGLE PTR, BYVAL yScale AS SINGLE PTR)
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *xScale* | Pointer to a simple precision that receives the x focus scale value. |
-| *yScale* | Pointer to a simple precision that receives the y focus scale value. |
+| *xScale* | Pointer to a single precision that receives the x focus scale value. |
+| *yScale* | Pointer to a single precision that receives the y focus scale value. |
 
 #### Return value
 
@@ -2326,7 +2326,7 @@ Remarks
 
 A simple path gradient brush has two colors: a boundary color and a center color. When you paint with such a brush, the color changes gradually from the boundary color to the center color as you move from the boundary path to the center point. You can create a more complex gradient by specifying an array of preset colors and an array of blend positions.
 
-You can obtain the interpolation colors and interpolation positions currently set for a **PathGradientBrush** object by calling the **GetInterpolationColors** method of that **PathGradientBrush** object. Before you call the **GetInterpolationColors** method, you must allocate two buffers: one to hold the array of interpolation colors and one to hold the array of interpolation positions. You can call the **GetInterpolationColorCount** method of the **PathGradientBrush** object to determine the required size of those buffers. The size of the color buffer is the return value of **GetInterpolationColorCount** multiplied by 4. The size of the position buffer is the value of **GetInterpolationColorCount** multiplied by 4 (the size of a simple precision number).
+You can obtain the interpolation colors and interpolation positions currently set for a **PathGradientBrush** object by calling the **GetInterpolationColors** method of that **PathGradientBrush** object. Before you call the **GetInterpolationColors** method, you must allocate two buffers: one to hold the array of interpolation colors and one to hold the array of interpolation positions. You can call the **GetInterpolationColorCount** method of the **PathGradientBrush** object to determine the required size of those buffers. The size of the color buffer is the return value of **GetInterpolationColorCount** multiplied by 4. The size of the position buffer is the value of **GetInterpolationColorCount** multiplied by 4 (the size of a single precision number).
 
 
 # <a name="GetInterpolationColorsPGBrush"></a>GetInterpolationColors (CGpPathGradientBrush)
@@ -2354,7 +2354,7 @@ If the function fails, it returns one of the other elements of the **Status** en
 
 A simple path gradient brush has two colors: a boundary color and a center color. When you paint with such a brush, the color changes gradually from the boundary color to the center color as you move from the boundary path to the center point. You can create a more complex gradient by specifying an array of preset colors and an array of blend positions.
 
-Before you call the GetInterpolationColors method, you must allocate two buffers: one to hold the array of preset colors and one to hold the array of blend positions. You can call the **GetInterpolationColorCount** method of the **PathGradientBrush** object to determine the required size of those buffers. The size of the color buffer is the return value of **GetInterpolationColorCount** multiplied by 4. The size of the position buffer is the value of **GetInterpolationColorCount** multiplied by 4 (the size of a simple precision number).
+Before you call the GetInterpolationColors method, you must allocate two buffers: one to hold the array of preset colors and one to hold the array of blend positions. You can call the **GetInterpolationColorCount** method of the **PathGradientBrush** object to determine the required size of those buffers. The size of the color buffer is the return value of **GetInterpolationColorCount** multiplied by 4. The size of the position buffer is the value of **GetInterpolationColorCount** multiplied by 4 (the size of a single precision number).
 
 #### Example
 
@@ -2863,7 +2863,7 @@ FUNCTION RotateTransform (BYVAL angle AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *angle* | Simple precision number that specifies the angle of rotation in degrees. |
+| *angle* | Single precision number that specifies the angle of rotation in degrees. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -2924,8 +2924,8 @@ FUNCTION ScaleTransform (BYVAL sx AS SINGLE, BYVAL sy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *sx* | Simple precision number that specifies the horizontal scale factor. |
-| *sy* | Simple precision number that specifies the vertical scale factor. |
+| *sx* | Single precision number that specifies the horizontal scale factor. |
+| *sy* | Single precision number that specifies the vertical scale factor. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -3057,8 +3057,8 @@ FUNCTION SetBlendBellShape (BYVAL focus AS SINGLE, BYVAL scale AS SINGLE = 1.0) 
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *focus* | Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
-| *scale* | Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
+| *focus* | Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
+| *scale* | Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
 
 #### Return value
 
@@ -3126,8 +3126,8 @@ FUNCTION SetBlendTriangularShape (BYVAL focus AS SINGLE, BYVAL scale AS SINGLE =
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *focus* | Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
-| *scale* | Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
+| *focus* | Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1. |
+| *scale* | Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1. |
 
 #### Return value
 
@@ -3322,8 +3322,8 @@ FUNCTION SetFocusScales (BYVAL xScale AS SINGLE, BYVAL yScale AS SINGLE) AS GpSt
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *xScale* | Simple precision number that specifies the x focus scale. |
-| *yScale* | Simple precision number that specifies the y focus scale. |
+| *xScale* | Single precision number that specifies the x focus scale. |
+| *yScale* | Single precision number that specifies the y focus scale. |
 
 #### Return value
 
@@ -3636,8 +3636,8 @@ FUNCTION TranslateTransform (BYVAL dx AS SINGLE, BYVAL dy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *dx* | Simple precision number that specifies the horizontal component of the translation. |
-| *dy* | Simple precision number that specifies the vertical component of the translation. |
+| *dx* | Single precision number that specifies the horizontal component of the translation. |
+| *dy* | Single precision number that specifies the vertical component of the translation. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -4012,7 +4012,7 @@ FUNCTION RotateTransform (BYVAL angle AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *angle* | Simple precision number that specifies the angle of rotation in degrees. |
+| *angle* | Single precision number that specifies the angle of rotation in degrees. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -4066,8 +4066,8 @@ FUNCTION ScaleTransform (BYVAL sx AS SINGLE, BYVAL sy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *sx* | Simple precision number that specifies the amount to scale in the x direction. |
-| *sy* | Simple precision number that specifies the amount to scale in the y direction. |
+| *sx* | Single precision number that specifies the amount to scale in the x direction. |
+| *sy* | Single precision number that specifies the amount to scale in the y direction. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -4232,8 +4232,8 @@ FUNCTION TranslateTransform (BYVAL dx AS SINGLE, BYVAL dy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *dx* | Simple precision number that specifies the horizontal component of the translation. |
-| *dy* | Simple precision number that specifies the vertical component of the translation. |
+| *dx* | Single precision number that specifies the horizontal component of the translation. |
+| *dy* | Single precision number that specifies the vertical component of the translation. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value

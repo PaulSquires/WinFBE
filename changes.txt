@@ -1,3 +1,15 @@
+Version 1.9.5 (November 1, 2019)
+- Added: ListView control.
+- Added: ListBox Insert method.
+- Changed: Remove the Visual Designer sample project (a new one will be added in the future).
+- Fixed: WinFBE project files for the those found in the "Sample_Projects" folder.
+
+
+Version 1.9.4 (October 1, 2019)
+- Fixed: Updated the WinFBE.ini file to correct path to compiler.
+- Fixed: Removed the Tool UPX.
+- Fixed: Created a SetCompilerSwitches.ini configuration file for the SetCompilerSwitches Tool.
+
 Version 1.9.3 (September 30, 2019)
 - Changed: Updated WinFBE source code to be FB 1.07.1 compatible. WinFBE32.exe and WinFBE64.exe compiled using FB 1.07.1-gcc-5.2.
 - Changed: Updated Italian language translation file thanks to Massimiliano.

@@ -1,0 +1,108 @@
+2
+FBGUI
+.bas
+CWindow: GDI: Hello World
+' ########################################################################################
+' Microsoft Windows
+' File: CW_GDI_HelloWord.fbtpl
+' Contents: CWindow Hello Word example
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow Hello World", @WndProc)
+   ' // Change the background to white
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   ' // Set the client size of the window
+   pWindow.SetClientSize(500, 320)
+   ' // Center the window
+   pWindow.Center
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hNewFont AS HFONT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the CWindow class from the CREATESTRUCT structure
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
+         ' // Create a new font scaled according the DPI ratio
+         IF pWindow->DPI <> 96 THEN hNewFont = pWindow->CreateFont("Tahoma", 9)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_PAINT
+    		DIM rc AS RECT, ps AS PAINTSTRUCT, hDC AS HANDLE, hOldFont AS HFONT
+         hDC = BeginPaint(hWnd, @ps)
+         IF hNewFont THEN hOldFont = CAST(HFONT, SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
+         GetClientRect(hWnd, @rc)
+         DrawTextW(hDC, "Hello, World!", -1, @rc, DT_SINGLELINE or DT_CENTER or DT_VCENTER)
+         IF hNewFont THEN SelectObject(hDC, CAST(HGDIOBJ, CAST(HFONT, hOldFont)))
+         EndPaint(hWnd, @ps)
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Destroy the new font
+         IF hNewFont THEN DeleteObject(CAST(HGDIOBJ, hNewFont))
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

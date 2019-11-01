@@ -21,6 +21,7 @@
 #Define IDC_FRMMAIN_COMBOBUILDS                     1005
 #Define IDC_FRMMAIN_COMBOFILES                      1006
 #Define IDC_FRMMAIN_COMBOFUNCTIONS                  1007
+#Define IDC_FRMMAIN_COMBOTOOLCHAINS                 1008
 
 '' Last position in document. Used when "Last Position" menu option is selected.
 Type LASTPOSITION_TYPE

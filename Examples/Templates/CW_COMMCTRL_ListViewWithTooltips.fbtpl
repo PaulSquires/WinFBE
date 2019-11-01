@@ -1,0 +1,137 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: ListView with Tooltips
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ListViewWithTooltips.fbtpl
+' Contents: CWindow ListView with tooltips example
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2018 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+#define IDC_LISTVIEW 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hgWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recommended way is to use a manifest file
+   AfxSetProcessDPIAware
+
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "ListView Test", @WndProc)
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Set the client size
+   pWindow.SetClientSize 250,250
+   ' // Center the window
+   pWindow.Center
+
+   ' // Add a ListView
+   DIM hListView AS HWND = pWindow.AddControl("ListView", pWindow.hwindow, IDC_LISTVIEW, "", 10, 10, 230, 230)
+   Listview_AddColumn(hListview, 0, "Common Controls", pWindow.ScaleX(227), LVCFMT_LEFT)
+   Listview_AddItem(hListview, 0, 0, "Buttons")
+   Listview_AddItem(hListview, 1, 0, "Checkboxes")
+   Listview_AddItem(hListview, 2, 0, "Comboboxes")
+   Listview_AddItem(hListview, 3, 0, "Custom Controls")
+   Listview_AddItem(hListview, 4, 0, "Frames")
+   Listview_AddItem(hListview, 5, 0, "Graphics")
+   Listview_AddItem(hListview, 6, 0, "Labels")
+   Listview_AddItem(hListview, 7, 0, "Listboxes")
+   Listview_AddItem(hListview, 8, 0, "Listviews")
+   Listview_AddItem(hListview, 9, 0, "Radio Buttons")
+   Listview_AddItem(hListview, 10, 0, "Textboxes")
+   DIM LV_Style AS DWORD = ListView_GetExtendedListViewStyle(hListView)
+   ListView_SetExtendedListViewStyle(hListView, LV_Style XOR LVS_EX_CHECKBOXES OR LVS_EX_INFOTIP)
+
+   ' // Optinal: Set the font of the tooltips
+   DIM hTooltipFont AS HFONT = pWindow.CreateFont("Times New Roman", 10, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET)
+   DIM hwndTooltip AS HWND = ListView_GetToolTips(hListview)
+   IF hwndTooltip THEN AfxSetWindowFont(hwndTooltip, hTooltipFont)
+
+   ' // Default message pump (you can replace it with your own)
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Delete the tooltip font
+   IF hTooltipFont THEN DeleteObject hTooltipFont
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window procedure
+' ========================================================================================
+FUNCTION WndProc(BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+  
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         ' // Listview Tooltips
+         DIM wszText AS WSTRING * 80
+         DIM LVTT_Info AS NMLVGetInfoTip PTR = CAST(NMLVGetInfoTip PTR, lParam)
+          SELECT CASE  LVTT_Info->hdr.code
+            CASE LVN_GETINFOTIP
+               SELECT CASE LVTT_Info->hdr.idFrom
+                  CASE IDC_LISTVIEW
+                     SELECT CASE LVTT_Info->iItem
+                        CASE  0 : wszText = "Add Buttons"
+                        CASE  1 : wszText = "Add Checkbox Controls"
+                        CASE  2 : wszText = "Add Combobox Controls"
+                        CASE  3 : wszText = "Add Custom Controls"
+                        CASE  4 : wszText = "Add Frame Controls"
+                        CASE  5 : wszText = "Add Graphic Controls"
+                        CASE  6 : wszText = "Add Label Controls"
+                        CASE  7 : wszText = "Add Listbox Controls"
+                        CASE  8 : wszText = "Add Listview Controls"
+                        CASE  9 : wszText = "Add Radio Button Controls"
+                        CASE 10 : wszText = "Add Textbox Controls"
+                     END SELECT
+               END SELECT
+               ' // Assign the tooltip text to the tooltip buffer
+               IF LEN(wszText) THEN *LVTT_Info->pszText = wszText
+         END SELECT
+
+      CASE WM_CLOSE
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+

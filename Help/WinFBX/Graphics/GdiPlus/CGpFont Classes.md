@@ -296,7 +296,7 @@ FUNCTION GetHeight (BYVAL dpi AS SINGLE) AS SINGLE
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *dpi* | Simple precision number that specifies the vertical resolution, in dots per inch, of the device that displays the font. |
+| *dpi* | Single precision number that specifies the vertical resolution, in dots per inch, of the device that displays the font. |
 
 #### Return value
 

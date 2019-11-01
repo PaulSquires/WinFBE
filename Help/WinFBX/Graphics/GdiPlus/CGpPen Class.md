@@ -1961,7 +1961,7 @@ FUNCTION SetMiterLimit (BYVAL miterLimit AS SINGLE) AS GpStatus
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *miterLimit* | Simple precision number that specifies the miter limit of this **Pen** object. A Simple precision number value that is less than 1.0! will be replaced with 1.0!. |
+| *miterLimit* | Single precision number that specifies the miter limit of this **Pen** object. A Single precision number value that is less than 1.0! will be replaced with 1.0!. |
 
 #### Return value
 
@@ -2105,8 +2105,8 @@ FUNCTION TranslateTransform (BYVAL dx AS SINGLE, BYVAL dy AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *dx* | Simple precision number that specifies the horizontal component of the translation. |
-| *dy* | Simple precision number that specifies the vertical component of the translation. |
+| *dx* | Single precision number that specifies the horizontal component of the translation. |
+| *dy* | Single precision number that specifies the vertical component of the translation. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of multiplication. **MatrixOrderPrepend** specifies that the passed matrix is on the left, and **MatrixOrderAppend** specifies that the passed matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value

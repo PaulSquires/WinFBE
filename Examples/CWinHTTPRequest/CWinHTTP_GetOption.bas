@@ -1,5 +1,4 @@
 '#CONSOLE ON
-#include once "windows.bi"
 #include once "Afx/CWinHttpRequest.inc"
 using Afx
 
@@ -17,16 +16,13 @@ pWHttp.Send
 
 IF pWHttp.GetLastResult = S_OK THEN
    ' // Get user agent string.
-   DIM cvText AS CVAR = pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
-   PRINT cvText.ToStr
-   ' // We can also use:
-   ' PRINT pWHttp.GetOption(WinHttpRequestOption_UserAgentString).ToStr
+   PRINT pWHttp.GetOption(WinHttpRequestOption_UserAgentString)
    ' // Get URL
-   PRINT pWHttp.GetOption(WinHttpRequestOption_URL).ToStr
+   PRINT pWHttp.GetOption(WinHttpRequestOption_URL)
    ' // Get URL Code Page.
-   PRINT pWHttp.GetOption(WinHttpRequestOption_URLCodePage).ToStr
+   PRINT pWHttp.GetOption(WinHttpRequestOption_URLCodePage)
    ' // Convert percent symbols to escape sequences.
-   PRINT pWHttp.GetOption(WinHttpRequestOption_EscapePercentInURL).ToStr
+   PRINT pWHttp.GetOption(WinHttpRequestOption_EscapePercentInURL)
 END IF
 
 PRINT

@@ -1,18 +1,19 @@
 ' ========================================================================================
-' The following example shows how to open an HTTP connection, send an HTTP request, and
-' returns the response body as a stream of bytes.
+' The following example shows how to open an HTTP connection, sends an HTTP request to
+' load an image, returns the response body as a stream of bytes and saves it to a file.
 ' ========================================================================================
 
 '#CONSOLE ON
 #include once "windows.bi"
 #include once "Afx/CWinHttpRequest.inc"
+#include once "Afx/CStream.inc"
 using Afx
 
 ' // Create an instance of the CWinHttp class
 DIM pWHttp AS CWinHttpRequest
 
 ' // Open an HTTP connection to an HTTP resource
-pWHttp.Open "GET", "http://www.microsoft.com/library/homepage/images/ms-banner.gif"
+pWHttp.Open "GET", "https://i.ytimg.com/vi/nPUi1XNiRzQ/maxresdefault.jpg"
 
 ' // Send an HTTP request to the HTTP server
 pWHttp.Send
@@ -20,19 +21,14 @@ pWHttp.Send
 ' // Wait for response with a timeout of 5 seconds
 DIM iSucceeded AS LONG = pWHttp.WaitForResponse(5)
 
-' // Get the response body
-DIM strResponseBody AS STRING = pWHttp.GetResponseStream
-
-' // Save the buffer into a file
-IF LEN(strResponseBody) THEN
-   DIM fn AS LONG = FREEFILE
-   OPEN "ms-banner.gif" FOR OUTPUT AS #fn
-   PUT #fn, 1, strResponseBody
-   CLOSE #fn
-   PRINT "File saved"
-ELSE
-   PRINT "Failure"
-END IF
+SCOPE
+   DIM st AS STRING = pWHttp.GetResponseBody
+  ' // Open a file stream
+   DIM pFileStream AS CFileStream
+   IF pFileStream.Open("image.jpg", STGM_CREATE OR STGM_WRITE) = S_OK then
+      pFileStream.WriteTextA(st)
+   END IF
+END SCOPE
 
 PRINT
 PRINT "Press any key..."

@@ -207,7 +207,7 @@ The **CWindow** constructor registers a class for the window with the name "FBWi
 DIM pWindow AS CWindow = "MyClassName"
 ```
 
-The constructor also checks if the application is DPI aware and calculates de scaling ratios and the default font name and point size ("Tahoma", 8 pt, for Windows XP and below; "Segoe UI", 9 pt, for Windows Vista and above").
+The constructor also checks if the application is DPI aware and calculates the scaling ratios and the default font name and point size ("Tahoma", 8 pt, for Windows XP and below; "Segoe UI", 9 pt, for Windows Vista and above").
 
 You can override it by setting your own DPI and/or font before creating the window, e.g.
 
@@ -384,7 +384,7 @@ instead of
 
 ```
 pWindow.AddControl("Button", pWindow.hWindow, IDCANCEL, "&Close", 350, 250, 75, 23, _
-   WS_CHILD OR WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER
+   WS_CHILD OR WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER)
 ```
 
 For a list of predefined class names and styles, see the **AddControl** method.

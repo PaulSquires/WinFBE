@@ -469,7 +469,7 @@ USING Afx
 <p>The <strong>CWindow</strong> constructor registers a class for the window with the name &quot;FBWindowClass:xxx&quot;, where xxx is a counter number. Alternatively, you can force the use of your own class name by specifying it, e.g.</p>
 <pre><code>DIM pWindow AS CWindow = &quot;MyClassName&quot;
 </code></pre>
-<p>The constructor also checks if the application is DPI aware and calculates de scaling ratios and the default font name and point size (&quot;Tahoma&quot;, 8 pt, for Windows XP and below; &quot;Segoe UI&quot;, 9 pt, for Windows Vista and above&quot;).</p>
+<p>The constructor also checks if the application is DPI aware and calculates the scaling ratios and the default font name and point size (&quot;Tahoma&quot;, 8 pt, for Windows XP and below; &quot;Segoe UI&quot;, 9 pt, for Windows Vista and above&quot;).</p>
 <p>You can override it by setting your own DPI and/or font before creating the window, e.g.</p>
 <pre><code>DIM pWindow AS CWindow
 pWindow. DPI = 96
@@ -589,7 +589,7 @@ CASE WM_CREATE
 </code></pre>
 <p>instead of</p>
 <pre><code>pWindow.AddControl(&quot;Button&quot;, pWindow.hWindow, IDCANCEL, &quot;&amp;Close&quot;, 350, 250, 75, 23, _
-   WS_CHILD OR WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER
+   WS_CHILD OR WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER)
 </code></pre>
 <p>For a list of predefined class names and styles, see the <strong>AddControl</strong> method.</p>
 <p>If the application is DPI aware, controls created with the <strong>AddControl</strong> method are scaled according to the DPI setting.</p>

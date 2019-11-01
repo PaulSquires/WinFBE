@@ -1483,7 +1483,7 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>angle</em></td>
-<td>Simple precision number that specifies the angle of rotation in degrees.</td>
+<td>Single precision number that specifies the angle of rotation in degrees.</td>
 </tr>
 <tr class="even">
 <td><em>order</em></td>
@@ -1545,11 +1545,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>sx</em></td>
-<td>Simple precision number that specifies the amount to scale in the x direction.</td>
+<td>Single precision number that specifies the amount to scale in the x direction.</td>
 </tr>
 <tr class="even">
 <td><em>sy</em></td>
-<td>Simple precision number that specifies the amount to scale in the y direction.</td>
+<td>Single precision number that specifies the amount to scale in the y direction.</td>
 </tr>
 <tr class="odd">
 <td><em>order</em></td>
@@ -1611,11 +1611,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>blendFactors</em></td>
-<td>Pointer to an array of simple precision numbers that specify blend factors. Each number in the array specifies a percentage of the ending color and should be in the range from 0.0 through 1.0.</td>
+<td>Pointer to an array of single precision numbers that specify blend factors. Each number in the array specifies a percentage of the ending color and should be in the range from 0.0 through 1.0.</td>
 </tr>
 <tr class="even">
 <td><em>blendPositions</em></td>
-<td>Pointer to an array of simple precision numbers that specify blend positions. Each number in the array indicates a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates a line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines.</td>
+<td>Pointer to an array of single precision numbers that specify blend positions. Each number in the array indicates a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates a line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines.</td>
 </tr>
 <tr class="odd">
 <td><em>count</em></td>
@@ -1670,11 +1670,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>focus</em></td>
-<td>Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
+<td>Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
 </tr>
 <tr class="even">
 <td><em>scale</em></td>
-<td>Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
+<td>Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
 </tr>
 </tbody>
 </table>
@@ -1733,11 +1733,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>focus</em></td>
-<td>Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
+<td>Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
 </tr>
 <tr class="even">
 <td><em>scale</em></td>
-<td>Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
+<td>Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
 </tr>
 </tbody>
 </table>
@@ -1847,7 +1847,7 @@ END SUB
 </tr>
 <tr class="even">
 <td><em>blendPositions</em></td>
-<td>Pointer to an array of simple precision numbers that specify the blend positions. Each number in the array specifies a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates the line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines.</td>
+<td>Pointer to an array of single precision numbers that specify the blend positions. Each number in the array specifies a percentage of the distance between the starting boundary and the ending boundary and is in the range from 0.0 through 1.0, where 0.0 indicates the starting boundary of the gradient and 1.0 indicates the ending boundary. There must be at least two positions specified: the first position, which is always 0.0f, and the last position, which is always 1.0f. Otherwise, the behavior is undefined. A blend position between 0.0 and 1.0 indicates the line, parallel to the boundary lines, that is a certain fraction of the distance from the starting boundary to the ending boundary. For example, a blend position of 0.7 indicates the line that is 70 percent of the distance from the starting boundary to the ending boundary. The color is constant on lines that are parallel to the boundary lines.</td>
 </tr>
 <tr class="odd">
 <td><em>count</em></td>
@@ -2067,11 +2067,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>dx</em></td>
-<td>Simple precision number that specifies the horizontal component of the translation.</td>
+<td>Single precision number that specifies the horizontal component of the translation.</td>
 </tr>
 <tr class="even">
 <td><em>dy</em></td>
-<td>Simple precision number that specifies the vertical component of the translation.</td>
+<td>Single precision number that specifies the vertical component of the translation.</td>
 </tr>
 <tr class="odd">
 <td><em>order</em></td>
@@ -2258,7 +2258,7 @@ END SUB
 <pre><code>FUNCTION GetBlendCount () AS INT_
 </code></pre>
 <h4 id="return-value-31">Return value</h4>
-<p>Before you call the <strong>GetBlend</strong> method of a <strong>PathGradientBrush</strong> object, you must allocate two buffers: one to receive an array of blend factors and one to receive an array of blend positions. To determine the size of the required buffers, call the <strong>GetBlendCount</strong> method of the <strong>PathGradientBrush</strong> object. The size (in bytes) of each buffer should be the return value of <strong>GetBlendCount</strong> multiplied by 4 (the size of a simple precision number).</p>
+<p>Before you call the <strong>GetBlend</strong> method of a <strong>PathGradientBrush</strong> object, you must allocate two buffers: one to receive an array of blend factors and one to receive an array of blend positions. To determine the size of the required buffers, call the <strong>GetBlendCount</strong> method of the <strong>PathGradientBrush</strong> object. The size (in bytes) of each buffer should be the return value of <strong>GetBlendCount</strong> multiplied by 4 (the size of a single precision number).</p>
 <h4 id="example-27">Example</h4>
 <pre><code>' ========================================================================================
 ' The following example demonstrates several methods of the PathGradientBrush class including
@@ -2477,11 +2477,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>xScale</em></td>
-<td>Pointer to a simple precision that receives the x focus scale value.</td>
+<td>Pointer to a single precision that receives the x focus scale value.</td>
 </tr>
 <tr class="even">
 <td><em>yScale</em></td>
-<td>Pointer to a simple precision that receives the y focus scale value.</td>
+<td>Pointer to a single precision that receives the y focus scale value.</td>
 </tr>
 </tbody>
 </table>
@@ -2556,7 +2556,7 @@ END SUB
 <h4 id="remarks-19">Remarks</h4>
 <p>Remarks</p>
 <p>A simple path gradient brush has two colors: a boundary color and a center color. When you paint with such a brush, the color changes gradually from the boundary color to the center color as you move from the boundary path to the center point. You can create a more complex gradient by specifying an array of preset colors and an array of blend positions.</p>
-<p>You can obtain the interpolation colors and interpolation positions currently set for a <strong>PathGradientBrush</strong> object by calling the <strong>GetInterpolationColors</strong> method of that <strong>PathGradientBrush</strong> object. Before you call the <strong>GetInterpolationColors</strong> method, you must allocate two buffers: one to hold the array of interpolation colors and one to hold the array of interpolation positions. You can call the <strong>GetInterpolationColorCount</strong> method of the <strong>PathGradientBrush</strong> object to determine the required size of those buffers. The size of the color buffer is the return value of <strong>GetInterpolationColorCount</strong> multiplied by 4. The size of the position buffer is the value of <strong>GetInterpolationColorCount</strong> multiplied by 4 (the size of a simple precision number).</p>
+<p>You can obtain the interpolation colors and interpolation positions currently set for a <strong>PathGradientBrush</strong> object by calling the <strong>GetInterpolationColors</strong> method of that <strong>PathGradientBrush</strong> object. Before you call the <strong>GetInterpolationColors</strong> method, you must allocate two buffers: one to hold the array of interpolation colors and one to hold the array of interpolation positions. You can call the <strong>GetInterpolationColorCount</strong> method of the <strong>PathGradientBrush</strong> object to determine the required size of those buffers. The size of the color buffer is the return value of <strong>GetInterpolationColorCount</strong> multiplied by 4. The size of the position buffer is the value of <strong>GetInterpolationColorCount</strong> multiplied by 4 (the size of a single precision number).</p>
 <h1 id="getinterpolationcolors-(cgppathgradientbrush)"><a name="GetInterpolationColorsPGBrush"></a>GetInterpolationColors (CGpPathGradientBrush)</h1>
 <p>Gets preset colors and blend positions currently specified for this path gradient brush.</p>
 <pre><code>FUNCTION GetInterpolationColors (BYVAL presetColors AS ARGB PTR, _
@@ -2589,7 +2589,7 @@ END SUB
 <p>If the function fails, it returns one of the other elements of the <strong>Status</strong> enumeration.</p>
 <h4 id="remarks-20">Remarks</h4>
 <p>A simple path gradient brush has two colors: a boundary color and a center color. When you paint with such a brush, the color changes gradually from the boundary color to the center color as you move from the boundary path to the center point. You can create a more complex gradient by specifying an array of preset colors and an array of blend positions.</p>
-<p>Before you call the GetInterpolationColors method, you must allocate two buffers: one to hold the array of preset colors and one to hold the array of blend positions. You can call the <strong>GetInterpolationColorCount</strong> method of the <strong>PathGradientBrush</strong> object to determine the required size of those buffers. The size of the color buffer is the return value of <strong>GetInterpolationColorCount</strong> multiplied by 4. The size of the position buffer is the value of <strong>GetInterpolationColorCount</strong> multiplied by 4 (the size of a simple precision number).</p>
+<p>Before you call the GetInterpolationColors method, you must allocate two buffers: one to hold the array of preset colors and one to hold the array of blend positions. You can call the <strong>GetInterpolationColorCount</strong> method of the <strong>PathGradientBrush</strong> object to determine the required size of those buffers. The size of the color buffer is the return value of <strong>GetInterpolationColorCount</strong> multiplied by 4. The size of the position buffer is the value of <strong>GetInterpolationColorCount</strong> multiplied by 4 (the size of a single precision number).</p>
 <h4 id="example-31">Example</h4>
 <pre><code>' ========================================================================================
 ' The following example creates a PathGradientBrush object from a triangular path. The code
@@ -3062,7 +3062,7 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>angle</em></td>
-<td>Simple precision number that specifies the angle of rotation in degrees.</td>
+<td>Single precision number that specifies the angle of rotation in degrees.</td>
 </tr>
 <tr class="even">
 <td><em>order</em></td>
@@ -3124,11 +3124,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>sx</em></td>
-<td>Simple precision number that specifies the horizontal scale factor.</td>
+<td>Single precision number that specifies the horizontal scale factor.</td>
 </tr>
 <tr class="even">
 <td><em>sy</em></td>
-<td>Simple precision number that specifies the vertical scale factor.</td>
+<td>Single precision number that specifies the vertical scale factor.</td>
 </tr>
 <tr class="odd">
 <td><em>order</em></td>
@@ -3265,11 +3265,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>focus</em></td>
-<td>Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
+<td>Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
 </tr>
 <tr class="even">
 <td><em>scale</em></td>
-<td>Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
+<td>Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
 </tr>
 </tbody>
 </table>
@@ -3335,11 +3335,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>focus</em></td>
-<td>Simple precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
+<td>Single precision number that specifies where the center color will be at its highest intensity. This number must be in the range 0 through 1.</td>
 </tr>
 <tr class="even">
 <td><em>scale</em></td>
-<td>Simple precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
+<td>Single precision number that specifies the maximum intensity of center color that gets blended with the boundary color. This number must be in the range 0 through 1. The default value is 1.</td>
 </tr>
 </tbody>
 </table>
@@ -3530,11 +3530,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>xScale</em></td>
-<td>Simple precision number that specifies the x focus scale.</td>
+<td>Single precision number that specifies the x focus scale.</td>
 </tr>
 <tr class="even">
 <td><em>yScale</em></td>
-<td>Simple precision number that specifies the y focus scale.</td>
+<td>Single precision number that specifies the y focus scale.</td>
 </tr>
 </tbody>
 </table>
@@ -3844,11 +3844,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>dx</em></td>
-<td>Simple precision number that specifies the horizontal component of the translation.</td>
+<td>Single precision number that specifies the horizontal component of the translation.</td>
 </tr>
 <tr class="even">
 <td><em>dy</em></td>
-<td>Simple precision number that specifies the vertical component of the translation.</td>
+<td>Single precision number that specifies the vertical component of the translation.</td>
 </tr>
 <tr class="odd">
 <td><em>order</em></td>
@@ -4218,7 +4218,7 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>angle</em></td>
-<td>Simple precision number that specifies the angle of rotation in degrees.</td>
+<td>Single precision number that specifies the angle of rotation in degrees.</td>
 </tr>
 <tr class="even">
 <td><em>order</em></td>
@@ -4272,11 +4272,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>sx</em></td>
-<td>Simple precision number that specifies the amount to scale in the x direction.</td>
+<td>Single precision number that specifies the amount to scale in the x direction.</td>
 </tr>
 <tr class="even">
 <td><em>sy</em></td>
-<td>Simple precision number that specifies the amount to scale in the y direction.</td>
+<td>Single precision number that specifies the amount to scale in the y direction.</td>
 </tr>
 <tr class="odd">
 <td><em>order</em></td>
@@ -4432,11 +4432,11 @@ END SUB
 <tbody>
 <tr class="odd">
 <td><em>dx</em></td>
-<td>Simple precision number that specifies the horizontal component of the translation.</td>
+<td>Single precision number that specifies the horizontal component of the translation.</td>
 </tr>
 <tr class="even">
 <td><em>dy</em></td>
-<td>Simple precision number that specifies the vertical component of the translation.</td>
+<td>Single precision number that specifies the vertical component of the translation.</td>
 </tr>
 <tr class="odd">
 <td><em>order</em></td>

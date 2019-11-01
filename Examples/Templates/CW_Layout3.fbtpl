@@ -1,0 +1,153 @@
+2
+FBGUI
+.bas
+CWindow: Layout manager (with Groupbox as a container)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_Layout3.fbtpl
+' Contents: Demonstrates the use of the Layout manager
+' Note: In this test, we hame made the combobox child of the group box.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CLayout.inc"
+USING Afx
+
+ENUM AFX_USERDATA
+   AFX_LAYOUTPTRIDX = 0
+END ENUM
+
+ENUM
+   IDC_EDIT1 = 1001
+   IDC_EDIT2
+   IDC_GROUPBOX
+   IDC_COMBOBOX
+   IDC_SIZEGRIP
+END ENUM
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "Layout manager", @WndProc)
+   pWindow.SetClientSize 455, 180
+   pWindow.Center
+
+   ' // Add an Edit control
+   DIM hEdit AS HWND = pWindow.AddControl("Edit", , IDC_EDIT1, "", 20, 15, 305, 23)
+   ' // Add a multiline Edit control
+   pWindow.AddControl("EditMultiline", , IDC_EDIT2, "", 20, 45, 305, 80)
+   ' // Alternate way
+'   pWindow.AddControl("Edit", , IDC_EDIT2, "", 20, 50, 300, 80, _
+'      WS_VISIBLE OR WS_TABSTOP OR ES_LEFT OR ES_AUTOHSCROLL OR ES_MULTILINE OR ES_NOHIDESEL OR ES_WANTRETURN)
+   ' // Set the focus in the first edit control
+   SetFocus hEdit
+
+   ' // Add more controls
+   pWindow.AddControl("Button", , IDCANCEL, "&Close", 250, 140, 75, 23)
+   DIM hGroupBox AS HWND = pWindow.AddControl("GroupBox", , IDC_GROUPBOX, "GroupBox", 340, 8, 100, 155, , WS_EX_TRANSPARENT OR WS_EX_CONTROLPARENT)
+   ' // Add a combobox control as child of the GroupBox control
+   DIM hCombobox AS HWND = pWindow.AddControl("ComboBox", hGroupBox, IDC_COMBOBOX, "", 10, 30, 80, 100)
+
+   ' // Fill the control with some data
+   DIM wszText AS WSTRING * 260
+   FOR i AS LONG = 1 TO 9
+      wszText = "Item " & RIGHT("00" & STR(i), 2)
+      SendMessageW(hComboBox, CB_ADDSTRING, 0, CAST(LPARAM, @wszText))
+   NEXT
+
+   ' // Anchor the controls
+   DIM pLayout AS CLayout = pWindow.hWindow
+   pWindow.UserData(AFX_LAYOUTPTRIDX) = CAST(LONG_PTR, @pLayout)
+   pLayout.AnchorControl(IDC_EDIT1, AFX_ANCHOR_WIDTH)
+   pLayout.AnchorControl(IDC_EDIT2, AFX_ANCHOR_HEIGHT_WIDTH)
+   pLayout.AnchorControl(IDCANCEL, AFX_ANCHOR_BOTTOM_RIGHT)
+   pLayout.AnchorControl(IDC_GROUPBOX, AFX_ANCHOR_HEIGHT_RIGHT)
+
+   ' // Ad a size grip
+   pWindow.AddControl("SizeGrip", pWindow.hWindow, IDC_SIZEGRIP)
+   pLayout.AnchorControl(IDC_SIZEGRIP, AFX_ANCHOR_BOTTOM_RIGHT)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_GETMINMAXINFO
+         ' Set the pointer to the address of the MINMAXINFO structure
+         DIM ptmmi AS MINMAXINFO PTR = CAST(MINMAXINFO PTR, lParam)
+         ' Set the minimum and maximum sizes that can be produced by dragging the borders of the window
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         IF pWindow THEN
+            ptmmi->ptMinTrackSize.x = 300 * pWindow->rxRatio
+            ptmmi->ptMinTrackSize.y = 180 * pWindow->ryRatio
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_SIZE
+         ' // Adjusts the controls
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+         IF pWindow THEN
+            DIM pLayout AS CLayout PTR = CAST(CLayout PTR, pWindow->UserData(AFX_LAYOUTPTRIDX))
+            IF pLayout THEN pLayout->AdjustControls
+         END IF
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         RemovePropW hwnd, "CLAYOUTPTR"
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

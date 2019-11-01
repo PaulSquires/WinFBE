@@ -2134,6 +2134,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
                                         ByVal fActivate As BOOLEAN, _
                                         ByVal dwThreadId As DWORD _
                                         ) As LRESULT
+
    Dim pDoc As clsDocument Ptr
    
    ' If the application is losing focus then validate any currently editing property
@@ -2143,6 +2144,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
       DisplayPropertyList(pDoc)
       exit function
    end if
+
       
    static bInActivateApp as Boolean
    if bInActivateApp then exit function

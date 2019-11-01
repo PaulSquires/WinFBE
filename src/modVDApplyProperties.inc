@@ -813,6 +813,37 @@ end function
 
 
 ' ========================================================================================
+' Apply properties to the Listview
+' ========================================================================================
+private function ListView_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                           byval pCtrl as clsControl ptr, _
+                                           byval pProp as clsProperty ptr _ 
+                                           ) as Long
+    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "BACKCOLOR"
+   case "CHECKBOXES"
+   case "GRIDLINES"
+   CASE "FULLROWSELECT"
+   CASE "HIDESELECTION"   
+         
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
 public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
@@ -911,6 +942,7 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
          case CTRL_FRAME:        Frame_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_PICTUREBOX:   PictureBox_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_PROGRESSBAR:  ProgressBar_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_LISTVIEW:     Listview_ApplyProperties(pDoc, pCtrl, pProp)
          CASE ELSE
       END SELECT
 
@@ -923,6 +955,7 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
    END IF
    
    ' Repaint to ensure that the grab handles draw
+   AfxRedrawWindow(pCtrl->hWindow)
    AfxRedrawWindow(pDoc->hWndFrame)
    AfxRedrawWindow(pDoc->hWndForm)
    AfxRedrawNonClientArea(pDoc->hWndForm) 

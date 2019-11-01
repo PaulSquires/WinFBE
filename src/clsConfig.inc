@@ -316,7 +316,7 @@ end function
 ''
 Function clsConfig.InitializeToolBox() as Long
    
-   redim gToolBox(20) as TOOLBOX_TYPE
+   redim gToolBox(50) as TOOLBOX_TYPE
    
    dim as long n = 0
    gToolBox(n).nToolType = CTRL_POINTER
@@ -374,13 +374,13 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszCursor = "IMAGE_CURSOR_LISTBOX"
    gToolBox(n).wszClassName = "LISTBOX"
 
-'   n = n + 1
-'   gToolBox(n).nToolType = CTRL_LISTVIEW
-'   gToolBox(n).wszToolBoxName   = "ListView"
-'   gToolBox(n).wszControlName   = "ListView"
-'   gToolBox(n).wszImage  = "IMAGE_LISTVIEW"
-'   gToolBox(n).wszCursor = "IMAGE_CURSOR_LISTVIEW"
-'   gToolBox(n).wszClassName = "LISTVIEW"
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_LISTVIEW
+   gToolBox(n).wszToolBoxName   = "ListView"
+   gToolBox(n).wszControlName   = "ListView"
+   gToolBox(n).wszImage  = "IMAGE_LISTVIEW"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_LISTVIEW"
+   gToolBox(n).wszClassName = "LISTVIEW"
 
    n = n + 1
    gToolBox(n).nToolType = CTRL_MASKEDEDIT

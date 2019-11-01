@@ -167,7 +167,7 @@ FUNCTION GetElements (BYVAL m AS SINGLE PTR) AS GpStatus
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *m* | Out. Pointer to an array that receives the matrix elements. The size of the array should be 6 × 4 (the size of a simple precision number). |
+| *m* | Out. Pointer to an array that receives the matrix elements. The size of the array should be 6 × 4 (the size of a single precision number). |
 
 #### Return value
 
@@ -185,7 +185,7 @@ FUNCTION Invert () AS GpStatus
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *m* | Out. Pointer to an array that receives the matrix elements. The size of the array should be 6 × 4 (the size of a simple precision number). |
+| *m* | Out. Pointer to an array that receives the matrix elements. The size of the array should be 6 × 4 (the size of a single precision number). |
 
 #### Return value
 
@@ -498,7 +498,7 @@ FUNCTION Rotate (BYVAL angle AS SINGLE, BYVAL order AS MatrixOrder = MatrixOrder
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *angle* | Simple precision number that specifies the angle of rotation in degrees. Positive values specify clockwise rotation. |
+| *angle* | Single precision number that specifies the angle of rotation in degrees. Positive values specify clockwise rotation. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of the multiplication. **MatrixOrderPrepend** specifies that the rotation matrix is on the left, and **MatrixOrderAppend** specifies that the rotation matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -553,7 +553,7 @@ FUNCTION RotateAt (BYVAL angle AS SINGLE, BYVAL center AS GpPointF PTR, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *angle* | Simple precision number that specifies the angle of rotation in degrees. Positive values specify clockwise rotation. |
+| *angle* | Single precision number that specifies the angle of rotation in degrees. Positive values specify clockwise rotation. |
 | *center* | Reference to a **GpPointF** object that specifies the center of the rotation. This is the point about which the rotation takes place. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of the multiplication. **MatrixOrderPrepend** specifies that the rotation matrix is on the left, and **MatrixOrderAppend** specifies that the rotation matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
@@ -617,8 +617,8 @@ FUNCTION Scale (BYVAL scaleX AS SINGLE, BYVAL scaleY AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *scaleX* | Simple precision that specifies the horizontal scale factor. |
-| *scaleY* | Simple precision that specifies the vertical scale factor. |
+| *scaleX* | Single precision that specifies the horizontal scale factor. |
+| *scaleY* | Single precision that specifies the vertical scale factor. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of the multiplication. M**atrixOrderPrepend** specifies that the rotation matrix is on the left, and **MatrixOrderAppend** specifies that the rotation matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -675,12 +675,12 @@ FUNCTION SetElements (BYVAL m11 AS SINGLE, BYVAL m12 AS SINGLE, BYVAL m21 AS SIN
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *m11* | Simple precision number that specifies the element in the first row, first column. |
-| *m12* | Simple precision number that specifies the element in the first row, second column. |
-| *m21* | Simple precision number that specifies the element in the second row, first column. |
-| *m22* | Simple precision number that specifies the element in the second row, second column. |
-| *dx* | Simple precision number that specifies the element in the third row, first column. |
-| *dy* | Simple precision number that specifies the element in the third row, second column. |
+| *m11* | Single precision number that specifies the element in the first row, first column. |
+| *m12* | Single precision number that specifies the element in the first row, second column. |
+| *m21* | Single precision number that specifies the element in the second row, first column. |
+| *m22* | Single precision number that specifies the element in the second row, second column. |
+| *dx* | Single precision number that specifies the element in the third row, first column. |
+| *dy* | Single precision number that specifies the element in the third row, second column. |
 
 #### Return value
 
@@ -728,8 +728,8 @@ FUNCTION Shear (BYVAL shearX AS SINGLE, BYVAL shearY AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *shearX* | Simple precision number that specifies the horizontal shear factor. |
-| *shearY* | Simple precision number that specifies the vertical shear factor. |
+| *shearX* | Single precision number that specifies the horizontal shear factor. |
+| *shearY* | Single precision number that specifies the vertical shear factor. |
 | *order* | Optional. Element of the **MatrixOrder** enumeration that specifies the order of the multiplication. **MatrixOrderPrepend** specifies that the rotation matrix is on the left, and **MatrixOrderAppend** specifies that the rotation matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value
@@ -925,8 +925,8 @@ FUNCTION Translate (BYVAL nOffsetX AS SINGLE, BYVAL nOffsetY AS SINGLE, _
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *nOffsetX* | Simple precision number that specifies the horizontal component of the translation. |
-| *nOffsetY* | Simple precision number that specifies the vertical component of the translation. |
+| *nOffsetX* | Single precision number that specifies the horizontal component of the translation. |
+| *nOffsetY* | Single precision number that specifies the vertical component of the translation. |
 | *order* | Optional. Element of the MatrixOrder enumeration that specifies the order of the multiplication. **MatrixOrderPrepend** specifies that the rotation matrix is on the left, and **MatrixOrderAppend** specifies that the rotation matrix is on the right. The default value is **MatrixOrderPrepend**. |
 
 #### Return value

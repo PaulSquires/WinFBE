@@ -1034,7 +1034,7 @@ FUNCTION DrawClosedCurve (BYVAL pPen AS CGpPen PTR, BYVAL pts AS GpPoint PTR, BY
 </tr>
 <tr class="even">
 <td><em>tension</em></td>
-<td>Simple precision number that specifies how tightly the curve bends through the coordinates of the closed cardinal spline.</td>
+<td>Single precision number that specifies how tightly the curve bends through the coordinates of the closed cardinal spline.</td>
 </tr>
 </tbody>
 </table>
@@ -1137,7 +1137,7 @@ FUNCTION DrawCurve (BYVAL pPen AS CGpPen PTR, BYVAL pts AS GpPoint PTR, BYVAL co
 </tr>
 <tr class="even">
 <td><em>tension</em></td>
-<td>Simple precision number that specifies how tightly the curve bends through the coordinates of the cardinal spline.</td>
+<td>Single precision number that specifies how tightly the curve bends through the coordinates of the cardinal spline.</td>
 </tr>
 </tbody>
 </table>
@@ -5423,7 +5423,7 @@ FUNCTION AddCurve (BYVAL pts AS GpPoint PTR, BYVAL nCount AS INT_, BYVAL offset 
 </tr>
 <tr class="odd">
 <td><em>tension</em></td>
-<td>Nonnegative simple precision number that controls the length of the curve and how the curve bends. A value of 0 specifies that the spline is a sequence of straight line segments. As the value increases, the curve becomes fuller.</td>
+<td>Nonnegative single precision number that controls the length of the curve and how the curve bends. A value of 0 specifies that the spline is a sequence of straight line segments. As the value increases, the curve becomes fuller.</td>
 </tr>
 </tbody>
 </table>
@@ -5513,18 +5513,14 @@ FUNCTION AddEllipse (BYVAL rc AS GpRect PTR) AS GpStatus
 <td>The y-coordinate of the upper-left corner of the bounding rectangle for the ellipse.</td>
 </tr>
 <tr class="odd">
-<td><em>y</em></td>
-<td>The width of the bounding rectangle for the ellipse.</td>
-</tr>
-<tr class="even">
 <td><em>nWidth</em></td>
 <td>The width of the bounding rectangle for the ellipse.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>nHeight</em></td>
 <td>The height of the bounding rectangle for the ellipse.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>rc</em></td>
 <td>Pointer to a <strong>GpRectF</strong> or <strong>GpRect</strong> structure specifying the dimensions of the rectagle.</td>
 </tr>
@@ -6683,7 +6679,7 @@ END SUB
 </tr>
 <tr class="even">
 <td><em>flatness</em></td>
-<td>Optional. Simple precision number that specifies the maximum error between the path and its flattened approximation. Reducing the flatness increases the number of line segments in the approximation. The default value is <strong>FlatnessDefault</strong>, which is a constant defined in Gdiplusenums.bi.</td>
+<td>Optional. Single precision number that specifies the maximum error between the path and its flattened approximation. Reducing the flatness increases the number of line segments in the approximation. The default value is <strong>FlatnessDefault</strong>, which is a constant defined in Gdiplusenums.bi.</td>
 </tr>
 </tbody>
 </table>

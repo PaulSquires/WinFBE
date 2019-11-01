@@ -1,0 +1,218 @@
+2
+FBGUI
+.bas
+CWindow: WebBrowser: Modeless popup with WebBrowser
+' ########################################################################################
+' Microsoft Windows
+' File: CW_ModelessPopupWindow.fbtpl
+' Contents: Modeless popup window with embedded WebBrowser control
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2018 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#include once "Afx/CWindow.inc"
+#include once "Afx/CAxHost/CWebCtx.inc"
+USING Afx
+
+CONST IDC_POPUP = 1001
+CONST IDC_WEBBROWSER = 1002
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION PopupWindow (BYVAL hParent AS HWND) AS CWindow PTR
+DECLARE FUNCTION PopupWndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   DIM hWndMain AS HWND = pWindow.Create(NULL, "Modeless popup window with WebBrowser", @WndProc)
+   pWindow.SetClientSize(900, 500)
+   pWindow.Center
+
+   ' // Add a button without position or size (it will be resized in the WM_SIZE message).
+   pWindow.AddControl("Button", , IDC_POPUP, "&Popup")
+
+   ' // Display the window
+   ShowWindow(hWndMain, nCmdShow)
+   UpdateWindow(hWndMain)
+
+   ' // Dispatch Windows messages
+   DIM uMsg AS MSG
+   WHILE (GetMessageW(@uMsg, NULL, 0, 0) <> FALSE)
+      ' // Check if a popup dialog is activated and get its handle
+      DIM hFocusWnd AS HWND = GetParent(AfxGetControlHandle(GetFocus(), IDC_WEBBROWSER))
+      ' // Otherwise, use the handle of the main window
+      IF hFocusWnd = NULL THEN hFocusWnd = hWndMain
+      ' // Give the WebBrowser control the opportunity to handle keystrokes
+      IF AfxCAxHostForwardMessage(GetFocus, @uMsg) = FALSE THEN
+         ' // Process Windows messages
+         IF IsDialogMessageW(hFocusWnd, @uMsg) = 0 THEN
+            TranslateMessage(@uMsg)
+            DispatchMessageW(@uMsg)
+          END IF
+      END IF
+   WEND
+   FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_SYSCOMMAND
+        ' Capture this message and send a WM_CLOSE message
+        IF (wParam AND &HFFF0) = SC_CLOSE THEN
+           SendMessageW hWnd, WM_CLOSE, 0, 0
+           EXIT FUNCTION
+        END IF
+
+      CASE WM_COMMAND
+         ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_POPUP
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  PopupWindow(hwnd)
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the button
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            pWindow->MoveWindow GetDlgItem(hwnd, IDC_POPUP), pWindow->ClientWidth - 140, pWindow->ClientHeight - 40, 75, 23, CTRUE
+         END IF
+
+      CASE WM_CLOSE
+         ' // Don't exit; let DefWindowProcW perform the default action
+
+    	CASE WM_DESTROY
+         ' // Quit the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+FUNCTION PopupWindow (BYVAL hParent AS HWND) AS CWindow PTR
+
+   DIM pWindow AS CWindow PTR = NEW CWindow
+   pWindow->Create(hParent, "Popup window", @PopupWndProc, 0, 0, 0, 0, _
+        WS_POPUPWINDOW OR WS_CAPTION OR WS_CLIPSIBLINGS OR WS_CLIPCHILDREN OR WS_THICKFRAME, _
+        WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE)
+   pWindow->Brush = GetStockObject(WHITE_BRUSH)
+   pWindow->SetClientSize(700, 400)
+   pWindow->Center(pWindow->hWindow, hParent)
+   ' // Display the window
+   ShowWindow(pWindow->hWindow, SW_NORMAL)
+   UpdateWindow(pWindow->hWindow)
+   FUNCTION = pWindow
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Popup window procedure
+' ========================================================================================
+FUNCTION PopupWndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the CWindow class from the CREATESTRUCT structure
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
+         IF pWindow THEN
+            IF pWindow->hWindow = NULL THEN pWindow->hWindow = hwnd
+            ' // Add a WebBrowser control
+            DIM pwb AS CWebCtx PTR = NEW CWebCtx(pWindow, IDC_WEBBROWSER, 0, 0, pWindow->ClientWidth, pWindow->ClientHeight)
+            ' // Navigate to a URL
+            pwb->Navigate("http://www.planetsquires.com/protect/forum/index.php")
+            SetPropW(pWindow->hWindow, "CWEBCTXPTR", CAST(HANDLE, pwb))
+            ' // Optional: Wait for page load with a timeout of 10 seconds
+            DIM lReadyState AS READYSTATE = pwb->WaitForPageLoad(10)
+            ' // Set the focus in the page (the page must be fully loaded)
+            pwb->SetFocus
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_SYSCOMMAND
+        ' Capture this message and send a WM_CLOSE message
+        IF (wParam AND &HFFF0) = SC_CLOSE THEN
+           SendMessageW hWnd, WM_CLOSE, 0, 0
+           EXIT FUNCTION
+        END IF
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Retrieve a pointer to the CWindow class
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            ' // Move the position of the control
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_WEBBROWSER), 0, 0, pWindow->ClientWidth, pWindow->ClientHeight, CTRUE
+         END IF
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_CLOSE
+         ' // Don't exit; let DefWindowProcW perform the default action
+
+    	CASE WM_DESTROY
+         ' // Delete the CWewbCtx class
+         DIM pwb AS CWebCtx PTR = CAST(CWebCtx PTR, GetPropW(hwnd, "CWEBCTXPTR"))
+         IF pwb THEN Delete pwb
+         ' // Delete the popup CWindow class
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd) 
+         IF pWindow THEN Delete pWindow
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

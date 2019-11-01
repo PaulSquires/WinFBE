@@ -1,0 +1,143 @@
+2
+FBGUI
+.bas
+CWindow: COM: YouTube (ATL container)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_YouTube_ATL.fbtpl
+' Contents: CWindow YouTube example (ATL container)
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandle(NULL), NULL, COMMAND(), SW_NORMAL)
+
+CONST IDC_ATLWIN = 1001
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION BuildYouTubeScript (BYVAL strCode AS STRING, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS STRING
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow YouTube Test", @WndProc)
+   pWindow.SetClientSize(450, 320)
+   pWindow.Center
+
+   ' // Initialize atl.dll
+   DIM hLib AS ANY PTR
+   hLib = DylibLoad("atl.dll")
+   DIM AS SUB AtlAxWinInit
+   AtlAxWinInit = DylibSymbol(hLib, "AtlAxWinInit")
+   AtlAxWinInit()
+
+   ' // Build the html script
+   DIM strCode AS STRING = "_oAgkTwFRuM"   ' --> Change me: 11 character video code
+   DIM s AS STRING = BuildYouTubeScript(strCode, pWindow.ClientWidth, pWindow.ClientHeight)
+
+   ' // Add the AtlAxWin control
+   pWindow.AddControl("AtlAxWin", , IDC_ATLWIN, s, 0, 0, 0, 0, WS_VISIBLE)
+   ' // Note: The atl.dll that comes installed its a very old one and doesn't work very well.
+   ' // If you use a newer version, change the name of the class passed to pWindow.AddControl,
+   ' // e.g. "AtlAxWin80" for atl80.dll.
+
+   |
+
+   ' // Dispatch messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the atl control
+            DIM pWindow AS CWindow PTR = AfxCWindowPtr(hwnd)
+            IF pWindow THEN pWindow->MoveWindow GetDlgItem(hwnd, IDC_ATLWIN), 0, 0, pWindow->ClientWidth, pWindow->ClientHeight, CTRUE
+         END IF
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Build the YouTube script
+' ========================================================================================
+FUNCTION BuildYouTubeScript (BYVAL strCode AS STRING, BYVAL nWidth AS LONG, BYVAL nHeight AS LONG) AS STRING
+
+   ' // Build the URL
+   DIM strURL AS STRING = "http://www.youtube.com/v/" & strCode
+
+   ' // Build the web page. Remember to always start it with "MSHTML:".
+   DIM s AS STRING
+   s  = "MSHTML:<!DOCTYPE html>" & CHR(13, 10)
+   s += "<html>" & CHR(13, 10)
+   s += "<head>" & CHR(13, 10)
+   s += "<meta http-equiv='MSThemeCompatible' content='Yes'>" & CHR(13, 10)
+   s += "<title>YouTube video</title>" & CHR(13, 10)
+   s += "" & CHR(13, 10)
+   s += "</head>" & CHR(13, 10)
+   s += "<body scroll='no' style='MARGIN: 0px 0px 0px 0px'>"
+   s += "<object width=" & STR(nWidth) & " height=" & STR(nHeight) & ">" & _
+        "<param name='movie' value=" & strURL & "</param>" & _
+        "<embed src=" & strURL & _
+        " type='application/x-shockwave-flash' width='100%' height='100%'>" & _
+        "</embed></object>"
+   s += "" & CHR(13, 10)
+   s += "</body>" & CHR(13, 10)
+   s += "" & CHR(13, 10)
+   s += "</html>" & CHR(13, 10)
+
+   FUNCTION = s
+
+END FUNCTION
+' ========================================================================================

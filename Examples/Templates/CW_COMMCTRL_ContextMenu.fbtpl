@@ -1,0 +1,118 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: Context menu
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ContextMenu.fbtpl
+' Contents: CWindow with a context menu
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_LABEL = 1001
+
+' // Menu identifiers
+ENUM
+   IDM_NEW = 1001   ' New file
+   IDM_OPEN         ' Open file...
+   IDM_SAVE         ' Save file
+   IDM_SAVEAS       ' Save file as...
+   IDM_EXIT         ' Exit
+END ENUM
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a context menu", @WndProc)
+   pWindow.SetClientSize(400, 230)
+   pWindow.Center
+
+   ' // Add a label
+   pWindow.AddControl("Label", , IDC_LABEL, " Click the mouse right button", 110, 20, 175, 23)
+   ' // Add a button
+   pWindow.AddControl("Button", , IDCANCEL, "&Close", 280,180, 75, 23)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDM_NEW   ' IDM_OPEN, IDM_SAVE, etc.
+               MessageBox hwnd, "New option clicked", "Menu", MB_OK
+               EXIT FUNCTION
+         END SELECT
+
+      CASE WM_CONTEXTMENU
+         ' // Build the context menu
+         DIM hPopUpMenu AS HMENU = CreatePopUpMenu
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_NEW, "&New" & CHR(9) & "Ctrl+N"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_OPEN, "&Open..." & CHR(9) & "Ctrl+O"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_SAVE, "&Save" & CHR(9) & "Ctrl+S"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_SAVEAS, "Save &As..."
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_EXIT, "E&xit" & CHR(9) & "Alt+F4"
+         DIM pt AS POINT
+         GetCursorPos @pt
+         TrackPopupMenu hPopupMenu, 0, pt.x, pt.y, 0, hwnd, NULL
+         DestroyMenu hPopupMenu
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

@@ -1,0 +1,172 @@
+2
+FBGUI
+.bas
+CWindow: GDI+: Drawing a string
+' ########################################################################################
+' Microsoft Windows
+' File: CW_GDIP_DrawString.fbtpl
+' Contents: GDI+ - DrawString example
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+' ========================================================================================
+' Demonstrates how to draw a string using GDI Plus.
+' To draw a string in Windows GDI+ you need a Graphics object, a Font object and a SolidBrush
+' object. The Graphics object provides the DrawString method, which does the actual drawing.
+' The SolidBrush object specifies the color of the string.
+' The following program, which draws a line from (100, 100) to (400, 100), consists of
+' three procedures: WinMain, WndProc, and OnPaint. The WinMain and WndProc functions provide
+' the fundamental code common to most CWindow applications. There is no GDI+ code in the
+' WndProc function. The WinMain function has a small amount of GDI+ code, namely the required
+' calls to AfxGdipInit and AfxGdipShutdown. The GDI+ code that actually creates a Graphics
+' object and draws a line is in the OnPaint procedure.
+' The OnPaint procedure receives a handle to a device context and passes that handle to a
+' Graphics constructor. To make the application DPI aware and scale the graphic object, the
+' OnPaint procedure calls the GetDpiX and GetDpiY methods to calculate the scaling ratios
+' and passes the retrieved values to the ScaleTransform method.
+' The argument passed to the SolidBrush constructor is a COLORREF value. The four numbers
+' passed to the GDIP_ARGB function represent the alpha, red, green, and blue components of
+' the color. The alpha component determines the transparency of the color; 0 is fully
+' transparent and 255 is fully opaque.
+' The FontFamily constructor receives a single, string argument that identifies the font
+' family. The address of the FontFamily object is the first argument passed to the Font
+' constructor. The second argument passed to the Font constructor specifies the font size,
+' and the third argument specifies the style. The value FontStyleRegular is a member of the
+' FontStyle enumeration, which is declared in Gdiplusenums.bi. To make the font DPI aware,
+' the application calls the function AfxPointsToPixelsX, which converts the point size to
+' pixels, and divides it by the scaling ratio. The last argument to the Font constructor
+' indicates that the size of the font is measured in pixels. The value UnitPixel is a member
+' of the Unit enumeration.
+' The first argument passed to the DrawString method is the address of a wide-character string.
+' The second argument, –1, specifies that the string is null terminated. (If the string is
+' not null terminated, the second argument should specify the number of wide characters in
+' the string.) The third argument is the address of the Font object. The fourth argument anf
+' fifth arguments are the coordinates of the location where the string will be drawn. The
+' last argument is the address of the Brush object, which specifies the color of the string.
+' Note the call to AfxGdipInit in the WinMain function. It returns a token that is later
+' passed to the AfxGdipShutdown procedure.
+' ========================================================================================
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+#INCLUDE ONCE "Afx/CGdiPlus/CGdiPlus.inc"
+#INCLUDE ONCE "Afx/CGraphCtx.inc"
+USING Afx
+
+CONST IDC_GRCTX = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Draws the line.
+' ========================================================================================
+SUB OnPaint (BYVAL hdc AS HDC)
+
+   ' // Creates a graphics object from the window device context
+   DIM graphics AS CGpGraphics = hdc
+
+   ' // Gets the DPI scaling ratios
+   DIM rxRatio AS SINGLE = graphics.GetDpiX / 96
+   DIM ryRatio AS SINGLE = graphics.GetDpiY / 96
+
+   ' // Sets the scale transform to make it DPI aware
+   graphics.ScaleTransform(rxRatio, ryRatio)
+
+   ' // Creates a SolidBrush object
+   DIM solidBrush AS CGpSolidBrush = GDIP_ARGB(255, 0, 0, 255)
+
+   ' // Creates a FontFamily object
+   DIM fontFamily AS CGpFontFamily = "Times New Roman"
+
+   ' // Creates a Font object
+   DIM font AS CGpFont = CGpFont(@fontFamily, AfxPointsToPixelsX(24) / rxRatio, FontStyleRegular, UnitPixel)
+
+   ' // Draws the string
+   graphics.DrawString("Hello World!", -1, @font, 100, 100, @solidBrush)
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   ' // The recommended way is to use a manifest file
+   AfxSetProcessDPIAware
+
+   ' // Initializes GDI+
+   DIM token AS ULONG_PTR = AfxGdipInit
+
+   ' // Creates the main window
+   DIM pWindow AS CWindow
+   ' -or- DIM pWindow AS CWindow = "MyClassName" (use the name that you wish)
+   pWindow.Create(NULL, "GDI+ Drawing a string", @WndProc)
+   pWindow.WindowStyle = WS_OVERLAPPED OR WS_CAPTION OR WS_SYSMENU
+   ' // Changes the background to white
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   ' // Sizes it by setting the wanted width and height of its client area
+   pWindow.SetClientSize(400, 250)
+   ' // Centers the window
+   pWindow.Center
+
+   ' // Displays the window and dispatches the Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+   ' // Shutdowns GDI+
+   AfxGdipShutdown(token)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_PAINT
+         DIM ps AS PAINTSTRUCT
+         DIM hdc AS HDC = BeginPaint(hwnd, @ps)
+         OnPaint(hdc)
+         EndPaint(hwnd, @ps)
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

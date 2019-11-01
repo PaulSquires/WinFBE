@@ -1,0 +1,349 @@
+2
+FBGUI
+.bas
+CWindow: MDI Framework Demo
+' ########################################################################################
+' Microsoft Windows
+' File: CW_MDIDemo.pbtpl
+' Contents: CWindow MDI Framework Demo
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#define USEMDI
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+' // Edit control identifier
+CONST IDC_EDIT = 101
+
+' // Menu identifiers
+ENUM
+   IDM_NEW = 1001     ' New file
+   IDM_OPEN           ' Open file...
+   IDM_SAVE           ' Save file
+   IDM_SAVEAS         ' Save file as...
+   IDM_EXIT           ' Exit
+
+   IDM_UNDO = 2001    ' Undo
+   IDM_CUT            ' Cut
+   IDM_COPY           ' Copy
+   IDM_PASTE          ' Paste
+
+   IDM_TILEH = 3001   ' Tile hosizontal
+   IDM_TILEV          ' Tile vertical
+   IDM_CASCADE        ' Cascade
+   IDM_ARRANGE        ' Arrange icons
+   IDM_CLOSE          ' Close
+   IDM_CLOSEALL       ' Close all
+END ENUM
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declarations
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+DECLARE FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Build the menu
+' ========================================================================================
+FUNCTION BuildMenu () AS HMENU
+
+   DIM hMenu AS HMENU
+   DIM hPopUpMenu AS HMENU
+
+   hMenu = CreateMenu
+   hPopUpMenu = CreatePopUpMenu
+      AppendMenuW hMenu, MF_POPUP OR MF_ENABLED, CAST(UINT_PTR, hPopUpMenu), "&File"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_NEW, "&New" & CHR(9) & "Ctrl+N"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_OPEN, "&Open..." & CHR(9) & "Ctrl+O"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_SAVE, "&Save" & CHR(9) & "Ctrl+S"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_SAVEAS, "Save &As..."
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_EXIT, "E&xit" & CHR(9) & "Alt+F4"
+   hPopUpMenu = CreatePopUpMenu
+      AppendMenuW hMenu, MF_POPUP OR MF_ENABLED, CAST(UINT_PTR, hPopUpMenu), "&Edit"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_UNDO, "&Undo" & CHR(9) & "Ctrl+Z"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_CUT, "Cu&t" & CHR(9) & "Ctrl+X"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_COPY, "&Copy" & CHR(9) & "Ctrl+C"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_PASTE, "&Paste" & CHR(9) & "Ctrl+V"
+   hPopUpMenu = CreatePopUpMenu
+      AppendMenuW hMenu, MF_POPUP OR MF_ENABLED, CAST(UINT_PTR, hPopUpMenu), "&Window"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_TILEH, "&Tile Horizontal"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_TILEV, "Tile &Vertical"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_CASCADE, "Ca&scade"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_ARRANGE, "&Arrange &Icons"
+         AppendMenuW hPopUpMenu, MF_SEPARATOR, 0, ""
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_CLOSE, "&Close" & CHR(9) & "Ctrl+F4"
+         AppendMenuW hPopUpMenu, MF_ENABLED, IDM_CLOSEALL, "Close &All"
+   FUNCTION = hMenu
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "MDI with CWindow", @WndProc)
+   ' // Change the window style to avoid flicker
+   pWindow.ClassStyle = CS_DBLCLKS
+   ' // Set the client size
+   pWindow.SetClientSize 650, 400
+   ' // Center the window
+   pWindow.Center
+
+   ' // Create a menu
+   DIM hMenu AS HMENU
+   hMenu = BuildMenu
+   SetMenu pWindow.hWindow, hMenu
+
+   '// Create a MDI client child window
+   DIM hwindowMenu AS HMENU
+   hwindowMenu = GetSubMenu(hMenu, 2)
+   pWindow.CreateMDIWindow(101, 0, 0, 0, 0, 0, 0, hwindowMenu, @MDIWindowProc)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hwndClient AS HWND    ' // Handle of the MDI client window
+   DIM hwndActive AS HWND       ' // Active window
+   DIM ptnmhdr AS NMHDR PTR     ' // Information about a notification message
+   DIM hMdi AS HWND             ' // MDI child window handle
+   STATIC nIdx AS LONG          ' // Counter
+   STATIC pWindow AS CWindow PTR
+
+   FUNCTION = 0
+
+   ' // Retrieve the MDI client window handle
+   IF hwndClient = NULL AND pWindow <> NULL THEN hwndClient = pWindow->hwndClient
+
+   SELECT CASE AS CONST uMsg
+
+      CASE WM_CREATE
+         ' // Retrieve a reference to the CWindow class from the CREATESTRUCT structure
+         pWindow = AfxCWindowPtr(lParam)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+
+            ' // New window
+            CASE IDM_NEW
+               IF hwndClient THEN
+                  nIdx += 1
+                  DIM mdi AS MDICREATESTRUCTW, dwStyle AS DWORD
+                  IF IsZoomed(CAST(HWND, SendMessageW(hwndClient, WM_MDIGETACTIVE, 0, 0))) THEN dwStyle = WS_MAXIMIZE
+                  hMdi = CreateWindowExW(WS_EX_MDICHILD OR WS_EX_CLIENTEDGE, "FBFrameClass", "", _
+                           dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, _
+                           hwndClient, NULL, CAST(HANDLE, GetWindowLongPtrW(hwndClient, GWLP_HINSTANCE)), NULL)
+                  SetWindowTextW hMdi, "MDI Child Window " & WSTR(nIdx)
+               END IF
+               EXIT FUNCTION
+
+            ' // Tile horizontally
+            CASE IDM_TILEH
+               IF hwndClient THEN SendMessageW hwndClient, WM_MDITILE, MDITILE_HORIZONTAL, 0
+               EXIT FUNCTION
+
+            ' // Tile vertically
+            CASE IDM_TILEV
+               IF hwndClient THEN SendMessageW hwndClient, WM_MDITILE, MDITILE_VERTICAL, 0
+               EXIT FUNCTION
+
+            ' // Cascade windows
+            CASE IDM_CASCADE
+               IF hwndClient THEN SendMessageW hwndClient, WM_MDICASCADE, 0, 0
+               EXIT FUNCTION
+
+            ' // Arrange icons
+            CASE IDM_ARRANGE
+               IF hwndClient THEN SendMessageW hwndClient, WM_MDIICONARRANGE, 0, 0
+               EXIT FUNCTION
+
+            CASE IDM_CLOSE
+               ' // Close the active window
+               IF hwndClient THEN
+                  hwndActive = CAST(HANDLE, SendMessageW(hwndClient, WM_MDIGETACTIVE, 0, 0))
+                  IF SendMessageW(hwndActive, WM_QUERYENDSESSION, 0, 0) THEN
+                     SendMessageW hwndClient, WM_MDIDESTROY, CAST(LPARAM, hwndActive), 0
+                  END IF
+               END IF
+               EXIT FUNCTION
+
+            CASE IDM_CLOSEALL
+               ' // Close all the MDI child windows
+               IF hwndClient THEN
+                  EnumChildWindows hwndClient, @CWindow_CloseEnumProc, 0
+               END IF
+               EXIT FUNCTION
+
+            ' // Exit the application
+            CASE IDM_EXIT
+               SendMessageW hwnd, WM_CLOSE, 0, 0
+               EXIT FUNCTION
+
+         END SELECT
+
+         ' // Pass unprocessed messages to the active MDI child and then to DefFrameProc()
+         hwndActive = CAST(HWND, SendMessageW(hwndClient, WM_MDIGETACTIVE, 0, 0))
+         IF IsWindow(hwndActive) THEN SendMessageW hwndActive, WM_COMMAND, wParam, lParam
+
+      CASE WM_NOTIFY
+         ptnmhdr = CAST(NMHDR PTR, lParam)
+'         SELECT CASE ptnmhdr->idFrom
+'            ' ...
+'            ' ...
+'         END SELECT
+
+         ' // Pass unprocessed messages to the active MDI child and then to DefFrameProc()
+         IF hwndClient THEN
+            hwndActive = CAST(HWND, SendMessageW(hwndClient, WM_MDIGETACTIVE, 0, 0))
+            IF IsWindow(hwndActive) THEN SendMessageW hwndActive, WM_NOTIFY, wParam, lParam
+         END IF
+
+      CASE WM_SIZE
+         ' // If the window isn't minimized, resize it
+         IF wParam <> SIZE_MINIMIZED THEN
+            IF hwndClient <> NULL AND pWindow <> NULL THEN
+               pWindow->MoveWindow hwndClient, 0, 0, pWindow->ClientWidth + 2, pWindow->ClientHeight + 2, CTRUE
+            END IF
+         END IF
+         ' // Note: This message is not passed to DefFrameProc when space
+         ' // is being reserved in the client area of the MDI frame
+         ' // or controls on the MDI frame are resizeable.
+         EXIT FUNCTION
+
+      CASE WM_CLOSE
+         IF hwndClient THEN
+            ' // Attempt to close all MDI child windows
+            EnumChildWindows hwndClient, @CWindow_CloseEnumProc, 0
+            ' // If child windows are still open abort closing the application
+            IF GetWindow(hwndClient, GW_CHILD) THEN EXIT FUNCTION
+         END IF
+
+      CASE WM_QUERYENDSESSION
+         IF hwndClient THEN
+            ' // Attempt to close all MDI child windows
+            EnumChildWindows hwndClient, @CWindow_CloseEnumProc, 0
+            ' // If child windows are still open abort closing the application
+            IF GetWindow(hwndClient, GW_CHILD) THEN EXIT FUNCTION
+         END IF
+
+    	CASE WM_DESTROY
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   IF hwndClient THEN
+   ' // The DefFrameProc function provides default processing for any window
+   ' // messages that the window procedure of a multiple-document interface (MDI)
+   ' // frame window does not process. All window messages that are not explicitly
+   ' // processed by the window procedure must be passed to the DefFrameProc
+   ' // function, not the DefWindowProc function.
+      FUNCTION = DefFrameProcW(hwnd, hwndClient, uMsg, wParam, lParam)
+   ELSE
+   ' // The DefWindowProc function calls the default window procedure to provide
+   ' // default processing for any window messages that an application does not process.
+   ' // This function ensures that every message is processed. DefWindowProc
+   ' // is called with the same parameters received by the window procedure.
+      FUNCTION = DefWindowProcW(hwnd, uMsg, wParam, lParam)
+   END IF
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Default CWindow MDI callback function.
+' ========================================================================================
+FUNCTION MDIWindowProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   DIM hEdit AS HWND
+   DIM rc AS RECT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Retrieve a pointer to the CWindow class
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(GetAncestor(hwnd, GA_ROOTOWNER))
+         ' // Create and edit control
+         IF pWindow THEN
+            GetClientRect hwnd, @rc
+            pWindow->AddControl("Edit", hwnd, IDC_EDIT, "", 0, 0, rc.Right, rc.Bottom, _
+               WS_CHILD OR WS_VISIBLE OR ES_MULTILINE OR WS_VSCROLL OR WS_HSCROLL OR ES_AUTOHSCROLL OR ES_AUTOVSCROLL OR ES_WANTRETURN OR ES_NOHIDESEL)
+            EXIT FUNCTION
+         END IF
+
+      CASE WM_MDIACTIVATE
+         IF lParam = hwnd THEN
+            ' ...
+         END IF
+         EXIT FUNCTION
+
+      CASE WM_SETFOCUS
+         ' // Set the keyboard focus to the first control that is
+         ' // visible, not disabled, and has the WS_TABSTOP style
+         SetFocus GetNextDlgTabItem(hwnd, NULL, FALSE)
+
+      CASE WM_SIZE
+         IF wParam <> SIZE_MINIMIZED THEN
+            ' // Resize the window and/or its controls
+            hEdit = GetDlgItem(hwnd, IDC_EDIT)
+            MoveWindow hEdit, 0, 0, LOWORD(lParam), HIWORD(lParam), CTRUE
+         END IF
+
+         ' Don't exit. Let DefMDIChildProcW to process the message for
+         ' properly resizing of the MDI child window.
+
+      CASE WM_DESTROY
+         ' // Do cleanup if needed, such removing properties attached
+         ' // to the MDI child window.
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // The DefMDIChildProc function provides default processing for any window
+   ' // message that the window procedure of a multiple-document interface (MDI)
+   ' // child window does not process. A window message not processed by the window
+   ' // procedure must be passed to the DefMDIChildProc function, not to the
+   ' // DefWindowProc function.
+   FUNCTION = DefMDIChildProcW(hwnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

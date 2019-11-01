@@ -1051,6 +1051,59 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    AfxDoEvents
    
+   
+   ' If this is a visual designer project then output specific equates that dictate
+   ' which controls get compiled into the file source.
+   dim as CWSTR wszVDEquates, wszCtrlEquate
+   dim as boolean bIsVisual = false
+   pDoc = gApp.pDocList
+   do until pDoc = 0
+      if pDoc->IsDesigner then 
+         bIsVisual = true
+         ' Search all of the controls and set the appropriate equate
+         dim pCtrl as clsControl ptr
+         for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+            pCtrl = pDoc->Controls.ItemAt(i)
+            wszCtrlEquate = "#define CODEGEN_" & ucase(GetToolBoxName( pCtrl->ControlType ))
+            if instr(wszVDEquates, wszCtrlEquate) = 0 then
+               wszVDEquates = wszVDEquates & wszCtrlEquate & vbcrlf
+            end if
+         NEXT
+         if pDoc->MainMenuExists then
+            wszCtrlEquate = "#define CODEGEN_MAINMENU"
+            if instr(wszVDEquates, wszCtrlEquate) = 0 then
+               wszVDEquates = wszVDEquates & wszCtrlEquate & vbcrlf
+            end if
+         end if
+         if pDoc->ToolBarExists then
+            wszCtrlEquate = "#define CODEGEN_TOOLBAR"
+            if instr(wszVDEquates, wszCtrlEquate) = 0 then
+               wszVDEquates = wszVDEquates & wszCtrlEquate & vbcrlf
+            end if
+         end if
+         if pDoc->StatusBarExists then
+            wszCtrlEquate = "#define CODEGEN_STATUSBAR"
+            if instr(wszVDEquates, wszCtrlEquate) = 0 then
+               wszVDEquates = wszVDEquates & wszCtrlEquate & vbcrlf
+            end if
+         end if
+      end if
+      pDoc = pDoc->pDocNext
+   loop
+   if bIsVisual then
+      dim wszVDMain as CWSTR = gCompile.MainFolder & "WinFBE_VD_MAIN.bas"
+      dim pStream as CTextStream
+      if pStream.Create(wszVDMain, true, true) = S_OK then 
+         dim as CWSTR wszText = _
+            wszVDEquates & _
+            "#Include Once " & wDQ & gCompile.MainFilename & wDQ
+         pStream.WriteLine wszText
+         pStream.Close
+         gCompile.MainFilename = wszVDMain
+      end if
+   end if
+   
+
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
    wszParams = "-m " + wDQ + gCompile.MainFilename + wDQ 
@@ -1065,6 +1118,10 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Ensure verbose compiler message output
    wszParams = wszParams + " -v " + gCompile.CompileFlags 
+   
+   if instr(wszParams, " -x ") = 0 then
+      wszParams = wszParams + " -x " + gCompile.OutputFilename
+   end if
    
    If gApp.IsProjectActive Then
       pDoc = gApp.pDocList

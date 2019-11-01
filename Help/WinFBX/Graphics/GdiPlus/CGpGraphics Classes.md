@@ -535,7 +535,7 @@ FUNCTION DrawClosedCurve (BYVAL pPen AS CGpPen PTR, BYVAL pts AS GpPoint PTR, BY
 | *pPen* | Pointer to a pen that is used to draw the closed cardinal spline. |
 | *pts* | Pointer to an array of **GpPointF** objects that specify the coordinates of the closed cardinal spline. The array of **GpPointF** objects must contain a minimum of three elements. |
 | *count* | Integer that specifies the number of elements in the points array. |
-| *tension* | Simple precision number that specifies how tightly the curve bends through the coordinates of the closed cardinal spline. |
+| *tension* | Single precision number that specifies how tightly the curve bends through the coordinates of the closed cardinal spline. |
 
 #### Return value
 
@@ -626,7 +626,7 @@ FUNCTION DrawCurve (BYVAL pPen AS CGpPen PTR, BYVAL pts AS GpPoint PTR, BYVAL co
 | *count* | Integer that specifies the number of elements in the points array. |
 | *offset* | Integer that specifies the element in the points array that specifies the point at which the cardinal spline begins. |
 | *numberOfSegments* | Integer that specifies the number of segments in the cardinal spline. |
-| *tension* | Simple precision number that specifies how tightly the curve bends through the coordinates of the cardinal spline. |
+| *tension* | Single precision number that specifies how tightly the curve bends through the coordinates of the cardinal spline. |
 
 #### Return value
 
@@ -4476,7 +4476,7 @@ FUNCTION AddCurve (BYVAL pts AS GpPoint PTR, BYVAL nCount AS INT_, BYVAL offset 
 | *count* | Integer that specifies the number of elements in the *pts* array. |
 | *offset* | Integer that specifies the index of the array element that is used as the first point of the cardinal spline. |
 | *numberOfSegments* | Integer that specifies the number of segments in the cardinal spline. Segments are the curves that connect consecutive points in the array. |
-| *tension* | Nonnegative simple precision number that controls the length of the curve and how the curve bends. A value of 0 specifies that the spline is a sequence of straight line segments. As the value increases, the curve becomes fuller. |
+| *tension* | Nonnegative single precision number that controls the length of the curve and how the curve bends. A value of 0 specifies that the spline is a sequence of straight line segments. As the value increases, the curve becomes fuller. |
 
 #### Return value
 
@@ -4565,7 +4565,6 @@ FUNCTION AddEllipse (BYVAL rc AS GpRect PTR) AS GpStatus
 | ---------- | ----------- |
 | *x* | The x-coordinate of the upper-left corner of the bounding rectangle for the ellipse. |
 | *y* | The y-coordinate of the upper-left corner of the bounding rectangle for the ellipse. |
-| *y* | The width of the bounding rectangle for the ellipse. |
 | *nWidth* | The width of the bounding rectangle for the ellipse. |
 | *nHeight* | The height of the bounding rectangle for the ellipse. |
 | *rc* | Pointer to a **GpRectF** or **GpRect** structure specifying the dimensions of the rectagle. |
@@ -5692,7 +5691,7 @@ FUNCTION Outline (pMatrix AS CGpMatrix PTR = NULL, BYVAL flatness AS SINGLE = Fl
 | Parameter  | Description |
 | ---------- | ----------- |
 | *pMatrix* | Optional. Pointer to a **Matrix** object that specifies the transformation. If this parameter is NULL, no transformation is applied. The default value is NULL. |
-| *flatness* | Optional. Simple precision number that specifies the maximum error between the path and its flattened approximation. Reducing the flatness increases the number of line segments in the approximation. The default value is **FlatnessDefault**, which is a constant defined in Gdiplusenums.bi. |
+| *flatness* | Optional. Single precision number that specifies the maximum error between the path and its flattened approximation. Reducing the flatness increases the number of line segments in the approximation. The default value is **FlatnessDefault**, which is a constant defined in Gdiplusenums.bi. |
 
 #### Return value
 

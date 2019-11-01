@@ -2,7 +2,7 @@
 
 `CGraphCtx` is a graphic control for pictures, text and graphics. You can use both GDI and GDI+ to draw graphics and text and to load and manipulate images. Optionally, you can add support for OpenGL by passing "OPENGL" in the caption.
 
-This control features persistence and uses a virtual buffer (set initially equal to the size of the control when it is created) to allow to display images bigger than the size of the control. Scrollbars are automatically added when the size of the virtual buffer is bigger than the size of the control and removed when unneeded. It also features keyboard navigation and sends command messages to the parent window or dialog when the return or Escape keys are pressed, and notification messages for mouse clicks.
+This control features persistence and uses a virtual buffer (set initially equal to the size of the control when it is created) to allow to display images bigger than the size of the control. Scrollbars are automatically added when the size of the virtual buffer is bigger than the size of the control and removed when unneeded. It also features keyboard navigation and sends command messages to the parent window when the return or Escape keys are pressed, and notification messages for mouse clicks.
 
 To use the control, include the CGraphCtx.inc file in your program and use the namespace **Afx**.
 
@@ -436,7 +436,8 @@ TRUE or FALSE.
 
 ##### Remarks
 
-Resizable and stretchable are mutually exclusive.
+If resizable, the virtual buffer is set to the size of the control. If the control is made smaller and then bigger, part of the contents
+are lost. Therefore, the caller must redraw it. Resizable and stretchable are mutually exclusive.
 
 ### <a name="SaveImage"></a>SaveImage
 

@@ -1,0 +1,167 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: TreeView
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_TreeView.fbtpl
+' Contents: Template - CWindow with a TreeView
+' Compiler: Free Basic
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+#define IDC_TREEVIEW 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow with a TreeView", @WndProc)
+   ' // Change the class style to avoid flicker
+   pWindow.ClassStyle = CS_DBLCLKS
+   pWindow.SetClientSize(320, 370)
+   pWindow.Center
+
+   ' // Add a TreeView
+   DIM hTreeView AS HWND
+   hTreeView = pWindow.AddControl("TreeView", , IDC_TREEVIEW, "")
+   pWindow.SetWindowPos hTreeView, NULL, 8, 8, 300, 320, SWP_NOZORDER
+
+   ' // To add checkboxes, use:
+   ' AfxAddWindowStyle hTreeView, TVS_CHECKBOXES
+
+   ' // Add items to the TreeView
+   DIM AS HTREEITEM hRoot, hNode, hItem
+   ' // Create the root node
+   hRoot = TreeView_AddRootItem(hTreeView, "Root")
+   ' // Create a node
+   hNode = TreeView_AppendItem(hTreeView, hRoot, "Node 1")
+   ' // Insert items in the node
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 1 Item 1")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 1 Item 2")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 1 Item 3")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 1 Item 4")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 1 Item 5")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 1 Item 6")
+   ' // Expand the node
+   TreeView_Expand(hTreeView, hNode, TVM_EXPAND)
+   ' // Create another node
+   hNode = TreeView_AppendItem(hTreeView, hRoot, "Node 2")
+   ' // Insert items in the node
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 2 Item 1")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 2 Item 2")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 2 Item 3")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 2 Item 4")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 2 Item 5")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 2 Item 6")
+   ' // Expand the node
+   TreeView_Expand(hTreeView, hNode, TVM_EXPAND)
+   ' // Create another node
+   hNode = TreeView_AppendItem(hTreeView, hRoot, "Node 3")
+   ' // Insert items in the node
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 3 Item 1")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 3 Item 2")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 3 Item 3")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 3 Item 4")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 3 Item 5")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 3 Item 6")
+   ' // Expand the node
+   TreeView_Expand(hTreeView, hNode, TVM_EXPAND)
+   ' // Create another node
+   hNode = TreeView_AppendItem(hTreeView, hRoot, "Node 4")
+   ' // Insert items in the node
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 4 Item 1")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 4 Item 2")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 4 Item 3")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 4 Item 4")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 4 Item 5")
+   hItem = TreeView_AppendItem(hTreeView, hNode, "Node 4 Item 6")
+   ' // Expand the node
+   TreeView_Expand(hTreeView, hNode, TVM_EXPAND)
+
+   ' // Expand the root node
+   TreeView_Expand(hTreeView, hRoot, TVE_EXPAND)
+
+   ' // Add a cancel button
+   pWindow.AddControl("Button", , IDCANCEL, "&Cancel", 233, 338, 75, 23)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Window procedure
+' ================================================================e========================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_NOTIFY
+         DIM ptnmhdr AS NMHDR PTR = CAST(NMHDR PTR, lParam)
+         SELECT CASE ptnmhdr->idFrom
+            CASE IDC_TREEVIEW
+               IF ptnmhdr->code = NM_DBLCLK THEN
+                  ' // Retrieve the handle of the TreeView
+                  DIM hTreeView AS HWND = GetDlgItem(hwnd, IDC_TREEVIEW)
+                  ' // Retrieve the selected item
+                  DIM hItem AS HTREEITEM = TreeView_GetSelection(hTreeView)
+                  ' // Retrieve the text of the selected item
+                  DIM wszText AS WSTRING * 260
+                  TreeView_GetItemText(hTreeView, hItem, @wszText, 260)
+                  MessageBox hwnd, wszText, "", MB_OK
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

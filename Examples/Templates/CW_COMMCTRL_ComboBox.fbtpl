@@ -1,0 +1,119 @@
+2
+FBGUI
+.bas
+CWindow: COMMCTRL: ComboBox
+' ########################################################################################
+' Microsoft Windows
+' File: CW_COMMCTRL_ComboBox.fbtpl
+' Contents: Demonstrates the use of the ComboBox control.
+' Comments: Commonly used to allow a user to select an item from a predefined list.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+CONST IDC_COMBOBOX = 1001
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "ComboBox control", @WndProc)
+   ' // Sizes it by setting the wanted width and height of its client area
+   pWindow.SetClientSize(500, 320)
+   ' // Centers the window
+   pWindow.Center
+
+   ' // Add a combobox control
+   DIM hCombobox AS HWND = pWindow.AddControl("ComboBox", , IDC_COMBOBOX, "", 80, 30, 190, 100)
+
+   ' // Fill the control with some data
+   DIM wszText AS WSTRING * 260
+   FOR i AS LONG = 1 TO 9
+      wszText = "Item " & RIGHT("00" & STR(i), 2)
+      ComboBox_AddString(hComboBox, @wszText)
+   NEXT
+   ' // Select the first item in the combo box
+   ComboBox_SetCursel(hComboBox, 0)
+
+   |
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            ' // If ESC key pressed, close the application sending an WM_CLOSE message
+            CASE IDCANCEL
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+            CASE IDC_COMBOBOX
+               ' // The selection has changed
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = LBN_SELCHANGE THEN
+                  ' // Handle of the combobox
+                  DIM hCombobox AS HWND = GetDlgItem(hwnd, IDC_COMBOBOX)
+                  ' // Retrieve the Item selected
+                  DIM curSel AS LONG = ComboBox_GetCursel(hCombobox)
+'                  ' // Retrieve the lenght of the text of the selected item
+'                  DIM nLen AS LONG = ComboBox_GetLBTextLen(hComboBox, curSel)
+'                  ' // Retrieve the text of the selected item
+'                  DIM pwszText AS WSTRING PTR = CAllocate(nLen + 1, SIZEOF(WCHAR))
+'                  ComboBox_GetLBText(hComboBox, curSel, pwszText)
+'                  MessageBoxW hwnd, "You have selected " & *pwszText, "ComboBox Test", MB_OK
+'                  Deallocate pwszText
+'                  pwszText = NULL
+                  ' // Alternate and shorter way
+                  MessageBoxW hwnd, "You have selected " & _
+                     AfxGetComboBoxText(hCombobox, curSel), "ComboBox Test", MB_OK
+               END IF
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

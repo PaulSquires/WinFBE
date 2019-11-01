@@ -39,7 +39,7 @@ DO
    ' // While not at the end of the recordset...
    IF pRecordset.EOF THEN EXIT DO
    ' // Get the content of the "Author" column
-'   DIM cvRes AS CVA = pRecordset.Collect("Author")
+'   DIM cvRes AS CVAR = pRecordset.Collect("Author")
 '   PRINT cvRes
    PRINT pRecordset.Collect("Author")
    ' // Fetch the next row

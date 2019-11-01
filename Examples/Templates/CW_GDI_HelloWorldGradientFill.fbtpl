@@ -1,0 +1,150 @@
+2
+FBGUI
+.bas
+CWindow: GDI: Hello World Gradient (GradientFill)
+' ########################################################################################
+' Microsoft Windows
+' File: CW_GDI_HelloWorldGradientFill.fbtpl
+' Contents: CWindow Hello Word with gradient example (GradientFill)
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Gradient fill procedure
+' ========================================================================================
+SUB DrawGradient (BYVAL hwnd AS HWND, BYVAL hDC AS HDC)
+
+   DIM rc AS RECT, vertex(1) AS TRIVERTEX
+
+   GetClientRect hwnd, @rc
+
+   vertex(0).x      = 0
+   vertex(0).y      = 0
+   vertex(0).Red    = &hFF00
+   vertex(0).Green  = &hFF00
+   vertex(0).Blue   = &h0000
+   vertex(0).Alpha  = &h0000
+
+   vertex(1).x      = rc.Right - rc.Left
+   vertex(1).y      = rc.Bottom - rc.Top
+   vertex(1).Red    = &h8000
+   vertex(1).Green  = &h0000
+   vertex(1).Blue   = &h0000
+   vertex(1).Alpha  = &h0000
+
+   DIM gRect AS GRADIENT_RECT
+   gRect.UpperLeft  = 0
+   gRect.LowerRight = 1
+
+   GradientFill hDc, @vertex(0), 2, @gRect, 1, GRADIENT_FILL_RECT_H
+
+END SUB
+' ========================================================================================
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, "CWindow Hello World with gradient", @WndProc)
+   pWindow.Brush = GetStockObject(WHITE_BRUSH)
+   pWindow.SetClientSize(500, 320)
+   pWindow.Center
+
+   |
+
+   ' // Display the window
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hWnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC hNewFont AS HFONT
+
+   SELECT CASE uMsg
+
+      CASE WM_CREATE
+         ' // Get a pointer to the CWindow class from the CREATESTRUCT structure
+         DIM pWindow AS CWindow PTR = AfxCWindowPtr(lParam)
+         ' // Create a new font scaled according the DPI ratio
+         IF pWindow->DPI <> 96 THEN hNewFont = pWindow->CreateFont("Tahoma", 9)
+         EXIT FUNCTION
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+      CASE WM_PAINT
+         ' // Draw the text
+         DIM ps AS PAINTSTRUCT, hOldFont AS HFONT
+         DIM hDC AS HDC = BeginPaint(hwnd, @ps)
+         DrawGradient hwnd, hdc
+         IF hNewFont THEN hOldFont = CAST(HFONT, SelectObject(hDC, CAST(HGDIOBJ, hNewFont)))
+         DIM rc AS RECT
+         GetClientRect hwnd, @rc
+         SetBkMode hDC, TRANSPARENT
+         SetTextColor hDC, &HFFFFFF
+         DrawTextW hDC, "Hello, World!", -1, @rc, DT_SINGLELINE OR DT_CENTER OR DT_VCENTER
+         IF hNewFont THEN SelectObject(hDC, CAST(HGDIOBJ, CAST(HFONT, hOldFont)))
+         EndPaint hwnd, @ps
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+      CASE WM_ERASEBKGND
+         ' // Draw the gradient
+         DIM hDC AS HDC = CAST(HDC, wParam)
+         DrawGradient hwnd, hDC
+         FUNCTION = CTRUE
+         EXIT FUNCTION
+
+    	CASE WM_DESTROY
+         ' // Destroy the new font
+         IF hNewFont THEN DeleteObject(CAST(HGDIOBJ, hNewFont))
+         ' // End the application by sending an WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

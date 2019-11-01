@@ -1,0 +1,123 @@
+2
+PBWIN
+.bas
+CWindow: GDI: Alternate and winding fill modes
+' ########################################################################################
+' Microsoft Windows
+' File: CW_GDI_AltWind.fbtpl
+' This program is a translation/adaptation of the ALTWIND.C-Alternate and Winding Fill
+' Modes Program © Charles Petzold, 1998, described and analysed in Chapter 5 of the book
+' Programming Windows, 5th Edition.
+' Displays the figure twice, once using the ALTERNATE filling mode and then using WINDING.
+' Compiler: FreeBasic 32 & 64 bit
+' Copyright (c) 2016 José Roca. Freeware. Use at your own risk.
+' THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
+' EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+' MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+' ########################################################################################
+
+#define UNICODE
+#INCLUDE ONCE "Afx/CWindow.inc"
+USING Afx
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   DIM hWndMain AS HWND = pWindow.Create(NULL, "Alternate and Winding Fill Modes", @WndProc)
+   pWindow.Center
+
+   |
+
+   ' // Display the window
+   ShowWindow(hWndMain, nCmdShow)
+   UpdateWindow(hWndMain)
+
+   ' // Dispatch Windows messages
+   DIM uMsg AS MSG
+   WHILE (GetMessageW(@uMsg, NULL, 0, 0) <> FALSE)
+      TranslateMessage(@uMsg)
+      DispatchMessageW(@uMsg)
+   WEND
+
+   FUNCTION = uMsg.wParam
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   STATIC cxClient AS LONG
+   STATIC cyClient AS LONG
+   STATIC aptFigure(9) AS POINT = {(10, 70), (50, 70), (50, 10), (90, 10), (90, 50), (30, 50), (30, 90), (70, 90), (70, 30), (10, 30)}
+
+   SELECT CASE uMsg
+
+      CASE WM_SIZE
+         ' // Store the size of the client area
+         cxClient = LOWORD(lParam)
+         cyClient = HIWORD(lParam)
+         EXIT FUNCTION
+
+      CASE WM_PAINT
+         ' // Do the painting
+         DIM ps AS PAINTSTRUCT
+         DIM hdc AS HDC = BeginPaint(hwnd, @ps)
+         SelectObject hdc, GetStockObject(GRAY_BRUSH)
+         DIM i AS LONG, apt(9) AS POINT
+         FOR i = 0 TO 9
+            apt(i).x = cxClient * aptFigure(i).x / 200
+            apt(i).y = cyClient * aptFigure(i).y / 100
+         NEXT
+         SetPolyFillMode hdc, ALTERNATE
+         Polygon hdc, @apt(0), 10
+         FOR i = 0 TO 9
+            apt(i).x = apt(i).x + cxClient / 2
+         NEXT
+         SetPolyFillMode hdc, WINDING
+         Polygon hdc, @apt(0), 10
+         EndPaint hwnd, @ps
+         EXIT FUNCTION
+
+      CASE WM_KEYDOWN
+         ' // If ESC key pressed, close the application sending an WM_CLOSE message
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE VK_ESCAPE
+               SendMessageW hwnd, WM_CLOSE, 0, 0
+               EXIT FUNCTION
+         END SELECT
+
+    	CASE WM_DESTROY
+         ' // End the application
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================

@@ -31,8 +31,8 @@ DO
    IF pRecordset.EOF THEN EXIT DO
    ' // Get the content of the "Author" column
 '   DIM cvRes AS CVAR = pRecordset.Collect("Author")
-'   PRINT cvRes.ToStr
-   PRINT pRecordset.Collect("Author").ToStr
+'   PRINT cvRes
+   PRINT pRecordset.Collect("Author")
    ' // Fetch the next row
    IF pRecordset.MoveNext <> S_OK THEN EXIT DO
 LOOP

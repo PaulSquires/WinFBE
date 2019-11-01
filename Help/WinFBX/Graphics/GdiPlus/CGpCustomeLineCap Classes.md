@@ -501,7 +501,7 @@ FUNCTION SetBaseInset (BYVAL baseinset AS SINGLE) AS GpStatus
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *baseinset* | Simple precision number that specifies the distance, in units, from the base cap to the start of the line. If this value is greater than the length of the line, the behavior of this method is undefined. |
+| *baseinset* | Single precision number that specifies the distance, in units, from the base cap to the start of the line. If this value is greater than the length of the line, the behavior of this method is undefined. |
 
 #### Return value
 
@@ -760,7 +760,7 @@ FUNCTION SetWidthScale (BYVAL widthScale AS SINGLE) AS GpStatus
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *widthScale* | Simple precision number that specifies the scaling factor that will be used to scale the line width. |
+| *widthScale* | Single precision number that specifies the scaling factor that will be used to scale the line width. |
 
 #### Return value
 

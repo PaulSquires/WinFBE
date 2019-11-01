@@ -489,8 +489,8 @@ END TYPE
 
 | Member     | Description |
 | ---------- | ----------- |
-| **Width** | Vertical measurement. |
-| **Height** | Horizontal measurement. |
+| **Width** | Horizontal measurement. |
+| **Height** | Vertical measurement. |
 
 # <a name="GpSizeF"></a>GpSizeF Structure
 
@@ -505,8 +505,8 @@ END TYPE
 
 | Member     | Description |
 | ---------- | ----------- |
-| **Width** | Vertical measurement. |
-| **Height** | Horizontal measurement. |
+| **Width** | Horizontal measurement. |
+| **Height** | Vertical measurement. |
 
 # <a name="ImageCodecInfo"></a>ImageCodecInfo Structure
 
