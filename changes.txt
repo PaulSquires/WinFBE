@@ -1,9 +1,14 @@
+Version 1.9.6 (November 2, 2019)
+- Added: ListView HitTest method. Determines what (if any) ListView Item and/or SubItem has been clicked on. HitTest( iItem, iSubItem )
+- Fixed: Removed "TextChanged" event from the ListView.
+- Fixed: ListView Events were not firing due to missing integration code.
+
 Version 1.9.5 (November 1, 2019)
 - Added: ListView control.
+- Added: Visual designer projects create WinFBE_VD_MAIN.bas that contains EQUATES to activate all controls that are present in the project. Thi helps reduce EXE size.
 - Added: ListBox Insert method.
 - Changed: Remove the Visual Designer sample project (a new one will be added in the future).
 - Fixed: WinFBE project files for the those found in the "Sample_Projects" folder.
-
 
 Version 1.9.4 (October 1, 2019)
 - Fixed: Updated the WinFBE.ini file to correct path to compiler.

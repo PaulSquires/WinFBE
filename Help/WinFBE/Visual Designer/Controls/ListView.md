@@ -42,6 +42,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | Hide | Conceals the control from the user.|
+| HitTest | Determines what (if any) ListView Item and/or SubItem has been clicked on. HitTest( iItem, iSubItem ) |
 | Refresh | Forces the form to invalidate its client area and immediately redraw itself and any child controls.|
 | SelectNextControl | Moves the input control to the next (True) or previous (False) control in the tab order. |
 | SetBounds | Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).|
