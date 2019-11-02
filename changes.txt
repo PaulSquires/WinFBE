@@ -1,3 +1,7 @@
+Version 1.9.7 (November 2, 2019)
+- Fixed: ListView notifications (Events) failing on 64 bit compiles.
+- Fixed: Added back several missing Codetip popup items for the ListView.
+
 Version 1.9.6 (November 2, 2019)
 - Added: ListView HitTest method. Determines what (if any) ListView Item and/or SubItem has been clicked on. HitTest( iItem, iSubItem )
 - Fixed: Removed "TextChanged" event from the ListView.
