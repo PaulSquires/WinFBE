@@ -544,8 +544,10 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
       
       case CTRL_LISTVIEW
          AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "ColumnClick")
          AddControlEvent(pCtrl, "Destroy")
          AddControlEvent(pCtrl, "DropFiles")
+         AddControlEvent(pCtrl, "ItemSelectionChanged")
          AddControlEvent(pCtrl, "GotFocus")
          AddControlEvent(pCtrl, "LostFocus")
          AddControlEvent(pCtrl, "MouseMove")

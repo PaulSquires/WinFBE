@@ -1120,7 +1120,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    wszParams = wszParams + " -v " + gCompile.CompileFlags 
    
    if instr(wszParams, " -x ") = 0 then
-      wszParams = wszParams + " -x " + gCompile.OutputFilename
+      wszParams = wszParams + " -x " + wDQ + gCompile.OutputFilename + wDQ
    end if
    
    If gApp.IsProjectActive Then
