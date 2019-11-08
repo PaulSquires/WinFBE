@@ -430,6 +430,14 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszCursor = "IMAGE_CURSOR_TEXTBOX"
    gToolBox(n).wszClassName = "TEXTBOX"
 
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_TREEVIEW
+   gToolBox(n).wszToolBoxName   = "TreeView"
+   gToolBox(n).wszControlName   = "TreeView"
+   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
+   gToolBox(n).wszClassName = "TREEVIEW"
+
 
    redim preserve gToolBox(n) as TOOLBOX_TYPE
 
@@ -463,12 +471,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(17).wszImage  = "IMAGE_UPDOWN"
 '   gToolBox(17).wszCursor = "IMAGE_CURSOR_UPDOWN"
 '   gToolBox(17).wszClassName = "UPDOWN"
-
-'   gToolBox(19).nToolType = CTRL_TREEVIEW
-'   gToolBox(19).wszName   = "TreeView"
-'   gToolBox(19).wszImage  = "IMAGE_TREEVIEW"
-'   gToolBox(19).wszCursor = "IMAGE_CURSOR_TREEVIEW"
-'   gToolBox(19).wszClassName = "TREEVIEW"
 
 '   gToolBox(20).nToolType = CTRL_SLIDER
 '   gToolBox(20).wszName   = "Slider"

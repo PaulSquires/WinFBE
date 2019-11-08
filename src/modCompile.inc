@@ -166,44 +166,8 @@ end function
 
 ''
 ''
-private FUNCTION CreateChildProcess( byref zCmdLine AS wstring, _
-                                     byref zParams  AS wstring, _
-                                     byval hChildStdOutWrite AS HANDLE _
-                                     ) AS BOOLEAN
-    
-   dim ProcessInfo AS PROCESS_INFORMATION
-   dim StartupInf  AS STARTUPINFO
-
-   StartupInf.cb         = SIZEOF(STARTUPINFO)
-   StartupInf.hStdError  = hChildStdOutWrite   
-   StartupInf.hStdOutput = hChildStdOutWrite  
-   StartupInf.dwFlags    = STARTF_USESTDHANDLES
-
-   IF CreateProcess( zCmdLine,  _    ' Create the child process.
-                     zParams, _      ' Command line
-                     BYVAL 0,     _  ' Process security attributes
-                     BYVAL 0,     _  ' Primary thread security attributes
-                     TRUE,        _  ' Handles are inherited
-                     CREATE_NO_WINDOW, _  ' Creation flags  
-                     BYVAL 0,     _  ' Use parent's environment
-                     BYVAL 0,     _  ' Use parent's current directory
-                     @StartupInf,  _  ' STARTUPINFO pointer
-                     @ProcessInfo) = FALSE THEN
-   ELSE
-      ' Close handles to the child process and its primary thread.
-      ' Some applications might keep these handles to monitor the status 
-      ' of the child process, for example.
-      CloseHandle( ProcessInfo.hProcess )
-      CloseHandle( ProcessInfo.hThread )
-      FUNCTION = TRUE
- END IF
-END FUNCTION
-
-
-''
-''
-private function RedirConsoleToFile( byref szExe AS wstring, _
-                                     byref szCmdLine AS wstring, _
+private function RedirConsoleToFile( byref wszExe AS wstring, _
+                                     byref wszCmdLine AS wstring, _
                                      byref sConsoleText AS string _
                                      ) as long
 
@@ -218,34 +182,90 @@ private function RedirConsoleToFile( byref szExe AS wstring, _
    SecurityAttribute.bInheritHandle       = TRUE
    SecurityAttribute.lpSecurityDescriptor = NULL
 
+   ' It appears that CreateProcess will fail if szExe is wrapped in quotes. This
+   ' means that the WinFBE installation and the location of the gcc tools should not
+   ' have any embedded spaces in their folder paths. 
+
    ' Create a pipe for the child process's STDOUT.
    IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
-      '? "error creating pipe"
+      ? "error creating pipe"
    ELSE
       ' Ensure the read handle to the pipe for STDOUT is not inherited.
       IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
-         '? "error SetHandleInformation"
+         ? "error SetHandleInformation"
       ELSE
          ' Create the child process and read from its standard output
-         IF CreateChildProcess(szExe, szCmdLine, hChildStdOutWrite) THEN
+         dim ProcessInfo AS PROCESS_INFORMATION
+         dim StartupInf  AS STARTUPINFO
+
+         StartupInf.cb         = SIZEOF(STARTUPINFO)
+         StartupInf.hStdError  = hChildStdOutWrite   
+         StartupInf.hStdOutput = hChildStdOutWrite  
+         StartupInf.dwFlags    = STARTF_USESTDHANDLES
+
+         dim wszFullCommandLine as wstring * 32767
+         dim wszFullExe as wstring * 32767
+         
+         if instr(wszExe, " ") then
+            wszFullExe = wchr(34) & wszExe & wchr(34, 32)
+         else
+            wszFullExe = wszExe 
+         end if
+         
+         wszFullCommandLine = wszFullExe & " " & wszCmdLine
+         
+' This call to CreateProcessW will succeed in all cases except for the one
+' where there is spaces in wszFullExe because once I wrap the string in double
+' quotes then the call to CreateProcessW fails.
+         IF CreateProcessW( wszFullExe,  _    ' Create the child process.
+                     wszCmdLine, _       ' Command line
+                     BYVAL 0,     _  ' Process security attributes
+                     BYVAL 0,     _  ' Primary thread security attributes
+                     TRUE,        _  ' Handles are inherited
+                     CREATE_NO_WINDOW, _  ' Creation flags  
+                     BYVAL 0,     _  ' Use parent's environment
+                     BYVAL 0,     _  ' Use parent's current directory
+                     @StartupInf,  _  ' STARTUPINFO pointer
+                     @ProcessInfo) THEN
+
+' If I use NULL for the first parameter and instead include the exe name as the
+' first parameter of the second parameter then the compile will fail with a "linker
+' error not finding WinMain@16".
+'         IF CreateProcessW( NULL,  _    ' Create the child process.
+'                     wszFullCommandLine, _       ' Command line
+'                     BYVAL 0,     _  ' Process security attributes
+'                     BYVAL 0,     _  ' Primary thread security attributes
+'                     TRUE,        _  ' Handles are inherited
+'                     CREATE_NO_WINDOW, _  ' Creation flags  
+'                     BYVAL 0,     _  ' Use parent's environment
+'                     BYVAL 0,     _  ' Use parent's current directory
+'                     @StartupInf,  _  ' STARTUPINFO pointer
+'                     @ProcessInfo) THEN
+
             CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
             DO
                IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN 
-                  '? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead, "dwReadBytes=";dwReadBytes
+                  '? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead
                   '? "GetLastError: "; GetLastError
                   EXIT DO
                end if  
-               '? "READ " & dwReadBytes & " BYTES=" & LEFT(sBuffer, dwReadBytes)
-               '? LEFT(sBuffer, dwReadBytes)
                sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
                '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
                ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
             LOOP
+            
          else
-            '? "CreateChildProcess failed"      
+            ? "CreateChildProcess failed"      
+            ' Close handles to the child process and its primary thread.
+            ' Some applications might keep these handles to monitor the status 
+            ' of the child process, for example.
+            CloseHandle( ProcessInfo.hProcess )
+            CloseHandle( ProcessInfo.hThread )
          END IF
+         
       END IF
    END IF
+
    function = 0
 END function
 

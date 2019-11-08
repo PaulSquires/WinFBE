@@ -1,4 +1,4 @@
-# ListView (wfxListView)
+﻿# ListView (wfxListView)
 
 ### Properties
 
@@ -41,6 +41,8 @@
 ### Methods
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
+| BeginUpdate | Prevents control updating during adding/removing of a bulk number of items |
+| EndUpdate | Enables control updating after adding/removing of a bulk number of items |
 | Hide | Conceals the control from the user.|
 | HitTest | Determines what (if any) ListView Item and/or SubItem has been clicked on. HitTest( iItem, iSubItem ) |
 | Refresh | Forces the form to invalidate its client area and immediately redraw itself and any child controls.|
@@ -52,7 +54,9 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllEvents | Special handler where all events are routed through. Use this handler if you prefer to use the Win32 api style messages and wParam and lParam parameters. Set the Handled element of EventArgs to true if you handle a message and do not want Windows to perform any further processing on the message.|
-| Click | Occurs when the client area of the control is clicked.|
+| Click | Occurs when the client area of the control is clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.|
+| ColumnClick | Occurs when a column header is clicked. e.ListViewColumn contains index of clicked Column header.|
+| ItemSelectionChanged | Occurs when the selected Item has changed. e.ListViewRow contains current selected Item index.|
 | Destroy | Occurs immediately before the control is about to be destroyed and all resources associated with it released.|
 | DropFiles | Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.|
 | GotFocus | Occurs when the control receives focus.|
@@ -71,11 +75,11 @@
 ### Items Collection (wfxListViewItemsCollection)
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
-| Add | Add a new item (and optional 32bit value) to the listview.|
+| Add | Add a new item (and optional 32bit value) to the listview. ListView.Items.Add( Text, 32bitValue)|
 | ByIndex | Return the wfxListViewItem object related to the specified listview item index.|
 | Clear | Removes all items from the listview.|
 | Count | Returns the total number of items in the listview.|
-| Insert | Add a new item (and optional 32bit value) to the listview at a specific position.|
+| Insert | Add a new item (and optional 32bit value) to the listview at a specific position. ListView.Items.Insert( Index, Text, 32bitValue)|
 | Remove | Remove/delete the item identified by the index value.|
 | SelectedCount | Returns the total number of selected items in the listview.|
 
@@ -103,7 +107,7 @@
 ### SubItems Collection (wfxListViewSubItemsCollection)
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
-| Add | Add a new subitem to the listview.|
+| Add | Add a new subitem to the listview. ListView.Items(i).SubItems.Add( Text )|
 | ByIndex | Return the wfxListViewSubItem object related to the specified listview item index.|
 | Clear | Removes all subitems from the listview item.|
 | Count | Returns the total number of subitems for the listview item.|
@@ -120,7 +124,7 @@
 ### Columns Collection (wfxListViewColumnsCollection)
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
-| Add | Add a new column to the listview.|
+| Add | Add a new column to the listview. ListView.Columns.Add( Text, Width(pixels), TextAlign as TextAlignment )|
 | ByIndex | Return the wfxListViewColumn object related to the specified column index.|
 | Clear | Removes all columnss from the listview.|
 | Count | Returns the total number of columns for the listview.|
@@ -129,29 +133,37 @@
 
 ## Working with a ListView
 ```
-Row count = frmMain.ListView1.Items.Count
-Selected count = frmMain.ListView1.Items.SelectedCount
-Current row = frmMain.ListView1.SelectedIndex
+' Row count = frmMain.ListView1.Items.Count
+' Selected count = frmMain.ListView1.Items.SelectedCount
+' Current row = frmMain.ListView1.SelectedIndex
 
-dim i as Long
+' Add 3 columns each 100 pixels wide and each using a different text alignment
+frmMain.ListView1.Columns.Add( "Column 1", 100, TextAlignment.Left )
+frmMain.ListView1.Columns.Add( "Column 2", 100, TextAlignment.Center )
+frmMain.ListView1.Columns.Add( "Column 3", 100, TextAlignment.Right )
 
-i = frmMain.ListView1.Columns.Add( "Column 1", 100, TextAlignment.Left )
-i = frmMain.ListView1.Columns.Add( "Column 2", 100, TextAlignment.Center )
-i = frmMain.ListView1.Columns.Add( "Column 3", 100, TextAlignment.Right )
+' Add a bulk number of Items and SubItems (basically rows to the ListView)
+' Prevent slow ListView updating by wrapping the operation in BeginUpdate/EndUpdate
 
+frmMain.ListView1.BeginUpdate
+dim i as long
 for ii as long = 0 to 99
    i = frmMain.ListView1.Items.Add( "Line " & ii )
    frmMain.ListView1.Item(i).SubItems.Add( "L" & ii & "Sub1" )
    frmMain.ListView1.Item(i).SubItems.Add( "L" & ii & "Sub2" )
 next
+frmMain.ListView1.EndUpdate
 
+' Change the foreground colors of a couple of SubItems
 frmMain.ListView1.Item(0).SubItem(0).ForeColor = colors.Red
 frmMain.ListView1.Item(0).SubItem(2).ForeColor = colors.Red
 
+' Change the foreground/background colors of a couple of SubItems
 frmMain.ListView1.Item(2).ForeColor = colors.Blue
 frmMain.ListView1.Item(2).BackColor = colors.Yellow
 frmMain.ListView1.Item(2).SubItem(1).ForeColor = colors.Blue
 
+' Set the initial Item to be selected
 frmMain.ListView1.SelectedIndex = 0
 ```
 

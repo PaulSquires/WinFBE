@@ -328,13 +328,29 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
       
+      case CTRL_TREEVIEW
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "BackColor", "SYSTEM|Window", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "CheckBoxes", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
+         AddControlProperty(pCtrl, "FullRowSelect", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "HideSelection", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Sorting", "SortOrder.None", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+         
 
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
       case CTRL_TABCONTROL
       case CTRL_UPDOWN
-      case CTRL_TREEVIEW
       case CTRL_SLIDER
       case CTRL_DATETIMEPICKER
       case CTRL_MONTHCALENDAR
@@ -379,6 +395,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_LABEL
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -390,6 +407,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+      
       case CTRL_BUTTON
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -406,6 +424,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_TEXTBOX, CTRL_RICHEDIT
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -423,6 +442,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_MASKEDEDIT
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -440,6 +460,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_CHECKBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -456,6 +477,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_LISTBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -472,6 +494,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_OPTION
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -488,6 +511,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+      
       case CTRL_FRAME
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -499,6 +523,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+      
       case CTRL_COMBOBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -518,6 +543,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
          AddControlEvent(pCtrl, "TextChanged")
+      
       case CTRL_PICTUREBOX
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
@@ -548,6 +574,23 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "Destroy")
          AddControlEvent(pCtrl, "DropFiles")
          AddControlEvent(pCtrl, "ItemSelectionChanged")
+         AddControlEvent(pCtrl, "GotFocus")
+         AddControlEvent(pCtrl, "LostFocus")
+         AddControlEvent(pCtrl, "MouseMove")
+         AddControlEvent(pCtrl, "MouseDown")
+         AddControlEvent(pCtrl, "MouseUp")
+         AddControlEvent(pCtrl, "MouseDoubleClick")
+         AddControlEvent(pCtrl, "MouseEnter")
+         AddControlEvent(pCtrl, "MouseHover")
+         AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
+
+      case CTRL_TREEVIEW
+         AddControlEvent(pCtrl, "Click")
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "DropFiles")
          AddControlEvent(pCtrl, "GotFocus")
          AddControlEvent(pCtrl, "LostFocus")
          AddControlEvent(pCtrl, "MouseMove")

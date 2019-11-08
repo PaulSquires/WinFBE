@@ -1,10 +1,13 @@
-Version 1.9.8
+Version 1.9.8 (November 7, 2019)
 - Added: ListView ItemSelectionChanged event.
 - Added: ListView ColumnClick event.
+- Added: ListView.BeginUpdate and ListView.EndUpdate for situations when adding many items during a bulk add.
 - Added: ListViewRow, ListViewColumn to the e EventArgs passed to certain ListView event handlers.
+- Added: Code to manipulate ListView Columns Text, Width, Alignment, Add, Insert, Remove, Clear for situations outside of the Form's Initialize event.
+- Fixed: Much faster deallocation of memory for large collections of items for controls like ListView and ListBox.
 - Fixed: ListView Click event now only fires once rather then three times when fired.
 - Fixed: freebasic_keywords.txt to remove duplicate entries (thanks cbruce).
-- Fixed: Regression fixed whereby compile would fail for source code files that have spaces in their full path filename.
+- Fixed: Regression fixed whereby compile would fail for source code files that have spaces in their full path filename. However, the problem still persists if your WinFBE installation folder contains spaces. Install WinFBE to locations with folder paths containing no spaces until a permanent fix can be found for this problem.
 
 Version 1.9.7 (November 2, 2019)
 - Fixed: ListView notifications (Events) failing on 64 bit compiles.
