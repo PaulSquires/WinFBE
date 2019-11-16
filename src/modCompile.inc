@@ -166,11 +166,104 @@ end function
 
 ''
 ''
+private function AlternateCompile( byref wszExe AS wstring, _
+                                   byref wszCmdLine AS wstring, _
+                                   byref sConsoleText AS string _
+                                   ) as long
+
+   Dim ShExecInfo As SHELLEXECUTEINFOW  
+
+   ' Create a temporary batch that will contain the compile commands. We shell
+   ' to and run this batch file in order to do the compile.
+   ' Replace any embedded spaces with underscores
+   dim as CWSTR wDQ = wchr(34)
+   dim as CWSTR wszBatchFile = "_winfbe_compile.bat"
+   dim as CWSTR wszLogFile   = "_winfbe_compile.log"
+   
+   ' Change to the output code directory
+   'ChDir gCompile.MainFolder
+   
+   ' Must delete any previous instance of the compiler log file in case it was not deleted. Need
+   ' to do this because the compiler appends to the log file rather than overwriting.
+   if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
+   
+   dim as long f = Freefile
+   Open wszBatchFile For Output as #f
+   print #f, wDQ & wszEXE & wDQ & " " & wszCmdLine;
+   Print #f, " >> "; wszLogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
+   close #f
+   
+   dim as CWSTR wszShellExe = Environ("COMSPEC")
+   dim as CWSTR wszShellParam   = " /C " & wszBatchFile
+
+   With ShExecInfo
+      .cbSize       = Len(SHELLEXECUTEINFOW)
+      .fMask        = SEE_MASK_NOCLOSEPROCESS
+      .HWnd         = 0
+      .lpVerb       = Null
+      .lpFile       = wszShellExe.sptr
+      .lpParameters = wszShellParam.sptr   
+      .lpDirectory  = 0
+      .nShow        = SW_HIDE
+      .hInstApp     = 0 
+   End With
+
+   ' Shell to the compiler 
+   ShellExecuteEx( @ShExecInfo )
+    
+   ' Give the process 33 ms (you can use a different value here depending on 
+   ' how responsive you wish your app to be)
+   Dim uMsg As MSG
+   while WaitForSingleObject(ShExecInfo.hProcess, 33) = WAIT_TIMEOUT
+   '  if after 33 ms the object's handle is not signaled..       
+   '  we examine the message queue and if there are any waiting..
+   '  Note:  see PeekMessage documentation for details on how to limit
+   '         the types of messages to look for
+      while(PeekMessage(@uMsg, HWND_FRMMAIN,  0, 0, PM_NOREMOVE))
+        ' we process them..
+        if(GetMessage(@uMsg, NULL, 0, 0) > 0) then
+            TranslateMessage(@uMsg)
+            DispatchMessage(@uMsg)
+         end if
+      wend
+   wend
+   
+   ' Get the log file contents into a string in order to parse it for errors, etc
+   If AfxFileExists(wszLogFile) Then
+      f = Freefile
+      Open wszLogFile For binary as #f
+      sConsoleText = string(lof(f), 0)
+      Get #f, , sConsoleText
+      Close #f
+   End If   
+
+? "--sConsoleText--"
+? sConsoleText
+
+'   if AfxFileExists(wszBatchFile) then AfxDeleteFile(wszBatchFile)
+'   if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
+
+   function = 0
+end function
+
+
+''
+''
 private function RedirConsoleToFile( byref wszExe AS wstring, _
                                      byref wszCmdLine AS wstring, _
                                      byref sConsoleText AS string _
                                      ) as long
 
+   ' It appears that CreateProcess will fail if szExe is wrapped in quotes or if
+   ' it contains spaces in the filename. Use the older Batch file method instead.
+   ' This means that the WinFBE installation and the location of the gcc tools should not
+   ' have any embedded spaces in their folder paths. 
+   if instr(wszExe, " ") then
+      AlternateCompile( wszExe, wszCmdLine, sConsoleText )
+      return 0
+   end if   
+
+   ' Continue on with the newer CreateProcess compile approach.
    dim SecurityAttribute AS SECURITY_ATTRIBUTES
    dim hChildStdOutRead  AS PHANDLE
    dim hChildStdOutWrite AS PHANDLE
@@ -181,10 +274,6 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
    SecurityAttribute.nLength              = SIZEOF(SECURITY_ATTRIBUTES)
    SecurityAttribute.bInheritHandle       = TRUE
    SecurityAttribute.lpSecurityDescriptor = NULL
-
-   ' It appears that CreateProcess will fail if szExe is wrapped in quotes. This
-   ' means that the WinFBE installation and the location of the gcc tools should not
-   ' have any embedded spaces in their folder paths. 
 
    ' Create a pipe for the child process's STDOUT.
    IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
@@ -203,21 +292,20 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
          StartupInf.hStdOutput = hChildStdOutWrite  
          StartupInf.dwFlags    = STARTF_USESTDHANDLES
 
-         dim wszFullCommandLine as wstring * 32767
          dim wszFullExe as wstring * 32767
          
          if instr(wszExe, " ") then
-            wszFullExe = wchr(34) & wszExe & wchr(34, 32)
+            wszFullExe = wchr(34) & wszExe & wchr(34)
          else
             wszFullExe = wszExe 
          end if
          
-         wszFullCommandLine = wszFullExe & " " & wszCmdLine
-         
 ' This call to CreateProcessW will succeed in all cases except for the one
 ' where there is spaces in wszFullExe because once I wrap the string in double
 ' quotes then the call to CreateProcessW fails.
-         IF CreateProcessW( wszFullExe,  _    ' Create the child process.
+
+         dim errCode as long 
+         errCode = CreateProcessW( wszFullExe,  _    ' Create the child process.
                      wszCmdLine, _       ' Command line
                      BYVAL 0,     _  ' Process security attributes
                      BYVAL 0,     _  ' Primary thread security attributes
@@ -226,21 +314,19 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
                      BYVAL 0,     _  ' Use parent's environment
                      BYVAL 0,     _  ' Use parent's current directory
                      @StartupInf,  _  ' STARTUPINFO pointer
-                     @ProcessInfo) THEN
+                     @ProcessInfo) 
+         
+         'if errCode = 0 then
+         '   ? wszFullExe
+         '   ? wszCmdLine
+         '   ? "CreateProcess FAILED errCode: "; errCode, "GetLastError: "; GetLastError()
+         '   'ERROR_INVALID_NAME
+         '   '    123 (0x7B)
+         '   '    The filename, directory name, or volume label syntax is incorrect.
+         'end if
 
-' If I use NULL for the first parameter and instead include the exe name as the
-' first parameter of the second parameter then the compile will fail with a "linker
-' error not finding WinMain@16".
-'         IF CreateProcessW( NULL,  _    ' Create the child process.
-'                     wszFullCommandLine, _       ' Command line
-'                     BYVAL 0,     _  ' Process security attributes
-'                     BYVAL 0,     _  ' Primary thread security attributes
-'                     TRUE,        _  ' Handles are inherited
-'                     CREATE_NO_WINDOW, _  ' Creation flags  
-'                     BYVAL 0,     _  ' Use parent's environment
-'                     BYVAL 0,     _  ' Use parent's current directory
-'                     @StartupInf,  _  ' STARTUPINFO pointer
-'                     @ProcessInfo) THEN
+
+         if errCode <> 0 then            
 
             CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
             DO
@@ -255,7 +341,10 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
             LOOP
             
          else
-            ? "CreateChildProcess failed"      
+            '? "CreateChildProcess failed"      
+            if instr( wszFullExe, " " ) then
+               AfxMsg( "CreateChildProcess failed. Install WinFBE into folder without spaces." )
+            end if    
             ' Close handles to the child process and its primary thread.
             ' Some applications might keep these handles to monitor the status 
             ' of the child process, for example.
@@ -632,12 +721,12 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    
    ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
    If (NumWarnings > 0) orelse (NumErrors > 0) orelse (NumDirectives > 0) then
-
+   
       cwsCompileMsg = L(193, "Errors")   & " " & NumErrors   & "  " & _
                       L(192, "Warnings") & " " & NumWarnings & _
                       "  [" & _
-                        AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
-                        AfxSystemTimeToTimeStr( gCompile.SystemTime, "hh:mm:ss" ) & "]"
+                        AfxLocalDateStr( "yyyy-MM-dd" ) & "  " & _
+                        AfxLocalTimeStr( "hh:mm:ss" ) & "]"
       gCompile.wszOutputMsg = L(229,"Failed Compile")  & " (" & cwsCompileMsg & ")" & vbcrlf
       SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
@@ -1126,16 +1215,26 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
+   ' Per fxm post https://www.freebasic.net/forum/viewtopic.php?f=8&p=266126#p266126
+   ' Do not specify file extension with -m parameter, and also include the file
+   ' a second time in the list of files but include the extension at that time.
+   'dim as CWSTR wszMfile = wDQ + gCompile.MainFilename + wDQ
+   'dim as CWSTR wszMfile = wDQ + AfxStrPathName("PATH", gCompile.MainFilename) + AfxStrPathName("NAME", gCompile.MainFilename) + wDQ
+   'wszParams = "-m " + wszMfile + " " + wDQ + gCompile.MainFilename + wDQ 
    wszParams = "-m " + wDQ + gCompile.MainFilename + wDQ 
+
 
    ' Determine if we need to generate a temporary Resource file to hold any
    ' necessary for visual designer forms/projects where image references need to be outputted.
    if CreateTempResourceFile() then
       wszParams = wszParams + " " + wDQ + gCompile.TempResourceFile + wDQ
-   else   
-      wszParams = wszParams + " " + wDQ + gCompile.ResourceFile + wDQ
+   else
+      if len(gCompile.ResourceFile) then  
+         wszParams = wszParams + " " + wDQ + gCompile.ResourceFile + wDQ
+      end if   
    end if   
 
+   
    ' Ensure verbose compiler message output
    wszParams = wszParams + " -v " + gCompile.CompileFlags 
    

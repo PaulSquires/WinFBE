@@ -172,7 +172,8 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
                      wsBaseType = wsParts
                      continue do
                   case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
-                       "WFXCHECKBOX", "WFXMASKEDEDIT", "WFXCOMBOBOX", "WFXOPTIONBUTTON"
+                       "WFXCHECKBOX", "WFXMASKEDEDIT", "WFXCOMBOBOX", "WFXOPTIONBUTTON", _
+                       "WFXLISTVIEW", "WFXPROGRESSBAR"
                      if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
                   case "WFXFRAME", "WFXPICTUREBOX"
                END SELECT
@@ -430,13 +431,13 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszCursor = "IMAGE_CURSOR_TEXTBOX"
    gToolBox(n).wszClassName = "TEXTBOX"
 
-   n = n + 1
-   gToolBox(n).nToolType = CTRL_TREEVIEW
-   gToolBox(n).wszToolBoxName   = "TreeView"
-   gToolBox(n).wszControlName   = "TreeView"
-   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
-   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
-   gToolBox(n).wszClassName = "TREEVIEW"
+'   n = n + 1
+'   gToolBox(n).nToolType = CTRL_TREEVIEW
+'   gToolBox(n).wszToolBoxName   = "TreeView"
+'   gToolBox(n).wszControlName   = "TreeView"
+'   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
+'   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
+'   gToolBox(n).wszClassName = "TREEVIEW"
 
 
    redim preserve gToolBox(n) as TOOLBOX_TYPE

@@ -130,7 +130,7 @@ private function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false 
          r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
          SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
-         startPos = r + len(txtFind)
+         startPos = r + len(txtReplace)  'len(txtFind)
          ' Adjust the searching positions
          SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
          SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
