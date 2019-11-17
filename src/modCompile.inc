@@ -1176,8 +1176,17 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
             wszCtrlEquate = "#define CODEGEN_" & ucase(GetToolBoxName( pCtrl->ControlType ))
             if instr(wszVDEquates, wszCtrlEquate) = 0 then
                wszVDEquates = wszVDEquates & wszCtrlEquate & vbcrlf
+               ' If adding a RichEdit control reference then we also need to add
+               ' TextBox reference because a RichEdit extends a TextBox.
+               if pCtrl->ControlType = CTRL_RICHEDIT then
+                  wszCtrlEquate = "#define CODEGEN_TEXTBOX"
+                  if instr(wszVDEquates, wszCtrlEquate) = 0 then
+                     wszVDEquates = wszVDEquates & wszCtrlEquate & vbcrlf
+                  end if
+               end if
             end if
          NEXT
+
          if pDoc->MainMenuExists then
             wszCtrlEquate = "#define CODEGEN_MAINMENU"
             if instr(wszVDEquates, wszCtrlEquate) = 0 then
@@ -1199,6 +1208,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       end if
       pDoc = pDoc->pDocNext
    loop
+
    if bIsVisual then
       dim wszVDMain as CWSTR = gCompile.MainFolder & "WinFBE_VD_MAIN.bas"
       dim pStream as CTextStream

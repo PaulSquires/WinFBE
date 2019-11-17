@@ -81,13 +81,155 @@ end function
 ' Dereferences expressions like:  g.MyFunction, g.ot.rc, g->MyFunction
 ' Used for determining what popup autocomplete list or codetip to display.
 ' ========================================================================================
+'private function DereferenceLine( byval pDoc as clsDocument ptr, _
+'                                  byval sTrigger as String, _
+'                                  byval nPosition as long _
+'                                  ) as DB2_DATA ptr
+'   if pDoc = 0 THEN exit function
+    
+'   dim pData as DB2_DATA ptr
+'   dim pDataTYPE as DB2_DATA ptr
+'   dim pLastData as DB2_DATA ptr
+    
+'   dim as long i, nTotalElements, nCurElement
+'   dim as ClassProperty nGetSet
+'   dim as string sElement, sVarName, sCurrentFunction, sTypeName, sLocal, sGlobal, sTemp
+'   dim as Boolean bIsTHIS
+
+'   dim as hwnd hEdit   = pDoc->hWndActiveScintilla
+'   dim as long curPos  = nPosition   
+'   dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
+'   dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
+    
+'   ' Comment out any comment line so the popup isn't activated when in a comment. 
+'   sLine = MaskStringCharacters(sLine)
+'   sLine = RemoveComments(sLine)
+
+'   ' Test to ensure that the incoming sTrigger character still exists after
+'   ' the commenting of the line. If it does then we know that the line
+'   ' is good and we can proceed to dereference elements on the line.
+'   ' The identifer that triggers an autocomplete list for a TYPE variable
+'   ' is either a dot "." or a pointer dereference "->"
+'   if right(sLine, len(sTrigger)) <> sTrigger THEN exit function
+'   sLine = rtrim(sLine, sTrigger)
+
+
+'   ' Proceed to parse the line. Find the beginning of the line in order to
+'   ' isolate the expression to dereference. The expression might contain an
+'   ' array reference so that would have to be removed, however the "(" can
+'   ' also signify the start position of the expression. For example:
+'   ' st = myFunction(myvar(3).myvalue)
+'   ' Simply reverse searching for the "(" would fail because the array "()"
+'   ' also needs to be taken into account. Therefore, search in reverse and
+'   ' take note of when the ")" is encountered in order to then match it with
+'   ' an "(".
+'   dim as long nStart, nEnd
+'   do
+'      nEnd = InStrRev(sLine, ")", -1)
+'      if nEnd = 0 then exit do
+'      nStart = InStrRev(sLine, "(", nEnd)
+'      if nStart = 0 then exit do
+'      ' Remove any array parenthesis.
+'      sLine = left(sLine, nStart-1) & mid(sLine, nEnd+1)
+'   LOOP
+'   ' All of the array parenthesis should now be removed so now we can simply
+'   ' search for the start of the line.
+'   i = InStrRev(sLine, any " (*[&@", -1)
+'   if i THEN sLine = mid(sLine, i+1)
+    
+'   ' Need to check if this line is part of a WITH / END WITH block.
+'   if (len(sLine) = 0) or (left(sLine, 1) = ".") then
+'      sLine = DetermineWithVariable(pDoc) & sLine
+'   END IF
+    
+'   ' Make it easier to parse by converting line to uppercase
+'   sLine = ucase(sLine)
+    
+'   ' Convert all "->" pointer references to "." dots to make parsing easier
+'   sLine = AfxStrReplace(sLine, "->", ".")
+'   nTotalElements = AfxStrParseCount(sLine, ".")
+'   nCurElement = 1
+    
+'   ' Determine what sub/function (if any) that we are in. This function will
+'   ' retrieve the current standalone function, or the fully qualified name of 
+'   ' a class/type function.
+'   ' eg.   clsType.MyFunctionName      ' inside a class/type function
+'   ' eg.   MyFunctionName              ' standalone function
+'   pDoc->GetCurrentFunctionName( sCurrentFunction, nGetSet )
+
+'   do until nCurElement > nTotalElements
+'      sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
+
+'      ' SEARCH FOR MATCHING VARIABLE NAME
+'      ' If the special keyword "THIS" is used then convert it to the function name
+'      if nCurElement = 1 then
+'         if ucase(sElement) = "THIS" then
+'            sElement = AfxStrParse(sCurrentFunction, 1, ".")
+'            bIsTHIS = true
+'         else
+'            bIsTHIS = false
+'         END IF
+'      END IF
+'      sVarName = sVarName & sElement
+
+'      '' ATTEMPT TO MATCH A FUNCTION NAME
+'      ' eg.    MyFunction
+'      ' eg.    mytype.MyFunction
+'      pData = gdb2.dbFindFunction( sVarName )
+'      if pData then return pData
+'      pData = gdb2.dbFindSub( sVarName )
+'      if pData then return pData
+'      pData = gdb2.dbFindProperty( sVarName )
+'      if pData then return pData
+                  
+'      '' ATTEMPT TO MATCH LOCAL VARIABLE
+'      ' <FunctionName>.<Element>
+'      ' <TYPEname>.<FunctionName>.<Element>
+'      sLocal = sCurrentFunction & "." & sVarName
+'      if AfxStrTally(sLocal, ".") = 1 then sLocal = "." & sLocal
+
+'      pData = gdb2.dbFindVariable(sLocal)
+'      if pData = 0 THEN 
+'         '' ATTEMPT TO MATCH ON A TYPE ELEMENT
+'         if pLastData then
+'            sTemp = pLastData->ElementValue & ".." & sElement
+'         else
+'            sTemp = sVarName & "." & sElement
+'         end if
+'         pData = gdb2.dbFindVariable(sTemp)
+          
+'         '' ATTEMPT TO MATCH GLOBAL VARIABLE   
+'         if pData = 0 then
+'            sGlobal = ".." & sElement     ' Global variable format ..<ElementName>
+'            pData = gdb2.dbFindVariable(sGlobal)
+'         end if
+'      END IF    
+           
+'      '' ATTEMPT TO MATCH ON A TYPE NAME
+'      if pData then 
+'         sTypeName = pData->ElementValue
+'      else
+'         sTypeName = sVarName   
+'      END IF
+'      pDataTYPE = gdb2.dbFindTYPE(sTypeName)
+'      if pDataTYPE then pLastData = pDataTYPE
+       
+'      sVarName = sTypeName & "."
+'      nCurElement = nCurElement + 1
+'   loop
+    
+'   if pLastData then pLastData->IsTHIS = bIsThis
+'   return pLastData
+       
+'END FUNCTION
+
 private function DereferenceLine( byval pDoc as clsDocument ptr, _
                                   byval sTrigger as String, _
                                   byval nPosition as long _
                                   ) as DB2_DATA ptr
    if pDoc = 0 THEN exit function
    
-   dim pData as DB2_DATA ptr
+   dim pData     as DB2_DATA ptr
    dim pDataTYPE as DB2_DATA ptr
    dim pLastData as DB2_DATA ptr
    
@@ -123,15 +265,21 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    ' also needs to be taken into account. Therefore, search in reverse and
    ' take note of when the ")" is encountered in order to then match it with
    ' an "(".
+   ' Need to alo handle situations where there are multiple () array references
+   ' in the expression. For example:  ListView1.Item(10).rc(5)
    dim as long nStart, nEnd
    do
-      nEnd = InStrRev(sLine, ")", -1)
-      if nEnd = 0 then exit do
-      nStart = InStrRev(sLine, "(", nEnd)
-      if nStart = 0 then exit do
-      ' Remove any array parenthesis.
-      sLine = left(sLine, nStart-1) & mid(sLine, nEnd+1)
-   LOOP
+      do
+         nEnd = InStrRev(sLine, ")", -1)
+         if nEnd = 0 then exit do
+         nStart = InStrRev(sLine, "(", nEnd)
+         if nStart = 0 then exit do
+         ' Remove any array parenthesis.
+         sLine = left(sLine, nStart-1) & mid(sLine, nEnd+1)
+      LOOP
+      if (nStart = 0) or (nEnd = 0) then exit do
+   loop
+   
    ' All of the array parenthesis should now be removed so now we can simply
    ' search for the start of the line.
    i = InStrRev(sLine, any " (*[&@", -1)

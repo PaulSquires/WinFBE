@@ -83,82 +83,94 @@
 <td>Gets or sets the column header style.</td>
 </tr>
 <tr class="even">
+<td>HeaderHeight</td>
+<td>Gets or sets the column header height</td>
+</tr>
+<tr class="odd">
+<td>HeaderBackColor</td>
+<td>The backgroundground color of the ListView column display text.</td>
+</tr>
+<tr class="even">
+<td>HeaderForeColor</td>
+<td>The foreground color of the ListView column display text.</td>
+</tr>
+<tr class="odd">
 <td>Height</td>
 <td>Gets or sets the height of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>HideSelection</td>
 <td>Indicates that the selection should be hidden when the edit control loses focus.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>hWindow</td>
 <td>Gets the Windows handle (hwnd) of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>hWindowParent</td>
 <td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Item</td>
 <td>Gets or sets properties of an Item <a href="#wfxListViewItem">wfxListViewItem</a> object</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Items</td>
 <td>Gets or sets properties of an Items <a href="#wfxListViewItemsCollection">wfxListViewItemsCollection</a> collection object</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Left</td>
 <td>Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Location</td>
 <td>Gets or sets the top and left position of the control. Get: returns <a href="#wfxPoint">wfxPoint</a> object. Set: (left, top).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Locked</td>
 <td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MultiSelec</td>
 <td>Gets or sets a value indicating whether multiple items can be selected.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Parent</td>
 <td>Gets or sets the parent container of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>SelectedItem</td>
 <td>Gets or sets the selected item in thelistbox (using a <a href="#wfxListViewItem">wfxListViewItem</a> object).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>SelectedIndex</td>
 <td>Gets or sets the index value of the selected item in the listview.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Size</td>
 <td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>TabIndex</td>
 <td>Gets or sets the position that the control occupies in the TAB position.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>TabStop</td>
 <td>Gets or sets a value (true/false) indicating whether the user can use the TAB key to give focus to the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Tag</td>
 <td>Gets or sets user defined text associated with the form.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Top</td>
 <td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Visible</td>
 <td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Width</td>
 <td>Gets or sets the width of the control.</td>
 </tr>
@@ -222,11 +234,19 @@
 </tr>
 <tr class="even">
 <td>Click</td>
-<td>Occurs when the client area of the control is clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.</td>
+<td>Occurs when the client area of the control is clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index. This event will also fire if ENTER is pressed.</td>
 </tr>
 <tr class="odd">
 <td>ColumnClick</td>
 <td>Occurs when a column header is clicked. e.ListViewColumn contains index of clicked Column header.</td>
+</tr>
+<tr class="even">
+<td>DoubleClick</td>
+<td>Occurs when the client area of the control is double clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.</td>
+</tr>
+<tr class="odd">
+<td>RightClick</td>
+<td>Occurs when the client area of the control is right clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.</td>
 </tr>
 <tr class="even">
 <td>ItemSelectionChanged</td>

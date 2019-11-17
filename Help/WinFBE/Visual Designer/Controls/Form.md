@@ -1,4 +1,4 @@
-# Form (wfxForm)
+﻿# Form (wfxForm)
 
 ### Properties
 
@@ -52,7 +52,9 @@
 | Refresh | Forces the form to invalidate its client area and immediately redraw itself and any child controls.|
 | SetBounds | Sets the bounds of the form to the specified location and size. SetBounds(left, top, width, height).|
 | Show | Creates and displays the form to the user.|
-| ShowDialog | Creates and shows the form as a modal dialog box.  |                      |
+| ShowDialog | Creates and shows the form as a modal dialog box.  |
+| ShowChild | Creates and shows the form as a child (WS_CHILD) of the specified parent form similar to a Panel control. |
+
 ### Events
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |

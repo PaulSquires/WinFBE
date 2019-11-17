@@ -17,6 +17,9 @@
 | FullRowSelect | Gets or sets a value indicating whether clicking an item selects all its subitems. |
 | GridLines | Gets or sets a value indicating whether grid lines appear between the rows and columns containing the items and subitems in the control. |
 | HeaderStyle | Gets or sets the column header style. |
+| HeaderHeight | Gets or sets the column header height |
+| HeaderBackColor | The backgroundground color of the ListView column display text. |
+| HeaderForeColor | The foreground color of the ListView column display text. |
 | Height | Gets or sets the height of the control.|
 | HideSelection  | Indicates that the selection should be hidden when the edit control loses focus. |
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
@@ -54,8 +57,10 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | AllEvents | Special handler where all events are routed through. Use this handler if you prefer to use the Win32 api style messages and wParam and lParam parameters. Set the Handled element of EventArgs to true if you handle a message and do not want Windows to perform any further processing on the message.|
-| Click | Occurs when the client area of the control is clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.|
+| Click | Occurs when the client area of the control is clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index. This event will also fire if ENTER is pressed.|
 | ColumnClick | Occurs when a column header is clicked. e.ListViewColumn contains index of clicked Column header.|
+| DoubleClick | Occurs when the client area of the control is double clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.|
+| RightClick | Occurs when the client area of the control is right clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index. |
 | ItemSelectionChanged | Occurs when the selected Item has changed. e.ListViewRow contains current selected Item index.|
 | Destroy | Occurs immediately before the control is about to be destroyed and all resources associated with it released.|
 | DropFiles | Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.|

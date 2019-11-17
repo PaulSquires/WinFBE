@@ -1,3 +1,13 @@
+Version 1.9.9 (November 17, 2019)
+- Added: New method Form.ShowChild allows displaying a Form as a child (WS_CHILD). This allows forms to act like child panel controls.
+- Added: ListView DoubleClick, RightClick events.
+- Added: ListView Click event will now also fire if ENTER is pressed on a ListView line.
+- Changed: ListView Columns.Add now only requires Text parameter with Width (default 100 pixels) and Alignment (TextAlignment.Left) being optional.
+- Fixed: ListView Click event was not returning correct e.ListViewRow, e.ListViewColumn values.
+- Fixed: When items are insert/remove from ListView/ListBox/ComboBox then their Index properties are now updated to accurately reflect their new position within the collections.
+- Fixed: Bug in Replace All whereby start search position was incremented by length of the find phrase rather than the replace phrase.
+- Fixed: Compile would fail if RichEdit exists in a project but no TextBoxes also exist in the project.
+
 Version 1.9.8 (November 7, 2019)
 - Added: ListView ItemSelectionChanged event.
 - Added: ListView ColumnClick event.
@@ -20,7 +30,7 @@ Version 1.9.6 (November 2, 2019)
 
 Version 1.9.5 (November 1, 2019)
 - Added: ListView control.
-- Added: Visual designer projects create WinFBE_VD_MAIN.bas that contains EQUATES to activate all controls that are present in the project. Thi helps reduce EXE size.
+- Added: Visual designer projects create WinFBE_VD_MAIN.bas that contains EQUATES to activate all controls that are present in the project. This helps reduce EXE size.
 - Added: ListBox Insert method.
 - Changed: Remove the Visual Designer sample project (a new one will be added in the future).
 - Fixed: WinFBE project files for the those found in the "Sample_Projects" folder.
