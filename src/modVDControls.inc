@@ -604,7 +604,9 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseUp")
          AddControlEvent(pCtrl, "MouseDoubleClick")
          AddControlEvent(pCtrl, "MouseEnter")
-         AddControlEvent(pCtrl, "MouseHover")
+         ' Do not add a MouseHover event for the ListView as it
+         ' seems to invoke hot tracking and automatic row selection.
+         'AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")

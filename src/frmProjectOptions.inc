@@ -95,26 +95,20 @@ private Function frmProjectOptions_SaveProjectOptions( ByVal HWnd As HWnd ) As B
    ' Save the actual Project data to disk.
    gConfig.ProjectSaveToFile()   
 
-   if gApp.IsNewProjectFlag then 
-      ' Need to remove resource file (if created) from the document list otherwise it
-      ' will be loaded again and it will display twice in the Explorer.
-      gApp.RemoveAllDocuments()
-      
-      ' Open the new project so it displays in the Explorer treeview. Pass the 
-      ' variable wText because passing gApp.ProjectFilename will cause that variable
-      ' to get reset because the parameter is byref and eventually that variable
-      ' gets assigned a null.
-      frmMain_OpenProjectSafely(HWND_FRMMAIN, wText) 
-
-      ' Add a new blank file to the project and set it as the Main by default   
-      dim pDoc as clsDocument ptr = OnCommand_FileNew(HWND_FRMMAIN)
-      if pDoc then 
-         SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
-      end if
-      ' Ensure that the main form files combo shows the correct list of files
-      frmMain_LoadComboFiles
+   if Button_GetCheck( GetDlgItem(Hwnd, IDC_FRMPROJECTOPTIONS_OPTNONE) ) THEN
+      gApp.NewProjectTemplateType = IDC_FRMPROJECTOPTIONS_OPTNONE
+   elseif Button_GetCheck( GetDlgItem(Hwnd, IDC_FRMPROJECTOPTIONS_OPTBLANK) ) THEN
+      gApp.NewProjectTemplateType = IDC_FRMPROJECTOPTIONS_OPTBLANK
+   elseif Button_GetCheck( GetDlgItem(Hwnd, IDC_FRMPROJECTOPTIONS_OPTVD) ) THEN
+      gApp.NewProjectTemplateType = IDC_FRMPROJECTOPTIONS_OPTVD
+   elseif Button_GetCheck( GetDlgItem(Hwnd, IDC_FRMPROJECTOPTIONS_OPTCONSOLE) ) THEN
+      gApp.NewProjectTemplateType = IDC_FRMPROJECTOPTIONS_OPTCONSOLE
+   elseif Button_GetCheck( GetDlgItem(Hwnd, IDC_FRMPROJECTOPTIONS_OPTDLL) ) THEN
+      gApp.NewProjectTemplateType = IDC_FRMPROJECTOPTIONS_OPTDLL
+   elseif Button_GetCheck( GetDlgItem(Hwnd, IDC_FRMPROJECTOPTIONS_OPTSTATIC) ) THEN
+      gApp.NewProjectTemplateType = IDC_FRMPROJECTOPTIONS_OPTSTATIC
    end if
-   
+
    function = true   
 End Function
 
@@ -151,9 +145,11 @@ private Function frmProjectOptions_OnCommand( ByVal HWnd As HWnd, _
       
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
+            gApp.IsNewProjectFlag = false
             SendMessage HWnd, WM_CLOSE, 0, 0
             exit function
          End If
+
    End Select
 
    Function = 0
@@ -193,8 +189,6 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmProjectOptions
 ' ========================================================================================
 private Function frmProjectOptions_OnDestroy( byval HWnd As HWnd ) As LRESULT
-   gApp.IsProjectLoading = FALSE
-   gApp.IsNewProjectFlag = false
    PostQuitMessage(0)
    Function = 0
 End Function
@@ -228,6 +222,7 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
                                         ) As LRESULT
 
    Dim wszTitle As WString * MAX_PATH
+   dim as long nLeft, nTop, nWidth, nHeight, nMidPoint
    
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
@@ -240,8 +235,12 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
    pWindow->SetClientSize(600, 320)
    pWindow->Center(pWindow->hWindow, hWndParent)
       
+   dim as RECT rcClient
+   GetClientRect( hForm, @rcClient )
+   nMidPoint = pWindow->UnScaleX((rcClient.Right / 2))
+   
    pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL1, L(240,"Project Path"), 26, 15, 235, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)                                              
    Dim As HWnd hProjectPath = _
    pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH, "", 26, 35, 508, 20, _
@@ -251,38 +250,86 @@ public Function frmProjectOptions_Show( ByVal hWndParent As HWnd, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL5, L(283,"Specify compiler options in addition to the selected build configuration"), 26, 95, 500, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+   nTop    = iIf(IsNewProject, 75, 95) 
+   nWidth  = iIf(IsNewProject, 260, 555)
+   nHeight = iIf(IsNewProject, 40, 20)
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL5, L(283,"Specify compiler options in addition to the selected build configuration") & ":", 26, nTop, nWidth, nHeight, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL2, L(241,"Other Options (32-bit compiler)"), 26, 121, 235, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL2, L(241,"Other Options (32-bit compiler)"), 26, 121, nWidth, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   nWidth = iIf(IsNewProject, 260, 555) 
    Dim As HWnd hProjectOther32 = _
-   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS32, "", 26, 141, 555, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS32, "", 26, 141, nWidth, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL4, L(242,"Other Options (64-bit compiler)"), 26, 170, 235, 18, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL4, L(242,"Other Options (64-bit compiler)"), 26, 170, nWidth, 18, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   nWidth = iIf(IsNewProject, 260, 555) 
    Dim As HWnd hProjectOther64 = _
-   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS64, "", 26, 190, 555, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMPROJECTOPTIONS_TXTOPTIONS64, "", 26, 190, nWidth, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
+   nWidth = iIf(IsNewProject, 260, 555) 
    dim as hwnd hManifest = _
-   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKMANIFEST, L(308,"Create resource file and manifest"), 26, 222, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMPROJECTOPTIONS_CHKMANIFEST, L(308,"Create resource file and manifest"), 26, 222, nWidth, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 250, 572, 2, _
+   If IsNewProject Then
+      pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL6, "", nMidPoint, 75, 3, 175, _
+           WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_SUNKEN, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+      nLeft  = nMidPoint + 20     
+      nTop   = 75
+      nWidth = 270
+      pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL7, L(176,"Templates") & ":", nLeft, nTop, nWidth, 20, _
+           WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT, _
+           WS_EX_LEFT Or WS_EX_LTRREADING)
+      nLeft  = nLeft + 20
+      nTop   = nTop + 22
+      nWidth = 260
+      pWindow->AddControl("RADIOBUTTON", , IDC_FRMPROJECTOPTIONS_OPTNONE, L(388,"None"), nLeft, nTop, nWidth, 20, _
+           WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER or WS_GROUP, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      nTop = nTop + 22
+      pWindow->AddControl("RADIOBUTTON", , IDC_FRMPROJECTOPTIONS_OPTBLANK, L(389,"Blank Document"), nLeft, nTop, nWidth, 20, _
+           WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      nTop = nTop + 22
+      pWindow->AddControl("RADIOBUTTON", , IDC_FRMPROJECTOPTIONS_OPTVD, L(390,"Visual Designer"), nLeft, nTop, nWidth, 20, _
+           WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      nTop = nTop + 22
+      pWindow->AddControl("RADIOBUTTON", , IDC_FRMPROJECTOPTIONS_OPTCONSOLE, L(391,"Console"), nLeft, nTop, nWidth, 20, _
+           WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      nTop = nTop + 22
+      pWindow->AddControl("RADIOBUTTON", , IDC_FRMPROJECTOPTIONS_OPTDLL, L(392,"Windows DLL"), nLeft, nTop, nWidth, 20, _
+           WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      nTop = nTop + 22
+      pWindow->AddControl("RADIOBUTTON", , IDC_FRMPROJECTOPTIONS_OPTSTATIC, L(393,"Static Library"), nLeft, nTop, nWidth, 20, _
+           WS_VISIBLE OR WS_TABSTOP OR BS_AUTORADIOBUTTON OR BS_LEFT OR BS_VCENTER, _
+           WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
+      CheckRadioButton( hForm, IDC_FRMPROJECTOPTIONS_OPTNONE, _
+                               IDC_FRMPROJECTOPTIONS_OPTSTATIC, _
+                               IDC_FRMPROJECTOPTIONS_OPTNONE )
+   end if
+   
+   
+   pWindow->AddControl("LABEL", , IDC_FRMPROJECTOPTIONS_LABEL3, "", 10, 260, 572, 2, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY Or SS_SUNKEN, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 423, 265, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDOK, L(0,"&OK"), 423, 275, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_DEFPUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 508, 265, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"&Cancel"), 508, 275, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

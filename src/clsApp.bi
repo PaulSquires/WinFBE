@@ -38,6 +38,7 @@ Type clsApp
       wszPanelText               as CWSTR             ' Current file loading or being compiled (for statusbar updating)
       hIconPanel                 as HANDLE            ' Success/failure of most previous compile (for Statusbar updating)
       FileLoadingCount           as long              ' Track count of files loading for statusbar display
+      NewProjectTemplateType     as long              ' IDC of the new project type to create.
       IsNewProjectFlag           As BOOLEAN
       IsProjectLoading           as Boolean           ' Project loading. Disable some screen updating.
       IsFileLoading              as Boolean           ' File loading. Disable some screen updating.

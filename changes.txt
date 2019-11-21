@@ -1,3 +1,11 @@
+Version 2.0.0 (November 21, 2019)
+- Added: New Project template options: None; Blank Document; Visual Designer; Console; Windows DLL; Static Library.
+- Added: ListView sort (ascending or descending) by a specified SubItem column index. ListView.Items.SortByColumn( nSortColumn, bSortAscend ).
+- Added: ListView Click event now sets e.KeyChar = 13, e.KeyCode = VK_RETURN, whenever ENTER is pressed on a selected row.
+- Fixed: ListView would "automatically" select the row under the cursor even if you don't click on it. Fix required removing the ListView MouseHover event.
+- Fixed: "Open Templates" menu option was disabled if no file/project was already opened.
+- Fixed: Removed extra separator bar between the "Replace" and "Goto Line" top menu items.
+
 Version 1.9.9 (November 17, 2019)
 - Added: New method Form.ShowChild allows displaying a Form as a child (WS_CHILD). This allows forms to act like child panel controls.
 - Added: ListView DoubleClick, RightClick events.

@@ -100,9 +100,270 @@ End Function
 ' ========================================================================================
 private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
 
+   
    ' Ensure that the Project Manager window has been created (show it now as well)
    frmProjectOptions_Show( HWnd, true ) 
    
+   if gApp.IsNewProjectFlag then 
+      ' Need to remove resource file (if created) from the document list otherwise it
+      ' will be loaded again and it will display twice in the Explorer.
+      gApp.RemoveAllDocuments()
+      
+      ' Open the new project so it displays in the Explorer treeview. Pass the 
+      ' variable wText because passing gApp.ProjectFilename will cause that variable
+      ' to get reset because the parameter is byref and eventually that variable
+      ' gets assigned a null.
+      dim as CWSTR wszText = gApp.ProjectFilename
+      frmMain_OpenProjectSafely(HWND_FRMMAIN, wszText) 
+
+
+      dim pDoc as clsDocument ptr 
+      dim pCtrl as clsControl ptr
+      dim as string szText 
+      dim as string DQ = chr(34) 
+      
+      
+      select case gApp.NewProjectTemplateType
+      
+      case IDC_FRMPROJECTOPTIONS_OPTNONE
+         ' Do nothing
+         
+      case IDC_FRMPROJECTOPTIONS_OPTBLANK
+         ' Add a new blank file to the project and set it as the Main by default   
+         pDoc = OnCommand_FileNew(HWND_FRMMAIN)
+         if pDoc then 
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
+         end if
+         
+      
+      case IDC_FRMPROJECTOPTIONS_OPTVD
+         pDoc = OnCommand_FileNew(HWND_FRMMAIN)
+         if pDoc then 
+            szText = _
+            "#Define UNICODE" & vbcrlf & _
+            "#Define _WIN32_WINNT &h0602" & vbcrlf & _
+            vbcrlf & _
+            vbcrlf & _
+            "#Include Once " & DQ & "windows.bi" & DQ & vbcrlf & _
+            "#Include Once " & DQ & "Afx\CWindow.inc" & DQ & vbcrlf & _
+            vbcrlf & _
+            "Using Afx" & vbcrlf & _
+            vbcrlf & _
+            "#Include Once " & DQ & "frmMain.inc" & DQ & vbcrlf & _
+            vbcrlf & _
+            vbcrlf & _
+            "Application.Run(frmMain)" & vbcrlf 
+
+            pDoc->SetText( szText )
+            dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+            SciMsg( pSci, SCI_GOTOLINE, 12, 0) 
+
+            ' Make this the Main file
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
+
+            ' Save the main file using the Project name and path
+            pDoc->IsNewFlag = false
+            pDoc->Diskfilename = AfxStrPathname( "PATH", gApp.ProjectFilename ) & _
+                                 AfxStrPathname( "NAME", gApp.ProjectFilename ) & _
+                                 ".bas"
+            pDoc->SaveFile
+         end if
+
+         ' Give a breather for the tab control and explorer node to update
+         AfxDoEvents()
+         
+         ' Create the frmMain
+         OnCommand_DesignerNewForm(HWND_FRMMAIN)
+         
+         pDoc = gTTabCtl.GetActiveDocumentPtr
+         if pDoc then
+            ' Set the Name property of the new form to frmMain
+            pCtrl = GetFormCtrlPtr(pDoc)
+            if pCtrl then SetControlProperty( pCtrl, "NAME", "frmMain" )
+         
+            ' Add something to the code editor so that it does not automatically 
+            ' generate the Application.Run code for the form.
+            szText = "' Auto generated frmMain form file" & vbcrlf
+            pDoc->SetText( szText )
+
+            ' Save the form file using the Project name and path
+            pDoc->IsNewFlag = false
+            pDoc->Diskfilename = AfxStrPathname( "PATH", gApp.ProjectFilename ) & _
+                                 "frmMain.inc"
+            pDoc->SaveFile
+         end if
+
+
+         ' Change the Build Configuration to match the first "GUI" (non-debug) type of entry.
+         for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+            if instr( " " & ucase(gConfig.Builds(i).wszOptions), " -S GUI") then
+               gApp.ProjectBuild = gConfig.Builds(i).id
+               exit for
+            end if
+         NEXT
+
+             
+      case IDC_FRMPROJECTOPTIONS_OPTCONSOLE
+         pDoc = OnCommand_FileNew(HWND_FRMMAIN)
+         if pDoc then 
+            szText = _
+            "'#CONSOLE ON"     & vbcrlf & _
+            "#Define UNICODE"  & vbcrlf & _
+            "#Include Once " & DQ & "windows.bi" & DQ & vbcrlf & _
+            vbcrlf & _
+            vbcrlf & _
+            "Print" & vbcrlf & _
+            "Print " & DQ & "Press any key..." & DQ & vbcrlf & _
+            "Sleep" & vbcrlf
+
+            pDoc->SetText( szText )
+            dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+            SciMsg( pSci, SCI_GOTOLINE, 4, 0) 
+
+            ' Make this the Main file
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
+
+            ' Save the main file using the Project name and path
+            pDoc->IsNewFlag = false
+            pDoc->Diskfilename = AfxStrPathname( "PATH", gApp.ProjectFilename ) & _
+                                 AfxStrPathname( "NAME", gApp.ProjectFilename ) & _
+                                 ".bas"
+            pDoc->SaveFile
+         end if
+         ' Change the Build Configuration to match the first "Console" (non-debug) type of entry.
+         for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+            if instr( " " & ucase(gConfig.Builds(i).wszOptions), " -S CONSOLE") then
+               gApp.ProjectBuild = gConfig.Builds(i).id
+               exit for
+            end if
+         NEXT
+      
+
+
+      case IDC_FRMPROJECTOPTIONS_OPTDLL
+         ' Change the Build Configuration to match the first "DLL" type of entry.
+         pDoc = OnCommand_FileNew(HWND_FRMMAIN)
+         if pDoc then 
+            szText = _
+            vbcrlf & _
+            "Extern " & DQ & "windows" & DQ & vbcrlf & _
+            vbcrlf & _
+            "'' Windows DLL template code" & vbcrlf & _
+            vbcrlf & _
+            "'' Add two numbers together and return the result" & vbcrlf & _
+            "Public Function Add2 alias " & DQ & "Add2" & DQ & "( ByVal x As Integer, ByVal y As Integer ) As Integer Export" & vbcrlf & _
+            "  Return( x + y )" & vbcrlf & _
+            "End Function" & vbcrlf & _
+            vbcrlf & _
+            "End Extern" & vbcrlf 
+
+            pDoc->SetText( szText )
+            dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+            SciMsg( pSci, SCI_GOTOLINE, 9, 0) 
+
+            ' Make this the Main file
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
+
+            ' Save the main file using the Project name and path
+            pDoc->IsNewFlag = false
+            pDoc->Diskfilename = AfxStrPathname( "PATH", gApp.ProjectFilename ) & _
+                                 AfxStrPathname( "NAME", gApp.ProjectFilename ) & _
+                                 ".bas"
+            pDoc->SaveFile
+
+         end if
+         
+         ' Change the Build Configuration to match the first "DLL" type of entry.
+         for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+            if instr( " " & ucase(gConfig.Builds(i).wszOptions), " -DLL") then
+               gApp.ProjectBuild = gConfig.Builds(i).id
+               exit for
+            end if
+         NEXT
+
+
+      case IDC_FRMPROJECTOPTIONS_OPTSTATIC
+         pDoc = OnCommand_FileNew(HWND_FRMMAIN)
+         if pDoc then 
+            szText = _
+            vbcrlf & _
+            "Extern " & DQ & "windows" & DQ & vbcrlf & _
+            vbcrlf & _
+            "'' Static Library template code" & vbcrlf & _
+            vbcrlf & _
+            "'' Add two numbers together and return the result" & vbcrlf & _
+            "Public Function Add2( ByVal x As Integer, ByVal y As Integer ) As Integer" & vbcrlf & _
+            "  Return( x + y )" & vbcrlf & _
+            "End Function" & vbcrlf & _
+            vbcrlf & _
+            "End Extern" & vbcrlf 
+
+            pDoc->SetText( szText )
+            dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+            SciMsg( pSci, SCI_GOTOLINE, 6, 0) 
+
+            ' Make this the Main file
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
+
+            ' Save the main file using the Project name and path
+            pDoc->IsNewFlag = false
+            pDoc->Diskfilename = AfxStrPathname( "PATH", gApp.ProjectFilename ) & _
+                                 AfxStrPathname( "NAME", gApp.ProjectFilename ) & _
+                                 ".bas"
+            pDoc->SaveFile
+         end if
+
+         ' Change the Build Configuration to match the first "LIB" type of entry.
+         for i as long = lbound(gConfig.Builds) to ubound(gConfig.Builds)
+            if instr( " " & ucase(gConfig.Builds(i).wszOptions), " -LIB") then
+               gApp.ProjectBuild = gConfig.Builds(i).id
+               exit for
+            end if
+         NEXT
+
+      end select
+      
+      
+      select case gApp.NewProjectTemplateType
+      case IDC_FRMPROJECTOPTIONS_OPTDLL, IDC_FRMPROJECTOPTIONS_OPTSTATIC   
+         ' Give a breather for the tab control and explorer node to update
+         AfxDoEvents()
+         pDoc = OnCommand_FileNew(HWND_FRMMAIN)
+         if pDoc then 
+            szText = _
+            "#inclib " & DQ & AfxStrPathname( "NAME", gApp.ProjectFilename ) & DQ & vbcrlf & _
+            "Declare Function Add2( ByVal x As Integer, ByVal y As Integer ) As Integer" & vbcrlf 
+
+            pDoc->SetText( szText )
+            dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+            SciMsg( pSci, SCI_GOTOLINE, 3, 0) 
+
+            ' Make this the Main file
+            SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEHEADER, 0), 0)
+
+            ' Save the main file using the Project name and path
+            pDoc->IsNewFlag = false
+            pDoc->Diskfilename = AfxStrPathname( "PATH", gApp.ProjectFilename ) & _
+                                 AfxStrPathname( "NAME", gApp.ProjectFilename ) & _
+                                 ".bi"
+            pDoc->SaveFile
+         end if
+      end select
+      
+
+      ' Ensure that the main form files combo shows the correct list of files
+      frmMain_LoadComboFiles
+      
+      ' Make sure that the Explorer root node is expanded
+      dim as HWND hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+      TreeView_Expand( hTree, gApp.hExplorerRootNode, TVE_EXPAND)
+      
+   end if
+
+   gApp.IsNewProjectFlag = false
+   gApp.IsProjectLoading = FALSE
+
+   frmBuildConfig_LoadBuildComboBox
    frmExplorer_PositionWindows
    frmMain_PositionWindows
    

@@ -1054,13 +1054,13 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Need to determine the output filename in order to search for any existing
    ' running process.
    gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
-   If Instr(Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
+   If Instr(" " & Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
       gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
    End If
-   If Instr(Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
+   If Instr(" " & Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
       gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
    End If
-   If Instr(Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
+   If Instr(" " & Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
       gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
    End If
 

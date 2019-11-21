@@ -87,6 +87,7 @@
 | Insert | Add a new item (and optional 32bit value) to the listview at a specific position. ListView.Items.Insert( Index, Text, 32bitValue)|
 | Remove | Remove/delete the item identified by the index value.|
 | SelectedCount | Returns the total number of selected items in the listview.|
+| SortByColumn | Sort by the specified SubItem column index. ListView.Items.SortByColumn( nSortColumn, bSortAscend ) |
 
 ### Item (wfxListViewItem)
 | Name                            | Description                    |

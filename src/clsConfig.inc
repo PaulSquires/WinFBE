@@ -432,6 +432,14 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszClassName = "TEXTBOX"
 
 '   n = n + 1
+'   gToolBox(n).nToolType = CTRL_MONTHCALENDAR
+'   gToolBox(n).wszToolBoxName   = "TextBox"
+'   gToolBox(n).wszControlName   = "MonthCalendar"
+'   gToolBox(n).wszImage  = "IMAGE_MONTHCALENDAR"
+'   gToolBox(n).wszCursor = "IMAGE_CURSOR_MONTHCALENDAR"
+'   gToolBox(n).wszClassName = "MONTHCALENDAR"
+
+'   n = n + 1
 '   gToolBox(n).nToolType = CTRL_TREEVIEW
 '   gToolBox(n).wszToolBoxName   = "TreeView"
 '   gToolBox(n).wszControlName   = "TreeView"
@@ -484,12 +492,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(21).wszImage  = "IMAGE_DATETIMEPICKER"
 '   gToolBox(21).wszCursor = "IMAGE_CURSOR_DATETIMEPICKER"
 '   gToolBox(21).wszClassName = "DATETIMEPICKER"
-
-'   gToolBox(22).nToolType = CTRL_MONTHCALENDAR
-'   gToolBox(22).wszName   = "MonthCalendar"
-'   gToolBox(22).wszImage  = "IMAGE_MONTHCALENDAR"
-'   gToolBox(22).wszCursor = "IMAGE_CURSOR_MONTHCALENDAR"
-'   gToolBox(22).wszClassName = "MONTHCALENDAR"
 
 '   gToolBox(23).nToolType = CTRL_WEBBROWSER
 '   gToolBox(23).wszName   = "WebBrowser"

@@ -95,7 +95,6 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_FINDINFILES, L(257,"Find In Files...") & Chr(9) & "Ctrl+Shift+F"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_REPLACE, L(46,"Replace") & "..." & Chr(9) & "Ctrl+R"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_GOTO, L(49,"Goto Line") & "..." & Chr(9) & "Ctrl+G"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          hPopUpSubMenu = CreatePopupMenu
@@ -345,6 +344,7 @@ public Function frmMain_ChangeTopMenuStates() As Long
    ' Items that will always be enabled.
    EnableMenuItem hMenu, IDM_FILENEW, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_FILEOPEN, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_FILEOPENTEMPLATES, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_COMMAND, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_EXIT, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_VIEWEXPLORER, MF_BYCOMMAND Or MF_ENABLED
