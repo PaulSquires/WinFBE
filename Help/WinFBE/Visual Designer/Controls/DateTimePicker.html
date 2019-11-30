@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>06_CheckBox</title>
+  <title>DateTimePicker</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,7 @@
   
 </head>
 <body>
-<h1 id="checkbox-(wfxcheckbox)">CheckBox (wfxCheckBox)</h1>
+<h1 id="date-time-picker(wfxdatetimepicker)">Date Time Picker(wfxDateTimePicker)</h1>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -35,12 +35,12 @@
 <td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
 </tr>
 <tr class="even">
-<td>BackColor</td>
-<td>Gets or sets the background color of the form. Refer to the <strong>Colors</strong> object.</td>
+<td>CalendarRightAlign</td>
+<td>Indicates whether the drop-down calendar will be right aligned with the control instead of left aligned which is the default.</td>
 </tr>
 <tr class="odd">
-<td>CheckState</td>
-<td>Gets or sets the state of the control. Refer to the <a href="#CheckBoxState">CheckBoxState</a> enum.</td>
+<td>DateFormat</td>
+<td>Gets or sets the format of the date and time displayed in the control. Refer to the DateTimePickerFormat enum.</td>
 </tr>
 <tr class="even">
 <td>CtrlId</td>
@@ -48,19 +48,19 @@
 </tr>
 <tr class="odd">
 <td>CtrlType</td>
-<td>Gets or sets the control type value. Always <strong>ControlType.CheckBox</strong> and used when adding control to the application’s form collection.</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.DateTimePicker</strong> and used when adding form to the application's form collection.</td>
 </tr>
 <tr class="even">
 <td>Enabled</td>
 <td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
 </tr>
 <tr class="odd">
-<td>Focused</td>
-<td>Gets or sets a value (true/false) indicating whether the control has input focus.</td>
-</tr>
-<tr class="even">
 <td>Font</td>
 <td>Gets or sets the font for the control. Refer to the Font object.</td>
+</tr>
+<tr class="even">
+<td>FormatCustom</td>
+<td>Gets or sets the custom format when the DateFormat property is set to CustomFormat.</td>
 </tr>
 <tr class="odd">
 <td>Height</td>
@@ -87,6 +87,14 @@
 <td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
 </tr>
 <tr class="odd">
+<td>SelectedDate</td>
+<td>Gets or sets the selected date in the format YYYMMDD.</td>
+</tr>
+<tr class="even">
+<td>SelectedTime</td>
+<td>Gets or sets the selected time in the format HHMMSS.</td>
+</tr>
+<tr class="odd">
 <td>Parent</td>
 <td>Gets or sets the parent container of the control.</td>
 </tr>
@@ -107,30 +115,18 @@
 <td>Gets or sets user defined text associated with the form.</td>
 </tr>
 <tr class="even">
-<td>Text</td>
-<td>Gets or sets the text (caption) associated with this form.</td>
-</tr>
-<tr class="odd">
-<td>TextAlign</td>
-<td>Gets or sets a value indicating the alignment of the text on a control. Refer to <a href="#ButtonAlignment">ButtonAlignment</a> enum.</td>
-</tr>
-<tr class="even">
-<td>ThreeState</td>
-<td>Gets or sets a value (true/false) indicating whether the control will allow three check states rather than two.</td>
+<td>ShowUpDown</td>
+<td>Gets or set a value indicating whether an up-down control is used to adjust the date/time value.</td>
 </tr>
 <tr class="odd">
 <td>Top</td>
 <td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
 </tr>
 <tr class="even">
-<td>UseMnemonic</td>
-<td>Gets or sets a value (true/false) indicating whether the first character preceded by an ampersand (&amp;) character will be used as the control’s accelerator key.</td>
-</tr>
-<tr class="odd">
 <td>Visible</td>
 <td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Width</td>
 <td>Gets or sets the width of the control.</td>
 </tr>
@@ -154,14 +150,10 @@
 <td>Forces the form to invalidate its client area and immediately redraw itself and any child controls.</td>
 </tr>
 <tr class="odd">
-<td>SelectNextControl</td>
-<td>Moves the input control to the next (True) or previous (False) control in the tab order.</td>
-</tr>
-<tr class="even">
 <td>SetBounds</td>
 <td>Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Show</td>
 <td>Creates and displays the control to the user.</td>
 </tr>
@@ -185,120 +177,161 @@
 <td>Occurs when the client area of the control is clicked.</td>
 </tr>
 <tr class="odd">
+<td>DateTimeChanged</td>
+<td>Indicates that a change (date or time has changed its value) has occured in the control.</td>
+</tr>
+<tr class="even">
 <td>Destroy</td>
 <td>Occurs immediately before the control is about to be destroyed and all resources associated with it released.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>DropFiles</td>
 <td>Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>GotFocus</td>
 <td>Occurs when the control receives focus.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>LostFocus</td>
 <td>Occurs when the control loses focus.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KeyDown</td>
 <td>Occurs when a key is pressed while the control has focus.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>KeyPress</td>
 <td>Occurs when a character, space or backspace key is pressed while the control has focus.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>KeyUp</td>
 <td>Occurs when a key is released while the control has focus.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseDoubleClick</td>
 <td>Occurs when the control is double clicked by the mouse.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MouseDown</td>
 <td>Occurs when the mouse pointer is over the control and a mouse button is pressed.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseEnter</td>
 <td>Occurs when the mouse pointer enters the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MouseHover</td>
 <td>Occurs when the mouse pointer rests on the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseLeave</td>
 <td>Occurs when the mouse pointer leaves the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MouseMove</td>
 <td>Occurs when the mouse pointer is moved over the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MouseUp</td>
 <td>Occurs when the mouse pointer is over the control and a mouse button is released.</td>
 </tr>
 </tbody>
 </table>
-<h5 id="checkboxstate">CheckBoxState</h5>
-<pre><code>Enum CheckBoxState      
-   Checked = 1
-   Unchecked
-   Indeterminate
+<h5 id="datetimepickerformat">DateTimePickerFormat</h5>
+<pre><code>Enum DateTimePickerFormat 
+   LongDate = 1
+   ShortDate
+   ShortDateCentury
+   TimeFormat
+   CustomFormat
 End Enum
 </code></pre>
-<h5 id="controlborderstyle">ControlBorderStyle</h5>
-<pre><code>Enum ControlBorderStyle
-   None = 1
-   FixedSingle  
-   Fixed3D 
-End Enum
-</code></pre>
-<h5 id="buttonalignment">ButtonAlignment</h5>
-<pre><code>Enum ButtonAlignment
-   BottomCenter = 1
-   BottomLeft   
-   BottomRight  
-   MiddleCenter 
-   MiddleLeft   
-   MiddleRight  
-   TopCenter    
-   TopLeft      
-   TopRight     
-End Enum
-</code></pre>
-<h5 id="wfxsize">wfxSize</h5>
-<pre><code>Type wfxSize
-   private:
-      _Width  as Long
-      _Height as long 
-
-   public:
-      Declare Property Width() As Long
-      Declare Property Width( ByVal nValue As Long )
-      Declare Property Height() As Long
-      Declare Property Height( ByVal nValue As Long )
-      Declare Function IsEmpty() as Boolean
-      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
-End Type
-</code></pre>
-<h5 id="wfxpoint">wfxPoint</h5>
-<pre><code>Type wfxPoint
-   private:
-      _x as Long
-      _y as long 
-
-   public:
-      Declare Property x() As Long
-      Declare Property x( ByVal nValue As Long )
-      Declare Property y() As Long
-      Declare Property y( ByVal nValue As Long )
-      Declare Function IsEmpty() as Boolean
-      Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
-End Type
-</code></pre>
+<p>If The DateFormat property is set to DateTimePickerFormat = CustomFormat, then the control will use the value of the FormatCustom property to display the date and/or time in the control.</p>
+<p>It is acceptable to include extra characters within the format string to produce a more rich display. However, any nonformat characters must be enclosed within single quotes. For example, the format string &quot;'Today is: 'hh':'m':'s ddddMMMdd', 'yyy&quot; would produce output like &quot;Today is: 04:22:31 Tuesday Mar 23, 1996&quot;. Note: When entering such a custom format string from within the WinFBE Visual Designer, you do not enclose the string in double quotes. WinFBE will automatically enclose the string in double quotes when code is generated at compile time.</p>
+<p>A custom format string consists of a series of elements that represent a particular piece of information and define its display format. The elements will be displayed in the order they appear in the format string. Date and time format elements will be replaced by the actual date and time. They are defined by the following groups of characters.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Element</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>&quot;d&quot;</td>
+<td>The one- or two-digit day.</td>
+</tr>
+<tr class="even">
+<td>&quot;dd&quot;</td>
+<td>The two-digit day. Single-digit day values are preceded by a zero.</td>
+</tr>
+<tr class="odd">
+<td>&quot;ddd&quot;</td>
+<td>The three-character weekday abbreviation.</td>
+</tr>
+<tr class="even">
+<td>&quot;dddd&quot;</td>
+<td>The full weekday name.</td>
+</tr>
+<tr class="odd">
+<td>&quot;h&quot;</td>
+<td>The one- or two-digit hour in 12-hour format.</td>
+</tr>
+<tr class="even">
+<td>&quot;hh&quot;</td>
+<td>The two-digit hour in 12-hour format. Single-digit values are preceded by a zero.</td>
+</tr>
+<tr class="odd">
+<td>&quot;H&quot;</td>
+<td>The one- or two-digit hour in 24-hour format.</td>
+</tr>
+<tr class="even">
+<td>&quot;HH&quot;</td>
+<td>The two-digit hour in 24-hour format. Single-digit values are preceded by a zero.</td>
+</tr>
+<tr class="odd">
+<td>&quot;m&quot;</td>
+<td>The one- or two-digit minute.</td>
+</tr>
+<tr class="even">
+<td>&quot;mm&quot;</td>
+<td>The two-digit minute. Single-digit values are preceded by a zero.</td>
+</tr>
+<tr class="odd">
+<td>&quot;M&quot;</td>
+<td>The one- or two-digit month number.</td>
+</tr>
+<tr class="even">
+<td>&quot;MM&quot;</td>
+<td>The two-digit month number. Single-digit values are preceded by a zero.</td>
+</tr>
+<tr class="odd">
+<td>&quot;MMM&quot;</td>
+<td>The three-character month abbreviation.</td>
+</tr>
+<tr class="even">
+<td>&quot;MMMM&quot;</td>
+<td>The full month name.</td>
+</tr>
+<tr class="odd">
+<td>&quot;t&quot;</td>
+<td>The one-letter AM/PM abbreviation (that is, AM is displayed as &quot;A&quot;).</td>
+</tr>
+<tr class="even">
+<td>&quot;tt&quot;</td>
+<td>The two-letter AM/PM abbreviation (that is, AM is displayed as &quot;AM&quot;).</td>
+</tr>
+<tr class="odd">
+<td>&quot;yy&quot;</td>
+<td>The last two digits of the year (that is, 1996 would be displayed as &quot;96&quot;).</td>
+</tr>
+<tr class="even">
+<td>&quot;yyyy&quot;</td>
+<td>The full year (that is, 1996 would be displayed as &quot;1996&quot;).</td>
+</tr>
+</tbody>
+</table>
 </body>
 </html>
 

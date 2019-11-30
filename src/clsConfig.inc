@@ -352,6 +352,14 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszClassName = "COMBOBOX"
 
    n = n + 1
+   gToolBox(n).nToolType = CTRL_DATETIMEPICKER
+   gToolBox(n).wszToolBoxName   = "DateTimePicker"
+   gToolBox(n).wszControlName   = "DateTimePicker"
+   gToolBox(n).wszImage  = "IMAGE_DATETIMEPICKER"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_DATETIMEPICKER"
+   gToolBox(n).wszClassName = "DATETIMEPICKER"
+
+   n = n + 1
    gToolBox(n).nToolType = CTRL_FRAME
    gToolBox(n).wszToolBoxName   = "Frame"
    gToolBox(n).wszControlName   = "Frame"
@@ -392,6 +400,14 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszClassName = "MASKEDEDIT"
 
    n = n + 1
+   gToolBox(n).nToolType = CTRL_MONTHCALENDAR
+   gToolBox(n).wszToolBoxName   = "MonthCalendar"
+   gToolBox(n).wszControlName   = "MonthCal"
+   gToolBox(n).wszImage  = "IMAGE_MONTHCALENDAR"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_MONTHCALENDAR"
+   gToolBox(n).wszClassName = "MONTHCALENDAR"
+
+   n = n + 1
    gToolBox(n).nToolType = CTRL_OPTION
    gToolBox(n).wszToolBoxName   = "OptionButton"
    gToolBox(n).wszControlName   = "Option"
@@ -424,6 +440,14 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszClassName = "RICHEDIT"
 
    n = n + 1
+   gToolBox(n).nToolType = CTRL_TABCONTROL
+   gToolBox(n).wszToolBoxName   = "TabControl"
+   gToolBox(n).wszControlName   = "TabControl"
+   gToolBox(n).wszImage  = "IMAGE_TABCONTROL"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_TABCONTROL"
+   gToolBox(n).wszClassName = "TABCONTROL"
+
+   n = n + 1
    gToolBox(n).nToolType = CTRL_TEXTBOX
    gToolBox(n).wszToolBoxName   = "TextBox"
    gToolBox(n).wszControlName   = "Text"
@@ -431,13 +455,6 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszCursor = "IMAGE_CURSOR_TEXTBOX"
    gToolBox(n).wszClassName = "TEXTBOX"
 
-'   n = n + 1
-'   gToolBox(n).nToolType = CTRL_MONTHCALENDAR
-'   gToolBox(n).wszToolBoxName   = "TextBox"
-'   gToolBox(n).wszControlName   = "MonthCalendar"
-'   gToolBox(n).wszImage  = "IMAGE_MONTHCALENDAR"
-'   gToolBox(n).wszCursor = "IMAGE_CURSOR_MONTHCALENDAR"
-'   gToolBox(n).wszClassName = "MONTHCALENDAR"
 
 '   n = n + 1
 '   gToolBox(n).nToolType = CTRL_TREEVIEW
@@ -469,12 +486,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(13).wszCursor = "IMAGE_CURSOR_TIMER"
 '   gToolBox(13).wszClassName = ""
 
-'   gToolBox(14).nToolType = CTRL_TABCONTROL
-'   gToolBox(14).wszName   = "TabControl"
-'   gToolBox(14).wszImage  = "IMAGE_TABCONTROL"
-'   gToolBox(14).wszCursor = "IMAGE_CURSOR_TABCONTROL"
-'   gToolBox(14).wszClassName = "TABCONTROL"
-
 '   gToolBox(17).nToolType = CTRL_UPDOWN
 '   gToolBox(17).wszName   = "UpDown"
 '   gToolBox(17).wszImage  = "IMAGE_UPDOWN"
@@ -486,12 +497,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(20).wszImage  = "IMAGE_SLIDER"
 '   gToolBox(20).wszCursor = "IMAGE_CURSOR_SLIDER"
 '   gToolBox(20).wszClassName = "SLIDER"
-
-'   gToolBox(21).nToolType = CTRL_DATETIMEPICKER
-'   gToolBox(21).wszName   = "DateTimePicker"
-'   gToolBox(21).wszImage  = "IMAGE_DATETIMEPICKER"
-'   gToolBox(21).wszCursor = "IMAGE_CURSOR_DATETIMEPICKER"
-'   gToolBox(21).wszClassName = "DATETIMEPICKER"
 
 '   gToolBox(23).nToolType = CTRL_WEBBROWSER
 '   gToolBox(23).wszName   = "WebBrowser"

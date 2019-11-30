@@ -85,6 +85,13 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Unchecked"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("CheckBoxState.Indeterminate"))
 
+      case "DATEFORMAT"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.LongDate"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.ShortDate"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.ShortDateCentury"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.TimeFormat"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("DateTimePickerFormat.CustomFormat"))
+
       CASE "HEADERSTYLE"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ColumnHeaderStyle.Clickable"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ColumnHeaderStyle.NonClickable"))
@@ -210,23 +217,25 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
          wszDefaultProp  = "Text" 
          wszDefaultEvent = "KeyPress" 
       case CTRL_LISTBOX, CTRL_COMBOBOX, CTRL_PROGRESSBAR, _
-           CTRL_LISTVIEW, CTRL_TREEVIEW
+           CTRL_LISTVIEW, CTRL_TREEVIEW, CTRL_MONTHCALENDAR, _
+           CTRL_DATETIMEPICKER
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Click" 
       case CTRL_PICTUREBOX
          wszDefaultProp  = "Image" 
          wszDefaultEvent = "Click" 
+      case CTRL_TABCONTROL   
+         wszDefaultProp  = "Name" 
+         wszDefaultEvent = "Selected" 
+
    
 ' TODO: Set default property/event for each control.
    '   CTRL_HSCROLL
    '   CTRL_VSCROLL
    '   CTRL_TIMER
-   '   CTRL_TABCONTROL
    '   CTRL_PROGRESSBAR
    '   CTRL_UPDOWN
    '   CTRL_SLIDER
-   '   CTRL_DATETIMEPICKER
-   '   CTRL_MONTHCALENDAR
    '   CTRL_WEBBROWSER
    '   CTRL_CUSTOM
    '   CTRL_OCX

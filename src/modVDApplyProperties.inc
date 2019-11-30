@@ -844,6 +844,167 @@ end function
 
 
 ' ========================================================================================
+' Apply properties to the MonthCalendar
+' ========================================================================================
+private function MonthCalendar_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                                byval pCtrl as clsControl ptr, _
+                                                byval pProp as clsProperty ptr _ 
+                                                ) as Long
+    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "BACKCOLOR"
+      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      MonthCal_SetColor( pCtrl->hWindow, MCSC_BACKGROUND, clrBack )
+   
+   case "WEEKNUMBERS"
+      if wszPropValue = "True" then
+         AfxAddWindowStyle(pCtrl->hWindow, MCS_WEEKNUMBERS)
+      else
+         AfxRemoveWindowStyle(pCtrl->hWindow, MCS_WEEKNUMBERS)
+      end if   
+      AfxRedrawWindow(pCtrl->hWindow) 
+
+   case "TODAYCIRCLE"
+      if wszPropValue = "True" then
+         AfxRemoveWindowStyle(pCtrl->hWindow, MCS_NOTODAYCIRCLE)
+      else
+         AfxAddWindowStyle(pCtrl->hWindow, MCS_NOTODAYCIRCLE)
+      end if   
+      AfxRedrawWindow(pCtrl->hWindow) 
+
+   case "TODAYDATE"
+      if len(trim(wszPropValue)) = 8 then
+         Dim As SYSTEMTIME pst
+         pst.wYear  = val(left(wszPropValue, 4))
+         pst.wMonth = val(mid(wszPropValue, 5, 2))
+         pst.wDay   = val(right(wszPropValue, 2))
+         MonthCal_SetCurSel( pCtrl->hWindow, @pst )
+      end if
+      
+   case "TODAYSELECTOR"
+      if wszPropValue = "True" then
+         AfxRemoveWindowStyle(pCtrl->hWindow, MCS_NOTODAY)
+      else
+         AfxAddWindowStyle(pCtrl->hWindow, MCS_NOTODAY)
+      end if   
+      AfxRedrawWindow(pCtrl->hWindow) 
+
+   case "TRAILINGDATES"
+      if wszPropValue = "True" then
+         AfxRemoveWindowStyle(pCtrl->hWindow, MCS_NOTRAILINGDATES)
+      else
+         AfxAddWindowStyle(pCtrl->hWindow, MCS_NOTRAILINGDATES)
+      end if   
+      AfxRedrawWindow(pCtrl->hWindow) 
+
+   case "SHORTDAYNAMES"
+      if wszPropValue = "True" then
+         AfxAddWindowStyle(pCtrl->hWindow, MCS_SHORTDAYSOFWEEK)
+      else
+         AfxRemoveWindowStyle(pCtrl->hWindow, MCS_SHORTDAYSOFWEEK)
+      end if   
+      AfxRedrawWindow(pCtrl->hWindow) 
+         
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
+' Apply properties to the DateTimePicker
+' ========================================================================================
+private function DateTimePicker_ApplyProperties( byval pDoc as clsDocument ptr, _
+                                                 byval pCtrl as clsControl ptr, _
+                                                 byval pProp as clsProperty ptr _ 
+                                                 ) as Long
+    
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+
+   dim as long nPropValue
+   dim as CWSTR wszPropName, wszPropValue
+
+   wszPropName  = pProp->wszPropName
+   wszPropValue = pProp->wszPropValue
+   nPropValue   = Val(pProp->wszPropValue)
+   
+   select CASE ucase(wszPropName)
+      
+   case "SELECTEDDATE"
+      Dim As SYSTEMTIME pst
+      pst.wYear  = val(left(wszPropValue, 4))
+      pst.wMonth = val(mid(wszPropValue, 5, 2))
+      pst.wDay   = val(right(wszPropValue, 2))
+      dim as CWSTR wszTime = GetControlProperty(pCtrl, "SELECTEDTIME")
+      pst.wHour   = val(left(wszTime, 2))
+      pst.wSecond = val(mid(wszTime, 3, 2))
+      pst.wMinute = val(right(wszTime, 2))
+      DateTime_SetSystemTime( pCtrl->hWindow, GDT_VALID, @pst )
+
+   case "SELECTEDTIME"
+      Dim As SYSTEMTIME pst
+      dim as CWSTR wszDate = GetControlProperty(pCtrl, "SELECTEDDATE")
+      pst.wYear  = val(left(wszDate, 4))
+      pst.wMonth = val(mid(wszDate, 5, 2))
+      pst.wDay   = val(right(wszDate, 2))
+      dim as CWSTR wszTime = GetControlProperty(pCtrl, "SELECTEDTIME")
+      pst.wHour   = val(left(wszPropValue, 2))
+      pst.wSecond = val(mid(wszPropValue, 3, 2))
+      pst.wMinute = val(right(wszPropValue, 2))
+      DateTime_SetSystemTime( pCtrl->hWindow, GDT_VALID, @pst )
+
+   case "FORMATCUSTOM"
+      dim as CWSTR wszDateFormat = GetControlProperty(pCtrl, "DATEFORMAT")
+      if wszDateFormat = "DateTimePickerFormat.CustomFormat" then
+         dim wszCustomFormat as wstring * MAX_PATH = wszPropValue
+         DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
+      end if
+
+   case "DATEFORMAT"
+      ' Remove any existing format styles
+      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_LONGDATEFORMAT)
+      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATEFORMAT)
+      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATECENTURYFORMAT)
+      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
+      select case wszPropValue
+         case "DateTimePickerFormat.LongDate"
+            AfxAddWindowStyle(pCtrl->hWindow, DTS_LONGDATEFORMAT)
+         case "DateTimePickerFormat.ShortDate"
+            AfxAddWindowStyle(pCtrl->hWindow, DTS_SHORTDATEFORMAT)
+         case "DateTimePickerFormat.ShortDateCentury"
+            AfxAddWindowStyle(pCtrl->hWindow, DTS_SHORTDATECENTURYFORMAT)
+         case "DateTimePickerFormat.TimeFormat"
+            AfxAddWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
+         case "DateTimePickerFormat.CustomFormat"
+            ' do nothing
+      end select
+      AfxRedrawWindow(pCtrl->hWindow) 
+      
+   case "SHOWUPDOWN"
+      if wszPropValue = "True" then
+         AfxAddWindowStyle(pCtrl->hWindow, DTS_UPDOWN)
+      else
+         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_UPDOWN)
+      end if   
+      AfxRedrawWindow(pCtrl->hWindow) 
+         
+   end select
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
 public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
@@ -929,20 +1090,22 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       ' Only act on properties where the value has changed.
       if pProp->wszPropValue = pProp->wszPropValuePrev then continue for
       select CASE pCtrl->ControlType
-         case CTRL_FORM:         Form_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_BUTTON:       Button_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_LABEL:        Label_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_CHECKBOX:     CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_OPTION:       OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_TEXTBOX:      TextBox_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_RICHEDIT:     TextBox_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_MASKEDEDIT:   MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_LISTBOX:      ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_COMBOBOX:     ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
-         case CTRL_FRAME:        Frame_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_PICTUREBOX:   PictureBox_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_PROGRESSBAR:  ProgressBar_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_LISTVIEW:     Listview_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_FORM:           Form_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_BUTTON:         Button_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_LABEL:          Label_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_CHECKBOX:       CheckBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_OPTION:         OptionButton_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_TEXTBOX:        TextBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_RICHEDIT:       TextBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_MASKEDEDIT:     MaskedEdit_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_LISTBOX:        ListBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_COMBOBOX:       ComboBox_ApplyProperties(pDoc, pCtrl, pProp)      
+         case CTRL_FRAME:          Frame_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_PICTUREBOX:     PictureBox_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_PROGRESSBAR:    ProgressBar_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_LISTVIEW:       Listview_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_MONTHCALENDAR:  MonthCalendar_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_DATETIMEPICKER: DateTimePicker_ApplyProperties(pDoc, pCtrl, pProp)
          CASE ELSE
       END SELECT
 

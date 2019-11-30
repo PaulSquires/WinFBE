@@ -204,14 +204,14 @@ public function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       case CTRL_PROGRESSBAR:       wszText = "wfxProgressBar"
       case CTRL_LISTVIEW:          wszText = "wfxListView"
       case CTRL_TREEVIEW:          wszText = "wfxTreeView"
+      case CTRL_MONTHCALENDAR:     wszText = "wfxMonthCalendar"
+      case CTRL_DATETIMEPICKER:    wszText = "wfxDateTimePicker"
+      case CTRL_TABCONTROL:        wszText = "wfxTabControl"
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
-      case CTRL_TABCONTROL
       case CTRL_UPDOWN
       case CTRL_SLIDER
-      case CTRL_DATETIMEPICKER
-      case CTRL_MONTHCALENDAR
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM
       case CTRL_OCX
