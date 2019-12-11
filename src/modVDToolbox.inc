@@ -13,6 +13,7 @@
 
 #include once "modVDToolbox.bi"
 #include once "frmImageManager.bi"
+#include once "frmVDTabChild.bi"
 #include once "clsApp.bi"
 #include once "clsDocument.bi"
 
@@ -335,19 +336,16 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
    dim as CWSTR wszPropName
    
    for i as long = lbound(pCtrlActive->Properties) to ubound(pCtrlActive->Properties)
-      ' There are some properties that are only used internally within the designer
-      ' and we don't want to display them in the designer itself.
       wszPropName = pCtrlActive->Properties(i).wszPropName
       select case ucase(wszPropName)
          case "NAME" ' ensure it sorts to first position
-            wszPropName = "_" & wszPropName
-         CASE "STYLE", "EXSTYLE"
-            continue for
+            wszPropName = "  " & wszPropName
+         case "(CUSTOM)" ' ensure it sorts after the first position
+            wszPropName = " Z" & wszPropName
       END SELECT
 
       idx = Listbox_AddString(hList, wszPropName.sptr)
       ListBox_SetItemData(hList, idx, i)   ' store array index in listbox item
-
    NEXT
 
    ' clear the listbox (EVENTS)
@@ -405,6 +403,10 @@ private function InitiatePropertyValueChange() as Long
             wszValue = AfxGetListBoxText(HWND_PROPLIST_COMBOLIST, ListBox_GetCurSel(HWND_PROPLIST_COMBOLIST) )
          case PropertyType.ImagePicker
             ' Image changes are never handled here. They are dealt with when the popup Image Manager dialog
+            ' closes. Exit out of this function now otherwise the property value will be deleted.
+            exit function
+         case PropertyType.CustomDialog
+            ' Custom changes are never handled here. They are dealt with when the popup custom dialog
             ' closes. Exit out of this function now otherwise the property value will be deleted.
             exit function
          case PropertyType.FontPicker
@@ -647,7 +649,9 @@ private function ShowPropertyListControl() as Long
          MapWindowPoints(0, hList, cast(POINT ptr, @pt), 1)                    
          If PtInRect(@rcLine, pt) then ShowWindow(HWND_PROPLIST_COMBOLIST, SW_SHOW)
 
-      CASE PropertyType.FontPicker, PropertyType.ImagePicker
+      CASE PropertyType.FontPicker, _
+           PropertyType.ImagePicker, _
+           PropertyType.CustomDialog
          rc.left = rc.right - (rc.bottom-rc.top)
          SetWindowPos(HWND_PROPLIST_COMBO, HWND_TOP, rc.left, rc.top, _
                              rc.right-rc.left, rc.bottom-rc.top, SWP_SHOWWINDOW)
@@ -1033,6 +1037,11 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                            wszPropValue = "(none)"
                      END SELECT
                   end if   
+                  
+                  if ucase(wszPropName) = "(CUSTOM)" then
+                     wszPropValue = ""  ' Ensure that nothing displays for the property value
+                  end if
+                  
                   if ucase(wszPropName) = "FONT" then
                      dim as LOGFONT lf
                      GetObject(hFontNormal, sizeof(lf), @lf)
@@ -1049,6 +1058,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                                             AfxStrParse(wszPropValue, 2, ",") & "pt"
                      wszPropValue = wszFont
                   end if
+                  
                   if nPropType = PropertyType.ColorPicker then
                      dim as CWSTR wszList, wszValue
                      wszList = AfxStrParse(wszPropValue, 1, "|")
@@ -1202,6 +1212,9 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
                      pDoc->bRegenerateCode = true
                      frmMain_SetStatusbar
                      PostMessage(HWND_FRMVDCOLORS, WM_ACTIVATE, WA_INACTIVE, 0)  ' to apply properties
+                  elseif pProp->PropType = PropertyType.CustomDialog then
+                     ' Show the Custom dialog for this control
+                     frmVDTabChild_Show(HWND_FRMMAIN, pProp->wszPropValue)
                   elseif pProp->PropType = PropertyType.ImagePicker then
                      frmImageManager_Show(HWND_FRMMAIN, pProp)
                   elseif pProp->PropType = PropertyType.ColorPicker then
@@ -1222,8 +1235,8 @@ private Function frmVDToolbox_ListBox_SubclassProc ( _
          END IF
          if loword(wParam) = IDC_FRMVDTOOLBOX_COMBOLIST then
             if (hiword(wParam) = LBN_SELCHANGE) then
-               InitiatePropertyValueChange
                ShowWindow(HWND_PROPLIST_COMBOLIST, SW_HIDE)
+               InitiatePropertyValueChange
             end if
          END IF
             
@@ -1392,11 +1405,11 @@ End Function
 ' ========================================================================================
 ' frmVDToolbox Window procedure
 ' ========================================================================================
-private Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
-                                            ByVal uMsg   As UINT, _
-                                            ByVal wParam As WPARAM, _
-                                            ByVal lParam As LPARAM _
-                                            ) As LRESULT
+private Function frmVDToolbox_WndProc( ByVal HWnd   As HWnd, _
+                                       ByVal uMsg   As UINT, _
+                                       ByVal wParam As WPARAM, _
+                                       ByVal lParam As LPARAM _
+                                       ) As LRESULT
 
    Select Case uMsg
       HANDLE_MSG (HWnd, WM_COMMAND,     frmVDToolbox_OnCommand)
@@ -1406,13 +1419,6 @@ private Function frmVDToolbox_SUBCLASSPROC( ByVal HWnd   As HWnd, _
       HANDLE_MSG (HWnd, WM_DESTROY,     frmVDToolbox_OnDestroy)
       HANDLE_MSG (HWnd, WM_MEASUREITEM, frmVDToolbox_OnMeasureItem)
       HANDLE_MSG (HWnd, WM_DRAWITEM,    frmVDToolbox_OnDrawItem)
-
-         
-      case WM_ACTIVATE
-         if loword(wParam) = WA_INACTIVE then
-            InitiatePropertyValueChange
-            HidePropertyListControls
-         end if 
    End Select
 
    ' for messages that we don't deal with
@@ -1450,7 +1456,7 @@ public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    Dim nTop    As Long = (rcWork.Bottom - rcWork.Top - nHeight) / 2
       
    HWND_FRMVDTOOLBOX = _
-   pWindow->Create( hWndParent, L(352,"Toolbox"), @frmVDToolbox_SUBCLASSPROC, nLeft, nTop, 300, nHeight, _
+   pWindow->Create( hWndParent, L(352,"Toolbox"), @frmVDToolbox_WndProc, nLeft, nTop, 300, nHeight, _
         WS_POPUP Or WS_CAPTION or WS_SYSMENU or WS_THICKFRAME or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CLIENTEDGE)
    ' We will set our own mouse pointer as needed

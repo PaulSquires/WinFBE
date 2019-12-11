@@ -37,7 +37,7 @@ public Function frmMain_RemoveFromComboFiles( byval pDoc as clsDocument ptr ) As
    
    dim as HWND hComboFiles = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES )
    dim as long nCount = ComboBox_GetCount( hComboFiles )
-   
+
    for i as long = 0 to nCount - 1
       if ComboBox_GetItemData( hComboFiles, i ) = pDoc then
          ComboBox_DeleteString( hComboFiles, i )
@@ -3017,7 +3017,7 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Add the top tabcontrol (initially not visible)
    gTTabCtl.hWindow = pWindow->AddControl("TABCONTROL", pWindow->hWindow, _
       IDC_FRMMAIN_TOPTABCONTROL, "", 0, 0, 0, 24, _
-      WS_CHILD Or WS_TABSTOP Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
+      WS_CHILD Or TCS_SINGLELINE Or TCS_RAGGEDRIGHT Or TCS_HOTTRACK Or _
       TCS_TABS Or TCS_FOCUSNEVER Or TCS_FORCEICONLEFT, WS_EX_LEFT Or WS_EX_LTRREADING, , _
       Cast(SUBCLASSPROC, @frmMain_TabCtl_SubclassProc), IDC_FRMMAIN_TOPTABCONTROL, Cast(DWORD_PTR, @pWindow))
     

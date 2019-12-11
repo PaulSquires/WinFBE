@@ -823,7 +823,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    dim wszParams    as CWSTR
    dim sConsoleText as string 
     
-   Dim As CWSTR wexecmd, wDQ, wsLogSt, wst
+   Dim As CWSTR wExeCmd, wDQ, wsLogSt, wst
          
    Dim As BOOLEAN fCompile32, fCompile64
    
@@ -843,7 +843,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' is not dirty and needs to be saved.
    if wID <> IDM_QUICKRUN THEN
       If gConfig.CompileAutosave Then
-         ' If there any "New" files that have not been edited yet causing thm to show 
+         ' If there any "New" files that have not been edited yet causing them to show 
          ' as dirty then we will mark them now so that the FileSaveAll command will
          ' ask to save it (otherwise a compile error will show).
          dim pDoc as clsDocument ptr = gApp.pDocList

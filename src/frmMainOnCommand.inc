@@ -986,7 +986,9 @@ public Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          If pDoc->IsNewFlag Then
             gTTabCtl.SetFocusTab(i)
          End If
-         pDoc->SaveFile()
+         if pDoc->SaveFile() = false then
+            ' Save file was cancelled
+         end if   
          gTTabCtl.SetTabText(i)  ' make sure "*" updates
          ' Parse the code for sub/function listing and create list
          ParseDocument(pDoc)
@@ -1077,19 +1079,24 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       ' Only remove this document from the global collection if it is not
       ' part of any active Project or if it is new/unsaved file. Files that are part of a project are
       ' all closed (tabs/nodes) automatically in one shot rather than individually.
-      if (gApp.IsProjectActive = false) or (pDoc->IsNewFlag = true) then 
+      dim as Boolean bRemoveFile 
+      if pDoc->IsNewFlag = true then 
+         bRemoveFile = true
+      else
+         bRemoveFile = iif( gApp.IsProjectActive, false, true )
+      end if
+
+      if bRemoveFile then
          ' Remove it from the Explorer
          Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
          Treeview_DeleteItem( hTree, pDoc->hNodeExplorer)
-      end if   
-      if gApp.IsProjectActive = false then
          ' Remove all references from the gdb2 database. Only remove the reference
          ' if the file is not part of an active project, otherwise, we will lose
          ' references to function names, etc.
          gdb2.dbDelete( pDoc->DiskFilename, 0 )
          frmMain_RemoveFromComboFiles( pDoc )
          gApp.RemoveDocument( pDoc )
-      end if   
+      end if
    next
       
    ' Set the active tab to the closest tab to the one just removed

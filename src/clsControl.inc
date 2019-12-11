@@ -15,5 +15,6 @@
 
 destructor clsControl
    if this.hBackBrush then DeleteBrush(this.hBackBrush)
+   if this.hImageList then ImageList_Destroy(this.hImageList)
 END DESTRUCTOR
 

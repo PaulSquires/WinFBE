@@ -22,6 +22,7 @@ enum PropertyType
    ColorPicker
    FontPicker
    ImagePicker
+   CustomDialog
 end enum
    
 type clsEvent
@@ -57,6 +58,7 @@ type clsControl
       Properties(Any)   As clsProperty
       Events(Any)       As clsEvent
       hBackBrush        as HBRUSH          ' needed for STATIC/LABEL controls (destroyed in destructor)
+      hImageList        as HANDLE          ' needed for TabControl
       Declare Destructor
 END TYPE
 

@@ -26,6 +26,7 @@ declare function IsControlNameExists( byval pDoc as clsDocument ptr, byref wszCo
 Declare Function IsControlLocked( byval pDoc as clsDocument ptr, byval pCtrl as clsControl ptr ) as boolean
 Declare Function IsFormNameExists( byref wszFormName as wstring ) as boolean
 declare function CreateToolboxControl( byval pDoc as clsDocument ptr, byval ControlType as long, byref rcDraw as RECT ) as clsControl ptr
+declare function ReCreateToolboxControl( byval pDoc as clsDocument ptr, byval pCtrl as clsControl ptr ) as long
 
 
 

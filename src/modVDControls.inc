@@ -54,6 +54,7 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
    ' Add control specific properties
    select CASE pCtrl->ControlType
       case CTRL_FORM
+         AddControlProperty(pCtrl, "ChildForm", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "WindowState", "FormWindowState.Normal", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "StartPosition", "FormStartPosition.Manual", PropertyType.ComboPicker)
@@ -88,6 +89,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
@@ -122,6 +125,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
       case CTRL_TEXTBOX, CTRL_RICHEDIT
@@ -151,6 +156,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "TextAlignment.Left", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
@@ -172,6 +179,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "ValidCharacters", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
@@ -186,6 +195,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleLeft", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "ThreeState", "False", PropertyType.TrueFalse)
@@ -215,6 +226,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "TextAlign", "LabelAlignment.MiddleLeft", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "UseTabStops", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
@@ -230,6 +243,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
@@ -245,6 +260,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Text", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TextAlign", "ButtonAlignment.MiddleLeft", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
@@ -257,6 +274,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "UseMnemonic", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
@@ -277,6 +296,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ImageWidth", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "ImageScaling", "ImageScale.AutoSize", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
 
       case CTRL_PROGRESSBAR
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
@@ -286,6 +307,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "Value", "0", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Marquee", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MarqueeAnimationSpeed", "30", PropertyType.EditEnter)
@@ -313,6 +336,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
       
       case CTRL_TREEVIEW
@@ -330,6 +355,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
          
       case CTRL_MONTHCALENDAR
@@ -342,6 +369,8 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "TodayCircle", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "SelectedDate", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "TodaySelector", "True", PropertyType.TrueFalse)
@@ -360,28 +389,34 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "SelectedDate", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "SelectedTime", "", PropertyType.EditEnter)
          AddControlProperty(pCtrl, "ShowUpDown", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
       case CTRL_TABCONTROL
-         AddControlProperty(pCtrl, "(Custom)", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "(Custom)", "", PropertyType.CustomDialog)
          AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "AllowFocus", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ResizeTabPages", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "ButtonStyle", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "FixedWidthTabs", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
-         AddControlProperty(pCtrl, "HeaderTopPadding", "4", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "HeaderSidePadding", "4", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "HotTracking", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "TabTopPadding", "4", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabSidePadding", "4", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MultiLine", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabHeight", "24", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabHeight", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabWidth", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
       case CTRL_HSCROLL
@@ -1036,6 +1071,74 @@ end function
 
 
 ' ========================================================================================
+' Re-Create the specified control on the design form
+' ========================================================================================
+public function ReCreateToolboxControl( byval pDoc as clsDocument ptr, _
+                                        byval pCtrl as clsControl ptr _
+                                        ) as long
+
+   ' Some controls need to be destroyed and re-created in order for certan properties 
+   ' to be properly displayed in the visual designer.
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
+   dim pProp as clsProperty ptr
+   
+   dim as RECT rc
+   dim as DWORD dwStyle, dwExStyle
+   dim wszCustomFormat as wstring * MAX_PATH = ""
+   
+   GetWindowRect( pCtrl->hWindow, @rc )
+   MapWindowPoints( HWND_DESKTOP, pWindow->hWindow, CAST(POINT PTR, @rc), 2)
+
+   select case pCtrl->ControlType
+
+      case CTRL_DATETIMEPICKER
+         DestroyWindow( pCtrl->hWindow )
+         
+         dwStyle = WS_VISIBLE
+         if GetControlProperty(pCtrl, "SHOWUPDOWN") = "True" then
+            dwStyle = dwStyle Or DTS_UPDOWN
+         end if   
+   
+         select case GetControlProperty(pCtrl, "DATEFORMAT")
+            case "DateTimePickerFormat.LongDate"
+               dwStyle = dwStyle Or DTS_LONGDATEFORMAT
+            case "DateTimePickerFormat.ShortDate"
+               dwStyle = dwStyle Or DTS_SHORTDATEFORMAT
+            case "DateTimePickerFormat.ShortDateCentury"
+               dwStyle = dwStyle Or DTS_SHORTDATECENTURYFORMAT
+            case "DateTimePickerFormat.TimeFormat"
+               dwStyle = dwStyle Or DTS_TIMEFORMAT
+            case "DateTimePickerFormat.CustomFormat"
+               ' Set value after control is created
+               wszCustomFormat = GetControlProperty(pCtrl, "DATEFORMAT")
+         end select
+
+         pCtrl->hWindow = pWindow->AddControl( "SysDateTimePick32", , 100, "", _
+                    pWindow->UnScaleX(rc.left), pWindow->UnScaleY(rc.top), _
+                    pWindow->UnScaleX(rc.right-rc.left), pWindow->UnScaleY(rc.bottom-rc.top), _
+                    dwStyle, dwExStyle, , _
+                    CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_DATETIMEPICKER, CAST(DWORD_PTR, pDoc))
+
+         DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
+
+   end select
+   
+   ' Apply the correct font
+   pProp = GetControlPropertyPtr( pCtrl, "FONT" )
+   if pProp then
+      dim as HFONT hFontOld = AfxGetWindowFont(pCtrl->hWindow)
+      dim as LOGFONT lf
+      lf = SetLogFontFromPropValue(pProp->wszPropValue)
+      dim as HFONT hFont = CreateFontIndirect(@lf)
+      AfxSetWindowFont(pCtrl->hWindow, hFont, true)
+      DeleteFont(hFontOld)
+   end if
+   
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Create the specified control on the design form
 ' ========================================================================================
 public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
@@ -1149,11 +1252,24 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
             elseif ControlType = CTRL_MONTHCALENDAR then
                dwStyle = WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS or WS_CLIPCHILDREN
                dwExStyle = 0
+            elseif ControlType = CTRL_TABCONTROL then
+               dwStyle = WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS or WS_CLIPCHILDREN OR _
+                         TCS_TABS OR TCS_SINGLELINE OR TCS_RAGGEDRIGHT or TCS_FORCEICONLEFT
+               dwExStyle = WS_EX_CONTROLPARENT
             end if   
+
+            ' Create the control
             pCtrl->hWindow = pWindow->AddControl( GetControlClassName(pCtrl), , 100, wszDefaultControlName, _
                              rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top, _
                              dwStyle, dwExStyle, , _
                              CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+
+            if ControlType = CTRL_TABCONTROL then
+               dim as long cx = 16 * (pWindow->DPI \ 96)
+               pCtrl->hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
+               TabCtrl_SetImageList( pCtrl->hWindow, pCtrl->hImageList )
+            end if
+            
       end select
    END IF
 

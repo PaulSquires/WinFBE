@@ -739,11 +739,32 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                case "HEIGHT"
                   nHeight = wszPropValue.ValLong
                   continue for
-               case "NAME"  ' don't output NAME property b/c it can't be changed programmically
-                  continue for
+               case "NAME"
+                  wszPropDefault = ""  ' force it to be output
                case "TABINDEX"
                   continue for   
             END SELECT
+
+            if nPropType = PropertyType.CustomDialog then
+               if pCtrl->ControlType = CTRL_TABCONTROL then
+                  frmVDTabChild_LoadTabPagesArray( wszPropValue )
+                  wszText = wszText & sp(1) & "dim as long nTabIndex" & vbcrlf
+                  for i as long = 0 to ubound(gTabPages)
+                     wszText = wszText & sp(1) & _
+                        "nTabIndex = " & wszCombinedName & ".TabPages.Add(" & _
+                              DQ & gTabPages(i).wszText & DQ & "," & _
+                              DQ & gTabPages(i).wszTabPage & DQ & "," & _
+                              DQ & gTabPages(i).wszImage & DQ & "," & _
+                              "0" & ")" & vbcrlf
+                     if gTabPages(i).IsActiveTab then
+                        wszText = wszText & sp(1) & _
+                           wszCombinedName & ".SelectedIndex = nTabIndex" & vbcrlf
+                     end if      
+                  next    
+                  continue for
+               end if
+            end if
+
 
             ' Only output properties that are different than the default WinFormsX values
             if ucase(wszPropValue) <> ucase(wszPropDefault) then
@@ -751,7 +772,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                   case "TEXT", "TAG", "PASSWORDCHAR", "GROUPNAME", _
                        "MASKSTRING", "INPUTSTRING", "DEFAULTCHARACTER", "VALIDCHARACTERS", _
                        "ICON", "IMAGE", "CUEBANNERTEXT", "SELECTEDDATE", "SELECTEDTIME", _
-                       "FORMATCUSTOM"            
+                       "FORMATCUSTOM", "NAME", "TOOLTIP"            
                      ' Ensure that any embedded double quotes are escaped
                      wszPropValue = AfxStrReplace(wszPropValue, DQ, DQ & " & chr(34) & " & DQ)
                      wszPropValue = DQ & wszPropValue & DQ
