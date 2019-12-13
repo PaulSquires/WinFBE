@@ -3,7 +3,7 @@
 These are the top tips to help you edit code faster and more efficiently with WinFBE. Try a few out and before you know it you will wonder how you ever coded without them!
 
 ### Tip 1: Duplicate line (Ctrl+D)
-Simply move your edit cursor to the that you want to duplicate and hit Ctrl+D. This is great wehn you have to add a line that is very similar to an existing one and only needs a few minor text edits. 
+Simply move your edit cursor to the that you want to duplicate and hit Ctrl+D. This is great when you have to add a line that is very similar to an existing one and only needs a few minor text edits. 
 
 ### Tip 2: Move a line (Ctrl+Shift+Up, and Ctrl+Shift+Down)
 This is an awesome shortcut for quickly repositioning a line within your code without having to resort to cut and paste. You will wonder how you ever coded without it!

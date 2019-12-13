@@ -404,14 +404,17 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ButtonStyle", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "FixedWidthTabs", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ForceImageLeft", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ForceLabelLeft", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "HotTracking", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "TabTopPadding", "4", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabSidePadding", "4", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "MultiLine", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "TabHeight", "0", PropertyType.EditEnterNumericOnly)
-         AddControlProperty(pCtrl, "TabWidth", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabImageSize", "ControlImageSize.Size16", PropertyType.ComboPicker)
+         AddControlProperty(pCtrl, "TabHeight", "24", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabWidth", "100", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
@@ -1085,12 +1088,106 @@ public function ReCreateToolboxControl( byval pDoc as clsDocument ptr, _
    dim as RECT rc
    dim as DWORD dwStyle, dwExStyle
    dim wszCustomFormat as wstring * MAX_PATH = ""
+   dim as CWSTR wszPropValue
+   dim as long CtrlID = GetDlgCtrlID(pCtrl->hWindow)
    
    GetWindowRect( pCtrl->hWindow, @rc )
    MapWindowPoints( HWND_DESKTOP, pWindow->hWindow, CAST(POINT PTR, @rc), 2)
 
    select case pCtrl->ControlType
 
+      case CTRL_TABCONTROL
+         if pCtrl->hImageList then ImageList_Destroy(pCtrl->hImageList)
+         DestroyWindow( pCtrl->hWindow )
+
+         dwStyle = WS_VISIBLE
+         if GetControlProperty(pCtrl, "BUTTONSTYLE") = "True" then
+            dwStyle = dwStyle or TCS_BUTTONS or TCS_FLATBUTTONS
+         else
+            dwStyle = dwStyle or TCS_TABS
+         end if
+
+         if GetControlProperty(pCtrl, "FIXEDWIDTHTABS") = "True" then
+            dwStyle = dwStyle or TCS_FIXEDWIDTH
+         else
+            dwStyle = dwStyle or TCS_RAGGEDRIGHT
+         end if
+
+         if GetControlProperty(pCtrl, "MULTILINE") = "True" then
+            dwStyle = dwStyle or TCS_MULTILINE
+         end if
+
+         if GetControlProperty(pCtrl, "FORCELABELLEFT") = "True" then
+            ' This will force the label and icon left
+            dwStyle = dwStyle or TCS_FORCELABELLEFT
+         else
+            if GetControlProperty(pCtrl, "FORCEIMAGELEFT") = "True" then
+               dwStyle = dwStyle or TCS_FORCEICONLEFT
+            end if
+         end if
+            
+         pCtrl->hWindow = pWindow->AddControl( "TabControl", , CtrlID, "", _
+                    pWindow->UnScaleX(rc.left), pWindow->UnScaleY(rc.top), _
+                    pWindow->UnScaleX(rc.right-rc.left), pWindow->UnScaleY(rc.bottom-rc.top), _
+                    dwStyle, dwExStyle, , _
+                    CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_TABCONTROL, CAST(DWORD_PTR, pDoc))
+
+         wszPropValue = GetControlProperty(pCtrl, "(CUSTOM)")
+         frmVDTabChild_LoadTabPagesArray( wszPropValue )
+         
+         dim as boolean bHasImages 
+         for i as long = 0 to ubound(gTabPages)
+            dim as long nIndex = TabCtrl_AddTab( pCtrl->hWindow, 0, gTabPages(i).wszText, 0 )
+            if gTabPages(i).IsActiveTab then
+               TabCtrl_SetCurSel( pCtrl->hWindow, nIndex )
+            end if   
+            if len(gTabPages(i).wszImage) then bHasImages = true
+         next 
+            
+         if bHasImages then
+            dim as long nImageSize = 16
+            wszPropValue = GetControlProperty(pCtrl, "TABIMAGESIZE")
+            select case wszPropValue
+               case "ControlImageSize.Size16": nImageSize = 16
+               case "ControlImageSize.Size24": nImageSize = 24
+               case "ControlImageSize.Size32": nImageSize = 32
+               case "ControlImageSize.Size48": nImageSize = 48
+            end select
+            
+            dim as long cx = nImageSize * (pWindow->DPI \ 96)
+            pCtrl->hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
+            TabCtrl_SetImageList( pCtrl->hWindow, pCtrl->hImageList )
+
+            Dim As HICON hIcon
+            dim as long nIndex
+            for i as long = 0 to ubound(gTabPages)
+               TabCtrl_SetImageIndex( pCtrl->hWindow, i, -1 )   
+               if len(rtrim(gTabPages(i).wszImage)) then
+                  dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(gTabPages(i).wszImage)
+                  if pImageType then
+                     hIcon = AfxGdipIconFromFile( pImageType->wszFileName )
+                     nIndex = ImageList_AddIcon( pCtrl->hImageList, hIcon )
+                     TabCtrl_SetImageIndex( pCtrl->hWindow, i, nIndex )   
+                  end if
+               end if
+            next
+         end if
+
+         if GetControlProperty(pCtrl, "FIXEDWIDTHTABS") = "True" then
+            dim as long nWidth  = AfxScaleX(val(GetControlProperty(pCtrl, "TABWIDTH")))
+            dim as long nHeight = AfxScaleY(val(GetControlProperty(pCtrl, "TABHEIGHT")))
+            if (nWidth * nHeight) <> 0 then  ' neither can be zero
+               TabCtrl_SetItemSize( pCtrl->hWindow, nWidth, nHeight )
+            end if   
+         end if
+         
+         ' Set the horizontal and vertical padding
+         dim as long nHorizPadding = AfxScaleX(val(GetControlProperty(pCtrl, "TABSIDEPADDING")))
+         dim as long nVertPadding  = AfxScaleY(val(GetControlProperty(pCtrl, "TABTOPPADDING")))
+         TabCtrl_SetPadding( pCtrl->hWindow, nHorizPadding, nVertPadding )
+
+
+         
       case CTRL_DATETIMEPICKER
          DestroyWindow( pCtrl->hWindow )
          
@@ -1113,7 +1210,7 @@ public function ReCreateToolboxControl( byval pDoc as clsDocument ptr, _
                wszCustomFormat = GetControlProperty(pCtrl, "DATEFORMAT")
          end select
 
-         pCtrl->hWindow = pWindow->AddControl( "SysDateTimePick32", , 100, "", _
+         pCtrl->hWindow = pWindow->AddControl( "SysDateTimePick32", , CtrlID, "", _
                     pWindow->UnScaleX(rc.left), pWindow->UnScaleY(rc.top), _
                     pWindow->UnScaleX(rc.right-rc.left), pWindow->UnScaleY(rc.bottom-rc.top), _
                     dwStyle, dwExStyle, , _
@@ -1264,12 +1361,10 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
                              dwStyle, dwExStyle, , _
                              CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
 
-            if ControlType = CTRL_TABCONTROL then
-               dim as long cx = 16 * (pWindow->DPI \ 96)
-               pCtrl->hImageList = ImageList_Create(cx, cx, ILC_MASK Or ILC_COLOR32, 1, 0)
-               TabCtrl_SetImageList( pCtrl->hWindow, pCtrl->hImageList )
+            if pCtrl->ControlType = CTRL_TABCONTROL then
+               ReCreateToolboxControl( pDoc, pCtrl )
             end if
-            
+
       end select
    END IF
 

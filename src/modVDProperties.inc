@@ -112,6 +112,10 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Gets or sets the format of the date and time displayed in the control."
       case "FIXEDWIDTHTABS"
          wszPropDescribe = "Indicates that all tabs in a tab control are the same width."
+      case "FORCEIMAGELEFT"
+         wszPropDescribe = "Forces the tab image to the left, leaving the label centered in a tab control."
+      case "FORCELABELLEFT"
+         wszPropDescribe = "Forces the tab image and tab label to the left in a tab control."
       case "FORMATCUSTOM"
          wszPropDescribe = "Gets or sets the custom format when the DateFormat property is set to CustomFormat."
       case "FULLROWSELECT"
@@ -232,12 +236,14 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Determines the index in the TAB order that this control will occupy."
       case "TABSTOP"   
          wszPropDescribe = "Indicates whether the user can use the TAB key to give focus to the control."
+      case "TABIMAGESIZE"
+         wszPropDescribe = "Gets or sets the size (in pixels) of images for tabs in a tab control."
       case "TABTOPPADDING"
          wszPropDescribe = "Gets or sets the amount of vertical padding around each tab's icon and label in a tab control."
       case "TABSIDEPADDING"
          wszPropDescribe = "Gets or sets the amount of horizontal padding around each tab's icon and label in a tab control."
       case "TABHEIGHT"
-         wszPropDescribe = "Gets or sets the height of tabs in a tab control."
+         wszPropDescribe = "Gets or sets the height of tabs in a tab control that have the property FixedWidthTabs equal True."
       case "TABWIDTH"
          wszPropDescribe = "Gets or sets the width of tabs in a tab control that have the property FixedWidthTabs equal True."
       case "TAG"   
@@ -393,7 +399,12 @@ public function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs when a key is released."
       case "SELECTIONCHANGED"  ' MonthCalendar
          wszEventDescribe = "Occurs in response to any selection change whereas Click occurs only when user makes an explicit date selection."
+      case "SELECTED"   ' tabcontrol
+         wszEventDescribe = "Occurs when a tab is selected."
+      case "SELECTING"  ' tabcontrol
+         wszEventDescribe = "Occurs before a tab is selected, enabling a handler to cancel the tab change."
       case else
+         
          wszEventDescribe = ""
    END SELECT
    

@@ -156,8 +156,8 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
       WS_CHILD Or WS_VISIBLE Or WS_HSCROLL Or WS_VSCROLL Or WS_BORDER Or WS_TABSTOP Or _
       LBS_STANDARD Or LBS_HASSTRINGS Or LBS_SORT Or LBS_NOTIFY Or LBS_NOINTEGRALHEIGHT, WS_EX_CLIENTEDGE)
       
-   pWindow->SetWindowPos hListBox, Null, 8, 8, 400, 337, SWP_NOZORDER
-   SendMessageW hListBox, LB_SETHORIZONTALEXTENT, Cast(WPARAM, 600 * pWindow->rxRatio), 0
+   pWindow->SetWindowPos( hListBox, Null, 8, 8, 400, 337, SWP_NOZORDER )
+   SendMessage( hListBox, LB_SETHORIZONTALEXTENT, Cast(WPARAM, 600 * pWindow->rxRatio), 0 )
 
    ' Add the buttons
    pWindow->AddControl("Button", , IDOK, L(0,"&OK"), 245, 353, 74, 28, _
@@ -179,7 +179,7 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
    IF hSearch <> INVALID_HANDLE_VALUE THEN
       DO
          IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
-            nCount +=1
+            nCount = nCount + 1
          END IF
       LOOP WHILE FindNextFile(hSearch, @WFD)
       FindClose(hSearch)
@@ -189,7 +189,7 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
    DIM rgwszPaths(nCount - 1) AS WSTRING * MAX_PATH
    idx = 0
 
-   ' // Find the files
+   ' Find the files
    dim pStream as CTextStream
    hSearch = FindFirstFile(wszCurPath, @WFD)
    IF hSearch <> INVALID_HANDLE_VALUE THEN
@@ -213,12 +213,12 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
                ' Store the full path in the array
                rgwszPaths(idx) = wszFullPath
                ' Store a pointer to the element of the array in the listbox item
-               SendMessageW hListBox, LB_SETITEMDATA, nItem, cast(LPARAM, VARPTR(rgwszPaths(idx)))
+               SendMessage(hListBox, LB_SETITEMDATA, nItem, cast(LPARAM, VARPTR(rgwszPaths(idx))) )
                idx += 1
                IF idx > UBOUND(rgwszPaths) THEN EXIT DO
             END IF
          END IF
-      LOOP WHILE FindNextFileW(hSearch, @WFD)
+      LOOP WHILE FindNextFile(hSearch, @WFD)
       FindClose(hSearch)
    END IF
    

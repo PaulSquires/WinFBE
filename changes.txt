@@ -1,11 +1,18 @@
-Version 2.0.1 ()
+Version 2.0.1 (December 13, 2019)
 - Added: Month Calendar control.
 - Added: DateTimePicker control.
+- Added: TabControl control. (still a work in progress but it is currently usable).
+- Added: ToolTip and ToolTipBalloon properties for most controls.
+- Added: New form property called ChildForm. Creates form with WS_CHILD style and is used when specifying child Tab Pages for Tab Control.
 - Changed: Updated German language file as provided by Joerg Buckel.
 - Fixed: ListView Hover event was not removed from the Visual Designer list of selectable methods.
 - Fixed: ListView GPF if number of defined subitems did not match number of defined columns.
 - Fixed: ListView regression whereby mouse clicking on checkbox item was not being recognized.
 - Fixed: ListView GPF if horizontal scroll bar moved to the right and then all columns deleted.
+- Fixed: ListView text property changes were not being immediately displayed (programmer would have to do a manual call to Refresh first).
+- Fixed: Attempting to close an unsaved new file belonging to an open project would not remove the reference to that file from the project.
+- Fixed: Bug whereby switching amongst Forms would cause changed Property values to also follow to the newly selected form and cause that form to show as "dirty" and needing to be saved.
+- Fixed: RichEdit TextAlign property not showing a list of valid choices.
 
 Version 2.0.0 (November 21, 2019)
 - Added: New Project template options: None; Blank Document; Visual Designer; Console; Windows DLL; Static Library.

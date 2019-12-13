@@ -110,6 +110,12 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.FitHeight"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ImageScale.Stretch"))
 
+      CASE "TABIMAGESIZE"
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlImageSize.Size16"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlImageSize.Size24"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlImageSize.Size32"))
+         ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("ControlImageSize.Size48"))
+
       CASE "STARTPOSITION"
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterParent"))
          ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("FormStartPosition.CenterScreen"))
@@ -149,7 +155,7 @@ private function LoadPropertyComboListbox( byval pDoc as clsDocument ptr, _
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopCenter"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopLeft"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("LabelAlignment.TopRight"))
-            case CTRL_TEXTBOX
+            case CTRL_TEXTBOX, CTRL_RICHEDIT
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Left"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Right"))
                ListBox_AddString(HWND_PROPLIST_COMBOLIST, @wstr("TextAlignment.Center"))

@@ -57,8 +57,8 @@ type clsControl
       rcHandles(1 to 8) as RECT            ' 8 grab handles
       Properties(Any)   As clsProperty
       Events(Any)       As clsEvent
-      hBackBrush        as HBRUSH          ' needed for STATIC/LABEL controls (destroyed in destructor)
-      hImageList        as HANDLE          ' needed for TabControl
+      hBackBrush        as HBRUSH            ' needed for STATIC/LABEL controls (destroyed in destructor)
+      hImageList        as HANDLE            ' needed for TabControl
       Declare Destructor
 END TYPE
 

@@ -1016,130 +1016,6 @@ end function
 
 
 ' ========================================================================================
-' Apply properties to the TabControl
-' ========================================================================================
-private function TabControl_ApplyProperties( byval pDoc as clsDocument ptr, _
-                                             byval pCtrl as clsControl ptr, _
-                                             byval pProp as clsProperty ptr _ 
-                                             ) as Long
-    
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
-
-   dim as long nPropValue
-   dim as CWSTR wszPropName, wszPropValue
-
-   wszPropName  = pProp->wszPropName
-   wszPropValue = pProp->wszPropValue
-   nPropValue   = Val(pProp->wszPropValue)
-   
-   select CASE ucase(wszPropName)
-      
-   case "(CUSTOM)"
-      frmVDTabChild_LoadTabPagesArray( wszPropValue )
-      TabCtrl_DeleteAllItems( pCtrl->hWindow )
-      for i as long = 0 to ubound(gTabPages)
-         dim as long nIndex = TabCtrl_AddTab( pCtrl->hWindow, 0, gTabPages(i).wszText, 0 )
-         if gTabPages(i).IsActiveTab then
-            TabCtrl_SetCurSel( pCtrl->hWindow, nIndex )
-         end if   
-      next    
-
-   
-   case "BUTTONSTYLE"
-      AfxRemoveWindowStyle(pCtrl->hWindow, TCS_TABS)
-      AfxRemoveWindowStyle(pCtrl->hWindow, TCS_BUTTONS)
-      AfxRemoveWindowStyle(pCtrl->hWindow, TCS_FLATBUTTONS)
-      if wszPropValue = "True" then
-         AfxAddWindowStyle(pCtrl->hWindow, TCS_BUTTONS)
-         AfxAddWindowStyle(pCtrl->hWindow, TCS_FLATBUTTONS)
-      else
-         AfxAddWindowStyle(pCtrl->hWindow, TCS_TABS)
-      end if   
-      AfxRedrawWindow(pCtrl->hWindow) 
-      
-
-   case "FIXEDWIDTHTABS"
-      AfxRemoveWindowStyle(pCtrl->hWindow, TCS_FIXEDWIDTH)
-      AfxRemoveWindowStyle(pCtrl->hWindow, TCS_RAGGEDRIGHT)
-      if wszPropValue = "True" then
-         AfxAddWindowStyle(pCtrl->hWindow, TCS_FIXEDWIDTH)
-         dim as long nCount = TabCtrl_GetItemCount(pCtrl->hWindow)
-         dim as RECT rc
-         for i as long = 0 to nCount - 1
-            TabCtrl_GetItemRect( pCtrl->hWindow, i, @rc )
-            dim as long nWidth = AfxScaleX(val(GetControlProperty(pCtrl, "TABWIDTH")))
-            dim as long nHeight = AfxScaleY(rc.bottom-rc.top)
-            dim as long nNewSize = MAKELONG(nWidth, nHeight)
-            if (nWidth * nHeight) <> 0 then  ' neither can be zero
-               TabCtrl_SetItemSize( pCtrl->hWindow, i, nNewSize )
-            end if   
-         next
-      else
-         AfxAddWindowStyle(pCtrl->hWindow, TCS_RAGGEDRIGHT)
-      end if   
-      AfxRedrawWindow(pCtrl->hWindow) 
-
-   
-   case "MULTILINE"
-      if wszPropValue = "True" then
-         AfxAddWindowStyle(pCtrl->hWindow, TCS_MULTILINE)
-      else   
-         AfxRemoveWindowStyle(pCtrl->hWindow, TCS_MULTILINE)
-      end if   
-      AfxRedrawWindow(pCtrl->hWindow) 
-
-   
-   case "TABHEIGHT"
-      dim as long nCount = TabCtrl_GetItemCount(pCtrl->hWindow)
-      for i as long = 0 to nCount - 1
-         dim as RECT rc
-         TabCtrl_GetItemRect( pCtrl->hWindow, i, @rc )
-         dim as long nWidth = AfxScaleX(rc.right-rc.left)
-         dim as long nHeight = AfxScaleX(nPropValue)
-         dim as long nNewSize = MAKELONG(nWidth, nHeight)
-         if (nWidth * nHeight) <> 0 then  ' neither can be zero
-            TabCtrl_SetItemSize( pCtrl->hWindow, i, nNewSize )
-         end if   
-      next
-
-   
-   case "TABWIDTH"
-      if GetControlProperty(pCtrl, "FIXEDWIDTHTABS") = "True" then
-         dim as long nWidth = AfxScaleX(nPropValue)
-         dim as long nHeight = AfxScaleY(val(GetControlProperty(pCtrl, "TABHEIGHT")))
-         dim as long nNewSize = MAKELONG(nWidth, nHeight)
-         dim as long nCount = TabCtrl_GetItemCount(pCtrl->hWindow)
-         for i as long = 0 to nCount - 1
-            if (nWidth * nHeight) <> 0 then  ' neither can be zero
-               TabCtrl_SetItemSize( pCtrl->hWindow, i, nNewSize )
-            end if   
-         next
-      end if
-      
-   
-   case "TABSIDEPADDING", "TABTOPPADDING"
-      dim as long nHorizPadding = AfxScaleX(val(GetControlProperty(pCtrl, "TABSIDEPADDING")))
-      dim as long nVertPadding  = AfxScaleY(val(GetControlProperty(pCtrl, "TABTOPPADDING")))
-      TabCtrl_SetPadding( pCtrl->hWindow, nHorizPadding, nVertPadding )
-
-      ' Need to send a WM_SIZE message in order for the change to be seen visually
-      dim as long nWidth = AfxGetWindowWidth(pCtrl->hWindow)
-      dim as long nHeight = AfxGetWindowHeight(pCtrl->hWindow)
-      SendMessage( pCtrl->hWindow, WM_SIZE, 0, MAKELONG(nWidth, nHeight) )
-      AfxRedrawNonClientArea(pCtrl->hWindow) 
-      AfxRedrawWindow(pCtrl->hWindow) 
-
-
-   case "RESIZETABPAGES"
-      
-      
-   end select
-   
-   function = 0
-end function
-
-
-' ========================================================================================
 ' Apply properties to the incoming control
 ' ========================================================================================
 public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
@@ -1241,7 +1117,8 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
          case CTRL_LISTVIEW:       Listview_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_MONTHCALENDAR:  MonthCalendar_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_DATETIMEPICKER: DateTimePicker_ApplyProperties(pDoc, pCtrl, pProp)
-         case CTRL_TABCONTROL:     TabControl_ApplyProperties(pDoc, pCtrl, pProp)
+         case CTRL_TABCONTROL
+            ' Tab Control gets recreated as a whole when the properties change. 
          CASE ELSE
       END SELECT
 
@@ -1252,6 +1129,10 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
    if pCtrl->SuspendLayout THEN
       pWindow->SetWindowPos( pCtrl->hWindow, 0, nLeft, nTop, nWidth, nHeight, SWP_NOZORDER)
    END IF
+   
+   if pCtrl->ControlType = CTRL_TABCONTROL then
+      ReCreateToolboxControl( pDoc, pCtrl )
+   end if
    
    ' Repaint to ensure that the grab handles draw
    AfxRedrawWindow(pCtrl->hWindow)

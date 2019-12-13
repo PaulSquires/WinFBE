@@ -302,28 +302,9 @@ private Function frmVDTabChild_OnCommand( ByVal HWnd As HWnd, _
                if pDoc then 
                   pDoc->UserModified = true
                   dim pCtrl as clsControl ptr = pDoc->Controls.GetActiveControl
-                  if pCtrl THEN 
-                     pCtrl->SuspendLayout = true
-                     ApplyControlProperties( pDoc, pCtrl )
-                     pCtrl->SuspendLayout = false
-                     
-                     ' Delete the current images in the TabControl ImageList
-                     ' and add new ones and then assign them to the tabs.
-                     ImageList_RemoveAll(pCtrl->hImageList)
-                     
-                     Dim As HICON hIcon
-                     dim as long nIndex
-                     for i as long = 0 to ubound(gTabPages)
-                        if len(gTabPages(i).wszImage) then
-                           dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(gTabPages(i).wszImage)
-                           if pImageType then
-                              hIcon = AfxGdipIconFromFile( pImageType->wszFileName )
-                              nIndex = ImageList_AddIcon( pCtrl->hImageList, hIcon )
-                           end if
-                           TabCtrl_SetImageIndex( pCtrl->hWindow, i, nIndex )   
-                        end if
-                     next
-   
+                  if pCtrl THEN
+                     ' Recreate the control
+                     ReCreateToolboxControl( pDoc, pCtrl )
                   end if
                end if      
             end if
@@ -456,9 +437,6 @@ public Function frmVDTabChild_Show( ByVal hWndParent As HWnd, _
    pWindow->AddControl("BUTTON", , IDC_FRMVDTABCHILD_CMDIMAGE, "...", 250, 214, 30, 22, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMVDTABCHILD_COMBOSIZE, "", 310, 214, 75, 20, _
-        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
    pWindow->AddControl("LABEL", , IDC_FRMVDTABCHILD_LABEL2, L(395,"TabPage") & ":", 20, 245, 218, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
@@ -481,17 +459,6 @@ public Function frmVDTabChild_Show( ByVal hWndParent As HWnd, _
    HWND_FRMVDTABCHILD = hForm
    
 
-   ' Load the Image Size combobox
-   hCtrl = GetDlgItem( hForm, IDC_FRMVDTABCHILD_COMBOSIZE )
-   ComboBox_AddString( hCtrl, @wstr("SIZE_16") )
-   ComboBox_AddString( hCtrl, @wstr("SIZE_24") )
-   ComboBox_AddString( hCtrl, @wstr("SIZE_32") )
-   ComboBox_AddString( hCtrl, @wstr("SIZE_48") )
-   'dim as long nIndex = ComboBox_FindStringExact( hCtrl, -1, pDoc->wszToolBarSize.sptr ) 
-   'ComboBox_SetCurSel( hCtrl, nIndex)
-   ComboBox_SetCurSel( hCtrl, 0)
-   
-   
    ' Load the list of forms that have the FormChild = True
    dim as HWND hCombo = GetDlgItem(hForm, IDC_FRMVDTABCHILD_COMBOTABPAGES)
    dim as CWSTR wszFormName = "(" & L(396,"No Child Form Selected") & ")"
@@ -508,6 +475,7 @@ public Function frmVDTabChild_Show( ByVal hWndParent As HWnd, _
       end if
       pDoc = pDoc->pDocNext
    loop
+   
    
    ' Copy all of the custom property values to the gTabPages array. We will work with
    ' temporary copies until the user hits OK.
