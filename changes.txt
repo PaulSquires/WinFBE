@@ -1,3 +1,8 @@
+Version 2.0.2 (December 16, 2019)
+- Fixed: ToolTip needed to have at least 1 character set at design time in order for ToolTip to display at runtime because the hWndToolTip would not be created.
+- Fixed: ListBox code regression in wfxApplication.inc WM_ERASEBKGND handler that caused excessive visual flicker (ControlType.ListBox was accidently set to ControlType.ListView).
+- Fixed: ListView now draws significantly faster becase only affected changed visible line items invoke a redraw of the ListView. Uses ListView_IsItemVisible to determine if item is visible.
+
 Version 2.0.1 (December 13, 2019)
 - Added: Month Calendar control.
 - Added: DateTimePicker control.
