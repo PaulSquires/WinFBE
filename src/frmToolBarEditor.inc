@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -482,14 +482,15 @@ private Function frmToolBarEditor_OnCommand( ByVal HWnd As HWnd, _
                   for i as long = lbound(gToolBarItems) to ubound(gToolBarItems)
                      pDoc->ToolBarItems(i) = gToolBarItems(i) 
                   next
+               else   
+                  erase pDoc->ToolBarItems
                end if
                ' Save the value indicating that we want the toolbar to display in
                ' the generated code for the form.
                pDoc->GenerateToolBar = Button_GetCheck( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_CHKDISPLAYONFORM) )
                
                dim as long nIndex = ComboBox_GetCurSel( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_COMBOSIZE) )
-               pDoc->wszToolBarSize = rtrim(AfxGetComboBoxText( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_COMBOSIZE), nIndex ), chr(0))
-               
+               pDoc->wszToolBarSize = AfxGetComboBoxText( GetDlgItem(HWND, IDC_FRMTOOLBAREDITOR_COMBOSIZE), nIndex )
                pDoc->UserModified = true
             end if
             SendMessage(HWnd, WM_CLOSE, 0, 0)
@@ -517,7 +518,7 @@ private Function frmToolBarEditor_OnClose( byval HWnd As HWnd ) As LRESULT
    erase gToolBarItems
    ' Enables parent window keeping parent's zorder
    EnableAllModeless()
-   DestroyWindow HWnd
+   DestroyWindow( HWnd )
    Function = 0
 End Function
 
@@ -726,6 +727,8 @@ public Function frmToolBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    ' Process Windows messages
    Function = pWindow->DoEvents( SW_SHOW )
+
+AfxMsg("closed")
    
    ' Delete the frmToolBarEditor CWindow class manually allocated memory 
    Delete pWindow

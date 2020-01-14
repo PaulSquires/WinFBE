@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -198,6 +198,8 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Gets or sets a value indicating whether multiple items can be selected."
       case "ODDROWCOLOR"   
          wszPropDescribe = "The background color of alternate odd rows in a ListView."
+      case "ODDROWCOLORENABLED"   
+         wszPropDescribe = "Indicates whether to use the color defined by the OddRowColor property."
       case "PASSWORDCHAR"   
          wszPropDescribe = "Indicates the character to display for password input for single-line edit control."
       case "READONLY"   

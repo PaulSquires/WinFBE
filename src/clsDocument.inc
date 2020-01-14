@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -85,8 +85,8 @@ end property
 ''
 ''  Returns True/False indicating that a valid top mainmenu exists for this form.
 function clsDocument.MainMenuExists() as Boolean
-   dim as long numItems = ubound(this.MenuItems) - 1
-   if (this.GenerateMenu = BST_CHECKED) andalso (numItems > -1) then
+   dim as long numItems = (ubound(this.MenuItems) - lbound(this.MenuItems)) + 1
+   if (this.GenerateMenu = BST_CHECKED) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -96,8 +96,8 @@ end function
 ''
 ''  Returns True/False indicating that a valid top toolbar exists for this form.
 function clsDocument.ToolBarExists() as Boolean
-   dim as long numItems = ubound(this.ToolBarItems) - 1
-   if (this.GenerateToolBar = BST_CHECKED) andalso (numItems > -1) then
+   dim as long numItems = (ubound(this.ToolBarItems) - lbound(this.ToolBarItems)) + 1
+   if (this.GenerateToolBar = BST_CHECKED) andalso (numItems > 0) then
       return true
    else   
       return false
@@ -107,8 +107,8 @@ end function
 ''
 ''  Returns True/False indicating that a valid top statusbar exists for this form.
 function clsDocument.StatusBarExists() as Boolean
-   dim as long numItems = ubound(this.PanelItems) - 1
-   if (this.GenerateStatusBar = BST_CHECKED) andalso (numItems > -1) then
+   dim as long numItems = (ubound(this.PanelItems) - lbound(this.PanelItems)) + 1
+   if (this.GenerateStatusBar = BST_CHECKED) andalso (numItems > 0) then
       return true
    else   
       return false

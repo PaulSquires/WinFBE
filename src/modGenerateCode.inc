@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -247,6 +247,7 @@ private function GenerateToolBarCode( byval pDoc as clsDocument ptr ) as CWSTR
 
    dim as CWSTR wszText = _
    sp(1) & "dim as long idxButton" & vbcrlf & _
+   sp(1) & "pForm->ToolBar.Buttons.Clear" & vbcrlf & _
    sp(1) & "pForm->ToolBar.Parent = pForm" & vbcrlf & _
    sp(1) & "pForm->ToolBar.ButtonSize = " & nButtonSize & vbcrlf 
 
@@ -288,6 +289,7 @@ private function GenerateStatusBarCode( byval pDoc as clsDocument ptr ) as CWSTR
    
    dim as CWSTR wszText = _
    sp(1) & "dim as long idxPanel" & vbcrlf & _
+   sp(1) & "pForm->StatusBar.Panels.Clear" & vbcrlf & _
    sp(1) & "pForm->StatusBar.Parent = pForm" & vbcrlf & _
    sp(1) & "pForm->StatusBar.SizingGrip = false" & vbcrlf 
 
@@ -334,6 +336,7 @@ private function GenerateMainMenuCode( byval pDoc as clsDocument ptr ) as CWSTR
    sp(1) & "ncm.cbSize = SizeOf(ncm)" & vbcrlf & _
    sp(1) & "SystemParametersInfo(SPI_GETNONCLIENTMETRICS, SizeOf(ncm), @ncm, 0)" & vbcrlf & _
    sp(1) & "nClientOffset = AfxUnScaleY(ncm.iMenuHeight)  ' holds the height of the mainmenu" & vbcrlf & vbcrlf & _
+   sp(1) & "pForm->MainMenu.MenuItems.Clear" & vbcrlf & _
    sp(1) & "pForm->MainMenu.Parent = pForm" & vbcrlf 
 
    ' Every level of indent is a parent menu item

@@ -1,4 +1,4 @@
-﻿# ListView (wfxListView)
+# ListView (wfxListView)
 
 ### Properties
 
@@ -10,7 +10,7 @@
 | Column |Gets or sets properties of a Column [wfxListViewColumn](#wfxListViewColumn) object |
 | Columns | Gets or sets properties of a Columns [wfxListViewColumnsCollection](#wfxListViewColumnsCollection) collection object |
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
-| CtrlType | Gets or sets the control type value. Always **ControlType.ListView** and used when adding control to the application’s form collection.|
+| CtrlType | Gets or sets the control type value. Always **ControlType.ListView** and used when adding control to the application�s form collection.|
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
 | Focused | Gets or sets a value (true/false) indicating whether the control has input focus.|
 | Font | Gets or sets the font for the control. Refer to the Font object.|
@@ -30,6 +30,8 @@
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
 | MultiSelec  | Gets or sets a value indicating whether multiple items can be selected. |
+| OddRowColor } Gets or sets the background color for alternate rows.|
+| OddRowColorEnabled | Get or sets a value (true/false) indicating whether to use the color defined by the OddRowColor property.|
 | Parent | Gets or sets the parent container of the control.|
 | SelectedItem | Gets or sets the selected item in thelistbox (using a [wfxListViewItem](#wfxListViewItem) object). |
 | SelectedIndex | Gets or sets the index value of the selected item in the listview.|

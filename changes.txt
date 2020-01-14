@@ -1,3 +1,17 @@
+Version 2.0.3 (January 14, 2020)
+- Added: ListView property OddRowColorEnabled (True/False).
+- Changed: ListView removed property "Sorting" until such time as sorting code is added to the control. In the meantime, use the SortByColumn method.
+- Fixed: ListView now draws significantly faster becase only affected changed visible line items invoke a redraw of the ListView only if the BeginUpdate flag is False. Enclosing many ListView row/col changes in BeginUpdate/EndUpdate continues to be the best approach for optimal performance.
+- Fixed: Visual Designer code generated for redisplaying closed forms would not correctly show previous statusbar, or toolbar, or mainmenu.
+- Fixed: MainMenus with only one defined entry would fail to display in the visual designer when the Menu Editor was closed.
+- Fixed: Visual Designer code generated for KeyUp, KeyDown, KeyPress events were not cancelling the key input when e.Handled = True.
+- Fixed: Setting StatusBar font via code was not working. Example: frmMain.StatusBar.Font = New wfxFont("Consolas", 10, FontStyles.Bold, FontCharset.Default)
+
+Version 2.0.2 (December 16, 2019)
+- Fixed: ToolTip needed to have at least 1 character set at design time in order for ToolTip to display at runtime because the hWndToolTip would not be created.
+- Fixed: ListBox code regression in wfxApplication.inc WM_ERASEBKGND handler that caused excessive visual flicker (ControlType.ListBox was accidently set to ControlType.ListView).
+- Fixed: ListView now draws significantly faster becase only affected changed visible line items invoke a redraw of the ListView. Uses ListView_IsItemVisible to determine if item is visible.
+
 Version 2.0.1 (December 13, 2019)
 - Added: Month Calendar control.
 - Added: DateTimePicker control.
