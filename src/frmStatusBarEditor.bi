@@ -1,5 +1,5 @@
 '    WinFBE - Programmer's Code Editor for the FreeBASIC Compiler
-'    Copyright (C) 2016-2019 Paul Squires, PlanetSquires Software
+'    Copyright (C) 2016-2020 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
 '    it under the terms of the GNU General Public License as published by
@@ -40,6 +40,14 @@
 #Define IDC_FRMSTATUSBAREDITOR_CMDPANELADD        1025
 #DEFINE IDC_FRMSTATUSBAREDITOR_LABEL8             1026
 #DEFINE IDC_FRMSTATUSBAREDITOR_TXTWIDTH           1027
+#DEFINE IDC_FRMSTATUSBAREDITOR_LABEL9             1028
+#DEFINE IDC_FRMSTATUSBAREDITOR_LABEL10            1029
+#DEFINE IDC_FRMSTATUSBAREDITOR_LABEL11            1030
+#DEFINE IDC_FRMSTATUSBAREDITOR_LABEL12            1031
+#DEFINE IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR     1032
+#DEFINE IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT  1033
+#DEFINE IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR     1034
+#DEFINE IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT  1035
 
 declare Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocument ptr ) As Long
-declare Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
+declare Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd, byval nDefaultPanel as Long ) as LRESULT

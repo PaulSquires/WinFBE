@@ -1906,8 +1906,20 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          if pDoc then frmToolBarEditor_CreateFakeToolBar( pDoc )
 
       case IDM_STATUSBAREDITOR            
-         frmStatusBarEditor_Show( HWND )
-         if pDoc then frmStatusBarEditor_CreateFakeStatusBar( pDoc )
+         ' If a Panel was clicked on then WPARAM would have been set to the
+         ' ControlID and panel index. When message cracked, that value would show as the
+         ' incoming codeNotify for this message.
+         ' Do a check to ensure that the panel click index is within the
+         ' acceptable ranges.
+         if pDoc then 
+            dim as long nIndex = cast(long, codeNotify)
+            if (nIndex < lbound(pDoc->PanelItems)) or _
+               (nIndex > ubound(pDoc->PanelItems)) then
+               nIndex = 0
+            end if   
+            frmStatusBarEditor_Show( HWND, nIndex )
+            frmStatusBarEditor_CreateFakeStatusBar( pDoc )
+         end if
 
       case IDM_IMAGEMANAGER
          frmImageManager_Show( HWND, 0 )

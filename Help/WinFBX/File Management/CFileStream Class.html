@@ -238,10 +238,14 @@ OPERATOR CAST () AS IStream PTR
 <td>Creates a new stream with its own seek pointer that references the same bytes as the original stream.</td>
 </tr>
 <tr class="odd">
+<td><a href="#StreamPtr">StreamPtr</a></td>
+<td>Returns a pointer to the underlying IStream interface.</td>
+</tr>
+<tr class="even">
 <td><a href="#GetLastResult">GetLastResult</a></td>
 <td>Returns the last result code.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#GetErrorInfo">GetErrorInfo</a></td>
 <td>Returns a description of the last result code.</td>
 </tr>
@@ -1002,6 +1006,10 @@ SLEEP
 </table>
 <h4 id="return-value-23">Return value</h4>
 <p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="streamptr"><a name="StreamPtr"></a>StreamPtr</h1>
+<p>Returns a pointer to the underlying IStream interface.</p>
+<pre><code>FUNCTION StreamPtr () AS IStreamPtr
+</code></pre>
 <h1 id="getlastresult"><a name="GetLastResult"></a>GetLastResult</h1>
 <p>Returns the last result code.</p>
 <pre><code>FUNCTION GetLastResult () AS HRESULT

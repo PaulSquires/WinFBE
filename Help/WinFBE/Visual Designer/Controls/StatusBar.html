@@ -231,28 +231,40 @@
 <td>Gets or sets a value indicating the panel's sizing style <a href="#StatusBarPanelAutoSize">StatusBarPanelAutoSize</a> enum.</td>
 </tr>
 <tr class="even">
-<td>BorderStyle</td>
-<td>Gets or sets a value indicating the panel's border style <a href="#StatusBarPanelBorderStyle">StatusBarPanelBorderStyle</a> enum.</td>
-</tr>
-<tr class="odd">
 <td>Icon</td>
 <td>Gets or sets the image name (as found in the Resource file) for any applicable icon image to display in the panel.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Text</td>
 <td>The text associated with this panel item.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ToolTip</td>
 <td>The tooltip text to display when the panel width is too narrow to display the full panel text.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Width</td>
 <td>Gets or sets the maximum panel width.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MinWidth</td>
 <td>Gets or sets the minimum panel width.</td>
+</tr>
+<tr class="odd">
+<td>BackColor</td>
+<td>Gets or sets the background color of the panel.</td>
+</tr>
+<tr class="even">
+<td>ForeColor</td>
+<td>Gets or sets the foreground color of the panel.</td>
+</tr>
+<tr class="odd">
+<td>BackColorHot</td>
+<td>Gets or sets the background color of the panel when the mouse is over the panel.</td>
+</tr>
+<tr class="even">
+<td>ForeColorHot</td>
+<td>Gets or sets the foreground color of the panel when the mouse is over the panel.</td>
 </tr>
 </tbody>
 </table>
@@ -268,13 +280,6 @@ End Enum
    None     = 0
    Contents = 1
    Spring   = 2
-End Enum
-</code></pre>
-<h5 id="statusbarpanelborderstyle">StatusBarPanelBorderStyle</h5>
-<pre><code>Enum StatusBarPanelBorderStyle
-   Sunken = 0
-   None   = SBT_NOBORDERS
-   Raised = SBT_POPOUT
 End Enum
 </code></pre>
 <h5 id="wfxsize">wfxSize</h5>
@@ -306,8 +311,6 @@ End Type
       Declare Function IsEmpty() as Boolean
       Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
 End Type
-</code></pre>
-<pre><code>
 </code></pre>
 </body>
 </html>

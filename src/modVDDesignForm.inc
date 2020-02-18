@@ -957,7 +957,13 @@ private Function DesignerForm_OnNotify( ByVal HWnd As HWnd, _
    Select Case pNMHDR->code 
       Case NM_CLICK
          if id = IDC_FAKESTATUSBAR then
-            PostMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_STATUSBAREDITOR, 0), 0 )
+            ' Determine if one of the Panels was clicked on. If it was then send
+            ' that value to the routine that will open the sttausbar editor 
+            ' defaulting to that panel as being selected.
+            Dim lpnm As NMMOUSE Ptr = Cast(NMMOUSE Ptr, pNMHDR)
+            ' lpnm->dwItemSpec  ' index of clicked panel
+            PostMessage( HWND_FRMMAIN, WM_COMMAND, _
+                         MAKELONG(IDM_STATUSBAREDITOR, lpnm->dwItemSpec), 0 )
          end if
    end select
    
@@ -1072,11 +1078,11 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
                dim pProp as clsProperty ptr
                pProp = GetControlPropertyPtr(pCtrl, "FORECOLOR")
                if pProp then 
-                  SetTextColor(cast(HDC, wParam), GetRGBColorFromProperty(pProp))
+                  SetTextColor(cast(HDC, wParam), GetRGBColorFromProperty(pProp->wszPropValue))
                end if
                pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
                if pProp then 
-                  dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+                  dim as COLORREF clrBack = GetRGBColorFromProperty(pProp->wszPropValue)
                   SetBkColor(cast(HDC, wParam), clrBack)
                   if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
                   pCtrl->hBackBrush = CreateSolidBrush(clrBack)
@@ -1087,11 +1093,109 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
    
 
       case WM_DRAWITEM
-         ' Label controls are OwnerDraw
          dim lpdis As DRAWITEMSTRUCT Ptr = cast( DRAWITEMSTRUCT Ptr, lParam )
          if lpdis = 0 then exit function
          dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByWindow(hwnd)
-         if pDoc THEN 
+         if pDoc = 0 THEN exit function
+            
+         if lpdis->hwndItem = pDoc->hWndStatusBar then
+            ' StatusBar panels are OwnerDraw
+            Dim memDC as HDC      ' Double buffering
+            Dim hbit As HBITMAP   ' Double buffering
+            Dim As RECT rc
+            Dim wszText As WString * MAX_PATH
+            dim as long nImageWidth 
+            dim as long nImageHeight
+
+            rc = lpdis->rcItem
+            
+            dim as long nItem = lpdis->itemID
+            If (nItem < 0) or (nItem > ubound(pDoc->PanelItems)) Then Exit Function
+
+            ' The image/text output rectangle is positioned within the main rc rectangle
+            ' depending on the alignment.
+            dim as RECT rc1 = rc
+            
+            dim wszImageName as wstring * MAX_PATH
+            wszImageName = pDoc->PanelItems(nItem).pProp.wszPropValue
+         
+            dim as HANDLE hIcon
+            dim hImageListNormal As HIMAGELIST 
+            if len(wszImageName) then
+               Dim cx As Long = AfxScaleX(16) 
+               dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszImageName)
+               hImageListNormal = ImageList_Create( cx, cx, ILC_COLOR32 Or ILC_MASK, 1, 1)
+               dim as long ii = AfxGdipAddIconFromFile( hImageListNormal, pImageType->wszFileName )
+               hIcon = ImageList_GetIcon( hImageListNormal, ii, ILD_NORMAL )
+               if hIcon then
+                  nImageWidth = AfxScaleX(16)
+                  nImageHeight = AfxScaleY(16)
+               end if   
+            End If   
+            
+            wszText = " " & pDoc->PanelItems(nItem).wszText & " "
+            dim as long nTextWidth = GetTextWidthPixels( lpdis->hwndItem, wszText )  
+
+            dim as long nTotalWidth 
+            if nImageWidth then nTotalWidth = nImageWidth + AfxScaleX(4)
+            if nTextWidth  then nTotalWidth = nTotalWidth + nTextWidth 
+            
+            select case pDoc->PanelItems(nItem).wszAlignment
+               case "StatusBarPanelAlignment.Left"
+                  ' No need to do anything because rc1 is already the full size of rc.
+               case "StatusBarPanelAlignment.Center"
+                  dim as long nPad = MAX(0, (rc.right - rc.left - nTotalWidth) / 2)
+                  rc1.left = rc1.left + nPad
+               case "StatusBarPanelAlignment.Right"
+                  rc1.left  = rc1.right - nTotalWidth
+            end select
+            
+            memDC = CreateCompatibleDC( lpdis->hDC )
+            hbit  = CreateCompatibleBitmap( lpdis->hDC, rc.right, rc.bottom )
+            If hbit Then hbit = SelectObject( memDC, hbit )
+
+            dim as HFONT _hFont = AfxGetWindowFont( lpdis->hwndItem )
+            SelectObject( memDC, _hFont )
+
+            ' Paint the entire background
+            dim as HBRUSH hBackBrush
+            dim as COLORREF rgbBackClr, rgbForeClr 
+
+            ' In the visual designer we only display the panels in the "non hot" state.
+            rgbBackClr = GetRGBColorFromProperty(pDoc->PanelItems(nItem).wszBackColor)
+            rgbForeClr = GetRGBColorFromProperty(pDoc->PanelItems(nItem).wszForeColor)
+
+            SetBkColor( memDC, rgbBackClr )   
+            SetTextColor( memDC, rgbForeClr )
+            hBackBrush = CreateSolidBrush(rgbBackClr)
+            FillRect( memDC, @rc, hBackBrush )
+            DeleteObject(hBackBrush)
+
+            ' Output any defined icon for the panel
+            if hIcon then
+               ' Center the image vertically within rc1
+               dim as long nPad = (rc1.bottom - rc1.top - nImageHeight) / 2
+               DrawIconEx( memDC, rc1.left, rc1.top + nPad, _
+                                  hIcon, _
+                                  nImageWidth, nImageHeight, 0, null, DI_NORMAL ) 
+               DeleteObject( hIcon )
+               ImageList_Destroy( hImageListNormal )
+               rc1.left = rc1.left + nImageWidth + AfxScaleX(4)
+            end if
+            
+            ' Prepare and paint the text coloring
+            dim as long lFormat = DT_LEFT Or DT_VCENTER or DT_SINGLELINE
+            wszText = pDoc->PanelItems(nItem).wszText
+            DrawText( memDC, wszText, -1, Cast(lpRect, @rc1), lFormat )
+
+            BitBlt lpdis->hDC, 0, 0, rc.right, rc.bottom, memDC, 0, 0, SRCCOPY 
+
+            ' Cleanup
+            If hbit  Then DeleteObject SelectObject(memDC, hbit)
+            If memDC Then DeleteDC memDC
+         
+         else
+            ' Label controls are OwnerDraw
             dim pCtrl as clsControl ptr = pDoc->Controls.GetCtrlPtr( lpdis->hwndItem )
             if pCtrl then
                dim pProp as clsProperty ptr
@@ -1099,10 +1203,10 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
                select case pCtrl->ControlType
                   case CTRL_LABEL
                      pProp = GetControlPropertyPtr( pCtrl, "FORECOLOR" )
-                     if pProp then SetTextColor( lpdis->hDC, GetRGBColorFromProperty(pProp) )
+                     if pProp then SetTextColor( lpdis->hDC, GetRGBColorFromProperty(pProp->wszPropValue) )
                      pProp = GetControlPropertyPtr(pCtrl, "BACKCOLOR")
                      if pProp then 
-                        dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+                        dim as COLORREF clrBack = GetRGBColorFromProperty(pProp->wszPropValue)
                         SetBkColor( lpdis->hDC, clrBack )
                         dim as RECT rc
                         GetClientRect( lpdis->hwndItem, @rc )
@@ -1140,10 +1244,8 @@ public Function DesignerForm_WndProc( ByVal HWnd   As HWnd, _
                      DrawText( lpdis->hDC, wszText, -1, Cast(lpRect, @lpdis->rcItem), lFormat )
                end select
             end if   
-            
          end if
-
-      
+            
    End Select
 
    ' for messages that we don't deal with

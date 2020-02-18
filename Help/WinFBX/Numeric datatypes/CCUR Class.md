@@ -133,24 +133,6 @@ SLEEP
 
 Assigns a value to a `CCUR` variable.
 
-```
-OPERATOR LET (BYREF cSrc AS CCUR)
-OPERATOR LET (BYVAL cySrc AS CURRENCY)
-OPERATOR LET (BYVAL nInteger AS LONGLONG)
-OPERATOR LET (BYVAL bSrc AS BYTE)
-OPERATOR LET (BYVAL ubSrc AS UBYTE)
-OPERATOR LET (BYVAL sSrc AS SHORT)
-OPERATOR LET (BYVAL usSrc AS USHORT)
-OPERATOR LET (BYVAL lSrc AS LONG)
-OPERATOR LET (BYVAL ulSrc AS ULONG)
-OPERATOR LET (BYVAL fSrc AS SINGLE)
-OPERATOR LET (BYVAL dSrc AS DOUBLE)
-OPERATOR LET (BYVAL dSrc AS DECIMAL)
-OPERATOR LET (BYREF szSrc AS STRING)
-OPERATOR LET (BYVAL varSrc AS VARIANT)
-OPERATOR LET (BYVAL pDispSrc AS IDispatch PTR)
-```
-
 #### Examples
 
 ```
@@ -160,7 +142,7 @@ c = 12345.1234
 c = "77777.999"
 ```
 
-The operator that accepts a DOUBLE value is particulary useful, because it allows to set the integer and fractionary parts at the same time with just a number, e.g.
+Passing a DOUBLE value allows to set the integer and fractionary parts at the same time with just a number, e.g.
 
 ```
 DIM c AS CCUR = 12345.1234
@@ -228,37 +210,13 @@ IF c = c3 THEN PRINT "equal" ELSE PRINT "different"
 
 ```
 OPERATOR + (BYREF cur1 AS CCUR, BYREF cur2 AS CCUR) AS CCUR
-OPERATOR + (BYREF cur AS CCUR, BYVAL nValue AS LONG) AS CCUR
-OPERATOR + (BYVAL nValue AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR + (BYREF cur AS CCUR, BYVAL nValue AS DOUBLE) AS CCUR
-OPERATOR + (BYVAL nValue AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR += (BYREF cur AS CCUR)
-OPERATOR += (BYVAL nValue AS LONG)
-OPERATOR += (BYVAL nValue AS DOUBLE)
 OPERATOR - (BYREF cur1 AS CCUR, BYREF cur2 AS CCUR) AS CCUR
-OPERATOR - (BYREF cur AS CCUR, BYVAL nValue AS LONG) AS CCUR
-OPERATOR - (BYVAL nValue AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR - (BYREF cur AS CCUR, BYVAL nValue AS DOUBLE) AS CCUR
-OPERATOR - (BYVAL nValue AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR -= (BYREF cur AS CCUR)
-OPERATOR -= (BYREF nValue AS LONG)
-OPERATOR -= (BYREF nValue AS DOUBLE)
 OPERATOR * (BYREF cur1 AS CCUR, BYREF cur2 AS CCUR) AS CCUR
-OPERATOR * (BYREF cur AS CCUR, BYVAL nOperand AS LONG) AS CCUR
-OPERATOR * (BYVAL nOperand AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR * (BYREF cur AS CCUR, BYVAL nOperand AS DOUBLE) AS CCUR
-OPERATOR * (BYVAL nOperand AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR *= (BYREF cur AS CCUR)
-OPERATOR *= (BYVAL nOperand AS LONG)
-OPERATOR *= (BYVAL nOperand AS DOUBLE)
 OPERATOR / (BYREF cur AS CCUR, BYVAL cOperand AS CCUR) AS CCUR
-OPERATOR / (BYREF cur AS CCUR, BYVAL nOperand AS LONG) AS CCUR
-OPERATOR / (BYREF cur AS CCUR, BYVAL nOperand AS DOUBLE) AS CCUR
-OPERATOR / (BYVAL nValue AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR / (BYVAL nValue AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR /= (BYREF cOperand AS CCUR)
-OPERATOR /= (BYVAL nOperand AS LONG)
-OPERATOR /= (BYVAL nOperand AS DOUBLE)
 ```
 
 #### Examples
@@ -334,11 +292,11 @@ PRINT c.FormatCurrency   --> 12.345,12 € (Spain)
 Formats a currency into a string form.
 
 ```
-FUNCTION FormatCurrency (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+FUNCTION FormatNumber (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
    BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS STRING
 ```
 ```
-FUNCTION FormatCurrencyW (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+FUNCTION FormatNumberW (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
    BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS CBSTR
 ```
 

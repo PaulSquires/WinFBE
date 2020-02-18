@@ -98,10 +98,14 @@
 <td>Creates a new stream with its own seek pointer that references the same bytes as the original stream.</td>
 </tr>
 <tr class="odd">
+<td><a href="#StreamPtr">StreamPtr</a></td>
+<td>Returns a pointer to the underlying IStream interface.</td>
+</tr>
+<tr class="even">
 <td><a href="#GetLastResult1">GetLastResult</a></td>
 <td>Returns the last result code.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#GetErrorInfo1">GetErrorInfo</a></td>
 <td>Returns a description of the last result code.</td>
 </tr>
@@ -110,7 +114,7 @@
 <h1 id="cmemtextstream-class">CMemTextStream Class</h1>
 <p>Creates a memory text stream, allowing read, write and seek operations. The stream is thread-safe as of Windows 8. On earlier systems, the stream is not thread-safe. Cloning is supported as of Windows 8.</p>
 <p><strong>Include file</strong>: CStream.inc</p>
-<h3 id="constructor-(cmemstream)">Constructor (CMemStream)</h3>
+<h3 id="constructor-(cmemtextstream)">Constructor (CMemTextStream)</h3>
 <pre><code>CONSTRUCTOR CMemTextStream
 CONSTRUCTOR CMemTextStream (BYVAL pwszText AS CONST WSTRING PTR)
 </code></pre>
@@ -174,16 +178,24 @@ CONSTRUCTOR CMemTextStream (BYVAL pwszText AS CONST WSTRING PTR)
 <td>Sets the seek position at the end of the stream.</td>
 </tr>
 <tr class="odd">
+<td><a href="#CopyTo2">CopyTo</a></td>
+<td>Copies a specified number of characters from the current seek pointer in the stream to the current seek pointer in another stream.</td>
+</tr>
+<tr class="even">
 <td><a href="#GetSize2">GetSize</a></td>
 <td>Returns the size of the stream.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#SetSize2">SetSize</a></td>
 <td>Changes the size of the stream.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#Clone2">Clone</a></td>
 <td>Creates a new stream with its own seek pointer that references the same bytes as the original stream.</td>
+</tr>
+<tr class="odd">
+<td><a href="#StreamPtr">StreamPtr</a></td>
+<td>Returns a pointer to the underlying IStream interface.</td>
 </tr>
 <tr class="even">
 <td><a href="#GetLastResult2">GetLastResult</a></td>
@@ -263,7 +275,7 @@ pStream.Close
 <td>Closes a <strong>Stream</strong> object and any dependent objects.</td>
 </tr>
 <tr class="odd">
-<td><a href="#CopyTo2">CopyTo</a></td>
+<td><a href="#CopyTo3">CopyTo</a></td>
 <td>Copies the specified number of characters or bytes (depending on <strong>Type_</strong>) in the <strong>Stream</strong> to another <strong>Stream</strong> object.</td>
 </tr>
 <tr class="even">
@@ -332,6 +344,18 @@ pStream.Close
 </tr>
 </tbody>
 </table>
+<h1 id="streamptr"><a name="StreamPtr"></a>StreamPtr</h1>
+<p>Returns a pointer to the underlying <strong>IStream</strong> interface.</p>
+<pre><code>FUNCTION StreamPtr () AS IStreamPtr
+</code></pre>
+<h4 id="remarks">Remarks</h4>
+<p>To save a memory stream to a file you can:</p>
+<ol>
+<li>Create an instance of the <strong>CFileStream</strong> class</li>
+<li>Get a pointer to its underlying <strong>IStream</strong> interface with <strong>CFileStream.StreamPtr</strong></li>
+<li>Copy the contents of the memory stream to the file stream with <strong>CMemStream.CopyTo</strong></li>
+<li>Close the file with <strong>CFileStream.Close</strong></li>
+</ol>
 <h1 id="read-(cmemstream)"><a name="Read1"></a>Read (CMemStream)</h1>
 <p>Reads a specified number of bytes from the stream into memory, starting at the current seek pointer.</p>
 <pre><code>FUNCTION Read (BYVAL pv AS ANY PTR, BYVAL cb AS ULONG, BYVAL pcbRead AS ULONG PTR) AS HRESULT
@@ -691,6 +715,41 @@ pStream.Close
 </table>
 <h4 id="return-value-21">Return value</h4>
 <p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
+<h1 id="copyto-(cmemtextstream)"><a name="CopyTo2"></a>CopyTo (CMemTextStream)</h1>
+<p>Copies a specified number of characters from the current seek pointer in the stream to the current seek pointer in another stream.</p>
+<pre><code>FUNCTION CopyTo (BYVAL pstm AS IStream PTR, _
+   BYVAL cb AS ULONGINT, _
+   BYVAL pcbRead AS ULONGINT PTR = NULL, _
+   BYVAL pcbWritten AS ULONGINT PTR = NULL) AS HRESULT
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>pstm</em></td>
+<td>A pointer to the destination stream. The stream pointed to by <em>pstm</em> can be a new stream or a clone of the source stream.</td>
+</tr>
+<tr class="even">
+<td><em>cb</em></td>
+<td>The number of characters of data to attempt to copy into the stream.</td>
+</tr>
+<tr class="odd">
+<td><em>pcbRead</em></td>
+<td>A pointer to the location where this method writes the actual number of bytes read from the source. You can set this pointer to NULL. In this case, this method does not provide the actual number of bytes read.</td>
+</tr>
+<tr class="even">
+<td><em>pcbWritten</em></td>
+<td>A pointer to the location where this method writes the actual number of bytes written to the destination. You can set this pointer to NULL. In this case, this method does not provide the actual number of bytes written.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-22">Return value</h4>
+<p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
 <h1 id="clone-(cmemtextstream)"><a name="Clone2"></a>Clone (CMemTextStream)</h1>
 <p>Creates a new stream with its own seek pointer that references the same bytes as the original stream. The <strong>Clone</strong> method creates a new stream for accessing the same bytes but using a separate seek pointer. The new stream sees the same data as the source-stream. Changes written to one stream are immediately visible in the other. Range locking is shared between the streams. The initial setting of the seek pointer in the cloned stream instance is the same as the current setting of the seek pointer in the original stream at the time of the clone operation.</p>
 <pre><code>FUNCTION Clone (BYVAL ppstm AS IStream PTR PTR) AS HRESULT
@@ -709,19 +768,19 @@ pStream.Close
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-22">Return value</h4>
+<h4 id="return-value-23">Return value</h4>
 <p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
 <h1 id="getlastresult-(cmemtextstream)"><a name="GetLastResult2"></a>GetLastResult (CMemTextStream)</h1>
 <p>Returns the last result code.</p>
 <pre><code>FUNCTION GetLastResult () AS HRESULT
 </code></pre>
-<h4 id="return-value-23">Return value</h4>
+<h4 id="return-value-24">Return value</h4>
 <p>HRESULT. S_OK (0) on success, or an error code on failure.</p>
 <h1 id="geterrorinfo-(cmemtextstream)"><a name="GetErrorInfo2"></a>GetErrorInfo (CMemTextStream)</h1>
 <p>Returns a description of the last result code.</p>
 <pre><code>FUNCTION GetErrorInfo () AS CWSTR
 </code></pre>
-<h4 id="return-value-24">Return value</h4>
+<h4 id="return-value-25">Return value</h4>
 <p>CWSTR. A description of the last result code. If the result code is S_OK (0), it returns &quot;Success&quot;; otherwise, it returns the hexadecimal value of the error code and a description such &quot;Seek error&quot;, &quot;Write fault&quot;, &quot;Read fault&quot; or &quot;Invalid argument&quot;.</p>
 <h1 id="charset-(cadostream)"><a name="Charset"></a>Charset (CADOStream)</h1>
 <p>Indicates the character set into which the contents of a text <strong>Stream</strong> should be translated for storage in the <strong>Stream</strong> object's internal buffer.</p>
@@ -742,9 +801,9 @@ PROPERTY Charset (BYREF cbsCharset AS CBSTR)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-25">Return value</h4>
+<h4 id="return-value-26">Return value</h4>
 <p>CBSTR. The character set.</p>
-<h4 id="remarks">Remarks</h4>
+<h4 id="remarks-1">Remarks</h4>
 <p>In a text <strong>Stream</strong> object, text data is stored in the character set specified by the <strong>Charset</strong> property. The default is Unicode. The <strong>Charset</strong> property is used for converting data going into the <strong>Stream</strong> or coming out of the <strong>Stream</strong>. For example, if the <strong>Stream</strong> contains ISO-8859-1 data and that data is copied to a <strong>BSTR</strong>, the <strong>Stream</strong> object will convert the data to Unicode. The reverse is also true.</p>
 <p>For an open <strong>Stream</strong>, the current <strong>Position</strong> must be at the beginning of the <strong>Stream</strong> (0) to be able to set <strong>Charset</strong>.</p>
 <p><strong>Charset</strong> is used only with text <strong>Stream</strong> objects (<strong>Type_</strong> is <strong>adTypeText</strong>). This property is ignored if <strong>Type_</strong> is <strong>adTypeBinary</strong>.</p>
@@ -752,9 +811,9 @@ PROPERTY Charset (BYREF cbsCharset AS CBSTR)
 <p>Closes a <strong>Stream</strong> object and any dependent objects.</p>
 <pre><code>FUNCTION Close () AS HRESULT
 </code></pre>
-<h4 id="return-value-26">Return value</h4>
+<h4 id="return-value-27">Return value</h4>
 <p>S_OK (0) or an HRESULT code.</p>
-<h1 id="copyto-(cadostream)"><a name="CopyTo2"></a>CopyTo (CADOStream)</h1>
+<h1 id="copyto-(cadostream)"><a name="CopyTo3"></a>CopyTo (CADOStream)</h1>
 <p>Copies the specified number of characters or bytes (depending on <strong>Type_</strong>) in the <strong>Stream</strong> to another <strong>Stream</strong> object.</p>
 <pre><code>FUNCTION CopyTo (BYVAL pDestStream AS ADOStream PTR, BYVAL CharNumber AS LONG = adReadAll) AS HRESULT
 </code></pre>
@@ -776,9 +835,9 @@ PROPERTY Charset (BYREF cbsCharset AS CBSTR)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-27">Return value</h4>
+<h4 id="return-value-28">Return value</h4>
 <p>CBSTR. The character set.</p>
-<h4 id="remarks-1">Remarks</h4>
+<h4 id="remarks-2">Remarks</h4>
 <p>This method copies the specified number of characters or bytes, starting from the current position specified by the <strong>Position</strong> property. If the specified number is more than the available number of bytes until <strong>EOS</strong>, then only characters or bytes from the current position to <strong>EOS</strong> are copied. If the value of <em>NumChars</em> is –1, or omitted, all characters or bytes starting from the current position are copied.</p>
 <p>If there are existing characters or bytes in the destination stream, all contents beyond the point where the copy ends remain, and are not truncated. Position becomes the byte immediately following the last byte copied. If you want to truncate these bytes, call <strong>SetEOS</strong>.</p>
 <p><strong>CopyTo</strong> should be used to copy data to a destination <strong>Stream</strong> of the same type as the source <strong>Stream</strong> (their <strong>Type_</strong> property settings are both <strong>adTypeText</strong> or both <strong>adTypeBinary</strong>). For text <strong>Stream</strong> objects, you can change the <strong>Charset</strong> property setting of the destination <strong>Stream</strong> to translate from one character set to another. Also, text <strong>Stream</strong> objects can be successfully copied into binary <strong>Stream objects</strong>, but binary <strong>Stream</strong> objects cannot be copied into text <strong>Stream</strong> objects.</p>
@@ -786,7 +845,7 @@ PROPERTY Charset (BYREF cbsCharset AS CBSTR)
 <p>Indicates whether the current position is at the end of the stream.</p>
 <pre><code>FUNCTION EOS () AS BOOLEAN
 </code></pre>
-<h4 id="return-value-28">Return value</h4>
+<h4 id="return-value-29">Return value</h4>
 <p>A Boolean value that indicates whether the current position is at the end of the stream. <strong>EOS</strong> returns True if there are no more bytes in the stream; it returns False if there are more bytes following the current position.</p>
 <p>To set the end of stream position, use the <strong>SetEOS</strong> method. To determine the current position, use the <strong>Position</strong> property.</p>
 <h1 id="lineseparator-(cadostream)"><a name="LineSeparator"></a>LineSeparator (CAdoStream)</h1>
@@ -834,9 +893,9 @@ PROPERTY LineSeparator (BYVAL LS AS LineSeparatorEnum)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-29">Return value</h4>
+<h4 id="return-value-30">Return value</h4>
 <p>LONG. A <strong>LineSeparatorEnum</strong> value.</p>
-<h4 id="remarks-2">Remarks</h4>
+<h4 id="remarks-3">Remarks</h4>
 <p><strong>LineSeparator</strong> is used to interpret lines when reading the content of a text <strong>Stream</strong>. Lines can be skipped with the <strong>SkipLine</strong> method.</p>
 <p><strong>LineSeparator</strong> is used only with text <strong>Stream</strong> objects (<strong>Type_</strong> is <strong>adTypeText</strong>). This property is ignored if <strong>Type_</strong> is <strong>adTypeBinary</strong>.</p>
 <h1 id="loadfromfile-(cadostream)"><a name="LoadFromFile"></a>LoadFromFile (CADOStream)</h1>
@@ -857,7 +916,7 @@ PROPERTY LineSeparator (BYVAL LS AS LineSeparatorEnum)
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-3">Remarks</h4>
+<h4 id="remarks-4">Remarks</h4>
 <p>This method may be used to load the contents of a local file into a <strong>Stream</strong> object. This may be used to upload the contents of a local file to a server.</p>
 <p>The <strong>Stream</strong> object must be already open before calling LoadFromFile. This method does not change the binding of the <strong>Stream</strong> object; it will still be bound to the object specified by the URL or <strong>Record</strong> with which the Stream was originally opened.</p>
 <p><strong>LoadFromFile</strong> overwrites the current contents of the <strong>Stream</strong> object with data read from the file. Any existing bytes in the <strong>Stream</strong> are overwritten by the contents of the file. Any previously existing and remaining bytes following the <strong>EOS</strong> created by <strong>LoadFromFile</strong>, are truncated.</p>
@@ -908,17 +967,17 @@ PROPERTY SET Mode (BYVAL nMode AS ConnectModeEnum)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-30">Return value</h4>
+<h4 id="return-value-31">Return value</h4>
 <p>LONG. A <strong>ConnectionModeEnum</strong> value.</p>
-<h4 id="remarks-4">Remarks</h4>
+<h4 id="remarks-5">Remarks</h4>
 <p>This property is read/write while the object is closed and read-only while the object is open.</p>
 <h1 id="open-(cadostream)"><a name="Open"></a>Open (CADOStream)</h1>
 <p>Opens the stream.</p>
 <pre><code>FUNCTION Open () AS HRESULT
 </code></pre>
-<h4 id="return-value-31">Return value</h4>
+<h4 id="return-value-32">Return value</h4>
 <p>S_OK (0) or an HRESULT code.</p>
-<h4 id="remarks-5">Remarks</h4>
+<h4 id="remarks-6">Remarks</h4>
 <p>Instantiates a <strong>Stream</strong> object in memory without associating it with an underlying source. You can dynamically add data to the stream simply by writing binary or text data to the <strong>Stream</strong> with <strong>Write</strong> or <strong>WriteText</strong>, or by loading data from a file with <strong>LoadFromFile</strong>.</p>
 <p>While the <strong>Stream</strong> is not open, it is possible to read all the read-only properties of the <strong>Stream</strong>.</p>
 <h1 id="position-(cadostream)"><a name="Position"></a>Position (CAdoStream)</h1>
@@ -940,9 +999,9 @@ PROPERTY Position (BYVAL nPos AS LONG)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-32">Return value</h4>
+<h4 id="return-value-33">Return value</h4>
 <p>LONG. The offset, in number of bytes, of the current position from the beginning of the stream.</p>
-<h4 id="remarks-6">Remarks</h4>
+<h4 id="remarks-7">Remarks</h4>
 <p>The current position can be moved to a point after the end of the stream. If you specify the current position beyond the end of the stream, the <strong>Size</strong> of the <strong>Stream</strong> object will be increased accordingly. Any new bytes added in this way will be null.</p>
 <p><strong>Notes</strong>: <strong>Position</strong> always measures bytes. For text streams using multibyte character sets, multiply the position by the character size to determine the character number. For example, for a two-byte character set, the first character is at position 0, the second character at position 2, the third character at position 4, and so on.</p>
 <p>Negative values cannot be used to change the current position in a <strong>Stream</strong>. Only positive numbers can be used for <strong>Position</strong>.</p>
@@ -991,9 +1050,9 @@ FUNCTION Read (BYVAL NumBytes AS LONG = adReadAll, BYREF cvValue AS CVAR) AS HRE
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-33">Return value</h4>
+<h4 id="return-value-34">Return value</h4>
 <p>CVAR. The bytes read.</p>
-<h4 id="remarks-7">Remarks</h4>
+<h4 id="remarks-8">Remarks</h4>
 <p>If <em>NumBytes</em> is more than the number of bytes left in the <strong>Stream</strong>, only the bytes remaining are returned. The data read is not padded to match the length specified by <em>NumBytes</em>. If there are no bytes left to read, a variant with a null value is returned. Read cannot be used to read backwards.</p>
 <p><strong>Note</strong>: <em>NumBytes</em> always measures bytes. For text <strong>Stream</strong> objects (<strong>Type_</strong> is <strong>adTypeText</strong>), use <strong>ReadText</strong>.</p>
 <h1 id="readtext-(cadostream)"><a name="ReadText"></a>ReadText (CADOStream)</h1>
@@ -1040,9 +1099,9 @@ FUNCTION ReadText (BYVAL NumChars AS LONG = adReadAll, BYREF cbsText AS CBSTR) A
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-34">Return value</h4>
+<h4 id="return-value-35">Return value</h4>
 <p>CBSTR. The characters read.</p>
-<h4 id="remarks-8">Remarks</h4>
+<h4 id="remarks-9">Remarks</h4>
 <p>If <em>NumChars</em> is more than the number of characters left in the stream, only the characters remaining are returned. The string read is not padded to match the length specified by <em>NumChars</em>. If there are no characters left to read, a variant whose value is null is returned. <strong>ReadText</strong> cannot be used to read backwards.</p>
 <p><strong>Note</strong>: The <strong>ReadText</strong> method is used with text streams (<strong>Type_</strong> is <strong>adTypeText</strong>). For binary streams (<strong>Type_</strong> is <strong>adTypeBinary</strong>), use <strong>Read</strong>.</p>
 <h1 id="savetofile-(cadostream)"><a name="SaveToFile"></a>SaveToFile (CADOStream)</h1>
@@ -1088,9 +1147,9 @@ FUNCTION ReadText (BYVAL NumChars AS LONG = adReadAll, BYREF cbsText AS CBSTR) A
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-35">Return value</h4>
+<h4 id="return-value-36">Return value</h4>
 <p>S_OK (0) or an HRESULT code.</p>
-<h4 id="remarks-9">Remarks</h4>
+<h4 id="remarks-10">Remarks</h4>
 <p><strong>SaveToFile</strong> may be used to copy the contents of a <strong>Stream</strong> object to a local file. There is no change in the contents or properties of the <strong>Stream object</strong>. The <strong>Stream</strong> object must be open before calling <strong>SaveToFile</strong>.</p>
 <p>This method does not change the association of the <strong>Stream</strong> object to its underlying source. The <strong>Stream</strong> object will still be associated with the original URL or <strong>Record</strong> that was its source when opened.</p>
 <p>After a <strong>SaveToFile</strong> operation, the current position (<strong>Position</strong>) in the stream is set to the beginning of the stream (0).</p>
@@ -1098,9 +1157,9 @@ FUNCTION ReadText (BYVAL NumChars AS LONG = adReadAll, BYREF cbsText AS CBSTR) A
 <p>Sets the position that is the end of the stream.</p>
 <pre><code>FUNCTION SetEOS () AS HRESULT
 </code></pre>
-<h4 id="return-value-36">Return value</h4>
+<h4 id="return-value-37">Return value</h4>
 <p>S_OK (0) or an HRESULT code.</p>
-<h4 id="remarks-10">Remarks</h4>
+<h4 id="remarks-11">Remarks</h4>
 <p><strong>SetEOS</strong> updates the value of the <strong>EOS</strong> property, by making the current <strong>Position</strong> the end of the stream. Any bytes or characters following the current position are truncated.</p>
 <p>Since <strong>Write</strong>, <strong>WriteText</strong>, and <strong>CopyTo</strong> do not truncate any extra values in existing <strong>Stream</strong> objects, you can truncate these bytes or characters by setting the new end-of-stream position with <strong>SetEOS</strong>.</p>
 <p><strong>Caution</strong>: If you set <strong>EOS</strong> to a position before the actual end of the stream, you will lose all data after the new <strong>EOS</strong> position.</p>
@@ -1108,15 +1167,15 @@ FUNCTION ReadText (BYVAL NumChars AS LONG = adReadAll, BYREF cbsText AS CBSTR) A
 <p>Indicates the size of the stream in number of bytes.</p>
 <pre><code>PROPERTY Size () AS LONG
 </code></pre>
-<h4 id="return-value-37">Return value</h4>
+<h4 id="return-value-38">Return value</h4>
 <p>LONG. The size of the stream in number of bytes.</p>
 <h1 id="skipline-(cadostream)"><a name="SkipLine"></a>SkipLine (CADOStream)</h1>
 <p>Skips one entire line when reading a text stream.</p>
 <pre><code>FUNCTION SkipLine () AS HRESULT
 </code></pre>
-<h4 id="return-value-38">Return value</h4>
+<h4 id="return-value-39">Return value</h4>
 <p>S_OK (0) or an HRESULT code.</p>
-<h4 id="remarks-11">Remarks</h4>
+<h4 id="remarks-12">Remarks</h4>
 <p>All characters up to, and including the next line separator, are skipped. By default, the <strong>LineSeparator</strong> is <strong>adCRLF</strong>. If you attempt to skip past <strong>EOS</strong>, the current position will simply remain at <strong>EOS</strong>.</p>
 <p>The <strong>SkipLine</strong> method is used with text streams (<strong>Type_</strong> is <strong>adTypeText</strong>).</p>
 <h1 id="state-(cadostream)"><a name="State"></a>State (CADOStream)</h1>
@@ -1159,7 +1218,7 @@ FUNCTION ReadText (BYVAL NumChars AS LONG = adReadAll, BYREF cbsText AS CBSTR) A
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-39">Return value</h4>
+<h4 id="return-value-40">Return value</h4>
 <p>LONG. The current <strong>Stream</strong> state.</p>
 <h1 id="type_-(cadostream)"><a name="Type_"></a>Type_ (CADOStream)</h1>
 <p>Indicates the type of data contained in the <strong>Stream</strong> (binary or text).</p>
@@ -1201,9 +1260,9 @@ PROPERTY Type_ (BYVAL nType AS StreamTypeEnum)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-40">Return value</h4>
+<h4 id="return-value-41">Return value</h4>
 <p>LONG. A <strong>StreamTypeEnum</strong> value.</p>
-<h4 id="remarks-12">Remarks</h4>
+<h4 id="remarks-13">Remarks</h4>
 <p>The <strong>Type_</strong> property is read/write only when the current position is at the beginning of the <strong>Stream</strong> (<strong>Position</strong> is 0), and read-only at any other position.</p>
 <p>The <strong>Type_</strong> property determines which methods should be used for reading and writing the <strong>Stream</strong>. For text streams, use <strong>ReadText</strong> and <strong>WriteText</strong>. For binary streams, use <strong>Read</strong> and <strong>Write</strong>.</p>
 <h1 id="write-(cadostream)"><a name="Write"></a>Write (CADOStream)</h1>
@@ -1224,7 +1283,7 @@ PROPERTY Type_ (BYVAL nType AS StreamTypeEnum)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-41">Return value</h4>
+<h4 id="return-value-42">Return value</h4>
 <p>S_OK (0) or an HRESULT code.</p>
 <p>DO Writes a string to a <strong>Stream</strong> object.</p>
 <pre><code>FUNCTION WriteText (BYREF cbsData AS CBSTR, BYVAL Options AS StreamWriteEnum = adWriteChar) AS HRESULT
@@ -1268,7 +1327,7 @@ PROPERTY Type_ (BYVAL nType AS StreamTypeEnum)
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-42">Return value</h4>
+<h4 id="return-value-43">Return value</h4>
 <p>Specified strings are written to the <strong>Stream</strong> object without any intervening spaces or characters between each string.</p>
 <p>The current <strong>Position</strong> is set to the character following the written data. The <strong>WriteText</strong> method does not truncate the rest of the data in a stream. If you want to truncate these characters, call <strong>SetEOS</strong>.</p>
 <p>If you write past the current <strong>EOS</strong> position, the <strong>Size</strong> of the <strong>Stream</strong> will be increased to contain any new characters, and <strong>EOS</strong> will move to the new last byte in the <strong>Stream</strong>.</p>

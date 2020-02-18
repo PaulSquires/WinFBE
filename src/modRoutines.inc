@@ -21,6 +21,20 @@
 
 
 ' ========================================================================================
+' Return the pixel width of the incoming text string
+' ========================================================================================
+public function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString ) as Long
+   dim as HDC _hdc = GetDC(hWin)
+   dim as SIZE _size 
+   dim as HFONT oldfont = SelectObject( _hdc, AfxGetWindowFont(hWin) )
+   GetTextExtentPoint32( _hdc, wszText, len(wszText), @_size)
+   SelectObject( _hdc, oldfont )
+   ReleaseDC( hWin, _hdc )
+   function = _size.cx 
+end function
+
+
+' ========================================================================================
 ' Change everything between quotes to # symbols
 ' ========================================================================================
 public function MaskStringCharacters( byval st as string) as string

@@ -184,29 +184,13 @@ SLEEP
 </table>
 <h1 id="operator-let-(=)"><a name="Operator1"></a>Operator LET (=)</h1>
 <p>Assigns a value to a <code>CCUR</code> variable.</p>
-<pre><code>OPERATOR LET (BYREF cSrc AS CCUR)
-OPERATOR LET (BYVAL cySrc AS CURRENCY)
-OPERATOR LET (BYVAL nInteger AS LONGLONG)
-OPERATOR LET (BYVAL bSrc AS BYTE)
-OPERATOR LET (BYVAL ubSrc AS UBYTE)
-OPERATOR LET (BYVAL sSrc AS SHORT)
-OPERATOR LET (BYVAL usSrc AS USHORT)
-OPERATOR LET (BYVAL lSrc AS LONG)
-OPERATOR LET (BYVAL ulSrc AS ULONG)
-OPERATOR LET (BYVAL fSrc AS SINGLE)
-OPERATOR LET (BYVAL dSrc AS DOUBLE)
-OPERATOR LET (BYVAL dSrc AS DECIMAL)
-OPERATOR LET (BYREF szSrc AS STRING)
-OPERATOR LET (BYVAL varSrc AS VARIANT)
-OPERATOR LET (BYVAL pDispSrc AS IDispatch PTR)
-</code></pre>
 <h4 id="examples-1">Examples</h4>
 <pre><code>DIM c AS CCUR
 c = 123
 c = 12345.1234
 c = &quot;77777.999&quot;
 </code></pre>
-<p>The operator that accepts a DOUBLE value is particulary useful, because it allows to set the integer and fractionary parts at the same time with just a number, e.g.</p>
+<p>Passing a DOUBLE value allows to set the integer and fractionary parts at the same time with just a number, e.g.</p>
 <pre><code>DIM c AS CCUR = 12345.1234
 </code></pre>
 <h1 id="cast-operators"><a name="Operator2"></a>CAST Operators</h1>
@@ -248,37 +232,13 @@ IF c = c3 THEN PRINT &quot;equal&quot; ELSE PRINT &quot;different&quot;
 </code></pre>
 <h1 id="math-operators"><a name="Operator5"></a>Math operators</h1>
 <pre><code>OPERATOR + (BYREF cur1 AS CCUR, BYREF cur2 AS CCUR) AS CCUR
-OPERATOR + (BYREF cur AS CCUR, BYVAL nValue AS LONG) AS CCUR
-OPERATOR + (BYVAL nValue AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR + (BYREF cur AS CCUR, BYVAL nValue AS DOUBLE) AS CCUR
-OPERATOR + (BYVAL nValue AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR += (BYREF cur AS CCUR)
-OPERATOR += (BYVAL nValue AS LONG)
-OPERATOR += (BYVAL nValue AS DOUBLE)
 OPERATOR - (BYREF cur1 AS CCUR, BYREF cur2 AS CCUR) AS CCUR
-OPERATOR - (BYREF cur AS CCUR, BYVAL nValue AS LONG) AS CCUR
-OPERATOR - (BYVAL nValue AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR - (BYREF cur AS CCUR, BYVAL nValue AS DOUBLE) AS CCUR
-OPERATOR - (BYVAL nValue AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR -= (BYREF cur AS CCUR)
-OPERATOR -= (BYREF nValue AS LONG)
-OPERATOR -= (BYREF nValue AS DOUBLE)
 OPERATOR * (BYREF cur1 AS CCUR, BYREF cur2 AS CCUR) AS CCUR
-OPERATOR * (BYREF cur AS CCUR, BYVAL nOperand AS LONG) AS CCUR
-OPERATOR * (BYVAL nOperand AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR * (BYREF cur AS CCUR, BYVAL nOperand AS DOUBLE) AS CCUR
-OPERATOR * (BYVAL nOperand AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR *= (BYREF cur AS CCUR)
-OPERATOR *= (BYVAL nOperand AS LONG)
-OPERATOR *= (BYVAL nOperand AS DOUBLE)
 OPERATOR / (BYREF cur AS CCUR, BYVAL cOperand AS CCUR) AS CCUR
-OPERATOR / (BYREF cur AS CCUR, BYVAL nOperand AS LONG) AS CCUR
-OPERATOR / (BYREF cur AS CCUR, BYVAL nOperand AS DOUBLE) AS CCUR
-OPERATOR / (BYVAL nValue AS LONG, BYREF cur AS CCUR) AS CCUR
-OPERATOR / (BYVAL nValue AS DOUBLE, BYREF cur AS CCUR) AS CCUR
 OPERATOR /= (BYREF cOperand AS CCUR)
-OPERATOR /= (BYVAL nOperand AS LONG)
-OPERATOR /= (BYVAL nOperand AS DOUBLE)
 </code></pre>
 <h4 id="examples-3">Examples</h4>
 <pre><code>DIM c AS CCUR = 12345.1234
@@ -349,10 +309,10 @@ PRINT c.FormatCurrency   --&gt; 12.345,12 € (Spain)
 </code></pre>
 <h1 id="formatnumber"><a name="FormatNumber"></a>FormatNumber</h1>
 <p>Formats a currency into a string form.</p>
-<pre><code>FUNCTION FormatCurrency (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+<pre><code>FUNCTION FormatNumber (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
    BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS STRING
 </code></pre>
-<pre><code>FUNCTION FormatCurrencyW (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+<pre><code>FUNCTION FormatNumberW (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
    BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS CBSTR
 </code></pre>
 <table>

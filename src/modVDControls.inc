@@ -423,10 +423,21 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
+      case CTRL_UPDOWN
+         AddControlProperty(pCtrl, "AllowDrop", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
+         AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTip", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
+
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
-      case CTRL_UPDOWN
       case CTRL_SLIDER
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM
@@ -535,7 +546,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
       
-      case CTRL_CHECKBOX
+      case CTRL_CHECKBOX, CTRL_UPDOWN
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "Destroy")
          AddControlEvent(pCtrl, "DropFiles")
@@ -741,7 +752,6 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
-      case CTRL_UPDOWN
       case CTRL_TREEVIEW
       case CTRL_SLIDER
       case CTRL_WEBBROWSER

@@ -278,10 +278,35 @@ private Function frmVDColors_WndProc( ByVal HWnd   As HWnd, _
    case WM_ACTIVATE
       if wParam = WA_INACTIVE then
          ShowWindow(HWND_FRMVDCOLORS, SW_HIDE)
-         dim pCtrl as clsControl ptr
-         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-         if pDoc then pCtrl = pDoc->Controls.GetActiveControl
-         if pCtrl then ApplyControlProperties(pDoc, pCtrl)
+         ' This function allows for two use cases: (1) is to be able to choose colors
+         ' in the PropertyList for various controls, and (2) is to be able to select
+         ' colors for StatusBar Panels. If the StatusBar Editor is active then we
+         ' must be looking for the pPropColor related to that panel, otherwise it
+         ' must be the PropertyList that is being used.
+         if IsWindowVisible(HWND_FRMSTATUSBAREDITOR) then
+            dim as hwnd hList1 = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+            dim as long nCurSel = ListBox_GetCurSel(hList1)
+            if nCurSel = -1 then exit function
+
+            select case gPanelItems(nCurSel).idColorCombo
+               case IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR
+                  gPanelItems(nCurSel).wszBackColor = gPanelItems(nCurSel).pPropColor.wszPropValue
+               case IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT
+                  gPanelItems(nCurSel).wszBackColorHot = gPanelItems(nCurSel).pPropColor.wszPropValue 
+               case IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR
+                  gPanelItems(nCurSel).wszForeColor = gPanelItems(nCurSel).pPropColor.wszPropValue 
+               case IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT
+                  gPanelItems(nCurSel).wszForeColorHot = gPanelItems(nCurSel).pPropColor.wszPropValue 
+            end select
+            AfxRedrawWindow( GetDlgItem(HWND_FRMSTATUSBAREDITOR, gPanelItems(nCurSel).idColorCombo ))
+
+         else
+            ' Regular PropertyList case   
+            dim pCtrl as clsControl ptr
+            dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+            if pDoc then pCtrl = pDoc->Controls.GetActiveControl
+            if pCtrl then ApplyControlProperties(pDoc, pCtrl)
+         end if
       end if   
 
    End Select
@@ -292,7 +317,7 @@ End Function
 
 
 ' ========================================================================================
-' frmVDColors_Show
+' frmVDColors_SetColorListBoxSelection
 ' ========================================================================================
 private Function frmVDColors_SetColorListBoxSelection( byref wszPropValue as wstring ) as Long
 
@@ -318,7 +343,12 @@ private Function frmVDColors_SetColorListBoxSelection( byref wszPropValue as wst
    ListBox_SetCurSel(hList2, -1)
    ListBox_SetCurSel(hList3, -1)
    
-   select case **wszList
+   ' Hide all existing pages
+   ShowWindow( hList1, SW_HIDE )
+   ShowWindow( hList2, SW_HIDE )
+   ShowWindow( hList3, SW_HIDE )
+   
+   select case wszList
       CASE "CUSTOM"
          TabCtrl_SetCurSel(hTabCtl, 0)
          wszValue = "Custom Color"
