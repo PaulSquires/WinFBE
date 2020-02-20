@@ -455,6 +455,14 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszCursor = "IMAGE_CURSOR_TEXTBOX"
    gToolBox(n).wszClassName = "TEXTBOX"
 
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_UPDOWN
+   gToolBox(n).wszToolBoxName   = "UpDown"
+   gToolBox(n).wszControlName   = "UpDown"
+   gToolBox(n).wszImage  = "IMAGE_UPDOWN"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_UPDOWN"
+   gToolBox(n).wszClassName = "UPDOWN"
+
 
 '   n = n + 1
 '   gToolBox(n).nToolType = CTRL_TREEVIEW

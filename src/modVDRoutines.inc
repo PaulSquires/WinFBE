@@ -12,6 +12,7 @@
 '    GNU General Public License for more details.
 
 #include once "modVDRoutines.bi"
+#include once "frmStatusBarEditor.bi"
 
 
 ' ========================================================================================
@@ -58,18 +59,33 @@ end function
 ' ========================================================================================
 public function GetActivePropertyPtr() as clsProperty ptr
 
-   Dim As HWnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
-   dim as long nCurSel = ListBox_GetCurSel(hList)
-   if nCurSel = -1 then return 0
-
-   dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
-   dim pCtrl as clsControl ptr 
-   if pDoc then pCtrl = pDoc->Controls.GetActiveControl
-   if pCtrl = 0 THEN return 0
-
-   dim as long idx = ListBox_GetItemData(hList, nCurSel)   ' property array index in listbox item
+   ' This function allows for two use cases: (1) is to be able to choose colors
+   ' in the PropertyList for various controls, and (2) is to be able to select
+   ' colors for StatusBar Panels. If the StatusBar Editor is active then we
+   ' must be looking for the pPropColor related to that panel, otherwise it
+   ' must be the PropertyList that is being used.
    
-   return @pCtrl->Properties(idx)
+   if IsWindowVisible(HWND_FRMSTATUSBAREDITOR) then
+      dim as hwnd hList1 = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+      dim as long nCurSel = ListBox_GetCurSel(hList1)
+      if nCurSel = -1 then return 0
+      return @gPanelItems(nCurSel).pPropColor
+      
+   else   
+      Dim As HWnd hList = GetDlgItem(HWND_FRMVDTOOLBOX, IDC_FRMVDTOOLBOX_LSTPROPERTIES)
+      dim as long nCurSel = ListBox_GetCurSel(hList)
+      if nCurSel = -1 then return 0
+
+      dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr
+      dim pCtrl as clsControl ptr 
+      if pDoc then pCtrl = pDoc->Controls.GetActiveControl
+      if pCtrl = 0 THEN return 0
+
+      dim as long idx = ListBox_GetItemData(hList, nCurSel)   ' property array index in listbox item
+      
+      return @pCtrl->Properties(idx)
+   end if
+   
 end function
 
 
@@ -207,10 +223,10 @@ public function GetWinformsXClassName( byval nControlType as long ) as CWSTR
       case CTRL_MONTHCALENDAR:     wszText = "wfxMonthCalendar"
       case CTRL_DATETIMEPICKER:    wszText = "wfxDateTimePicker"
       case CTRL_TABCONTROL:        wszText = "wfxTabControl"
+      case CTRL_UPDOWN:            wszText = "wfxUpDown"
       case CTRL_HSCROLL
       case CTRL_VSCROLL
       case CTRL_TIMER
-      case CTRL_UPDOWN
       case CTRL_SLIDER
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM

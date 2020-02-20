@@ -94,53 +94,5 @@
 | Image | The image name associated with this tab page.|
 | Data32 | The optional 32bit value associated with this tab page.|
 
+##### Note that Adding or Inserting new Tab Pages during runtime is not yet supported.
 
-##### ControlImageSize
-```
-Enum ControlImageSize
-   Size16 = 16
-   Size24 = 24
-   Size32 = 32
-   Size48 = 48
-End Enum
-```
-##### ControlBorderStyle
-```
-Enum ControlBorderStyle
-   None	= 1
-   FixedSingle	
-   Fixed3D 
-End Enum
-```
-##### wfxSize
-```
-Type wfxSize
-   private:
-      _Width  as Long
-      _Height as long 
-
-   public:
-      Declare Property Width() As Long
-      Declare Property Width( ByVal nValue As Long )
-      Declare Property Height() As Long
-      Declare Property Height( ByVal nValue As Long )
-      Declare Function IsEmpty() as Boolean
-      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
-End Type
-```
-##### wfxPoint
-```
-Type wfxPoint
-   private:
-      _x as Long
-      _y as long 
-
-   public:
-      Declare Property x() As Long
-      Declare Property x( ByVal nValue As Long )
-      Declare Property y() As Long
-      Declare Property y( ByVal nValue As Long )
-      Declare Function IsEmpty() as Boolean
-      Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
-End Type
-```

@@ -319,7 +319,7 @@ AfxMsg cws
 Changes the current directory for the current process.
 
 ```
-FUNCTION AfxChDir (BYVAL pwszPathName AS LPCWSTR) AS BOOLEAN
+FUNCTION AfxChDir (BYVAL pwszPathName AS LPCWSTR) AS LONG
 FUNCTION AfxSetCurDir (BYVAL pwszPathName AS LPCWSTR) AS BOOLEAN
 FUNCTION AfxSetCurrentDirectory (BYVAL pwszPathName AS LPCWSTR) AS BOOLEAN
 ```
@@ -328,7 +328,15 @@ FUNCTION AfxSetCurrentDirectory (BYVAL pwszPathName AS LPCWSTR) AS BOOLEAN
 | ---------- | ----------- |
 | *lpPathName* | The path to the new current directory. This parameter may specify a relative path or a full path. In either case, the full path of the specified directory is calculated and stored as the current directory. |
 
-#### Return value
+#### Return value for AfxChDir:
+
+If the function succeeds, the return value is 0.<br>
+If the function fails, the return value is -1.<br>
+To get extended error information, call **GetLastError**.
+
+**AfxMkDir** is an unicode replacement for Free Basic's **MkDir**.
+
+#### Return value for AfxSetCurDir and AfxSetCurrentDirectory:
 
 If the function succeeds, the return value is TRUE.<br>
 If the function fails, the return value is FALSE.<br>
@@ -360,21 +368,29 @@ If the function fails, the return value is FALSE. To get extended error informat
 
 **AfxFileCopy** is an unicode replacement for Free Basic's **FileCopy** and returns 0 on success, or 1 if an error occurred.
 
-# <a name="AfxMakeDir"></a>AfxMakeDir / AfxCreateDirectory / AfxMkDir
+# <a name="AfxMakeDir"></a>AfxMkDir / AfxMakeDir / AfxCreateDirectory
 
 Creates a new directory.
 
 ```
+FUNCTION AfxMkDir (BYVAL lpPathName AS LPCWSTR) AS LONG
 FUNCTION AfxCreateDirectory (BYVAL lpPathName AS LPCWSTR) AS BOOLEAN
 FUNCTION AfxMakeDir (BYVAL lpPathName AS LPCWSTR) AS BOOLEAN
-FUNCTION AfxMkDir (BYVAL lpPathName AS LPCWSTR) AS BOOLEAN
 ```
 
 | Parameter  | Description |
 | ---------- | ----------- |
 | *lpPathName* | The path of the directory to be created. To extend the limit to 32,767 wide characters, prepend "\\\\?\\" to the path. |
 
-#### Return value:
+#### Return value for AfxMkDir:
+
+If the function succeeds, the return value is 0.<br>
+If the function fails, the return value is -1.<br>
+To get extended error information, call **GetLastError**.
+
+**AfxMkDir** is an unicode replacement for Free Basic's **MkDir**.
+
+#### Return value for AfxCreateDirectory and AfxMakeDir:
 
 If the function succeeds, the return value is TRUE.<br>
 If the function fails, the return value is FALSE.<br>
@@ -386,10 +402,6 @@ Possible errors include the following.
 | ---------- | ----------- |
 | ERROR_ALREADY_EXISTS | The specified directory already exists. |
 | ERROR_PATH_NOT_FOUND | One or more intermediate directories do not exist; this function will only create the final directory in the path. |
-
-#### Remarks
-
-**AfxMkDir** is an unicode replacement for Free Basic's **MkDir** and returns 0 on success, or -1 on failure.
 
 # <a name="AfxDeleteFile"></a>AfxDeleteFile / AfxKill
 
@@ -461,14 +473,14 @@ The name of the current directory for the current process.
 
 Unicode replacement for Free Basic's **CurDir**.
 
-# <a name="AfxMoveFile"></a>AfxRenameFile / AfxMoveFile / AfxName
+# <a name="AfxMoveFile"></a>AfxName / AfxRenameFile / AfxMoveFile
 
 Moves an existing file or a directory, including its children.
 
 ```
+FUNCTION AfxName (BYVAL lpExistingFileName AS LPCWSTR, BYVAL lpNewFileName AS LPCWSTR) AS LONG
 FUNCTION AfxRenameFile (BYVAL lpExistingFileName AS LPCWSTR, BYVAL lpNewFileName AS LPCWSTR) AS BOOLEAN
 FUNCTION AfxMoveFile (BYVAL lpExistingFileName AS LPCWSTR, BYVAL lpNewFileName AS LPCWSTR) AS BOOLEAN
-FUNCTION AfxName (BYVAL lpExistingFileName AS LPCWSTR, BYVAL lpNewFileName AS LPCWSTR) AS LONG
 ```
 
 | Parameter  | Description |
@@ -476,31 +488,43 @@ FUNCTION AfxName (BYVAL lpExistingFileName AS LPCWSTR, BYVAL lpNewFileName AS LP
 | *lpExistingFileName* | The name of an existing file. To extend the limit to 32,767 wide characters, prepend "\\\\?\\" to the path. If *lpExistingFileName* does not exist, **AfxRenameFile** fails, and **GetLastError** returns ERROR_FILE_NOT_FOUND. |
 | *lpNewFileName* | The name of the new file. To extend the limit to 32,767 wide characters, prepend "\\\\?\\" to the path. |
 
-#### Return value:
+#### Return value for AfxName:
+
+If the function succeeds, the return value is 0.<br>
+If the function fails, the return value is -1.<br>
+To get extended error information, call **GetLastError**.
+
+**AfxName** is an unicode replacement for Free Basic's **Name**.
+
+#### Return value for AfxRenameFile and AfxMoveFile:
 
 If the function succeeds, the return value is TRUE.<br>
 If the function fails, the return value is FALSE.<br>
 To get extended error information, call **GetLastError**.
 
-#### Remark
-
-**AfxName** is an unicode replacement for Free Basic's **Name** and returns 0 on success, or non-zero on failure.
-
-# <a name="AfxRemoveDir"></a>AfxRemoveDir / AfxRmDir / AfxRemoveDirectory
+# <a name="AfxRemoveDir"></a>AfxRmDir / AfxRemoveDir / AfxRemoveDirectory
 
 Deletes an existing empty directory.
 
 ```
+FUNCTION AfxRmDir (BYVAL lpPathName AS LPCWSTR) AS LONG
 FUNCTION AfxRemoveDir (BYVAL lpPathName AS LPCWSTR) AS BOOLEAN
 FUNCTION AfxRemoveDirectory (BYVAL lpPathName AS LPCWSTR) AS BOOLEAN
-FUNCTION AfxRmDir (BYVAL lpPathName AS LPCWSTR) AS BOOLEAN
 ```
 
 | Parameter  | Description |
 | ---------- | ----------- |
 | *lpPathName* | The path of the directory to be removed. This path must specify an empty directory, and the calling process must have delete access to the directory. To extend the limit to 32,767 wide characters, prepend "\\\\?\\" to the path. |
 
-#### Return value:
+#### Return value for AfxRmDir:
+
+If the function succeeds, the return value is 0.<br>
+If the function fails, the return value is -1.<br>
+To get extended error information, call **GetLastError**.
+
+**AfxRmDir** is an unicode replacement for Free Basic's **RmDir**.
+
+#### Return value for AfxRemoveDir and AfxRemoveDirectory:
 
 If the function succeeds, the return value is TRUE.<br>
 If the function fails, the return value is FALSE.<br>
@@ -508,9 +532,7 @@ To get extended error information, call **GetLastError**.
 
 #### Remaks
 
-The **AfxRemoveDir** function marks a directory for deletion on close. Therefore, the directory is not removed until the last handle to the directory is closed. To recursively delete the files in a directory, use the **SHFileOperation** function. **AfxRemoveDir** removes a directory junction, even if the contents of the target are not empty; the function removes directory junctions regardless of the state of the target object. 
-
-**AfxRmDir** is an unicode replacement for Free Basic's **RmDir** and returns 0 on success, or -1 on failure.
+These functions mark a directory for deletion on close. Therefore, the directory is not removed until the last handle to the directory is closed. To recursively delete the files in a directory, use the **SHFileOperation** function.
 
 # <a name="AfxFileExists"></a>AfxFileExists
 

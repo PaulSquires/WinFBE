@@ -1,3 +1,21 @@
+Version 2.0.5 (February 19, 2020)
+- Fixed: Multiple Tab Controls on a form would result in code generation error.
+- Fixed: Regression: Forms with StatusBar would make ListBoxes and Labels not display their contents.
+- Fixed: If no valid Menu items exist then "Display on Form" checkbox in the Menu Editor is cleared and no menu code is generated.
+
+Version 2.0.4 (February 18, 2020)
+- Added: UpDown control.
+- Changed: StatusBar Panels are now OwnerDraw which allowed for defining Fore/ForeHot/Back/BackHot Colors, on a per-Panel basis.
+- Changed: Use of StatusBar BorderStyle is now deprecated as it has no effect in WinFBE programs where Windows Themes are enabled.
+- Changed: StatusBar Panel ToolTips now act like regular tooltips and are not restricted by the limitations per the SB_SETTIPTEXT Win32 message documentation.
+- Changed: New Chinese lanuage file thanks to ganlinlao.
+- Fixed: Regression in WinForms code whereby KeyDown, KeyUp and KeyPress fired twice instead of once.
+- Fixed: ListView possible GPF when invoking Items Clear method (disabled redraw of ListView to prevent accessing a now deleted Item).
+- Fixed: The Width and MinWidth properties of StatusBar Panels were not being generated in code correctly.
+- Fixed: StatusBar Panels with AutoSize set to Contents were not calculating space needed for any associated Panel image.
+- Fixed: StatusBar Panel with AutoSize set to Spring can now be any panel (not just the last panel). However, only one panel can be designated as Spring.
+- Fixed: An assigned Button control Image would not necessarily display the correct size at design time.
+
 Version 2.0.3 (January 14, 2020)
 - Added: ListView property OddRowColorEnabled (True/False).
 - Changed: ListView removed property "Sorting" until such time as sorting code is added to the control. In the meantime, use the SortByColumn method.

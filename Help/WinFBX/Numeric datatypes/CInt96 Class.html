@@ -35,7 +35,7 @@ CONSTRUCTOR CInt96 (BYREF wszSrc AS WSTRING)
 <pre><code>DIM int96 AS CInt96 = 1234567890
 </code></pre>
 <h4 id="remarks">Remarks</h4>
-<p>Because the bigger numeric variable natively supported by Free Basic is a long integer, if we want to set bigger values we need to use strings, e.g.</p>
+<p>Because the bigger numeric variable natively supported by Free Basic is a long/ulong integer, if we want to set bigger values we need to use strings, e.g.</p>
 <pre><code>DIM int96 AS CInt96 = &quot;79228162514264337593543950335&quot;
 </code></pre>
 <h3 id="operators">Operators</h3>
@@ -117,12 +117,7 @@ END FUNCTION
 </code></pre>
 <h1 id="operator-let-(=)"><a name="Operator1"></a>Operator LET (=)</h1>
 <p>Assigns a value to a <code>CInt96</code> variable.</p>
-<pre><code>OPERATOR LET (BYREF cSrc AS CInt96)
-OPERATOR LET (BYVAL nInteger AS LONGINT)
-OPERATOR LET (BYVAL cySrc AS CURRENCY)
-OPERATOR LET (BYVAL nUInteger AS ULONGINT)
-OPERATOR LET (BYREF wszSrc AS WSTRING)
-</code></pre>
+<p>Because the bigger numeric variable natively supported by Free Basic is a long/ulong integer, if we want to set bigger values we need to use strings.</p>
 <h4 id="examples">Examples</h4>
 <pre><code>DIM int96 AS CInt96
 int96 = 1234567890
@@ -133,16 +128,7 @@ DIM int96 AS CInt96 = &quot;1234567890&quot;
 </code></pre>
 <h1 id="cast-operators"><a name="Operator2"></a>CAST Operators</h1>
 <p>Converts a <code>Cint16</code> into another data type.</p>
-<pre><code>OPERATOR CAST () AS BYTE
-OPERATOR CAST () AS UBYTE
-OPERATOR CAST () AS SHORT
-OPERATOR CAST () AS USHORT
-OPERATOR CAST () AS LONG
-OPERATOR CAST () AS ULONG
-OPERATOR CAST () AS LONGINT
-OPERATOR CAST () AS ULONGINT
-OPERATOR CAST () AS SINGLE
-OPERATOR CAST () AS DOUBLE
+<pre><code>OPERATOR CAST () AS DOUBLE
 OPERATOR CAST () AS CURRENCY
 OPERATOR CAST () AS VARIANT
 OPERATOR CAST () AS STRING
@@ -163,45 +149,13 @@ OPERATOR &gt;= (BYREF int961 AS CInt96, BYREF int962 AS CInt96) AS BOOLEAN
 </code></pre>
 <h1 id="math-operators"><a name="Operator5"></a>Math operators</h1>
 <pre><code>OPERATOR + (BYREF int961 AS CInt96, BYREF int962 AS CInt96) AS CInt96
-OPERATOR + (BYREF int96 AS CInt96, BYREF wszValue AS WSTRING) AS CInt96
-OPERATOR + (BYREF int96 AS CInt96, BYVAL nValue AS LONGINT) AS CInt96
-OPERATOR + (BYREF int96 AS CInt96, BYVAL nValue AS ULONGINT) AS CInt96
-OPERATOR + (BYVAL nValue AS LONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR + (BYVAL nValue AS ULONGINT, BYREF int96 AS CInt96) AS CInt96
 OPERATOR += (BYREF int96 AS CInt96)
-OPERATOR += (BYVAL nValue AS LONGINT)
-OPERATOR += (BYVAL nValue AS ULONGINT)
-OPERATOR += (BYVAL wszValue AS WSTRING)
 OPERATOR - (BYREF int961 AS CInt96, BYREF int962 AS CInt96) AS CInt96
-OPERATOR - (BYREF int96 AS CInt96, BYVAL nValue AS LONGINT) AS CInt96
-OPERATOR - (BYREF int96 AS CInt96, BYVAL nValue AS ULONGINT) AS CInt96
-OPERATOR - (BYVAL nValue AS LONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR - (BYVAL nValue AS ULONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR - (BYREF int96 AS CInt96, BYVAL wszValue AS WSTRING) AS CInt96
 OPERATOR -= (BYREF int96 AS CInt96)
-OPERATOR -= (BYREF nValue AS LONGINT)
-OPERATOR -= (BYREF nValue AS ULONGINT)
-OPERATOR -= (BYREF wszValue AS WSTRING)
 OPERATOR * (BYREF int961 AS CInt96, BYREF int962 AS CInt96) AS CInt96
-OPERATOR * (BYREF int96 AS CInt96, BYVAL nOperand AS LONGINT) AS CInt96
-OPERATOR * (BYREF int96 AS CInt96, BYVAL nOperand AS ULONGINT) AS CInt96
-OPERATOR * (BYVAL nOperand AS LONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR * (BYVAL nOperand AS ULONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR * (BYREF int96 AS CInt96, BYREF wszValue AS WSTRING) AS CInt96
 OPERATOR *= (BYREF int96 AS CInt96)
-OPERATOR *= (BYVAL nOperand AS LONGINT)
-OPERATOR *= (BYVAL nOperand AS ULONGINT)
-OPERATOR *= (BYVAL wszValue AS WSTRING)
 OPERATOR / (BYREF int96 AS CInt96, BYVAL cOperand AS CInt96) AS CInt96
-OPERATOR / (BYREF int96 AS CInt96, BYVAL nOperand AS LONGINT) AS CInt96
-OPERATOR / (BYREF int96 AS CInt96, BYVAL nOperand AS ULONGINT) AS CInt96
-OPERATOR / (BYVAL nValue AS LONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR / (BYVAL nValue AS ULONGINT, BYREF int96 AS CInt96) AS CInt96
-OPERATOR / (BYREF int96 AS CInt96, BYREF wszValue AS WSTRING) AS CInt96
 OPERATOR /= (BYREF cOperand AS CInt96)
-OPERATOR /= (BYVAL nOperand AS LONGINT)
-OPERATOR /= (BYVAL nOperand AS ULONGINT)
-OPERATOR /= (BYREF wszValue AS WSTRING)
 </code></pre>
 <h4 id="examples-1">Examples</h4>
 <pre><code>DIM int96 AS CInt96 = 1234567890

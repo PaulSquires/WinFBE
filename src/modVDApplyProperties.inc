@@ -39,7 +39,7 @@ private function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
 
    case "BACKCOLOR"
-      pWindow->Brush = CreateSolidBrush( GetRGBColorFromProperty(pProp) )
+      pWindow->Brush = CreateSolidBrush( GetRGBColorFromProperty(wszPropValue) )
       AfxRedrawWindow(pCtrl->hWindow)
    
    case "CHILDFORM"
@@ -160,13 +160,25 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
       dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszPropValue)
       if pImageType then 
          pCtrl->AfxButtonPtr->SetImageFromFile( pImageType->wszFilename )
+         ' The button defaults to 16x16 so make sure that the image reflects this. The
+         ' button control would have loaded whatever size the default icon was in the
+         ' file and that may not necessarily be 16x16. Subsequent property calls to
+         ' ImageWidth, ImageHeight, and ImageHighDPI will resize the image accordingly if
+         ' the default values are different.
+         dim as long nWidth = val( GetControlProperty(pCtrl, "IMAGEWIDTH") )
+         dim as long nHeight = val( GetControlProperty(pCtrl, "IMAGEHEIGHT") )
+         if wszPropValue = "True" then
+            pCtrl->AfxButtonPtr->SetImageSize( pWindow->ScaleX(nWidth), pWindow->ScaleY(nHeight), true )
+         else   
+            pCtrl->AfxButtonPtr->SetImageSize( nWidth, nHeight, true )
+         end if   
       end if
 
    case "IMAGEWIDTH"
-      pCtrl->AfxButtonPtr->SetImageWidth( nPropValue )
+      pCtrl->AfxButtonPtr->SetImageWidth( nPropValue, true )
       
    case "IMAGEHEIGHT"
-      pCtrl->AfxButtonPtr->SetImageHeight( nPropValue )
+      pCtrl->AfxButtonPtr->SetImageHeight( nPropValue, true )
          
    case "IMAGEHIGHDPI"
       ' The default width/height is 16x16 so adjust that size accordingly.
@@ -177,13 +189,13 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
       end if
       
    case "BACKCOLOR"
-      pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(pProp), true )
+      pCtrl->AfxButtonPtr->SetButtonBkColor( GetRGBColorFromProperty(wszPropValue), true )
 
    case "TEXTFORECOLOR"
-      pCtrl->AfxButtonPtr->SetTextForeColor( GetRGBColorFromProperty(pProp), true )
+      pCtrl->AfxButtonPtr->SetTextForeColor( GetRGBColorFromProperty(wszPropValue), true )
 
    case "TEXTBACKCOLOR"
-      pCtrl->AfxButtonPtr->SetTextBkColor( GetRGBColorFromProperty(pProp), true )
+      pCtrl->AfxButtonPtr->SetTextBkColor( GetRGBColorFromProperty(wszPropValue), true )
 
    case "TEXTMARGIN"
       pCtrl->AfxButtonPtr->SetTextMargin( nPropValue, true )
@@ -229,7 +241,7 @@ private function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
@@ -275,7 +287,7 @@ private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
@@ -347,7 +359,7 @@ private function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
@@ -421,7 +433,7 @@ private function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
@@ -475,7 +487,7 @@ private function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
@@ -549,7 +561,7 @@ private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
 
@@ -648,7 +660,7 @@ private function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
 
@@ -701,7 +713,7 @@ private function Frame_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       if pCtrl->hBackBrush then DeleteBrush(pCtrl->hBackBrush)
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
       AfxRedrawWindow(pCtrl->hWindow)
@@ -764,10 +776,10 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       end select        
 
    case "BACKCOLOR"
-      pCtrl->AfxPicturePtr->SetBkColor( GetRGBColorFromProperty(pProp), true )
+      pCtrl->AfxPicturePtr->SetBkColor( GetRGBColorFromProperty(wszPropValue), true )
 
    case "BACKCOLORHOT"
-      pCtrl->AfxPicturePtr->SetBkColorHot( GetRGBColorFromProperty(pProp), true )
+      pCtrl->AfxPicturePtr->SetBkColorHot( GetRGBColorFromProperty(wszPropValue), true )
 
    end select
    
@@ -876,7 +888,7 @@ private function MonthCalendar_ApplyProperties( byval pDoc as clsDocument ptr, _
    select CASE ucase(wszPropName)
       
    case "BACKCOLOR"
-      dim as COLORREF clrBack = GetRGBColorFromProperty(pProp)
+      dim as COLORREF clrBack = GetRGBColorFromProperty(wszPropValue)
       MonthCal_SetColor( pCtrl->hWindow, MCSC_BACKGROUND, clrBack )
    
    case "WEEKNUMBERS"

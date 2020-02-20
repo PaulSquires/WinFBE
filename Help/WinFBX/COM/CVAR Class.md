@@ -149,6 +149,7 @@ CONSTRUCTOR (BYREF cbs AS CBSTR)
 CONSTRUCTOR (BYVAL pvar AS VARIANT PTR)
 CONSTRUCTOR (BYVAL cy AS CURRENCY)
 CONSTRUCTOR (BYVAL dec AS DECIMAL)
+DECLARE CONSTRUCTOR (BYVAL b AS BOOLEAN)
 CONSTRUCTOR (BYREF pDisp AS IDispatch PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
 CONSTRUCTOR (BYREF pUnk AS IUnknown PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
 CONSTRUCTOR (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT_I4)
@@ -166,6 +167,7 @@ CONSTRUCTOR (BYVAL _pvar AS ANY PTR, BYREF strType AS STRING)
 | *pvar* | Pointer to a VARIANT. |
 | *cy* | A currency structure. |
 | *dec* | A decimal structure. |
+| *b* | A boolean value (TRUE or FALSE). |
 | *pwsz* | Pointer to an unicode string. You can also pass a Free Basic ansi string or a string literal. |
 | *cbs* | A CBSTR. |
 | *cws* | A CWSTR. |
@@ -203,6 +205,7 @@ OPERATOR Let (BYVAL v AS VARIANT)
 OPERATOR Let (BYVAL pvar AS VARIANT PTR)
 OPERATOR Let (BYVAL cy AS CURRENCY)
 OPERATOR Let (BYVAL dec AS DECIMAL)
+OPERATOR Let (BYVAL b AS BOOLEAN)
 OPERATOR Let (BYREF cbs AS CBSTR)
 OPERATOR Let (BYREF cws AS CWSTR)
 OPERATOR Let (BYREF pDisp AS IDispatch PTR)

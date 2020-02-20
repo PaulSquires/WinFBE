@@ -37,6 +37,7 @@ OPERATOR CAST () AS IStream PTR
 | [GetSize](#GetSize1) | Returns the size of the stream. |
 | [SetSize](#SetSize1) | Changes the size of the stream. |
 | [Clone](#Clone1) | Creates a new stream with its own seek pointer that references the same bytes as the original stream. |
+| [StreamPtr](#StreamPtr) | Returns a pointer to the underlying IStream interface. |
 | [GetLastResult](#GetLastResult1) | Returns the last result code. |
 | [GetErrorInfo](#GetErrorInfo1) | Returns a description of the last result code. |
 
@@ -46,7 +47,7 @@ Creates a memory text stream, allowing read, write and seek operations. The stre
 
 **Include file**: CStream.inc
 
-### Constructor (CMemStream)
+### Constructor (CMemTextStream)
 
 ```
 CONSTRUCTOR CMemTextStream
@@ -77,9 +78,11 @@ OPERATOR CAST () AS IStream PTR
 | [ResetSeekPosition](#ResetSeekPosition2) | Sets the seek position at the beginning of the stream. |
 | [SeekAtEndOfFile](#SeekAtEndOfFile2) | Sets the seek position at the end of the stream. |
 | [SeekAtEndOfStream](#SeekAtEndOfStream2) | Sets the seek position at the end of the stream. |
+| [CopyTo](#CopyTo2) | Copies a specified number of characters from the current seek pointer in the stream to the current seek pointer in another stream. |
 | [GetSize](#GetSize2) | Returns the size of the stream. |
 | [SetSize](#SetSize2) | Changes the size of the stream. |
 | [Clone](#Clone2) | Creates a new stream with its own seek pointer that references the same bytes as the original stream. |
+| [StreamPtr](#StreamPtr) | Returns a pointer to the underlying IStream interface. |
 | [GetLastResult](#GetLastResult2) | Returns the last result code. |
 | [GetErrorInfo](#GetErrorInfo2) | Returns a description of the last result code. |
 
@@ -150,7 +153,7 @@ pStream.Close
 | ---------- | ----------- |
 | [Charset](#Charset) | Indicates the character set into which the contents of a text **Stream** should be translated for storage in the **Stream** object's internal buffer. |
 | [Close](#Close) | Closes a **Stream** object and any dependent objects. |
-| [CopyTo](#CopyTo2) | Copies the specified number of characters or bytes (depending on **Type_**) in the **Stream** to another **Stream** object. |
+| [CopyTo](#CopyTo3) | Copies the specified number of characters or bytes (depending on **Type_**) in the **Stream** to another **Stream** object. |
 | [EOS](#EOS) | Indicates whether the current position is at the end of the stream. |
 | [LineSeparator](#LineSeparator) | Indicates the binary character to be used as the line separator in text **Stream** objects. |
 | [LoadFromFile](#LoadFromFile) | Loads the contents of an existing file into a **Stream**. |
@@ -167,6 +170,23 @@ pStream.Close
 | [Type_](#Type_) | Indicates the type of data contained in the **Stream** (binary or text). |
 | [Write](#Write) | Writes binary data to a **Stream** object. |
 | [WriteText](#WriteText) | Writes a string to a **Stream** object. |
+
+# <a name="StreamPtr"></a>StreamPtr
+
+Returns a pointer to the underlying **IStream** interface.
+
+```
+FUNCTION StreamPtr () AS IStreamPtr
+```
+
+#### Remarks
+
+To save a memory stream to a file you can:
+
+1. Create an instance of the **CFileStream** class
+2. Get a pointer to its underlying **IStream** interface with **CFileStream.StreamPtr**
+3. Copy the contents of the memory stream to the file stream with **CMemStream.CopyTo**
+5. Close the file with **CFileStream.Close**
 
 # <a name="Read1"></a>Read (CMemStream)
 
@@ -499,6 +519,28 @@ FUNCTION SetSize (BYVAL libNewSize AS ULONGINT) AS HRESULT
 
 HRESULT. S_OK (0) on success, or an error code on failure.
 
+# <a name="CopyTo2"></a>CopyTo (CMemTextStream)
+
+Copies a specified number of characters from the current seek pointer in the stream to the current seek pointer in another stream.
+
+```
+FUNCTION CopyTo (BYVAL pstm AS IStream PTR, _
+   BYVAL cb AS ULONGINT, _
+   BYVAL pcbRead AS ULONGINT PTR = NULL, _
+   BYVAL pcbWritten AS ULONGINT PTR = NULL) AS HRESULT
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *pstm* | A pointer to the destination stream. The stream pointed to by *pstm* can be a new stream or a clone of the source stream. |
+| *cb* | The number of characters of data to attempt to copy into the stream. |
+| *pcbRead* | A pointer to the location where this method writes the actual number of bytes read from the source. You can set this pointer to NULL. In this case, this method does not provide the actual number of bytes read. |
+| *pcbWritten* | A pointer to the location where this method writes the actual number of bytes written to the destination. You can set this pointer to NULL. In this case, this method does not provide the actual number of bytes written. |
+
+#### Return value
+
+HRESULT. S_OK (0) on success, or an error code on failure.
+
 # <a name="Clone2"></a>Clone (CMemTextStream)
 
 Creates a new stream with its own seek pointer that references the same bytes as the original stream. The **Clone** method creates a new stream for accessing the same bytes but using a separate seek pointer. The new stream sees the same data as the source-stream. Changes written to one stream are immediately visible in the other. Range locking is shared between the streams. The initial setting of the seek pointer in the cloned stream instance is the same as the current setting of the seek pointer in the original stream at the time of the clone operation.
@@ -576,7 +618,7 @@ FUNCTION Close () AS HRESULT
 
 S_OK (0) or an HRESULT code.
 
-# <a name="CopyTo2"></a>CopyTo (CADOStream)
+# <a name="CopyTo3"></a>CopyTo (CADOStream)
 
 Copies the specified number of characters or bytes (depending on **Type_**) in the **Stream** to another **Stream** object.
 

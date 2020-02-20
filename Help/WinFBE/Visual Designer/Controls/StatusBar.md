@@ -59,12 +59,15 @@
 | Index | The index value related to the statusbar panel.|
 | Alignment | Gets or sets a value indicating the panel's text alignment [StatusBarPanelAlignment](#StatusBarPanelAlignment) enum.|
 | AutoSize | Gets or sets a value indicating the panel's sizing style [StatusBarPanelAutoSize](#StatusBarPanelAutoSize) enum. |
-| BorderStyle | Gets or sets a value indicating the panel's border style [StatusBarPanelBorderStyle](#StatusBarPanelBorderStyle) enum.|
 | Icon | Gets or sets the image name (as found in the Resource file) for any applicable icon image to display in the panel. |
 | Text | The text associated with this panel item.|
 | ToolTip | The tooltip text to display when the panel width is too narrow to display the full panel text.|
 | Width | Gets or sets the maximum panel width. |
 | MinWidth | Gets or sets the minimum panel width. |
+| BackColor | Gets or sets the background color of the panel. |
+| ForeColor | Gets or sets the foreground color of the panel. |
+| BackColorHot | Gets or sets the background color of the panel when the mouse is over the panel. |
+| ForeColorHot | Gets or sets the foreground color of the panel when the mouse is over the panel. |
 
 ##### StatusBarPanelAlignment
 ```
@@ -80,14 +83,6 @@ Enum StatusBarPanelAutoSize
    None     = 0
    Contents = 1
    Spring   = 2
-End Enum
-```
-##### StatusBarPanelBorderStyle
-```
-Enum StatusBarPanelBorderStyle
-   Sunken = 0
-   None   = SBT_NOBORDERS
-   Raised = SBT_POPOUT
 End Enum
 ```
 ##### wfxSize
@@ -121,8 +116,4 @@ Type wfxPoint
       Declare Function IsEmpty() as Boolean
       Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
 End Type
-```
-
-```
-
 ```

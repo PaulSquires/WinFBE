@@ -728,8 +728,6 @@ public Function frmToolBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Process Windows messages
    Function = pWindow->DoEvents( SW_SHOW )
 
-AfxMsg("closed")
-   
    ' Delete the frmToolBarEditor CWindow class manually allocated memory 
    Delete pWindow
 

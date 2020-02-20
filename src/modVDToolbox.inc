@@ -225,7 +225,7 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
          wszDefaultEvent = "KeyPress" 
       case CTRL_LISTBOX, CTRL_COMBOBOX, CTRL_PROGRESSBAR, _
            CTRL_LISTVIEW, CTRL_TREEVIEW, CTRL_MONTHCALENDAR, _
-           CTRL_DATETIMEPICKER
+           CTRL_DATETIMEPICKER, CTRL_UPDOWN
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Click" 
       case CTRL_PICTUREBOX
@@ -1079,7 +1079,7 @@ private Function frmVDToolbox_OnDrawItem( ByVal HWnd As HWnd, _
                      rcColor.top    = rcColor.top + pWindow->ScaleY(1)
                      rcColor.bottom = rcColor.bottom - pWindow->ScaleY(4)
                         
-                     dim as COLORREF rgbClr = GetRGBColorFromProperty(@pCtrl->Properties(lpdis->itemData))
+                     dim as COLORREF rgbClr = GetRGBColorFromProperty(pCtrl->Properties(lpdis->itemData).wszPropValue)
                      hBrushColor = CreateSolidBrush(rgbClr)
 
                      ' DRAW COLOR RECT

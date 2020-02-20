@@ -86,6 +86,7 @@ OPERATOR CAST () AS IStream PTR
 | [UnlockRegion](#UnlockRegion) | Removes the access restriction on a range of bytes previously restricted with *LockRegion*. |
 | [Stat](#Stat) | Retrieves the **STATSTG** structure for this stream. |
 | [Clone](#Clone) | Creates a new stream with its own seek pointer that references the same bytes as the original stream. |
+| [StreamPtr](#StreamPtr) | Returns a pointer to the underlying IStream interface. |
 | [GetLastResult](#GetLastResult) | Returns the last result code. |
 | [GetErrorInfo](#GetErrorInfo) | Returns a description of the last result code. |
 
@@ -636,6 +637,14 @@ FUNCTION Clone (BYVAL ppstm AS IStream PTR PTR) AS HRESULT
 #### Return value
 
 HRESULT. S_OK (0) on success, or an error code on failure.
+
+# <a name="StreamPtr"></a>StreamPtr
+
+Returns a pointer to the underlying IStream interface.
+
+```
+FUNCTION StreamPtr () AS IStreamPtr
+```
 
 # <a name="GetLastResult"></a>GetLastResult
 

@@ -538,6 +538,7 @@ CONSTRUCTOR (BYREF cbs AS CBSTR)
 CONSTRUCTOR (BYVAL pvar AS VARIANT PTR)
 CONSTRUCTOR (BYVAL cy AS CURRENCY)
 CONSTRUCTOR (BYVAL dec AS DECIMAL)
+DECLARE CONSTRUCTOR (BYVAL b AS BOOLEAN)
 CONSTRUCTOR (BYREF pDisp AS IDispatch PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
 CONSTRUCTOR (BYREF pUnk AS IUnknown PTR, BYVAL fAddRef AS BOOLEAN = FALSE)
 CONSTRUCTOR (BYVAL _value AS LONGINT, BYVAL _vType AS WORD = VT_I4)
@@ -576,42 +577,46 @@ CONSTRUCTOR (BYVAL _pvar AS ANY PTR, BYREF strType AS STRING)
 <td>A decimal structure.</td>
 </tr>
 <tr class="even">
+<td><em>b</em></td>
+<td>A boolean value (TRUE or FALSE).</td>
+</tr>
+<tr class="odd">
 <td><em>pwsz</em></td>
 <td>Pointer to an unicode string. You can also pass a Free Basic ansi string or a string literal.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>cbs</em></td>
 <td>A CBSTR.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>cws</em></td>
 <td>A CWSTR.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>pDisp</em></td>
 <td>Pointer to a DISPATCH interface.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>pUnk</em></td>
 <td>Pointer to a UNKNOWN interface.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>_value</em></td>
 <td>A numeric value or variable.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>_pvar</em></td>
 <td>Pointer to a variable. This will create a VT_BYREF variant of the specified type.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>_vtype</em></td>
 <td>The variant type, e.g. VT_I4, VT_UI4.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><em>strType</em></td>
 <td>The variant type as a string: &quot;BOOL&quot;, &quot;BYTE&quot;, &quot;UBYTE&quot;, &quot;SHORT&quot;, &quot;USHORT, &quot;INT&quot;, UINT&quot;, &quot;LONG&quot;, &quot;ULONG&quot;, &quot;LONGINT&quot;, &quot;SINGLE, &quot;DOUBLE&quot;, &quot;NULL&quot;.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><em>fAddRef</em></td>
 <td>TRUE or FALSE. If TRUE, increases the reference count of the passed interface.</td>
 </tr>
@@ -633,6 +638,7 @@ OPERATOR Let (BYVAL v AS VARIANT)
 OPERATOR Let (BYVAL pvar AS VARIANT PTR)
 OPERATOR Let (BYVAL cy AS CURRENCY)
 OPERATOR Let (BYVAL dec AS DECIMAL)
+OPERATOR Let (BYVAL b AS BOOLEAN)
 OPERATOR Let (BYREF cbs AS CBSTR)
 OPERATOR Let (BYREF cws AS CWSTR)
 OPERATOR Let (BYREF pDisp AS IDispatch PTR)

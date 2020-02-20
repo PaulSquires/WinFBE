@@ -513,10 +513,16 @@ FUNCTION Invoke (BYVAL pwszName AS WSTRING PTR, cvArg1...cvArg16) AS CVAR
 | Parameter  | Description |
 | ---------- | ----------- |
 | *dispID* | Identifies the member. Use **GetIDsOfNames** or the object's documentation to obtain the dispatch identifier. |
-| *pwszName* | The name of the property to call. |
+| *pwszName* | The name of the method or property to call. |
 | *cvArg1...cvArg16* | CVAR. Parameters that will be passed to **IDIspatch.Invoke** as an array of variants in reversed order. |
 
-Remarks
+#### Return value
+
+Returns a variant with the result of the call when the **Invoke** method is used instead of **Get** to retrieve the value of a property. If it is not a get property, it returns a null variant.
+
+#### Remarks
+
+For optional parameters, we must use a VT_ERROR VARIANT with a value of DISP_E_PARAMNOTFOUND. You can use the function **AfxCVarOptPrm** or the macro **CVAR_OPTPRM** for this purpose.
 
 To check for succes or failure, call the **GetLastResult** method. It will return S_OK (0) on succes or an HRESULT code on failure.
 
@@ -535,9 +541,23 @@ To check for succes or failure, call the **GetLastResult** method. It will retur
 | DISP_E_UNKNOWNLCID | The member being invoked interprets string arguments according to the LCID, and the LCID is not recognized. If the LCID is not needed to interpret arguments, this error should not be returned. |
 | DISP_E_PARAMNOTOPTIONAL | A required parameter was omitted. |
 
-#### Remarks
+#### Usage example
 
-For optional parameters, we must use a VT_ERROR VARIANT with a value of DISP_E_PARAMNOTFOUND. You can use the function **AfxCVarOptPrm** or the macro **CVAR_OPTPRM** for this purpose.
+```
+'#CONSOLE ON
+#include once "Afx/CDIspInvoke.inc"
+using Afx
+
+' // Create an instance of the Msxml2 object
+DIM pDisp AS CDispInvoke = "Msxml2.XMLHTTP.6.0"
+' // To check for success, see if the value returned by the DispPtr method is not null
+IF pDisp.DispPtr = NULL THEN END
+pDisp.Invoke("open", "GET", "https://sourceforge.net/", FALSE)
+pDisp.Invoke("Send")
+DIM strResponse AS STRING = pDisp.Get("ResponseText")
+print strResponse
+SLEEP
+```
 
 # <a name="SetLcid"></a>SetLcid
 

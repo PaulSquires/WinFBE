@@ -16,11 +16,6 @@
 #include once "clsConfig.bi"
 
 
-' Temporary PanelItem array to hold items while they are being
-' edited in the StatusBar Editor. 
-dim shared gPanelItems(any) as clsPanelItem
-
-
 ' ========================================================================================
 ' Create the statusbar to display on the Form
 ' ========================================================================================
@@ -49,11 +44,10 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
    ' Size the panels in order to accommodate autosize
    dim as long lb = 0 
    dim as long ub = ubound(pDoc->PanelItems)
-   dim as long nPanelWidth, nPanelMinWidth, nBorderStyle
-   Dim As Long nWidths(ub)
-   dim hIcon as HICON
-   dim wszImageName as wstring * MAX_PATH
-   
+   dim as long nPanelWidth, nPanelMinWidth, nTotalPanelWidths
+   dim as long nSpringIndex = -1
+   Dim As Long nTemp(ub)   ' panel widths (-1 if Spring)
+   Dim As Long nWidths(ub) ' final panel cummulative widths array 
 
    Dim pWindowMain As CWindow Ptr = AfxCWindowPtr( HWND_FRMMAIN )
    SendMessage( pDoc->hWndStatusBar, WM_SETFONT, cast(WPARAM, pWindowMain->font), cast(LPARAM, CTRUE))
@@ -72,51 +66,40 @@ public Function frmStatusBarEditor_CreateFakeStatusBar( ByVal pDoc as clsDocumen
             nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth ) * cx
             if nPanelWidth < nPanelMinWidth then nPanelWidth = nPanelMinWidth
          case "STATUSBARPANELAUTOSIZE.CONTENTS"
-            dim as HDC _hdc = GetDC(pDoc->hWndStatusBar)
-            dim as SIZE _size 
-            dim as HFONT oldfont = SelectObject( _hdc, pWindowMain->font )
             dim as WString * MAX_PATH wszBuffer = " " & pDoc->PanelItems(i).wszText & " "
-            GetTextExtentPoint32( _hdc, wszBuffer, len(wszBuffer), @_size)
-            SelectObject( _hdc, oldfont )
-            ReleaseDC( pDoc->hWndStatusBar, _hdc )
-            nPanelWidth = _size.cx
-            nPanelMinWidth = val( pDoc->PanelItems(i).wszMinWidth ) * cx
+            dim as long nTextWidth = GetTextWidthPixels( pDoc->hWndStatusBar, wszBuffer )  
+            ' Also need to calculate the width of any defined panel image.
+            ' ImageName is held in pProp.wszPropValue
+            dim as long nImageWidth 
+            if len(pDoc->PanelItems(i).pProp.wszPropValue) then
+               nImageWidth = AfxScaleX(20)  ' 16 + 4 padding
+            end if
+            nPanelWidth = nTextWidth + nImageWidth 
             if nPanelWidth < nPanelMinWidth then nPanelWidth = nPanelMinWidth
          case "STATUSBARPANELAUTOSIZE.SPRING"
-            nPanelWidth = iif(i, rc.right - nWidths(i-1), rc.right)
+            nSpringIndex = i
+            nPanelWidth = 0
       end select
-      nWidths(i) = iif(i, nWidths(i-1), 0) + nPanelWidth
+      nTemp(i) = nPanelWidth
+      nTotalPanelWidths = nTotalPanelWidths + nPanelWidth
    NEXT
+   
+   ' Handle the Panel that may have been designated as AutoSize = Spring
+   if nSpringIndex <> -1 then
+      nTemp(nSpringIndex) = MAX(0, rc.right - nTotalPanelWidths)
+   end if
+   
+   ' Build the cumulative Panel Widths array that gets sent to the StatusBar
+   for i as long = lb to ub
+      nWidths(i) = iif(i, nWidths(i-1), 0) + nTemp(i)
+   next
    StatusBar_SetParts( pDoc->hWndStatusBar, (ub-lb)+1, @nWidths(0))
 
    ' Set the text/icons for the panels. Need to do this after the widths are set.
+   ' Basically, a call to SetText with SBT_OWNERDRAW will fire WM_DRAWITEM in the
+   ' parent form. That is where the images and icons are actually drawn.
    for i as long = lb to ub
-      dim as CWSTR wszPanelText = pDoc->PanelItems(i).wszText
-      select case ucase( pDoc->PanelItems(i).wszAlignment )
-         case "STATUSBARPANELALIGNMENT.LEFT":   ' do nothing
-         case "STATUSBARPANELALIGNMENT.CENTER": wszPanelText = chr(9) & wszPanelText
-         case "STATUSBARPANELALIGNMENT.RIGHT":  wszPanelText = chr(9,9) & wszPanelText
-      end select
-      select case ucase( pDoc->PanelItems(i).wszBorderStyle )
-         case "STATUSBARPANELBORDERSTYLE.NONE":   nBorderStyle = SBT_NOBORDERS
-         case "STATUSBARPANELBORDERSTYLE.SUNKEN": nBorderStyle = 0
-         case "STATUSBARPANELBORDERSTYLE.RAISED": nBorderStyle = SBT_POPOUT
-      end select
-
-      StatusBar_SetText( pDoc->hWndStatusBar, i, wszPanelText, nBorderStyle ) 
-
-      wszImageName = pDoc->PanelItems(i).pProp.wszPropValue
-      hIcon = 0
-      if len(wszImageName) then
-         dim pImageType as IMAGES_TYPE ptr = GetImagesTypePtr(wszImageName)
-         DestroyIcon( StatusBar_GetIcon( pDoc->hWndStatusBar, i ) )
-         if pImageType then
-            hIcon = AfxGdipIconFromFile( pImageType->wszFileName )
-         end if
-      end if
-
-      ' If no hIcon defined then any previous icon will be removed (hIcon = 0)
-      StatusBar_SetIcon( pDoc->hWndStatusBar, i, hIcon ) 
+      StatusBar_SetText( pDoc->hWndStatusBar, i, "", SBT_OWNERDRAW ) 
    next
 
    ShowWindow( pDoc->hWndStatusBar, SW_SHOW )
@@ -195,11 +178,13 @@ private function frmStatusBarEditor_SetTextboxes() as long
    ComboBox_SetCurSel( hCtrl, nIndex)
    EnableWindow( hCtrl, fEnabled)
 
-   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE)
-   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBorderStyle else wszText = ""
-   nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
-   ComboBox_SetCurSel( hCtrl, nIndex)
-   EnableWindow( hCtrl, fEnabled)
+   ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+   ' in WinFBE programs where Windows Themes are enabled.
+   'hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE)
+   'if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBorderStyle else wszText = ""
+   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
+   'ComboBox_SetCurSel( hCtrl, nIndex)
+   'EnableWindow( hCtrl, fEnabled)
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE)
    if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszAutoSize else wszText = ""
@@ -246,7 +231,35 @@ private function frmStatusBarEditor_SetTextboxes() as long
          ShowWindow( hCtrl, SW_HIDE )
       end if
    end if
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR)
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBackColor else wszText = ""
+   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
+   'ComboBox_SetCurSel( hCtrl, nIndex)
+   AfxSetWindowText( hCtrl, wszText )
+   EnableWindow( hCtrl, fEnabled)
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR)
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszForeColor else wszText = ""
+   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
+   'ComboBox_SetCurSel( hCtrl, nIndex)
+   AfxSetWindowText( hCtrl, wszText )
+   EnableWindow( hCtrl, fEnabled)
+
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT)
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBackColorHot else wszText = ""
+   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
+   'ComboBox_SetCurSel( hCtrl, nIndex)
+   AfxSetWindowText( hCtrl, wszText )
+   EnableWindow( hCtrl, fEnabled)
    
+   hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT)
+   if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszForeColorHot else wszText = ""
+   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
+   'ComboBox_SetCurSel( hCtrl, nIndex)
+   AfxSetWindowText( hCtrl, wszText )
+   EnableWindow( hCtrl, fEnabled)
+
    function = 0
 end function
 
@@ -306,15 +319,29 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
          END IF
 
       
-      case IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE
-         if codeNotify = CBN_SELCHANGE THEN
-            if nCurSel > -1 THEN gPanelItems(nCurSel).wszBorderStyle = AfxGetWindowText(hwndCtl) 
-         END IF
+      ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+      ' in WinFBE programs where Windows Themes are enabled.
+      'case IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE
+      '   if codeNotify = CBN_SELCHANGE THEN
+      '      if nCurSel > -1 THEN gPanelItems(nCurSel).wszBorderStyle = AfxGetWindowText(hwndCtl) 
+      '   END IF
 
       
       case IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE
          if codeNotify = CBN_SELCHANGE THEN
-            if nCurSel > -1 THEN gPanelItems(nCurSel).wszAutoSize = AfxGetWindowText(hwndCtl) 
+            if nCurSel > -1 THEN
+               dim as CWSTR wszAutoSize = AfxGetWindowText(hwndCtl)
+               ' Only one panel can have AutoSize set to Spring. Reset all panels
+               ' that have Spring set and then set this panel to have the Spring.
+               if wszAutoSize = "StatusBarPanelAutoSize.Spring" then
+                  for i as long = lbound(gPanelItems) to ubound(gPanelItems)
+                     if gPanelItems(i).wszAutoSize = "StatusBarPanelAutoSize.Spring" then
+                        gPanelItems(i).wszAutoSize = "StatusBarPanelAutoSize.None"
+                     end if   
+                  next
+               end if
+               gPanelItems(nCurSel).wszAutoSize = wszAutoSize
+            end if
          END IF
 
       
@@ -467,6 +494,195 @@ End Function
 
 
 ' ========================================================================================
+' Process WM_MEASUREITEM message for window/dialog: frmStatusBarEditor
+' ========================================================================================
+private Function frmStatusBarEditor_OnMeasureItem( ByVal HWnd As HWnd, _
+                                                   ByVal lpmis As MEASUREITEMSTRUCT Ptr _
+                                                   ) As Long
+   ' Set the height of the List box items. 
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   lpmis->itemHeight = pWindow->ScaleY(20)
+   Function = 0
+End Function
+
+
+' ========================================================================================
+' Process WM_DRAWITEM message for window/dialog: frmStatusBarEditor
+' ========================================================================================
+private Function frmStatusBarEditor_OnDrawItem( ByVal HWnd As HWnd, _
+                                                ByVal lpdis As Const DRAWITEMSTRUCT Ptr _
+                                                ) As Long
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   if pWindow = 0 THEN exit function
+
+   dim as hwnd hList1 = GetDlgItem( HWND, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+   dim as long nCurSel = ListBox_GetCurSel(hList1)
+
+   Dim As HBRUSH hBrush, hBrushOld
+   Dim As RECT rc, rc2 
+   dim as CWSTR wszPropValue
+   Dim wszText As WString * MAX_PATH
+   
+      
+   Select Case lpdis->itemAction
+      Case ODA_DRAWENTIRE, ODA_SELECT
+         
+         SaveDC(lpdis->hDC)
+         
+         ' CLEAR BACKGROUND
+         If (lpdis->itemState And ODS_SELECTED) Then     
+            SetBkColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHT))   
+            SetTextColor(lpdis->hDC, GetSysColor(COLOR_HIGHLIGHTTEXT))
+            hBrush = GetSysColorBrush(COLOR_HIGHLIGHT) 
+         else
+            SetBkColor(lpdis->hDC, GetSysColor(COLOR_WINDOW))   
+            SetTextColor(lpdis->hDC, GetSysColor(COLOR_WINDOWTEXT))
+            hBrush = GetSysColorBrush(COLOR_WINDOW) 
+         end if
+         SelectObject(lpdis->hDC, hBrush)      
+         FillRect(lpdis->hDC, @rc, hBrush)  
+
+         ' Exit if no panel is selected
+         if nCurSel = -1 then exit function
+      
+         ' COMBOBOX FOR BACK/FORE COLORS
+         select case lpdis->CtlID 
+            case IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR
+               wszPropValue = gPanelItems(nCurSel).wszBackColor
+            case IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT
+               wszPropValue = gPanelItems(nCurSel).wszBackColorHot
+            case IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR
+               wszPropValue = gPanelItems(nCurSel).wszForeColor
+            case IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT
+               wszPropValue = gPanelItems(nCurSel).wszForeColorHot
+         end select
+
+         rc = lpdis->rcItem
+         
+         dim as CWSTR wszList, wszValue
+         wszList = AfxStrParse(wszPropValue, 1, "|")
+         wszValue = AfxStrParse(wszPropValue, 2, "|")
+         wszText = wszValue
+         if wszList = "CUSTOM" then wszText = "Custom Color"
+            
+         rc.left   = pWindow->ScaleX(6)
+         rc.top    = rc.top + pWindow->ScaleY(2)
+         rc.right  = rc.left + pWindow->ScaleX(16)
+         rc.bottom = rc.bottom - pWindow->ScaleY(2)
+            
+         dim as COLORREF rgbClr = GetRGBColorFromProperty(wszPropValue)
+         hBrush = CreateSolidBrush(rgbClr)
+
+         ' DRAW COLOR RECT
+         hBrushOld = SelectObject(lpdis->hDC, hBrush)
+         Rectangle( lpdis->hDC, rc.Left, rc.Top, rc.Right, rc.Bottom)
+         SelectObject( lpdis->hDC, hBrushOld)
+         rc.left = rc.right + pWindow->ScaleX(4)
+         rc.right = lpdis->rcItem.right
+         DeleteObject(hBrush)
+
+         SelectObject(lpdis->hDC, AfxGetWindowFont(hwnd) )
+         DrawText( lpdis->hDC, _
+                   wszText, _
+                   -1, Cast(lpRect, @rc), _
+                   DT_LEFT Or DT_SINGLELINE Or DT_VCENTER or DT_NOPREFIX)
+   
+   end select
+   
+   RestoreDC(lpdis->hDC, -1)
+
+   return True 
+End Function
+
+
+' ========================================================================================
+' Processes messages for the subclassed color comboboxes.
+' ========================================================================================
+private Function frmStatusBarEditor_ComboBox_SubclassProc ( _
+                  ByVal HWnd   As HWnd, _                 ' // Control window handle
+                  ByVal uMsg   As UINT, _                 ' // Type of message
+                  ByVal wParam As WPARAM, _               ' // First message parameter
+                  ByVal lParam As LPARAM, _               ' // Second message parameter
+                  ByVal uIdSubclass As UINT_PTR, _        ' // The subclass ID
+                  ByVal dwRefData As DWORD_PTR _          ' // Pointer to reference data
+                  ) As LRESULT
+
+   Select Case uMsg
+
+      Case WM_GETDLGCODE
+         ' All keyboard input
+         Function = DLGC_WANTALLKEYS
+         Exit Function
+
+
+      case WM_SYSKEYDOWN
+         'This should suppress the Alt+Down arrow that invokes the combolist dropdown.
+         return true
+         
+         
+      case WM_KEYDOWN
+         ' Only allow the TAB key to pass through. 
+         Select Case wParam
+            Case VK_TAB
+               ' move input fcous to the next/prev control in the tab order
+               dim as Boolean bBackward = iif( GetKeyState(VK_SHIFT) < 0, true, false )
+               Dim As HWnd hCtrl = GetNextDlgTabItem( GetParent(hwnd), HWND, bBackward)
+               SetFocus(hCtrl)
+
+            case else
+               return true   
+         end select
+         
+         
+      case WM_LBUTTONDOWN, WM_LBUTTONDBLCLK
+         ' Catch the mouse down click in order to prevent the subsequent CBN_DROPDOWN and CBN_SELCHANGE
+         ' messages. We don't want the dropdown to show. We will show the popup color selector
+         ' instead.
+         SetFocus(HWND)
+         
+         dim as hwnd hList1 = GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS)
+         dim as long nCurSel = ListBox_GetCurSel(hList1)
+         if nCurSel = -1 then return true
+         
+         dim as long nID = GetDlgCtrlID( hwnd )
+         select case nID
+            case IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR
+               gPanelItems(nCurSel).pPropColor.wszPropValue = gPanelItems(nCurSel).wszBackColor
+            case IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT
+               gPanelItems(nCurSel).pPropColor.wszPropValue = gPanelItems(nCurSel).wszBackColorHot
+            case IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR
+               gPanelItems(nCurSel).pPropColor.wszPropValue = gPanelItems(nCurSel).wszForeColor
+            case IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT
+               gPanelItems(nCurSel).pPropColor.wszPropValue = gPanelItems(nCurSel).wszForeColorHot
+         end select
+         gPanelItems(nCurSel).idColorCombo = nID
+           
+         dim as RECT rc
+         GetWindowRect( hwnd, @rc )
+         ' initialize the color popup if not already done so
+         frmVDColors_Show( hwnd, gPanelItems(nCurSel).pPropColor.wszPropValue )  
+         dim as long nWidth = AfxGetWindowWidth(HWND_FRMVDCOLORS)
+         SetWindowPos( HWND_FRMVDCOLORS, HWND_TOP, _
+                       rc.right - nWidth, rc.bottom, _
+                       0, 0, SWP_NOSIZE or SWP_SHOWWINDOW)
+
+         return true
+         
+
+      Case WM_DESTROY
+         ' REQUIRED: Remove control subclassing
+         RemoveWindowSubclass HWnd, @frmStatusBarEditor_ComboBox_SubclassProc, uIdSubclass
+
+   End Select
+
+   ' Default processing of Windows messages
+   Function = DefSubclassProc(HWnd, uMsg, wParam, lParam)
+
+End Function
+
+
+
+' ========================================================================================
 ' frmStatusBarEditor Window procedure
 ' ========================================================================================
 private Function frmStatusBarEditor_WndProc( ByVal HWnd   As HWnd, _
@@ -476,10 +692,12 @@ private Function frmStatusBarEditor_WndProc( ByVal HWnd   As HWnd, _
                                              ) As LRESULT
 
    Select Case uMsg
-      HANDLE_MSG (HWnd, WM_CREATE,   frmStatusBarEditor_OnCreate)
-      HANDLE_MSG (HWnd, WM_CLOSE,    frmStatusBarEditor_OnClose)
-      HANDLE_MSG (HWnd, WM_DESTROY,  frmStatusBarEditor_OnDestroy)
-      HANDLE_MSG (HWnd, WM_COMMAND,  frmStatusBarEditor_OnCommand)
+      HANDLE_MSG (HWnd, WM_CREATE,      frmStatusBarEditor_OnCreate)
+      HANDLE_MSG (HWnd, WM_CLOSE,       frmStatusBarEditor_OnClose)
+      HANDLE_MSG (HWnd, WM_DESTROY,     frmStatusBarEditor_OnDestroy)
+      HANDLE_MSG (HWnd, WM_COMMAND,     frmStatusBarEditor_OnCommand)
+      HANDLE_MSG (HWnd, WM_MEASUREITEM, frmStatusBarEditor_OnMeasureItem)
+      HANDLE_MSG (HWnd, WM_DRAWITEM,    frmStatusBarEditor_OnDrawItem)
    End Select
 
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
@@ -490,7 +708,7 @@ End Function
 ' ========================================================================================
 ' frmStatusBarEditor_Show
 ' ========================================================================================
-public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
+public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd, byval nDefaultPanel as Long ) as LRESULT
 
    DIM hBitmap AS HBITMAP
    dim hCtrl as HWnd
@@ -503,10 +721,10 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    
    Dim As HWnd hForm = _
    pWindow->Create( hWndParent, L(314,"Statusbar Editor"), _
-        @frmStatusBarEditor_WndProc, 0, 0, 508, 380, _
+        @frmStatusBarEditor_WndProc, 0, 0, 508, 478, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(508, 380)
+   pWindow->SetClientSize(508, 478)
    pWindow->Center
         
    HWND_FRMSTATUSBAREDITOR = hForm
@@ -565,54 +783,80 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL5, L(238,"Border Style") & ":", 21, 222, 93, 21, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL6, L(239,"Autosize") & ":", 21, 222, 93, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE, "", 114, 219, 207, 21, _
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE, "", 114, 219, 207, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL6, L(239,"Autosize") & ":", 21, 250, 93, 20, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL8, L(381,"Width") & ":", 21, 250, 93, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE, "", 114, 247, 207, 21, _
-        WS_CHILD Or WS_VISIBLE Or WS_VSCROLL Or WS_TABSTOP Or CBS_DROPDOWNLIST, _
-        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL8, L(381,"Width") & ":", 21, 277, 93, 21, _
-        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
-        WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTWIDTH, "", 114, 273, 207, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTWIDTH, "", 114, 247, 207, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
-   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL7, L(245,"Minimum Width") & ":", 21, 302, 93, 21, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL7, L(245,"Minimum Width") & ":", 21, 277, 93, 21, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH, "", 114, 298, 207, 20, _
+   pWindow->AddControl("TEXTBOX", , IDC_FRMSTATUSBAREDITOR_TXTMINWIDTH, "", 114, 273, 207, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or ES_LEFT Or ES_AUTOHSCROLL, _
         WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
 
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL9, L(397,"BackColor") & ":", 21, 304, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR, "", 114, 300, 207, 21, _
+        WS_CHILD or WS_VISIBLE or WS_TABSTOP Or CBS_DROPDOWNLIST or CBS_OWNERDRAWFIXED or CBS_HASSTRINGS, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(SUBCLASSPROC, @frmStatusBarEditor_ComboBox_SubclassProc), IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR, Cast(DWORD_PTR, @pWindow))
 
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPICSELECT, "...", 350, 295, 26, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL10, L(399,"ForeColor") & ":", 21, 331, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR, "", 114, 327, 207, 21, _
+        WS_CHILD or WS_VISIBLE or WS_TABSTOP Or CBS_DROPDOWNLIST or CBS_OWNERDRAWFIXED or CBS_HASSTRINGS, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(SUBCLASSPROC, @frmStatusBarEditor_ComboBox_SubclassProc), IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR, Cast(DWORD_PTR, @pWindow))
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL11, L(398,"BackColorHot") & ":", 21, 358, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT, "", 114, 354, 207, 21, _
+        WS_CHILD or WS_VISIBLE or WS_TABSTOP Or CBS_DROPDOWNLIST or CBS_OWNERDRAWFIXED or CBS_HASSTRINGS, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(SUBCLASSPROC, @frmStatusBarEditor_ComboBox_SubclassProc), IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT, Cast(DWORD_PTR, @pWindow))
+
+   pWindow->AddControl("LABEL", , IDC_FRMSTATUSBAREDITOR_LABEL11, L(400,"ForeColorHot") & ":", 21, 385, 93, 21, _
+        WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_LEFT Or SS_NOTIFY, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("COMBOBOX", , IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT, "", 114, 381, 207, 21, _
+        WS_CHILD or WS_VISIBLE or WS_TABSTOP Or CBS_DROPDOWNLIST or CBS_OWNERDRAWFIXED or CBS_HASSTRINGS, _
+        WS_EX_CLIENTEDGE Or WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR, , _
+        Cast(SUBCLASSPROC, @frmStatusBarEditor_ComboBox_SubclassProc), IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT, Cast(DWORD_PTR, @pWindow))
+
+
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDPICSELECT, "...", 350, 290, 26, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    ' Add an image control                                                         
-   DIM pImageCtx AS CImageCtx = CImageCtx(pWindow, IDC_FRMSTATUSBAREDITOR_PICIMAGE, , 384, 224, 60, 60)
+   DIM pImageCtx AS CImageCtx = CImageCtx(pWindow, IDC_FRMSTATUSBAREDITOR_PICIMAGE, , 384, 219, 60, 60)
 
-   pWindow->AddControl("GROUPBOX", , IDC_FRMSTATUSBAREDITOR_FRAME1, L(246,"Image"), 342, 190, 144, 128, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMSTATUSBAREDITOR_FRAME1, L(246,"Image"), 342, 185, 144, 128, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM, L(237,"Display on Form"), 21, 345, 175, 16, _
+
+   pWindow->AddControl("CHECKBOX", , IDC_FRMSTATUSBAREDITOR_CHKDISPLAYONFORM, L(237,"Display on Form"), 21, 443, 175, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-
-   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDOK, L(0,"OK"), 331, 333, 74, 28, _
+   
+   pWindow->AddControl("BUTTON", , IDC_FRMSTATUSBAREDITOR_CMDOK, L(0,"OK"), 331, 431, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 412, 333, 74, 28, _
+   pWindow->AddControl("BUTTON", , IDCANCEL, L(1,"Cancel"), 412, 431, 74, 28, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
@@ -638,10 +882,12 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAlignment.Center") )
    ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAlignment.Right") )
   
-   hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE )
-   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.None") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.Sunken") )
-   ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.Raised") )
+   ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+   ' in WinFBE programs where Windows Themes are enabled.
+   'hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOBORDERSTYLE )
+   'ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.None") )
+   'ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.Sunken") )
+   'ComboBox_AddString( hCtrl, @wstr("StatusBarPanelBorderStyle.Raised") )
 
    hCtrl = GetDlgItem( hForm, IDC_FRMSTATUSBAREDITOR_COMBOAUTOSIZE )
    ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAutoSize.None") )
@@ -649,7 +895,7 @@ public Function frmStatusBarEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ComboBox_AddString( hCtrl, @wstr("StatusBarPanelAutoSize.Spring") )
 
    
-   frmStatusBarEditor_DisplayListBox( 0 )
+   frmStatusBarEditor_DisplayListBox( nDefaultPanel )
    frmStatusBarEditor_SetTextboxes()
    SetFocus( GetDlgItem( HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_LSTPANELS ) )
 

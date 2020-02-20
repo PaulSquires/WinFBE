@@ -420,11 +420,10 @@ end function
 ' ========================================================================================
 ' Get the RGB (BGR) color value from the specified property value
 ' ========================================================================================
-public function GetRGBColorFromProperty( byval pProp as clsProperty ptr ) as COLORREF
-   if pProp = 0 then exit function
+public function GetRGBColorFromProperty( byref wszPropValue as wstring ) as COLORREF
+   if len(wszPropValue) = 0 then exit function
    
-   dim as CWSTR wszPropValue, wszList, wszValue
-   wszPropValue = pProp->wszPropValue
+   dim as CWSTR wszList, wszValue
    wszList = AfxStrParse(wszPropValue, 1, "|")
    wszValue = AfxStrParse(wszPropValue, 2, "|")
 

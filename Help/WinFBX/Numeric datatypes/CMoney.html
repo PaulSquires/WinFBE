@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<head>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
+  <meta http-equiv='MSThemeCompatible' content='Yes'>
+
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>CMoney</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">@font-face {font-family: octicons-link;src: url(data:font/woff;charset=utf-8;base64,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) format('woff');}body {-webkit-text-size-adjust: 100%;text-size-adjust: 100%;color: #333;font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";font-size: 16px;line-height: 1.6;word-wrap: break-word;max-width: 99%;box-sizing: border-box;padding: 20px 5px 8rem 5px; margin-left: auto;margin-right: auto;}body a {background-color: transparent;}body a:active,body a:hover {outline: 0;}body strong {font-weight: bold;}body h1 {font-size: 2em;margin: 0.67em 0;}body img {border: 0;}body hr {box-sizing: content-box;height: 0;}body pre {overflow: auto;}body code,body kbd,body pre {font-family: monospace, monospace;font-size: 1em;}body input {color: inherit;font: inherit;margin: 0;}body html input[disabled] {cursor: default;}body input {line-height: normal;}body input[type="checkbox"] {box-sizing: border-box;padding: 0;}body table {border-collapse: collapse;border-spacing: 0;}body td,body th {padding: 0;}body * {box-sizing: border-box;}body input {font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";}body a {color: #4078c0;text-decoration: none;}body a:hover,body a:active {text-decoration: underline;}body hr {height: 0;margin: 15px 0;overflow: hidden;background: transparent;border: 0;border-bottom: 1px solid #ddd;}body hr:before {display: table;content: "";}body hr:after {display: table;clear: both;content: "";}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 15px;margin-bottom: 15px;line-height: 1.1;}body h1 {font-size: 30px;}body h2 {font-size: 21px;}body h3 {font-size: 16px;}body h4 {font-size: 14px;}body h5 {font-size: 12px;}body h6 {font-size: 11px;}body blockquote {margin: 0;}body ul,body ol {padding: 0;margin-top: 0;margin-bottom: 0;}body ol ol,body ul ol {list-style-type: lower-roman;}body ul ul ol,body ul ol ol,body ol ul ol,body ol ol ol {list-style-type: lower-alpha;}body dd {margin-left: 0;}body code {font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;font-size: 12px;}body pre {margin-top: 0;margin-bottom: 0;font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;}body .select::-ms-expand {opacity: 0;}body .octicon {font: normal normal normal 16px/1 octicons-link;display: inline-block;text-decoration: none;text-rendering: auto;-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;}body .octicon-link:before {content: '\f05c';}body:before {display: table;content: "";}body:after {display: table;clear: both;content: "";}body>*:first-child {margin-top: 0 !important;}body>*:last-child {margin-bottom: 0 !important;}body a:not([href]) {color: inherit;text-decoration: none;}body .anchor {display: inline-block;padding-right: 2px;margin-left: -18px;}body .anchor:focus {outline: none;}body h1,body h2,body h3,body h4,body h5,body h6 {margin-top: 1em;margin-bottom: 16px;font-weight: bold;line-height: 1.4;}body h1 .octicon-link,body h2 .octicon-link,body h3 .octicon-link,body h4 .octicon-link,body h5 .octicon-link,body h6 .octicon-link {color: #000;vertical-align: middle;visibility: hidden;}body h1:hover .anchor,body h2:hover .anchor,body h3:hover .anchor,body h4:hover .anchor,body h5:hover .anchor,body h6:hover .anchor {text-decoration: none;}body h1:hover .anchor .octicon-link,body h2:hover .anchor .octicon-link,body h3:hover .anchor .octicon-link,body h4:hover .anchor .octicon-link,body h5:hover .anchor .octicon-link,body h6:hover .anchor .octicon-link {visibility: visible;}body h1 {padding-bottom: 0.3em;font-size: 1.75em;line-height: 1.2;}body h1 .anchor {line-height: 1;}body h2 {padding-bottom: 0.3em;font-size: 1.5em;line-height: 1.225;}body h2 .anchor {line-height: 1;}body h3 {font-size: 1.25em;line-height: 1.43;}body h3 .anchor {line-height: 1.2;}body h4 {font-size: 1em;}body h4 .anchor {line-height: 1.2;}body h5 {font-size: 1em;}body h5 .anchor {line-height: 1.1;}body h6 {font-size: 1em;color: #777;}body h6 .anchor {line-height: 1.1;}body p,body blockquote,body ul,body ol,body dl,body table,body pre {margin-top: 0;margin-bottom: 16px;}body hr {height: 4px;padding: 0;margin: 16px 0;background-color: #e7e7e7;border: 0 none;}body ul,body ol {padding-left: 2em;}body ul ul,body ul ol,body ol ol,body ol ul {margin-top: 0;margin-bottom: 0;}body li>p {margin-top: 16px;}body dl {padding: 0;}body dl dt {padding: 0;margin-top: 16px;font-size: 1em;font-style: italic;font-weight: bold;}body dl dd {padding: 0 16px;margin-bottom: 16px;}body blockquote {padding: 0 15px;color: #777;border-left: 4px solid #ddd;}body blockquote>:first-child {margin-top: 0;}body blockquote>:last-child {margin-bottom: 0;}body table {display: block;width: 100%;overflow: auto;word-break: normal;word-break: keep-all;}body table th {font-weight: bold;}body table th,body table td {padding: 6px 13px;border: 1px solid #ddd;}body table tr {background-color: #fff;border-top: 1px solid #ccc;}body table tr:nth-child(2n) {background-color: #f8f8f8;}body img {max-width: 100%;box-sizing: content-box;background-color: #fff;}body code {padding: 0;padding-top: 0;padding-bottom: 0;margin: 0;font-size: 85%;background-color: rgba(0,0,0,0.04);border-radius: 3px;}body code:before,body code:after {letter-spacing: -0.2em;content: "\00a0";}body pre>code {padding: 0;margin: 0;font-size: 100%;word-break: normal;white-space: pre;background: transparent;border: 0;}body .highlight {margin-bottom: 16px;}body .highlight pre,body pre {padding: 16px;overflow: auto;font-size: 85%;line-height: 1.45;background-color: #f7f7f7;border-radius: 3px;}body .highlight pre {margin-bottom: 0;word-break: normal;}body pre {word-wrap: normal;}body pre code {display: inline;max-width: initial;padding: 0;margin: 0;overflow: initial;line-height: inherit;word-wrap: normal;background-color: transparent;border: 0;}body pre code:before,body pre code:after {content: normal;}body kbd {display: inline-block;padding: 3px 5px;font-size: 11px;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .pl-c {color: #969896;}body .pl-c1,body .pl-s .pl-v {color: #0086b3;}body .pl-e,body .pl-en {color: #795da3;}body .pl-s .pl-s1,body .pl-smi {color: #333;}body .pl-ent {color: #63a35c;}body .pl-k {color: #a71d5d;}body .pl-pds,body .pl-s,body .pl-s .pl-pse .pl-s1,body .pl-sr,body .pl-sr .pl-cce,body .pl-sr .pl-sra,body .pl-sr .pl-sre {color: #183691;}body .pl-v {color: #ed6a43;}body .pl-id {color: #b52a1d;}body .pl-ii {background-color: #b52a1d;color: #f8f8f8;}body .pl-sr .pl-cce {color: #63a35c;font-weight: bold;}body .pl-ml {color: #693a17;}body .pl-mh,body .pl-mh .pl-en,body .pl-ms {color: #1d3e81;font-weight: bold;}body .pl-mq {color: #008080;}body .pl-mi {color: #333;font-style: italic;}body .pl-mb {color: #333;font-weight: bold;}body .pl-md {background-color: #ffecec;color: #bd2c00;}body .pl-mi1 {background-color: #eaffea;color: #55a532;}body .pl-mdr {color: #795da3;font-weight: bold;}body .pl-mo {color: #1d3e81;}body kbd {display: inline-block;padding: 3px 5px;font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;line-height: 10px;color: #555;vertical-align: middle;background-color: #fcfcfc;border: solid 1px #ccc;border-bottom-color: #bbb;border-radius: 3px;box-shadow: inset 0 -1px 0 #bbb;}body .task-list-item {list-style-type: none;}body .task-list-item+.task-list-item {margin-top: 3px;}body .task-list-item input {margin: 0 0.35em 0.25em -1.6em;vertical-align: middle;}body :checked+.radio-label {z-index: 1;position: relative;border-color: #4078c0;}</style>
+  
+    
+  
+</head>
+<body>
+<h1 id="cmoney-class">CMoney Class</h1>
+<p><strong>CMoney</strong> is especially useful for financial calculations, as it avoids the round-off errors associated with floating point data types. The <strong>WinFBX</strong> framework also provides <strong>CCUR</strong>, that implements a currency data type with 4 digits of precision after the decimal point. <strong>CMoney</strong> allows te use of 0 to 9 digits of precision (the default value is 2 digits) for a greater flexibility (some currencies have 0 decimal places, e.g. the Japanese yen, and some three decimal places, e.g. the Kuwaiti dinar). The number of decimal places defaults to 2, but you can choose between 0-9 by defining them before includind CMoney.inc, e.g. #define AFX_CMONEY_DECIMAL_PLACES 4. If you choose more than 9 decimal places, the output will be truncated. The internal storage of <strong>CCUR</strong> and <strong>CMoney</strong> differs substantially: <strong>CCUR</strong> uses a CURRENCY structure and <strong>CMoney</strong> a DECIMAL structure.</p>
+<p>When using 2 decimal digits, the greatest possible value is +/-792,281,625,142,643,375,935,439,503.35. However, the formatting functions, <strong>FormatCurrency</strong> and <strong>FormatNumber</strong> can only return a maximum value of +/-922,337,203,685,477.58, which are more than enough for financial calculations, because they use a currency data type. For greater values, you can format the returned string by yourself.</p>
+<p>The locale identifier defaults to 1033 (US), for consistency with FreeBasic numeric data types, but you can change it by defining it before including CMoney.inc, e.g. #define AFX_CMONEY_LCID 3082 (Spain). The locale identifier (LCID) instructs the methods of this class about how input and output strings should be treated. For example, if you choose the Spanish LCID, the formated string input and output will use a comma, instead of a point, as the dcimal separator, and a point, instead of a comma, as the thousands separator.</p>
+<h3 id="constructors">Constructors</h3>
+<p>Creates a new instance of the <strong>CMoney</strong> class and assigns the value passed to it.</p>
+<pre><code>CONSTRUCTOR CMoney
+CONSTRUCTOR (BYREF cSrc AS CMoney)
+CONSTRUCTOR (BYVAL nInteger AS LONGINT)
+CONSTRUCTOR (BYVAL nUInteger AS ULONGINT)
+CONSTRUCTOR (BYREF decSrc AS DECIMAL)
+CONSTRUCTOR (BYVAL cy AS CURRENCY)
+CONSTRUCTOR (BYVAL nValue AS DOUBLE)
+CONSTRUCTOR (BYREF wszSrc AS WSTRING)
+</code></pre>
+<h4 id="remarks">Remarks</h4>
+<p>We can also use strings to set the value, e.g.:</p>
+<pre><code>DIM money AS CMoney = &quot;1234567890.12&quot;
+</code></pre>
+<p>--or--</p>
+<pre><code>DIM money AS CMoney = &quot;1,234,567,890.12&quot;
+</code></pre>
+<p>When using a locale identifier other than the default one, we may need to use different separators for the thousands and the decimal point. For example, if using the locale identifier for Spain we need to use &quot;,&quot; as the decimal separator and &quot;.&quot; as the thousands separator.</p>
+<pre><code>DIM money AS CMoney = &quot;1.234.567.890,12&quot;
+</code></pre>
+<h3 id="operators">Operators</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#Operator1">Operator LET</a></td>
+<td>Assigns a value to a <strong>CMoney</strong> variable.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operator2">CAST operators</a></td>
+<td>Converts a <strong>CMoney</strong> into another data type.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Operator3">Operator *</a></td>
+<td>Returns the address of the underlying <strong>DECIMAL</strong> structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#Operator4">Comparison operators</a></td>
+<td>Compares <strong>CMoney</strong> numbers.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Operator5">Math operators</a></td>
+<td>Add, subtract, multiply or divide <strong>CMoney</strong> numbers.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#CyAbs">Abs_</a></td>
+<td>Returns the absolute value of a money data type.</td>
+</tr>
+<tr class="even">
+<td><a href="#FormatCurrency">FormatCurrency</a></td>
+<td>Formats a currency into a string form.</td>
+</tr>
+<tr class="odd">
+<td><a href="#FormatNumber">FormatNumber</a></td>
+<td>Formats a currency into a string form.</td>
+</tr>
+<tr class="even">
+<td><a href="#IsSigned">IsSigned</a></td>
+<td>Returns true if this number is signed or false otherwise.</td>
+</tr>
+<tr class="odd">
+<td><a href="#IsUnsigned">IsUnsigned</a></td>
+<td>Returns true if this number is unsigned or false otherwise.</td>
+</tr>
+<tr class="even">
+<td><a href="#Scale">Scale</a></td>
+<td>Returns the scale of the money number.</td>
+</tr>
+<tr class="odd">
+<td><a href="#Sign">Sign</a></td>
+<td>Returns 0 if it is not signed of &amp;h80 (128) if it is signed.</td>
+</tr>
+<tr class="even">
+<td><a href="#ToCyVar">ToCyVar</a></td>
+<td>Returns the money number as a VT_CURRENCY variant.</td>
+</tr>
+<tr class="odd">
+<td><a href="#ToVar">ToVar</a></td>
+<td>Returns the money number as a VT_DECIMAL variant.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="operator-let-(=)"><a name="Operator1"></a>Operator LET (=)</h1>
+<p>Assigns a value to a <strong>CMoney</strong> variable.</p>
+<h4 id="examples">Examples</h4>
+<pre><code>DIM money AS CMoney
+money = 123
+money = 12345.12
+</code></pre>
+<h1 id="cast-operators"><a name="Operator2"></a>CAST Operators</h1>
+<p>Converts a <strong>CMoney</strong> into another data type.</p>
+<pre><code>OPERATOR CAST () AS DOUBLE
+OPERATOR CAST () AS CURRENCY
+OPERATOR CAST () AS DECIMAL
+OPERATOR CAST () AS VARIANT
+OPERATOR CAST () AS STRING
+</code></pre>
+<h4 id="remarks-1">Remarks</h4>
+<p>These operators aren't called directly, They perform the conversion when the target is not a <strong>CMoney</strong> variable.</p>
+<h1 id="operator-*"><a name="Operator3"></a>Operator *</h1>
+<p>Returns the address of the underlying <strong>DECIMAL</strong> structure.</p>
+<pre><code>OPERATOR * (BYREF money AS CMoney) AS DECIMAL PTR
+</code></pre>
+<h1 id="comparison-operators"><a name="Operator4"></a>Comparison operators</h1>
+<p>Compares <strong>CMoney</strong> numbers.</p>
+<pre><code>OPERATOR = (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS BOOLEAN
+OPERATOR &lt;&gt; (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS BOOLEAN
+OPERATOR &lt; (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS BOOLEAN
+OPERATOR &gt; (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS BOOLEAN
+OPERATOR &lt;= (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS BOOLEAN
+OPERATOR &gt;= (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS BOOLEAN
+</code></pre>
+<h1 id="math-operators"><a name="Operator5"></a>Math operators</h1>
+<p>Add, subtract, multiply or divide <strong>CMoney</strong> numbers.</p>
+<pre><code>OPERATOR + (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS CMoney
+OPERATOR += (BYREF money AS CMoney)
+OPERATOR - (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS CMoney
+OPERATOR - (BYREF money AS CMoney) AS CMoney
+OPERATOR -= (BYREF money AS CMoney)
+OPERATOR * (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS CMoney
+OPERATOR *= (BYREF money AS CMoney)
+OPERATOR / (BYREF money1 AS CMoney, BYREF money2 AS CMoney) AS CMoney
+OPERATOR /= (BYREF money AS CMoney)
+</code></pre>
+<h4 id="examples-1">Examples</h4>
+<pre><code>DIM money AS CMoney = 12345.12
+money = money + 111.11
+money = money - 111.11
+money = money * 2
+money = money / 2
+money += 123
+money -= 123
+money *= 2.3
+money /= 2.3
+</code></pre>
+<h4 id="remarks-2">Remarks</h4>
+<p>The version OPERATOR - (BYREF money AS CMoney) AS CMoney changes the sign of a decimal number.</p>
+<pre><code>DIM money AS CMoney = 123
+money = -money
+</code></pre>
+<h1 id="abs_"><a name="CyAbs"></a>Abs_</h1>
+<p>Returns the absolute value of a money data type.</p>
+<pre><code>FUNCTION Abs_ () AS CMoney
+</code></pre>
+<h1 id="formatcurrency"><a name="FormatCurrency"></a>FormatCurrency</h1>
+<p>Formats a currency into a string form.</p>
+<pre><code>FUNCTION FormatCurrency (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+   BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>iNumDig</em></td>
+<td>The number of digits to pad to after the decimal point. Specify -1 to use the system default value.</td>
+</tr>
+<tr class="even">
+<td><em>ilncLead</em></td>
+<td>Specifies whether to include the leading digit on numbers.<br>-2 : Use the system default.<br>-1 : Include the leading digit.<br> 0 : Do not include the leading digit.</td>
+</tr>
+<tr class="odd">
+<td><em>iUseParens</em></td>
+<td>Specifies whether negative numbers should use parentheses.<br>-2 : Use the system default.<br>-1 : Use parentheses.<br> 0 : Do not use parentheses.</td>
+</tr>
+<tr class="even">
+<td><em>iGroup</em></td>
+<td>Specifies whether thousands should be grouped. For example 10,000 versus 10000.<br>-2 : Use the system default.<br>-1 : Group thousands.<br> 0 : Do not group thousands.</td>
+</tr>
+<tr class="odd">
+<td><em>dwFlags</em></td>
+<td>VAR_CALENDAR_HIJRI is the only flag that can be set.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value">Return value</h4>
+<p>A string containing the formatted value.</p>
+<h4 id="remarks-3">Remarks</h4>
+<p>Same as <strong>FormatNumber</strong> but adding the currency symbol.</p>
+<h4 id="example">Example</h4>
+<pre><code>DIM c AS CCUR = 12345.1234
+PRINT c.FormatCurrency   --&gt; 12.345,12 € (Spain)
+</code></pre>
+<h1 id="formatnumber"><a name="FormatNumber"></a>FormatNumber</h1>
+<p>Formats a currency into a string form.</p>
+<pre><code>FUNCTION FormatNumer (BYVAL iNumDig AS LONG = -1, BYVAL ilncLead AS LONG = -2, _
+   BYVAL iUseParens AS LONG = -2, BYVAL iGroup AS LONG = -2, BYVAL dwFlags AS DWORD = 0) AS STRING
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>iNumDig</em></td>
+<td>The number of digits to pad to after the decimal point. Specify -1 to use the system default value.</td>
+</tr>
+<tr class="even">
+<td><em>ilncLead</em></td>
+<td>Specifies whether to include the leading digit on numbers.<br>-2 : Use the system default.<br>-1 : Include the leading digit.<br> 0 : Do not include the leading digit.</td>
+</tr>
+<tr class="odd">
+<td><em>iUseParens</em></td>
+<td>Specifies whether negative numbers should use parentheses.<br>-2 : Use the system default.<br>-1 : Use parentheses.<br> 0 : Do not use parentheses.</td>
+</tr>
+<tr class="even">
+<td><em>iGroup</em></td>
+<td>Specifies whether thousands should be grouped. For example 10,000 versus 10000.<br>-2 : Use the system default.<br>-1 : Group thousands.<br> 0 : Do not group thousands.</td>
+</tr>
+<tr class="odd">
+<td><em>dwFlags</em></td>
+<td>VAR_CALENDAR_HIJRI is the only flag that can be set.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-1">Return value</h4>
+<p>A string containing the formatted value.</p>
+<h4 id="remarks-4">Remarks</h4>
+<p>Same as <strong>FormatCurrency</strong> but without adding the currency symbol.</p>
+<h4 id="example-1">Example</h4>
+<pre><code>DIM c AS CCUR = 12345.1234
+PRINT c.FormatNumber   --&gt; 12.345,12 (Spain)
+</code></pre>
+<h1 id="issigned"><a name="IsSigned"></a>IsSigned</h1>
+<p>Returns true if this number is signed or false otherwise.</p>
+<pre><code>FUNCTION IsSigned () AS BOOLEAN
+</code></pre>
+<h1 id="isunsigned"><a name="IsUnsigned"></a>IsUnsigned</h1>
+<p>Returns true if this number is unsigned or false otherwise.</p>
+<pre><code>FUNCTION IsUnsigned () AS BOOLEAN
+</code></pre>
+<h1 id="scale"><a name="Scale"></a>Scale</h1>
+<p>Returns the scale of the money number.</p>
+<pre><code>FUNCTION Scale () AS UBYTE
+</code></pre>
+<h1 id="sign"><a name="Sign"></a>Sign</h1>
+<p>Returns 0 if it is not signed of &amp;h80 (128) if it is signed.</p>
+<pre><code>FUNCTION Sign () AS UBYTE
+</code></pre>
+<h1 id="tocyvar"><a name="ToCyVar"></a>ToCyVar</h1>
+<p>Returns the money number as a VT_CURRENCY variant.</p>
+<pre><code>FUNCTION ToCyVar () AS VARIANT
+</code></pre>
+<h1 id="tovar"><a name="ToVar"></a>ToVar</h1>
+<p>Returns the money number as a VT_DECIMAL variant.</p>
+<pre><code>FUNCTION ToVar () AS VARIANT
+</code></pre>
+</body>
+</html>
+

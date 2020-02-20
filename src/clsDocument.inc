@@ -556,8 +556,10 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszTooltip = mid(**wst, 20)
       elseif left(wst, 21) = "'     PANELALIGNMENT=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAlignment = mid(**wst, 22)
-      elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(**wst, 24)
+      ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+      ' in WinFBE programs where Windows Themes are enabled.
+      'elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
+      '   if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(**wst, 24)
       elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(**wst, 21)
       elseif left(wst, 17) = "'     PANELWIDTH=" then
@@ -566,6 +568,14 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          if bReadingPanelItem then this.PanelItems(NextPanelItem).wszMinWidth = mid(**wst, 21)
       elseif left(wst, 17) = "'     PANELIMAGE=" then
          if bReadingPanelItem then this.PanelItems(NextPanelItem).pProp.wszPropValue = mid(**wst, 18)
+      elseif left(wst, 21) = "'     PANELBACKCOLOR=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColor = mid(**wst, 22)
+      elseif left(wst, 24) = "'     PANELBACKCOLORHOT=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColorHot = mid(**wst, 25)
+      elseif left(wst, 21) = "'     PANELFORECOLOR=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColor = mid(**wst, 22)
+      elseif left(wst, 24) = "'     PANELFORECOLORHOT=" then
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColorHot = mid(**wst, 25)
       elseif left(wst, 17) = "'   PANELITEM_END" then
          bReadingPanelItem = false   
 

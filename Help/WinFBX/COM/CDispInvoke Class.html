@@ -753,7 +753,7 @@ FUNCTION Invoke (BYVAL pwszName AS WSTRING PTR, cvArg1...cvArg16) AS CVAR
 </tr>
 <tr class="even">
 <td><em>pwszName</em></td>
-<td>The name of the property to call.</td>
+<td>The name of the method or property to call.</td>
 </tr>
 <tr class="odd">
 <td><em>cvArg1...cvArg16</em></td>
@@ -761,7 +761,10 @@ FUNCTION Invoke (BYVAL pwszName AS WSTRING PTR, cvArg1...cvArg16) AS CVAR
 </tr>
 </tbody>
 </table>
-<p>Remarks</p>
+<h4 id="return-value-4">Return value</h4>
+<p>Returns a variant with the result of the call when the <strong>Invoke</strong> method is used instead of <strong>Get</strong> to retrieve the value of a property. If it is not a get property, it returns a null variant.</p>
+<h4 id="remarks-5">Remarks</h4>
+<p>For optional parameters, we must use a VT_ERROR VARIANT with a value of DISP_E_PARAMNOTFOUND. You can use the function <strong>AfxCVarOptPrm</strong> or the macro <strong>CVAR_OPTPRM</strong> for this purpose.</p>
 <p>To check for succes or failure, call the <strong>GetLastResult</strong> method. It will return S_OK (0) on succes or an HRESULT code on failure.</p>
 <table>
 <thead>
@@ -821,8 +824,21 @@ FUNCTION Invoke (BYVAL pwszName AS WSTRING PTR, cvArg1...cvArg16) AS CVAR
 </tr>
 </tbody>
 </table>
-<h4 id="remarks-5">Remarks</h4>
-<p>For optional parameters, we must use a VT_ERROR VARIANT with a value of DISP_E_PARAMNOTFOUND. You can use the function <strong>AfxCVarOptPrm</strong> or the macro <strong>CVAR_OPTPRM</strong> for this purpose.</p>
+<h4 id="usage-example-2">Usage example</h4>
+<pre><code>'#CONSOLE ON
+#include once &quot;Afx/CDIspInvoke.inc&quot;
+using Afx
+
+' // Create an instance of the Msxml2 object
+DIM pDisp AS CDispInvoke = &quot;Msxml2.XMLHTTP.6.0&quot;
+' // To check for success, see if the value returned by the DispPtr method is not null
+IF pDisp.DispPtr = NULL THEN END
+pDisp.Invoke(&quot;open&quot;, &quot;GET&quot;, &quot;https://sourceforge.net/&quot;, FALSE)
+pDisp.Invoke(&quot;Send&quot;)
+DIM strResponse AS STRING = pDisp.Get(&quot;ResponseText&quot;)
+print strResponse
+SLEEP
+</code></pre>
 <h1 id="setlcid"><a name="SetLcid"></a>SetLcid</h1>
 <p>Sets de locale identifier used by the class.</p>
 <pre><code>FUNCTION SetLcid (BYVAL lcid AS LCID)

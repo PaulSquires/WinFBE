@@ -493,6 +493,9 @@ public Function frmVDTabChild_Show( ByVal hWndParent As HWnd, _
    ' Delete the frmBuildConfig CWindow class manually allocated memory 
    Delete pWindow
 
+   ' Reset the gTabPages global array
+   erase gTabPages
+   
 End Function
 
 

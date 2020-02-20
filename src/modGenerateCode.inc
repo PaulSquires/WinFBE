@@ -170,12 +170,19 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
               "'     PANELNAME="        & pDoc->PanelItems(ii).wszName        & vbcrlf & _
               "'     PANELTEXT="        & pDoc->PanelItems(ii).wszText        & vbcrlf & _
               "'     PANELTOOLTIP="     & pDoc->PanelItems(ii).wszTooltip     & vbcrlf & _
-              "'     PANELALIGNMENT="   & pDoc->PanelItems(ii).wszAlignment   & vbcrlf & _
-              "'     PANELBORDERSTYLE=" & pDoc->PanelItems(ii).wszBorderStyle & vbcrlf & _
-              "'     PANELAUTOSIZE="    & pDoc->PanelItems(ii).wszAutoSize    & vbcrlf & _
-              "'     PANELWIDTH="       & pDoc->PanelItems(ii).wszWidth       & vbcrlf & _
-              "'     PANELMINWIDTH="    & pDoc->PanelItems(ii).wszMinWidth    & vbcrlf & _
-              "'     PANELIMAGE="       & pDoc->PanelItems(ii).pProp.wszPropValue & vbcrlf & _
+              "'     PANELALIGNMENT="   & pDoc->PanelItems(ii).wszAlignment   & vbcrlf 
+              ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+              ' in WinFBE programs where Windows Themes are enabled.
+              '"'     PANELBORDERSTYLE=" & pDoc->PanelItems(ii).wszBorderStyle & vbcrlf & _
+         wszControls = wszControls & _
+              "'     PANELAUTOSIZE="     & pDoc->PanelItems(ii).wszAutoSize    & vbcrlf & _
+              "'     PANELWIDTH="        & pDoc->PanelItems(ii).wszWidth       & vbcrlf & _
+              "'     PANELMINWIDTH="     & pDoc->PanelItems(ii).wszMinWidth    & vbcrlf & _
+              "'     PANELIMAGE="        & pDoc->PanelItems(ii).pProp.wszPropValue & vbcrlf & _
+              "'     PANELBACKCOLOR="    & pDoc->PanelItems(ii).wszBackColor    & vbcrlf & _
+              "'     PANELBACKCOLORHOT=" & pDoc->PanelItems(ii).wszBackColorHot & vbcrlf & _
+              "'     PANELFORECOLOR="    & pDoc->PanelItems(ii).wszForeColor    & vbcrlf & _
+              "'     PANELFORECOLORHOT=" & pDoc->PanelItems(ii).wszForeColorHot & vbcrlf & _
               "'   PANELITEM_END" & vbcrlf 
       next
       wszControls = wszControls & "' WINFBE PANELS_END" & vbcrlf
@@ -299,10 +306,46 @@ private function GenerateStatusBarCode( byval pDoc as clsDocument ptr ) as CWSTR
       sp(1) & "pForm->StatusBar.Panel(idxPanel).Text = " & DQ & pDoc->PanelItems(i).wszText & DQ & vbcrlf & _
       sp(1) & "pForm->StatusBar.Panel(idxPanel).Icon = " & DQ & pDoc->PanelItems(i).pProp.wszPropValue & DQ & vbcrlf & _
       sp(1) & "pForm->StatusBar.Panel(idxPanel).ToolTip = " & DQ & pDoc->PanelItems(i).wszToolTip & DQ & vbcrlf & _
-      sp(1) & "pForm->StatusBar.Panel(idxPanel).Width = 100" & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).Width = " & pDoc->PanelItems(i).wszWidth & vbcrlf & _
+      sp(1) & "pForm->StatusBar.Panel(idxPanel).MinWidth = " & pDoc->PanelItems(i).wszMinWidth & vbcrlf & _
       sp(1) & "pForm->StatusBar.Panel(idxPanel).Alignment = " & pDoc->PanelItems(i).wszAlignment & vbcrlf & _
-      sp(1) & "pForm->StatusBar.Panel(idxPanel).BorderStyle = " & pDoc->PanelItems(i).wszBorderStyle & vbcrlf & _
       sp(1) & "pForm->StatusBar.Panel(idxPanel).AutoSize = " & pDoc->PanelItems(i).wszAutoSize & vbcrlf 
+      ' BorderStyle is deprecated as of v2.0.4 as it has no effect
+      ' in WinFBE programs where Windows Themes are enabled.
+      'sp(1) & "pForm->StatusBar.Panel(idxPanel).BorderStyle = " & pDoc->PanelItems(i).wszBorderStyle & vbcrlf & _
+
+      ' Output the Back/Fore panel colors
+      dim as CWSTR wszPropValue
+      for ii as long = 0 to 3
+         select case ii
+            case 0: wszPropValue = pDoc->PanelItems(i).wszBackColor
+            case 1: wszPropValue = pDoc->PanelItems(i).wszBackColorHot
+            case 2: wszPropValue = pDoc->PanelItems(i).wszForeColor
+            case 3: wszPropValue = pDoc->PanelItems(i).wszForeColorHot
+         end select
+         if left(wszPropValue, 7) = "SYSTEM|" then
+            wszPropValue = "Colors.System" & mid(wszPropValue, 8)
+         elseif left(wszPropValue, 7) = "COLORS|" then
+            wszPropValue = "Colors." & mid(wszPropValue, 8)
+         elseif left(wszPropValue, 7) = "CUSTOM|" then
+            wszPropValue = mid(wszPropValue, 8) & "  ' custom color"
+         end if   
+         select case ii
+            case 0
+               wszText = wszText & _
+               sp(1) & "pForm->StatusBar.Panel(idxPanel).BackColor = " & wszPropValue & vbcrlf 
+            case 1
+               wszText = wszText & _
+               sp(1) & "pForm->StatusBar.Panel(idxPanel).BackColorHot = " & wszPropValue & vbcrlf 
+            case 2
+               wszText = wszText & _
+               sp(1) & "pForm->StatusBar.Panel(idxPanel).ForeColor = " & wszPropValue & vbcrlf 
+            case 3
+               wszText = wszText & _
+               sp(1) & "pForm->StatusBar.Panel(idxPanel).ForeColorHot = " & wszPropValue & vbcrlf 
+         end select
+      next
+
    next
 
    dim as CWSTR wszFormName = GetFormName(pDoc)
@@ -707,6 +750,20 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
       wszText = wszText & GenerateStatusBarCode(pDoc)
    end if
    
+   ' If a TabControl exists to be code generated then we need to output
+   ' a variable that holds the tab page index. We do it here because inside
+   ' the For/Next would result in duplicate definition error.
+   for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+      pCtrl = pDoc->Controls.ItemAt(i)
+      if pCtrl then
+         if pCtrl->ControlType = CTRL_TABCONTROL then
+            wszText = wszText & sp(1) & "dim as long nTabIndex" & vbcrlf
+            exit for
+         end if
+      end if      
+   next
+
+   ' Generate code for all of the controls
    for i as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
       pCtrl = pDoc->Controls.ItemAt(i)
 
@@ -751,7 +808,6 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
             if nPropType = PropertyType.CustomDialog then
                if pCtrl->ControlType = CTRL_TABCONTROL then
                   frmVDTabChild_LoadTabPagesArray( wszPropValue )
-                  wszText = wszText & sp(1) & "dim as long nTabIndex" & vbcrlf
                   for i as long = 0 to ubound(gTabPages)
                      wszText = wszText & sp(1) & _
                         "nTabIndex = " & wszCombinedName & ".TabPages.Add(" & _
@@ -763,7 +819,9 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                         wszText = wszText & sp(1) & _
                            wszCombinedName & ".SelectedIndex = nTabIndex" & vbcrlf
                      end if      
-                  next    
+                  next
+                  ' Reset the global gTabPages array
+                  erase gTabPages    
                   continue for
                end if
             end if

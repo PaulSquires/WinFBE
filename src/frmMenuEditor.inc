@@ -280,6 +280,9 @@ private Function frmMenuEditor_OnCommand( ByVal HWnd As HWnd, _
                ' the generated code for the form.
                pDoc->GenerateMenu = Button_GetCheck( GetDlgItem(HWND, IDC_FRMMENUEDITOR_CHKDISPLAYONFORM) )
 
+               ' If there are no valid MenuItems then set the GenerateMenu to False.
+               if numItems < 0 then pDoc->GenerateMenu = 0
+               
                pDoc->UserModified = true
             end if
             
@@ -682,6 +685,9 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    
    ' Delete the frmMenuEditor CWindow class manually allocated memory 
    Delete pWindow
+   
+   ' Erase the temporary global MenuItems array
+   erase gMenuItems
 
 End Function
 
