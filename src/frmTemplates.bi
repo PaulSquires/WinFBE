@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 #Define IDC_FRMTEMPLATES_LISTBOX                    1000
 
 declare Function frmTemplates_Show (ByVal hParent As HWnd, ByVal x As Long, ByVal y As Long) As LRESULT

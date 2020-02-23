@@ -1,3 +1,15 @@
+Version 2.0.6 (February 22, 2020)
+- Added: Refresh method for the StatusBar Panel class so only a particular Panel is redrawn rather than the whole statusbar.
+- Added: The WinFBE.ini config file is automatically reloaded should an external tool or program modify it (prior to this change it was only reloaded before to a compile).
+- Added: Some missing codetips for StatusBar Panels and UpDown control.
+- Changed: Image filenames are now stored in the form files as relative paths to the form file.
+- Fixed: Crash in certain cases when attempting to invoke the "Open Templates" dialog (via the menu or dropdown toolbar button).
+- Fixed: Changing StatusBar text at runtime did not immediately update the text displayed in the panel.
+- Fixed: Listview would crash if Listview.BeginUpdate was followed by Listview.Items.Clear.
+- Fixed: Frame controls could "disappear" if a modal dialog was shown during the Form's Load event. 
+- Fixed: MenuEditor crash if trying to Insert new item prior to first item in list (WinFBE64.exe).
+- Fixed: ListBox ItemHeight not properly returned when multiple ListBoxes existed on a Form.
+
 Version 2.0.5 (February 19, 2020)
 - Fixed: Multiple Tab Controls on a form would result in code generation error.
 - Fixed: Regression: Forms with StatusBar would make ListBoxes and Labels not display their contents.

@@ -83,7 +83,7 @@ public Function CreateMRUpopup() As HMENU
       If AfxFileExists(gConfig.MRU(i)) = 0 Then
          gConfig.MRU(i) = ""
       Else
-         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
+         AppendMenu( hPopupMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
       End If
    Next
    
@@ -95,12 +95,12 @@ public Function CreateMRUpopup() As HMENU
          gConfig.MRUPROJECT(i) = ""
       Else               
          If i = 0 Then AppendMenuW( hPopUpMenu, MF_SEPARATOR, 0, "" )
-         AppendMenuW( hPopupMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUPROJECT(i) )
+         AppendMenu( hPopupMenu, MF_STRING, IDC_MRUPROJECTBASE + i, gConfig.MRUPROJECT(i) )
       End If
    Next
 
    If GetMenuItemCount(hPopupMenu) = 0 Then
-      AppendMenuW( hPopupMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
+      AppendMenu( hPopupMenu, MF_STRING Or MF_GRAYED Or MF_DISABLED, 0, L(11,"(Empty)") )
    End If
    
    Function = hPopupMenu

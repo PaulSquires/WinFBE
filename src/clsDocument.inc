@@ -302,6 +302,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' Set a flag that we are loading code from a file. This is important because if the file
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
+            this.DiskFilename = *pwszFile   ' assign before GetFileToString because needed for RelativeFile calculation.
             this.LoadingFromFile = true
             dim sText as string  ' this will be an UTF-8 encoded string
             ' GetFileToString has a call to pDoc->ParseFormMetaData which will create/recreate
@@ -313,7 +314,6 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                print "Error opening: "; *pwszFile
             End If
             this.LoadingFromFile = false
-            this.DiskFilename = *pwszFile
             SciMsg( m_pSci(0), SCI_SETSAVEPOINT, 0, 0)
             SciMsg( m_pSci(0), SCI_EMPTYUNDOBUFFER, 0, 0)
             ' Update the most recently used file list (only for non-IsNewFlag files)
@@ -467,18 +467,18 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       numOffsetLines = numOffsetLines + 1
       
       if left(wst, 16) = "' WINFBE VERSION" then
-         wszPropValue = trim(mid(**wst, 17))
+         wszPropValue = trim(mid(wst, 17))
          if ConvertWinFBEversion(wszPropValue) < ConvertWinFBEversion(APPVERSION) then
             this.bRegenerateCode = true
             this.UserModified = true
          end if
          
       elseif left(wst, 15) = "' LOCKCONTROLS=" then
-         wszPropValue = mid(**wst, 16)  ' default is False
+         wszPropValue = mid(wst, 16)  ' default is False
          if wszPropValue = "True" then this.bLockControls = true
 
       elseif left(wst, 12) = "' SNAPLINES=" then
-         wszPropValue = mid(**wst, 13)  ' default is True
+         wszPropValue = mid(wst, 13)  ' default is True
          if wszPropValue = "False" then this.bSnapLines = false
 
       elseif left(wst, 17) = "' WINFBE FORM_END" then
@@ -493,25 +493,25 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          NextMenuItem = ub + 1
          bReadingMenuItem = true
       elseif left(wst, 21) = "'   MAINMENU_DISPLAY=" then
-         this.GenerateMenu = val(mid(**wst, 22))
+         this.GenerateMenu = val(mid(wst, 22))
       elseif left(wst, 11) = "'     NAME=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszName = mid(**wst, 12)
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszName = mid(wst, 12)
       elseif left(wst, 14) = "'     CAPTION=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszCaption = mid(**wst, 15)
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszCaption = mid(wst, 15)
       elseif left(wst, 13) = "'     INDENT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).nIndent = val(mid(**wst, 14))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).nIndent = val(mid(wst, 14))
       elseif left(wst, 10) = "'     ALT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkAlt = val(mid(**wst, 11))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkAlt = val(mid(wst, 11))
       elseif left(wst, 12) = "'     SHIFT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkShift = val(mid(**wst, 13))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkShift = val(mid(wst, 13))
       elseif left(wst, 11) = "'     CTRL=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkCtrl = val(mid(**wst, 12))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkCtrl = val(mid(wst, 12))
       elseif left(wst, 15) = "'     SHORTCUT=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszShortcut = mid(**wst, 16)
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).wszShortcut = mid(wst, 16)
       elseif left(wst, 14) = "'     CHECKED=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkChecked = val(mid(**wst, 15))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkChecked = val(mid(wst, 15))
       elseif left(wst, 13) = "'     GRAYED=" then
-         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkGrayed = val(mid(**wst, 14))
+         if bReadingMenuItem then this.MenuItems(NextMenuItem).chkGrayed = val(mid(wst, 14))
       elseif left(wst, 16) = "'   MENUITEM_END" then
          bReadingMenuItem = false   
       
@@ -522,21 +522,21 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          NextToolBarItem = ub + 1
          bReadingToolBarItem = true
       elseif left(wst, 20) = "'   TOOLBAR_DISPLAY=" then
-         this.GenerateToolBar = val(mid(**wst, 21))
+         this.GenerateToolBar = val(mid(wst, 21))
       elseif left(wst, 17) = "'   TOOLBAR_SIZE=" then
-         this.wszToolBarSize = mid(**wst, 18)
+         this.wszToolBarSize = mid(wst, 18)
       elseif left(wst, 17) = "'     BUTTONNAME=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszName = mid(**wst, 18)
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszName = mid(wst, 18)
       elseif left(wst, 17) = "'     BUTTONTYPE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszButtonType = mid(**wst, 18)
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszButtonType = mid(wst, 18)
       elseif left(wst, 20) = "'     BUTTONTOOLTIP=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszTooltip = mid(**wst, 21)
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).wszTooltip = mid(wst, 21)
       elseif left(wst, 24) = "'     BUTTONNORMALIMAGE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropNormalImage.wszPropValue = mid(**wst, 25)
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropNormalImage.wszPropValue = mid(wst, 25)
       elseif left(wst, 21) = "'     BUTTONHOTIMAGE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropHotImage.wszPropValue = mid(**wst, 22)
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropHotImage.wszPropValue = mid(wst, 22)
       elseif left(wst, 26) = "'     BUTTONDISABLEDIMAGE=" then
-         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropDisabledImage.wszPropValue = mid(**wst, 27)
+         if bReadingToolBarItem then this.ToolBarItems(NextToolBarItem).pPropDisabledImage.wszPropValue = mid(wst, 27)
       elseif left(wst, 19) = "'   TOOLBARITEM_END" then
          bReadingToolBarItem = false   
 
@@ -547,35 +547,35 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          NextPanelItem = ub + 1
          bReadingPanelItem = true
       elseif left(wst, 22) = "'   STATUSBAR_DISPLAY=" then
-         this.GenerateStatusBar = val(mid(**wst, 23))
+         this.GenerateStatusBar = val(mid(wst, 23))
       elseif left(wst, 16) = "'     PANELNAME=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszName = mid(**wst, 17)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszName = mid(wst, 17)
       elseif left(wst, 16) = "'     PANELTEXT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszText = mid(**wst, 17)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszText = mid(wst, 17)
       elseif left(wst, 19) = "'     PANELTOOLTIP=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszTooltip = mid(**wst, 20)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszTooltip = mid(wst, 20)
       elseif left(wst, 21) = "'     PANELALIGNMENT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAlignment = mid(**wst, 22)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAlignment = mid(wst, 22)
       ' BorderStyle is deprecated as of v2.0.4 as it has no effect
       ' in WinFBE programs where Windows Themes are enabled.
       'elseif left(wst, 23) = "'     PANELBORDERSTYLE=" then
-      '   if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(**wst, 24)
+      '   if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBorderStyle = mid(wst, 24)
       elseif left(wst, 20) = "'     PANELAUTOSIZE=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(**wst, 21)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszAutoSize = mid(wst, 21)
       elseif left(wst, 17) = "'     PANELWIDTH=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszWidth = mid(**wst, 18)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszWidth = mid(wst, 18)
       elseif left(wst, 20) = "'     PANELMINWIDTH=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszMinWidth = mid(**wst, 21)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszMinWidth = mid(wst, 21)
       elseif left(wst, 17) = "'     PANELIMAGE=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).pProp.wszPropValue = mid(**wst, 18)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).pProp.wszPropValue = mid(wst, 18)
       elseif left(wst, 21) = "'     PANELBACKCOLOR=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColor = mid(**wst, 22)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColor = mid(wst, 22)
       elseif left(wst, 24) = "'     PANELBACKCOLORHOT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColorHot = mid(**wst, 25)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszBackColorHot = mid(wst, 25)
       elseif left(wst, 21) = "'     PANELFORECOLOR=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColor = mid(**wst, 22)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColor = mid(wst, 22)
       elseif left(wst, 24) = "'     PANELFORECOLORHOT=" then
-         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColorHot = mid(**wst, 25)
+         if bReadingPanelItem then this.PanelItems(NextPanelItem).wszForeColorHot = mid(wst, 25)
       elseif left(wst, 17) = "'   PANELITEM_END" then
          bReadingPanelItem = false   
 
@@ -587,11 +587,18 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
          this.AllImages(NextImageItem).pDoc = @this
          bReadingImageItem = true
       elseif left(wst, 16) = "'     IMAGENAME=" then
-         if bReadingImageItem then this.AllImages(NextImageItem).wszImageName = mid(**wst, 17)
+         if bReadingImageItem then this.AllImages(NextImageItem).wszImageName = mid(wst, 17)
       elseif left(wst, 15) = "'     FILENAME=" then
-         if bReadingImageItem then this.AllImages(NextImageItem).wszFileName = ProcessFromCurdrive(mid(**wst, 16))
+         if bReadingImageItem then 
+            ' If this is a relative filename then convert it back.
+            dim as CWSTR wszImageFilename = ProcessFromCurdrive(mid(wst, 16))
+            if AfxPathIsRelative(wszImageFilename) then 
+               wszImageFilename = AfxPathCombine( AfxStrPathName("PATH", this.DiskFilename), wszImageFilename)
+            end if
+            this.AllImages(NextImageItem).wszFileName = wszImageFilename
+         end if
       elseif left(wst, 19) = "'     RESOURCETYPE=" then
-         if bReadingImageItem then this.AllImages(NextImageItem).wszFormat = mid(**wst, 20)
+         if bReadingImageItem then this.AllImages(NextImageItem).wszFormat = mid(wst, 20)
       elseif left(wst, 13) = "'   IMAGE_END" then
          bReadingImageItem = false   
 
@@ -629,12 +636,12 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
 
       elseif left(wst, 16) = "'     PROP_NAME=" then
          if bIsValidControl then
-            wszPropName = mid(**wst, 17)
+            wszPropName = mid(wst, 17)
          end if
          
       elseif left(wst, 17) = "'     PROP_VALUE=" then
          if bIsValidControl then
-            wszPropValue = mid(**wst, 18)   ' utf8 encoded 
+            wszPropValue = mid(wst, 18)   ' utf8 encoded 
             ' Only set the loading property if it exists in the current property
             ' listing. We do this otherwise older now unused properties will continue
             ' to get loaded when we no longer want them to.
@@ -652,7 +659,7 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
 
       elseif left(wst, 17) = "'     EVENT_NAME=" then
          if bIsValidControl then
-            wszEventName = mid(**wst, 18)
+            wszEventName = mid(wst, 18)
             SetControlEvent(pCtrl, wszEventName, true)
          end if
       end if   
@@ -1614,7 +1621,7 @@ Function clsDocument.ApplyProperties() As Long
    end if
 
    strFontName = Str(gConfig.EditorFontname)
-   nFontSize   = Val(**gConfig.EditorFontsize)
+   nFontSize   = Val(gConfig.EditorFontsize)
    
    Select Case gConfig.KeywordCase
       Case 0:  nFontCase = SC_CASE_LOWER
@@ -1720,8 +1727,8 @@ Function clsDocument.ApplyProperties() As Long
           
       ''
       ''  TAB WIDTH 
-      SciMsg( m_pSci(i), SCI_SETTABWIDTH, Val(**gConfig.TabSize), 0 )
-      SciMsg( m_pSci(i), SCI_SETINDENT, Val(**gConfig.TabSize), 0 )
+      SciMsg( m_pSci(i), SCI_SETTABWIDTH, Val(gConfig.TabSize), 0 )
+      SciMsg( m_pSci(i), SCI_SETINDENT, Val(gConfig.TabSize), 0 )
  
       ''
       ''  INDENTATION GUIDES
@@ -1781,7 +1788,7 @@ Function clsDocument.ApplyProperties() As Long
    
       '' RIGHT EDGE COLUMN
       SciMsg( m_pSci(i), SCI_SETEDGEMODE, iif(gConfig.RightEdge, EDGE_LINE, EDGE_NONE), 0 )
-      SciMsg( m_pSci(i), SCI_SETEDGECOLUMN, val(**gConfig.RightEdgePosition), 0 )
+      SciMsg( m_pSci(i), SCI_SETEDGECOLUMN, val(gConfig.RightEdgePosition), 0 )
       'SciMsg( m_pSci, SCI_SETEDGECOLOR, iif(gConfig.RightEdge, EDGE_LINE, EDGE_NONE) )
 
       ''
@@ -1962,7 +1969,7 @@ Function clsDocument.SetBookmarks( ByVal sBookmarks As String ) As Long
    Dim As Long nLine
    
    For i As Long = 1 To nCount
-      nLine = Val( **AfxStrParse(sBookmarks, i, ",") )
+      nLine = Val( AfxStrParse(sBookmarks, i, ",") )
       SciMsg( pSci, SCI_MARKERADD, nLine, 0)
    Next
 

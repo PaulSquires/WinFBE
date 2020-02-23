@@ -166,15 +166,20 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
                WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_FLAT, WS_EX_NOPARENTNOTIFY)
 
    ' Search templates
-   DIM hSearch as HANDLE, WFD AS WIN32_FIND_DATAW, FileNo AS LONG, nType AS LONG, nItem AS LONG
-   DIM wszPath AS WSTRING * MAX_PATH, wszCurPath AS WSTRING * MAX_PATH, wszText AS WSTRING * 260
-   DIM wszFullPath AS WSTRING * MAX_PATH * 2, idx AS LONG, nLin AS LONG
-   wszPath = AfxGetExePathName & "Templates\"
-   wszCurPath = wszPath & "*.fbtpl"
+   DIM hSearch as HANDLE
+   dim WFD AS WIN32_FIND_DATAW
+   dim as long FileNo, nType, nCount, nItem, idx, nLin 
+    
+   DIM wszPath AS WSTRING * MAX_PATH
+   dim wszCurPath AS WSTRING * MAX_PATH
+   dim wszText AS WSTRING * MAX_PATH
+   DIM wszFullPath AS WSTRING * MAX_PATH * 2
+   
+   wszPath = AfxGetExePathName + "Templates\"
+   wszCurPath = wszPath + "*.fbtpl"
 
    ' Count the number of files and dimension the array
    ' REDIM PRESERVE causes problems
-   DIM nCount AS LONG
    hSearch = FindFirstFile(wszCurPath, @WFD)
    IF hSearch <> INVALID_HANDLE_VALUE THEN
       DO
@@ -184,6 +189,7 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
       LOOP WHILE FindNextFile(hSearch, @WFD)
       FindClose(hSearch)
    END IF
+   
    ' Dimension the array
    IF nCount = 0 THEN EXIT FUNCTION
    DIM rgwszPaths(nCount - 1) AS WSTRING * MAX_PATH
@@ -196,26 +202,37 @@ public Function frmTemplates_Show( ByVal hParent As HWnd, _
       DO
          IF (WFD.dwFileAttributes AND FILE_ATTRIBUTE_DIRECTORY) <> FILE_ATTRIBUTE_DIRECTORY THEN
             wszFullPath = wszPath & WFD.cFileName
+            ' The start of a template file contains 4 lines of meta data
+            ' For example:
+            ' 2       
+            ' FBGUI
+            ' .bas
+            ' CWindow: COM: Explorer Browser in a tab page
+            
             ' Get the description
             if pStream.Open(wszFullPath) = S_OK then
                nLin = 0
                DO UNTIL pStream.EOS
                   wszText = pStream.ReadLine
-                  nLin += 1
+                  nLin = nLin + 1
                   IF nLin = 1 THEN nType = VAL(wszText)
                   IF nType < 1 OR nType > 2 THEN EXIT DO
                   IF nType = 1 AND nLin = 3 THEN EXIT DO
                   IF nType = 2 AND nLin = 4 THEN EXIT DO
                LOOP
                pStream.Close
-               ' Display the description in the listbox
-               nItem = SendMessage(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
-               ' Store the full path in the array
-               rgwszPaths(idx) = wszFullPath
-               ' Store a pointer to the element of the array in the listbox item
-               SendMessage(hListBox, LB_SETITEMDATA, nItem, cast(LPARAM, VARPTR(rgwszPaths(idx))) )
-               idx += 1
-               IF idx > UBOUND(rgwszPaths) THEN EXIT DO
+               
+               if len(wszText) then
+                  ' Display the description in the listbox
+                  nItem = SendMessage(hListBox, LB_ADDSTRING, 0, cast(LPARAM, @wszText))
+                  ' Store the full path in the array
+                  rgwszPaths(idx) = wszFullPath
+                  ' Store a pointer to the element of the array in the listbox item
+                  SendMessage(hListBox, LB_SETITEMDATA, nItem, cast(LPARAM, @rgwszPaths(idx) ))
+                  idx = idx + 1
+                  IF idx > UBOUND(rgwszPaths) THEN EXIT DO
+               end if
+               
             END IF
          END IF
       LOOP WHILE FindNextFile(hSearch, @WFD)

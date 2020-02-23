@@ -104,10 +104,19 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
    if numImageItems > 0 then
       wszControls = wszControls & "' WINFBE IMAGES_START" & vbcrlf 
       for ii as long = lbound(pDoc->AllImages) to ubound(pDoc->AllImages)
+         dim as CWSTR wszRelative
+         dim as CWSTR wszImageFilename = pDoc->AllImages(ii).wszFilename
+         
+         ' Attempt to convert the image file name to relative path
+         if AfxFileExists( pDoc->DiskFilename ) then
+            wszRelative = AfxPathRelativePathTo( pDoc->DiskFilename, FILE_ATTRIBUTE_NORMAL, wszImageFilename, FILE_ATTRIBUTE_NORMAL)
+            if AfxPathIsRelative(wszRelative) then wszImageFilename = wszRelative
+         end if
+         
          wszControls = wszControls & _
               "'   IMAGE_START" & vbcrlf & _
               "'     IMAGENAME="     & pDoc->AllImages(ii).wszImageName & vbcrlf & _
-              "'     FILENAME="      & ProcessToCurdrive(pDoc->AllImages(ii).wszFilename) & vbcrlf & _
+              "'     FILENAME="      & ProcessToCurdrive(wszImageFilename) & vbcrlf & _
               "'     RESOURCETYPE="  & pDoc->AllImages(ii).wszFormat & vbcrlf & _
               "'   IMAGE_END" & vbcrlf 
       next

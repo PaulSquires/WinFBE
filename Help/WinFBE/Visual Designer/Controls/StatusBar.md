@@ -26,7 +26,7 @@
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | Hide | Conceals the control from the user.|
-| Refresh | Forces the form to invalidate its client area and immediately redraw itself and any child controls.|
+| Refresh | Forces the statusbar to invalidate its client area and immediately redraw itself and any child controls.|
 | SetBounds | Sets the bounds of the control to the specified location and size. SetBounds(left, top, width, height).|
 | Show | Creates and displays the control to the user.|
 
@@ -68,6 +68,7 @@
 | ForeColor | Gets or sets the foreground color of the panel. |
 | BackColorHot | Gets or sets the background color of the panel when the mouse is over the panel. |
 | ForeColorHot | Gets or sets the foreground color of the panel when the mouse is over the panel. |
+| Refresh | Forces the statusbar panel to invalidate its client area and immediately redraw itself.|
 
 ##### StatusBarPanelAlignment
 ```

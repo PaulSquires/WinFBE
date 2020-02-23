@@ -44,7 +44,7 @@ Using Afx
 
 #Define APPNAME        WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT   WStr("WinFBE")
-#Define APPVERSION     WStr("2.0.5") 
+#Define APPVERSION     WStr("2.0.6") 
 #Define APPCOPYRIGHT   WStr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2020") 
 
 
@@ -139,11 +139,12 @@ dim shared gLasso   as clsLasso
 ' ========================================================================================
 ' WinMain
 ' ========================================================================================
-Function WinMain( ByVal hInstance     As HINSTANCE, _
-                  ByVal hPrevInstance As HINSTANCE, _
-                  ByVal szCmdLine     As ZString Ptr, _
-                  ByVal nCmdShow      As Long _
-                  ) As Long
+Function WinMain( _
+            ByVal hInstance     As HINSTANCE, _
+            ByVal hPrevInstance As HINSTANCE, _
+            ByVal szCmdLine     As ZString Ptr, _
+            ByVal nCmdShow      As Long _
+            ) As Long
 
    ' Load configuration files 
    gConfig.LoadConfigFile()
@@ -157,21 +158,21 @@ Function WinMain( ByVal hInstance     As HINSTANCE, _
    wszLocalizationFile = AfxGetExePathName + wstr("Languages\english.lang")
    If LoadLocalizationFile(wszLocalizationFile, true) = False Then
       MessageBox( 0, _
-                  WStr("English Localization file could not be loaded. Aborting application.") + vbcrlf + _
+                  "English Localization file could not be loaded. Aborting application." + vbcrlf + _
                   wszLocalizationFile, _
-                  WStr("Error"), _
+                  "Error", _
                   MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Return 1
    End If
    
    
    ' Load the selected localization file
-   wszLocalizationFile = AfxGetExePathName + wstr("Languages\") + gConfig.LocalizationFile
+   wszLocalizationFile = AfxGetExePathName + "Languages\" + gConfig.LocalizationFile
    If LoadLocalizationFile(wszLocalizationFile, false) = False Then
       MessageBox( 0, _
-                  WStr("Localization file could not be loaded. Aborting application.") + vbcrlf + _
+                  "Localization file could not be loaded. Aborting application." + vbcrlf + _
                   wszLocalizationFile, _
-                  WStr("Error"), _
+                  "Error", _
                   MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
       Return 1
    End If
@@ -236,7 +237,7 @@ End Function
 ' ========================================================================================
 ' Main program entry point
 ' ========================================================================================
-End WinMain( GetModuleHandleW(Null), Null, Command(), SW_NORMAL )
+End WinMain( GetModuleHandle(Null), Null, Command(), SW_NORMAL )
 
 
 

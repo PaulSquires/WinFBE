@@ -155,7 +155,7 @@ public Function GetFontCharSetID(ByREF wzCharsetName As CWSTR ) As Long
 
    If Len(wzCharsetName) = 0 Then Return SC_CHARSET_DEFAULT
    
-   Select Case **wzCharsetName
+   Select Case wzCharsetName
       Case "Default"       : Function = SC_CHARSET_DEFAULT
       Case "Ansi"          : Function = SC_CHARSET_ANSI
       Case "Arabic"        : Function = SC_CHARSET_ARABIC
@@ -618,8 +618,10 @@ public Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
    end if      
    Dim wzCurDrive As CWSTR = LCase(Left(zText, 3))  ' eg. D:\
 
+   ' If the incoming filename is a relative file name then the following test
+   ' will have no effect.
    If LCase(Left(wzFilename, 3)) = wzCurDrive Then 
-      wzFilename = WSTR("{CURDRIVE}") & Mid(**wzFilename, 2)
+      wzFilename = WSTR("{CURDRIVE}") & Mid(wzFilename, 2)
    End If
 
    Return wzFilename
@@ -1301,12 +1303,12 @@ public function GetRunExecutableFilename() as CWSTR
          if wszOptions[i-1] = 34 THEN bInString = not bInString  ' double quotes
          if bInString THEN continue for
          if wszOptions[i-1] = 45 then  ' dash   
-            wszFilename = mid(**wszOptions, y, i-y-1)
+            wszFilename = mid(wszOptions, y, i-y-1)
             exit for
          end if   
       NEXT
       ' There was no other switch so we made it to the end of the string
-      if len(wszFilename) = 0 then wszFilename = mid(**wszOptions, y)
+      if len(wszFilename) = 0 then wszFilename = mid(wszOptions, y)
    END IF
    
    ' Has a filename been determined yet? If it has then it possibly does not have

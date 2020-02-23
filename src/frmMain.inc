@@ -3217,6 +3217,12 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
             ' Check for any QuickRun exes that can be deleted.
             gApp.CheckQuickRunExe
              
+            ' Check if the WinFBE.ini file was changed by an external program.
+            ' Reload the config file in case a user has automated a change to it since
+            ' the application started (for example, changing the compiler path).
+            gConfig.ReloadConfigFileTest()
+            
+            
             ' Determines whether a message is intended for the specified
             ' dialog box and, if it is, processes the message.
             ' Ensure keystrokes like TAB are properly handled by the modeless dialogs

@@ -126,6 +126,7 @@ Type clsConfig
       _WinAPICodetipsFilename    as CWSTR 
       _WinFormsXCodetipsFilename as CWSTR 
       _WinFBXCodetipsFilename    as CWSTR
+      _DateFileTime              As FILETIME
       
    Public:
       WinFBEversion        as CWSTR
@@ -208,4 +209,5 @@ Type clsConfig
       declare Function LoadCodetipsWinFormsX() as boolean
       declare Function LoadCodetipsWinFBX() as boolean
       declare Function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval IsWinAPI as boolean ) as boolean
+      declare Function ReloadConfigFileTest() As BOOLEAN    
 End Type

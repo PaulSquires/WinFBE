@@ -447,7 +447,7 @@ private Function frmMenuEditor_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             if nCurSel = -1 then exit function 
             Redim Preserve gMenuItems(Ubound(gMenuItems)+1)
-            For i as long = Ubound(gMenuItems) To nCurSel Step -1
+            For i as long = Ubound(gMenuItems) To nCurSel + 1 Step -1
                gMenuItems(i) = gMenuItems(i-1) 
             Next
             dim newMenuItem as clsMenuItem

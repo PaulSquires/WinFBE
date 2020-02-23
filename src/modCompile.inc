@@ -831,10 +831,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    
    wDQ = wchr(34) ' unicode double quotes
                              
-   ' Reload the config file in case a user has automated a change to it since
-   ' the application started (for example, changing the compiler path).
-   gConfig.LoadConfigFile()
-   
    gCompile.wszFullCommandLine = ""
    gCompile.wszFullLogFile = ""
    gCompile.wszOutputMsg = ""

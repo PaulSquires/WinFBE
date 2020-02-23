@@ -1390,6 +1390,10 @@ Function clsConfig.LoadConfigFile() as Long
       end if   
    NEXT
    
+   ' Save the last write time so that it can be checked in the message loop
+   ' in order to detect external changes to it.
+   _DateFileTime = AfxGetFileLastWriteTime( _ConfigFilename )
+
    Function = 0
 End Function
 
@@ -1713,3 +1717,18 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
 End Function
 
 
+' ========================================================================================
+' Reload the config file should it have been changed by an external program.
+' ========================================================================================
+Function clsConfig.ReloadConfigFileTest() As BOOLEAN    
+
+   dim As FILETIME ft
+   
+   ' Compare the disk file date time to the value currently stored in static variable.
+   ft = AfxGetFileLastWriteTime(_ConfigFilename)
+   If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(_DateFileTime) Then
+      gConfig.LoadConfigFile()  ' this function also updates the _DateFileTime value
+   end if
+   
+   function = 0
+end function
