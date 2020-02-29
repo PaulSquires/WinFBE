@@ -44,6 +44,12 @@
 #Define IDC_FRMUSERTOOLS_CHKDISPLAYMENU             1028
 #Define IDC_FRMUSERTOOLS_CMDOK                      1029
 
+' User Tool actions (selected, pre/post compile, after WinFBE starts up)
+const USERTOOL_ACTION_SELECTED      = 0   
+const USERTOOL_ACTION_PRECOMPILE    = 1   
+const USERTOOL_ACTION_POSTCOMPILE   = 2
+const USERTOOL_ACTION_WINFBESTARTUP = 3
+
 common shared as HACCEL ghAccelUserTools
 
 declare Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long            

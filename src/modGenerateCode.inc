@@ -994,10 +994,26 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          "' because a resource file will be generated automatically." & vbcrlf & _
          "'     '#RESOURCE " & DQ & "resource.rc" & DQ & vbcrlf & vbcrlf 
       END IF
+
+      
       wszHeader = wszHeader & vbcrlf & _
       "''" & vbcrlf & _
-      "''  Remove the following Application.Run code if it used elsewhere in your application." & vbcrlf & _
+      "''  Remove the following Application.Run code if it used elsewhere in your application." & vbcrlf 
+      ' Do a check to see if Application.Run already exists in the project. If it does then
+      ' comment out the Application.Run 
+      dim as long TotalAppRunCount = 0
+      dim as clsDocument ptr pDocSearch = gApp.pDocList
+      do until pDocSearch = 0
+         if pDocSearch->AppRunCount > 0 then
+            TotalAppRunCount = TotalAppRunCount + pDocSearch->AppRunCount
+            exit do
+         end if
+         pDocSearch = pDocSearch->pDocNext
+      loop
+      wszHeader = wszHeader & _
+      iif(TotalAppRunCount > 0, "'", "") & _
       "Application.Run(" & wszFormName & ")" & vbcrlf & vbcrlf
+      
       if pDoc->IsNewFlag then
          pDoc->AppendText(wszHeader)
       end if   

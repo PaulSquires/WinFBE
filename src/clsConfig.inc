@@ -456,21 +456,28 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszClassName = "TEXTBOX"
 
    n = n + 1
+   gToolBox(n).nToolType = CTRL_TIMER
+   gToolBox(n).wszToolBoxName   = "Timer"
+   gToolBox(n).wszControlName   = "Timer"
+   gToolBox(n).wszImage  = "IMAGE_TIMER"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_TIMER"
+   gToolBox(n).wszClassName = ""
+
+   n = n + 1
+   gToolBox(n).nToolType = CTRL_TREEVIEW
+   gToolBox(n).wszToolBoxName   = "TreeView"
+   gToolBox(n).wszControlName   = "TreeView"
+   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
+   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
+   gToolBox(n).wszClassName = "TREEVIEW"
+
+   n = n + 1
    gToolBox(n).nToolType = CTRL_UPDOWN
    gToolBox(n).wszToolBoxName   = "UpDown"
    gToolBox(n).wszControlName   = "UpDown"
    gToolBox(n).wszImage  = "IMAGE_UPDOWN"
    gToolBox(n).wszCursor = "IMAGE_CURSOR_UPDOWN"
    gToolBox(n).wszClassName = "UPDOWN"
-
-
-'   n = n + 1
-'   gToolBox(n).nToolType = CTRL_TREEVIEW
-'   gToolBox(n).wszToolBoxName   = "TreeView"
-'   gToolBox(n).wszControlName   = "TreeView"
-'   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
-'   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
-'   gToolBox(n).wszClassName = "TREEVIEW"
 
 
    redim preserve gToolBox(n) as TOOLBOX_TYPE
@@ -488,17 +495,6 @@ Function clsConfig.InitializeToolBox() as Long
 '   gToolBox(12).wszCursor = "IMAGE_CURSOR_VSCROLL"
 '   gToolBox(12).wszClassName = "VSCROLLBAR"
 
-'   gToolBox(13).nToolType = CTRL_TIMER
-'   gToolBox(13).wszName   = "Timer"
-'   gToolBox(13).wszImage  = "IMAGE_TIMER"
-'   gToolBox(13).wszCursor = "IMAGE_CURSOR_TIMER"
-'   gToolBox(13).wszClassName = ""
-
-'   gToolBox(17).nToolType = CTRL_UPDOWN
-'   gToolBox(17).wszName   = "UpDown"
-'   gToolBox(17).wszImage  = "IMAGE_UPDOWN"
-'   gToolBox(17).wszCursor = "IMAGE_CURSOR_UPDOWN"
-'   gToolBox(17).wszClassName = "UPDOWN"
 
 '   gToolBox(20).nToolType = CTRL_SLIDER
 '   gToolBox(20).wszName   = "Slider"
@@ -1114,14 +1110,14 @@ Function clsConfig.LoadConfigFile() as Long
                this.Tools(i).wszParameters    = AfxStrParse(wData, 3, "|-|")
                this.Tools(i).wszKey           = AfxStrParse(wData, 4, "|-|")
                this.Tools(i).wszWorkingFolder = AfxStrParse(wData, 5, "|-|")
-               this.Tools(i).IsCtrl           = val(**AfxStrParse(wData, 6, "|-|"))
-               this.Tools(i).IsAlt            = val(**AfxStrParse(wData, 7, "|-|"))
-               this.Tools(i).IsShift          = val(**AfxStrParse(wData, 8, "|-|"))
-               this.Tools(i).IsPromptRun      = val(**AfxStrParse(wData, 9, "|-|"))
-               this.Tools(i).IsMinimized      = val(**AfxStrParse(wData, 10, "|-|"))
-               this.Tools(i).IsWaitFinish     = val(**AfxStrParse(wData, 11, "|-|"))
-               this.Tools(i).IsDisplayMenu    = val(**AfxStrParse(wData, 12, "|-|"))
-               this.Tools(i).Action           = val(**AfxStrParse(wData, 13, "|-|"))
+               this.Tools(i).IsCtrl           = val(AfxStrParse(wData, 6, "|-|"))
+               this.Tools(i).IsAlt            = val(AfxStrParse(wData, 7, "|-|"))
+               this.Tools(i).IsShift          = val(AfxStrParse(wData, 8, "|-|"))
+               this.Tools(i).IsPromptRun      = val(AfxStrParse(wData, 9, "|-|"))
+               this.Tools(i).IsMinimized      = val(AfxStrParse(wData, 10, "|-|"))
+               this.Tools(i).IsWaitFinish     = val(AfxStrParse(wData, 11, "|-|"))
+               this.Tools(i).IsDisplayMenu    = val(AfxStrParse(wData, 12, "|-|"))
+               this.Tools(i).Action           = val(AfxStrParse(wData, 13, "|-|"))
                Continue Do
             End If
          End If
@@ -1133,9 +1129,9 @@ Function clsConfig.LoadConfigFile() as Long
                this.Builds(i).id             = AfxStrParse(wData, 1, "|-|")
                this.Builds(i).wszDescription = AfxStrParse(wData, 2, "|-|")
                this.Builds(i).wszOptions     = AfxStrParse(wData, 3, "|-|")
-               this.Builds(i).IsDefault      = val(**AfxStrParse(wData, 4, "|-|"))
-               this.Builds(i).Is32bit        = val(**AfxStrParse(wData, 5, "|-|"))
-               this.Builds(i).Is64bit        = val(**AfxStrParse(wData, 6, "|-|"))
+               this.Builds(i).IsDefault      = val(AfxStrParse(wData, 4, "|-|"))
+               this.Builds(i).Is32bit        = val(AfxStrParse(wData, 5, "|-|"))
+               this.Builds(i).Is64bit        = val(AfxStrParse(wData, 6, "|-|"))
                Continue Do
             End If
          End If

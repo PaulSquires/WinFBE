@@ -104,6 +104,7 @@ Type clsDocument
       wszFormMetaData   as CWSTR           ' Form metadata that defines the form
       AllImages(any)    as IMAGES_TYPE     ' All Images belonging to the Form
       bDesignerViewLoad as boolean = true  ' Show designer/code when initially loaded from file and displayed in tab
+      AppRunCount       as long = 0        ' Only one should exist in the whole project so track if one or more exists in the code.
                   
       ' SnapLines       
       bSnapLines        as Boolean = true  ' Enable/Disable SnapLines

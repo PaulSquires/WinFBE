@@ -841,9 +841,12 @@ public Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
         pWindow->AddControl("TREEVIEW", , IDC_FRMEXPLORER_TREE, "", 0, 0, 0, 0, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or _
         TVS_INFOTIP or TVS_SHOWSELALWAYS Or TVS_FULLROWSELECT Or TVS_TRACKSELECT or _
-        TVS_HASBUTTONS or TVS_HASLINES or TVS_LINESATROOT, _   
+        TVS_HASBUTTONS, _   
         WS_EX_LEFT Or WS_EX_RIGHTSCROLLBAR )  
         
+   ' All FullRowSelect in the treeview by NOT specifiying the following style when created.
+   ' or TVS_HASLINES or TVS_LINESATROOT
+   
    ' Use the new style Explorer Treeview (triangles instead of boxes).
    ' Set an undocumented extended style that enables the treeview glyphs to resize
    ' according to the high dpi setting.

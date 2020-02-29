@@ -347,11 +347,18 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "BorderStyle", "ControlBorderStyle.Fixed3D", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "CheckBoxes", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Enabled", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "FadeButtons", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Font", CreateDefaultFontPropValue, PropertyType.FontPicker)
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
-         AddControlProperty(pCtrl, "FullRowSelect", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "FullRowSelect", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "HideSelection", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "HotTracking", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ItemHeight", "20", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Scrollable", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ShowLines", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ShowRootLines", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "ShowPlusMinus", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Sorting", "SortOrder.None", PropertyType.ComboPicker)
          AddControlProperty(pCtrl, "TabIndex", "0", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "TabStop", "True", PropertyType.TrueFalse)
@@ -435,9 +442,15 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ToolTipBalloon", "False", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Visible", "True", PropertyType.TrueFalse)
 
+      case CTRL_TIMER
+         AddControlProperty(pCtrl, "AutoReset", "True", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Enabled", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
+         AddControlProperty(pCtrl, "Tag", "", PropertyType.EditEnter)
+         AddControlProperty(pCtrl, "Interval", "1000", PropertyType.EditEnterNumericOnly)
+
       case CTRL_HSCROLL
       case CTRL_VSCROLL
-      case CTRL_TIMER
       case CTRL_SLIDER
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM
@@ -682,6 +695,14 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "DropFiles")
          AddControlEvent(pCtrl, "GotFocus")
          AddControlEvent(pCtrl, "LostFocus")
+         AddControlEvent(pCtrl, "BeforeSelect")
+         AddControlEvent(pCtrl, "AfterSelect")
+         AddControlEvent(pCtrl, "BeforeCollapse")
+         AddControlEvent(pCtrl, "AfterCollapse")
+         AddControlEvent(pCtrl, "BeforeExpand")
+         AddControlEvent(pCtrl, "AfterExpand")
+         AddControlEvent(pCtrl, "BeforeCheck")
+         AddControlEvent(pCtrl, "AfterCheck")
          AddControlEvent(pCtrl, "MouseMove")
          AddControlEvent(pCtrl, "MouseDown")
          AddControlEvent(pCtrl, "MouseUp")
@@ -689,9 +710,6 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
-         AddControlEvent(pCtrl, "KeyDown")
-         AddControlEvent(pCtrl, "KeyPress")
-         AddControlEvent(pCtrl, "KeyUp")
 
       case CTRL_MONTHCALENDAR
          AddControlEvent(pCtrl, "Click")
@@ -748,10 +766,13 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "Selected")
          AddControlEvent(pCtrl, "Selecting")
 
+      case CTRL_TIMER
+         AddControlEvent(pCtrl, "Destroy")
+         AddControlEvent(pCtrl, "Elapsed")
+         
          
       case CTRL_HSCROLL
       case CTRL_VSCROLL
-      case CTRL_TIMER
       case CTRL_TREEVIEW
       case CTRL_SLIDER
       case CTRL_WEBBROWSER
@@ -1332,6 +1353,16 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
                              rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
             pCtrl->hWindow = pCtrl->AfxPicturePtr->hWindow
             SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+         case CTRL_TIMER
+            ' Readjust the rcDraw to be 16x16
+            rcDraw.right = rcDraw.left + 16   ' do not dpi scale number
+            rcDraw.bottom = rcDraw.top + 16   ' do not dpi scale number
+            pCtrl->AfxPicturePtr = new CImageCtx(pWindow, 100, , _
+                             rcDraw.left, rcDraw.top, rcDraw.right-rcDraw.left, rcDraw.bottom-rcDraw.top)
+            pCtrl->hWindow = pCtrl->AfxPicturePtr->hWindow
+            SetWindowSubclass(pCtrl->hWindow, CAST(SUBCLASSPROC, @Control_SubclassProc), ControlType, CAST(DWORD_PTR, pDoc))
+            pCtrl->AfxPicturePtr->LoadImageFromResource( pWindow->InstanceHandle, "IMAGE_TIMERCONTROL" )
+            pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_STRETCH, true )
          case else   
             dim as long dwExStyle = -1
             dim as long dwStyle = -1

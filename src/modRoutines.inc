@@ -848,15 +848,26 @@ public Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, _
          
    end select
 
+   
    ' Set the title of the dialog
    hr = pofd->lpVtbl->SetTitle(pofd, L(248,"Open file"))
-   ' Set the default folder
+
+   ' Set the default folder to display in the open dialog
+   dim wszDefaultFolder as WString * MAX_PATH
+   if AfxFileExists( gApp.ProjectFilename ) then
+      wszDefaultFolder = AfxStrPathName( "PATH", gApp.ProjectFilename )
+   else
+      wszDefaultFolder = AfxStrPathName( "PATH", AfxGetCurDir )  
+   end if
    Dim pFolder As IShellItem Ptr
-   SHCreateItemFromParsingName (AfxGetExePathName, Null, @IID_IShellItem, @pFolder)
+   SHCreateItemFromParsingName (wszDefaultFolder, Null, @IID_IShellItem, @pFolder)
    If pFolder Then
-      pofd->lpVtbl->SetDefaultFolder(pofd, pFolder)
-      pFolder->lpVtbl->Release(pFolder)
+      hr = pofd->lpVtbl->SetFolder(pofd, pFolder)
+      If SUCCEEDED(hr) Then
+         pFolder->lpVtbl->Release(pFolder)
+      end if      
    End If
+   
    ' Allow multiselection
    hr = pofd->lpVtbl->SetOptions(pofd, FOS_ALLOWMULTISELECT Or FOS_NOCHANGEDIR or FOS_FILEMUSTEXIST)
    ' Display the dialog
@@ -895,7 +906,13 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    
    wszFilename = AfxStrPathname( "NAMEX", *pwszFileName )
    if AfxFileExists( *pwszFileName ) then
-      wszFilePath = AfxStrPathName( "PATH", *pwszFileName ) 
+      wszFilePath = AfxStrPathName( "PATH", *pwszFileName )
+   else   
+      ' If this is a new file being saved then try to default to the project folder
+      ' if a project is active.
+      if AfxFileExists( gApp.ProjectFilename ) then
+         wszFilePath = AfxStrPathname( "PATH", gApp.ProjectFilename )
+      end if
    end if
 
    ' // Set the file types
@@ -1461,7 +1478,13 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
          ' data that exists in the gdb2 database for this file. This will also delete
          ' any form codegen parsed structures because line numbers for those structures
          ' are after the main scintilla code.
-         gdb2.dbDelete( wszFilename, nStartParseLine )      
+         gdb2.dbDelete( wszFilename, nStartParseLine )
+         
+         ' Reset the count that tracks whether this file contains an Application.Run
+         ' statement (multiple lines in the same code file may contain this function call).
+         ' For visual designer projects, only one of these statements should exist in 
+         ' the entire project.
+         pDoc->AppRunCount = 0
       end if
       
       ' Analyze all lines in the file
@@ -1546,6 +1569,13 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
             ' part of a TYPE structure. The current parser state will dictate how the
             ' variable information is saved to the database.
             if parser.parseVariableDefinitions() then continue for
+            
+            ' If the line starts with Application.Run then set the flag in the document. We
+            ' can only have one instance of Application.Run in visual designer projects
+            ' otherwise the resulting exe will start phantom processes.
+            if left(parser.st_ucase, 15) = "APPLICATION.RUN" then
+               pDoc->AppRunCount = pDoc->AppRunCount + 1
+            end if
 
          NEXT
       next

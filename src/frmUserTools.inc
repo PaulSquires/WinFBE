@@ -65,10 +65,10 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
       if pDocMain THEN wszMainSource = chr(34) + pDocMain->DiskFilename + chr(34)
           
       wszParameters = gConfig.Tools(nToolNum).wszParameters
-      wszParameters = AfxStrReplace(wszParameters, wstr("<P>"), wszProjectName)
-      wszParameters = AfxStrReplace(wszParameters, wstr("<p>"), wszProjectName)
-      wszParameters = AfxStrReplace(wszParameters, wstr("<S>"), wszMainSource)
-      wszParameters = AfxStrReplace(wszParameters, wstr("<s>"), wszMainSource)
+      wszParameters = AfxStrReplace(wszParameters, "<P>", wszProjectName)
+      wszParameters = AfxStrReplace(wszParameters, "<p>", wszProjectName)
+      wszParameters = AfxStrReplace(wszParameters, "<S>", wszMainSource)
+      wszParameters = AfxStrReplace(wszParameters, "<s>", wszMainSource)
 
       dim as long idxBuild = ComboBox_GetCurSel(HWND_FRMMAIN_COMBOBUILDS)
       if (idxBuild > -1) andalso (pDocMain <> 0) THEN
@@ -76,29 +76,29 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
          if len(wszExeName) = 0 then
             wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
                          AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                         wstr(".exe")
-            If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DLL")) orelse _
-               Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -DYLIB")) Then 
+                         ".exe"
+            If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), " -DLL") orelse _
+               Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), " -DYLIB") Then 
                wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
                             AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                            wstr(".dll")
+                            ".dll"
             end if
-            If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), wstr(" -LIB")) then 
+            If Instr(Ucase(gConfig.Builds(idxBuild).wszOptions), " -LIB") then 
                wszExeName = AfxStrPathname("PATH", pDocMain->DiskFilename) + _
                             AfxStrPathname("NAME", pDocMain->DiskFilename) + _
-                            wstr(".a")
+                            ".a"
             end if              
          end if
       END IF
-      wszParameters = AfxStrReplace(wszParameters, wstr("<E>"), wszExeName)
-      wszParameters = AfxStrReplace(wszParameters, wstr("<e>"), wszExeName)
+      wszParameters = AfxStrReplace(wszParameters, "<E>", wszExeName)
+      wszParameters = AfxStrReplace(wszParameters, "<e>", wszExeName)
        
       if pDocCurrent Then 
           ' Determine the word underneath the cursor
          wszWord = Trim(pDocCurrent->GetWord, Any " ()*&^%$#@!~`:;'><?/.,-+=\|}{[]")
       End If
-      wszParameters = AfxStrReplace(wszParameters, wstr("<W>"), wszWord)
-      wszParameters = AfxStrReplace(wszParameters, wstr("<w>"), wszWord)
+      wszParameters = AfxStrReplace(wszParameters, "<W>", wszWord)
+      wszParameters = AfxStrReplace(wszParameters, "<w>", wszWord)
         
    end if
        
@@ -115,7 +115,7 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
          wszWorkingFolder = AfxPathCombine(AfxGetExePathName, wszWorkingFolder)
       END IF
       if AfxPathIsDirectory(wszWorkingFolder) = false then
-         wszWorkingFolder = left(AfxGetExePathName, 1) + mid(**wszWorkingFolder, 2)
+         wszWorkingFolder = left(AfxGetExePathName, 1) + mid(wszWorkingFolder, 2)
       end if
       ChDir gConfig.Tools(nToolNum).wszWorkingFolder
    End If
@@ -128,9 +128,9 @@ public Function frmUserTools_ExecuteUserTool( ByVal nToolNum As Long ) As Long
       wszCommand = AfxPathCombine(AfxGetExePathName, wszCommand)
    END IF
    if AfxPathFileExists(wszCommand) = false THEN
-      wszCommand = left(AfxGetExePathName, 1) + mid(**wszCommand, 2)
+      wszCommand = left(AfxGetExePathName, 1) + mid(wszCommand, 2)
    END IF
-   wszCommand = chr(34) + wszCommand + chr(34)
+   wszCommand = wchr(34) + wszCommand + wchr(34)
 
    With ShExecInfo
       .cbSize       = Len(SHELLEXECUTEINFOW)
@@ -273,7 +273,7 @@ public Function frmUserTools_CreateAcceleratorTable() As Long
       End If
 
       if gConfig.Tools(y).IsDisplayMenu then
-         if len(wszShortcut) then wszShortcut = chr(9) + wszShortcut
+         if len(wszShortcut) then wszShortcut = wchr(9) + wszShortcut
          AppendMenu(hToolsMenu, MF_ENABLED, IDM_USERTOOL + y, gConfig.Tools(y).wszDescription + wszShortcut)
       end if
    Next                                    
@@ -328,15 +328,15 @@ private function frmUserTools_SetTextboxes() as long
    dim as long nCurSel = ListBox_GetCurSel(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_LSTTOOLS))
    dim as Boolean fEnabled = iif( nCurSel < 0, false, true)
 
-   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTTOOLNAME), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszDescription, wstr("")))
+   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTTOOLNAME), iif(fEnabled, gConfig.ToolsTemp(nCurSel).wszDescription, wstr("")))
    EnableWindow(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTTOOLNAME), fEnabled)
-   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTCOMMAND), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszCommand, wstr("")))
+   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTCOMMAND), iif(fEnabled, gConfig.ToolsTemp(nCurSel).wszCommand, wstr("")))
    EnableWindow(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTCOMMAND), fEnabled)
-   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTPARAMETERS), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszParameters, wstr("")))
+   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTPARAMETERS), iif(fEnabled, gConfig.ToolsTemp(nCurSel).wszParameters, wstr("")))
    EnableWindow(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTPARAMETERS), fEnabled)
-   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTKEY), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszKey, wstr("")))
+   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTKEY), iif(fEnabled, gConfig.ToolsTemp(nCurSel).wszKey, wstr("")))
    EnableWindow(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTKEY), fEnabled)
-   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTWORKINGFOLDER), iif(fEnabled, **gConfig.ToolsTemp(nCurSel).wszWorkingFolder, wstr("")))
+   AfxSetWindowText(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTWORKINGFOLDER), iif(fEnabled, gConfig.ToolsTemp(nCurSel).wszWorkingFolder, wstr("")))
    EnableWindow(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_TXTWORKINGFOLDER), fEnabled)
    Button_SetCheck(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_CHKCTRL), iif(fEnabled, gConfig.ToolsTemp(nCurSel).IsCtrl, 0))
    EnableWindow(GetDlgItem(HWND_FRMUSERTOOLS, IDC_FRMUSERTOOLS_CHKCTRL), fEnabled)
@@ -762,6 +762,7 @@ public Function frmUserTools_Show( ByVal hWndParent As HWnd ) as LRESULT
    ComboBox_AddString( hCombo, @L(303,"Invoke only when selected by user") ) 
    ComboBox_AddString( hCombo, @L(302,"Invoke during pre-compile") ) 
    ComboBox_AddString( hCombo, @L(301,"Invoke during post-compile") ) 
+   ComboBox_AddString( hCombo, @L(402,"Invoke immediately after WinFBE starts") ) 
    
    dim hList as hwnd = GetDlgItem(hForm, IDC_FRMUSERTOOLS_LSTTOOLS)
    ListBox_SetCurSel(hList, 0)

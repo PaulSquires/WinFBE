@@ -1046,6 +1046,7 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
    dim as long nPropValue, nTemp, nLeft, nTop, nWidth, nHeight
    dim as CWSTR wszPropName, wszPropValue
    
+   
    ' Loop through all properties and apply them
    for i as long = lb to ub
       pProp = @pCtrl->Properties(i)
@@ -1131,6 +1132,8 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
          case CTRL_DATETIMEPICKER: DateTimePicker_ApplyProperties(pDoc, pCtrl, pProp)
          case CTRL_TABCONTROL
             ' Tab Control gets recreated as a whole when the properties change. 
+         case CTRL_TIMER
+            ' Timers are non-visual controls so no need to do any further processing.
          CASE ELSE
       END SELECT
 

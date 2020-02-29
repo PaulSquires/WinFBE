@@ -561,7 +561,13 @@ public function HandleDesignerLButtonDown( ByVal HWnd As HWnd ) as LRESULT
    ' #1: Determine if a grab handle has been clicked on
    pDoc->GrabHit = SetGrabHandleMouseCursor(pDoc, pt.x, pt.y, pCtrl)
    if pDoc->GrabHit <> GRAB_NOHIT THEN
-      ' One of the sizing handles was clicked on   
+      ' One of the sizing handles was clicked on.
+      ' Do not allow resizing of Timer controls.   
+      if pCtrl->ControlType = CTRL_TIMER then
+         ClipCursor(0)
+         ReleaseCapture
+         exit function
+      end if
       pDoc->bSizing = true
       pDoc->pCtrlAction = pCtrl
       GetWindowRect(pDoc->pCtrlAction->hWindow, @pDoc->rcSize)

@@ -911,6 +911,25 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    If pDocMain = 0 Then return 0
    
 
+   ' Do a check to ensure that only one call to Application.Run exists, otherwise
+   ' present a warning message before continuing.
+   dim as CWSTR wszWarning = L(401,"Multiple calls to Application.Run exist. Check the source code of these files:") & ":"
+   dim as long TotalAppRunCount = 0
+   pDoc = gApp.pDocList
+   do until pDoc = 0
+      if pDoc->AppRunCount > 0 then
+         wszWarning = wszWarning & vbcrlf &  "- " & AfxStrPathname( "NAMEX", pDoc->DiskFilename ) 
+         TotalAppRunCount = TotalAppRunCount + pDoc->AppRunCount
+      end if
+      pDoc = pDoc->pDocNext
+   loop
+   if TotalAppRunCount > 1 then
+      MessageBox( HWND_FRMMAIN, wszWarning, L(109,"Warning"), _
+                        MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 )
+      Function = False: Exit Function
+   end if
+
+   
    ' If this is a QuickRun then we need to copy the current source code to a temporary bas file
    ' and compile that bas file instead. The resulting bas file will be deleted after the compiling
    ' has completed and exe will be deleted when the exe is terminated. 

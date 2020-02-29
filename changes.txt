@@ -1,3 +1,11 @@
+Version 2.0.7
+- Added: Checks to detect multiple calls to the Application.Run function for visual designer projects. Warning shown on compile.
+- Added: If Application.Run already exists in visual designer project then any newly created forms will have that call automatically commented out in the code editor. 
+- Added: New User Tool action option: "Invoke immediately after WinFBE starts". This will run (or show) the user tool immediately after the main WinFBE window is displayed.
+- Changed: The Explorer pane now uses FullRowSelect style for its TreeView.
+- Fixed: Better setting of initial folder for Open / SaveAs when projects are active.
+- Fixed: Regression - somehow old corrupted wfbe project files for the Sample_Projects were included in the 2.0.4, 2.0.5 and 2.0.6 releases.
+
 Version 2.0.6 (February 22, 2020)
 - Added: Refresh method for the StatusBar Panel class so only a particular Panel is redrawn rather than the whole statusbar.
 - Added: The WinFBE.ini config file is automatically reloaded should an external tool or program modify it (prior to this change it was only reloaded before to a compile).

@@ -234,14 +234,15 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
       case CTRL_TABCONTROL   
          wszDefaultProp  = "Name" 
          wszDefaultEvent = "Selected" 
+      case CTRL_TIMER
+         wszDefaultProp  = "Name" 
+         wszDefaultEvent = "Elapsed" 
 
    
 ' TODO: Set default property/event for each control.
    '   CTRL_HSCROLL
    '   CTRL_VSCROLL
-   '   CTRL_TIMER
    '   CTRL_PROGRESSBAR
-   '   CTRL_UPDOWN
    '   CTRL_SLIDER
    '   CTRL_WEBBROWSER
    '   CTRL_CUSTOM
@@ -348,6 +349,12 @@ public Function DisplayPropertyList( byval pDoc as clsDocument ptr ) as Long
             wszPropName = "  " & wszPropName
          case "(CUSTOM)" ' ensure it sorts after the first position
             wszPropName = " Z" & wszPropName
+         case "WIDTH", "HEIGHT"
+            ' Do not output these properties to the listbox for Timers because 
+            ' their size is always 16x16.
+            if pCtrlActive->ControlType = CTRL_TIMER then
+               continue for
+            end if
       END SELECT
 
       idx = Listbox_AddString(hList, wszPropName.sptr)

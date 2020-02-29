@@ -2892,6 +2892,28 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
             gConfig.SaveConfigFile
          end if   
 
+      case MSG_USER_PROCESS_STARTUPUSERTOOLS
+         ' process any User Tools that must display immediately after the main WinFBE
+         ' user interface is created and displayed.
+         
+         ' Wait a bit to ensure that the WinFBE window is visible... This loop
+         ' is mostly never necessary but better to check just to be consistent.
+         dim as double nStartTime = timer
+         do
+            if IsWindowVisible( HWND_FRMMAIN ) then exit do
+            ' If we've waited more than 5 seconds then break out to avoid 
+            ' an infite loop.
+            if (timer - nStartTime) > 5 then exit do
+         loop
+
+         ' Only invoke any User Tools that have action for startup
+         for y as long = LBound(gConfig.Tools) To UBound(gConfig.Tools)
+            if gConfig.Tools(y).Action = USERTOOL_ACTION_WINFBESTARTUP then
+               frmUserTools_ExecuteUserTool(y)
+            end if   
+         NEXT
+         
+         
       case MSG_USER_GENERATECODE
          Dim pDoc As clsDocument Ptr 
          if lParam = 0 then
@@ -3099,6 +3121,9 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    ' Post a message to process the application's command line as applicable.
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_COMMANDLINE, 0, 0 )
+
+   ' Post a message to process any User Tools that must start after WinFBE displays.
+   PostMessage( pWindow->hWindow, MSG_USER_PROCESS_STARTUPUSERTOOLS, 0, 0 )
 
    ' Post a message to do an update check (if applicable)
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_UPDATECHECK, 0, 0 )

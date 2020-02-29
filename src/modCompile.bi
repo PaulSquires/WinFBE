@@ -13,11 +13,6 @@
 
 #pragma once
 
-' User Tool actions (selected, pre/post compile)
-const USERTOOL_ACTION_SELECTED    = 0   
-const USERTOOL_ACTION_PRECOMPILE  = 1   
-const USERTOOL_ACTION_POSTCOMPILE = 2
-
 ''
 ''  COMPILE_TYPE
 ''  Handle information related to the currnet compile process 
