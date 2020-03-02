@@ -463,13 +463,13 @@ Function clsConfig.InitializeToolBox() as Long
    gToolBox(n).wszCursor = "IMAGE_CURSOR_TIMER"
    gToolBox(n).wszClassName = ""
 
-   n = n + 1
-   gToolBox(n).nToolType = CTRL_TREEVIEW
-   gToolBox(n).wszToolBoxName   = "TreeView"
-   gToolBox(n).wszControlName   = "TreeView"
-   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
-   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
-   gToolBox(n).wszClassName = "TREEVIEW"
+'   n = n + 1
+'   gToolBox(n).nToolType = CTRL_TREEVIEW
+'   gToolBox(n).wszToolBoxName   = "TreeView"
+'   gToolBox(n).wszControlName   = "TreeView"
+'   gToolBox(n).wszImage  = "IMAGE_TREEVIEW"
+'   gToolBox(n).wszCursor = "IMAGE_CURSOR_TREEVIEW"
+'   gToolBox(n).wszClassName = "TREEVIEW"
 
    n = n + 1
    gToolBox(n).nToolType = CTRL_UPDOWN

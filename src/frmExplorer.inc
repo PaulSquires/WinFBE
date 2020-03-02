@@ -167,6 +167,8 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
    
    hRootNode = gApp.hExplorerRootNode
 
+   SendMessage( hTree, WM_SETREDRAW, false, 0 )
+
    ' If hNodeExplorer does not exist then we must be adding a new document. If it does
    ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
@@ -239,6 +241,8 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
       loop      
       Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
    End If
+
+   SendMessage( hTree, WM_SETREDRAW, true, 0 )
    AfxRedrawWindow(hTree)
    
    Function = 0
@@ -473,6 +477,15 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
    ' Determine what node was clicked on
    Select Case pNMHDR->code 
       
+      case TVN_ITEMEXPANDING 
+         hTree = lpNMTV->hdr.hWndFrom
+         SendMessage( hTree, WM_SETREDRAW, false, 0 )
+      
+      case TVN_ITEMEXPANDED 
+         hTree = lpNMTV->hdr.hWndFrom
+         SendMessage( hTree, WM_SETREDRAW, true, 0 )
+         AfxRedrawWindow( hTree )
+         
       case TVN_DELETEITEM
          ' A node in the treeview is being removed.
          

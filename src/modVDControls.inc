@@ -710,6 +710,9 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseEnter")
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
+         AddControlEvent(pCtrl, "KeyDown")
+         AddControlEvent(pCtrl, "KeyPress")
+         AddControlEvent(pCtrl, "KeyUp")
 
       case CTRL_MONTHCALENDAR
          AddControlEvent(pCtrl, "Click")

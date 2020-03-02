@@ -102,8 +102,16 @@ FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM
                FOR i AS LONG = 1 TO 100
                   ' // Advances the current position for a progress bar by the step
                   ' // increment and redraws the bar to reflect the new position
-                  ProgressBar_StepIt(hProgressBar)
-                  SLEEP 10
+                  ' ProgressBar_StepIt(hProgressBar)
+                  ' // Note: When using the default green color and visual themes,
+                  ' // ProgressBar_StepIt only renders half of the progress bar.
+                  ' // Microsoft added fancy animations to the progress bar control in Vista.
+                  ' // To provide a smoother visual feedback drawing is delayed when moving forward.
+                  ' // By setting the position back to a smaller value, the ProgressBar drawing is
+                  ' // forced to jump back (no delay in getting to a position smaller than the current).
+                  ProgressBar_SetPos(hProgressBar, i + 1)
+                  ProgressBar_SetPos(hProgressBar, i)
+                  SLEEP 20
                NEXT
                ' // Clears the bar by reseting its position to 0
                ProgressBar_SetPos(hProgressBar, 0)
