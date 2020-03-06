@@ -4,70 +4,10 @@
   <meta http-equiv='X-UA-Compatible' content='IE=edge' />
   <meta http-equiv='MSThemeCompatible' content='Yes'>
 
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta http-equiv='MSThemeCompatible' content='Yes'>
-
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>ListView</title>
+  <title>TreeView</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -80,7 +20,7 @@
   
 </head>
 <body>
-<h1 id="listview-(wfxlistview)">ListView (wfxListView)</h1>
+<h1 id="treeview-(wfxtreeview)">TreeView (wfxTreeView)</h1>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -95,32 +35,32 @@
 <td>Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.</td>
 </tr>
 <tr class="even">
+<td>BackColor</td>
+<td>Gets or sets the background color of the control. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="odd">
 <td>BorderStyle</td>
 <td>Gets or sets the border style of the control. Refer to the <a href="#ControlBorderStyle">ControlBorderStyle</a> enum.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CheckBoxes</td>
-<td>Gets or sets a value indicating whether a check box appears next to each item in the control.</td>
-</tr>
-<tr class="even">
-<td>Column</td>
-<td>Gets or sets properties of a Column <a href="#wfxListViewColumn">wfxListViewColumn</a> object</td>
+<td>Gets or sets a value (true/false) indicating whether a check box appears next to each item in the control.</td>
 </tr>
 <tr class="odd">
-<td>Columns</td>
-<td>Gets or sets properties of a Columns <a href="#wfxListViewColumnsCollection">wfxListViewColumnsCollection</a> collection object</td>
-</tr>
-<tr class="even">
 <td>CtrlId</td>
 <td>Gets or sets a value indicating the control ID of the control.</td>
 </tr>
-<tr class="odd">
-<td>CtrlType</td>
-<td>Gets or sets the control type value. Always <strong>ControlType.ListView</strong> and used when adding control to the application’s form collection.</td>
-</tr>
 <tr class="even">
+<td>CtrlType</td>
+<td>Gets or sets the control type value. Always <strong>ControlType.TreeView</strong> and used when adding control to the application’s form collection.</td>
+</tr>
+<tr class="odd">
 <td>Enabled</td>
 <td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
+</tr>
+<tr class="even">
+<td>FadeButtons</td>
+<td>Fade expand/collapse buttons in or out when the mouse moves away or into a state of hovering over the control.</td>
 </tr>
 <tr class="odd">
 <td>Focused</td>
@@ -131,28 +71,12 @@
 <td>Gets or sets the font for the control. Refer to the Font object.</td>
 </tr>
 <tr class="odd">
+<td>ForeColor</td>
+<td>Gets or sets the foreground color of the control. Refer to the <strong>Colors</strong> object.</td>
+</tr>
+<tr class="even">
 <td>FullRowSelect</td>
-<td>Gets or sets a value indicating whether clicking an item selects all its subitems.</td>
-</tr>
-<tr class="even">
-<td>GridLines</td>
-<td>Gets or sets a value indicating whether grid lines appear between the rows and columns containing the items and subitems in the control.</td>
-</tr>
-<tr class="odd">
-<td>HeaderStyle</td>
-<td>Gets or sets the column header style.</td>
-</tr>
-<tr class="even">
-<td>HeaderHeight</td>
-<td>Gets or sets the column header height</td>
-</tr>
-<tr class="odd">
-<td>HeaderBackColor</td>
-<td>The backgroundground color of the ListView column display text.</td>
-</tr>
-<tr class="even">
-<td>HeaderForeColor</td>
-<td>The foreground color of the ListView column display text.</td>
+<td>Gets or sets a value indicating whether clicking an item selects all its subitems (for TreeViews this style cannot be used in conjunction with the ShowLines property.)</td>
 </tr>
 <tr class="odd">
 <td>Height</td>
@@ -160,23 +84,23 @@
 </tr>
 <tr class="even">
 <td>HideSelection</td>
-<td>Indicates that the selection should be hidden when the edit control loses focus.</td>
+<td>Indicates that the selection should be hidden when the control loses focus.</td>
 </tr>
 <tr class="odd">
+<td>HotTracking</td>
+<td>Determines whether items under the mouse pointer are automatically highlighted.</td>
+</tr>
+<tr class="even">
 <td>hWindow</td>
 <td>Gets the Windows handle (hwnd) of the control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>hWindowParent</td>
 <td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
 </tr>
-<tr class="odd">
-<td>Item</td>
-<td>Gets or sets properties of an Item <a href="#wfxListViewItem">wfxListViewItem</a> object</td>
-</tr>
 <tr class="even">
-<td>Items</td>
-<td>Gets or sets properties of an Items <a href="#wfxListViewItemsCollection">wfxListViewItemsCollection</a> collection object</td>
+<td>ItemHeight</td>
+<td>Determines the height of an individual item in a control (in pixels).</td>
 </tr>
 <tr class="odd">
 <td>Left</td>
@@ -191,24 +115,32 @@
 <td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
 </tr>
 <tr class="even">
-<td>MultiSelec</td>
-<td>Gets or sets a value indicating whether multiple items can be selected.</td>
-</tr>
-<tr class="odd">
 <td>Parent</td>
 <td>Gets or sets the parent container of the control.</td>
 </tr>
+<tr class="odd">
+<td>Scrollable</td>
+<td>Gets or sets a value (true/false) indicating whether the control displays scroll bars when they are needed.</td>
+</tr>
 <tr class="even">
-<td>SelectedItem</td>
-<td>Gets or sets the selected item in thelistbox (using a <a href="#wfxListViewItem">wfxListViewItem</a> object).</td>
+<td>ShowLines</td>
+<td>Gets or sets a value (true/false) indicating whether lines are drawn between the tree nodes in the control.</td>
 </tr>
 <tr class="odd">
-<td>SelectedIndex</td>
-<td>Gets or sets the index value of the selected item in the listview.</td>
+<td>ShowPlusMinus</td>
+<td>Gets or sets a value (true/false) indicating whether the expand/collapse image is displayed next to tree nodes that contain child tree nodes.</td>
 </tr>
 <tr class="even">
+<td>ShowRootLines</td>
+<td>Gets or sets a value (true/false) indicating whether lines are drawn between the tree nodes that are at the root of the control.</td>
+</tr>
+<tr class="odd">
 <td>Size</td>
 <td>Gets or sets the size of the form. Get: returns <a href="#wfxSize">wfxSize</a> object. Set: (width, height)</td>
+</tr>
+<tr class="even">
+<td>Sorted</td>
+<td>Gets or sets a value (true/false) indicating whether the nodes are automatically sorted alphabetically based on the value of the Text property.</td>
 </tr>
 <tr class="odd">
 <td>TabIndex</td>
@@ -223,14 +155,18 @@
 <td>Gets or sets user defined text associated with the form.</td>
 </tr>
 <tr class="even">
+<td>Text</td>
+<td>Gets or sets the text (caption) associated with this form.</td>
+</tr>
+<tr class="odd">
 <td>Top</td>
 <td>Gets or sets the distance, in pixels, between the top edge of the control and the top edge of its container's client area (normally the form).</td>
 </tr>
-<tr class="odd">
-<td>Visible</td>
-<td>Gets or sets a value (true/false) indicating whether the control is displayed.</td>
-</tr>
 <tr class="even">
+<td>TreeNode</td>
+<td>The node that is currently being acted upon for messages such as BeforeExpand, AfterExpand, BeforeCollapse, AfterCollapse, BeforeCheck, AfterCheck, etc</td>
+</tr>
+<tr class="odd">
 <td>Width</td>
 <td>Gets or sets the width of the control.</td>
 </tr>
@@ -247,19 +183,27 @@
 <tbody>
 <tr class="odd">
 <td>BeginUpdate</td>
-<td>Prevents control updating during adding/removing of a bulk number of items</td>
+<td>Maintains performance while items are added to the control one at a time by preventing the control from drawing until the EndUpdate method is called.</td>
 </tr>
 <tr class="even">
 <td>EndUpdate</td>
-<td>Enables control updating after adding/removing of a bulk number of items</td>
+<td>Resumes painting the control after painting had been suspended by the BeginUpdate method.</td>
 </tr>
 <tr class="odd">
-<td>Hide</td>
-<td>Conceals the control from the user.</td>
+<td>ExpandAll</td>
+<td>Expands all the tree nodes.</td>
 </tr>
 <tr class="even">
-<td>HitTest</td>
-<td>Determines what (if any) ListView Item and/or SubItem has been clicked on. HitTest( iItem, iSubItem )</td>
+<td>CollapseAll</td>
+<td>Collapses all the tree nodes.</td>
+</tr>
+<tr class="odd">
+<td>GetNodeAt</td>
+<td>Retrieves the tree node that is at the specified location. GetNodeAt(Point) or GetNodeAt(xpos, ypos)</td>
+</tr>
+<tr class="even">
+<td>Hide</td>
+<td>Conceals the control from the user.</td>
 </tr>
 <tr class="odd">
 <td>Refresh</td>
@@ -276,6 +220,10 @@
 <tr class="even">
 <td>Show</td>
 <td>Creates and displays the control to the user.</td>
+</tr>
+<tr class="odd">
+<td>Sort</td>
+<td>Sorts the items in TreeView control.</td>
 </tr>
 </tbody>
 </table>
@@ -294,23 +242,7 @@
 </tr>
 <tr class="even">
 <td>Click</td>
-<td>Occurs when the client area of the control is clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index. This event will also fire if ENTER is pressed.</td>
-</tr>
-<tr class="odd">
-<td>ColumnClick</td>
-<td>Occurs when a column header is clicked. e.ListViewColumn contains index of clicked Column header.</td>
-</tr>
-<tr class="even">
-<td>DoubleClick</td>
-<td>Occurs when the client area of the control is double clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.</td>
-</tr>
-<tr class="odd">
-<td>RightClick</td>
-<td>Occurs when the client area of the control is right clicked. e.ListViewRow contains clicked Item index. e.ListViewColumn contains clicked SubItem index.</td>
-</tr>
-<tr class="even">
-<td>ItemSelectionChanged</td>
-<td>Occurs when the selected Item has changed. e.ListViewRow contains current selected Item index.</td>
+<td>Occurs when a node in the TreeView is clicked on or when the current selected node changes.</td>
 </tr>
 <tr class="odd">
 <td>Destroy</td>
@@ -319,6 +251,38 @@
 <tr class="even">
 <td>DropFiles</td>
 <td>Occurs when an object is dragged and dropped onto the control and the AllowDrop property of the control is set to True.</td>
+</tr>
+<tr class="odd">
+<td>BeforeExpand</td>
+<td>Occurs before the tree node is expanded.</td>
+</tr>
+<tr class="even">
+<td>AfterExpand</td>
+<td>Occurs after the tree node is expanded.</td>
+</tr>
+<tr class="odd">
+<td>BeforeCollapse</td>
+<td>Occurs before the tree node is collapsed.</td>
+</tr>
+<tr class="even">
+<td>AfterCollapse</td>
+<td>Occurs after the tree node is collapsed.</td>
+</tr>
+<tr class="odd">
+<td>BeforeSelect</td>
+<td>Occurs before the tree node is selected.</td>
+</tr>
+<tr class="even">
+<td>AfterSelect</td>
+<td>Occurs after the tree node is selected.</td>
+</tr>
+<tr class="odd">
+<td>BeforeCheck</td>
+<td>Occurs before the tree node check box is checked.</td>
+</tr>
+<tr class="even">
+<td>AfterCheck</td>
+<td>Occurs after the tree node check box is checked.</td>
 </tr>
 <tr class="odd">
 <td>GotFocus</td>
@@ -370,7 +334,8 @@
 </tr>
 </tbody>
 </table>
-<h3 id="items-collection-(wfxlistviewitemscollection)">Items Collection (wfxListViewItemsCollection)</h3>
+<h1 id="treenode-(wfxtreenode)">TreeNode (wfxTreeNode)</h1>
+<h3 id="properties-1">Properties</h3>
 <table>
 <thead>
 <tr class="header">
@@ -380,87 +345,36 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>Add</td>
-<td>Add a new item (and optional 32bit value) to the listview. ListView.Items.Add( Text, 32bitValue)</td>
+<td>hNode</td>
+<td>The node handle (HTREEITEM) used by Win32 api functions.</td>
 </tr>
 <tr class="even">
-<td>ByIndex</td>
-<td>Return the wfxListViewItem object related to the specified listview item index.</td>
-</tr>
-<tr class="odd">
-<td>Clear</td>
-<td>Removes all items from the listview.</td>
-</tr>
-<tr class="even">
-<td>Count</td>
-<td>Returns the total number of items in the listview.</td>
-</tr>
-<tr class="odd">
-<td>Insert</td>
-<td>Add a new item (and optional 32bit value) to the listview at a specific position. ListView.Items.Insert( Index, Text, 32bitValue)</td>
-</tr>
-<tr class="even">
-<td>Remove</td>
-<td>Remove/delete the item identified by the index value.</td>
-</tr>
-<tr class="odd">
-<td>SelectedCount</td>
-<td>Returns the total number of selected items in the listview.</td>
-</tr>
-<tr class="even">
-<td>SortByColumn</td>
-<td>Sort by the specified SubItem column index. ListView.Items.SortByColumn( nSortColumn, bSortAscend )</td>
-</tr>
-</tbody>
-</table>
-<h3 id="item-(wfxlistviewitem)">Item (wfxListViewItem)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
 <td>Index</td>
-<td>The index value related to the listview item.</td>
-</tr>
-<tr class="even">
-<td>Checked</td>
-<td>Gets or sets a value (true/false) indicating whether the Item is checked.</td>
+<td>The position of the node within the node collection.</td>
 </tr>
 <tr class="odd">
+<td>Checked</td>
+<td>Gets or sets a value (true/false) indicating that the node's checkmark is checked.</td>
+</tr>
+<tr class="even">
 <td>Selected</td>
-<td>Gets or sets a value (true/false) indicating whether the Item is selected.</td>
+<td>Gets or sets a value (true/false) indicating that the node is the currently selected node in the control.</td>
+</tr>
+<tr class="odd">
+<td>Text</td>
+<td>Gets or sets the text that displays for the node.</td>
 </tr>
 <tr class="even">
 <td>Data32</td>
-<td>The optional 32bit value associated with this listview item.</td>
+<td>Gets or sets a value (32-bit) associated with the node. This value can be used by the user for whatever purpose necessary.</td>
 </tr>
 <tr class="odd">
-<td>Text</td>
-<td>The text associated with this listview item.</td>
-</tr>
-<tr class="even">
-<td>BackColor</td>
-<td>Gets or sets the foreground color of the listview item. Refer to the <strong>Colors</strong> object.</td>
-</tr>
-<tr class="odd">
-<td>ForeColor</td>
-<td>Gets or sets the foreground color of the listview item. Refer to the <strong>Colors</strong> object.</td>
-</tr>
-<tr class="even">
-<td>SubItem</td>
-<td>A specific wfxListViewSubItem of a listview item.</td>
-</tr>
-<tr class="odd">
-<td>SubItems</td>
-<td>A collection of subitems of a listview item.</td>
+<td>pTreeView</td>
+<td>A pointer to the main wfxTreeView class.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="subitem-(wfxlistviewsubitem)">SubItem (wfxListViewSubItem)</h3>
+<h3 id="methods-1">Methods</h3>
 <table>
 <thead>
 <tr class="header">
@@ -470,24 +384,38 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>Index</td>
-<td>The index value related to the listview subitem.</td>
+<td>Remove</td>
+<td>Removes the tree node from the control.</td>
 </tr>
 <tr class="even">
-<td>Text</td>
-<td>The text associated with this listview item.</td>
+<td>Expand</td>
+<td>Expands the tree node.</td>
 </tr>
 <tr class="odd">
-<td>BackColor</td>
-<td>Gets or sets the foreground color of the listview subitem. Refer to the <strong>Colors</strong> object.</td>
+<td>ExpandAll</td>
+<td>Expands all the child tree nodes.</td>
 </tr>
 <tr class="even">
-<td>ForeColor</td>
-<td>Gets or sets the foreground color of the listview subitem. Refer to the <strong>Colors</strong> object.</td>
+<td>Collapse</td>
+<td>Collapses the TreeNode.</td>
+</tr>
+<tr class="odd">
+<td>EnsureVisible</td>
+<td>Ensures that the tree node is visible, expanding tree nodes and scrolling the tree view control as necessary.</td>
+</tr>
+<tr class="even">
+<td>SortChildren</td>
+<td>Sorts the immediate child nodes of the TreeNode.</td>
+</tr>
+<tr class="odd">
+<td>Nodes</td>
+<td>Collection of child nodes of this TreeNode (wfxTreeSubNodeCollection.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="subitems-collection-(wfxlistviewsubitemscollection)">SubItems Collection (wfxListViewSubItemsCollection)</h3>
+<h1 id="treenodecollection-(wfxtreenodecollection)">TreeNodeCollection (wfxTreeNodeCollection)</h1>
+<h1 id="treesubnodecollection-(wfxtreesubnodecollection)">TreeSubNodeCollection (wfxTreeSubNodeCollection)</h1>
+<h3 id="properties-2">Properties</h3>
 <table>
 <thead>
 <tr class="header">
@@ -498,175 +426,61 @@
 <tbody>
 <tr class="odd">
 <td>Add</td>
-<td>Add a new subitem to the listview. ListView.Items(i).SubItems.Add( Text )</td>
+<td>Add a new node (and optional 32bit value) to the treeview. TreeView.Nodes.Add( Text, 32bitValue) or TreeNode.Nodes.Add( Text, 32bitValue)</td>
 </tr>
 <tr class="even">
 <td>ByIndex</td>
-<td>Return the wfxListViewSubItem object related to the specified listview item index.</td>
+<td>Return the wfxTreeNode object related to the specified TreeNode item index.</td>
 </tr>
 <tr class="odd">
 <td>Clear</td>
-<td>Removes all subitems from the listview item.</td>
+<td>Removes all items from the collection.</td>
 </tr>
 <tr class="even">
 <td>Count</td>
-<td>Returns the total number of subitems for the listview item.</td>
+<td>Returns the total number of nodes in the collection.</td>
 </tr>
 <tr class="odd">
+<td>Insert</td>
+<td>Add a new node (and optional 32bit value) to the treeview at a specific position. TreeView.Nodes.Insert( Index, Text, 32bitValue)</td>
+</tr>
+<tr class="even">
 <td>Remove</td>
-<td>Removes a specific subitem from a listview item.</td>
+<td>Remove/delete the node identified by the index value.</td>
+</tr>
+<tr class="odd">
+<td>pTreeView</td>
+<td>A pointer to the main wfxTreeView class.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="column-(wfxlistviewcolumn)">Column (wfxListViewColumn)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Index</td>
-<td>The index value related to the listview column.</td>
-</tr>
-<tr class="even">
-<td>Text</td>
-<td>The text associated with this listview column.</td>
-</tr>
-<tr class="odd">
-<td>Width</td>
-<td>The width of the listview column.</td>
-</tr>
-<tr class="even">
-<td>TextAlign</td>
-<td>Set the text alignment of the column text.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="columns-collection-(wfxlistviewcolumnscollection)">Columns Collection (wfxListViewColumnsCollection)</h3>
-<table>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Add</td>
-<td>Add a new column to the listview. ListView.Columns.Add( Text, Width(pixels), TextAlign as TextAlignment )</td>
-</tr>
-<tr class="even">
-<td>ByIndex</td>
-<td>Return the wfxListViewColumn object related to the specified column index.</td>
-</tr>
-<tr class="odd">
-<td>Clear</td>
-<td>Removes all columnss from the listview.</td>
-</tr>
-<tr class="even">
-<td>Count</td>
-<td>Returns the total number of columns for the listview.</td>
-</tr>
-<tr class="odd">
-<td>Remove</td>
-<td>Removes a specific column from a listview.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="working-with-a-listview">Working with a ListView</h2>
-<pre><code>' Row count = frmMain.ListView1.Items.Count
-' Selected count = frmMain.ListView1.Items.SelectedCount
-' Current row = frmMain.ListView1.SelectedIndex
-
-' Add 3 columns each 100 pixels wide and each using a different text alignment
-frmMain.ListView1.Columns.Add( &quot;Column 1&quot;, 100, TextAlignment.Left )
-frmMain.ListView1.Columns.Add( &quot;Column 2&quot;, 100, TextAlignment.Center )
-frmMain.ListView1.Columns.Add( &quot;Column 3&quot;, 100, TextAlignment.Right )
-
-' Add a bulk number of Items and SubItems (basically rows to the ListView)
-' Prevent slow ListView updating by wrapping the operation in BeginUpdate/EndUpdate
-
-frmMain.ListView1.BeginUpdate
-dim i as long
-for ii as long = 0 to 99
-   i = frmMain.ListView1.Items.Add( &quot;Line &quot; &amp; ii )
-   frmMain.ListView1.Item(i).SubItems.Add( &quot;L&quot; &amp; ii &amp; &quot;Sub1&quot; )
-   frmMain.ListView1.Item(i).SubItems.Add( &quot;L&quot; &amp; ii &amp; &quot;Sub2&quot; )
-next
-frmMain.ListView1.EndUpdate
-
-' Change the foreground colors of a couple of SubItems
-frmMain.ListView1.Item(0).SubItem(0).ForeColor = colors.Red
-frmMain.ListView1.Item(0).SubItem(2).ForeColor = colors.Red
-
-' Change the foreground/background colors of a couple of SubItems
-frmMain.ListView1.Item(2).ForeColor = colors.Blue
-frmMain.ListView1.Item(2).BackColor = colors.Yellow
-frmMain.ListView1.Item(2).SubItem(1).ForeColor = colors.Blue
-
-' Set the initial Item to be selected
-frmMain.ListView1.SelectedIndex = 0
-</code></pre>
 <h5 id="controlborderstyle">ControlBorderStyle</h5>
 <pre><code>Enum ControlBorderStyle
-   None = 1
+   None  = 1
    FixedSingle  
    Fixed3D 
 End Enum
 </code></pre>
-<h5 id="wfxsize">wfxSize</h5>
-<pre><code>Type wfxSize
-   private:
-      _Width  as Long
-      _Height as long 
-
-   public:
-      Declare Property Width() As Long
-      Declare Property Width( ByVal nValue As Long )
-      Declare Property Height() As Long
-      Declare Property Height( ByVal nValue As Long )
-      Declare Function IsEmpty() as Boolean
-      Declare Constructor ( byval nWidth as long = 0, byval nHeight as long = 0)
-End Type
+<h1 id="how-to-use-the-treeview">How to use the TreeView</h1>
+<h2 id="adding-root-and-children-nodes">Adding root and children nodes</h2>
+<p>The following example will create four root nodes. The fourth root node (Project 4), will have several children nodes. If the TreeView has the Sorted property set to True then the nodes and children nodes will automatically be sorted when they are added to the control.</p>
+<pre><code>dim as long root, node, subnode, subsubnode
+root = frmMain.TreeView1.Nodes.Add(&quot;Project 1&quot;)
+root = frmMain.TreeView1.Nodes.Add(&quot;Project 2&quot;)
+root = frmMain.TreeView1.Nodes.Add(&quot;Project 13&quot;)
+    
+node = frmMain.TreeView1.Node(root).Nodes.Add(&quot;Project 6&quot;)
+for i as long = 1 to 3
+   subnode = frmMain.TreeView1.Node(root).Node(node).Nodes.Add(&quot;Project File&quot; &amp; i)
+   for i as long = 1 to 2
+      subsubnode = frmMain.TreeView1.Node(root).Node(node).Node(subnode).Nodes.Add(&quot;Sub Project File&quot; &amp; i)
+      for i as long = 1 to 5
+         frmMain.TreeView1.Node(root).Node(node).Node(subnode).Node(subsubnode).Nodes.Add(&quot;Sub Sub Project File&quot; &amp; i)
+      next
+   next
+next
 </code></pre>
-<h5 id="wfxpoint">wfxPoint</h5>
-<pre><code>Type wfxPoint
-   private:
-      _x as Long
-      _y as long 
-
-   public:
-      Declare Property x() As Long
-      Declare Property x( ByVal nValue As Long )
-      Declare Property y() As Long
-      Declare Property y( ByVal nValue As Long )
-      Declare Function IsEmpty() as Boolean
-      Declare Constructor ( byval xPos as long = 0, byval yPos as long = 0)
-End Type
-</code></pre>
+<h2></h2>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
