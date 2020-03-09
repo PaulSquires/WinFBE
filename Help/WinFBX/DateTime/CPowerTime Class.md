@@ -59,6 +59,7 @@ CPowerTime_Week           CPowerTime_Day * 7
 | [Second](#Second) | Returns the Second component of the **CPowerTime** object. This is a numeric value in the range of 0-59. |
 | [SetFileTime](#SetFileTime) | Sets the date and time of this **CPowerTime** object. |
 | [TimeString](#TimeString) | Retuns the time as a string based on the specified mask, e.g. "dd-MM-yyyy". |
+| [ToUTC](#Toutc) | The **CPowerTime** object is converted to Coordinated Universal Time (UTC). |
 | [Today](#Today) | Assigns the current local date on this computer to this **CPowerTime** object. |
 | [UTCToLocal](#UTCToLocal) | Converts time based on the Coordinated Universal Time (UTC) to local file time. |
 | [WeekOne](#WeekOne) | Returns the first day of the first week of the year. |
@@ -174,7 +175,7 @@ SUB AddDays (BYVAL nDays AS LONG)
 
 # <a name="AddHours"></a>AddHours
 
-Adds the specified number of hours to this **CPowerTime** object. The valid values for this member are 1 through 23. You can subtract hours by using a negative number.
+Adds the specified number of hours to this **CPowerTime** object. You can subtract hours by using a negative number.
 
 ```
 AddHours (BYVAL nHours AS LONG)
@@ -186,7 +187,7 @@ AddHours (BYVAL nHours AS LONG)
 
 # <a name="AddMinutes"></a>AddMinutes
 
-Adds the specified number of minutes to this **CPowerTime** object. The valid values for this member are 1 through 59. You can subtract minutes by using a negative number.
+Adds the specified number of minutes to this **CPowerTime** object. You can subtract minutes by using a negative number.
 
 ```
 SUB AddMinutes (BYVAL nMinutes AS LONG)
@@ -198,7 +199,7 @@ SUB AddMinutes (BYVAL nMinutes AS LONG)
 
 # <a name="AddMonths"></a>AddMonths
 
-Adds the specified number of months to this **CPowerTime** object. The valid values for this member are 1 through 12. You can subtract months by using a negative number.
+Adds the specified number of months to this **CPowerTime** object. You can subtract months by using a negative number.
 
 ```
 SUB AddMonths (BYVAL nMonths AS LONG)
@@ -210,7 +211,7 @@ SUB AddMonths (BYVAL nMonths AS LONG)
 
 # <a name="AddMSeconds"></a>AddMSeconds
 
-Adds the specified number of milliseconds to this **CPowerTime** object. The valid values for this member are 1 through 999. You can subtract milliseconds by using a negative number.
+Adds the specified number of milliseconds to this **CPowerTime** object. You can subtract milliseconds by using a negative number.
 
 ```
 SUB AddSeconds (BYVAL nSeconds AS LONG)
@@ -222,7 +223,7 @@ SUB AddSeconds (BYVAL nSeconds AS LONG)
 
 # <a name="AddSeconds"></a>AddSeconds
 
-Adds the specified number of seconds to this **CPowerTime** object. The valid values for this member are 0 through 59. You can subtract seconds by using a negative number.
+Adds the specified number of seconds to this **CPowerTime** object. You can subtract seconds by using a negative number.
 
 ```
 SUB AddSeconds (BYVAL nSeconds AS LONG)
@@ -854,7 +855,7 @@ FUNCTION WeeksInMonth (BYVAL nMonth AS LONG = 0, BYVAL nYear AS LONG = 0) AS LON
 
 # <a name="WeeksInYear"></a>WeeksInYear
 
-Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53. The year must be a four figit year. 
+Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53. The year must be a four digit year. 
  If the year is omitted, the year of this **CPowertime** object is assumed.
 ```
 FUNCTION WeeksInYear (BYVAL nYear AS LONG = 0) AS LONG

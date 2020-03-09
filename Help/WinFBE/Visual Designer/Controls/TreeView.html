@@ -21,6 +21,7 @@
 </head>
 <body>
 <h1 id="treeview-(wfxtreeview)">TreeView (wfxTreeView)</h1>
+<h4 id="(note:-image-support-for-treeview-has-not-yet-been-implemented)">(Note: Image support for TreeView has not yet been implemented)</h4>
 <h3 id="properties">Properties</h3>
 <table>
 <thead>
@@ -113,6 +114,14 @@
 <tr class="odd">
 <td>Locked</td>
 <td>Gets or sets a value (true/false) indicating whether the control can be moved or resized.</td>
+</tr>
+<tr class="even">
+<td>Node</td>
+<td>Gets or sets properties of an TreeNode <a href="#wfxTreeNode">wfxTreeNode</a> object</td>
+</tr>
+<tr class="odd">
+<td>Nodes</td>
+<td>Gets or sets properties of an TreeNode <a href="#wfxTreeNodeCollection">wfxTreeNodeCollection</a> collection object</td>
 </tr>
 <tr class="even">
 <td>Parent</td>
@@ -369,8 +378,20 @@
 <td>Gets or sets a value (32-bit) associated with the node. This value can be used by the user for whatever purpose necessary.</td>
 </tr>
 <tr class="odd">
+<td>ToolTipText</td>
+<td>Gets or sets ToolTip text that will display when the mouse pointer moves over this TreeNode.</td>
+</tr>
+<tr class="even">
 <td>pTreeView</td>
 <td>A pointer to the main wfxTreeView class.</td>
+</tr>
+<tr class="odd">
+<td>Node</td>
+<td>Gets or sets properties of an TreeNode <a href="#wfxTreeNode">wfxTreeNode</a> object</td>
+</tr>
+<tr class="even">
+<td>Nodes</td>
+<td>Gets or sets properties of an TreeNode <a href="#wfxTreeSubNodeCollection">wfxTreeSubNodeCollection</a> collection object</td>
 </tr>
 </tbody>
 </table>
@@ -454,13 +475,6 @@
 </tr>
 </tbody>
 </table>
-<h5 id="controlborderstyle">ControlBorderStyle</h5>
-<pre><code>Enum ControlBorderStyle
-   None  = 1
-   FixedSingle  
-   Fixed3D 
-End Enum
-</code></pre>
 <h1 id="how-to-use-the-treeview">How to use the TreeView</h1>
 <h2 id="adding-root-and-children-nodes">Adding root and children nodes</h2>
 <p>The following example will create four root nodes. The fourth root node (Project 4), will have several children nodes. If the TreeView has the Sorted property set to True then the nodes and children nodes will automatically be sorted when they are added to the control.</p>
@@ -480,7 +494,162 @@ for i as long = 1 to 3
    next
 next
 </code></pre>
-<h2></h2>
+<p>The above example just adds a text description to each new TreeNode. You can also specifiy an optional 32-bit Long integer that you can use for whatever purpose you wish.</p>
+<pre><code>frmMain.TreeView1.GetSelectedNode.Nodes.Add( &quot;New Node&quot;, 10232 )
+</code></pre>
+<h2 id="deleting/removing-a-treenode">Deleting/Removing a TreeNode</h2>
+<pre><code>' The following removes the first node off of the root using the collection:
+frmMain.TreeView1.Nodes.Remove(0)
+
+' Remove the node using the TreeNode Remove method:
+frmMain.TreeView1.Node(0).Remove
+
+' -or- (notice the use of ByRef)
+Dim ByRef TreeNode = frmMain.TreeView1.Node(0)
+TreeNode.Remove
+
+' Every node also has child node collections, so to remove the first child node of the first root node then do this:
+frmMain.TreeView1.Node(0).Nodes.Remove(0)
+
+' Remove the currently selected node
+frmMain.TreeView1.SelectedNode.Remove
+</code></pre>
+<h2 id="display-a-popup-menu-when-right-click-on-a-treenode">Display a Popup Menu when Right Click on a TreeNode</h2>
+<pre><code>Function frmMain_TreeView1_MouseDown( ByRef sender As wfxTreeView, ByRef e As EventArgs ) As LRESULT
+   
+   if e.RButton then
+      ' Determine if we have clicked on a TreeNode
+      dim as wfxPoint wpt = e.pt
+      wpt.Convert( frmMain.TreeView1.hWindow )
+      
+      ' Only continue if the TreeNode is valid
+      dim byref TreeNode as wfxTreeNode = sender.GetNodeAt( wpt )
+      if TreeNode.hNode = 0 then exit function
+      
+      ' Ensure that the node right clicked on is now selected
+      TreeNode.Selected = true 
+      
+      dim as wfxPopupMenu PopMenu
+      PopMenu.AddItem( &quot;Menu Option 1&quot;, 1 )
+      PopMenu.AddItem( &quot;Menu Option 2&quot;, 2 )
+      PopMenu.AddItem( &quot;Menu Option 3&quot;, 3 )
+      PopMenu.AddSeparator
+      PopMenu.AddItem( &quot;Menu Option 4&quot;, 4 )
+      
+      ' Show the popup menu (need to use screen coordinates rather than client coordinates)
+      dim as long nResult = PopMenu.Show( sender.hWindow, e.x, e.y )
+      
+      AfxMsg( &quot;You selected menu option: &quot; &amp; nResult )
+      
+      select case nResult
+         case 1
+         case 2
+         case 3
+         case 4   
+      end select
+   end if
+   
+   Function = 0
+End Function
+</code></pre>
+<h2 id="treeview-sorting">TreeView Sorting</h2>
+<p>You can specify that the all nodes in the TreeView are automatically sorted whenever a node is added or inserted into the tree.</p>
+<pre><code>frmMain.TreeView1.Sorted = true
+</code></pre>
+<p>If the tree is not sorted, you can manually make a call to the sort method to sort all of the nodes.</p>
+<pre><code>frmMain.TreeView1.Sort
+</code></pre>
+<p>If the tree's sorting is False, you can manually sort individual nodes (and their children nodes).</p>
+<pre><code>frmMain.TreeView1.GetSelectedNode.SortChildren
+' -or-
+frmMain.TreeView1.Node(nIndex).SortChildren
+</code></pre>
+<h2 id="actions-on-a-treenode">Actions on a TreeNode</h2>
+<pre><code>' Remember, you can retrieve a reference to the TreeNode rather than always having to access the node through the collection
+Dim ByRef TreeNode = frmMain.TreeView1.Node(nIndex)
+
+' Set the text for a node
+frmMain.TreeView1.Node(nIndex).Text = &quot;New Node Text&quot;
+
+' Set the ToolTip text that displays when the mouse passes over the node
+frmMain.TreeView1.Node(nIndex).TooTipText = &quot;This is the tooltip&quot;
+
+' Make the specified node the Selected Node
+frmMain.TreeView1.Node(nIndex).Selected = true
+
+' Check the checkbox for the node (if CheckBox style is enabled for the TreeVie)
+frmMain.TreeView1.Node(nIndex).Checked = true
+
+' Expand the TreeNode
+frmMain.TreeView1.Node(nIndex).Expand
+
+' Expand the TreeNode and all of it's children nodes
+frmMain.TreeView1.Node(nIndex).ExpandAll
+
+' Ensure that the TreeNode is visible
+frmMain.TreeView1.Node(nIndex).EnsureVisible
+
+' Retrieve the handle to the node (needed if you want to manipulate the node using Windows API functions)
+Dim As HTREEITEM hNode = frmMain.TreeView1.Node(nIndex).hNode 
+</code></pre>
+<h2 id="searching-entire-treeview">Searching entire TreeView</h2>
+<p>Because a TreeView is nothing more than a collection of nodes and child nodes, you can use a recursive approach to search the entire TreeView.</p>
+<pre><code>function SearchTreeView( byref ParentNode as wfxTreeNode, byval wszSearchText as CWSTR ) as boolean
+   ' Do we have a match?
+   if ParentNode.Text = wszSearchText then 
+      ' Text was matched. Do whatever we need to do to the node.
+      ' For example, set the node to be the selected node.
+      ParentNode.Selected = true
+      ParentNode.EnsureVisible 
+      return true   ' cancel any further searching
+   end if
+   
+   ' Recursively search any subnodes of this TreeNode
+   for i as long = 0 to ParentNode.Nodes.count - 1
+      SearchTreeView( ParentNode.Node(i), wszSearchText )
+   next      
+   function = 0
+end function
+
+' Start our search by iterating the root nodes
+dim as CWSTR wszSearchText = &quot;Sub Sub Project File1&quot;
+for i as long = 0 to frmMain.TreeView1.Nodes.count - 1
+   if SearchTreeView( frmMain.TreeView1.Node(i), wszSearchText ) then exit for
+next
+</code></pre>
+<h2 id="reducing-screen-flicker">Reducing screen flicker</h2>
+<p>You can reduce screen flicker when adding bulk amount of nodes by wrapping the code in BeginUpdate and EndUpdate.</p>
+<pre><code>frmMain.TreeView1.BeginUpdate
+   
+dim as long root
+For i as long = 1 to 10000
+   root = frmMain.TreeView1.Nodes.Add(&quot;Node #&quot; &amp; i)
+Next
+   
+frmMain.TreeView1.EndUpdate
+</code></pre>
+<h2 id="canceling-an-action-on-a-treeview">Canceling an action on a TreeView</h2>
+<p>Some actions on a TreeView are allowed to be canceled. For example, when navigating from node to node, events are fired. In your code, you have the ability to stop the movement from the current node to the new node. To cancel an action you simply need to set e.Cancel = True prior to returning from the event handler (alternatively, you can set the event handler itself to return False). You can only cancel an action in a &quot;Before&quot; handler.</p>
+<p>Examples:</p>
+<pre><code>Function frmMain_TreeView1_BeforeSelect( ByRef sender As wfxTreeView, ByRef e As EventArgs ) As LRESULT
+   ? &quot;BeforeSelect: &quot;; sender.TreeNode.Text
+   e.Cancel = true
+   Function = 0
+End Function
+
+Function frmMain_TreeView1_BeforeExpand( ByRef sender As wfxTreeView, ByRef e As EventArgs ) As LRESULT
+   ? &quot;BeforeExpand: &quot;; sender.TreeNode.Text
+   ' e.Cancel = true
+   Function = true  ' &lt;-- same effect as e.Cancel = True
+End Function
+
+Function frmMain_TreeView1_BeforeCollapse( ByRef sender As wfxTreeView, ByRef e As EventArgs ) As LRESULT
+   ? &quot;BeforeCollapse: &quot;; sender.TreeNode.Text
+   e.Cancel = true
+   Function = 0
+End Function
+</code></pre>
+<p>In the above examples, notice the use of the property &quot;TreeNode&quot; of the sender object. This is a special property that represents the TreeNode that is currently being acted upon. This can be different than the SelectedNode TreeNode (especially if a node is being expanded or collapsed programmatically).</p>
 </body>
 </html>
 

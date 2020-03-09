@@ -1,6 +1,6 @@
-# Fonts
+# Fonts (wfxFont)
 
-Internally, the visual designer handles creating and assigning fonts tot he various controls being used in your application. However, there may come a time when you need to create and assign fonts via your code. WinFBE creates fonts that are high dpi aware meaning that they scale correctly even on monitors that have very high resolutions.
+Internally, the visual designer handles creating and assigning fonts to the various controls being used in your application. However, there may come a time when you need to create and assign fonts via your code. WinFBE creates fonts that are high dpi aware meaning that they scale correctly even on monitors that have very high resolutions.
 
 #### Creating and assigning a new font
 

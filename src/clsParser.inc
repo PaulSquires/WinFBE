@@ -323,7 +323,8 @@ function clsParser.parseVariableDefinitions() as boolean
    ' DIFFERENT WAYS TO DIMENSION VARIABLES
    ' dim shared va1 as long
    ' dim shared as long var1, var2, var3
-   ' dim va1 as long
+   ' dim var1 as long
+   ' dim byref var1 as 
    ' dim as long var1, var2, var3
    ' As Long var1, var2, var3
    ' As Long Ptr var1, var2, var3
@@ -335,6 +336,8 @@ function clsParser.parseVariableDefinitions() as boolean
 
    if left(this.st_ucase, 11) = "DIM SHARED " THEN
       sTemp = mid(this.st, 12)
+   elseif left(this.st_ucase, 10) = "DIM BYREF " THEN
+      sTemp = mid(this.st, 11)
    elseif left(this.st_ucase, 4) = "DIM " THEN
       sTemp = mid(this.st, 5)
    elseif left(this.st_ucase, 13) = "REDIM SHARED " THEN

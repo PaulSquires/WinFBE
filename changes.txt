@@ -1,5 +1,13 @@
-Version 2.0.8
+Version 2.0.8 (March 9, 2020)
+Editor:
+- Fixed: Corrected internal parser to recognize byref variable declareations: "dim byref var1 as".
 - Fixed: DShow_PlayClip example project was corrupted.
+Visual Designer:
+- Added: TreeView control.
+- Added: wfxPopupMenu class.
+- Fixed: Label text was limited to MAX_PATH characters. Code changed to allow unlimited characters.
+- Fixed: WM_DROPFILES message was only being handled by the Form. Any controls with AllowDrop = True are now correctly handled.
+- Fixed: Form now has its own Text property handlers because the base wfxControl version calls AfxRedrawWindow and that tends to hide existing Frame controls.
 
 Version 2.0.7 (March 2, 2020)
 - Added: Checks to detect multiple calls to the Application.Run function for visual designer projects. Warning shown on compile.

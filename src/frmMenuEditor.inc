@@ -181,11 +181,14 @@ private Function frmMenuEditor_GenerateMenuItemName( byval nCurSel as long ) As 
          nextSeperator = nextSeperator + 1
          wszName = "mnuSep" & nextSeperator
          For i as long = 0 To ubound(gMenuItems) - 1
-            If UCase(gMenuItems(i).wszName ) = UCase(wszName) Then continue do
+            If UCase(gMenuItems(i).wszName) = UCase(wszName) Then continue do
          Next                       
-      Loop until bFound = false
+         if bFound = false then exit do
+      Loop 
    Else
-      wszName = "mnu" & AfxStrRemoveAny( wszCaption, " &_-.")
+      ' The name can only be alphanumeric
+      static wszRetain as CWSTR = "abcdefghijklmnopqrstuvwxyz0123456789"
+      wszName = "mnu" & AfxStrRetainAnyI(wszCaption, wszRetain)
    End If
          
    function = wszName
@@ -653,6 +656,8 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ComboBox_AddString(hCtrl, @wstr("PgUp"))
    ComboBox_AddString(hCtrl, @wstr("PgDn"))
    ComboBox_AddString(hCtrl, @wstr("Space"))
+   ComboBox_AddString(hCtrl, @wstr("Plus"))
+   ComboBox_AddString(hCtrl, @wstr("Minus"))
     
    ComboBox_SetCurSel(hCtrl, 0)
 

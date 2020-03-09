@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>05_Fonts</title>
+  <title>07_Size</title>
   <style type="text/css">
       code{white-space: pre-wrap;}
       span.smallcaps{font-variant: small-caps;}
@@ -20,16 +20,33 @@
   
 </head>
 <body>
-<h1 id="fonts-(wfxfont)">Fonts (wfxFont)</h1>
-<p>Internally, the visual designer handles creating and assigning fonts to the various controls being used in your application. However, there may come a time when you need to create and assign fonts via your code. WinFBE creates fonts that are high dpi aware meaning that they scale correctly even on monitors that have very high resolutions.</p>
-<h4 id="creating-and-assigning-a-new-font">Creating and assigning a new font</h4>
-<pre><code>Form1.CheckBox1.Font = New wfxFont(&quot;Segoe UI&quot;, 9, FontStyles.Bold, FontCharset.Ansi)
+<h1 id="size-(wfxsize)">Size (wfxSize)</h1>
+<p>This class allows you to easily retrieve the height and width of a control. You can not use this class to set the height and width of a control.</p>
+<h4 id="creating-and-assigning-a-new-size">Creating and assigning a new size</h4>
+<pre><code>Dim sz As wfxSize
+sz.Width = 100
+sz.Height = 400
+
+Dim sz As wfxSize = frmMain.TreeView1.hWindow
+' sz.Height and sz.Width will now reflect the height and width of the control.
+
+Dim sz As wfxSize
+sz.Convert( frmMain.TreeView1.hWindow )
+' sz.Height and sz.Width will now reflect the height and width of the control.
+
 </code></pre>
-<h4 id="parameters">Parameters</h4>
-<p><strong>FontName</strong></p>
-<p><strong>FontSize</strong></p>
-<p><strong>FontStyle</strong> (use <strong>OR</strong> to combine multiple styles) ​ FontStyles.Normal ​ FontStyles.Bold ​ FontStyles.Italic ​ FontStyles.Strikeout ​ FontStyles.Underline</p>
-<p><strong>CharacterSet</strong> ​ FontCharset.Default ​ FontCharset.Ansi ​ FontCharset.Arabic ​ FontCharset.Baltic ​ FontCharset.ChineseBig5 ​ FontCharset.EastEurope ​ FontCharset.GB2312 ​ FontCharset.Greek ​ FontCharset.Hangul ​ FontCharset.Hebrew ​ FontCharset.Johab ​ FontCharset.Mac ​ FontCharset.OEM ​ FontCharset.Russian ​ FontCharset.Shiftjis ​ FontCharset.Symbol ​ FontCharset.Thai ​ FontCharset.Turkish ​ FontCharset.Vietnamese</p>
+<h4 id="convert-between-coordinates">Convert between Coordinates</h4>
+<pre><code>Function frmMain_TreeView1_MouseDown( ByRef sender As wfxTreeView, ByRef e As EventArgs ) As LRESULT
+   
+   ' The incoming e.pt is screen coordinates based. Use the Convert method
+   ' of the class to change the point relative to the TreeView window.
+   
+   dim as wfxPoint wpt = e.pt
+   wpt.Convert( frmMain.TreeView1.hWindow )
+
+   Function = 0
+End Function   
+</code></pre>
 </body>
 </html>
 

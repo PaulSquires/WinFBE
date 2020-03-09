@@ -215,30 +215,34 @@ CPowerTime_Week           CPowerTime_Day * 7
 <td>Retuns the time as a string based on the specified mask, e.g. &quot;dd-MM-yyyy&quot;.</td>
 </tr>
 <tr class="odd">
+<td><a href="#Toutc">ToUTC</a></td>
+<td>The <strong>CPowerTime</strong> object is converted to Coordinated Universal Time (UTC).</td>
+</tr>
+<tr class="even">
 <td><a href="#Today">Today</a></td>
 <td>Assigns the current local date on this computer to this <strong>CPowerTime</strong> object.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#UTCToLocal">UTCToLocal</a></td>
 <td>Converts time based on the Coordinated Universal Time (UTC) to local file time.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#WeekOne">WeekOne</a></td>
 <td>Returns the first day of the first week of the year.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#WeekNumber">WeekNumber</a></td>
 <td>Returns the week number for a given date.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#WeeksInMonth">WeeksInMonth</a></td>
 <td>Returns the number of weeks in the year.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#WeeksInYear">WeeksInYear</a></td>
 <td>Returns the number of weeks in the specefied month and year.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#Year">Year</a></td>
 <td>Returns the Year component of the <strong>CPowerTime</strong> object.</td>
 </tr>
@@ -359,7 +363,7 @@ OPERATOR &gt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
 </tbody>
 </table>
 <h1 id="addhours"><a name="AddHours"></a>AddHours</h1>
-<p>Adds the specified number of hours to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 23. You can subtract hours by using a negative number.</p>
+<p>Adds the specified number of hours to this <strong>CPowerTime</strong> object. You can subtract hours by using a negative number.</p>
 <pre><code>AddHours (BYVAL nHours AS LONG)
 </code></pre>
 <table>
@@ -377,7 +381,7 @@ OPERATOR &gt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
 </tbody>
 </table>
 <h1 id="addminutes"><a name="AddMinutes"></a>AddMinutes</h1>
-<p>Adds the specified number of minutes to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 59. You can subtract minutes by using a negative number.</p>
+<p>Adds the specified number of minutes to this <strong>CPowerTime</strong> object. You can subtract minutes by using a negative number.</p>
 <pre><code>SUB AddMinutes (BYVAL nMinutes AS LONG)
 </code></pre>
 <table>
@@ -395,7 +399,7 @@ OPERATOR &gt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
 </tbody>
 </table>
 <h1 id="addmonths"><a name="AddMonths"></a>AddMonths</h1>
-<p>Adds the specified number of months to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 12. You can subtract months by using a negative number.</p>
+<p>Adds the specified number of months to this <strong>CPowerTime</strong> object. You can subtract months by using a negative number.</p>
 <pre><code>SUB AddMonths (BYVAL nMonths AS LONG)
 </code></pre>
 <table>
@@ -413,7 +417,7 @@ OPERATOR &gt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
 </tbody>
 </table>
 <h1 id="addmseconds"><a name="AddMSeconds"></a>AddMSeconds</h1>
-<p>Adds the specified number of milliseconds to this <strong>CPowerTime</strong> object. The valid values for this member are 1 through 999. You can subtract milliseconds by using a negative number.</p>
+<p>Adds the specified number of milliseconds to this <strong>CPowerTime</strong> object. You can subtract milliseconds by using a negative number.</p>
 <pre><code>SUB AddSeconds (BYVAL nSeconds AS LONG)
 </code></pre>
 <table>
@@ -431,7 +435,7 @@ OPERATOR &gt;= (BYREF dt1 AS CPowerTime, BYREF dt2 AS CPowerTime) AS BOOLEAN
 </tbody>
 </table>
 <h1 id="addseconds"><a name="AddSeconds"></a>AddSeconds</h1>
-<p>Adds the specified number of seconds to this <strong>CPowerTime</strong> object. The valid values for this member are 0 through 59. You can subtract seconds by using a negative number.</p>
+<p>Adds the specified number of seconds to this <strong>CPowerTime</strong> object. You can subtract seconds by using a negative number.</p>
 <pre><code>SUB AddSeconds (BYVAL nSeconds AS LONG)
 </code></pre>
 <table>
@@ -1299,7 +1303,7 @@ print cft.GetFileTime
 </tbody>
 </table>
 <h1 id="weeksinyear"><a name="WeeksInYear"></a>WeeksInYear</h1>
-<p>Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53. The year must be a four figit year. If the year is omitted, the year of this <strong>CPowertime</strong> object is assumed.</p>
+<p>Returns the number of weeks in the year, where weeks are taken to start on Monday. Will be 52 or 53. The year must be a four digit year. If the year is omitted, the year of this <strong>CPowertime</strong> object is assumed.</p>
 <pre><code>FUNCTION WeeksInYear (BYVAL nYear AS LONG = 0) AS LONG
 </code></pre>
 <table>
