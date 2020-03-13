@@ -155,6 +155,8 @@ function clsParser.InspectLine() as boolean
    ' know it can not be any of these so why even waste time testing them.
    
    ' TEST FOR START OF SUB/FUNCTION
+   ' These can be part of a TYPE or standalone.
+   
    sTemp = ""
    if len(st_ucase) > 4 THEN 
       If Left(st_ucase, 7)  = "STATIC " Then
@@ -334,43 +336,52 @@ function clsParser.parseVariableDefinitions() as boolean
    dim as String sTemp, sTemp_ucase, sList
    dim as long n, n2, numParts
 
-   if left(this.st_ucase, 11) = "DIM SHARED " THEN
-      sTemp = mid(this.st, 12)
-   elseif left(this.st_ucase, 10) = "DIM BYREF " THEN
-      sTemp = mid(this.st, 11)
-   elseif left(this.st_ucase, 4) = "DIM " THEN
-      sTemp = mid(this.st, 5)
-   elseif left(this.st_ucase, 13) = "REDIM SHARED " THEN
-      sTemp = mid(this.st, 14)
-   elseif left(this.st_ucase, 15) = "REDIM PRESERVE " THEN
-      return false
-   elseif left(this.st_ucase, 6) = "REDIM " THEN 
-      if instr(this.st_ucase, " AS ")=0 then return false
-      sTemp = mid(this.st, 7)
-   elseif left(this.st_ucase, 3) = "AS " then
-      ' This type of declare syntax can only be valid inside a class/TYPE
-      ' the word following is the variable type
-      if this.action = ACTION_PARSETYPE THEN 
+   if this.action = ACTION_PARSETYPE then
+      if left(this.st_ucase, 3) = "AS " then
+         ' This type of declare syntax can only be valid inside a class/TYPE
+         ' the word following is the variable type.
+         ' As DataType fieldname [= initializer], ...
+         ' As DataType fieldname(array dimensions) [= initializer], ...
+         ' As DataType fieldname(Any [, Any...])
+         ' As DataType fieldname : bits [= initializer], ...
+         ' As DataType fieldname3, fieldname4
          sTemp = this.st
-      else
+         
+      elseif instr(this.st_ucase, " AS ") then
+         ' This is the normal way variables are defined in a TYPE. Make sure
+         ' to restrict this test to TYPES only because otherwise we'll pick up
+         ' statements like "For i As Long = 1 to 10 
+         ' fieldname1 As DataType
+         ' fieldname2 As DataType
+         sTemp = this.st
+      end if
+
+   elseif this.action = ACTION_PARSEPARAMETERS then
+      ' Sub/Function parameters appear 
+      ' MyFunc( byval fieldname1 As DataType = 0 ) As Long
+      sTemp = this.st
+      sTemp = AfxStrRemoveI(sTemp, "byval ")
+      sTemp = AfxStrRemoveI(sTemp, "byref ")
+      sTemp = AfxStrRemoveI(sTemp, "const ")
+
+   else
+      ' The following are the normal ways that variables are defined   
+      if left(this.st_ucase, 11) = "DIM SHARED " THEN
+         sTemp = mid(this.st, 12)
+      elseif left(this.st_ucase, 10) = "DIM BYREF " THEN
+         sTemp = mid(this.st, 11)
+      elseif left(this.st_ucase, 4) = "DIM " THEN
+         sTemp = mid(this.st, 5)
+      elseif left(this.st_ucase, 13) = "REDIM SHARED " THEN
+         sTemp = mid(this.st, 14)
+      elseif left(this.st_ucase, 15) = "REDIM PRESERVE " THEN
          return false
-      end if      
-   elseif instr(this.st_ucase, " AS ") then
-      ' This is the normal way variables are defined in a TYPE. Make sure
-      ' to restrict this test to types only because otherwise we'll pick up
-      ' statements like "For i As Long = 1 to 10 
-      ' This is also the way function parameters appear.
-      if this.action = ACTION_PARSETYPE THEN 
-         sTemp = this.st
-      elseif (this.action = ACTION_PARSEPARAMETERS) then
-         sTemp = this.st
-         sTemp = AfxStrRemoveI(sTemp, "byval ")
-         sTemp = AfxStrRemoveI(sTemp, "byref ")
-         sTemp = AfxStrRemoveI(sTemp, "const ")
-      else   
-         return false
-      end if      
-   end if 
+      elseif left(this.st_ucase, 6) = "REDIM " THEN 
+         if instr(this.st_ucase, " AS ") = 0 then return false
+         sTemp = mid(this.st, 7)
+      end if
+   end if
+   
 
    ' At this point the line (sTemp) has been reduced to one the two following
    ' types of declare lines, or zero length if no declare found.
@@ -378,28 +389,31 @@ function clsParser.parseVariableDefinitions() as boolean
    ' As Long Ptr var1, var2, var3
    ' var1 as Long
    ' var1 as Long = 12345    ' need to remove initializers
-   ' var1 as Long Pointer
+   ' var1 as Long Pointer    ' need to remove pointer/ptr
    if len(sTemp) = 0 THEN return false
 
    ' Remove any text and array parenthesis.
-   ' For example: "AS WString * MAX_PATH wszText=GETT("FFFF"), wszName ="TTTT""
+   ' For example: 
+   ' AS WString * MAX_PATH wszText = myFunc("FFFF"), wszName = "TTTT", myArray(5)
    sTemp = AfxStrRemove(sTemp, """", """", true ) 
    sTemp = AfxStrRemoveWithMark(sTemp, "(", ")","",true,true) 
 
    ' Remove any initializers 
    n = instr(sTemp, "=")
    if n THEN
-       sTemp = AfxStrRemoveWithMark(sTemp, "=", ",", ",", true, false) 
-       n = instr(sTemp, "=")
-       if n THEN 
-           sTemp =rtrim(left(sTemp, n-1))
-       end if
+      sTemp = AfxStrRemoveWithMark(sTemp, "=", ",", ",", true, false) 
+      n = instr(sTemp, "=")
+      if n THEN 
+         sTemp = rtrim(left(sTemp, n-1))
+      end if
    end if
    
    ' Remove all Pointer references (we don't need them)
    sTemp = AfxStrRemoveI(sTemp, " ptr")
    sTemp = AfxStrRemoveI(sTemp, " pointer")
              
+   if len(sTemp) = 0 THEN return false
+
    sTemp_ucase = ucase(sTemp)
     
    this.bIsAlias = false
@@ -407,6 +421,9 @@ function clsParser.parseVariableDefinitions() as boolean
    ' "AS Long var1, var2, var3"
    '  12345678
    if left(sTemp_ucase, 3) = "AS " THEN
+      ' Get the type of variable. If is a standard variable type then we
+      ' will only save the dim if it is part of a TYPE because those are 
+      ' the only ones that matter when doing autocomplete. 
       n = instr(4, sTemp, " ")
       this.varType = mid(sTemp, 4, n-4) 
       ' Next is a comma separated list of elements DIM'd as the datatype
@@ -422,23 +439,35 @@ function clsParser.parseVariableDefinitions() as boolean
       numParts = AfxStrParseCount(sList, ",")
       for i as long = 1 to numParts
          this.varName = trim(AfxStrParse(sList, i, ","), any " :")
-         gdb2.dbAdd( @this, DB2_VARIABLE )
+         if this.action = ACTION_PARSETYPE THEN 
+            gdb2.dbAdd( @this, DB2_VARIABLE )
+         else
+            if IsStandardDataType(this.varType) = false THEN 
+               gdb2.dbAdd( @this, DB2_VARIABLE )
+               return true
+            end if
+         end if
       NEXT
       return true
    
    elseIF instr(sTemp, ",") THEN
       'For example: "S1 AS Long , S2 AS BOOLEAN , ZZ AS WString * MAX_PATH"
+      ' This type of dim will not appear in TYPE structures.
       numParts = AfxStrParseCount(sTemp, ",")
       for i as long = 1 to numParts
          sList= trim(AfxStrParse(sTemp, i, ","), any " :")
          this.varName = AfxStrParse(sList, 1, " ") 
          this.varType = trim(AfxStrParse(sList, 3, " "), any " :") 
-         gdb2.dbAdd( @this, DB2_VARIABLE )
+         if IsStandardDataType(this.varType) = false THEN 
+            gdb2.dbAdd( @this, DB2_VARIABLE )
+            return true
+         end if
       NEXT
       return true
    
    else
       ' "var1 AS Long"
+      ' This type of dim can appear in TYPE structures.
       this.varName = AfxStrParse(sTemp, 1, " ") 
       this.varType = trim(AfxStrParse(sTemp, 3, " "), any " :") 
       if this.action = ACTION_PARSETYPE THEN 
@@ -462,13 +491,11 @@ function clsParser.parseTYPE() as boolean
    if gConfig.CodeTips = false then return false
 
    ' We are inside of a TYPE structure. Need to examine all lines that are marked
-   ' as public in order to construct the "|" delimited list of TYPE elements (variables and functions).
+   ' as public in order to identify the TYPE elements.
    if this.action <> ACTION_PARSETYPE THEN return false
 
-   ' This function will parse for SUB/FUNCTIONS; Any variables will be identified through
+   ' This function will also parse for SUB/FUNCTIONS; Any variables will be identified through
    ' the subsequent parser calls to clsParser.parseVariableDefinitions
-   
-   dim as string sTemp
    
    if st_ucase[0] = 35 THEN return true   ' skip any embedded conditional "#" defines
    
@@ -482,25 +509,13 @@ function clsParser.parseTYPE() as boolean
          this.bInTypePublic = true: return true
       END IF
    end if
-
    
-   ' Handle any DECLARE's for TYPEs methods and properties. We only need to retrieve the
-   ' function name here because the parameter list would have been picked up elsewhere
-   ' during the parse of the action FUNCTION type / END FUNCTION code block.
-   ' We don't save any CONSTRUCTOR or DESTRUCTOR declares.
-   if len(st_ucase) > 12 THEN 
-      if left(st_ucase, 17) = "DECLARE FUNCTION " THEN
-         sTemp = mid(st, 18)
-      elseif left(st_ucase, 12) = "DECLARE SUB " THEN
-         sTemp = mid(st, 13)
-      elseif left(st_ucase, 17) = "DECLARE PROPERTY " THEN
-         sTemp = mid(st, 18)
-      end if
-   END IF
-
-   if len(sTemp) then  ' we have found a sub/function definition
-      return true
-   END IF
+   ' Are we looking a declare line in the TYPE structure? If yes, then signal to
+   ' the calling code that we can continue onwards to the next line of code and
+   ' bypass any further processing of this line. The actual names and parameters
+   ' are parsed later when the parser encounters the actual body code of the type/class.
+   ' Simply look for 'DECLARE' because that would handle FUNCTION/SUB/PROPERTY/OPERATOR.
+   if left(st_ucase, 8) = "DECLARE " THEN return true
 
    return false
 end function

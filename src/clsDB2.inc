@@ -21,40 +21,50 @@
 ' Every variable name is prefaced with its owner's name in order to differentiate
 ' it from other variables (Global variables have no owner name). Usually owners are class/TYPEs.
 ' The incoming parameter list for a Function is also processed as a variable.
+'
 ' Therefore, the format is:  <OwnerName>.<FunctionName>.<VariableName>
 '
 ' eg.  
 '      TYPE MyType
 '         PUBLIC:
-'            st As String
+'            st As String               ' ElementName = MyType..st  ElementValue = String
+'            controls As clsCollection  ' ElementName = MyType..controls  ElementValue = clsCollection
+
+'            ' The Declares in a TYPE would not be parsed. They are picked up elsewhere
+'            ' in the source code when the Type body code is found.
 '            Declare Function CalculateAmount( ByVal nDollars As Single ) As Single
 '      END TYPE
 '
+' eg.
 '      DIM SHARED AS MyType g     '   ..g     ElementName = ..g   ElementValue = MyType
 '
 ' eg. (Function as part of TYPE)
-'      Function MyType.CalculateAmount( ByVal nDollars As Single ) As Single  
-'         ' ElementName = MyType.CalculateAmount.nDollars   ElementValue = Single
-'         Dim n As Long        ' ElementName = MyType.CalculateAmount.n   ElementValue = Long
+'      Function MyType.CalculateAmount( ByVal nDollars As Single, myTypeVar as MYTYPE ) As Single  
+'         ' The incoming nDollars would be discarded by the parser
+'         ' MyTypeVar would be stored as:
+'         '    ElementName = MyType.CalculateAmount.myTypeVar   ElementValue = MYTYPE
+'         Dim n As Long        ' This would be discarded by the parser
 '         Dim rc As RECT       ' ElementName = MyType.CalculateAmount.rc  ElementValue = RECT
 '      End Function
 '
 ' eg. (Standalone Function)
 '      Function MyFunction( ByVal p As MyType Ptr ) As Long   ' ElementName = .MyFunction.p   ElementValue = MyType
-'         Dim n As Long        ' ElementName = .MyFunction.n   ElementValue = Long
+'         Dim n As Long        ' This would be discarded by the parser
 '         Dim m As MyType      ' ElementName = .MyFunction.m   ElementValue = MyType
 '      End Function
 '
 '
 ' FUNCTION NAMES
 ' ==============
-'    ElementName = Function name    (can also be fully qualified if from a TYPE.  eg.  MyType.CalculateAmount
+'    ElementName = Function name  
+'                  (can also be fully qualified if from a TYPE.  eg. MyType.CalculateAmount )
 '    ElementValue = The Calltip
 '
 ' TYPE STRUCTURES
 ' ===============
 '    ElementName  = The name of the CLASS/TYPE.
 '    ElementValue = The true name of the CLASS/TYPE (b/c ElementName may be an ALIAS)
+'    TypeExtends  = The TYPE is extended from this TYPE
 '
 ' ENUM STRUCTURES
 ' ===============
@@ -66,6 +76,7 @@
 '    ElementValue = The text of the TODO as found in code.
 '
 ' 
+
 
 #include once "clsDB2.bi"
 #include once "clsParser.bi"
@@ -154,7 +165,7 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
                .ElementName = parser->funcName & "." & parser->varName
             end if
             .ElementValue = parser->varType 
-            .IsPrivate = iif(parser->bInTypePublic, false, true)
+            .IsPublic     = parser->bInTypePublic
             .IsWinApi     = parser->IsWinApi
             if .ElementName = "" then exit function
 
@@ -350,22 +361,6 @@ end function
 
 ''
 ''
-function clsDB2.dbFilenameExists( byref sFilename as CWSTR ) as boolean
-   ' Search to see if the incoming filename has already been parsed.
-   dim pData as DB2_DATA ptr
-   dim as CWSTR wszFilename = ucase(sFilename)
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext()
-      if pData = 0 THEN exit do
-      if wszFilename = ucase(pData->fileName) THEN return true
-   loop
-   return false
-end function
-
-
-''
-''
 function clsDB2.dbDebug() as long
    dim pStream as CTextStream
    pStream.Create("_debug.txt")
@@ -378,9 +373,10 @@ function clsDB2.dbDebug() as long
    do 
       pData = this.dbGetNext
       if pData = 0 THEN exit do
-      if pData->projectIndex = -1 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_TYPE then continue do
+      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
+      pStream.WriteLine "   CLASSES/TYPES"
       pStream.WriteLine "   fileName: " & pData->fileName
       pStream.WriteLine "   ElementName: " & pData->ElementName
       pStream.WriteLine "   ElementValue: " & pData->ElementValue
@@ -397,14 +393,15 @@ function clsDB2.dbDebug() as long
    do 
       pData = this.dbGetNext
       if pData = 0 THEN exit do
-      if pData->projectIndex = -1 THEN continue do
-      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_FUNCTION then continue do
+      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
+      pStream.WriteLine "   FUNCTIONS"
       pStream.WriteLine "   fileName: " & pData->fileName
       pStream.WriteLine "   ElementName: " & pData->ElementName
       pStream.WriteLine "   ElementValue: " & pData->ElementValue
       pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
       pStream.WriteLine ""
    loop
    pStream.WriteLine ""
@@ -417,19 +414,21 @@ function clsDB2.dbDebug() as long
    do 
       pData = this.dbGetNext
       if pData = 0 THEN exit do
-      if pData->projectIndex = -1 THEN continue do
-      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_SUB then continue do
+      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
+      pStream.WriteLine "   SUBS"
       pStream.WriteLine "   fileName: " & pData->fileName
       pStream.WriteLine "   ElementName: " & pData->ElementName
       pStream.WriteLine "   ElementValue: " & pData->ElementValue
       pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
       pStream.WriteLine ""
    loop
    pStream.WriteLine ""
    pStream.WriteLine ""
    pStream.WriteLine ""
+
 
    ' PRINT ALL PROPERTIES
    pStream.WriteLine "PROPERTIES"
@@ -437,19 +436,21 @@ function clsDB2.dbDebug() as long
    do 
       pData = this.dbGetNext
       if pData = 0 THEN exit do
-      if pData->projectIndex = -1 THEN continue do
-      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_PROPERTY then continue do
+      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
+      pStream.WriteLine "   PROPERTIES"
       pStream.WriteLine "   fileName: " & pData->fileName
       pStream.WriteLine "   ElementName: " & pData->ElementName
       pStream.WriteLine "   ElementValue: " & pData->ElementValue
       pStream.WriteLine "   lineNum: " & pData->nLineNum
+      pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
       pStream.WriteLine ""
    loop
    pStream.WriteLine ""
    pStream.WriteLine ""
    pStream.WriteLine ""
+
 
    ' PRINT ALL VARIABLES
    pStream.WriteLine "VARIABLES"
@@ -457,14 +458,14 @@ function clsDB2.dbDebug() as long
    do 
       pData = this.dbGetNext
       if pData = 0 THEN exit do
-      if pData->projectIndex = -1 THEN continue do
-      if pData->projectIndex = -2 THEN continue do
       if pData->deleted = true THEN continue do
       if pData->id <> DB2_VARIABLE then continue do
+      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
+      pStream.WriteLine "   VARIABLES"
       pStream.WriteLine "   fileName: " & pData->fileName
       pStream.WriteLine "   ElementName: " & pData->ElementName
       pStream.WriteLine "   ElementValue: " & pData->ElementValue
-      pStream.WriteLine "   IsPrivate: " & pData->IsPrivate
+      pStream.WriteLine "   IsPublic (TYPE elements): " & pData->IsPublic
       pStream.WriteLine "   lineNum: " & pData->nLineNum
       pStream.WriteLine ""
    loop

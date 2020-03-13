@@ -52,7 +52,6 @@ private function FormatCodetip( byval strCodeTip as string ) as STRING
 end function
 
 
-
 ' ========================================================================================
 ' Determine what variable relates to the "With" statement
 ' ========================================================================================
@@ -75,154 +74,12 @@ private function DetermineWithVariable( byval pDoc as clsDocument ptr) as string
 end function    
 
 
-       
+
 ' ========================================================================================
 ' Take the current line and determine what variable is being referenced.
 ' Dereferences expressions like:  g.MyFunction, g.ot.rc, g->MyFunction
 ' Used for determining what popup autocomplete list or codetip to display.
 ' ========================================================================================
-'private function DereferenceLine( byval pDoc as clsDocument ptr, _
-'                                  byval sTrigger as String, _
-'                                  byval nPosition as long _
-'                                  ) as DB2_DATA ptr
-'   if pDoc = 0 THEN exit function
-    
-'   dim pData as DB2_DATA ptr
-'   dim pDataTYPE as DB2_DATA ptr
-'   dim pLastData as DB2_DATA ptr
-    
-'   dim as long i, nTotalElements, nCurElement
-'   dim as ClassProperty nGetSet
-'   dim as string sElement, sVarName, sCurrentFunction, sTypeName, sLocal, sGlobal, sTemp
-'   dim as Boolean bIsTHIS
-
-'   dim as hwnd hEdit   = pDoc->hWndActiveScintilla
-'   dim as long curPos  = nPosition   
-'   dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
-'   dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
-    
-'   ' Comment out any comment line so the popup isn't activated when in a comment. 
-'   sLine = MaskStringCharacters(sLine)
-'   sLine = RemoveComments(sLine)
-
-'   ' Test to ensure that the incoming sTrigger character still exists after
-'   ' the commenting of the line. If it does then we know that the line
-'   ' is good and we can proceed to dereference elements on the line.
-'   ' The identifer that triggers an autocomplete list for a TYPE variable
-'   ' is either a dot "." or a pointer dereference "->"
-'   if right(sLine, len(sTrigger)) <> sTrigger THEN exit function
-'   sLine = rtrim(sLine, sTrigger)
-
-
-'   ' Proceed to parse the line. Find the beginning of the line in order to
-'   ' isolate the expression to dereference. The expression might contain an
-'   ' array reference so that would have to be removed, however the "(" can
-'   ' also signify the start position of the expression. For example:
-'   ' st = myFunction(myvar(3).myvalue)
-'   ' Simply reverse searching for the "(" would fail because the array "()"
-'   ' also needs to be taken into account. Therefore, search in reverse and
-'   ' take note of when the ")" is encountered in order to then match it with
-'   ' an "(".
-'   dim as long nStart, nEnd
-'   do
-'      nEnd = InStrRev(sLine, ")", -1)
-'      if nEnd = 0 then exit do
-'      nStart = InStrRev(sLine, "(", nEnd)
-'      if nStart = 0 then exit do
-'      ' Remove any array parenthesis.
-'      sLine = left(sLine, nStart-1) & mid(sLine, nEnd+1)
-'   LOOP
-'   ' All of the array parenthesis should now be removed so now we can simply
-'   ' search for the start of the line.
-'   i = InStrRev(sLine, any " (*[&@", -1)
-'   if i THEN sLine = mid(sLine, i+1)
-    
-'   ' Need to check if this line is part of a WITH / END WITH block.
-'   if (len(sLine) = 0) or (left(sLine, 1) = ".") then
-'      sLine = DetermineWithVariable(pDoc) & sLine
-'   END IF
-    
-'   ' Make it easier to parse by converting line to uppercase
-'   sLine = ucase(sLine)
-    
-'   ' Convert all "->" pointer references to "." dots to make parsing easier
-'   sLine = AfxStrReplace(sLine, "->", ".")
-'   nTotalElements = AfxStrParseCount(sLine, ".")
-'   nCurElement = 1
-    
-'   ' Determine what sub/function (if any) that we are in. This function will
-'   ' retrieve the current standalone function, or the fully qualified name of 
-'   ' a class/type function.
-'   ' eg.   clsType.MyFunctionName      ' inside a class/type function
-'   ' eg.   MyFunctionName              ' standalone function
-'   pDoc->GetCurrentFunctionName( sCurrentFunction, nGetSet )
-
-'   do until nCurElement > nTotalElements
-'      sElement = AfxStrParse(sLine, nCurElement, ".")   ' p | MyFunction
-
-'      ' SEARCH FOR MATCHING VARIABLE NAME
-'      ' If the special keyword "THIS" is used then convert it to the function name
-'      if nCurElement = 1 then
-'         if ucase(sElement) = "THIS" then
-'            sElement = AfxStrParse(sCurrentFunction, 1, ".")
-'            bIsTHIS = true
-'         else
-'            bIsTHIS = false
-'         END IF
-'      END IF
-'      sVarName = sVarName & sElement
-
-'      '' ATTEMPT TO MATCH A FUNCTION NAME
-'      ' eg.    MyFunction
-'      ' eg.    mytype.MyFunction
-'      pData = gdb2.dbFindFunction( sVarName )
-'      if pData then return pData
-'      pData = gdb2.dbFindSub( sVarName )
-'      if pData then return pData
-'      pData = gdb2.dbFindProperty( sVarName )
-'      if pData then return pData
-                  
-'      '' ATTEMPT TO MATCH LOCAL VARIABLE
-'      ' <FunctionName>.<Element>
-'      ' <TYPEname>.<FunctionName>.<Element>
-'      sLocal = sCurrentFunction & "." & sVarName
-'      if AfxStrTally(sLocal, ".") = 1 then sLocal = "." & sLocal
-
-'      pData = gdb2.dbFindVariable(sLocal)
-'      if pData = 0 THEN 
-'         '' ATTEMPT TO MATCH ON A TYPE ELEMENT
-'         if pLastData then
-'            sTemp = pLastData->ElementValue & ".." & sElement
-'         else
-'            sTemp = sVarName & "." & sElement
-'         end if
-'         pData = gdb2.dbFindVariable(sTemp)
-          
-'         '' ATTEMPT TO MATCH GLOBAL VARIABLE   
-'         if pData = 0 then
-'            sGlobal = ".." & sElement     ' Global variable format ..<ElementName>
-'            pData = gdb2.dbFindVariable(sGlobal)
-'         end if
-'      END IF    
-           
-'      '' ATTEMPT TO MATCH ON A TYPE NAME
-'      if pData then 
-'         sTypeName = pData->ElementValue
-'      else
-'         sTypeName = sVarName   
-'      END IF
-'      pDataTYPE = gdb2.dbFindTYPE(sTypeName)
-'      if pDataTYPE then pLastData = pDataTYPE
-       
-'      sVarName = sTypeName & "."
-'      nCurElement = nCurElement + 1
-'   loop
-    
-'   if pLastData then pLastData->IsTHIS = bIsThis
-'   return pLastData
-       
-'END FUNCTION
-
 private function DereferenceLine( byval pDoc as clsDocument ptr, _
                                   byval sTrigger as String, _
                                   byval nPosition as long _
@@ -340,7 +197,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
       if pData = 0 THEN 
          '' ATTEMPT TO MATCH ON A TYPE ELEMENT
          if pLastData then
-            sTemp = pLastData->ElementValue & ".." & sElement
+            sTemp = AfxStrParse(pLastData->ElementValue, 1, "|") & ".." & sElement
          else
             sTemp = sVarName & "." & sElement
          end if
@@ -354,11 +211,20 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
       END IF    
           
       '' ATTEMPT TO MATCH ON A TYPE NAME
-      if pData then 
-         sTypeName = pData->ElementValue
+      if pData then
+         ' If we are attempting to activate a CodeTip via "(" then the codetip
+         ' for a TYPE function element is stored in Element Value. Return the
+         ' pData now rather than continuing to then try to do a lookup for a
+         ' TYPE that will fail (because ElementValue is not a TYPE in this case,
+         ' but rather a codetip).
+         if nCurElement = nTotalElements then return pData
+         ' If an embedded "|" exists then this ElementValue holds a forward
+         ' TYPE reference as well as the CodeTip.
+         sTypeName = AfxStrParse(pData->ElementValue, 1, "|")
       else
          sTypeName = sVarName   
       END IF
+
       pDataTYPE = gdb2.dbFindTYPE(sTypeName)
       if pDataTYPE then pLastData = pDataTYPE
       
@@ -392,8 +258,11 @@ private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
    pData = DereferenceLine(pDoc, "(", curPos-1)
    if pData then
       select case pData->id 
-         CASE DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
+         CASE DB2_FUNCTION, DB2_SUB, DB2_PROPERTY, DB2_VARIABLE
+            ' If an embedded "|" exists then this ElementValue holds a forward
+            ' TYPE reference as well as the CodeTip.
             codeTip = pData->ElementValue
+            if instr(codeTip, "|") then codeTip = AfxStrParse(codeTip, 2, "|")
       end select
    END IF
    if len(codeTip) THEN 
@@ -457,7 +326,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    
    dim as long curPos, nCol, nLenMatchWord, ub, iNextType
    dim as string sWord, sList, st, sDot, sLookFor, sElement, sProp
-   dim as Boolean bIsTHIS, bTypesOnly
+   dim as Boolean bIsTHIS, bTypesOnly, bTypesNotPreloaded
    
    dim pDoc as clsDocument ptr
    dim pData as DB2_DATA ptr
@@ -513,10 +382,12 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       elseif right(sLine_ucase, 12) = "CONSTRUCTOR " then 
          ' okay
          bTypesOnly = true
+         bTypesNotPreloaded = true  ' only TYPES that are in our source.
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       elseif right(sLine_ucase, 11) = "DESTRUCTOR " then 
          ' okay
          bTypesOnly = true
+         bTypesNotPreloaded = true
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       elseif right(sLine_ucase, 9) = " EXTENDS " then 
          ' okay
@@ -529,7 +400,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          sDot = "->"   
          pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
       END IF
-      ' Check if it is a "DIM i AS" type of statement
+      ' Check if it is a "FOR i AS LONG" type of statement
       if instr(sLine, "FOR ") then 
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
@@ -569,6 +440,12 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
             if pData->id = DB2_TYPE THEN
                if bTypesOnly then
                   if pData->IsEnum then continue do
+                  if bTypesNotPreloaded then
+                     ' Only look at TYPES that are loade dinto the editor. These would
+                     ' be entries that have a Filename attached to them. Preloaded TYPES
+                     ' from WinAPI or Afx do not have Filenames.
+                     if len(pData->fileName) = 0 then continue do
+                  end if
                END IF
                st = trim(AfxStrParse(pData->ElementValue, 1, " "))
                if nLenMatchWord then
@@ -596,8 +473,10 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                bIsTHIS = pData->IsTHIS
                
                ' Construct the popup list by retrieving all elements
-               ' related to the TYPE name.
-               sLookFor = ucase(pData->ElementValue)
+               ' related to the TYPE name. We get the first "|" because it is
+               ' possible that the ElementValue holds both the TYPE forward
+               ' reference as well as a CodeTip.
+               sLookFor = AfxStrParse(pData->ElementValue, 1, "|")
    
                ' Lookup the TYPE because we need to ensure that we are using
                ' the true TYPE and not the ALIAS name. When the TYPE is found, the
@@ -611,7 +490,8 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                   if pData = 0 then exit do
                   ub = ubound(AllTypes) + 1
                   redim preserve AllTypes(ub)
-                  AllTypes(ub) = ucase(pData->ElementValue) ' the true TYPE associated with the variable
+                  ' the true TYPE associated with the variable
+                  AllTypes(ub) = ucase(AfxStrParse(pData->ElementValue, 1, "|"))
                   sLookFor = pData->TypeExtends
                loop 
                iNextType = lbound(AllTypes)
@@ -635,7 +515,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                                  ' Only include PUBLIC elements of the TYPE unless the flag has
                                  ' been set that the THIS keyword was used.
                                  if bIsTHIS = false then
-                                    if pData->IsPrivate then continue do
+                                    if pData->IsPublic = false then continue do
                                  END IF
                                  if nLenMatchWord then
                                     if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
@@ -657,11 +537,10 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                               
                               ' If this is a Property then we need to append either (Get) or (Set) to
                               ' the name in order to differentiate them in any autocomplete popup.
+                              sProp = ""
                               if pData->id = DB2_PROPERTY THEN 
-                                 sProp = trim(ucase(AfxStrParse(pData->ElementValue, 2, ")" )))
-                                 sProp = iif( left(sProp, 3) = "AS ", " (Get)", " (Set)")
-                              else
-                                 sProp = ""
+                                 if pData->GetSet = ClassProperty.Getter then sProp = " (Get)"
+                                 if pData->GetSet = ClassProperty.Setter then sProp = " (Set)"
                               END IF
                               
                               if nLenMatchWord then

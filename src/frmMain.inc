@@ -231,7 +231,7 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
          ' In the DereferenceLine function any "->" are converted to "." for simplicity.
          pData = DereferenceLine( pDoc, sTrigger, wordStartPos - 1 )
          if pData then 
-            sFunctionName = pData->ElementName & "." & sFunctionName
+            sFunctionName = AfxStrParse(pData->ElementValue, 1, "|") & "." & sFunctionName
             ' Set pData to null because it currently points at the TYPE definition and
             ' we the gdb2 searches below to actually find the sub/function.
             pData = 0
@@ -610,7 +610,8 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          if gApp.SuppressNotify then return true
          ' Show line and column. Only do on modification of text otherwise we will have
          ' a huge slowdown when notifications sent for UI updates.
-         If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+         If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or _
+            (pNSC->modificationType And SC_MOD_DELETETEXT) Then
             ' Set parsing flag to true. We use a parse flag rather than depending on the dirty
             ' flags because the file could stay dirty for a long time before it gets saved and 
             ' every call to the parser would happen even in cases where only directional 
@@ -707,7 +708,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          select CASE chr(pNSC->ch)
          case ".", ">"    '  Show autocomplete list for TYPE variables
             ' dot "." or ">"  part of a pointer
-            ' Need to PostMessage in order to give time for notification to complete. the "."
+            ' Need to PostMessage in order to give time for notification to complete. The "."
             ' is also used as a character that selects and closes the popup list. If no
             ' PostMessage then the "." will automatically select the first entry in the list
             ' and close.
@@ -1336,7 +1337,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
            IDM_FILECLOSE_EXPLORERTREEVIEW
          dim as hwnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
          dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
-         dim as long ItemLParam = FF_TreeView_GetlParam( hTV, hItem )
+         dim as long ItemLParam = TreeView_GetlParam( hTV, hItem )
          ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
          pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
          if id = IDM_FILEOPEN_EXPLORERTREEVIEW then
@@ -1779,7 +1780,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                  IDM_SETFILEMAIN_EXPLORERTREEVIEW, IDM_SETFILERESOURCE_EXPLORERTREEVIEW, _
                  IDM_SETFILEHEADER_EXPLORERTREEVIEW
                dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
-               dim as long ItemLParam = FF_TreeView_GetlParam( hTV, hItem )
+               dim as long ItemLParam = TreeView_GetlParam( hTV, hItem )
                ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
                pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
          end select
@@ -1834,7 +1835,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          ' tab as current and issue a EFC_CLOSECURRENT. 
          dim as hwnd hTV = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
          dim as HTREEITEM hItem = TreeView_GetSelection( hTV )
-         dim as long ItemLParam = FF_TreeView_GetlParam( hTV, hItem )
+         dim as long ItemLParam = TreeView_GetlParam( hTV, hItem )
          ' Must cast the ItemLParam Long to Integer or FBC will fail 64 bit compile.
          pDoc = Cast(clsDocument ptr, cast(integer, ItemLParam) )
          if pDoc = 0 then exit function
@@ -3128,26 +3129,11 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Post a message to do an update check (if applicable)
    PostMessage( pWindow->hWindow, MSG_USER_PROCESS_UPDATECHECK, 0, 0 )
 
-' TODO: Remove SetTimer (debug for showing GDI count)
-'SetTimer(HWND_FRMMAIN, 1000, 500, 0)
-   
    ' Process windows events
    Dim uMsg As MSG
    
    ' Message loop
    Do While GetMessage(@uMsg, Null, 0, 0)
-
-'      if uMsg.message = WM_TIMER then
-'         Dim As HWnd hStatusbar = GetDlgItem(HWnd_FRMMAIN, IDC_FRMMAIN_STATUSBAR)
-'         static GUILeak as wstring * 100
-'         dim hProcess AS HANDLE
-'         dim dwProcessID as dword
-'         getwindowthreadprocessid( HWnd_FRMMAIN, @dwProcessID)
-'         hProcess = openprocess(PROCESS_QUERY_INFORMATION OR PROCESS_VM_READ, 0, dwProcessID)
-'         GUILeak = "GDICount: " & str(getguiresources(hProcess, GR_GDIOBJECTS))
-'         StatusBar_SetText(hStatusbar, 0, GUILeak)
-'      end if
-
 
       ' Processes accelerator keys for menu commands
       If (pWindow->AccelHandle = 0) Orelse (TranslateAccelerator(pWindow->hWindow, pWindow->AccelHandle, @uMsg) = 0) then

@@ -237,11 +237,8 @@ private function AlternateCompile( byref wszExe AS wstring, _
       Close #f
    End If   
 
-? "--sConsoleText--"
-? sConsoleText
-
-'   if AfxFileExists(wszBatchFile) then AfxDeleteFile(wszBatchFile)
-'   if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
+   if AfxFileExists(wszBatchFile) then AfxDeleteFile(wszBatchFile)
+   if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
 
    function = 0
 end function
@@ -277,11 +274,11 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
 
    ' Create a pipe for the child process's STDOUT.
    IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
-      ? "error creating pipe"
+      '? "error creating pipe"
    ELSE
       ' Ensure the read handle to the pipe for STDOUT is not inherited.
       IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
-         ? "error SetHandleInformation"
+         '? "error SetHandleInformation"
       ELSE
          ' Create the child process and read from its standard output
          dim ProcessInfo AS PROCESS_INFORMATION
@@ -316,16 +313,6 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
                      @StartupInf,  _  ' STARTUPINFO pointer
                      @ProcessInfo) 
          
-         'if errCode = 0 then
-         '   ? wszFullExe
-         '   ? wszCmdLine
-         '   ? "CreateProcess FAILED errCode: "; errCode, "GetLastError: "; GetLastError()
-         '   'ERROR_INVALID_NAME
-         '   '    123 (0x7B)
-         '   '    The filename, directory name, or volume label syntax is incorrect.
-         'end if
-
-
          if errCode <> 0 then            
 
             CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.

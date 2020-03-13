@@ -1,6 +1,17 @@
+Version 2.0.9
+Editor:
+- Added: F4 popup Function List will now select the current active sub/function name (previously it would always select the parent document node).
+- Fixed: Refactor some of the parsing engine to better display autocomplete popup and codetips.
+
+Visual Designer:
+- Added: TextBox/RichEdit SelectionChanged event.
+- Added: TextBox/RichEdit LinePosition property and ColumnPosition property.
+- Changed: Removed the MaxLength property for Edit and RichEdit controls. Limits are now Edit (32K), RichEdit(1GB). Change via code if needing higher limits.
+- Fixed: Changing RichEdit WordWrap property at runtime will now recreate the control.
+
 Version 2.0.8 (March 9, 2020)
 Editor:
-- Fixed: Corrected internal parser to recognize byref variable declareations: "dim byref var1 as".
+- Fixed: Corrected internal parser to recognize byref variable declarations: "dim byref var1 as".
 - Fixed: DShow_PlayClip example project was corrupted.
 Visual Designer:
 - Added: TreeView control.

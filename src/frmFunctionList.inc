@@ -31,14 +31,28 @@ private Function frmFunctionList_SetListBoxPosition() As Long
    Dim As HWnd hList  = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX)
    Dim As Long nCount = Listbox_GetCount(hList)
    dim as integer nParam  ' must be INTEGER otherwise the Cast below fails on 64-bit.
+   dim wszListText as wstring * MAX_PATH
    
    ' Search for a match
    For i As Long = 0 To nCount - 1
       hItem = cast(HTREEITEM, ListBox_GetItemData(hList, i))
-      nParam = FF_TreeView_GetlParam(hTree, hItem)
+      nParam = TreeView_GetlParam(hTree, hItem)
       pDoc = Cast(clsDocument ptr, nParam)
       if pDoc = pDocActive THEN
-         nCurSel = i: Exit For
+         ' Attempt to match the function name in the child nodes
+         dim as string sCurrentFunction
+         dim as ClassProperty nGetSet
+         pDoc->GetCurrentFunctionName( sCurrentFunction, nGetSet )
+         For ii As Long = i To nCount - 1
+            SendMessage( hList, LB_GETTEXT, ii, Cast(LPARAM, @wszListText))
+            if ucase(wszListText) = ucase(sCurrentFunction) then
+               nCurSel = ii: exit for
+            end if   
+         next
+         ' Didn't find an exact function name match so exit out with just 
+         ' the parent document match instead.
+         if nCurSel = -1 then nCurSel = i
+         Exit For
       END IF
    Next
    
@@ -85,6 +99,9 @@ private Function frmFunctionList_UpdateListBox() As Long
    ' Clear the listbox and add the new items
    Listbox_ResetContent(hList)
    
+   ' We get the list of files from the Project Explorer treeview rather
+   ' than going through all pDoc documents because the nodes already
+   ' exist and are already sorted.
    Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    Dim As HTREEITEM hChild, hChildSearch, hParent
    dim as long p, pDoc
@@ -113,7 +130,7 @@ private Function frmFunctionList_UpdateListBox() As Long
       do until hParent = 0 
          ' Filename
          Treeview_GetItemText(hTree, hParent, @wszText, MAX_PATH)
-         pDoc = FF_TreeView_GetlParam(hTree, hParent)
+         pDoc = TreeView_GetlParam(hTree, hParent)
          wszText = ucase(wszText)
 
          bFound = frmFunctionList_SearchChildNodes(hParent, hChild, wszSearch) 
@@ -278,7 +295,7 @@ private Function frmFunctionList_OnDrawItem( ByVal HWnd As HWnd, _
          ' Determine what font to use and if itès a header line then only show
          ' the filename's name and extension (not full path)
          dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-         bIsHeader = iif( FF_TreeView_GetlParam( hTree, cast(HTREEITEM, lpdis->itemData)), true, false)
+         bIsHeader = iif( TreeView_GetlParam( hTree, cast(HTREEITEM, lpdis->itemData)), true, false)
 
          if bIsHeader then wzText = AfxStrPathname( "NAMEX", wzText )
          hFont = pWindow->CreateFont("", 9, iif(bIsHeader, FW_BOLD, FW_NORMAL) )
@@ -464,8 +481,4 @@ public Function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
    
    Function = 0
 End Function
-
-
-
-
 

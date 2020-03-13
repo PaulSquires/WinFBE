@@ -30,7 +30,7 @@ public Function frmRecent_LoadTreeview() As LRESULT
 
    ''  RECENT FILES
    wzStr = UCase(L(10, "Recent Files")) 
-   hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr )
+   hNode = TreeView_AppendItem( hTree, TVI_ROOT, wzStr )
    hFirstNode = hNode
    gApp.hRecentFilesRootNode = hNode
    Treeview_SetBold( hTree, hNode, TRUE) 
@@ -38,33 +38,33 @@ public Function frmRecent_LoadTreeview() As LRESULT
       ' If the file no longer exists then remove it from the MRU list 
       gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i)) 
       If AfxFileExists(gConfig.MRU(i)) Then 
-         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRU(i) )
+         TreeView_AppendItem( hTree, hNode, gConfig.MRU(i) )
          fEmpty = False 
       End If 
    Next 
    If fEmpty Then 
       wzStr = @L(11,"(Empty)") 
-      FF_TreeView_InsertItem( hTree, hNode, wzStr, 0 ) 
+      TreeView_AppendItem( hTree, hNode, wzStr, 0 ) 
    End If 
    Treeview_Expand(hTree, hNode, TVE_EXPAND)  
 
 
    ''  RECENT PROJECTS
    wzStr = UCase(L(219, "Recent Projects")) 
-   hNode = FF_TreeView_InsertItem( hTree, TVI_ROOT, wzStr ) 
+   hNode = TreeView_AppendItem( hTree, TVI_ROOT, wzStr ) 
    gApp.hRecentProjectsRootNode = hNode
    Treeview_SetBold( hTree, hNode, TRUE) 
    For i As Long = 0 To 9 
       ' If the file no longer exists then remove it from the MRU list 
       gConfig.MRUPROJECT(i) = ProcessFromCurdrive(gConfig.MRUPROJECT(i)) 
       If AfxFileExists(gConfig.MRUPROJECT(i)) Then 
-         FF_TreeView_InsertItem( hTree, hNode, gConfig.MRUPROJECT(i) )
+         TreeView_AppendItem( hTree, hNode, gConfig.MRUPROJECT(i) )
          fEmpty = False 
       End If 
    Next 
    If fEmpty Then 
       wzStr = @L(11,"(Empty)") 
-      FF_TreeView_InsertItem( hTree, hNode, wzStr )
+      TreeView_AppendItem( hTree, hNode, wzStr )
    End If 
    Treeview_Expand(hTree, hNode, TVE_EXPAND)  
  

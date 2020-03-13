@@ -51,48 +51,56 @@
 <td>Gets or sets the border style of the control. Refer to the <a href="#ControlBorderStyle">ControlBorderStyle</a> enum.</td>
 </tr>
 <tr class="even">
+<td>ColumnPosition</td>
+<td>Gets or sets the caret to the specified column (zero based) of the current line.</td>
+</tr>
+<tr class="odd">
 <td>CtrlId</td>
 <td>Gets or sets a value indicating the control ID of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>CtrlType</td>
 <td>Gets or sets the control type value. Always <strong>ControlType.RichEdit</strong> and used when adding control to the application’s form collection.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Enabled</td>
 <td>Gets or sets a value (true/false) indicating whether the control can respond to user interaction.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Focused</td>
 <td>Gets or sets a value (true/false) indicating whether the control has input focus.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Font</td>
 <td>Gets or sets the font for the control. Refer to the Font object.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>ForeColor</td>
 <td>Gets or sets the foreground color of the control. Refer to the <strong>Colors</strong> object.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Height</td>
 <td>Gets or sets the height of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>HideSelection</td>
 <td>Gets or sets a value (true/false) indicating whether the selection should be hidden when the control loses focus.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>hWindow</td>
 <td>Gets the Windows handle (hwnd) of the control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>hWindowParent</td>
 <td>Gets or sets the Windows handle (hwnd) of the parent control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Left</td>
 <td>Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).</td>
+</tr>
+<tr class="even">
+<td>LinePosition</td>
+<td>Gets or sets the caret to the specified line (zero based).</td>
 </tr>
 <tr class="odd">
 <td>Location</td>
@@ -283,6 +291,10 @@
 <tr class="odd">
 <td>TextChanged</td>
 <td>Occurs when the Text property is changed by either a programmatic modification or user interaction.</td>
+</tr>
+<tr class="even">
+<td>SelectionChanged</td>
+<td>Occurs when the selection or position within the control changes.</td>
 </tr>
 </tbody>
 </table>

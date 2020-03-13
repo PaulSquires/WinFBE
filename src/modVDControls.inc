@@ -146,7 +146,6 @@ private function AttachDefaultControlProperties( byval pCtrl as clsControl ptr )
          AddControlProperty(pCtrl, "ForeColor", "SYSTEM|WindowText", PropertyType.ColorPicker)
          AddControlProperty(pCtrl, "HideSelection", "True", PropertyType.TrueFalse)
          AddControlProperty(pCtrl, "Locked", "False", PropertyType.TrueFalse)
-         AddControlProperty(pCtrl, "MaxLength", "32767", PropertyType.EditEnterNumericOnly)
          AddControlProperty(pCtrl, "Multiline", iif(pCtrl->ControlType=CTRL_TEXTBOX,"False","True"), PropertyType.TrueFalse)
          if pCtrl->ControlType = CTRL_TEXTBOX then
          AddControlProperty(pCtrl, "PasswordChar", "", PropertyType.EditEnter)
@@ -537,6 +536,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
          AddControlEvent(pCtrl, "TextChanged")
+         AddControlEvent(pCtrl, "SelectionChanged")
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
@@ -776,7 +776,6 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          
       case CTRL_HSCROLL
       case CTRL_VSCROLL
-      case CTRL_TREEVIEW
       case CTRL_SLIDER
       case CTRL_WEBBROWSER
       case CTRL_CUSTOM

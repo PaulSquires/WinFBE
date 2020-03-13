@@ -60,7 +60,7 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    ' Delete all nodes in the Explorer treeview and reset it to "FILES" mode.
    dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    Treeview_DeleteAllItems(hTree)
-   gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, wstr("FILES") )
+   gApp.hExplorerRootNode = TreeView_AppendItem(hTree, TVI_ROOT, wstr("FILES") )
    Treeview_SetBold(hTree, gApp.hExplorerRootNode, TRUE)
 
    ' If the Find/Replace window is open then close it.
@@ -84,6 +84,9 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    
    ' Reset the ProjectNotes text box with the generic non-project related notes
    AfxSetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), gApp.NonProjectNotes)
+
+   ' If the compiler Output window is open then ensure that it is now hidden
+   ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
 
    frmExplorer_PositionWindows
    frmMain_PositionWindows

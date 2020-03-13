@@ -15,7 +15,7 @@
 
 ' Enum used to distinguish bewteen a sub/function and Property Get/Set
 enum ClassProperty
-   None   = 0
+   None   = 0   ' sub/function
    Getter = 1
    Setter = 2
    ctor   = 3   ' constructor
@@ -47,7 +47,6 @@ type clsParser
       funcParams      as string        ' Parameters to a function identifed in sFuncName
       funcLineNum     as long          ' The line where the sub/function started. This is different than lineNum.
       typeName        as string        ' Name of TYPE being parsed
-      typeElements    as string        ' Elements of the TYPE identified in sTypeName
       typeAlias       as string        ' Same as typeName unless ALIAS was detected
       varName         as string        ' Name of variable
       varType         as string        ' Type of variable identified in sVarName

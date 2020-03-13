@@ -14,8 +14,6 @@
 #pragma once
 
 declare function GetTextWidthPixels( byval hWin as HWND, byref wszText as WString ) as Long
-declare function RemoveComments( byval st as string) as string
-declare function MaskStringCharacters( byval st as string) as string
 declare function JulianDateNow() as long
 declare function ConvertWinFBEversion( byref wszVersion as wstring ) as long
 declare function DisableAllModeless() as long
@@ -35,9 +33,6 @@ declare function IsCurrentLineIncludeFilename() as Boolean
 declare function OpenSelectedDocument( byref wszFilename as wstring, byref wszFunctionName as WSTRING = "", byval nLineNumber as long = -1 ) as clsDocument ptr
 declare Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
 declare Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
-Declare Function FF_TreeView_InsertItem( ByVal hWndControl As HWnd, ByVal hParent As HANDLE, ByRef TheText As WString, ByVal lParam As LPARAM = 0, ByVal iImage As Long = 0, ByVal iSelectedImage As Long = 0 ) As HANDLE
-declare Function FF_TreeView_GetlParam( ByVal hWndControl As HWnd, ByVal hItem As HANDLE ) As Long
-declare Function FF_TreeView_SetlParam (ByVal hWndControl as HWnd, ByVal hItem as HANDLE, ByVal lParam as Long) as Long
 declare Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) As WString Ptr
 declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal idButton As Long) As IShellItemArray Ptr
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr
@@ -53,7 +48,6 @@ Declare Function GetProcessImageName( ByVal pe32w As PROCESSENTRY32W Ptr, ByVal 
 Declare Function IsProcessRunning( ByVal pwszExeFileName As WString Ptr ) As BOOLEAN
 Declare Function GetRunExecutableFilename() as CWSTR
 Declare Function LoadPNGfromRes(BYVAL hInstance AS HINSTANCE, BYREF wszImageName AS WSTRING) as any ptr
-Declare Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
 declare function DoCheckForUpdates( byval hWndParent as hwnd, byval bSilentCheck as Boolean = false ) as long
 declare function GetListBoxEmptyClientArea( byval hListBox as HWND, byval nLineHeight as long ) as RECT
                                             

@@ -125,7 +125,7 @@ private function frmExplorer_GetFileNameFunctionName( byval hItem as HTREEITEM, 
    dim zFilename as wstring * MAX_PATH
    dim zFunctionName as wstring * MAX_PATH
             
-   lParam = FF_TreeView_GetlParam(hTree, hItem)
+   lParam = TreeView_GetlParam(hTree, hItem)
    pDoc = Cast(clsDocument Ptr, lParam)
    if pDoc then
       ' This is a header node. Open the document based on the pDoc info
@@ -138,7 +138,7 @@ private function frmExplorer_GetFileNameFunctionName( byval hItem as HTREEITEM, 
       ' correct filename.
       TreeView_GetItemText(hTree, hItem, @zFunctionName, MAX_PATH)
       hItem = TreeView_GetNextItem(hTree, hItem, TVGN_PARENT)   
-      lParam = FF_TreeView_GetlParam(hTree, hItem)
+      lParam = TreeView_GetlParam(hTree, hItem)
       pDoc = Cast(clsDocument Ptr, lParam)
       if pDoc then zFilename = pDoc->DiskFilename
    end if
@@ -186,7 +186,7 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
 
       If pDoc->hNodeExplorer = 0 Then
          hRootNode = GetExplorerSpecialSubNode( pDoc->ProjectFileType )
-         pDoc->hNodeExplorer = FF_TreeView_InsertItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc), 1, 1 )
+         pDoc->hNodeExplorer = TreeView_AppendItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc), 1, 1 )
          frmMain_AddToComboFiles( pDoc )
          fAddChildren = True
       else
@@ -235,7 +235,7 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
                      case ClassProperty.ctor:   sNodeName = sNodeName & " (ctor)"
                      case ClassProperty.dtor:   sNodeName = sNodeName & " (dtor)"
                   end select      
-                  hNode = FF_TreeView_InsertItem(hTree, pDoc->hNodeExplorer, sNodeName, 0, 2, 2 )
+                  hNode = TreeView_AppendItem(hTree, pDoc->hNodeExplorer, sNodeName, 0, 2, 2 )
                END IF
          END SELECT
       loop      
@@ -550,7 +550,7 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
             
             If pNMHDR->code = NM_RCLICK Then
                ' Create the popup menu
-               lParam = FF_TreeView_GetlParam(hTree, hItem)
+               lParam = TreeView_GetlParam(hTree, hItem)
                pDoc = Cast(clsDocument ptr, lParam)
                Dim As HMENU hPopupMenu = CreateExplorerContextMenu(pDoc)
                GetCursorPos @pt
@@ -873,7 +873,7 @@ public Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT
    SendMessage( hTree, WM_SETFONT, Cast(WPARAM, hFont), CTRUE )
    SendMessage( hTree, TVM_SETBKCOLOR, 0, Cast(LPARAM, GetSysColor(COLOR_BTNFACE)) )
 
-   gApp.hExplorerRootNode = FF_TreeView_InsertItem(hTree, TVI_ROOT, wstr("FILES") )
+   gApp.hExplorerRootNode = TreeView_AppendItem(hTree, TVI_ROOT, wstr("FILES") )
    Treeview_SetBold( hTree, gApp.hExplorerRootNode, TRUE )
 
 

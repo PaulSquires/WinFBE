@@ -217,8 +217,8 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
    ''
    ''  Format:
    ''  TYPE:<typename>
-   ''  <type_element>
-   ''  <type_element>
+   ''  <type_element>(param1 as type, ...) As Long
+   ''  <type_element>|TYPE
    ''  ...etc
    ''  ENDTYPE
    ''
@@ -239,7 +239,7 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       
       if left(wst, 5) = "TYPE:" then
          bReadingType = true
-         parser.typeName = mid(**wst, 6) 
+         parser.typeName = mid(wst, 6) 
          parser.typeAlias = parser.typeName
          if parser.typeName = "BASE" then
             bIsBase = true
@@ -271,8 +271,14 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
                gdb2.dbAdd( @parser, DB2_VARIABLE )
             next 
          else
-            parser.varName = AfxStrParse(wst, 1, "|")
-            parser.varType = AfxStrParse(wst, 2, "|")
+            parser.varName = AfxStrParse(wst, 1, "|")   ' eg. ByIndex
+            ' An element can have both a forward reference to another TYPE
+            ' and also a CodeTip. For example, the Treeview Node property
+            ' points to an wfxTreeNodeCollection TYPE but can also popup
+            dim as CWSTR wszTypeCodeTip = _
+                           AfxStrParse(wst, 2, "|") & "|" & _  ' eg. wfxTreeNode
+                           AfxStrParse(wst, 3, "|")            ' eg. ByIndex( byval nIndex as long ) byref as _wfxTreeNode
+            parser.varType = trim(wszTypeCodeTip, "|")
             gdb2.dbAdd( @parser, DB2_VARIABLE )
          end if
       end if
@@ -1534,24 +1540,24 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    LockWindowUpdate(hTV)
 
    Treeview_DeleteAllItems(hTV)
-   gApp.hExplorerRootNode = FF_TreeView_InsertItem( hTV, TVI_ROOT, "" )
+   gApp.hExplorerRootNode = TreeView_AppendItem( hTV, TVI_ROOT, "" )
    Treeview_SetBold(hTV, gApp.hExplorerRootNode, TRUE)
    ' Add the subnodes for the various file types
    
    gApp.hExplorerMainNode = _
-      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(212,"Main"), cast(LPARAM, 0) )
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(212,"Main"), cast(LPARAM, 0) )
       Treeview_SetBold(hTV, gApp.hExplorerMainNode, TRUE)
    gApp.hExplorerResourceNode = _
-      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(213,"Resource"), cast(LPARAM, 0) )
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(213,"Resource"), cast(LPARAM, 0) )
       Treeview_SetBold(hTV, gApp.hExplorerResourceNode, TRUE)
    gApp.hExplorerHeaderNode = _
-      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(175,"Header"), cast(LPARAM, 0) )
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(175,"Header"), cast(LPARAM, 0) )
       Treeview_SetBold(hTV, gApp.hExplorerHeaderNode, TRUE)
    gApp.hExplorerModuleNode = _
-      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(211,"Module"), cast(LPARAM, 0) )
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(211,"Module"), cast(LPARAM, 0) )
       Treeview_SetBold(hTV, gApp.hExplorerModuleNode, TRUE)
    gApp.hExplorerNormalNode = _
-      FF_TreeView_InsertItem( hTV, gApp.hExplorerRootNode, L(210,"Normal"), cast(LPARAM, 0) )
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(210,"Normal"), cast(LPARAM, 0) )
       Treeview_SetBold(hTV, gApp.hExplorerNormalNode, TRUE)
    
    gApp.FileLoadingCount = 0

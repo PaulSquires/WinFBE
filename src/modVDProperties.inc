@@ -178,8 +178,6 @@ public function DisplayPropertyDetails() as Long
          wszPropDescribe = "Time, in milliseconds, between marquee animation updates."
       CASE "MASKSTRING"
          wszPropDescribe = "A mask string that specifies the type of character that can appear at each position in the user input.."
-      case "MAXLENGTH"   
-         wszPropDescribe = "Indicates the maximum number of characters that can be entered into the edit control."
       case "MAXIMIZEBOX"   
          wszPropDescribe = "Determines whether a form has a maximize box in the upper-right corner of its caption bar."
       case "MINIMIZEBOX"   
@@ -431,8 +429,9 @@ public function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs when a control has focus and the user presses and releases a key."
       CASE "KEYUP"
          wszEventDescribe = "Occurs when a key is released."
-      case "SELECTIONCHANGED"  ' MonthCalendar
-         wszEventDescribe = "Occurs in response to any selection change whereas Click occurs only when user makes an explicit date selection."
+      case "SELECTIONCHANGED"
+         ' MonthCalendar/RichEdit
+         wszEventDescribe = "Occurs in response to any selection change."
       case "SELECTED"   ' tabcontrol
          wszEventDescribe = "Occurs when a tab is selected."
       case "SELECTING"  ' tabcontrol

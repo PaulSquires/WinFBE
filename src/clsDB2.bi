@@ -19,27 +19,26 @@
 ''  Application in-memory database
 ''
 const DB2_VARIABLE         = 1
-const DB2_FUNCTION         = 2
-const DB2_SUB              = 3
-const DB2_PROPERTY         = 4
+const DB2_FUNCTION         = 2    ' Standalone and TYPE functions
+const DB2_SUB              = 3    ' Standalone and TYPE subs
+const DB2_PROPERTY         = 4    ' GetProp/SetProp/Constr/Destr of TYPEs
 const DB2_TYPE             = 5
 const DB2_TODO             = 6
 const DB2_STANDARDDATATYPE = 7    ' long, integer, string, etc...
 
 type DB2_DATA
    deleted      as BOOLEAN = true  ' True/False
-   fileName     as CWSTR           ' Filename for #INCLUDE or source file (needed for deleting).
-   projectIndex as long            ' Needed for deleting
+   fileName     as CWSTR           ' Filename of source file (needed for deleting).
    id           as LONG            ' See DB_* above for what type of record this is.
    nLineNum     as long            ' Location in the file where found
    ElementName  as string          ' Function name / Variable Name / Type Name
    ElementValue as string          ' Function Calltip / TYPE associated with ElementName variable
-   IsPrivate    as Boolean         ' Element is private in a TYPE
+   TypeExtends  as String          ' The TYPE is extended from this TYPE
+   IsPublic     as Boolean = true  ' Element is public in a TYPE (default) 
    IsTHIS       as Boolean         ' Dynamically set in DereferenceLine so caller can show/hide private elements
    IsWinApi     as Boolean         ' If data item is WinApi related
    IsEnum       as Boolean         ' If TYPE is treated as an ENUM
-   GetSet       as ClassProperty   ' 0=sub/function, 1=propertyGet, 2=propertySet
-   TypeExtends  as String          ' The TYPE is extended from this TYPE
+   GetSet       as ClassProperty   ' 0=sub/function, 1=propertyGet, 2=propertySet, 3=ctor, 4=dtor
 END TYPE
 
 TYPE clsDB2
@@ -60,7 +59,6 @@ TYPE clsDB2
       declare function dbFindProperty( byref sFunctionName as string, byref sFilename as string = "" ) as DB2_DATA ptr
       declare function dbFindVariable( byref sVariableName as string ) as DB2_DATA ptr
       declare function dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
-      declare function dbFilenameExists( byref sFilename as CWSTR ) as boolean
       declare function dbDebug() as long
       declare constructor
 END TYPE

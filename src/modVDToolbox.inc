@@ -239,10 +239,8 @@ private Function ShowDefaultPropertyForControl( byval pCtrl as clsControl ptr ) 
          wszDefaultEvent = "Elapsed" 
 
    
-' TODO: Set default property/event for each control.
    '   CTRL_HSCROLL
    '   CTRL_VSCROLL
-   '   CTRL_PROGRESSBAR
    '   CTRL_SLIDER
    '   CTRL_WEBBROWSER
    '   CTRL_CUSTOM

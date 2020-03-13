@@ -210,7 +210,7 @@ private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
              hLabel = GetDlgItem(HWnd, IDC_FRMOPTIONS_LBLCATEGORY)
              
              ' Display the correct Category name and Child dialog. The child identifier is held in the lParam
-             Select Case FF_TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
+             Select Case TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
                  Case 0
                      SetWindowTextW( hLabel, WStr(" ") & L(226,"General Options")) 
                      hForm = HWND_FRMOPTIONSGENERAL
@@ -364,12 +364,12 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
 
    ' Configure the TreeView
    Dim hItem As HANDLE 
-   hItem = FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
-   FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
-   FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   2)
-   FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     3)
-   FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       4)
-   FF_TreeView_InsertItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 5)
+   hItem = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
+   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
+   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   2)
+   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     3)
+   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       4)
+   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 5)
 
    ' Load all of the child dialogs
    frmOptionsGeneral_Show( pWindow->hWindow )

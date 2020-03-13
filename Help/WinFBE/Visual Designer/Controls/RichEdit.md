@@ -9,6 +9,7 @@
 | AllowDrop | Gets or sets a value (true/false) indicating whether the control will accept data that is dragged onto it.|
 | BackColor | Gets or sets the background color of the form. Refer to the **Colors** object. |
 | BorderStyle | Gets or sets the border style of the control. Refer to the [ControlBorderStyle](#ControlBorderStyle) enum.|
+| ColumnPosition | Gets or sets the caret to the specified column (zero based) of the current line. |
 | CtrlId | Gets or sets a value indicating the control ID of the control.|
 | CtrlType | Gets or sets the control type value. Always **ControlType.RichEdit** and used when adding control to the application’s form collection. |
 | Enabled | Gets or sets a value (true/false) indicating whether the control can respond to user interaction.|
@@ -20,6 +21,7 @@
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
 | Left | Gets or sets the distance, in pixels, between the left edge of the control and the left edge of its container's client area (normally the form).|
+| LinePosition | Gets or sets the caret to the specified line (zero based). |
 | Location |Gets or sets the top and left position of the control. Get: returns [wfxPoint](#wfxPoint) object. Set: (left, top). |
 | Locked | Gets or sets a value (true/false) indicating whether the control can be moved or resized.|
 | MaxLength | Gets or sets a value indicating the maximum number of characters that can be entered into the control.|
@@ -70,6 +72,7 @@
 |MouseMove | Occurs when the mouse pointer is moved over the control.|
 | MouseUp | Occurs when the mouse pointer is over the control and a mouse button is released.|
 | TextChanged | Occurs when the Text property is changed by either a programmatic modification or user interaction.|
+| SelectionChanged | Occurs when the selection or position within the control changes. |
 
 ##### ControlBorderStyle
 ```

@@ -274,7 +274,7 @@ private Function frmHelpViewer_OnNotify( ByVal HWnd As HWnd, _
          end if 
       case TVN_SELCHANGED
          Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
-         dim as long idx = FF_TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
+         dim as long idx = TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
          frmHelpViewer_DisplayHTML(idx)
    end select
    
