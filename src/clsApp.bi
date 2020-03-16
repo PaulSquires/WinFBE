@@ -13,7 +13,6 @@
 
 #pragma once
 
-
 Type clsApp
    Private: 
       m_arrQuickRun(Any) As WSTRING * MAX_PATH
@@ -85,5 +84,4 @@ Type clsApp
       declare Function GetProjectCompiler() As long
       
 End Type
-
 

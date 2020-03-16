@@ -120,7 +120,6 @@ Type clsDocument
       hNodeExplorer     As HTREEITEM
       FileEncoding      as long       
       bNeedsParsing     as Boolean  ' Document requires to be parsed due to changes.
-      ParseStartLine    as long     ' Line in file where parsing should start
       UserModified      as boolean  ' occurs when user manually changes encoding state so that document will be saved in the new format
       DeletedButKeep    as boolean  ' file no longer exists but keep open anyway
       DocumentBuild     as string   ' specific build configuration to use for this document
@@ -169,6 +168,7 @@ Type clsDocument
       Declare Function CurrentLineUp() As Long
       Declare Function CurrentLineDown() As Long
       Declare Function MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
+      declare function NewLineBelowCurrent() as Long
       Declare Function ToggleBookmark( ByVal nLine As Long ) As Long
       Declare Function NextBookmark() As Long 
       Declare Function PrevBookmark() As Long 

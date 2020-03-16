@@ -21,7 +21,7 @@ enum
    AUTOCOMPLETE_DIM_AS 
    AUTOCOMPLETE_TYPE
 end enum   
-   
+                 
 ' Index for scintilla autocomplete raw PNG for SCI_REGISTERRGBAIMAGE
 enum
    IMAGE_AUTOC_BASETYPE = 1        ' default variable types. Long, String, Single, etc

@@ -52,7 +52,6 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
    If pDoc = 0 Then exit function
    if pDoc->bNeedsParsing = false then exit function
 
-
    dim as long nLineCount, nLineNum, nPos, nStartParseLine
    Dim As String st, st_ucase, sLine
    
@@ -66,39 +65,35 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
    ' load them into an array.
    
    ' Dynamic string array to hold all lines loaded from the file. It
-   ' is resized at a reasonable capacity chunks in order to avoid
+   ' is resized at reasonable capacity chunks in order to avoid
    ' too many memory reallocations if constantly redim'd. 
    redim sLineArray( any ) as string 
    
-   ' Boolean to ensure that we check to parse any Form codegen code. Once it is
-   ' checked and parsed then we set the boolean to true to exit the loop.
-   dim as boolean bParsingCodeGen = false
+   ' Create a parse TYPE that handles the state information throughout parsing this document.
+   dim parser as clsParser
    
-   do
+   with parser
+      .action   = ACTION_NONE
+      .fileName = wszFilename
+      ' Flag whether we are parsing the codegen code. We do not want to save any
+      ' of the Form Types sub/function/ctor/dtor because those will then display
+      ' in the Explorer Treeview. The user would click on them expecting to be
+      ' able to then see them in the editor. We can't allow that.
+      .bParsingCodeGen = false
+   end with
 
+
+   do
       if (gApp.IsProjectLoading) orelse (gApp.IsFileLoading) then
          gApp.wszPanelText = wszFilename
          gApp.hIconPanel = 0
          frmMain_SetStatusbar
       END IF
 
-      ' Create a parse TYPE that handles the state information throughout parsing this document.
-      dim parser as clsParser
-      
-      with parser
-         .action   = ACTION_NONE
-         .fileName = wszFilename
-         ' Flag whether we are parsing the codegen code. We do not want to save any
-         ' of the Form Types sub/function/ctor/dtor because those will then display
-         ' in the Explorer Treeview. The user would click on them expecting to be
-         ' able to then see them in the editor. We can't allow that.
-         .bParsingCodeGen = bParsingCodeGen
-      end with
-
         
-      if bParsingCodeGen then
+      if parser.bParsingCodeGen then
          ' We put the codegen code lines after the scintilla lines because this
-         ' ensures that nStartParseLine is > 0 then the codegen code will get
+         ' ensures that if nStartParseLine is > 0 then the codegen code will get
          ' reparsed when the main scintilla document is modified. Otherwise, 
          ' we'd have to gdb2.dbDelete all entries in the database and have to
          ' reparse the whole file when at times we only need to parse from the
@@ -107,13 +102,13 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
          nStartParseLine = lbound( sLineArray )
       else
          nLineCount = pDoc->GetLineCount - 1  
-         nStartParseLine = pDoc->ParseStartLine
+         nStartParseLine = 0
       
          ' Before starting to parse this document we must remove any previously saved
          ' data that exists in the gdb2 database for this file. This will also delete
          ' any form codegen parsed structures because line numbers for those structures
          ' are after the main scintilla code.
-         gdb2.dbDelete( wszFilename, nStartParseLine )
+         gdb2.dbDelete( wszFilename )
          
          ' Reset the count that tracks whether this file contains an Application.Run
          ' statement (multiple lines in the same code file may contain this function call).
@@ -130,7 +125,7 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
          
          ' IMPORTANT: Get the full line as it could be across multiple lines via the line continuation underscore.
          do
-            if bParsingCodeGen THEN
+            if parser.bParsingCodeGen THEN
                ' Parsing the codegen array
                st = sLineArray( nLineNum )
             else
@@ -219,8 +214,8 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
 
       ' Check to see if this is a visual design form. If it is, then we need
       ' to parse the codegen string.
-      if bParsingCodeGen = false then
-         bParsingCodeGen = true
+      if parser.bParsingCodeGen = false then
+         parser.bParsingCodeGen = true
          if pDoc->IsDesigner then
             ' Load the codegen lines into the sLineArray
             dim as CWSTR wst
@@ -250,7 +245,6 @@ public Function ParseDocument( byval pDoc as clsDocument ptr ) As Long
 
    ' Document has now been fully parsed
    pDoc->bNeedsParsing = false
-   pDoc->ParseStartLine = 0
 
    ' Update the Explorer treeview nodes to ensure that any new nodes are added
    ' and any old nodes are deleted.

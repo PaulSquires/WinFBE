@@ -1317,57 +1317,28 @@ End Function
 ''
 ''
 Function clsDocument.MoveCurrentLines( ByVal flagMoveDown As BOOLEAN ) As Long
-
-   Dim startPos    As Long     ' Starting position
-   Dim endPos      As Long     ' Ending position
-   Dim startLine   As Long     ' Starting line
-   Dim endLine     As Long     ' Ending line
-   Dim line2swap   As Long 
-   Dim nbChar      As Long 
-   Dim nTextLen    As Long
-   
    dim as any ptr pSci = this.GetActiveScintillaPtr()
-   this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
-
-   Dim noSel      As Long = (startLine = endLine)
-   Dim nbSelLines As Long = (endLine - startLine + 1)
-
    If flagMoveDown Then
-      nTextLen  = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
-      If (startLine = -1) Or (endLine >= SciMsg( pSci, SCI_LINEFROMPOSITION, nTextLen, 0)) Then Exit Function
-      line2swap = endLine + 1
-      If (line2swap + 1) = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0) Then nbChar += 2    ' cr/lf
-   Else
-      If (startLine <= 0) Then Exit Function
-      line2swap = startLine - 1
-   End If
-   
-   nbChar = nbChar + SciMsg( pSci, SCI_LINELENGTH, line2swap, 0)
-   
-   SciMsg( pSci, SCI_BEGINUNDOACTION, 0, 0)
-   SciMsg( pSci, SCI_GOTOLINE, line2swap, 0)
-
-   gApp.SuppressNotify = True
-   For i As Long = 0 To nbSelLines - 1
-      If flagMoveDown Then
-         this.CurrentLineUp()
-      Else
-         this.CurrentLineDown()
-      End If   
-   Next
-   gApp.SuppressNotify = False
-   SciMsg( pSci, SCI_ENDUNDOACTION, 0, 0)
-
-   If flagMoveDown Then
-      SciMsg( pSci, SCI_SETSELECTIONSTART, startPos + nbChar, 0)
-      SciMsg( pSci, SCI_SETSELECTIONEND, Iif(noSel, startPos + nbChar, endPos + nbChar), 0)
-   Else
-      SciMsg( pSci, SCI_SETSELECTIONSTART, startPos - nbChar, 0)
-      SciMsg( pSci, SCI_SETSELECTIONEND, Iif(noSel, startPos - nbChar, endPos - nbChar), 0)
-   End If
-   
+      SciMsg( pSci, SCI_MOVESELECTEDLINESDOWN, 0, 0)
+   else   
+      SciMsg( pSci, SCI_MOVESELECTEDLINESUP, 0, 0)
+   end if
    Function = 0
 End Function
+
+
+''
+''
+Function clsDocument.NewLineBelowCurrent() As Long
+   ' From anywhere on the current line creates a new line immediately
+   ' below the current line and positions the cursor to the start of
+   ' that new line.
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   SciMsg( pSci, SCI_LINEEND, 0, 0)
+   SciMsg( pSci, SCI_NEWLINE, 0, 0)
+   Function = 0
+End Function
+
 
 ''
 ''
@@ -1983,27 +1954,15 @@ Function clsDocument.LineDuplicate() As Long
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Duplicate the current caret line, or an entire block of
    ' code should a selection be active.
-   Dim startSelPos As Long     ' Starting position
-   Dim endSelPos   As Long     ' Ending position
-   Dim strText     As String   ' Selected text
-
-   ' If startSelPos and endSelPos are the same there is no selection,
-   startSelPos = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0)
-   endSelPos   = SciMsg( pSci, SCI_GETSELECTIONEND, 0, 0)
-   
+   dim as long startSelPos = SciMsg( pSci, SCI_GETSELECTIONSTART, 0, 0)
+   dim as long endSelPos   = SciMsg( pSci, SCI_GETSELECTIONEND, 0, 0)
    If startSelPos = endSelPos Then   ' no selection
       ' Simply duplicate the line that the caret is on.
       SciMsg( pSci, SCI_LINEDUPLICATE, 0, 0)
    else
-      ' Retrieve the text
-      strText = this.GetTextRange(startSelPos, endSelPos)
-      SciMsg( pSci, SCI_INSERTTEXT, -1, Cast(LPARAM, Strptr(strText)) )
-      SciMsg( pSci, SCI_SETSELECTIONSTART, startSelPos, 0)
-      SciMsg( pSci, SCI_SETSELECTIONEND, endSelPos, 0)
+      SciMsg( pSci, SCI_SELECTIONDUPLICATE, 0, 0)
    end if
-
    Function = 0
-
 End Function
 
 

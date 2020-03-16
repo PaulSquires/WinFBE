@@ -63,7 +63,7 @@ public function frmOutput_UpdateToDoListview() as long
       if pData->id <> DB2_TODO THEN continue do
       FF_ListView_InsertItem( hLV, n, 0, WStr(pData->nLineNum) ) 
       FF_ListView_InsertItem( hLV, n, 1, WStr(pData->fileName) )
-      FF_ListView_InsertItem( hLV, n, 2, WStr(pData->ElementValue) ) 
+      FF_ListView_InsertItem( hLV, n, 2, WStr(pData->ElementData) ) 
       n = n + 1
    loop
 

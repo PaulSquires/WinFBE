@@ -118,10 +118,9 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
    dim parser as clsParser
 
    parser.fileName = ""     ' no need to store this sFilename
-   parser.IsWinApi = IsWinAPI
 
    ''
-   ''  Codetips definition file for WinAPI/WinFBX/WinFormsX
+   ''  Codetips definition file for WinAPI/WinFBX
    ''
    ''  Format:
    ''  1st character:  F=FUNCTION, T=TYPE, S=STANDARD_DATATYPE
@@ -143,13 +142,13 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
       If i = 0 Then continue do
       
       wsID = left(wst, i - 1)
-      wst = mid(**wst, i + 1)
+      wst  = mid(wst, i + 1)
                 
-      select CASE **wsID
+      select CASE wsID
          case "S"    ' standard datatype
             i = instr(wst, "|")
             parser.typeName = Left(wst, i-1)
-            parser.Description = mid(**wst, i+1)
+            parser.Description = mid(wst, i+1)
             gdb2.dbAdd( @parser, DB2_STANDARDDATATYPE )  
             
          CASE "F"    ' function
@@ -162,22 +161,7 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
             i = instr(wst, "|")
             parser.typeName = Left(wst, i-1)
             parser.typeAlias = parser.typeName
-            wsParts = mid(**wst, i + 1)
-            
-            if IsWinAPI = false then
-               ' Check for the WFXBASE type. We save that string and add it to subsequent
-               ' types for the visual designer.
-               select case ucase(parser.typeName)
-                  CASE "WFXBASE" 
-                     wsBaseType = wsParts
-                     continue do
-                  case "WFXFORM", "WFXBUTTON", "WFXLABEL", "WFXTEXTBOX", "WFXLISTBOX", _
-                       "WFXCHECKBOX", "WFXMASKEDEDIT", "WFXCOMBOBOX", "WFXOPTIONBUTTON", _
-                       "WFXLISTVIEW", "WFXPROGRESSBAR"
-                     if len(wsBaseType) then wsParts = wsParts & "|" & wsBaseType
-                  case "WFXFRAME", "WFXPICTUREBOX"
-               END SELECT
-            END IF
+            wsParts = mid(wst, i + 1)
             gdb2.dbAdd( @parser, DB2_TYPE )
 
             ' Each element of the TYPE structure is added to the database. The
@@ -210,15 +194,16 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
    dim parser as clsParser
 
    parser.fileName = ""     ' no need to store this sFilename
-   parser.IsWinApi = false
 
    ''
    ''  Codetips definition file for WinFormsX
    ''
    ''  Format:
+   ''
    ''  TYPE:<typename>
-   ''  <type_element>(param1 as type, ...) As Long
-   ''  <type_element>|TYPE
+   ''  <type_element>|FORWARDTYPE|(CallTip param1 as type, ...) As Long
+   ''  <type_element>|FORWARDTYPE|(CallTip param1 as type, ...) As Long
+   ''  <type_element>|FORWARDTYPE|(CallTip param1 as type, ...) As Long
    ''  ...etc
    ''  ENDTYPE
    ''
@@ -240,7 +225,7 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       if left(wst, 5) = "TYPE:" then
          bReadingType = true
          parser.typeName = mid(wst, 6) 
-         parser.typeAlias = parser.typeName
+         parser.typeAlias = parser.typeName   
          if parser.typeName = "BASE" then
             bIsBase = true
          else   
@@ -259,6 +244,7 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
          ' Each element of the TYPE structure is added to the database. 
          parser.funcName = ""
          parser.varType  = ""
+         parser.funcParams = ""
          parser.bInTypePublic = true
          if bIsBase then
             dim as long ub = ubound(arrBase) + 1
@@ -267,7 +253,9 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
          elseif wst = "+BASE" then
             ' add all of the BASE properties to this type
             for i as long = lbound(arrBase) to ubound(arrBase) 
-               parser.varName = arrBase(i)
+               parser.varName    = trim(AfxStrParse(arrBase(i), 1, "|"))
+               parser.varType    = trim(AfxStrParse(arrBase(i), 2, "|"))
+               parser.funcParams = trim(AfxStrParse(arrBase(i), 3, "|"))
                gdb2.dbAdd( @parser, DB2_VARIABLE )
             next 
          else
@@ -275,10 +263,8 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
             ' An element can have both a forward reference to another TYPE
             ' and also a CodeTip. For example, the Treeview Node property
             ' points to an wfxTreeNodeCollection TYPE but can also popup
-            dim as CWSTR wszTypeCodeTip = _
-                           AfxStrParse(wst, 2, "|") & "|" & _  ' eg. wfxTreeNode
-                           AfxStrParse(wst, 3, "|")            ' eg. ByIndex( byval nIndex as long ) byref as _wfxTreeNode
-            parser.varType = trim(wszTypeCodeTip, "|")
+            parser.varType = trim(AfxStrParse(wst, 2, "|"))
+            parser.funcParams = trim(AfxStrParse(wst, 3, "|"))
             gdb2.dbAdd( @parser, DB2_VARIABLE )
          end if
       end if
@@ -296,7 +282,6 @@ Function clsConfig.LoadCodetipsWinFormsX() as boolean
    function = this.LoadCodetipsWinForms(_WinFormsXCodetipsFilename)
    dim parser as clsParser
    parser.fileName = ""     ' no need to store this sFilename
-   parser.IsWinApi = false
    parser.typeName = "Application"
    parser.typeAlias = "wfxApplication"
    gdb2.dbAdd( @parser, DB2_TYPE )
@@ -1533,8 +1518,6 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS) )
    
    gApp.IsProjectLoading = true 
-   gApp.IsWindowIncludes = false
-   gdb2.dbDeleteWinAPI
          
    ' Prevent Treeview flickering during adding
    LockWindowUpdate(hTV)

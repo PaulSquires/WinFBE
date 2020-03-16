@@ -26,6 +26,6 @@
 | Elapsed | Occurs when the Timer interval elapses.|
 
 
-###
+##
 You do not have to kill or destroy a Timer. You simply need to StartTimer and StopTimer. The Timer resources are freed when StopTimer is called or the Form containing the Timer is closed.
 

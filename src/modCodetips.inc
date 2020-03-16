@@ -197,7 +197,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
       if pData = 0 THEN 
          '' ATTEMPT TO MATCH ON A TYPE ELEMENT
          if pLastData then
-            sTemp = AfxStrParse(pLastData->ElementValue, 1, "|") & ".." & sElement
+            sTemp = pLastData->VariableType & ".." & sElement
          else
             sTemp = sVarName & "." & sElement
          end if
@@ -208,7 +208,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
             sGlobal = ".." & sElement     ' Global variable format ..<ElementName>
             pData = gdb2.dbFindVariable(sGlobal)
          end if
-      END IF    
+      END IF              
           
       '' ATTEMPT TO MATCH ON A TYPE NAME
       if pData then
@@ -218,16 +218,14 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
          ' TYPE that will fail (because ElementValue is not a TYPE in this case,
          ' but rather a codetip).
          if nCurElement = nTotalElements then return pData
-         ' If an embedded "|" exists then this ElementValue holds a forward
-         ' TYPE reference as well as the CodeTip.
-         sTypeName = AfxStrParse(pData->ElementValue, 1, "|")
+         sTypeName = pData->VariableType   ' forward reference to the TYPE if applicable
       else
          sTypeName = sVarName   
       END IF
 
       pDataTYPE = gdb2.dbFindTYPE(sTypeName)
       if pDataTYPE then pLastData = pDataTYPE
-      
+
       sVarName = sTypeName & "."
       nCurElement = nCurElement + 1
    loop
@@ -237,7 +235,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
       
 END FUNCTION
 
-
+   
 ' ========================================================================================
 ' Show codetips
 ' ========================================================================================
@@ -252,19 +250,14 @@ private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
 
    ' If the file is dirty then reparse it before attempting the codetip
    If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+      pDoc->bRegenerateCode = true
+      GenerateFormCode(pDoc)
       ParseDocument( pDoc )
    End If   
    
    pData = DereferenceLine(pDoc, "(", curPos-1)
-   if pData then
-      select case pData->id 
-         CASE DB2_FUNCTION, DB2_SUB, DB2_PROPERTY, DB2_VARIABLE
-            ' If an embedded "|" exists then this ElementValue holds a forward
-            ' TYPE reference as well as the CodeTip.
-            codeTip = pData->ElementValue
-            if instr(codeTip, "|") then codeTip = AfxStrParse(codeTip, 2, "|")
-      end select
-   END IF
+   if pData then codeTip = pData->CallTip
+
    if len(codeTip) THEN 
       codeTip = FormatCodetip(codeTip)
       SciExec( hEdit, SCI_CALLTIPSHOW, curPos, strptr(codeTip))
@@ -311,7 +304,8 @@ end function
 ' ========================================================================================
 private function ExistsInAutocompleteList( byref sList as string, _
                                            byref sMatch as string _
-                                           ) as long
+                                           ) as boolean
+   if rtrim(sMatch) = "" then return true
    if instr( "|" & ucase(sList) & "|", ucase(sMatch) & "?") THEN return true
    return false
 end function
@@ -372,12 +366,16 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
 
       if right(sLine_ucase, 4) = " AS " then 
          ' okay
+         bTypesOnly = false
+         bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       elseif right(sLine_ucase, 1) = "(" then 
          ShowCodetip(pDoc)
          exit function 
       elseif right(sLine_ucase, 5) = " NEW " then 
          ' okay
+         bTypesOnly = false
+         bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       elseif right(sLine_ucase, 12) = "CONSTRUCTOR " then 
          ' okay
@@ -392,6 +390,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       elseif right(sLine_ucase, 9) = " EXTENDS " then 
          ' okay
          bTypesOnly = true
+         bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       elseif right(sLine_ucase, 1) = "." then 
          sDot = "."  ' okay
@@ -408,6 +407,8 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
          If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+            pDoc->bRegenerateCode = true
+            GenerateFormCode(pDoc)
             ParseDocument(pDoc)
          End If   
       end if
@@ -427,27 +428,30 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
             
             if bTypesOnly = false then
                if pData->id = DB2_STANDARDDATATYPE then
+                  st = pData->VariableType
                   if nLenMatchWord then
-                     if left(ucase(pData->ElementValue), nLenMatchWord) = pDoc->sMatchWord THEN 
-                        sList = sList & pData->ElementValue & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
+                     if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
+                        sList = sList & st & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
                      END IF
-                  else   
-                     sList = sList & pData->ElementValue & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
+                  else
+                     if len(st) then      
+                        sList = sList & st & "?" & str(IMAGE_AUTOC_BASETYPE) & "|"
+                     end if   
                   END IF
                END IF      
             end if
-            
+    
             if pData->id = DB2_TYPE THEN
                if bTypesOnly then
                   if pData->IsEnum then continue do
                   if bTypesNotPreloaded then
-                     ' Only look at TYPES that are loade dinto the editor. These would
+                     ' Only look at TYPES that are loaded into the editor. These would
                      ' be entries that have a Filename attached to them. Preloaded TYPES
                      ' from WinAPI or Afx do not have Filenames.
                      if len(pData->fileName) = 0 then continue do
                   end if
                END IF
-               st = trim(AfxStrParse(pData->ElementValue, 1, " "))
+               st = rtrim(pData->VariableType)
                if nLenMatchWord then
                   if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
                      If ExistsInAutocompleteList(sList, st) = false THEN 
@@ -473,10 +477,8 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                bIsTHIS = pData->IsTHIS
                
                ' Construct the popup list by retrieving all elements
-               ' related to the TYPE name. We get the first "|" because it is
-               ' possible that the ElementValue holds both the TYPE forward
-               ' reference as well as a CodeTip.
-               sLookFor = AfxStrParse(pData->ElementValue, 1, "|")
+               ' related to the TYPE name. 
+               sLookFor = pData->VariableType
    
                ' Lookup the TYPE because we need to ensure that we are using
                ' the true TYPE and not the ALIAS name. When the TYPE is found, the
@@ -491,7 +493,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                   ub = ubound(AllTypes) + 1
                   redim preserve AllTypes(ub)
                   ' the true TYPE associated with the variable
-                  AllTypes(ub) = ucase(AfxStrParse(pData->ElementValue, 1, "|"))
+                  AllTypes(ub) = ucase(pData->VariableType)
                   sLookFor = pData->TypeExtends
                loop 
                iNextType = lbound(AllTypes)
@@ -534,7 +536,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                            
                            case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY    ' 2 parse parts  mytype.MyFunction
                               st = AfxStrParse(sElement, 2, ".")   ' Get the MyFunction portion
-                              
+
                               ' If this is a Property then we need to append either (Get) or (Set) to
                               ' the name in order to differentiate them in any autocomplete popup.
                               sProp = ""
@@ -569,7 +571,8 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
 
    end select
      
-   sList = trim(sList, "|")
+   sList = trim(sList, any "| ")
+   sList = AfxStrRemove( sList, " ")
    if len(sList) THEN
       ' Save the code editor starting position 
       pDoc->AutoCStartPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)

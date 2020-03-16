@@ -72,6 +72,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_DUPLICATELINE, L(28,"Duplicate Current Line") & Chr(9) & "Ctrl+D"
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEUP, L(29,"Move Up Current Line") & Chr(9) & "Ctrl+Shift+Up"
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_MOVELINEDOWN, L(30,"Move Down Current Line") & Chr(9) & "Ctrl+Shift+Down"
+              AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_NEWLINEBELOWCURRENT, L(403,"New Line Below Current Line") & Chr(9) & "Ctrl+Enter"
          hPopUpSubMenu = CreatePopupMenu
             AppendMenu hPopUpMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpSubMenu), L(31,"Case Conversions")
               AppendMenu hPopUpSubMenu, MF_ENABLED, IDM_TOUPPERCASE, L(32,"Selection to Upper Case") & Chr(9) & "Ctrl+Alt+U"
@@ -289,6 +290,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_PRIOR,      IDM_GOTOPREVFUNCTION )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_PLUS,   IDM_ZOOMIN )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_OEM_MINUS,  IDM_ZOOMOUT )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_RETURN,     IDM_NEWLINEBELOWCURRENT )
 
 
 

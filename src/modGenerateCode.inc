@@ -534,7 +534,7 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
          ' If the Event/function does not already exist in code then create it now.
          pDoc->bNeedsParsing = true
          ParseDocument( pDoc )
-         
+
          ' Only check if we are not loading the project because the event handling
          ' could already exist but just be in another source code file that has
          ' not yet been loaded.
@@ -1029,6 +1029,11 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    ' Save the generated codegen code because we will output it to a disk file
    pDoc->wszFormCodeGen = wszCodeGen
    pDoc->bRegenerateCode = false
+   ' IMPORTANT to set the document to need parsing because the code generation
+   ' has changed. When document is saved then the reparse flag must be TRUE
+   ' otherwise the second pass during the parse will not fire and get the
+   ' code generation variables included into the database.
+   pDoc->bNeedsParsing = true
    
    function = 0
 end function

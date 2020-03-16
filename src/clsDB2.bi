@@ -32,11 +32,12 @@ type DB2_DATA
    id           as LONG            ' See DB_* above for what type of record this is.
    nLineNum     as long            ' Location in the file where found
    ElementName  as string          ' Function name / Variable Name / Type Name
-   ElementValue as string          ' Function Calltip / TYPE associated with ElementName variable
+   ElementData  as string          ' Generic text data related to ElementName (todo text, etc)
+   CallTip      as string          ' Function Calltip associated with ElementName variable
+   VariableType as string          ' The type of variable this is. Could be a TYPE name.
    TypeExtends  as String          ' The TYPE is extended from this TYPE
    IsPublic     as Boolean = true  ' Element is public in a TYPE (default) 
    IsTHIS       as Boolean         ' Dynamically set in DereferenceLine so caller can show/hide private elements
-   IsWinApi     as Boolean         ' If data item is WinApi related
    IsEnum       as Boolean         ' If TYPE is treated as an ENUM
    GetSet       as ClassProperty   ' 0=sub/function, 1=propertyGet, 2=propertySet, 3=ctor, 4=dtor
 END TYPE
@@ -48,9 +49,8 @@ TYPE clsDB2
       
    public:  
       declare function dbAdd( byval parser as clsParser ptr, byval id as long) as DB2_DATA ptr
-      declare function dbDelete( byref wszFilename as WString, byval nParseStartLine as long ) as long
+      declare function dbDelete( byref wszFilename as WString ) as long
       declare function dbDeleteAll() as boolean
-      declare function dbDeleteWinAPI() as boolean
       declare function dbRewind() as LONG
       declare function dbGetNext() as DB2_DATA ptr
       declare function dbSeek( byval sLookFor as string, byval Action as long, byval sFilename as string = "" ) as DB2_DATA ptr

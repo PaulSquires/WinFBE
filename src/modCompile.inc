@@ -652,7 +652,10 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                if pDoc then
                   if pDoc->IsDesigner then
                      if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
-                     if len(pDoc->wszFormCodegen) = 0 then GenerateFormCode(pDoc)   ' regenerate visual designer code
+                     if len(pDoc->wszFormCodegen) = 0 then 
+                        pDoc->bRegenerateCode = true
+                        GenerateFormCode(pDoc)   ' regenerate visual designer code
+                     end if   
                      ' Offset is based on form metadata + code generation
                      pDoc->ErrorOffset = 0
                      pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 

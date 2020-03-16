@@ -200,7 +200,7 @@ end function
 
 
 ' ========================================================================================
-' Position editor to document/function under the current caret position
+' Position editor to document/function/variable under the current caret position
 ' ========================================================================================
 private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
 
@@ -218,30 +218,37 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
       wszFilename = gApp.IncludeFilename 
    else
 
-      ' Determine the word at the current caret position.
-      sFunctionName = pDoc->GetWord
-      
-      ' Determine if the function name is part of a class. This would be identified
-      ' by a preceeding "." or "->" symbol.  eg  pDoc->GetCurrentLineNumber
-      dim as long curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
-      dim as long wordStartPos = SciExec( hEdit, SCI_WORDSTARTPOSITION, curPos, True)
-      sTrigger = right( pDoc->GetWord( wordStartPos - 1 ), 1 )
-      if sTrigger = ">" then sTrigger = "->"
-      if ( sTrigger = "." ) orelse ( sTrigger = "->" ) then
-         ' In the DereferenceLine function any "->" are converted to "." for simplicity.
-         pData = DereferenceLine( pDoc, sTrigger, wordStartPos - 1 )
-         if pData then 
-            sFunctionName = AfxStrParse(pData->ElementValue, 1, "|") & "." & sFunctionName
-            ' Set pData to null because it currently points at the TYPE definition and
-            ' we the gdb2 searches below to actually find the sub/function.
-            pData = 0
-         end if
-      end if   
+      ' Determine the word at the current caret position if nothing is selected.
+      sFunctionName = trim(pDoc->GetSelText)
+      if len(sFunctionName) = 0 then sFunctionName = trim(pDoc->GetWord)
 
-      ' Search the list of Function names
-      if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
-      if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
-      if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
+      if len(sFunctionName) then
+         ' Determine if the function name is part of a class. This would be identified
+         ' by a preceeding "." or "->" symbol.  eg  pDoc->GetCurrentLineNumber
+         dim as long curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+         dim as long wordStartPos = SciExec( hEdit, SCI_WORDSTARTPOSITION, curPos, True)
+         sTrigger = right( pDoc->GetWord( wordStartPos - 1 ), 1 )
+         if sTrigger = ">" then sTrigger = "->"
+         if ( sTrigger = "." ) orelse ( sTrigger = "->" ) then
+            ' In the DereferenceLine function any "->" are converted to "." for simplicity.
+            pData = DereferenceLine( pDoc, sTrigger, wordStartPos - 1 )
+            if pData then 
+               sFunctionName = pData->VariableType & "." & sFunctionName
+               ' Set pData to null because it currently points at the TYPE definition and
+               ' we the gdb2 searches below to actually find the sub/function.
+               pData = 0
+            end if
+         end if   
+
+         ' Search the list of Function names
+         if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
+         if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
+         if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
+         ' Search for variable definitions
+         if pData = 0 then pData = gdb2.dbFindVariable( sFunctionName )
+         ' Search for the TYPE definition
+         if pData = 0 then pData = gdb2.dbFindType( sFunctionName )
+      end if
       
       IF pData = 0 then
          MessageBox( HWND_FRMMAIN, L(224,"Sub/Function definition not found."), @WStr(APPNAME), MB_ICONWARNING)
@@ -254,7 +261,7 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
    gLastPosition.pDoc       = pDoc
    gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
    gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   OpenSelectedDocument( wszFilename, sFunctionName )
+   OpenSelectedDocument( wszFilename, sFunctionName, pData->nLineNum )
 
    Function = 0
 End Function
@@ -418,6 +425,7 @@ public Function frmMain_SetStatusbar() as long
       
       wszText = ""
       Select Case pDoc->ProjectFileType
+         Case FILETYPE_HEADER:    wszText = ucase(L(175,"Header")) 
          Case FILETYPE_NORMAL:    wszText = ucase(L(210,"Normal")) 
          Case FILETYPE_MODULE:    wszText = ucase(L(211,"Module"))
          Case FILETYPE_MAIN:      wszText = ucase(L(212,"Main"))
@@ -617,17 +625,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             ' every call to the parser would happen even in cases where only directional 
             ' movement has occured with no text modifications at all.
             pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc Then 
-               pDoc->bNeedsParsing = true
-               ' 1.8.8 Tried changing the parse routine to only parse from the modified line
-               ' to the end of the file. The problem with that is that the parser looks for starting
-               ' Sub/Function and End Sub / End Function line. Same thing with TYPE/END TYPE and ENUMS.
-               ' If we start parsing in the middle of one of those block structures then we will
-               ' not have them recognized because only the end points will be found in the parse.
-               ' For now, until a better algorithm is found, it is wise to simply reparse the 
-               ' whole file.
-               pDoc->ParseStartLine = 0  'pDoc->GetCurrentLineNumber
-            end if
+            If pDoc Then pDoc->bNeedsParsing = true
             frmMain_SetStatusbar
          end if
          return true
@@ -1589,19 +1587,20 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             frmMain_SetStatusbar
          end if
          
-      Case IDM_COMMENTBLOCK:       pDoc->BlockComment(True) 
-      Case IDM_UNCOMMENTBLOCK:     pDoc->BlockComment(False) 
-      Case IDM_DUPLICATELINE:      pDoc->LineDuplicate()
-      Case IDM_MOVELINEUP:         pDoc->MoveCurrentLines(False) 
-      Case IDM_MOVELINEDOWN:       pDoc->MoveCurrentLines(True)  
-      Case IDM_TOUPPERCASE:        pDoc->ChangeSelectionCase(1)
-      Case IDM_TOLOWERCASE:        pDoc->ChangeSelectionCase(2)
-      Case IDM_TOMIXEDCASE:        pDoc->ChangeSelectionCase(3)
-      Case IDM_EOLTOCRLF:          pDoc->ConvertEOL(SC_EOL_CRLF)
-      Case IDM_EOLTOCR:            pDoc->ConvertEOL(SC_EOL_CR)
-      Case IDM_EOLTOLF:            pDoc->ConvertEOL(SC_EOL_LF)
-      Case IDM_TABSTOSPACES:       pDoc->TabsToSpaces()
-      Case IDM_SELECTLINE:         pDoc->SelectLine(-1)
+      Case IDM_COMMENTBLOCK:        pDoc->BlockComment(True) 
+      Case IDM_UNCOMMENTBLOCK:      pDoc->BlockComment(False) 
+      Case IDM_DUPLICATELINE:       pDoc->LineDuplicate()
+      Case IDM_MOVELINEUP:          pDoc->MoveCurrentLines(False) 
+      Case IDM_MOVELINEDOWN:        pDoc->MoveCurrentLines(True)  
+      Case IDM_NEWLINEBELOWCURRENT: pDoc->NewLineBelowCurrent()  
+      Case IDM_TOUPPERCASE:         pDoc->ChangeSelectionCase(1)
+      Case IDM_TOLOWERCASE:         pDoc->ChangeSelectionCase(2)
+      Case IDM_TOMIXEDCASE:         pDoc->ChangeSelectionCase(3)
+      Case IDM_EOLTOCRLF:           pDoc->ConvertEOL(SC_EOL_CRLF)
+      Case IDM_EOLTOCR:             pDoc->ConvertEOL(SC_EOL_CR)
+      Case IDM_EOLTOLF:             pDoc->ConvertEOL(SC_EOL_LF)
+      Case IDM_TABSTOSPACES:        pDoc->TabsToSpaces()
+      Case IDM_SELECTLINE:          pDoc->SelectLine(-1)
 
       Case IDM_SELECTALL
          ' Check if the Compiler log file or Notes windows or Snippets have
@@ -1664,24 +1663,49 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_FINDNEXTACCEL, IDM_FINDPREVACCEL   ' F3/Shift+F3
          if pDoc = 0 then exit function
 
-         dim as long startPos, endPos, curPos, mainSel
-         Dim As String sFindText = pDoc->GetSelText()
+         dim as long startPos, endPos, curPos, mainSel, r
+         Dim As String sFindText = pDoc->GetSelText
          
          ' Use a static string variable to keep track of the F3/Shift F3 information
          ' We use the static value if there is no currently selected word/phrase.
          static as string sFindTextStatic
-         if len(sFindText) = 0 then sFindText = sFindTextStatic
+         if (len(sFindText) = 0) and (len(sFindTextStatic) <> 0) then 
+            sFindText = sFindTextStatic
+         end if
          sFindTextStatic = sFindText
          
          if len(sFindText) then
             curPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-            startPos = iif( id = IDM_FINDNEXTACCEL, curPos + 1, curPos - 1 )
-            endPos = iif( id = IDM_FINDNEXTACCEL, SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0), 0)
-            SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-            SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-            ' Search for the text to find
-            dim as long r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
-            If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
+            if id = IDM_FINDNEXTACCEL then
+               startPos = curPos + 1
+               endPos = SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0)
+               SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+               SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+               ' Search for the text to find
+               r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+               If r = -1 Then
+                  ' No match found. Do search starting from the beginning of the file.
+                  SciExec( hEdit, SCI_SETTARGETSTART, 0, 0)
+                  r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+               end if
+               If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
+               
+            elseif id = IDM_FINDPREVACCEL then
+               startPos = curPos - 1
+               endPos = 0
+               SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+               SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+               ' Search for the text to find
+               r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+               If r = -1 Then
+                  ' No match found. Do search starting from the end of the file.
+                  startPos = SciExec( hEdit, SCI_GETTEXTLENGTH, 0, 0)
+                  SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+                  r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
+               end if
+               If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
+               
+            end if
          end if
 
       Case IDM_GOTO
@@ -1843,7 +1867,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
            if OnCommand_FileClose( HWnd, EFC_CLOSECURRENT ) = false then exit function
          end if  
          ' File close succeeded. Remove this document from the project collection and remove treeview node. 
-         gdb2.dbDelete( pDoc->DiskFilename, 0 )
+         gdb2.dbDelete( pDoc->DiskFilename )
          Treeview_DeleteItem( hTV, hItem)
          frmMain_RemoveFromComboFiles( pDoc )
          gApp.RemoveDocument( pDoc )

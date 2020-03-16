@@ -82,6 +82,7 @@
 #include once "clsParser.bi"
 
 
+
 ''
 ''
 constructor clsDB2
@@ -127,8 +128,7 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
       select CASE id
          case DB2_STANDARDDATATYPE
             .ElementName  = parser->typeName
-            .ElementValue = parser->typeName
-            .IsWinApi     = parser->IsWinApi
+            .VariableType = parser->typeName
             if .ElementName = "" then exit function
             
          case DB2_TYPE    ' this handles ENUM also
@@ -136,22 +136,20 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
             if this.dbFindTYPE( parser->typeName) then return 0
             .nLineNum     = parser->funcLineNum
             .ElementName  = parser->typeName
-            .ElementValue = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
-            .IsWinApi     = parser->IsWinApi
+            .VariableType = parser->typeAlias  ' same as typeName unless it was an ALIAS (always search using this name)
             .IsEnum       = parser->IsEnum
             .TypeExtends  = parser->TypeExtends
             if .ElementName = "" then exit function
          
          case DB2_TODO
             .ElementName  = ""
-            .ElementValue = parser->todoText
+            .ElementData  = parser->todoText
             .nLineNum     = parser->lineNum + 1  ' display in listview
          
          case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY   
             .nLineNum     = parser->funcLineNum
             .ElementName  = parser->funcName
-            .ElementValue = parser->funcParams   ' Calltip
-            .IsWinApi     = parser->IsWinApi
+            .CallTip      = parser->funcParams   ' Calltip
             .GetSet       = parser->GetSet
             if .ElementName = "" then exit function
          
@@ -164,9 +162,9 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
                ' funcName is already mytype.MyFunctionName
                .ElementName = parser->funcName & "." & parser->varName
             end if
-            .ElementValue = parser->varType 
+            .CallTip      = parser->funcParams   ' Calltip
+            .VariableType = parser->varType
             .IsPublic     = parser->bInTypePublic
-            .IsWinApi     = parser->IsWinApi
             if .ElementName = "" then exit function
 
       END SELECT
@@ -193,18 +191,14 @@ end function
 
 ''
 ''
-function clsDB2.dbDelete( byref wszFilename as WString, _
-                          byval nParseStartLine as long _
-                           ) as long
+function clsDB2.dbDelete( byref wszFilename as WString ) as long
    dim nCount as long 
    dim as CWSTR wszFile = ucase(wszFilename)
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       if m_arrData(i).deleted = true then continue for
       if ucase(m_arrData(i).fileName) = wszFile THEN
-         if m_arrData(i).nLineNum >= nParseStartLine then
-            m_arrData(i).deleted = true
-            nCount = nCount + 1
-         end if
+         m_arrData(i).deleted = true
+         nCount = nCount + 1
       END IF   
    NEXT
    function = nCount
@@ -216,17 +210,6 @@ function clsDB2.dbDeleteAll() as boolean
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       m_arrData(i).deleted = true
       function = true
-   NEXT
-end function
-
-''
-''
-function clsDB2.dbDeleteWinAPI() as boolean
-   for i as long = lbound(m_arrData) to ubound(m_arrData)
-      if m_arrData(i).IsWinApi THEN
-         m_arrData(i).deleted = true
-         function = true
-      END IF
    NEXT
 end function
 
@@ -352,8 +335,8 @@ function clsDB2.dbFindTYPE( byref sTypeName as string ) as DB2_DATA ptr
    pData = this.dbSeek(sTypeName, DB2_TYPE) 
    if pData = 0 then return 0
    ' If this Type is an ALIAS for another Type then get that real type
-   if ucase(pData->ElementName) <> ucase(pData->ElementValue) then
-      return this.dbSeek(pData->ElementValue, DB2_TYPE) 
+   if ucase(pData->ElementName) <> ucase(pData->VariableType) then
+      return this.dbSeek(pData->VariableType, DB2_TYPE) 
    END IF   
    return pData
 end function
@@ -365,110 +348,54 @@ function clsDB2.dbDebug() as long
    dim pStream as CTextStream
    pStream.Create("_debug.txt")
 
+   dim as CWSTR wszTitle
+   dim as long dataType
+   
    dim pData as DB2_DATA ptr
    
    ' PRINT ALL TYPES
-   pStream.WriteLine "CLASSES/TYPES"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_TYPE then continue do
-      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
-      pStream.WriteLine "   CLASSES/TYPES"
-      pStream.WriteLine "   fileName: " & pData->fileName
-      pStream.WriteLine "   ElementName: " & pData->ElementName
-      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-      pStream.WriteLine "   lineNum: " & pData->nLineNum
-      pStream.WriteLine ""
-   loop
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-      
-   ' PRINT ALL FUNCTIONS
-   pStream.WriteLine "FUNCTIONS"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_FUNCTION then continue do
-      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
-      pStream.WriteLine "   FUNCTIONS"
-      pStream.WriteLine "   fileName: " & pData->fileName
-      pStream.WriteLine "   ElementName: " & pData->ElementName
-      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-      pStream.WriteLine "   lineNum: " & pData->nLineNum
-      pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
-      pStream.WriteLine ""
-   loop
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-      
-   ' PRINT ALL SUBS
-   pStream.WriteLine "SUBS"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_SUB then continue do
-      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
-      pStream.WriteLine "   SUBS"
-      pStream.WriteLine "   fileName: " & pData->fileName
-      pStream.WriteLine "   ElementName: " & pData->ElementName
-      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-      pStream.WriteLine "   lineNum: " & pData->nLineNum
-      pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
-      pStream.WriteLine ""
-   loop
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-   pStream.WriteLine ""
+   for i as long = 1 to 5
+      select case i
+         case 1
+            wszTitle = "CLASSES/TYPES"
+            dataType = DB2_TYPE
+         case 2
+            wszTitle = "FUNCTIONS"
+            dataType = DB2_FUNCTION
+         case 3
+            wszTitle = "SUBS"
+            dataType = DB2_SUB
+         case 4
+            wszTitle = "PROPERTY"
+            dataType = DB2_PROPERTY
+         case 5
+            wszTitle = "VARIABLES"
+            dataType = DB2_VARIABLE
+      end select
 
-
-   ' PRINT ALL PROPERTIES
-   pStream.WriteLine "PROPERTIES"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_PROPERTY then continue do
-      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
-      pStream.WriteLine "   PROPERTIES"
-      pStream.WriteLine "   fileName: " & pData->fileName
-      pStream.WriteLine "   ElementName: " & pData->ElementName
-      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-      pStream.WriteLine "   lineNum: " & pData->nLineNum
-      pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
+      pStream.WriteLine wszTitle
+      this.dbRewind()
+      do 
+         pData = this.dbGetNext
+         if pData = 0 THEN exit do
+         if pData->id <> dataType then continue do
+         'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
+         pStream.WriteLine "   " & wszTitle
+         pStream.WriteLine "   deleted: "           & pData->deleted
+         pStream.WriteLine "   fileName: "          & pData->fileName
+         pStream.WriteLine "   ElementName: "       & pData->ElementName
+         pStream.WriteLine "   VariableType:"       & pData->VariableType
+         pStream.WriteLine "   CallTip: "           & pData->CallTip
+         pStream.WriteLine "   lineNum: "           & pData->nLineNum
+         pStream.WriteLine "   Get/Set/ctor/dtor: " & pData->GetSet
+         pStream.WriteLine "   IsPublic (TYPE elements): " & pData->IsPublic
+         pStream.WriteLine ""
+      loop
       pStream.WriteLine ""
-   loop
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-   pStream.WriteLine ""
-
-
-   ' PRINT ALL VARIABLES
-   pStream.WriteLine "VARIABLES"
-   this.dbRewind()
-   do 
-      pData = this.dbGetNext
-      if pData = 0 THEN exit do
-      if pData->deleted = true THEN continue do
-      if pData->id <> DB2_VARIABLE then continue do
-      'if len(pData->fileName) = 0 then continue do  ' bypass any predefined data
-      pStream.WriteLine "   VARIABLES"
-      pStream.WriteLine "   fileName: " & pData->fileName
-      pStream.WriteLine "   ElementName: " & pData->ElementName
-      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-      pStream.WriteLine "   IsPublic (TYPE elements): " & pData->IsPublic
-      pStream.WriteLine "   lineNum: " & pData->nLineNum
       pStream.WriteLine ""
-   loop
+      pStream.WriteLine ""
+
+   next
    pStream.WriteLine ""
    
 '   ' PRINT ALL TODO

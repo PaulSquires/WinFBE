@@ -1,7 +1,10 @@
 Version 2.0.9
 Editor:
+- Added: From anywhere on the current line pressing Ctrl+ENTER creates a new line immediately below the current line and positions the cursor to the start of that new line.
 - Added: F4 popup Function List will now select the current active sub/function name (previously it would always select the parent document node).
-- Fixed: Refactor some of the parsing engine to better display autocomplete popup and codetips.
+- Added: Pressing F6 on a TYPE name will reposition you to the TYPE/END TYPE structure definition. Shift+F6 to return to previous editing position.
+- Added: F3 and Shift+F3 finding of current highlighted text will now do wrap around searching of the text buffer.
+- Fixed: Refactored some of the parsing engine to better display autocomplete popup and codetips.
 
 Visual Designer:
 - Added: TextBox/RichEdit SelectionChanged event.

@@ -35,7 +35,7 @@ enum
    ACTION_PARSECONSTRUCTOR
    ACTION_PARSEDESTRUCTOR
 end enum
-
+      
 type clsParser
    public:
       fileName        as CWSTR
@@ -54,7 +54,6 @@ type clsParser
       todoText        as string        ' text description associated with a TODO item
       bInTypePublic   as Boolean       ' PRIVATE/PUBLIC sections of a TYPE
       Description     as string        ' Text from '#Description: tag
-      IsWinApi        as boolean       ' If windows.bi was found then database items added
       IsEnum          as Boolean       ' The TYPE is treated as an ENUM
       GetSet          as ClassProperty ' 0=sub/function, 1=propertyGet, 2=propertySet
       TypeExtends     as String        ' The TYPE is extended from this TYPE

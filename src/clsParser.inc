@@ -115,6 +115,11 @@ function clsParser.InspectLine() as boolean
             if i THEN 
                this.typeName  = trim(mid(st, 6, (i-6)))
                this.typeAlias = trim(AfxStrRemainI(st, " AS "))
+               ' Determine if this is an ALIAS for a Function or Sub similar to the following example:
+               ' Type Scintilla_DirectFunction As Function CDECL( ByVal As Any Ptr, ByVal As UINT, ByVal As WPARAM, ByVal As LPARAM ) As LRESULT
+               if left(ucase(this.typeAlias), 8) = "FUNCTION" then
+                  this.typeAlias = this.typeName
+               end if
                gdb2.dbAdd( @this, DB2_TYPE )
                this.typeName  = "": this.typeAlias = ""
                this.funcLineNum = this.lineNum
