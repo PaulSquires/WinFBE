@@ -48,7 +48,7 @@
 ### Methods
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
-| Close | Closes the form.|
+| Close | Closes the form. frmMain.Close( ByVal ReturnValue As Long = 0 ) |
 | Hide | Conceals the form from the user.|
 | Refresh | Forces the form to invalidate its client area and immediately redraw itself and any child controls.|
 | SetBounds | Sets the bounds of the form to the specified location and size. SetBounds(left, top, width, height).|
@@ -81,7 +81,7 @@
 | Move | Occurs when the form is moved.|
 | Resize | Occurs when the form is resized.|
 | Shown | Occurs whenever the form is first displayed.|
-
+| MessagePumpHook | Injects user defined code directly into the Form message pump. Return True if process the message and want to skip the remainder of the message pump.|
 
 
 Form events in a specific order every time a form is created and shown. 

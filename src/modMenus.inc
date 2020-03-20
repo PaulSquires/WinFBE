@@ -232,7 +232,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINFBX, "WinFBX Framework Help"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPWINAPI, "WinAPI Help"
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPTIPS, L(220,"Editing Tips") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_HELPSHORTCUTS, L(220,"Keyboard Shortcuts") & "..."
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_CHECKFORUPDATES, L(91,"Check for Updates")
          AppendMenu hPopUpMenu, MF_SEPARATOR, 0, ""
@@ -363,7 +363,7 @@ public Function frmMain_ChangeTopMenuStates() As Long
    EnableMenuItem hMenu, IDM_HELPWINAPI, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINFBE, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_HELPWINFBX, MF_BYCOMMAND Or MF_ENABLED
-   EnableMenuItem hMenu, IDM_HELPTIPS, MF_BYCOMMAND Or MF_ENABLED
+   EnableMenuItem hMenu, IDM_HELPSHORTCUTS, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_CHECKFORUPDATES, MF_BYCOMMAND Or MF_ENABLED
    EnableMenuItem hMenu, IDM_ABOUT, MF_BYCOMMAND Or MF_ENABLED
 

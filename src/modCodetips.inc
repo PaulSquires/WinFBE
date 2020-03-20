@@ -99,7 +99,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    dim as long curPos  = nPosition   
    dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
    dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
-   
+
    ' Comment out any comment line so the popup isn't activated when in a comment. 
    sLine = MaskStringCharacters(sLine)
    sLine = RemoveComments(sLine)
@@ -239,26 +239,62 @@ END FUNCTION
 ' ========================================================================================
 ' Show codetips
 ' ========================================================================================
-private function ShowCodetip( byval pDoc as clsDocument ptr) as BOOLEAN
+private function ShowCodetip( byval pDoc as clsDocument ptr, _
+                              byval bCommaTrigger as Boolean = false _
+                              ) as BOOLEAN
 
    if gConfig.CodeTips = false then exit function
    
    dim pData as DB2_DATA ptr
    dim as string codeTip
-   dim as hwnd hEdit   = pDoc->hWndActiveScintilla
-   dim as long curPos  = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
-
-   ' If the file is dirty then reparse it before attempting the codetip
-   If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-      pDoc->bRegenerateCode = true
-      GenerateFormCode(pDoc)
-      ParseDocument( pDoc )
-   End If   
+   dim as hwnd hEdit  = pDoc->hWndActiveScintilla
+   dim as long curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
    
-   pData = DereferenceLine(pDoc, "(", curPos-1)
-   if pData then codeTip = pData->CallTip
+   if bCommaTrigger then
+      ' It is possible that a codetip had been displayed but the user moved off of the
+      ' current line and thereby closed the codetip. If user goes back to the line and
+      ' presses a comma to enter another parameter for function, then we should do a 
+      ' test to see if we can redisplay the codetip popup again.
+      ' Need to alo handle situations where there are multiple () array references
+      ' in the expression. For example:  ListView1.Item(10).rc(5)
+      dim as long nCol = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
+      dim as string sLine = rtrim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
+      dim as boolean bInClosed
+      for i as long = len(sLine) -1 to 0 step -1
+         if sLine[i] = asc(")") then 
+            bInClosed = true: continue for
+         end if
+         if sLine[i] = asc("(") then
+            if bInClosed = true then
+               bInClosed = false
+            else
+               exit for
+            end if
+         end if         
+         curPos = curPos - 1
+      next
+   end if
+
+   ' If a CodeTip already exists but was cancelled because an autocomplete
+   ' popup was displayed then we simply redisplay that popup now.
+   if len(pDoc->wszLastCallTip) andalso (pDoc->nLastCallTipLine = pDoc->GetCurrentLineNumber) then
+      codeTip = pDoc->wszLastCallTip   
+   else      
+      pDoc->wszLastCallTip = ""
+      pDoc->nLastCallTipLine = -1
+      ' If the file is dirty then reparse it before attempting the codetip
+      If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+         pDoc->bRegenerateCode = true
+         GenerateFormCode(pDoc)
+         ParseDocument( pDoc )
+      End If   
+      pData = DereferenceLine(pDoc, "(", curPos-1)
+      if pData then codeTip = pData->CallTip
+   end if
 
    if len(codeTip) THEN 
+      pDoc->wszLastCallTip = codeTip
+      pDoc->nLastCallTipLine = pDoc->GetCurrentLineNumber
       codeTip = FormatCodetip(codeTip)
       SciExec( hEdit, SCI_CALLTIPSHOW, curPos, strptr(codeTip))
       return TRUE
@@ -372,6 +408,9 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       elseif right(sLine_ucase, 1) = "(" then 
          ShowCodetip(pDoc)
          exit function 
+      elseif right(sLine_ucase, 1) = "," then 
+         ShowCodetip(pDoc, true)
+         exit function 
       elseif right(sLine_ucase, 5) = " NEW " then 
          ' okay
          bTypesOnly = false
@@ -467,6 +506,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                END IF
             END IF
          loop
+
 
       case AUTOCOMPLETE_TYPE
          pData = DereferenceLine( pDoc, sDot, curPos )

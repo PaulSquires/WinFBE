@@ -203,7 +203,7 @@
 <tbody>
 <tr class="odd">
 <td>Close</td>
-<td>Closes the form.</td>
+<td>Closes the form. frmMain.Close( ByVal ReturnValue As Long = 0 )</td>
 </tr>
 <tr class="even">
 <td>Hide</td>
@@ -327,6 +327,10 @@
 <tr class="even">
 <td>Shown</td>
 <td>Occurs whenever the form is first displayed.</td>
+</tr>
+<tr class="odd">
+<td>MessagePumpHook</td>
+<td>Injects user defined code directly into the Form message pump. Return True if process the message and want to skip the remainder of the message pump.</td>
 </tr>
 </tbody>
 </table>

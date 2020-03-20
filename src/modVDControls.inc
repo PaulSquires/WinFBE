@@ -492,6 +492,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
+         AddControlEvent(pCtrl, "MessagePumpHook")
       
       case CTRL_LABEL
          AddControlEvent(pCtrl, "Click")

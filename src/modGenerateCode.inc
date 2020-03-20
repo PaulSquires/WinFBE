@@ -510,8 +510,6 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    wszStartTag = "' WINFBE_CODEGEN_START"
    wszEndTag   = "' WINFBE_CODEGEN_END"
 
-   wszText = "#include once " & DQ & "WinFormsX\WinFormsX.bi" & DQ & vbcrlf 
-
    ''
    ''  Generate the Declares for all of the Events for any MainMenu for the Form 
    ''
@@ -684,10 +682,14 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                wszFunction = wszFormName
                if pCtrl->ControlType <> CTRL_FORM then wszFunction = wszFunction & "_" & wszCtrlName
                wszFunction = wszFunction & "_" & pCtrl->Events(ii).wszEventName 
-               
-               ' Define the function prototype/declaration
-               wszPrototype = "Function " & wszFunction & "( ByRef sender As " & _
-               GetWinformsXClassName(pCtrl->ControlType) & ", ByRef e As EventArgs ) As LRESULT" & vbcrlf
+
+               if ucase(pCtrl->Events(ii).wszEventName) = "MESSAGEPUMPHOOK" then
+                  wszPrototype = "Function " & wszFunction & "( byval lpMSG as MSG ptr ) as boolean" & vbcrlf & vbcrlf 
+               else
+                  ' Define the function prototype/declaration
+                  wszPrototype = "Function " & wszFunction & "( ByRef sender As " & _
+                  GetWinformsXClassName(pCtrl->ControlType) & ", ByRef e As EventArgs ) As LRESULT" & vbcrlf
+               end if
 
                ' Add the event/function to the list of declares
                wszAllDeclares = wszAllDeclares & "Declare " & wszPrototype
@@ -976,7 +978,14 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
    wszText = wszText & _ 
    "dim shared " & wszFormName & " as " & wszFormName & "Type" & vbcrlf
    
-   wszCodeGen = wszStartTag & vbcrlf & wszText & wszEndTag & vbcrlf 
+   ' We need to wrap the CodeGen in comment block. This is because the CodeGen is output
+   ' during the compile (without comment block) and then later #include'd at the end of
+   ' output compile code with comment block in order to prevent duplicate definition errors.
+   wszCodeGen = wszStartTag & vbcrlf & _
+                "#if 0" & vbcrlf & _
+                wszText & _
+                "#endif" & vbcrlf & _
+                wszEndTag & vbcrlf 
                      
    dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
    if SciMsg( pSci, SCI_GETLENGTH, 0 , 0) = 0 then

@@ -41,7 +41,9 @@ END FUNCTION
 ' Get the details of a TODO item
 ' ========================================================================================
 function clsParser.parseToDoItem( byval sText as string ) as boolean
-   dim as long nPos = instr(ucase(sText), "' TODO:")
+   dim as long nPos
+   nPos = instr(ucase(sText), "' TODO:")
+   if nPos = 0 then nPos = instr(ucase(sText), "'TODO:")
    if nPos = 0 THEN return false
    ' Everything leading up to the found "'" must be a space. Use pointer
    ' indexing for speed to bypass expensive ltrim, etc.
@@ -53,7 +55,6 @@ function clsParser.parseToDoItem( byval sText as string ) as boolean
    gdb2.dbAdd( @this, DB2_TODO)
    return true
 end function
-
    
 ' ========================================================================================
 ' Determine if we are inside a multiline comment block

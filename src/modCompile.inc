@@ -1170,6 +1170,18 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' which controls get compiled into the file source.
    dim as CWSTR wszVDEquates, wszCtrlEquate
    dim as boolean bIsVisual = false
+   
+   ' In 2.0.8 and lower, the following two defines were put into the user code
+   ' when a new main.bas file was created by New Project. Fr 2.0.9+ we move that
+   ' code to the WinFBE_VD_MAIN.bas file and comment it out from the Main file.
+   dim as CWSTR wszUnicodeEquate = "#Define UNICODE" & vbcrlf 
+   dim as CWSTR wszDefineWin32Equate = "#Define _WIN32_WINNT &h0602" & vbcrlf
+   
+   wszVDEquates = wszUnicodeEquate & _
+                  wszDefineWin32Equate & _
+                  "#Include Once " & chr(34) & "windows.bi" & chr(34) & vbcrlf & _
+                  "#Include Once " & chr(34) & "Afx\CWindow.inc" & chr(34) & vbcrlf
+      
    pDoc = gApp.pDocList
    do until pDoc = 0
       if pDoc->IsDesigner then 
@@ -1214,13 +1226,57 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       pDoc = pDoc->pDocNext
    loop
 
+   wszVDEquates = wszVDEquates & _
+      "#Include once " & chr(34) & "WinFormsX\WinFormsX.bi" & chr(34) & vbcrlf & _
+      "Using Afx" & vbcrlf 
+
    if bIsVisual then
       dim wszVDMain as CWSTR = gCompile.MainFolder & "WinFBE_VD_MAIN.bas"
       dim pStream as CTextStream
       if pStream.Create(wszVDMain, true, true) = S_OK then 
+         ' Get all of the text from the MAIN pDoc file
+         dim as string wszMainFileText = pDocMain->GetText
+         ' In 2.0.8 and lower, the following two defines were put into the user code
+         ' when a new main.bas file was created by New Project. From 2.0.9+ we move that
+         ' code to the WinFBE_VD_MAIN.bas file and comment it out from the Main file.
+         wszMainFileText = AfxStrReplace( wszMainFileText, wszUnicodeEquate, "'" & wszUnicodeEquate )
+         wszMainFileText = AfxStrReplace( wszMainFileText, wszDefineWin32Equate, "'" & wszDefineWin32Equate )
+         ' Also in pre 2.0.9 versions, the user would have had to #Include the individual form files
+         ' into their main bas file. 2.0.9+ automatically outputs the code the codegen file so we
+         ' need to scan the main file and comment out any files that include a form file.
+         dim as CWSTR wszLookFor, wszAllTYPEs, wszAllEvents
+         pDoc = gApp.pDocList
+         do until pDoc = 0
+            if pDoc <> pDocMain then
+               if pDoc->IsDesigner then 
+                  ' REM out any user entered #include file
+                  wszLookFor = "#include once " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
+                  wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
+                  wszLookFor = "#include " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
+                  wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
+                  
+                  ' Get the code for the TYPE definitions and the EVENTS.
+                  ' Need to remove the #if 0 #endif from the FormCodeGen because we are now outputting
+                  ' the TYPE definitions. The #If 0 will remain in the physical code file so that when
+                  ' it is #included at the end of the main compile file then we won't get any duplicate
+                  ' definition errors.
+                  dim as CWSTR wszTYPE = pDoc->wszFormCodeGen
+                  wszTYPE = AfxStrReplaceI( wszTYPE, "#if 0", "" )
+                  wszTYPE = AfxStrReplaceI( wszTYPE, "#endif", "" )
+                  wszAllTYPEs = wszAllTYPEs & wszTYPE
+                  wszAllEvents = wszAllEvents & _
+                                 "#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
+               end if
+            end if
+            pDoc = pDoc->pDocNext
+         loop
+         
          dim as CWSTR wszText = _
-            wszVDEquates & _
-            "#Include Once " & wDQ & gCompile.MainFilename & wDQ
+                        wszVDEquates    & _
+                        wszAllTYPEs     & _   ' this also includes Declares for the Events
+                        wszMainFileText & _
+                        wszAllEvents
+         
          pStream.WriteLine wszText
          pStream.Close
          gCompile.MainFilename = wszVDMain

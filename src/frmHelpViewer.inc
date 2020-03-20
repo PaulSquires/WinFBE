@@ -66,7 +66,7 @@ public Function ShowContextHelp( byval id as long ) As Long
             wszHelpFilename = gConfig.Win32APIHelpfile 
          END IF
 
-      case IDM_HELPTIPS, IDM_HELPWINFBE, IDM_HELPWINFBX
+      case IDM_HELPSHORTCUTS, IDM_HELPWINFBE, IDM_HELPWINFBX
          frmHelpViewer_Show( HWND_FRMMAIN, id )
          exit function
 
@@ -407,7 +407,7 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
                                     byval idmHelpMessage as long _
                                     ) As LRESULT
 
-   static as Long idxNodeTips = -1
+   static as Long idxNodeShortcuts = -1
    dim as hwnd hTree1, hTree2, hTabCtrl
    
    if IsWindow( HWND_FRMHELPVIEWER ) = 0 then
@@ -513,8 +513,8 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
          elseif gHTMLHelp(i).hTreeview = hTree2 then
             if idxNodeTree2 = -1 then idxNodeTree2 = i
          end if
-         if AfxStrPathName( "NAMEX", ucase( gHTMLHelp(i).wszFilename )) = "EDITING TIPS.HTML" then
-            if idxNodeTips = -1 then idxNodeTips = i
+         if AfxStrPathName( "NAMEX", ucase( gHTMLHelp(i).wszFilename )) = "KEYBOARD SHORTCUTS.HTML" then
+            if idxNodeShortcuts = -1 then idxNodeShortcuts = i
          end if
       next 
 
@@ -533,9 +533,9 @@ public Function frmHelpViewer_Show( ByVal hWndParent As HWnd, _
    ' both test what the active tab page in order to perform their work.
    hTabCtrl = GetDlgItem( HWND_FRMHELPVIEWER, IDC_FRMHELPVIEWER_TABCONTROL )
    select case idmHelpMessage
-      case IDM_HELPTIPS
+      case IDM_HELPSHORTCUTS
          TabCtrl_SetCurSel( hTabCtrl, 0 )
-         frmHelpViewer_DisplayHTML( idxNodeTips )
+         frmHelpViewer_DisplayHTML( idxNodeShortcuts )
       
       case IDM_HELPWINFBE
          TabCtrl_SetCurSel( hTabCtrl, 0 ) 

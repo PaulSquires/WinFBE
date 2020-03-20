@@ -143,16 +143,25 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
          pDoc = OnCommand_FileNew(HWND_FRMMAIN)
          if pDoc then 
             szText = _
-            "#Define UNICODE" & vbcrlf & _
-            "#Define _WIN32_WINNT &h0602" & vbcrlf & _
+            "' " & string(88, asc("=")) & vbcrlf & _
+            "' WinFBE - FreeBASIC Editor (Windows 32/64 bit)" & vbcrlf & _
+            "' Visual Designer auto generated project" & vbcrlf & _
+            "' " & string(88, asc("=")) & vbcrlf & _
             vbcrlf & _
+            "' Main application entry point." & vbcrlf & _
+            "' Place any additional global variables or #include files here." & vbcrlf & _
             vbcrlf & _
-            "#Include Once " & DQ & "windows.bi" & DQ & vbcrlf & _
-            "#Include Once " & DQ & "Afx\CWindow.inc" & DQ & vbcrlf & _
+            "' For your convenience, below are some of the most commonly used WinFBX library" & vbcrlf & _
+            "' include files. Uncomment the files that you wish to use in the project or add" & vbcrlf & _
+            "' additional ones. Refer to the WinFBX Framework Help documentation for information" & vbcrlf & _    
+            "' on how to use the various functions." & vbcrlf & _
             vbcrlf & _
-            "Using Afx" & vbcrlf & _
-            vbcrlf & _
-            "#Include Once " & DQ & "frmMain.inc" & DQ & vbcrlf & _
+            "' #Include Once " & DQ & "Afx\AfxFile.inc"  & DQ & vbcrlf & _
+            "' #Include Once " & DQ & "Afx\AfxStr.inc"   & DQ & vbcrlf & _
+            "' #Include Once " & DQ & "Afx\AfxTime.inc"  & DQ & vbcrlf & _
+            "' #Include Once " & DQ & "Afx\CIniFile.inc" & DQ & vbcrlf & _
+            "' #Include Once " & DQ & "Afx\CMoney.inc"   & DQ & vbcrlf & _
+            "' #Include Once " & DQ & "Afx\CPrint.inc"   & DQ & vbcrlf & _
             vbcrlf & _
             vbcrlf & _
             "Application.Run(frmMain)" & vbcrlf 

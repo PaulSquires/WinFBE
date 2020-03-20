@@ -1,13 +1,22 @@
-Version 2.0.9
+Version 2.0.9 (March 20, 2020)
 Editor:
 - Added: From anywhere on the current line pressing Ctrl+ENTER creates a new line immediately below the current line and positions the cursor to the start of that new line.
 - Added: F4 popup Function List will now select the current active sub/function name (previously it would always select the parent document node).
 - Added: Pressing F6 on a TYPE name will reposition you to the TYPE/END TYPE structure definition. Shift+F6 to return to previous editing position.
 - Added: F3 and Shift+F3 finding of current highlighted text will now do wrap around searching of the text buffer.
+- Added: OPERATOR / END OPERATOR auto insert.
+- Added: Keyboard Shortcuts help file (replaces the previous Editing Tips file). Can display from the Help menu. 
+- Added: CodeTips for functions will redisplay after closing an AutoComplete list popup.
+- Added: Will now recognize 'TODO: in addition to the existing ' TODO:  (notice the difference is the removal of the space between apostrophe and TODO:).
 - Fixed: Refactored some of the parsing engine to better display autocomplete popup and codetips.
+- Fixed: The word "HEADER" was not appearing in the status bar for opn files in the editor marked as a header file.
+- Fixed: Improved the AutoInsert for SELECT CASE when text already exists on the SELECT CASE line itself.
 
 Visual Designer:
+- Added: Notepad example project. Located at \Examples\Visual_Designer_Projects\Notepad
+- Added: MessagePumpHook event added to Form objects.
 - Added: TextBox/RichEdit SelectionChanged event.
+- Added: TextBox/RichEdit TextChanged event.
 - Added: TextBox/RichEdit LinePosition property and ColumnPosition property.
 - Changed: Removed the MaxLength property for Edit and RichEdit controls. Limits are now Edit (32K), RichEdit(1GB). Change via code if needing higher limits.
 - Fixed: Changing RichEdit WordWrap property at runtime will now recreate the control.

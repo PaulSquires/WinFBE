@@ -407,6 +407,8 @@ public function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs when the selected row in a ListView changes."
       CASE "DROPFILES"
          wszEventDescribe = "Occurs whenever files are dropped on a control with the AllowDrop property enabled."
+      CASE "MESSAGEPUMPHOOK"
+         wszEventDescribe = "User defined code injected directly into the message pump."
       CASE "MOUSEMOVE"
          wszEventDescribe = "Occurs when the mouse pointer is moved over the control."
       CASE "MOUSEDOWN"

@@ -398,39 +398,6 @@ function clsDB2.dbDebug() as long
    next
    pStream.WriteLine ""
    
-'   ' PRINT ALL TODO
-'   pStream.WriteLine "TODO DESCRIPTIONS"
-'   this.dbRewind()
-'   do 
-'      pData = this.dbGetNext
-'      if pData = 0 THEN exit do
-'      if pData->projectIndex = -1 THEN continue do
-'      if pData->deleted = true THEN continue do
-'      if pData->id <> DB2_TODO then continue do
-'      pStream.WriteLine "   fileName: " & pData->fileName
-'      pStream.WriteLine "   ElementName: " & pData->ElementName
-'      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-'      pStream.WriteLine "   lineNum: " & pData->nLineNum
-'      pStream.WriteLine ""
-'   loop
-'   pStream.WriteLine ""
-
-'   ' PRINT ALL WINAPI/WINFBX FUNCTION DEFINITIONS
-'   pStream.WriteLine "WINAPI/WINFBX FUNCTIONS"
-'   this.dbRewind()
-'   do 
-'      pData = this.dbGetNext
-'      if pData = 0 THEN exit do
-'      if pData->projectIndex <> -1 THEN continue do
-'      if pData->deleted = true THEN continue do
-'      if pData->id <> DB2_FUNCTION then continue do
-'      pStream.WriteLine "   fileName: " & pData->fileName
-'      pStream.WriteLine "   ElementName: " & pData->ElementName
-'      pStream.WriteLine "   ElementValue: " & pData->ElementValue
-'      pStream.WriteLine ""
-'   loop
-'   pStream.WriteLine ""
-   
    pStream.Close
    function = 0
 end function

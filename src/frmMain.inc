@@ -650,7 +650,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                      
                
       case SCN_AUTOCCANCELLED
-         ' Destroy the secondary popup information window
+         ' Destroy the popup information window
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          If pDoc Then 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
@@ -665,7 +665,6 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          If pDoc Then 
             hEdit = pDoc->hWndActiveScintilla
             ' Get the position where the listbox was opened.
-            'dim as long nStartPos = SciExec( hEdit, SCI_AUTOCPOSSTART, 0, 0 )
             dim as long nStartPos = pDoc->AutoCStartPos
             Dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             ' Get the match word that existed when the listbox was displayed
@@ -688,6 +687,11 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                ' the equals sign to terminate ab autocomplete popup list.
                PostMessage(HWND, MSG_USER_APPENDEQUALSSIGN, 0, 0)
             end if
+            
+            ' If a CodeTip was displayed prior to the autocomplete popup list then
+            ' redsiplay that CodeTip now.
+            ShowCodetip( pDoc )
+            
             return true   
          end if
 
@@ -715,10 +719,14 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
           
          case ")"      ' Close and active code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            pDoc->wszLastCallTip = ""
+            pDoc->nLastCallTipLine = -1
             SciExec( hEdit, SCI_CALLTIPCANCEL, 0, 0 )
                
-         case "("      ' Show code tip 
+         case "(", ","      ' Show code tip 
             pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+            pDoc->wszLastCallTip = ""
+            pDoc->nLastCallTipLine = -1
             If PostMessage(HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, pNSC->ch, 0) then exit function
 
          case chr(13)  ' ENTER KEY PRESSED
@@ -1983,7 +1991,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_USERTOOL To (IDM_USERTOOL + UBound(gConfig.Tools))
          frmUserTools_ExecuteUserTool( id - IDM_USERTOOL )
 
-      Case IDM_HELP, IDM_HELPTIPS, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
+      Case IDM_HELP, IDM_HELPSHORTCUTS, IDM_HELPWINAPI, IDM_HELPWINFBE, IDM_HELPWINFBX
          ShowContextHelp(id) 
   
       case IDM_CHECKFORUPDATES
