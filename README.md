@@ -12,7 +12,7 @@ Features:
 - High DPI aware for any monitor resolution.
 - Language localization. Simple create language file based on English.lang file.
 - Localized for 10 languages:
-- - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukranian, Portuguese 
+- - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukrainian, Portuguese 
 - Projects and non-project based editing.
 - Built-in Visual Designer for GUI application development.
 - Easy integration of Console or GUI based code.
