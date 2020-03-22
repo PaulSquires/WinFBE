@@ -25,6 +25,8 @@ These are the available keyboard shortcuts that will help you edit code faster a
 | ```Ctrl```+```C``` | Copy the selected text to the clipboard |
 | ```Ctrl```+```V``` | Paste clipboard text to the current edit position |
 | ```Ctrl```+```Y``` | Delete the entire current line |
+| ```Ctrl```+```DEL``` | Delete next word |
+| ```Ctrl```+```Shift```+```DEL``` | Delete all from current position to end of the line |
 | ```Ctrl```+```I``` | Insert a file into the current document |
 | ```TAB``` | Indent the selected block of text |
 | ```Shift```+```TAB``` | Unindent the selected block of text |

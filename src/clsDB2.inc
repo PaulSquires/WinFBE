@@ -111,11 +111,32 @@ end constructor
 
 ''
 ''
+function clsDB2.dbGetFreeSlot() as Long
+   
+   dim as long nSlot = -1
+   
+   ' Find a slot to put the data in
+   for i as long = lbound(m_arrData) to ubound(m_arrData)
+      if m_arrData(i).deleted THEN
+         nSlot = i: exit for
+      END IF   
+   NEXT
+   
+   ' If no slot found then resize the array to make room
+   if nSlot = -1 THEN
+      nSlot = ubound(m_arrData) + 1
+      redim preserve m_arrData( nSlot + 10000 ) as DB2_DATA
+   END IF
+   
+   function = nSlot
+end function
+ 
+
+''
+''
 function clsDB2.dbAdd( byval parser as clsParser ptr, _
                        byval id as long _
                        ) as DB2_DATA ptr
-   
-   dim as long nSlot = -1
    
    dim db as DB2_DATA
    
@@ -124,6 +145,7 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
       .id           = id                ' the type of database record that we are storing
       .nLineNum     = parser->lineNum
       .fileName     = parser->fileName
+      .nFileType    = parser->nFileType
       
       select CASE id
          case DB2_STANDARDDATATYPE
@@ -171,23 +193,24 @@ function clsDB2.dbAdd( byval parser as clsParser ptr, _
 
    end with
 
-   ' Find a slot to put the data in
-   for i as long = lbound(m_arrData) to ubound(m_arrData)
-      if m_arrData(i).deleted THEN
-         nSlot = i: exit for
-      END IF   
-   NEXT
-   
-   ' If no slot found then resize the array to make room
-   if nSlot = -1 THEN
-      nSlot = ubound(m_arrData) + 1
-      redim preserve m_arrData(nSlot+500) as DB2_DATA
-   END IF
-   
+   dim as long nSlot = this.dbGetFreeSlot()
    m_arrData(nSlot) = db
 
    function = @m_arrData(nSlot)
 end function                
+
+
+''
+''
+function clsDB2.dbAddDirect( byval pData as DB2_DATA ptr ) as Long
+   ' Thsi function is used when loading data directly from the external 
+   ' cache file database. It loads the record directly into the memory array.
+   if pData = 0 then exit function
+   dim as long nSlot = this.dbGetFreeSlot()
+   m_arrData(nSlot) = *pData
+   function = 0
+end function
+
 
 ''
 ''
@@ -209,6 +232,18 @@ end function
 function clsDB2.dbDeleteAll() as boolean
    for i as long = lbound(m_arrData) to ubound(m_arrData)
       m_arrData(i).deleted = true
+      function = true
+   NEXT
+end function
+
+''
+''
+function clsDB2.dbDeleteByFileType( byval nFileType as long ) as boolean
+   ' Delete database entry based on incoming DB2_FILETYPE_* value
+   for i as long = lbound(m_arrData) to ubound(m_arrData)
+      if m_arrData(i).nFileType = nFileType then
+         m_arrData(i).deleted = true
+      end if
       function = true
    NEXT
 end function
@@ -383,6 +418,16 @@ function clsDB2.dbDebug() as long
          pStream.WriteLine "   " & wszTitle
          pStream.WriteLine "   deleted: "           & pData->deleted
          pStream.WriteLine "   fileName: "          & pData->fileName
+         
+         dim as CWSTR wszFileType
+         select case pData->nFileType
+            case DB2_FILETYPE_FB:        wszFileType = "DB2_FILETYPE_FB"
+            case DB2_FILETYPE_WINAPI:    wszFileType = "DB2_FILETYPE_WINAPI"
+            case DB2_FILETYPE_WINFORMSX: wszFileType = "DB2_FILETYPE_WINFORMSX"
+            case DB2_FILETYPE_WINFBX:    wszFileType = "DB2_FILETYPE_WINFBX"
+            case DB2_FILETYPE_USERCODE:  wszFileType = "DB2_FILETYPE_USERCODE"
+         end select
+         pStream.WriteLine "   nFileType: "         & wszFileType
          pStream.WriteLine "   ElementName: "       & pData->ElementName
          pStream.WriteLine "   VariableType:"       & pData->VariableType
          pStream.WriteLine "   CallTip: "           & pData->CallTip

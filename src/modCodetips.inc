@@ -577,24 +577,14 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                            case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY    ' 2 parse parts  mytype.MyFunction
                               st = AfxStrParse(sElement, 2, ".")   ' Get the MyFunction portion
 
-                              ' If this is a Property then we need to append either (Get) or (Set) to
-                              ' the name in order to differentiate them in any autocomplete popup.
-                              sProp = ""
-                              if pData->id = DB2_PROPERTY THEN 
-                                 if pData->GetSet = ClassProperty.Getter then sProp = " (Get)"
-                                 if pData->GetSet = ClassProperty.Setter then sProp = " (Set)"
-                              END IF
-                              
                               if nLenMatchWord then
                                  if left(ucase(st), nLenMatchWord) = pDoc->sMatchWord THEN 
-                                    st = st & sProp
                                     If ExistsInAutocompleteList(sList, st) = false THEN 
                                        st = st & "?" & str(IMAGE_AUTOC_METHOD) 
                                        sList = sList & st & "|"
                                     end if
                                  end if
                               else
-                                 st = st & sProp
                                  If ExistsInAutocompleteList(sList, st) = false THEN 
                                     st = st & "?" & str(IMAGE_AUTOC_METHOD) 
                                     sList = sList & st & "|"
@@ -612,7 +602,6 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    end select
      
    sList = trim(sList, any "| ")
-   sList = AfxStrRemove( sList, " ")
    if len(sList) THEN
       ' Save the code editor starting position 
       pDoc->AutoCStartPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)

@@ -35,6 +35,8 @@ Constructor clsConfig
    _WinAPICodetipsFilename    = AfxGetExePathName & "Settings\codetips_winapi.ini" 
    _WinFormsXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winformsx.ini" 
    _WinFBXCodetipsFilename    = AfxGetExePathName & "Settings\codetips_winfbx.ini" 
+   _CodetipCacheDatabase      = AfxGetExePathName & "Settings\codetips_db_data.ini" 
+   _CodetipCacheMetaData      = AfxGetExePathName & "Settings\codetips_db_meta.ini" 
 End Constructor
 
 ''
@@ -83,7 +85,11 @@ Function clsConfig.LoadCodetipsFB() as boolean
    
    dim parser as clsParser
 
-   parser.fileName = ""     ' no need to store this sFilename
+   ' First, delete all exisiting codetips of this type
+   gdb2.dbDeleteByFileType( DB2_FILETYPE_FB )
+   
+   parser.fileName = ""   ' filename not required
+   parser.nFileType = DB2_FILETYPE_FB
    
    dim pStream AS CTextStream
    if pStream.Open(_FBCodetipsFilename) <> S_OK then return true  ' error
@@ -109,7 +115,7 @@ End Function
 ''
 ''
 Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
-                                        byval IsWinAPI as boolean _
+                                        byval nFileType as long _
                                         ) as boolean
                                         
    Dim as CWSTR wst, wsID, wsTypeName, wsTypeElements, wsParts, wsPart, wsBaseType
@@ -117,7 +123,8 @@ Function clsConfig.LoadCodetipsGeneric( byval wszFilename as CWSTR, _
    
    dim parser as clsParser
 
-   parser.fileName = ""     ' no need to store this sFilename
+   parser.fileName = ""   ' filename not required
+   parser.nFileType = nFileType
 
    ''
    ''  Codetips definition file for WinAPI/WinFBX
@@ -193,7 +200,8 @@ Function clsConfig.LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
    
    dim parser as clsParser
 
-   parser.fileName = ""     ' no need to store this sFilename
+   parser.fileName = ""   ' filename not required
+   parser.nFileType = DB2_FILETYPE_WINFORMSX
 
    ''
    ''  Codetips definition file for WinFormsX
@@ -279,9 +287,11 @@ End Function
 ''
 ''
 Function clsConfig.LoadCodetipsWinFormsX() as boolean
+   gdb2.dbDeleteByFileType( DB2_FILETYPE_WINFORMSX )
    function = this.LoadCodetipsWinForms(_WinFormsXCodetipsFilename)
    dim parser as clsParser
-   parser.fileName = ""     ' no need to store this sFilename
+   parser.fileName = ""   ' filename not required
+   parser.nFileType = DB2_FILETYPE_WINFORMSX
    parser.typeName = "Application"
    parser.typeAlias = "wfxApplication"
    gdb2.dbAdd( @parser, DB2_TYPE )
@@ -293,13 +303,255 @@ end function
 ''
 ''
 Function clsConfig.LoadCodetipsWinFBX() as boolean
-   function = this.LoadCodetipsGeneric(_WinFBXCodetipsFilename, false)
+   gdb2.dbDeleteByFileType( DB2_FILETYPE_WINFBX )
+   function = this.LoadCodetipsGeneric(_WinFBXCodetipsFilename, DB2_FILETYPE_WINFBX)
 end function
 
 ''
 ''
 Function clsConfig.LoadCodetipsWinAPI() as boolean
-   function = this.LoadCodetipsGeneric(_WinAPICodetipsFilename, true)
+   gdb2.dbDeleteByFileType( DB2_FILETYPE_WINAPI )
+   function = this.LoadCodetipsGeneric(_WinAPICodetipsFilename, DB2_FILETYPE_WINAPI)
+end function
+
+
+''
+''
+function clsConfig.ProjectGetCodetipsCacheFilename() as CWSTR
+   dim as CWSTR wszFilename = _
+                  AfxStrPathname("PATH", gApp.ProjectFilename) & _
+                  AfxStrPathname("NAME", gApp.ProjectFilename) & _
+                  "_db_data.ini"
+   return wszFilename
+end function
+
+
+''
+''
+function clsConfig.ProjectSaveCodetipsCache() as Long
+   if gApp.IsProjectActive = false then exit function
+   
+   dim pData as DB2_DATA ptr
+   dim as CWSTR wszFilename = this.ProjectGetCodetipsCacheFilename
+   dim as long f, nResult
+   
+   ' Write the actual project codetip cache
+   if AfxFileExists(wszFilename) then AfxDeleteFile( wszFilename )
+   f = freefile
+   nResult = open( wszFilename, for random, access write, as #f, len = len(DB2_DATA) )
+   if nResult = 0 then
+      gdb2.dbRewind()
+      do 
+         pData = gdb2.dbGetNext()
+         if pData = 0 THEN exit do
+         if pData->deleted then continue do
+         ' Only save the codetips related to this project.
+         select case pData->nFileType
+            case DB2_FILETYPE_USERCODE
+               put #f, , *pData
+         end select
+      loop
+      close #f
+   end if
+
+   function = 0
+end function
+
+
+''
+''
+function clsConfig.ProjectLoadCodetipsCache() as Long
+
+   dim pData as DB2_DATA ptr
+   dim db2Data as DB2_DATA
+   dim as CWSTR wszFilename = this.ProjectGetCodetipsCacheFilename
+   dim as long f, nResult, numRecs
+   
+   ' Delete any existing DB2_FILETYPE_USERCODE (this would be from a previous project)
+   gdb2.dbRewind()
+   do 
+      pData = gdb2.dbGetNext()
+      if pData = 0 THEN exit do
+      if pData->nFileType = DB2_FILETYPE_USERCODE then
+         pData->deleted = true
+      end if
+   loop
+
+   ' Do the file exists check after the database entry deletions
+   if AfxFileExists(wszFilename) = false then exit function
+   
+   ' Read in the cached project codetips and variables
+   numRecs = AfxGetFilesize(wszFilename) / len(DB2_DATA)
+   f = freefile
+   nResult = open( wszFilename, for random, access read, lock read, as #f, len = len(DB2_DATA) )
+   if nResult = 0 then
+      for i as long = 1 to numRecs
+         get #f, i, db2data
+         ' In order to make an educated guess as to whether the filenames are valid in the
+         ' cache file, we test to see if the file exists. If they don't exist then most likely
+         ' the user has opened the project from a different computer have a different drive
+         ' letter structure.
+         if len(db2data.fileName) then
+            if AfxFileExists(db2data.fileName) = false then
+               gApp.IsProjectCacheLoaded = false   ' this will force the project to reparse files
+               close #f: exit function
+            end if   
+         end if   
+         gdb2.dbAddDirect( @db2data )
+      NEXT
+      close #f
+      gApp.IsProjectCacheLoaded = true
+   end if
+
+   function = 0
+end function
+
+
+''
+''
+function clsConfig.SaveCodetipsCache() as Long
+   ' Attempt to load all codetips from an existing cache, otherwisw
+   ' load and parse them now.
+   ' If no cache database existi or if the cache is not up to date
+   ' with the date of original codetip file then set bWriteCodetipCache
+   ' so that the up to date files are witten when program ends.
+   
+   dim as long f, nResult
+   dim pData as DB2_DATA ptr
+   dim meta as CODETIP_META_DATA
+   
+   if gConfig.bWriteCodetipCache then
+
+      ' Write the cache meta data
+      if AfxFileExists(_CodetipCacheMetaData) then AfxDeleteFile( _CodetipCacheMetaData )
+      f = freefile
+      nResult = open( _CodetipCacheMetaData, for random, access write, as #f, len = len(CODETIP_META_DATA) )
+      if nResult = 0 then
+         meta.nFileType    = DB2_FILETYPE_FB
+         meta.DateFileTime = AfxGetFileLastWriteTime( _FBCodetipsFilename )
+         put #f, , meta
+         meta.nFileType    = DB2_FILETYPE_WINAPI
+         meta.DateFileTime = AfxGetFileLastWriteTime( _WinAPICodetipsFilename )
+         put #f, , meta
+         meta.nFileType    = DB2_FILETYPE_WINFORMSX
+         meta.DateFileTime = AfxGetFileLastWriteTime( _WinFormsXCodetipsFilename )
+         put #f, , meta
+         meta.nFileType    = DB2_FILETYPE_WINFBX
+         meta.DateFileTime = AfxGetFileLastWriteTime( _WinFBXCodetipsFilename )
+         put #f, , meta
+         close #f
+      end if
+      
+      ' Write the actual codetip cache
+      if AfxFileExists(_CodetipCacheDatabase) then AfxDeleteFile( _CodetipCacheDatabase )
+      f = freefile
+      nResult = open( _CodetipCacheDatabase, for random, access write, as #f, len = len(DB2_DATA) )
+      if nResult = 0 then
+         gdb2.dbRewind()
+         do 
+            pData = gdb2.dbGetNext()
+            if pData = 0 THEN exit do
+            if pData->deleted then continue do
+            ' Only save the generic codetips. Bypass any user code specific codetips.
+            select case pData->nFileType
+               case DB2_FILETYPE_FB, _
+                    DB2_FILETYPE_WINAPI, _
+                    DB2_FILETYPE_WINFORMSX, _
+                    DB2_FILETYPE_WINFBX    
+               put #f, , *pData
+            end select
+         loop
+         close #f
+      end if
+      
+   end if
+   
+   function = 0
+end function
+
+
+''
+''
+function clsConfig.LoadCodetipsCache() as Long
+   ' Attempt to load all codetips from an existing cache, otherwisw
+   ' load and parse them now.
+   ' If no cache database exists or if the cache is not up to date
+   ' with the date of original codetip file then set bWriteCodetipCache
+   ' so that the up to date files are written when WinFBE exits.
+   
+   gConfig.bWriteCodetipCache = false
+   
+   dim db2Data as DB2_DATA
+   dim meta    as CODETIP_META_DATA
+   dim ft      as FILETIME
+   dim as long f, nResult, numRecs
+   
+   ' Read the cache meta data to see if any of the original codetip files have been modified.
+   if ( AfxFileExists(_CodetipCacheMetaData) = false ) orelse _
+      ( AfxFileExists(_CodetipCacheDatabase) = false ) then 
+
+      gConfig.bWriteCodetipCache = true
+      this.LoadCodetipsFB()
+      this.LoadCodetipsWinAPI()
+      this.LoadCodetipsWinFormsX()
+      this.LoadCodetipsWinFBX()
+
+   else
+      
+      ' Load the codetip cache database. The cache may not be up to date but we take care of
+      ' that problem by later reading the cache meta data and then reparsing and update any 
+      ' codetips that have changed.
+      numRecs = AfxGetFilesize(_CodetipCacheDatabase) / len(DB2_DATA)
+      f = freefile
+      nResult = open( _CodetipCacheDatabase, for random, access read, lock read, as #f, len = len(DB2_DATA) )
+      if nResult = 0 then
+         for i as long = 1 to numRecs
+            get #f, i, db2data
+            gdb2.dbAddDirect( @db2data )
+         NEXT
+         close #f
+      end if
+
+      ' Load the metadata and update any cache data that may have changed
+      numRecs = AfxGetFilesize(_CodetipCacheMetaData) / len(CODETIP_META_DATA)
+      f = freefile
+      nResult = open( _CodetipCacheMetaData, for random, access read, lock read, as #f, len = len(CODETIP_META_DATA) )
+      if nResult = 0 then
+         for i as long = 1 to numRecs
+            get #f, i, meta
+            select case meta.nFileType
+               case DB2_FILETYPE_FB
+                  ft = AfxGetFileLastWriteTime( _FBCodetipsFilename )
+                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                     gConfig.bWriteCodetipCache = true
+                     this.LoadCodetipsFB()   ' this function first deletes existing codetips of this type
+                  end if   
+               case DB2_FILETYPE_WINAPI
+                  ft = AfxGetFileLastWriteTime( _WinAPICodetipsFilename )
+                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                     gConfig.bWriteCodetipCache = true
+                     this.LoadCodetipsWinAPI()  ' this function first deletes existing codetips of this type
+                  end if   
+               case DB2_FILETYPE_WINFORMSX
+                  ft = AfxGetFileLastWriteTime( _WinFormsXCodetipsFilename )
+                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                     gConfig.bWriteCodetipCache = true
+                     this.LoadCodetipsWinFormsX() ' this function first deletes existing codetips of this type
+                  end if   
+               case DB2_FILETYPE_WINFBX
+                  ft = AfxGetFileLastWriteTime( _WinFBXCodetipsFilename )
+                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                     gConfig.bWriteCodetipCache = true
+                     this.LoadCodetipsWinFBX() ' this function first deletes existing codetips of this type
+                  end if   
+            end select
+         NEXT
+         close #f
+      end if
+
+   end if
+
+   function = 0
 end function
 
 
@@ -1503,10 +1755,15 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    gApp.ProjectFilename = wszFile
    gApp.ProjectName = AfxStrPathname( "NAMEX", gApp.ProjectFilename )
    gApp.ProjectNotes = ""
+   
 
    dim pStream as CTextStream  ' (utf16)
    if pStream.OpenUnicode(gApp.ProjectFilename) <> S_OK then return false
 
+   ' Attempt to load cached codetips/data for this project in order to bypass
+   ' all of the manual parsing of the code files.
+   gConfig.ProjectLoadCodetipsCache()
+   
    ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
    ' here and open them only after all over documents have been loaded. This will look
    ' visually more appealing.
@@ -1520,7 +1777,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    gApp.IsProjectLoading = true 
          
    ' Prevent Treeview flickering during adding
-   LockWindowUpdate(hTV)
+   SendMessage( hTV, WM_SETREDRAW, false, 0 )
 
    Treeview_DeleteAllItems(hTV)
    gApp.hExplorerRootNode = TreeView_AppendItem( hTV, TVI_ROOT, "" )
@@ -1652,7 +1909,9 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    Loop                        
    pStream.Close
    
-   LockWindowUpdate(0)
+
+   SendMessage( hTV, WM_SETREDRAW, true, 0 )
+   AfxRedrawWindow(hTV)
    
    ' Display all of the tabs
    For i = LBound(nTabs) To UBound(nTabs)
@@ -1674,6 +1933,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    end if
    
    gApp.IsProjectLoading = false
+   gApp.IsProjectCacheLoaded = false   ' to ensure edits will invoke ParseDocument
    gApp.IsProjectActive = true
    gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
    gApp.hIconPanel = 0
@@ -1697,6 +1957,12 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    
    frmMain_SetStatusbar
    SetCursor( hCurSave )
+
+   ' Update the TODO listview in the frmOutput form
+   frmOutput_UpdateToDoListview
+
+   frmMain_PositionWindows
+   frmMain_SetFocusToCurrentCodeWindow
 
    Function = True   ' successful open
 End Function

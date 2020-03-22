@@ -66,9 +66,9 @@ Using Afx
 #include once "clsLasso.bi"
 #include once "clsDocument.bi"
 #include once "clsTopTabCtl.bi"
+#include once "clsDB2.bi"
 #include once "clsConfig.bi"
 #include once "clsApp.bi"
-#include once "clsDB2.bi"
 
 '  Global classes
 Dim Shared gApp     As clsApp
@@ -205,14 +205,9 @@ Function WinMain( _
    ' Load the HTML help library for displaying FreeBASIC help *.chm file
    gpHelpLib = DyLibLoad( "hhctrl.ocx" )
 
-   
-   ' Load preparsed codetip files for the compiler's \inc folders.
-   if gConfig.Codetips then
-      gConfig.LoadCodetipsFB()
-      gConfig.LoadCodetipsWinAPI()
-      gConfig.LoadCodetipsWinFormsX()
-      gConfig.LoadCodetipsWinFBX()
-   end if
+
+   ' Load preparsed cached codetip files 
+   if gConfig.Codetips then gConfig.LoadCodetipsCache
 
    
    ' Load any user code snippets and initialize the ToolBox
@@ -222,6 +217,9 @@ Function WinMain( _
 
    ' Show the main form
    Function = frmMain_Show( 0 )
+
+   ' If the codetip cache needs to be saved then do that now
+   if gConfig.bWriteCodetipCache then gConfig.SaveCodetipsCache
 
 
    ' Free the Scintilla and HTML help libraries

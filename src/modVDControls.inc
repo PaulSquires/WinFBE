@@ -1299,8 +1299,8 @@ public function CreateToolboxControl( byval pDoc as clsDocument ptr, _
       wszDefaultControlName = GenerateDefaultFormName()
       pDoc->hWndForm = _
          pForm->Create( pDoc->hWndFrame, "Form1", @DesignerForm_WndProc, 0, 0, 0, 0, _
-              WS_CHILD or WS_OVERLAPPED Or WS_OVERLAPPEDWINDOW or _
-              WS_CLIPSIBLINGS or WS_CLIPCHILDREN or WS_VISIBLE, _
+              WS_CHILD or WS_OVERLAPPED Or WS_OVERLAPPEDWINDOW or WS_VISIBLE or _
+              WS_CLIPSIBLINGS or WS_CLIPCHILDREN, _
               WS_EX_CONTROLPARENT OR WS_EX_WINDOWEDGE)
       pForm->ClassStyle = CS_DBLCLKS 
       SetWindowLongPtr( pDoc->hWndForm, GWLP_ID, IDC_DESIGNFORM )

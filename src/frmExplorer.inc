@@ -167,8 +167,11 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
    
    hRootNode = gApp.hExplorerRootNode
 
-   SendMessage( hTree, WM_SETREDRAW, false, 0 )
-
+   ' Project loading invokes its own redraw prevention so do not do it again here
+   if gApp.IsProjectLoading = false then
+      SendMessage( hTree, WM_SETREDRAW, false, 0 )
+   end if
+   
    ' If hNodeExplorer does not exist then we must be adding a new document. If it does
    ' exist then we simply need to update the child nodes.
    If fUpdateNodes = False Then
@@ -206,7 +209,8 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
    ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
    ' We never want to sort the ExplorerRootNode if a project is active because it will move
    ' our special subnode branches (Main/Resource/Normal/Module/Header).
-   if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+   ' Only need to do this for nodes being added after a project load.
+   if ( gApp.IsProjectActive = true ) andalso ( gApp.IsProjectLoading = false ) then
       if hRootNode <> gApp.hExplorerRootNode then
          Treeview_SortChildren( hTree, hRootNode, 0 )
       end if   
@@ -218,32 +222,40 @@ public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
       dim wszText as wstring * MAX_PATH
       dim as HTREEITEM hNode
       dim pData as DB2_DATA ptr
-      dim as string sFilename = ucase(pDoc->DiskFilename)
-      dim as string sNodeName
-      
+      dim as CWSTR wszFilename = ucase(pDoc->DiskFilename)
+      dim as CWSTR wszNodeName
+       
       gdb2.dbRewind()
       do 
          pData = gdb2.dbGetNext
          if pData = 0 THEN exit do
+         if pData->deleted then continue do
+         if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
          select case pData->id 
             case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
-               if sFilename = ucase(pData->fileName) THEN
-                  sNodeName = pData->ElementName
+               if wszFilename = ucase(pData->fileName) THEN
+                  wszNodeName = pData->ElementName
                   select case pData->GetSet 
-                     case ClassProperty.Getter: sNodeName = sNodeName & " (get)"
-                     case ClassProperty.Setter: sNodeName = sNodeName & " (set)"
-                     case ClassProperty.ctor:   sNodeName = sNodeName & " (ctor)"
-                     case ClassProperty.dtor:   sNodeName = sNodeName & " (dtor)"
+                     case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
+                     case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
+                     case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
+                     case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
                   end select      
-                  hNode = TreeView_AppendItem(hTree, pDoc->hNodeExplorer, sNodeName, 0, 2, 2 )
+                  hNode = TreeView_AppendItem(hTree, pDoc->hNodeExplorer, wszNodeName, 0, 2, 2 )
                END IF
          END SELECT
       loop      
-      Treeview_SortChildren(hTree, pDoc->hNodeExplorer, 0)
+      ' Only sort the children nodes if the node is open and visible, otherwise the nodes
+      ' get sorted when the parent node is expanded.
+      if TreeView_GetItemState( hTree, pDoc->hNodeExplorer, TVIS_EXPANDED ) then
+         Treeview_SortChildren( hTree, pDoc->hNodeExplorer, 0 )
+      end if
    End If
 
-   SendMessage( hTree, WM_SETREDRAW, true, 0 )
-   AfxRedrawWindow(hTree)
+   if gApp.IsProjectLoading = false then
+      SendMessage( hTree, WM_SETREDRAW, true, 0 )
+      AfxRedrawWindow(hTree)
+   end if
    
    Function = 0
 End Function
@@ -466,7 +478,7 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
                                        ByVal pNMHDR As NMHDR Ptr _
                                        ) As LRESULT
  
-   Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
+   Dim lpNMTV As NMTREEVIEW Ptr = Cast(NMTREEVIEW Ptr, pNMHDR)
    Dim As HTREEITEM hItem
    Dim As HWND hTree 
    Dim As LPARAM lParam
@@ -480,7 +492,14 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
       case TVN_ITEMEXPANDING 
          hTree = lpNMTV->hdr.hWndFrom
          SendMessage( hTree, WM_SETREDRAW, false, 0 )
-      
+         ' Sort the children. We do the sort prior to expanding rather than sorting the children
+         ' as they are added to the node. Sorting the nodes after every Treeview_AddItem slows
+         ' down loading of larger projects.
+         if lpNMTV->action = TVE_EXPAND then
+            hItem = Treeview_GetSelection(hTree)
+            Treeview_SortChildren(hTree, hItem, 0)
+         end if
+         
       case TVN_ITEMEXPANDED 
          hTree = lpNMTV->hdr.hWndFrom
          SendMessage( hTree, WM_SETREDRAW, true, 0 )

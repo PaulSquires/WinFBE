@@ -13,6 +13,7 @@
 
 #pragma once
 
+
 ' Enum used to distinguish bewteen a sub/function and Property Get/Set
 enum ClassProperty
    None   = 0   ' sub/function
@@ -39,6 +40,7 @@ end enum
 type clsParser
    public:
       fileName        as CWSTR
+      nFileType       as long          ' Refer to DB_FILETYPE_*
       action          as Long          ' current active action
       lineNum         as long
       st              as String        ' full line, comments and double spaces removed

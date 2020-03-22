@@ -124,7 +124,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
    '     This is the highest level window and is basically just the container for 
    '     the other two windows. Contains tab control to switch between design/code views.
    ' (2) The DesignFrame window. This is the scrollable window.
-   ' (3) The DesignForm window. This is the actual visual for that we manipulate by
+   ' (3) The DesignForm window. This is the actual visual form that we manipulate by
    '     adding controls to it, etc.
    ' (*4) There is a 4th window in the sense that the Scintilla code window swaps
    '      out the DesignFrame whenever the tabcontrol switches between design/code view.
@@ -142,7 +142,7 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
         WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
    pMain->Brush = GetSysColorBrush(COLOR_WINDOW)
-   pMain->SetClientSize(2500, 2500)
+   pMain->SetClientSize(3000, 3000)
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(this.hWindow(0), GCLP_HCURSOR, 0)   
    ' Allow the Designer Frame window to scroll. This allows us to create Forms that
@@ -178,9 +178,9 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
    pFrame->DPI = AfxCWindowPtr(hwndParent)->DPI
    this.hWndFrame = _
    pFrame->Create( pMain->hWindow, "", @DesignerFrame_WndProc, 0, 0, 0, 0, _
-        WS_CHILD or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN or WS_VISIBLE, _
+        WS_CHILD or WS_VISIBLE or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _ 
         WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   'pFrame->ClassStyle = CS_DBLCLKS
+   pFrame->ClassStyle = CS_DBLCLKS
    SetWindowLongPtr( pFrame->hWindow, GWLP_ID, IDC_DESIGNFRAME )
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(this.hWndFrame, GCLP_HCURSOR, 0)   
@@ -194,7 +194,6 @@ Function clsDocument.CreateDesignerWindow( ByVal hWndParent As HWnd ) as hwnd
       SetRect(@rc, 10, 10, 510, 310)
       pCtrl = CreateToolboxControl( @this, CTRL_FORM, rc )
    end if
-   
    
    function = this.hWindow(0)
 end function
@@ -342,6 +341,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
       GenerateFormCode( @this )
    end if   
 
+   ' Apply code editor properties to the edit window
    this.ApplyProperties()
 
    Function = this.hWindow(0)

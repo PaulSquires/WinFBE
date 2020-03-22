@@ -671,8 +671,6 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             dim as long nLenMatchWord = len(pDoc->sMatchWord)
             ' Set the word that was selected in the listbox
             dim as String sText = *cast(zstring ptr, pNSC->lpText)
-            ' Remove and (Get)/(Set) that would have been added for Property
-            sText = AfxStrParse(sText, 1, " ")
             SciExec( hEdit, SCI_SETSEL, nStartPos-nLenMatchWord, nPos)
             SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, strptr(sText)))
             nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
@@ -694,7 +692,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             
             return true   
          end if
-
+ 
       case SCN_AUTOCCHARDELETED    
          if gConfig.CodeTips then
             ' Use deleted a character while autocompletion list was active. Display
@@ -1018,15 +1016,12 @@ public Function frmMain_PositionWindows() As LRESULT
          
          frmMain_SetFocusToCurrentCodeWindow
       end if
-      
       AfxRedrawWindow(HWND_FRMMAIN)
-
    end if
    
    
    ' Ensure that the correct notes are shown
    frmOutput_ShowNotes
-   frmMain_SetStatusbar
    
    Function = 0
 End Function
@@ -1103,6 +1098,8 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
          pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, pwszName )
       End If   
 
+      ' ParseDocument will not parse if the project has loaded codetips from cache.
+      ' ParseDocument will update the file loading count in the statusbar
       pDoc->bNeedsParsing = true
       ParseDocument( pDoc )
 
@@ -1118,9 +1115,11 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
 
    
    ' Add the document to the Explorer treeview and ensure that the root and special
-   ' nodes are created.
-   AddFunctionsToExplorerTreeview( pDoc, False )
-
+   ' nodes are created. If a project is active and loading then bypass this step
+   ' because we add the tree nodes after the project fully loads for speed.
+ '  if ( gApp.IsProjectActive = false ) andalso (gApp.IsProjectLoading = false ) then
+      AddFunctionsToExplorerTreeview( pDoc, False )
+ '  end if
 
    ' Set the default build configuration for this document. If no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
@@ -1150,15 +1149,18 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
 
    ' If a Menu, ToolBar or StatusBar exists on the Form then ensure that it
    ' resizes to the new Form width.
-   frmMenuEditor_CreateFakeMainMenu(pDoc)
-   frmToolBarEditor_CreateFakeToolBar(pDoc)
-   frmStatusBarEditor_CreateFakeStatusBar(pDoc)
-
+   if pDoc->IsDesigner then
+      frmMenuEditor_CreateFakeMainMenu(pDoc)
+      frmToolBarEditor_CreateFakeToolBar(pDoc)
+      frmStatusBarEditor_CreateFakeStatusBar(pDoc)
+   end if
 
    ' Position all of the controls into place
-   frmMain_PositionWindows
-   frmMain_SetFocusToCurrentCodeWindow
-
+   if ( gApp.IsProjectActive = false ) andalso (gApp.IsProjectLoading = false ) then
+      frmMain_PositionWindows
+      frmMain_SetFocusToCurrentCodeWindow
+   end if
+   
    Function = pDoc
 End Function
 

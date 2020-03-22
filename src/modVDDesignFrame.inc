@@ -11,11 +11,8 @@
 '    MERCHANTABILITY or FITNESS for A PARTICULAR PURPOSE.  See the
 '    GNU General Public License for more details.
 
-'    VISUAL DESIGNER ROUTINES
-'
 
 #include once "modVDDesignFrame.bi"
-
 
 ' ========================================================================================
 ' Process WM_PAINT message for Visual Designer Frame
@@ -31,7 +28,7 @@ private Function DesignerFrame_OnPaint( ByVal HWnd As HWnd) As LRESULT
    if pDoc THEN DrawGrabHandles(hDC, pDoc, true)
 
    EndPaint hWnd, @ps
-   
+    
    Function = 0
 End Function
 
@@ -62,6 +59,7 @@ public Function DesignerFrame_WndProc( ByVal HWnd   As HWnd, _
       case WM_LBUTTONDOWN: HandleDesignerLButtonDown(HWND)
       case WM_LBUTTONUP:   HandleDesignerLButtonUp(HWND)
       case WM_MOUSEMOVE:   HandleDesignerMouseMove(HWND)
+         
    End Select
 
    ' for messages that we don't deal with

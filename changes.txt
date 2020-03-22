@@ -1,3 +1,11 @@
+Version 2.1.0
+Editor:
+- Added: New caching system that should speed up large project loading. Parser database saved between sessions.
+- Fixed: In certain cases, (Get) or (Set) would be included in the autocomplete text being entered int othe editor after selection.
+
+Visual Designer:
+
+
 Version 2.0.9 (March 20, 2020)
 Editor:
 - Added: From anywhere on the current line pressing Ctrl+ENTER creates a new line immediately below the current line and positions the cursor to the start of that new line.

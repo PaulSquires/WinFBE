@@ -46,6 +46,19 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.SaveProject(false)
    if OnCommand_FileClose( HWnd, EFC_CLOSEALL ) = false then exit function
    
+   ' Delete all nodes in the Explorer treeview and reset it to "FILES" mode.
+   dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   SendMessage( hTree, WM_SETREDRAW, false, 0 )
+   Treeview_DeleteAllItems(hTree)
+   SendMessage( hTree, WM_SETREDRAW, true, 0 )
+
+   SendMessage( hTree, WM_SETREDRAW, false, 0 )
+   gApp.hExplorerRootNode = TreeView_AppendItem(hTree, TVI_ROOT, wstr("FILES") )
+   Treeview_SetBold(hTree, gApp.hExplorerRootNode, TRUE)
+
+   ' Save the project codetips to cache
+   gConfig.ProjectSaveCodetipsCache
+   
    ' If the entire app is closing down then we do not have to process the
    ' remaining project cleanup commands. 
    if gApp.IsShutdown then return true
@@ -56,12 +69,6 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    ' Clear the Files and Function comboboxes
    ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES) )
    ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS) )
-
-   ' Delete all nodes in the Explorer treeview and reset it to "FILES" mode.
-   dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   Treeview_DeleteAllItems(hTree)
-   gApp.hExplorerRootNode = TreeView_AppendItem(hTree, TVI_ROOT, wstr("FILES") )
-   Treeview_SetBold(hTree, gApp.hExplorerRootNode, TRUE)
 
    ' If the Find/Replace window is open then close it.
    DestroyWindow(HWND_FRMFINDREPLACE)
@@ -86,11 +93,13 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    AfxSetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), gApp.NonProjectNotes)
 
    ' If the compiler Output window is open then ensure that it is now hidden
-   ShowWindow( HWND_FRMOUTPUT, SW_HIDE )
-
+   ShowWindow( HWND_FRMOUTPUT, SW_HIDE )   
+   
    frmExplorer_PositionWindows
    frmMain_PositionWindows
     
+   SendMessage( hTree, WM_SETREDRAW, true, 0 )
+
    frmMain_SetStatusbar
    frmMain_SetFocusToCurrentCodeWindow
 
@@ -1115,8 +1124,8 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
    gTTabCtl.SetFocusTab(nCurSel)
       
-   ' Update the TODO listview in the frmOutput form
-   frmOutput_UpdateToDoListview
+   ' Clear any previous info from the Output windows
+   frmOutput_ResetAllControls
    
    frmMain_PositionWindows
    frmExplorer_PositionWindows

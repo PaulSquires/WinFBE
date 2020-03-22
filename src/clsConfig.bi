@@ -117,6 +117,17 @@ type TYPE_THEMES
 END TYPE
 
 
+' Structure used to save codetip cache database information to disk. This
+' data is checked when loading the codetip cache to see if any of the original
+' codetip files had changed since the cache was created. If yes, then that
+' codetip file needs to be reparsed.
+type CODETIP_META_DATA
+   nFileType    as long           ' refer to DB2_FILETYPE_*  (filenames are not stored)
+   DateFileTime as FILETIME       ' DateTime of original codetip file
+   filler(1024) as ubyte          ' extra space for possible future expansion
+end type
+
+
 Type clsConfig
    Private:
       _ConfigFilename            As CWSTR 
@@ -126,6 +137,8 @@ Type clsConfig
       _WinAPICodetipsFilename    as CWSTR 
       _WinFormsXCodetipsFilename as CWSTR 
       _WinFBXCodetipsFilename    as CWSTR
+      _CodetipCacheDatabase      as CWSTR 
+      _CodetipCacheMetaData      as CWSTR
       _DateFileTime              As FILETIME
       
    Public:
@@ -188,6 +201,7 @@ Type clsConfig
       RunViaCommandWindow  As Long = False
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
+      bWriteCodetipCache   as boolean
       
       Declare Constructor()
       declare function ImportTheme( byref st as wstring, byval bImportExternal as Boolean = false ) as Long
@@ -203,11 +217,16 @@ Type clsConfig
       declare Function InitializeToolBox() as Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN    
+      declare function ProjectGetCodetipsCacheFilename() as CWSTR
+      declare function ProjectSaveCodetipsCache() as Long
+      declare function ProjectLoadCodetipsCache() as Long
       declare Function LoadCodetipsFB() as boolean
       declare Function LoadCodetipsWinAPI() as boolean
       declare Function LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean
       declare Function LoadCodetipsWinFormsX() as boolean
       declare Function LoadCodetipsWinFBX() as boolean
-      declare Function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval IsWinAPI as boolean ) as boolean
+      declare Function LoadCodetipsGeneric( byval wszFilename as CWSTR, byval nFileType as Long) as boolean
+      declare function LoadCodetipsCache() as Long
+      declare function SaveCodetipsCache() as Long
       declare Function ReloadConfigFileTest() As BOOLEAN    
 End Type
