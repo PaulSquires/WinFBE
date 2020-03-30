@@ -56,6 +56,25 @@ type IMAGES_TYPE
    pDoc         as clsDocument_ ptr   ' backpointer to pDoc in case search on wszImageName performed.
 end type
 
+
+' TYPE that holds data for all project files as it they are loaded from
+' the project file.
+type PROJECT_FILELOAD_DATA
+   wszFilename    as CWSTR        ' full path and filename
+   nFileType      as long         ' pDoc->ProjectFileType
+   bLoadInTab     as boolean
+   wszBookmarks   as CWSTR        ' pDoc->GetBookmarks()
+   IsDesigner     as boolean
+   IsDesignerView as long         
+   nFirstLine     as long         ' first line of main view 
+   nPosition      as long         ' current position of main view
+   nFirstLine1    as long         ' first line of second view 
+   nPosition1     as long         ' current position of second view
+   nSplitPosition as long         ' pDoc->SplitY
+   nFocusEdit     as long         ' View 0 or View 1
+end type
+
+
 Type clsDocument
    Private:
       ' 2 Scintilla direct pointers to accommodate split editing
@@ -68,6 +87,8 @@ Type clsDocument
       IsNewFlag         As BOOLEAN
       LoadingFromFile   as Boolean
       
+      docData           as PROJECT_FILELOAD_DATA    ' loaded from project files
+      
       ' 2 Scintilla controls to accommodate split editing
       ' hWindow(0) is our MAIN control (bottom)
       ' hWindow(1) is our split control (top)
@@ -79,6 +100,7 @@ Type clsDocument
       wszToolBarSize    as CWSTR = wstr("SIZE_24")  ' SIZE_16, SIZE_24, SIZE_32, SIZE_48
       PanelItems(any)   as clsPanelItem
       Controls          as clsCollection
+      AllImages(any)    as IMAGES_TYPE     ' All Images belonging to the Form
       GenerateMenu      as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateToolBar   as long = BST_CHECKED  ' Indicates to generate code for the menu
       GenerateStatusBar as long = BST_CHECKED  ' Indicates to generate code for the statusbar
@@ -104,7 +126,6 @@ Type clsDocument
       wszFormMetaData   as CWSTR           ' Form metadata that defines the form
       wszLastCallTip    as CWSTR           ' Last CallTip that was displayed before being cancelled by autocomplete popup.
       nLastCallTipLine  as long            ' The line on which the last calltip popup displayed
-      AllImages(any)    as IMAGES_TYPE     ' All Images belonging to the Form
       bDesignerViewLoad as boolean = true  ' Show designer/code when initially loaded from file and displayed in tab
       AppRunCount       as long = 0        ' Only one should exist in the whole project so track if one or more exists in the code.
                   
@@ -144,11 +165,11 @@ Type clsDocument
       declare function ToolBarExists() as Boolean
       declare function StatusBarExists() as Boolean
       declare function GetActiveScintillaPtr() as any ptr
-      Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, ByVal pwszFile As WString Ptr = 0) As HWnd
+      Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, Byref wszFileName As WString = "") As HWnd
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   
       Declare Function FindReplace( ByVal strFindText As String, ByVal strReplaceText As String ) As Long
       Declare Function InsertFile() As BOOLEAN
-      declare function ParseFormMetaData( ByVal hWndParent As HWnd, byref sAllText as wstring ) as CWSTR
+      declare function ParseFormMetaData( ByVal hWndParent As HWnd, byref sAllText as wstring, byval bLoadOnly as Boolean = false ) as CWSTR
       Declare Function SaveFile(ByVal bSaveAs As BOOLEAN = False) As BOOLEAN
       Declare Function ApplyProperties() As Long
       Declare Function GetTextRange( ByVal cpMin As Long, ByVal cpMax As Long) As String
@@ -165,6 +186,7 @@ Type clsDocument
       Declare Function SetText( ByRef sText As Const String ) As Long 
       declare Function SetLine( ByVal nLineNum As Long, byval sNewText as string) As long
       declare Function AppendText( ByRef sText As Const String ) As Long 
+      declare Function CenterCurrentLine() As Long 
       Declare Function GetSelectedLineRange( ByRef startLine As Long, ByRef endLine As Long, ByRef startPos As Long, ByRef endPos As Long ) As Long 
       Declare Function BlockComment( ByVal flagBlock As BOOLEAN ) As Long
       Declare Function CurrentLineUp() As Long

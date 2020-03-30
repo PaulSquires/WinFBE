@@ -479,25 +479,27 @@ private function InitiatePropertyValueChange() as Long
                   do until pDocParse = 0
                      bReparse = false
                      hEdit = pDocParse->hWndActiveScintilla
-                     if i = 1 then 
-                        SendMessage( hEdit, SCI_SETSEARCHFLAGS, SCFIND_WHOLEWORD, 0)
-                     else   
-                        SendMessage( hEdit, SCI_SETSEARCHFLAGS, 0, 0)
+                     if hEdit then
+                        if i = 1 then 
+                           SendMessage( hEdit, SCI_SETSEARCHFLAGS, SCFIND_WHOLEWORD, 0)
+                        else   
+                           SendMessage( hEdit, SCI_SETSEARCHFLAGS, 0, 0)
+                        end if
+                        SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+                        startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
+                        endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
+                        do 
+                           r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind(i)), Strptr(txtFind(i)))
+                           if r = -1 THEN exit do
+                           bReparse = true
+                           SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace(i)), Strptr(txtReplace(i)) )
+                           startPos = r + len(txtFind(i))
+                           ' Adjust the searching positions
+                           SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
+                           SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
+                        loop
+                        if bReparse then ParseDocument(pDocParse)
                      end if
-                     SciExec( hEdit, SCI_TARGETWHOLEDOCUMENT, 0, 0)
-                     startPos = SciExec( hEdit, SCI_GETTARGETSTART, 0, 0)
-                     endPos = SciExec( hEdit, SCI_GETTARGETEND, 0, 0)
-                     do 
-                        r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind(i)), Strptr(txtFind(i)))
-                        if r = -1 THEN exit do
-                        bReparse = true
-                        SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace(i)), Strptr(txtReplace(i)) )
-                        startPos = r + len(txtFind(i))
-                        ' Adjust the searching positions
-                        SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
-                        SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
-                     loop
-                     if bReparse then ParseDocument(pDocParse)
                      pDocParse = pDocParse->pDocNext
                   loop
                next   

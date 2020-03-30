@@ -20,7 +20,7 @@
 ' ========================================================================================
 private function frmFindReplace_NextSelection( byval StartPos as long, _
                                                byval bGetNext as boolean _
-                                               ) as long
+                                               ) as boolean
 
    dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
    if pDoc = 0 THEN exit function
@@ -80,12 +80,12 @@ private function frmFindReplace_NextSelection( byval StartPos as long, _
       SciExec( hEdit, SCI_ENSUREVISIBLE, currentLine, 0) 
       SciExec( hEdit, SCI_SETSEL, iPositions(mainIdx), iPositions(mainIdx) + lenFind)
       AfxSetWindowText(hWndResults, mainIdx & " of " & gFind.foundCount)
+      return true
    else
       SciExec( hEdit, SCI_SETSEL, startPos, startPos)
       AfxSetWindowText(hWndResults, L(269, "No results"))
+      return false
    END IF
-   
-   function = 0
 end function
 
 
@@ -348,14 +348,18 @@ private Function frmFindReplace_OnNotify( ByVal HWnd As HWnd, _
             case IDC_FRMFINDREPLACE_BTNLEFT
                if gFind.foundCount then
                   dim as long startPos = SendMessage( hEdit, SCI_GETANCHOR, 0, 0) 
-                  frmFindReplace_NextSelection(startPos, false)
+                  if frmFindReplace_NextSelection(startPos, false) then
+                     pDoc->CenterCurrentLine
+                  end if
                end if
                exit function
 
             case IDC_FRMFINDREPLACE_BTNRIGHT
                if gFind.foundCount then
                   dim as long startPos = SendMessage( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-                  frmFindReplace_NextSelection(startPos, true)
+                  if frmFindReplace_NextSelection(startPos, true) then
+                     pDoc->CenterCurrentLine
+                  end if
                end if
                exit function
 
@@ -377,6 +381,7 @@ private Function frmFindReplace_OnNotify( ByVal HWnd As HWnd, _
             case IDC_FRMFINDREPLACE_BTNREPLACE
                frmFindReplace_DoReplace(false)
                frmFindReplace_HighlightSearches
+               pDoc->CenterCurrentLine
                exit function
 
             case IDC_FRMFINDREPLACE_BTNREPLACEALL

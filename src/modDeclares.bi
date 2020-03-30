@@ -167,6 +167,9 @@ Type FINDREPLACE_TYPE
    nMatchCase          As long          ' match case when searching
    nSelection          As long          ' search only selected text
    bShowReplace        as Boolean
+   nSearchCurrentDoc   as Long
+   nSearchAllOpenDocs  as Long
+   nSearchProject      as Long
 End Type
 dim Shared gFind As FINDREPLACE_TYPE
 dim Shared gFindInFiles As FINDREPLACE_TYPE

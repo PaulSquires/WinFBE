@@ -41,6 +41,7 @@ Type clsApp
       IsNewProjectFlag           As BOOLEAN
       IsProjectLoading           as Boolean           ' Project loading. Disable some screen updating.
       IsProjectCacheLoaded       as Boolean           ' The project codetip cache was successfully load. Bypass ParseDocument on load.
+      IsFunctionListSorted       as Boolean = true    ' Will be false if IsProjectCacheLoaded is True.
       IsFileLoading              as Boolean           ' File loading. Disable some screen updating.
       IsCompiling                as Boolean           ' File/Project currently being compiled (spinning mouse cursor).
       IsShutDown                 as boolean           ' App is currently closing
@@ -70,12 +71,12 @@ Type clsApp
       declare function AddQuickRunEXE( byref sFilename as wstring ) as Long
       declare function CheckQuickRunEXE() as Long
       declare Function RemoveAllSelectionAttributes() As long
-      Declare Function AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
+      Declare Function AddNewDocument() As clsDocument Ptr 
       Declare Function RemoveDocument( ByVal pDoc As clsDocument Ptr ) As Long
       declare Function RemoveAllDocuments() As Long
       Declare Function GetDocumentCount() As Long
       declare Function GetDocumentPtrByWindow( byval hWindow as hwnd) As clsDocument ptr
-      Declare Function GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
+      Declare Function GetDocumentPtrByFilename( Byref wszName As WString ) As clsDocument Ptr
       Declare Function GetMainDocumentPtr() As clsDocument Ptr
       Declare Function GetResourceDocumentPtr() As clsDocument Ptr
       declare function GetSourceDocumentPtr( byval pDocIn as clsDocument ptr ) As clsDocument Ptr

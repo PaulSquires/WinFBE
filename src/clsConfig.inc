@@ -22,6 +22,7 @@
 #include once "frmMain.bi"
 #include once "modVDColors.bi"
 #include once "modVDDesignForm.bi"
+#include once "modParser.bi"
 
                
 ''
@@ -317,7 +318,7 @@ end function
 
 ''
 ''
-function clsConfig.ProjectGetCodetipsCacheFilename() as CWSTR
+function clsConfig.ProjectGetCacheFilename() as CWSTR
    dim as CWSTR wszFilename = _
                   AfxStrPathname("PATH", gApp.ProjectFilename) & _
                   AfxStrPathname("NAME", gApp.ProjectFilename) & _
@@ -328,18 +329,22 @@ end function
 
 ''
 ''
-function clsConfig.ProjectSaveCodetipsCache() as Long
+function clsConfig.ProjectSaveCache() as Long
    if gApp.IsProjectActive = false then exit function
    
+   ' Only save the cache file if config option is enabled
+   if gConfig.EnableProjectCache = false then exit function
+
    dim pData as DB2_DATA ptr
-   dim as CWSTR wszFilename = this.ProjectGetCodetipsCacheFilename
-   dim as long f, nResult
-   
-   ' Write the actual project codetip cache
-   if AfxFileExists(wszFilename) then AfxDeleteFile( wszFilename )
-   f = freefile
-   nResult = open( wszFilename, for random, access write, as #f, len = len(DB2_DATA) )
-   if nResult = 0 then
+   dim as CWSTR wszFilename = this.ProjectGetCacheFilename
+
+   dim pStream as CFileStream
+
+   if pStream.Open( wszFilename, _
+                    STGM_WRITE or STGM_CREATE or STGM_SHARE_EXCLUSIVE, _ 
+                    FILE_ATTRIBUTE_NORMAL, _
+                    true _  ' always Create because STGM_CREATE is also specified
+                    ) = S_OK then
       gdb2.dbRewind()
       do 
          pData = gdb2.dbGetNext()
@@ -348,25 +353,30 @@ function clsConfig.ProjectSaveCodetipsCache() as Long
          ' Only save the codetips related to this project.
          select case pData->nFileType
             case DB2_FILETYPE_USERCODE
-               put #f, , *pData
+               if pStream.Write( pData, sizeof(DB2_DATA), null ) <> S_OK then
+                  '? "Error write record "
+               end if
          end select
       loop
-      close #f
+      pStream.Close
    end if
-
+   
    function = 0
 end function
 
 
 ''
 ''
-function clsConfig.ProjectLoadCodetipsCache() as Long
+function clsConfig.ProjectLoadCache() as Long
 
    dim pData as DB2_DATA ptr
    dim db2Data as DB2_DATA
-   dim as CWSTR wszFilename = this.ProjectGetCodetipsCacheFilename
-   dim as long f, nResult, numRecs
+   dim as CWSTR wszFilename = this.ProjectGetCacheFilename
+   dim as long numRecs
    
+   gApp.IsFunctionListSorted = true
+   gApp.IsProjectCacheLoaded = false
+
    ' Delete any existing DB2_FILETYPE_USERCODE (this would be from a previous project)
    gdb2.dbRewind()
    do 
@@ -377,32 +387,47 @@ function clsConfig.ProjectLoadCodetipsCache() as Long
       end if
    loop
 
+   ' Do config check after database deletions
+   if gConfig.EnableProjectCache = false then 
+      ' Delete any existing cache because if cache option re-enabled in the future then
+      ' the project would use an outdated cache.
+      if AfxFileExists(wszFilename) then AfxDeleteFile(wszFilename)
+      exit function
+   end if
+   
    ' Do the file exists check after the database entry deletions
    if AfxFileExists(wszFilename) = false then exit function
    
-   ' Read in the cached project codetips and variables
-   numRecs = AfxGetFilesize(wszFilename) / len(DB2_DATA)
-   f = freefile
-   nResult = open( wszFilename, for random, access read, lock read, as #f, len = len(DB2_DATA) )
-   if nResult = 0 then
-      for i as long = 1 to numRecs
-         get #f, i, db2data
-         ' In order to make an educated guess as to whether the filenames are valid in the
-         ' cache file, we test to see if the file exists. If they don't exist then most likely
-         ' the user has opened the project from a different computer have a different drive
-         ' letter structure.
-         if len(db2data.fileName) then
-            if AfxFileExists(db2data.fileName) = false then
-               gApp.IsProjectCacheLoaded = false   ' this will force the project to reparse files
-               close #f: exit function
-            end if   
-         end if   
-         gdb2.dbAddDirect( @db2data )
-      NEXT
-      close #f
-      gApp.IsProjectCacheLoaded = true
-   end if
+   dim pStream as CFileStream
+   if pStream.Open( wszFilename, _
+                    STGM_READ or STGM_SHARE_EXCLUSIVE, _     ' STGM_CREATE, STGM_WRITE, STGM_READ, STGM_READWRITE
+                    FILE_ATTRIBUTE_NORMAL, _
+                    false _               ' fCreate
+                    ) = S_OK then
 
+      numRecs = (pStream.GetSize / sizeof(DB2_DATA))
+      
+      for i as long = 1 to numRecs
+         if pStream.Read( @db2data, sizeof(DB2_DATA), null ) = S_OK then
+            ' In order to make an educated guess as to whether the filenames are valid in the
+            ' cache file, we test to see if the file exists. If they don't exist then most likely
+            ' the user has opened the project from a different computer have a different drive
+            ' letter structure.
+            if len(db2data.fileName) then
+               if AfxFileExists(db2data.fileName) = false then
+                  gApp.IsProjectCacheLoaded = false   ' this will force the project to reparse files
+                  pStream.Close
+                  exit function
+               end if   
+            end if   
+            gdb2.dbAddDirect( @db2data )
+         end if   
+      next
+      pStream.Close 
+      gApp.IsProjectCacheLoaded = true
+      gApp.IsFunctionListSorted = false
+   end if
+   
    function = 0
 end function
 
@@ -424,29 +449,37 @@ function clsConfig.SaveCodetipsCache() as Long
 
       ' Write the cache meta data
       if AfxFileExists(_CodetipCacheMetaData) then AfxDeleteFile( _CodetipCacheMetaData )
-      f = freefile
-      nResult = open( _CodetipCacheMetaData, for random, access write, as #f, len = len(CODETIP_META_DATA) )
-      if nResult = 0 then
+
+      dim pStream as CFileStream
+
+      if pStream.Open( _CodetipCacheMetaData, _
+                       STGM_WRITE or STGM_CREATE or STGM_SHARE_EXCLUSIVE, _ 
+                       FILE_ATTRIBUTE_NORMAL, _
+                       true _  ' always Create because STGM_CREATE is also specified
+                       ) = S_OK then
          meta.nFileType    = DB2_FILETYPE_FB
          meta.DateFileTime = AfxGetFileLastWriteTime( _FBCodetipsFilename )
-         put #f, , meta
+         pStream.Write( @meta, sizeof(CODETIP_META_DATA), null )
          meta.nFileType    = DB2_FILETYPE_WINAPI
          meta.DateFileTime = AfxGetFileLastWriteTime( _WinAPICodetipsFilename )
-         put #f, , meta
+         pStream.Write( @meta, sizeof(CODETIP_META_DATA), null )
          meta.nFileType    = DB2_FILETYPE_WINFORMSX
          meta.DateFileTime = AfxGetFileLastWriteTime( _WinFormsXCodetipsFilename )
-         put #f, , meta
+         pStream.Write( @meta, sizeof(CODETIP_META_DATA), null )
          meta.nFileType    = DB2_FILETYPE_WINFBX
          meta.DateFileTime = AfxGetFileLastWriteTime( _WinFBXCodetipsFilename )
-         put #f, , meta
-         close #f
+         pStream.Write( @meta, sizeof(CODETIP_META_DATA), null )
+         pStream.Close
       end if
+      
       
       ' Write the actual codetip cache
       if AfxFileExists(_CodetipCacheDatabase) then AfxDeleteFile( _CodetipCacheDatabase )
-      f = freefile
-      nResult = open( _CodetipCacheDatabase, for random, access write, as #f, len = len(DB2_DATA) )
-      if nResult = 0 then
+      if pStream.Open( _CodetipCacheDatabase, _
+                       STGM_WRITE or STGM_CREATE or STGM_SHARE_EXCLUSIVE, _ 
+                       FILE_ATTRIBUTE_NORMAL, _
+                       true _  ' always Create because STGM_CREATE is also specified
+                       ) = S_OK then
          gdb2.dbRewind()
          do 
             pData = gdb2.dbGetNext()
@@ -458,12 +491,11 @@ function clsConfig.SaveCodetipsCache() as Long
                     DB2_FILETYPE_WINAPI, _
                     DB2_FILETYPE_WINFORMSX, _
                     DB2_FILETYPE_WINFBX    
-               put #f, , *pData
+               pStream.Write( pData, sizeof(DB2_DATA), null )
             end select
          loop
-         close #f
+         pStream.Close
       end if
-      
    end if
    
    function = 0
@@ -501,53 +533,61 @@ function clsConfig.LoadCodetipsCache() as Long
       ' Load the codetip cache database. The cache may not be up to date but we take care of
       ' that problem by later reading the cache meta data and then reparsing and update any 
       ' codetips that have changed.
-      numRecs = AfxGetFilesize(_CodetipCacheDatabase) / len(DB2_DATA)
-      f = freefile
-      nResult = open( _CodetipCacheDatabase, for random, access read, lock read, as #f, len = len(DB2_DATA) )
-      if nResult = 0 then
+      dim pStream as CFileStream
+      if pStream.Open( _CodetipCacheDatabase, _
+                       STGM_READ or STGM_SHARE_EXCLUSIVE, _     ' STGM_CREATE, STGM_WRITE, STGM_READ, STGM_READWRITE
+                       FILE_ATTRIBUTE_NORMAL, _
+                       false _               ' fCreate
+                       ) = S_OK then
+         numRecs = (pStream.GetSize / sizeof(DB2_DATA))
          for i as long = 1 to numRecs
-            get #f, i, db2data
-            gdb2.dbAddDirect( @db2data )
-         NEXT
-         close #f
-      end if
+            if pStream.Read( @db2data, sizeof(DB2_DATA), null ) = S_OK then
+               gdb2.dbAddDirect( @db2data )
+            end if
+         next
+         pStream.Close
+      end if      
+
 
       ' Load the metadata and update any cache data that may have changed
-      numRecs = AfxGetFilesize(_CodetipCacheMetaData) / len(CODETIP_META_DATA)
-      f = freefile
-      nResult = open( _CodetipCacheMetaData, for random, access read, lock read, as #f, len = len(CODETIP_META_DATA) )
-      if nResult = 0 then
+      if pStream.Open( _CodetipCacheMetaData, _
+                       STGM_READ or STGM_SHARE_EXCLUSIVE, _     ' STGM_CREATE, STGM_WRITE, STGM_READ, STGM_READWRITE
+                       FILE_ATTRIBUTE_NORMAL, _
+                       false _               ' fCreate
+                       ) = S_OK then
+         numRecs = (pStream.GetSize / sizeof(CODETIP_META_DATA))
          for i as long = 1 to numRecs
-            get #f, i, meta
-            select case meta.nFileType
-               case DB2_FILETYPE_FB
-                  ft = AfxGetFileLastWriteTime( _FBCodetipsFilename )
-                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
-                     gConfig.bWriteCodetipCache = true
-                     this.LoadCodetipsFB()   ' this function first deletes existing codetips of this type
-                  end if   
-               case DB2_FILETYPE_WINAPI
-                  ft = AfxGetFileLastWriteTime( _WinAPICodetipsFilename )
-                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
-                     gConfig.bWriteCodetipCache = true
-                     this.LoadCodetipsWinAPI()  ' this function first deletes existing codetips of this type
-                  end if   
-               case DB2_FILETYPE_WINFORMSX
-                  ft = AfxGetFileLastWriteTime( _WinFormsXCodetipsFilename )
-                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
-                     gConfig.bWriteCodetipCache = true
-                     this.LoadCodetipsWinFormsX() ' this function first deletes existing codetips of this type
-                  end if   
-               case DB2_FILETYPE_WINFBX
-                  ft = AfxGetFileLastWriteTime( _WinFBXCodetipsFilename )
-                  If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
-                     gConfig.bWriteCodetipCache = true
-                     this.LoadCodetipsWinFBX() ' this function first deletes existing codetips of this type
-                  end if   
-            end select
+            if pStream.Read( @meta, sizeof(CODETIP_META_DATA), null ) = S_OK then
+               select case meta.nFileType
+                  case DB2_FILETYPE_FB
+                     ft = AfxGetFileLastWriteTime( _FBCodetipsFilename )
+                     If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                        gConfig.bWriteCodetipCache = true
+                        this.LoadCodetipsFB()   ' this function first deletes existing codetips of this type
+                     end if   
+                  case DB2_FILETYPE_WINAPI
+                     ft = AfxGetFileLastWriteTime( _WinAPICodetipsFilename )
+                     If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                        gConfig.bWriteCodetipCache = true
+                        this.LoadCodetipsWinAPI()  ' this function first deletes existing codetips of this type
+                     end if   
+                  case DB2_FILETYPE_WINFORMSX
+                     ft = AfxGetFileLastWriteTime( _WinFormsXCodetipsFilename )
+                     If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                        gConfig.bWriteCodetipCache = true
+                        this.LoadCodetipsWinFormsX() ' this function first deletes existing codetips of this type
+                     end if   
+                  case DB2_FILETYPE_WINFBX
+                     ft = AfxGetFileLastWriteTime( _WinFBXCodetipsFilename )
+                     If AfxFileTimeToVariantTime(meta.DateFileTime) <> AfxFileTimeToVariantTime(ft) Then
+                        gConfig.bWriteCodetipCache = true
+                        this.LoadCodetipsWinFBX() ' this function first deletes existing codetips of this type
+                     end if   
+               end select
+            end if
          NEXT
-         close #f
-      end if
+         pStream.Close
+      end if      
 
    end if
 
@@ -973,6 +1013,7 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "[Editor]"
    pStream.WriteLine "AskExit="               & this.AskExit
    pStream.WriteLine "CheckForUpdates="       & this.CheckForUpdates
+   pStream.WriteLine "EnableProjectCache="    & this.EnableProjectCache
    pStream.WriteLine "LastUpdateCheck="       & this.LastUpdateCheck
    pStream.WriteLine "HideToolbar="           & this.HideToolbar
    pStream.WriteLine "HideStatusbar="         & this.HideStatusbar
@@ -996,6 +1037,7 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "KeywordCase="           & this.KeywordCase          
    pStream.WriteLine "LocalizationFile="      & this.LocalizationFile     
    pStream.WriteLine "TabSize="               & this.TabSize              
+   pStream.WriteLine "PositionMiddle="        & this.PositionMiddle
    pStream.WriteLine "EditorFontname="        & this.EditorFontname       
    pStream.WriteLine "EditorFontsize="        & this.EditorFontsize       
    pStream.WriteLine "EditorFontCharSet="     & this.EditorFontCharSet    
@@ -1194,12 +1236,12 @@ Function clsConfig.ImportTheme( byref st as wstring, _
             theme.id = AfxStrParse(wData2, 1, ",")
             theme.wszDescription = AfxStrParse(wData2, 2, ",")
          else
-            theme.colors(xx).nFg = val(**AfxStrParse(wData2, 1, ","))
-            theme.colors(xx).nBg = val(**AfxStrParse(wData2, 2, ","))   
-            theme.colors(xx).bUseDefaultBg = val(**AfxStrParse(wData2, 3, ","))   
-            theme.colors(xx).bFontBold = val(**AfxStrParse(wData2, 4, ","))   
-            theme.colors(xx).bFontItalic = val(**AfxStrParse(wData2, 5, ","))   
-            theme.colors(xx).bFontUnderline = val(**AfxStrParse(wData2, 6, ","))   
+            theme.colors(xx).nFg = val(AfxStrParse(wData2, 1, ","))
+            theme.colors(xx).nBg = val(AfxStrParse(wData2, 2, ","))   
+            theme.colors(xx).bUseDefaultBg = val(AfxStrParse(wData2, 3, ","))   
+            theme.colors(xx).bFontBold = val(AfxStrParse(wData2, 4, ","))   
+            theme.colors(xx).bFontItalic = val(AfxStrParse(wData2, 5, ","))   
+            theme.colors(xx).bFontUnderline = val(AfxStrParse(wData2, 6, ","))   
          END IF
       NEXT
    
@@ -1306,6 +1348,10 @@ Function clsConfig.LoadConfigFile() as Long
    Dim i      as Long
    dim bReadingNote as Boolean
 
+   ' Remove any existing Themes and Builds
+   erase this.Themes
+   erase this.Builds
+   
    If AfxFileExists(_ConfigFilename) then
       dim pStream AS CTextStream   '(utf16)
       if pStream.OpenUnicode(_ConfigFilename) <> S_OK then return true   ' error
@@ -1401,10 +1447,11 @@ Function clsConfig.LoadConfigFile() as Long
          End If
 
          
-         Select Case **wKey
+         Select Case wKey
             Case "WinFBEversion":        this.WinFBEversion        = wData
             Case "SelectedTheme":        this.SelectedTheme        = wData
             Case "AskExit":              this.AskExit              = nData
+            Case "EnableProjectCache":   this.EnableProjectCache   = nData
             Case "CheckForUpdates":      this.CheckForUpdates      = nData
             Case "LastUpdateCheck":      this.LastUpdateCheck      = nData
             Case "HideToolbar":          this.HideToolbar          = nData
@@ -1425,6 +1472,7 @@ Function clsConfig.LoadConfigFile() as Long
             Case "HighlightCurrentLine": this.HighlightCurrentLine = nData
             Case "IndentGuides":         this.IndentGuides         = nData
             Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
+            Case "PositionMiddle":       this.PositionMiddle       = nData
             Case "LocalizationFile":     this.LocalizationFile     = wData
             Case "TabSize":              this.TabSize              = wData
             Case "UnicodeEncoding":      this.UnicodeEncoding      = nData
@@ -1613,7 +1661,7 @@ Function clsConfig.LoadConfigFile() as Long
       ' it easier to add/delete colors when this was first designed but I did not.
       if this.WinFBEversion < "1.7.4" then
          for i as long = lbound(this.Themes) to ubound(this.Themes)
-            select case **this.Themes(i).wszDescription
+            select case this.Themes(i).wszDescription
                CASE "Default Theme"
                   this.Themes(0) = DefaultThemes(0)   
                case "Visual Studio Code (Dark)"
@@ -1679,6 +1727,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
          pStream.WriteLine "FileType=" & pDoc->ProjectFileType
          pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than True
          pStream.WriteLine "Bookmarks=" & pDoc->GetBookmarks()
+         pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
          pStream.WriteLine "IsDesignerView=" & IsDesignerView(pDoc)
          pStream.WriteLine "FirstLine=" & SendMessage( pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0) 
          pStream.WriteLine "Position=" & SendMessage( pDoc->hWindow(0), SCI_GETCURRENTPOS, 0, 0)  
@@ -1703,6 +1752,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
             wszText = ProcessToCurdrive(wszText)
             pStream.WriteLine "File=" & wszText
             pStream.WriteLine "FileType=" & pDoc->ProjectFileType
+            pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
             pStream.WriteLine "TabIndex=" & 0    
             pStream.WriteLine "FileEnd=[-]"
          End If
@@ -1735,16 +1785,18 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    Dim as CWSTR wst, wKey, wData, wszFilename
       
    Dim sBookmarks As String
-   Dim As Long nData, i, iTab, nActiveTab, nFocusEdit 
+   Dim As Long nData, i, iTab, nActiveTab, nFocusEdit
+   dim as long nFileIndex = -1
    dim as long nFirstLine, nPosition, nFirstLine1, nPosition1, nSplitPosition
 
    ' Info saved for each File and used to create the file once FileEnd is found
    Dim As Long nFileType, nTabIndex
    Dim As BOOLEAN bLoadInTab
    dim as Boolean bReadingNote
+   dim as Boolean bIsDesigner
    dim as Boolean bDesignerView
    
-   dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
    dim as hwnd hStatusBar = GetDlgItem( HWND_FRMMAIN, IDC_FRMMAIN_STATUSBAR )
    
    If AfxFileExists(wszFile) = 0 Then Exit Function
@@ -1762,43 +1814,23 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
 
    ' Attempt to load cached codetips/data for this project in order to bypass
    ' all of the manual parsing of the code files.
-   gConfig.ProjectLoadCodetipsCache()
+   gConfig.ProjectLoadCache()
+    
+   ' Variable length array to hold sequence of all project files
+   dim docData(any) as PROJECT_FILELOAD_DATA
    
-   ' Variable length array to hold sequence of TabCtrl tabs to open. We save the sequence
-   ' here and open them only after all over documents have been loaded. This will look
-   ' visually more appealing.
-   Dim nTabs(any) As clsDocument Ptr
-
-  
-   ' Clear the Files and Function comboboxes
-   ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFILES) )
-   ComboBox_ResetContent( GetDlgItem(HWND_FRMMAIN, IDC_FRMMAIN_COMBOFUNCTIONS) )
    
    gApp.IsProjectLoading = true 
          
-   ' Prevent Treeview flickering during adding
-   SendMessage( hTV, WM_SETREDRAW, false, 0 )
-
-   Treeview_DeleteAllItems(hTV)
-   gApp.hExplorerRootNode = TreeView_AppendItem( hTV, TVI_ROOT, "" )
-   Treeview_SetBold(hTV, gApp.hExplorerRootNode, TRUE)
-   ' Add the subnodes for the various file types
+   ' Create the special nodes and set the project name to the root node
+   frmExplorer_CreateSpecialNodes()
+   TreeView_SetItemText(hTree, gApp.hExplorerRootNode, ucase(gApp.ProjectName) )
+   Treeview_ExpandSiblings( hTree, gApp.hExplorerRootNode )
    
-   gApp.hExplorerMainNode = _
-      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(212,"Main"), cast(LPARAM, 0) )
-      Treeview_SetBold(hTV, gApp.hExplorerMainNode, TRUE)
-   gApp.hExplorerResourceNode = _
-      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(213,"Resource"), cast(LPARAM, 0) )
-      Treeview_SetBold(hTV, gApp.hExplorerResourceNode, TRUE)
-   gApp.hExplorerHeaderNode = _
-      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(175,"Header"), cast(LPARAM, 0) )
-      Treeview_SetBold(hTV, gApp.hExplorerHeaderNode, TRUE)
-   gApp.hExplorerModuleNode = _
-      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(211,"Module"), cast(LPARAM, 0) )
-      Treeview_SetBold(hTV, gApp.hExplorerModuleNode, TRUE)
-   gApp.hExplorerNormalNode = _
-      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(210,"Normal"), cast(LPARAM, 0) )
-      Treeview_SetBold(hTV, gApp.hExplorerNormalNode, TRUE)
+   
+   ' Prevent Treeview flickering during adding
+   SetWindowRedraw( hTree, false )
+   
    
    gApp.FileLoadingCount = 0
    
@@ -1826,7 +1858,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
       If i = 0 Then Continue Do
       
       wKey  = Left(wst, i-1)
-      wData = Mid(**wst, i+1)
+      wData = Mid(wst, i+1)
       
       Select Case UCase(wData)
          Case "TRUE":   nData = True
@@ -1836,7 +1868,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
 
       wData = ProcessFromCurdrive(wData)
 
-      Select Case **wKey
+      Select Case wKey
          Case "ProjectBuild":        gApp.ProjectBuild       = wData
          Case "ProjectOther32":      gApp.ProjectOther32     = wData
          Case "ProjectOther64":      gApp.ProjectOther64     = wData
@@ -1846,6 +1878,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
          Case "File":                wszFilename = wData
          Case "FileType":            nFileType   = nData
          
+         case "IsDesigner":          bIsDesigner = nData
          case "IsDesignerView":      bDesignerView = nData
          Case "TabIndex":            bLoadInTab  = nData
          Case "Bookmarks":           sBookmarks  = Str(wData)
@@ -1857,108 +1890,150 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
          Case "FocusEdit":           nFocusEdit  = nData
             
          Case "FileEnd":
+
             ' If this is a relative filename then convert it back.
             if AfxPathIsRelative(wszFilename) then 
                wszFilename = AfxPathCombine( AfxStrPathName("PATH", gApp.ProjectFilename), wszFilename)
             end if
             If AfxFileExists(wszFilename) Then
-               pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       FALSE, _    ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       wszFilename, _  ' pwszName
-                                       0, _        ' pDocIn
-                                       false, _    ' bIsDesigner
-                                       nFileType )
-               ' If opening a project file that does not yet have a file type designation
-               ' then assign it as a NORMAL file rather than leaving it empty.
-               if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
-                  pDoc->ProjectFileType = FILETYPE_NORMAL
-               end if   
 
-               pDoc->SplitY = nSplitPosition
-               pDoc->bDesignerViewLoad = bDesignerView
-               
-               If bLoadInTab Then
-                  If nTabIndex > Ubound(nTabs) Then
-                     Redim Preserve nTabs(nTabIndex) As clsDocument Ptr
-                  End If
-                  nTabs(nTabIndex) = pDoc
-                  nTabIndex += 1
+               nFileIndex = nFileIndex + 1
+               If nFileIndex > Ubound(docData) Then
+                  redim preserve docData( Ubound(docData) + 100 ) 
                End If
-                   
-               ' Set the saved position
-               SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, nFirstLine, 0) 
-               SciExec( pDoc->hWindow(0), SCI_GOTOPOS, nPosition, 0) 
-               SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, nFirstLine1, 0) 
-               SciExec( pDoc->hWindow(1), SCI_GOTOPOS, nPosition1, 0) 
-               pDoc->hWndActiveScintilla = pDoc->hWindow(nFocusEdit)
+
+               with docData(nFileIndex)
+                  .wszFilename    = wszFilename
+                  .nFileType      = nFileType
+                  .bLoadInTab     = bLoadInTab
+                  .wszBookmarks   = sBookmarks
+                  .IsDesigner     = bIsDesigner
+                  .IsDesignerView = bDesignerView
+                  .nFirstLine     = nFirstLine
+                  .nPosition      = nPosition
+                  .nFirstLine1    = nFirstLine1
+                  .nPosition1     = nPosition1
+                  .nSplitPosition = nSplitPosition
+                  .nFocusEdit     = nFocusEdit
+               end with
+
                nFirstLine  = 0: nPosition  = 0
                nFirstLine1 = 0: nPosition1 = 0
-               nFocusEdit = 0
-               
-               ' Set any bookmarks
-               pDoc->SetBookmarks(sBookmarks)
-               sBookmarks = ""
+               nFocusEdit  = 0: nSplitPosition = 0
+               sBookmarks  = ""
+               bLoadInTab    = false
+               bIsDesigner   = false
+               bDesignerView = false
+            end if
             
-            End If
-
       End Select
    
    Loop                        
    pStream.Close
    
 
-   SendMessage( hTV, WM_SETREDRAW, true, 0 )
-   AfxRedrawWindow(hTV)
+   ' Load/Display all of the project files
+   for i as long = lbound(docData) to ubound(docData)
    
-   ' Display all of the tabs
-   For i = LBound(nTabs) To UBound(nTabs)
-      iTab = gTTabCtl.GetTabIndexFromFilename(nTabs(i)->DiskFilename)
-      If iTab = -1 Then iTab = gTTabCtl.AddTab( nTabs(i) )  ' Add the new document to the top tabcontrol
-      if nTabs(i)->IsDesigner then
-         if nTabs(i)->bDesignerViewLoad then
-            TabCtrl_SetCurSel( nTabs(i)->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
-         else
-            TabCtrl_SetCurSel( nTabs(i)->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
-         end if
-      end if
-   Next   
+      if AfxFileExists( docData(i).wszFilename ) = false then continue for
+      
+      gApp.FileLoadingCount = gApp.FileLoadingCount + 1
+      gApp.wszPanelText = docData(i).wszFilename
+      frmMain_SetStatusbar
 
-   gTTabCtl.SetFocusTab( nActiveTab )
+      ' Re-load all files that were previously shoing in open tabs. Also, be sure
+      ' to load and visual designer forms as these can not be quick loaded from cache.
+      if (docData(i).bLoadInTab) orelse (docData(i).IsDesigner) then
+         pDoc = frmMain_OpenFileSafely( _
+                     HWND_FRMMAIN, _
+                     False, _    ' bIsNewFile
+                     False, _    ' bIsTemplate
+                     FALSE, _    ' bShowInTab (we'll manually add new tab below)
+                     false, _    ' bIsInclude
+                     docData(i).wszFilename, _  ' wszName
+                     0, _        ' pDocIn
+                     docData(i).IsDesigner, _    ' bIsDesigner
+                     docData(i).nFileType )
+ 
+         if docData(i).bLoadInTab then
+            iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
+            if docData(i).IsDesignerView then
+               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 0 )  ' 1 = code tab, 0 = Designer
+            else
+               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+            end if
+            ' Set the saved positions
+            pDoc->bDesignerViewLoad = docData(i).IsDesignerView
+            pDoc->SplitY = docData(i).nSplitPosition
+            SciExec( pDoc->hWindow(0), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine, 0) 
+            SciExec( pDoc->hWindow(0), SCI_GOTOPOS, docData(i).nPosition, 0) 
+            SciExec( pDoc->hWindow(1), SCI_SETFIRSTVISIBLELINE, docData(i).nFirstLine1, 0) 
+            SciExec( pDoc->hWindow(1), SCI_GOTOPOS, docData(i).nPosition1, 0) 
+            pDoc->hWndActiveScintilla = pDoc->hWindow(docData(i).nFocusEdit)
+            pDoc->SetBookmarks(docData(i).wszBookmarks)
+         end if
+      
+      else
+         ' This is a regular document that does not initially display in the top tab control.
+         ' We simply need to create an Explorer node for it and add its child nodes. No need
+         ' to sort those child nodes (an expensive operation) because they will automatically
+         ' sort when the user expands the node branch.      
+         pDoc = gApp.AddNewDocument() 
+         pDoc->DateFileTime    = AfxGetFileLastWriteTime( docData(i).wszFilename )
+         pDoc->DiskFilename    = docData(i).wszFilename
+         pDoc->IsDesigner      = docData(i).IsDesigner
+         pDoc->ProjectFileType = docData(i).nFileType
+         ' No Scinitlla window is created for these types of documents so no parsing has
+         ' been done yet. Do the parsing now.
+         if gApp.IsProjectCacheLoaded = false then
+            pDoc->bNeedsParsing = true 
+            ParseDocument( pDoc )
+         end if
+         pDoc->hNodeExplorer = frmExplorer_AddParentNode( pDoc )
+         frmExplorer_AddChildNodes( pDoc )
+      end if
+   
+   next
+                  
+   
+   ' Make sure the parent special node is sorted
+   TabCtrl_SetCurSel( gTTabCtl.hWindow, nActiveTab )
+   gTTabCtl.DisplayScintilla( nActiveTab, True )
    pDoc = gTTabCtl.GetActiveDocumentPtr()
    If pDoc Then
-      Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
+      Treeview_SortChildren( hTree, TreeView_GetParent( hTree, pDoc->hNodeExplorer ), 0 )
+      TreeView_SelectItem( hTree, pDoc->hNodeExplorer )
    end if
    
+   SetWindowRedraw( hTree, true )
+   AfxRedrawWindow( hTree )
+
    gApp.IsProjectLoading = false
-   gApp.IsProjectCacheLoaded = false   ' to ensure edits will invoke ParseDocument
+   gApp.IsProjectCacheLoaded = false   ' to ensure future edits will invoke ParseDocument
    gApp.IsProjectActive = true
    gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
    gApp.hIconPanel = 0
    
+
    ' If no active build configuration then assign the currently active selection
    if gApp.ProjectBuild = "" then 
       gApp.ProjectBuild = frmBuildConfig_GetSelectedBuildGUID()
    end if   
-   
-   frmMain_LoadComboFiles
-   frmMain_SelectComboFiles
-
-   TreeView_SetItemText(hTV, gApp.hExplorerRootNode, ucase(gApp.ProjectName) )
-   Treeview_EnsureVisible(hTV, gApp.hExplorerRootNode)
-   
-   ' Show the correct notes for this project
-   frmOutput_ShowNotes
-
    ' Ensure that the correct build is selected
    frmBuildConfig_LoadBuildComboBox
    
+
+   frmMain_LoadComboFiles
+   frmMain_LoadComboFunctions
+   frmMain_SelectComboFiles
+   frmMain_SelectComboFunctions
+
+
    frmMain_SetStatusbar
    SetCursor( hCurSave )
 
-   ' Update the TODO listview in the frmOutput form
+   ' Show the correct notes and TODO data for this project
+   frmOutput_ShowNotes
    frmOutput_UpdateToDoListview
 
    frmMain_PositionWindows
@@ -1973,12 +2048,20 @@ End Function
 ' ========================================================================================
 Function clsConfig.ReloadConfigFileTest() As BOOLEAN    
 
+   if gApp.IsShutdown = true then return false
+   
    dim As FILETIME ft
    
    ' Compare the disk file date time to the value currently stored in static variable.
    ft = AfxGetFileLastWriteTime(_ConfigFilename)
    If AfxFileTimeToVariantTime(ft) <> AfxFileTimeToVariantTime(_DateFileTime) Then
       gConfig.LoadConfigFile()  ' this function also updates the _DateFileTime value
+      ' Apply the newly saved options to all open Scintilla windows
+      Dim pDoc As clsDocument Ptr = gApp.pDocList
+      do until pDoc = 0
+         pDoc->ApplyProperties
+         pDoc = pDoc->pDocNext
+      loop   
    end if
    
    function = 0

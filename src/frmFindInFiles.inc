@@ -162,129 +162,167 @@ END FUNCTION
 ' ========================================================================================
 private function frmFindInFiles_DoFindInFilesEx() as LONG
    Dim ShExecInfo As SHELLEXECUTEINFOW  
-
+   dim as CWSTR DQ = wchr(34)
+   
 '  /L         Uses search strings literally.
 '  /P         Skip files with non-printable characters.
 '  /N         Prints the line number before each line that matches.
    'Dim sParam as string = " /L /P /N"
-   Dim sParam as string = " /P /N"
+   Dim wszParam as CWSTR = " /P /N"
    
 '  /R         Whole word searching needs regular expression
-   If gFindInFiles.nWholeWord Then sParam = sParam & " /R "
+   If gFindInFiles.nWholeWord = BST_CHECKED Then wszParam = wszParam & " /R "
+
 '  /I         Specifies that the search is not to be case-sensitive.
-   If gFindInFiles.nMatchCase = 0 Then sParam = sParam & " /I "     ' case insensitive search
+   If gFindInFiles.nMatchCase = 0 Then wszParam = wszParam & " /I "     ' case insensitive search
    
 '  /S         Searches for matching files in the current directory and all
 '             subdirectories.
    ' If /S is used then resulting filenames will include full path, otherwise
    ' only the filename is returned.
-   If gFindInFiles.nSearchSubFolders Then sParam = sParam & " /S "
+   If gFindInFiles.nSearchSubFolders = BST_CHECKED Then wszParam = wszParam & " /S "
 
    ' Ensure that the text in the find textbox has been added to the combobox. Need to do
    ' this to ensure that manually typed in text has been captured.
-   Dim wszText As WString * MAX_PATH
-   wszText = AfxGetWindowText( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND))
-   if len(wszText) = 0 THEN
-      SetFocus(GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND))
+   Dim wszFindText As WString * MAX_PATH
+   wszFindText = AfxGetWindowText( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND))
+   if len(wszFindText) = 0 THEN
+      SetFocus( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND) )
       exit function      
    END IF
-   gFindInFiles.txtFind = Str(wszText)
+   gFindInFiles.txtFind = wszFindText
    frmFindInFiles_AddToFindCombo(gFindInFiles.txtFind)
-   If gFindInFiles.nWholeWord Then 
-      wszText = "\<" & wszText & "\>"
-   end if   
-   
+   If gFindInFiles.nWholeWord Then wszFindText = "\<" & wszFindText & "\>"
+
    ' What folder to start searching in
-   gFindInFiles.txtFolder = str(trim(AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER) )))
+   gFindInFiles.txtFolder = trim(AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER) ))
    if len(gFindInFiles.txtFolder) = 0 THEN 
       gFindInFiles.txtFolder = AfxGetExePathName
-      AfxSetWindowText(GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER), gFindInFiles.txtFolder)
+      AfxSetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER), gFindInFiles.txtFolder )
    end if
    frmFindInFiles_AddToFolderCombo(gFindInFiles.txtFolder)
    if right(gFindInFiles.txtFolder,1) <> "\" then gFindInFiles.txtFolder = gFindInFiles.txtFolder & "\"
-   dim sFolder as CWSTR = gFindInFiles.txtFolder 
+   dim wszFolder as CWSTR = gFindInFiles.txtFolder 
+
 
    ' What files are we searching in
    dim as long nCount, i
    dim as BOOLEAN InString
-   dim as CWSTR sFiles, sSearchFiles, sFilename, sChar
-   sFiles = trim(AfxGetWindowText( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFILES)))
-   gFindInFiles.txtFiles = str(sFiles)
-   frmFindInFiles_AddToFilesCombo(gFindInFiles.txtFiles)
-   ' Parse the files to determine if multiple files or file types need to be searched for
-   if instr(sFiles, wchr(34)) THEN
-      ' In order to better parse the string for the filenames, replace any spaces in the
-      ' filenames with special character; then parse; and finally remove the special character.
-      for i = 1 to len(sFiles)
-         sChar = mid(sFiles, i, 1)
-         if sChar = Wchr(34) THEN
-            InString = iif( InString = true, false, true) 
-         elseif sChar = wstr(" ") then
-            if InString = true THEN
-               ' special character replaces the space
-               sFiles = left(**sFiles, i-1) & wchr(8) & mid(sFiles, i+1)
-            END IF         
-         END IF
-      NEXT
-      
-      ' Clean the string to remove any duplicate remaining spaces
-      sFiles = AfxStrShrink(sFiles)
+   dim as CWSTR wszFiles, wszSearchFiles, wszFilename, wszTextFilenames, wszChar
+   
 
-      ' This is a list of double quoted filenames to search
-      nCount = AfxStrParseCount(sFiles, " ")
-      for i = 1 to nCount
-         sFilename = trim( AfxStrParse(sFiles, i, " "), Wchr(34) )
-         ' Put back any special characters to spaces again
-         sFilename = AfxStrReplace(sFilename, wchr(8), wchr(32) )
-         sSearchFiles = sSearchFiles + Wchr(34) + sFolder + sFilename + Wchr(34, 32)
-      NEXT   
+   if (gFindInFiles.nSearchProject = BST_CHECKED) or _
+      (gFindInFiles.nSearchCurrentDoc = BST_CHECKED) or _
+      (gFindInFiles.nSearchAllOpenDocs = BST_CHECKED) then 
+
+      dim pStream as CTextStream
+      wszTextFilenames = "_searchfiles.txt"
+       
+      if pStream.Create(wszTextFilenames) = S_OK then
+         Dim pDoc As clsDocument Ptr = gApp.pDocList
+         do until pDoc = 0
+
+            if gFindInFiles.nSearchProject = BST_CHECKED then
+               pStream.WriteLine pDoc->DiskFilename
+               
+            elseif gFindInFiles.nSearchAllOpenDocs = BST_CHECKED then 
+               if gTTabCtl.GetTabIndexFromFilename( pDoc->DiskFilename ) <> -1 then
+                  pStream.WriteLine pDoc->DiskFilename
+               end if   
+
+            elseif gFindInFiles.nSearchCurrentDoc = BST_CHECKED then
+               if pDoc = gTTabCtl.GetActiveDocumentPtr() then
+                  pStream.WriteLine pDoc->DiskFilename
+               end if
+            
+            end if
+                  
+            pDoc = pDoc->pDocNext
+         loop   
+         pStream.Close   
+         wszParam = wszParam & " /F:" & wszTextFilenames & " "
+      end if
+
    else
-      ' This is a list of patterns to use (*.bas *.bi) etc
-      nCount = AfxStrParseCount(sFiles, " ")
-      for i = 1 to nCount
-         sSearchFiles = sSearchFiles + wchr(34) + sFolder + AfxStrParse(sFiles, i, " ") + wchr(34, 32)
-      NEXT   
-   END IF
+      wszFiles = trim(AfxGetWindowText( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFILES)))
+      gFindInFiles.txtFiles = wszFiles
+      frmFindInFiles_AddToFilesCombo( gFindInFiles.txtFiles )
       
-   Dim wszFileExe   As WString * MAX_PATH
-   Dim wszParam     As WString * MAX_PATH  
-   Dim wszBatchFile As WString * MAX_PATH  
-   Dim wszResults   As WString * MAX_PATH  
+      ' Parse the files to determine if multiple files or file types need to be searched for
+      if instr( wszFiles, DQ ) THEN
+         ' In order to better parse the string for the filenames, replace any spaces in the
+         ' filenames with special character; then parse; and finally remove the special character.
+         for i = 1 to len(wszFiles)
+            wszChar = mid(wszFiles, i, 1)
+            if wszChar = DQ THEN
+               InString = iif( InString = true, false, true) 
+            elseif wszChar = " " then
+               if InString = true THEN
+                  ' special character replaces the space
+                  wszFiles = left(wszFiles, i-1) & wchr(8) & mid(wszFiles, i+1)
+               END IF         
+            END IF
+         NEXT
+         
+         ' Clean the string to remove any duplicate remaining spaces
+         wszFiles = AfxStrShrink(wszFiles)
+
+         ' This is a list of double quoted filenames to search
+         nCount = AfxStrParseCount(wszFiles, " ")
+         for i = 1 to nCount
+            wszFilename = trim( AfxStrParse(wszFiles, i, " "), DQ )
+            ' Put back any special characters to spaces again
+            wszFilename = AfxStrReplace(wszFilename, wchr(8), " " )
+            wszSearchFiles = wszSearchFiles + DQ + wszFolder + wszFilename + DQ + " "
+         NEXT   
+      else
+         ' This is a list of patterns to use (*.bas *.bi) etc
+         nCount = AfxStrParseCount(wszFiles, " ")
+         for i = 1 to nCount
+            wszSearchFiles = wszSearchFiles + DQ + wszFolder + AfxStrParse(wszFiles, i, " ") + DQ + " "
+         NEXT   
+      END IF
+   end if
+      
+
 
    'FINDSTR [/B] [/E] [/L] [/R] [/S] [/I] [/X] [/V] [/N] [/M] [/O] [/P] [/F:file]
    '        [/C:string] [/G:file] [/D:dir list] [/A:color attributes] [/OFF[LINE]]
    '        strings [[drive:][path]filename[ ...]]
-   wszResults = AfxGetExePathName & "\_search.txt"
-   if AfxFileExists(wszResults) then kill wszResults
-   if instr(wszResults, " ") THEN wszResults = chr(34) & wszResults & chr(34)
-   wszFileExe = "FindStr.exe"  
-   wszParam   = WSTR(sParam & " /C:") & chr(34) & wszText & chr(34) & _
-                 " " & **sSearchFiles & " >> " & wszResults
+   Dim as CWSTR wszFileExe, wszParams, wszBatchFile, wszResults   
 
-   wszBatchFile = AfxGetExePathName & "\_search.bat"
+   wszResults = AfxGetExePathName & "_search.txt"
+   if AfxFileExists(wszResults) then kill wszResults
+   if instr(wszResults, " ") THEN wszResults = DQ & wszResults & DQ
+   
+   wszFileExe = "FindStr.exe"  
+   wszParams  =  wszParam & " /C:" & DQ & wszFindText & DQ & _
+                 " " & wszSearchFiles & " >> " & wszResults
+   
    ' Open filename does not use enclosing quotes
+   wszBatchFile = AfxGetExePathName & "_search.bat"
    dim pStream as CTextStream
    if pStream.Create(wszBatchFile) = S_OK then
-      pStream.WriteLine wszFileExe & " " & wszParam
+      pStream.WriteLine wszFileExe & " " & wszParams
    end if
    pStream.Close   
  
    wszFileExe = Environ("COMSPEC")
    ' Batch filename must be enclosed in quotes b/c might have spaces in name
-   wszParam   = wstr(" /C " & chr(34) & wszBatchFile & chr(34))
+   wszParams   = " /C " & DQ & wszBatchFile & DQ
    With ShExecInfo
       .cbSize       = Len(SHELLEXECUTEINFOW)
       .fMask        = SEE_MASK_NOCLOSEPROCESS
       .HWnd         = 0
       .lpVerb       = Null
-      .lpFile       = @wszFileExe
-      .lpParameters = @wszParam   
+      .lpFile       = wszFileExe.sptr
+      .lpParameters = wszParams.sptr
       .lpDirectory  = 0
       .nShow        = SW_HIDE
       .hInstApp     = 0 
    End With
 
-   ShellExecuteEx(@ShExecInfo)
+   ShellExecuteEx( @ShExecInfo )
 
    ' Give the process 33 ms (you can use a different value here depending on 
    ' how responsive you wish your app to be)
@@ -303,9 +341,19 @@ private function frmFindInFiles_DoFindInFilesEx() as LONG
       wend
    wend
 
-   kill wszBatchFile
+   AfxDeleteFile( wszBatchFile )
+   AfxDeleteFile( wszTextFilenames )
    
-   frmFindInFiles_ParseSearchResults(wszResults)
+   frmFindInFiles_ParseSearchResults( wszResults )
+
+
+' To search for multiple strings in a set of files, create a text file that contains 
+' each search criterion on a separate line. You can also list the exact files that you 
+' want to search in a text file. For example, to use the search criteria in the file 
+' Stringlist.txt, search the files listed in Filelist.txt, and then store the results 
+' in the file Results.out, type:
+'
+' findstr /g:stringlist.txt /f:filelist.txt > results.out 
 
 'C:\>findstr /?
 'Searches for strings in files.
@@ -504,7 +552,30 @@ private Function frmFindInFiles_OnCommand( ByVal HWnd As HWnd, _
             Exit Function
          End If
 
-         
+      Case IDC_FRMFINDINFILES_CHKCURRENTDOC
+         If codeNotify = BN_CLICKED Then
+            gFindInFiles.nSearchCurrentDoc = Button_GetCheck(hwndCtl)
+            Button_SetCheck( GetDlgItem(HWND, IDC_FRMFINDINFILES_CHKALLOPENDOCS), BST_UNCHECKED )
+            Button_SetCheck( GetDlgItem(HWND, IDC_FRMFINDINFILES_CHKPROJECT), BST_UNCHECKED )
+            Exit Function
+         End If
+
+      Case IDC_FRMFINDINFILES_CHKALLOPENDOCS
+         If codeNotify = BN_CLICKED Then
+            gFindInFiles.nSearchAllOpenDocs = Button_GetCheck(hwndCtl)
+            Button_SetCheck( GetDlgItem(HWND, IDC_FRMFINDINFILES_CHKCURRENTDOC), BST_UNCHECKED )
+            Button_SetCheck( GetDlgItem(HWND, IDC_FRMFINDINFILES_CHKPROJECT), BST_UNCHECKED )
+            Exit Function
+         End If
+
+      Case IDC_FRMFINDINFILES_CHKPROJECT
+         If codeNotify = BN_CLICKED Then
+            gFindInFiles.nSearchProject = Button_GetCheck(hwndCtl)
+            Button_SetCheck( GetDlgItem(HWND, IDC_FRMFINDINFILES_CHKCURRENTDOC), BST_UNCHECKED )
+            Button_SetCheck( GetDlgItem(HWND, IDC_FRMFINDINFILES_CHKALLOPENDOCS), BST_UNCHECKED )
+            Exit Function
+         End If
+
    End Select
 
    Function = 0
@@ -529,10 +600,13 @@ private Function frmFindInFiles_OnDestroy( byval HWnd As HWnd ) As LRESULT
    gFindInFiles.nWholeWord = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKWHOLEWORDS) )  
    gFindInFiles.nMatchCase = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKMATCHCASE) )    
    gFindInFiles.nSearchSubFolders = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKSUBFOLDERS) )    
-   gFindInFiles.txtFind = str(AfxGetWindowText( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND)))
+   gFindInFiles.nSearchCurrentDoc = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKCURRENTDOC) )
+   gFindInFiles.nSearchAllOpenDocs = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKALLOPENDOCS) )
+   gFindInFiles.nSearchProject = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMFINDINFILES_CHKPROJECT) )
+   gFindInFiles.txtFind = AfxGetWindowText( GetDlgItem(HWnd_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND))
    gFindInFiles.txtLastFind = gFindInFiles.txtFind 
-   gFindInFiles.txtFiles = str(AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFILES)))
-   gFindInFiles.txtFolder = str(AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER)))
+   gFindInFiles.txtFiles = AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFILES))
+   gFindInFiles.txtFolder = AfxGetWindowText( GetDlgItem(HWND_FRMFINDINFILES,IDC_FRMFINDINFILES_COMBOFOLDER))
 
    HWND_FRMFINDINFILES = 0
    PostQuitMessage(0)
@@ -591,16 +665,16 @@ public Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->Create(hwndParent, L(256,"Find In Files"), @frmFindInFiles_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING Or WS_EX_RIGHTSCROLLBAR)
-   pWindow->SetClientSize(510, 205)
+   pWindow->SetClientSize(515, 222)
    pWindow->Center
    
-   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LBLFINDWHAT, L(159,"Find What") & ":", 7, 20, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LBLFINDWHAT, L(159,"Find What") & ":", 7, 19, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LABEL1, L(259,"In Files") & ":", 7, 50, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LABEL1, L(259,"In Files") & ":", 7, 48, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LABEL1, L(260,"In Folder") & ":", 7, 80, 70, 16, _
+   pWindow->AddControl("LABEL", , IDC_FRMFINDINFILES_LABEL1, L(260,"In Folder") & ":", 7, 78, 70, 16, _
         WS_CHILD Or WS_VISIBLE Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN Or SS_RIGHT Or SS_NOTIFY, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("COMBOBOX", , IDC_FRMFINDINFILES_COMBOFIND, "", 85, 17, 317, 22, _
@@ -624,7 +698,7 @@ public Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->AddControl("BUTTON", , IDCANCEL, L(161,"Close"), 414, 105, 90, 24, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("GROUPBOX", , IDC_FRMFINDINFILES_FRAMEOPTIONS, L(167,"Options"), 16, 105, 187, 90, _
+   pWindow->AddControl("GROUPBOX", , IDC_FRMFINDINFILES_FRAMEOPTIONS, L(167,"Options"), 16, 105, 386, 107, _
         WS_CHILD Or WS_VISIBLE Or BS_TEXT Or BS_LEFT Or BS_NOTIFY Or BS_GROUPBOX, _
         WS_EX_TRANSPARENT Or WS_EX_LEFT Or WS_EX_LTRREADING)
    pWindow->AddControl("CHECKBOX", , IDC_FRMFINDINFILES_CHKWHOLEWORDS, L(162,"Match Whole Words"), 26, 123, 167, 20, _
@@ -636,6 +710,17 @@ public Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->AddControl("CHECKBOX", , IDC_FRMFINDINFILES_CHKSUBFOLDERS, L(258,"Search Subfolders"), 26, 163, 167, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   dim as HWND hCtrl = _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMFINDINFILES_CHKCURRENTDOC, L(408,"Current Document"), 195, 123, 167, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMFINDINFILES_CHKALLOPENDOCS, L(409,"All Open Documents"), 195, 143, 167, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMFINDINFILES_CHKPROJECT, L(410,"Current Project"), 195, 163, 167, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   EnableWindow( hCtrl, gApp.IsProjectActive )     
 
    Dim As Long i, nCount, startPos, endPos, startLine, endLine
    Dim As String buffer, sFind, sFiles, sFolder
@@ -674,9 +759,12 @@ public Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT
    SetWindowText( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFOLDER), WStr(gFindInFiles.txtFolder) )    
    EnableWindow( GetDlgItem(HWND_FRMFINDINFILES, IDOK), True )
  
-   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKWHOLEWORDS), gFindInFiles.nWholeWord )
-   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKMATCHCASE), gFindInFiles.nMatchCase )
-   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKSUBFOLDERS), gFindInFiles.nSearchSubFolders )
+   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKWHOLEWORDS),  gFindInFiles.nWholeWord )
+   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKMATCHCASE),   gFindInFiles.nMatchCase )
+   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKSUBFOLDERS),  gFindInFiles.nSearchSubFolders )
+   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKCURRENTDOC),  gFindInFiles.nSearchCurrentDoc )
+   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKALLOPENDOCS), gFindInFiles.nSearchAllOpenDocs )
+   Button_SetCheck( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_CHKPROJECT),     gFindInFiles.nSearchProject )
    
    ShowWindow HWND_FRMFINDINFILES, SW_SHOW
    SetFocus( GetDlgItem(HWND_FRMFINDINFILES, IDC_FRMFINDINFILES_COMBOFIND) )

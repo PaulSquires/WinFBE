@@ -30,11 +30,12 @@ end function
 
 ''
 ''
-Function clsApp.AddDocument( ByVal pDoc As clsDocument Ptr ) As Long
+Function clsApp.AddNewDocument() As clsDocument Ptr 
    ' Add it to the start of the linked list
+   dim pDoc As clsDocument Ptr = New clsDocument
    pDoc->pDocNext = this.pDocList
    this.pDocList = pDoc
-   Function = 0
+   Function = pDoc
 End Function
 
 
@@ -84,11 +85,11 @@ End Function
 
 ''
 ''
-Function clsApp.GetDocumentPtrByFilename( ByVal pswzName As WString Ptr ) As clsDocument Ptr
-   If pswzName = 0 Then Return 0
+Function clsApp.GetDocumentPtrByFilename( Byref wszName As WString ) As clsDocument Ptr
+   If len(wszName) = 0 Then Return 0
    dim pDoc as clsDocument ptr = this.pDocList
    do until pDoc = 0
-      If Ucase(pDoc->DiskFilename) = Ucase(*pswzName) Then return pDoc
+      If Ucase(pDoc->DiskFilename) = Ucase(wszName) Then return pDoc
       pDoc = pDoc->pDocNext
    loop
    function = 0

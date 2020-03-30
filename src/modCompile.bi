@@ -37,6 +37,7 @@ Type COMPILE_TYPE
    StartTime          As Double
    EndTime            As Double
    CompileID          as long                 ' Type of compile (wID). Needed in case frmOutput listview later clicked on.
+   bInvalidImagePath  as Boolean              ' One or more images have invalid path will result in failed resource compile
 End Type
 
 declare function ResetScintillaCursors() as Long

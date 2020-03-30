@@ -96,7 +96,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    dim as Boolean bIsTHIS
 
    dim as hwnd hEdit   = pDoc->hWndActiveScintilla
-   dim as long curPos  = nPosition   
+   dim as long curPos  = nPosition  
    dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
    dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
 
@@ -366,13 +366,6 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
              
-   ' Retrieve the position
-   curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0)
-   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
-  
-   dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
-   dim as string sLine_ucase
-   
    ' Get the current entered word/characters to only match.
    ' Remove any trailing "." because we have modified valid scintilla to recognize
    ' the period as part of a valid word.
@@ -387,7 +380,15 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          exit function
       end if   
    END IF                 
+
+
+   ' Retrieve the position
+   curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
+   nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
   
+   dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
+   dim as string sLine_ucase
+   
    ' If no active autocomplete then create the list based on the current underlying match word.
    if (SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) = 0) and _
       (notification <> SCN_AUTOCCHARDELETED) and _
@@ -405,6 +406,12 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          bTypesOnly = false
          bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+      elseif right(sLine_ucase, 1) = "." then 
+         sDot = "."  ' okay
+         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
+      elseif right(sLine_ucase, 2) = "->" then
+         sDot = "->"   
+         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
       elseif right(sLine_ucase, 1) = "(" then 
          ShowCodetip(pDoc)
          exit function 
@@ -431,12 +438,6 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          bTypesOnly = true
          bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
-      elseif right(sLine_ucase, 1) = "." then 
-         sDot = "."  ' okay
-         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
-      elseif right(sLine_ucase, 2) = "->" then
-         sDot = "->"   
-         pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
       END IF
       ' Check if it is a "FOR i AS LONG" type of statement
       if instr(sLine, "FOR ") then 
@@ -509,7 +510,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
 
 
       case AUTOCOMPLETE_TYPE
-         pData = DereferenceLine( pDoc, sDot, curPos )
+         pData = DereferenceLine( pDoc, sDot, curPos - 1)
          if pData then 
 
             if (pData->id = DB2_VARIABLE) or (pData->id = DB2_TYPE) then

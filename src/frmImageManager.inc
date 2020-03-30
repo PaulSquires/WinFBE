@@ -96,6 +96,8 @@ private Function frmImageManager_DisplayImage( byval hwnd as HWND, _
             case 5     ' Stretch
                pImageCtx->SetImageAdjustment( GDIP_IMAGECTX_STRETCH, CTRUE )
          end select
+         
+         dim hCtrl as HWND = GetDlgItem( HWND_FRMIMAGES, IDC_FRMIMAGEMANAGER_FRAMEPREVIEW )
          wszFilename = wszFilename & pImageType->wszFileName
          if AfxFileExists(pImageType->wszFileName) = false then
             wszFilename = wszFilename & " (" & L(81, "File not found") & ")"
@@ -191,7 +193,7 @@ private Function frmImageManager_AddImage( ByVal HWnd As HWnd ) As LRESULT
                redim preserve pDoc->AllImages(ub)
                pDoc->AllImages(ub).wszFileName  = *pwszName
                pDoc->AllImages(ub).wszImageName = frmImageManager_GenerateImageName(*pwszName)
-               pDoc->AllImages(ub).wszFormat    = wstr("RCDATA")
+               pDoc->AllImages(ub).wszFormat    = "RCDATA"
                pDoc->AllImages(ub).pDoc         = pDoc
                dim as long count = ListView_GetItemCount(hLV)
                FF_ListView_InsertItem( hLV, count, 0, pDoc->AllImages(ub).wszImageName )
@@ -237,7 +239,7 @@ private Function frmImageManager_RemoveImage( ByVal HWnd As HWnd ) As LRESULT
    dim as CWSTR wszMsg
    
    ' Get the pDoc related to this IMAGE_NAME being deleted in order to ensure that
-   ' we remove it from the current document.
+   ' we remove it from the correct document.
    FF_ListView_GetItemText(hLV, nCurSel, 0, @wszImageName, MAX_PATH)
    pImageType = GetImagesTypePtr(wszImageName)
    
@@ -274,18 +276,17 @@ private Function frmImageManager_RemoveImage( ByVal HWnd As HWnd ) As LRESULT
    If MessageBox( hwnd, wszMsg, L(276,"Confirm"), MB_ICONQUESTION Or MB_YESNOCANCEL ) <> IDYES Then exit function
 
    ' Do the actual delete from the AllImages array for the pDoc that holds the image.
-   if pImageType then pDoc = pImageType->pDoc
-   if pDoc then
-      for i as long = nCurSel to ubound(pDoc->AllImages) - 1
-         pDoc->AllImages(i) = pDoc->AllImages(i+1) 
+   if pImageType->pDoc then
+      for i as long = nCurSel to ubound(pImageType->pDoc->AllImages) - 1
+         pImageType->pDoc->AllImages(i) = pImageType->pDoc->AllImages(i+1) 
       next
-      if Ubound(pDoc->AllImages)-1 < 0 then
-         erase pDoc->AllImages
-      else   
-         Redim Preserve pDoc->AllImages(Ubound(pDoc->AllImages)-1)
+      if Ubound(pImageType->pDoc->AllImages)-1 < 0 then
+         erase pImageType->pDoc->AllImages
+      else               
+         Redim Preserve pImageType->pDoc->AllImages(Ubound(pImageType->pDoc->AllImages)-1)
       end if
       ' Save the changes to the pDoc
-      pDoc->SaveFile
+      pImageType->pDoc->SaveFile
    end if
    
    ' Ensure that the IMAGE_NAME is removed from all Properties that rely on the image.
@@ -359,6 +360,27 @@ private Function frmImageManager_OnCommand( ByVal HWnd As HWnd, _
       Case IDCANCEL
          If codeNotify = BN_CLICKED Then
             SendMessage HWnd, WM_CLOSE, 0, 0
+            Exit Function
+         End If
+         
+      case IDC_FRMIMAGEMANAGER_CMDFILENAME
+         If codeNotify = BN_CLICKED Then
+            ' Popup an inputbox to get corrected image filename
+            dim as CWSTR wszResult
+            dim as CWSTR wszFilename = pImageType->wszFileName
+            wszResult = AfxInputBox( HWND_FRMIMAGES, 0, 0, _
+                                     L(368,"Image Manager"), _
+                                     L(405,"Enter valid image file path") & ":", _
+                                     wszFilename, 1000 )
+            if len(wszResult) then
+               if ucase(wszResult) <> ucase(wszFilename) then
+                  if pImageType then
+                     pImageType->wszFileName = wszResult
+                     if pImageType->pDoc then pImageType->pDoc->SaveFile
+                     frmImageManager_DisplayImage( HWND, nCurSel )
+                  end if                     
+               end if
+            end if   
             Exit Function
          End If
          
@@ -504,7 +526,6 @@ private Function frmImageManager_Listview_SubclassProc ( _
          Exit Function
 
       Case WM_LBUTTONDBLCLK
-         'SetDocumentErrorPosition( HWND, gCompile.CompileID )    
          Exit Function
          
       Case WM_KEYUP
@@ -648,13 +669,13 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
    ListView_AddColumn( hLV, 0, L(364, "Name"), pWindow->ScaleX(210) )
    ListView_AddColumn( hLV, 1, L(374, "File Type"), pWindow->ScaleX(100) )
 
-   ' Add the images to the listview
-   dim as long nextLine = 0
 
-   dim pDoc as clsDocument ptr = gApp.pDocList
-   dim as long nCount = 0
+   ' Add the images to the listview
+   dim pDoc as clsDocument ptr 
    dim as long nSelLine = 0
+   dim as long nextLine = 0
    
+   pDoc = gApp.pDocList
    do until pDoc = 0
       if (gApp.IsProjectActive = false) andalso (pDoc <> gTTabCtl.GetActiveDocumentPtr) then 
          ' For non-projects only output images related to the active form.
@@ -694,10 +715,11 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
       ComboBox_SetCurSel( hCtl, 0 )   ' Actual Size
    end if
    
-   pWindow->AddControl("LABEL", , IDC_FRMIMAGEMANAGER_LABEL1, L(0002, "File") & ":", 356, nTop + 380, 320, 20, _
-           WS_CHILD Or WS_VISIBLE Or SS_LEFT, WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("BUTTON", , IDC_FRMIMAGEMANAGER_CMDFILENAME, L(0002, "File") & "...", 356, nTop + 380, 75, 20, _
+        WS_CHILD Or WS_VISIBLE or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
-   pWindow->AddControl("LABEL", , IDC_FRMIMAGEMANAGER_LBLFILENAME, "", 356, nTop + 400, 334, 20, _
+   pWindow->AddControl("LABEL", , IDC_FRMIMAGEMANAGER_LBLFILENAME, "", 356, nTop + 400, 300, 20, _
            WS_CHILD Or WS_VISIBLE Or SS_LEFT or SS_PATHELLIPSIS, WS_EX_LEFT Or WS_EX_LTRREADING)
 
    pWindow->AddControl("GROUPBOX",, IDC_FRMIMAGEMANAGER_FRAMEPREVIEW, L(377,"Image Preview"), 356, nTop, 334, 350, _

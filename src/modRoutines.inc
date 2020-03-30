@@ -20,6 +20,7 @@
 #include once "frmMain.bi"
 
 
+
 ' ========================================================================================
 ' Return the pixel width of the incoming text string
 ' ========================================================================================
@@ -319,6 +320,36 @@ END FUNCTION
 
 
 ' ========================================================================================
+' Parse a string to a string array and return the number of lines.
+' ========================================================================================
+public function GetStringToArray( byref txtBuffer as string, _
+                                  txtArray() as string _
+                                  ) as long
+   ' Load the lines into the string array. This is MUCH faster than having
+   ' to use AfxStrParse to retrieve each line.
+   dim as string st
+   dim as long iLineStart = 1
+   dim as long iLineEnd, nNextLine
+   dim as Long nNextBufferArrayLine = 1
+
+   ' Convert the string into an array that can be parsed.
+   do until iLineStart >= len( txtBuffer )
+      iLineEnd = instr(iLineStart, txtBuffer, vbcrlf)
+      if iLineEnd = 0 then iLineEnd = len( txtBuffer )  ' cr/lf not found
+      st = mid( txtBuffer, iLineStart, iLineEnd - iLineStart )
+      iLineStart = iLineStart + len(st) + len(vbcrlf)
+      if nNextBufferArrayLine >= ubound(txtArray) THEN
+         redim preserve txtArray( ubound(txtArray) + 5000 )
+      END IF
+      txtArray(nNextBufferArrayLine) = st   
+      nNextBufferArrayLine = nNextBufferArrayLine + 1
+   loop
+
+   function = nNextBufferArrayLine - 1
+end function
+
+
+' ========================================================================================
 ' Open a disk file and read it into a string (ANSI or UTF8)
 ' ========================================================================================
 public function GetFileToString( byref wszFilename as const wstring, _
@@ -343,14 +374,14 @@ public function GetFileToString( byref wszFilename as const wstring, _
    ' Check for BOM signatures
    if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
       ' UTF8 BOM encoded 
-      if pDoc then pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
+      pDoc->FileEncoding = FILE_ENCODING_UTF8_BOM
       txtBuffer = mid(txtBuffer, 4)   ' bypass the BOM
    elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
       ' UTF16 BOM (little endian) encoded
-      if pDoc then pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
+      pDoc->FileEncoding = FILE_ENCODING_UTF16_BOM 
       txtBuffer = mid(txtBuffer, 3)   ' bypass the BOM
    else
-      if pDoc then pDoc->FileEncoding = FILE_ENCODING_ANSI
+      pDoc->FileEncoding = FILE_ENCODING_ANSI
    END IF
 
    select case pDoc->FileEncoding
@@ -539,24 +570,30 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
                               False, _    ' bIsTemplate
                               true, _     ' bShowInTab
                               false, _    ' bIsInclude
-                              "", _       ' pwszName
+                              "", _       ' wszFileName
                               pDoc )      ' pDocIn
    else   
-      if AfxFileExists(wszFilename) = 0 THEN exit function
+      if AfxFileExists(wszFilename) = false THEN exit function
       ' Display the document containing the selected sub/function       
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
                               False, _    ' bIsNewFile
                               False, _    ' bIsTemplate
                               true, _     ' bShowInTab
                               false, _    ' bIsInclude
-                              wszFilename, _  ' pwszName
+                              wszFilename, _  ' wszFileName
                               0 )         ' pDocIn
    end if
 
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN
-     
+      ' Make sure that the code editor is selected for visual designer forms
+      if (pDoc->IsDesigner = true) andalso (IsDesignerView(pDoc) = true) then
+         if nLineNumber <> -1 then
+            TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab, 0 = Designer
+            frmMain_PositionWindows
+         end if   
+      end if
       ' Do not reposition if incoming LineNumber is -1 because that value represents
       ' the caller specifically not wanting a repositioning.
       if nLineNumber <> -1 then 
@@ -1372,18 +1409,16 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    ' will open but fail and send request but security parameters of the system will prevent data
    ' from being received resulting in a zero byte file. 
    if AfxFileExists( wszFilename ) then
-      dim as long f = freefile
-      open wszFilename for input as #f
-       
-      do until eof(f)
-         line input #f, st
-         if left( st, 15 ) = "latest_version=" then
-            wszLatestVersion = trim(mid( st, 16 ))
-            exit do
-         end if
-      loop
-          
-      close #f
+      dim pStream AS CTextStream 
+      if pStream.Open(wszFilename, IOMODE_FORREADING) = S_OK then 
+         Do Until pStream.EOS
+            st = pStream.ReadLine
+            if left( st, 15 ) = "latest_version=" then
+               wszLatestVersion = trim(mid( st, 16 ))
+               exit do
+            end if
+         loop
+      end if
       AfxDeleteFile( wszFilename ) 
    end if
    

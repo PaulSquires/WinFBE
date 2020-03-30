@@ -19,14 +19,14 @@
 
 ''
 ''
-Function clsTopTabCtl.GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) As Long
+Function clsTopTabCtl.GetTabIndexFromFilename( Byref wszName As WString ) As Long
    ' Get the index of tab that holds the incoming filename. This is used
    ' mostly for positioning the editor to the correct document when an
    ' error occurs during compiling. 
    ' Returns -1 if not found, otherwise zero based index of tab.
    
    If TabCtrl_GetItemCount(this.hWindow) = 0 Then Return -1 
-   If pwszName = 0 Then Return -1
+   If len(wszName) = 0 Then Return -1
    
    Dim As Long i
    Dim pDoc As clsDocument Ptr 
@@ -39,7 +39,7 @@ Function clsTopTabCtl.GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) A
       TabCtrl_GetItem( this.hWindow, i, @TB )
       pDoc = Cast(clsDocument Ptr, TB.lParam)
       If pDoc Then 
-         If Ucase(pDoc->DiskFilename) = Ucase(*pwszName) Then Return i
+         If Ucase(pDoc->DiskFilename) = Ucase(wszName) Then Return i
       End If   
    Next
 
@@ -110,7 +110,6 @@ Function clsTopTabCtl.SetFocusTab( ByVal idx As Long ) As Long
       if IsWindowVisible(HWND_FRMFINDREPLACE) THEN
          frmFindReplace_HighlightSearches
       END IF
-      SetFocusScintilla
    End If
 End Function
 
@@ -185,7 +184,6 @@ Function clsTopTabCtl.DisplayScintilla( ByVal idx As Long, ByVal bShow As BOOLEA
    ' Show/Hide the Scintilla editing window (or visual designer window) for the incoming tab index
    Dim TB As TC_ITEM 
    TB.Mask = TCIF_PARAM
-   
    TabCtrl_GetItem( this.hWindow, idx, @TB )
    
    Dim pDocShow As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
@@ -224,32 +222,24 @@ End Function
 ''
 Function clsTopTabCtl.AddTab( ByVal pDoc As clsDocument Ptr ) As Long
    Dim idx As Long
-   Dim TB  As TC_ITEM 
-   
-   TB.Mask   = TCIF_PARAM Or TCIF_IMAGE
-   TB.lParam = Cast(LPARAM, pDoc)
-   TB.iImage = 0
-   
-   Dim As Long NumItems = TabCtrl_GetItemCount(this.hWindow)             
-   
    ' Return the index of the added tab
-   idx = SendMessage( this.hWindow, TCM_INSERTITEM, NumItems, Cast(LPARAM, @TB) )     
-   
+   idx = TabCtrl_AddTab( this.hWindow, 0, "", Cast(LPARAM, pDoc) ) 
    this.SetTabText(idx)
-   
    Function = idx
 End Function
 
 ''
 ''
 Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
-   Dim TB    As TC_ITEM 
+   ' Set the text for the incoming tab index. If the index
+   ' is -1 then set the text of the current tab.
    Dim wszText As WString * MAX_PATH  
    Dim wszTemp As WString * MAX_PATH  
 
    If idx = -1 Then idx = TabCtrl_GetCurSel(this.hWindow)
-
+   
    ' Get the pointer to the clsDocument stored in lParam and also retrieve the existing text. 
+   Dim TB As TC_ITEM 
    TB.Mask       = TCIF_PARAM Or TCIF_TEXT
    TB.pszText    = @wszTemp
    TB.cchTextMax = MAX_PATH
@@ -257,6 +247,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
    
    Dim pDoc As clsDocument Ptr = Cast(clsDocument Ptr, TB.lParam)
    If pDoc Then 
+      
       ' Set the text that displays on the tab
       wszText = AfxStrPathname( "NAMEX", pDoc->DiskFilename )
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
@@ -265,9 +256,7 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
             
       ' We only update the text if it has changed in order to prevent flicker.
       If wszText <> wszTemp Then
-         TB.Mask    = TCIF_TEXT 
-         TB.pszText = @wszText  
-         Function = TabCtrl_SetItem( this.hWindow, idx, @TB )
+         TabCtrl_SetText( this.hWindow, idx, @wszText )
          ' Also update the Explorer node's filename
          if pDoc->hNodeExplorer then
             Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
@@ -276,7 +265,9 @@ Function clsTopTabCtl.SetTabText( ByVal idx As Long ) As Long
             TreeView_SetItemText( hTree, pDoc->hNodeExplorer, @wszText )
          end if   
       End If
+
    End If
    
+   function = idx
 End Function
 

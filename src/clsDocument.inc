@@ -204,7 +204,7 @@ end function
 Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
                                        ByVal IsNewFile  As BOOLEAN, _     
                                        ByVal IsTemplate As BOOLEAN = False, _
-                                       ByVal pwszFile   As WString Ptr = 0 _
+                                       Byref wszFile    As WString = "" _
                                        ) As HWnd   
 
    ' Creates a Scintilla editing window (initially not visible). Optionally, load a diskfile
@@ -257,18 +257,18 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
    End If
    this.ProjectFileType = FILETYPE_UNDEFINED
    
-   If pwszFile Then   
+   If len(wszFile) Then   
       ' Do not use Dir() > "" here b/c if incoming file originated from a Do/Loop 
       ' of files using Dir() then there will be problems.
 
-      If AfxFileExists(*pwszFile) Then     
+      If AfxFileExists(wszFile) Then     
          Dim As String st, sText
          Dim As Long f = Freefile
          Dim As Long idx
          
          If IsTemplate Then
             dim pStream as CTextStream
-            if pStream.Open(*pwszFile) = S_OK then
+            if pStream.Open(wszFile) = S_OK then
                ' Look at the first 4 lines
                ' Line 3 tells us the file type (bas or xml)
                Do Until pStream.EOS
@@ -301,16 +301,15 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' Set a flag that we are loading code from a file. This is important because if the file
             ' contains visual designer code then we only want to apply control properties after all of 
             ' the file is read, otherwise it would get applied immediately after each call to CreateToolboxControl.
-            this.DiskFilename = *pwszFile   ' assign before GetFileToString because needed for RelativeFile calculation.
+            this.DiskFilename = wszFile   ' assign before GetFileToString because needed for RelativeFile calculation.
             this.LoadingFromFile = true
             dim sText as string  ' this will be an UTF-8 encoded string
-            ' GetFileToString has a call to pDoc->ParseFormMetaData which will create/recreate
-            ' the designer form.
-            if GetFileToString(*pwszFile, sText, @this) = false then
+            ' GetFileToString has a call to pDoc->ParseFormMetaData which will create/recreate the designer form.
+            if GetFileToString(wszFile, sText, @this) = false then
                this.SetText( sText ) 
-               this.DateFileTime = AfxGetFileLastWriteTime( *pwszFile )
+               this.DateFileTime = AfxGetFileLastWriteTime( wszFile )
             else
-               print "Error opening: "; *pwszFile
+               print "Error opening: "; wszFile
             End If
             this.LoadingFromFile = false
             SciMsg( m_pSci(0), SCI_SETSAVEPOINT, 0, 0)
@@ -318,7 +317,7 @@ Function clsDocument.CreateCodeWindow( ByVal hWndParent As HWnd, _
             ' Update the most recently used file list (only for non-IsNewFlag files)
             ' Only add file to MRU list if it is not part of an active Project.
             If gApp.IsProjectActive = false Then 
-               UpdateMRUList(*pwszFile)
+               UpdateMRUList(wszFile)
             end if
          End If
       End If   
@@ -411,7 +410,10 @@ End Function
 ' Parse all of the file's code to remove and process any visual designer specific code.
 ' Returns a string representing just the code only (visual designer metastatements removed).
 ' ========================================================================================
-function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllText as wstring ) as CWSTR
+function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, _
+                                        byref wszAllText as wstring, _
+                                        byval bLoadOnly  as Boolean = false _
+                                        ) as CWSTR
    
    ' NOTE: The incoming wszAllText string is UTF-16 encoded. The resulting string that
    ' is returned from this function is also UTF-16 encoded. All WinFBE form files
@@ -438,11 +440,13 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
       this.IsDesigner = true
       ' Remove any previously created controls, etc otherwise reloading the form
       ' file will result in duplicates.
-      if this.hWndForm then DestroyWindow(this.hWndForm)
-      if this.hWndFrame then DestroyWindow(this.hWndFrame)
-      if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
-      if this.hDesignTabCtrl then DestroyWindow(this.hDesignTabCtrl)
-      this.CreateDesignerWindow(hWndParent)
+      if bLoadOnly = false then
+         if this.hWndForm then DestroyWindow(this.hWndForm)
+         if this.hWndFrame then DestroyWindow(this.hWndFrame)
+         if this.hWndDesigner then DestroyWindow(this.hWndDesigner)
+         if this.hDesignTabCtrl then DestroyWindow(this.hDesignTabCtrl)
+         this.CreateDesignerWindow(hWndParent)
+      end if
       numOffsetLines = 1
    else
       ' This is just a regular code file with no visual designer
@@ -621,15 +625,23 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
             bIsValidControl = false
          else
             bIsValidControl = true
-            pCtrl = CreateToolboxControl( @this, nControlType, rc )
-            pCtrlActive = pCtrl
+            if bLoadOnly = true then
+               dim pCtrlTemp as clsControl ptr = new clsControl
+               pCtrlTemp->ControlType = nControlType
+               this.Controls.Add(pCtrlTemp)
+            else
+               pCtrl = CreateToolboxControl( @this, nControlType, rc )
+               pCtrlActive = pCtrl
+            end if   
          end if
          
       elseif left(wst, 20) = "' WINFBE CONTROL_END" then
          if bIsValidControl then
-            pCtrl->SuspendLayout = true
-            ApplyControlProperties( @this, pCtrl )
-            pCtrl->SuspendLayout = false
+            if bLoadOnly = false then
+               pCtrl->SuspendLayout = true
+               ApplyControlProperties( @this, pCtrl )
+               pCtrl->SuspendLayout = false
+            end if
          end if
       'elseif left(sLine, 20) = "'   PROPERTIES_START" then
       'elseif left(sLine, 18) = "'   PROPERTIES_END" then
@@ -670,25 +682,27 @@ function clsDocument.ParseFormMetaData( ByVal hWndParent As HWnd, byref wszAllTe
    
 end function
 
+
 ''
 ''
 Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
-   Dim sText     As String
-   Dim wFilename As WString * MAX_PATH
-   Dim wText     As WString * MAX_PATH  
-   Dim f         As Long
+   Dim sText       As String
+   Dim wszFilename As WString * MAX_PATH
+   Dim wszText     As WString * MAX_PATH  
+   Dim wst         as CWSTR
+   
    
    ' If this is a new Untitled document then set flag to display SaveAs dialog.
    If this.IsNewFlag Then bSaveAs = true
       
-   wFilename = this.Diskfilename
+   wszFilename = this.Diskfilename
    
    If bSaveAs Then
       ' Display the Save File Dialog
-      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wFilename, "", IDM_FILESAVEAS)
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, "", IDM_FILESAVEAS)
       If pwszName Then
-         wFilename = *pwszName
+         wszFilename = *pwszName
          CoTaskMemFree(pwszName)
       Else
          Return False
@@ -696,9 +710,12 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    End If
 
    dim as any ptr pSci = this.GetActiveScintillaPtr()
+   
    ' If this is a FORM document then we need to create the string of controls and properties that gets
    ' saved at the start of the file before any of the code is displayed.
    if this.IsDesigner then
+      ' We also need to find out how many vbcrlf's exist until the end of the WINFBE_CODEGEN_END tag
+      ' in order to properly calculate the file error offset.
       this.bRegenerateCode = true
       GenerateFormMetaData(@this)     ' recreate the metadata
       GenerateFormCode(@this)         ' regenerate visual designer code
@@ -706,16 +723,20 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
       this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormMetaData, vbcrlf) 
       this.ErrorOffset = this.ErrorOffset + AfxStrTally(this.wszFormCodegen, vbcrlf) 
    END IF
+
+   ' If pSci does not exist then this file exists in the Explorer but has not yet been
+   ' displayed in order to create a Scintilla window. Simply need to exit.
+   if pSci = 0 then return true
+   
    ' Save text buffer to disk by directly accessing buffer rather
    ' saving it to an intermediary string variable first.
    Dim As ZString Ptr psz = Cast( ZString Ptr, SciExec(this.hWindow(0), SCI_GETCHARACTERPOINTER, 0, 0) )
-   
    dim as long sciCodePage = SciMsg(pSci, SCI_GETCODEPAGE, 0, 0)   ' 0 or SC_CP_UTF8 
    
-   if AfxFileExists(wFilename) THEN Kill(wFilename)
+   if AfxFileExists(wszFilename) THEN AfxDeleteFile(wszFilename)
       
    dim pStream as CFileStream
-   if pStream.Open(wFilename, STGM_CREATE or STGM_WRITE) = S_OK then
+   if pStream.Open(wszFilename, STGM_CREATE or STGM_WRITE) = S_OK then
       dim as string st
       select CASE this.FileEncoding
          case FILE_ENCODING_ANSI
@@ -762,14 +783,14 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    end if
    pStream.Close
 
-   this.DiskFilename = wFilename
-   this.DateFileTime = AfxGetFileLastWriteTime( wFilename )
+   this.DiskFilename = wszFilename
+   this.DateFileTime = AfxGetFileLastWriteTime( wszFilename )
    this.UserModified = false
    
    ' If this was a new document then it needs to be saved to Recent File list.
    If this.IsNewFlag Then 
       If gApp.IsProjectActive = false Then 
-         UpdateMRUList(wFilename)
+         UpdateMRUList(wszFilename)
       end if
    end if
    this.IsNewFlag = False
@@ -989,6 +1010,22 @@ Function clsDocument.AppendText( ByRef sText As Const String ) As Long
    SciMsg( pSci, SCI_COLOURISE, 0, -1 )
    Function = 0
 End Function
+
+
+''
+''
+Function clsDocument.CenterCurrentLine() As Long 
+   ' Center the current line to the middle of the visible screen. This is useful
+   ' when searching and finding text. The found text will always display in the 
+   ' middle of the screen. 
+   if gConfig.PositionMiddle = 0 then exit function
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
+   dim as long numLinesOnScreen = SciMsg( pSci, SCI_LINESONSCREEN, 0, 0)
+   dim as long nMiddle = (this.GetCurrentLineNumber - (numLinesOnScreen / 2) + 1)
+   SciMsg( pSci, SCI_SETFIRSTVISIBLELINE, nMiddle, 0)
+   Function = 0
+End Function
+
 
 
 ''
@@ -1576,6 +1613,8 @@ Function clsDocument.ApplyProperties() As Long
    Dim ryRatio     As Single = 1
    dim pTheme      as TYPE_THEMES ptr
    
+   If m_pSci(0) = 0 Then Exit Function
+
    ' Determine the pWindow parent of the Scintilla window in order
    ' to ensure that DPI ratios are correctly used.
    Dim pWindow As CWindow Ptr = AfxCWindowOwnerPtr(this.hWindow(0))
@@ -1601,7 +1640,6 @@ Function clsDocument.ApplyProperties() As Long
       Case 3:  nFontCase = SC_CASE_MIXED    ' original case
    End Select            
    
-   If m_pSci(0) = 0 Then Exit Function
 
    pTheme = gConfig.GetThemePtr
    
@@ -1786,7 +1824,6 @@ Function clsDocument.ApplyProperties() As Long
          End If
          
          If gConfig.SyntaxHighlighting Then
-       
             ' Set the Multiline Comments style
             SciMsg( m_pSci(i), SCI_STYLESETFORE, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).nFg)
             SciMsg( m_pSci(i), SCI_STYLESETBACK, SCE_B_MULTILINECOMMENT, pTheme->colors(CLR_COMMENTS).nBg)
@@ -1969,17 +2006,33 @@ End Function
 ''
 ''
 function clsDocument.CompileDirectives( Directives() as COMPILE_DIRECTIVES ) as Long
-   dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' Search the source code for any user embedded compiler directives.
    Dim ub     As Long    
    Dim i      As Long    
    Dim nLines As Long    
    dim st     as String
    
-   nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
+   dim sText as string  ' this will be an UTF-8 encoded string
+   
+   dim txtArray(any) as string ' temp string array if needed
+   
+   dim as any ptr pSci = this.GetActiveScintillaPtr()
 
-   For i = 0 To nLines
-      st = ltrim(this.GetLine(i))
+   if pSci = 0 then
+      ' The document has not been loaded into a Scintilla window
+      GetFileToString( this.DiskFilename, sText, @this)
+      nLines = GetStringToArray( sText, txtArray() )
+   else
+      nLines = SciMsg( pSci, SCI_GETLINECOUNT, 0, 0)
+   end if
+
+   For i = 0 To nLines - 1
+      if pSci then
+         st = ltrim(this.GetLine(i))
+      else
+         st = ltrim(txtArray(i + 1))
+      end if
+         
       if left(st, 1) <> "'" THEN continue for
       st = ltrim(mid(st, 2))
 

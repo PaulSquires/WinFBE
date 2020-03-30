@@ -66,6 +66,11 @@ private function CreateTempResourceFile() as boolean
                    pDoc->AllImages(i).wszFormat    & wspace(2) & _
                    wchr(34) & pDoc->AllImages(i).wszFileName & wchr(34) & _
                    vbcrlf
+         ' Check to ensure that the path to the image is valid otherwise the
+         ' resource compiler will fail.
+         if AfxFileExists( pDoc->AllImages(i).wszFileName ) = false then
+            gCompile.bInvalidImagePath = true
+         end if
       next   
       pDoc = pDoc->pDocNext
    loop
@@ -230,16 +235,21 @@ private function AlternateCompile( byref wszExe AS wstring, _
    
    ' Get the log file contents into a string in order to parse it for errors, etc
    If AfxFileExists(wszLogFile) Then
-      f = Freefile
-      Open wszLogFile For binary as #f
-      sConsoleText = string(lof(f), 0)
-      Get #f, , sConsoleText
-      Close #f
+      dim pStream as CFileStream
+      if pStream.Open( wszLogFile, _
+                       STGM_READ or STGM_SHARE_EXCLUSIVE, _     
+                       FILE_ATTRIBUTE_NORMAL, _
+                       false _               ' fCreate
+                       ) = S_OK then
+         sConsoleText = string( pStream.GetSize, 0 )
+         pStream.Read( strptr(sConsoleText), len(sConsoleText), null ) 
+         pStream.Close
+      end if   
    End If   
 
    if AfxFileExists(wszBatchFile) then AfxDeleteFile(wszBatchFile)
    if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
-
+  
    function = 0
 end function
 
@@ -364,7 +374,7 @@ public Function RunEXE( ByRef wszFileExe As CWSTR, _
       dim pStream as CTextStream
       if pStream.Create(wszBatchFile) = S_OK then
          pStream.WriteLine "@echo off"
-         pStream.WriteLine Left(**wszPath, 2)     ' ensure on correct drive
+         pStream.WriteLine Left(wszPath, 2)     ' ensure on correct drive
          pStream.WriteLine "cd " & chr(34) & wszPath & chr(34)   ' change to correct folder
          pStream.WriteLine chr(34) & wszFileExe & chr(34) & " " & wszParam
          pStream.WriteLine "pause"
@@ -530,21 +540,21 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       
       ' Deal with the situation where we might be trying to compile a 64-bit application
       ' from a 32-bit operating system.
-      If Left(**wst_ucase, 16) = WSTR("THIS VERSION OF ") Then
+      If Left(wst_ucase, 16) = "THIS VERSION OF " Then
          fGoodCompile = false
-         FF_ListView_InsertItem( hLV, NumWarnings, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, NumWarnings, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, NumWarnings, 2, WStr("compiling FAILED: Windows not 64-bit (refer to log file)") ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 0, "0" )
+         FF_ListView_InsertItem( hLV, NumWarnings, 1, "" ) 
+         FF_ListView_InsertItem( hLV, NumWarnings, 2, "compiling FAILED: Windows not 64-bit (refer to log file)" ) 
          wszOutputMsg = wsLogSt: exit For
          exit for
       End If   
 
       ' Save the FB version and copyright information. 
-      If Left(**wst_ucase, 19) = WSTR("FREEBASIC COMPILER ") Then
+      If Left(wst_ucase, 19) = "FREEBASIC COMPILER " Then
          fGoodCompile = True
          wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
       End If        
-      If Left(**wst_ucase, 13) = WSTR("COPYRIGHT (C)") Then
+      If Left(wst_ucase, 13) = "COPYRIGHT (C)" Then
          fGoodCompile = True
          wszOutputMsg = wszOutputMsg & wst & vbCrLf: Continue For
       End If        
@@ -562,56 +572,56 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       ' Very sorry, but GoRC had a problem.
                                           
       ' Check to see if linking failed
-      If (Left(**wst_ucase, 6) = WSTR("ERROR!")) or _
-         (left(**wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, WStr("compiling resource FAILED: Error Code 1 (refer to log file)") ) 
+      If (Left(wst_ucase, 6) = "ERROR!") or _
+         (left(wst_ucase, 34) = "VERY SORRY, BUT GORC HAD A PROBLEM") Then
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "compiling resource FAILED: Error Code 1 (refer to log file)" ) 
          NumErrors = NumErrors + 1
-      elseIf (Left(**wst_ucase, 5) = WSTR("ERROR")) Then
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, WStr("compiling FAILED: Error Code 1 (refer to log file)") ) 
+      elseIf (Left(wst_ucase, 5) = "ERROR") Then
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "compiling FAILED: Error Code 1 (refer to log file)" ) 
          NumErrors = NumErrors + 1
-      elseIf (Left(**wst_ucase, 19) = WSTR("COMPILING C FAILED:")) Then
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") )
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 2, WStr("compiling C FAILED: Error Code 1 (refer to log file)") ) 
+      elseIf (Left(wst_ucase, 19) = "COMPILING C FAILED:") Then
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" )
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 2, "compiling C FAILED: Error Code 1 (refer to log file)" ) 
          NumErrors = NumErrors + 1
       end if
       
-      If Instr(**wst_ucase, WSTR("LINKING FAILED:")) Then 
-         FF_ListView_InsertItem( hLV, nListViewLine, 0, WStr("0") ) 
-         FF_ListView_InsertItem( hLV, nListViewLine, 1, WStr("") ) 
+      If Instr(wst_ucase, "LINKING FAILED:") Then 
+         FF_ListView_InsertItem( hLV, nListViewLine, 0, "0" ) 
+         FF_ListView_InsertItem( hLV, nListViewLine, 1, "" ) 
          FF_ListView_InsertItem( hLV, nListViewLine, 2, wst & " (refer to log file)" ) 
          NumErrors = NumErrors + 1
       End If
  
  
       ' Check for the "linking: " line because that line identifies the actual output filename being created
-      If Left(**wst_ucase, 9) = WSTR("LINKING: ") Then 
+      If Left(wst_ucase, 9) = "LINKING: " Then 
          ' -o "WinFBE.exe" 
-         i = Instr(wst, WSTR(" -o "))
+         i = Instr(wst, " -o ")
          If i Then
-            wszTemp = Mid(**wst, i+4)
-            i = Instr(wszTemp, wDQ & WSTR(" "))
+            wszTemp = Mid(wst, i+4)
+            i = Instr(wszTemp, wDQ & " ")
             If i Then gCompile.OutputFilename = AfxStrRemove(Left(wszTemp, i), wDQ)
          End If      
       End If
       
       ' Determine if we are reading any lines in the log file that appear after the "compiling: " line
       ' but before the "assembling: ". Anything there is data output by #print preprocessor statements.
-      If Left(**wst_ucase, 11) = WSTR("COMPILING: ") Then 
+      If Left(wst_ucase, 11) = "COMPILING: " Then 
          bReadingCompileOutput = true
          continue for
-      elseIf Left(**wst_ucase, 13) = WSTR("COMPILING C: ") Then 
+      elseIf Left(wst_ucase, 13) = "COMPILING C: " Then 
          bReadingCompileOutput = true
          continue for
-      elseIf Left(**wst_ucase, 12) = WSTR("ASSEMBLING: ") Then 
+      elseIf Left(wst_ucase, 12) = "ASSEMBLING: " Then 
          bReadingCompileOutput = false
-      elseIf Left(**wst_ucase, 14) = WSTR("COMPILING RC: ") Then 
+      elseIf Left(wst_ucase, 14) = "COMPILING RC: " Then 
          bReadingCompileOutput = false
-      elseIf Left(**wst_ucase, 9) = WSTR("LINKING: ") Then 
+      elseIf Left(wst_ucase, 9) = "LINKING: " Then 
          bReadingCompileOutput = false
       end if
 
@@ -621,9 +631,9 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
 
          ' Check for any compiler warnings
          Error_Start = 0
-         IsWarning = Instr(**wst_ucase, WSTR(") WARNING "))
+         IsWarning = Instr(wst_ucase, ") WARNING ")
          If IsWarning Then Error_Start = IsWarning
-         IsError   = Instr(**wst_ucase, WSTR(") ERROR ")) 
+         IsError   = Instr(wst_ucase, ") ERROR ") 
          If IsError Then Error_Start = IsError
          
          If (Error_Start > 0) Then 
@@ -637,14 +647,14 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
             ' opening parenthesis.
             ' 2018-08-29: Code updated to handle case of embedded parenthesis in file name
             Parenthesis_End   = Error_Start
-            Parenthesis_Start = InStrRev(**wst, WSTR("("), Parenthesis_End)
+            Parenthesis_Start = InStrRev(wst, "(", Parenthesis_End)
             
             If (Parenthesis_Start < Parenthesis_End) Andalso _
                (Parenthesis_End <= Error_Start) then
        
-               wst1 = left(**wst, Parenthesis_Start-1)   ' filename
-               wst2 = Mid( **wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
-               wst3 = Mid( **wst, Error_Start + 1)  ' error message
+               wst1 = left(wst, Parenthesis_Start-1)   ' filename
+               wst2 = Mid( wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
+               wst3 = Mid( wst, Error_Start + 1)  ' error message
      
                ' If this is a visual designer form file then we need to modify the line
                ' number based on the error offset number.
@@ -680,8 +690,8 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
 
          else
                      
-            FF_ListView_InsertItem( hLV, nListViewLine, 0, wstr("") )  ' line#
-            FF_ListView_InsertItem( hLV, nListViewLine, 1, wstr("") )  ' filename
+            FF_ListView_InsertItem( hLV, nListViewLine, 0, "" )  ' line#
+            FF_ListView_InsertItem( hLV, nListViewLine, 1, "" )  ' filename
             FF_ListView_InsertItem( hLV, nListViewLine, 2, wst )  ' message
             NumDirectives = NumDirectives + 1
          end if
@@ -763,7 +773,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
                          L(192, "Warnings") & " " & NumWarnings & _
                          "  [ " & AfxStrPathname("NAMEX", gCompile.OutputFilename) & "  " & _
-                         **AfxStrFormatKBSize(nFileSize) & " (" & _
+                         AfxStrFormatKBSize(nFileSize) & " (" & _
                          nFileSize & " " & L(199,"bytes") & ") ]"
          SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
@@ -776,7 +786,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                L(192,"Warnings")      & " " & NumWarnings & ")" & vbcrlf & vbcrlf & _
          L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
          L(195,"Target Compilation:") & " " & gCompile.OutputFilename & " (" & _
-               **AfxStrFormatKBSize(nFileSize) & ", " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
+               AfxStrFormatKBSize(nFileSize) & ", " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
          L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & _
                                         " " & L(198,"seconds") & " (" & _
                                         AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
@@ -824,7 +834,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    gCompile.wszFullCommandLine = ""
    gCompile.wszFullLogFile = ""
    gCompile.wszOutputMsg = ""
-  
+   gCompile.bInvalidImagePath = false
+   
    ' Can only continue to compile if the primary source code file
    ' is not dirty and needs to be saved.
    if wID <> IDM_QUICKRUN THEN
@@ -900,7 +911,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    End If
    If pDocMain = 0 Then return 0
    
-
+ 
    ' Do a check to ensure that only one call to Application.Run exists, otherwise
    ' present a warning message before continuing.
    dim as CWSTR wszWarning = L(401,"Multiple calls to Application.Run exist. Check the source code of these files:") & ":"
@@ -984,7 +995,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                   pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
                   pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
                   ' need to convert ansi to unicode
-                  wst = WStr(*psz)
+                  wst = *psz
                   pStream.Write wst.m_pBuffer, wst.m_BufferLen
                end if    
                
@@ -999,7 +1010,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       gCompile.MainFolder   = AfxStrPathname("PATH", pDocMain->DiskFilename)
    END IF
    
-   gCompile.ResourceFile = WStr("")    ' default that there is no resource
+   gCompile.ResourceFile = ""    ' default that there is no resource
    gCompile.CompileFlags = gConfig.Builds(idxBuild).wszOptions
 
    ' If the path to the WinFBX (Afx) library is valid then add that path
@@ -1014,15 +1025,15 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Dim pDocResource As clsDocument Ptr = gApp.GetResourceDocumentPtr()
       if pDocResource then gCompile.ResourceFile = pDocResource->DiskFilename
 
-      gCompile.ObjFolder = gCompile.MainFolder & wstr(".wfbe\")
-      gCompile.ObjFolderShort = wstr(".\.wfbe\")
+      gCompile.ObjFolder = gCompile.MainFolder & ".wfbe\"
+      gCompile.ObjFolderShort = ".\.wfbe\"
 
       If fCompile32 Then 
-         gCompile.ObjID = wstr("32.o")
+         gCompile.ObjID = "32.o"
          gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.ProjectOther32           
       End If
       If fCompile64 Then 
-         gCompile.ObjID = wstr("64.o")
+         gCompile.ObjID = "64.o"
          gCompile.CompileFlags = gCompile.CompileFlags + " " + gApp.ProjectOther64           
       End If   
       
@@ -1045,11 +1056,11 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
          case IDM_CONSOLE
             n = instr(gCompile.CompileFlags, " -S GUI ")
             if n THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, n, 8)
-            gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s console ")
+            gCompile.CompileFlags = gCompile.CompileFlags + " -s console "
          case IDM_GUI
             n = instr(gCompile.CompileFlags, " -S CONSOLE ")
             if n THEN gCompile.CompileFlags = AfxStrDelete(gCompile.CompileFlags, n, 12)
-            gCompile.CompileFlags = gCompile.CompileFlags + " " + wstr(" -s gui ")
+            gCompile.CompileFlags = gCompile.CompileFlags + " -s gui "
          case IDM_RESOURCE
             gCompile.ResourceFile = directives(i).DirectiveText
       END select
@@ -1058,15 +1069,15 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
 
    ' Need to determine the output filename in order to search for any existing
    ' running process.
-   gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".exe")
-   If Instr(" " & Ucase(gCompile.CompileFlags), wstr(" -DLL")) Then
-      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
+   gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".exe"
+   If Instr(" " & Ucase(gCompile.CompileFlags), " -DLL") Then
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll"
    End If
-   If Instr(" " & Ucase(gCompile.CompileFlags), wstr(" -DYLIB")) Then
-      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & wstr(".dll")
+   If Instr(" " & Ucase(gCompile.CompileFlags), " -DYLIB") Then
+      gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & ".dll"
    End If
-   If Instr(" " & Ucase(gCompile.CompileFlags), wstr(" -LIB")) Then
-      gCompile.OutputFilename = gCompile.MainFolder & wstr("lib") & gCompile.MainName & wstr(".a")
+   If Instr(" " & Ucase(gCompile.CompileFlags), " -LIB") Then
+      gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & ".a"
    End If
 
 
@@ -1140,7 +1151,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                SetCompileStatusBarMessage( wst, 0 )
  
                wszCommand = gCompile.CompilerPath
-               wszParams = " -c -b " + wDQ + pDoc->DiskFilename + wDQ + _
+               wszParams = " -c -b " + _
+                           wDQ + pDoc->DiskFilename + wDQ + _
                            " -v -o " + wDQ + wszTemp + wDQ 
                RedirConsoleToFile( wszCommand, wszParams, sConsoleText )
                gCompile.wszFullCommandLine = wszCommand & " " & wszParams
@@ -1163,8 +1175,6 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       loop
    End If
 
-   AfxDoEvents
-   
    
    ' If this is a visual designer project then output specific equates that dictate
    ' which controls get compiled into the file source.
@@ -1172,7 +1182,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    dim as boolean bIsVisual = false
    
    ' In 2.0.8 and lower, the following two defines were put into the user code
-   ' when a new main.bas file was created by New Project. Fr 2.0.9+ we move that
+   ' when a new main.bas file was created by New Project. From 2.0.9+ we move that
    ' code to the WinFBE_VD_MAIN.bas file and comment it out from the Main file.
    dim as CWSTR wszUnicodeEquate = "#Define UNICODE" & vbcrlf 
    dim as CWSTR wszDefineWin32Equate = "#Define _WIN32_WINNT &h0602" & vbcrlf
@@ -1225,6 +1235,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       end if
       pDoc = pDoc->pDocNext
    loop
+
 
    wszVDEquates = wszVDEquates & _
       "#Include once " & chr(34) & "WinFormsX\WinFormsX.bi" & chr(34) & vbcrlf & _
@@ -1303,7 +1314,21 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       if len(gCompile.ResourceFile) then  
          wszParams = wszParams + " " + wDQ + gCompile.ResourceFile + wDQ
       end if   
-   end if   
+   end if
+   
+   ' Present a warning that the compile will fail if one or more of the Images in the
+   ' resource file have an invalid path.
+   if gCompile.bInvalidImagePath then
+      gApp.IsCompiling = false
+      SetCursor( hCurSave )
+      ResetScintillaCursors()
+      SetCompileStatusBarMessage( "", 0 )
+      dim as CWSTR wszWarning = L(404,"Image Manager contains invalid image paths. Resource file creation will fail.")
+      MessageBox( HWND_FRMMAIN, wszWarning, L(109,"Warning"), _
+                        MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 )
+      Function = False: Exit Function
+   end if
+   
 
    
    ' Ensure verbose compiler message output
@@ -1376,7 +1401,10 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       NEXT
 
       If gCompile.RunAfterCompile Then 
-         RunEXE( gCompile.OutputFilename, gApp.ProjectCommandLine)
+         RunEXE( _
+            gCompile.OutputFilename,    _
+            iif( gApp.IsProjectActive, gApp.ProjectCommandLine, gApp.wszCommandLine ) _
+            )
       End If
    
    end if

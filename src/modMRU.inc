@@ -38,7 +38,7 @@ public Function OpenMRUFile( ByVal HWnd As HWnd, _
                            False, _    ' bIsTemplate
                            true, _     ' bShowInTab
                            false, _    ' bIsInclude
-                           @wzFile, _  ' pwszName
+                           wzFile, _   ' wszName
                            0 )  ' pDocIn
    
    Function = 0

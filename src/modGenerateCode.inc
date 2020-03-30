@@ -988,44 +988,46 @@ public function GenerateFormCode( byval pDoc as clsDocument ptr ) as long
                 wszEndTag & vbcrlf 
                      
    dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
-   if SciMsg( pSci, SCI_GETLENGTH, 0 , 0) = 0 then
-      ' If this is the first time generating code then add the boilerplate code
-      ' to start the application and show the form.
-      dim as CWSTR wszHeader
-      if gApp.IsProjectActive = false then
-         wszHeader = wszHeader & _
-         "' You should always include a resource file that references a valid manifest.xml"      & vbcrlf & _
-         "' file otherwise your application will not properly display Windows themed controls."  & vbcrlf & _
-         "' Sample resource.rc and manifest.xml files can be found in the WinFBE \Settings folder."   & vbcrlf & _
-         "' The following WinFBE directive includes the resource in your application. Simply" & vbcrlf & _
-         "' uncomment the line." & vbcrlf & _
-         "' If you are using WinFBE's project management features then delete the following line" & vbcrlf & _
-         "' because a resource file will be generated automatically." & vbcrlf & _
-         "'     '#RESOURCE " & DQ & "resource.rc" & DQ & vbcrlf & vbcrlf 
-      END IF
+   if pSci <> 0 then
+      if SciMsg( pSci, SCI_GETLENGTH, 0 , 0) = 0 then
+         ' If this is the first time generating code then add the boilerplate code
+         ' to start the application and show the form.
+         dim as CWSTR wszHeader
+         if gApp.IsProjectActive = false then
+            wszHeader = wszHeader & _
+            "' You should always include a resource file that references a valid manifest.xml"      & vbcrlf & _
+            "' file otherwise your application will not properly display Windows themed controls."  & vbcrlf & _
+            "' Sample resource.rc and manifest.xml files can be found in the WinFBE \Settings folder."   & vbcrlf & _
+            "' The following WinFBE directive includes the resource in your application. Simply" & vbcrlf & _
+            "' uncomment the line." & vbcrlf & _
+            "' If you are using WinFBE's project management features then delete the following line" & vbcrlf & _
+            "' because a resource file will be generated automatically." & vbcrlf & _
+            "'     '#RESOURCE " & DQ & "resource.rc" & DQ & vbcrlf & vbcrlf 
+         END IF
 
-      
-      wszHeader = wszHeader & vbcrlf & _
-      "''" & vbcrlf & _
-      "''  Remove the following Application.Run code if it used elsewhere in your application." & vbcrlf 
-      ' Do a check to see if Application.Run already exists in the project. If it does then
-      ' comment out the Application.Run 
-      dim as long TotalAppRunCount = 0
-      dim as clsDocument ptr pDocSearch = gApp.pDocList
-      do until pDocSearch = 0
-         if pDocSearch->AppRunCount > 0 then
-            TotalAppRunCount = TotalAppRunCount + pDocSearch->AppRunCount
-            exit do
-         end if
-         pDocSearch = pDocSearch->pDocNext
-      loop
-      wszHeader = wszHeader & _
-      iif(TotalAppRunCount > 0, "'", "") & _
-      "Application.Run(" & wszFormName & ")" & vbcrlf & vbcrlf
-      
-      if pDoc->IsNewFlag then
-         pDoc->AppendText(wszHeader)
-      end if   
+         
+         wszHeader = wszHeader & vbcrlf & _
+         "''" & vbcrlf & _
+         "''  Remove the following Application.Run code if it used elsewhere in your application." & vbcrlf 
+         ' Do a check to see if Application.Run already exists in the project. If it does then
+         ' comment out the Application.Run 
+         dim as long TotalAppRunCount = 0
+         dim as clsDocument ptr pDocSearch = gApp.pDocList
+         do until pDocSearch = 0
+            if pDocSearch->AppRunCount > 0 then
+               TotalAppRunCount = TotalAppRunCount + pDocSearch->AppRunCount
+               exit do
+            end if
+            pDocSearch = pDocSearch->pDocNext
+         loop
+         wszHeader = wszHeader & _
+         iif(TotalAppRunCount > 0, "'", "") & _
+         "Application.Run(" & wszFormName & ")" & vbcrlf & vbcrlf
+         
+         if pDoc->IsNewFlag then
+            pDoc->AppendText(wszHeader)
+         end if   
+      end if
    end if
 
    ' If any new Events were discovered then append them to the code editor

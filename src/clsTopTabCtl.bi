@@ -21,7 +21,7 @@ Type clsTopTabCtl
    Public:
       hWindow   As HWnd
       Declare Function AddTab( ByVal pDoc As clsDocument Ptr ) As Long
-      Declare Function GetTabIndexFromFilename( ByVal pwszName As WString Ptr ) As Long
+      Declare Function GetTabIndexFromFilename( Byref wszName As WString ) As Long
       declare Function GetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
       Declare Function SetTabIndexByDocumentPtr( ByVal pDocIn As clsDocument Ptr ) As Long
       Declare Function SetFocusTab( ByVal idx As Long ) As Long

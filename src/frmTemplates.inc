@@ -72,7 +72,7 @@ private Function frmTemplates_OnCommand( ByVal HWnd As HWnd, _
                                        true, _     ' bIsTemplate
                                        True,  _    ' bShowInTab
                                        false, _    ' bIsInclude
-                                       pwszPath, _ ' pwszName
+                                       *pwszPath, _  ' wszName
                                        0 )         ' pDocIn
    
                ' Ensure that the code window scrolls to the correct location

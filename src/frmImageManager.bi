@@ -23,6 +23,6 @@
 #Define IDC_FRMIMAGEMANAGER_FORMATICON              1007
 #Define IDC_FRMIMAGEMANAGER_FORMATCURSOR            1008
 #Define IDC_FRMIMAGEMANAGER_FORMATRCDATA            1009
-#Define IDC_FRMIMAGEMANAGER_LABEL1                  1010
+#Define IDC_FRMIMAGEMANAGER_CMDFILENAME             1010
 
 declare Function frmImageManager_Show( ByVal hWndParent As HWnd, Byval pProp as clsProperty ptr = 0 ) As LRESULT

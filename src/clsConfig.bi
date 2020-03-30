@@ -158,6 +158,7 @@ Type clsConfig
       bKeywordsDirty       As BOOLEAN = True       ' not saved to file
       AskExit              As Long = false         ' use Long so True/False string not written to file
       CheckForUpdates      As Long = True
+      EnableProjectCache   as Long = true          ' Fast project cache
       LastUpdateCheck      as long = 0             ' Julian date of last update check
       HideToolbar          as long = false
       HideStatusbar        as long = false
@@ -176,6 +177,7 @@ Type clsConfig
       LineNumbering        As Long = True
       HighlightCurrentLine As Long = True
       IndentGuides         As Long = True
+      PositionMiddle       as long = false         ' position found text to middle of screen
       TabIndentSpaces      As Long = True
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
@@ -217,9 +219,9 @@ Type clsConfig
       declare Function InitializeToolBox() as Long
       Declare Function ProjectSaveToFile() As BOOLEAN    
       declare Function ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN    
-      declare function ProjectGetCodetipsCacheFilename() as CWSTR
-      declare function ProjectSaveCodetipsCache() as Long
-      declare function ProjectLoadCodetipsCache() as Long
+      declare function ProjectGetCacheFilename() as CWSTR
+      declare function ProjectSaveCache() as Long
+      declare function ProjectLoadCache() as Long
       declare Function LoadCodetipsFB() as boolean
       declare Function LoadCodetipsWinAPI() as boolean
       declare Function LoadCodetipsWinForms( byval wszFilename as CWSTR ) as boolean

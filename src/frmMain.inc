@@ -209,7 +209,8 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
    dim pData as DB2_DATA ptr
    dim as CWSTR wszFilename
    dim as string sFunctionName, sTrigger
-
+   dim as long nLineNum = 0
+   
    dim as hwnd hEdit = pDoc->hWndActiveScintilla
    
    ' Version 1.8.8 added ability to open an underlying #Include file if such
@@ -255,13 +256,14 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
          exit function
       end if
       wszFilename = pData->filename
+      nLineNum = pData->nLineNum
    end if
    
    ' Save our current position in case user invokes "Last Position" option,   
    gLastPosition.pDoc       = pDoc
    gLastPosition.nFirstLine = SciExec( hEdit, SCI_GETFIRSTVISIBLELINE, 0, 0) 
    gLastPosition.nPosition  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0) 
-   OpenSelectedDocument( wszFilename, sFunctionName, pData->nLineNum )
+   OpenSelectedDocument( wszFilename, sFunctionName, nLineNum )
 
    Function = 0
 End Function
@@ -281,7 +283,7 @@ private Function frmMain_GotoLastPosition() As Long
             False, _    ' bIsTemplate
             True,  _    ' bShowInTab
             false, _    ' bIsInclude
-            gLastPosition.pDoc->DiskFilename, _ ' pwszName
+            gLastPosition.pDoc->DiskFilename, _ ' wszFileName
             gLastPosition.pDoc )  ' pDocIn
    SciExec( GetFocus, SCI_SETFIRSTVISIBLELINE, gLastPosition.nFirstLine, 0) 
    SciExec( GetFocus, SCI_GOTOPOS, gLastPosition.nPosition, 0) 
@@ -414,6 +416,7 @@ public Function frmMain_SetStatusbar() as long
          static pDocLast as clsDocument ptr
          static nLineLast as long
          if ( pDocLast <> pDoc ) orelse ( nLineLast <> nLine ) then
+            frmMain_SelectComboFiles
             frmMain_SelectComboFunctions
          end if
          pDocLast = pDoc
@@ -625,8 +628,28 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             ' every call to the parser would happen even in cases where only directional 
             ' movement has occured with no text modifications at all.
             pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc Then pDoc->bNeedsParsing = true
             frmMain_SetStatusbar
+            If pDoc Then 
+               pDoc->bNeedsParsing = true
+               If (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+                  ' Do a check to see if we have backspaced to a point where there is a
+                  ' period to try to popup an autocomplete or codetip.
+                  Dim as long nPos, nChar
+                  hEdit = pDoc->hWndActiveScintilla
+                  nPos  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0 ) - 1
+                  nChar = SciExec( hEdit, SCI_GETCHARAT, nPos, 0 )
+                  select case chr(nChar)
+                     case ".", ">"    '  Show autocomplete list for TYPE variables
+                        ' dot "." or ">"  part of a pointer
+                        ' Need to PostMessage in order to give time for notification to complete. The "."
+                        ' is also used as a character that selects and closes the popup list. If no
+                        ' PostMessage then the "." will automatically select the first entry in the list
+                        ' and close.
+                        pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+                        PostMessage( HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, nChar, 0 )
+                  end select
+               end if
+            end if
          end if
          return true
          
@@ -1014,7 +1037,6 @@ public Function frmMain_PositionWindows() As LRESULT
          ' especially important if the Main window is resized.
          frmFindReplace_PositionWindow
          
-         frmMain_SetFocusToCurrentCodeWindow
       end if
       AfxRedrawWindow(HWND_FRMMAIN)
    end if
@@ -1072,54 +1094,58 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                         ByVal bIsTemplate As BOOLEAN, _
                                         ByVal bShowInTab  As BOOLEAN, _
                                         byval bIsInclude  as BOOLEAN, _
-                                        ByVal pwszName    As WString Ptr, _
+                                        Byref wszName     As WString, _
                                         ByVal pDocIn      As clsDocument Ptr, _
                                         byval bIsDesigner as Boolean = false, _
                                         byval nFileType as long = FILETYPE_UNDEFINED _
                                         ) As clsDocument Ptr
-   
+     
    Dim As Long iTab = -1
    Dim pDoc As clsDocument Ptr 
    Dim As Hwnd hTree = GetDlgItem( HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE )
    
+   ' This function opens/creates various types of files depending on the situation. 
+   ' - New documents
+   ' - Open document from disk (after WinFBE has been loaded)
+   ' - Display document that is already loaded and has valid Scintilla loaded control.
+   ' - Display document that is already loaded but does not have a valid Scintilla loaded control.
+
+   ' If the incoming pDocIn is null then we need to create a new pDoc and add it to the collection. 
    If pDocIn = 0 Then   
       ' Create a new pDoc 
-      gApp.FileLoadingCount = gApp.FileLoadingCount + 1
-
-      pDoc = New clsDocument
-
-      gApp.AddDocument( pDoc ) 
+      pDoc = gApp.AddNewDocument() 
       pDoc->IsDesigner = bIsDesigner 
-
-      ' All pDoc's will have an associated Scintilla window for code.
       If bIsNewFile Then
          pDoc->CreateCodeWindow( HWnd, True )  ' Create the new Scintilla window
       Else
-         pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, pwszName )
-      End If   
-
-      ' ParseDocument will not parse if the project has loaded codetips from cache.
-      ' ParseDocument will update the file loading count in the statusbar
-      pDoc->bNeedsParsing = true
-      ParseDocument( pDoc )
-
-      ' When a Project is being loaded, the incoming nFileType is from the project
-      ' file. We pass it to the AddFunctionsToExplorerTreeview function in order to
-      ' ensure that the pDoc is attached to the right node.
+         pDoc->CreateCodeWindow( HWnd, false, bIsTemplate, wszName )
+         pDoc->bNeedsParsing = true
+         ParseDocument( pDoc )
+      End If
       pDoc->ProjectFileType = nFileType
-   Else
-      ' deal with the existing pDoc
-      pDoc = pDocIn     
-   End If   
-   pwszName = @pDoc->DiskFilename
+      frmMain_AddToComboFiles( pDoc )
+      ' Add the document data to the Explorer treeview   
+      pDoc->hNodeExplorer = frmExplorer_AddParentNode( pDoc )
+      frmExplorer_AddChildNodes( pDoc )
+   end if
 
    
-   ' Add the document to the Explorer treeview and ensure that the root and special
-   ' nodes are created. If a project is active and loading then bypass this step
-   ' because we add the tree nodes after the project fully loads for speed.
- '  if ( gApp.IsProjectActive = false ) andalso (gApp.IsProjectLoading = false ) then
-      AddFunctionsToExplorerTreeview( pDoc, False )
- '  end if
+   ' If incoming pDocIn existed but did not have a valid Scintilla control then this
+   ' was a document created during a mass project load. In that situation, the creation
+   ' of the Scintilla control and loading of the actual code text is delayed until the
+   ' document actually has to be displayed.
+   if pDocIn then 
+      if pDocIn->hWndActiveScintilla = 0 then
+         ' Call CreateCodeWindow will reset the ProjectFileType so save it here.
+         dim as long nFileType = pDocIn->ProjectFileType
+         pDocIn->CreateCodeWindow( HWnd, false, false, pDocIn->DiskFilename )
+         pDocIn->ProjectFileType = nFileType
+         ' This document would already have its data added to the Explorer treeview so
+         ' no need to do that again.
+      end if
+      pDoc = pDocIn     
+   end if
+
 
    ' Set the default build configuration for this document. If no IsDefault option
    ' has been checked then we simply use whatever the current selected build is.
@@ -1130,17 +1156,11 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       end if
    end if      
    
-   ' Only sort the root if no project is active because we do not want the 
-   ' ordering of our special subnodes to be reorganized.
-   if ( gApp.IsProjectActive = false ) andalso (gApp.IsProjectLoading = false ) then
-      Treeview_SortChildren( hTree, gApp.hExplorerRootNode, 0 )
-   end if   
-   TreeView_Expand( hTree, gApp.hExplorerRootNode, TVE_EXPAND)
-
+   
    If bShowInTab Then
       ' If the document is already open and loaded then simply switch to
       ' that document in the top tabcontrol.
-      iTab = gTTabCtl.GetTabIndexFromFilename(pwszName)
+      iTab = gTTabCtl.GetTabIndexFromFilename( pDoc->DiskFilename )
       If iTab = -1 Then iTab = gTTabCtl.AddTab( pDoc )  ' Add the new document to the top tabcontrol
       gTTabCtl.SetFocusTab(iTab)
       Treeview_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), _
@@ -1155,11 +1175,9 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
       frmStatusBarEditor_CreateFakeStatusBar(pDoc)
    end if
 
-   ' Position all of the controls into place
-   if ( gApp.IsProjectActive = false ) andalso (gApp.IsProjectLoading = false ) then
-      frmMain_PositionWindows
-      frmMain_SetFocusToCurrentCodeWindow
-   end if
+   ' Position all of the controls into place and set focus to the document
+   frmMain_PositionWindows
+   frmMain_SetFocusToCurrentCodeWindow
    
    Function = pDoc
 End Function
@@ -1221,8 +1239,6 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       select case codeNotify
          case SCEN_SETFOCUS
             pDoc->hWndActiveScintilla = hwndCtl
-            frmMain_SelectComboFiles
-            frmMain_SelectComboFunctions
          case SCEN_KILLFOCUS
             pDoc->hWndActiveScintilla = 0
       end select      
@@ -1698,7 +1714,10 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                   SciExec( hEdit, SCI_SETTARGETSTART, 0, 0)
                   r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
                end if
-               If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
+               If r <> -1 Then 
+                  SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
+                  pDoc->CenterCurrentLine
+               end if
                
             elseif id = IDM_FINDPREVACCEL then
                startPos = curPos - 1
@@ -1713,8 +1732,10 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                   SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
                   r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(sFindText), Strptr(sFindText))
                end if
-               If r <> -1 Then SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
-               
+               If r <> -1 Then 
+                  SciExec( hEdit, SCI_SETSEL, r, r + len(sFindText)) 
+                  pDoc->CenterCurrentLine
+               end if
             end if
          end if
 
@@ -1792,8 +1813,6 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       Case IDM_PROJECTFILESADD:       OnCommand_FileOpen( HWnd, false )
       Case IDM_PROJECTCLOSE:          OnCommand_ProjectClose( HWnd )
       Case IDM_PROJECTOPTIONS:        frmProjectOptions_Show( HWnd, false ) 
-
-      
       
       Case IDM_SETFILENORMAL, IDM_SETFILEMODULE, IDM_SETFILEMAIN, _
            IDM_SETFILERESOURCE, IDM_SETFILEHEADER, _
@@ -1847,14 +1866,17 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                   Treeview_DeleteItem( hTV, pDoc2->hNodeExplorer )
                   pDoc2->hNodeExplorer = 0
                   pDoc2->ProjectFileType = FILETYPE_NORMAL
-                  AddFunctionsToExplorerTreeview( pDoc2, false )
+                  pDoc2->hNodeExplorer = frmExplorer_AddParentNode( pDoc2 )
+                  frmExplorer_AddChildNodes( pDoc2 )
                end if   
             end if
             ' Set the new FileType for the currently selected document
             gApp.ProjectSetFileType( pDoc, nFileType )
             Treeview_DeleteItem( hTV, pDoc->hNodeExplorer )
             pDoc->hNodeExplorer = 0
-            AddFunctionsToExplorerTreeview( pDoc, false )
+            pDoc->hNodeExplorer = frmExplorer_AddParentNode( pDoc )
+            frmExplorer_AddChildNodes( pDoc )
+            Treeview_SortChildren( hTV, TreeView_GetParent( hTV, pDoc->hNodeExplorer ), 0 )
             Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
             frmMain_SetStatusbar
          end if
@@ -1888,7 +1910,10 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          code_Compile( id )
       
       Case IDM_RUNEXE
-         RunExe( GetRunExecutableFilename, gApp.ProjectCommandLine )
+         RunExe( _
+             GetRunExecutableFilename, _
+             iif( gApp.IsProjectActive, gApp.ProjectCommandLine, gApp.wszCommandLine ) _
+             )
       
       Case IDM_COMMANDLINE
          frmCommandLine_Show( HWnd )
@@ -2102,7 +2127,6 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
          END SELECT
          
       Case TCN_SELCHANGE
-         dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
          select case id 
             case IDC_FRMMAIN_TOPTABCONTROL 
                ' Show the new tab
@@ -2114,23 +2138,28 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
                   ' Prevent Treeview flickering during the selection movement. This
                   ' is necessary because for large treeview we will see noticable flicker
                   ' as the new selection scrolls into view.
-                  dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-                  LockWindowUpdate(hTV)
-                  Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
-                  LockWindowUpdate(0)
+                  dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+                  SetWindowRedraw( hTree, false )
+                  Treeview_SortChildren( hTree, TreeView_GetParent(hTree, pDoc->hNodeExplorer), 0 )
+                  Treeview_SelectItem( hTree, pDoc->hNodeExplorer )
+                  Treeview_EnsureVisible( hTree, pDoc->hNodeExplorer )
+                  SetWindowRedraw( hTree, true )
+                  AfxRedrawWindow( hTree )
                   
-                  ' Select the correct Files combobox item based on the current document
-                  frmMain_SelectComboFiles
-                  
-                  ' Load the Functions list combobox and set it to the current function
-                  ' based on line position.
+                  ' Load the Functions combobox based on the selected Explorer treeview node
                   frmMain_LoadComboFunctions
                   frmMain_SelectComboFunctions
-               
+                
                   if pDoc->IsDesigner THEN
-                     DisplayPropertyList( pDoc )
+                     if IsDesignerView(pDoc) then
+                        DisplayPropertyList( pDoc )
+                     end if   
                   end if   
                end if
+               
+               ' Set the focus to the Scintilla window. This will call frmMain_SetStatusbar
+               ' which also calls frmMain_SelectComboFiles and frmMain_SelectComboFunctions.
+               frmMain_SetFocusToCurrentCodeWindow
 
             case IDC_DESIGNTABCTRL 
                frmMain_PositionWindows
@@ -2181,7 +2210,6 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
                                         ByVal fActivate As BOOLEAN, _
                                         ByVal dwThreadId As DWORD _
                                         ) As LRESULT
-
    Dim pDoc As clsDocument Ptr
    
    ' If the application is losing focus then validate any currently editing property
@@ -2249,7 +2277,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
                                        False, _    ' bIsTemplate
                                        True,  _    ' bShowInTab
                                        false, _    ' bIsInclude
-                                       0, _        ' pwszName
+                                       "", _       ' wszName
                                        pDoc )      ' pDocIn
                If MessageBox( HWND_FRMMAIN, _
                                pDoc->DiskFilename & vbCrLf & _ 
@@ -2360,13 +2388,23 @@ private Function frmMain_OnDropFiles( ByVal HWnd As HWnd, _
             if wFileExt = ".WFBE" then
                frmMain_OpenProjectSafely(HWND_FRMMAIN, wszPath) 
             Else   
-               frmMain_OpenFileSafely(HWnd, _
-                                       False, _    ' bIsNewFile
-                                       False, _    ' bIsTemplate
-                                       True,  _    ' bShowInTab
-                                       false, _    ' bIsInclude
-                                       @wszPath, _ ' pwszName
-                                       0 )         ' pDocIn
+               ' Test to see if the file is already loaded in the editor. If it is, then
+               ' bypass loading it again thereby creating multiple ghost instances.
+               dim pDoc as clsDocument ptr
+               dim pDocIn as clsDocument ptr
+               pDoc = gApp.GetDocumentPtrByFilename(wszPath) 
+               if pDoc then
+                  if pDoc->GetActiveScintillaPtr = 0 then pDocIn = pDoc
+               end if   
+               if (pDoc = 0) orelse (pDocIn <> 0) then 
+                  frmMain_OpenFileSafely(HWnd, _
+                                          False, _    ' bIsNewFile
+                                          False, _    ' bIsTemplate
+                                          True,  _    ' bShowInTab
+                                          false, _    ' bIsInclude
+                                          wszPath, _  ' wszName
+                                          pDocIn )    ' pDocIn
+               end if
             end if                           
          End If
       End If
@@ -2893,7 +2931,7 @@ private Function frmMain_WndProc( ByVal HWnd   As HWnd, _
                                        False, _    ' bIsTemplate
                                        True,  _    ' bShowInTab
                                        false, _    ' bIsInclude
-                                       pwszArg, _  ' pwszName
+                                       *pwszArg, _  ' pwszName
                                        0 )         ' pDocIn
          End Select   
           

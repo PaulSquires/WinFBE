@@ -34,6 +34,7 @@ private Function frmGoto_OnCommand( ByVal HWnd As HWnd, _
                If pDoc Then 
                   dim as hwnd hEdit = pDoc->hWndActiveScintilla
                   SciExec( hEdit, SCI_GOTOLINE, nLine, 0 )
+                  pDoc->CenterCurrentLine
                END IF
             End If
             SendMessage HWnd, WM_CLOSE, 0, 0

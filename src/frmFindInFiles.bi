@@ -29,5 +29,8 @@
 #Define IDC_FRMFINDINFILES_CMDFOLDERS               1013
 #Define IDC_FRMFINDINFILES_LABEL1                   1014
 #Define IDC_FRMFINDINFILES_LABEL2                   1015
+#Define IDC_FRMFINDINFILES_CHKCURRENTDOC            1016
+#Define IDC_FRMFINDINFILES_CHKALLOPENDOCS           1017
+#Define IDC_FRMFINDINFILES_CHKPROJECT               1018
  
 declare Function frmFindInFiles_Show( ByVal hWndParent As HWnd ) As LRESULT

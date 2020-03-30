@@ -57,7 +57,7 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    Treeview_SetBold(hTree, gApp.hExplorerRootNode, TRUE)
 
    ' Save the project codetips to cache
-   gConfig.ProjectSaveCodetipsCache
+   gConfig.ProjectSaveCache
    
    ' If the entire app is closing down then we do not have to process the
    ' remaining project cleanup commands. 
@@ -85,6 +85,9 @@ private Function OnCommand_ProjectClose( ByVal HWnd As HWnd ) As LRESULT
    gApp.ProjectManifest      = false
    gApp.ProjectNotes         = ""
    gApp.ProjectCommandLine   = ""
+
+   gApp.wszPanelText = ""
+   gApp.hIconPanel = 0
        
    ' Clear any previous info from the Output windows
    frmOutput_ResetAllControls
@@ -204,7 +207,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
          
             ' Add something to the code editor so that it does not automatically 
             ' generate the Application.Run code for the form.
-            szText = "' Auto generated frmMain form file" & vbcrlf
+            szText = "' frmMain form code file" & vbcrlf
             pDoc->SetText( szText )
 
             ' Save the form file using the Project name and path
@@ -422,7 +425,7 @@ public Function OnCommand_DesignerNewForm( ByVal HWnd As HWnd ) As LRESULT
                            False, _   ' bIsTemplate
                            True,  _   ' bShowInTab
                            false, _   ' bIsInclude
-                           0, _       ' pwszName
+                           "", _      ' wszName
                            0, _       ' pDocIn
                            true )     ' Create a visual designer   
    Function = 0
@@ -828,7 +831,7 @@ private Function OnCommand_FileNew( ByVal HWnd As HWnd ) As clsDocument ptr
                                      False, _   ' bIsTemplate
                                      True,  _   ' bShowInTab
                                      false, _   ' bIsInclude
-                                     0, _       ' pwszName
+                                     "", _      ' wszName
                                      0 )        ' pDocIn
 
 End Function
@@ -842,6 +845,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
                                      ) As LRESULT
 
    dim pDoc as clsDocument ptr
+   dim pDocIn as clsDocument ptr
    
    ' Display the Open File Dialog
    Dim pItems As IShellItemArray Ptr = AfxIFileOpenDialogMultiple(HWnd, IDM_FILEOPEN)
@@ -864,7 +868,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
 
    ' Prevent Treeview flickering during adding
    dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   LockWindowUpdate(hTV)
+   SetWindowRedraw( hTV, false )
 
    gApp.FileLoadingCount = 0
    
@@ -875,15 +879,18 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
          If pwszName Then 
             ' Test to see if the file is already loaded in the editor. If it is, then
             ' bypass loading it again thereby creating multiple ghost instances.
-            pDoc = gApp.GetDocumentPtrByFilename(pwszName) 
-            if pDoc = 0 then
+            pDoc = gApp.GetDocumentPtrByFilename(*pwszName) 
+            if pDoc then
+               if pDoc->GetActiveScintillaPtr = 0 then pDocIn = pDoc
+            end if   
+            if (pDoc = 0) orelse (pDocIn <> 0) then 
                pDoc = frmMain_OpenFileSafely(HWnd, _
                                              False, _    ' bIsNewFile
                                              False, _    ' bIsTemplate
                                              false,  _   ' bShowInTab
                                              false, _    ' bIsInclude
-                                             pwszName, _ ' pwszName
-                                             0 )         ' pDocIn
+                                             *pwszName, _ ' pwszName
+                                             pDocIn )         ' pDocIn
             end if
             if bShowInTab then pDocTabs(i) = pDoc
             CoTaskMemFree(pwszName)
@@ -896,7 +903,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    pItems->lpVtbl->Release(pItems)
    
    ' Display all of the tabs
-   dim as long iTab
+   dim as long iTab = -1
    For i = LBound(pDocTabs) To UBound(pDocTabs)
       if pDocTabs(i) = 0 then continue for
       iTab = gTTabCtl.GetTabIndexByDocumentPtr(pDocTabs(i))
@@ -905,7 +912,8 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
    if iTab > -1 then gTTabCtl.SetFocusTab(iTab)
 
    gApp.IsFileLoading = false
-   LockWindowUpdate(0)
+   SetWindowRedraw( hTV, true )
+   AfxRedrawWindow( hTV )
    gApp.wszPanelText = ""   ' reset filename text that displays in StatusBar panel
    frmMain_SetStatusbar
 
@@ -943,9 +951,9 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
       ' Regenerate code to ensure that any missing body functions are now present
       pDoc->bRegenerateCode = true
       SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-      AddFunctionsToExplorerTreeview( pDoc, true )
+      frmExplorer_AddChildNodes( pDoc )
    end if
-   
+          
    ' Do the actual saving to disk
    dim wszFilename as CWSTR = pDoc->DiskFilename
    If pDoc->SaveFile(bSaveAs) Then
@@ -961,7 +969,7 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
          frmMain_LoadComboFiles
          frmMain_SelectComboFiles
       end if
-      AddFunctionsToExplorerTreeview( pDoc, true )
+      frmExplorer_AddChildNodes( pDoc )
    EndIf   
 
    ' Ensure that the Tab displays the correct filename in case it was changed
@@ -998,7 +1006,7 @@ public Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          ' Regenerate code to ensure that any missing body functions are now present
          pDoc->bRegenerateCode = true
          SendMessage(hwnd, MSG_USER_GENERATECODE, 0, cast(LPARAM, pDoc))
-         AddFunctionsToExplorerTreeview( pDoc, true )
+         frmExplorer_AddChildNodes( pDoc )
       end if
 
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
@@ -1013,7 +1021,7 @@ public Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          gTTabCtl.SetTabText(i)  ' make sure "*" updates
          ' Parse the code for sub/function listing and create list
          ParseDocument(pDoc)
-         AddFunctionsToExplorerTreeview(pDoc, true)
+         frmExplorer_AddChildNodes( pDoc )
       End If   
    Next
    frmMain_SetFocusToCurrentCodeWindow
@@ -1124,9 +1132,6 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    nCurSel = TabCtrl_GetCurSel(gTTabCtl.hWindow)
    gTTabCtl.SetFocusTab(nCurSel)
       
-   ' Clear any previous info from the Output windows
-   frmOutput_ResetAllControls
-   
    frmMain_PositionWindows
    frmExplorer_PositionWindows
    

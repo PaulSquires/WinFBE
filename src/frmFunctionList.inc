@@ -109,7 +109,7 @@ private Function frmFunctionList_UpdateListBox() As Long
    dim wszText as wstring * MAX_PATH
    dim as CWSTR wszSearch = AfxGetWindowText(GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_TXTSEARCH))
    
-   LockWindowUpdate(hList)
+   SetWindowRedraw(hList, false)
    
    redim hRootNodes(any) as HTREEITEM
    
@@ -126,6 +126,7 @@ private Function frmFunctionList_UpdateListBox() As Long
    end if
    
    for ii as long = lbound(hRootNodes) to ubound(hRootNodes)
+      if gApp.IsFunctionListSorted = false then Treeview_SortChildren( hTree, hRootNodes(ii), 0 )
       hParent = Treeview_GetChild( hTree, hRootNodes(ii))
       do until hParent = 0 
          ' Filename
@@ -141,6 +142,7 @@ private Function frmFunctionList_UpdateListBox() As Long
          end if
          
          ' Get all functions in the file
+         if gApp.IsFunctionListSorted = false then Treeview_SortChildren( hTree, hParent, 0 )
          hChild = Treeview_GetChild( hTree, hParent)
          do until hChild = 0 
             bFound = true
@@ -160,8 +162,10 @@ private Function frmFunctionList_UpdateListBox() As Long
       loop 
    
    next
+   gApp.IsFunctionListSorted = true
    
-   LockWindowUpdate(null)
+   SetWindowRedraw(hList, true)
+   AfxRedrawWindow(hList)
 
    Function = 0
 End Function
@@ -408,8 +412,9 @@ private function frmFunctionList_ReparseFiles() as Long
    Dim pDoc As clsDocument Ptr = gApp.pDocList
    do until pDoc = 0
       If cbool(SciExec( pDoc->hWindow(0), SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
+         pDoc->bNeedsParsing = true
          ParseDocument(pDoc)
-         AddFunctionsToExplorerTreeview(pDoc, true)
+         frmExplorer_AddChildNodes( pDoc )
       end if
       pDoc = pDoc->pDocNext
    loop   
@@ -469,12 +474,9 @@ public Function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
    
    frmFunctionList_PositionWindows
 
-   LockWindowUpdate(hList)
    frmFunctionList_ReparseFiles
    frmFunctionList_UpdateListBox()
    frmFunctionList_SetListBoxPosition()
-   LockWindowUpdate(null)
-   AfxRedrawWindow(hList)
 
    ShowWindow HWND_FRMFUNCTIONLIST, SW_SHOW
    SetFocus hList

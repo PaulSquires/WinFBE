@@ -85,9 +85,42 @@ End Function
  
 
 ' ========================================================================================
+' Create the special root nodes
+' ========================================================================================
+public function frmExplorer_CreateSpecialNodes() as HTREEITEM
+
+   dim as hwnd hTV = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+
+   Treeview_DeleteAllItems(hTV)
+
+   gApp.hExplorerRootNode = TreeView_AppendItem( hTV, TVI_ROOT, "" )
+   Treeview_SetBold(hTV, gApp.hExplorerRootNode, TRUE)
+
+   ' Add the subnodes for the various file types
+   gApp.hExplorerMainNode = _
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(212,"Main"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerMainNode, TRUE)
+   gApp.hExplorerResourceNode = _
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(213,"Resource"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerResourceNode, TRUE)
+   gApp.hExplorerHeaderNode = _
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(175,"Header"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerHeaderNode, TRUE)
+   gApp.hExplorerModuleNode = _
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(211,"Module"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerModuleNode, TRUE)
+   gApp.hExplorerNormalNode = _
+      TreeView_AppendItem( hTV, gApp.hExplorerRootNode, L(210,"Normal"), cast(LPARAM, 0) )
+      Treeview_SetBold(hTV, gApp.hExplorerNormalNode, TRUE)
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' Get the special subnode based on the filetype
 ' ========================================================================================
-public function GetExplorerSpecialSubNode( byval nFileType as long ) as HTREEITEM
+public function frmExplorer_GetSpecialNode( byval nFileType as long ) as HTREEITEM
    
    dim hRootNode as HTREEITEM
    
@@ -151,114 +184,97 @@ end function
 
 
 ' ========================================================================================
-' Add the names of all subs/functions belonging to this document to the Explorer treeview
+' Add the incoming Document to a parent node in the Explorer treeview
 ' ========================================================================================
-public Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, _
-                                                ByVal fUpdateNodes As BOOLEAN _
-                                                ) As Long
+public Function frmExplorer_AddParentNode( ByVal pDoc As clsDocument Ptr ) as HTREEITEM
  
    If pDoc = 0 Then Exit Function
    
-   Dim As CWSTR wzFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
-   Dim As Hwnd hTree   = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
-   Dim As HTREEITEM hChild, hRootNode
-   Dim As BOOLEAN fAddChildren = False
-   dim as long idx
+   Dim As HTREEITEM hSpecialNode, hItem
    
-   hRootNode = gApp.hExplorerRootNode
+   Dim As Hwnd hTree    = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+   Dim As CWSTR wszFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
+   
+   ' Give this document a default project type depending on its file extension
+   if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+      if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
+         if pDoc->IsDesigner then 
+            pDoc->ProjectFileType = FILETYPE_NORMAL 
+         else
+            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )
+         end if
+      end if   
+   end if
 
-   ' Project loading invokes its own redraw prevention so do not do it again here
+   hItem = pDoc->hNodeExplorer 
+   if hItem = 0 then
+      hSpecialNode = frmExplorer_GetSpecialNode( pDoc->ProjectFileType )
+      hItem = TreeView_AppendItem( hTree, hSpecialNode, wszFile, cast(LPARAM, pDoc), 1, 1 )
+   end if
    if gApp.IsProjectLoading = false then
-      SendMessage( hTree, WM_SETREDRAW, false, 0 )
+      Treeview_SortChildren( hTree, TreeView_GetParent(hTree, hItem), 0 )
    end if
    
-   ' If hNodeExplorer does not exist then we must be adding a new document. If it does
-   ' exist then we simply need to update the child nodes.
-   If fUpdateNodes = False Then
+   function = hItem
+end function
 
-      if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
-         if pDoc->IsDesigner then pDoc->ProjectFileType = FILETYPE_NORMAL 
-      end if
 
-      if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
-         ' Give this document a default project type depending on its file extension
-         if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
-            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType)
-         end if
-      end if
-
-      If pDoc->hNodeExplorer = 0 Then
-         hRootNode = GetExplorerSpecialSubNode( pDoc->ProjectFileType )
-         pDoc->hNodeExplorer = TreeView_AppendItem( hTree, hRootNode, wzFile, cast(LPARAM, pDoc), 1, 1 )
-         frmMain_AddToComboFiles( pDoc )
-         fAddChildren = True
-      else
-         hRootNode = TreeView_GetParent( hTree, pDoc->hNodeExplorer )
-      End If
-
-   Else
-      ' Delete any existing children sub/function nodes and then update with new pointer values
-      hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
-      Do Until hChild = 0
-         TreeView_DeleteItem( hTree, hChild )
-         hChild = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
-      Loop
-      fAddChildren = True
-   End If
+' ========================================================================================
+' Add the incoming Document to a parent node in the Explorer treeview
+' ========================================================================================
+public Function frmExplorer_AddChildNodes( ByVal pDoc As clsDocument Ptr ) as long
  
-   ' Need to ensure the Explorer treeview is sorted because the filename may have changed.
-   ' We never want to sort the ExplorerRootNode if a project is active because it will move
-   ' our special subnode branches (Main/Resource/Normal/Module/Header).
-   ' Only need to do this for nodes being added after a project load.
-   if ( gApp.IsProjectActive = true ) andalso ( gApp.IsProjectLoading = false ) then
-      if hRootNode <> gApp.hExplorerRootNode then
-         Treeview_SortChildren( hTree, hRootNode, 0 )
-      end if   
-   else
-      Treeview_SortChildren( hTree, hRootNode, 0 )
+   If pDoc = 0 Then Exit Function
+   
+   Dim As HTREEITEM hItem
+
+   Dim As Hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+
+   if gApp.IsProjectLoading = false then
+      SetWindowRedraw( hTree, false )
+   end if
+
+   ' Delete any existing children sub/function nodes and then update with new values
+   hItem = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
+   Do Until hItem = 0
+      TreeView_DeleteItem( hTree, hItem )
+      hItem = TreeView_GetChild( hTree, pDoc->hNodeExplorer )
+   Loop
+
+   dim pData as DB2_DATA ptr
+   dim as CWSTR wszFilename = ucase(pDoc->DiskFilename)
+   dim as CWSTR wszNodeName
+    
+   gdb2.dbRewind()
+   do 
+      pData = gdb2.dbGetNext
+      if pData = 0 THEN exit do
+      if pData->deleted then continue do
+      if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
+      select case pData->id 
+         case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
+            if wszFilename = ucase(pData->fileName) THEN
+               wszNodeName = pData->ElementName
+               select case pData->GetSet 
+                  case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
+                  case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
+                  case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
+                  case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
+               end select      
+               hItem = TreeView_AppendItem( hTree, pDoc->hNodeExplorer, wszNodeName, 0, 2, 2 )
+            END IF
+      END SELECT
+   loop      
+       
+   if gApp.IsProjectLoading = false then
+      Treeview_SortChildren( hTree, pDoc->hNodeExplorer, 0 )
+      SetWindowRedraw( hTree, true )
+      AfxRedrawWindow( hTree )
    end if
       
-   If fAddChildren Then
-      dim wszText as wstring * MAX_PATH
-      dim as HTREEITEM hNode
-      dim pData as DB2_DATA ptr
-      dim as CWSTR wszFilename = ucase(pDoc->DiskFilename)
-      dim as CWSTR wszNodeName
-       
-      gdb2.dbRewind()
-      do 
-         pData = gdb2.dbGetNext
-         if pData = 0 THEN exit do
-         if pData->deleted then continue do
-         if pData->nFileType <> DB2_FILETYPE_USERCODE then continue do
-         select case pData->id 
-            case DB2_FUNCTION, DB2_SUB, DB2_PROPERTY
-               if wszFilename = ucase(pData->fileName) THEN
-                  wszNodeName = pData->ElementName
-                  select case pData->GetSet 
-                     case ClassProperty.Getter: wszNodeName = wszNodeName & " (get)"
-                     case ClassProperty.Setter: wszNodeName = wszNodeName & " (set)"
-                     case ClassProperty.ctor:   wszNodeName = wszNodeName & " (ctor)"
-                     case ClassProperty.dtor:   wszNodeName = wszNodeName & " (dtor)"
-                  end select      
-                  hNode = TreeView_AppendItem(hTree, pDoc->hNodeExplorer, wszNodeName, 0, 2, 2 )
-               END IF
-         END SELECT
-      loop      
-      ' Only sort the children nodes if the node is open and visible, otherwise the nodes
-      ' get sorted when the parent node is expanded.
-      if TreeView_GetItemState( hTree, pDoc->hNodeExplorer, TVIS_EXPANDED ) then
-         Treeview_SortChildren( hTree, pDoc->hNodeExplorer, 0 )
-      end if
-   End If
+   function = 0
+end function
 
-   if gApp.IsProjectLoading = false then
-      SendMessage( hTree, WM_SETREDRAW, true, 0 )
-      AfxRedrawWindow(hTree)
-   end if
-   
-   Function = 0
-End Function
 
 
 ' ========================================================================================
@@ -491,7 +507,7 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
       
       case TVN_ITEMEXPANDING 
          hTree = lpNMTV->hdr.hWndFrom
-         SendMessage( hTree, WM_SETREDRAW, false, 0 )
+         SetWindowRedraw( hTree, false )
          ' Sort the children. We do the sort prior to expanding rather than sorting the children
          ' as they are added to the node. Sorting the nodes after every Treeview_AddItem slows
          ' down loading of larger projects.
@@ -502,7 +518,7 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
          
       case TVN_ITEMEXPANDED 
          hTree = lpNMTV->hdr.hWndFrom
-         SendMessage( hTree, WM_SETREDRAW, true, 0 )
+         SetWindowRedraw( hTree, true )
          AfxRedrawWindow( hTree )
          
       case TVN_DELETEITEM
@@ -538,15 +554,6 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
          frmExplorer_GetFileNameFunctionName(hItem, wszFilename, wszFunctionName)
          pDoc = OpenSelectedDocument( wszFilename, wszFunctionName )
          TreeView_SelectItem( hTree, hItem )
-         ' Get the pDoc and check to see if it is a visual designer. If it is, then
-         ' initiate the toggle between the code editor and visual designer.
-         if pDoc then
-            if pDoc->IsDesigner then
-               ' Show the code editor.
-               TabCtrl_SetCurSel( pDoc->hDesignTabCtrl, 1 )  ' 1 = code tab
-               frmMain_PositionWindows
-            end if
-         END IF
          return true    ' prevent branch from expanding
          
       Case NM_CLICK, NM_RCLICK

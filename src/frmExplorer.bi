@@ -31,6 +31,8 @@ type DRAG_STATE
    pDoc            as clsDocument ptr
 end type
 
-declare function GetExplorerSpecialSubNode( byval nFileType as long ) as HTREEITEM
-declare Function AddFunctionsToExplorerTreeview( ByVal pDoc As clsDocument Ptr, ByVal fUpdateNodes As BOOLEAN ) As Long
+declare function frmExplorer_CreateSpecialNodes() as HTREEITEM
+declare Function frmExplorer_AddParentNode( ByVal pDoc As clsDocument Ptr ) as HTREEITEM
+declare Function frmExplorer_AddChildNodes( ByVal pDoc As clsDocument Ptr ) as long
+declare function frmExplorer_GetSpecialNode( byval nFileType as long ) as HTREEITEM
 declare Function frmExplorer_Show( ByVal hWndParent As HWnd ) As LRESULT

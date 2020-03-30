@@ -1,10 +1,17 @@
 Version 2.1.0
 Editor:
 - Added: New caching system that should speed up large project loading. Parser database saved between sessions.
+- Added: New Environment Option "Enable fast project cache" in support of the newly added project caching system that was added.
+- Added: Environment Settings / Code Editor option called "Position searches to middle of screen" to enable/disable positioning search found text to the middle of the screen.
+- Added: Find in Files new option to restrict search to "Project Files".
+- Changed: All file operations now use Streams (using CFileStream or CTextStream classes) to replace built in FB Get/Put commands.
 - Fixed: In certain cases, (Get) or (Set) would be included in the autocomplete text being entered int othe editor after selection.
+- Fixed: GPF when pressing F6 on a #Include statement to load that file into the editor.
+- Fixed: Non-Project user entered Command Line parameters were not being passed to compiled EXE beng run.
 
 Visual Designer:
-
+- Added: Image Manager ability to manually edit the filename rather than having to remove and invalid path image and re-add the correct path image.
+- Changed: You no longer have to manually add #Include statements for your Form files in your main .bas file.
 
 Version 2.0.9 (March 20, 2020)
 Editor:

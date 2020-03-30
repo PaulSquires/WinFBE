@@ -58,6 +58,7 @@ public Function DesignerMain_WndProc( ByVal HWnd   As HWnd, _
          IF pScrollWindow THEN 
             if uMsg = WM_VSCROLL then pScrollWindow->OnVScroll(wParam, lParam)
             if uMsg = WM_HSCROLL then pScrollWindow->OnHScroll(wParam, lParam)
+            AfxRedrawWindow( GetDlgItem(hwnd, IDC_DESIGNFRAME) )
          end if   
          EXIT FUNCTION
 
