@@ -196,7 +196,7 @@ public Function frmExplorer_AddParentNode( ByVal pDoc As clsDocument Ptr ) as HT
    Dim As CWSTR wszFile = AfxStrPathname("NAMEX", pDoc->DiskFilename)
    
    ' Give this document a default project type depending on its file extension
-   if pDoc->ProjectFileType = FILETYPE_UNDEFINED then
+   if (pDoc->IsNewFlag = false) andalso (pDoc->ProjectFileType = FILETYPE_UNDEFINED) then
       if ( gApp.IsProjectActive = true ) orelse ( gApp.IsProjectLoading = true ) then
          if pDoc->IsDesigner then 
             pDoc->ProjectFileType = FILETYPE_NORMAL 
@@ -204,6 +204,14 @@ public Function frmExplorer_AddParentNode( ByVal pDoc As clsDocument Ptr ) as HT
             gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )
          end if
       end if   
+   end if
+
+   ' If the node already exists in the tree then delete it because we will add it again. This is
+   ' necessary for situations where the filename changes and the file then moves to a different
+   ' node branch.
+   if pDoc->hNodeExplorer then
+      TreeView_DeleteItem( hTree, pDoc->hNodeExplorer )
+      pDoc->hNodeExplorer  = 0
    end if
 
    hItem = pDoc->hNodeExplorer 

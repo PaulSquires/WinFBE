@@ -957,15 +957,23 @@ public Function OnCommand_FileSave( ByVal HWnd As HWnd, _
    ' Do the actual saving to disk
    dim wszFilename as CWSTR = pDoc->DiskFilename
    If pDoc->SaveFile(bSaveAs) Then
-      ' Apply document properties to this file because the file extension may have
-      ' changed. For example from Untitled to *.bas
-      If gApp.IsProjectActive Then
-         gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
-      End If
       pDoc->ApplyProperties
       ParseDocument( pDoc )
+      ' Apply document properties to this file because the file extension may have
+      ' changed. For example from Untitled to *.bas
       ' Reload the main form files combobox in case names have changed. 
       if pDoc->DiskFilename <> wszFilename then
+         If gApp.IsProjectActive Then
+            gApp.ProjectSetFileType( pDoc, pDoc->ProjectFileType )    
+            pDoc->hNodeExplorer = frmExplorer_AddParentNode( pDoc )
+            dim as hwnd hTree = GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE)
+            SetWindowRedraw( hTree, false )
+            Treeview_SortChildren( hTree, TreeView_GetParent(hTree, pDoc->hNodeExplorer), 0 )
+            Treeview_SelectItem( hTree, pDoc->hNodeExplorer )
+            Treeview_EnsureVisible( hTree, pDoc->hNodeExplorer )
+            SetWindowRedraw( hTree, true )
+            AfxRedrawWindow( hTree )
+         end if
          frmMain_LoadComboFiles
          frmMain_SelectComboFiles
       end if
@@ -1015,9 +1023,15 @@ public Function OnCommand_FileSaveAll( ByVal HWnd As HWnd ) As LRESULT
          If pDoc->IsNewFlag Then
             gTTabCtl.SetFocusTab(i)
          End If
+         dim wszFilename as CWSTR = pDoc->DiskFilename
          if pDoc->SaveFile() = false then
             ' Save file was cancelled
          end if   
+         ' Reload the main form files combobox in case names have changed. 
+         if pDoc->DiskFilename <> wszFilename then
+            frmMain_LoadComboFiles
+            frmMain_SelectComboFiles
+         end if
          gTTabCtl.SetTabText(i)  ' make sure "*" updates
          ' Parse the code for sub/function listing and create list
          ParseDocument(pDoc)
@@ -1104,6 +1118,7 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
       END IF
      
       TabCtrl_DeleteItem(gTTabCtl.hWindow, i)
+      AfxRedrawWindow( gTTabCtl.hWindow )
       
       ' Only remove this document from the global collection if it is not
       ' part of any active Project or if it is new/unsaved file. Files that are part of a project are

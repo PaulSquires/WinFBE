@@ -154,14 +154,14 @@ ReDim Shared LL(Any) As WString * MAX_PATH
 ''
 Type FINDREPLACE_TYPE
    foundCount          as long 
-   txtFind             As String
-   txtReplace          As String
-   txtFindCombo(10)    As String
-   txtFilesCombo(10)   As String
-   txtFolderCombo(10)  As String
-   txtLastFind         As String
-   txtFiles            As String        ' *.*, *.bas, etc (FindInFolder)
-   txtFolder           As String        ' start search from this folder (FindInFolder)
+   txtFind             As CWSTR
+   txtReplace          As CWSTR
+   txtFindCombo(10)    As CWSTR
+   txtFilesCombo(10)   As CWSTR
+   txtFolderCombo(10)  As CWSTR
+   txtLastFind         As CWSTR
+   txtFiles            As CWSTR         ' *.*, *.bas, etc (FindInFolder)
+   txtFolder           As CWSTR         ' start search from this folder (FindInFolder)
    nSearchSubFolders   As Long          ' search sub folders as well (FindInFolder)
    nWholeWord          As long          ' find/replace whole word search
    nMatchCase          As long          ' match case when searching

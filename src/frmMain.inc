@@ -710,7 +710,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             end if
             
             ' If a CodeTip was displayed prior to the autocomplete popup list then
-            ' redsiplay that CodeTip now.
+            ' redisplay that CodeTip now.
             ShowCodetip( pDoc )
             
             return true   
@@ -724,6 +724,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          end if
                                     
       CASE SCN_CHARADDED
+         if gApp.SuppressNotify then exit function
          pDoc = gTTabCtl.GetActiveDocumentPtr()
          If pDoc = 0 Then exit function
          hEdit = pDoc->hWndActiveScintilla
@@ -1590,13 +1591,19 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+         elseif AfxGetFormHandle(GetFocus) = HWND_FRMFINDINFILES then
+            Dim As HWnd hCtrl = GetNextDlgTabItem( HWND_FRMFINDINFILES, GetFocus, false )
+            SetFocus(hCtrl)
          else
             ' Determine if a Snippet can be inserted. This takes precedence over doing a block indent.
             if frmSnippets_DoInsertSnippet( pDoc ) = false then
                ' No snippet to insert, do a block indent instead.
                gApp.SuppressNotify = true
+               SetWindowRedraw( hEdit, false )
                Function = SciExec(hEdit, SCI_TAB, 0, 0)
+               SetWindowRedraw( hEdit, true )
                gApp.SuppressNotify = false
+               AfxRedrawWindow( hEdit )
             end if
             frmMain_SetStatusbar
          end if
@@ -1606,10 +1613,16 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE)
          elseif GetFocus = GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE) then
             if gFind.bShowReplace then SetFocus GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND)
+         elseif AfxGetFormHandle(GetFocus) = HWND_FRMFINDINFILES then
+            Dim As HWnd hCtrl = GetNextDlgTabItem( HWND_FRMFINDINFILES, GetFocus, true )
+            SetFocus(hCtrl)
          else
             gApp.SuppressNotify = true
+            SetWindowRedraw( hEdit, false )
             Function = SciExec(hEdit, SCI_BACKTAB, 0, 0)
+            SetWindowRedraw( hEdit, true )
             gApp.SuppressNotify = false
+            AfxRedrawWindow( hEdit )
             frmMain_SetStatusbar
          end if
          
@@ -1677,6 +1690,7 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          frmFindReplace_Show( HWND_FRMMAIN, iif(id = IDM_FIND, false, true) )
       
       Case IDM_FINDINFILES
+         if hEdit = 0 then hEdit = HWND_FRMMAIN   ' possible no files are open
          frmFindInFiles_Show( hEdit )
 
       Case IDM_FINDNEXT, IDM_FINDPREV
@@ -2216,7 +2230,7 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
    ' in the ToolBox PropertyList.
    If fActivate = false Then
       pDoc = gTTabCtl.GetActiveDocumentPtr()
-      DisplayPropertyList(pDoc)
+      if pDoc then DisplayPropertyList(pDoc)
       exit function
    end if
 
@@ -3213,9 +3227,11 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
          if (ghAccelUserTools = 0) orelse (TranslateAccelerator(pWindow->hWindow, ghAccelUserTools, @uMsg) = 0) Then 
 
             ' Close any open Find/Replace window with ESC key
+            ' Close any open FindInFiles window with ESC key
             ' Close any open FunctionList window
             if (uMsg.message = WM_KEYDOWN) andAlso (uMsg.wParam = VK_ESCAPE) THEN
                if IsWindowVisible( HWND_FRMFINDREPLACE ) THEN SendMessage( HWND_FRMFINDREPLACE, WM_CLOSE, 0, 0 )
+               if IsWindowVisible( HWND_FRMFINDINFILES ) THEN SendMessage( HWND_FRMFINDINFILES, WM_CLOSE, 0, 0 )
                if IsWindowVisible( HWND_FRMFUNCTIONLIST ) THEN SendMessage( HWND_FRMFUNCTIONLIST, WM_CLOSE, 0, 0 )
             END IF
 

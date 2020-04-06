@@ -498,6 +498,11 @@ public Function frmMain_ChangeTopMenuStates() As Long
       EnableMenuItem hMenu, IDM_QUICKRUN, MF_BYCOMMAND Or MF_GRAYED
    end if
 
+   ' If any documents exist in the editor then enable FindInFiles
+   if gApp.GetDocumentCount then
+      EnableMenuItem hMenu, IDM_FINDINFILES, MF_BYCOMMAND Or MF_ENABLED
+   end if
+      
    If AfxFileExists(GetRunExecutableFilename) Then
       EnableMenuItem hMenu, IDM_RUNEXE, MF_BYCOMMAND Or MF_ENABLED
    Else

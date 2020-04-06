@@ -132,7 +132,9 @@ Type clsConfig
    Private:
       _ConfigFilename            As CWSTR 
       _SnippetsFilename          as CWSTR
+      _SnippetsDefaultFilename   as CWSTR
       _FBKeywordsFilename        as CWSTR 
+      _FBKeywordsDefaultFilename as CWSTR 
       _FBCodetipsFilename        as CWSTR
       _WinAPICodetipsFilename    as CWSTR 
       _WinFormsXCodetipsFilename as CWSTR 

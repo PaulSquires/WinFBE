@@ -94,6 +94,10 @@ end function
 ' ========================================================================================
 private Function frmFunctionList_UpdateListBox() As Long
 
+   ' Check for a valid HWND because this function will be called during a File Save
+   ' and it is entirely possible that the FunctionList is not displayed. Screen
+   ' flicker will otherwise result.
+   if IsWindow(HWND_FRMFUNCTIONLIST) = 0 then exit function
    Dim As HWnd hList = GetDlgItem(HWND_FRMFUNCTIONLIST, IDC_FRMFUNCTIONLIST_LISTBOX)
    
    ' Clear the listbox and add the new items

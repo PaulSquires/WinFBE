@@ -708,7 +708,7 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    If fGoodCompile = False Then NumErrors = NumErrors + 1
 
 
-   dim as CWSTR cwsCompileMsg
+   dim as CWSTR wszCompileMsg
 
    ' If the EXE output file was never created then throw an error
    if fCompilingObjFiles = false then
@@ -722,13 +722,13 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
    ' In all cases where warnings and/or errors exist, we will show the Compiler Results listview
    If (NumWarnings > 0) orelse (NumErrors > 0) orelse (NumDirectives > 0) then
    
-      cwsCompileMsg = L(193, "Errors")   & " " & NumErrors   & "  " & _
+      wszCompileMsg = L(193, "Errors")   & " " & NumErrors   & "  " & _
                       L(192, "Warnings") & " " & NumWarnings & _
                       "  [" & _
                         AfxLocalDateStr( "yyyy-MM-dd" ) & "  " & _
                         AfxLocalTimeStr( "hh:mm:ss" ) & "]"
-      gCompile.wszOutputMsg = L(229,"Failed Compile")  & " (" & cwsCompileMsg & ")" & vbcrlf
-      SetCompileStatusBarMessage( cwsCompileMsg, ghIconBad )
+      gCompile.wszOutputMsg = L(229,"Failed Compile")  & " (" & wszCompileMsg & ")" & vbcrlf
+      SetCompileStatusBarMessage( wszCompileMsg, ghIconBad )
       MessageBeep(MB_ICONWARNING)
       
       ' Position the Compiler Log to the first error/warning
@@ -770,23 +770,23 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
       ' close if the user is looking at the logfile textbox.
       if bAllowSuccessMessage then  ' we are not compiling modules
          dim as long nFileSize = AfxGetFileSize(gCompile.OutputFilename)
-         cwsCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
+         wszCompileMsg = L(193, "Errors") & " " & NumErrors & "  " & _
                          L(192, "Warnings") & " " & NumWarnings & _
                          "  [ " & AfxStrPathname("NAMEX", gCompile.OutputFilename) & "  " & _
-                         AfxStrFormatKBSize(nFileSize) & " (" & _
+                         rtrim(AfxStrFormatKBSize(nFileSize)) & " (" & _
                          nFileSize & " " & L(199,"bytes") & ") ]"
-         SetCompileStatusBarMessage( cwsCompileMsg, ghIconGood )
+         SetCompileStatusBarMessage( wszCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
          ' Simply sound a success
          MessageBeep(MB_OK)
 
-         gCompile.wszOutputMsg = _
+         gCompile.wszOutputMsg = _   ' this gets output to the Output window
          L(228,"Successful Compile")  & " (" & _
                L(193,"Errors")        & " " & NumErrors & " " & _
                L(192,"Warnings")      & " " & NumWarnings & ")" & vbcrlf & vbcrlf & _
          L(194,"Primary Source:")     & " " & gCompile.MainFilename & vbCrLf & _
          L(195,"Target Compilation:") & " " & gCompile.OutputFilename & " (" & _
-               AfxStrFormatKBSize(nFileSize) & ", " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
+               rtrim(AfxStrFormatKBSize(nFileSize)) & ", " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
          L(196,"Compile Time:")       & " " & Format(gCompile.EndTime-gCompile.StartTime, "###0.0") & _
                                         " " & L(198,"seconds") & " (" & _
                                         AfxSystemTimeToDateStr( gCompile.SystemTime, "yyyy-MM-dd" ) & " " & _
@@ -852,8 +852,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
             Return True  ' user cancelled save
          end if   
          ' Reload the main form files combobox in case names have changed
-         frmMain_LoadComboFiles
-         frmMain_SelectComboFiles
+         ' pDoc->SaveFile do this (OnCommand_FileSaveAll calls pDoc->SaveFile)
       End If
    END IF
    

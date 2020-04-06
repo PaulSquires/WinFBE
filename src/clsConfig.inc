@@ -31,7 +31,9 @@
 Constructor clsConfig
    _ConfigFilename            = AfxGetExePathName & "Settings\WinFBE.ini" 
    _SnippetsFilename          = AfxGetExePathName & "Settings\user_snippets.ini" 
+   _SnippetsDefaultFilename   = AfxGetExePathName & "Settings\user_snippets_default.ini" 
    _FBKeywordsFilename        = AfxGetExePathName & "Settings\freebasic_keywords.txt" 
+   _FBKeywordsDefaultFilename = AfxGetExePathName & "Settings\freebasic_keywords_default.txt" 
    _FBCodetipsFilename        = AfxGetExePathName & "Settings\codetips.ini" 
    _WinAPICodetipsFilename    = AfxGetExePathName & "Settings\codetips_winapi.ini" 
    _WinFormsXCodetipsFilename = AfxGetExePathName & "Settings\codetips_winformsx.ini" 
@@ -43,6 +45,16 @@ End Constructor
 ''
 ''
 Function clsConfig.LoadKeywords() as Long
+   If AfxFileExists(_FBKeywordsFilename) = false Then 
+      ' The FB keywords file does not exist. Try copying the "default" keywords over
+      ' to the main file that the user can modify.
+      If AfxFileExists(_FBKeywordsDefaultFilename) Then 
+         if AfxCopyFile( _FBKeywordsDefaultFilename.sptr, _FBKeywordsFilename.sptr, true ) = false then
+            exit function
+         end if
+      end if
+   end if
+   If AfxFileExists(_FBKeywordsFilename) = false Then exit function
    dim pStream AS CTextStream
    if pStream.Open(_FBKeywordsFilename) <> S_OK then exit function
    dim as CWSTR wst = pStream.ReadAll
@@ -1279,7 +1291,17 @@ Function clsConfig.LoadSnippets() as Long
    Dim as CWSTR wst
    Dim as long ub     
 
-   If AfxFileExists(_SnippetsFilename) = 0 Then Exit Function
+   If AfxFileExists(_SnippetsFilename) = false Then 
+      ' The snippets file does not exist. Try copying the "default" snippets over
+      ' to the main file that the user will modify.
+      If AfxFileExists(_SnippetsDefaultFilename) Then 
+         if AfxCopyFile( _SnippetsDefaultFilename.sptr, _SnippetsFilename.sptr, true ) = false then
+            exit function
+         end if
+      end if
+   end if
+   If AfxFileExists(_SnippetsFilename) = false Then exit function
+   
     
    dim pStream AS CTextStream   '(utf16)
    if pStream.OpenUnicode(_SnippetsFilename) <> S_OK then return true   ' error

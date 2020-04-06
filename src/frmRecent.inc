@@ -92,12 +92,26 @@ public Function frmRecent_PositionWindows() As LRESULT
    Dim As Long nLeft, nTop, nWidth, nHeight
    
    nTop = pWindow->ScaleY(12)
+   hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_BTNNEWFILE)
+   SetWindowPos( hBtn, 0, pWindow->ScaleX(28), nTop, _
+                     rc.right-pWindow->ScaleX(56), pWindow->ScaleY(28),  _
+                     SWP_SHOWWINDOW Or SWP_NOZORDER )
+   AfxRedrawWindow(hBtn)
+
+   nTop = nTop + pWindow->ScaleY(40)
    hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_BTNOPENFILE)
    SetWindowPos( hBtn, 0, pWindow->ScaleX(28), nTop, _
                      rc.right-pWindow->ScaleX(56), pWindow->ScaleY(28),  _
                      SWP_SHOWWINDOW Or SWP_NOZORDER )
    AfxRedrawWindow(hBtn)
    
+   nTop = nTop + pWindow->ScaleY(40)
+   hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_BTNNEWPROJECT)
+   SetWindowPos( hBtn, 0, pWindow->ScaleX(28), nTop, _
+                     rc.right-pWindow->ScaleX(56), pWindow->ScaleY(28),  _
+                     SWP_SHOWWINDOW Or SWP_NOZORDER )
+   AfxRedrawWindow(hBtn)
+
    nTop = nTop + pWindow->ScaleY(40)
    hBtn = GetDlgItem(HWND_FRMRECENT, IDC_FRMRECENT_BTNOPENPROJECT)
    SetWindowPos( hBtn, 0, pWindow->ScaleX(28), nTop, _
@@ -140,9 +154,17 @@ private Function frmRecent_OnCommand( ByVal HWnd As HWnd, _
                                       ByVal codeNotify As UINT _
                                       ) As LRESULT
    Select Case id
+      Case IDC_FRMRECENT_BTNNEWFILE
+         If codeNotify = BN_CLICKED Then
+            OnCommand_FileNew(HWND_FRMMAIN) 
+         End If
       Case IDC_FRMRECENT_BTNOPENFILE
          If codeNotify = BN_CLICKED Then
             OnCommand_FileOpen(HWND_FRMMAIN) 
+         End If
+      Case IDC_FRMRECENT_BTNNEWPROJECT
+         If codeNotify = BN_CLICKED Then
+            OnCommand_ProjectNew(HWND_FRMMAIN) 
          End If
       Case IDC_FRMRECENT_BTNOPENPROJECT
          If codeNotify = BN_CLICKED Then
@@ -161,7 +183,11 @@ private Function frmRecent_OnDestroy( byval HWnd As HWnd ) As LRESULT
    Dim pWindow As CWindow Ptr = AfxCWindowPtr(hWnd)
 
    DIM pButton AS CXpButton ptr 
+   pButton = AfxCXpButtonPtr(hwnd, IDC_FRMRECENT_BTNNEWFILE)
+   if pButton then delete pButton
    pButton = AfxCXpButtonPtr(hwnd, IDC_FRMRECENT_BTNOPENFILE)
+   if pButton then delete pButton
+   pButton = AfxCXpButtonPtr(hwnd, IDC_FRMRECENT_BTNNEWPROJECT)
    if pButton then delete pButton
    pButton = AfxCXpButtonPtr(hwnd, IDC_FRMRECENT_BTNOPENPROJECT)
    if pButton then delete pButton
@@ -281,6 +307,13 @@ public Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    pWindow->Brush = GetSysColorBrush(COLOR_BTNFACE)
 
    DIM pButton AS CXpButton ptr 
+   pButton = new CXpButton(pWindow, IDC_FRMRECENT_BTNNEWFILE, L(411, "New File"), 0, 0, 0, 0)
+   pButton->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
+   pButton->DisableTheming
+   pButton->SetTextForeColor(BGR(255,255,250))
+   pButton->SetButtonBkColor(BGR(9,71,113))
+   pButton->SetButtonBkColorHot(BGR(63,63,70))
+
    pButton = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENFILE, L(248, "Open File"), 0, 0, 0, 0)
    pButton->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
    pButton->DisableTheming
@@ -289,6 +322,13 @@ public Function frmRecent_Show( ByVal hWndParent As HWnd ) As LRESULT
    pButton->SetButtonBkColorHot(BGR(63,63,70))
     
    pButton = new CXpButton(pWindow, IDC_FRMRECENT_BTNOPENPROJECT, L(249, "Open Project"), 0, 0, 0, 0)
+   pButton->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
+   pButton->DisableTheming
+   pButton->SetTextForeColor(BGR(255,255,250))
+   pButton->SetButtonBkColor(BGR(9,71,113))
+   pButton->SetButtonBkColorHot(BGR(63,63,70))
+
+   pButton = new CXpButton(pWindow, IDC_FRMRECENT_BTNNEWPROJECT, L(180, "New Project"), 0, 0, 0, 0)
    pButton->SetFont(pWindow->CreateFont( "Segoe UI Semibold", 10))
    pButton->DisableTheming
    pButton->SetTextForeColor(BGR(255,255,250))

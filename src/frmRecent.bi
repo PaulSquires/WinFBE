@@ -13,9 +13,11 @@
 
 #pragma once
 
-#Define IDC_FRMRECENT_BTNOPENFILE                   1000
-#Define IDC_FRMRECENT_BTNOPENPROJECT                1001
-#Define IDC_FRMRECENT_TREEVIEW                      1002
+#Define IDC_FRMRECENT_BTNNEWFILE                    1000
+#Define IDC_FRMRECENT_BTNOPENFILE                   1001
+#Define IDC_FRMRECENT_BTNNEWPROJECT                 1002
+#Define IDC_FRMRECENT_BTNOPENPROJECT                1003
+#Define IDC_FRMRECENT_TREEVIEW                      1004
 
 declare Function frmRecent_LoadTreeview() As LRESULT
 declare Function frmRecent_PositionWindows As LRESULT

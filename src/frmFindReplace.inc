@@ -126,6 +126,7 @@ private function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false 
       SciExec( hEdit, SCI_INDICATORCLEARRANGE, startPos, endPos)
       
       gApp.SuppressNotify = true
+      SetWindowRedraw( hEdit, false )
       do 
          r = SciExec( hEdit, SCI_SEARCHINTARGET, Len(txtFind), Strptr(txtFind))
          if r = -1 THEN exit do
@@ -135,7 +136,9 @@ private function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false 
          SciExec( hEdit, SCI_SETTARGETSTART, startPos, 0)
          SciExec( hEdit, SCI_SETTARGETEND, endPos, 0)
       loop
+      SetWindowRedraw( hEdit, true )
       gApp.SuppressNotify = false
+      AfxRedrawWindow( hEdit )
 
    else   
       ' Need to ensure that the current cursor/selection is actually the find
@@ -149,6 +152,13 @@ private function frmFindReplace_DoReplace( byval fReplaceAll as BOOLEAN = false 
       SciExec( hEdit, SCI_REPLACETARGET, len(txtReplace), Strptr(txtReplace) )
    end if
       
+   ' Need to reparse because some of the function names may been replaced
+   ' with new names.
+   pDoc->bNeedsParsing = true
+   ParseDocument( pDoc )
+   frmMain_LoadComboFunctions()
+   frmMain_SelectComboFunctions()
+   
    function = 0
 end function
 

@@ -1263,42 +1263,45 @@ End Function
 Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
 
    Dim i           As Long        ' Loop counter
-   Dim startPos    As Long        ' Starting position
-   Dim endPos      As Long        ' Ending position
-   Dim startLine   As Long        ' Starting line
-   Dim endLine     As Long        ' Ending line
+   Dim firstPos    As Long        ' Starting position of the line
+   Dim startPos    As Long        ' Starting position of selection
+   Dim endPos      As Long        ' Ending position of selection
+   Dim startLine   As Long        ' Starting line number
+   Dim endLine     As Long        ' Ending line number
    Dim nPos        As Long        ' Position
    Dim strText     As String      ' Portion of the line to replace
+   Dim strNewText  As String      ' New text to insert or delete
    Dim nCount      As Long        ' Number of "'" added or removed
    
    dim as any ptr pSci = this.GetActiveScintillaPtr()
    ' flagBlock = True for Blocking comment, False for UnBlocking comment
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
-   SciMsg( pSci, SCI_GOTOLINE, startLine, 0) 
    
    gApp.SuppressNotify = True
+   SetWindowRedraw( this.hWndActiveScintilla, false )
+   SciMsg( pSci, SCI_BEGINUNDOACTION, 0, 0)
    For i = startLine To endLine
       strText = this.GetLine(i)   
-      If flagBlock = False Then   ' unblock comment
+      If flagBlock = False Then   
+         ' unblock comment
          If Left(strText, 1) <> "'" Then
             Continue For
          Else   
-            strText = Iif(Len(strText) > 1, Mid(strText, 2), " ")
-         End If   
+            firstpos = SciMsg( pSci, SCI_POSITIONFROMLINE, i, 0 )
+            SciMsg( pSci, SCI_DELETERANGE, firstpos, Cast(LPARAM, 1) )
+         End If
+         nCount += 1
       Else
+         ' block comment
          If Len(rtrim(strText)) Then
-            strText = "'" & strText
+            strNewText = "'"
+            firstpos = SciMsg( pSci, SCI_POSITIONFROMLINE, i, 0 )
+            SciMsg( pSci, SCI_INSERTTEXT, firstpos, Cast(LPARAM, Strptr(strNewText)) )
+            nCount += 1
          end if   
       End If
-      If Len(strText) Then
-         nPos = SciMsg( pSci, SCI_POSITIONFROMLINE, i, 0)   ' starting position of the line
-         SciMsg( pSci, SCI_SETTARGETSTART, nPos, 0)
-         SciMsg( pSci, SCI_SETTARGETEND, nPos + Len(strText) + Iif(flagBlock, -1, 1), 0)
-         SciMsg( pSci, SCI_REPLACETARGET, Len(strText), Cast(LPARAM, Strptr(strText))) 
-         nCount += 1
-      End If
    Next
-   gApp.SuppressNotify = False
+   SciMsg( pSci, SCI_ENDUNDOACTION, 0, 0)
 
    If startPos <> endPos Then
       SciMsg( pSci, SCI_SETSELECTIONSTART, startPos, 0)
@@ -1307,6 +1310,10 @@ Function clsDocument.BlockComment( ByVal flagBlock As BOOLEAN ) As Long
       SciMsg( pSci, SCI_SETSELECTIONSTART, endPos + Iif(flagBlock, nCount, -nCount), 0)
       SciMsg( pSci, SCI_SETSELECTIONEND, endPos + Iif(flagBlock, nCount, -nCount), 0)
    End If
+
+   SetWindowRedraw( this.hWndActiveScintilla, true )
+   gApp.SuppressNotify = False
+   AfxRedrawWindow( this.hWndActiveScintilla )
    
    Function = 0
 End Function

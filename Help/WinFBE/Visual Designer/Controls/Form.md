@@ -57,6 +57,8 @@
 | ShowChild | Creates and shows the form as a child (WS_CHILD) of the specified parent form similar to a Panel control. |
 
 ### Events
+The code for the selected Events will be automatically inserted into the code editor. For this to happen, select the Event and then toggle to the code editor for the Form. The Event's function stub will automatically added to the end of the code window (if it does not already exist).
+
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | Activated | Occurs when the form is activated in code or by the user.|
@@ -90,8 +92,8 @@ Form events in a specific order every time a form is created and shown.
 | Name                            | Description                    |
 | ------------------------------- | ------------------------------ |
 | Initialize | Occurs before a user loads the form. The form TYPE variable is valid but any Window handles are not valid at this point.|
-| FormLoad | The form handle and all child controls exist however the form and controls are not yet visible. Respond to this event to reposition controls or to add data to controls. For example, add rows to a Listbox or Combobox. |
-| FormActivated | The form has gained input focus (similar to the GotFocus event of a control).|
+| Load | The form handle and all child controls exist however the form and controls are not yet visible. Respond to this event to reposition controls or to add data to controls. For example, add rows to a Listbox or Combobox. |
+| Activated | The form has gained input focus (similar to the GotFocus event of a control).|
 | Shown | This event is only raised the first time a form is displayed; subsequently minimizing, maximizing, restoring, hiding, showing, or invalidating and repainting will not raise this event. |
 
 ### During form destruction
