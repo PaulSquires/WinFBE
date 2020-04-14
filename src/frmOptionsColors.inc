@@ -208,7 +208,7 @@ private Function frmOptionsColors_SetTempColorSelection( ByVal HWnd As HWnd, _
    gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
    
    ' Must increase the nCurSel value because it is zero based and the color
-   ' offset is between CLR_CARET and CLR_WINDOW
+   ' offset is between CLR_CARET and CLR_BRACEBAD
    Select Case nCtrlID 
       Case IDC_FRMOPTIONSCOLORS_CBCOLOR1 
          idx = ComboBox_GetCurSel( hCB1 )
@@ -250,7 +250,7 @@ private Function frmOptionsColors_ShowComboColors( ByVal HWnd As HWnd ) As Long
    dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
    gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
    ' Must increase the nCurSel value because it is zero based and the color
-   ' offset is between CLR_CARET and CLR_WINDOW
+   ' offset is between CLR_CARET and CLR_BRACEBAD
    nFg = gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+ CLR_CARET).nFg 
    nBg = gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+ CLR_CARET).nBg 
 
@@ -287,6 +287,8 @@ private Function frmOptionsColors_ShowComboColors( ByVal HWnd As HWnd ) As Long
    If nCurSel = 2  Then fHideBack = True   ' Highlight current line
    If nCurSel = 4  Then fHideBack = True   ' Fold Margin
    If nCurSel = 13 Then fHideBack = True   ' Window
+   If nCurSel = 14 Then fHideBack = True   ' Brace highlight Match
+   If nCurSel = 15 Then fHideBack = True   ' Brace highlight Match
    ShowWindow hCB2, Iif( fHideBack, SW_HIDE, SW_SHOW )
    ShowWindow GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND), Iif( fHideBack, SW_HIDE, SW_SHOW )
 
@@ -629,6 +631,8 @@ public Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(149,"Strings")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(150,"Text")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(152,"Window")) )
+   SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(414,"Brace Highlight Match")) )
+   SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(415,"Brace Highlight No-Match")) )
 
 
    ' Copy all of the Themes to the ThemesTemp array because we will work with 

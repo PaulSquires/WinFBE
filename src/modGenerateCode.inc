@@ -116,7 +116,7 @@ public function GenerateFormMetaData( byval pDoc as clsDocument ptr ) as long
          wszControls = wszControls & _
               "'   IMAGE_START" & vbcrlf & _
               "'     IMAGENAME="     & pDoc->AllImages(ii).wszImageName & vbcrlf & _
-              "'     FILENAME="      & ProcessToCurdrive(wszImageFilename) & vbcrlf & _
+              "'     FILENAME="      & ProcessToCurdriveProject(wszImageFilename) & vbcrlf & _
               "'     RESOURCETYPE="  & pDoc->AllImages(ii).wszFormat & vbcrlf & _
               "'   IMAGE_END" & vbcrlf 
       next

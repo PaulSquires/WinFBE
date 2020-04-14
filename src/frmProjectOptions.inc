@@ -27,11 +27,37 @@ private function frmProjectOptions_CreateResourceManifest() as Long
    dim as CWSTR wszManifestTemplate = AfxGetExePathName + "Settings\WinFBE_manifest.xml"
    dim as CWSTR wszResourceTemplate = AfxGetExePathName + "Settings\WinFBE_resource.rc" 
    
-   if AfxFileExists(wszManifestTemplate) = false then exit function
-   if AfxFileExists(wszResourceTemplate) = false then exit function
-   if AfxFileExists(wszManifest) = false then AfxCopyFile( wszManifestTemplate, wszManifest, true )
-   if AfxFileExists(wszResource) = false then AfxCopyFile( wszResourceTemplate, wszResource, true )
-
+   dim as CWSTR wszFilesMissing
+   
+   if AfxFileExists(wszManifest) = false then 
+      if AfxFileExists(wszManifestTemplate) = false then 
+         wszFilesMissing = wszFilesMissing & _
+                           space(5) & "- " & AfxStrPathname( "NAMEX", wszManifestTemplate ) & vbcrlf
+      else
+         AfxCopyFile( wszManifestTemplate, wszManifest, true )
+      end if
+   end if
+   
+   if AfxFileExists(wszResource) = false then 
+      if AfxFileExists(wszResourceTemplate) = false then 
+         wszFilesMissing = wszFilesMissing & _
+                           space(5) & "- " & AfxStrPathname( "NAMEX", wszResourceTemplate ) & vbcrlf
+      else
+         AfxCopyFile( wszResourceTemplate, wszResource, true )
+      end if   
+   end if
+   
+   if len(wszFilesMissing) then
+      MessageBox( 0, _
+                  "The following files(s) are missing from the WinFBE Settings folder. " + _
+                  "Please reinstall the WinFBE application." & vbcrlf & vbcrlf & _ 
+                  wszFilesMissing, _
+                  "Error", _
+                  MB_OK Or MB_ICONWARNING Or MB_DEFBUTTON1 Or MB_APPLMODAL )
+      exit function
+   end if
+   
+   
    ' Add the resource file to the project if it does not already exist in the project
    if gApp.GetDocumentPtrByFilename(wszResource) = 0 then
       dim pDoc as clsDocument ptr

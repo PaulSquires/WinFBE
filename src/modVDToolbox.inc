@@ -1179,10 +1179,23 @@ End Function
 ' Process WM_DESTROY message for window/dialog: frmVDToolbox
 ' ========================================================================================
 private Function frmVDToolbox_OnDestroy( byval HWnd As HWnd ) As LRESULT
+
+   ' Determine the current ToolBox positioning 
+   Dim WinPla As WINDOWPLACEMENT
+   WinPla.Length = Sizeof(WinPla)
+   GetWindowPlacement(HWND_FRMVDTOOLBOX, @WinPla)
+   With gConfig
+      .ToolBoxLeft   = WinPla.rcNormalPosition.Left 
+      .ToolBoxTop    = WinPla.rcNormalPosition.Top
+      .ToolBoxRight  = WinPla.rcNormalPosition.Right
+      .ToolBoxBottom = WinPla.rcNormalPosition.Bottom
+   End With
+
    ' Delete the manually created bold font
    dim as hFONT hFontBold = AfxGetWindowFont( GetDlgItem(hwnd, IDC_FRMVDTOOLBOX_LBLPROPNAME ))
    if hFontBold then DeleteFont(hFontBold)
    HWND_FRMVDTOOLBOX = 0
+   
    Function = 0
 End Function
 
@@ -1458,23 +1471,48 @@ public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
       nCmdShow = SW_SHOW
    End If
       
+   Dim pMainWindow As CWindow Ptr = AfxCWindowPtr(HWND_FRMMAIN)
+   Dim rcWork As RECT = pMainWindow->GetWorkArea
+   ' The rcWork rectangle is not high DPI aware
+   
+   ' SET STARTUP POSITION
+   Dim WinPla As WINDOWPLACEMENT
+   
+   ' If no valid window size exists then set to the default working area of the screen
+   If (gConfig.ToolBoxRight = 0) OrElse (gConfig.ToolBoxBottom = 0) Then
+      ' Retrieve the size of the working area (not high dpi aware)
+      ' ensure all of the values are high dpi aware
+      dim as long nHeight   = pMainWindow->ScaleY( (rcWork.Bottom - rcWork.Top) * .70 )
+      dim as long nWidth    = pMainWindow->ScaleX( 300 )
+      gConfig.ToolBoxLeft   = pMainWindow->ScaleX( rcWork.Right - 360 )
+      gConfig.ToolBoxTop    = (pMainWindow->ScaleY( rcWork.bottom ) - nHeight ) / 2
+      gConfig.ToolBoxRight  = gConfig.ToolBoxLeft + nWidth
+      gConfig.ToolBoxBottom = gConfig.ToolBoxTop + nHeight
+   End If
+   
+   With WinPla
+      .Length = Sizeof(WinPla)
+      .rcNormalPosition.Left   = gConfig.ToolBoxLeft   
+      .rcNormalPosition.Top    = gConfig.ToolBoxTop    
+      .rcNormalPosition.Right  = gConfig.ToolBoxRight  
+      .rcNormalPosition.Bottom = gConfig.ToolBoxBottom 
+      .showCmd = SW_SHOWNORMAL
+   End With
+     
 
    '  Create the main window and child controls
    Dim pWindow As CWindow Ptr = New CWindow
    pWindow->DPI = AfxCWindowOwnerPtr(hwndParent)->DPI
 
-   Dim rcWork  As Rect = pWindow->GetWorkArea
-   Dim nHeight As Long = (rcWork.Bottom - rcWork.Top) * .70
-   dim nLeft   as long = ((rcWork.Right - rcWork.Left) * .65) 
-   Dim nTop    As Long = (rcWork.Bottom - rcWork.Top - nHeight) / 2
-      
    HWND_FRMVDTOOLBOX = _
-   pWindow->Create( hWndParent, L(352,"Toolbox"), @frmVDToolbox_WndProc, nLeft, nTop, 300, nHeight, _
+   pWindow->Create( hWndParent, L(352,"Toolbox"), @frmVDToolbox_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION or WS_SYSMENU or WS_THICKFRAME or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_CLIENTEDGE)
    ' We will set our own mouse pointer as needed
    SetClassLongPtr(HWND_FRMVDTOOLBOX, GCLP_HCURSOR, 0)   
    
+   SetWindowPlacement(HWND_FRMVDTOOLBOX, @WinPla)
+
    ' Set the small and large icon for the main window (must be set after main window is created)
    pWindow->BigIcon   =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 32, 32, LR_SHARED)
    pWindow->SmallIcon =  LoadImage( pWindow->InstanceHandle, "IMAGE_AAA_MAINICON", IMAGE_ICON, 16, 16, LR_SHARED)
@@ -1556,6 +1594,11 @@ public Function frmVDToolbox_Show( ByVal hWndParent As HWnd, _
    frmVDColors_Show(hList2, "")
    
    frmVDToolbox_PositionWindows
+
+   ' Ensure the window is placed on screen should the user had changed 
+   ' the logical ordering of a multiple display setup.
+   AfxForceVisibleDisplay(HWND_FRMVDTOOLBOX)
+
 
    TabCtrl_SetCurSel(hTabCtl, 0)
    ShowWindow HWND_FRMVDTOOLBOX, nCmdShow

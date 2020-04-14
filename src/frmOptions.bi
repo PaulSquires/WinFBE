@@ -19,5 +19,7 @@
 #Define IDC_FRMOPTIONS_CMDOK                        1003
 #Define IDC_FRMOPTIONS_TVWCATEGORIES                1004
 
+dim shared OptionsDialogLastOpened as long 
+
 declare Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
 

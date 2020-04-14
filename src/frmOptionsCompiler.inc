@@ -112,6 +112,10 @@ public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
         L(273,"Run compiled programs using command window"), 0, 145, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSCOMPILER_CHKDISABLECOMPILEBEEP, _
+        L(413,"Disable successful compile sound"), 0, 166, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSCOMPILER_LBLFBHELP, L(155,"FreeBASIC Help file (*.chm)") & ":", 0, 202, 375, 14, _
         WS_CHILD Or WS_VISIBLE Or SS_LEFT Or SS_NOTIFY, _
@@ -134,11 +138,11 @@ public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    
-   gConfig.FBWINCompiler32  = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-   gConfig.FBWINCompiler64  = ProcessFromCurdrive(gConfig.FBWINCompiler64)
-   gConfig.CompilerHelpfile = ProcessFromCurdrive(gConfig.CompilerHelpfile)
-   gConfig.Win32APIHelpfile = ProcessFromCurdrive(gConfig.Win32APIHelpfile)
-   gConfig.WinFBXHelpfile   = ProcessFromCurdrive(gConfig.WinFBXHelpfile)
+   gConfig.FBWINCompiler32  = ProcessFromCurdriveApp(gConfig.FBWINCompiler32)
+   gConfig.FBWINCompiler64  = ProcessFromCurdriveApp(gConfig.FBWINCompiler64)
+   gConfig.CompilerHelpfile = ProcessFromCurdriveApp(gConfig.CompilerHelpfile)
+   gConfig.Win32APIHelpfile = ProcessFromCurdriveApp(gConfig.Win32APIHelpfile)
+   gConfig.WinFBXHelpfile   = ProcessFromCurdriveApp(gConfig.WinFBXHelpfile)
 
    Dim As HWnd HWnd = HWND_FRMOPTIONSCOMPILER
    AfxSetWindowText( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTFBWIN32),        gConfig.FBWINCompiler32)
@@ -148,6 +152,7 @@ public Function frmOptionsCompiler_Show( ByVal hWndParent As HWnd ) as LRESULT
    AfxSetWindowText( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH),  gConfig.Win32APIHelpfile)
    AfxSetWindowText( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_TXTWINFBXHELPPATH), gConfig.WinFBXHelpfile)
    Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW),  gConfig.RunViaCommandWindow)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_CHKDISABLECOMPILEBEEP),  gConfig.DisableCompileBeep)
 
    Function = 0 
 End Function

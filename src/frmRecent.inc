@@ -36,7 +36,7 @@ public Function frmRecent_LoadTreeview() As LRESULT
    Treeview_SetBold( hTree, hNode, TRUE) 
    For i As Long = 0 To 9 
       ' If the file no longer exists then remove it from the MRU list 
-      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i)) 
+      gConfig.MRU(i) = ProcessFromCurdriveApp(gConfig.MRU(i)) 
       If AfxFileExists(gConfig.MRU(i)) Then 
          TreeView_AppendItem( hTree, hNode, gConfig.MRU(i) )
          fEmpty = False 
@@ -56,7 +56,7 @@ public Function frmRecent_LoadTreeview() As LRESULT
    Treeview_SetBold( hTree, hNode, TRUE) 
    For i As Long = 0 To 9 
       ' If the file no longer exists then remove it from the MRU list 
-      gConfig.MRUPROJECT(i) = ProcessFromCurdrive(gConfig.MRUPROJECT(i)) 
+      gConfig.MRUPROJECT(i) = ProcessFromCurdriveApp(gConfig.MRUPROJECT(i)) 
       If AfxFileExists(gConfig.MRUPROJECT(i)) Then 
          TreeView_AppendItem( hTree, hNode, gConfig.MRUPROJECT(i) )
          fEmpty = False 

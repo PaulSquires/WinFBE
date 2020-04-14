@@ -289,6 +289,21 @@ private function ShowCodetip( byval pDoc as clsDocument ptr, _
          ParseDocument( pDoc )
       End If   
       pData = DereferenceLine(pDoc, "(", curPos-1)
+      if pData = 0 then 
+         ' Maybe this is a class sub/function inside of a class method that is
+         ' not prefixed by the "this" keyword.
+         dim sClassFunction as String
+         pDoc->GetCurrentFunctionName( sClassFunction, 0 )
+         dim as long f = instr( sClassFunction, "." )
+         if f then
+            ' Get the word preceeding our "("
+            dim as string sFunctionName = pDoc->GetWord( curPos - 1)
+            sFunctionName = left( sClassFunction, f ) & sFunctionName
+            if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
+            if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
+            if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
+         end if   
+      end if
       if pData then codeTip = pData->CallTip
    end if
 

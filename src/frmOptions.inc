@@ -58,6 +58,7 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.UnicodeEncoding      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKUNICODE) )
    gConfig.RightEdge            = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWRIGHTEDGE) )
    gConfig.PositionMiddle       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKPOSITIONMIDDLE) )
+   gConfig.BraceHighlight       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKBRACEHIGHLIGHT) )
 
    gConfig.RightEdgePosition = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTRIGHTEDGE) )
    gConfig.TabSize = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE) )
@@ -109,6 +110,7 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.Win32APIHelpfile = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWIN32HELPPATH) )
    gConfig.WinFBXHelpfile   = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_TXTWINFBXHELPPATH) )
    gConfig.RunViaCommandWindow = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSCOMPILER_CHKRUNVIACOMMANDWINDOW) )
+   gConfig.DisableCompileBeep = Button_GetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSCOMPILER_CHKDISABLECOMPILEBEEP) )
    
    
    ' KEYWORDS
@@ -195,59 +197,63 @@ private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
                                       ByVal pNMHDR As NMHDR Ptr _
                                       ) As LRESULT
 
-    Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
+   Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWnd)
     
-    Select Case id
+   Select Case id
    
-       Case IDC_FRMOPTIONS_TVWCATEGORIES
-          If pNMHDR->code = TVN_SELCHANGED Then
-             Dim As Long nLeft, nTop
-             Dim As HWnd hForm, hLabel
+      Case IDC_FRMOPTIONS_TVWCATEGORIES
+         If pNMHDR->code = TVN_SELCHANGED Then
+            Dim As Long nLeft, nTop
+            Dim As HWnd hForm, hLabel
 
-             Static hCurrent As HWnd   ' hwnd of currently display child Form
+            Static hCurrent As HWnd   ' hwnd of currently display child Form
              
-             If hCurrent Then ShowWindow hCurrent, SW_HIDE
+            If hCurrent Then ShowWindow hCurrent, SW_HIDE
              
-             Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
-             hLabel = GetDlgItem(HWnd, IDC_FRMOPTIONS_LBLCATEGORY)
+            Dim lpNMTV As NM_TREEVIEW Ptr = Cast(NM_TREEVIEW Ptr, pNMHDR)
+            hLabel = GetDlgItem(HWnd, IDC_FRMOPTIONS_LBLCATEGORY)
              
-             ' Display the correct Category name and Child dialog. The child identifier is held in the lParam
-             Select Case TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
-                 Case 0
-                     SetWindowTextW( hLabel, WStr(" ") & L(226,"General Options")) 
-                     hForm = HWND_FRMOPTIONSGENERAL
-                 Case 1
-                     SetWindowTextW( hLabel, WStr(" ") & L(110,"Code Editor")) 
-                     hForm = HWND_FRMOPTIONSEDITOR
-                 Case 2
-                     SetWindowTextW( hLabel, WStr(" ") & L(111,"Colors and Fonts") )
-                     hForm = HWND_FRMOPTIONSCOLORS
-                 Case 3
-                     SetWindowTextW( hLabel, WStr(" ") & L(112,"Compiler Setup") )
-                     hForm = HWND_FRMOPTIONSCOMPILER
-                 Case 4
-                     SetWindowTextW( hLabel, WStr(" ") & L(129,"Localization") )
-                     hForm = HWND_FRMOPTIONSLOCAL
-                 Case 5
-                     SetWindowTextW( hLabel, WStr(" ") & L(177,"FreeBASIC Keywords") )
-                     hForm = HWND_FRMOPTIONSKEYWORDS
-             End Select
+            ' Display the correct Category name and Child dialog. The child identifier is held in the lParam
+            dim as long nBranchNum = TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
+            Select Case nBranchNum
+               Case 0
+                  SetWindowTextW( hLabel, WStr(" ") & L(226,"General Options")) 
+                  hForm = HWND_FRMOPTIONSGENERAL
+               Case 1
+                  SetWindowTextW( hLabel, WStr(" ") & L(110,"Code Editor")) 
+                  hForm = HWND_FRMOPTIONSEDITOR
+               Case 2
+                  SetWindowTextW( hLabel, WStr(" ") & L(111,"Colors and Fonts") )
+                  hForm = HWND_FRMOPTIONSCOLORS
+               Case 3
+                  SetWindowTextW( hLabel, WStr(" ") & L(112,"Compiler Setup") )
+                  hForm = HWND_FRMOPTIONSCOMPILER
+               Case 4
+                  SetWindowTextW( hLabel, WStr(" ") & L(129,"Localization") )
+                  hForm = HWND_FRMOPTIONSLOCAL
+               Case 5
+                  SetWindowTextW( hLabel, WStr(" ") & L(177,"FreeBASIC Keywords") )
+                  hForm = HWND_FRMOPTIONSKEYWORDS
+            End Select
              
-         
-             ' Move the child Form into place. The child form will be displayed under the header label.
-             Dim rc As Rect
-             GetWindowRect( hLabel, @rc )
-             MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
-             SetWindowPos hForm, HWND_TOP, _
-                           rc.Left + pWindow->ScaleX(5), pWindow->ScaleY(50), _
-                           pWindow->ScaleX(420), pWindow->ScaleY(350), _
-                           SWP_SHOWWINDOW
+            ' Save the most recently opened tree branch 
+            OptionsDialogLastOpened = nBranchNum
+
+            
+            ' Move the child Form into place. The child form will be displayed under the header label.
+            Dim rc As Rect
+            GetWindowRect( hLabel, @rc )
+            MapWindowPoints( Null, HWnd, Cast(LPPOINT, @rc), 2 )
+            SetWindowPos hForm, HWND_TOP, _
+                          rc.Left + pWindow->ScaleX(5), pWindow->ScaleY(50), _
+                          pWindow->ScaleX(420), pWindow->ScaleY(350), _
+                          SWP_SHOWWINDOW
              
-             InvalidateRect HWnd, ByVal Null, True
-             UpdateWindow HWnd
+            InvalidateRect HWnd, ByVal Null, True
+            UpdateWindow HWnd
              
-             hCurrent = hForm
-          End If
+            hCurrent = hForm
+         End If
 
    End Select
 
@@ -365,13 +371,13 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    gConfig.LoadConfigFile()
 
    ' Configure the TreeView
-   Dim hItem As HANDLE 
-   hItem = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
-   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
-   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   2)
-   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     3)
-   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       4)
-   TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 5)
+   Dim hItems(5) As HTREEITEM 
+   hItems(0) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
+   hItems(1) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
+   hItems(2) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   2)
+   hItems(3) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     3)
+   hItems(4) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       4)
+   hItems(5) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 5)
 
    ' Load all of the child dialogs
    frmOptionsGeneral_Show( pWindow->hWindow )
@@ -381,8 +387,8 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    frmOptionsLocal_Show( pWindow->hWindow )
    frmOptionsKeywords_Show( pWindow->hWindow )
 
-   ' Select the first item "Code Editor"
-   TreeView_SelectItem( hWndTreeview, hItem)
+   ' Select the most previously open tree branch or first item "Code Editor" by default.
+   TreeView_SelectItem( hWndTreeview, hItems(OptionsDialogLastOpened) )
 
    SetFocus hWndTreeview
    

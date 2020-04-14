@@ -1057,6 +1057,13 @@ private Function OnCommand_FileClose( ByVal HWnd As HWnd, _
    Dim pDoc As clsDocument Ptr
    Dim As Long r
    
+   ' If a Project is not active then we need to save the current non-project notes
+   ' when this file is closed. It is possible that this file is being closed and
+   ' a project is being opened.
+   if gApp.IsProjectActive = false then
+      gApp.NonProjectNotes = AfxGetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES))
+   end if
+   
    ' Build a list of files to check
    dim as long nCurSel 
    ' If the incoming nTabNum is -1 then we want to close the current

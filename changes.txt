@@ -1,3 +1,23 @@
+Version 2.1.1 (April 14, 2020)
+Editor:
+- Added: Brace highlight matching. Settings to enable/disable and to set colors for match and no match.
+- Added: New Compiler setup option: "Disable successful compile sound".
+- Added: Environment Options dialog now remembers last selected option and will display that option window on subsequent opens.
+- Added: Shift+F7 as keyboard shortcut key for "Environment Options".
+- Added: F6 Goto Definition will now find functions in class methods that are not prefixed with the "this" keyword.
+- Added: Codetip popups will now find functions in class methods that are not prefixed with the "this" keyword.
+- Changed: AutoInsert now correctly implements TABs for indentation if the editor option "Treat Tab as spaces" is unchecked. 
+- Fixed: Code Editor option called "Position searches to middle of screen" was not positioning in all envisioned scenarios.
+- Fixed: The keyword "Chr" and "RTrim" were incorrectly mixed capitalized in the freebasic_keywords.txt settings file. Users will need to manually change that keyword to all lowercase "chr" and "rtrim" in order for keyword highlighting to be correct.
+- Fixed: Corrected situation whereby non-project related notes could get reset when switching between non-project files and projects.
+- Fixed: Logic error when saving project file names/paths to Most Recently Used list when the project resided on a drive different than the WinFBE application. This situation involved the incorrect application of the {CURDRIVE} parameter.
+
+Visual Designer:
+- Added: ToolBox window size and position is now saved and restored between sessions.
+- Added: Error message displayed if using "Project Options" to add manifest and resource files but the WinFBE_manifest.xml and/or WinFB_resource.rc files are missing from WinFBE Settings folder.
+- Fixed: Forms with BorderStyle property set to FormBorderStyle.SizeableToolWindow were incorrectly displayed in the visual designer.
+- Fixed: Code generation error if last line of main code file does not have trailing CR/LF.
+
 Version 2.1.0 (April 6, 2020)
 Editor:
 - Added: New caching system that should speed up large project loading. Parser database saved between sessions.

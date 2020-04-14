@@ -32,8 +32,10 @@ declare function GetFileToString( byref wszFilename as const wstring, byref txtB
 declare function ConvertTextBuffer( byval pDoc as clsDocument ptr, byval FileEncoding as long ) as Long
 declare function IsCurrentLineIncludeFilename() as Boolean
 declare function OpenSelectedDocument( byref wszFilename as wstring, byref wszFunctionName as WSTRING = "", byval nLineNumber as long = -1 ) as clsDocument ptr
-declare Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
-declare Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
+declare Function ProcessToCurdriveProject( Byval wzFilename As CWSTR ) As CWSTR
+declare Function ProcessFromCurdriveProject( Byval wzFilename As CWSTR ) As CWSTR
+declare Function ProcessToCurdriveApp( Byval wzFilename As CWSTR ) As CWSTR
+declare Function ProcessFromCurdriveApp( Byval wzFilename As CWSTR ) As CWSTR
 declare Function AfxIFileOpenDialogW( ByVal hwndOwner As HWnd, ByVal idButton As Long) As WString Ptr
 declare Function AfxIFileOpenDialogMultiple( ByVal hwndOwner As HWnd, ByVal idButton As Long) As IShellItemArray Ptr
 Declare Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, ByVal pwszFileName As WString Ptr, ByVal pwszDefExt As WString Ptr, ByVal id As Long = 0, ByVal sigdnName As SIGDN = SIGDN_FILESYSPATH ) As WString Ptr

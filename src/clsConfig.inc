@@ -1050,6 +1050,7 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "LocalizationFile="      & this.LocalizationFile     
    pStream.WriteLine "TabSize="               & this.TabSize              
    pStream.WriteLine "PositionMiddle="        & this.PositionMiddle
+   pStream.WriteLine "BraceHighlight="        & this.BraceHighlight
    pStream.WriteLine "EditorFontname="        & this.EditorFontname       
    pStream.WriteLine "EditorFontsize="        & this.EditorFontsize       
    pStream.WriteLine "EditorFontCharSet="     & this.EditorFontCharSet    
@@ -1062,6 +1063,10 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "StartupMaximized="      & this.StartupMaximized     
    pStream.WriteLine "ShowExplorer="          & this.ShowExplorer         
    pStream.WriteLine "ShowExplorerWidth="     & this.ShowExplorerWidth    
+   pStream.WriteLine "ToolBoxLeft="           & this.ToolBoxLeft          
+   pStream.WriteLine "ToolBoxTop="            & this.ToolBoxTop           
+   pStream.WriteLine "ToolBoxRight="          & this.ToolBoxRight         
+   pStream.WriteLine "ToolBoxBottom="         & this.ToolBoxBottom        
    pStream.WriteLine ""
 
    ' For each folder location determine if it resides on the same drive as
@@ -1069,11 +1074,11 @@ Function clsConfig.SaveConfigFile() as Long
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
-   this.FBWINCompiler32  = ProcessToCurdrive(this.FBWINCompiler32)
-   this.FBWINCompiler64  = ProcessToCurdrive(this.FBWINCompiler64)
-   this.CompilerHelpfile = ProcessToCurdrive(this.CompilerHelpfile)
-   this.Win32APIHelpfile = ProcessToCurdrive(this.Win32APIHelpfile)
-   this.WinFBXHelpfile   = ProcessToCurdrive(this.WinFBXHelpfile)
+   this.FBWINCompiler32  = ProcessToCurdriveApp(this.FBWINCompiler32)
+   this.FBWINCompiler64  = ProcessToCurdriveApp(this.FBWINCompiler64)
+   this.CompilerHelpfile = ProcessToCurdriveApp(this.CompilerHelpfile)
+   this.Win32APIHelpfile = ProcessToCurdriveApp(this.Win32APIHelpfile)
+   this.WinFBXHelpfile   = ProcessToCurdriveApp(this.WinFBXHelpfile)
 
    pStream.WriteLine "[Compiler]" 
    pStream.WriteLine "FBWINCompiler32="       & this.FBWINCompiler32      
@@ -1083,6 +1088,7 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "Win32APIHelpfile="      & this.Win32APIHelpfile     
    pStream.WriteLine "WinFBXHelpfile="        & this.WinFBXHelpfile     
    pStream.WriteLine "RunViaCommandWindow="   & this.RunViaCommandWindow
+   pStream.WriteLine "DisableCompileBeep="    & this.DisableCompileBeep
    pStream.WriteLine "WinFBXPath="            & this.WinFBXPath
    
 
@@ -1091,10 +1097,10 @@ Function clsConfig.SaveConfigFile() as Long
    for i as long = lbound(this.Tools) to ubound(this.Tools)
       pStream.Write "USERTOOL_" & Right("00" & Str(i), 2) & "="
       pStream.Write this.Tools(i).wszDescription & "|-|"
-      pStream.Write this.Tools(i).wszCommand & "|-|" 
+      pStream.Write ProcessToCurdriveApp(this.Tools(i).wszCommand) & "|-|" 
       pStream.Write this.Tools(i).wszParameters & "|-|"
       pStream.Write this.Tools(i).wszKey & "|-|" 
-      pStream.Write this.Tools(i).wszWorkingFolder & "|-|"
+      pStream.Write ProcessToCurdriveApp(this.Tools(i).wszWorkingFolder) & "|-|"
       pStream.Write this.Tools(i).IsCtrl & "|-|"
       pStream.Write this.Tools(i).IsAlt & "|-|"  
       pStream.Write this.Tools(i).IsShift & "|-|"
@@ -1117,20 +1123,21 @@ Function clsConfig.SaveConfigFile() as Long
       pStream.WriteLine this.Builds(i).Is64bit
    NEXT
 
+   
    pStream.WriteLine ""
    pStream.WriteLine "[MRU]"  
    For i As Long = 0 To 9
-      this.MRU(i) = ProcessToCurdrive(this.MRU(i))
+      this.MRU(i) = ProcessToCurdriveApp(this.MRU(i))
       pStream.WriteLine "MRU_" & Right("00" & Str(i), 2) & "=" & this.MRU(i) 
    Next         
    
    pStream.WriteLine ""
    pStream.WriteLine "[MRUPROJECTS]"  
    For i As Long = 0 To 9
-      this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
+      this.MRUProject(i) = ProcessToCurdriveApp(this.MRUProject(i))
       pStream.WriteLine "MRUPROJECT_" & Right("00" & Str(i), 2) & "=" & this.MRUProject(i) 
    Next         
-
+   
    pStream.WriteLine ""
    pStream.WriteLine "[Themes]" 
    pStream.WriteLine "SelectedTheme=" & this.SelectedTheme
@@ -1138,7 +1145,7 @@ Function clsConfig.SaveConfigFile() as Long
       pStream.Write "THEME_" & Right("00" & Str(i), 2) & "=" & _
                     this.Themes(i).id & "," & _
                     AfxStrReplaceAny(this.Themes(i).wszDescription, ",|", "_") 
-      for ii as long = CLR_CARET to CLR_WINDOW
+      for ii as long = CLR_CARET to CLR_BRACEBAD
          pStream.Write "|" & this.Themes(i).colors(ii).nFg & "," & _
                         this.Themes(i).colors(ii).nBg & "," & _
                         this.Themes(i).colors(ii).bUseDefaultBg & "," & _
@@ -1176,7 +1183,7 @@ FUNCTION clsConfig.WriteMRU() as long
    
    ' Write the new values.
    For i As Long = 0 To 9
-      this.MRU(i) = ProcessToCurdrive(this.MRU(i))
+      this.MRU(i) = ProcessToCurdriveApp(this.MRU(i))
       wszKeyName = "MRU_" & Right("00" & Str(i), 2)
       wszValue   = this.MRU(i) 
       WritePrivateProfileString(wszSectionName, wszKeyName, wszValue, _ConfigFilename)
@@ -1199,7 +1206,7 @@ FUNCTION clsConfig.WriteMRUProjects() as long
    
    ' Write the new values.
    For i As Long = 0 To 9
-      this.MRUProject(i) = ProcessToCurdrive(this.MRUProject(i))
+      this.MRUProject(i) = ProcessToCurdriveApp(this.MRUProject(i))
       wszKeyName = "MRUPROJECT_" & Right("00" & Str(i), 2) 
       wszValue   = this.MRUProject(i) 
       WritePrivateProfileString( wszSectionName, wszKeyName, wszValue, _ConfigFilename )
@@ -1257,6 +1264,16 @@ Function clsConfig.ImportTheme( byref st as wstring, _
          END IF
       NEXT
    
+      ' Version 2.1.1 adds Brace highlighting colors
+      if theme.colors(CLR_BRACEBAD).nFg = 0 then
+         theme.colors(CLR_BRACEBAD).nFg = BGR(196,000,000)    ' red
+         theme.colors(CLR_BRACEBAD).nBg = -1
+      end if   
+      if theme.colors(CLR_BRACEGOOD).nFg = 0 then
+         theme.colors(CLR_BRACEGOOD).nFg = BGR(000,128,000)    ' green
+         theme.colors(CLR_BRACEGOOD).nBg = -1
+      end if   
+
       if bImportExternal THEN
          theme.id = AfxGuidText(AfxGuid())
          i = ubound(this.ThemesTemp) + 1
@@ -1409,18 +1426,16 @@ Function clsConfig.LoadConfigFile() as Long
          wData = Mid(wst.wstr, i+1)
          nData = Val(wData)
          
-         wData = ProcessFromCurdrive(wData)
-
 
          If Left(wKey, 9) = "USERTOOL_" Then  ' is this a User Tool entry
             i = Val(Right(wKey,2))
             If i > ubound(this.Tools) Then
-               redim preserve this.Tools(i) 
+               redim preserve this.Tools(i)
                this.Tools(i).wszDescription   = AfxStrParse(wData, 1, "|-|")
-               this.Tools(i).wszCommand       = AfxStrParse(wData, 2, "|-|")
+               this.Tools(i).wszCommand       = ProcessFromCurdriveApp( AfxStrParse(wData, 2, "|-|") ) 
                this.Tools(i).wszParameters    = AfxStrParse(wData, 3, "|-|")
                this.Tools(i).wszKey           = AfxStrParse(wData, 4, "|-|")
-               this.Tools(i).wszWorkingFolder = AfxStrParse(wData, 5, "|-|")
+               this.Tools(i).wszWorkingFolder = ProcessFromCurdriveApp( AfxStrParse(wData, 5, "|-|") ) 
                this.Tools(i).IsCtrl           = val(AfxStrParse(wData, 6, "|-|"))
                this.Tools(i).IsAlt            = val(AfxStrParse(wData, 7, "|-|"))
                this.Tools(i).IsShift          = val(AfxStrParse(wData, 8, "|-|"))
@@ -1452,10 +1467,11 @@ Function clsConfig.LoadConfigFile() as Long
             continue do
          End If
 
+
          If Left(wKey, 4) = "MRU_" Then  ' is this an MRU entry
             i = Val(Right(wKey,2))
             If (i >= 0) And (i <= 9) Then 
-               this.MRU(i) = wData
+               this.MRU(i) = ProcessFromCurdriveApp(wData)
                Continue Do
             End If
          End If
@@ -1463,7 +1479,7 @@ Function clsConfig.LoadConfigFile() as Long
          If Left(wKey, 11) = "MRUPROJECT_" Then  ' is this an MRU Project entry
             i = Val(Right(wKey,2))
             If (i >= 0) And (i <= 9) Then 
-               this.MRUProject(i) = wData
+               this.MRUProject(i) = ProcessFromCurdriveApp(wData)
                Continue Do
             End If
          End If
@@ -1495,7 +1511,8 @@ Function clsConfig.LoadConfigFile() as Long
             Case "IndentGuides":         this.IndentGuides         = nData
             Case "TabIndentSpaces":      this.TabIndentSpaces      = nData
             Case "PositionMiddle":       this.PositionMiddle       = nData
-            Case "LocalizationFile":     this.LocalizationFile     = wData
+            Case "BraceHighlight":       this.BraceHighlight       = nData
+            Case "LocalizationFile":     this.LocalizationFile     = ProcessFromCurdriveApp(wData)
             Case "TabSize":              this.TabSize              = wData
             Case "UnicodeEncoding":      this.UnicodeEncoding      = nData
             Case "EditorFontname":       this.EditorFontname       = wData
@@ -1509,14 +1526,19 @@ Function clsConfig.LoadConfigFile() as Long
             Case "StartupMaximized":     this.StartupMaximized     = nData
             Case "ShowExplorer":         this.ShowExplorer         = nData
             Case "ShowExplorerWidth":    this.ShowExplorerWidth    = nData
-            Case "FBWINCompiler32":      this.FBWINCompiler32      = wData
-            Case "FBWINCompiler64":      this.FBWINCompiler64      = wData
-            case "WinFBXPath":           this.WinFBXPath           = wData
+            Case "ToolBoxLeft":          this.ToolBoxLeft          = nData
+            Case "ToolBoxTop":           this.ToolBoxTop           = nData
+            Case "ToolBoxRight":         this.ToolBoxRight         = nData
+            Case "ToolBoxBottom":        this.ToolBoxBottom        = nData
+            Case "FBWINCompiler32":      this.FBWINCompiler32      = ProcessFromCurdriveApp(wData)
+            Case "FBWINCompiler64":      this.FBWINCompiler64      = ProcessFromCurdriveApp(wData)
+            case "WinFBXPath":           this.WinFBXPath           = ProcessFromCurdriveApp(wData)
             Case "CompilerSwitches":     this.CompilerSwitches     = wData
-            Case "CompilerHelpfile":     this.CompilerHelpfile     = wData
-            Case "Win32APIHelpfile":     this.Win32APIHelpfile     = wData
-            Case "WinFBXHelpfile":       this.WinFBXHelpfile       = wData
+            Case "CompilerHelpfile":     this.CompilerHelpfile     = ProcessFromCurdriveApp(wData)
+            Case "Win32APIHelpfile":     this.Win32APIHelpfile     = ProcessFromCurdriveApp(wData)
+            Case "WinFBXHelpfile":       this.WinFBXHelpfile       = ProcessFromCurdriveApp(wData)
             case "RunViaCommandWindow":  this.RunViaCommandWindow  = nData
+            case "DisableCompileBeep":   this.DisableCompileBeep   = nData
          End Select
       
       Loop
@@ -1619,8 +1641,8 @@ Function clsConfig.LoadConfigFile() as Long
       .colors(CLR_FOLDMARGIN).nBg   = -1
       .colors(CLR_FOLDSYMBOL).nFg   = BGR(255,255,255)    ' white
       .colors(CLR_FOLDSYMBOL).nBg   = BGR(0,0,0)          ' black
-      .colors(CLR_LINENUMBERS).nFg  = BGR(0,0,0)          ' black
-      .colors(CLR_LINENUMBERS).nBg  = BGR(204,204,204)    ' light gray
+      .colors(CLR_LINENUMBERS).nFg  = BGR(128,128,128)    ' gray
+      .colors(CLR_LINENUMBERS).nBg  = BGR(255,255,255)    ' white
       .colors(CLR_OPERATORS).nFg    = BGR(196,0,0)        ' red
       .colors(CLR_OPERATORS).nBg    = BGR(255,255,255)    ' white
       .colors(CLR_INDENTGUIDES).nFg = BGR(255,255,255)    ' white
@@ -1635,6 +1657,10 @@ Function clsConfig.LoadConfigFile() as Long
       .colors(CLR_TEXT).nBg         = BGR(255,255,255)    ' white
       .colors(CLR_WINDOW).nFg       = BGR(255,255,255)    ' white
       .colors(CLR_WINDOW).nBg       = -1
+      .colors(CLR_BRACEGOOD).nFg    = BGR(000,128,000)    ' green
+      .colors(CLR_BRACEGOOD).nBg    = -1
+      .colors(CLR_BRACEBAD).nFg     = BGR(196,000,000)    ' red
+      .colors(CLR_BRACEBAD).nBg     = -1
    end with
 
    with DefaultThemes(1)
@@ -1668,6 +1694,10 @@ Function clsConfig.LoadConfigFile() as Long
       .colors(CLR_TEXT).nBg         = BGR(030,030,030)    ' light black
       .colors(CLR_WINDOW).nFg       = BGR(030,030,030)    ' light black
       .colors(CLR_WINDOW).nBg       = -1
+      .colors(CLR_BRACEGOOD).nFg    = BGR(000,128,000)    ' green
+      .colors(CLR_BRACEGOOD).nBg    = -1
+      .colors(CLR_BRACEBAD).nFg     = BGR(196,000,000)    ' red
+      .colors(CLR_BRACEBAD).nBg     = -1
    end with
 
    ' Create a default Theme if none exist
@@ -1698,6 +1728,25 @@ Function clsConfig.LoadConfigFile() as Long
          this.idxTheme = i: exit for
       end if   
    NEXT
+   
+   ' Attempt to fill in any missing compiler paths and help files
+   dim as CWSTR wszText
+   if len(this.FBWINCompiler32) = 0 then
+      wszText = AfxGetExePathName & "FreeBASIC-1.07.1-gcc-5.2\fbc32.exe"      
+      if AfxFileExists(wszText) then this.FBWINCompiler32 = wszText
+   end if
+   if len(this.FBWINCompiler64) = 0 then
+      wszText = AfxGetExePathName & "FreeBASIC-1.07.1-gcc-5.2\fbc64.exe"      
+      if AfxFileExists(wszText) then this.FBWINCompiler64 = wszText
+   end if
+   if len(this.CompilerHelpfile) = 0 then
+      wszText = AfxGetExePathName & "Help\freebasic_manual.chm"
+      if AfxFileExists(wszText) then this.CompilerHelpfile = wszText
+   end if
+   if len(this.Win32APIHelpfile) = 0 then
+      wszText = AfxGetExePathName & "Help\win32_fb.chm"
+      if AfxFileExists(wszText) then this.Win32APIHelpfile = wszText
+   end if
    
    ' Save the last write time so that it can be checked in the message loop
    ' in order to detect external changes to it.
@@ -1744,7 +1793,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
          wszText = pDoc->DiskFilename
          cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
          if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
-         wszText = ProcessToCurdrive(wszText)
+         wszText = ProcessToCurdriveProject(wszText)
          pStream.WriteLine "File=" & wszText
          pStream.WriteLine "FileType=" & pDoc->ProjectFileType
          pStream.WriteLine "TabIndex=" & -1     ' use -1 rather than True
@@ -1771,7 +1820,7 @@ Function clsConfig.ProjectSaveToFile() As BOOLEAN
             wszText = pDoc->DiskFilename
             cwzRelative = AfxPathRelativePathTo( gApp.ProjectFilename, FILE_ATTRIBUTE_NORMAL, wszText, FILE_ATTRIBUTE_NORMAL)
             if AfxPathIsRelative(cwzRelative) then wszText = cwzRelative
-            wszText = ProcessToCurdrive(wszText)
+            wszText = ProcessToCurdriveProject(wszText)
             pStream.WriteLine "File=" & wszText
             pStream.WriteLine "FileType=" & pDoc->ProjectFileType
             pStream.WriteLine "IsDesigner=" & pDoc->IsDesigner
@@ -1888,7 +1937,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
          Case Else:     nData = Val(wData)
       End Select
 
-      wData = ProcessFromCurdrive(wData)
+      wData = ProcessFromCurdriveProject(wData)
 
       Select Case wKey
          Case "ProjectBuild":        gApp.ProjectBuild       = wData

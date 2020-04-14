@@ -17,7 +17,9 @@
 ' Colors
 enum
    ' Start the enum at 2 because when theme is saved to file the first parse is the
-   ' theme id and theme description. The colors start at parse 2.
+   ' theme id and theme description. The colors start at parse 2. Never change the
+   ' order of these constants ro insert any into the list because readign and writing
+   ' the Theme data expects the colors to be in this order. Add new colors at the end.
    CLR_CARET = 2          
    CLR_COMMENTS
    CLR_HIGHLIGHTED     
@@ -32,6 +34,8 @@ enum
    CLR_STRINGS         
    CLR_TEXT            
    CLR_WINDOW
+   CLR_BRACEGOOD
+   CLR_BRACEBAD
 end enum
 
 '  Control types   
@@ -113,7 +117,7 @@ End Type
 type TYPE_THEMES
    id             as string    ' GUID
    wszDescription as CWSTR
-   colors(CLR_CARET to CLR_WINDOW) as TYPE_COLORS
+   colors(CLR_CARET to CLR_BRACEBAD) as TYPE_COLORS
 END TYPE
 
 
@@ -180,6 +184,7 @@ Type clsConfig
       HighlightCurrentLine As Long = True
       IndentGuides         As Long = True
       PositionMiddle       as long = false         ' position found text to middle of screen
+      BraceHighlight       As Long = True
       TabIndentSpaces      As Long = True
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
@@ -195,6 +200,10 @@ Type clsConfig
       StartupRight         As Long = 0
       StartupBottom        As Long = 0
       StartupMaximized     As Long = False
+      ToolBoxLeft          as long = 0
+      ToolBoxTop           as long = 0
+      ToolBoxRight         as long = 0
+      ToolBoxBottom        as long = 0
       FBWINCompiler32      As CWSTR
       FBWINCompiler64      As CWSTR
       CompilerSwitches     As CWSTR
@@ -203,6 +212,7 @@ Type clsConfig
       WinFBXHelpfile       As CWSTR
       WinFBXPath           as CWSTR
       RunViaCommandWindow  As Long = False
+      DisableCompileBeep   as long = false
       MRU(9)               As CWSTR
       MRUProject(9)        As CWSTR
       bWriteCodetipCache   as boolean

@@ -167,7 +167,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
 
    hPopUpMenu = CreatePopupMenu
       AppendMenu hMenu, MF_POPUP Or MF_ENABLED, Cast(UINT_PTR, hPopUpMenu), L(288,"Options")
-         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..."
+         AppendMenu hPopUpMenu, MF_ENABLED, IDM_OPTIONS, L(62,"Environment Options") & "..." & chr(9) & "Shift+F7"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_BUILDCONFIG, L(277,"Build Configurations") & "..." & Chr(9) & "F7"
          AppendMenu hPopUpMenu, MF_ENABLED, IDM_USERSNIPPETS, L(88,"User Snippets") & "..." & Chr(9) & "Ctrl+Shift+F7"
 
@@ -260,6 +260,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F3,  IDM_FINDPREVACCEL )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F5,  IDM_RUNEXE )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F6,  IDM_LASTPOSITION )
+   pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F7,  IDM_OPTIONS )
    pWindow->AddAccelerator( FVIRTKEY Or FSHIFT,   VK_F8,  IDM_UNFOLDALL )
    pWindow->AddAccelerator( FVIRTKEY or FSHIFT,   VK_TAB, IDM_UNINDENTBLOCK )
    

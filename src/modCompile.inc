@@ -778,8 +778,10 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
          SetCompileStatusBarMessage( wszCompileMsg, ghIconGood )
          ' 2018-12-13: No longer offer the option to show the popup successful dialog.
          ' Simply sound a success
-         MessageBeep(MB_OK)
-
+         if gConfig.DisableCompileBeep = false then
+            MessageBeep(MB_OK)
+         end if
+         
          gCompile.wszOutputMsg = _   ' this gets output to the Output window
          L(228,"Successful Compile")  & " (" & _
                L(193,"Errors")        & " " & NumErrors & " " & _
@@ -861,8 +863,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    if idxBuild = -1 then idxBuild = 0
    
    ' Perform some pre-compile checks to see if we should continue.
-   gConfig.FBWINCompiler32 = ProcessFromCurdrive(gConfig.FBWINCompiler32)
-   gConfig.FBWINCompiler64 = ProcessFromCurdrive(gConfig.FBWINCompiler64)
+   gConfig.FBWINCompiler32 = ProcessFromCurdriveApp(gConfig.FBWINCompiler32)
+   gConfig.FBWINCompiler64 = ProcessFromCurdriveApp(gConfig.FBWINCompiler64)
    if gConfig.Builds(idxBuild).Is32bit then
       fCompile32 = True: fCompile64 = False
       gCompile.CompilerPath = gConfig.FBWINcompiler32
@@ -1282,9 +1284,9 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
          loop
          
          dim as CWSTR wszText = _
-                        wszVDEquates    & _
-                        wszAllTYPEs     & _   ' this also includes Declares for the Events
-                        wszMainFileText & _
+                        wszVDEquates    & vbcrlf & _
+                        wszAllTYPEs     & vbcrlf & _   ' this also includes Declares for the Events
+                        wszMainFileText & vbcrlf & _   '<-- ensure vbcrlf because Main file may not have crlf on last line
                         wszAllEvents
          
          pStream.WriteLine wszText

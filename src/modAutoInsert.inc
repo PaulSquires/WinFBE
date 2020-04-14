@@ -63,7 +63,7 @@ private function CanCompleteBlockStatement( byval pDoc as clsDocument ptr, _
    
    for i as long = nStartLine to NumLines - 1
       ' Does this line start with the matching phrase we are looking for?
-      sLine = ucase(ltrim(pDoc->GetLine(i)))
+      sLine = ucase( ltrim(pDoc->GetLine(i), any chr(32,9)) )
       
       nLenMatch = len(sStartMatch)
       if nLenMatch then
@@ -108,6 +108,32 @@ end function
 
 
 ' ========================================================================================
+' Return the number of tabs that can fill a string of incoming size
+' ========================================================================================
+function NumTabsFromSpaces( byval numSpaces as long ) as long
+   if gConfig.TabIndentSpaces then return numSpaces
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc = 0 Then return 0
+   dim as long IndentSize = SciExec(pDoc->hWndActiveScintilla, SCI_GETINDENT, 0, 0)
+   if IndentSize = 0 then return 0
+   return (numSpaces / IndentSize)
+end function
+
+
+' ========================================================================================
+' Return a fill string with all spaces or TABs depending on the config setting
+' ========================================================================================
+function FillString( byval sSpaces as string ) as string
+   ' If convert tabs to spaces then nothing needs to done because
+   ' the incoming sSpaces is alreayd in the correct format.
+   if gConfig.TabIndentSpaces then return sSpaces
+   ' Try to convert the incoming sSpaces to TABs.
+   dim as long numTabs = NumTabsFromSpaces( len(sSpaces) )
+   return string(numTabs, chr(9))
+end function
+
+
+' ========================================================================================
 ' Attempt to autocomplete a statement block
 ' ========================================================================================
 public function AttemptAutoInsert() as Long
@@ -116,7 +142,7 @@ public function AttemptAutoInsert() as Long
    ' chosen settings.
    
    Dim as HWND hEdit
-   Dim as long nLine, nCurLine, curPos, LineLen, nFoldLevel, TabSize, nSpaces, IndentSize, i
+   Dim as long nLine, nCurLine, curPos, LineLen, nFoldLevel, nSpaces, IndentSize, i
    Dim as string strFill, strTemp, strCurLine, strPrevLine, strRightText
       
 
@@ -134,15 +160,16 @@ public function AttemptAutoInsert() as Long
    strPrevLine = pDoc->GetLine(nLine-1)
    if len(strPrevLine) = 0 then exit function
 
-   ' Get the tab width and indent size
-   TabSize     = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0)
+   ' Get the tab width and indent size (these are actually both the same 
+   ' size as set in the pDoc->ApplyProperties code).
+   'TabSize     = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0) '<-- not needed
    IndentSize  = SciExec(hEdit, SCI_GETINDENT, 0, 0)
    
    ' Calculate the number of spaces to fill on the left
    For i = 1 To Len(strPrevLine)
       If Mid(strPrevLine, i, 1) <> " " Then
          If Mid(strPrevLine, i, 1) = Chr(9) Then
-            nSpaces = nSpaces + TabSize
+            nSpaces = nSpaces + IndentSize
          Else
             Exit For
          End If
@@ -153,67 +180,10 @@ public function AttemptAutoInsert() as Long
    strPrevLine = Trim(Ucase(strPrevLine), Any Chr(32, 9))
    
    If gConfig.AutoIndentation = 0 Then
-      nSpaces = 0: IndentSize = 0: TabSize = 0
+      nSpaces = 0: IndentSize = 0
    END IF
 
 
-   ''''''''''
-   ' ELSE / ELSEIF
-   '   Search backwards in the most recent IF/THEN line and use the 
-   '   indentation of that line for the ELSE or ELSEIF statement.
-   If gConfig.AutoIndentation Then
-      If (left(strPrevLine, 4) = "ELSE") or (left(strPrevLine, 7) = "ELSEIF ") then
-         nCurLine = pDoc->GetCurrentLineNumber
-         for i = nCurLine to 0 step -1
-            strTemp = pDoc->GetLine(i)
-            if left(ltrim(ucase(strTemp), any chr(32,9)), 3) = "IF " then
-               ' Reposition the ELSE/ELSEIF line to line up with the IF line
-               nSpaces = instr(ucase(strTemp), "IF ") - 1
-               strPrevLine = space(nSpaces) & Trim(pDoc->GetLine(nLine-1), Any Chr(32, 9))  ' need it to be original case
-               pDoc->SetLine(nLine-1, strPrevLine)
-               strFill = Space(nSpaces + IndentSize) & strCurLine  
-               pDoc->SetLine(nLine, strFill)
-               ' Add the current editing position
-               curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + nSpaces + IndentSize
-               SciExec(hEdit, SCI_SETSEL, curPos, curPos)
-               exit function
-            end if
-         next
-      end if
-   end if
-
-   ''''''''''
-   ' CASE
-   '   Search backwards in the most recent CASE line and use the 
-   '   indentation of that line for the CASE or CASE ELSE statement.
-   If gConfig.AutoIndentation Then
-      If left(strPrevLine, 5) = "CASE " then  ' this will catch CASE ELSE as well
-         strPrevLine = Trim(pDoc->GetLine(nLine-1), Any Chr(32, 9))  ' need it to be original case
-         nSpaces = instr(ucase(pDoc->GetLine(nLine-1)), "CASE ") - 1
-         nCurLine = pDoc->GetCurrentLineNumber - 2  ' skip the current CASE and look for previous
-         for i = nCurLine to 0 step -1
-            strTemp = pDoc->GetLine(i)
-            dim as string strTempTrim = ltrim(ucase(strTemp), any chr(32,9))
-            if left(strTempTrim, 12) = "SELECT CASE " then
-               exit for   ' no need to keep searching
-            elseif left(strTempTrim, 5) = "CASE " then
-               nSpaces = instr(ucase(strTemp), "CASE ") - 1
-               exit for
-            end if
-         next
-         ' Reposition the CASE line to line up with the previous CASE line 
-         strPrevLine = space(nSpaces) & strPrevLine
-         pDoc->SetLine(nLine-1, strPrevLine)
-         strFill = Space(nSpaces + IndentSize) & strCurLine  
-         pDoc->SetLine(nLine, strFill)
-         ' Add the current editing position
-         curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + nSpaces + IndentSize
-         SciExec(hEdit, SCI_SETSEL, curPos, curPos)
-         exit function
-      end if
-   end if
-
-         
    ''''''''''
    ' IF/THEN
    '   Before autoindenting an IF statement make sure that this
@@ -223,65 +193,127 @@ public function AttemptAutoInsert() as Long
       ' once we have wrapped it in an END IF. It will include any chunk of
       ' text that was after the THEN in a single line IF/THEN
       SciExec(hEdit, SCI_LINEDELETE, 0, 0)
-      strFill = Space(nSpaces + IndentSize) & ltrim(strCurline, any chr(32,9)) & vbcrlf
+      strFill = FillString(Space(nSpaces + IndentSize)) & ltrim(strCurline, any chr(32,9)) & vbcrlf
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_IF, nLine) then
-         strFill = strFill & SPACE(nSpaces) & "end if" & vbcrlf
+         strFill = strFill & FillString(SPACE(nSpaces)) & "end if" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
+   
     
-   '''''''''''''
-   ' FOR/NEXT
-   If Left(strPrevLine, 4) = "FOR " then
-      strFill = Space(nSpaces + IndentSize) 
-      if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FOR, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "next" & vbcrlf
-      end if          
-      SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
-      SciExec(hEdit, SCI_SETSEL, curPos, curPos)
-      exit function
+   ''''''''''
+   ' ELSE / ELSEIF
+   '   Search backwards in the most recent IF/THEN line and use the 
+   '   indentation of that line for the ELSE or ELSEIF statement.
+   If gConfig.AutoIndentation Then
+      If (left(strPrevLine, 4) = "ELSE") or (left(strPrevLine, 7) = "ELSEIF ") then
+         nCurLine = pDoc->GetCurrentLineNumber
+         for i = nCurLine to 0 step -1
+            strTemp = AfxStrReplace(pDoc->GetLine(i), chr(9), space(IndentSize))
+            if left(ltrim(ucase(strTemp)), 3) = "IF " then
+               ' Reposition the ELSE/ELSEIF line to line up with the IF line
+               nSpaces = instr(ucase(strTemp), "IF ") - 1
+               strPrevLine = FillString(space(nSpaces)) & Trim(pDoc->GetLine(nLine-1), Any Chr(32, 9))  ' need it to be original case
+               pDoc->SetLine(nLine-1, strPrevLine)
+               strFill = FillString(Space(nSpaces + IndentSize)) & strCurLine  
+               pDoc->SetLine(nLine, strFill)
+               ' Add the current editing position
+               curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + NumTabsFromSpaces(nSpaces + IndentSize)
+               SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+               exit function
+            end if
+         next
+      end if
    end if
+
 
    '''''''''''''
    ' SELECT CASE
    If Left(strPrevLine, 12) = "SELECT CASE " then
       SciExec(hEdit, SCI_LINEDELETE, 0, 0)
-      strFill = Space(nSpaces + IndentSize)  
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_SELECT, nLine) then
-         strFill = strFill & "case " & strCurLine & vbcrlf & SPACE(nSpaces) & "end select" & vbcrlf
+         strFill = strFill & "case " & strCurLine & vbcrlf & FillString(SPACE(nSpaces)) & "end select" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize + 5
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) + 5
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
+
+   ''''''''''
+   ' CASE
+   '   Search backwards in the most recent CASE line and use the 
+   '   indentation of that line for the CASE or CASE ELSE statement.
+   If gConfig.AutoIndentation Then
+      If left(strPrevLine, 5) = "CASE " then  ' this will catch CASE ELSE as well
+         strPrevLine = AfxStrReplace( pDoc->GetLine(nLine-1), chr(9), space(IndentSize))
+         nSpaces = instr(ucase(strPrevLine), "CASE ") - 1
+         strPrevLine = Trim(strPrevLine)  ' need it to be original case
+         nCurLine = pDoc->GetCurrentLineNumber - 2  ' skip the current CASE and look for previous
+         for i = nCurLine to 0 step -1
+            strTemp = AfxStrReplace( pDoc->GetLine(i), chr(9), space(IndentSize) )
+            dim as string strTempTrim = ltrim(ucase(strTemp))
+            if left(strTempTrim, 12) = "SELECT CASE " then
+               exit for   ' no need to keep searching
+            elseif left(strTempTrim, 5) = "CASE " then
+               nSpaces = instr(ucase(strTemp), "CASE ") - 1
+               exit for
+            end if
+         next
+         ' Reposition the CASE line to line up with the previous CASE line 
+         strPrevLine = FillString(space(nSpaces)) & strPrevLine
+         pDoc->SetLine(nLine-1, strPrevLine)
+         strFill = FillString(Space(nSpaces + IndentSize)) & strCurLine  
+         pDoc->SetLine(nLine, strFill)
+         ' Add the current editing position
+         curPos = SciExec(hEdit, SCI_POSITIONFROMLINE, nLine, 0) + NumTabsFromSpaces(nSpaces + IndentSize)
+         SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+         exit function
+      end if
+   end if
+
+         
+   '''''''''''''
+   ' FOR/NEXT
+   If Left(strPrevLine, 4) = "FOR " then
+      strFill = FillString(Space(nSpaces + IndentSize)) 
+      if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FOR, nLine) then
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "next" & vbcrlf
+      end if          
+      SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
+      SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+      exit function
+   end if
+
 
    '''''''''''''
    ' WHILE/WEND
    If (Left(strPrevLine, 6) = "WHILE ") or (strPrevLine = "WHILE") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_WHILE, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "wend" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "wend" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize )
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
+   
 
    '''''''''''''
    ' DO/LOOP
    If (Left(strPrevLine, 3) = "DO ") or (strPrevLine = "DO") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_DO, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "loop" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "loop" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -296,12 +328,12 @@ public function AttemptAutoInsert() as Long
       i = instr(strTemp, "(")
       if i then strTemp = left(strTemp, i-1)
       if instr(strTemp, "=") then exit function
-      strFill = Space(nSpaces + IndentSize)
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FUNCTION, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end function" & vbcrlf
+         strFill = strFill  & vbcrlf & FillString(SPACE(nSpaces)) & "end function" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -311,12 +343,12 @@ public function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 4)  = "SUB ") orelse _
       (Left(strPrevLine, 12) = "PRIVATE SUB ") orelse _
       (Left(strPrevLine, 11) = "PUBLIC SUB") then
-      strFill = Space(nSpaces + IndentSize)
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_SUB, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end sub" & vbcrlf
+         strFill = strFill  & vbcrlf & FillString(SPACE(nSpaces)) & "end sub" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -324,12 +356,12 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' PROPERTY/END PROPERTY
    If (Left(strPrevLine, 9)  = "PROPERTY ") then
-      strFill = Space(nSpaces + IndentSize)
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_PROPERTY, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end property" & vbcrlf
+         strFill = strFill  & vbcrlf & FillString(SPACE(nSpaces)) & "end property" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -337,12 +369,12 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' OPERATOR/END OPERATOR
    If (Left(strPrevLine, 9)  = "OPERATOR ") then
-      strFill = Space(nSpaces + IndentSize)
+      strFill = FillString(Space(nSpaces + IndentSize))
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_OPERATOR, nLine) then
-         strFill = strFill  & vbcrlf & SPACE(nSpaces) & "end operator" & vbcrlf
+         strFill = strFill  & vbcrlf & FillString(SPACE(nSpaces)) & "end operator" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -350,12 +382,12 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' CONSTRUCTOR/END CONSTRUCTOR
    If (Left(strPrevLine, 12)  = "CONSTRUCTOR ") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize)) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_CONSTRUCTOR, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end constructor" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "end constructor" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -363,12 +395,12 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' DESTRUCTOR/END DESTRUCTOR
    If (Left(strPrevLine, 11)  = "DESTRUCTOR ") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize)) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_DESTRUCTOR, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end destructor" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "end destructor" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -378,12 +410,12 @@ public function AttemptAutoInsert() as Long
    If (Left(strPrevLine, 5)  = "TYPE ") then
       ' Determine if this is a TYPE = statement rather than a true TYPE structure
       if instr(ucase(strPrevLine), " AS ") then exit function
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize)) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_TYPE, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end type" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "end type" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -391,12 +423,12 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' WITH/END WITH
    If (Left(strPrevLine, 4)  = "WITH") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize)) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_WITH, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end with" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "end with" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -404,12 +436,12 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' ENUM/END ENUM
    If (Left(strPrevLine, 4)  = "ENUM") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize)) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_ENUM, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end enum" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "end enum" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
@@ -417,19 +449,19 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' UNION/END UNION
    If (Left(strPrevLine, 6)  = "UNION ") then
-      strFill = Space(nSpaces + IndentSize) 
+      strFill = FillString(Space(nSpaces + IndentSize)) 
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_UNION, nLine) then
-         strFill = strFill & vbcrlf & SPACE(nSpaces) & "end union" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "end union" & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
-      curPos = curPos + nSpaces + IndentSize 
+      curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
       exit function
    end if
 
    '''''''''''''
    ' Add the same spaces on the left that the line above
-   strFill = Space(nSpaces)
+   strFill = FillString(Space(nSpaces))
    SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
 
    function = 0

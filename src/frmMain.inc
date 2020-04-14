@@ -249,6 +249,19 @@ private Function frmMain_GotoDefinition( ByVal pDoc As clsDocument Ptr ) As Long
          if pData = 0 then pData = gdb2.dbFindVariable( sFunctionName )
          ' Search for the TYPE definition
          if pData = 0 then pData = gdb2.dbFindType( sFunctionName )
+      
+         ' Maybe this is a class sub/function inside of a class method that is
+         ' not prefixed by the "this" keyword.
+         dim sClassFunction as String
+         pDoc->GetCurrentFunctionName( sClassFunction, 0 )
+         dim as long f = instr( sClassFunction, "." )
+         if f then
+            sFunctionName = left( sClassFunction, f ) & sFunctionName
+            if pData = 0 then pData = gdb2.dbFindFunction( sFunctionName )
+            if pData = 0 then pData = gdb2.dbFindSub( sFunctionName )
+            if pData = 0 then pData = gdb2.dbFindProperty( sFunctionName )
+         end if   
+      
       end if
       
       IF pData = 0 then
@@ -606,8 +619,40 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                   pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
                   SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
                end select
+               frmMain_SetStatusbar
+            
+               ' Get the current character and attempt to do a brace match
+               if gConfig.BraceHighlight then
+                  dim as long nEndPos
+                  dim as long nCurPos = SciExec( pDoc->hWndActiveScintilla, SCI_GETCURRENTPOS, 0, 0)
+                  dim as long ch = SciExec( pDoc->hWndActiveScintilla, SCI_GETCHARAT, nCurPos, 0)
+                  
+                  dim pTheme as TYPE_THEMES ptr
+
+                  pTheme = gConfig.GetThemePtr
+                  
+                  if pTheme then 
+                     select case chr(ch)             
+                        case "(", ")", "[", "]", "{", "}"  
+                           nEndPos = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, nCurPos, 0)
+                           IF nEndPos < 0 THEN   ' No match
+                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 8, pTheme->colors(CLR_BRACEBAD).nFg )  ' red
+                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, nCurPos, 0 )
+                           ELSE                 ' Have match
+                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 8, pTheme->colors(CLR_BRACEGOOD).nFg )  ' green
+                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, nCurPos, nEndPos )
+                           END IF
+                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 8, 255 ) ' transparency of outline
+                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 8, 127 )        ' transparency of interior      
+
+                        case else
+                           SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
+                     end select
+                  end if
+               
+               end if
+               
             end if
-            frmMain_SetStatusbar
          end if
          return true
          
@@ -1057,6 +1102,14 @@ End Function
 public Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, _
                                            byref wszProjectFileName as const WString _
                                            ) as Boolean
+
+   ' If a Project is not active then we need to save the current non-project notes
+   ' when this file is closed. It is possible that this file is being closed and
+   ' a project is being opened.
+   if gApp.IsProjectActive = false then
+      gApp.NonProjectNotes = AfxGetWindowText(GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES))
+      gConfig.SaveConfigFile
+   end if
 
    ' If a project is open then close any files that may be open in the editor. No need to
    ' do this if a new project is being created/opened because that function has already

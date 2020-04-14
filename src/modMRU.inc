@@ -79,7 +79,7 @@ public Function CreateMRUpopup() As HMENU
    ' Display MRU files
    For i As Long = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
+      gConfig.MRU(i) = ProcessFromCurdriveApp(gConfig.MRU(i))
       If AfxFileExists(gConfig.MRU(i)) = 0 Then
          gConfig.MRU(i) = ""
       Else
@@ -90,7 +90,7 @@ public Function CreateMRUpopup() As HMENU
    ' Display MRU projects
    For i As Long = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRUPROJECT(i) = ProcessFromCurdrive(gConfig.MRUPROJECT(i))
+      gConfig.MRUPROJECT(i) = ProcessFromCurdriveApp(gConfig.MRUPROJECT(i))
       If AfxFileExists(gConfig.MRUPROJECT(i)) = 0 Then
          gConfig.MRUPROJECT(i) = ""
       Else               
@@ -123,7 +123,7 @@ public Function UpdateMRUMenu( ByVal hMenu As HMENU ) As Long
    ' Add the new items
    For i = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRU(i) = ProcessFromCurdrive(gConfig.MRU(i))
+      gConfig.MRU(i) = ProcessFromCurdriveApp(gConfig.MRU(i))
       If AfxFileExists( gConfig.MRU(i) ) Then
          AppendMenu( hSubMenu, MF_STRING, IDC_MRUBASE + i, gConfig.MRU(i) )
       Else
@@ -155,7 +155,7 @@ public Function UpdateMRUList( Byref wzFilename As WString ) As Long
    ' also for an available entry to put the filename in.
    For i = 0 To 9
       wzFile = gConfig.MRU(i)
-      wzFile = ProcessFromCurdrive(wzFile)
+      wzFile = ProcessFromCurdriveApp(wzFile)
       If Ucase(wzFile) = Ucase(wzFilename) Then
          idxExistsAt = i:  Exit For
       End If   
@@ -221,7 +221,7 @@ public Function UpdateMRUProjectMenu( ByVal hMenu As HMENU ) As Long
    ' Add the new items
    For i = 0 To 9
       ' If the file no longer exists then remove it from the MRU list
-      gConfig.MRUProject(i) = ProcessFromCurdrive(gConfig.MRUProject(i))
+      gConfig.MRUProject(i) = ProcessFromCurdriveApp(gConfig.MRUProject(i))
       If AfxFileExists(gConfig.MRUProject(i)) = 0 Then
          gConfig.MRUProject(i) = ""
       Else
@@ -249,7 +249,7 @@ public Function UpdateMRUProjectList( Byval wszFilename As CWSTR ) As Long
    ' Search the 10 MRU items to see if the filename already exists and
    ' also for an available entry to put the filename in.
    For i = 0 To 9
-      gConfig.MRUProject(i) = ProcessFromCurdrive(gConfig.MRUProject(i))
+      gConfig.MRUProject(i) = ProcessFromCurdriveApp(gConfig.MRUProject(i))
       If Ucase(gConfig.MRUProject(i)) = Ucase(wszFilename) Then
          idxExistsAt = i:  Exit For
       End If   

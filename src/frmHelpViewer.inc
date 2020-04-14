@@ -43,9 +43,9 @@ public Function ShowContextHelp( byval id as long ) As Long
    dim as CWSTR wszHelpFilename, wszLabel
    
    ' Ensure that the CurDrive parameter is converted if applicable
-   gConfig.CompilerHelpFile = ProcessFromCurdrive( gConfig.CompilerHelpFile ) 
-   gConfig.Win32APIHelpfile = ProcessFromCurdrive( gConfig.Win32APIHelpfile ) 
-   gConfig.WinFBXHelpfile   = ProcessFromCurdrive( gConfig.WinFBXHelpfile ) 
+   gConfig.CompilerHelpFile = ProcessFromCurdriveApp( gConfig.CompilerHelpFile ) 
+   gConfig.Win32APIHelpfile = ProcessFromCurdriveApp( gConfig.Win32APIHelpfile ) 
+   gConfig.WinFBXHelpfile   = ProcessFromCurdriveApp( gConfig.WinFBXHelpfile ) 
 
    select Case id
       case IDM_HELP

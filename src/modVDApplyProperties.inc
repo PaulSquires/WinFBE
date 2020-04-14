@@ -94,11 +94,8 @@ private function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
          select case **wszPropValue
             case "FormBorderStyle.None"
                AfxRemoveWindowStyle(pCtrl->hWindow, WS_CAPTION)
-            case "FormBorderStyle.SizableToolWindow"
-               AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
-               AfxAddWindowStyle(pCtrl->hWindow, WS_THICKFRAME)
-               AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_TOOLWINDOW)
-            case "FormBorderStyle.FixedToolWindow"
+            case "FormBorderStyle.SizableToolWindow", _
+                 "FormBorderStyle.FixedToolWindow"
                AfxAddWindowStyle(pCtrl->hWindow, WS_BORDER)
                AfxAddWindowStyle(pCtrl->hWindow, WS_DLGFRAME)
                AfxAddWindowExStyle(pCtrl->hWindow, WS_EX_TOOLWINDOW)

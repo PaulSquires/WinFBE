@@ -485,7 +485,7 @@ public function IsCurrentLineIncludeFilename() as Boolean
    if idxBuild = -1 then idxBuild = 0
    if gConfig.Builds(idxBuild).Is32bit then wszCompilerPath = gConfig.FBWINcompiler32
    if gConfig.Builds(idxBuild).Is64bit then wszCompilerPath = gConfig.FBWINcompiler64
-   wszCompilerPath = ProcessFromCurdrive(wszCompilerPath)
+   wszCompilerPath = ProcessFromCurdriveApp(wszCompilerPath)
    wszCompilerPath = AfxStrPathname( "PATH", wszCompilerPath ) & "inc"
 
    ' Convert relative path to absolute path if needed.
@@ -605,6 +605,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
          end if
          SciExec( hEdit, SCI_SETFIRSTVISIBLELINE, Max(nLineNumber - 3, 0), 0) 
          SciExec( hEdit, SCI_GOTOLINE, nLineNumber, 0) 
+         pDoc->CenterCurrentLine
       end if
    END IF 
    
@@ -615,50 +616,84 @@ end function
 ' ========================================================================================
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
-public Function ProcessToCurdrive( Byval wzFilename As CWSTR ) As CWSTR
+public Function ProcessToCurdriveApp( Byval wszFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
-   ' the project file. If it does then substitute the replaceable parameter
+   ' the WinFBE app. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
-   dim zText as CWSTR 
-   if AfxFileExists(gApp.ProjectFilename) Then
-      zText = gApp.ProjectFilename
-   else
-      zText = AfxGetExePathName
-   end if      
-   Dim wzCurDrive As CWSTR = LCase(Left(zText, 3))  ' eg. D:\
+   dim as CWSTR wszText = AfxGetExePathName
+
+   Dim wszCurDrive As CWSTR = LCase(Left(wszText, 3))  ' eg. D:\
 
    ' If the incoming filename is a relative file name then the following test
    ' will have no effect.
-   If LCase(Left(wzFilename, 3)) = wzCurDrive Then 
-      wzFilename = WSTR("{CURDRIVE}") & Mid(wzFilename, 2)
+   If LCase(Left(wszFilename, 3)) = wszCurDrive Then 
+      wszFilename = WSTR("{CURDRIVE}") & Mid(wszFilename, 2)
    End If
 
-   Return wzFilename
+   Return wszFilename
 End Function
 
 
 ' ========================================================================================
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
-public Function ProcessFromCurdrive( Byval wzFilename As CWSTR ) As CWSTR
+public Function ProcessFromCurdriveApp( Byval wszFilename As CWSTR ) As CWSTR
+   ' For each folder location determine if it resides on the same drive as
+   ' the WinFBE app. If it does then substitute the replaceable parameter
+   ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
+   ' on different media (eg. thumb drive) that may be assigned a different
+   ' drive letter.
+   dim as CWSTR wszText = AfxGetExePathName
+
+   If Ucase(Left(wszFilename, 10)) = WSTR("{CURDRIVE}") Then 
+      wszFilename = Left(wszText, 1) & Mid(wszFilename, 11)
+   End If
+
+   Return wszFilename
+End Function
+
+
+' ========================================================================================
+' Process prefix {CURDRIVE} and convert to current drive letter.
+' ========================================================================================
+public Function ProcessToCurdriveProject( Byval wszFilename As CWSTR ) As CWSTR
    ' For each folder location determine if it resides on the same drive as
    ' the project file. If it does then substitute the replaceable parameter
    ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
    ' on different media (eg. thumb drive) that may be assigned a different
    ' drive letter.
-   dim zText as CWSTR 
-   if AfxFileExists(gApp.ProjectFilename) Then
-      zText = gApp.ProjectFilename
-   else
-      zText = AfxGetExePathName
-   end if      
-   If Ucase(Left(wzFilename, 10)) = WSTR("{CURDRIVE}") Then 
-      wzFilename = Left(zText, 1) & Mid(wzFilename, 11)
+   dim wszText as CWSTR = gApp.ProjectFilename
+
+   Dim wszCurDrive As CWSTR = LCase(Left(wszText, 3))  ' eg. D:\
+
+   ' If the incoming filename is a relative file name then the following test
+   ' will have no effect.
+   If LCase(Left(wszFilename, 3)) = wszCurDrive Then 
+      wszFilename = WSTR("{CURDRIVE}") & Mid(wszFilename, 2)
    End If
 
-   Return wzFilename
+   Return wszFilename
+End Function
+
+
+' ========================================================================================
+' Process current drive to prefix {CURDRIVE} 
+' ========================================================================================
+public Function ProcessFromCurdriveProject( Byval wszFilename As CWSTR ) As CWSTR
+   ' For each folder location determine if it resides on the same drive as
+   ' the project file. If it does then substitute the replaceable parameter
+   ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
+   ' on different media (eg. thumb drive) that may be assigned a different
+   ' drive letter.
+   dim wszText as CWSTR = gApp.ProjectFilename
+   
+   If Ucase(Left(wszFilename, 10)) = WSTR("{CURDRIVE}") Then 
+      wszFilename = Left(wszText, 1) & Mid(wszFilename, 11)
+   End If
+
+   Return wszFilename
 End Function
 
 
@@ -1387,6 +1422,7 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    DIM pWHttp AS CWinHttpRequest
    
    wszFilename = AfxGetExePathName + wszServerFile
+   AfxDeleteFile( wszFilename )   ' delete any previous existing file
 
    ' Open an HTTP connection to an HTTP resource
    if pWHttp.Open( "GET", "https://www.planetsquires.com/" & wszServerFile ) = S_OK then
