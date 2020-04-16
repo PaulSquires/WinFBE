@@ -95,6 +95,7 @@ These are the available keyboard shortcuts that will help you edit code faster a
 ## Options Commands
 | Shortcut           | Description       |
 | ------------------ | ----------------- |
+| ```Shift```+```F7``` | Environment Options |
 | ```F7```           | Build configurations |
 | ```Ctrl```+```Shift```+```F7```| User Snippets |
 

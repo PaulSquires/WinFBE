@@ -1247,6 +1247,11 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       dim pStream as CTextStream
       if pStream.Create(wszVDMain, true, true) = S_OK then 
          ' Get all of the text from the MAIN pDoc file
+         if pDocMain->hWindow(0) = 0 then
+            dim as long nFileType = pDocMain->ProjectFileType
+            pDocMain->CreateCodeWindow( HWND_FRMMAIN, false, false, pDocMain->DiskFilename )
+            pDocMain->ProjectFileType = nFileType
+         end if
          dim as string wszMainFileText = pDocMain->GetText
          ' In 2.0.8 and lower, the following two defines were put into the user code
          ' when a new main.bas file was created by New Project. From 2.0.9+ we move that

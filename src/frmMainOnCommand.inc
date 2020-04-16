@@ -147,6 +147,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
          ' Add a new blank file to the project and set it as the Main by default   
          pDoc = OnCommand_FileNew(HWND_FRMMAIN)
          if pDoc then 
+            pDoc->ProjectFileType = FILETYPE_NORMAL
             SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
          end if
          
@@ -183,6 +184,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
             SciMsg( pSci, SCI_GOTOLINE, 12, 0) 
 
             ' Make this the Main file
+            pDoc->ProjectFileType = FILETYPE_NORMAL
             SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
 
             ' Save the main file using the Project name and path
@@ -191,6 +193,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
                                  AfxStrPathname( "NAME", gApp.ProjectFilename ) & _
                                  ".bas"
             pDoc->SaveFile
+
          end if
 
          ' Give a breather for the tab control and explorer node to update
@@ -245,6 +248,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
             SciMsg( pSci, SCI_GOTOLINE, 4, 0) 
 
             ' Make this the Main file
+            pDoc->ProjectFileType = FILETYPE_NORMAL
             SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
 
             ' Save the main file using the Project name and path
@@ -286,6 +290,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
             SciMsg( pSci, SCI_GOTOLINE, 9, 0) 
 
             ' Make this the Main file
+            pDoc->ProjectFileType = FILETYPE_NORMAL
             SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
 
             ' Save the main file using the Project name and path
@@ -327,6 +332,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
             SciMsg( pSci, SCI_GOTOLINE, 6, 0) 
 
             ' Make this the Main file
+            pDoc->ProjectFileType = FILETYPE_NORMAL
             SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEMAIN, 0), 0)
 
             ' Save the main file using the Project name and path
@@ -363,6 +369,7 @@ private Function OnCommand_ProjectNew( ByVal HWnd As HWnd ) As LRESULT
             SciMsg( pSci, SCI_GOTOLINE, 3, 0) 
 
             ' Make this the Main file
+            pDoc->ProjectFileType = FILETYPE_NORMAL
             SendMessage( HWND_FRMMAIN, WM_COMMAND, MAKELONG(IDM_SETFILEHEADER, 0), 0)
 
             ' Save the main file using the Project name and path

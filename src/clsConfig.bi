@@ -189,7 +189,7 @@ Type clsConfig
       MultipleInstances    As Long = True
       CompileAutosave      As Long = True
       UnicodeEncoding      As Long = False
-      TabSize              As CWSTR = "3"
+      TabSize              As CWSTR = "4"
       LocalizationFile     As CWSTR = "english.lang"
       EditorFontname       As CWSTR = "Courier New"
       EditorFontCharSet    As CWSTR = "Default"

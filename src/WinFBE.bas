@@ -117,6 +117,7 @@ dim shared gLasso   as clsLasso
 #Include Once "frmOutput.inc" 
 #Include Once "frmOptionsGeneral.inc"
 #Include Once "frmOptionsEditor.inc"
+#Include Once "frmOptionsEditor2.inc"
 #Include Once "frmOptionsColors.inc"
 #Include Once "frmOptionsCompiler.inc"
 #Include Once "frmOptionsLocal.inc"

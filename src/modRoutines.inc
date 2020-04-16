@@ -1422,7 +1422,6 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    DIM pWHttp AS CWinHttpRequest
    
    wszFilename = AfxGetExePathName + wszServerFile
-   AfxDeleteFile( wszFilename )   ' delete any previous existing file
 
    ' Open an HTTP connection to an HTTP resource
    if pWHttp.Open( "GET", "https://www.planetsquires.com/" & wszServerFile ) = S_OK then
@@ -1437,6 +1436,7 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
          DIM pFileStream AS CFileStream
          IF pFileStream.Open(wszFilename, STGM_CREATE OR STGM_WRITE) = S_OK then
             pFileStream.WriteTextA(st)
+            pFileStream.Close
          END IF
       end if
    end if
@@ -1454,8 +1454,8 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
                exit do
             end if
          loop
+         pStream.Close
       end if
-      AfxDeleteFile( wszFilename ) 
    end if
    
    if len(wszLatestVersion) = 0 then
@@ -1465,6 +1465,7 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
                      L(94,"Software Update"), _
                      MB_ICONINFORMATION Or MB_OK )
       end if
+      AfxDeleteFile( wszFilename ) 
       exit function
    end if
       
@@ -1476,7 +1477,9 @@ public function DoCheckForUpdates( byval hWndParent as hwnd, _
    ' Save the config file so that other editor instances will not also do update checks again
    gConfig.LastUpdateCheck = JulianDateNow
    gConfig.SaveConfigFile
-   
+
+   AfxDeleteFile( wszFilename ) 
+
    if bSilentCheck = false then      
       if installedVersion = latestVersion then
          wszMsg = L(96,"You are up to date!") & vbcrlf & _

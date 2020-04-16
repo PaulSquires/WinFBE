@@ -585,6 +585,20 @@ End Function
 
 
 ' ========================================================================================
+' Determine if the incoming character is a brace character
+' ========================================================================================
+private function frmMain_IsBrace( byval c as integer ) as Boolean
+
+   select case chr(c)
+      case "(", ")", "[", "]", "{", "}"
+         return true
+   end select       
+
+   return false
+end function
+
+
+' ========================================================================================
 ' Process Scintilla Notifications
 ' ========================================================================================
 private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
@@ -607,7 +621,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             If pDoc Then 
                ' This code will position our substitute scrollbar thumbs only when the 
                ' caret position crosses a page boundry via keyboard input
-               If pNSC->updated And SC_UPDATE_SELECTION And pNSC->updated > SC_UPDATE_SELECTION Then
+               If pNSC->updated And SC_UPDATE_SELECTION then 'And pNSC->updated > SC_UPDATE_SELECTION Then
                   pDoc->ScrInfo.nPos = SciExec(pDoc->hWindow(0), SCI_GETFIRSTVISIBLELINE, 0, 0)
                   SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
                End If
@@ -620,36 +634,49 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                   SetScrollInfo( pDoc->hScrollBar, SB_CTL, @pDoc->ScrInfo, TRUE)
                end select
                frmMain_SetStatusbar
-            
-               ' Get the current character and attempt to do a brace match
-               if gConfig.BraceHighlight then
-                  dim as long nEndPos
-                  dim as long nCurPos = SciExec( pDoc->hWndActiveScintilla, SCI_GETCURRENTPOS, 0, 0)
-                  dim as long ch = SciExec( pDoc->hWndActiveScintilla, SCI_GETCHARAT, nCurPos, 0)
-                  
-                  dim pTheme as TYPE_THEMES ptr
+ 
+               '// Has the caret changed position
+               var caretPos = SciExec( pDoc->hWndActiveScintilla, SCI_GETCURRENTPOS, 0, 0)
 
-                  pTheme = gConfig.GetThemePtr
+               if pDoc->lastCaretPos <> caretPos then
+                  pDoc->lastCaretPos = caretPos
+
+                  if gConfig.BraceHighlight then
+                     var bracePos1 = -1
+                     var bracePos2 = -1
+   
+                     '// Is there a brace to the left or right
+                     if (caretPos > 0) and ( frmMain_IsBrace(SciExec(pDoc->hWndActiveScintilla, SCI_GETCHARAT, caretPos - 1, 0))) then
+                        bracePos1 = (caretPos - 1)
+                     elseif frmMain_IsBrace(SciExec(pDoc->hWndActiveScintilla, SCI_GETCHARAT, caretPos, 0)) then
+                        bracePos1 = caretPos
+                     end if
+                     
+                     dim pTheme as TYPE_THEMES ptr
+                     pTheme = gConfig.GetThemePtr
                   
-                  if pTheme then 
-                     select case chr(ch)             
-                        case "(", ")", "[", "]", "{", "}"  
-                           nEndPos = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, nCurPos, 0)
-                           IF nEndPos < 0 THEN   ' No match
+                     if pTheme then 
+                        if bracePos1 >= 0 then
+                           '// Find the matching brace
+                           bracePos2 = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, bracePos1, 0)
+                           if bracePos2 = -1 then
                               SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 8, pTheme->colors(CLR_BRACEBAD).nFg )  ' red
-                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, nCurPos, 0 )
-                           ELSE                 ' Have match
+                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, bracePos1, 0 )
+                           else
                               SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 8, pTheme->colors(CLR_BRACEGOOD).nFg )  ' green
-                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, nCurPos, nEndPos )
-                           END IF
-                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 8, 255 ) ' transparency of outline
-                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 8, 127 )        ' transparency of interior      
-
-                        case else
+                              SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, bracePos1, bracePos2 )
+                           end if
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 8, 255 ) ' transparency of outline
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 8, 127 )        ' transparency of interior      
+                        else
+                           '// Turn off brace matching
                            SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
-                     end select
-                  end if
-               
+                        end if
+                     end if
+                     
+                  else
+                     SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
+                  end if         
                end if
                
             end if
@@ -3411,3 +3438,4 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow = AfxCWindowPtr( HWND_FRMMAIN ):       Delete pWindow
 
 End Function
+

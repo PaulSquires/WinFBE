@@ -1,3 +1,13 @@
+Version 2.1.2 (April 16, 2020)
+Editor:
+- Added: An additional "Code Editor" page of "Environment Options" because the number of options had filled the first Code Editor page.
+- Changed: Refactored the logic for displaying brace highlighting to be the same as used by ScintillaNET.
+- Changed: Improved the visibility of brace highlighting by changing the alpha values of the highlight colors.
+- Fixed: Turning off Brace matching would not uncolor any braces that were active at the time the option was changed.
+
+Visual Designer:
+- Fixed: Regression whereby new projects created via template not setting MAIN file and dispaying it in the correct Main Explorer treeview branch.
+
 Version 2.1.1 (April 14, 2020)
 Editor:
 - Added: Brace highlight matching. Settings to enable/disable and to set colors for match and no match.

@@ -149,6 +149,7 @@ Type clsDocument
       sMatchWord        as string   ' for the incremental autocomplete search
       AutoCompleteType  as long     ' AUTOC_DIMAS, AUTOC_TYPE
       AutoCStartPos     as Long
+      lastCaretPos      as long     'used for checking in SCN_UPDATEUI
       
       ' Following used for split edit views
       hScrollBar        as hwnd

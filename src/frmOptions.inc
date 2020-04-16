@@ -14,6 +14,7 @@
 #include once "frmOptions.bi"
 #include once "frmOptionsGeneral.bi"
 #include once "frmOptionsEditor.bi"
+#include once "frmOptionsEditor2.bi"
 #include once "frmOptionsCompiler.bi"
 #include once "frmOptionsColors.bi"
 #include once "frmOptionsLocal.bi"
@@ -45,8 +46,6 @@ private function frmOptions_SaveEditorOptions() as long
    ' EDITOR OPTIONS   
    HWnd = HWND_FRMOPTIONSEDITOR
    gConfig.SyntaxHighlighting   = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSYNTAXHIGHLIGHTING) )
-   gConfig.Codetips             = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCODETIPS) )
-   gConfig.AutoComplete         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOCOMPLETE) )
    gConfig.LeftMargin           = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWLEFTMARGIN) )
    gConfig.FoldMargin           = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWFOLDMARGIN) )
    gConfig.ConfineCaret         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCONFINECARET) )
@@ -54,16 +53,21 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.HighlightCurrentLine = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKCURRENTLINE) )
    gConfig.TabIndentSpaces      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKTABTOSPACES) )
    gConfig.IndentGuides         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKINDENTGUIDES ) )
-   gConfig.AutoIndentation      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKAUTOINDENTATION) )
-   gConfig.UnicodeEncoding      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKUNICODE) )
    gConfig.RightEdge            = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKSHOWRIGHTEDGE) )
    gConfig.PositionMiddle       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKPOSITIONMIDDLE) )
-   gConfig.BraceHighlight       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_CHKBRACEHIGHLIGHT) )
 
    gConfig.RightEdgePosition = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTRIGHTEDGE) )
    gConfig.TabSize = AfxGetWindowText( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR_TXTTABSIZE) )
    gConfig.KeywordCase = ComboBox_GetCurSel( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR_COMBOCASE))
    
+   ' EDITOR OPTIONS2   
+   HWnd = HWND_FRMOPTIONSEDITOR2
+   gConfig.Codetips             = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS) )
+   gConfig.AutoComplete         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE) )
+   gConfig.AutoIndentation      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) )
+   gConfig.BraceHighlight       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT) )
+
+
    ' If a localization file is currently being edited then save it now.
    frmOptionsLocal_LocalEditCheck
 
@@ -217,22 +221,25 @@ private Function frmOptions_OnNotify( ByVal HWnd As HWnd, _
             dim as long nBranchNum = TreeView_GetlParam( pNMHDR->hWndFrom, lpNMTV->itemNew.hItem)
             Select Case nBranchNum
                Case 0
-                  SetWindowTextW( hLabel, WStr(" ") & L(226,"General Options")) 
+                  AfxSetWindowText( hLabel, " " & L(226,"General Options")) 
                   hForm = HWND_FRMOPTIONSGENERAL
                Case 1
-                  SetWindowTextW( hLabel, WStr(" ") & L(110,"Code Editor")) 
+                  AfxSetWindowText( hLabel, " " & L(110,"Code Editor")) 
                   hForm = HWND_FRMOPTIONSEDITOR
                Case 2
-                  SetWindowTextW( hLabel, WStr(" ") & L(111,"Colors and Fonts") )
-                  hForm = HWND_FRMOPTIONSCOLORS
+                  AfxSetWindowText( hLabel, " " & L(110,"Code Editor")) 
+                  hForm = HWND_FRMOPTIONSEDITOR2
                Case 3
-                  SetWindowTextW( hLabel, WStr(" ") & L(112,"Compiler Setup") )
-                  hForm = HWND_FRMOPTIONSCOMPILER
+                  AfxSetWindowText( hLabel, " " & L(111,"Colors and Fonts") )
+                  hForm = HWND_FRMOPTIONSCOLORS
                Case 4
-                  SetWindowTextW( hLabel, WStr(" ") & L(129,"Localization") )
-                  hForm = HWND_FRMOPTIONSLOCAL
+                  AfxSetWindowText( hLabel, " " & L(112,"Compiler Setup") )
+                  hForm = HWND_FRMOPTIONSCOMPILER
                Case 5
-                  SetWindowTextW( hLabel, WStr(" ") & L(177,"FreeBASIC Keywords") )
+                  AfxSetWindowText( hLabel, " " & L(129,"Localization") )
+                  hForm = HWND_FRMOPTIONSLOCAL
+               Case 6
+                  AfxSetWindowText( hLabel, " " & L(177,"FreeBASIC Keywords") )
                   hForm = HWND_FRMOPTIONSKEYWORDS
             End Select
              
@@ -371,17 +378,19 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    gConfig.LoadConfigFile()
 
    ' Configure the TreeView
-   Dim hItems(5) As HTREEITEM 
+   Dim hItems(6) As HTREEITEM 
    hItems(0) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(226,"General Options"),    0)
    hItems(1) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        1)
-   hItems(2) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   2)
-   hItems(3) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     3)
-   hItems(4) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       4)
-   hItems(5) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 5)
+   hItems(2) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(110,"Code Editor"),        2)
+   hItems(3) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),   3)
+   hItems(4) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(112,"Compiler Setup"),     4)
+   hItems(5) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(129,"Localization"),       5)
+   hItems(6) = TreeView_AppendItem (hWndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"), 6)
 
    ' Load all of the child dialogs
    frmOptionsGeneral_Show( pWindow->hWindow )
    frmOptionsEditor_Show( pWindow->hWindow )
+   frmOptionsEditor2_Show( pWindow->hWindow )
    frmOptionsColors_Show( pWindow->hWindow )
    frmOptionsCompiler_Show( pWindow->hWindow )
    frmOptionsLocal_Show( pWindow->hWindow )
@@ -401,6 +410,7 @@ public Function frmOptions_Show( ByVal hWndParent As HWnd ) as LRESULT
    ' Delete the child windows releasing their manually allocated memory 
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSGENERAL):   Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSEDITOR):    Delete pWindow
+   pWindow = AfxCWindowPtr(HWND_FRMOPTIONSEDITOR2):   Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOLORS):    Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSCOMPILER):  Delete pWindow
    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSLOCAL):     Delete pWindow
