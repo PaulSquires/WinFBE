@@ -1,3 +1,12 @@
+Version 2.1.3 (April 18, 2020)
+Editor:
+- Added: Character Autocompletion option (enabled by default) adapted from code located at: https://github.com/jacobslusser/ScintillaNET/wiki/Character-Autocompletion
+- Added: New Auto Indentation sub option "Append loop variable to For/Next statement". (disabled by default)
+
+Visual Designer:
+- Fixed: Errors occuring in MAIN file for a visual designer project would cause "WinFBE_VD_MAIN.bas" to be loaded into the editor. The correct designated MAIN file is now loaded.
+- Fixed: wfxTextBox.SelectionLength() was returning negative lengths.
+
 Version 2.1.2 (April 16, 2020)
 Editor:
 - Added: An additional "Code Editor" page of "Environment Options" because the number of options had filled the first Code Editor page.

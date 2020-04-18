@@ -38,6 +38,12 @@ Type COMPILE_TYPE
    EndTime            As Double
    CompileID          as long                 ' Type of compile (wID). Needed in case frmOutput listview later clicked on.
    bInvalidImagePath  as Boolean              ' One or more images have invalid path will result in failed resource compile
+   
+   ' The following are used to diagnose an error thrown in WinFBE_VD_MAIN.bas. We will
+   ' need to subtract the nMainStartLine from the error line number and then load pDocMain
+   ' into the editor and position.
+   pDocMain           as clsDocument ptr
+   pDocMainOffset     as long                 ' Line in file where the pDocMain code is output
 End Type
 
 declare function ResetScintillaCursors() as Long

@@ -16,13 +16,42 @@
 
 
 ' ========================================================================================
+' Process WM_COMMAND message for window/dialog: frmOptions
+' ========================================================================================
+private Function frmOptionsEditor2_OnCommand( ByVal HWnd As HWnd, _
+                                              ByVal id As Long, _
+                                              ByVal hwndCtl As HWnd, _
+                                              ByVal codeNotify As UINT _
+                                              ) As LRESULT
+
+   Select Case id
+      
+      case IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION
+         if codeNotify = BN_CLICKED THEN
+            if Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) ) then
+               EnableWindow( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE), true )
+            else
+               EnableWindow( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE), false )
+            end if   
+         end if
+   
+   end select      
+
+   function = 0
+end function
+
+
+' ========================================================================================
 ' frmOptionsEditor2 Window procedure
 ' ========================================================================================
 private Function frmOptionsEditor2_WndProc( ByVal HWnd   As HWnd, _
-                                           ByVal uMsg   As UINT, _
-                                           ByVal wParam As WPARAM, _
-                                           ByVal lParam As LPARAM _
-                                           ) As LRESULT
+                                            ByVal uMsg   As UINT, _
+                                            ByVal wParam As WPARAM, _
+                                            ByVal lParam As LPARAM _
+                                            ) As LRESULT
+   Select Case uMsg
+      HANDLE_MSG (HWnd, WM_COMMAND,  frmOptionsEditor2_OnCommand)
+   End Select
 
    ' for messages that we don't deal with
    Function = DefWindowProc(HWnd, uMsg, wParam, lParam)
@@ -50,19 +79,33 @@ public Function frmOptionsEditor2_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE, L(95,"Enable Autocomplete"), 0, 21, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION, L(120,"Auto indentation"), 0, 42, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKCHARAUTOCOMPLETE, L(417,"Enable Character Autocompletion"), 0, 42, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
-   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT, L(412,"Enable Brace Highlighting"), 0, 63, 400, 20, _
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION, L(120,"Enable Auto Indentation"), 0, 63, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE, L(416,"Append loop variable to For/Next statement"), 30, 84, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT, L(412,"Enable Brace Highlighting"), 0, 105, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As HWnd HWnd = HWND_FRMOPTIONSEDITOR2
    
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS),           gConfig.CodeTips)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE),       gConfig.AutoComplete)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION),    gConfig.AutoIndentation)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT),     gConfig.BraceHighlight)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS),         gConfig.CodeTips)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE),     gConfig.AutoComplete)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCHARAUTOCOMPLETE), gConfig.CharacterAutoComplete)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION),  gConfig.AutoIndentation)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE),  gConfig.ForNextVariable)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT),   gConfig.BraceHighlight)
+
+   if Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) ) then
+      EnableWindow( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE), true )
+   else
+      EnableWindow( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE), false )
+   end if   
 
    Function = 0
    

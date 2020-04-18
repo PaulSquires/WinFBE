@@ -599,6 +599,93 @@ end function
 
 
 ' ========================================================================================
+' Handle Character Autocompletion if that editor option is active
+' ========================================================================================
+private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byval ch as long ) as Boolean
+   if gConfig.CharacterAutoComplete = 0 then exit function
+  
+   if pDoc = 0 then exit function
+   
+   dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+   if pSci = 0 then exit function
+   
+   dim as long caretPos = SciMsg( pSci, SCI_GETCURRENTPOS, 0, 0)
+   dim as long docStart = caretPos = 1
+   dim as long docEnd   = caretPos = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
+
+   dim as long nCharPrev = iif( docStart, _
+                       SciMsg( pSci, SCI_GETCHARAT, caretPos, 0), _
+                       SciMsg( pSci, SCI_GETCHARAT, caretPos-2, 0) )
+   
+   dim as long nCharNext = SciMsg( pSci, SCI_GETCHARAT, caretPos, 0)
+
+   dim as boolean isCharPrevBlank = iif( instr(chr(nCharPrev), any chr(32, 9, 10, 13)), true, false )
+
+   dim as boolean isCharNextBlank = iif( instr(chr(nCharNext), any chr(32, 9, 10, 13)), true, false ) 
+   if nCharNext = docEnd then isCharNextBlank = true
+
+   dim as boolean isEnclosed = false
+   if (nCharPrev = asc("(") and nCharNext = asc(")") ) or _
+      (nCharPrev = asc("{") and nCharNext = asc("}") ) or _
+      (nCharPrev = asc("[") and nCharNext = asc("]") ) then
+      isEnclosed = true
+   end if                      
+                         
+   dim as boolean isSpaceEnclosed = false
+   if (nCharPrev = asc("(") and isCharNextBlank ) or _
+      (isCharPrevBlank and nCharNext = asc(")") ) or _
+      (nCharPrev = asc("{") and isCharNextBlank)  or _
+      (isCharPrevBlank and nCharNext = asc("}") ) or _
+      (nCharPrev = asc("[") and isCharNextBlank)  or _
+      (isCharPrevBlank and nCharNext = asc("]") ) then
+      isSpaceEnclosed = true
+   end if   
+
+   dim as boolean isCharOrString = false
+   if (isCharPrevBlank and isCharNextBlank) or isEnclosed or isSpaceEnclosed then
+      isCharOrString = true
+   end if
+
+   dim as boolean charNextIsCharOrString = iif( instr(chr(nCharNext), any chr(34,92)), true, false )
+
+   dim as WString * 10 wszText
+     
+   select case chr(ch)
+      case "("
+         if (charNextIsCharOrString) then return false
+         wszText = ")"
+         SciMsg( pSci, SCI_INSERTTEXT, caretPos, cast(LPARAM, @wszText) )
+         
+      case "{"
+         if (charNextIsCharOrString) then return false
+         wszText = "}"
+         SciMsg( pSci, SCI_INSERTTEXT, caretPos, cast(LPARAM, @wszText) )
+         
+      case "["
+         if (charNextIsCharOrString) then return false
+         wszText = "]"
+         SciMsg( pSci, SCI_INSERTTEXT, caretPos, cast(LPARAM, @wszText) )
+         
+      case chr(34)
+         '// 0x22 = "
+         if (nCharPrev = 34) and (nCharNext = 34) then
+            SciMsg( pSci, SCI_DELETERANGE, caretPos, 1)
+            SciMsg( pSci, SCI_GOTOPOS, caretPos, 0)
+            return false
+         end if
+
+         if (isCharOrString) then
+            wszText = chr(34)
+            SciMsg( pSci, SCI_INSERTTEXT, caretPos, cast(LPARAM, @wszText) )
+         end if    
+      
+   end select
+
+   function = true
+end function
+
+
+' ========================================================================================
 ' Process Scintilla Notifications
 ' ========================================================================================
 private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
@@ -801,6 +888,9 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          If pDoc = 0 Then exit function
          hEdit = pDoc->hWndActiveScintilla
        
+         ' Attempt to do a Character Autocompletion if that editor option is active.
+         frmMain_InsertMatchedChars( pDoc, pNSC->ch )
+         
          select CASE chr(pNSC->ch)
          case ".", ">"    '  Show autocomplete list for TYPE variables
             ' dot "." or ">"  part of a pointer
@@ -835,6 +925,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             if ShowAutocompleteList() then exit function
              
          END SELECT
+         
    End Select
 
    Function = 0
@@ -3438,4 +3529,6 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow = AfxCWindowPtr( HWND_FRMMAIN ):       Delete pWindow
 
 End Function
+
+
 

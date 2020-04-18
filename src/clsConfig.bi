@@ -148,74 +148,76 @@ Type clsConfig
       _DateFileTime              As FILETIME
       
    Public:
-      WinFBEversion        as CWSTR
-      SelectedTheme        as string          ' GUID of selected theme
-      idxTheme             as long            ' need global b/c can't GetCurSel from CBN_EDITCHANGE
-      Themes(any)          as TYPE_THEMES
-      ThemesTemp(any)      as TYPE_THEMES
-      Tools(any)           as TYPE_TOOLS
-      ToolsTemp(any)       as TYPE_TOOLS  
-      Builds(any)          as TYPE_BUILDS  
-      BuildsTemp(any)      as TYPE_BUILDS  
-      Snippets(any)        as TYPE_SNIPPETS
-      SnippetsTemp(any)    as TYPE_SNIPPETS  
-      rcSnippets           as rect                 ' Snippet window position (nt saved to file)
-      FBKeywords           As String
-      bKeywordsDirty       As BOOLEAN = True       ' not saved to file
-      AskExit              As Long = false         ' use Long so True/False string not written to file
-      CheckForUpdates      As Long = True
-      EnableProjectCache   as Long = true          ' Fast project cache
-      LastUpdateCheck      as long = 0             ' Julian date of last update check
-      HideToolbar          as long = false
-      HideStatusbar        as long = false
-      CloseFuncList        As Long = True
-      ShowExplorer         As Long = True
-      ShowExplorerWidth    As Long = 250
-      SyntaxHighlighting   As Long = True
-      Codetips             As Long = True
-      AutoComplete         As Long = True
-      RightEdge            As Long = TRUE
-      RightEdgePosition    As CWSTR = "80"
-      LeftMargin           As Long = True
-      FoldMargin           As Long = false
-      AutoIndentation      As Long = True
-      ConfineCaret         As Long = true
-      LineNumbering        As Long = True
-      HighlightCurrentLine As Long = True
-      IndentGuides         As Long = True
-      PositionMiddle       as long = false         ' position found text to middle of screen
-      BraceHighlight       As Long = True
-      TabIndentSpaces      As Long = True
-      MultipleInstances    As Long = True
-      CompileAutosave      As Long = True
-      UnicodeEncoding      As Long = False
-      TabSize              As CWSTR = "4"
-      LocalizationFile     As CWSTR = "english.lang"
-      EditorFontname       As CWSTR = "Courier New"
-      EditorFontCharSet    As CWSTR = "Default"
-      EditorFontsize       As CWSTR = "10"
-      KeywordCase          As Long = 2  ' "Original Case"
-      StartupLeft          As Long = 0
-      StartupTop           As Long = 0
-      StartupRight         As Long = 0
-      StartupBottom        As Long = 0
-      StartupMaximized     As Long = False
-      ToolBoxLeft          as long = 0
-      ToolBoxTop           as long = 0
-      ToolBoxRight         as long = 0
-      ToolBoxBottom        as long = 0
-      FBWINCompiler32      As CWSTR
-      FBWINCompiler64      As CWSTR
-      CompilerSwitches     As CWSTR
-      CompilerHelpfile     As CWSTR
-      Win32APIHelpfile     As CWSTR
-      WinFBXHelpfile       As CWSTR
-      WinFBXPath           as CWSTR
-      RunViaCommandWindow  As Long = False
-      DisableCompileBeep   as long = false
-      MRU(9)               As CWSTR
-      MRUProject(9)        As CWSTR
-      bWriteCodetipCache   as boolean
+      WinFBEversion         as CWSTR
+      SelectedTheme         as string          ' GUID of selected theme
+      idxTheme              as long            ' need global b/c can't GetCurSel from CBN_EDITCHANGE
+      Themes(any)           as TYPE_THEMES
+      ThemesTemp(any)       as TYPE_THEMES
+      Tools(any)            as TYPE_TOOLS
+      ToolsTemp(any)        as TYPE_TOOLS  
+      Builds(any)           as TYPE_BUILDS  
+      BuildsTemp(any)       as TYPE_BUILDS  
+      Snippets(any)         as TYPE_SNIPPETS
+      SnippetsTemp(any)     as TYPE_SNIPPETS  
+      rcSnippets            as rect                 ' Snippet window position (nt saved to file)
+      FBKeywords            As String
+      bKeywordsDirty        As BOOLEAN = True       ' not saved to file
+      AskExit               As Long = false         ' use Long so True/False string not written to file
+      CheckForUpdates       As Long = True
+      EnableProjectCache    as Long = true          ' Fast project cache
+      LastUpdateCheck       as long = 0             ' Julian date of last update check
+      HideToolbar           as long = false
+      HideStatusbar         as long = false
+      CloseFuncList         As Long = True
+      ShowExplorer          As Long = True
+      ShowExplorerWidth     As Long = 250
+      SyntaxHighlighting    As Long = True
+      Codetips              As Long = True
+      AutoComplete          As Long = True
+      CharacterAutoComplete As Long = true
+      RightEdge             As Long = TRUE
+      RightEdgePosition     As CWSTR = "80"
+      LeftMargin            As Long = True
+      FoldMargin            As Long = false
+      AutoIndentation       As Long = True
+      ForNextVariable       as long = false
+      ConfineCaret          As Long = true
+      LineNumbering         As Long = True
+      HighlightCurrentLine  As Long = True
+      IndentGuides          As Long = True
+      PositionMiddle        as long = false         ' position found text to middle of screen
+      BraceHighlight        As Long = True
+      TabIndentSpaces       As Long = True
+      MultipleInstances     As Long = True
+      CompileAutosave       As Long = True
+      UnicodeEncoding       As Long = False
+      TabSize               As CWSTR = "4"
+      LocalizationFile      As CWSTR = "english.lang"
+      EditorFontname        As CWSTR = "Courier New"
+      EditorFontCharSet     As CWSTR = "Default"
+      EditorFontsize        As CWSTR = "10"
+      KeywordCase           As Long = 2  ' "Original Case"
+      StartupLeft           As Long = 0
+      StartupTop            As Long = 0
+      StartupRight          As Long = 0
+      StartupBottom         As Long = 0
+      StartupMaximized      As Long = False
+      ToolBoxLeft           as long = 0
+      ToolBoxTop            as long = 0
+      ToolBoxRight          as long = 0
+      ToolBoxBottom         as long = 0
+      FBWINCompiler32       As CWSTR
+      FBWINCompiler64       As CWSTR
+      CompilerSwitches      As CWSTR
+      CompilerHelpfile      As CWSTR
+      Win32APIHelpfile      As CWSTR
+      WinFBXHelpfile        As CWSTR
+      WinFBXPath            as CWSTR
+      RunViaCommandWindow   As Long = False
+      DisableCompileBeep    as long = false
+      MRU(9)                As CWSTR
+      MRUProject(9)         As CWSTR
+      bWriteCodetipCache    as boolean
       
       Declare Constructor()
       declare function ImportTheme( byref st as wstring, byval bImportExternal as Boolean = false ) as Long

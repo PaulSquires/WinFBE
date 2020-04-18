@@ -143,7 +143,7 @@ public function AttemptAutoInsert() as Long
    
    Dim as HWND hEdit
    Dim as long nLine, nCurLine, curPos, LineLen, nFoldLevel, nSpaces, IndentSize, i
-   Dim as string strFill, strTemp, strCurLine, strPrevLine, strRightText
+   Dim as string strFill, strTemp, strCurLine, strPrevLine, strPrevLineOrig, strRightText
       
 
    Dim pDoc As clsDocument Ptr 
@@ -160,6 +160,9 @@ public function AttemptAutoInsert() as Long
    strPrevLine = pDoc->GetLine(nLine-1)
    if len(strPrevLine) = 0 then exit function
 
+   ' Save a non-uppercased version of the strPrevLine for For/Next insert
+   strPrevLineOrig = strPrevLine
+   
    ' Get the tab width and indent size (these are actually both the same 
    ' size as set in the pDoc->ApplyProperties code).
    'TabSize     = SciExec(hEdit, SCI_GETTABWIDTH, 0, 0) '<-- not needed
@@ -280,9 +283,15 @@ public function AttemptAutoInsert() as Long
    '''''''''''''
    ' FOR/NEXT
    If Left(strPrevLine, 4) = "FOR " then
-      strFill = FillString(Space(nSpaces + IndentSize)) 
+      strFill = FillString(Space(nSpaces + IndentSize))
+      dim as CWSTR wszLoopVar
+      if gConfig.ForNextVariable then
+         ' Determine the loop variable and append it to the "next" statement
+         strPrevLine = AfxStrShrink(strPrevLineOrig)
+         wszLoopVar = " " & AfxStrParse(strPrevLineOrig, 2, " ")
+      end if   
       if CanCompleteBlockStatement(pDoc, BLOCK_STATEMENT_FOR, nLine) then
-         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "next" & vbcrlf
+         strFill = strFill & vbcrlf & FillString(SPACE(nSpaces)) & "next" & wszLoopVar & vbcrlf
       end if          
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize) 

@@ -62,10 +62,12 @@ private function frmOptions_SaveEditorOptions() as long
    
    ' EDITOR OPTIONS2   
    HWnd = HWND_FRMOPTIONSEDITOR2
-   gConfig.Codetips             = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS) )
-   gConfig.AutoComplete         = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE) )
-   gConfig.AutoIndentation      = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) )
-   gConfig.BraceHighlight       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT) )
+   gConfig.Codetips              = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS) )
+   gConfig.AutoComplete          = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE) )
+   gConfig.CharacterAutoComplete = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKCHARAUTOCOMPLETE) )
+   gConfig.AutoIndentation       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) )
+   gConfig.ForNextVariable       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE) )
+   gConfig.BraceHighlight        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT) )
 
 
    ' If a localization file is currently being edited then save it now.

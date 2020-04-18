@@ -656,24 +656,35 @@ private function ParseLogForError( byref wsLogSt as CWSTR, _
                wst2 = Mid( wst, Parenthesis_Start + 1, Parenthesis_End - Parenthesis_Start - 1)  ' line# 
                wst3 = Mid( wst, Error_Start + 1)  ' error message
      
-               ' If this is a visual designer form file then we need to modify the line
-               ' number based on the error offset number.
-               dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
-               if pDoc then
-                  if pDoc->IsDesigner then
-                     if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
-                     if len(pDoc->wszFormCodegen) = 0 then 
-                        pDoc->bRegenerateCode = true
-                        GenerateFormCode(pDoc)   ' regenerate visual designer code
-                     end if   
-                     ' Offset is based on form metadata + code generation
-                     pDoc->ErrorOffset = 0
-                     pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
-                     pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
-                     wst2 = str( val(wst2) - pDoc->ErrorOffset)
-                  end if
-               END IF
 
+               ' If the filename is "WinFBE_VD_MAIN.bas" then we need to load the corresponding 
+               ' pDocMain instead and adjust for the error line offset.
+               if ucase(AfxStrPathname( "NAMEX", wst1 )) = "WINFBE_VD_MAIN.BAS" then
+                  wst1 = gCompile.pDocMain->DiskFilename
+                  wst2 = str( val(wst2) - gCompile.pDocMainOffset)
+               
+               else
+               
+                  ' If this is a visual designer Form file then we need to modify the line
+                  ' number based on the error offset number.
+                  dim pDoc as clsDocument ptr = gApp.GetDocumentPtrByFilename(wst1)
+                  if pDoc then
+                     if pDoc->IsDesigner then
+                        if len(pDoc->wszFormMetaData) = 0 then GenerateFormMetaData(pDoc)   ' recreate the metadata
+                        if len(pDoc->wszFormCodegen) = 0 then 
+                           pDoc->bRegenerateCode = true
+                           GenerateFormCode(pDoc)   ' regenerate visual designer code
+                        end if   
+                        ' Offset is based on form metadata + code generation
+                        pDoc->ErrorOffset = 0
+                        pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormMetaData, vbcrlf) 
+                        pDoc->ErrorOffset = pDoc->ErrorOffset + AfxStrTally(pDoc->wszFormCodegen, vbcrlf) 
+                        wst2 = str( val(wst2) - pDoc->ErrorOffset)
+                     end if
+                  END IF
+               
+               end if
+               
                FF_ListView_InsertItem( hLV, nListViewLine, 0, wst2 )  ' line#
                FF_ListView_InsertItem( hLV, nListViewLine, 1, wst1 )  ' filename
                FF_ListView_InsertItem( hLV, nListViewLine, 2, wst3 )  ' error message
@@ -1252,7 +1263,9 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
             pDocMain->CreateCodeWindow( HWND_FRMMAIN, false, false, pDocMain->DiskFilename )
             pDocMain->ProjectFileType = nFileType
          end if
+         
          dim as string wszMainFileText = pDocMain->GetText
+         
          ' In 2.0.8 and lower, the following two defines were put into the user code
          ' when a new main.bas file was created by New Project. From 2.0.9+ we move that
          ' code to the WinFBE_VD_MAIN.bas file and comment it out from the Main file.
@@ -1290,9 +1303,20 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
          
          dim as CWSTR wszText = _
                         wszVDEquates    & vbcrlf & _
-                        wszAllTYPEs     & vbcrlf & _   ' this also includes Declares for the Events
+                        wszAllTYPEs     & vbcrlf       ' this also includes Declares for the Events
+
+         ' Save the pDocMain in case WinFBE_VD_MAIN.bas throws an error and we have
+         ' to load the original main file into the editor and reposition to the error line.
+         gCompile.pDocMain = pDocMain
+         ' Determine the number of vbcrlf's to this point because we need to store the line offset
+         ' to where the Main code is to written.
+         gCompile.pDocMainOffset = AfxStrTally( wszText, vbcrlf )
+         
+         ' Continue to build the output string and then write it disk.
+         wszText = wszText & _
                         wszMainFileText & vbcrlf & _   '<-- ensure vbcrlf because Main file may not have crlf on last line
                         wszAllEvents
+
          
          pStream.WriteLine wszText
          pStream.Close
