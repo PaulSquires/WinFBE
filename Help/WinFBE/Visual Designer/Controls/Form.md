@@ -95,6 +95,7 @@ Form events in a specific order every time a form is created and shown.
 | Load | The form handle and all child controls exist however the form and controls are not yet visible. Respond to this event to reposition controls or to add data to controls. For example, add rows to a Listbox or Combobox. |
 | Activated | The form has gained input focus (similar to the GotFocus event of a control).|
 | Shown | This event is only raised the first time a form is displayed; subsequently minimizing, maximizing, restoring, hiding, showing, or invalidating and repainting will not raise this event. |
+| FormReady | This event is raised after all form and control creation is complete. It ensures that the form is a state that allows for user interaction. | 
 
 ### During form destruction
 | Name                            | Description                    |

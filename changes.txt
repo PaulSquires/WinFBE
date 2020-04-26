@@ -1,3 +1,18 @@
+Version 2.1.4 (April 26, 2020)
+Editor:
+- Changed: Updated David Robert's User Tools for SetCompilerPathsII, SetCompilerSwitchsII, and ArchSettings to the latest version.
+- Fixed: WinFBE would not correctly save its startup size/position if the editor had been "Aero snapped" via a Windows docking action such as docking it to the left hand side of the screen via a Winkey+LeftArrow keypress.
+- Fixed: Duplicate controls would result if reloading a Form file modified by an external program.
+
+Visual Designer:
+- Added: Keyboard shortcuts for cut/copy/paste now works for visual designer controls.
+- Added: FormReady event for Forms that fires when the Form is ready for user interaction.
+- Changed: Control ID identifiers for all controls on a Form now start at 9000 and increment +1 for each added control.
+- Fixed: Controls with Image properties would not correctly show the actual image when the form is loaded into the editor.
+- Fixed: Corrected regression whereby duplicate definition errors for Form file if it is also the MAIN code file.
+- Fixed: Statusbar control identifier was hardcoded as 100 potentially causing conflict with CreateWindowEX controls that may be added by the user.
+- Fixed: Stausbar Editor initially set colors needed a mouseover in order for the correct colors to display.
+
 Version 2.1.3 (April 18, 2020)
 Editor:
 - Added: Character Autocompletion option (enabled by default) adapted from code located at: https://github.com/jacobslusser/ScintillaNET/wiki/Character-Autocompletion

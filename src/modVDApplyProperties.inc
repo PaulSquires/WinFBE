@@ -91,7 +91,7 @@ private function Form_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_DLGMODALFRAME)
       
       if bIsChildForm = false then
-         select case **wszPropValue
+         select case wszPropValue
             case "FormBorderStyle.None"
                AfxRemoveWindowStyle(pCtrl->hWindow, WS_CAPTION)
             case "FormBorderStyle.SizableToolWindow", _
@@ -199,7 +199,7 @@ private function Button_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    case "TEXTALIGN"
       dim as long wsStyle
-      select case **wszPropValue
+      select case wszPropValue
          CASE "ButtonAlignment.BottomCenter": wsStyle = DT_CENTER OR DT_BOTTOM
          CASE "ButtonAlignment.BottomLeft":   wsStyle = DT_LEFT   OR DT_BOTTOM
          CASE "ButtonAlignment.BottomRight":  wsStyle = DT_RIGHT  OR DT_BOTTOM
@@ -245,7 +245,7 @@ private function Label_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    case "BORDERSTYLE"
       dim as long wsStyle
-      select case **wszPropValue
+      select case wszPropValue
          case "ControlBorderStyle.None"
             AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
@@ -291,7 +291,7 @@ private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    case "CHECKSTATE"
       dim as long wsState
-      select case **wszPropValue
+      select case wszPropValue
          Case "CheckBoxState.Checked": wsState = BST_CHECKED
          Case "CheckBoxState.UnChecked": wsState = BST_UNCHECKED
          Case "CheckBoxState.Indeterminate": wsState = BST_INDETERMINATE
@@ -316,7 +316,7 @@ private function CheckBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRemoveWindowStyle(pCtrl->hWindow, BS_BOTTOM)
       AfxRemoveWindowStyle(pCtrl->hWindow, BS_VCENTER)
       dim as long wsStyle
-      select case **wszPropValue
+      select case wszPropValue
          CASE "ButtonAlignment.BottomCenter": wsStyle = BS_CENTER OR BS_BOTTOM
          CASE "ButtonAlignment.BottomLeft":   wsStyle = BS_LEFT   OR BS_BOTTOM
          CASE "ButtonAlignment.BottomRight":  wsStyle = BS_RIGHT  OR BS_BOTTOM
@@ -389,7 +389,7 @@ private function OptionButton_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRemoveWindowStyle(pCtrl->hWindow, BS_BOTTOM)
       AfxRemoveWindowStyle(pCtrl->hWindow, BS_VCENTER)
       dim as long wsStyle
-      select case **wszPropValue
+      select case wszPropValue
          CASE "ButtonAlignment.BottomCenter": wsStyle = BS_CENTER OR BS_BOTTOM
          CASE "ButtonAlignment.BottomLeft":   wsStyle = BS_LEFT   OR BS_BOTTOM
          CASE "ButtonAlignment.BottomRight":  wsStyle = BS_RIGHT  OR BS_BOTTOM
@@ -437,7 +437,7 @@ private function ListBox_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    case "BORDERSTYLE"
       dim as long wsStyle                                     
-      select case **wszPropValue
+      select case wszPropValue
          case "ControlBorderStyle.None"
             AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
@@ -491,7 +491,7 @@ private function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
 
    case "BORDERSTYLE"
       dim as long wsStyle                                     
-      select case **wszPropValue
+      select case wszPropValue
          case "ControlBorderStyle.None"
             AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
@@ -508,7 +508,7 @@ private function ComboBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       dim as long nCtrlId, dwStyle, dwExStyle = -1
       dwStyle = WS_CHILD or WS_VISIBLE OR WS_HSCROLL OR WS_VSCROLL OR WS_BORDER OR _
                 CBS_HASSTRINGS or CBS_NOINTEGRALHEIGHT 
-      Select Case **wszPropValue
+      Select Case wszPropValue
          Case "ComboBoxStyle.Simple":       dwStyle = dwStyle OR CBS_SIMPLE 
          Case "ComboBoxStyle.DropDown":     dwStyle = dwStyle OR CBS_DROPDOWN 
          Case "ComboBoxStyle.DropDownList": dwStyle = dwStyle OR CBS_DROPDOWNLIST 
@@ -563,7 +563,7 @@ private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
 
    case "BORDERSTYLE"
-      select case **wszPropValue
+      select case wszPropValue
          case "ControlBorderStyle.None"
             AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
@@ -579,7 +579,7 @@ private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    case "CHARACTERCASING"
       AfxRemoveWindowStyle(pCtrl->hWindow, ES_LOWERCASE)
       AfxRemoveWindowStyle(pCtrl->hWindow, ES_UPPERCASE)
-      select case **wszPropValue
+      select case wszPropValue
          Case "CharacterCase.Normal"
          Case "CharacterCase.Upper"
             AfxAddWindowStyle(pCtrl->hWindow, ES_UPPERCASE)
@@ -606,7 +606,7 @@ private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRemoveWindowStyle(pCtrl->hWindow, WS_HSCROLL)
       AfxRemoveWindowStyle(pCtrl->hWindow, WS_VSCROLL)
       dim as long wsStyle
-      select case **wszPropValue
+      select case wszPropValue
          case "ScrollBars.None"
          case "ScrollBars.Horizontal"
             wsStyle = WS_HSCROLL
@@ -623,7 +623,7 @@ private function TextBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       AfxRemoveWindowStyle(pCtrl->hWindow, ES_LEFT)
       AfxRemoveWindowStyle(pCtrl->hWindow, ES_RIGHT)
       dim as long wsStyle
-      select case **wszPropValue
+      select case wszPropValue
          CASE "TextAlignment.Left":   wsStyle = ES_LEFT
          CASE "TextAlignment.Center": wsStyle = ES_CENTER 
          CASE "TextAlignment.Right":  wsStyle = ES_RIGHT  
@@ -662,7 +662,7 @@ private function MaskedEdit_ApplyProperties( byval pDoc as clsDocument ptr, _
       pCtrl->hBackBrush = CreateSolidBrush(clrBack)
 
    case "BORDERSTYLE"
-      select case **wszPropValue
+      select case wszPropValue
          case "ControlBorderStyle.None"
             AfxRemoveWindowStyle(pCtrl->hWindow, WS_BORDER)
             AfxRemoveWindowExStyle(pCtrl->hWindow, WS_EX_CLIENTEDGE)
@@ -737,7 +737,7 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
    wszPropName  = pProp->wszPropName
    wszPropValue = pProp->wszPropValue
    nPropValue   = Val(pProp->wszPropValue)
-   
+
    select CASE ucase(wszPropName)
       
    case "IMAGE"
@@ -759,7 +759,7 @@ private function PictureBox_ApplyProperties( byval pDoc as clsDocument ptr, _
       end if
          
    case "IMAGESCALING"
-      select case **wszPropValue
+      select case wszPropValue
          case "ImageScale.None"
             pCtrl->AfxPicturePtr->SetImageAdjustment( GDIP_IMAGECTX_ACTUALSIZE, true )
          case "ImageScale.AutoSize"

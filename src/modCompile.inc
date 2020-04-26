@@ -1277,7 +1277,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
          dim as CWSTR wszLookFor, wszAllTYPEs, wszAllEvents
          pDoc = gApp.pDocList
          do until pDoc = 0
-            if pDoc <> pDocMain then
+            'if pDoc <> pDocMain then
                if pDoc->IsDesigner then 
                   ' REM out any user entered #include file
                   wszLookFor = "#include once " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
@@ -1294,10 +1294,12 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                   wszTYPE = AfxStrReplaceI( wszTYPE, "#if 0", "" )
                   wszTYPE = AfxStrReplaceI( wszTYPE, "#endif", "" )
                   wszAllTYPEs = wszAllTYPEs & wszTYPE
-                  wszAllEvents = wszAllEvents & _
-                                 "#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
+                  if pDoc <> pDocMain then
+                     wszAllEvents = wszAllEvents & _
+                                    "#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
+                  end if
                end if
-            end if
+            'end if
             pDoc = pDoc->pDocNext
          loop
          

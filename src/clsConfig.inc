@@ -22,6 +22,7 @@
 #include once "frmMain.bi"
 #include once "modVDColors.bi"
 #include once "modVDDesignForm.bi"
+#include once "modVDApplyProperties.bi"
 #include once "modParser.bi"
 
                
@@ -1006,7 +1007,7 @@ Function clsConfig.SaveConfigFile() as Long
    ' Determine the current editor positioning 
    Dim WinPla As WINDOWPLACEMENT
    WinPla.Length = Sizeof(WinPla)
-   GetWindowPlacement(HWND_FRMMAIN, @WinPla)
+   GetWindowPlacement( HWND_FRMMAIN, @WinPla )
    With this
       .StartupLeft   = WinPla.rcNormalPosition.Left 
       .StartupTop    = WinPla.rcNormalPosition.Top
@@ -1014,6 +1015,13 @@ Function clsConfig.SaveConfigFile() as Long
       .StartupBottom = WinPla.rcNormalPosition.Bottom
       .StartupMaximized = Iif( WinPla.showCmd = SW_MAXIMIZE, True, False )
    End With
+   
+   dim as RECT rc
+   GetWindowRect( HWND_FRMMAIN, @rc )
+   if this.StartupLeft <> rc.Left then this.StartupLeft = rc.Left
+   if this.StartupTop <> rc.Top then this.StartupTop = rc.Top
+   if this.StartupRight <> rc.Right then this.StartupRight = rc.Right
+   if this.StartupBottom <> rc.Bottom then this.StartupBottom = rc.Bottom
 
    dim pStream AS CTextStream   '(utf16)
    if pStream.Create(_ConfigFilename, true, true) <> S_OK then return true   ' error
@@ -1275,7 +1283,7 @@ Function clsConfig.ImportTheme( byref st as wstring, _
          theme.colors(CLR_BRACEGOOD).nFg = BGR(000,128,000)    ' green
          theme.colors(CLR_BRACEGOOD).nBg = -1
       end if   
-
+      
       if bImportExternal THEN
          theme.id = AfxGuidText(AfxGuid())
          i = ubound(this.ThemesTemp) + 1
@@ -2080,6 +2088,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
       TreeView_SelectItem( hTree, pDoc->hNodeExplorer )
    end if
    
+
    SetWindowRedraw( hTree, true )
    AfxRedrawWindow( hTree )
 
@@ -2110,6 +2119,27 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    ' Show the correct notes and TODO data for this project
    frmOutput_ShowNotes
    frmOutput_UpdateToDoListview
+
+   ' Need to iterate the loaded forms that are currently visually active and
+   ' re-apply properties because loadign of Image properties will fail until
+   ' all the forms are loaded in the editor.
+   Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
+   for i as long = 0 to nCount - 1
+      ' Get the document pointer and then save file to disk
+      dim TB as TC_ITEM
+      TB.Mask = TCIF_PARAM
+      TabCtrl_GetItem( gTTabCtl.hWindow, i, @TB )
+      pDoc = Cast(clsDocument Ptr, TB.lParam)
+      if pDoc then
+         if pDoc->IsDesigner then
+            ' Apply all control properties 
+            for ii as long = pDoc->Controls.ItemFirst to pDoc->Controls.ItemLast
+               dim pCtrl as clsControl ptr = pDoc->Controls.ItemAt(ii)
+               if pCtrl then ApplyControlProperties(pDoc, pCtrl)
+            next         
+         end if
+      end if
+   next
 
    frmMain_PositionWindows
    frmMain_SetFocusToCurrentCodeWindow

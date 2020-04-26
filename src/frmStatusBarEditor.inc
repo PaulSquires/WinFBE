@@ -234,31 +234,27 @@ private function frmStatusBarEditor_SetTextboxes() as long
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLOR)
    if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBackColor else wszText = ""
-   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
-   'ComboBox_SetCurSel( hCtrl, nIndex)
    AfxSetWindowText( hCtrl, wszText )
    EnableWindow( hCtrl, fEnabled)
+   AfxRedrawWindow(hCtrl)
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOFORECOLOR)
    if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszForeColor else wszText = ""
-   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
-   'ComboBox_SetCurSel( hCtrl, nIndex)
    AfxSetWindowText( hCtrl, wszText )
    EnableWindow( hCtrl, fEnabled)
+   AfxRedrawWindow(hCtrl)
 
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOBACKCOLORHOT)
    if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszBackColorHot else wszText = ""
-   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
-   'ComboBox_SetCurSel( hCtrl, nIndex)
    AfxSetWindowText( hCtrl, wszText )
    EnableWindow( hCtrl, fEnabled)
+   AfxRedrawWindow(hCtrl)
    
    hCtrl = GetDlgItem(HWND_FRMSTATUSBAREDITOR, IDC_FRMSTATUSBAREDITOR_COMBOFORECOLORHOT)
    if nCurSel <> -1 then wszText = gPanelItems(nCurSel).wszForeColorHot else wszText = ""
-   'nIndex = ComboBox_FindStringExact( hCtrl, -1, @wszText ) 
-   'ComboBox_SetCurSel( hCtrl, nIndex)
    AfxSetWindowText( hCtrl, wszText )
    EnableWindow( hCtrl, fEnabled)
+   AfxRedrawWindow(hCtrl)
 
    function = 0
 end function

@@ -482,6 +482,7 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "Resize")
          AddControlEvent(pCtrl, "FormClosing")
          AddControlEvent(pCtrl, "FormClosed")
+         AddControlEvent(pCtrl, "FormReady")
          AddControlEvent(pCtrl, "Move")
          AddControlEvent(pCtrl, "Click")
          AddControlEvent(pCtrl, "DropFiles")

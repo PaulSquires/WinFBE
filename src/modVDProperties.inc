@@ -391,6 +391,8 @@ public function DisplayEventDetails() as Long
          wszEventDescribe = "Occurs whenever the user closes the form, before the form has been closed."
       CASE "FORMCLOSED"
          wszEventDescribe = "Occurs whenever the user closes the form, after the form has been closed."
+      CASE "FORMREADY"
+         wszEventDescribe = "Occurs when the form is fully loaded and ready for user interaction."
       CASE "MOVE"
          wszEventDescribe = "Occurs when a control is moved."
       CASE "CLICK"

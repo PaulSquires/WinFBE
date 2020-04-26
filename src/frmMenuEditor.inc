@@ -658,6 +658,7 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    ComboBox_AddString(hCtrl, @wstr("Space"))
    ComboBox_AddString(hCtrl, @wstr("Plus"))
    ComboBox_AddString(hCtrl, @wstr("Minus"))
+   ComboBox_AddString(hCtrl, @wstr("Enter"))
     
    ComboBox_SetCurSel(hCtrl, 0)
 

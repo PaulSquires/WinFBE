@@ -601,10 +601,12 @@ private Function frmExplorer_OnNotify( ByVal HWnd As HWnd, _
             end if
          end if
          
+     
    End Select
  
    Function = 0
 End Function
+
 
 
 ' ========================================================================================
@@ -625,7 +627,7 @@ private Function frmExplorer_OnPaint( ByVal HWnd As HWnd ) As LRESULT
 
    SaveDC hDC
 
-   FillRect( hDC, @rc, GetSysColorBrush( COLOR_BTNFACE) )
+   FillRect( hDC, @rc, GetSysColorBrush(COLOR_BTNFACE) )
    
    ' Outline the right edge of dialog with a dull gray pen
    hPen = CreatePen( PS_SOLID, 1, GetSysColor(COLOR_ACTIVEBORDER) )

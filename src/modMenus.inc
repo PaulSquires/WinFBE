@@ -266,6 +266,7 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_A,          IDM_SELECTALL )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_B,          IDM_COMMENTBLOCK )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_C,          IDM_COPY )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_D,          IDM_DUPLICATELINE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_E,          IDM_REDO )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F,          IDM_FIND )
@@ -279,7 +280,9 @@ public Function frmMain_BuildMenu( ByVal pWindow As CWindow Ptr ) As HMENU
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_R,          IDM_REPLACE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_S,          IDM_FILESAVE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_T,          IDM_FILEOPENTEMPLATES )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_V,          IDM_PASTE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_W,          IDM_CLOSETAB )
+   pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_X,          IDM_CUT )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_Y,          IDM_DELETELINE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F2,         IDM_BOOKMARKTOGGLE )
    pWindow->AddAccelerator( FVIRTKEY Or FCONTROL, VK_F5,         IDM_COMPILE )

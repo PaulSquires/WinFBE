@@ -1639,20 +1639,22 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                if IsDesignerView(pDoc) then
                   dim pCtrl as clsControl ptr
                   dim rc as RECT
-                  dim as long nLeft, nTop, nLeftActive, nTopActive
+                  dim as long nLeft, nTop, nLeftActive = 99999, nTopActive = 99999
+                  dim as long nCurLeft, nCurTop
                   
-                  ' Need to get the Left/Top properties for the active control in the copy group
+                  ' Need to get the Left/Top properties for least top/left in the copy group
                   for i as long = lbound(gCopyControls) to ubound(gCopyControls)
-                     if gCopyControls(i).IsActive THEN
-                        nLeftActive = val(GetControlProperty(@gCopyControls(i), "LEFT"))
-                        nTopActive  = val(GetControlProperty(@gCopyControls(i), "TOP"))
-                        exit for
-                     END IF
+                     nCurLeft = val(GetControlProperty(@gCopyControls(i), "LEFT"))
+                     nCurTop  = val(GetControlProperty(@gCopyControls(i), "TOP"))
+                     if nCurLeft < nLeftActive then nLeftActive = nCurLeft
+                     if nCurTop < nTopActive then nTopActive = nCurTop 
+                     exit for
                   next
                      
                   ' Create the control and copy the properties to it
                   for i as long = lbound(gCopyControls) to ubound(gCopyControls)
                      pCtrl = CreateToolboxControl(pDoc, gCopyControls(i).ControlType, rc)
+                     gCopyControls(i).hWindow = pCtrl->hWindow
                      
                      for ii as long = lbound(gCopyControls(i).Properties) to ubound(gCopyControls(i).Properties)
                         select case ucase(gCopyControls(i).Properties(ii).wszPropName)
@@ -1673,23 +1675,35 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
                      ' Set the left/top properties relative to the current insert position
                      dim pt as point
                      GetCursorPos(@pt)
+                     ' Map the point to the client area coordinates
                      MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @pt), 1)
+
+                     ' Ensure that the point is within the client area
+                     dim rc as RECT
+                     GetWindowRect(pDoc->hWndForm, @rc)
+                     MapWindowPoints(0, pDoc->hWndForm, cast(point ptr, @rc), 2)
+                     if PtInRect(@rc, pt) = 0 then
+                        pt.x = 10: pt.y = 10
+                     end if
+
                      Dim pWindow As CWindow Ptr = AfxCWindowPtr(HWND)
                      if pWindow then
                         pt.x = pWindow->UnScaleX(pt.x)
                         pt.y = pWindow->UnScaleY(pt.y)
-                     end if   
+                     end if
                      SetControlProperty(pCtrl, "LEFT", str(pt.x + (nLeft-nLeftActive)))
                      SetControlProperty(pCtrl, "TOP", str(pt.y + (nTop-nTopActive)))
-                     pCtrl->IsActive = false
-                     pCtrl->IsSelected = false
                      
                      pCtrl->SuspendLayout = true
                      ApplyControlProperties( pDoc, pCtrl )
                      pCtrl->SuspendLayout = false
                   NEXT
-                  ' Ensure the grab handles of form and controls are redrawn or hidden
-                  pDoc->Controls.SetActiveControl(pDoc->hWndForm)
+
+                  ' Select all of the newly created controls
+                  for i as long = lbound(gCopyControls) to ubound(gCopyControls)
+                     pDoc->Controls.SelectControl( gCopyControls(i).hWindow )
+                  next 
+
                   pDoc->bRegenerateCode = true
                   pDoc->UserModified = true
                   AfxRedrawWindow(pDoc->hWndFrame)
@@ -2490,12 +2504,28 @@ private Function frmMain_OnActivateApp( ByVal HWnd As HWnd, _
                                pDoc->DiskFilename & vbCrLf & _ 
                                L(266, "File was changed by another application. Reload it?"), _
                                L(267, "File Changed"), MB_ICONQUESTION Or MB_YESNO) = IDYES Then
-                  dim sText as string
-                  if GetFileToString(pDoc->DiskFilename, sText, pDoc) = false then
-                     pDoc->SetText( sText ) 
-                  else
-                     print "Error opening: "; pDoc->DiskFilename
-                  End If
+                  
+                  dim as CWSTR wszFilename = pDoc->DiskFilename
+                  dim as long nFileType = pDoc->ProjectFileType
+                  
+                  ' Remove the current file and open the changed file.
+                  frmMain_OnCommand(HWND_FRMMAIN, IDM_REMOVEFILEFROMPROJECT, 0, 0)
+                  
+                  ' Ensure that the file is open and displayed
+                  dim as clsDocument ptr pDocLoad = _
+                  frmMain_OpenFileSafely( HWND_FRMMAIN, _
+                                          False, _    ' bIsNewFile
+                                          False, _    ' bIsTemplate
+                                          True,  _    ' bShowInTab
+                                          false, _    ' bIsInclude
+                                          wszFilename, _ ' wszName
+                                          0 )         ' pDocIn
+                  
+                  pDocLoad->ProjectFileType = nFileType
+                  pDocLoad->hNodeExplorer = frmExplorer_AddParentNode( pDocLoad )
+                  frmExplorer_AddChildNodes( pDocLoad )
+                  TreeView_SelectItem( GetDlgItem(HWND_FRMEXPLORER, IDC_FRMEXPLORER_TREE), pDocLoad->hNodeExplorer )
+                  
                End If                
             End If
             pDoc->DateFileTime = AfxGetFileLastWriteTime( pDoc->DiskFilename )

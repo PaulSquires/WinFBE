@@ -35,7 +35,7 @@ enum
    CLR_TEXT            
    CLR_WINDOW
    CLR_BRACEGOOD
-   CLR_BRACEBAD
+   CLR_BRACEBAD   '17
 end enum
 
 '  Control types   
