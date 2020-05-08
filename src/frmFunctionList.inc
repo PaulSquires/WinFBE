@@ -410,7 +410,7 @@ End Function
 ' ========================================================================================
 ' Reparse any dirty files
 ' ========================================================================================
-private function frmFunctionList_ReparseFiles() as Long
+public function frmFunctionList_ReparseFiles() as Long
    '  Need to re-parse any dirty files. This is especially important for QuickRun scenarios
    '  where the file is never physically saved.
    Dim pDoc As clsDocument Ptr = gApp.pDocList

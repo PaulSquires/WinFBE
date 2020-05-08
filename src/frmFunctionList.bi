@@ -17,3 +17,5 @@
 #Define IDC_FRMFUNCTIONLIST_TXTSEARCH               1001
 
 declare Function frmFunctionList_Show( ByVal hWndParent As HWnd ) as LRESULT
+declare function frmFunctionList_ReparseFiles() as Long
+

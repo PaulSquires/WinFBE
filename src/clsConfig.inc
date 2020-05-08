@@ -1396,12 +1396,15 @@ Function clsConfig.LoadConfigFile() as Long
    Dim nData  As Long  
    Dim i      as Long
    dim bReadingNote as Boolean
+   dim bNewConfigFile as Boolean
 
    ' Remove any existing Themes and Builds
    erase this.Themes
    erase this.Builds
    
-   If AfxFileExists(_ConfigFilename) then
+   If AfxFileExists(_ConfigFilename) = 0 then
+      bNewConfigFile = true
+   else
       dim pStream AS CTextStream   '(utf16)
       if pStream.OpenUnicode(_ConfigFilename) <> S_OK then return true   ' error
 
@@ -1557,8 +1560,42 @@ Function clsConfig.LoadConfigFile() as Long
       pStream.Close
    end if
    
+   
+   ' Set some defaults if the config file was missing.
+   ' If no Tools exist then create some default ones...
+   if (ubound(this.Tools) = -1) and (bNewConfigFile = true) THEN
+      dim wszTools(5) as CWSTR
+      wszTools(0) = "ASCII Chart|-|.\Tools\asciichart32.exe|-||-|1|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
+      wszTools(1) = "GUID Generator|-|.\Tools\GUIDgen32.exe|-||-|2|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
+      wszTools(2) = "Registers|-|.\Tools\Registers.chm|-||-|3|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
+      wszTools(3) = "Arch settings|-|.\Tools\ArchSettings.exe|-||-|4|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
+      wszTools(4) = "Set compiler switches|-|.\Tools\SetCompilerSwitchesII.exe|-||-|5|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
+      wszTools(5) = "Set compiler paths|-|.\Tools\SetCompilerPathsII.exe|-||-|6|-||-|1|-|0|-|0|-|0|-|0|-|0|-|1|-|0"
+      for i = lbound(wszTools) to ubound(wszTools)
+         If i > ubound(this.Tools) Then
+            redim preserve this.Tools(i)
+            wData = wszTools(i)
+            this.Tools(i).wszDescription   = AfxStrParse(wData, 1, "|-|")
+            this.Tools(i).wszCommand       = ProcessFromCurdriveApp( AfxStrParse(wData, 2, "|-|") ) 
+            this.Tools(i).wszParameters    = AfxStrParse(wData, 3, "|-|")
+            this.Tools(i).wszKey           = AfxStrParse(wData, 4, "|-|")
+            this.Tools(i).wszWorkingFolder = ProcessFromCurdriveApp( AfxStrParse(wData, 5, "|-|") ) 
+            this.Tools(i).IsCtrl           = val(AfxStrParse(wData, 6, "|-|"))
+            this.Tools(i).IsAlt            = val(AfxStrParse(wData, 7, "|-|"))
+            this.Tools(i).IsShift          = val(AfxStrParse(wData, 8, "|-|"))
+            this.Tools(i).IsPromptRun      = val(AfxStrParse(wData, 9, "|-|"))
+            this.Tools(i).IsMinimized      = val(AfxStrParse(wData, 10, "|-|"))
+            this.Tools(i).IsWaitFinish     = val(AfxStrParse(wData, 11, "|-|"))
+            this.Tools(i).IsDisplayMenu    = val(AfxStrParse(wData, 12, "|-|"))
+            this.Tools(i).Action           = val(AfxStrParse(wData, 13, "|-|"))
+         End If
+      next
+   end if
+      
+
    ' Set some defaults if the config file was missing or corrupt
-   ' If no builds exist then create some default ones...
+   ' If no builds exist then create some default ones... We do this
+   ' no matter if it is a bNewConfigFile or not.
    if ubound(this.Builds) = -1 THEN
       redim this.Builds(11) 
       this.Builds(0).id = AfxGuidText(AfxGuid())
@@ -1713,6 +1750,7 @@ Function clsConfig.LoadConfigFile() as Long
    end with
 
    ' Create a default Theme if none exist
+   ' We do this no matter if it is a bNewConfigFile or not.
    if ubound(this.Themes) = -1 THEN
       redim this.Themes(1) 
       this.Themes(0) = DefaultThemes(0)   ' default theme

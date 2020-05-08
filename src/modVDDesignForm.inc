@@ -667,6 +667,7 @@ public function HandleDesignerLButtonUp( ByVal HWnd As HWnd ) as LRESULT
          if hCtrlSel = 0 THEN hCtrlSel = pDoc->hWndForm
          pDoc->Controls.SelectControl(hCtrlSel)
          pDoc->Controls.SetActiveControl(hCtrlSel)
+         DisplayPropertyList(pDoc)
       else
          ' Create the selected Toolbox control.
          ' Need to modify rcLasso dimensions in case of HighDPI

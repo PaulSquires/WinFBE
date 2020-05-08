@@ -583,7 +583,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
                               wszFilename, _  ' wszFileName
                               0 )         ' pDocIn
    end if
-
+   
    ' Set the top line to display in the editor. I chose to start 3 lines before the
    ' function just to make it visually more appealing.
    if pDoc THEN

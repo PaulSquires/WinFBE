@@ -18,6 +18,7 @@
 ''
 
 #include once "modAutoInsert.bi"
+#include once "frmFunctionList.bi"
 
 
 ' ========================================================================================
@@ -160,6 +161,17 @@ public function AttemptAutoInsert() as Long
    strPrevLine = pDoc->GetLine(nLine-1)
    if len(strPrevLine) = 0 then exit function
 
+   ' Get the styling of the current line to determine if we are in a 
+   ' multiline or single line comment block then abort the autoinsert.
+   select case SciExec(hEdit, SCI_GETSTYLEAT, curPos, 0)
+      case SCE_B_MULTILINECOMMENT
+         exit function
+      case SCE_B_COMMENT
+         ' Allow to continue for single line comments because we want the ENTER
+         ' key to position our cursor under the preceeding ' mark.
+   end select
+   
+   
    ' Save a non-uppercased version of the strPrevLine for For/Next insert
    strPrevLineOrig = strPrevLine
    
@@ -344,6 +356,7 @@ public function AttemptAutoInsert() as Long
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+      frmFunctionList_ReparseFiles()
       exit function
    end if
 
@@ -359,6 +372,7 @@ public function AttemptAutoInsert() as Long
       SciExec(hEdit, SCI_ADDTEXT, Len(strFill), Strptr(strFill))
       curPos = curPos + NumTabsFromSpaces(nSpaces + IndentSize)
       SciExec(hEdit, SCI_SETSEL, curPos, curPos)
+      frmFunctionList_ReparseFiles()
       exit function
    end if
 

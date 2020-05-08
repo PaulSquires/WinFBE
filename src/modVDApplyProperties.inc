@@ -988,8 +988,14 @@ private function DateTimePicker_ApplyProperties( byval pDoc as clsDocument ptr, 
    case "FORMATCUSTOM"
       dim as CWSTR wszDateFormat = GetControlProperty(pCtrl, "DATEFORMAT")
       if wszDateFormat = "DateTimePickerFormat.CustomFormat" then
+         ' Remove any existing format styles
+         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_LONGDATEFORMAT)
+         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATEFORMAT)
+         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATECENTURYFORMAT)
+         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
          dim wszCustomFormat as wstring * MAX_PATH = wszPropValue
          DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
+         AfxRedrawWindow(pCtrl->hWindow) 
       end if
 
    case "DATEFORMAT"
@@ -1010,14 +1016,14 @@ private function DateTimePicker_ApplyProperties( byval pDoc as clsDocument ptr, 
          case "DateTimePickerFormat.TimeFormat"
             AfxAddWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
          case "DateTimePickerFormat.CustomFormat"
-            ' do nothing
+            wszCustomFormat = GetControlProperty(pCtrl, "FORMATCUSTOM")
+            DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
       end select
       AfxRedrawWindow(pCtrl->hWindow) 
       
    case "SHOWUPDOWN"
       ' Apparently this style can not be changed after control creation.      
-      ReCreateToolboxControl( pDoc, pCtrl )
-         
+
    end select
    
    function = 0
@@ -1146,6 +1152,10 @@ public function ApplyControlProperties( byval pDoc as clsDocument ptr, _
       ReCreateToolboxControl( pDoc, pCtrl )
    end if
    
+   if pCtrl->ControlType = CTRL_DATETIMEPICKER then
+      ReCreateToolboxControl( pDoc, pCtrl )
+   end if
+         
    ' Repaint to ensure that the grab handles draw
    AfxRedrawWindow(pCtrl->hWindow)
    AfxRedrawWindow(pDoc->hWndFrame)

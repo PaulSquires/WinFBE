@@ -613,6 +613,13 @@ private function frmMain_InsertMatchedChars( byval pDoc as clsDocument ptr, byva
    dim as long docStart = caretPos = 1
    dim as long docEnd   = caretPos = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
 
+   ' Get the styling of the current line to determine if we are in a 
+   ' multiline or single line comment block then abort the autoinsert.
+   select case SciMsg( pSci, SCI_GETSTYLEAT, caretPos, 0)
+      case SCE_B_MULTILINECOMMENT, SCE_B_COMMENT
+         exit function
+   end select
+
    dim as long nCharPrev = iif( docStart, _
                        SciMsg( pSci, SCI_GETCHARAT, caretPos, 0), _
                        SciMsg( pSci, SCI_GETCHARAT, caretPos-2, 0) )
@@ -780,7 +787,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          if gApp.SuppressNotify then return true
          ' Show line and column. Only do on modification of text otherwise we will have
          ' a huge slowdown when notifications sent for UI updates.
-         If (pNSC->modificationType And SC_MOD_INSERTTEXT) Or _
+         If (pNSC->modificationType And SC_MOD_INSERTTEXT) orelse _
             (pNSC->modificationType And SC_MOD_DELETETEXT) Then
             ' Set parsing flag to true. We use a parse flag rather than depending on the dirty
             ' flags because the file could stay dirty for a long time before it gets saved and 
@@ -1151,7 +1158,7 @@ public Function frmMain_PositionWindows() As LRESULT
          frmVDToolbox_Show( HWND_FRMMAIN, SW_SHOW )
          DisplayPropertyList( pDoc )
          ShowWindow( HWND_FRMVDTOOLBOX, SW_SHOWNORMAL )
-
+         
          ShowWindow( pDoc->hWindow(0), SW_HIDE )
          ShowWindow( pDoc->hWindow(1), SW_HIDE )
          ShowWindow( pDoc->hScrollbar, SW_HIDE )
@@ -1604,7 +1611,8 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          select case GetFocus()
             case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
                  GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
+                 HWND_PROPLIST_EDIT
                SendMessage( GetFocus, WM_COPY, 0, 0 )
             case else     
                if IsDesignerView(pDoc) then
@@ -1633,7 +1641,8 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          select case GetFocus()
             case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
                  GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
+                 HWND_PROPLIST_EDIT
                SendMessage( GetFocus, WM_PASTE, 0, 0 )
             case else     
                if IsDesignerView(pDoc) then

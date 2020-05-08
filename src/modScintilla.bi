@@ -1025,6 +1025,9 @@ Dim Shared SciMsg As Scintilla_DirectFunction
 ''  CHARRANGE, TEXTRANGE, FINDTEXTEX, FORMATRANGE, and NMHDR structs.
 ''  So older code that treats Scintilla as a RichEdit will work.
 
+type uptr_t as uinteger
+type sptr_t as integer
+
 
 ' // Size = 8 bytes
 Type Sci_CharacterRange Field = 4
@@ -1045,11 +1048,6 @@ Type Sci_TextToFind Field = 4
    chrgText  As Sci_CharacterRange   ' struct Sci_CharacterRange chrgText
 End Type
 
-'#define CharacterRange Sci_CharacterRange
-'#define TextRange Sci_TextRange
-'#define TextToFind Sci_TextToFind
-
-'typedef void *Sci_SurfaceID;
 
 ' // Size = 16 bytes
 Type Sci_Rectangle
@@ -1071,107 +1069,42 @@ Type Sci_RangeToFormat Field = 4
    chrg      As Sci_CharacterRange   ' struct Sci_CharacterRange chrg
 End Type
 
-'#define RangeToFormat Sci_RangeToFormat
          
-Type Sci_NotifyHeader 
-  ' /* Compatible with Windows NMHDR.
-  '  * hwndFrom is really an environment specific window handle or pointer
-  '  * but most clients of Scintilla.h do not have this type visible. */
-	hwndFrom as HWND
-	idFrom As UINT_PTR
-	code As UINT
-End Type
-    
+type Sci_Position as integer
+type Sci_PositionU as uinteger
+type Sci_PositionCR as clong
          
-#ifdef __FB_64BIT__       
-Type SCNotification        
-   hdr                  As Sci_NotifyHeader
-   position             As long
-   ch                   As integer
-   modifiers            As long
-   modificationType     As long
-   lpText               As UINT_PTR
-   length               As long
-   linesAdded           As long
-   message              As long
-   wParam               As integer 'WPARAM
-   lParam               As integer 'LPARAM
-   nLine                As long
-   foldLevelNow         As integer
-   foldLevelPrev        As integer
-   margin               As integer
-   listType             As integer
-   x                    As integer
-   y                    As integer
-   token                As integer
-   annotationLinesAdded As integer
-   updated              As integer
-End Type       
-#else       
-Type SCNotification 
-   hdr                  As Sci_NotifyHeader
-   position             As long
-   ch                   As long
-   modifiers            As long
-   modificationType     As long
-   lpText               As ZString Ptr
-   length               As long
-   linesAdded           As long
-   message              As long
-   wParam               As WPARAM
-   lParam               As LPARAM
-   nLine                As long
-   foldLevelNow         As long
-   foldLevelPrev        As long
-   margin               As long
-   listType             As long
-   x                    As long
-   y                    As long
-   token                As long
-   annotationLinesAdded As long
-   updated              As long
-End Type
-#endif
+type Sci_NotifyHeader
+	hwndFrom as any ptr
+	idFrom as uptr_t
+	code as ulong
+end type
 
-'struct SCNotification {
-'	struct Sci_NotifyHeader nmhdr;
-'	Sci_Position position;
-'	/* SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK, */
-'	/* SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK, */
-'	/* SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK, */
-'	/* SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
-'	/* SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
-'
-'	int ch;
-'	/* SCN_CHARADDED, SCN_KEY, SCN_AUTOCCOMPLETE, SCN_AUTOCSELECTION, */
-'	/* SCN_USERLISTSELECTION */
-'	int modifiers;
-'	/* SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, */
-'	/* SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE, */
-'
-'	int modificationType;	/* SCN_MODIFIED */
-'	const char *text;
-'	/* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION, SCN_URIDROPPED */
-'
-'	Sci_Position length;		/* SCN_MODIFIED */
-'	Sci_Position linesAdded;	/* SCN_MODIFIED */
-'	int message;	/* SCN_MACRORECORD */
-'	uptr_t wParam;	/* SCN_MACRORECORD */
-'	sptr_t lParam;	/* SCN_MACRORECORD */
-'	Sci_Position line;		/* SCN_MODIFIED */
-'	int foldLevelNow;	/* SCN_MODIFIED */
-'	int foldLevelPrev;	/* SCN_MODIFIED */
-'	int margin;		/* SCN_MARGINCLICK */
-'	int listType;	/* SCN_USERLISTSELECTION */
-'	int x;			/* SCN_DWELLSTART, SCN_DWELLEND */
-'	int y;		/* SCN_DWELLSTART, SCN_DWELLEND */
-'	int token;		/* SCN_MODIFIED with SC_MOD_CONTAINER */
-'	int annotationLinesAdded;	/* SCN_MODIFIED with SC_MOD_CHANGEANNOTATION */
-'	int updated;	/* SCN_UPDATEUI */
-'	int listCompletionMethod;
-'	/* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
-'
-'};
+type SCNotification
+	hdr as Sci_NotifyHeader
+	position as Sci_Position
+	ch as long
+	modifiers as long
+	modificationType as long
+	lptext as const zstring ptr
+	length as Sci_Position
+	linesAdded as Sci_Position
+	message as long
+	wParam as uptr_t
+	lParam as sptr_t
+	line as Sci_Position
+	foldLevelNow as long
+	foldLevelPrev as long
+	margin as long
+	listType as long
+	x as long
+	y as long
+	token as long
+	annotationLinesAdded as Sci_Position
+	updated as long
+	listCompletionMethod as long
+end type
+
 
 
 #IfDef INCLUDE_DEPRECATED_FEATURES

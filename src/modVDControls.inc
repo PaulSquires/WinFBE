@@ -1245,7 +1245,7 @@ public function ReCreateToolboxControl( byval pDoc as clsDocument ptr, _
                dwStyle = dwStyle Or DTS_TIMEFORMAT
             case "DateTimePickerFormat.CustomFormat"
                ' Set value after control is created
-               wszCustomFormat = GetControlProperty(pCtrl, "DATEFORMAT")
+               wszCustomFormat = GetControlProperty(pCtrl, "FORMATCUSTOM")
          end select
 
          pCtrl->hWindow = pWindow->AddControl( "SysDateTimePick32", , CtrlID, "", _

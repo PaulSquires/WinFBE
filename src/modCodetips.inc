@@ -401,6 +401,13 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    curPos = SciExec(hEdit, SCI_GETCURRENTPOS, 0, 0) 
    nCol   = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
   
+   ' Get the styling of the current line to determine if we are in a 
+   ' multiline or single line comment block then abort the autoinsert.
+   select case SciExec(hEdit, SCI_GETSTYLEAT, curPos, 0)
+      case SCE_B_MULTILINECOMMENT, SCE_B_COMMENT
+         exit function
+   end select
+
    dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
    dim as string sLine_ucase
    

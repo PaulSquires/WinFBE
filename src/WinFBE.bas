@@ -44,7 +44,7 @@ Using Afx
 
 #Define APPNAME        WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT   WStr("WinFBE")
-#Define APPVERSION     WStr("2.1.4") 
+#Define APPVERSION     WStr("2.1.5") 
 #Define APPCOPYRIGHT   WStr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2020") 
 
 
