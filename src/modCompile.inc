@@ -107,8 +107,8 @@ private function CreateTempResourceFile() as boolean
 
          ' Check for BOM signatures
          if left(txtBuffer, 3) = chr(&HEF, &HBB, &HBF) THEN
-            ' UTF8 BOM encoded 
-            wszExistingText = Utf8ToUnicode( mid(txtBuffer, 4) )   ' bypass the BOM
+            ' UTF8 BOM encoded  (convert from utf8)
+            wszExistingText.Utf8 = mid(txtBuffer, 4)  ' bypass the BOM
          elseif left(txtBuffer, 2) = chr(&HFF, &HFE) THEN
             ' UTF16 BOM (little endian) encoded
             wszExistingText = mid(txtBuffer, 3)   ' bypass the BOM
@@ -254,6 +254,7 @@ private function AlternateCompile( byref wszExe AS wstring, _
 end function
 
 
+
 ''
 ''
 private function RedirConsoleToFile( byref wszExe AS wstring, _
@@ -270,6 +271,10 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
       return 0
    end if   
 
+   ' Create the child process and read from its standard output
+   dim ProcessInfo AS PROCESS_INFORMATION
+   dim StartupInf  AS STARTUPINFO
+
    ' Continue on with the newer CreateProcess compile approach.
    dim SecurityAttribute AS SECURITY_ATTRIBUTES
    dim hChildStdOutRead  AS PHANDLE
@@ -283,17 +288,13 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
    SecurityAttribute.lpSecurityDescriptor = NULL
 
    ' Create a pipe for the child process's STDOUT.
-   IF CreatePipe(@hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0) = FALSE THEN
+   IF CreatePipe( @hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0 ) = FALSE THEN
       '? "error creating pipe"
    ELSE
       ' Ensure the read handle to the pipe for STDOUT is not inherited.
-      IF SetHandleInformation(hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0) = FALSE THEN
+      IF SetHandleInformation( hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0 ) = FALSE THEN
          '? "error SetHandleInformation"
       ELSE
-         ' Create the child process and read from its standard output
-         dim ProcessInfo AS PROCESS_INFORMATION
-         dim StartupInf  AS STARTUPINFO
-
          StartupInf.cb         = SIZEOF(STARTUPINFO)
          StartupInf.hStdError  = hChildStdOutWrite   
          StartupInf.hStdOutput = hChildStdOutWrite  
@@ -308,26 +309,27 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
          end if
          
 ' This call to CreateProcessW will succeed in all cases except for the one
-' where there is spaces in wszFullExe because once I wrap the string in double
+' where there are spaces in wszFullExe because once I wrap the string in double
 ' quotes then the call to CreateProcessW fails.
 
          dim errCode as long 
-         errCode = CreateProcessW( wszFullExe,  _    ' Create the child process.
+         errCode = CreateProcessW( _
+                     wszFullExe,  _      ' Create the child process.
                      wszCmdLine, _       ' Command line
-                     BYVAL 0,     _  ' Process security attributes
-                     BYVAL 0,     _  ' Primary thread security attributes
-                     TRUE,        _  ' Handles are inherited
-                     CREATE_NO_WINDOW, _  ' Creation flags  
-                     BYVAL 0,     _  ' Use parent's environment
-                     BYVAL 0,     _  ' Use parent's current directory
-                     @StartupInf,  _  ' STARTUPINFO pointer
+                     BYVAL 0,     _      ' Process security attributes
+                     BYVAL 0,     _      ' Primary thread security attributes
+                     TRUE,        _      ' Handles are inherited
+                     CREATE_NO_WINDOW, _ ' Creation flags  
+                     BYVAL 0,     _      ' Use parent's environment
+                     BYVAL 0,     _      ' Use parent's current directory
+                     @StartupInf,  _     ' STARTUPINFO pointer
                      @ProcessInfo) 
          
          if errCode <> 0 then            
 
-            CloseHandle(hChildStdOutWrite) ' To avoid ReadFile hanging at the end.
+            CloseHandle( hChildStdOutWrite ) ' To avoid ReadFile hanging at the end.
             DO
-               IF ReadFile(hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0) = FALSE THEN 
+               IF ReadFile( hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0 ) = FALSE THEN 
                   '? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead
                   '? "GetLastError: "; GetLastError
                   EXIT DO
@@ -342,15 +344,19 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
             if instr( wszFullExe, " " ) then
                AfxMsg( "CreateChildProcess failed. Install WinFBE into folder without spaces." )
             end if    
-            ' Close handles to the child process and its primary thread.
-            ' Some applications might keep these handles to monitor the status 
-            ' of the child process, for example.
-            CloseHandle( ProcessInfo.hProcess )
-            CloseHandle( ProcessInfo.hThread )
          END IF
          
       END IF
    END IF
+
+   ' Close handles to the child process and its primary thread.
+   ' Some applications might keep these handles to monitor the status 
+   ' of the child process, for example.
+   if hChildStdOutRead     then CloseHandle( hChildStdOutRead )
+   if hChildStdOutWrite    then CloseHandle( hChildStdOutWrite )
+   if ProcessInfo.hProcess then CloseHandle( ProcessInfo.hProcess )
+   if ProcessInfo.hThread  then CloseHandle( ProcessInfo.hThread )
+
 
    function = 0
 END function
@@ -1001,8 +1007,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                   pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
                   pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
                   ' convert utf8 to utf16
-                  st = Utf8ToUnicode(*psz)   ' use a regular string b/c it is a byte buffer
-                  pStream.Write strptr(st), len(st)
+                  wst.Utf8 = *psz  ' convert the utf *psz from Utf8
+                  pStream.Write wst.m_pBuffer, wst.m_BufferLen
                else
                   pStream.Write pDocMain->wszFormMetaData.m_pBuffer, pDocMain->wszFormMetaData.m_BufferLen
                   pStream.Write pDocMain->wszFormCodeGen.m_pBuffer, pDocMain->wszFormCodeGen.m_BufferLen
@@ -1204,7 +1210,7 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
                   "#Include Once " & chr(34) & "windows.bi" & chr(34) & vbcrlf & _
                   "#Include Once " & chr(34) & "Afx\CWindow.inc" & chr(34) & vbcrlf
       
-   pDoc = gApp.pDocList
+   pDoc = iIf( gApp.IsProjectActive, gApp.pDocList, pDocMain )
    do until pDoc = 0
       if pDoc->IsDesigner then 
          bIsVisual = true
@@ -1245,6 +1251,8 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
             end if
          end if
       end if
+
+      If gApp.IsProjectActive = false Then exit do
       pDoc = pDoc->pDocNext
    loop
 
@@ -1264,8 +1272,9 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
             pDocMain->ProjectFileType = nFileType
          end if
          
-         dim as string wszMainFileText = pDocMain->GetText
-         
+         dim as CWSTR wszMainFileText 
+         wszMainFileText.Utf8 = pDocMain->GetText  ' Convert from utf8
+
          ' In 2.0.8 and lower, the following two defines were put into the user code
          ' when a new main.bas file was created by New Project. From 2.0.9+ we move that
          ' code to the WinFBE_VD_MAIN.bas file and comment it out from the Main file.
@@ -1275,31 +1284,31 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
          ' into their main bas file. 2.0.9+ automatically outputs the code the codegen file so we
          ' need to scan the main file and comment out any files that include a form file.
          dim as CWSTR wszLookFor, wszAllTYPEs, wszAllEvents
-         pDoc = gApp.pDocList
+         
+         pDoc = iIf( gApp.IsProjectActive, gApp.pDocList, pDocMain )
          do until pDoc = 0
-            'if pDoc <> pDocMain then
-               if pDoc->IsDesigner then 
-                  ' REM out any user entered #include file
-                  wszLookFor = "#include once " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
-                  wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
-                  wszLookFor = "#include " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
-                  wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
-                  
-                  ' Get the code for the TYPE definitions and the EVENTS.
-                  ' Need to remove the #if 0 #endif from the FormCodeGen because we are now outputting
-                  ' the TYPE definitions. The #If 0 will remain in the physical code file so that when
-                  ' it is #included at the end of the main compile file then we won't get any duplicate
-                  ' definition errors.
-                  dim as CWSTR wszTYPE = pDoc->wszFormCodeGen
-                  wszTYPE = AfxStrReplaceI( wszTYPE, "#if 0", "" )
-                  wszTYPE = AfxStrReplaceI( wszTYPE, "#endif", "" )
-                  wszAllTYPEs = wszAllTYPEs & wszTYPE
-                  if pDoc <> pDocMain then
-                     wszAllEvents = wszAllEvents & _
-                                    "#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
-                  end if
-               end if
-            'end if
+				if pDoc->IsDesigner then 
+					' REM out any user entered #include file
+					wszLookFor = "#include once " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
+					wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
+					wszLookFor = "#include " & chr(34) & AfxStrPathName( "NAMEX", pDoc->DiskFilename ) & chr(34) & vbcrlf
+					wszMainFileText = AfxStrReplaceI( wszMainFileText, wszLookFor, "'" & wszLookFor )
+					
+					' Get the code for the TYPE definitions and the EVENTS.
+					' Need to remove the #if 0 #endif from the FormCodeGen because we are now outputting
+					' the TYPE definitions. The #If 0 will remain in the physical code file so that when
+					' it is #included at the end of the main compile file then we won't get any duplicate
+					' definition errors.
+					dim as CWSTR wszTYPE = pDoc->wszFormCodeGen
+					wszTYPE = AfxStrReplaceI( wszTYPE, "#if 0", "" )
+					wszTYPE = AfxStrReplaceI( wszTYPE, "#endif", "" )
+					wszAllTYPEs = wszAllTYPEs & wszTYPE
+					if pDoc <> pDocMain then
+						wszAllEvents = wszAllEvents & _
+											"#include once " & chr(34) & pDoc->DiskFilename & chr(34) & vbcrlf
+					end if
+				end if
+            If gApp.IsProjectActive = false Then exit do
             pDoc = pDoc->pDocNext
          loop
          
@@ -1361,13 +1370,16 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       Function = False: Exit Function
    end if
    
-
    
    ' Ensure verbose compiler message output
    wszParams = wszParams + " -v " + gCompile.CompileFlags 
    
-   if instr(wszParams, " -x ") = 0 then
+   f = instr(wszParams, " -x ") 
+   if f = 0 then
       wszParams = wszParams + " -x " + wDQ + gCompile.OutputFilename + wDQ
+   else
+      ' The ParseLogForError() function below will identify the correct
+      ' filename for gCompile.OutputFilename based on the man file being linked.
    end if
    
    If gApp.IsProjectActive Then
@@ -1433,6 +1445,12 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
       NEXT
 
       If gCompile.RunAfterCompile Then 
+         ' If gCompile.OutputFilename is a relative filename then convert it to full filename.
+         gCompile.OutputFilename = AfxStrReplace( gCompile.OutputFilename, "/", "\" )
+         if AfxPathIsRelative( gCompile.OutputFilename ) then 
+            gCompile.OutputFilename = AfxPathCombine( gCompile.MainFolder, gCompile.OutputFilename )
+         end if
+
          RunEXE( _
             gCompile.OutputFilename,    _
             iif( gApp.IsProjectActive, gApp.ProjectCommandLine, gApp.wszCommandLine ) _

@@ -894,7 +894,7 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
                pDoc = frmMain_OpenFileSafely(HWnd, _
                                              False, _    ' bIsNewFile
                                              False, _    ' bIsTemplate
-                                             false,  _   ' bShowInTab
+                                             false, _    ' bShowInTab
                                              false, _    ' bIsInclude
                                              *pwszName, _ ' pwszName
                                              pDocIn )         ' pDocIn
@@ -916,7 +916,10 @@ private Function OnCommand_FileOpen( ByVal HWnd As HWnd, _
       iTab = gTTabCtl.GetTabIndexByDocumentPtr(pDocTabs(i))
       if iTab = -1 then iTab = gTTabCtl.AddTab(pDocTabs(i))  ' Add the new document to the top tabcontrol
    Next   
-   if iTab > -1 then gTTabCtl.SetFocusTab(iTab)
+   if iTab > -1 then 
+		gTTabCtl.SetFocusTab(iTab)
+      Treeview_SelectItem( hTV, pDoc->hNodeExplorer )
+	end if
 
    gApp.IsFileLoading = false
    SetWindowRedraw( hTV, true )

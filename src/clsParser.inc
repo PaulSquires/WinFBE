@@ -209,9 +209,13 @@ function clsParser.InspectLine() as boolean
       dim as string sFuncParams, st
       this.funcName = sTemp
       i = instr(sTemp, "(")
-      if i THEN this.funcName = rtrim(left(sTemp, i-1))
       if i then sFuncParams = mid(sTemp, i)
+      if i THEN this.funcName = rtrim(left(sTemp, i-1))
       
+      ' The sub/function name will be up to the first whitespace
+      dim as long ii = instr(this.funcName, " ")
+      if ii then this.funcName = left( this.funcName, ii-1 )
+
       ' If this is a PROPERTY then we need to make an educated assessment of whether
       ' it is a Get or Set property and set the flag appropriately.
       if this.action = ACTION_PARSEPROPERTY then
@@ -247,10 +251,6 @@ function clsParser.InspectLine() as boolean
       end if
 
       if i then this.funcParams = this.funcName & sFuncParams
-      this.funcName = AfxStrRemoveI(this.funcName, " OVERLOAD")
-      this.funcName = AfxStrRemoveI(this.funcName, " CDECL")
-      this.funcName = AfxStrRemoveI(this.funcName, " PASCAL")
-      this.funcName = AfxStrRemoveI(this.funcName, " STDCALL")
       this.funcLineNum = this.lineNum
       
       return true
@@ -392,6 +392,7 @@ function clsParser.parseVariableDefinitions() as boolean
    ' At this point the line (sTemp) has been reduced to one the two following
    ' types of declare lines, or zero length if no declare found.
    ' As Long var1, var2, var3
+   ' As Long var1(0 to ub)
    ' As Long Ptr var1, var2, var3
    ' var1 as Long
    ' var1 as Long = 12345    ' need to remove initializers
@@ -403,6 +404,8 @@ function clsParser.parseVariableDefinitions() as boolean
    ' AS WString * MAX_PATH wszText = myFunc("FFFF"), wszName = "TTTT", myArray(5)
    sTemp = AfxStrRemove(sTemp, """", """", true ) 
    sTemp = AfxStrRemoveWithMark(sTemp, "(", ")","",true,true) 
+   sTemp = AfxStrRemoveWithMark(sTemp, "{", "}","",true,true) 
+   sTemp = AfxStrRemoveWithMark(sTemp, "[", "]","",true,true) 
 
    ' Remove any initializers 
    n = instr(sTemp, "=")
@@ -413,7 +416,7 @@ function clsParser.parseVariableDefinitions() as boolean
          sTemp = rtrim(left(sTemp, n-1))
       end if
    end if
-   
+
    ' Remove all Pointer references (we don't need them)
    sTemp = AfxStrRemoveI(sTemp, " ptr")
    sTemp = AfxStrRemoveI(sTemp, " pointer")

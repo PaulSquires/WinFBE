@@ -98,7 +98,7 @@ private function DereferenceLine( byval pDoc as clsDocument ptr, _
    dim as hwnd hEdit   = pDoc->hWndActiveScintilla
    dim as long curPos  = nPosition  
    dim as long nCol    = SciExec(hEdit, SCI_GETCOLUMN, curPos, 0) 
-   dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1))
+   dim as string sLine = trim(left(pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol+1), any chr(32,9))
 
    ' Comment out any comment line so the popup isn't activated when in a comment. 
    sLine = MaskStringCharacters(sLine)
@@ -357,7 +357,8 @@ private function ExistsInAutocompleteList( byref sList as string, _
                                            byref sMatch as string _
                                            ) as boolean
    if rtrim(sMatch) = "" then return true
-   if instr( "|" & ucase(sList) & "|", ucase(sMatch) & "?") THEN return true
+   dim as string sLookFor = "|" & ucase(sMatch) & "?" & "|"
+   if instr( "|" & ucase(sList) & "|", sLookFor ) THEN return true
    return false
 end function
 
@@ -428,44 +429,54 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
          bTypesOnly = false
          bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+
       elseif right(sLine_ucase, 1) = "." then 
          sDot = "."  ' okay
          pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
+
       elseif right(sLine_ucase, 2) = "->" then
          sDot = "->"   
          pDoc->AutoCompleteType = AUTOCOMPLETE_TYPE
+
       elseif right(sLine_ucase, 1) = "(" then 
          ShowCodetip(pDoc)
          exit function 
+
       elseif right(sLine_ucase, 1) = "," then 
          ShowCodetip(pDoc, true)
          exit function 
+
       elseif right(sLine_ucase, 5) = " NEW " then 
          ' okay
          bTypesOnly = false
          bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+
       elseif right(sLine_ucase, 12) = "CONSTRUCTOR " then 
          ' okay
          bTypesOnly = true
          bTypesNotPreloaded = true  ' only TYPES that are in our source.
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+
       elseif right(sLine_ucase, 11) = "DESTRUCTOR " then 
          ' okay
          bTypesOnly = true
          bTypesNotPreloaded = true
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
+
       elseif right(sLine_ucase, 9) = " EXTENDS " then 
          ' okay
          bTypesOnly = true
          bTypesNotPreloaded = false  ' all types
          pDoc->AutoCompleteType = AUTOCOMPLETE_DIM_AS
       END IF
+
       ' Check if it is a "FOR i AS LONG" type of statement
       if instr(sLine, "FOR ") then 
          SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
          exit function
       END IF
+
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
          If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
@@ -590,9 +601,12 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                                        end if
                                     end if
                                  else
+? "["; sList; "]", "["; st; "]"
                                     If ExistsInAutocompleteList(sList, st) = false THEN 
                                        st = st & "?" & str(IMAGE_AUTOC_PROPERTY) 
                                        sList = sList & st & "|"
+else
+? st; " exists in "; sList                                       
                                     end if
                                  end if         
                               end if

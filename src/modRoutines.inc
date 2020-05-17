@@ -289,6 +289,8 @@ END FUNCTION
 ' Maps UTF-8 string to Unicode character string 
 ' ========================================================================================
 public FUNCTION Utf8ToUnicode(BYREF ansiStr AS CONST STRING) AS STRING
+'*** This conversion does not appear to be reliable.
+'*** Better using the CWSTR.Utf8 method instead.
    DIM dwLen AS DWORD = MultiByteToWideChar(CP_UTF8, 0, STRPTR(ansiStr), LEN(ansiStr), NULL, 0)
    IF dwLen THEN
       DIM s AS STRING = SPACE(dwLen * 2)

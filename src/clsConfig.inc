@@ -2064,8 +2064,10 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
 
       ' Re-load all files that were previously shoing in open tabs. Also, be sure
       ' to load and visual designer forms as these can not be quick loaded from cache.
-      if (docData(i).bLoadInTab) orelse (docData(i).IsDesigner) then
-         pDoc = frmMain_OpenFileSafely( _
+      if (docData(i).bLoadInTab) orelse (docData(i).IsDesigner) orelse _
+		   gApp.IsProjectCacheLoaded = false then
+         
+			pDoc = frmMain_OpenFileSafely( _
                      HWND_FRMMAIN, _
                      False, _    ' bIsNewFile
                      False, _    ' bIsTemplate
@@ -2159,7 +2161,7 @@ Function clsConfig.ProjectLoadFromFile( byval wszFile as CWSTR ) As BOOLEAN
    frmOutput_UpdateToDoListview
 
    ' Need to iterate the loaded forms that are currently visually active and
-   ' re-apply properties because loadign of Image properties will fail until
+   ' re-apply properties because loading of Image properties will fail until
    ' all the forms are loaded in the editor.
    Dim As Long nCount = TabCtrl_GetItemCount(gTTabCtl.hWindow) 
    for i as long = 0 to nCount - 1

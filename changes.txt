@@ -1,3 +1,18 @@
+Version 2.1.6 (May 17, 2020)
+Editor:
+- Fixed: Issue with subs/functions not displaying in Explorer treeview during project loading.
+- Fixed: File/Open single source file (non-project related) would not display filename in Explorer treeview.
+- Fixed: Leading chr(9) tab characters interfered with triggering Autocomplete for "this." or "this->".
+- Fixed: Parser infinite loop when parsing DIM lines with { } variable initializers.
+- Fixed: Compiling a visual designer Form file when a project was not active would fail if more than one file was open in the editor at the time of compiling.
+- Fixed: A Utf8 to Unicode conversion error when outputting Form code.
+- Fixed: Some elements from parsed code would not display in popup AutoComplete selection lists.
+- Fixed: Run after Compile would fail if -x command line used specifying a relative path filename.
+
+Visual Designer:
+- Fixed: Form would flash on screen even if Visible = False.
+
+
 Version 2.1.5 (May 8, 2020)
 Editor:
 - Changed: Running WinFBE for first time with no existing WinFBE.ini config file will automatically create entries for User Tools that exist in the Tools folder.

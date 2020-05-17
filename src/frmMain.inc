@@ -779,22 +779,27 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          
       
       case SCN_MODIFYATTEMPTRO
+         
          ' Attempting to modify a read-only document.
          MessageBeep(MB_ICONWARNING)
                   
                   
       Case SCN_MODIFIED
+         
          if gApp.SuppressNotify then return true
          ' Show line and column. Only do on modification of text otherwise we will have
          ' a huge slowdown when notifications sent for UI updates.
+         
          If (pNSC->modificationType And SC_MOD_INSERTTEXT) orelse _
             (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+            
             ' Set parsing flag to true. We use a parse flag rather than depending on the dirty
             ' flags because the file could stay dirty for a long time before it gets saved and 
             ' every call to the parser would happen even in cases where only directional 
             ' movement has occured with no text modifications at all.
             pDoc = gTTabCtl.GetActiveDocumentPtr()
             frmMain_SetStatusbar
+            
             If pDoc Then 
                pDoc->bNeedsParsing = true
                If (pNSC->modificationType And SC_MOD_DELETETEXT) Then
@@ -851,19 +856,25 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          ' ourselves because the startpos of the word is not the same as the start position
          ' used by the autocomplete listbox (because we are doing incremental searches).
          pDoc = gTTabCtl.GetActiveDocumentPtr()
+         
          If pDoc Then 
+            
             hEdit = pDoc->hWndActiveScintilla
+            
             ' Get the position where the listbox was opened.
             dim as long nStartPos = pDoc->AutoCStartPos
             Dim as long nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
+            
             ' Get the match word that existed when the listbox was displayed
             dim as long nLenMatchWord = len(pDoc->sMatchWord)
+            
             ' Set the word that was selected in the listbox
             dim as String sText = *cast(zstring ptr, pNSC->lpText)
             SciExec( hEdit, SCI_SETSEL, nStartPos-nLenMatchWord, nPos)
             SciExec( hEdit, SCI_REPLACESEL, 0, Cast(LPARAM, strptr(sText)))
             nPos = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0)
             SciExec( hEdit, SCI_SETSEL, nPos, nPos)
+            
             ' Now that we have inserted our own text, cancel the autoinsertion by
             ' the autocomplete listbox.
             SciExec( hEdit, SCI_AUTOCCANCEL, 0, 0)
@@ -882,6 +893,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             return true   
          end if
  
+      
       case SCN_AUTOCCHARDELETED    
          if gConfig.CodeTips then
             ' Use deleted a character while autocompletion list was active. Display
@@ -889,6 +901,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             ShowAutocompleteList(SCN_AUTOCCHARDELETED)
          end if
                                     
+      
       CASE SCN_CHARADDED
          if gApp.SuppressNotify then exit function
          pDoc = gTTabCtl.GetActiveDocumentPtr()
@@ -1276,7 +1289,7 @@ public Function frmMain_OpenFileSafely( ByVal HWnd        As HWnd, _
                                         Byref wszName     As WString, _
                                         ByVal pDocIn      As clsDocument Ptr, _
                                         byval bIsDesigner as Boolean = false, _
-                                        byval nFileType as long = FILETYPE_UNDEFINED _
+                                        byval nFileType   as long = FILETYPE_UNDEFINED _
                                         ) As clsDocument Ptr
      
    Dim As Long iTab = -1

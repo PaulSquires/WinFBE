@@ -44,7 +44,7 @@ Using Afx
 
 #Define APPNAME        WStr("WinFBE - FreeBASIC Editor")
 #Define APPNAMESHORT   WStr("WinFBE")
-#Define APPVERSION     WStr("2.1.5") 
+#Define APPVERSION     WStr("2.1.6") 
 #Define APPCOPYRIGHT   WStr("Paul Squires, PlanetSquires Software, Copyright (C) 2016-2020") 
 
 
@@ -195,11 +195,12 @@ Function WinMain( _
    CoInitialize(Null)
 
 
-   ' Load the Scintilla code editing dll
    #IfDef __FB_64BIT__
-      Dim As Any Ptr pLib = Dylibload("SciLexer64.dll")
+      ' Load the Scintilla code editing dll
+      Dim As Any Ptr pLibSciLexer = Dylibload("SciLexer64.dll")
    #Else
-      Dim As Any Ptr pLib = Dylibload("SciLexer32.dll")
+      ' Load the Scintilla code editing dll
+      Dim As Any Ptr pLibSciLexer = Dylibload("SciLexer32.dll")
    #EndIf
 
    
@@ -223,8 +224,8 @@ Function WinMain( _
    if gConfig.bWriteCodetipCache then gConfig.SaveCodetipsCache
 
 
-   ' Free the Scintilla and HTML help libraries
-   Dylibfree(pLib)
+   ' Free the Scintilla, CaptureConsole and HTML help libraries
+   Dylibfree(pLibSciLexer)
    Dylibfree(gpHelpLib)
    
 
