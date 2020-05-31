@@ -45,4 +45,5 @@ declare Function frmMain_SetFocusToCurrentCodeWindow() As Long
 Declare Function frmMain_OpenFileSafely( ByVal HWnd As HWnd, ByVal bIsNewFile As BOOLEAN, ByVal bIsTemplate As BOOLEAN, ByVal bShowInTab As BOOLEAN, byval bIsInclude as BOOLEAN, Byref wszName As WString, ByVal pDocIn As clsDocument Ptr, byval bIsDesigner as Boolean = false, byval nFileType as long = FILETYPE_UNDEFINED ) As clsDocument Ptr
 declare Function frmMain_OpenProjectSafely( ByVal HWnd As HWnd, byref wszProjectFileName as const WString ) as Boolean
 declare Function frmMain_PositionWindows() As LRESULT
+declare function frmMain_HighlightWord( byval pDoc as clsDocument ptr, byref text as string ) as long
 declare Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT

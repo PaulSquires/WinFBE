@@ -169,91 +169,6 @@ end function
 '' but does not PRINT on Windows 7. Also, dkl posted in FB forum that FB prints
 '' to STDOUT rather than STDERR. This is too bad.
 
-''
-''
-private function AlternateCompile( byref wszExe AS wstring, _
-                                   byref wszCmdLine AS wstring, _
-                                   byref sConsoleText AS string _
-                                   ) as long
-
-   Dim ShExecInfo As SHELLEXECUTEINFOW  
-
-   ' Create a temporary batch that will contain the compile commands. We shell
-   ' to and run this batch file in order to do the compile.
-   ' Replace any embedded spaces with underscores
-   dim as CWSTR wDQ = wchr(34)
-   dim as CWSTR wszBatchFile = "_winfbe_compile.bat"
-   dim as CWSTR wszLogFile   = "_winfbe_compile.log"
-   
-   ' Change to the output code directory
-   'ChDir gCompile.MainFolder
-   
-   ' Must delete any previous instance of the compiler log file in case it was not deleted. Need
-   ' to do this because the compiler appends to the log file rather than overwriting.
-   if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
-   
-   dim as long f = Freefile
-   Open wszBatchFile For Output as #f
-   print #f, wDQ & wszEXE & wDQ & " " & wszCmdLine;
-   Print #f, " >> "; wszLogFile; " 2>&1"   ' ensure stderr is redirected (appended) to log file as well
-   close #f
-   
-   dim as CWSTR wszShellExe = Environ("COMSPEC")
-   dim as CWSTR wszShellParam   = " /C " & wszBatchFile
-
-   With ShExecInfo
-      .cbSize       = Len(SHELLEXECUTEINFOW)
-      .fMask        = SEE_MASK_NOCLOSEPROCESS
-      .HWnd         = 0
-      .lpVerb       = Null
-      .lpFile       = wszShellExe.sptr
-      .lpParameters = wszShellParam.sptr   
-      .lpDirectory  = 0
-      .nShow        = SW_HIDE
-      .hInstApp     = 0 
-   End With
-
-   ' Shell to the compiler 
-   ShellExecuteEx( @ShExecInfo )
-    
-   ' Give the process 33 ms (you can use a different value here depending on 
-   ' how responsive you wish your app to be)
-   Dim uMsg As MSG
-   while WaitForSingleObject(ShExecInfo.hProcess, 33) = WAIT_TIMEOUT
-   '  if after 33 ms the object's handle is not signaled..       
-   '  we examine the message queue and if there are any waiting..
-   '  Note:  see PeekMessage documentation for details on how to limit
-   '         the types of messages to look for
-      while(PeekMessage(@uMsg, HWND_FRMMAIN,  0, 0, PM_NOREMOVE))
-        ' we process them..
-        if(GetMessage(@uMsg, NULL, 0, 0) > 0) then
-            TranslateMessage(@uMsg)
-            DispatchMessage(@uMsg)
-         end if
-      wend
-   wend
-   
-   ' Get the log file contents into a string in order to parse it for errors, etc
-   If AfxFileExists(wszLogFile) Then
-      dim pStream as CFileStream
-      if pStream.Open( wszLogFile, _
-                       STGM_READ or STGM_SHARE_EXCLUSIVE, _     
-                       FILE_ATTRIBUTE_NORMAL, _
-                       false _               ' fCreate
-                       ) = S_OK then
-         sConsoleText = string( pStream.GetSize, 0 )
-         pStream.Read( strptr(sConsoleText), len(sConsoleText), null ) 
-         pStream.Close
-      end if   
-   End If   
-
-   if AfxFileExists(wszBatchFile) then AfxDeleteFile(wszBatchFile)
-   if AfxFileExists(wszLogFile) then AfxDeleteFile(wszLogFile)
-  
-   function = 0
-end function
-
-
 
 ''
 ''
@@ -262,14 +177,17 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
                                      byref sConsoleText AS string _
                                      ) as long
 
-   ' It appears that CreateProcess will fail if szExe is wrapped in quotes or if
-   ' it contains spaces in the filename. Use the older Batch file method instead.
-   ' This means that the WinFBE installation and the location of the gcc tools should not
-   ' have any embedded spaces in their folder paths. 
+   ' From the MinGW "Getting Started" guide:
+   '    MinGW may have problems with paths containing spaces, and if not, usually 
+   '    other programs used with MinGW will experience problems with such paths. 
+   '    Thus, we strongly recommend that you do not install MinGW in any location 
+   '    with spaces in the path name reference; i.e. you should avoid installing 
+   '    into any subdirectory of "Program Files" or "My Documents", or the like.
    if instr(wszExe, " ") then
-      AlternateCompile( wszExe, wszCmdLine, sConsoleText )
-      return 0
-   end if   
+      AfxMsg( "Compile failed (CreateChildProcess)." & vbcrlf & _
+              "Please install WinFBE into a folder without spaces." )
+      exit function
+   end if
 
    ' Create the child process and read from its standard output
    dim ProcessInfo AS PROCESS_INFORMATION
@@ -291,72 +209,61 @@ private function RedirConsoleToFile( byref wszExe AS wstring, _
    IF CreatePipe( @hChildStdOutRead, @hChildStdOutWrite, @SecurityAttribute, BYVAL 0 ) = FALSE THEN
       '? "error creating pipe"
    ELSE
-      ' Ensure the read handle to the pipe for STDOUT is not inherited.
-      IF SetHandleInformation( hChildStdOutRead, HANDLE_FLAG_INHERIT, BYVAL 0 ) = FALSE THEN
-         '? "error SetHandleInformation"
-      ELSE
-         StartupInf.cb         = SIZEOF(STARTUPINFO)
-         StartupInf.hStdError  = hChildStdOutWrite   
-         StartupInf.hStdOutput = hChildStdOutWrite  
-         StartupInf.dwFlags    = STARTF_USESTDHANDLES
+      StartupInf.cb         = SIZEOF(STARTUPINFO)
+      GetStartupInfo(@StartupInf )  
+      StartupInf.hStdError  = hChildStdOutWrite   
+      StartupInf.hStdOutput = hChildStdOutWrite  
+      StartupInf.dwFlags    = STARTF_USESTDHANDLES or STARTF_USESHOWWINDOW
+      StartupInf.wShowWindow = SW_HIDE
+      
+      ' This call to CreateProcessW will succeed in all cases except for the one
+      ' where there are spaces in wszFullExe because once I wrap the string in double
+      ' quotes then the call to CreateProcessW fails.
 
-         dim wszFullExe as wstring * 32767
-         
-         if instr(wszExe, " ") then
-            wszFullExe = wchr(34) & wszExe & wchr(34)
-         else
-            wszFullExe = wszExe 
-         end if
-         
-' This call to CreateProcessW will succeed in all cases except for the one
-' where there are spaces in wszFullExe because once I wrap the string in double
-' quotes then the call to CreateProcessW fails.
+      dim errCode as long 
+      errCode = CreateProcessW( _
+                  wszExe,  _          ' Create the child process.
+                  wszCmdLine, _       ' Command line
+                  BYVAL 0,     _      ' Process security attributes
+                  BYVAL 0,     _      ' Primary thread security attributes
+                  TRUE,        _      ' Handles are inherited
+                  byval 0,     _      ' Creation flags  
+                  BYVAL 0,     _      ' Use parent's environment
+                  BYVAL 0,     _      ' Use parent's current directory
+                  @StartupInf,  _     ' STARTUPINFO pointer
+                  @ProcessInfo) 
+      
+      if errCode <> 0 then            
 
-         dim errCode as long 
-         errCode = CreateProcessW( _
-                     wszFullExe,  _      ' Create the child process.
-                     wszCmdLine, _       ' Command line
-                     BYVAL 0,     _      ' Process security attributes
-                     BYVAL 0,     _      ' Primary thread security attributes
-                     TRUE,        _      ' Handles are inherited
-                     CREATE_NO_WINDOW, _ ' Creation flags  
-                     BYVAL 0,     _      ' Use parent's environment
-                     BYVAL 0,     _      ' Use parent's current directory
-                     @StartupInf,  _     ' STARTUPINFO pointer
-                     @ProcessInfo) 
-         
-         if errCode <> 0 then            
-
-            CloseHandle( hChildStdOutWrite ) ' To avoid ReadFile hanging at the end.
-            DO
-               IF ReadFile( hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0 ) = FALSE THEN 
-                  '? "ERROR ReadFile. hChildStdOutRead=";hChildStdOutRead
-                  '? "GetLastError: "; GetLastError
-                  EXIT DO
-               end if  
-               sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
-               '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
-               ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
-            LOOP
+         CloseHandle( hChildStdOutWrite ) ' To avoid ReadFile hanging at the end.
+         DO
+            IF ReadFile( hChildStdOutRead, BYVAL VARPTR(sBuffer), 4096, @dwReadBytes, BYVAL 0 ) = FALSE THEN 
+               '? "ERROR ReadFile', "GetLastError: "; GetLastError
+               EXIT DO
+            end if  
+            sConsoleText = sConsoleText & LEFT(sBuffer, dwReadBytes)
+            '(at this stage we could SAVE the buffer that we've read from the child to a file, but 
+            ' thats an extra ReadFile+WriteFile compared to the direct-to-hFile method)
+         LOOP
             
-         else
-            '? "CreateChildProcess failed"      
-            if instr( wszFullExe, " " ) then
-               AfxMsg( "CreateChildProcess failed. Install WinFBE into folder without spaces." )
-            end if    
-         END IF
-         
+      else
+         '? "CreateChildProcess failed"      
+         if instr( wszExe, " " ) then
+            AfxMsg( "CreateChildProcess failed. Install WinFBE into folder without spaces." )
+         end if    
+         if hChildStdOutRead  then CloseHandle( hChildStdOutRead )
+         if hChildStdOutWrite then CloseHandle( hChildStdOutWrite )
+         exit function
       END IF
+         
    END IF
 
    ' Close handles to the child process and its primary thread.
    ' Some applications might keep these handles to monitor the status 
    ' of the child process, for example.
-   if hChildStdOutRead     then CloseHandle( hChildStdOutRead )
-   if hChildStdOutWrite    then CloseHandle( hChildStdOutWrite )
    if ProcessInfo.hProcess then CloseHandle( ProcessInfo.hProcess )
    if ProcessInfo.hThread  then CloseHandle( ProcessInfo.hThread )
-
+   if hChildStdOutRead     then CloseHandle( hChildStdOutRead )
 
    function = 0
 END function

@@ -208,7 +208,7 @@ private Function frmOptionsColors_SetTempColorSelection( ByVal HWnd As HWnd, _
    gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
    
    ' Must increase the nCurSel value because it is zero based and the color
-   ' offset is between CLR_CARET and CLR_BRACEBAD
+   ' offset is between CLR_CARET and CLR_OCCURRENCE
    Select Case nCtrlID 
       Case IDC_FRMOPTIONSCOLORS_CBCOLOR1 
          idx = ComboBox_GetCurSel( hCB1 )
@@ -250,7 +250,7 @@ private Function frmOptionsColors_ShowComboColors( ByVal HWnd As HWnd ) As Long
    dim as hwnd hWndCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSCOLORS_COMBOTHEMES)
    gConfig.idxTheme = Combobox_GetCurSel( hWndCombo )
    ' Must increase the nCurSel value because it is zero based and the color
-   ' offset is between CLR_CARET and CLR_BRACEBAD
+   ' offset is between CLR_CARET and CLR_OCCURRENCE
    nFg = gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+ CLR_CARET).nFg 
    nBg = gConfig.ThemesTemp(gConfig.idxTheme).colors(nCurSel+ CLR_CARET).nBg 
 
@@ -289,6 +289,7 @@ private Function frmOptionsColors_ShowComboColors( ByVal HWnd As HWnd ) As Long
    If nCurSel = 13 Then fHideBack = True   ' Window
    If nCurSel = 14 Then fHideBack = True   ' Brace highlight Match
    If nCurSel = 15 Then fHideBack = True   ' Brace highlight Match
+   If nCurSel = 16 Then fHideBack = True   ' Occurrences highlight
    ShowWindow hCB2, Iif( fHideBack, SW_HIDE, SW_SHOW )
    ShowWindow GetDlgItem(HWnd, IDC_FRMOPTIONSCOLORS_LBLBACKGROUND), Iif( fHideBack, SW_HIDE, SW_SHOW )
 
@@ -633,6 +634,7 @@ public Function frmOptionsColors_Show( ByVal hWndParent As HWnd ) as LRESULT
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(152,"Window")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(414,"Brace Highlight Match")) )
    SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(415,"Brace Highlight No-Match")) )
+   SendMessage( hList, LB_ADDSTRING, 0, Cast(LPARAM, @L(418,"Occurrences Highlighting")) )
 
 
    ' Copy all of the Themes to the ThemesTemp array because we will work with 

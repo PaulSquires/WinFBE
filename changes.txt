@@ -1,3 +1,13 @@
+Version 2.1.7 (May 31, 2020)
+Editor:
+- Added: Occurrences Highlighting. Editor will highlight words under the current cursor position (Visual Studio has this type of feature as well).
+- Changed: Changed the default toolchain to: FreeBASIC-1.07.1-gcc-8.4
+- Fixed: Performance issue with parsing document when about to show a popup Autocomplete list.
+
+Visual Designer:
+- Fixed: Listbox control not consistently updating display visually during add or remove.
+
+
 Version 2.1.6 (May 17, 2020)
 Editor:
 - Fixed: Issue with subs/functions not displaying in Explorer treeview during project loading.

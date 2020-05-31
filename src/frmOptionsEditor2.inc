@@ -91,15 +91,19 @@ public Function frmOptionsEditor2_Show( ByVal hWndParent As HWnd ) as LRESULT
    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT, L(412,"Enable Brace Highlighting"), 0, 105, 400, 20, _
         WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
+   pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSEDITOR2_CHKOCCURRENCEHIGHLIGHT, L(419,"Enable Occurrences Highlighting"), 0, 126, 400, 20, _
+        WS_CHILD Or WS_VISIBLE Or WS_TABSTOP Or BS_TEXT Or BS_NOTIFY Or BS_AUTOCHECKBOX Or BS_LEFT Or BS_VCENTER, _
+        WS_EX_LEFT Or WS_EX_LTRREADING)
 
    Dim As HWnd HWnd = HWND_FRMOPTIONSEDITOR2
    
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS),         gConfig.CodeTips)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE),     gConfig.AutoComplete)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCHARAUTOCOMPLETE), gConfig.CharacterAutoComplete)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION),  gConfig.AutoIndentation)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE),  gConfig.ForNextVariable)
-   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT),   gConfig.BraceHighlight)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCODETIPS),            gConfig.CodeTips)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOCOMPLETE),        gConfig.AutoComplete)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKCHARAUTOCOMPLETE),    gConfig.CharacterAutoComplete)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION),     gConfig.AutoIndentation)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE),     gConfig.ForNextVariable)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT),      gConfig.BraceHighlight)
+   Button_SetCheck( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKOCCURRENCEHIGHLIGHT), gConfig.OccurrenceHighlight)
 
    if Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) ) then
       EnableWindow( GetDlgItem( HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE), true )

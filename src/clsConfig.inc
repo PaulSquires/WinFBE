@@ -1061,6 +1061,7 @@ Function clsConfig.SaveConfigFile() as Long
    pStream.WriteLine "TabSize="               & this.TabSize              
    pStream.WriteLine "PositionMiddle="        & this.PositionMiddle
    pStream.WriteLine "BraceHighlight="        & this.BraceHighlight
+   pStream.WriteLine "OccurrenceHighlight="   & this.OccurrenceHighlight
    pStream.WriteLine "EditorFontname="        & this.EditorFontname       
    pStream.WriteLine "EditorFontsize="        & this.EditorFontsize       
    pStream.WriteLine "EditorFontCharSet="     & this.EditorFontCharSet    
@@ -1155,7 +1156,7 @@ Function clsConfig.SaveConfigFile() as Long
       pStream.Write "THEME_" & Right("00" & Str(i), 2) & "=" & _
                     this.Themes(i).id & "," & _
                     AfxStrReplaceAny(this.Themes(i).wszDescription, ",|", "_") 
-      for ii as long = CLR_CARET to CLR_BRACEBAD
+      for ii as long = CLR_CARET to CLR_OCCURRENCE
          pStream.Write "|" & this.Themes(i).colors(ii).nFg & "," & _
                         this.Themes(i).colors(ii).nBg & "," & _
                         this.Themes(i).colors(ii).bUseDefaultBg & "," & _
@@ -1284,6 +1285,12 @@ Function clsConfig.ImportTheme( byref st as wstring, _
          theme.colors(CLR_BRACEGOOD).nBg = -1
       end if   
       
+      ' Version 2.1.7 adds Occurrences highlighting colors
+      if theme.colors(CLR_OCCURRENCE).nFg = 0 then
+         theme.colors(CLR_OCCURRENCE).nFg = BGR(127,127,127)    ' gray
+         theme.colors(CLR_OCCURRENCE).nBg = -1
+      end if   
+
       if bImportExternal THEN
          theme.id = AfxGuidText(AfxGuid())
          i = ubound(this.ThemesTemp) + 1
@@ -1527,6 +1534,7 @@ Function clsConfig.LoadConfigFile() as Long
             Case "TabIndentSpaces":        this.TabIndentSpaces       = nData
             Case "PositionMiddle":         this.PositionMiddle        = nData
             Case "BraceHighlight":         this.BraceHighlight        = nData
+            Case "OccurrenceHighlight":    this.OccurrenceHighlight   = nData
             Case "LocalizationFile":       this.LocalizationFile      = ProcessFromCurdriveApp(wData)
             Case "TabSize":                this.TabSize               = wData
             Case "UnicodeEncoding":        this.UnicodeEncoding       = nData
@@ -1710,6 +1718,8 @@ Function clsConfig.LoadConfigFile() as Long
       .colors(CLR_BRACEGOOD).nBg    = -1
       .colors(CLR_BRACEBAD).nFg     = BGR(196,000,000)    ' red
       .colors(CLR_BRACEBAD).nBg     = -1
+      .colors(CLR_OCCURRENCE).nFg   = BGR(148,202,240)    ' powder blue
+      .colors(CLR_OCCURRENCE).nBg   = -1
    end with
 
    with DefaultThemes(1)
@@ -1747,6 +1757,8 @@ Function clsConfig.LoadConfigFile() as Long
       .colors(CLR_BRACEGOOD).nBg    = -1
       .colors(CLR_BRACEBAD).nFg     = BGR(196,000,000)    ' red
       .colors(CLR_BRACEBAD).nBg     = -1
+      .colors(CLR_OCCURRENCE).nFg   = BGR(127,127,127)    ' gray
+      .colors(CLR_OCCURRENCE).nBg   = -1
    end with
 
    ' Create a default Theme if none exist
@@ -1782,11 +1794,11 @@ Function clsConfig.LoadConfigFile() as Long
    ' Attempt to fill in any missing compiler paths and help files
    dim as CWSTR wszText
    if len(this.FBWINCompiler32) = 0 then
-      wszText = AfxGetExePathName & "FreeBASIC-1.07.1-gcc-5.2\fbc32.exe"      
+      wszText = AfxGetExePathName & "FreeBASIC-1.07.1-gcc-8.4\fbc32.exe"      
       if AfxFileExists(wszText) then this.FBWINCompiler32 = wszText
    end if
    if len(this.FBWINCompiler64) = 0 then
-      wszText = AfxGetExePathName & "FreeBASIC-1.07.1-gcc-5.2\fbc64.exe"      
+      wszText = AfxGetExePathName & "FreeBASIC-1.07.1-gcc-8.4\fbc64.exe"      
       if AfxFileExists(wszText) then this.FBWINCompiler64 = wszText
    end if
    if len(this.CompilerHelpfile) = 0 then

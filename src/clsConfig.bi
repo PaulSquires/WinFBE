@@ -35,7 +35,8 @@ enum
    CLR_TEXT            
    CLR_WINDOW
    CLR_BRACEGOOD
-   CLR_BRACEBAD   '17
+   CLR_BRACEBAD   
+   CLR_OCCURRENCE '18
 end enum
 
 '  Control types   
@@ -117,7 +118,7 @@ End Type
 type TYPE_THEMES
    id             as string    ' GUID
    wszDescription as CWSTR
-   colors(CLR_CARET to CLR_BRACEBAD) as TYPE_COLORS
+   colors(CLR_CARET to CLR_OCCURRENCE) as TYPE_COLORS
 END TYPE
 
 
@@ -187,6 +188,7 @@ Type clsConfig
       IndentGuides          As Long = True
       PositionMiddle        as long = false         ' position found text to middle of screen
       BraceHighlight        As Long = True
+      OccurrenceHighlight   As Long = True
       TabIndentSpaces       As Long = True
       MultipleInstances     As Long = True
       CompileAutosave       As Long = True

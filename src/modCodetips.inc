@@ -282,12 +282,6 @@ private function ShowCodetip( byval pDoc as clsDocument ptr, _
    else      
       pDoc->wszLastCallTip = ""
       pDoc->nLastCallTipLine = -1
-      ' If the file is dirty then reparse it before attempting the codetip
-      If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-         pDoc->bRegenerateCode = true
-         GenerateFormCode(pDoc)
-         ParseDocument( pDoc )
-      End If   
       pData = DereferenceLine(pDoc, "(", curPos-1)
       if pData = 0 then 
          ' Maybe this is a class sub/function inside of a class method that is
@@ -388,6 +382,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
    pDoc->sMatchWord = ucase( trim( pDoc->GetWord, any " .") )
    nLenMatchWord = len(pDoc->sMatchWord )
 
+
    ' If an autocomplete is active but now there is no match word then
    ' a space or tab must have been pressed so autocomplete cancel and now exit.
    if SciExec(hEdit, SCI_AUTOCACTIVE, 0, 0) then
@@ -408,6 +403,7 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
       case SCE_B_MULTILINECOMMENT, SCE_B_COMMENT
          exit function
    end select
+
 
    dim as string sLine = left( pDoc->GetLine(pDoc->GetCurrentLineNumber), nCol )
    dim as string sLine_ucase
@@ -479,11 +475,14 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
 
       if pDoc->AutoCompleteType <> AUTOCOMPLETE_NONE then
          ' If the file is dirty then reparse it before attempting the autocomplete
-         If cbool(SciExec( hEdit, SCI_GETMODIFY, 0, 0 )) or pDoc->UserModified Then
-            pDoc->bRegenerateCode = true
-            GenerateFormCode(pDoc)
-            ParseDocument(pDoc)
-         End If   
+         If pDoc->UserModified Then
+				if pDoc->IsDesigner then
+					pDoc->bRegenerateCode = true
+					GenerateFormCode(pDoc)
+				else
+					ParseDocument(pDoc)
+				end if
+			End If   
       end if
    END IF
    
@@ -601,12 +600,9 @@ private function ShowAutocompleteList( byval Notification as long = 0) as BOOLEA
                                        end if
                                     end if
                                  else
-? "["; sList; "]", "["; st; "]"
                                     If ExistsInAutocompleteList(sList, st) = false THEN 
                                        st = st & "?" & str(IMAGE_AUTOC_PROPERTY) 
                                        sList = sList & st & "|"
-else
-? st; " exists in "; sList                                       
                                     end if
                                  end if         
                               end if

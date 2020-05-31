@@ -584,6 +584,75 @@ private Function frmMain_ProcessCommandLine( ByVal HWnd As HWnd ) As Long
 End Function   
 
 
+
+' ========================================================================================
+' Determine if the incoming character is a brace character
+' ========================================================================================
+function frmMain_HighlightWord( byval pDoc as clsDocument ptr, byref text as string ) as long
+
+   if pDoc = 0 then exit function
+   
+   dim as any ptr pSci = pDoc->GetActiveScintillaPtr()
+   if pSci = 0 then exit function
+
+   '// Indicators 0-7 could be in use by a lexer
+   '// Indicator 8 is used by Find/Replace
+   '// Indicator 9 is used for Brace Highlighting
+   '// so we'll use indicator 10 to highlight words.
+   dim as long NUM = 10
+
+   '// Remove all uses of our indicator
+   dim as long nLength = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
+   SciMsg( pSci, SCI_SETINDICATORCURRENT, 10, 0)
+   SciMsg( pSci, SCI_INDICATORCLEARRANGE, 0, nLength)
+
+   if len(ltrim(text)) = 0 then exit function
+
+   '// Update indicator appearance
+   dim pTheme as TYPE_THEMES ptr
+   pTheme = gConfig.GetThemePtr
+   if pTheme = 0 then exit function
+    
+   SciMsg( pSci, SCI_INDICSETSTYLE, NUM, INDIC_STRAIGHTBOX )
+   SciMsg( pSci, SCI_INDICSETFORE, NUM, pTheme->colors(CLR_OCCURRENCE).nFg) 
+   SciMsg( pSci, SCI_INDICSETOUTLINEALPHA, NUM, 50 )
+   SciMsg( pSci, SCI_INDICSETALPHA, NUM, 80 )   
+
+   '// Search the document
+   SciMsg( pSci, SCI_TARGETWHOLEDOCUMENT, 0, 0)
+   SciMsg( pSci, SCI_SETSEARCHFLAGS, SCFIND_WHOLEWORD, 0)
+
+   dim as long numfound = 0
+	dim as long startPos = 0
+   dim as long r
+   do 
+      r = SciMsg( pSci, SCI_SEARCHINTARGET, Len(text), cast(LPARAM, Strptr(text)))
+      if r = -1 THEN exit do
+      
+      numfound = numfound + 1
+		
+		SciMsg( pSci, SCI_SETINDICATORVALUE, NUM, 0 )
+      SciMsg( pSci, SCI_INDICATORFILLRANGE, r, len(text))
+      startPos = r + len(text)
+      
+      ' Adjust the searching positions
+      SciMsg( pSci, SCI_SETTARGETSTART, startPos, 0)
+      SciMsg( pSci, SCI_SETTARGETEND, nLength, 0)
+   loop
+
+   '// If only the current word was found then we don't want any highlighting
+	'// because the effect would be that the current word highlights as we type.
+	'// Remove all uses of our indicator
+   if numfound <= 1 then
+		nLength = SciMsg( pSci, SCI_GETTEXTLENGTH, 0, 0)
+		SciMsg( pSci, SCI_SETINDICATORCURRENT, 10, 0)
+		SciMsg( pSci, SCI_INDICATORCLEARRANGE, 0, nLength)
+	end if
+	
+   function = 0
+end function
+
+
 ' ========================================================================================
 ' Determine if the incoming character is a brace character
 ' ========================================================================================
@@ -735,6 +804,16 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                if pDoc->lastCaretPos <> caretPos then
                   pDoc->lastCaretPos = caretPos
 
+                  if gConfig.OccurrenceHighlight then
+                     static as string sCurWord, sPrevWord
+                     sCurWord = pDoc->GetWord()
+                     if sCurWord <> sPrevWord then
+                        frmMain_HighlightWord( pDoc, sCurWord )
+                        sPrevWord = sCurWord
+                     end if
+                  end if
+                  
+                  
                   if gConfig.BraceHighlight then
                      var bracePos1 = -1
                      var bracePos2 = -1
@@ -754,14 +833,16 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                            '// Find the matching brace
                            bracePos2 = SciExec( pDoc->hWndActiveScintilla, SCI_BRACEMATCH, bracePos1, 0)
                            if bracePos2 = -1 then
-                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 8, pTheme->colors(CLR_BRACEBAD).nFg )  ' red
+                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->colors(CLR_BRACEBAD).nFg )  ' red
                               SciExec( pDoc->hWndActiveScintilla, SCI_BRACEBADLIGHT, bracePos1, 0 )
                            else
-                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 8, pTheme->colors(CLR_BRACEGOOD).nFg )  ' green
+                              SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETFORE, 9, pTheme->colors(CLR_BRACEGOOD).nFg )  ' green
                               SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, bracePos1, bracePos2 )
                            end if
-                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 8, 255 ) ' transparency of outline
-                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 8, 127 )        ' transparency of interior      
+                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 255 ) ' transparency of outline
+                           'SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 127 )        ' transparency of interior      
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETOUTLINEALPHA, 9, 50 ) ' transparency of outline
+                           SciExec( pDoc->hWndActiveScintilla, SCI_INDICSETALPHA, 9, 30 )        ' transparency of interior      
                         else
                            '// Turn off brace matching
                            SciExec( pDoc->hWndActiveScintilla, SCI_BRACEHIGHLIGHT, -1, -1 )
@@ -798,28 +879,29 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
             ' every call to the parser would happen even in cases where only directional 
             ' movement has occured with no text modifications at all.
             pDoc = gTTabCtl.GetActiveDocumentPtr()
-            frmMain_SetStatusbar
-            
             If pDoc Then 
-               pDoc->bNeedsParsing = true
-               If (pNSC->modificationType And SC_MOD_DELETETEXT) Then
-                  ' Do a check to see if we have backspaced to a point where there is a
-                  ' period to try to popup an autocomplete or codetip.
-                  Dim as long nPos, nChar
-                  hEdit = pDoc->hWndActiveScintilla
-                  nPos  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0 ) - 1
-                  nChar = SciExec( hEdit, SCI_GETCHARAT, nPos, 0 )
-                  select case chr(nChar)
-                     case ".", ">"    '  Show autocomplete list for TYPE variables
-                        ' dot "." or ">"  part of a pointer
-                        ' Need to PostMessage in order to give time for notification to complete. The "."
-                        ' is also used as a character that selects and closes the popup list. If no
-                        ' PostMessage then the "." will automatically select the first entry in the list
-                        ' and close.
-                        pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
-                        PostMessage( HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, nChar, 0 )
-                  end select
-               end if
+               frmMain_SetStatusbar
+
+					pDoc->bNeedsParsing = true
+					If (pNSC->modificationType And SC_MOD_DELETETEXT) Then
+						' Do a check to see if we have backspaced to a point where there is a
+						' period to try to popup an autocomplete or codetip.
+						Dim as long nPos, nChar
+						hEdit = pDoc->hWndActiveScintilla
+						nPos  = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0 ) - 1
+						nChar = SciExec( hEdit, SCI_GETCHARAT, nPos, 0 )
+						select case chr(nChar)
+							case ".", ">"    '  Show autocomplete list for TYPE variables
+								' dot "." or ">"  part of a pointer
+								' Need to PostMessage in order to give time for notification to complete. The "."
+								' is also used as a character that selects and closes the popup list. If no
+								' PostMessage then the "." will automatically select the first entry in the list
+								' and close.
+								pDoc->AutoCompleteType = AUTOCOMPLETE_NONE
+								PostMessage( HWND_FRMMAIN, MSG_USER_SHOWAUTOCOMPLETE, nChar, 0 )
+						end select
+					end if
+
             end if
          end if
          return true
@@ -908,6 +990,8 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
          If pDoc = 0 Then exit function
          hEdit = pDoc->hWndActiveScintilla
        
+			pDoc->bNeedsParsing = true
+
          ' Attempt to do a Character Autocompletion if that editor option is active.
          frmMain_InsertMatchedChars( pDoc, pNSC->ch )
          

@@ -19,6 +19,7 @@
 #include once "frmOptionsColors.bi"
 #include once "frmOptionsLocal.bi"
 #include once "frmOptionsKeywords.bi"
+#include once "frmMain.bi"
 
 #include once "clsConfig.bi"
 
@@ -68,6 +69,7 @@ private function frmOptions_SaveEditorOptions() as long
    gConfig.AutoIndentation       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKAUTOINDENTATION) )
    gConfig.ForNextVariable       = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKFORNEXTVARIABLE) )
    gConfig.BraceHighlight        = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKBRACEHIGHLIGHT) )
+   gConfig.OccurrenceHighlight   = Button_GetCheck( GetDlgItem(HWnd, IDC_FRMOPTIONSEDITOR2_CHKOCCURRENCEHIGHLIGHT) )
 
 
    ' If a localization file is currently being edited then save it now.
@@ -134,6 +136,14 @@ private function frmOptions_SaveEditorOptions() as long
    
    ' Output the config settings to disk file
    gConfig.SaveConfigFile
+   
+   ' If Occurrences Highlighting is false then ensure that any highlights
+   ' on the screen will be removed.
+   dim pDoc as clsDocument ptr
+   pDoc = gTTabCtl.GetActiveDocumentPtr()
+   if pDoc then
+      frmMain_HighlightWord( pDoc, "" )
+   end if
 
    function = 0
 End function

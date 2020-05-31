@@ -1657,12 +1657,12 @@ Function clsDocument.ApplyProperties() As Long
                          
       ' Add Brace Highlighting Functionality:
       ' First, we set the style of the indicator number we want to use to the Box style
-      SciMsg( m_pSci(i), SCI_INDICSETSTYLE, 8, INDIC_STRAIGHTBOX )
+      SciMsg( m_pSci(i), SCI_INDICSETSTYLE, 9, INDIC_STRAIGHTBOX )
       ' Then, we make that indicator the current one
-      SciMsg( m_pSci(i), SCI_SETINDICATORCURRENT, 8, 0 )
+      SciMsg( m_pSci(i), SCI_SETINDICATORCURRENT, 9, 0 )
       ' Lastly, we apply the indicator (in this case), to a single char
-      SciMsg( m_pSci(i), SCI_BRACEHIGHLIGHTINDICATOR, 1, 8 )  ' use indicator for SCI_BRACEHIGHLIGHTINDICATOR...
-      SciMsg( m_pSci(i), SCI_BRACEBADLIGHTINDICATOR, 1, 8 )   ' and SCI_BRACEBADLIGHTINDICATOR
+      SciMsg( m_pSci(i), SCI_BRACEHIGHLIGHTINDICATOR, 1, 9 )  ' use indicator for SCI_BRACEHIGHLIGHTINDICATOR...
+      SciMsg( m_pSci(i), SCI_BRACEBADLIGHTINDICATOR, 1, 9 )   ' and SCI_BRACEBADLIGHTINDICATOR
 
       SciMsg( m_pSci(i), SCI_STYLESETFONT, STYLE_DEFAULT, Cast(LPARAM, Strptr(strFontName)) )
       SciMsg( m_pSci(i), SCI_STYLESETSIZE, STYLE_DEFAULT, nFontSize )
