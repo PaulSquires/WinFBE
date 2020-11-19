@@ -200,7 +200,7 @@ BOOLEAN. True on success or False on failure.
 
 # <a name="GetString"></a>GetString
 
-Retrieves a numeric value from the specified section in an initialization file.
+Retrieves a string from the specified section in an initialization file.
 
 ```
 FUNCTION GetString (BYREF wszSectionName AS WSTRING, _

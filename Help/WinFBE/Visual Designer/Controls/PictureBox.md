@@ -14,6 +14,7 @@
 | hWindow |  Gets the Windows handle (hwnd) of the control. |
 | hWindowParent | Gets or sets the Windows handle (hwnd) of the parent control. |
 | Image | Gets or sets the image to display in the control. The image is retrieved from the resource file for the project. Use the Image Manager to store you images specifying the RC_DATA resource type format. |
+| ImageFromFile | Sets the image to display in the control. The image is retrieved from a valid disk file. |
 | ImageHeight | Gets or sets the height of the image. Use the value of zero (0) to allow the control to manage the height. |
 | ImageWidth | Gets or sets the width of the image. Use the value of zero (0) to allow the control to manage the width. |
 | ImageScaling | Gets or sets the scale used to apply to the image.Refer to the [ImageScale](#ImageScale) enum for values. |

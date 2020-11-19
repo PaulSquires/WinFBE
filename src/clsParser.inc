@@ -61,15 +61,15 @@ end function
 ' ========================================================================================
 function clsParser.IsMultilineComment(byval sLine as String) as boolean
    ' If we are already in a comment then test to see if we have now reached the end of it.
-   if action = ACTION_PARSECOMMENT THEN 
+   if this.bInMultiLineComment THEN 
       if right(sLine, 2) = "'/" THEN 
-         action = ACTION_NONE
+         this.bInMultiLineComment = false
       end if
    else   
       ' It is possible that the start and end comment markers may appear on 
       ' the same line. Do a test for this.
       if (left(sLine, 2) = "/'") andalso (right(sLine, 2) <> "'/") THEN 
-         action = ACTION_PARSECOMMENT
+         this.bInMultiLineComment = true
       else
          ' Not in a multiline comment. Just a normal line.
          return false         

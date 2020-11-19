@@ -407,29 +407,33 @@
 </tr>
 <tr class="even">
 <td><a href="#AfxGetWindowFont">AfxGetWindowFont</a></td>
-<td>Retrieves the font with which the control is currently drawing its text.</td>
+<td>Retrieves the font with which the window or control is currently drawing its text.</td>
 </tr>
 <tr class="odd">
+<td><a href="#AfxGetWindowFontInfo">AfxGetWindowFontInfo</a></td>
+<td>Retrieves information about the font being used by a window or control.</td>
+</tr>
+<tr class="even">
 <td><a href="#AfxGetWindowsFontInfo">AfxGetWindowsFontInfo</a></td>
 <td>Retrieves information about the fonts used by Windows.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#AfxGetWindowsFontPointSize">AfxGetWindowsFontPointSize</a></td>
 <td>Retrieves the point size of the fonts used by Windows.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#AfxModifyFontFaceName">AfxModifyFontFaceName</a></td>
 <td>Modifies the face name of the font of a window or control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#AfxModifyFontHeight">AfxModifyFontHeight</a></td>
 <td>Modifies the height of the font used by a window of control.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#AfxModifyFontSettings">AfxModifyFontSettings</a></td>
 <td>Modifies settings of the font used by a window of control.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#AfxSetWindowFont">AfxSetWindowFont</a></td>
 <td>Sets the font that a control is to use when drawing text.</td>
 </tr>
@@ -2193,7 +2197,7 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 </tbody>
 </table>
 <h1 id="afxgetwindowfont"><a name="AfxGetWindowFont"></a>AfxGetWindowFont</h1>
-<p>Retrieves the font with which the control is currently drawing its text.</p>
+<p>Retrieves the font with which the window or control is currently drawing its text.</p>
 <pre><code>FUNCTION AfxGetWindowFont (BYVAL hwnd AS HWND) AS HFONT
 </code></pre>
 <table>
@@ -2206,10 +2210,32 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 <tbody>
 <tr class="odd">
 <td><em>hwnd</em></td>
-<td>A handle to a window.</td>
+<td>A handle to a window or control.</td>
 </tr>
 </tbody>
 </table>
+<h4 id="return-value-49">Return value</h4>
+<p>The handle of the font.</p>
+<h1 id="afxgetwindowfontinfo"><a name="AfxGetWindowFontInfo"></a>AfxGetWindowFontInfo</h1>
+<p>Retrieves information about the font being used by a window or control.</p>
+<pre><code>FUNCTION AfxGetWindowFontInfo (BYVAL hwnd AS HWND) AS LOGFONTW
+</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>hwnd</em></td>
+<td>A handle to a window or control.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="return-value-50">Return value</h4>
+<p>A LOGFONTW structure.</p>
 <h1 id="afxgetwindowsfontinfo"><a name="AfxGetWindowsFontInfo"></a>AfxGetWindowsFontInfo</h1>
 <p>Retrieves information about the fonts used by Windows.</p>
 <pre><code>FUNCTION AfxGetWindowsFontInfo (BYVAL nType AS LONG, BYVAL plfw AS LOGFONTW PTR) AS BOOLEAN
@@ -2232,7 +2258,7 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-49">Return value</h4>
+<h4 id="return-value-51">Return value</h4>
 <p>TRUE on succes or FALSE on failure. To get extended error information, call <strong>GetLastError</strong>.</p>
 <h1 id="afxgetwindowsfontpointsize"><a name="AfxGetWindowsFontPointSize"></a>AfxGetWindowsFontPointSize</h1>
 <p>Retrieves the point size of the fonts used by Windows.</p>
@@ -2274,7 +2300,7 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-50">Return value</h4>
+<h4 id="return-value-52">Return value</h4>
 <p>The handle of the new font on success, or NULL on failure.</p>
 <p>To get extended error information call <strong>GetLastError</strong>.</p>
 <h4 id="remarks-8">Remarks</h4>
@@ -2301,7 +2327,7 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-51">Return value</h4>
+<h4 id="return-value-53">Return value</h4>
 <p>The handle of the new font on success, or NULL on failure.</p>
 <p>To get extended error information call <strong>GetLastError</strong>.</p>
 <h4 id="remarks-9">Remarks</h4>
@@ -2332,7 +2358,7 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-52">Return value</h4>
+<h4 id="return-value-54">Return value</h4>
 <p>The handle of the new font on success, or NULL on failure.</p>
 <p>To get extended error information call <strong>GetLastError</strong>.</p>
 <h4 id="remarks-10">Remarks</h4>
@@ -2363,7 +2389,7 @@ hFont = AfxCreateFont(&quot;Marlett&quot;, 8, -1, FW_NORMAL, , , , SYMBOL_CHARSE
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-53">Return value</h4>
+<h4 id="return-value-55">Return value</h4>
 <p>The handle of the new font on success, or NULL on failure.</p>
 <p>To get extended error information call <strong>GetLastError</strong>.</p>
 <h4 id="remarks-11">Remarks</h4>
@@ -2521,7 +2547,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-54">Return value</h4>
+<h4 id="return-value-56">Return value</h4>
 <p>TRUE or FALSE.</p>
 <h1 id="afxisresolutionatleast"><a name="AfxIsResolutionAtLeast"></a>AfxIsResolutionAtLeast</h1>
 <p>Determines if screen resolution meets minimum requirements.</p>
@@ -2545,14 +2571,14 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-55">Return value</h4>
+<h4 id="return-value-57">Return value</h4>
 <p>TRUE or FALSE.</p>
 <h1 id="afxsetprocessdpiaware"><a name="AfxSetProcessDPIAware"></a>AfxSetProcessDPIAware</h1>
 <p>Sets the current process as dots per inch (dpi) aware.</p>
 <p>Note: <strong>AfxSetProcessDPIAware</strong> is subject to a possible race condition if a DLL caches dpi settings during initialization. For this reason, it is recommended that dpi-aware be set through the application (.exe) manifest rather than by calling <strong>AfxSetProcessDPIAware</strong>.</p>
 <pre><code>FUNCTION AfxSetProcessDPIAware () AS BOOLEAN
 </code></pre>
-<h4 id="return-value-56">Return value</h4>
+<h4 id="return-value-58">Return value</h4>
 <p>If the function succeeds, the return value is TRUE. Otherwise, the return value is FALSE.</p>
 <h4 id="remarks-17">Remarks</h4>
 <p>DLLs should accept the dpi setting of the host process rather than call <strong>AfxSetProcessDPIAware</strong> themselves. To be set properly, <em>dpiAware</em> should be specified as part of the application (.exe) manifest. (<em>dpiAware</em> defined in an embedded DLL manifest has no affect.) The following markup shows how to set <em>dpiAware</em> as part of an application (.exe) manifest.</p>
@@ -2570,7 +2596,7 @@ FUNCTION AfxGetDpiY () AS LONG
 <p>Determines whether the current process is dots per inch (dpi) aware such that it adjusts the sizes of UI elements to compensate for the dpi setting.</p>
 <pre><code>FUNCTION AfxIsProcessDPIAware () AS BOOLEAN
 </code></pre>
-<h4 id="return-value-57">Return value</h4>
+<h4 id="return-value-59">Return value</h4>
 <p>TRUE if the process is dpi aware; otherwise, FALSE.</p>
 <h1 id="afxloadiconmetric"><a name="AfxLoadIconMetric"></a>AfxLoadIconMetric</h1>
 <p>Loads a specified icon resource with a client-specified system metric.</p>
@@ -2603,7 +2629,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-58">Return value</h4>
+<h4 id="return-value-60">Return value</h4>
 <p>Returns S_OK if successful, otherwise an error, including the following value: <em>E_INVALIDARG</em> : The contents of the buffer pointed to by pszName do not fit any of the expected interpretations.</p>
 <h4 id="remarks-18">Remarks</h4>
 <p><strong>LoadIconMetric</strong> is similar to <strong>LoadIcon</strong>, but with the capability to specify the icon metric. It is used in place of <strong>LoadIcon</strong> when the calling application wants to ensure a high quality icon. This is particularly useful in high dots per inch (dpi) situations.</p>
@@ -2699,7 +2725,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-59">Return value</h4>
+<h4 id="return-value-61">Return value</h4>
 <p>The previous window extended styles.</p>
 <h4 id="usage-example-4">Usage example</h4>
 <pre><code>AfxAddWindowExStyle(hwnd, WS_EX_COMPOSITED)
@@ -2728,7 +2754,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-60">Return value</h4>
+<h4 id="return-value-62">Return value</h4>
 <p>The previous window styles.</p>
 <h4 id="usage-example-5">Usage example</h4>
 <pre><code>AfxAddWindowStyle(hwnd, WS_HSCROLL)
@@ -2793,7 +2819,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-61">Return value</h4>
+<h4 id="return-value-63">Return value</h4>
 <p>The previous extended window styles.</p>
 <h1 id="afxremovewindowstyle"><a name="AfxRemoveWindowStyle"></a>AfxRemoveWindowStyle</h1>
 <p>Removes a style from the specified window.</p>
@@ -2817,7 +2843,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-62">Return value</h4>
+<h4 id="return-value-64">Return value</h4>
 <p>The previous window styles.</p>
 <h1 id="afxsetwindowexstyle"><a name="AfxSetWindowExStyle"></a>AfxSetWindowExStyle</h1>
 <p>Sets the extended style(s) of the specified window.</p>
@@ -2841,7 +2867,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-63">Return value</h4>
+<h4 id="return-value-65">Return value</h4>
 <p>The previous extended window styles.</p>
 <h1 id="afxsetwindowstyle"><a name="AfxSetWindowStyle"></a>AfxSetWindowStyle</h1>
 <p>Sets the style(s) of the specified window.</p>
@@ -2865,7 +2891,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-64">Return value</h4>
+<h4 id="return-value-66">Return value</h4>
 <p>The previous window styles.</p>
 <h1 id="afxgetcontrolhandle"><a name="AfxGetControlHandle"></a>AfxGetControlHandle</h1>
 <p>Returns the handle of the control with the specified identifier. The reference handle can be the handle of the form or the handle of any other control on the form.</p>
@@ -2889,7 +2915,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-65">Return value</h4>
+<h4 id="return-value-67">Return value</h4>
 <p>Returns the handle of the control or NULL.</p>
 <h1 id="afxgetformhandle"><a name="AfxGetFormHandle"></a>AfxGetFormHandle</h1>
 <p>Finds the handle of the top-level window or MDI child window that is the ancestor of the specified window handle. The reference handle is the handle of any control on the form.</p>
@@ -2909,7 +2935,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-66">Return value</h4>
+<h4 id="return-value-68">Return value</h4>
 <p>Handle of the ancestor window.</p>
 <h1 id="afxgethwndfrompid"><a name="AfxGetHwndFromPID"></a>AfxGetHwndFromPID</h1>
 <p>Retrieves a window handle given it's process identifier.</p>
@@ -2929,7 +2955,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-67">Return value</h4>
+<h4 id="return-value-69">Return value</h4>
 <p>The window handle or NULL.</p>
 <h1 id="afxgetpathfromwindowhandle"><a name="AfxGetPathFromWindowHandle"></a>AfxGetPathFromWindowHandle</h1>
 <p>Retrieves the path of the executable file that created the specified window.</p>
@@ -2949,7 +2975,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-68">Return value</h4>
+<h4 id="return-value-70">Return value</h4>
 <p>The path of the executable file.</p>
 <h1 id="afxcenterwindow"><a name="AfxCenterWindow"></a>AfxCenterWindow</h1>
 <p>Centers a window on the screen or over another window. It also ensures that the placement is done within the work area.</p>
@@ -2999,7 +3025,7 @@ FUNCTION AfxGetDpiY () AS LONG
 <p>Retrieves the handle of the enabled and visible window at the top of the z-order in an application.</p>
 <pre><code>FUNCTION AfxGetTopEnabledWindow () AS HWND
 </code></pre>
-<h4 id="return-value-69">Return value</h4>
+<h4 id="return-value-71">Return value</h4>
 <p>Handle of the window at top of z-order or NULL.</p>
 <h1 id="afxgettoplevelparent"><a name="AfxGetTopLevelParent"></a>AfxGetTopLevelParent</h1>
 <p>Retrieves the window's top-level parent window.</p>
@@ -3019,7 +3045,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-70">Return value</h4>
+<h4 id="return-value-72">Return value</h4>
 <p>Handle of the top-level parent window.</p>
 <h1 id="afxgettoplevelwindow"><a name="AfxGetTopLevelWindow"></a>AfxGetTopLevelWindow</h1>
 <p>Retrieves the window's top-level parent or owner window.</p>
@@ -3039,7 +3065,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-71">Return value</h4>
+<h4 id="return-value-73">Return value</h4>
 <p>Handle of the top-level parent or owner window.</p>
 <h1 id="afxgetwindowclassname"><a name="AfxGetWindowClassName"></a>AfxGetWindowClassName</h1>
 <p>Retrieves the name of the class to which the specified window belongs.</p>
@@ -3059,7 +3085,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-72">Return value</h4>
+<h4 id="return-value-74">Return value</h4>
 <p>The name of the class.</p>
 <h1 id="afxgetwindowclientheight"><a name="AfxGetWindowClientHeight"></a>AfxGetWindowClientHeight</h1>
 <p>Returns the height of the client area of window, in pixels.</p>
@@ -3097,7 +3123,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-73">Return value</h4>
+<h4 id="return-value-75">Return value</h4>
 <p>A RECT structure with the retrieved coordinates of the window's client area.</p>
 <h1 id="afxgetwindowclientwidth"><a name="AfxGetWindowClientWidth"></a>AfxGetWindowClientWidth</h1>
 <p>Returns the width of the client area of a window, in pixels.</p>
@@ -3183,7 +3209,7 @@ FUNCTION AfxGetDpiY () AS LONG
 <p>Retrieves the dimensions of the bounding rectangle of the specified window. The dimensions are given in screen coordinates that are relative to the upper-left corner of the screen.</p>
 <pre><code>FUNCTION AfxGetWindowRect (BYVAL hwnd AS HWND) AS RECT
 </code></pre>
-<h4 id="return-value-74">Return value</h4>
+<h4 id="return-value-76">Return value</h4>
 <p>A RECT structure with the retrieved dimensions.</p>
 <h1 id="afxgetwindowsize"><a name="AfxGetWindowSize"></a>AfxGetWindowSize</h1>
 <p>Gets the width and height of the specified window, in pixels.</p>
@@ -3215,7 +3241,7 @@ FUNCTION AfxGetDpiY () AS LONG
 <p>Gets the text of a window. This function can also be used to retrieve the text of buttons, edit and static controls.</p>
 <pre><code>FUNCTION AfxGetWindowText (BYVAL hwnd AS HWND) AS CWSTR
 </code></pre>
-<h4 id="return-value-75">Return value</h4>
+<h4 id="return-value-77">Return value</h4>
 <p>The text of the window.</p>
 <p>For an edit control, the text returned is the content of the edit control. For a combo box, the text is the content of the edit control (or static-text) portion of the combo box. For a button, the text is the button name. For other windows, the text is the window title. To retrieve the text of an item in a list box, an application can use the <strong>ListBox_GetText</strong> function.</p>
 <p>Rich Edit: If the text to be copied exceeds 64K, use either the EM_STREAMOUT or EM_GETSELTEXT message.</p>
@@ -3241,7 +3267,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-76">Return value</h4>
+<h4 id="return-value-78">Return value</h4>
 <p>If the function succeeds, the return value is the length of the text in characters, not including the terminating null character.</p>
 <p>If the function fails, the return value is zero.</p>
 <p>For an edit control, the text returned is the content of the edit control. For a combo box, the text is the content of the edit control (or static-text) portion of the combo box. For a button, the text is the button name. For other windows, the text is the window title. To retrieve the text of an item in a list box, an application can use the <strong>ListBox_GetTextLength</strong> function.</p>
@@ -3256,7 +3282,7 @@ FUNCTION AfxGetDpiY () AS LONG
 <p>Retrieves the coordinates of the work area on the primary display monitor expressed in virtual screen coordinates. The work area is the portion of the screen not obscured by the system taskbar or by application desktop toolbars. To get the work area of a monitor other than the primary display monitor, call the <strong>GetMonitorInfo</strong> function.</p>
 <pre><code>FUNCTION AfxGetWorkAreaRect () AS RECT
 </code></pre>
-<h4 id="return-value-77">Return value</h4>
+<h4 id="return-value-79">Return value</h4>
 <p>A RECT structure with the retrieved coordinates.</p>
 <h1 id="afxgetworkareawidth"><a name="AfxGetWorkAreaWidth"></a>AfxGetWorkAreaWidth</h1>
 <p>Retrieves the width of the work area on the primary display monitor expressed in virtual screen coordinates. The work area is the portion of the screen not obscured by the system taskbar or by application desktop toolbars. To get the work area of a monitor other than the primary display monitor, call the <strong>GetMonitorInfo</strong> function.</p>
@@ -3266,7 +3292,7 @@ FUNCTION AfxGetDpiY () AS LONG
 <p>Redraws the non-client area of the specified window.</p>
 <pre><code>FUNCTION AfxRedrawNonClientArea (BYVAL hwnd AS HWND) AS BOOLEAN
 </code></pre>
-<h4 id="return-value-78">Return value</h4>
+<h4 id="return-value-80">Return value</h4>
 <p>If the function succeeds, the return value is TRUE.</p>
 <p>If the function fails, the return value is FALSE. To get extended error information, call <strong>GetLastError</strong>.</p>
 <h1 id="afxredrawwindow"><a name="AfxRedrawWindow"></a>AfxRedrawWindow</h1>
@@ -3334,7 +3360,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-79">Return value</h4>
+<h4 id="return-value-81">Return value</h4>
 <p>The return value is a handle to the previous large or small icon, depending on the value of <em>nIconType</em>. It is NULL if the window previously had no icon of the type indicated by <em>nIconType</em>.</p>
 <h1 id="afxsetwindowlocation"><a name="AfxSetWindowLocation"></a>AfxSetWindowLocation</h1>
 <p>Sets the location of the top left corner of the window, in pixels.The location is relative to the upper-left corner of the client area in the parent window.</p>
@@ -3362,7 +3388,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-80">Return value</h4>
+<h4 id="return-value-82">Return value</h4>
 <p>If the function succeeds, the return value is TRUE.</p>
 <p>If the function fails, the return value is FALSE. To get extended error information, call <strong>GetLastError</strong>.</p>
 <h1 id="afxsetwindowsize"><a name="AfxSetWindowSize"></a>AfxSetWindowSize</h1>
@@ -3413,7 +3439,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-81">Return value</h4>
+<h4 id="return-value-83">Return value</h4>
 <p>If the function succeeds, the return value is TRUE.</p>
 <p>If the function fails, the return value is FALSE.</p>
 <h1 id="afxshowwindowstate"><a name="AfxShowWindowState"></a>AfxShowWindowState</h1>
@@ -3500,7 +3526,7 @@ FUNCTION AfxGetDpiY () AS LONG
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-82">Return value</h4>
+<h4 id="return-value-84">Return value</h4>
 <p>If the window was previously visible, the return value is TRUE.</p>
 <p>If the window was previously hidden, the return value is FALSE.</p>
 <h4 id="remarks-22">Remarks</h4>

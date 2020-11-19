@@ -1,3 +1,19 @@
+Version 2.1.8 (November 19, 2020)
+Editor:
+- Polish language file provided by Waldemar Pajak.
+- Updated Italian language file provided by Massimiliano.
+- For/Next loop variables were sometimes not being correctly identified when that option was enabled in Editor Options.
+- Multiline comment blocks inside of sub/function blocks was not being parsed correctly causing sub/function definitions in the visual designer to be regenerated.
+- The "Refresh" method would appear twice in the codetip popup menu for Forms.
+- New Form files will default to .inc file extension if a project is active, otherwise the file extension will default to .bas.
+
+Visual Designer:
+- DateTimePicker control: font property not set correctly at run time.
+- Menu Editor: added blank line to dropdown Shortcut key combobox so you can unselect any previously set shortcut key.
+- PictureBox control: added property 'ImageFromFile' to be able to load images from disk.
+- ListBox: backcolor of an empty list box was not being handled correctly.
+
+
 Version 2.1.7 (May 31, 2020)
 Editor:
 - Added: Occurrences Highlighting. Editor will highlight words under the current cursor position (Visual Studio has this type of feature as well).

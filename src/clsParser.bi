@@ -31,7 +31,6 @@ enum
    ACTION_PARSEPROPERTY     
    ACTION_PARSETYPE
    ACTION_PARSEENUM
-   ACTION_PARSECOMMENT
    ACTION_PARSEPARAMETERS   ' function parameters
    ACTION_PARSECONSTRUCTOR
    ACTION_PARSEDESTRUCTOR
@@ -60,6 +59,8 @@ type clsParser
       GetSet          as ClassProperty ' 0=sub/function, 1=propertyGet, 2=propertySet
       TypeExtends     as String        ' The TYPE is extended from this TYPE
       bParsingCodeGen as Boolean       ' flag to parser to properly mark codegen sub/function/properties
+      bInMultiLineComment as boolean   ' flag that we are currently inside a multiline comment block
+      
       declare function parseToDoItem(byval sText as string) as boolean
       declare function IsMultilineComment(byval sLine as String) as boolean
       declare function NormalizeLine() as boolean

@@ -1246,10 +1246,13 @@ public Function code_Compile( ByVal wID As Long ) As BOOLEAN
    ' Compile the Main file. If this is a project then we also need to link
    ' in all of the *.o object files.
    ' Per fxm post https://www.freebasic.net/forum/viewtopic.php?f=8&p=266126#p266126
-   ' Do not specify file extension with -m parameter, and also include the file
-   ' a second time in the list of files but include the extension at that time.
-   'dim as CWSTR wszMfile = wDQ + gCompile.MainFilename + wDQ
+   ' and https://www.freebasic.net/forum/viewtopic.php?f=3&t=28723&p=274431#p274431
+   ' Do not specify file extension with -m parameter.
+   ' So the main module file must be called twice in the command line:
+   ' - after compile option '-m', but without specified extension,
+   ' - and also like any module to compile, but there with its specified extension.
    'dim as CWSTR wszMfile = wDQ + AfxStrPathName("PATH", gCompile.MainFilename) + AfxStrPathName("NAME", gCompile.MainFilename) + wDQ
+   'dim as CWSTR wszMfile = AfxStrPathName("NAME", gCompile.MainFilename) 
    'wszParams = "-m " + wszMfile + " " + wDQ + gCompile.MainFilename + wDQ 
    wszParams = "-m " + wDQ + gCompile.MainFilename + wDQ 
 

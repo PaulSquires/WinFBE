@@ -304,16 +304,48 @@
 <td>Hour of the day when the transition from standard time to daylight saving time occurs on an operating system.</td>
 </tr>
 <tr class="odd">
+<td><a href="#AfxTimeZoneDaylightMinute">AfxTimeZoneDaylightMinute</a></td>
+<td>Minute of of the <strong>DaylightHour</strong> when the transition from standard time to daylight saving time occurs on an operating system.</td>
+</tr>
+<tr class="even">
 <td><a href="#AfxTimeZoneDaylightMonth">AfxTimeZoneDaylightMonth</a></td>
 <td>Month when the transition from standard time to daylight saving time occurs on an operating system.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#AfxTimeZoneDaylightName">AfxTimeZoneDaylightName</a></td>
 <td>A description for daylight saving time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</td>
 </tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneId">AfxTimeZoneId</a></td>
+<td>Returns the time zone identifier.</td>
+</tr>
 <tr class="odd">
 <td><a href="#AfxTimeZoneIsDaylightSavingTime">AfxTimeZoneIsDaylightSavingTime</a></td>
-<td>Indicates whether the the system is operating in the range of daylight saving time for the current time zone.</td>
+<td>Indicates whether the the system is operating in the range covered by the DaylightDate member of the TIME_ZONE_INFORMATION structure.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneIsStandardSavingTime">AfxTimeZoneIsStandardSavingTime</a></td>
+<td>Indicates whether the the system is operating in the range covered by the StandardDate member of the TIME_ZONE_INFORMATION structure.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneStandardDay">AfxTimeZoneStandardDay</a></td>
+<td><strong>StandardDayOfWeek</strong> of the <strong>StandardMonth</strong> when the transition from daylight saving time to standard time occurs on an operating system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneStandardDayOfWeek">AfxTimeZoneStandardDayOfWeek</a></td>
+<td>Day of the week when the transition from daylight saving time to standard time occurs on an operating system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneStandardHour">AfxTimeZoneStandardHour</a></td>
+<td>Hour of the day when the transition from daylight saving time to standard time occurs on an operating system.</td>
+</tr>
+<tr class="even">
+<td><a href="#AfxTimeZoneStandardMinute">AfxTimeZoneStandardMinute</a></td>
+<td>Minute of of the <strong>StandardHour</strong> when the transition from standard time to daylight saving time occurs on an operating system.</td>
+</tr>
+<tr class="odd">
+<td><a href="#AfxTimeZoneStandardMonth">AfxTimeZoneStandardMonth</a></td>
+<td>Month when the transition from daylight saving time to standard time occurs on an operating system.</td>
 </tr>
 <tr class="even">
 <td><a href="#AfxTimeZoneStandardName">AfxTimeZoneStandardName</a></td>
@@ -2023,7 +2055,7 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 <p>The converted time value as SYSTEMTIME structure.</p>
 <h1 id="afxtimezonebias"><a name="AfxTimeZoneBias"></a>AfxTimeZoneBias</h1>
 <p>Returns the current bias for local time translation. The bias is the difference between Coordinated Universal Time (UTC) and local time. All translations between UTC and local time are based on the following formula: UTC = local time + bias. Units = minutes.</p>
-<pre><code>FUNCTION AfxTimeZoneBias () AS DWORD
+<pre><code>FUNCTION AfxTimeZoneBias () AS LONG
 </code></pre>
 <h1 id="afxtimezonedaylightbias"><a name="AfxTimeZoneDaylightBias"></a>AfxTimeZoneDaylightBias</h1>
 <p>Returns the bias value to be used during local time translations that occur during daylight saving time. This property is ignored if a value for the DaylightDay property is not supplied. The value of this property is added to the Bias property to form the bias used during daylight time. In most time zones, the value of this property is -60. Units = minutes.</p>
@@ -2031,35 +2063,98 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 </code></pre>
 <h1 id="afxtimezonedaylightday"><a name="AfxTimeZoneDaylightDay"></a>AfxTimeZoneDaylightDay</h1>
 <p>Returns the <strong>DaylightDayOfWeek</strong> of the <strong>DaylightMonth</strong> when the transition from standard time to daylight saving time occurs on this operating system.</p>
-<pre><code>FUNCTION AfxTimeZoneDaylightDay () AS DWORD
+<pre><code>FUNCTION AfxTimeZoneDaylightDay () AS WORD
 </code></pre>
 <p><strong>Example</strong>: If the transition day (<strong>DaylightDayOfWeek</strong>) occurs on a Sunday, then the value &quot;1&quot; indicates the first Sunday of the <strong>DaylightMonth</strong>, &quot;2&quot; indicates the second Sunday, and so on. The value &quot;5&quot; indicates the last <strong>DaylightDayOfWeek</strong> in the month.</p>
 <h1 id="afxtimezonedaylightdayofweek"><a name="AfxTimeZoneDaylightDayOfWeek"></a>AfxTimeZoneDaylightDayOfWeek</h1>
 <p>Day of the week when the transition from standard time to daylight saving time occurs on an operating system.</p>
-<pre><code>FUNCTION AfxTimeZoneDaylightDayOfWeek () AS DWORD
+<pre><code>FUNCTION AfxTimeZoneDaylightDayOfWeek () AS WORD
 </code></pre>
 <h4 id="return-value-26">Return value</h4>
 <p>The day of the week when the transition from standard time to daylight saving time occurs on an operating system. 0 = Sunday, 1 = Monday, and so on.</p>
 <h1 id="afxtimezonedaylighthour"><a name="AfxTimeZoneDaylightHour"></a>AfxTimeZoneDaylightHour</h1>
 <p>Hour of the day when the transition from standard time to daylight saving time occurs on an operating system.</p>
-<pre><code>FUNCTION AfxTimeZoneDaylightHour () AS DWORD
+<pre><code>FUNCTION AfxTimeZoneDaylightHour () AS WORD
+</code></pre>
+<h1 id="afxtimezonedaylightminute"><a name="AfxTimeZoneDaylightMinute"></a>AfxTimeZoneDaylightMinute</h1>
+<p>Minute of the <strong>DaylightHour</strong> when the transition from standard time to daylight saving time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneDaylightMinute () AS WORD
 </code></pre>
 <h1 id="afxtimezonedaylightmonth"><a name="AfxTimeZoneDaylightMonth"></a>AfxTimeZoneDaylightMonth</h1>
 <p>Month when the transition from standard time to daylight saving time occurs on an operating system.</p>
-<pre><code>FUNCTION AfxTimeZoneDaylightMonth () AS DWORD
+<pre><code>FUNCTION AfxTimeZoneDaylightMonth () AS WORD
 </code></pre>
 <h4 id="return-value-27">Return value</h4>
 <p>The month when the transition from standard time to daylight saving time occurs on an operating system. 1 = January, 2 = February, and so on.</p>
+<h1 id="afxtimezoneid"><a name="AfxTimeZoneId"></a>AfxTimeZoneId</h1>
+<p>Returns the time zone identifier.</p>
+<pre><code>FUNCTION AfxTimeZoneId () AS DWORD
+</code></pre>
+<h4 id="return-value-28">Return value</h4>
+<table>
+<thead>
+<tr class="header">
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>TIME_ZONE_ID_UNKNOWN</strong> (0)</td>
+<td>Daylight saving time is not used in the current time zone, because there are no transition dates or automatic adjustment for daylight saving time is disabled.</td>
+</tr>
+<tr class="even">
+<td><strong>TIME_ZONE_ID_STANDARD</strong> (1)</td>
+<td>The system is operating in the range covered by the StandardDate member of the TIME_ZONE_INFORMATION structure.</td>
+</tr>
+<tr class="odd">
+<td><strong>TIME_ZONE_ID_DAYLIGHT</strong> (2)</td>
+<td>The system is operating in the range covered by the DaylightDate member of the TIME_ZONE_INFORMATION structure.</td>
+</tr>
+</tbody>
+</table>
+<p>If the function fails for other reasons, such as an out of memory error, it returns <strong>TIME_ZONE_ID_INVALID</strong>. To get extended error information, call <strong>GetLastError</strong>.</p>
 <h1 id="afxtimezonedaylightname"><a name="AfxTimeZoneDaylightName"></a>AfxTimeZoneDaylightName</h1>
 <p>Returns a description for daylight saving time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</p>
 <pre><code>FUNCTION AfxTimeZoneDaylightName () AS CWSTR
 </code></pre>
 <h1 id="afxtimezoneisdaylightsavingtime"><a name="AfxTimeZoneIsDaylightSavingTime"></a>AfxTimeZoneIsDaylightSavingTime</h1>
-<p>Indicates whether the the system is operating in the range of daylight saving time for the current time zone.</p>
+<p>Indicates whether the the system is operating in the range covered by the DaylightDate member of the TIME_ZONE_INFORMATION structure.</p>
 <pre><code>FUNCTION AfxTimeZoneIsDaylightSavingTime () AS BOOLEAN
 </code></pre>
-<h4 id="return-value-28">Return value</h4>
+<h4 id="return-value-29">Return value</h4>
 <p>TRUE or FALSE.</p>
+<h1 id="afxtimezoneisstandardsavingtime"><a name="AfxTimeZoneIsStandardSavingTime"></a>AfxTimeZoneIsStandardSavingTime</h1>
+<p>Indicates whether the the system is operating in the range covered by the StandardDate member of the TIME_ZONE_INFORMATION structure.</p>
+<pre><code>FUNCTION AfxTimeZoneIsStandardSavingTime () AS BOOLEAN
+</code></pre>
+<h4 id="return-value-30">Return value</h4>
+<p>TRUE or FALSE.</p>
+<h1 id="afxtimezonestandardday"><a name="AfxTimeZoneStandardDay"></a>AfxTimeZoneStandardDay</h1>
+<p>Returns the <strong>StandardDayOfWeek</strong> of the <strong>StandardMonth</strong> when the transition from daylight saving to standard time occurs on this operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneStandardDay () AS WORD
+</code></pre>
+<p><strong>Example</strong>: If the transition day (<strong>StandardDayOfWeek</strong>) occurs on a Sunday, then the value &quot;1&quot; indicates the first Sunday of the <strong>StandardMonth</strong>, &quot;2&quot; indicates the second Sunday, and so on. The value &quot;5&quot; indicates the last <strong>StandardDayOfWeek</strong> in the month.</p>
+<h1 id="afxtimezonestandarddayofweek"><a name="AfxTimeZoneStandardDayOfWeek"></a>AfxTimeZoneStandardDayOfWeek</h1>
+<p>Day of the week when the transition from daylight saving time to standard time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneStandardDayOfWeek () AS WORD
+</code></pre>
+<h4 id="return-value-31">Return value</h4>
+<p>The day of the week when the transition from daylight saving time to standard time occurs on an operating system. 0 = Sunday, 1 = Monday, and so on.</p>
+<h1 id="afxtimezonestandardhour"><a name="AfxTimeZoneStandardHour"></a>AfxTimeZoneStandardHour</h1>
+<p>Hour of the day when the transition from daylight time saving time to standard time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneStandardHour () AS WORD
+</code></pre>
+<h1 id="afxtimezonestandardminute"><a name="AfxTimeZoneStandardMinute"></a>AfxTimeZoneStandardMinute</h1>
+<p>Minute of the <strong>StandardHour</strong> when the transition from standard time to daylight saving time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneStandardMinute () AS WORD
+</code></pre>
+<h1 id="afxtimezonestandardmonth"><a name="AfxTimeZoneStandardMonth"></a>AfxTimeZoneStandardMonth</h1>
+<p>Month when the transition from daylight saving time to standard time occurs on an operating system.</p>
+<pre><code>FUNCTION AfxTimeZoneStandardMonth () AS WORD
+</code></pre>
+<h4 id="return-value-32">Return value</h4>
+<p>The month when the transition from daylight saving time to standard time occurs on an operating system. 1 = January, 2 = February, and so on.</p>
 <h1 id="afxtimezonestandardname"><a name="AfxTimeZoneStandardName"></a>AfxTimeZoneStandardName</h1>
 <p>Returns a description for standard time. For example, &quot;EST&quot; could indicate Eastern Standard Time. This string can be empty.</p>
 <pre><code>FUNCTION AfxTimeZoneStandardName () AS CWSTR
@@ -2117,7 +2212,7 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-29">Return value</h4>
+<h4 id="return-value-33">Return value</h4>
 <p>The formatted date and time.</p>
 <h1 id="afxvariantdatetostr"><a name="AfxVariantDateToStr"></a>AfxVariantDateToStr</h1>
 <p>Converts a DATE_ type to a string containing only the date</p>
@@ -2141,7 +2236,7 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-30">Return value</h4>
+<h4 id="return-value-34">Return value</h4>
 <p>The formatted date.</p>
 <h1 id="afxvarianttimetostr"><a name="AfxVariantTimeToStr"></a>AfxVariantTimeToStr</h1>
 <p>Converts a DATE_ type to a string containing only the time.</p>
@@ -2165,7 +2260,7 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-31">Return value</h4>
+<h4 id="return-value-35">Return value</h4>
 <p>The formatted time.</p>
 <h1 id="afxvarianttimetosystemtime"><a name="AfxVariantTimeToSystemTime"></a>AfxVariantTimeToSystemTime</h1>
 <p>Converts a DATE_ (double) to a SYSTEMTIME.</p>
@@ -2185,7 +2280,7 @@ PRINT AfxAstroDay(28, 2, 1902) - AfxAstroDay(1, 3, 1898)  ' Prints 1459 days
 </tr>
 </tbody>
 </table>
-<h4 id="return-value-32">Return value</h4>
+<h4 id="return-value-36">Return value</h4>
 <p>The date and time in SYSTEMTIME format.</p>
 <h1 id="afxweeknumber"><a name="AfxWeekNumber"></a>AfxWeekNumber</h1>
 <p>Returns the week number for a given date. The year must be a 4 digit year.</p>

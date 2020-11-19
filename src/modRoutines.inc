@@ -892,6 +892,7 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
                                     ) As WString Ptr
 
    ' // Create an instance of the IFileSaveDialog interface
+   Dim rgFileTypes(1 To 4) As COMDLG_FILTERSPEC 
    Dim hr As Long
    Dim psfd As IFileSaveDialog Ptr
    hr = CoCreateInstance(@CLSID_FileSaveDialog, Null, CLSCTX_INPROC_SERVER, @IID_IFileSaveDialog, @psfd)
@@ -900,6 +901,12 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    dim as CWSTR wszFilename, wszFilePath 
    
    wszFilename = AfxStrPathname( "NAMEX", *pwszFileName )
+   if pwszDefExt then 
+      if AfxStrPathname( "EXTN", wszFilename ) = "" then
+         wszFilename = wszFilename & "." & *pwszDefExt
+      end if   
+   end if
+   
    if AfxFileExists( *pwszFileName ) then
       wszFilePath = AfxStrPathName( "PATH", *pwszFileName )
    else   
@@ -911,7 +918,6 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
    end if
 
    ' // Set the file types
-   Dim rgFileTypes(1 To 4) As COMDLG_FILTERSPEC 
    
    Select Case id
       Case IDC_FRMPROJECTOPTIONS_CMDSELECT, IDM_PROJECTSAVE, IDM_PROJECTSAVEAS
@@ -952,6 +958,11 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
          rgFileTypes(4).pszSpec = @WSTR("*.*")
          psfd->lpVtbl->SetFileTypes(psfd, 4, @rgFileTypes(1))
          psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
+         if pwszDefExt then 
+            if *pwszDefExt = "inc" then
+               psfd->lpVtbl->SetFileTypeIndex(psfd, 2)
+            end if
+         end if
    End Select
    
    ' // Set the file name

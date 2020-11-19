@@ -176,8 +176,7 @@ public Function frmMain_SelectComboFunctions() As Long
    
    pDoc->GetCurrentFunctionName( sFunctionName, nGetSet )
    
-   ' If no Functions exist in the Functions combo then it obviously has not
-   ' been loaded yet.
+   ' If no Functions exist in the Functions combo then it obviously has not been loaded yet.
    if ComboBox_GetCount( hComboFunctions ) = 0 then frmMain_LoadComboFunctions
    dim as long idx = frmMain_ComboFunctionsFindString( sFunctionName, nGetSet )
 

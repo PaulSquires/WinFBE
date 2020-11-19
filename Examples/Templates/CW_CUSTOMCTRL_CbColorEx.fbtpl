@@ -1,7 +1,7 @@
 2
 FBGUI
 .bas
-CWindow: CUSTOMCTRL: Combobox color list (SetWindowSubClass)
+CWindow: CUSTOMCTRL: Combobox color list Ex
 ' ########################################################################################
 ' Microsoft Windows
 ' File: CW_CbColorEx.fbtpl

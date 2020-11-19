@@ -631,6 +631,10 @@ public Function frmMenuEditor_Show( ByVal hWndParent As HWnd ) as LRESULT
    hCtrl = GetDlgItem( HWND_FRMMENUEDITOR, IDC_FRMMENUEDITOR_CMBOSHORTCUT)
    ComboBox_ResetContent(hCtrl)
 
+   ' Have a blank string at the beginning of the list so that an accelerator can be unselected
+   wszString = ""
+   ComboBox_AddString(hCtrl, @wszString)
+   
    For i as long = 1 To 26  ' A-Z
       wszString = wchr(i + 64)
       ComboBox_AddString(hCtrl, @wszString)

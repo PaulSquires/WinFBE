@@ -687,10 +687,11 @@ end function
 ''
 Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
 
-   Dim sText       As String
-   Dim wszFilename As WString * MAX_PATH
-   Dim wszText     As WString * MAX_PATH  
-   Dim wst         as CWSTR
+   Dim sText        As String
+   Dim wszFilename  As WString * MAX_PATH
+   Dim wszExtension As WString * MAX_PATH
+   Dim wszText      As WString * MAX_PATH  
+   Dim wst          as CWSTR
    
    
    ' If this is a new Untitled document then set flag to display SaveAs dialog.
@@ -699,8 +700,13 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    wszFilename = this.Diskfilename
    
    If bSaveAs Then
+      ' If this is a new Form being saved for the first time then the extension should
+      ' be .bas if no project is active, and .inc if a project is active.
+      if this.IsDesigner then
+         wszExtension = iif(gApp.IsProjectActive, "inc", "bas")
+      end if   
       ' Display the Save File Dialog
-      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, "", IDM_FILESAVEAS)
+      Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, @wszExtension, IDM_FILESAVEAS)
       If pwszName Then
          wszFilename = *pwszName
          CoTaskMemFree(pwszName)

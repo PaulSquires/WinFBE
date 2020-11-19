@@ -117,7 +117,8 @@ Assorted Windows procedures.
 | [AfxCreateFont](#AfxCreateFont) | Creates a logical font. |
 | [AfxGetFontHeight](#AfxGetFontHeight) | Returns the logical height of a font given its point size. |
 | [AfxGetFontPointSize](#AfxGetFontPointSize) | Returns the point size of a font given its logical height. |
-| [AfxGetWindowFont](#AfxGetWindowFont) | Retrieves the font with which the control is currently drawing its text. |
+| [AfxGetWindowFont](#AfxGetWindowFont) | Retrieves the font with which the window or control is currently drawing its text. |
+| [AfxGetWindowFontInfo](#AfxGetWindowFontInfo) | Retrieves information about the font being used by a window or control. |
 | [AfxGetWindowsFontInfo](#AfxGetWindowsFontInfo) | Retrieves information about the fonts used by Windows. |
 | [AfxGetWindowsFontPointSize](#AfxGetWindowsFontPointSize) | Retrieves the point size of the fonts used by Windows. |
 | [AfxModifyFontFaceName](#AfxModifyFontFaceName) | Modifies the face name of the font of a window or control. |
@@ -1347,7 +1348,7 @@ FUNCTION AfxGetFontPointSize (BYVAL nHeight AS LONG) AS LONG
 
 # <a name="AfxGetWindowFont"></a>AfxGetWindowFont
 
-Retrieves the font with which the control is currently drawing its text.
+Retrieves the font with which the window or control is currently drawing its text.
 
 ```
 FUNCTION AfxGetWindowFont (BYVAL hwnd AS HWND) AS HFONT
@@ -1355,7 +1356,27 @@ FUNCTION AfxGetWindowFont (BYVAL hwnd AS HWND) AS HFONT
 
 | Parameter  | Description |
 | ---------- | ----------- |
-| *hwnd* | A handle to a window. |
+| *hwnd* | A handle to a window or control. |
+
+#### Return value
+
+The handle of the font.
+
+# <a name="AfxGetWindowFontInfo"></a>AfxGetWindowFontInfo
+
+Retrieves information about the font being used by a window or control.
+
+```
+FUNCTION AfxGetWindowFontInfo (BYVAL hwnd AS HWND) AS LOGFONTW
+```
+
+| Parameter  | Description |
+| ---------- | ----------- |
+| *hwnd* | A handle to a window or control. |
+
+#### Return value
+
+A LOGFONTW structure.
 
 # <a name="AfxGetWindowsFontInfo"></a>AfxGetWindowsFontInfo
 

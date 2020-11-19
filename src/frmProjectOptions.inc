@@ -153,7 +153,7 @@ private Function frmProjectOptions_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             dim as CWSTR wszProjectName = ""
             if gApp.IsNewProjectFlag = false then wszProjectName = gApp.ProjectName
-            Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWnd, wszProjectName, WStr("wfbe"), IDC_FRMPROJECTOPTIONS_CMDSELECT)
+            Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWnd, wszProjectName, @wstr("wfbe"), IDC_FRMPROJECTOPTIONS_CMDSELECT)
             If pwszName Then
                AfxSetWindowText( GetDlgItem(HWnd, IDC_FRMPROJECTOPTIONS_TXTPROJECTPATH), pwszName )
                CoTaskMemFree pwszName

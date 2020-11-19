@@ -24,8 +24,8 @@
 <p>Theme aware push button that can also act as a toggle button and display an icon or bitmap.</p>
 <ul>
 <li>Draws a themed button in Windows XP or superior, using the functions available in UxTheme.dll, or a button with classic appearance in other versions of Windows, using GDI functions.</li>
-<li>Allows up to three images per button (for normal, hot and disabled states). If you want a button with a centered image and no text, use the XPBI_CENTERCENTER flag in the SetImagePos procedure.</li>
-<li>Can be used as a toggle button setting this flag with the SetToggle procedure.</li>
+<li>Allows up to three images per button (for normal, hot and disabled states). If you want a button with a centered image and no text, use the XPBI_CENTERCENTER flag in the <strong>ImagePos</strong> method.</li>
+<li>Can be used as a toggle button setting this flag with the <strong>Toggle</strong> method.</li>
 <li>Images and fonts are owned and destroyed by the control.</li>
 <li>If theming is diabled, you can use you own colors for the different elements of the button: Background, foreground, text, etc.</li>
 </ul>
@@ -283,6 +283,130 @@ FUNCTION AfxCXpButtonPtr (BYVAL hParent AS HWND, BYVAL cID AS LONG) AS CXpButton
 </tr>
 </tbody>
 </table>
+<h3 id="example">Example</h3>
+<pre><code>#define UNICODE
+#define _WIN32_WINNT &amp;h0602
+#INCLUDE ONCE &quot;Afx/CWindow.inc&quot;
+#INCLUDE ONCE &quot;Afx/CXpButton.inc&quot;
+USING Afx
+
+CONST IDC_BUTTON1 = 1001
+CONST IDC_BUTTON2 = 1002
+CONST IDC_BUTTON3 = 1003
+
+DECLARE FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                          BYVAL hPrevInstance AS HINSTANCE, _
+                          BYVAL szCmdLine AS ZSTRING PTR, _
+                          BYVAL nCmdShow AS LONG) AS LONG
+
+   END WinMain(GetModuleHandleW(NULL), NULL, COMMAND(), SW_NORMAL)
+
+' // Forward declaration
+DECLARE FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+' ========================================================================================
+' Main
+' ========================================================================================
+FUNCTION WinMain (BYVAL hInstance AS HINSTANCE, _
+                  BYVAL hPrevInstance AS HINSTANCE, _
+                  BYVAL szCmdLine AS ZSTRING PTR, _
+                  BYVAL nCmdShow AS LONG) AS LONG
+
+   ' // Set process DPI aware
+   AfxSetProcessDPIAware
+
+   ' // Create the main window
+   DIM pWindow AS CWindow
+   pWindow.Create(NULL, &quot;XpButton example&quot;, @WndProc)
+   pWindow.SetClientSize(215, 142)
+   pWindow.Center
+
+   ' // Create the first button
+   DIM pXpButton1 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON1, &quot;&amp;Hot&quot;, 50, 10, 114, 34)
+   ' // Load a png icon from file (remember to change tha path of the file)
+   pXpButton1.SetImageFromFile(ExePath &amp; &quot;/arrow_left_64.png&quot;, XPBI_NORMAL)
+   ' // Load a Windows predefined icon as the &quot;hot&quot; image
+   pXpButton1.SetIcon LoadIcon(NULL, IDI_QUESTION), XPBI_HOT
+   ' // Change the cursor shape
+   pXpButton1.SetCursor LoadCursor(NULL, IDC_CROSS)
+   ' // Set a margin of 10 dpi units (pixels x scaling ratio)
+   pXpButton1.SetImageMargin 10
+
+   ' // Create the second button
+   DIM pXpButton2 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON2, &quot;&amp;Cancel&quot;, 50, 50, 114, 34)
+   ' // Load a Windows predefined icon
+   pXpButton2.SetIcon LoadIcon(NULL, IDI_ERROR), XPBI_NORMAL
+   pXpButton2.SetImagePos XPBI_RIGHT OR XPBI_VCENTER
+   pXpButton2.SetTextFormat DT_LEFT OR DT_VCENTER OR DT_SINGLELINE
+'   EnableWindow pXpButton2.hWindow, FALSE   ' Disable the button
+
+   ' // Create a coloured button
+   DIM pXpButton3 AS CXpButton = CXpButton(@pWindow, IDC_BUTTON3, &quot;&amp;Coloured Button&quot;, 50, 90, 114, 34, WS_VISIBLE OR WS_TABSTOP OR BS_PUSHBUTTON OR BS_CENTER OR BS_VCENTER OR BS_FLAT)
+   ' // Disable theming
+   pXpButton3.DisableTheming
+   ' // Set the background color to blue
+   pXpButton3.SetButtonBkColor BGR(0, 0, 255)
+   ' // Set the background color when pressed to yellow
+   pXpButton3.SetButtonBkColorDown BGR(255, 255, 0)
+   ' // Set the text foreground color to yellow
+   pXpButton3.SetTextForeColor BGR(255, 255, 0)
+   ' // Set the text background color to blue
+   pXpButton3.SetTextBkColor BGR(0, 0, 255)
+   ' // Set the text foreground color when pressed to white
+   pXpButton3.SetTextForeColorDown BGR(255, 255, 255)
+   ' // Set the text background color when pressed to red
+   pXpButton3.SetTextBkColorDown BGR(255, 0, 0)
+   ' // Set the text backround color when pressed to red
+   pXpButton3.SetTextBkColorDown BGR(255, 0, 0)
+   ' // Set the text format (cnetered and single line)
+   pXpButton3.TextFormat = DT_CENTER OR DT_VCENTER OR DT_SINGLELINE
+' pXpButton3.SetToggle TRUE   ' make it a toggle button
+
+   ' // Set the focus in the first button
+   SetFocus pXpButton1.hWindow
+
+   ' // Dispatch Windows messages
+   FUNCTION = pWindow.DoEvents(nCmdShow)
+
+END FUNCTION
+' ========================================================================================
+
+' ========================================================================================
+' Main window callback procedure
+' ========================================================================================
+FUNCTION WndProc (BYVAL hwnd AS HWND, BYVAL uMsg AS UINT, BYVAL wParam AS WPARAM, BYVAL lParam AS LPARAM) AS LRESULT
+
+   SELECT CASE uMsg
+
+      CASE WM_COMMAND
+         SELECT CASE GET_WM_COMMAND_ID(wParam, lParam)
+            CASE IDC_BUTTON1, IDC_BUTTON2, IDC_BUTTON3
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  ' AfxMsg &quot;Button clicked&quot;
+                  EXIT FUNCTION
+               END IF
+
+            CASE IDCANCEL
+               ' // If ESC key pressed, close the application by sending an WM_CLOSE message
+               IF GET_WM_COMMAND_CMD(wParam, lParam) = BN_CLICKED THEN
+                  SendMessageW hwnd, WM_CLOSE, 0, 0
+                  EXIT FUNCTION
+               END IF
+         END SELECT
+
+        CASE WM_DESTROY
+         ' // Ends the application by sending a WM_QUIT message
+         PostQuitMessage(0)
+         EXIT FUNCTION
+
+   END SELECT
+
+   ' // Default processing of Windows messages
+   FUNCTION = DefWindowProcW(hWnd, uMsg, wParam, lParam)
+
+END FUNCTION
+' ========================================================================================
+</code></pre>
 <h1 id="disabletheming"><a name="DisableTheming"></a>DisableTheming</h1>
 <p>Disables theming.</p>
 <pre><code>SUB DisableTheming
