@@ -11,8 +11,8 @@ Features:
 - 32 bit and 64 bit versions.
 - High DPI aware for any monitor resolution.
 - Language localization. Simple create language file based on English.lang file.
-- Localized for 10 languages:
-- - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukrainian, Portuguese 
+- Localized for 11 languages:
+- - English, French, Spanish, German, Czech, Italian, Chinese, Russian, Ukrainian, Portuguese, Polish
 - Projects and non-project based editing.
 - Built-in Visual Designer for GUI application development.
 - Easy integration of Console or GUI based code.
