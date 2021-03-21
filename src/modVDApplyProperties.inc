@@ -951,80 +951,9 @@ private function DateTimePicker_ApplyProperties( byval pDoc as clsDocument ptr, 
                                                  byval pProp as clsProperty ptr _ 
                                                  ) as Long
     
-   Dim pWindow As CWindow Ptr = AfxCWindowPtr(pDoc->hWndForm)
-
-   dim as long nPropValue
-   dim as CWSTR wszPropName, wszPropValue
-
-   wszPropName  = pProp->wszPropName
-   wszPropValue = pProp->wszPropValue
-   nPropValue   = Val(pProp->wszPropValue)
-   
-   select CASE ucase(wszPropName)
-      
-   case "SELECTEDDATE"
-      Dim As SYSTEMTIME pst
-      pst.wYear  = val(left(wszPropValue, 4))
-      pst.wMonth = val(mid(wszPropValue, 5, 2))
-      pst.wDay   = val(right(wszPropValue, 2))
-      dim as CWSTR wszTime = GetControlProperty(pCtrl, "SELECTEDTIME")
-      pst.wHour   = val(left(wszTime, 2))
-      pst.wSecond = val(mid(wszTime, 3, 2))
-      pst.wMinute = val(right(wszTime, 2))
-      DateTime_SetSystemTime( pCtrl->hWindow, GDT_VALID, @pst )
-
-   case "SELECTEDTIME"
-      Dim As SYSTEMTIME pst
-      dim as CWSTR wszDate = GetControlProperty(pCtrl, "SELECTEDDATE")
-      pst.wYear  = val(left(wszDate, 4))
-      pst.wMonth = val(mid(wszDate, 5, 2))
-      pst.wDay   = val(right(wszDate, 2))
-      dim as CWSTR wszTime = GetControlProperty(pCtrl, "SELECTEDTIME")
-      pst.wHour   = val(left(wszPropValue, 2))
-      pst.wSecond = val(mid(wszPropValue, 3, 2))
-      pst.wMinute = val(right(wszPropValue, 2))
-      DateTime_SetSystemTime( pCtrl->hWindow, GDT_VALID, @pst )
-
-   case "FORMATCUSTOM"
-      dim as CWSTR wszDateFormat = GetControlProperty(pCtrl, "DATEFORMAT")
-      if wszDateFormat = "DateTimePickerFormat.CustomFormat" then
-         ' Remove any existing format styles
-         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_LONGDATEFORMAT)
-         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATEFORMAT)
-         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATECENTURYFORMAT)
-         AfxRemoveWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
-         dim wszCustomFormat as wstring * MAX_PATH = wszPropValue
-         DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
-         AfxRedrawWindow(pCtrl->hWindow) 
-      end if
-
-   case "DATEFORMAT"
-      ' Remove any existing format styles
-      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_LONGDATEFORMAT)
-      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATEFORMAT)
-      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_SHORTDATECENTURYFORMAT)
-      AfxRemoveWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
-      dim wszCustomFormat as wstring * MAX_PATH = ""
-      DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
-      select case wszPropValue
-         case "DateTimePickerFormat.LongDate"
-            AfxAddWindowStyle(pCtrl->hWindow, DTS_LONGDATEFORMAT)
-         case "DateTimePickerFormat.ShortDate"
-            AfxAddWindowStyle(pCtrl->hWindow, DTS_SHORTDATEFORMAT)
-         case "DateTimePickerFormat.ShortDateCentury"
-            AfxAddWindowStyle(pCtrl->hWindow, DTS_SHORTDATECENTURYFORMAT)
-         case "DateTimePickerFormat.TimeFormat"
-            AfxAddWindowStyle(pCtrl->hWindow, DTS_TIMEFORMAT)
-         case "DateTimePickerFormat.CustomFormat"
-            wszCustomFormat = GetControlProperty(pCtrl, "FORMATCUSTOM")
-            DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
-      end select
-      AfxRedrawWindow(pCtrl->hWindow) 
-      
-   case "SHOWUPDOWN"
-      ' Apparently this style can not be changed after control creation.      
-
-   end select
+   ' This control gets recreated when properties change because visually some states 
+   ' require a complete rebuilding of the control. No need to set properties here
+   ' if the control is going to be rebuilt anyway in ReCreateToolboxControl.
    
    function = 0
 end function

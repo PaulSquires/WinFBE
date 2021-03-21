@@ -565,7 +565,7 @@ public function OpenSelectedDocument( byref wszFilename as wstring, _
    ' pass that pDoc rather than looking for a disk filename.
    dim pDoc as clsDocument ptr
    pDoc = gApp.GetDocumentPtrByFilename( wszFilename )
-   
+
    if pDoc then
       pDoc = frmMain_OpenFileSafely(HWND_FRMMAIN, _
                               False, _    ' bIsNewFile
@@ -900,10 +900,13 @@ public Function AfxIFileSaveDialog( ByVal hwndOwner As HWnd, _
 
    dim as CWSTR wszFilename, wszFilePath 
    
+   ' Add extensions if it does not already exist as part of the filename
    wszFilename = AfxStrPathname( "NAMEX", *pwszFileName )
-   if pwszDefExt then 
+   if len(wszFilename) then 
       if AfxStrPathname( "EXTN", wszFilename ) = "" then
-         wszFilename = wszFilename & "." & *pwszDefExt
+         if len(*pwszDefExt) then
+            wszFilename = wszFilename & "." & *pwszDefExt
+         end if   
       end if   
    end if
    

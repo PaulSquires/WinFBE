@@ -165,6 +165,7 @@ Type clsDocument
       declare function MainMenuExists() as Boolean
       declare function ToolBarExists() as Boolean
       declare function StatusBarExists() as Boolean
+      declare function IsValidScintillaID( byval idScintilla as long ) as boolean
       declare function GetActiveScintillaPtr() as any ptr
       Declare Function CreateCodeWindow( ByVal hWndParent As HWnd, ByVal IsNewFile As BOOLEAN, ByVal IsTemplate As BOOLEAN = False, Byref wszFileName As WString = "") As HWnd
       declare Function CreateDesignerWindow( ByVal hWndParent As HWnd) As HWnd   

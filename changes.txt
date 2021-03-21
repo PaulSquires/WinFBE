@@ -1,3 +1,27 @@
+Version 2.1.9
+Editor:
+- Multiple find/replace selection highlights could occur if the user changed the active selection area after activating the Find/Replace dialog.
+- Replace-dialog selection-highlight in code window out of sync with actual highlight (when 2nd+ selection performed).
+- Find/Replace dialog active and pressing Ctrl+A to select all text in one of the find/replace textboxes would instead select all text in the current active code edit window.
+- Split windows would not activate cold folding in both panes. Only one pane would respond to code folding margin margin clicks.
+- SCEN_KILLFOCUS in WM_COMMAND was resetting the hWndActiveScintilla window to zero causing a situation whereby incorrect split pane could be used to display code from Sub/Functions selector combobox.
+- Have noticed that with Code Folding enabled that file loading/parsing is somewhat slower. If you prefer faster document responsiveness maybe turn off the code folding option.
+- Double periods ".." would appear within the default displayed filename in the 'Save As' dialog for new files being saved for the first time.
+
+Visual Designer:
+- MainMenu: MenuItem item in MenuItems collection would crash when retrieving text property value.
+- TextBox: Removed the SelectionChanged event as that event is for RichEdit controls, not TextBoxes.
+- Statusbar: Fixed not being able to fully delete the last remaining Statusbar Panel.
+- Statusbar: Code generation error when Statusbar deleted from Form but Toolbar also exists.
+- When an editable ToolBox property has focus, actions such as Select All and Cut would act on controls in the visual designer rather than on the text in the property itself.
+- DateTimePicker: Within the visual designer now correctly displays the SelectedDate/SelectedTime. Code generation was always correct.
+- ListBox: Corrected redraw/repaint issues of other controls on a Form when ListBox was empty.
+- Image Manager: Form width is adjusted wider for non-English localizations.
+- Image Manager: Filename edit button is now disabled if no valid image has been selected from the list of images.
+- PictureBox: An invalid of empty image name will now clear any existing image from the control.
+- Timer: Modified so that if the Interval property value is changed then the Timer will automatically get re-created with the new interval value
+
+
 Version 2.1.8 (November 19, 2020)
 Editor:
 - Polish language file provided by Waldemar Pajak.
@@ -125,7 +149,7 @@ Editor:
 - Fixed: Find/Replace could change the name of a sub/function. The Explorer treeview and Functions combobox are now correctly updated in the code editor.
  
 Visual Designer:
-- Added: Image Manager ability to manually edit the filename rather than having to remove and invalid path image and re-add the correct path image.
+- Added: Image Manager ability to manually edit the filename rather than having to remove an invalid path image and re-add the correct path image.
 - Changed: You no longer have to manually add #Include statements for your Form files in your main .bas file.
 
 Version 2.0.9 (March 20, 2020)

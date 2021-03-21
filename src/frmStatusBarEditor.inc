@@ -444,6 +444,8 @@ private Function frmStatusBarEditor_OnCommand( ByVal HWnd As HWnd, _
                   for i as long = lbound(gPanelItems) to ubound(gPanelItems)
                      pDoc->PanelItems(i) = gPanelItems(i) 
                   next
+               else
+                  erase pDoc->PanelItems
                end if
                ' Save the value indicating that we want the statusbar to display in
                ' the generated code for the form.

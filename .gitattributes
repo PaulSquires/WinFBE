@@ -11,6 +11,7 @@
 *.txt       eol=crlf
 *.fbtpl     eol=crlf
 *.rc        eol=crlf
+*.wfbe      eol=crlf
 
 
 # Standard to msysgit

@@ -61,6 +61,20 @@ Destructor clsDocument
    
 End Destructor
 
+
+' ========================================================================================
+' Determines if the IDC_SCINTILLA id being checked belongs to any of the 
+' currently defined Scintilla windows (needed for splitter windows).
+' ========================================================================================
+function clsDocument.IsValidScintillaID( byval idScintilla as long ) as boolean
+   for i as long = lbound(this.hWindow) to ubound(this.hWindow)
+      if IDC_SCINTILLA + i = idScintilla then
+         return true
+      end if
+   next
+end function
+
+
 ''
 ''
 function clsDocument.GetActiveScintillaPtr() as any ptr
@@ -74,7 +88,7 @@ end function
 
 
 property clsDocument.hWndActiveScintilla() as hwnd
-   if m_hWndActiveScintilla = 0 THEN m_hWndActiveScintilla = this.hWindow(0)
+   if m_hWndActiveScintilla = 0 then m_hWndActiveScintilla = this.hWindow(0)
    property = m_hWndActiveScintilla
 end property
 
@@ -702,8 +716,10 @@ Function clsDocument.SaveFile( ByVal bSaveAs As BOOLEAN = False ) As BOOLEAN
    If bSaveAs Then
       ' If this is a new Form being saved for the first time then the extension should
       ' be .bas if no project is active, and .inc if a project is active.
-      if this.IsDesigner then
-         wszExtension = iif(gApp.IsProjectActive, "inc", "bas")
+      if this.IsNewFlag then
+         if this.IsDesigner then
+            wszExtension = iif(gApp.IsProjectActive, "inc", "bas")
+         end if   
       end if   
       ' Display the Save File Dialog
       Dim pwszName As WString Ptr = AfxIFileSaveDialog(HWND_FRMMAIN, @wszFilename, @wszExtension, IDM_FILESAVEAS)
@@ -876,6 +892,7 @@ Function clsDocument.SetMarkerHighlight() As Long
    ' search results are colored using the normal highlight colors so we need them
    ' to stand out from the selected range.
    dim as any ptr pSci = this.GetActiveScintillaPtr()
+   SciMsg( pSci, SCI_MARKERDELETEALL, 10, 0) ' Remove any existing before drawing the new highlight
    Dim As Long startPos, endPos, startLine, endLine
    this.GetSelectedLineRange( startLine, endLine, startPos, endPos )
    if endLine <> startLine THEN

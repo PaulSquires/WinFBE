@@ -69,6 +69,7 @@ private Function frmImageManager_DisplayImage( byval hwnd as HWND, _
    ' a pointer to the IMAGES_TYPE in the ListView data area because the pDoc->AllImages
    ' array gets REDIM PRESERVE which moves the array elements around in memory.
    ShowWindow(hImageCtx, SW_HIDE)
+   EnableWindow( GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_CMDFILENAME), false)
    if nIndex >= 0 then
       FF_ListView_GetItemText(GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_LISTVIEW), nIndex, 0, @wszImageName, MAX_PATH)
       pImageType = GetImagesTypePtr(wszImageName)
@@ -103,6 +104,7 @@ private Function frmImageManager_DisplayImage( byval hwnd as HWND, _
             wszFilename = wszFilename & " (" & L(81, "File not found") & ")"
          end if   
          ShowWindow(hImageCtx, SW_SHOW)
+         EnableWindow( GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_CMDFILENAME), true)
       end if
    end if         
    AfxSetWindowText( GetDlgItem(hwnd, IDC_FRMIMAGEMANAGER_LBLFILENAME), wszFilename)
@@ -367,7 +369,8 @@ private Function frmImageManager_OnCommand( ByVal HWnd As HWnd, _
          If codeNotify = BN_CLICKED Then
             ' Popup an inputbox to get corrected image filename
             dim as CWSTR wszResult
-            dim as CWSTR wszFilename = pImageType->wszFileName
+            dim as CWSTR wszFilename 
+            if pImageType then wszFilename = pImageType->wszFileName
             wszResult = AfxInputBox( HWND_FRMIMAGES, 0, 0, _
                                      L(368,"Image Manager"), _
                                      L(405,"Enter valid image file path") & ":", _
@@ -589,9 +592,12 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
    pWindow->Create( hWndParent, L(368,"Image Manager"), @frmImageManager_WndProc, 0, 0, 0, 0, _
         WS_POPUP Or WS_CAPTION Or WS_SYSMENU Or WS_CLIPSIBLINGS Or WS_CLIPCHILDREN, _
         WS_EX_DLGMODALFRAME Or WS_EX_CONTROLPARENT Or WS_EX_LEFT )
-   pWindow->SetClientSize(700, 480)
+   if ucase(gConfig.LocalizationFile) = "ENGLISH.LANG" then     
+      pWindow->SetClientSize(700, 480)
+   else   
+      pWindow->SetClientSize(780, 480)
+   end if
    pWindow->Center(pWindow->hWindow, hWndParent)
-
    
    ' Save the incoming pProp value to the ImageManager window. We do this because if the StatusBar
    ' Editor or ToolBar Editor or TabControl Custom called this ImageManager then we need to save 
@@ -715,7 +721,7 @@ public Function frmImageManager_Show( ByVal hWndParent As HWnd, _
       ComboBox_SetCurSel( hCtl, 0 )   ' Actual Size
    end if
    
-   pWindow->AddControl("BUTTON", , IDC_FRMIMAGEMANAGER_CMDFILENAME, L(0002, "File") & "...", 356, nTop + 380, 75, 20, _
+   pWindow->AddControl("BUTTON", , IDC_FRMIMAGEMANAGER_CMDFILENAME, L(0014, "Edit") & "...", 356, nTop + 380, 75, 20, _
         WS_CHILD Or WS_VISIBLE or WS_TABSTOP Or BS_TEXT Or BS_PUSHBUTTON Or BS_NOTIFY Or BS_CENTER Or BS_VCENTER, _
         WS_EX_LEFT Or WS_EX_LTRREADING)
 

@@ -164,7 +164,7 @@ end function
 
 
 ' ========================================================================================
-' Select the Files combobox item based on incoming filename
+' Select the Functions combobox item based on current editing position
 ' ========================================================================================
 public Function frmMain_SelectComboFunctions() As Long
    Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -774,13 +774,14 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
    Dim as HWND hEdit
    Dim as long nLine, nFoldLevel
     
+
    Select Case pNSC->hdr.code
          
       Case SCN_UPDATEUI    
          if gApp.SuppressNotify then return true
-         If pNSC->hdr.idFrom = IDC_SCINTILLA Then
-            pDoc = gTTabCtl.GetActiveDocumentPtr()
-            If pDoc Then 
+         pDoc = gTTabCtl.GetActiveDocumentPtr()
+         If pDoc Then 
+            If pDoc->IsValidScintillaID( pNSC->hdr.idFrom ) Then
                ' This code will position our substitute scrollbar thumbs only when the 
                ' caret position crosses a page boundry via keyboard input
                If pNSC->updated And SC_UPDATE_SELECTION then 'And pNSC->updated > SC_UPDATE_SELECTION Then
@@ -797,6 +798,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                end select
                frmMain_SetStatusbar
  
+                              
                '// Has the caret changed position
                var caretPos = SciExec( pDoc->hWndActiveScintilla, SCI_GETCURRENTPOS, 0, 0)
 
@@ -918,7 +920,7 @@ private Function Scintilla_OnNotify( ByVal HWnd As HWnd, _
                Case 2   ' fold margin
                   ' If is the head line...
                   If (nFoldLevel And SC_FOLDLEVELHEADERFLAG) <> 0 Then
-                     SciExec(hEdit, SCI_TOGGLEFOLD, nLine, 0) 
+                     pDoc->FoldToggle(nLine) 
                   End If   
             End Select
          End If           
@@ -1514,8 +1516,17 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
       select case codeNotify
          case SCEN_SETFOCUS
             pDoc->hWndActiveScintilla = hwndCtl
-         case SCEN_KILLFOCUS
-            pDoc->hWndActiveScintilla = 0
+
+            ' Remove any markers set in the document that highlights
+            ' entire lines (used for Selected text searching).
+            pDoc->RemoveMarkerHighlight
+ 
+
+'         case SCEN_KILLFOCUS
+'            pDoc->hWndActiveScintilla = 0
+'            *** DO NOT SET hwndActiveScintilla = 0 because if split window in effect
+'            *** then if sub/function selected from combobox then incorrect pane will
+'            *** be used to display the code.
       end select      
       hEdit = pDoc->hWndActiveScintilla
       frmMain_ChangeToolbarButtonsState
@@ -1690,7 +1701,10 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          select case GetFocus()
             case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
                  GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
+                 HWND_PROPLIST_EDIT
                SendMessage( GetFocus, WM_CUT, 0, 0 )
             case else     
                if IsDesignerView(pDoc) then
@@ -1708,6 +1722,8 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
                  GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
                  GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
                  HWND_PROPLIST_EDIT
                SendMessage( GetFocus, WM_COPY, 0, 0 )
             case else     
@@ -1738,6 +1754,8 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
             case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
                  GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
                  GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
                  HWND_PROPLIST_EDIT
                SendMessage( GetFocus, WM_PASTE, 0, 0 )
             case else     
@@ -1937,7 +1955,10 @@ private Function frmMain_OnCommand( ByVal HWnd As HWnd, _
          select case GetFocus()
             case GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTNOTES), _
                  GetDlgItem(HWND_FRMOUTPUT, IDC_FRMOUTPUT_TXTLOGFILE), _ 
-                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE)
+                 GetDlgItem(HWND_FRMSNIPPETS, IDC_FRMSNIPPETS_TXTCODE), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTFIND), _
+                 GetDlgItem(HWND_FRMFINDREPLACE, IDC_FRMFINDREPLACE_TXTREPLACE), _
+                 HWND_PROPLIST_EDIT
                Edit_SetSel( GetFocus, 0, -1 )
             case else     
                if IsDesignerView(pDoc) THEN
@@ -2357,14 +2378,17 @@ private Function frmMain_OnNotify( ByVal HWnd As HWnd, _
    Dim pt As Point   
    Dim rc As Rect      
    
-   If id = IDC_SCINTILLA Then
-      ' Process Scintilla control notification messages. First, check to see if the notifications
-      ' have been suppressed by a bulk modification activity that should only update the screen
-      ' at the end of its process (eg. moving large numbers of selected lines up or down).
-      If gApp.SuppressNotify Then Exit Function
-      Scintilla_OnNotify HWnd, Cast(SCNOTIFICATION Ptr, pNMHDR)
-      Exit Function
-   End If
+   Dim pDoc As clsDocument Ptr = gTTabCtl.GetActiveDocumentPtr()
+   If pDoc Then 
+      if pDoc->IsValidScintillaID(id) then
+         ' Process Scintilla control notification messages. First, check to see if the notifications
+         ' have been suppressed by a bulk modification activity that should only update the screen
+         ' at the end of its process (eg. moving large numbers of selected lines up or down).
+         If gApp.SuppressNotify Then Exit Function
+         Scintilla_OnNotify HWnd, Cast(SCNOTIFICATION Ptr, pNMHDR)
+         Exit Function
+      End If
+   end if
         
 
    Select Case pNMHDR->code 
@@ -3550,7 +3574,7 @@ public Function frmMain_Show( ByVal hWndParent As HWnd ) as LRESULT
                   if pDoc->IsDesigner THEN
                      if IsDesignerView(pDoc) then
                         ' Don't allow keys to the scintilla control
-                        if GetDlgCtrlID(GetFocus) = IDC_SCINTILLA then 
+                        if pDoc->IsValidScintillaID(GetDlgCtrlID(GetFocus)) then 
                            if uMsg.wParam = VK_DELETE then
                               frmMain_OnCommand(HWND_FRMMAIN, IDM_DELETE, 0, 0)
                               continue do

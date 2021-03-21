@@ -538,7 +538,9 @@ private function AttachDefaultControlEvents( byval pCtrl as clsControl ptr ) as 
          AddControlEvent(pCtrl, "MouseHover")
          AddControlEvent(pCtrl, "MouseLeave")
          AddControlEvent(pCtrl, "TextChanged")
-         AddControlEvent(pCtrl, "SelectionChanged")
+         if pCtrl->ControlType = CTRL_RICHEDIT then
+            AddControlEvent(pCtrl, "SelectionChanged")
+         end if   
          AddControlEvent(pCtrl, "KeyDown")
          AddControlEvent(pCtrl, "KeyPress")
          AddControlEvent(pCtrl, "KeyUp")
@@ -1255,6 +1257,17 @@ public function ReCreateToolboxControl( byval pDoc as clsDocument ptr, _
                     CAST(SUBCLASSPROC, @Control_SubclassProc), CTRL_DATETIMEPICKER, CAST(DWORD_PTR, pDoc))
 
          DateTime_SetFormat( pCtrl->hWindow, @wszCustomFormat )      
+
+         Dim As SYSTEMTIME pst
+         dim as CWSTR wszDate = GetControlProperty(pCtrl, "SELECTEDDATE")
+         pst.wYear  = val(left(wszDate, 4))
+         pst.wMonth = val(mid(wszDate, 5, 2))
+         pst.wDay   = val(right(wszDate, 2))
+         dim as CWSTR wszTime = GetControlProperty(pCtrl, "SELECTEDTIME")
+         pst.wHour   = val(left(wszTime, 2))
+         pst.wSecond = val(mid(wszTime, 3, 2))
+         pst.wMinute = val(right(wszTime, 2))
+         DateTime_SetSystemTime( pCtrl->hWindow, GDT_VALID, @pst )
 
    end select
    
