@@ -1,5 +1,7 @@
-Version 2.1.9
+Version 2.1.9 (March 25, 2021)
 Editor:
+- FreeBASIC Compiler v1.07.2 (with GCC 5.2). You can still use different backend toolchains via the SetCompilerPaths plugin.
+- New Windows installer (winfbe_suite_setup.exe) create to help users who do nto feel comfortable with standard compressed archive files. WinFBE is *not* designed to be installed into the Windows Program Files folder.
 - Multiple find/replace selection highlights could occur if the user changed the active selection area after activating the Find/Replace dialog.
 - Replace-dialog selection-highlight in code window out of sync with actual highlight (when 2nd+ selection performed).
 - Find/Replace dialog active and pressing Ctrl+A to select all text in one of the find/replace textboxes would instead select all text in the current active code edit window.
@@ -7,6 +9,7 @@ Editor:
 - SCEN_KILLFOCUS in WM_COMMAND was resetting the hWndActiveScintilla window to zero causing a situation whereby incorrect split pane could be used to display code from Sub/Functions selector combobox.
 - Have noticed that with Code Folding enabled that file loading/parsing is somewhat slower. If you prefer faster document responsiveness maybe turn off the code folding option.
 - Double periods ".." would appear within the default displayed filename in the 'Save As' dialog for new files being saved for the first time.
+- Sample_Projects folder contained corrupted winfbe project files.
 
 Visual Designer:
 - MainMenu: MenuItem item in MenuItems collection would crash when retrieving text property value.
