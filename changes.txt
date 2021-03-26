@@ -1,7 +1,10 @@
+Version 2.2.0 (March 26, 2021)
+- Previous upload for version 2.1.9 did not include GCC toolchain for 32-bit FBC. It is now included so you can use the -gen gcc compiler flag to create 32-bit programs.
+
 Version 2.1.9 (March 25, 2021)
 Editor:
 - FreeBASIC Compiler v1.07.2 (with GCC 5.2). You can still use different backend toolchains via the SetCompilerPaths plugin.
-- New Windows installer (winfbe_suite_setup.exe) create to help users who do nto feel comfortable with standard compressed archive files. WinFBE is *not* designed to be installed into the Windows Program Files folder.
+- New Windows installer (winfbe_suite_setup.exe) create to help users who do not feel comfortable with standard compressed archive files. WinFBE is *not* designed to be installed into the Windows Program Files folder.
 - Multiple find/replace selection highlights could occur if the user changed the active selection area after activating the Find/Replace dialog.
 - Replace-dialog selection-highlight in code window out of sync with actual highlight (when 2nd+ selection performed).
 - Find/Replace dialog active and pressing Ctrl+A to select all text in one of the find/replace textboxes would instead select all text in the current active code edit window.
